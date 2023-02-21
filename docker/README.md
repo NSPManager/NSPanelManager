@@ -1,6 +1,6 @@
 # Default settings
-Default admin page login:
-Username: root
+Default admin page login:  
+Username: root  
 Password: password123
 
 # Scripts
