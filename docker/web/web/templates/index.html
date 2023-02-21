@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="title is-4">Panels</h2>
+<table class="table is-fullwidth is-hoverable">
+    <thead>
+        <tr>
+            <th>NSPanel</th>
+            <th>Room</th>
+            <th>MAC Address</th>
+            <th>Last seen</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            {% for nspanel in nspanels %}
+            <th>{{ nspanel.friendly_name }}</th>
+            <td>{{ nspanel.room.friendly_name }}</td>
+            <td>{{ nspanel.mac_address }}</td>
+            <td>{{ nspanel.last_checkin }}</td>
+            {% endfor %}
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

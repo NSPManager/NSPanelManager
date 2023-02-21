@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="title is-4">Rooms</h2>
+<table class="table is-fullwidth is-hoverable">
+    <thead>
+        <tr>
+            <th>Room</th>
+            <th>Friendly name</th>
+            <th>NSPanels</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            {% for room in rooms %}
+            <th>{{ room.friendly_name }}</th>
+            <td>
+                {% for nspanel in room.nspanels.object.all %}
+                {{ nspanel.room.friendly_name }}
+                {% endfor %}
+            </td>
+            {% endfor %}
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

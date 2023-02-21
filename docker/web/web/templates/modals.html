@@ -1,0 +1,24 @@
+<form method="POST" action="{% url 'save_new_room' %}">
+    {% csrf_token %}
+    <div class="modal" id="modal-new-room">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Create new room</p>
+                <button class="delete" aria-label="close"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="field">
+                    <label class="label">Friendly name</label>
+                    <div class="control">
+                        <input class="input" type="text" name="friendly_name" placeholder="Office">
+                    </div>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success">Save changes</button>
+                <button class="button">Cancel</button>
+            </footer>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,39 @@
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="/">
+            <h1 class="title is-4">NSPanelManager</h1>
+        </a>
+
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+    </div>
+
+    <div id="navbar" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="/">
+                NSPanels
+            </a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link" href="/rooms">
+                    Rooms
+                </a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="/rooms">
+                        Rooms
+                    </a>
+                    <a class="navbar-item" onclick="$('#modal-new-room').addClass('is-active');">
+                        New room
+                    </a>
+                </div>
+            </div>
+
+            <a class="navbar-item">
+                Settings
+            </a>
+        </div>
+    </div>
+</nav>
