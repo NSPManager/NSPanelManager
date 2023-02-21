@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd nspanelmanager
+
 echo "Running migrations..."
 ./manage.py migrate
 

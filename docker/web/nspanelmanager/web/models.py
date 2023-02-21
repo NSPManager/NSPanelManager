@@ -1,5 +1,5 @@
-from datetime import datetime
 from django.db import models
+from datetime import datetime
 import django.utils
 
 
@@ -11,7 +11,7 @@ class NSPanel(models.Model):
     mac_address = models.CharField(max_length=17)
     friendly_name = models.CharField(max_length=100)
     last_seen = models.DateTimeField(default=django.utils.timezone.now)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
 
 
 class Light(models.Model):

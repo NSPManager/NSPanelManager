@@ -12,14 +12,16 @@
         </tr>
     </thead>
     <tbody>
+        {% for nspanel in nspanels %}
         <tr>
-            {% for nspanel in nspanels %}
             <th>{{ nspanel.friendly_name }}</th>
-            <td>{{ nspanel.room.friendly_name }}</td>
+            <td><a href="{% url 'edit_room' room_id=nspanel.room.id %}"><span class="tag is-link">
+                        {{ nspanel.room.friendly_name }}</span></a>
+            </td>
             <td>{{ nspanel.mac_address }}</td>
-            <td>{{ nspanel.last_checkin }}</td>
-            {% endfor %}
+            <td>{{ nspanel.last_seen }}</td>
         </tr>
+        {% endfor %}
     </tbody>
 </table>
 {% endblock %}
