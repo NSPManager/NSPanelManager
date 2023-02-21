@@ -1,10 +1,27 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% load static %}
+
+<style>
+    #room_text {
+        height: 38px;
+        width: 165px;
+        text-align: center;
+        line-height: 38px;
+        font-size: 22px;
+        color: white;
+        left: 60px;
+        top: 278px;
+        position: absolute;
+    }
+</style>
+
 <div class="card">
     <div class="card-content">
         <h2 class="title is-4">General settings</h2>
-        <form>
+        <form method="POST" action="{% url 'update_room_form' room_id=room.id %}">
+            {% csrf_token %}
             <div class="field">
                 <label class="label">Friendly name</label>
                 <div class="control">
@@ -16,9 +33,11 @@
     </div>
 </div>
 <br>
-<div class="card">
+<div class="card" style="width: 455px; height: 320px; background-image: url('{% static 'panel_views/1-0.bmp' %}');">
     <div class="card-content">
-
+        <div id="room_text">
+            {{ room.friendly_name }}
+        </div>
     </div>
 </div>
 {% endblock %}

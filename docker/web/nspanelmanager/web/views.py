@@ -20,3 +20,10 @@ def save_new_room(request):
     new_room.friendly_name = request.POST['friendly_name']
     new_room.save()
     return redirect('rooms')
+
+
+def update_room_form(request, room_id: int):
+    room = Room.objects.filter(id=room_id).first()
+    room.friendly_name = request.POST['friendly_name']
+    room.save()
+    return redirect('edit_room', room_id=room_id)
