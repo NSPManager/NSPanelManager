@@ -1,0 +1,12 @@
+{
+    "wifi_hostname": "NSPanelManager-ESP",
+    "wifi_ssid": "",
+    "wifi_psk": "",
+    "manager_address": "",
+    "manager_port": 8000,
+    "mqtt_server": "",
+    "mqtt_port": 1883,
+    "mqtt_username": "",
+    "mqtt_password": "",
+    "log_level": 4
+}

@@ -1,3 +1,4 @@
 .vscode
 *.pyc
 docker/web/db.sqlite3
+firmware/NSPanelManagerFirmware/data/config.json
