@@ -39,6 +39,20 @@ def save_new_firmware(request):
     return redirect('/')
 
 
+def save_new_data_file(request):
+    if request.method == 'POST':
+        uploaded_file = request.FILES['data_file']
+        fs = FileSystemStorage()
+        fs.delete("data_file.bin")
+        fs.save("data_file.bin", uploaded_file)
+    return redirect('/')
+
+
 def download_firmware(request):
     fs = FileSystemStorage()
     return HttpResponse(fs.open("firmware.bin").read(), content_type="application/octet-stream")
+
+
+def download_data_file(request):
+    fs = FileSystemStorage()
+    return HttpResponse(fs.open("littlefs.bin").read(), content_type="application/octet-stream")

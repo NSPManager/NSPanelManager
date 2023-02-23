@@ -54,3 +54,35 @@
         </div>
     </div>
 </form>
+
+<form method="POST" action="{% url 'save_new_data_file' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="modal" id="modal-upload-data-file">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Upload new data file</p>
+                <button type="button" class="delete" aria-label="close"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="file">
+                    <label class="file-label">
+                        <input class="file-input" type="file" name="data_file" accept=".bin">
+                        <span class="file-cta">
+                            <span class="file-icon">
+                                <i class="fas fa-upload"></i>
+                            </span>
+                            <span class="file-label">
+                                Choose a file…
+                            </span>
+                        </span>
+                    </label>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button type="submit" class="button is-success">Upload</button>
+                <button type="button" class="button modal-cancel-button">Cancel</button>
+            </footer>
+        </div>
+    </div>
+</form>
