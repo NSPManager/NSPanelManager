@@ -86,3 +86,20 @@
         </div>
     </div>
 </form>
+
+{% csrf_token %}
+<div class="modal" id="modal-command-sent">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Command sent</p>
+            <button type="button" class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+            <p>Command sent</p>
+        </section>
+        <footer class="modal-card-foot">
+            <button type="button" class="button is-primary modal-cancel-button">OK</button>
+        </footer>
+    </div>
+</div>

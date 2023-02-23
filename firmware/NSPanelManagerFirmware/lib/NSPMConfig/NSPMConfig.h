@@ -21,9 +21,6 @@ public:
     /// @brief The instance of the config manager
     static NSPMConfig *instance;
 
-    /// @brief The friendly name of this panel.
-    std::string friendly_name;
-
     /// @brief The address (hostname or IP) to the manager server
     std::string manager_address;
     /// @brief The port to access to manager at

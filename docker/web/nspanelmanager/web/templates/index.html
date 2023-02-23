@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 
+{% block head %}
+{% load static %}
+<script src="{% static 'index.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 <h2 class="title is-4">Panels</h2>
 <table class="table is-fullwidth is-hoverable">
@@ -9,6 +14,7 @@
             <th>Room</th>
             <th>MAC Address</th>
             <th>Last seen</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -20,6 +26,8 @@
             </td>
             <td>{{ nspanel.mac_address }}</td>
             <td>{{ nspanel.last_seen }}</td>
+            <td><button type="button" class="button is-link is-small"
+                    onclick="startNSPanelOtaUpdate('{{ nspanel.ip_address }}');">OTA Update</button></td>
         </tr>
         {% endfor %}
     </tbody>

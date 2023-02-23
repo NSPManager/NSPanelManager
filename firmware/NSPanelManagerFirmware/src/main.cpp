@@ -1,10 +1,12 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <nspm-bin-version.h>
 #include <string>
 #include <LittleFS.h>
 #include <NSPMConfig.h>
 #include <ArduLog.h>
 #include <WiFi.h>
+#include <HTTPClient.h>
 #include <PubSubClient.h>
 #include <WebManager.h>
 
@@ -14,6 +16,33 @@ WebManager webMan;
 TaskHandle_t _taskWifiAndMqttManager;
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
+
+void registerToNSPanelManager()
+{
+  if (WiFi.isConnected())
+  {
+    WiFiClient wifiClient;
+    HTTPClient httpClient;
+    std::string url = "http://";
+    url.append(NSPMConfig::instance->manager_address);
+    url.append(":");
+    url.append(std::to_string(NSPMConfig::instance->manager_port));
+    url.append("/api/register_nspanel");
+
+    StaticJsonDocument<128> doc;
+    doc["mac_address"] = WiFi.macAddress().c_str();
+    doc["friendly_name"] = NSPMConfig::instance->wifi_hostname.c_str();
+
+    char buffer[128];
+    serializeJson(doc, buffer);
+
+    httpClient.begin(wifiClient, url.c_str());
+    httpClient.addHeader("Content-Type", "application/json");
+    int responseCode = httpClient.POST(buffer);
+
+    LOG_INFO("Registration at manager got response code: ", responseCode);
+  }
+}
 
 void taskManageWifiAndMqtt(void *param)
 {
@@ -40,6 +69,7 @@ void taskManageWifiAndMqtt(void *param)
             LOG_INFO("Gateway:    ", LOG_BOLD, WiFi.gatewayIP());
             // Start web server
             webMan.init(NSPanelManagerFirmwareVersion);
+            registerToNSPanelManager();
           }
           else
           {
