@@ -8,4 +8,8 @@ $(document).ready(function () {
     $('.modal-card-head .delete').click(function () {
         $('.modal').removeClass('is-active');
     });
+
+    $('.modal-cancel-button').click(function () {
+        $('.modal').removeClass('is-active');
+    });
 });
