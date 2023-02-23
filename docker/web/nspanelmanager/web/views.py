@@ -55,4 +55,4 @@ def download_firmware(request):
 
 def download_data_file(request):
     fs = FileSystemStorage()
-    return HttpResponse(fs.open("littlefs.bin").read(), content_type="application/octet-stream")
+    return HttpResponse(fs.open("data_file.bin").read(), content_type="application/octet-stream")

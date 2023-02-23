@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <nspm-bin-version.h>
 #include <string>
 #include <LittleFS.h>
 #include <NSPMConfig.h>
@@ -38,7 +39,7 @@ void taskManageWifiAndMqtt(void *param)
             LOG_INFO("Netmask:    ", LOG_BOLD, WiFi.subnetMask());
             LOG_INFO("Gateway:    ", LOG_BOLD, WiFi.gatewayIP());
             // Start web server
-            webMan.init();
+            webMan.init(NSPanelManagerFirmwareVersion);
           }
           else
           {
@@ -99,7 +100,7 @@ void taskManageWifiAndMqtt(void *param)
         LOG_INFO("WiFi SSID: Light Controller");
         LOG_INFO("WiFi PSK : password");
         LOG_INFO("WiFi IP Address: ", WiFi.softAPIP().toString().c_str());
-        webMan.init();
+        webMan.init(NSPanelManagerFirmwareVersion);
         vTaskDelete(NULL); // This task is complete. Stop processing.
       }
       else
@@ -134,5 +135,6 @@ void setup()
 
 void loop()
 {
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  mqttClient.loop();
+  vTaskDelay(10 / portTICK_PERIOD_MS);
 }

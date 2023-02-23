@@ -10,13 +10,14 @@
 // Make space for variables in memory
 WebManager *WebManager::instance;
 
-void WebManager::init()
+void WebManager::init(const char *nspmFirmwareVersion)
 {
     this->instance = this;
+    this->_nspmFirmwareVersion = nspmFirmwareVersion;
 
     LOG_DEBUG("Setting up web server routes");
     this->_server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-                     { request->send(LittleFS, "/index.html"); });
+                     { request->send(LittleFS, "/index.html", String(), false, WebManager::processIndexTemplate); });
 
     this->_server.on("/save_config", HTTP_POST, WebManager::saveConfigFromWeb);
     this->_server.on("/start_ota_update", HTTP_POST, WebManager::startOTAUpdate);
@@ -28,6 +29,16 @@ void WebManager::init()
 
     this->_server.serveStatic("/static", LittleFS, "/static");
     this->_server.begin();
+}
+
+String WebManager::processIndexTemplate(const String &templateVar)
+{
+    if (templateVar == "version")
+    {
+        return WebManager::instance->_nspmFirmwareVersion.c_str();
+    }
+
+    return "-- UNKNOWN TEMPLATE --";
 }
 
 void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request)
@@ -122,13 +133,36 @@ void WebManager::startOTAUpdate(AsyncWebServerRequest *request)
 
 void WebManager::_taskPerformOTAUpdate(void *param)
 {
-    LOG_INFO("Starting OTA Update...");
+    if (WebManager::_update(U_FLASH, "/download_firmware"))
+    {
+        LOG_INFO("Update of U_FLASH successful, will continue with update of U_SPIFFS");
+        if (WebManager::_update(U_SPIFFS, "/download_data_file"))
+        {
+            // Resave config to the new file system
+            NSPMConfig::instance->saveToLittleFS();
+            LOG_INFO("OTA Update complete! Will reboot.");
+            ESP.restart();
+        }
+        else
+        {
+            LOG_ERROR("Something went wrong when updating U_SPIFFS!");
+        }
+    }
+    else
+    {
+        LOG_ERROR("Something went wrong during OTA update of U_FLASH!");
+    }
+}
+
+bool WebManager::_update(uint8_t type, const char *url)
+{
+    LOG_INFO("Starting ", type == U_FLASH ? "FLASH" : "LittleFS", " OTA update...");
     WiFiClient client;
     unsigned long contentLength = 0;
     bool isValidContentType = false;
     if (client.connect(NSPMConfig::instance->manager_address.c_str(), NSPMConfig::instance->manager_port))
     {
-        client.print(String("GET /download_firmware HTTP/1.1\r\n") +
+        client.print(String("GET ") + url + " HTTP/1.1\r\n" +
                      "Host: " + NSPMConfig::instance->manager_address.c_str() + "\r\n" +
                      "Cache-Control: no-cache\r\n" +
                      "Connection: close\r\n\r\n");
@@ -141,13 +175,12 @@ void WebManager::_taskPerformOTAUpdate(void *param)
             {
                 LOG_ERROR("Timeout while downloading firmware!");
                 client.stop();
-                vTaskDelete(NULL);
+                return false;
             }
         }
 
         while (client.available())
         {
-            // TODO: Verify data as per https://github.com/espressif/arduino-esp32/blob/master/libraries/Update/examples/AWS_S3_OTA_Update/AWS_S3_OTA_Update.ino
             String line = client.readStringUntil('\n');
             // remove space, to check if the line is end of headers
             line.trim();
@@ -174,7 +207,7 @@ void WebManager::_taskPerformOTAUpdate(void *param)
             if (line.startsWith("Content-Length: "))
             {
                 contentLength = atol((getHeaderValue(line, "Content-Length: ")).c_str());
-                LOG_DEBUG("Got", contentLength, "bytes from server");
+                LOG_DEBUG("Got ", contentLength, " bytes from server");
             }
 
             // Next, the content type
@@ -191,13 +224,14 @@ void WebManager::_taskPerformOTAUpdate(void *param)
     else
     {
         LOG_ERROR("Failed to connect to manager!");
+        return false;
     }
 
     // check contentLength and content type
     if (contentLength && isValidContentType)
     {
         // Check if there is enough to OTA Update
-        bool canBegin = Update.begin(contentLength);
+        bool canBegin = Update.begin(contentLength, type);
 
         if (canBegin)
         {
@@ -206,11 +240,11 @@ void WebManager::_taskPerformOTAUpdate(void *param)
             size_t written = Update.writeStream(client);
             if (written == contentLength)
             {
-                LOG_INFO("Wrote", written, "bytes successfully.");
+                LOG_INFO("Wrote ", written, " bytes successfully.");
             }
             else
             {
-                LOG_ERROR("Wrote only", written, "/", contentLength, "bytes.");
+                LOG_ERROR("Wrote only ", written, "/", contentLength, " bytes.");
             }
 
             if (Update.end())
@@ -219,30 +253,33 @@ void WebManager::_taskPerformOTAUpdate(void *param)
                 if (Update.isFinished())
                 {
                     LOG_WARNING("OTA Done, will reboot!");
-                    ESP.restart();
+                    return true;
                 }
                 else
                 {
                     LOG_ERROR("OTA Not finished. Something went wrong!");
+                    return false;
                 }
             }
             else
             {
                 LOG_ERROR("OTA Update error #:", Update.getError());
+                return false;
             }
         }
         else
         {
             LOG_ERROR("Not enough space for OTA update!");
             client.flush();
+            return false;
         }
     }
     else
     {
         LOG_ERROR("There was no content in the OTA response!");
         client.flush();
+        return false;
     }
 
-    // Task complete.
-    vTaskDelete(NULL);
+    return true;
 }
