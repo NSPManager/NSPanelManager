@@ -3,6 +3,11 @@ from datetime import datetime
 import django.utils
 
 
+class Firmware:
+    name = models.CharField(max_length=128)
+    binary_data = models.BinaryField()
+
+
 class Room(models.Model):
     friendly_name = models.CharField(max_length=30)
 

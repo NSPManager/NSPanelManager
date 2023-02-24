@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.core.files.storage import FileSystemStorage
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import NSPanel, Room
 
@@ -30,21 +31,27 @@ def update_room_form(request, room_id: int):
     return redirect('edit_room', room_id=room_id)
 
 
+# TODO: Make exempt only when Debug = true
+@csrf_exempt
 def save_new_firmware(request):
     if request.method == 'POST':
         uploaded_file = request.FILES['firmware']
         fs = FileSystemStorage()
         fs.delete("firmware.bin")
         fs.save("firmware.bin", uploaded_file)
+        print("Saved new firmware.")
     return redirect('/')
 
 
+# TODO: Make exempt only when Debug = true
+@csrf_exempt
 def save_new_data_file(request):
     if request.method == 'POST':
         uploaded_file = request.FILES['data_file']
         fs = FileSystemStorage()
         fs.delete("data_file.bin")
         fs.save("data_file.bin", uploaded_file)
+        print("Saved new data file.")
     return redirect('/')
 
 
