@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, HttpResponse
 from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
 
+import hashlib
+
 from .models import NSPanel, Room
 
 
@@ -63,3 +65,13 @@ def download_firmware(request):
 def download_data_file(request):
     fs = FileSystemStorage()
     return HttpResponse(fs.open("data_file.bin").read(), content_type="application/octet-stream")
+
+
+def checksum_firmware(request):
+    fs = FileSystemStorage()
+    return HttpResponse(hashlib.md5(fs.open("firmware.bin").read()).hexdigest())
+
+
+def checksum_data_file(request):
+    fs = FileSystemStorage()
+    return HttpResponse(hashlib.md5(fs.open("data_file.bin").read()).hexdigest())

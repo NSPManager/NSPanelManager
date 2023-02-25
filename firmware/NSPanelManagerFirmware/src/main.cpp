@@ -9,7 +9,9 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <WebManager.h>
+#include <NSPanel.h>
 
+NSPanel nspanel;
 MqttLog logger;
 NSPMConfig config;
 WebManager webMan;
@@ -161,10 +163,17 @@ void setup()
 
   LOG_INFO("Starting tasks");
   xTaskCreatePinnedToCore(taskManageWifiAndMqtt, "taskManageWifiAndMqtt", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+
+  while (!mqttClient.connected())
+  {
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+  }
+
+  nspanel.init();
 }
 
 void loop()
 {
   mqttClient.loop();
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(5 / portTICK_PERIOD_MS);
 }

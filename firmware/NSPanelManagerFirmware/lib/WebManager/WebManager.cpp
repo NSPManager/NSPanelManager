@@ -6,6 +6,7 @@
 #include <Arduino.h>
 #include <Update.h>
 #include <MqttLog.h>
+#include <HTTPClient.h>
 
 // Make space for variables in memory
 WebManager *WebManager::instance;
@@ -169,25 +170,95 @@ void WebManager::startOTAUpdate(AsyncWebServerRequest *request)
 
 void WebManager::_taskPerformOTAUpdate(void *param)
 {
-    if (WebManager::_update(U_FLASH, "/download_firmware"))
+    char checksum_holder[32];
+    WebManager::_httpGetMD5("/checksum_firmware", checksum_holder);
+    LOG_DEBUG("Got firmware MD5 ", checksum_holder);
+    LOG_DEBUG("Stored firmware MD5 ", NSPMConfig::instance->md5_firmware.c_str());
+    bool hasAnythingUpdated = false;
+    bool firmwareUpdateSuccessful = true;
+    vTaskDelay(250 / portTICK_PERIOD_MS); // Wait for other tasks.
+    if (NSPMConfig::instance->md5_firmware.compare(checksum_holder) != 0)
     {
-        LOG_INFO("Update of U_FLASH successful, will continue with update of U_SPIFFS");
-        if (WebManager::_update(U_SPIFFS, "/download_data_file"))
+        firmwareUpdateSuccessful = WebManager::_update(U_FLASH, "/download_firmware");
+        if (firmwareUpdateSuccessful)
         {
-            // Resave config to the new file system
+            LOG_INFO("Successfully updated firmware.");
+            // Save new firmware checksum
+            NSPMConfig::instance->md5_firmware = checksum_holder;
             NSPMConfig::instance->saveToLittleFS();
-            LOG_INFO("OTA Update complete! Will reboot.");
-            ESP.restart();
+            hasAnythingUpdated = true;
         }
         else
         {
-            LOG_ERROR("Something went wrong when updating U_SPIFFS!");
+            LOG_ERROR("Something went wrong during firmware upgrade.");
         }
     }
     else
     {
-        LOG_ERROR("Something went wrong during OTA update of U_FLASH!");
+        LOG_INFO("Firmware is the same, will not update.");
     }
+
+    if (firmwareUpdateSuccessful)
+    {
+        LOG_INFO("Firmware update done without errors, will check LittleFS.");
+        WebManager::_httpGetMD5("/checksum_data_file", checksum_holder);
+        LOG_DEBUG("Got LittleFS MD5 ", checksum_holder);
+        LOG_DEBUG("Stored LittleFS MD5 ", NSPMConfig::instance->md5_data_file.c_str());
+        vTaskDelay(250 / portTICK_PERIOD_MS); // Wait for other tasks.
+        if (NSPMConfig::instance->md5_data_file.compare(checksum_holder) != 0)
+        {
+            if (WebManager::_update(U_SPIFFS, "/download_data_file"))
+            {
+                LOG_INFO("Successfully updated LittleFS.");
+                // Save new LittleFS checksum
+                NSPMConfig::instance->md5_data_file = checksum_holder;
+                NSPMConfig::instance->saveToLittleFS();
+                hasAnythingUpdated = true;
+            }
+            else
+            {
+                LOG_ERROR("Something went wrong during LittleFS upgrade.");
+            }
+        }
+        else
+        {
+            LOG_INFO("LittleFS is the same, will not update.");
+        }
+    }
+
+    if (hasAnythingUpdated)
+    {
+        LOG_INFO("OTA Done, will reboot.");
+        ESP.restart();
+    }
+    else
+    {
+        LOG_INFO("No OTA was performed, will not reboot.");
+    }
+
+    vTaskDelete(NULL); // Task complete. Delete FreeRTOS task
+}
+
+bool WebManager::_httpGetMD5(const char *path, char *buffer)
+{
+    std::string serverUrl = "http://";
+    serverUrl.append(NSPMConfig::instance->manager_address);
+    serverUrl.append(":");
+    serverUrl.append(std::to_string(NSPMConfig::instance->manager_port));
+    serverUrl.append(path);
+
+    HTTPClient http;
+    http.begin(serverUrl.c_str());
+    int responseCode = http.GET();
+
+    if (responseCode == 200)
+    {
+        http.getString().toCharArray(buffer, 32);
+        http.end();
+        return true;
+    }
+    http.end();
+    return false;
 }
 
 bool WebManager::_update(uint8_t type, const char *url)
@@ -271,7 +342,7 @@ bool WebManager::_update(uint8_t type, const char *url)
 
         if (canBegin)
         {
-            LOG_INFO("Starting OTA. This may take a few minutes. Be patience!");
+            LOG_INFO("Starting OTA. This may take a few minutes. Be patient!");
 
             size_t written = Update.writeStream(client);
             if (written == contentLength)

@@ -4,7 +4,7 @@
 
 NSPanelManager_address="127.0.0.1"
 NSPanelManager_port="8000"
-NSPanelsToOTA=("10.0.0.225") # Array of NSPanels to call OTA for when upload finished successfully. Space separated
+NSPanelsToOTA=("10.0.0.226") # Array of NSPanels to call OTA for when upload finished successfully. Space separated
 
 # Update version file.
 current_version="$(grep -oE "[0-9\.]+" include/nspm-bin-version.h)"

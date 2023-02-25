@@ -48,6 +48,9 @@ public:
     std::string mqtt_availability_topic;
     /// @brief MQTT topic to send logs to
     std::string mqtt_log_topic;
+
+    std::string md5_firmware;
+    std::string md5_data_file;
 };
 
 #endif

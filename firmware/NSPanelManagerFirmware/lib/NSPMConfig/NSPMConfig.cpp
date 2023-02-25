@@ -33,7 +33,7 @@ bool NSPMConfig::loadFromLittleFS()
         return false;
     }
 
-    StaticJsonDocument<512> doc;
+    StaticJsonDocument<1024> doc;
     DeserializationError error = deserializeJson(doc, configFile);
     configFile.close();
     if (error)
@@ -64,13 +64,16 @@ bool NSPMConfig::loadFromLittleFS()
     this->mqtt_log_topic.append(NSPMConfig::instance->wifi_hostname);
     this->mqtt_log_topic.append("/log");
 
+    this->md5_firmware = doc["md5_firmware"] | "";
+    this->md5_data_file = doc["md5_data_file"] | "";
+
     Serial.println("Config data loaded.");
     return true;
 }
 
 bool NSPMConfig::saveToLittleFS()
 {
-    StaticJsonDocument<512> config_json;
+    StaticJsonDocument<1024> config_json;
 
     config_json["wifi_hostname"] = this->wifi_hostname.c_str();
     config_json["wifi_ssid"] = this->wifi_ssid.c_str();
@@ -82,6 +85,8 @@ bool NSPMConfig::saveToLittleFS()
     config_json["mqtt_username"] = this->mqtt_username;
     config_json["mqtt_password"] = this->mqtt_password;
     config_json["log_level"] = this->logging_level;
+    config_json["md5_firmware"] = this->md5_firmware;
+    config_json["md5_data_file"] = this->md5_data_file;
 
     File config_file = LittleFS.open("/config.json", "w");
     if (!config_file)
