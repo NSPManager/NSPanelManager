@@ -1,4 +1,7 @@
 .vscode
 *.pyc
 docker/web/db.sqlite3
+docker/web/nspanelmanager/firmware.bin
+docker/web/nspanelmanager/littlefs.bin
 firmware/NSPanelManagerFirmware/data/config.json
+firmware/NSPanelManagerFirmware/.pio
