@@ -15,6 +15,55 @@ def rooms(request):
     return render(request, 'rooms.html', {'rooms': Room.objects.all()})
 
 
+def rooms_order(request):
+    return render(request, 'rooms_order.html', {'rooms': Room.objects.all().order_by('displayOrder')})
+
+
+def move_room_up(request, room_id: int):
+    room = Room.objects.get(id=room_id)
+    if room.displayOrder > 1:
+        otherRoom = Room.objects.filter(displayOrder=room.displayOrder - 1)
+        if otherRoom.count() > 0:
+            move_up_room = otherRoom.first()
+            move_up_room.displayOrder += 1
+            move_up_room.save()
+
+            room.displayOrder -= 1
+            room.save()
+
+        # Loop through all rooms and make sure they all follow a pattern
+        all_rooms = Room.objects.all().order_by('displayOrder')
+        i = 1
+        for room in all_rooms:
+            room.displayOrder = i
+            room.save()
+            i += 1
+
+    return redirect('rooms_order')
+
+
+def move_room_down(request, room_id: int):
+    room = Room.objects.get(id=room_id)
+    otherRoom = Room.objects.filter(displayOrder=room.displayOrder + 1)
+    if otherRoom.count() > 0:
+        move_up_room = otherRoom.first()
+        move_up_room.displayOrder -= 1
+        move_up_room.save()
+
+        room.displayOrder += 1
+        room.save()
+
+    # Loop through all rooms and make sure they all follow a pattern
+    all_rooms = Room.objects.all().order_by('displayOrder')
+    i = 1
+    for room in all_rooms:
+        room.displayOrder = i
+        room.save()
+        i += 1
+
+    return redirect('rooms_order')
+
+
 def edit_room(request, room_id: int):
     return render(request, 'edit_room.html', {'room': Room.objects.filter(id=room_id).first()})
 

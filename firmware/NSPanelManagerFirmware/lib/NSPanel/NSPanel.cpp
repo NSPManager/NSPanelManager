@@ -324,7 +324,11 @@ void NSPanel::_taskUpdateTFTConfigOTA(void *param)
             }
         }
 
-        LOG_INFO("TFT Upload complete. Will restart.");
+        LOG_INFO("TFT Upload complete. Will restart after TFT has completed.");
+        while (Serial2.available() == 0)
+        {
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+        }
         ESP.restart();
     }
     else

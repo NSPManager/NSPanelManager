@@ -4,7 +4,16 @@ import django.utils
 
 
 class Room(models.Model):
+    # Get the next free number in the ordering
+    def number():
+        no = Room.objects.all().count()
+        if no == None:
+            return 1
+        else:
+            return no + 1
+
     friendly_name = models.CharField(max_length=30)
+    displayOrder = models.IntegerField(default=number)
 
 
 class NSPanel(models.Model):

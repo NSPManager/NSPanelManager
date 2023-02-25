@@ -7,6 +7,10 @@ urlpatterns = [
     # Web routes
     path('', views.index, name='index'),
     path('rooms', views.rooms, name='rooms'),
+    path('rooms/order', views.rooms_order, name='rooms_order'),
+    path('moveRoomUp/<int:room_id>', views.move_room_up, name='move_room_up'),
+    path('moveRoomDown/<int:room_id>',
+         views.move_room_down, name='move_room_down'),
     path('rooms/<int:room_id>/', views.edit_room, name='edit_room'),
     path('save_room/<int:room_id>',
          views.update_room_form, name='update_room_form'),
