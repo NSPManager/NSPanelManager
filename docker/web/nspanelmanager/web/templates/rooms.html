@@ -11,16 +11,17 @@
         </tr>
     </thead>
     <tbody>
+        {% for room in rooms %}
         <tr>
-            {% for room in rooms %}
+            <th>{{ room.id }}</th>
             <th>{{ room.friendly_name }}</th>
             <td>
-                {% for nspanel in room.nspanels.object.all %}
-                {{ nspanel.room.friendly_name }}
+                {% for nspanel in room.nspanel_set.all %}
+                <span class="tag is-info is-small">{{ nspanel.friendly_name }}</span>
                 {% endfor %}
             </td>
-            {% endfor %}
         </tr>
+        {% endfor %}
     </tbody>
 </table>
 {% endblock %}

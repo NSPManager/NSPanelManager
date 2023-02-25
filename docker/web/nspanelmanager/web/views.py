@@ -56,6 +56,19 @@ def save_new_data_file(request):
         print("Saved new data file.")
     return redirect('/')
 
+# TODO: Make exempt only when Debug = true
+
+
+@csrf_exempt
+def save_new_tft_file(request):
+    if request.method == 'POST':
+        uploaded_file = request.FILES['tft_file']
+        fs = FileSystemStorage()
+        fs.delete("gui.tft")
+        fs.save("gui.tft", uploaded_file)
+        print("Saved new GUI tft file.")
+    return redirect('/')
+
 
 def download_firmware(request):
     fs = FileSystemStorage()
@@ -65,6 +78,11 @@ def download_firmware(request):
 def download_data_file(request):
     fs = FileSystemStorage()
     return HttpResponse(fs.open("data_file.bin").read(), content_type="application/octet-stream")
+
+
+def download_tft(request):
+    fs = FileSystemStorage()
+    return HttpResponse(fs.open("gui.tft").read(), content_type="application/octet-stream")
 
 
 def checksum_firmware(request):
