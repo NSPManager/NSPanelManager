@@ -1,10 +1,10 @@
 #include <NSPMConfig.h>
-#include <ArduLog.h>
 #include <FS.h>
 #include <LittleFS.h>
 #include <ArduinoJson.h>
+#include <WiFi.h>
 
-// LMANConfig
+// NSPMConfig
 // Give somewhere in memory for instance to exist
 NSPMConfig *NSPMConfig::instance;
 
@@ -13,23 +13,23 @@ bool NSPMConfig::init()
     NSPMConfig::instance = this;
     if (LittleFS.begin(false))
     {
-        LOG_INFO("LittleFS mounted.");
+        Serial.println("LittleFS mounted.");
         return true;
     }
     else
     {
-        LOG_ERROR("Failed to mount LittleFS");
+        Serial.println("Failed to mount LittleFS");
         return false;
     }
 }
 
 bool NSPMConfig::loadFromLittleFS()
 {
-    LOG_INFO("Loading config from LittleFS");
+    Serial.println("Loading config from LittleFS");
     File configFile = LittleFS.open("/config.json");
     if (!configFile)
     {
-        LOG_ERROR("Failed to load config.json!");
+        Serial.println("Failed to load config.json!");
         return false;
     }
 
@@ -38,7 +38,7 @@ bool NSPMConfig::loadFromLittleFS()
     configFile.close();
     if (error)
     {
-        LOG_ERROR("Failed to deserialize config.json");
+        Serial.println("Failed to deserialize config.json");
         return false;
     }
 
@@ -49,15 +49,22 @@ bool NSPMConfig::loadFromLittleFS()
     this->manager_address = doc["manager_address"] | "";
     this->manager_port = doc["manager_port"] | 8000;
     this->logging_level = doc["log_level"] | 4; // Set logging to debug if no level was read from file.
-    LOG_INFO("Setting logging level to ", LOG_BOLD, this->logging_level);
-    ArduLog::getInstance()->SetLogLevel(static_cast<ArduLogLevel>(this->logging_level));
 
     this->mqtt_server = doc["mqtt_server"] | "";
     this->mqtt_port = doc["mqtt_port"].as<uint8_t>() | 1883;
     this->mqtt_username = doc["mqtt_username"] | "";
     this->mqtt_password = doc["mqtt_password"] | "";
 
-    LOG_INFO("Config data loaded.");
+    // Load calculated values
+    this->mqtt_availability_topic = "nspanel/";
+    this->mqtt_availability_topic.append(NSPMConfig::instance->wifi_hostname);
+    this->mqtt_availability_topic.append("/status");
+
+    this->mqtt_log_topic = "nspanel/";
+    this->mqtt_log_topic.append(NSPMConfig::instance->wifi_hostname);
+    this->mqtt_log_topic.append("/log");
+
+    Serial.println("Config data loaded.");
     return true;
 }
 
@@ -79,15 +86,15 @@ bool NSPMConfig::saveToLittleFS()
     File config_file = LittleFS.open("/config.json", "w");
     if (!config_file)
     {
-        LOG_ERROR("Failed to open 'config.json' for writing.");
+        Serial.println("Failed to open 'config.json' for writing.");
     }
     else if (serializeJson(config_json, config_file) == 0)
     {
-        LOG_ERROR("Failed to save config file.");
+        Serial.println("Failed to save config file.");
     }
     else
     {
-        LOG_INFO("Saved config file.");
+        Serial.println("Saved config file.");
     }
     config_file.close();
 
@@ -105,6 +112,5 @@ bool NSPMConfig::factoryReset()
     this->mqtt_port = 1883;
     this->mqtt_username = "";
     this->mqtt_password = "";
-
     return this->saveToLittleFS();
 }

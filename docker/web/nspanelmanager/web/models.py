@@ -3,11 +3,6 @@ from datetime import datetime
 import django.utils
 
 
-class Firmware:
-    name = models.CharField(max_length=128)
-    binary_data = models.BinaryField()
-
-
 class Room(models.Model):
     friendly_name = models.CharField(max_length=30)
 
@@ -17,6 +12,7 @@ class NSPanel(models.Model):
     friendly_name = models.CharField(max_length=100)
     last_seen = models.DateTimeField(default=django.utils.timezone.now)
     ip_address = models.CharField(max_length=15, default="")
+    version = models.CharField(max_length=15, default="")
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
 
 

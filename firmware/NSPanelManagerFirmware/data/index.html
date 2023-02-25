@@ -126,36 +126,21 @@
                     <label class="label">Friendly name</label>
                     <div class="control">
                         <input class="input" type="text" name="wifi_hostname" id="wifi_hostname"
-                            placeholder="Device name" required>
+                            placeholder="Device name" value="%wifi_hostname%" required>
                     </div>
                 </div>
                 <div class="field">
                     <label class="label">Manager address</label>
                     <div class="control">
                         <input class="input" type="text" name="manager_address" id="manager_address"
-                            placeholder="192.168.1.5" required>
+                            placeholder="192.168.1.5" value="%manager_address%" required>
                     </div>
                 </div>
                 <div class="field">
                     <label class="label">Manager port</label>
                     <div class="control">
                         <input class="input" type="number" name="manager_port" id="manager_port" placeholder="8000"
-                            required>
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">Serial log level</label>
-                    <div class="control">
-                        <div class="select">
-                            <select name="log_level" id="log_level">
-                                <option value="0">None</option>
-                                <option value="1">Error</option>
-                                <option value="2">Warning</option>
-                                <option value="3">Info</option>
-                                <option value="4">Debug</option>
-                                <option value="5">Trace</option>
-                            </select>
-                        </div>
+                            value="%manager_port%" required>
                     </div>
                 </div>
             </div>
@@ -169,7 +154,8 @@
                 </div>
                 <div class="field has-addons">
                     <div class="control is-expanded">
-                        <input class="input" type="text" name="wifi_ssid" id="wifi_ssid" placeholder="SSID" required>
+                        <input class="input" type="text" name="wifi_ssid" id="wifi_ssid" placeholder="SSID"
+                            value="%wifi_ssid%" required>
                     </div>
                     <div class="control">
                         <a class="button is-info" onclick="showWifiSelectModal();">List</a>
@@ -179,7 +165,7 @@
                     <label class="label">WiFi Password</label>
                     <div class="control">
                         <input class="input" type="password" name="wifi_psk" id="wifi_psk" placeholder="Password"
-                            required>
+                            value="%wifi_psk%" required>
                     </div>
                 </div>
             </div>
@@ -192,33 +178,28 @@
                     <label class="label">MQTT Server</label>
                     <div class="control">
                         <input class="input" type="text" name="mqtt_server" id="mqtt_server" placeholder="MQTT Server"
-                            required>
+                            value="%mqtt_server%" required>
                     </div>
                 </div>
                 <div class="field">
                     <label class="label">MQTT Port</label>
                     <div class="control">
                         <input class="input" type="number" name="mqtt_port" id="mqtt_port" placeholder="MQTT Port"
-                            required>
+                            value="%mqtt_port%" required>
                     </div>
-                </div>
-                <div class="field">
-                    <label class="checkbox">
-                        <input type="checkbox" name="mqtt_auth" id="mqtt_auth">
-                        Use MQTT authentication?
-                    </label>
                 </div>
                 <div class="field" id="mqtt_username_field">
                     <label class="label">MQTT Username</label>
                     <div class="control">
-                        <input class="input" type="text" name="mqtt_username" id="mqtt_username"
+                        <input class="input" type="text" name="mqtt_username" id="mqtt_username" value="%mqtt_username%"
                             placeholder="MQTT Username">
                     </div>
                 </div>
                 <div class="field" id="mqtt_psk_field">
                     <label class="label">MQTT Password</label>
                     <div class="control">
-                        <input class="input" type="password" name="mqtt_psk" id="mqtt_psk" placeholder="MQTT Password">
+                        <input class="input" type="password" name="mqtt_psk" id="mqtt_psk" placeholder="MQTT Password"
+                            value="%mqtt_psk%">
                     </div>
                 </div>
             </div>

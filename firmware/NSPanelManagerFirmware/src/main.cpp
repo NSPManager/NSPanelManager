@@ -1,17 +1,17 @@
 #include <Arduino.h>
+#include <MqttLog.h>
 #include <ArduinoJson.h>
+#include <PubSubClient.h>
 #include <nspm-bin-version.h>
 #include <string>
 #include <LittleFS.h>
 #include <NSPMConfig.h>
-#include <ArduLog.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <PubSubClient.h>
 #include <WebManager.h>
 
+MqttLog logger;
 NSPMConfig config;
-ArduLog logger;
 WebManager webMan;
 TaskHandle_t _taskWifiAndMqttManager;
 WiFiClient espClient;
@@ -59,14 +59,14 @@ void taskManageWifiAndMqtt(void *param)
         while (!WiFi.isConnected())
         {
           WiFi.begin(config.wifi_ssid.c_str(), config.wifi_psk.c_str());
-          LOG_INFO("Connecting to WiFi ", LOG_BOLD, config.wifi_ssid.c_str());
+          LOG_INFO("Connecting to WiFi ", config.wifi_ssid.c_str());
           vTaskDelay(1000 / portTICK_PERIOD_MS);
           if (WiFi.isConnected())
           {
-            LOG_INFO("Connected to WiFi ", LOG_BOLD, config.wifi_ssid.c_str());
-            LOG_INFO("IP Address: ", LOG_BOLD, WiFi.localIP());
-            LOG_INFO("Netmask:    ", LOG_BOLD, WiFi.subnetMask());
-            LOG_INFO("Gateway:    ", LOG_BOLD, WiFi.gatewayIP());
+            LOG_INFO("Connected to WiFi ", config.wifi_ssid.c_str());
+            LOG_INFO("IP Address: ", WiFi.localIP());
+            LOG_INFO("Netmask:    ", WiFi.subnetMask());
+            LOG_INFO("Gateway:    ", WiFi.gatewayIP());
             // Start web server
             webMan.init(NSPanelManagerFirmwareVersion);
             registerToNSPanelManager();
@@ -91,13 +91,13 @@ void taskManageWifiAndMqtt(void *param)
           // mqttClient.setCallback(mqttCallback);
           // TODO: MQTT Callback
           mqttClient.setBufferSize(2048);
-          LOG_INFO("Connecting to MQTT server ", LOG_BOLD, config.mqtt_server.c_str());
+          LOG_INFO("Connecting to MQTT server ", config.mqtt_server.c_str());
           // mqttClient.connect(config.wifi_hostname.c_str(), config.mqtt_username.c_str(), config.mqtt_password.c_str());
-          mqttClient.connect(config.wifi_hostname.c_str(), config.mqtt_username.c_str(), config.mqtt_password.c_str(), NSPMConfig::instance->mqtt_avalability_topic.c_str(), 1, 1, "offline");
+          mqttClient.connect(config.wifi_hostname.c_str(), config.mqtt_username.c_str(), config.mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, 1, "offline");
           vTaskDelay(1000 / portTICK_PERIOD_MS);
           if (mqttClient.connected())
           {
-            LOG_INFO("Connected to MQTT server ", LOG_BOLD, config.mqtt_server.c_str());
+            LOG_INFO("Connected to MQTT server ", config.mqtt_server.c_str());
             // TODO: Subscribe
           }
           else
@@ -147,17 +147,17 @@ void taskManageWifiAndMqtt(void *param)
 
 void setup()
 {
-  // Setup logging
   Serial.begin(115200);
-  logger.init();
-  logger.SetSerial(&Serial);
-  logger.SetLogLevel(ArduLogLevel::Trace);
 
   // Load config if any, and if it fails. Factory reset!
   if (!(config.init() && config.loadFromLittleFS()))
   {
     config.factoryReset();
   }
+
+  // Setup logging
+  logger.init(&mqttClient, &(NSPMConfig::instance->mqtt_log_topic));
+  logger.setLogLevel(static_cast<MqttLogLevel>(config.logging_level));
 
   LOG_INFO("Starting tasks");
   xTaskCreatePinnedToCore(taskManageWifiAndMqtt, "taskManageWifiAndMqtt", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);

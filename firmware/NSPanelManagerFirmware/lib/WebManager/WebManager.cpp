@@ -1,11 +1,11 @@
 #include <WebManager.h>
-#include <ArduLog.h>
 #include <LittleFS.h>
 #include <NSPMConfig.h>
 #include <list>
 #include <WiFi.h>
 #include <Arduino.h>
 #include <Update.h>
+#include <MqttLog.h>
 
 // Make space for variables in memory
 WebManager *WebManager::instance;
@@ -36,6 +36,42 @@ String WebManager::processIndexTemplate(const String &templateVar)
     if (templateVar == "version")
     {
         return WebManager::instance->_nspmFirmwareVersion.c_str();
+    }
+    else if (templateVar == "wifi_hostname")
+    {
+        return NSPMConfig::instance->wifi_hostname.c_str();
+    }
+    else if (templateVar == "wifi_ssid")
+    {
+        return NSPMConfig::instance->wifi_ssid.c_str();
+    }
+    else if (templateVar == "wifi_psk")
+    {
+        return NSPMConfig::instance->wifi_psk.c_str();
+    }
+    else if (templateVar == "manager_address")
+    {
+        return NSPMConfig::instance->manager_address.c_str();
+    }
+    else if (templateVar == "manager_port")
+    {
+        return String(NSPMConfig::instance->manager_port);
+    }
+    else if (templateVar == "mqtt_server")
+    {
+        return NSPMConfig::instance->mqtt_server.c_str();
+    }
+    else if (templateVar == "mqtt_port")
+    {
+        return String(NSPMConfig::instance->mqtt_port);
+    }
+    else if (templateVar == "mqtt_username")
+    {
+        return NSPMConfig::instance->mqtt_username.c_str();
+    }
+    else if (templateVar == "mqtt_psk")
+    {
+        return NSPMConfig::instance->mqtt_password.c_str();
     }
 
     return "-- UNKNOWN TEMPLATE --";

@@ -13,17 +13,22 @@ current_minor_version="$(echo $current_version | cut -d . -f 3)"
 current_minor_version="$((current_minor_version+1))"
 echo "#define NSPanelManagerFirmwareVersion \"$current_major_version.$current_minor_version\"" > include/nspm-bin-version.h
 
-# Build firmware
-platformio run --environment esp32dev
+# Build firmware and LittleFS
+platformio run --environment esp32dev && platformio run --target buildfs --environment esp32dev
 
-# Build LittleFS
-platformio run --target buildfs --environment esp32dev
+if [ "$?" -ne 0 ]; then
+    echo "Software build failed. Will not upload to NSPanelManager"
+    exit 1
+fi
 
 # Upload firmware and LittleFS to NSPanelManager
 curl http://"$NSPanelManager_address":"$NSPanelManager_port"/save_new_firmware -F firmware=@.pio/build/esp32dev/firmware.bin
 firmware_status="$?"
 curl http://"$NSPanelManager_address":"$NSPanelManager_port"/save_new_data_file -F data_file=@.pio/build/esp32dev/littlefs.bin
 data_file_status="$?"
+
+# Wait for Django to process files.
+sleep 5
 
 if [ "$firmware_status" -eq 0 ] && [ "$data_file_status" -eq 0 ]; then
 	for nspanel in "${NSPanelsToOTA[@]}"; do
