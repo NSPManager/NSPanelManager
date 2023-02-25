@@ -20,6 +20,7 @@ public:
     static void saveConfigFromWeb(AsyncWebServerRequest *request);
     static void respondAvailableWiFiNetworks(AsyncWebServerRequest *request);
     static void startOTAUpdate(AsyncWebServerRequest *request);
+    static void startTFTOTAUpdate(AsyncWebServerRequest *request);
 
 private:
     AsyncWebServer _server = AsyncWebServer(80);

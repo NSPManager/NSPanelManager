@@ -7,6 +7,7 @@
 #include <Update.h>
 #include <MqttLog.h>
 #include <HTTPClient.h>
+#include <NSPanel.h>
 
 // Make space for variables in memory
 WebManager *WebManager::instance;
@@ -22,6 +23,7 @@ void WebManager::init(const char *nspmFirmwareVersion)
 
     this->_server.on("/save_config", HTTP_POST, WebManager::saveConfigFromWeb);
     this->_server.on("/start_ota_update", HTTP_POST, WebManager::startOTAUpdate);
+    this->_server.on("/start_tft_ota_update", HTTP_POST, WebManager::startTFTOTAUpdate);
 
     this->_server.onNotFound([](AsyncWebServerRequest *request)
                              { request->send(404, "text/plain", "Path/File not found!"); });
@@ -160,6 +162,12 @@ void WebManager::respondAvailableWiFiNetworks(AsyncWebServerRequest *request)
     json += "]";
     request->send(200, "application/json", json);
     json = String();
+}
+
+void WebManager::startTFTOTAUpdate(AsyncWebServerRequest *request)
+{
+    NSPanel::instance->startOTAUpdate();
+    request->send(200);
 }
 
 void WebManager::startOTAUpdate(AsyncWebServerRequest *request)

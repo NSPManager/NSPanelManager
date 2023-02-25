@@ -31,8 +31,13 @@
             </td>
             <td>{{ nspanel.mac_address }}</td>
             <td>{{ nspanel.last_seen }}</td>
-            <td><button type="button" class="button is-link is-small"
-                    onclick="startNSPanelOtaUpdate('{{ nspanel.ip_address }}');">OTA Update</button></td>
+            <td>
+                <button type="button" class="button is-link is-small"
+                    onclick="startNSPanelOtaUpdate('{{ nspanel.ip_address }}');">OTA Update</button>
+                <button type="button" class="button is-link is-small"
+                    onclick="startNSPanelTftUpdate('{{ nspanel.ip_address }}');">TFT
+                    Update</button>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
