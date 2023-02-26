@@ -5,3 +5,4 @@ docker/web/nspanelmanager/firmware.bin
 docker/web/nspanelmanager/littlefs.bin
 firmware/NSPanelManagerFirmware/data/config.json
 firmware/NSPanelManagerFirmware/.pio
+firmware/NSPanelManagerFirmware/littlefs.md5

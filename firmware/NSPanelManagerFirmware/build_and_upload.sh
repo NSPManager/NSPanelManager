@@ -14,11 +14,29 @@ current_minor_version="$((current_minor_version+1))"
 echo "#define NSPanelManagerFirmwareVersion \"$current_major_version.$current_minor_version\"" > include/nspm-bin-version.h
 
 # Build firmware and LittleFS
-platformio run --environment esp32dev && platformio run --target buildfs --environment esp32dev
+platformio run --environment esp32dev
+firmware_build_result="$?"
 
 if [ "$?" -ne 0 ]; then
-    echo "Software build failed. Will not upload to NSPanelManager"
+    echo "Firmware build failed. Will not upload to NSPanelManager"
     exit 1
+fi
+
+touch littlefs.md5
+current_littlefs_md5="$(cat littlefs.md5)"
+new_littlefs_md5="$(find data/ -type f -exec md5sum {} \; | sort | md5sum | cut -d ' ' -f 1)"
+
+if [ "$current_littlefs_md5" != "$new_littlefs_md5" ]; then
+	platformio run --target buildfs --environment esp32dev
+
+	if [ "$?" -ne 0 ]; then
+		echo "--- LittleFS build failed. Will not upload to NSPanelManager ---"
+		exit 2
+	fi
+
+	echo $new_littlefs_md5 > littlefs.md5
+else
+	echo "LittleFS has not changed. Will not build."
 fi
 
 # Upload firmware and LittleFS to NSPanelManager
