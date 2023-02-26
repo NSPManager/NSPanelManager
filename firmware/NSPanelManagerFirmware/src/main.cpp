@@ -10,8 +10,10 @@
 #include <HTTPClient.h>
 #include <WebManager.h>
 #include <NSPanel.h>
+#include <InterfaceManager.h>
 
 NSPanel nspanel;
+InterfaceManager interfaceManager;
 MqttLog logger;
 NSPMConfig config;
 WebManager webMan;
@@ -112,6 +114,10 @@ void taskManageWifiAndMqtt(void *param)
       {
         LOG_ERROR("No MQTT server configured!");
       }
+      else if (WiFi.isConnected() && mqttClient.connected())
+      {
+        // TODO: Send status updates as in RAM usage
+      }
       vTaskDelay(10000 / portTICK_PERIOD_MS);
     }
   }
@@ -170,6 +176,7 @@ void setup()
   }
 
   nspanel.init();
+  interfaceManager.init(&mqttClient);
 }
 
 void loop()

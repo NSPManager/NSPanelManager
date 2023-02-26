@@ -103,6 +103,7 @@ void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request)
         LOG_ERROR("Failed to save new configuration!");
     }
 
+    // TODO: Restart after settings saved
     request->redirect("/");
 }
 
@@ -187,7 +188,17 @@ void WebManager::_taskPerformOTAUpdate(void *param)
     vTaskDelay(250 / portTICK_PERIOD_MS); // Wait for other tasks.
     if (NSPMConfig::instance->md5_firmware.compare(checksum_holder) != 0)
     {
-        firmwareUpdateSuccessful = WebManager::_update(U_FLASH, "/download_firmware");
+        int tries = 0;
+        do
+        {
+            firmwareUpdateSuccessful = WebManager::_update(U_FLASH, "/download_firmware");
+            tries++;
+            if (!firmwareUpdateSuccessful && tries <= 3)
+            {
+                LOG_ERROR("Failed to run OTA. Will try again in 2 seconds.");
+                vTaskDelay(2000);
+            }
+        } while (!firmwareUpdateSuccessful && tries <= 3);
         if (firmwareUpdateSuccessful)
         {
             LOG_INFO("Successfully updated firmware.");
@@ -215,7 +226,19 @@ void WebManager::_taskPerformOTAUpdate(void *param)
         vTaskDelay(250 / portTICK_PERIOD_MS); // Wait for other tasks.
         if (NSPMConfig::instance->md5_data_file.compare(checksum_holder) != 0)
         {
-            if (WebManager::_update(U_SPIFFS, "/download_data_file"))
+            bool littleFSUpdateSuccessful = false;
+            int tries = 0;
+            do
+            {
+                littleFSUpdateSuccessful = WebManager::_update(U_SPIFFS, "/download_data_file");
+                tries++;
+                if (!firmwareUpdateSuccessful && tries <= 3)
+                {
+                    LOG_ERROR("Failed to run OTA. Will try again in 2 seconds.");
+                    vTaskDelay(2000);
+                }
+            } while (!littleFSUpdateSuccessful && tries <= 3);
+            if (littleFSUpdateSuccessful)
             {
                 LOG_INFO("Successfully updated LittleFS.");
                 // Save new LittleFS checksum

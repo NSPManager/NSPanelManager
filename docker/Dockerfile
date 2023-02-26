@@ -2,7 +2,7 @@ FROM python:latest
 
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
-		postgresql-client curl \
+		postgresql-client curl inotify-tools \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN echo "alias ll='ls -lh --color=auto'" >> /etc/bash.bashrc

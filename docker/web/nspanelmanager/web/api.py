@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
@@ -37,3 +37,29 @@ def register_nspanel(request):
     # Save the update/Create new panel
     new_panel.save()
     return HttpResponse('OK', status=200)
+
+
+def get_nspanel_config(request):
+    nspanel = NSPanel.objects.get(mac_address=request.GET["mac"])
+    base = {}
+    base["home"] = nspanel.room.displayOrder
+    base["rooms"] = {}
+    for room in Room.objects.all().order_by('displayOrder'):
+        base["rooms"][str(room.displayOrder)] = {}
+        base["rooms"][str(room.displayOrder)]["name"] = room.friendly_name
+        base["rooms"][str(room.displayOrder)]["lights"] = {}
+        for light in room.light_set.all():
+            base["rooms"][str(room.displayOrder)]["lights"]["ceiling"] = {}
+            base["rooms"][str(room.displayOrder)]["lights"]["table"] = {}
+            category = ""
+            if light.is_ceiling_light:
+                category = "ceiling"
+            else:
+                category = "table"
+
+            base["rooms"][str(room.displayOrder)
+                          ]["lights"][category][light.id] = {}
+            base["rooms"][str(
+                room.displayOrder)]["lights"][category][light.id]["name"] = light.friendly_name
+
+    return JsonResponse(base)

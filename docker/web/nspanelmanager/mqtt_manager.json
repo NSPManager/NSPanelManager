@@ -1,0 +1,9 @@
+{
+    "mqtt_server": "10.2.0.4",
+    "mqtt_port": 1883,
+    "mqtt_username": "",
+    "mqtt_password": "",
+    "use_mqtt_manager": true,
+    "homeassistant_url": "https://homeassistant.tpanajott.com/",
+    "homeassistant_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0ZTEwM2QwODkxMmI0NTNiYWZhZWY4ZmI0NjgwM2NmZSIsImlhdCI6MTY3NzQyNDU2NSwiZXhwIjoxOTkyNzg0NTY1fQ.alIIkTQl-HxjVSFPOViLMOGgkHYeijH8o9cQ60aMqRw"
+}

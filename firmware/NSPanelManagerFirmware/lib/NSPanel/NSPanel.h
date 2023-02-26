@@ -20,15 +20,21 @@ struct NSPanelCommand
     /// @brief Do we expect a response with data?
     bool expectResponse = false;
     /// @brief The callback function when data is returned
-    void (*callback)(std::string);
+    void (*callback)();
 };
 
 class NSPanel
 {
 public:
     inline static NSPanel *instance;
+    static void attachTouchEventCallback(void (*callback)(uint8_t, uint8_t, bool));
     void init();
     void startOTAUpdate();
+    void goToPage(const char *page);
+    void setDimLevel(uint8_t dimLevel);
+    void setSleep(bool sleep);
+    void setComponentText(const char *componentId, const char *text);
+    void restart();
 
 private:
     // Tasks
@@ -41,9 +47,14 @@ private:
     unsigned long _lastCommandSent = 0;
     std::queue<NSPanelCommand> _commandQueue;
     void _sendCommandWithoutResponse(const char *command);
+    void _sendCommandClearResponse(const char *command);
     void _addCommandToQueue(NSPanelCommand command);
     void _sendCommand(NSPanelCommand *command);
-    void tryBaud();
+    void _startListeningToPanel();
+    void _stopListeningToPanel();
+
+    static inline void (*_touchEventCallback)(uint8_t, uint8_t, bool);
+    static void _clearSerialBuffer();
 };
 
 #endif

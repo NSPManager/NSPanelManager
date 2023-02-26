@@ -3,6 +3,7 @@
 #include <NSPanelReturnData.h>
 #include <WiFiClient.h>
 #include <string>
+#include <math.h>
 
 bool recvRetCommandFinished()
 {
@@ -23,27 +24,56 @@ bool recvRetCommandFinished()
     return ret;
 }
 
-void NSPanel::tryBaud()
+void NSPanel::goToPage(const char *page)
 {
-    this->_sendCommandWithoutResponse("boguscommand=0");
-    this->_sendCommandWithoutResponse("connect");
-
-    // Wake up the nextion
-    this->_sendCommandWithoutResponse("bkcmd=0");
-    this->_sendCommandWithoutResponse("sleep=0");
-
-    this->_sendCommandWithoutResponse("bkcmd=0");
-    this->_sendCommandWithoutResponse("sleep=0");
-
-    // Reboot it
-    this->_sendCommandWithoutResponse("rest");
-
-    this->_sendCommandWithoutResponse("page bootscreen");
-    this->_sendCommandWithoutResponse("dim=1.0");
-
-    vTaskDelay(5000 / portTICK_PERIOD_MS);
-    this->_sendCommandWithoutResponse("page Bathroom");
+    std::string cmd_string = "page ";
+    cmd_string.append(page);
+    this->_sendCommandWithoutResponse(cmd_string.c_str());
 }
+
+void NSPanel::setDimLevel(uint8_t dimLevel)
+{
+    float dimLevelToPanel = dimLevel / 100;
+    std::string cmd_string = "dim=";
+    cmd_string.append(std::to_string(dimLevelToPanel));
+    this->_sendCommandWithoutResponse(cmd_string.c_str());
+}
+
+void NSPanel::setSleep(bool sleep)
+{
+    this->_sendCommandWithoutResponse(sleep ? "sleep=1" : "sleep=0");
+}
+
+void NSPanel::setComponentText(const char *componentId, const char *text)
+{
+    std::string cmd = componentId;
+    cmd.append(".txt=\"");
+    cmd.append(text);
+    cmd.append("\"");
+    this->_sendCommandWithoutResponse(cmd.c_str());
+}
+
+void NSPanel::restart()
+{
+    this->_sendCommandWithoutResponse("rest");
+}
+
+// void NSPanel::tryBaud()
+// {
+//     // Wake up the nextion
+//     this->_sendCommandWithoutResponse("bkcmd=0");
+//     this->_sendCommandWithoutResponse("sleep=0");
+
+//     this->_sendCommandWithoutResponse("bkcmd=0");
+//     this->_sendCommandWithoutResponse("sleep=0");
+
+//     // // Reboot it
+//     this->_sendCommandWithoutResponse("rest");
+//     this->_sendCommandWithoutResponse("dim=1.0");
+
+//     vTaskDelay(5000 / portTICK_PERIOD_MS);
+//     this->_sendCommandWithoutResponse("page Bathroom");
+// }
 
 void NSPanel::init()
 {
@@ -55,14 +85,42 @@ void NSPanel::init()
 
     LOG_INFO("Starting communication with NSPanel.");
     xTaskCreatePinnedToCore(_taskSendCommandQueue, "taskUartListen", 5000, NULL, 1, &this->_taskHandleSendCommandQueue, CONFIG_ARDUINO_RUNNING_CORE);
+    this->_startListeningToPanel();
+
+    // Connect to display and start it
+    this->_sendCommandWithoutResponse("boguscommand=0");
+    this->_sendCommandWithoutResponse("connect");
+    this->_sendCommandWithoutResponse("bkcmd=0");
+    this->_sendCommandWithoutResponse("sleep=0");
+    this->_sendCommandWithoutResponse("bkcmd=0");
+    this->_sendCommandWithoutResponse("sleep=0");
+    this->_sendCommandClearResponse("rest");
+    this->_sendCommandWithoutResponse("dim=1.0");
+}
+
+void NSPanel::_startListeningToPanel()
+{
     xTaskCreatePinnedToCore(_taskReadNSPanelData, "taskUartListen", 5000, NULL, 1, &this->_taskHandleReadNSPanelData, CONFIG_ARDUINO_RUNNING_CORE);
-    this->tryBaud();
+}
+
+void NSPanel::_stopListeningToPanel()
+{
+    vTaskDelete(this->_taskHandleReadNSPanelData);
 }
 
 void NSPanel::_sendCommandWithoutResponse(const char *command)
 {
     NSPanelCommand cmd;
     cmd.command = command;
+    this->_addCommandToQueue(cmd);
+}
+
+void NSPanel::_sendCommandClearResponse(const char *command)
+{
+    NSPanelCommand cmd;
+    cmd.command = command;
+    cmd.expectResponse = true;
+    cmd.callback = &NSPanel::_clearSerialBuffer;
     this->_addCommandToQueue(cmd);
 }
 
@@ -94,6 +152,11 @@ void NSPanel::_taskSendCommandQueue(void *param)
     }
 }
 
+void NSPanel::attachTouchEventCallback(void (*callback)(uint8_t, uint8_t, bool))
+{
+    NSPanel::_touchEventCallback = callback;
+}
+
 void NSPanel::_taskReadNSPanelData(void *param)
 {
     LOG_INFO("Starting taskReadNSPanelData.");
@@ -106,19 +169,18 @@ void NSPanel::_taskReadNSPanelData(void *param)
             switch (readByte)
             {
             case NEX_OUT_TOUCH_EVENT:
-                LOG_DEBUG("page: ", String(Serial2.read(), HEX).c_str());
-                LOG_DEBUG("component: ", String(Serial2.read(), HEX).c_str());
-                LOG_DEBUG("Type: ", Serial2.read() == 0x01 ? "PRESS" : "RELEASE");
-                // Read the rest of the bytes
-                for (int i = 0; i < 3; i++)
-                {
-                    Serial2.read();
-                }
+                NSPanel::_touchEventCallback(Serial2.read(), Serial2.read(), Serial2.read() == 0x01);
                 break;
 
             default:
                 LOG_DEBUG("Read ", String(readByte, HEX).c_str());
                 break;
+            }
+
+            // Read the last 0xFF bytes of the end of every event
+            for (int i = 0; i < 3; i++)
+            {
+                Serial2.read();
             }
 
             if (Serial2.available() == 0)
@@ -139,16 +201,41 @@ void NSPanel::_sendCommand(NSPanelCommand *command)
         Serial2.read();
     }
 
+    if (command->expectResponse)
+    {
+        LOG_DEBUG("Stopping read of panel data. Sending command and waiting for response.");
+        this->_stopListeningToPanel();
+    }
+
     Serial2.print(command->command.c_str());
     Serial2.write(0xFF);
     Serial2.write(0xFF);
     Serial2.write(0xFF);
     this->_lastCommandSent = millis();
+
+    if (command->expectResponse)
+    {
+        while (Serial2.available() == 0)
+        {
+            vTaskDelay(5);
+        }
+
+        command->callback();
+        this->_startListeningToPanel();
+    }
 }
 
 void NSPanel::startOTAUpdate()
 {
     xTaskCreatePinnedToCore(_taskUpdateTFTConfigOTA, "taskUpdateTFTConfigOTA", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+}
+
+void NSPanel::_clearSerialBuffer()
+{
+    while (Serial2.available() > 0)
+    {
+        Serial2.read();
+    }
 }
 
 void NSPanel::_taskUpdateTFTConfigOTA(void *param)

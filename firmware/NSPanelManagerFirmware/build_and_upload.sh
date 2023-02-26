@@ -17,7 +17,7 @@ echo "#define NSPanelManagerFirmwareVersion \"$current_major_version.$current_mi
 platformio run --environment esp32dev
 firmware_build_result="$?"
 
-if [ "$?" -ne 0 ]; then
+if [ "$firmware_build_result" -ne 0 ]; then
     echo "Firmware build failed. Will not upload to NSPanelManager"
     exit 1
 fi
@@ -26,7 +26,7 @@ touch littlefs.md5
 current_littlefs_md5="$(cat littlefs.md5)"
 new_littlefs_md5="$(find data/ -type f -exec md5sum {} \; | sort | md5sum | cut -d ' ' -f 1)"
 
-if [ "$current_littlefs_md5" != "$new_littlefs_md5" ]; then
+if [ "$current_littlefs_md5" != "$new_littlefs_md5" ] || [ ! -f ".pio/build/esp32dev/littlefs.bin" ]; then
 	platformio run --target buildfs --environment esp32dev
 
 	if [ "$?" -ne 0 ]; then

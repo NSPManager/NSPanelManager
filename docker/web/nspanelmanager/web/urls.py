@@ -25,4 +25,6 @@ urlpatterns = [
     path('checksum_data_file', views.checksum_data_file, name='checksum_data_file'),
     # Below are API routes
     path('api/register_nspanel', api.register_nspanel, name='register_nspanel'),
+    path('api/get_nspanel_config', api.get_nspanel_config,
+         name='get_nspanel_config'),
 ]
