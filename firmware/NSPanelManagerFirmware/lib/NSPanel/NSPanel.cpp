@@ -26,6 +26,7 @@ bool recvRetCommandFinished()
 
 void NSPanel::goToPage(const char *page)
 {
+    LOG_DEBUG("Navigating to page ", page);
     std::string cmd_string = "page ";
     cmd_string.append(page);
     this->_sendCommandWithoutResponse(cmd_string.c_str());
@@ -58,23 +59,6 @@ void NSPanel::restart()
     this->_sendCommandWithoutResponse("rest");
 }
 
-// void NSPanel::tryBaud()
-// {
-//     // Wake up the nextion
-//     this->_sendCommandWithoutResponse("bkcmd=0");
-//     this->_sendCommandWithoutResponse("sleep=0");
-
-//     this->_sendCommandWithoutResponse("bkcmd=0");
-//     this->_sendCommandWithoutResponse("sleep=0");
-
-//     // // Reboot it
-//     this->_sendCommandWithoutResponse("rest");
-//     this->_sendCommandWithoutResponse("dim=1.0");
-
-//     vTaskDelay(5000 / portTICK_PERIOD_MS);
-//     this->_sendCommandWithoutResponse("page Bathroom");
-// }
-
 void NSPanel::init()
 {
     // Pin 4 controls screen on/off.
@@ -95,7 +79,7 @@ void NSPanel::init()
     this->_sendCommandWithoutResponse("bkcmd=0");
     this->_sendCommandWithoutResponse("sleep=0");
     this->_sendCommandClearResponse("rest");
-    this->_sendCommandWithoutResponse("dim=1.0");
+    this->_sendCommandClearResponse("dim=1.0");
 }
 
 void NSPanel::_startListeningToPanel()

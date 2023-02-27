@@ -7,6 +7,7 @@ void InterfaceManager::init(PubSubClient *mqttClient)
 {
     this->_instance = this;
     this->_mqttClient = mqttClient;
+    this->_mqttClient->setCallback(&InterfaceManager::mqttCallback);
     NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
 
     this->_roomDataJson = new DynamicJsonDocument(2048);
@@ -47,12 +48,14 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
 
 void InterfaceManager::_processPanelConfig()
 {
+    LOG_DEBUG("Processing rooms");
     this->_cfg.homeScreen = (*this->_roomDataJson)["home"].as<uint8_t>();
     for (JsonPair kv : (*this->_roomDataJson)["rooms"].as<JsonObject>())
     {
         roomConfig roomCfg;
         roomCfg.id = atoi(kv.key().c_str());
         roomCfg.name = kv.value()["name"] | "ERR";
+        LOG_DEBUG("Loaded room ID: ", roomCfg.id);
         this->_cfg.rooms.push_back(roomCfg);
     }
 
@@ -84,7 +87,7 @@ void InterfaceManager::_changeRoom(uint8_t roomId)
             LOG_DEBUG("Found requested room with ID: ", roomId);
             this->_cfg.currentRoom = it;
             this->_updatePanelWithNewRoomInfo();
-            break;
+            return;
         }
     }
 
@@ -95,6 +98,13 @@ void InterfaceManager::_changeRoom(uint8_t roomId)
 void InterfaceManager::_updatePanelWithNewRoomInfo()
 {
     NSPanel::instance->setComponentText("home.room", this->_cfg.currentRoom->name.c_str());
+}
+
+void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int length)
+{
+    std::string tpc = topic;
+    StaticJsonDocument<128> data;
+    deserializeJson(data, payload, length);
 }
 
 bool InterfaceManager::_getPanelConfig()

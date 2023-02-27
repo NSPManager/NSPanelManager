@@ -33,6 +33,7 @@ class InterfaceManager
 public:
     void init(PubSubClient *mqttClient);
     static void processTouchEvent(uint8_t, uint8_t, bool);
+    static void mqttCallback(char *topic, byte *payload, unsigned int length);
 
 private:
     static inline InterfaceManager *_instance;
