@@ -9,6 +9,8 @@ void InterfaceManager::init(PubSubClient *mqttClient)
     this->_mqttClient = mqttClient;
     this->_mqttClient->setCallback(&InterfaceManager::mqttCallback);
     NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
+    NSPanel::instance->goToPage("bootscreen");
+    NSPanel::instance->setComponentText("bootscreen.t_loading", "Loading config from managerment server...");
 
     this->_roomDataJson = new DynamicJsonDocument(2048);
     uint8_t tries = 0;
@@ -31,9 +33,7 @@ void InterfaceManager::init(PubSubClient *mqttClient)
     } while (!successDownloadingConfig);
     // Config downloaded, process the raw data
     this->_processPanelConfig();
-
-    NSPanel::instance->goToPage("bootscreen");
-    // NSPanel::instance->goToPage(100);
+    delete this->_roomDataJson; // All JSON-data processed, delete data from memory
 }
 
 void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
@@ -63,6 +63,7 @@ void InterfaceManager::_processPanelConfig()
     this->_roomDataJson->clear();
 
     this->_changeRoom(this->_cfg.homeScreen);
+    NSPanel::instance->goToPage("page home");
 }
 
 void InterfaceManager::_goToNextRoom()

@@ -61,5 +61,11 @@ def get_nspanel_config(request):
                           ]["lights"][category][light.id] = {}
             base["rooms"][str(
                 room.displayOrder)]["lights"][category][light.id]["name"] = light.friendly_name
+            base["rooms"][str(
+                room.displayOrder)]["lights"][category][light.id]["can_dim"] = light.can_dim
+            base["rooms"][str(
+                room.displayOrder)]["lights"][category][light.id]["can_temperature"] = light.can_color_temperature
+            base["rooms"][str(
+                room.displayOrder)]["lights"][category][light.id]["can_rgb"] = light.can_rgb
 
     return JsonResponse(base)
