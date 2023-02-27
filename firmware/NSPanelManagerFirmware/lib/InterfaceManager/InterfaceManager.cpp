@@ -64,36 +64,37 @@ void InterfaceManager::_processPanelConfig()
 
 void InterfaceManager::_goToNextRoom()
 {
-    if (this->_currentRoom->id == this->_cfg.rooms.end()->id)
+    LOG_DEBUG("Switching to next room.");
+    this->_cfg.currentRoom++;
+    if (this->_cfg.currentRoom == this->_cfg.rooms.end())
     {
-        this->_changeRoom(1);
+        LOG_DEBUG("End of rooms. Going to first.");
+        this->_cfg.currentRoom = this->_cfg.rooms.begin();
     }
-    else
-    {
-        this->_changeRoom(this->_currentRoom->id + 1);
-    }
+    this->_updatePanelWithNewRoomInfo();
 }
 
 void InterfaceManager::_changeRoom(uint8_t roomId)
 {
     bool foundRoom = false;
-    for (roomConfig &cfg : this->_cfg.rooms)
+    for (std::list<roomConfig>::iterator it = this->_cfg.rooms.begin(); it != this->_cfg.rooms.end(); it++)
     {
-        if (cfg.id == roomId)
+        if (it->id == roomId)
         {
-            LOG_DEBUG("Found requested room");
-            this->_currentRoom = &cfg;
-            foundRoom = true;
+            LOG_DEBUG("Found requested room with ID: ", roomId);
+            this->_cfg.currentRoom = it;
+            this->_updatePanelWithNewRoomInfo();
             break;
         }
     }
-    if (!foundRoom)
-    {
-        LOG_ERROR("Did not find requested room. Will cancel operation.");
-        return;
-    }
 
-    NSPanel::instance->setComponentText("home.room", this->_currentRoom->name.c_str());
+    LOG_ERROR("Did not find requested room. Will cancel operation.");
+    return;
+}
+
+void InterfaceManager::_updatePanelWithNewRoomInfo()
+{
+    NSPanel::instance->setComponentText("home.room", this->_cfg.currentRoom->name.c_str());
 }
 
 bool InterfaceManager::_getPanelConfig()

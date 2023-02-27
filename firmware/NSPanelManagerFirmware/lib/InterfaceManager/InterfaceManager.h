@@ -25,6 +25,7 @@ struct interfaceConfig
 {
     uint8_t homeScreen = 0;
     std::list<roomConfig> rooms;
+    std::list<roomConfig>::iterator currentRoom;
 };
 
 class InterfaceManager
@@ -38,9 +39,9 @@ private:
     PubSubClient *_mqttClient;
     DynamicJsonDocument *_roomDataJson;
     interfaceConfig _cfg;
-    roomConfig *_currentRoom;
     void _goToNextRoom();
     void _changeRoom(uint8_t roomId);
+    void _updatePanelWithNewRoomInfo();
     bool _getPanelConfig();
     void _processPanelConfig();
 };
