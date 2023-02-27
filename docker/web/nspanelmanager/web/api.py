@@ -49,23 +49,17 @@ def get_nspanel_config(request):
         base["rooms"][str(room.displayOrder)]["name"] = room.friendly_name
         base["rooms"][str(room.displayOrder)]["lights"] = {}
         for light in room.light_set.all():
-            base["rooms"][str(room.displayOrder)]["lights"]["ceiling"] = {}
-            base["rooms"][str(room.displayOrder)]["lights"]["table"] = {}
-            category = ""
-            if light.is_ceiling_light:
-                category = "ceiling"
-            else:
-                category = "table"
-
             base["rooms"][str(room.displayOrder)
-                          ]["lights"][category][light.id] = {}
+                          ]["lights"][light.id] = {}
             base["rooms"][str(
-                room.displayOrder)]["lights"][category][light.id]["name"] = light.friendly_name
+                room.displayOrder)]["lights"][light.id]["name"] = light.friendly_name
             base["rooms"][str(
-                room.displayOrder)]["lights"][category][light.id]["can_dim"] = light.can_dim
+                room.displayOrder)]["lights"][light.id]["ceiling"] = light.is_ceiling_light
             base["rooms"][str(
-                room.displayOrder)]["lights"][category][light.id]["can_temperature"] = light.can_color_temperature
+                room.displayOrder)]["lights"][light.id]["can_dim"] = light.can_dim
             base["rooms"][str(
-                room.displayOrder)]["lights"][category][light.id]["can_rgb"] = light.can_rgb
+                room.displayOrder)]["lights"][light.id]["can_temperature"] = light.can_color_temperature
+            base["rooms"][str(
+                room.displayOrder)]["lights"][light.id]["can_rgb"] = light.can_rgb
 
     return JsonResponse(base)

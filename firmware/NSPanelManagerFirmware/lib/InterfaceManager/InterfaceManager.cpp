@@ -10,39 +10,103 @@ void InterfaceManager::init(PubSubClient *mqttClient)
     this->_mqttClient->setCallback(&InterfaceManager::mqttCallback);
     NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
     NSPanel::instance->goToPage("bootscreen");
-    NSPanel::instance->setComponentText("bootscreen.t_loading", "Loading config from managerment server...");
+    xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+}
 
-    this->_roomDataJson = new DynamicJsonDocument(2048);
+void InterfaceManager::_taskLoadConfigAndInit(void *param)
+{
+    unsigned long start = millis();
+    while (!WiFi.isConnected() || !InterfaceManager::_instance->_mqttClient->connected())
+    {
+        if (!WiFi.isConnected())
+        {
+            NSPanel::instance->setComponentText("bootscreen.t_loading", "Connecting to WiFi...");
+        }
+        else if (!InterfaceManager::_instance->_mqttClient->connected())
+        {
+            NSPanel::instance->setComponentText("bootscreen.t_loading", "Connecting to MQTT...");
+        }
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+    }
+
+    if (millis() - start < 8000)
+    {
+        LOG_DEBUG("WiFi and MQTT ready. Will delay for panel to become ready...");
+        vTaskDelay((millis() - start) / portTICK_PERIOD_MS);
+    }
+
+    NSPanel::instance->setComponentText("bootscreen.t_loading", "Loading config...");
+
+    InterfaceManager::_instance->_roomDataJson = new DynamicJsonDocument(2048);
     uint8_t tries = 0;
     bool successDownloadingConfig = false;
     do
     {
-        successDownloadingConfig = this->_getPanelConfig();
+        successDownloadingConfig = InterfaceManager::_instance->_getPanelConfig();
         if (!successDownloadingConfig)
         {
             tries++;
             LOG_ERROR("Failed to download config, will try again in 5 seconds.");
-            vTaskDelay(5000 / portTICK_RATE_MS);
+            vTaskDelay(5000 / portTICK_PERIOD_MS);
 
             if (tries == 5)
             {
                 LOG_ERROR("Failed to download config, will restart and try again.");
+                NSPanel::instance->setComponentText("bootscreen.t_loading", "Restarting...");
+                vTaskDelay(5000 / portTICK_PERIOD_MS);
                 ESP.restart();
             }
         }
     } while (!successDownloadingConfig);
     // Config downloaded, process the raw data
-    this->_processPanelConfig();
-    delete this->_roomDataJson; // All JSON-data processed, delete data from memory
+    InterfaceManager::_instance->_processPanelConfig();
+    delete InterfaceManager::_instance->_roomDataJson; // All JSON-data processed, delete data from memory
+
+    // Set some default values before showing page
+    InterfaceManager::_instance->_changeMode(roomMode::room);
+
+    // As there may be may be MANY topics to subscribe to, do it in checks of 5 with delays
+    // between them to allow for processing all the incoming data.
+    NSPanel::instance->setComponentText("bootscreen.t_loading", "Subscribing...");
+    uint8_t numSubscribed = 0;
+    // Every light in every room
+    for (roomConfig &roomCfg : InterfaceManager::_instance->_cfg.rooms)
+    {
+        for (lightConfig &lightCfg : roomCfg.ceilingLights)
+        {
+            // Build topic from name
+            std::string levelStatusTopic = "nspanel/entities/light.";
+            levelStatusTopic.append(lightCfg.name);
+            levelStatusTopic.append("/state_brightness_pct");
+            InterfaceManager::_instance->_mqttClient->subscribe(levelStatusTopic.c_str());
+            // Check if it is time to delay to allow for processing of incoming MQTT data
+            numSubscribed++;
+            if (numSubscribed == 5)
+            {
+                vTaskDelay(50 / portTICK_PERIOD_MS);
+                numSubscribed = 0;
+            }
+        }
+        // TODO: Implement table light logic
+        // for (lightConfig &lightCfg : roomCfg.tableLights)
+        // {
+        // }
+    }
+
+    vTaskDelete(NULL); // Delete task, we are done
 }
 
 void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
 {
     LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
 
-    if (page == 2 && component == 21 && pressed)
+    if (page == 2 && component == 20 && pressed)
     {
         InterfaceManager::_instance->_goToNextRoom();
+    }
+    else if (page == 2 && component == 8 && pressed)
+    {
+        InterfaceManager::_instance->_goToNextMode();
     }
 }
 
@@ -56,6 +120,27 @@ void InterfaceManager::_processPanelConfig()
         roomCfg.id = atoi(kv.key().c_str());
         roomCfg.name = kv.value()["name"] | "ERR";
         LOG_DEBUG("Loaded room ID: ", roomCfg.id);
+
+        JsonVariant ceilingLights = kv.value()["lights"];
+        for (JsonPair lightPair : ceilingLights.as<JsonObject>())
+        {
+            lightConfig lightCfg;
+            lightCfg.id = atoi(lightPair.key().c_str());
+            lightCfg.name = lightPair.value()["name"] | "ERR-L";
+            lightCfg.canDim = lightPair.value()["can_dim"];
+            lightCfg.canTemperature = lightPair.value()["can_temperature"];
+            lightCfg.canRgb = lightPair.value()["can_rgb"];
+            LOG_DEBUG("Loaded light ID: ", lightCfg.id);
+            if (lightPair.value()["ceiling"] == true)
+            {
+                roomCfg.ceilingLights.push_back(lightCfg);
+            }
+            else
+            {
+                roomCfg.tableLights.push_back(lightCfg);
+            }
+        }
+
         this->_cfg.rooms.push_back(roomCfg);
     }
 
@@ -63,7 +148,7 @@ void InterfaceManager::_processPanelConfig()
     this->_roomDataJson->clear();
 
     this->_changeRoom(this->_cfg.homeScreen);
-    NSPanel::instance->goToPage("page home");
+    NSPanel::instance->goToPage("home");
 }
 
 void InterfaceManager::_goToNextRoom()
@@ -101,11 +186,113 @@ void InterfaceManager::_updatePanelWithNewRoomInfo()
     NSPanel::instance->setComponentText("home.room", this->_cfg.currentRoom->name.c_str());
 }
 
+void InterfaceManager::_goToNextMode()
+{
+    roomMode newMode = static_cast<roomMode>(static_cast<int>(this->_currentRoomMode) + 1);
+    if (newMode == roomMode::END)
+    {
+        newMode = roomMode::room;
+    }
+    this->_changeMode(newMode);
+}
+
+void InterfaceManager::_changeMode(roomMode mode)
+{
+    this->_currentRoomMode = mode;
+    if (this->_currentRoomMode == roomMode::room)
+    {
+        NSPanel::instance->setComponentText("home.mode", "Room");
+    }
+    else if (this->_currentRoomMode == roomMode::house)
+    {
+        NSPanel::instance->setComponentText("home.mode", "House");
+    }
+    else
+    {
+        NSPanel::instance->setComponentText("home.mode", "UNKNOWN");
+    }
+}
+
 void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int length)
 {
+    std::string payloadStr = std::string((char *)payload, length);
     std::string tpc = topic;
-    StaticJsonDocument<128> data;
-    deserializeJson(data, payload, length);
+    try
+    {
+        std::string domain = tpc;
+        domain = domain.erase(0, strlen("nspanel/entities/"));
+        domain = domain.substr(0, domain.find('.'));
+
+        std::string entity = tpc;
+        entity = entity.erase(0, entity.find('.') + 1);
+        entity = entity.substr(0, entity.find('/'));
+
+        std::string attribute = tpc;
+        attribute = attribute.erase(0, attribute.find_last_of('/') + 1);
+
+        if (domain.compare("light") == 0 && attribute.compare("state_brightness_pct") == 0)
+        {
+            InterfaceManager::_instance->_setLightLevel(entity, atoi(payloadStr.c_str()));
+        }
+    }
+    catch (...)
+    {
+        LOG_ERROR("Error processing MQTT message on topic ", tpc.c_str());
+    }
+}
+
+void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
+{
+    for (roomConfig &roomCfg : InterfaceManager::_instance->_cfg.rooms)
+    {
+        for (lightConfig &lightCfg : roomCfg.ceilingLights)
+        {
+            if (lightCfg.name.compare(light) == 0)
+            {
+                lightCfg.level = level;
+                this->_updatePanelLightStatus();
+                return;
+            }
+        }
+
+        for (lightConfig &lightCfg : roomCfg.tableLights)
+        {
+            if (lightCfg.name.compare(light) == 0)
+            {
+                lightCfg.level = level;
+                this->_updatePanelLightStatus();
+                return;
+            }
+        }
+    }
+}
+
+void InterfaceManager::_updatePanelLightStatus()
+{
+    uint totalLights = 0;
+    uint totalBrightness = 0;
+    for (lightConfig &light : this->_cfg.currentRoom->ceilingLights)
+    {
+        if (light.level > 0)
+        {
+            totalLights++;
+            totalBrightness += light.level;
+        }
+    }
+
+    LOG_DEBUG("Total light: ", totalLights);
+    LOG_DEBUG("Total brightness: ", totalBrightness);
+
+    uint averageBrightness = totalLights == 0 ? 0 : totalBrightness / totalLights;
+    if (averageBrightness > 0)
+    {
+        NSPanel::instance->setComponentVal("home.b_ceiling", 1);
+    }
+    else
+    {
+        NSPanel::instance->setComponentVal("home.b_ceiling", 0);
+    }
+    NSPanel::instance->setComponentText("home.n_ceiling", std::to_string(averageBrightness).append("%").c_str());
 }
 
 bool InterfaceManager::_getPanelConfig()

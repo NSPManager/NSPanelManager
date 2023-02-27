@@ -170,11 +170,6 @@ void setup()
   LOG_INFO("Starting tasks");
   xTaskCreatePinnedToCore(taskManageWifiAndMqtt, "taskManageWifiAndMqtt", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 
-  while (!mqttClient.connected())
-  {
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-  }
-
   nspanel.init();
   interfaceManager.init(&mqttClient);
 }

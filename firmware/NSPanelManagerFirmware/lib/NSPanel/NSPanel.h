@@ -34,6 +34,7 @@ public:
     void setDimLevel(uint8_t dimLevel);
     void setSleep(bool sleep);
     void setComponentText(const char *componentId, const char *text);
+    void setComponentVal(const char *componentId, uint8_t value);
     void restart();
 
 private:
