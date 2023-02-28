@@ -92,9 +92,7 @@ void taskManageWifiAndMqtt(void *param)
         while (WiFi.isConnected() && !mqttClient.connected())
         {
           mqttClient.setServer(config.mqtt_server.c_str(), config.mqtt_port);
-          // mqttClient.setCallback(mqttCallback);
           // TODO: MQTT Callback
-          mqttClient.setBufferSize(2048);
           LOG_INFO("Connecting to MQTT server ", config.mqtt_server.c_str());
           // mqttClient.connect(config.wifi_hostname.c_str(), config.mqtt_username.c_str(), config.mqtt_password.c_str());
           mqttClient.connect(config.wifi_hostname.c_str(), config.mqtt_username.c_str(), config.mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, 1, "offline");
@@ -156,6 +154,7 @@ void taskManageWifiAndMqtt(void *param)
 void setup()
 {
   Serial.begin(115200);
+  mqttClient.setBufferSize(2048);
 
   // Load config if any, and if it fails. Factory reset!
   if (!(config.init() && config.loadFromLittleFS()))

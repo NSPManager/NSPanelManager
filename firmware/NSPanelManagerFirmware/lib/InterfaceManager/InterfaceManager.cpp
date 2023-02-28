@@ -1,4 +1,5 @@
 #include <InterfaceManager.h>
+#include <TftDefines.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <MqttLog.h>
@@ -65,6 +66,12 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
     // Set some default values before showing page
     InterfaceManager::_instance->_changeMode(roomMode::room);
 
+    LOG_DEBUG("Free HEAP: ", ESP.getFreeHeap());
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
+    // Start task for MQTT processing
+    xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskLoadConfigAndInit", 5000, NULL, 1, &InterfaceManager::_taskHandleProcessMqttMessages, CONFIG_ARDUINO_RUNNING_CORE);
+
     // As there may be may be MANY topics to subscribe to, do it in checks of 5 with delays
     // between them to allow for processing all the incoming data.
     NSPanel::instance->setComponentText("bootscreen.t_loading", "Subscribing...");
@@ -100,13 +107,75 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
 {
     LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
 
-    if (page == 2 && component == 20 && pressed)
+    if (page == HOME_PAGE_ID && pressed)
     {
-        InterfaceManager::_instance->_goToNextRoom();
-    }
-    else if (page == 2 && component == 8 && pressed)
-    {
-        InterfaceManager::_instance->_goToNextMode();
+        if (component == SWITCH_ROOM_BUTTON_ID)
+        {
+            InterfaceManager::_instance->_goToNextRoom();
+        }
+        else if (component == SWITCH_MODE_BUTTON_ID)
+        {
+            InterfaceManager::_instance->_goToNextMode();
+        }
+        else if (component == CEILING_LIGHTS_RAISE_BUTTON_ID)
+        {
+            // Raise light level of all turned on lights to next step of 10 from average light level
+            // If no lights are turned on, turn them all on to level 10
+            std::list<lightConfig> lights;
+            int totalLights = 0;
+            int totalBrightness = 0;
+            for (lightConfig &cfg : InterfaceManager::_instance->_cfg.currentRoom->ceilingLights)
+            {
+                if (cfg.level > 0)
+                {
+                    lights.push_back(cfg);
+                    totalLights++;
+                    totalBrightness += cfg.level;
+                }
+            }
+            // No lights are currently on. Switch ALL the ceiling lights on to level 10.
+            if (totalLights == 0)
+            {
+                InterfaceManager::_instance->_changeLightsToLevel(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, 10);
+            }
+            else
+            {
+                uint8_t averageBrightness = (totalBrightness / totalLights);
+                uint8_t newBrightness = InterfaceManager::roundToNearest(averageBrightness + 10, 10);
+                if (newBrightness > 100)
+                {
+                    newBrightness == 100;
+                }
+                InterfaceManager::_instance->_changeLightsToLevel(&lights, newBrightness);
+            }
+        }
+        else if (component == CEILING_LIGHTS_LOWER_BUTTON_ID)
+        {
+            // Lower light level of all turned on lights to next step of 10 from average light level
+            std::list<lightConfig> lights;
+            int totalLights = 0;
+            int totalBrightness = 0;
+            for (lightConfig &cfg : InterfaceManager::_instance->_cfg.currentRoom->ceilingLights)
+            {
+                if (cfg.level > 0)
+                {
+                    lights.push_back(cfg);
+                    totalLights++;
+                    totalBrightness += cfg.level;
+                }
+            }
+            // No lights are currently on. Switch ALL the ceiling lights on to level 10.
+            if (totalLights > 0)
+            {
+                uint8_t averageBrightness = (totalBrightness / totalLights);
+                uint8_t newBrightness = InterfaceManager::roundToNearest(averageBrightness - 10, 10);
+                if (newBrightness < 0)
+                {
+                    newBrightness == 0;
+                }
+                InterfaceManager::_instance->_changeLightsToLevel(&lights, newBrightness);
+            }
+        }
     }
 }
 
@@ -215,29 +284,55 @@ void InterfaceManager::_changeMode(roomMode mode)
 
 void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int length)
 {
-    std::string payloadStr = std::string((char *)payload, length);
-    std::string tpc = topic;
-    try
+    mqttMessage msg;
+    msg.topic = topic;
+    msg.payload = std::string((char *)payload, length);
+    LOG_DEBUG("Got message in ", msg.payload.c_str());
+    InterfaceManager::_mqttMessages.push_back(msg);
+    // Notify task that a new message needs processing
+    xTaskNotifyGive(InterfaceManager::_taskHandleProcessMqttMessages);
+}
+
+void InterfaceManager::_taskProcessMqttMessages(void *param)
+{
+    LOG_DEBUG("Starting _taskProcessMqttMessages");
+    for (;;)
     {
-        std::string domain = tpc;
-        domain = domain.erase(0, strlen("nspanel/entities/"));
-        domain = domain.substr(0, domain.find('.'));
-
-        std::string entity = tpc;
-        entity = entity.erase(0, entity.find('.') + 1);
-        entity = entity.substr(0, entity.find('/'));
-
-        std::string attribute = tpc;
-        attribute = attribute.erase(0, attribute.find_last_of('/') + 1);
-
-        if (domain.compare("light") == 0 && attribute.compare("state_brightness_pct") == 0)
+        // Wait for notification that we need to process messages.
+        LOG_DEBUG("Pausing for new MQTT messages");
+        if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY))
         {
-            InterfaceManager::_instance->_setLightLevel(entity, atoi(payloadStr.c_str()));
+            // Process all the messages
+            while (InterfaceManager::_mqttMessages.size() > 0)
+            {
+                mqttMessage msg = InterfaceManager::_mqttMessages.front();
+                LOG_DEBUG("Processing message from: ", msg.topic.c_str());
+                try
+                {
+                    std::string domain = msg.topic;
+                    domain = domain.erase(0, strlen("nspanel/entities/"));
+                    domain = domain.substr(0, domain.find('.'));
+
+                    std::string entity = msg.topic;
+                    entity = entity.erase(0, entity.find('.') + 1);
+                    entity = entity.substr(0, entity.find('/'));
+
+                    std::string attribute = msg.topic;
+                    attribute = attribute.erase(0, attribute.find_last_of('/') + 1);
+
+                    if (domain.compare("light") == 0 && attribute.compare("state_brightness_pct") == 0)
+                    {
+                        InterfaceManager::_instance->_setLightLevel(entity, atoi(msg.payload.c_str()));
+                    }
+                }
+                catch (...)
+                {
+                    LOG_ERROR("Error processing MQTT message on topic ", msg.topic.c_str());
+                }
+                InterfaceManager::_mqttMessages.pop_front();
+                vTaskDelay(5); // Wait 5ms between processing each event to allow for other tasks.
+            }
         }
-    }
-    catch (...)
-    {
-        LOG_ERROR("Error processing MQTT message on topic ", tpc.c_str());
     }
 }
 
@@ -267,6 +362,21 @@ void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
     }
 }
 
+void InterfaceManager::_changeGroupOfLights(std::list<lightConfig> *lights, int8 ajustBy, uint8_t step)
+{
+}
+
+void InterfaceManager::_changeLightsToLevel(std::list<lightConfig> *lights, uint8_t level)
+{
+    for (lightConfig &light : (*lights))
+    {
+        std::string topic = "nspanel/entities/light.";
+        topic.append(light.name);
+        topic.append("/brightness_pct");
+        this->_mqttClient->publish(topic.c_str(), std::to_string(level).c_str());
+    }
+}
+
 void InterfaceManager::_updatePanelLightStatus()
 {
     uint totalLights = 0;
@@ -292,7 +402,7 @@ void InterfaceManager::_updatePanelLightStatus()
     {
         NSPanel::instance->setComponentVal("home.b_ceiling", 0);
     }
-    NSPanel::instance->setComponentText("home.n_ceiling", std::to_string(averageBrightness).append("%").c_str());
+    NSPanel::instance->setComponentVal("home.n_ceiling", averageBrightness);
 }
 
 bool InterfaceManager::_getPanelConfig()
@@ -385,4 +495,11 @@ bool InterfaceManager::_getPanelConfig()
         client.flush();
     }
     return false;
+}
+
+uint8_t InterfaceManager::roundToNearest(uint8_t original, uint8_t step)
+{
+    uint8_t lower = (original / step) * step;
+    uint8_t upper = original + step;
+    return (original - lower > upper - original) ? upper : lower;
 }
