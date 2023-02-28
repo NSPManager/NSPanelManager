@@ -79,8 +79,6 @@ private:
     /// @param level The new value
     void _setLightLevel(std::string light, uint8_t level);
 
-    void _changeGroupOfLights(std::list<lightConfig> *lights, uint8_t ajustBy, uint8_t step);
-
     /// @brief Send out new value for a list of lights
     /// @param lights The lights to set value for
     /// @param level The new value

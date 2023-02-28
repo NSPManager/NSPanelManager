@@ -176,6 +176,27 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
                 InterfaceManager::_instance->_changeLightsToLevel(&lights, newBrightness);
             }
         }
+        else if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
+        {
+            int totalLights = 0;
+            for (lightConfig &cfg : InterfaceManager::_instance->_cfg.currentRoom->ceilingLights)
+            {
+                if (cfg.level > 0)
+                {
+                    totalLights++;
+                }
+            }
+            // Some lights are turned on, turn them all off
+            if (totalLights > 0)
+            {
+                InterfaceManager::_instance->_changeLightsToLevel(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, 0);
+            }
+            else
+            {
+                // All light are turned off, turn them all to level 50
+                InterfaceManager::_instance->_changeLightsToLevel(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, 50);
+            }
+        }
     }
 }
 
@@ -360,10 +381,6 @@ void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
             }
         }
     }
-}
-
-void InterfaceManager::_changeGroupOfLights(std::list<lightConfig> *lights, int8 ajustBy, uint8_t step)
-{
 }
 
 void InterfaceManager::_changeLightsToLevel(std::list<lightConfig> *lights, uint8_t level)

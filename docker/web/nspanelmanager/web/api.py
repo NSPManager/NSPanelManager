@@ -32,7 +32,8 @@ def register_nspanel(request):
     new_panel.ip_address = get_client_ip(request)
 
     # If no room is set, select the first one as default
-    new_panel.room = Room.objects.first()
+    if not new_panel.room:
+        new_panel.room = Room.objects.first()
 
     # Save the update/Create new panel
     new_panel.save()

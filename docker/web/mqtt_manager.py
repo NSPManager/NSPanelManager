@@ -60,7 +60,14 @@ def setHomeassistantState(domain, service, entity_id, attribute, state):
     }
     print("Posting to " + url)
     print(body)
-    post(url, headers=headers, json=body)
+    response = post(url, headers=headers, json=body)
+    if response.status_code == 200:
+        send_new_status(domain, service, entity_id, attribute, state)
+
+
+def send_new_status(domain, service, entity_id, attribute, state):
+    client.publish("nspanel/entities/" + entity_id +
+                   "/state_" + attribute, state, retain=True)
 
 
 def connect_and_loop():
