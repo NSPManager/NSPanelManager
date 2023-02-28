@@ -74,6 +74,9 @@ private:
     bool _getPanelConfig();
     void _processPanelConfig();
 
+    void _adjustCeilingOrTableLights(std::list<lightConfig> *lights, bool isUp);
+    void _adjustCeilingOrTableLightsMaster(std::list<lightConfig> *lights);
+
     /// @brief Set internal light representation level
     /// @param light The light to set value for
     /// @param level The new value

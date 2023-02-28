@@ -50,7 +50,7 @@ public:
     template <typename... Args>
     void logToMqtt(const MqttLogLevel logLevel, const char *filename, int lineNumber, const char *functionName, Args &&...args)
     {
-        if (this->_logLevel != MqttLogLevel::None && logLevel > this->_logLevel && this->_mqttClient->connected() && !this->_mqttLogTopic->empty())
+        if (this->_logLevel != MqttLogLevel::None || logLevel > this->_logLevel || this->_mqttLogTopic->empty())
         {
             return;
         }

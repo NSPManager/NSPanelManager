@@ -85,6 +85,8 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
             std::string levelStatusTopic = "nspanel/entities/light.";
             levelStatusTopic.append(lightCfg.name);
             levelStatusTopic.append("/state_brightness_pct");
+            LOG_DEBUG("Subscrubing to: ", levelStatusTopic.c_str());
+            vTaskDelay(10 / portTICK_PERIOD_MS);
             InterfaceManager::_instance->_mqttClient->subscribe(levelStatusTopic.c_str());
             // Check if it is time to delay to allow for processing of incoming MQTT data
             numSubscribed++;
@@ -119,84 +121,101 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         }
         else if (component == CEILING_LIGHTS_RAISE_BUTTON_ID)
         {
-            // Raise light level of all turned on lights to next step of 10 from average light level
-            // If no lights are turned on, turn them all on to level 10
-            std::list<lightConfig> lights;
-            int totalLights = 0;
-            int totalBrightness = 0;
-            for (lightConfig &cfg : InterfaceManager::_instance->_cfg.currentRoom->ceilingLights)
-            {
-                if (cfg.level > 0)
-                {
-                    lights.push_back(cfg);
-                    totalLights++;
-                    totalBrightness += cfg.level;
-                }
-            }
-            // No lights are currently on. Switch ALL the ceiling lights on to level 10.
-            if (totalLights == 0)
-            {
-                InterfaceManager::_instance->_changeLightsToLevel(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, 10);
-            }
-            else
-            {
-                uint8_t averageBrightness = (totalBrightness / totalLights);
-                uint8_t newBrightness = InterfaceManager::roundToNearest(averageBrightness + 10, 10);
-                if (newBrightness > 100)
-                {
-                    newBrightness == 100;
-                }
-                InterfaceManager::_instance->_changeLightsToLevel(&lights, newBrightness);
-            }
+            InterfaceManager::_instance->_adjustCeilingOrTableLights(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, true);
         }
         else if (component == CEILING_LIGHTS_LOWER_BUTTON_ID)
         {
-            // Lower light level of all turned on lights to next step of 10 from average light level
-            std::list<lightConfig> lights;
-            int totalLights = 0;
-            int totalBrightness = 0;
-            for (lightConfig &cfg : InterfaceManager::_instance->_cfg.currentRoom->ceilingLights)
-            {
-                if (cfg.level > 0)
-                {
-                    lights.push_back(cfg);
-                    totalLights++;
-                    totalBrightness += cfg.level;
-                }
-            }
-            // No lights are currently on. Switch ALL the ceiling lights on to level 10.
-            if (totalLights > 0)
-            {
-                uint8_t averageBrightness = (totalBrightness / totalLights);
-                uint8_t newBrightness = InterfaceManager::roundToNearest(averageBrightness - 10, 10);
-                if (newBrightness < 0)
-                {
-                    newBrightness == 0;
-                }
-                InterfaceManager::_instance->_changeLightsToLevel(&lights, newBrightness);
-            }
+            InterfaceManager::_instance->_adjustCeilingOrTableLights(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, false);
         }
         else if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
-            int totalLights = 0;
-            for (lightConfig &cfg : InterfaceManager::_instance->_cfg.currentRoom->ceilingLights)
+            InterfaceManager::_instance->_adjustCeilingOrTableLightsMaster(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights);
+        }
+    }
+}
+
+void InterfaceManager::_adjustCeilingOrTableLights(std::list<lightConfig> *lights, bool isUp)
+{
+    // Lower light level of all turned on lights to next step of 10 from average light level
+    std::list<lightConfig> onLights;
+    int totalLights = 0;
+    int totalBrightness = 0;
+    for (lightConfig &cfg : (*lights))
+    {
+        LOG_ERROR("Light level: ", cfg.level);
+        if (cfg.canDim && cfg.level > 0)
+        {
+            onLights.push_back(cfg);
+            totalBrightness += cfg.level;
+            totalLights++;
+        }
+    }
+
+    LOG_DEBUG("Found ", totalLights, " with total level: ", totalBrightness);
+
+    if (totalBrightness == 0 && isUp)
+    {
+        // No lights are on, turn them all to 10%
+        InterfaceManager::_instance->_changeLightsToLevel(lights, 10);
+    }
+    else
+    {
+        // Go to nearest +10/-10 adjustment for lights that are on.
+        uint8_t averageBrightness = totalLights == 0 ? 0 : (totalBrightness / totalLights);
+        uint8_t newBrightness = 0;
+        if (isUp)
+        {
+            if (averageBrightness > 90)
             {
-                if (cfg.level > 0)
-                {
-                    totalLights++;
-                }
-            }
-            // Some lights are turned on, turn them all off
-            if (totalLights > 0)
-            {
-                InterfaceManager::_instance->_changeLightsToLevel(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, 0);
+                newBrightness = 100;
             }
             else
             {
-                // All light are turned off, turn them all to level 50
-                InterfaceManager::_instance->_changeLightsToLevel(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, 50);
+                newBrightness = InterfaceManager::roundToNearest(averageBrightness + 10, 10);
             }
         }
+        else
+        {
+            if (averageBrightness < 10)
+            {
+                newBrightness = 0;
+            }
+            else
+            {
+                newBrightness = InterfaceManager::roundToNearest(averageBrightness - 10, 10);
+            }
+        }
+        if (newBrightness == 0)
+        {
+            InterfaceManager::_instance->_changeLightsToLevel(lights, newBrightness);
+        }
+        else
+        {
+            InterfaceManager::_instance->_changeLightsToLevel(&onLights, newBrightness);
+        }
+    }
+}
+
+void InterfaceManager::_adjustCeilingOrTableLightsMaster(std::list<lightConfig> *lights)
+{
+    int totalLights = 0;
+    for (lightConfig &cfg : (*lights))
+    {
+        if (cfg.level > 0)
+        {
+            totalLights++;
+            break;
+        }
+    }
+    // Some lights are turned on, turn them all off
+    if (totalLights > 0)
+    {
+        InterfaceManager::_instance->_changeLightsToLevel(lights, 0);
+    }
+    else
+    {
+        // All light are turned off, turn them all to level 50
+        InterfaceManager::_instance->_changeLightsToLevel(lights, 50);
     }
 }
 
@@ -309,15 +328,16 @@ void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int len
     mqttMessage msg;
     msg.topic = topic;
     msg.payload = std::string((char *)payload, length);
-    LOG_DEBUG("Got message in ", msg.payload.c_str());
     InterfaceManager::_mqttMessages.push_back(msg);
     // Notify task that a new message needs processing
-    xTaskNotifyGive(InterfaceManager::_taskHandleProcessMqttMessages);
+    vTaskNotifyGiveFromISR(InterfaceManager::_taskHandleProcessMqttMessages, NULL);
+    portYIELD_FROM_ISR();
 }
 
 void InterfaceManager::_taskProcessMqttMessages(void *param)
 {
     LOG_DEBUG("Starting _taskProcessMqttMessages");
+    vTaskDelay(100 / portTICK_PERIOD_MS);
     for (;;)
     {
         // Wait for notification that we need to process messages.
@@ -401,15 +421,12 @@ void InterfaceManager::_updatePanelLightStatus()
     uint totalBrightness = 0;
     for (lightConfig &light : this->_cfg.currentRoom->ceilingLights)
     {
-        if (light.level > 0)
+        if (light.canDim && light.level > 0)
         {
             totalLights++;
             totalBrightness += light.level;
         }
     }
-
-    LOG_DEBUG("Total light: ", totalLights);
-    LOG_DEBUG("Total brightness: ", totalBrightness);
 
     uint averageBrightness = totalLights == 0 ? 0 : totalBrightness / totalLights;
     if (averageBrightness > 0)
@@ -421,6 +438,8 @@ void InterfaceManager::_updatePanelLightStatus()
         NSPanel::instance->setComponentVal("home.b_ceiling", 0);
     }
     NSPanel::instance->setComponentVal("home.n_ceiling", averageBrightness);
+
+    // TODO: Implement check for table lights
 }
 
 bool InterfaceManager::_getPanelConfig()
