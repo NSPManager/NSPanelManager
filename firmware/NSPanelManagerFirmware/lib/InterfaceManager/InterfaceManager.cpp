@@ -274,6 +274,7 @@ void InterfaceManager::_changeRoom(uint8_t roomId)
 void InterfaceManager::_updatePanelWithNewRoomInfo()
 {
     NSPanel::instance->setComponentText("home.room", this->_cfg.currentRoom->name.c_str());
+    this->_updatePanelLightStatus();
 }
 
 void InterfaceManager::_goToNextMode()
