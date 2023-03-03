@@ -97,9 +97,6 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
             }
         }
         // TODO: Implement table light logic
-        // for (lightConfig &lightCfg : roomCfg.tableLights)
-        // {
-        // }
     }
 
     vTaskDelete(NULL); // Delete task, we are done

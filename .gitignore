@@ -7,3 +7,6 @@ docker/web/nspanelmanager/db.sqlite3
 firmware/NSPanelManagerFirmware/data/config.json
 firmware/NSPanelManagerFirmware/.pio
 firmware/NSPanelManagerFirmware/littlefs.md5
+firmware/NSPanelManagerFirmware/.cproject
+firmware/NSPanelManagerFirmware/.project
+firmware/NSPanelManagerFirmware/.settings

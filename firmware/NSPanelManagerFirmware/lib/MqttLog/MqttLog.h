@@ -50,7 +50,7 @@ public:
     template <typename... Args>
     void logToMqtt(const MqttLogLevel logLevel, const char *filename, int lineNumber, const char *functionName, Args &&...args)
     {
-        if (this->_logLevel != MqttLogLevel::None || logLevel > this->_logLevel || this->_mqttLogTopic->empty())
+        if (logLevel > this->_logLevel || this->_mqttLogTopic->empty())
         {
             return;
         }
@@ -92,8 +92,9 @@ public:
         mqttLogMessage.append(functionName);
         mqttLogMessage.append(") ");
         mqttLogMessage.append(this->_messageBuild.c_str());
+
         // Reset message holder before giving up the mutex
-        this->_messageBuild = "";
+        this->_messageBuild.clear();
         this->_mqttClient->publish(this->_mqttLogTopic->c_str(), mqttLogMessage.c_str());
 
         xSemaphoreGive(this->_messageBuilderMutex);

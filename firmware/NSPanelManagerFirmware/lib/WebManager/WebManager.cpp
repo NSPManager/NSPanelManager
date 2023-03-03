@@ -76,6 +76,10 @@ String WebManager::processIndexTemplate(const String &templateVar)
     {
         return NSPMConfig::instance->mqtt_password.c_str();
     }
+    else if (templateVar == "log_level")
+	{
+		return String(NSPMConfig::instance->logging_level);
+	}
 
     return "-- UNKNOWN TEMPLATE --";
 }
@@ -107,63 +111,63 @@ void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request)
     request->redirect("/");
 }
 
-void WebManager::respondAvailableWiFiNetworks(AsyncWebServerRequest *request)
-{
-    String json = "[";
-    int n = WiFi.scanComplete();
-    if (n == -2)
-    {
-        WiFi.scanNetworks(true);
-    }
-    else if (n)
-    {
-        for (int i = 0; i < n; ++i)
-        {
-            if (!WiFi.SSID(i).isEmpty())
-            {
-                LOG_DEBUG("Found WiFi ", WiFi.SSID(i).c_str());
-                if (i)
-                    json += ",";
-                json += "{";
-                json += "\"rssi\":" + String(WiFi.RSSI(i));
-                json += ",\"ssid\":\"" + WiFi.SSID(i) + "\"";
-                json += ",\"channel\":" + String(WiFi.channel(i));
-
-                switch (WiFi.encryptionType(i))
-                {
-                case wifi_auth_mode_t::WIFI_AUTH_OPEN:
-                    json += ",\"security\": \"OPEN\"";
-                    break;
-                case wifi_auth_mode_t::WIFI_AUTH_WPA2_PSK:
-                    json += ",\"security\": \"WPA2 PSK\"";
-                    break;
-                case wifi_auth_mode_t::WIFI_AUTH_WPA3_PSK:
-                    json += ",\"security\": \"WPA3 PSK\"";
-                    break;
-                case wifi_auth_mode_t::WIFI_AUTH_WPA_PSK:
-                    json += ",\"security\": \"WPA PSK\"";
-                    break;
-                case wifi_auth_mode_t::WIFI_AUTH_WEP:
-                    json += ",\"security\": \"WEP\"";
-                    break;
-
-                default:
-                    json += ",\"security\": \"UNKNOWN\"";
-                    break;
-                }
-                json += "}";
-            }
-        }
-        WiFi.scanDelete();
-        if (WiFi.scanComplete() == -2)
-        {
-            WiFi.scanNetworks(true);
-        }
-    }
-    json += "]";
-    request->send(200, "application/json", json);
-    json = String();
-}
+//void WebManager::respondAvailableWiFiNetworks(AsyncWebServerRequest *request)
+//{
+//    String json = "[";
+//    int n = WiFi.scanComplete();
+//    if (n == -2)
+//    {
+//        WiFi.scanNetworks(true);
+//    }
+//    else if (n)
+//    {
+//        for (int i = 0; i < n; ++i)
+//        {
+//            if (!WiFi.SSID(i).isEmpty())
+//            {
+//                LOG_DEBUG("Found WiFi ", WiFi.SSID(i).c_str());
+//                if (i)
+//                    json += ",";
+//                json += "{";
+//                json += "\"rssi\":" + String(WiFi.RSSI(i));
+//                json += ",\"ssid\":\"" + WiFi.SSID(i) + "\"";
+//                json += ",\"channel\":" + String(WiFi.channel(i));
+//
+//                switch (WiFi.encryptionType(i))
+//                {
+//                case wifi_auth_mode_t::WIFI_AUTH_OPEN:
+//                    json += ",\"security\": \"OPEN\"";
+//                    break;
+//                case wifi_auth_mode_t::WIFI_AUTH_WPA2_PSK:
+//                    json += ",\"security\": \"WPA2 PSK\"";
+//                    break;
+//                case wifi_auth_mode_t::WIFI_AUTH_WPA3_PSK:
+//                    json += ",\"security\": \"WPA3 PSK\"";
+//                    break;
+//                case wifi_auth_mode_t::WIFI_AUTH_WPA_PSK:
+//                    json += ",\"security\": \"WPA PSK\"";
+//                    break;
+//                case wifi_auth_mode_t::WIFI_AUTH_WEP:
+//                    json += ",\"security\": \"WEP\"";
+//                    break;
+//
+//                default:
+//                    json += ",\"security\": \"UNKNOWN\"";
+//                    break;
+//                }
+//                json += "}";
+//            }
+//        }
+//        WiFi.scanDelete();
+//        if (WiFi.scanComplete() == -2)
+//        {
+//            WiFi.scanNetworks(true);
+//        }
+//    }
+//    json += "]";
+//    request->send(200, "application/json", json);
+//    json = String();
+//}
 
 void WebManager::startTFTOTAUpdate(AsyncWebServerRequest *request)
 {

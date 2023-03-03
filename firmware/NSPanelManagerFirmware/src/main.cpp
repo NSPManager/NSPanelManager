@@ -99,8 +99,9 @@ void taskManageWifiAndMqtt(void *param)
           vTaskDelay(1000 / portTICK_PERIOD_MS);
           if (mqttClient.connected())
           {
+            // This task only handles connection. The InterfaceManager will take care of subscribing to relevant topics
+            // once the connection is MQTT is established.
             LOG_INFO("Connected to MQTT server ", config.mqtt_server.c_str());
-            // TODO: Subscribe
           }
           else
           {
@@ -165,6 +166,7 @@ void setup()
   // Setup logging
   logger.init(&mqttClient, &(NSPMConfig::instance->mqtt_log_topic));
   logger.setLogLevel(static_cast<MqttLogLevel>(config.logging_level));
+  // logger.setLogLevel(MqttLogLevel::Debug);
 
   LOG_INFO("Starting tasks");
   xTaskCreatePinnedToCore(taskManageWifiAndMqtt, "taskManageWifiAndMqtt", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);

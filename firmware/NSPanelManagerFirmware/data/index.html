@@ -1,9 +1,11 @@
 <!DOCTYPE html>
+<html>
 
 <HEAD>
     <TITLE>NSPanelManager</TITLE>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
+    <script src="/static/jquery.min.js"></script>
     <link rel="stylesheet" href="/static/bulma.min.css">
 
     <style>
@@ -19,6 +21,12 @@
             color: #ffffff;
         }
     </style>
+
+    <script>
+        $('document').ready(function () {
+            $('#log_level').val("%log_level%").change();
+        });
+    </script>
 </HEAD>
 
 <body>
@@ -141,6 +149,21 @@
                     <div class="control">
                         <input class="input" type="number" name="manager_port" id="manager_port" placeholder="8000"
                             value="%manager_port%" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Log level</label>
+                    <div class="control">
+                        <div class="select">
+                            <select name="log_level" id="log_level">
+                                <option value="0">None</option>
+                                <option value="1">Error</option>
+                                <option value="2">Warning</option>
+                                <option value="3">Info</option>
+                                <option value="4">Debug</option>
+                                <option value="5">Trace</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
