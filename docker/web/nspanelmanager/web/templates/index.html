@@ -15,6 +15,7 @@
             <th>IP Address</th>
             <th>MAC Address</th>
             <th>Last seen</th>
+            <th>Version</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -31,6 +32,7 @@
             </td>
             <td>{{ nspanel.mac_address }}</td>
             <td>{{ nspanel.last_seen }}</td>
+            <td>{{ nspanel.version }}</td>
             <td>
                 <button type="button" class="button is-link is-small"
                     onclick="startNSPanelOtaUpdate('{{ nspanel.ip_address }}');">OTA Update</button>

@@ -66,9 +66,6 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
     // Set some default values before showing page
     InterfaceManager::_instance->_changeMode(roomMode::room);
 
-    LOG_DEBUG("Free HEAP: ", ESP.getFreeHeap());
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-
     // Start task for MQTT processing
     xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskLoadConfigAndInit", 5000, NULL, 1, &InterfaceManager::_taskHandleProcessMqttMessages, CONFIG_ARDUINO_RUNNING_CORE);
 
@@ -116,17 +113,13 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         {
             InterfaceManager::_instance->_goToNextMode();
         }
-        else if (component == CEILING_LIGHTS_RAISE_BUTTON_ID)
-        {
-            InterfaceManager::_instance->_adjustCeilingOrTableLights(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, true);
-        }
-        else if (component == CEILING_LIGHTS_LOWER_BUTTON_ID)
-        {
-            InterfaceManager::_instance->_adjustCeilingOrTableLights(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, false);
-        }
         else if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
             InterfaceManager::_instance->_adjustCeilingOrTableLightsMaster(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights);
+        }
+        else if (component == LIGHT_LEVEL_CHANGE_BUTTON_ID)
+        {
+        	NSPanel::instance->getComponentIntVal("home.saturation");
         }
     }
 }

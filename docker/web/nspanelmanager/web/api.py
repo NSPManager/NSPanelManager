@@ -51,6 +51,7 @@ def register_nspanel(request):
 
     new_panel.friendly_name = data['friendly_name']
     new_panel.mac_address = data['mac_address']
+    new_panel.version = data["version"]
     new_panel.last_seen = datetime.now()
     new_panel.ip_address = get_client_ip(request)
 
