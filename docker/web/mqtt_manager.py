@@ -5,28 +5,15 @@ from requests import get, post
 from time import sleep
 import json
 
-use_mqtt_manager = False
-mqtt_server = ""
-mqtt_port = 1883
-mqtt_username = ""
-mqtt_password = ""
-homeassistant_url = ""
-homeassistant_token = ""
-last_settings_file_mtime = ""
+settings = {}
+last_settings_file_mtime = 0
 client = mqtt.Client("NSPanelManager")
 
 
 def read_settings():
-    global mqtt_server, mqtt_port, mqtt_username, mqtt_password, homeassistant_url,  homeassistant_token, use_mqtt_manager
+    global settings
     with open("nspanelmanager/mqtt_manager.json", "r") as f:
-        data = json.loads(f.read())
-        mqtt_server = data["mqtt_server"]
-        mqtt_port = data["mqtt_port"]
-        mqtt_username = data["mqtt_username"]
-        mqtt_password = data["mqtt_password"]
-        homeassistant_url = data["homeassistant_url"]
-        homeassistant_token = data["homeassistant_token"]
-        use_mqtt_manager = data["use_mqtt_manager"]
+        settings = json.loads(f.read())
 
 
 def on_connect(client, userdata, flags, rc):
@@ -49,9 +36,12 @@ def on_message(client, userdata, msg):
 
 
 def setHomeassistantState(domain, service, entity_id, attribute, state):
-    url = homeassistant_url + "api/services/" + domain + "/" + service
+    global settings
+    url = settings["sources"]["homeassistant"]["url"] + \
+        "api/services/" + domain + "/" + service
+
     headers = {
-        "Authorization": "Bearer " + homeassistant_token,
+        "Authorization": "Bearer " + settings["sources"]["homeassistant"]["token"],
         "content-type": "application/json",
     }
     body = {
@@ -71,12 +61,14 @@ def send_new_status(domain, service, entity_id, attribute, state):
 
 
 def connect_and_loop():
-    global client, mqtt_server, mqtt_port, mqtt_username, mqtt_password
-    print("Connecting to " + mqtt_server + ":" + str(mqtt_port))
+    global settings
+    print("Connecting to " +
+          settings["mqtt_server"] + ":" + str(settings["mqtt_port"]))
     client.on_connect = on_connect
     client.on_message = on_message
-    client.username_pw_set(mqtt_username, mqtt_password)
-    client.connect(mqtt_server, mqtt_port, 60)
+    client.username_pw_set(
+        settings["mqtt_username"], settings["mqtt_password"])
+    client.connect(settings["mqtt_server"], settings["mqtt_port"], 60)
     client.loop_start()
 
 
@@ -86,8 +78,9 @@ if __name__ == '__main__':
             client.loop_stop()
             client.disconnect()
             read_settings()
-            if use_mqtt_manager:
+            if settings["mqtt_server"] and settings["mqtt_port"]:
                 connect_and_loop()
+
             else:
                 print("Settings dictate to NOT use MQTT Manager.")
             last_settings_file_mtime = os.path.getmtime(

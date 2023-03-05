@@ -3,8 +3,31 @@ from django.shortcuts import render, redirect
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 import json
+import requests
 
 from .models import NSPanel, Room
+
+
+def get_all_available_light_entities(request):
+    # TODO: Implement OpenHAB and manually entered entities
+    # Get Home Assistant lights
+    return_json = {}
+    return_json["home_assistant_lights"] = []
+    return_json["openhab_lights"] = []
+    return_json["manual_lights"] = []
+
+    home_assistant_request_headers = {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0ZTEwM2QwODkxMmI0NTNiYWZhZWY4ZmI0NjgwM2NmZSIsImlhdCI6MTY3NzQyNDU2NSwiZXhwIjoxOTkyNzg0NTY1fQ.alIIkTQl-HxjVSFPOViLMOGgkHYeijH8o9cQ60aMqRw",
+        "content-type": "application/json",
+    }
+    home_assistant_response = requests.get(
+        "http://10.2.0.6:8123/api/states", headers=home_assistant_request_headers)
+
+    for entity in home_assistant_response.json():
+        if (entity["entity_id"].startswith("light.")):
+            return_json["home_assistant_lights"].append(entity["entity_id"])
+
+    return JsonResponse(return_json)
 
 
 def get_client_ip(request):

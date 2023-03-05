@@ -1,0 +1,16 @@
+{
+    "mqtt_server": "",
+    "mqtt_port": 1883,
+    "mqtt_username": "",
+    "mqtt_password": "",
+    "sources": {
+        "homeassistant": {
+            "url": "",
+            "token": ""
+        },
+        "openhab": {
+            "url": "",
+            "token": ""
+        }
+    }
+}

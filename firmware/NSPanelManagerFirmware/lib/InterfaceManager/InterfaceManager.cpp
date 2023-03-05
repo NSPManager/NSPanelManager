@@ -461,6 +461,7 @@ bool InterfaceManager::_getPanelConfig()
                 LOG_ERROR("Timeout while downloading firmware!");
                 client.stop();
             }
+            vTaskDelay(20 / portTICK_PERIOD_MS);
         }
 
         while (client.available())

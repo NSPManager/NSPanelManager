@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="title is-4">Manager Settings</h2>
+<table class="table is-fullwidth is-hoverable">
+    <thead>
+        <tr>
+            <th>Room</th>
+            <th>Friendly name</th>
+            <th>NSPanels</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for room in rooms %}
+        <tr>
+            <th>{{ room.id }}</th>
+            <th>{{ room.friendly_name }}</th>
+            <td>
+                {% for nspanel in room.nspanel_set.all %}
+                <span class="tag is-info is-small">{{ nspanel.friendly_name }}</span>
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
