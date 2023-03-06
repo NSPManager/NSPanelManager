@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <NSPanel.h>
 #include <MqttLog.h>
 #include <NSPanelReturnData.h>
@@ -69,40 +70,38 @@ int NSPanel::getComponentIntVal(const char* componentId) {
 		vTaskDelay(100 / portTICK_PERIOD_MS);
 	}
 
-	if(xSemaphoreTake(this->_mutexReadSerialData, 1000 / portTICK_PERIOD_MS) == pdTRUE) {
-		LOG_DEBUG("Clearing buffer");
-		this->_clearSerialBuffer();
-
-		LOG_DEBUG("Sending raw command");
-			std::string cmd = "get ";
-			cmd.append(componentId);
-			cmd.append(".val");
-		    this->_sendRawCommand(cmd.c_str(), cmd.length());
-
-		    // Wait for data to become available
-		    LOG_DEBUG("Waiting for data");
-		    while(Serial2.available() == 0) {
-		    	vTaskDelay(10 / portTICK_PERIOD_MS);
-		    }
-
-		    int value = 0;
-		    LOG_DEBUG("Reading data");
-		    if(Serial2.read() == 0x71) {
-		    	value = Serial2.read();
-		    	value += Serial2.read() << 8;
-		    	value += Serial2.read() << 16;
-		    	value += Serial2.read() << 24;
-		    	this->_clearSerialBuffer();
-
-		    	LOG_DEBUG("Got value: ", value);
-		    } else {
-		    	LOG_ERROR("Failed to get response, not expected return data.");
-		    }
-	} else {
+	if(!xSemaphoreTake(this->_mutexReadSerialData, 1000 / portTICK_PERIOD_MS) == pdTRUE) {
 		LOG_ERROR("Failed to get Serial read mutex when reading response from panel!");
+		return -255;
 	}
 
-    return -255;
+	this->_clearSerialBuffer();
+
+	std::string cmd = "get ";
+	cmd.append(componentId);
+	cmd.append(".val");
+	this->_sendRawCommand(cmd.c_str(), cmd.length());
+
+	// Wait for data to become available
+	while(Serial2.available() == 0) {
+		vTaskDelay(10 / portTICK_PERIOD_MS);
+	}
+
+	int value = -1;
+	if(Serial2.read() == 0x71) {
+		value = Serial2.read();
+		value += Serial2.read() << 8;
+		value += Serial2.read() << 16;
+		value += Serial2.read() << 24;
+		this->_clearSerialBuffer();
+	} else {
+		LOG_ERROR("Failed to get response, not expected return data.");
+		value = -254;
+	}
+
+	xSemaphoreGive(this->_mutexReadSerialData);
+
+	return value;
 }
 
 void NSPanel::restart()
@@ -120,7 +119,7 @@ void NSPanel::init()
     this->_mutexReadSerialData = xSemaphoreCreateMutex();
 
     LOG_INFO("Starting communication with NSPanel.");
-    xTaskCreatePinnedToCore(_taskSendCommandQueue, "taskUartListen", 5000, NULL, 1, &this->_taskHandleSendCommandQueue, CONFIG_ARDUINO_RUNNING_CORE);
+    xTaskCreatePinnedToCore(_taskSendCommandQueue, "taskSendCommandQueue", 5000, NULL, 1, &this->_taskHandleSendCommandQueue, CONFIG_ARDUINO_RUNNING_CORE);
     this->_startListeningToPanel();
 
     // Connect to display and start it
@@ -136,13 +135,15 @@ void NSPanel::init()
 
 void NSPanel::_startListeningToPanel()
 {
-    xTaskCreatePinnedToCore(_taskReadNSPanelData, "taskUartListen", 5000, NULL, 1, &this->_taskHandleReadNSPanelData, CONFIG_ARDUINO_RUNNING_CORE);
+    xTaskCreatePinnedToCore(_taskProcessPanelOutput, "taskProcessPanelOutput", 5000, NULL, 1, &this->_taskHandleProcessPanelOutput, CONFIG_ARDUINO_RUNNING_CORE);
+    xTaskCreatePinnedToCore(_taskReadNSPanelData, "taskReadNSPanelData", 5000, NULL, 1, &this->_taskHandleReadNSPanelData, CONFIG_ARDUINO_RUNNING_CORE);
 }
 
 void NSPanel::_stopListeningToPanel()
 {
 	if(this->_taskHandleReadNSPanelData != NULL) {
 		vTaskDelete(this->_taskHandleReadNSPanelData);
+		vTaskDelete(this->_taskHandleProcessPanelOutput);
 	}
 }
 
@@ -200,40 +201,52 @@ void NSPanel::_taskReadNSPanelData(void *param)
     LOG_INFO("Starting taskReadNSPanelData.");
     for (;;)
     {
-    	// Check if we have read access
-    	if(xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, 20 / portTICK_PERIOD_MS) == pdTRUE) {
-    		// Process all commands in queue
-    		while (Serial2.available() > 0)
-			{
-				uint8_t readByte = Serial2.read();
-				switch (readByte)
-				{
-				case NEX_OUT_TOUCH_EVENT:
-					NSPanel::_touchEventCallback(Serial2.read(), Serial2.read(), Serial2.read() == 0x01);
-					break;
-
-				default:
-					LOG_DEBUG("Read ", String(readByte, HEX).c_str());
-					break;
-				}
-
-				// Read the last 0xFF bytes of the end of every event
-				for (int i = 0; i < 3; i++)
-				{
-					Serial2.read();
-				}
-
-				if (Serial2.available() == 0)
-				{
-					LOG_DEBUG("--- READ COMPLETE ---");
-				}
-			}
+    	// Wait until access is given to serial
+    	if(xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, portMAX_DELAY) == pdTRUE) {
+    		// Read the output from the panel if any and add the payload to the process queue
+    		if(Serial2.available() > 0) {
+    			std::vector<char> data;
+    			while(Serial2.available() > 0) {
+    				data.push_back(Serial2.read());
+    			}
+    			NSPanel::instance->_processQueue.push(data);
+    			xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
+    		}
     		xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
     	}
 
         // Wait 10ms between each read.
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
+}
+
+void NSPanel::_taskProcessPanelOutput(void* param) {
+	LOG_DEBUG("Starting taskProcessPanelOutput");
+	for(;;) {
+		// Wait for things that needs processing
+		if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY)) {
+			while(!NSPanel::instance->_processQueue.empty()) {
+				std::vector<char> itemPayload = NSPanel::instance->_processQueue.front();
+
+				// Select correct action depending on type of event
+				switch(itemPayload[0]) {
+					case NEX_OUT_TOUCH_EVENT:
+						NSPanel::_touchEventCallback(itemPayload[1], itemPayload[2], itemPayload[3] == 0x01);
+						break;
+
+					default:
+						LOG_DEBUG("Read type ", String(itemPayload[0], HEX).c_str());
+						LOG_DEBUG("Data ", String(itemPayload.data(), HEX).c_str());
+						break;
+				}
+
+				// Done with item, pop it off the queue
+				NSPanel::instance->_processQueue.pop();
+				// Wait at least 10ms between each processing of event to allow for other functions to execute.
+				vTaskDelay(10 / portTICK_PERIOD_MS);
+			}
+		}
+	}
 }
 
 void NSPanel::_sendCommand(NSPanelCommand *command)
@@ -244,28 +257,31 @@ void NSPanel::_sendCommand(NSPanelCommand *command)
         Serial2.read();
     }
 
-    if (command->expectResponse)
+    if (command->expectResponse && !xSemaphoreTake(this->_mutexReadSerialData, 250 / portTICK_PERIOD_MS) == pdTRUE)
     {
-        LOG_DEBUG("Stopping read of panel data. Sending command and waiting for response.");
-        this->_stopListeningToPanel();
+    	LOG_ERROR("Failed to get serial read mutex! Will not continue call.");
+    	return;
     }
 
     Serial2.print(command->command.c_str());
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-    this->_lastCommandSent = millis();
+	Serial2.write(0xFF);
+	Serial2.write(0xFF);
+	Serial2.write(0xFF);
+	this->_lastCommandSent = millis();
 
-    if (command->expectResponse)
-    {
-        while (Serial2.available() == 0)
-        {
-            vTaskDelay(5);
-        }
+	if (command->expectResponse)
+	{
+		while (Serial2.available() == 0)
+		{
+			vTaskDelay(5);
+		}
 
-        command->callback(command);
-        this->_startListeningToPanel();
-    }
+		// Give back serial read mutex.
+		xSemaphoreGive(this->_mutexReadSerialData);
+
+		// Call callback function for command when data is available at Serial2
+		command->callback(command);
+	}
 }
 
 void NSPanel::_sendRawCommand(const char* command, int length) {

@@ -5,6 +5,7 @@
 #include <NSPMConfig.h>
 #include <HardwareSerial.h>
 #include <list>
+#include <vector>
 #include <queue>
 
 #define getHeaderValue(x, y) x.substring(strlen(y))
@@ -50,6 +51,9 @@ private:
     TaskHandle_t _taskHandleReadNSPanelData;
     static void _taskReadNSPanelData(void *param);
     static void _taskUpdateTFTConfigOTA(void *param);
+    std::queue<std::vector<char>> _processQueue;
+    TaskHandle_t _taskHandleProcessPanelOutput;
+    static void _taskProcessPanelOutput(void *param);
     SemaphoreHandle_t _mutexReadSerialData;
 
     unsigned long _lastCommandSent = 0;

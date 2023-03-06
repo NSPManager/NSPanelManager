@@ -1,4 +1,5 @@
 #include <InterfaceManager.h>
+#include <pages.h>
 #include <TftDefines.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
@@ -103,7 +104,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
 {
     LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
 
-    if (page == HOME_PAGE_ID && pressed)
+    if (page == HOME_PAGE_ID && !pressed)
     {
         if (component == SWITCH_ROOM_BUTTON_ID)
         {
@@ -119,7 +120,10 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         }
         else if (component == LIGHT_LEVEL_CHANGE_BUTTON_ID)
         {
-        	NSPanel::instance->getComponentIntVal("home.saturation");
+        	// TODO: Adjust only light that are on or if none are on, turn them all to the new value
+        	InterfaceManager::_instance->_changeLightsToLevel(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, HomePage::getSaturationValue());
+        } else if (component == LIGHT_COLOR_CHANGE_BUTTON_ID) {
+        	LOG_DEBUG("Got new color val: ", HomePage::getColorTempValue());
         }
     }
 }
