@@ -22,5 +22,13 @@ int HomePage::getColorTempValue() {
 }
 
 void HomePage::setColorTempValue(uint8_t value) {
-	return NSPanel::instance->setComponentVal(HOME_COLOR_TEMP_SLIDER_NAME, value);
+	NSPanel::instance->setComponentVal(HOME_COLOR_TEMP_SLIDER_NAME, value);
+}
+
+void HomePage::setCeilingBrightnessLabelText(uint8_t value) {
+	NSPanel::instance->setComponentVal(HOME_LABEL_CEILING_BRIGHTNESS, value);
+}
+
+void HomePage::setTableBrightnessLabelText(uint8_t value) {
+	NSPanel::instance->setComponentVal(HOME_LABEL_TABLE_BRIGHTNESS, value);
 }

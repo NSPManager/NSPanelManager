@@ -18,12 +18,20 @@ struct lightConfig
     std::string name;
 };
 
-struct roomConfig
+class roomConfig
 {
+public:
     uint8_t id = 0;
     std::string name;
     std::list<lightConfig> ceilingLights;
     std::list<lightConfig> tableLights;
+    std::list<lightConfig*> getCeilingLightsThatAreOn();
+    std::list<lightConfig*> getTableLightsThatAreOn();
+    std::list<lightConfig*> getAllCeilingLights();
+    std::list<lightConfig*> getAllTableLights();
+    bool anyCeilingLighstOn();
+    bool anyTableLighstOn();
+    bool anyLightsOn();
 };
 
 struct interfaceConfig
@@ -74,8 +82,10 @@ private:
     bool _getPanelConfig();
     void _processPanelConfig();
 
-    void _adjustCeilingOrTableLights(std::list<lightConfig> *lights, bool isUp);
-    void _adjustCeilingOrTableLightsMaster(std::list<lightConfig> *lights);
+    void _ceilingMasterButtonEvent();
+    void _tableMasterButtonEvent();
+    void _updateLightsThatAreOn(); // Set light level for all lights that are currently on
+    void _updateAllLights();
 
     /// @brief Set internal light representation level
     /// @param light The light to set value for
@@ -85,7 +95,7 @@ private:
     /// @brief Send out new value for a list of lights
     /// @param lights The lights to set value for
     /// @param level The new value
-    void _changeLightsToLevel(std::list<lightConfig> *lights, uint8_t level);
+    void _changeLightsToLevel(std::list<lightConfig*> *lights, uint8_t level);
 };
 
 #endif

@@ -16,6 +16,7 @@ def get_all_available_light_entities(request):
     return_json["openhab_lights"] = []
     return_json["manual_lights"] = []
 
+    # Home Assistant
     home_assistant_request_headers = {
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0ZTEwM2QwODkxMmI0NTNiYWZhZWY4ZmI0NjgwM2NmZSIsImlhdCI6MTY3NzQyNDU2NSwiZXhwIjoxOTkyNzg0NTY1fQ.alIIkTQl-HxjVSFPOViLMOGgkHYeijH8o9cQ60aMqRw",
         "content-type": "application/json",
@@ -26,6 +27,19 @@ def get_all_available_light_entities(request):
     for entity in home_assistant_response.json():
         if (entity["entity_id"].startswith("light.")):
             return_json["home_assistant_lights"].append(entity["entity_id"])
+
+    # OpenHAB
+    # TODO: Sort out how to map channels from items to the correct POST request when MQTT is received
+    # openhab_request_headers = {
+    #     "Authorization": "Bearer eyJraWQiOm51bGwsImFsZyI6IlJTMjU2In0.eyJpc3MiOiJvcGVuaGFiIiwiYXVkIjoib3BlbmhhYiIsImV4cCI6MTY3ODIzMDc3NywianRpIjoiYm9XNjA4U1FmQjVSRG9rcHJ4XzVNUSIsImlhdCI6MTY3ODIyNzE3NywibmJmIjoxNjc4MjI3MDU3LCJzdWIiOiJhZG1pbiIsImNsaWVudF9pZCI6Imh0dHA6Ly8xOTIuMTY4LjMyLjI6ODA4MCIsInNjb3BlIjoiYWRtaW4iLCJyb2xlIjpbImFkbWluaXN0cmF0b3IiXX0.LCQnaMV2oqOFKSA_Qn5Tymb4PurCLBZCpofrEjRwzajkmUR5OBqgF8tptZYtxSMu0xh7BUB38PiUCJ0dQXbb6ShdWnLnAoVD4aRr5IHwz8BmVHY05fbJav6pKUIubeMYETLSVQtNtQsTVvX8rjJgVkjhfDpNBQ8jHtR1oxCBm-9VtP9NTdc-Rx6f94EROIC4IkH9wKUiGWYRukiBKNUfWSB7MGKPkwadV9ExT8pZMR3SoWWKAGZKKPFRmuOfw0d-jI9Td8ZLQjMDri2UA8CZVA5xmGAOZyId0AtYe0w_gcJqXG5R2LD5M2JPouRJ_oEgDlstMSCHp1yrVIWwB-9clQ",
+    #     "content-type": "application/json",
+    # }
+    # openhab_response = requests.get(
+    #     "http://192.168.32.2:8080/rest/things", headers=openhab_request_headers)
+
+    # for entity in openhab_response.json():
+    #     if (entity["name"].startswith("light.")):
+    #         return_json["openhab_lights"].append(entity["name"])
 
     return JsonResponse(return_json)
 

@@ -51,6 +51,7 @@ private:
     TaskHandle_t _taskHandleReadNSPanelData;
     static void _taskReadNSPanelData(void *param);
     static void _taskUpdateTFTConfigOTA(void *param);
+    static bool _updateTFTOTA();
     std::queue<std::vector<char>> _processQueue;
     TaskHandle_t _taskHandleProcessPanelOutput;
     static void _taskProcessPanelOutput(void *param);

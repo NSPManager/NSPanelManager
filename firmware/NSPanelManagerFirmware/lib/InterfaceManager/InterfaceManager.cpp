@@ -5,6 +5,64 @@
 #include <WiFiClient.h>
 #include <MqttLog.h>
 
+std::list<lightConfig*> roomConfig::getCeilingLightsThatAreOn() {
+	std::list<lightConfig*> returnList;
+	for(lightConfig &light : this->ceilingLights) {
+		if(light.level > 0) {
+			returnList.push_back(&light);
+		}
+	}
+	return returnList;
+}
+
+std::list<lightConfig*> roomConfig::getTableLightsThatAreOn() {
+	std::list<lightConfig*> returnList;
+	for(lightConfig &light : this->tableLights) {
+		if(light.level > 0) {
+			returnList.push_back(&light);
+		}
+	}
+	return returnList;
+}
+
+std::list<lightConfig*> roomConfig::getAllCeilingLights() {
+	std::list<lightConfig*> returnList;
+	for(lightConfig &cfg : this->ceilingLights) {
+		returnList.push_back(&cfg);
+	}
+	return returnList;
+}
+
+std::list<lightConfig*> roomConfig::getAllTableLights() {
+	std::list<lightConfig*> returnList;
+	for(lightConfig &cfg : this->tableLights) {
+		returnList.push_back(&cfg);
+	}
+	return returnList;
+}
+
+bool roomConfig::anyCeilingLighstOn() {
+	for(lightConfig &cfg : this->ceilingLights) {
+		if(cfg.level > 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool roomConfig::anyTableLighstOn() {
+	for(lightConfig &cfg : this->tableLights) {
+		if(cfg.level > 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool roomConfig::anyLightsOn() {
+	return this->anyCeilingLighstOn() || this->anyTableLighstOn();
+}
+
 void InterfaceManager::init(PubSubClient *mqttClient)
 {
     this->_instance = this;
@@ -51,7 +109,8 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
             LOG_ERROR("Failed to download config, will try again in 5 seconds.");
             vTaskDelay(5000 / portTICK_PERIOD_MS);
 
-            if (tries == 5)
+            // 30 failed tries to download config, restart and try again.
+            if (tries == 30)
             {
                 LOG_ERROR("Failed to download config, will restart and try again.");
                 NSPanel::instance->setComponentText("bootscreen.t_loading", "Restarting...");
@@ -83,16 +142,8 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
             std::string levelStatusTopic = "nspanel/entities/light.";
             levelStatusTopic.append(lightCfg.name);
             levelStatusTopic.append("/state_brightness_pct");
-            LOG_DEBUG("Subscrubing to: ", levelStatusTopic.c_str());
-            vTaskDelay(10 / portTICK_PERIOD_MS);
             InterfaceManager::_instance->_mqttClient->subscribe(levelStatusTopic.c_str());
-            // Check if it is time to delay to allow for processing of incoming MQTT data
-            numSubscribed++;
-            if (numSubscribed == 5)
-            {
-                vTaskDelay(50 / portTICK_PERIOD_MS);
-                numSubscribed = 0;
-            }
+            vTaskDelay(10 / portTICK_PERIOD_MS);
         }
         // TODO: Implement table light logic
     }
@@ -102,8 +153,6 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
 
 void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
 {
-    LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
-
     if (page == HOME_PAGE_ID && !pressed)
     {
         if (component == SWITCH_ROOM_BUTTON_ID)
@@ -116,101 +165,71 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         }
         else if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
-            InterfaceManager::_instance->_adjustCeilingOrTableLightsMaster(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights);
+            InterfaceManager::_instance->_ceilingMasterButtonEvent();
         }
+        else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
+		{
+			InterfaceManager::_instance->_tableMasterButtonEvent();
+		}
         else if (component == LIGHT_LEVEL_CHANGE_BUTTON_ID)
         {
         	// TODO: Adjust only light that are on or if none are on, turn them all to the new value
-        	InterfaceManager::_instance->_changeLightsToLevel(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, HomePage::getSaturationValue());
+//        	InterfaceManager::_instance->_changeLightsToLevel(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, HomePage::getSaturationValue());
+        	if(InterfaceManager::_instance->_cfg.currentRoom->anyLightsOn()) {
+        		InterfaceManager::_instance->_updateLightsThatAreOn();
+        	} else {
+        		InterfaceManager::_instance->_updateAllLights();
+        	}
         } else if (component == LIGHT_COLOR_CHANGE_BUTTON_ID) {
         	LOG_DEBUG("Got new color val: ", HomePage::getColorTempValue());
         }
+    } else {
+    	LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
     }
 }
 
-void InterfaceManager::_adjustCeilingOrTableLights(std::list<lightConfig> *lights, bool isUp)
+void InterfaceManager::_ceilingMasterButtonEvent()
 {
-    // Lower light level of all turned on lights to next step of 10 from average light level
-    std::list<lightConfig> onLights;
-    int totalLights = 0;
-    int totalBrightness = 0;
-    for (lightConfig &cfg : (*lights))
-    {
-        LOG_ERROR("Light level: ", cfg.level);
-        if (cfg.canDim && cfg.level > 0)
-        {
-            onLights.push_back(cfg);
-            totalBrightness += cfg.level;
-            totalLights++;
-        }
-    }
+    std::list<lightConfig*> onLights = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
 
-    LOG_DEBUG("Found ", totalLights, " with total level: ", totalBrightness);
-
-    if (totalBrightness == 0 && isUp)
-    {
-        // No lights are on, turn them all to 10%
-        InterfaceManager::_instance->_changeLightsToLevel(lights, 10);
-    }
-    else
-    {
-        // Go to nearest +10/-10 adjustment for lights that are on.
-        uint8_t averageBrightness = totalLights == 0 ? 0 : (totalBrightness / totalLights);
-        uint8_t newBrightness = 0;
-        if (isUp)
-        {
-            if (averageBrightness > 90)
-            {
-                newBrightness = 100;
-            }
-            else
-            {
-                newBrightness = InterfaceManager::roundToNearest(averageBrightness + 10, 10);
-            }
-        }
-        else
-        {
-            if (averageBrightness < 10)
-            {
-                newBrightness = 0;
-            }
-            else
-            {
-                newBrightness = InterfaceManager::roundToNearest(averageBrightness - 10, 10);
-            }
-        }
-        if (newBrightness == 0)
-        {
-            InterfaceManager::_instance->_changeLightsToLevel(lights, newBrightness);
-        }
-        else
-        {
-            InterfaceManager::_instance->_changeLightsToLevel(&onLights, newBrightness);
-        }
+    if(onLights.size() > 0) {
+    	this->_changeLightsToLevel(&onLights, 0);
+    } else {
+    	std::list<lightConfig*> lightList = this->_cfg.currentRoom->getAllCeilingLights();
+    	this->_changeLightsToLevel(&lightList, HomePage::getSaturationValue());
     }
 }
 
-void InterfaceManager::_adjustCeilingOrTableLightsMaster(std::list<lightConfig> *lights)
+void InterfaceManager::_tableMasterButtonEvent()
 {
-    int totalLights = 0;
-    for (lightConfig &cfg : (*lights))
-    {
-        if (cfg.level > 0)
-        {
-            totalLights++;
-            break;
-        }
-    }
-    // Some lights are turned on, turn them all off
-    if (totalLights > 0)
-    {
-        InterfaceManager::_instance->_changeLightsToLevel(lights, 0);
-    }
-    else
-    {
-        // All light are turned off, turn them all to level 50
-        InterfaceManager::_instance->_changeLightsToLevel(lights, 50);
-    }
+    std::list<lightConfig*> onLights = this->_cfg.currentRoom->getTableLightsThatAreOn();
+
+    if(onLights.size() > 0) {
+		this->_changeLightsToLevel(&onLights, 0);
+	} else {
+		std::list<lightConfig*> lightList = this->_cfg.currentRoom->getAllTableLights();
+		this->_changeLightsToLevel(&lightList, HomePage::getSaturationValue());
+	}
+}
+
+void InterfaceManager::_updateLightsThatAreOn() {
+	std::list<lightConfig*> ceilingLightsOn = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
+	std::list<lightConfig*> tableLightsOn = this->_cfg.currentRoom->getTableLightsThatAreOn();
+
+	uint8_t newLevel = HomePage::getSaturationValue();
+	LOG_DEBUG("Setting light level ", newLevel, " for all lights currently on.");
+	this->_changeLightsToLevel(&ceilingLightsOn, newLevel);
+	this->_changeLightsToLevel(&tableLightsOn, newLevel);
+}
+
+void InterfaceManager::_updateAllLights() {
+	std::list<lightConfig*> ceilingLightsOn = this->_cfg.currentRoom->getAllCeilingLights();
+	std::list<lightConfig*> tableLightsOn = this->_cfg.currentRoom->getAllTableLights();
+
+	uint8_t newLevel = HomePage::getSaturationValue();
+	LOG_DEBUG("Setting light level ", newLevel, " for all lights.");
+	this->_changeLightsToLevel(&ceilingLightsOn, newLevel);
+	this->_changeLightsToLevel(&tableLightsOn, newLevel);
 }
 
 void InterfaceManager::_processPanelConfig()
@@ -222,7 +241,6 @@ void InterfaceManager::_processPanelConfig()
         roomConfig roomCfg;
         roomCfg.id = atoi(kv.key().c_str());
         roomCfg.name = kv.value()["name"] | "ERR";
-        LOG_DEBUG("Loaded room ID: ", roomCfg.id);
 
         JsonVariant ceilingLights = kv.value()["lights"];
         for (JsonPair lightPair : ceilingLights.as<JsonObject>())
@@ -233,7 +251,6 @@ void InterfaceManager::_processPanelConfig()
             lightCfg.canDim = lightPair.value()["can_dim"];
             lightCfg.canTemperature = lightPair.value()["can_temperature"];
             lightCfg.canRgb = lightPair.value()["can_rgb"];
-            LOG_DEBUG("Loaded light ID: ", lightCfg.id);
             if (lightPair.value()["ceiling"] == true)
             {
                 roomCfg.ceilingLights.push_back(lightCfg);
@@ -305,11 +322,11 @@ void InterfaceManager::_changeMode(roomMode mode)
     this->_currentRoomMode = mode;
     if (this->_currentRoomMode == roomMode::room)
     {
-        NSPanel::instance->setComponentText("home.mode", "Room");
+        NSPanel::instance->setComponentText("home.mode", "Room lights");
     }
     else if (this->_currentRoomMode == roomMode::house)
     {
-        NSPanel::instance->setComponentText("home.mode", "House");
+        NSPanel::instance->setComponentText("home.mode", "All lights");
     }
     else
     {
@@ -342,7 +359,6 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
             while (InterfaceManager::_mqttMessages.size() > 0)
             {
                 mqttMessage msg = InterfaceManager::_mqttMessages.front();
-                LOG_DEBUG("Processing message from: ", msg.topic.c_str());
                 try
                 {
                     std::string domain = msg.topic;
@@ -398,12 +414,12 @@ void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
     }
 }
 
-void InterfaceManager::_changeLightsToLevel(std::list<lightConfig> *lights, uint8_t level)
+void InterfaceManager::_changeLightsToLevel(std::list<lightConfig*> *lights, uint8_t level)
 {
-    for (lightConfig &light : (*lights))
+    for (lightConfig *light : (*lights))
     {
         std::string topic = "nspanel/entities/light.";
-        topic.append(light.name);
+        topic.append(light->name);
         topic.append("/brightness_pct");
         this->_mqttClient->publish(topic.c_str(), std::to_string(level).c_str());
     }

@@ -17,6 +17,8 @@ public:
 	static int getSaturationValue();
 	static void setColorTempValue(uint8_t value);
 	static int getColorTempValue();
+	static void setCeilingBrightnessLabelText(uint8_t value);
+	static void setTableBrightnessLabelText(uint8_t value);
 };
 
 

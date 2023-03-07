@@ -1,10 +1,13 @@
 #define HOME_PAGE_ID 2
-#define SWITCH_ROOM_BUTTON_ID 20
+#define SWITCH_ROOM_BUTTON_ID 10
 #define SWITCH_MODE_BUTTON_ID 8
 #define LIGHT_COLOR_CHANGE_BUTTON_ID 1
 #define LIGHT_LEVEL_CHANGE_BUTTON_ID 2
-#define CEILING_LIGHTS_MASTER_BUTTON_ID 3
+#define CEILING_LIGHTS_MASTER_BUTTON_ID 19
+#define TABLE_LIGHTS_MASTER_BUTTON_ID 20
 
 #define HOME_PAGE_NAME "home"
-#define HOME_SATURATION_SLIDER_NAME "home.saturation"
-#define HOME_COLOR_TEMP_SLIDER_NAME "home.color" // TODO: What is the correct name?
+#define HOME_SATURATION_SLIDER_NAME "home.s_brightness"
+#define HOME_COLOR_TEMP_SLIDER_NAME "home.s_kelvin"
+#define HOME_LABEL_CEILING_BRIGHTNESS "home.n_ceiling"
+#define HOME_LABEL_TABLE_BRIGHTNESS "home.n_table"
