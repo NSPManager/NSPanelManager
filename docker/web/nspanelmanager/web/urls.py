@@ -27,4 +27,6 @@ urlpatterns = [
     path('api/register_nspanel', api.register_nspanel, name='register_nspanel'),
     path('api/get_nspanel_config', api.get_nspanel_config,
          name='get_nspanel_config'),
+    path('api/get_all_available_lights',
+         api.get_all_available_light_entities, name='get_all_available_lights'),
 ]

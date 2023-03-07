@@ -4,6 +4,8 @@
 #include <Arduino.h>
 #include <NSPMConfig.h>
 #include <HardwareSerial.h>
+#include <list>
+#include <vector>
 #include <queue>
 
 #define getHeaderValue(x, y) x.substring(strlen(y))
@@ -19,8 +21,12 @@ struct NSPanelCommand
     bool expectFinishedResponse = false;
     /// @brief Do we expect a response with data?
     bool expectResponse = false;
+    /// @brief The buffer to save the response in
+    std::list<uint8_t> *buffer = nullptr;
     /// @brief The callback function when data is returned
-    void (*callback)();
+    void (*callback)(NSPanelCommand *cmd);
+    /// @brief Used to indicate that the callback function is done
+    bool callbackFinished = false;
 };
 
 class NSPanel
@@ -35,6 +41,7 @@ public:
     void setSleep(bool sleep);
     void setComponentText(const char *componentId, const char *text);
     void setComponentVal(const char *componentId, uint8_t value);
+    int getComponentIntVal(const char *componentId);
     void restart();
 
 private:
@@ -44,6 +51,10 @@ private:
     TaskHandle_t _taskHandleReadNSPanelData;
     static void _taskReadNSPanelData(void *param);
     static void _taskUpdateTFTConfigOTA(void *param);
+    std::queue<std::vector<char>> _processQueue;
+    TaskHandle_t _taskHandleProcessPanelOutput;
+    static void _taskProcessPanelOutput(void *param);
+    SemaphoreHandle_t _mutexReadSerialData;
 
     unsigned long _lastCommandSent = 0;
     std::queue<NSPanelCommand> _commandQueue;
@@ -51,10 +62,12 @@ private:
     void _sendCommandClearResponse(const char *command);
     void _addCommandToQueue(NSPanelCommand command);
     void _sendCommand(NSPanelCommand *command);
+    void _sendRawCommand(const char* command, int length);
     void _startListeningToPanel();
     void _stopListeningToPanel();
 
     static inline void (*_touchEventCallback)(uint8_t, uint8_t, bool);
+    static void _clearSerialBuffer(NSPanelCommand *cmd);
     static void _clearSerialBuffer();
 };
 

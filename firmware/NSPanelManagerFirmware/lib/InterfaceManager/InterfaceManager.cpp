@@ -1,4 +1,5 @@
 #include <InterfaceManager.h>
+#include <pages.h>
 #include <TftDefines.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
@@ -66,9 +67,6 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
     // Set some default values before showing page
     InterfaceManager::_instance->_changeMode(roomMode::room);
 
-    LOG_DEBUG("Free HEAP: ", ESP.getFreeHeap());
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-
     // Start task for MQTT processing
     xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskLoadConfigAndInit", 5000, NULL, 1, &InterfaceManager::_taskHandleProcessMqttMessages, CONFIG_ARDUINO_RUNNING_CORE);
 
@@ -106,7 +104,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
 {
     LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
 
-    if (page == HOME_PAGE_ID && pressed)
+    if (page == HOME_PAGE_ID && !pressed)
     {
         if (component == SWITCH_ROOM_BUTTON_ID)
         {
@@ -116,17 +114,16 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         {
             InterfaceManager::_instance->_goToNextMode();
         }
-        else if (component == CEILING_LIGHTS_RAISE_BUTTON_ID)
-        {
-            InterfaceManager::_instance->_adjustCeilingOrTableLights(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, true);
-        }
-        else if (component == CEILING_LIGHTS_LOWER_BUTTON_ID)
-        {
-            InterfaceManager::_instance->_adjustCeilingOrTableLights(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, false);
-        }
         else if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
             InterfaceManager::_instance->_adjustCeilingOrTableLightsMaster(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights);
+        }
+        else if (component == LIGHT_LEVEL_CHANGE_BUTTON_ID)
+        {
+        	// TODO: Adjust only light that are on or if none are on, turn them all to the new value
+        	InterfaceManager::_instance->_changeLightsToLevel(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, HomePage::getSaturationValue());
+        } else if (component == LIGHT_COLOR_CHANGE_BUTTON_ID) {
+        	LOG_DEBUG("Got new color val: ", HomePage::getColorTempValue());
         }
     }
 }
@@ -461,6 +458,7 @@ bool InterfaceManager::_getPanelConfig()
                 LOG_ERROR("Timeout while downloading firmware!");
                 client.stop();
             }
+            vTaskDelay(20 / portTICK_PERIOD_MS);
         }
 
         while (client.available())

@@ -36,6 +36,7 @@ void registerToNSPanelManager()
     StaticJsonDocument<128> doc;
     doc["mac_address"] = WiFi.macAddress().c_str();
     doc["friendly_name"] = NSPMConfig::instance->wifi_hostname.c_str();
+    doc["version"] = NSPanelManagerFirmwareVersion;
 
     char buffer[128];
     serializeJson(doc, buffer);
