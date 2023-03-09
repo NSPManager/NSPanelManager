@@ -103,6 +103,8 @@ void taskManageWifiAndMqtt(void *param)
             // This task only handles connection. The InterfaceManager will take care of subscribing to relevant topics
             // once the connection is MQTT is established.
             LOG_INFO("Connected to MQTT server ", config.mqtt_server.c_str());
+            InterfaceManager::subscribeToMqttTopics();
+            mqttClient.publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), "online");
           }
           else
           {

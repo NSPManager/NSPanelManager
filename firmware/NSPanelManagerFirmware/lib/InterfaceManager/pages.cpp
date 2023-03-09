@@ -9,12 +9,12 @@
 #include <NSPanel.h>
 #include <TftDefines.h>
 
-int HomePage::getSaturationValue() {
-	return NSPanel::instance->getComponentIntVal(HOME_SATURATION_SLIDER_NAME);
+int HomePage::getDimmingValue() {
+	return NSPanel::instance->getComponentIntVal(HOME_DIMMER_SLIDER_NAME);
 }
 
-void HomePage::setSaturationValue(uint8_t value) {
-	NSPanel::instance->setComponentVal(HOME_SATURATION_SLIDER_NAME, value);
+void HomePage::setDimmingValue(uint8_t value) {
+	NSPanel::instance->setComponentVal(HOME_DIMMER_SLIDER_NAME, value);
 }
 
 int HomePage::getColorTempValue() {
@@ -31,4 +31,12 @@ void HomePage::setCeilingBrightnessLabelText(uint8_t value) {
 
 void HomePage::setTableBrightnessLabelText(uint8_t value) {
 	NSPanel::instance->setComponentVal(HOME_LABEL_TABLE_BRIGHTNESS, value);
+}
+
+void HomePage::setCeilingLightsState(bool state) {
+	NSPanel::instance->setComponentVal(HOME_BUTTON_CEILING_NAME, state ? 1 : 0);
+}
+
+void HomePage::setTableLightsState(bool state) {
+	NSPanel::instance->setComponentVal(HOME_BUTTON_TABLE_NAME, state ? 1 : 0);
 }

@@ -132,23 +132,34 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
     // As there may be may be MANY topics to subscribe to, do it in checks of 5 with delays
     // between them to allow for processing all the incoming data.
     NSPanel::instance->setComponentText("bootscreen.t_loading", "Subscribing...");
-    uint8_t numSubscribed = 0;
-    // Every light in every room
-    for (roomConfig &roomCfg : InterfaceManager::_instance->_cfg.rooms)
-    {
-        for (lightConfig &lightCfg : roomCfg.ceilingLights)
-        {
-            // Build topic from name
-            std::string levelStatusTopic = "nspanel/entities/light.";
-            levelStatusTopic.append(lightCfg.name);
-            levelStatusTopic.append("/state_brightness_pct");
-            InterfaceManager::_instance->_mqttClient->subscribe(levelStatusTopic.c_str());
-            vTaskDelay(10 / portTICK_PERIOD_MS);
-        }
-        // TODO: Implement table light logic
-    }
+    InterfaceManager::subscribeToMqttTopics();
 
     vTaskDelete(NULL); // Delete task, we are done
+}
+
+void InterfaceManager::subscribeToMqttTopics() {
+	// Every light in every room
+	for (roomConfig &roomCfg : InterfaceManager::_instance->_cfg.rooms)
+	{
+		for (lightConfig &lightCfg : roomCfg.ceilingLights)
+		{
+			// Build topic from name
+			std::string levelStatusTopic = "nspanel/entities/light.";
+			levelStatusTopic.append(lightCfg.name);
+			levelStatusTopic.append("/state_brightness_pct");
+			InterfaceManager::_instance->_mqttClient->subscribe(levelStatusTopic.c_str());
+
+			if(lightCfg.canTemperature) {
+				std::string colorTempStateTopic = "nspanel/entities/light.";
+				colorTempStateTopic.append(lightCfg.name);
+				colorTempStateTopic.append("/kelvin");
+				InterfaceManager::_instance->_mqttClient->subscribe(colorTempStateTopic.c_str());
+			}
+
+			vTaskDelay(10 / portTICK_PERIOD_MS);
+		}
+		// TODO: Implement table light logic
+	}
 }
 
 void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
@@ -173,15 +184,13 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
 		}
         else if (component == LIGHT_LEVEL_CHANGE_BUTTON_ID)
         {
-        	// TODO: Adjust only light that are on or if none are on, turn them all to the new value
-//        	InterfaceManager::_instance->_changeLightsToLevel(&InterfaceManager::_instance->_cfg.currentRoom->ceilingLights, HomePage::getSaturationValue());
         	if(InterfaceManager::_instance->_cfg.currentRoom->anyLightsOn()) {
         		InterfaceManager::_instance->_updateLightsThatAreOn();
         	} else {
         		InterfaceManager::_instance->_updateAllLights();
         	}
         } else if (component == LIGHT_COLOR_CHANGE_BUTTON_ID) {
-        	LOG_DEBUG("Got new color val: ", HomePage::getColorTempValue());
+        	InterfaceManager::_instance->_updateLightsColorTemp();
         }
     } else {
     	LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
@@ -196,7 +205,7 @@ void InterfaceManager::_ceilingMasterButtonEvent()
     	this->_changeLightsToLevel(&onLights, 0);
     } else {
     	std::list<lightConfig*> lightList = this->_cfg.currentRoom->getAllCeilingLights();
-    	this->_changeLightsToLevel(&lightList, HomePage::getSaturationValue());
+    	this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
     }
 }
 
@@ -208,7 +217,7 @@ void InterfaceManager::_tableMasterButtonEvent()
 		this->_changeLightsToLevel(&onLights, 0);
 	} else {
 		std::list<lightConfig*> lightList = this->_cfg.currentRoom->getAllTableLights();
-		this->_changeLightsToLevel(&lightList, HomePage::getSaturationValue());
+		this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
 	}
 }
 
@@ -216,20 +225,30 @@ void InterfaceManager::_updateLightsThatAreOn() {
 	std::list<lightConfig*> ceilingLightsOn = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
 	std::list<lightConfig*> tableLightsOn = this->_cfg.currentRoom->getTableLightsThatAreOn();
 
-	uint8_t newLevel = HomePage::getSaturationValue();
-	LOG_DEBUG("Setting light level ", newLevel, " for all lights currently on.");
+	uint8_t newLevel = HomePage::getDimmingValue();
 	this->_changeLightsToLevel(&ceilingLightsOn, newLevel);
 	this->_changeLightsToLevel(&tableLightsOn, newLevel);
 }
 
 void InterfaceManager::_updateAllLights() {
-	std::list<lightConfig*> ceilingLightsOn = this->_cfg.currentRoom->getAllCeilingLights();
-	std::list<lightConfig*> tableLightsOn = this->_cfg.currentRoom->getAllTableLights();
+	std::list<lightConfig*> ceilingLights = this->_cfg.currentRoom->getAllCeilingLights();
+	std::list<lightConfig*> tableLights = this->_cfg.currentRoom->getAllTableLights();
 
-	uint8_t newLevel = HomePage::getSaturationValue();
-	LOG_DEBUG("Setting light level ", newLevel, " for all lights.");
-	this->_changeLightsToLevel(&ceilingLightsOn, newLevel);
-	this->_changeLightsToLevel(&tableLightsOn, newLevel);
+	uint8_t newLevel = HomePage::getDimmingValue();
+	this->_changeLightsToLevel(&ceilingLights, newLevel);
+	this->_changeLightsToLevel(&tableLights, newLevel);
+}
+
+void InterfaceManager::_updateLightsColorTemp() {
+	std::list<lightConfig*> ceilingLights = this->_cfg.currentRoom->getAllCeilingLights();
+	std::list<lightConfig*> tableLights = this->_cfg.currentRoom->getAllTableLights();
+
+	// Get value from panel and calculate for 2000-6500 kelvin. Also inverse value, warm color temperature on top
+	// TODO: Implement check in management web interface that allows for this to be reversed
+	uint16_t newKelvin = HomePage::getColorTempValue();
+	newKelvin = 6000 - (newKelvin*40);
+	this->_changeLightsToKelvin(&ceilingLights, newKelvin);
+	this->_changeLightsToKelvin(&tableLights, newKelvin);
 }
 
 void InterfaceManager::_processPanelConfig()
@@ -352,7 +371,6 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
     for (;;)
     {
         // Wait for notification that we need to process messages.
-        LOG_DEBUG("Pausing for new MQTT messages");
         if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY))
         {
             // Process all the messages
@@ -422,6 +440,19 @@ void InterfaceManager::_changeLightsToLevel(std::list<lightConfig*> *lights, uin
         topic.append(light->name);
         topic.append("/brightness_pct");
         this->_mqttClient->publish(topic.c_str(), std::to_string(level).c_str());
+        vTaskDelay(5 / portTICK_PERIOD_MS);
+    }
+}
+
+void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig*> *lights, uint16_t kelvin)
+{
+    for (lightConfig *light : (*lights))
+    {
+        std::string topic = "nspanel/entities/light.";
+        topic.append(light->name);
+        topic.append("/kelvin");
+        this->_mqttClient->publish(topic.c_str(), std::to_string(kelvin).c_str());
+        vTaskDelay(5 / portTICK_PERIOD_MS);
     }
 }
 
@@ -438,18 +469,40 @@ void InterfaceManager::_updatePanelLightStatus()
         }
     }
 
-    uint averageBrightness = totalLights == 0 ? 0 : totalBrightness / totalLights;
-    if (averageBrightness > 0)
-    {
-        NSPanel::instance->setComponentVal("home.b_ceiling", 1);
-    }
-    else
-    {
-        NSPanel::instance->setComponentVal("home.b_ceiling", 0);
-    }
-    NSPanel::instance->setComponentVal("home.n_ceiling", averageBrightness);
+    uint8_t averageCeilingBrightness = totalLights == 0 ? 0 : totalBrightness / totalLights;
+    HomePage::setCeilingLightsState(averageCeilingBrightness > 0);
+    HomePage::setCeilingBrightnessLabelText(averageCeilingBrightness);
 
-    // TODO: Implement check for table lights
+    totalLights = 0;
+	totalBrightness = 0;
+	for (lightConfig &light : this->_cfg.currentRoom->tableLights)
+	{
+		if (light.canDim && light.level > 0)
+		{
+			totalLights++;
+			totalBrightness += light.level;
+		}
+	}
+	uint8_t averageTableBrightness = totalLights == 0 ? 0 : totalBrightness / totalLights;
+	HomePage::setTableLightsState(averageTableBrightness > 0);
+	HomePage::setTableBrightnessLabelText(averageTableBrightness);
+
+	uint8_t totalAverage;
+	if(averageCeilingBrightness > 0 && averageTableBrightness > 0) {
+		totalAverage = (averageCeilingBrightness + averageTableBrightness) / 2;
+	} else if (averageCeilingBrightness > 0) {
+		totalAverage = averageCeilingBrightness;
+	} else if (averageTableBrightness > 0) {
+		totalAverage = averageTableBrightness;
+	} else {
+		totalAverage = 0;
+	}
+
+	// Only set a new value if any lights are on.
+	// This value will be used as the next "on" value.
+	if(totalAverage > 0 && totalAverage != HomePage::getDimmingValue()) {
+		HomePage::setDimmingValue(totalAverage);
+	}
 }
 
 bool InterfaceManager::_getPanelConfig()

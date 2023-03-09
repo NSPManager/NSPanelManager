@@ -13,12 +13,14 @@
 
 class HomePage {
 public:
-	static void setSaturationValue(uint8_t value);
-	static int getSaturationValue();
+	static void setDimmingValue(uint8_t value);
+	static int getDimmingValue();
 	static void setColorTempValue(uint8_t value);
 	static int getColorTempValue();
 	static void setCeilingBrightnessLabelText(uint8_t value);
 	static void setTableBrightnessLabelText(uint8_t value);
+	static void setCeilingLightsState(bool state);
+	static void setTableLightsState(bool state);
 };
 
 

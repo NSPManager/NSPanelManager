@@ -27,6 +27,9 @@ def on_message(client, userdata, msg):
     domain = parts[2].split('.')[0]
     entity_id = parts[2]
     attribute = parts[3]
+    if attribute.startswith("state_"):
+        return
+
     service = ""
     if domain == "light":
         service = "turn_on"
@@ -48,8 +51,9 @@ def setHomeassistantState(domain, service, entity_id, attribute, state):
         "entity_id": entity_id,
         attribute: state
     }
-    print("Posting to " + url)
-    print(body)
+    # print("Posting to " + url)
+    # print(body)
+    # print("----------------")
     response = post(url, headers=headers, json=body)
     if response.status_code == 200:
         send_new_status(domain, service, entity_id, attribute, state)

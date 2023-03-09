@@ -90,7 +90,6 @@ def save_new_firmware(request):
         fs = FileSystemStorage()
         fs.delete("firmware.bin")
         fs.save("firmware.bin", uploaded_file)
-        print("Saved new firmware.")
     return redirect('/')
 
 
@@ -102,7 +101,6 @@ def save_new_data_file(request):
         fs = FileSystemStorage()
         fs.delete("data_file.bin")
         fs.save("data_file.bin", uploaded_file)
-        print("Saved new data file.")
     return redirect('/')
 
 # TODO: Make exempt only when Debug = true

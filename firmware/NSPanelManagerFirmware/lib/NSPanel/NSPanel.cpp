@@ -65,7 +65,6 @@ void NSPanel::setComponentVal(const char *componentId, uint8_t value)
 
 int NSPanel::getComponentIntVal(const char* componentId) {
 	// Wait for command queue to clear
-	LOG_DEBUG("Waiting for queue to empty, current size: ", this->_commandQueue.size());
 	while(this->_commandQueue.size() > 0) {
 		vTaskDelay(100 / portTICK_PERIOD_MS);
 	}
@@ -118,7 +117,7 @@ void NSPanel::init()
     NSPanel::instance = this;
     this->_mutexReadSerialData = xSemaphoreCreateMutex();
 
-    LOG_INFO("Starting communication with NSPanel.");
+    LOG_INFO("Init NSPanel.");
     xTaskCreatePinnedToCore(_taskSendCommandQueue, "taskSendCommandQueue", 5000, NULL, 1, &this->_taskHandleSendCommandQueue, CONFIG_ARDUINO_RUNNING_CORE);
     this->_startListeningToPanel();
 
@@ -312,7 +311,6 @@ void NSPanel::_clearSerialBuffer() {
 void NSPanel::_taskUpdateTFTConfigOTA(void *param)
 {
     LOG_INFO("Starting TFT update...");
-
 	for(;;) {
 		bool updateResult = NSPanel::_updateTFTOTA();
 		if(updateResult) {

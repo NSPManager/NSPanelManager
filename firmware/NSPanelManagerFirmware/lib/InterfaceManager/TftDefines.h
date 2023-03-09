@@ -7,7 +7,9 @@
 #define TABLE_LIGHTS_MASTER_BUTTON_ID 20
 
 #define HOME_PAGE_NAME "home"
-#define HOME_SATURATION_SLIDER_NAME "home.s_brightness"
+#define HOME_DIMMER_SLIDER_NAME "home.s_brightness"
 #define HOME_COLOR_TEMP_SLIDER_NAME "home.s_kelvin"
 #define HOME_LABEL_CEILING_BRIGHTNESS "home.n_ceiling"
 #define HOME_LABEL_TABLE_BRIGHTNESS "home.n_table"
+#define HOME_BUTTON_CEILING_NAME "home.b_ceiling"
+#define HOME_BUTTON_TABLE_NAME "home.b_table"

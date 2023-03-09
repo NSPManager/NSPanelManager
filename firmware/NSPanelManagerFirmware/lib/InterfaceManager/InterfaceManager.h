@@ -61,6 +61,7 @@ public:
     static void processTouchEvent(uint8_t, uint8_t, bool);
     static void mqttCallback(char *topic, byte *payload, unsigned int length);
     static uint8_t roundToNearest(uint8_t original, uint8_t step);
+    static void subscribeToMqttTopics();
 
 private:
     static inline InterfaceManager *_instance;
@@ -85,7 +86,8 @@ private:
     void _ceilingMasterButtonEvent();
     void _tableMasterButtonEvent();
     void _updateLightsThatAreOn(); // Set light level for all lights that are currently on
-    void _updateAllLights();
+    void _updateAllLights(); // Send light level to all lights
+    void _updateLightsColorTemp(); // Send new color temp to all lights
 
     /// @brief Set internal light representation level
     /// @param light The light to set value for
@@ -96,6 +98,7 @@ private:
     /// @param lights The lights to set value for
     /// @param level The new value
     void _changeLightsToLevel(std::list<lightConfig*> *lights, uint8_t level);
+    void _changeLightsToKelvin(std::list<lightConfig*> *lights, uint16_t kelvin);
 };
 
 #endif
