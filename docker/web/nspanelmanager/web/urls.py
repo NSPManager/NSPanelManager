@@ -17,6 +17,8 @@ urlpatterns = [
     path('remove_light/<int:room_id>/<int:light_id>',
          views.remove_light_from_room, name="remove_light_from_room"),
     path('add_light/<int:room_id>', views.add_light_to_room, name="add_new_light"),
+    path('settings', views.settings_page, name="settings"),
+    path('save_settings', views.save_settings, name="save_settings"),
     path('save_new_room', views.save_new_room, name='save_new_room'),
     path('save_new_firmware', views.save_new_firmware, name='save_new_firmware'),
     path('save_new_data_file', views.save_new_data_file, name='save_new_data_file'),

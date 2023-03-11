@@ -3,6 +3,11 @@ from datetime import datetime
 import django.utils
 
 
+class Settings(models.Model):
+    name = models.CharField(max_length=255)
+    value = models.CharField(max_length=255)
+
+
 class Room(models.Model):
     # Get the next free number in the ordering
     def number():

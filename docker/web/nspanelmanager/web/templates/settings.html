@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form method="POST" action="{% url 'save_settings' %}" id="config">
+    {% csrf_token %}
+    <div class="box">
+        <div class="field">
+            <h5 class="title is-5">MQTT</h5>
+        </div>
+        <div class="field">
+            <label class="label">MQTT Server</label>
+            <div class="control">
+                <input class="input" type="text" name="mqtt_server" id="mqtt_server" placeholder="MQTT Server"
+                    value="{{ mqtt_server }}" required>
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">MQTT Port</label>
+            <div class="control">
+                <input class="input" type="number" name="mqtt_port" id="mqtt_port" placeholder="MQTT Port"
+                    value="{{ mqtt_port }}" required>
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">MQTT Username</label>
+            <div class="control">
+                <input class="input" type="text" name="mqtt_username" id="mqtt_username" value="{{ mqtt_username }}"
+                    placeholder="MQTT Username">
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">MQTT Password</label>
+            <div class="control">
+                <input class="input" type="password" name="mqtt_password" id="mqtt_password" placeholder="MQTT Password"
+                    value="{{ mqtt_password }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        <div class="field">
+            <h5 class="title is-5">Home Assistant API</h5>
+        </div>
+        <div class="field">
+            <label class="label">Address</label>
+            <div class="control">
+                <input class="input" type="text" name="home_assistant_address" id="home_assistant_address"
+                    placeholder="http://192.168.1.5:8123" value="{{ home_assistant_address }}">
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Access token</label>
+            <div class="control">
+                <input class="input" type="password" name="home_assistant_token" id="home_assistant_token"
+                    value="{{ home_assistant_token }}" placeholder="ey...">
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        <div class="field">
+            <h5 class="title is-5">OpenHAB API</h5>
+        </div>
+        <div class="field">
+            <label class="label">Address</label>
+            <div class="control">
+                <input class="input" type="text" name="openhab_address" id="openhab_address"
+                    placeholder="http://192.168.1.5:8123" value="{{ openhab_address }}">
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Access token</label>
+            <div class="control">
+                <input class="input" type="password" name="openhab_token" id="openhab_token" value="{{ openhab_token }}"
+                    placeholder="ey...">
+            </div>
+        </div>
+    </div>
+
+    <!-- Add 1rem of padding to bottom to prevent a white bar appering on the bottom of the page -->
+    <div class="level" style="padding-bottom: 1rem;">
+        <div class="level-left">
+            <div class="buttons is-right">
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="buttons">
+                <button class="button is-success" type="submit" id="save_button">Save</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

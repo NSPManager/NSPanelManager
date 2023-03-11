@@ -4,7 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 import hashlib
 
-from .models import NSPanel, Room, Light
+from .models import NSPanel, Room, Light, Settings
+from web.settings_helper import get_setting_with_default, set_setting_value
 
 
 def index(request):
@@ -92,7 +93,7 @@ def add_light_to_room(request, room_id: int):
     newLight = Light()
     newLight.room = room
     newLight.friendly_name = request.POST["add_new_light_name"]
-    if "ceiling_light" in request.POST:
+    if request.POST["light_type"] == "ceiling":
         newLight.is_ceiling_light = True
     if "dimmable" in request.POST:
         newLight.can_dim = True
@@ -104,7 +105,43 @@ def add_light_to_room(request, room_id: int):
 
     return redirect('edit_room', room_id=room_id)
 
-# TODO: Make exempt only when Debug = true
+
+def settings_page(request):
+    data = {}
+    data["mqtt_server"] = get_setting_with_default("mqtt_server", "")
+    data["mqtt_port"] = get_setting_with_default("mqtt_port", 1883)
+    data["mqtt_username"] = get_setting_with_default("mqtt_username", "")
+    data["mqtt_password"] = get_setting_with_default("mqtt_password", "")
+    data["home_assistant_address"] = get_setting_with_default(
+        "home_assistant_address", "")
+    data["home_assistant_token"] = get_setting_with_default(
+        "home_assistant_token", "")
+    data["openhab_address"] = get_setting_with_default(
+        "openhab_address", "")
+    data["openhab_token"] = get_setting_with_default(
+        "openhab_token", "")
+    return render(request, 'settings.html', data)
+
+
+def save_settings(request):
+    set_setting_value(name="mqtt_server", value=request.POST["mqtt_server"])
+    set_setting_value(name="mqtt_port", value=request.POST["mqtt_port"])
+    set_setting_value(name="mqtt_username",
+                      value=request.POST["mqtt_username"])
+    set_setting_value(name="mqtt_password",
+                      value=request.POST["mqtt_password"])
+    set_setting_value(name="home_assistant_address",
+                      value=request.POST["home_assistant_address"])
+    set_setting_value(name="home_assistant_token",
+                      value=request.POST["home_assistant_token"])
+    set_setting_value(name="openhab_address",
+                      value=request.POST["openhab_address"])
+    set_setting_value(name="openhab_token",
+                      value=request.POST["openhab_token"])
+
+    return redirect('settings')
+
+    # TODO: Make exempt only when Debug = true
 
 
 @csrf_exempt

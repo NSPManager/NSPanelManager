@@ -1,3 +1,7 @@
+function add_new_light_to_available_lights_list(light_name, type) {
+    $("#add_new_light_options").append('<a class="panel-block" data-type="' + type + '">' + light_name + '</a>');
+}
+
 function populate_add_new_light_dialog() {
     $("#add_new_light_options").hide();
     $("#add_new_light_loader").show();
@@ -5,13 +9,13 @@ function populate_add_new_light_dialog() {
     $.get("/api/get_all_available_lights", function (data) {
         $("#add_new_light_options").html("");
         data.home_assistant_lights.forEach(light => {
-            $("#add_new_light_options").append('<a class="panel-block" data-type="home_assistant">' + light + '</a>');
+            add_new_light_to_available_lights_list(light, "home_assistant");
         });
         data.openhab_lights.forEach(light => {
-            $("#add_new_light_options").append('<a class="panel-block" data-type="home_assistant">' + light + '</a>');
+            add_new_light_to_available_lights_list(light, "openhab");
         });
         data.manual_lights.forEach(light => {
-            $("#add_new_light_options").append('<a class="panel-block" data-type="home_assistant">' + light + '</a>');
+            add_new_light_to_available_lights_list(light, "manual");
         });
 
         $("#add_new_light_loader").hide();
