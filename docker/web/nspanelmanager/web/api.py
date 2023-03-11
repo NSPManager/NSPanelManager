@@ -9,6 +9,39 @@ from .models import NSPanel, Room
 from web.settings_helper import get_setting_with_default
 
 
+def get_mqtt_manager_config(request):
+    return_json = {}
+    return_json["color_temp_min"] = get_setting_with_default(
+        "color_temp_min", 2000)
+    return_json["color_temp_max"] = get_setting_with_default(
+        "color_temp_max", 6000)
+    return_json["mqtt_server"] = get_setting_with_default("mqtt_server", "")
+    return_json["mqtt_port"] = int(get_setting_with_default("mqtt_port", 1883))
+    return_json["mqtt_username"] = get_setting_with_default(
+        "mqtt_username", "")
+    return_json["mqtt_password"] = get_setting_with_default(
+        "mqtt_password", "")
+    return_json["home_assistant_address"] = get_setting_with_default(
+        "home_assistant_address", "")
+    return_json["home_assistant_token"] = get_setting_with_default(
+        "home_assistant_token", "")
+    return_json["openhab_address"] = get_setting_with_default(
+        "openhab_address", "")
+    return_json["openhab_token"] = get_setting_with_default(
+        "openhab_token", "")
+    return_json["openhab_brightness_channel_name"] = get_setting_with_default(
+        "openhab_brightness_channel_name", "")
+    return_json["openhab_brightness_channel_min"] = get_setting_with_default(
+        "openhab_brightness_channel_min", 0)
+    return_json["openhab_brightness_channel_max"] = get_setting_with_default(
+        "openhab_brightness_channel_max", 255)
+    return_json["openhab_color_temp_channel_name"] = get_setting_with_default(
+        "openhab_color_temp_channel_name", "")
+    return_json["openhab_rgb_channel_name"] = get_setting_with_default(
+        "openhab_rgb_channel_name", "")
+    return JsonResponse(return_json)
+
+
 def get_all_available_light_entities(request):
     # TODO: Implement OpenHAB and manually entered entities
     # Get Home Assistant lights

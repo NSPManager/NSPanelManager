@@ -5,6 +5,24 @@
     {% csrf_token %}
     <div class="box">
         <div class="field">
+            <h5 class="title is-5">General</h5>
+        </div>
+        <div class="field">
+            <label class="label">Color temperature min & max</label>
+        </div>
+        <div class="field is-grouped">
+            <div class="control">
+                <input class="input" type="number" name="color_temp_min" id="color_temp_min" placeholder="Min"
+                    value="{{ color_temp_min }}" required>
+            </div>
+            <div class="control">
+                <input class="input" type="number" name="color_temp_max" id="color_temp_max" placeholder="Max"
+                    value="{{ color_temp_max }}" required>
+            </div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="field">
             <h5 class="title is-5">MQTT</h5>
         </div>
         <div class="field">
@@ -73,6 +91,52 @@
             <div class="control">
                 <input class="input" type="password" name="openhab_token" id="openhab_token" value="{{ openhab_token }}"
                     placeholder="ey...">
+            </div>
+        </div>
+        <br>
+        <div class="field">
+            <h5 class="title is-5">OpenHAB suffixes</h5>
+        </div>
+        <div class="field">
+            <label class="label">Default brightness channel suffix</label>
+            <div class="control">
+                <input class="input" type="text" name="openhab_brightness_channel_name"
+                    id="openhab_brightness_channel_name" placeholder="_Brightness"
+                    value="{{ openhab_brightness_channel_name }}">
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Min & Max values</label>
+        </div>
+        <div class="field is-grouped">
+            <div class="control">
+                <input class="input" type="number" name="openhab_brightness_channel_min"
+                    id="openhab_brightness_channel_min" placeholder="Min brightness" default="1" min="0" max="1024"
+                    value="{{ openhab_brightness_channel_min }}" required>
+            </div>
+            <div class="control">
+                <input class="input" type="number" name="openhab_brightness_channel_max"
+                    id="openhab_brightness_channel_max" placeholder="Max brightness" default="100" min="0" max="1024"
+                    value="{{ openhab_brightness_channel_max }}" required>
+            </div>
+        </div>
+
+        <br>
+        <div class="field">
+            <label class="label">Default color temperature channel suffix</label>
+            <div class="control">
+                <input class="input" type="text" name="openhab_color_temp_channel_name"
+                    id="openhab_color_temp_channel_name" placeholder="_Color_Temperature"
+                    value="{{ openhab_color_temp_channel_name }}">
+            </div>
+        </div>
+
+        <br>
+        <div class="field">
+            <label class="label">Default RGB channel suffix</label>
+            <div class="control">
+                <input class="input" type="text" name="openhab_rgb_channel_name" id="openhab_rgb_channel_name"
+                    placeholder="_rgberature" value="{{ openhab_rgb_channel_name }}">
             </div>
         </div>
     </div>

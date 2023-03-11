@@ -40,11 +40,11 @@ def on_message(client, userdata, msg):
 
 def setHomeassistantState(domain, service, entity_id, attribute, state):
     global settings
-    url = settings["sources"]["homeassistant"]["url"] + \
-        "api/services/" + domain + "/" + service
+    url = settings["home_assistant_address"] + \
+        "/api/services/" + domain + "/" + service
 
     headers = {
-        "Authorization": "Bearer " + settings["sources"]["homeassistant"]["token"],
+        "Authorization": "Bearer " + settings["home_assistant_token"],
         "content-type": "application/json",
     }
     body = {
@@ -64,36 +64,47 @@ def send_new_status(domain, service, entity_id, attribute, state):
                    "/state_" + attribute, state, retain=True)
 
 
+def get_config():
+    global settings
+    while True:
+        try:
+            config_request = get(
+                "http://127.0.0.1:8000/api/get_mqtt_manager_config", timeout=5)
+            if config_request.status_code == 200:
+                print("Got config, will start MQTT Manager.")
+                settings = config_request.json()
+                break
+        except:
+            print("ERROR: Failed to get config. Will try again in 10 seconds.")
+            sleep(10)
+
+
 def connect_and_loop():
     global settings
-    print("Connecting to " +
-          settings["mqtt_server"] + ":" + str(settings["mqtt_port"]))
     client.on_connect = on_connect
     client.on_message = on_message
     client.username_pw_set(
         settings["mqtt_username"], settings["mqtt_password"])
     # Wait for connection
+    connection_return_code = 0
+    mqtt_server = settings["mqtt_server"]
+    mqtt_port = int(settings["mqtt_port"])
+    print(F"Connecting to {mqtt_server}:{mqtt_port}")
     while True:
         try:
-            client.connect(settings["mqtt_server"], settings["mqtt_port"], 60)
-            break
+            client.connect(mqtt_server, mqtt_port, 5)
+            break  # Connection call did not raise exception, connection is sucessfull
         except:
-            print("Failed to connect to MQTT. Will try again in 10 seconds.")
+            print(
+                F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
             sleep(10)
-    client.loop_start()
+    client.loop_forever()
 
 
 if __name__ == '__main__':
-    while True:
-        if last_settings_file_mtime != os.path.getmtime("nspanelmanager/mqtt_manager.json"):
-            client.loop_stop()
-            client.disconnect()
-            read_settings()
-            if settings["mqtt_server"] and settings["mqtt_port"]:
-                connect_and_loop()
-
-            else:
-                print("Settings dictate to NOT use MQTT Manager.")
-            last_settings_file_mtime = os.path.getmtime(
-                "nspanelmanager/mqtt_manager.json")
-        sleep(5)
+    get_config()
+    if settings["mqtt_server"] and settings["mqtt_port"]:
+        connect_and_loop()
+    else:
+        print(
+            "Settings dictate to NOT use MQTT Manager as no MQTT configuration is present.")

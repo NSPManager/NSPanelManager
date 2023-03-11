@@ -3,6 +3,8 @@ from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
 
 import hashlib
+import psutil
+import subprocess
 
 from .models import NSPanel, Room, Light, Settings
 from web.settings_helper import get_setting_with_default, set_setting_value
@@ -108,6 +110,10 @@ def add_light_to_room(request, room_id: int):
 
 def settings_page(request):
     data = {}
+    data["color_temp_min"] = get_setting_with_default(
+        "color_temp_min", 2000)
+    data["color_temp_max"] = get_setting_with_default(
+        "color_temp_max", 6000)
     data["mqtt_server"] = get_setting_with_default("mqtt_server", "")
     data["mqtt_port"] = get_setting_with_default("mqtt_port", 1883)
     data["mqtt_username"] = get_setting_with_default("mqtt_username", "")
@@ -120,6 +126,16 @@ def settings_page(request):
         "openhab_address", "")
     data["openhab_token"] = get_setting_with_default(
         "openhab_token", "")
+    data["openhab_brightness_channel_name"] = get_setting_with_default(
+        "openhab_brightness_channel_name", "")
+    data["openhab_brightness_channel_min"] = get_setting_with_default(
+        "openhab_brightness_channel_min", 0)
+    data["openhab_brightness_channel_max"] = get_setting_with_default(
+        "openhab_brightness_channel_max", 255)
+    data["openhab_color_temp_channel_name"] = get_setting_with_default(
+        "openhab_color_temp_channel_name", "")
+    data["openhab_rgb_channel_name"] = get_setting_with_default(
+        "openhab_rgb_channel_name", "")
     return render(request, 'settings.html', data)
 
 
@@ -138,7 +154,26 @@ def save_settings(request):
                       value=request.POST["openhab_address"])
     set_setting_value(name="openhab_token",
                       value=request.POST["openhab_token"])
+    set_setting_value(name="openhab_brightness_channel_name",
+                      value=request.POST["openhab_brightness_channel_name"])
+    set_setting_value(name="openhab_brightness_channel_min",
+                      value=request.POST["openhab_brightness_channel_min"])
+    set_setting_value(name="openhab_brightness_channel_max",
+                      value=request.POST["openhab_brightness_channel_max"])
+    set_setting_value(name="openhab_color_temp_channel_name",
+                      value=request.POST["openhab_color_temp_channel_name"])
+    set_setting_value(name="openhab_rgb_channel_name",
+                      value=request.POST["openhab_rgb_channel_name"])
 
+    # Settings saved, restart mqtt_manager
+    for proc in psutil.process_iter():
+        if "./mqtt_manager.py" in proc.cmdline():
+            print("Killing existing mqtt_manager")
+            proc.kill()
+    # Restart the process
+    print("Starting a new mqtt_manager")
+    subprocess.Popen(
+        ["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
     return redirect('settings')
 
     # TODO: Make exempt only when Debug = true

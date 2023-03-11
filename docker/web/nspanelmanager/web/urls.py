@@ -34,4 +34,6 @@ urlpatterns = [
          name='get_nspanel_config'),
     path('api/get_all_available_lights',
          api.get_all_available_light_entities, name='get_all_available_lights'),
+    path('api/get_mqtt_manager_config', api.get_mqtt_manager_config,
+         name='get_mqtt_manager_config')
 ]
