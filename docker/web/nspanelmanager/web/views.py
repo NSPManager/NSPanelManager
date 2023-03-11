@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 import hashlib
 
-from .models import NSPanel, Room
+from .models import NSPanel, Room, Light
 
 
 def index(request):
@@ -82,7 +82,31 @@ def update_room_form(request, room_id: int):
     return redirect('edit_room', room_id=room_id)
 
 
+def remove_light_from_room(request, room_id: int, light_id: int):
+    Light.objects.filter(id=light_id).delete()
+    return redirect('edit_room', room_id=room_id)
+
+
+def add_light_to_room(request, room_id: int):
+    room = Room.objects.filter(id=room_id).first()
+    newLight = Light()
+    newLight.room = room
+    newLight.friendly_name = request.POST["add_new_light_name"]
+    if "ceiling_light" in request.POST:
+        newLight.is_ceiling_light = True
+    if "dimmable" in request.POST:
+        newLight.can_dim = True
+    if "color_temperature" in request.POST:
+        newLight.can_color_temperature = True
+    if "rgb" in request.POST:
+        newLight.can_rgb = True
+    newLight.save()
+
+    return redirect('edit_room', room_id=room_id)
+
 # TODO: Make exempt only when Debug = true
+
+
 @csrf_exempt
 def save_new_firmware(request):
     if request.method == 'POST':

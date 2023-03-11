@@ -1,33 +1,128 @@
 {% extends 'base.html' %}
 
+{% block head %}
+{% load static %}
+<script src="{% static 'edit_room.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 {% load static %}
 
-<style>
-    #room_text {
-        height: 38px;
-        width: 165px;
-        text-align: center;
-        line-height: 38px;
-        font-size: 22px;
-        color: white;
-        left: 60px;
-        top: 278px;
-        position: absolute;
-    }
+<div class="modal" id="modal-add-light">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <nav class="panel" style="background-color: white;">
+            <p class="panel-heading">
+                Choose a light
+            </p>
+            <div class="panel-block">
+                <p class="control has-icons-left">
+                    <input class="input" type="text" placeholder="Search" id="add_new_light_search">
+                    <span class="icon is-left">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                    </span>
+                </p>
+            </div>
+            <p class="panel-tabs" id="add_new_light_tabs">
+                <a class="is-active" id="filter_for_all" onclick="add_new_lights_filter_for_type('all');">All</a>
+                <a id="filter_for_home_assistant" onclick="add_new_lights_filter_for_type('home_assistant');">Home
+                    Assistant</a>
+                <a id="filter_for_openhab" onclick="add_new_lights_filter_for_type('openhab');">OpenHAB</a>
+                <a id="filter_for_manual" onclick="add_new_lights_filter_for_type('manual');">Manual</a>
+            </p>
+            <div id="add_new_light_options">
+                <a class="panel-block">Office Ceiling Light</a>
+            </div>
+            <div id="add_new_light_loader">
+                <center>{% include 'loader.html' %}</center>
+            </div>
+        </nav>
+    </div>
+</div>
 
-    #all_rooms_text {
-        height: 38px;
-        width: 214px;
-        text-align: center;
-        line-height: 38px;
-        font-size: 22px;
-        color: white;
-        left: 227px;
-        top: 278px;
-        position: absolute;
-    }
-</style>
+<form method="POST" action="{% url 'add_new_light' room.id %}">
+    {% csrf_token %}
+    <div class="modal" id="modal-add-light-options">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Add new light to room</p>
+                <button type="button" class="delete" aria-label="close"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="field">
+                    <label class="label">Name</label>
+                    <div class="control">
+                        <input class="input" type="text" placeholder="Text input" id="add_new_light_name"
+                            name="add_new_light_name" readonly>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Type</label>
+                    <div class="control">
+                        <label class="radio">
+                            <input type="radio" name="ceiling_light" checked>
+                            Ceiling light
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="table_light">
+                            Table light
+                        </label>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Capabilities</label>
+                    <div class="control">
+                        <label class="checkbox">
+                            <input type="checkbox" name="dimmable" checked>
+                            Dimmable
+                        </label>
+                    </div>
+                    <div class="control">
+                        <label class="checkbox">
+                            <input type="checkbox" name="color_temperature">
+                            Color temperature
+                        </label>
+                    </div>
+                    <div class="control">
+                        <label class="checkbox">
+                            <input type="checkbox" name="rgb">
+                            RGB
+                        </label>
+                    </div>
+                </div>
+                <div id="openhab_light_options">
+                    <div class="field">
+                        <label class="label">Dimming channel name</label>
+                        <div class="control">
+                            <input class="input" type="text" placeholder="Dimming channel"
+                                id="openhab_dimming_channel_name" name="openhab_dimming_channel_name">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Color temperature channel name</label>
+                        <div class="control">
+                            <input class="input" type="text" placeholder="Color temperature channel"
+                                id="openhab_color_temperature_channel_name"
+                                name="openhab_color_temperature_channel_name">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">RGB channel name</label>
+                        <div class="control">
+                            <input class="input" type="text" placeholder="RGB channel" id="openhab_RGB_channel_name"
+                                name="openhab_RGB_channel_name">
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button type="button" class="button modal-cancel-button">Cancel</button>
+                <button type="submit" class="button is-primary">Add</button>
+            </footer>
+        </div>
+    </div>
+</form>
 
 <div class="card">
     <div class="card-content">
@@ -45,15 +140,30 @@
     </div>
 </div>
 <br>
-<div class="card" style="width: 455px; height: 320px; background-image: url('{% static 'panel_views/1-0.bmp' %}');">
-    <div class="card-content">
-        <div id="room_text">
-            {{ room.friendly_name }}
-        </div>
-
-        <div id="all_rooms_text">
-            All Lights
-        </div>
-    </div>
-</div>
+<button type="button" class="button is-primary" onclick="add_new_light();">Add new light</button>
+<table class="table is-fullwidth is-hoverable">
+    <thead>
+        <tr>
+            <th>Light</th>
+            <th>Type</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for light in room.light_set.all %}
+        <tr>
+            <th>{{ light.friendly_name }}</th>
+            {% if light.is_ceiling_light %}
+            <th>Ceiling</th>
+            {% else %}
+            <th>Table</th>
+            {% endif %}
+            <td>
+                <a href='{% url "remove_light_from_room" room.id light.id %}'
+                    class="button is-small is-danger">Remove</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

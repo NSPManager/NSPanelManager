@@ -72,7 +72,14 @@ def connect_and_loop():
     client.on_message = on_message
     client.username_pw_set(
         settings["mqtt_username"], settings["mqtt_password"])
-    client.connect(settings["mqtt_server"], settings["mqtt_port"], 60)
+    # Wait for connection
+    while True:
+        try:
+            client.connect(settings["mqtt_server"], settings["mqtt_port"], 60)
+            break
+        except:
+            print("Failed to connect to MQTT. Will try again in 10 seconds.")
+            sleep(10)
     client.loop_start()
 
 
