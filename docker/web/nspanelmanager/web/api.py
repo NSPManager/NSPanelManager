@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import requests
 
-from .models import NSPanel, Room
+from .models import NSPanel, Room, Light
 from web.settings_helper import get_setting_with_default
 
 
@@ -39,6 +39,18 @@ def get_mqtt_manager_config(request):
         "openhab_color_temp_channel_name", "")
     return_json["openhab_rgb_channel_name"] = get_setting_with_default(
         "openhab_rgb_channel_name", "")
+    
+    return_json["lights"] = []
+
+    for light in Light.objects.all():
+        lightConfig = {}
+        lightConfig["name"] = light.friendly_name
+        lightConfig["type"] = light.type
+        lightConfig["can_dim"] = light.can_dim
+        lightConfig["can_color_temperature"] = light.can_color_temperature
+        lightConfig["can_rgb"] = light.can_rgb
+        return_json["lights"].append(lightConfig)
+
     return JsonResponse(return_json)
 
 

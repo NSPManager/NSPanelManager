@@ -24,44 +24,41 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     parts = msg.topic.split('/')
-    domain = parts[2].split('.')[0]
-    entity_id = parts[2]
-    attribute = parts[3]
-    if attribute.startswith("state_"):
-        return
+    if len(parts) >= 5:
+        domain = parts[2]
+        entity_id = parts[3]
+        attribute = parts[4]
+        if attribute.startswith("state_"):
+            return
 
-    service = ""
-    if domain == "light":
-        service = "turn_on"
+        service = ""
+        if domain == "light":
+            service = "turn_on"
 
-    setHomeassistantState(domain=domain, service=service, entity_id=entity_id,
-                          attribute=attribute, state=msg.payload.decode('utf-8'))
+        setHomeassistantState(domain=domain, service=service, entity_id=entity_id, attribute=attribute, state=msg.payload.decode('utf-8'))
 
 
 def setHomeassistantState(domain, service, entity_id, attribute, state):
     global settings
-    url = settings["home_assistant_address"] + \
-        "/api/services/" + domain + "/" + service
+    url = settings["home_assistant_address"] + "/api/services/" + domain + "/" + service
 
     headers = {
         "Authorization": "Bearer " + settings["home_assistant_token"],
         "content-type": "application/json",
     }
     body = {
-        "entity_id": entity_id,
+        "entity_id": F"light.{entity_id}",
         attribute: state
     }
-    # print("Posting to " + url)
-    # print(body)
-    # print("----------------")
     response = post(url, headers=headers, json=body)
     if response.status_code == 200:
         send_new_status(domain, service, entity_id, attribute, state)
+    else:
+        print(F"ERROR: Setting {entity_id}.{attribute} = {state} reeturned code: {response.status_code}")
 
 
 def send_new_status(domain, service, entity_id, attribute, state):
-    client.publish("nspanel/entities/" + entity_id +
-                   "/state_" + attribute, state, retain=True)
+    client.publish(F"nspanel/entities/{domain}/{entity_id}/state_{attribute}", state, retain=True)
 
 
 def get_config():
@@ -75,8 +72,8 @@ def get_config():
                 settings = config_request.json()
                 break
         except:
-            print("ERROR: Failed to get config. Will try again in 10 seconds.")
-            sleep(10)
+            print("ERROR: Failed to get config. Will try again in 5 seconds.")
+            sleep(5)
 
 
 def connect_and_loop():

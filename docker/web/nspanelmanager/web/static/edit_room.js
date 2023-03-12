@@ -35,6 +35,7 @@ function add_new_light_show_light_page(light_element) {
     }
 
     $("#add_new_light_name").val($(this).text()); // Set text field
+    $("#add_new_light_type").val($(this).data("type")); // Set the correct type
 
     // TODO: Populate OpenHAB default channel names
 

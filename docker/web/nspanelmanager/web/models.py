@@ -33,15 +33,8 @@ class NSPanel(models.Model):
 class Light(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     friendly_name = models.CharField(max_length=255, default="")
+    type = models.CharField(max_length=16, default="manual") # "home_assistant", "openhab" or "manual"
     is_ceiling_light = models.BooleanField(default=False)
     can_dim = models.BooleanField(default=False)
     can_rgb = models.BooleanField(default=False)
     can_color_temperature = models.BooleanField(default=False)
-    cmd_topic = models.CharField(max_length=255, default="", blank=True)
-    rgb_topic = models.CharField(max_length=255, default="", blank=True)
-    color_temperature_topic = models.CharField(
-        max_length=255, default="", blank=True)
-    state_topic = models.CharField(max_length=255, default="", blank=True)
-    rgb_state_topic = models.CharField(max_length=255, default="", blank=True)
-    color_temperature = models.CharField(
-        max_length=255, default="", blank=True)

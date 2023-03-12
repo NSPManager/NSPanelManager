@@ -42,6 +42,7 @@
 
 <form method="POST" action="{% url 'add_new_light' room.id %}">
     {% csrf_token %}
+    <input class="input" type="hidden" id="add_new_light_type" name="add_new_light_type" readonly>
     <div class="modal" id="modal-add-light-options">
         <div class="modal-background"></div>
         <div class="modal-card">
@@ -53,8 +54,7 @@
                 <div class="field">
                     <label class="label">Name</label>
                     <div class="control">
-                        <input class="input" type="text" placeholder="Text input" id="add_new_light_name"
-                            name="add_new_light_name" readonly>
+                        <input class="input" type="text" placeholder="Text input" id="add_new_light_name" name="add_new_light_name" readonly>
                     </div>
                 </div>
                 <div class="field">
@@ -126,7 +126,7 @@
 
 <div class="card">
     <div class="card-content">
-        <h2 class="title is-4">General settings</h2>
+        <h2 class="title is-4">Room settings</h2>
         <form method="POST" action="{% url 'update_room_form' room_id=room.id %}">
             {% csrf_token %}
             <div class="field">
@@ -140,11 +140,13 @@
     </div>
 </div>
 <br>
+<h2 class="title is-4">Lights in room</h2>
 <button type="button" class="button is-primary" onclick="add_new_light();">Add new light</button>
 <table class="table is-fullwidth is-hoverable">
     <thead>
         <tr>
             <th>Light</th>
+            <th>Source</th>
             <th>Type</th>
             <th>Actions</th>
         </tr>
@@ -153,10 +155,21 @@
         {% for light in room.light_set.all %}
         <tr>
             <th>{{ light.friendly_name }}</th>
+            <td>
+                {% if light.type == "home_assistant" %}
+                <span class="tag is-info">Home Assistant</span>
+                {% elif light.type == "openhab" %}
+                <span class="tag is-warning">OpenHAB</span>
+                {% elif light.type == "manual" %}
+                <span class="tag is-black">Manual</span>
+                {% else %}
+                <span class="tag is-danger">Unknown: {{ light.type }}</span>
+                {% endif %}
+            </td>
             {% if light.is_ceiling_light %}
-            <th>Ceiling</th>
+            <td>Ceiling</td>
             {% else %}
-            <th>Table</th>
+            <td>Table</td>
             {% endif %}
             <td>
                 <a href='{% url "remove_light_from_room" room.id light.id %}'

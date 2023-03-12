@@ -15,7 +15,7 @@ def index(request):
 
 
 def rooms(request):
-    return render(request, 'rooms.html', {'rooms': Room.objects.all()})
+    return render(request, 'rooms.html', {'rooms': Room.objects.all().order_by('displayOrder')})
 
 
 def rooms_order(request):
@@ -94,6 +94,7 @@ def add_light_to_room(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
     newLight = Light()
     newLight.room = room
+    newLight.type = request.POST["add_new_light_type"]
     newLight.friendly_name = request.POST["add_new_light_name"]
     if request.POST["light_type"] == "ceiling":
         newLight.is_ceiling_light = True
