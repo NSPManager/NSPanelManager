@@ -27,7 +27,6 @@ bool recvRetCommandFinished()
 
 void NSPanel::goToPage(const char *page)
 {
-    LOG_DEBUG("Navigating to page ", page);
     std::string cmd_string = "page ";
     cmd_string.append(page);
     this->_sendCommandWithoutResponse(cmd_string.c_str());
@@ -219,7 +218,6 @@ void NSPanel::_taskReadNSPanelData(void *param)
 }
 
 void NSPanel::_taskProcessPanelOutput(void* param) {
-	LOG_DEBUG("Starting taskProcessPanelOutput");
 	for(;;) {
 		// Wait for things that needs processing
 		if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY)) {
@@ -375,7 +373,6 @@ bool NSPanel::_updateTFTOTA() {
 			if (line.startsWith("Content-Length: "))
 			{
 				contentLength = atol((getHeaderValue(line, "Content-Length: ")).c_str());
-				LOG_DEBUG("Got ", contentLength, " bytes from server");
 			}
 
 			// Next, the content type
@@ -462,7 +459,6 @@ bool NSPanel::_updateTFTOTA() {
 		{
 			LOG_ERROR("Failed to init upload to TFT. Got return code: ", String(returnData, HEX).c_str());
 			client.flush();
-			LOG_DEBUG("More data:");
 			while (Serial2.available() > 0)
 			{
 				LOG_INFO(String(Serial2.read(), HEX).c_str());

@@ -11,6 +11,7 @@ struct lightConfig
 {
     uint8_t id = 0;
     uint8_t level = 0;
+    uint8_t colorTemperature = 0;
     bool isCeiling = false;
     bool canDim = false;
     bool canTemperature = false;
@@ -27,10 +28,12 @@ public:
     std::list<lightConfig> tableLights;
     std::list<lightConfig*> getCeilingLightsThatAreOn();
     std::list<lightConfig*> getTableLightsThatAreOn();
+    std::list<lightConfig*> getAllLightsThatAreOn();
     std::list<lightConfig*> getAllCeilingLights();
     std::list<lightConfig*> getAllTableLights();
-    bool anyCeilingLighstOn();
-    bool anyTableLighstOn();
+    std::list<lightConfig*> getAllLights();
+    bool anyCeilingLightsOn();
+    bool anyTableLightstOn();
     bool anyLightsOn();
 };
 
@@ -89,10 +92,17 @@ private:
     void _updateAllLights(); // Send light level to all lights
     void _updateLightsColorTemp(); // Send new color temp to all lights
 
+    void _subscribeToLightTopics(lightConfig *cfg);
+
     /// @brief Set internal light representation level
     /// @param light The light to set value for
     /// @param level The new value
     void _setLightLevel(std::string light, uint8_t level);
+
+    /// @brief Set internal light representation color temperature
+	/// @param light The light to set value for
+	/// @param level The new value
+	void _setLightColorTemperature(std::string light, uint8_t level);
 
     /// @brief Send out new value for a list of lights
     /// @param lights The lights to set value for

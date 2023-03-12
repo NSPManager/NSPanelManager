@@ -25,6 +25,21 @@ std::list<lightConfig*> roomConfig::getTableLightsThatAreOn() {
 	return returnList;
 }
 
+std::list<lightConfig*> roomConfig::getAllLightsThatAreOn() {
+	std::list<lightConfig*> returnList;
+	for(lightConfig &light : this->tableLights) {
+		if(light.level > 0) {
+			returnList.push_back(&light);
+		}
+	}
+	for(lightConfig &light : this->ceilingLights) {
+		if(light.level > 0) {
+			returnList.push_back(&light);
+		}
+	}
+	return returnList;
+}
+
 std::list<lightConfig*> roomConfig::getAllCeilingLights() {
 	std::list<lightConfig*> returnList;
 	for(lightConfig &cfg : this->ceilingLights) {
@@ -41,7 +56,18 @@ std::list<lightConfig*> roomConfig::getAllTableLights() {
 	return returnList;
 }
 
-bool roomConfig::anyCeilingLighstOn() {
+std::list<lightConfig*> roomConfig::getAllLights() {
+	std::list<lightConfig*> returnList;
+	for(lightConfig &cfg : this->tableLights) {
+		returnList.push_back(&cfg);
+	}
+	for(lightConfig &cfg : this->ceilingLights) {
+		returnList.push_back(&cfg);
+	}
+	return returnList;
+}
+
+bool roomConfig::anyCeilingLightsOn() {
 	for(lightConfig &cfg : this->ceilingLights) {
 		if(cfg.level > 0) {
 			return true;
@@ -50,7 +76,7 @@ bool roomConfig::anyCeilingLighstOn() {
 	return false;
 }
 
-bool roomConfig::anyTableLighstOn() {
+bool roomConfig::anyTableLightstOn() {
 	for(lightConfig &cfg : this->tableLights) {
 		if(cfg.level > 0) {
 			return true;
@@ -60,7 +86,7 @@ bool roomConfig::anyTableLighstOn() {
 }
 
 bool roomConfig::anyLightsOn() {
-	return this->anyCeilingLighstOn() || this->anyTableLighstOn();
+	return this->anyCeilingLightsOn() || this->anyTableLightstOn();
 }
 
 void InterfaceManager::init(PubSubClient *mqttClient)
@@ -89,9 +115,9 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
         vTaskDelay(500 / portTICK_PERIOD_MS);
     }
 
-    if (millis() - start < 8000)
+    // Wait for panel to become ready
+    if (millis() - start < 4000)
     {
-        LOG_DEBUG("WiFi and MQTT ready. Will delay for panel to become ready...");
         vTaskDelay((millis() - start) / portTICK_PERIOD_MS);
     }
 
@@ -143,22 +169,29 @@ void InterfaceManager::subscribeToMqttTopics() {
 	{
 		for (lightConfig &lightCfg : roomCfg.ceilingLights)
 		{
-			// Build topic from name
-			std::string levelStatusTopic = "nspanel/entities/light.";
-			levelStatusTopic.append(lightCfg.name);
-			levelStatusTopic.append("/state_brightness_pct");
-			InterfaceManager::_instance->_mqttClient->subscribe(levelStatusTopic.c_str());
-
-			if(lightCfg.canTemperature) {
-				std::string colorTempStateTopic = "nspanel/entities/light.";
-				colorTempStateTopic.append(lightCfg.name);
-				colorTempStateTopic.append("/kelvin");
-				InterfaceManager::_instance->_mqttClient->subscribe(colorTempStateTopic.c_str());
-			}
-
+			InterfaceManager::_instance->_subscribeToLightTopics(&lightCfg);
 			vTaskDelay(10 / portTICK_PERIOD_MS);
 		}
-		// TODO: Implement table light logic
+		for (lightConfig &lightCfg : roomCfg.tableLights)
+		{
+			InterfaceManager::_instance->_subscribeToLightTopics(&lightCfg);
+			vTaskDelay(10 / portTICK_PERIOD_MS);
+		}
+	}
+}
+
+void InterfaceManager::_subscribeToLightTopics(lightConfig *cfg) {
+	// Build topic from name
+	std::string levelStatusTopic = "nspanel/entities/light/";
+	levelStatusTopic.append(cfg->name);
+	levelStatusTopic.append("/state_brightness_pct");
+	this->_mqttClient->subscribe(levelStatusTopic.c_str());
+
+	if(cfg->canTemperature) {
+		std::string colorTempStateTopic = "nspanel/entities/light/";
+		colorTempStateTopic.append(cfg->name);
+		colorTempStateTopic.append("/state_kelvin");
+		this->_mqttClient->subscribe(colorTempStateTopic.c_str());
 	}
 }
 
@@ -207,6 +240,7 @@ void InterfaceManager::_ceilingMasterButtonEvent()
     	std::list<lightConfig*> lightList = this->_cfg.currentRoom->getAllCeilingLights();
     	this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
     }
+    this->_updatePanelLightStatus();
 }
 
 void InterfaceManager::_tableMasterButtonEvent()
@@ -219,41 +253,37 @@ void InterfaceManager::_tableMasterButtonEvent()
 		std::list<lightConfig*> lightList = this->_cfg.currentRoom->getAllTableLights();
 		this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
 	}
+    this->_updatePanelLightStatus();
 }
 
 void InterfaceManager::_updateLightsThatAreOn() {
-	std::list<lightConfig*> ceilingLightsOn = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
-	std::list<lightConfig*> tableLightsOn = this->_cfg.currentRoom->getTableLightsThatAreOn();
+	std::list<lightConfig*> lights = this->_cfg.currentRoom->getAllLightsThatAreOn();
 
 	uint8_t newLevel = HomePage::getDimmingValue();
-	this->_changeLightsToLevel(&ceilingLightsOn, newLevel);
-	this->_changeLightsToLevel(&tableLightsOn, newLevel);
+	this->_changeLightsToLevel(&lights, newLevel);
+	this->_updatePanelLightStatus();
 }
 
 void InterfaceManager::_updateAllLights() {
-	std::list<lightConfig*> ceilingLights = this->_cfg.currentRoom->getAllCeilingLights();
-	std::list<lightConfig*> tableLights = this->_cfg.currentRoom->getAllTableLights();
+	std::list<lightConfig*> lights = this->_cfg.currentRoom->getAllLights();
 
 	uint8_t newLevel = HomePage::getDimmingValue();
-	this->_changeLightsToLevel(&ceilingLights, newLevel);
-	this->_changeLightsToLevel(&tableLights, newLevel);
+	this->_changeLightsToLevel(&lights, newLevel);
+	this->_updatePanelLightStatus();
 }
 
 void InterfaceManager::_updateLightsColorTemp() {
-	std::list<lightConfig*> ceilingLights = this->_cfg.currentRoom->getAllCeilingLights();
-	std::list<lightConfig*> tableLights = this->_cfg.currentRoom->getAllTableLights();
+	std::list<lightConfig*> lights = this->_cfg.currentRoom->getAllLights();
 
 	// Get value from panel and calculate for 2000-6500 kelvin. Also inverse value, warm color temperature on top
 	// TODO: Implement check in management web interface that allows for this to be reversed
 	uint16_t newKelvin = HomePage::getColorTempValue();
-	newKelvin = 6000 - (newKelvin*40);
-	this->_changeLightsToKelvin(&ceilingLights, newKelvin);
-	this->_changeLightsToKelvin(&tableLights, newKelvin);
+	this->_changeLightsToKelvin(&lights, newKelvin);
+	this->_updatePanelLightStatus();
 }
 
 void InterfaceManager::_processPanelConfig()
 {
-    LOG_DEBUG("Processing rooms");
     this->_cfg.homeScreen = (*this->_roomDataJson)["home"].as<uint8_t>();
     for (JsonPair kv : (*this->_roomDataJson)["rooms"].as<JsonObject>())
     {
@@ -292,11 +322,9 @@ void InterfaceManager::_processPanelConfig()
 
 void InterfaceManager::_goToNextRoom()
 {
-    LOG_DEBUG("Switching to next room.");
     this->_cfg.currentRoom++;
     if (this->_cfg.currentRoom == this->_cfg.rooms.end())
     {
-        LOG_DEBUG("End of rooms. Going to first.");
         this->_cfg.currentRoom = this->_cfg.rooms.begin();
     }
     this->_updatePanelWithNewRoomInfo();
@@ -309,7 +337,6 @@ void InterfaceManager::_changeRoom(uint8_t roomId)
     {
         if (it->id == roomId)
         {
-            LOG_DEBUG("Found requested room with ID: ", roomId);
             this->_cfg.currentRoom = it;
             this->_updatePanelWithNewRoomInfo();
             return;
@@ -366,7 +393,6 @@ void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int len
 
 void InterfaceManager::_taskProcessMqttMessages(void *param)
 {
-    LOG_DEBUG("Starting _taskProcessMqttMessages");
     vTaskDelay(100 / portTICK_PERIOD_MS);
     for (;;)
     {
@@ -381,10 +407,11 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
                 {
                     std::string domain = msg.topic;
                     domain = domain.erase(0, strlen("nspanel/entities/"));
-                    domain = domain.substr(0, domain.find('.'));
+                    domain = domain.substr(0, domain.find('/'));
 
                     std::string entity = msg.topic;
-                    entity = entity.erase(0, entity.find('.') + 1);
+                    entity = entity.erase(0, strlen("nspanel/entities/"));
+                    entity = entity.erase(0, entity.find('/')+1);
                     entity = entity.substr(0, entity.find('/'));
 
                     std::string attribute = msg.topic;
@@ -394,13 +421,20 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
                     {
                         InterfaceManager::_instance->_setLightLevel(entity, atoi(msg.payload.c_str()));
                     }
+                    else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0)
+                    {
+                    	// TODO: Implement mechanism to reverse color temperature slider
+                    	uint8_t colorTemp = (6000 - atoi(msg.payload.c_str())) / 40;
+                    	LOG_DEBUG("Color temp: ", colorTemp);
+                    	InterfaceManager::_instance->_setLightColorTemperature(entity, colorTemp);
+                    }
                 }
                 catch (...)
                 {
                     LOG_ERROR("Error processing MQTT message on topic ", msg.topic.c_str());
                 }
                 InterfaceManager::_mqttMessages.pop_front();
-                vTaskDelay(5); // Wait 5ms between processing each event to allow for other tasks.
+                vTaskDelay(10 / portTICK_PERIOD_MS); // Wait 10ms between processing each event to allow for other tasks, ie. more MQTT messages to arrive.
             }
         }
     }
@@ -408,14 +442,17 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
 
 void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
 {
+	// TODO: Only update the displayed light level after all MQTT messages has processed
     for (roomConfig &roomCfg : InterfaceManager::_instance->_cfg.rooms)
     {
         for (lightConfig &lightCfg : roomCfg.ceilingLights)
         {
             if (lightCfg.name.compare(light) == 0)
             {
-                lightCfg.level = level;
-                this->_updatePanelLightStatus();
+            	if(lightCfg.level != level) {
+            		lightCfg.level = level;
+					this->_updatePanelLightStatus();
+            	}
                 return;
             }
         }
@@ -424,8 +461,41 @@ void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
         {
             if (lightCfg.name.compare(light) == 0)
             {
-                lightCfg.level = level;
-                this->_updatePanelLightStatus();
+            	if(lightCfg.level != level) {
+					lightCfg.level = level;
+					this->_updatePanelLightStatus();
+            	}
+                return;
+            }
+        }
+    }
+}
+
+void InterfaceManager::_setLightColorTemperature(std::string light, uint8_t level)
+{
+	// TODO: Only update the displayed light level after all MQTT messages has processed
+    for (roomConfig &roomCfg : InterfaceManager::_instance->_cfg.rooms)
+    {
+        for (lightConfig &lightCfg : roomCfg.ceilingLights)
+        {
+            if (lightCfg.name.compare(light) == 0)
+            {
+            	if(lightCfg.colorTemperature != level) {
+            		lightCfg.colorTemperature = level;
+					this->_updatePanelLightStatus();
+            	}
+                return;
+            }
+        }
+
+        for (lightConfig &lightCfg : roomCfg.tableLights)
+        {
+            if (lightCfg.name.compare(light) == 0)
+            {
+            	if(lightCfg.colorTemperature != level) {
+					lightCfg.colorTemperature = level;
+					this->_updatePanelLightStatus();
+            	}
                 return;
             }
         }
@@ -434,24 +504,44 @@ void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
 
 void InterfaceManager::_changeLightsToLevel(std::list<lightConfig*> *lights, uint8_t level)
 {
+	for (lightConfig *light : (*lights))
+	{
+		light->level = level;
+	}
+
     for (lightConfig *light : (*lights))
     {
-        std::string topic = "nspanel/entities/light.";
+        std::string topic = "nspanel/entities/light/";
         topic.append(light->name);
         topic.append("/brightness_pct");
-        this->_mqttClient->publish(topic.c_str(), std::to_string(level).c_str());
+        if(!this->_mqttClient->publish(topic.c_str(), std::to_string(level).c_str())) {
+        	LOG_ERROR("Failed to send light update!");
+        }
         vTaskDelay(5 / portTICK_PERIOD_MS);
     }
 }
 
 void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig*> *lights, uint16_t kelvin)
 {
+	for (lightConfig *light : (*lights))
+	{
+		if(light->canTemperature) {
+			light->colorTemperature = kelvin;
+		}
+	}
+
+	// TODO: Implement mechanism to reverse color temp
+	uint16_t sendKelvin = 6000 - (kelvin * 40);
     for (lightConfig *light : (*lights))
     {
-        std::string topic = "nspanel/entities/light.";
-        topic.append(light->name);
-        topic.append("/kelvin");
-        this->_mqttClient->publish(topic.c_str(), std::to_string(kelvin).c_str());
+    	if(light->canTemperature) {
+    		std::string topic = "nspanel/entities/light/";
+			topic.append(light->name);
+			topic.append("/kelvin");
+			if(!this->_mqttClient->publish(topic.c_str(), std::to_string(sendKelvin).c_str())) {
+				LOG_ERROR("Failed to send light update!");
+			}
+    	}
         vTaskDelay(5 / portTICK_PERIOD_MS);
     }
 }
@@ -460,54 +550,69 @@ void InterfaceManager::_updatePanelLightStatus()
 {
     uint totalLights = 0;
     uint totalBrightness = 0;
+    uint totalKelvin = 0;
     for (lightConfig &light : this->_cfg.currentRoom->ceilingLights)
     {
-        if (light.canDim && light.level > 0)
-        {
-            totalLights++;
-            totalBrightness += light.level;
-        }
+    	totalLights++;
+		totalBrightness += light.level;
+		totalKelvin += light.colorTemperature;
     }
 
     uint8_t averageCeilingBrightness = totalLights == 0 ? 0 : totalBrightness / totalLights;
+    uint8_t averageCeilingKelvin = totalLights == 0 ? 0 : totalKelvin / totalLights;
     HomePage::setCeilingLightsState(averageCeilingBrightness > 0);
     HomePage::setCeilingBrightnessLabelText(averageCeilingBrightness);
 
     totalLights = 0;
 	totalBrightness = 0;
+	totalKelvin = 0;
 	for (lightConfig &light : this->_cfg.currentRoom->tableLights)
 	{
-		if (light.canDim && light.level > 0)
-		{
-			totalLights++;
-			totalBrightness += light.level;
-		}
+		totalLights++;
+		totalBrightness += light.level;
+		totalKelvin += light.colorTemperature;
 	}
 	uint8_t averageTableBrightness = totalLights == 0 ? 0 : totalBrightness / totalLights;
+	uint8_t averageTableKelvin = totalLights == 0 ? 0 : totalKelvin / totalLights;
 	HomePage::setTableLightsState(averageTableBrightness > 0);
 	HomePage::setTableBrightnessLabelText(averageTableBrightness);
 
-	uint8_t totalAverage;
+	uint8_t totalAverageBrightness;
 	if(averageCeilingBrightness > 0 && averageTableBrightness > 0) {
-		totalAverage = (averageCeilingBrightness + averageTableBrightness) / 2;
+		totalAverageBrightness = (averageCeilingBrightness + averageTableBrightness) / 2;
 	} else if (averageCeilingBrightness > 0) {
-		totalAverage = averageCeilingBrightness;
+		totalAverageBrightness = averageCeilingBrightness;
 	} else if (averageTableBrightness > 0) {
-		totalAverage = averageTableBrightness;
+		totalAverageBrightness = averageTableBrightness;
 	} else {
-		totalAverage = 0;
+		totalAverageBrightness = 0;
 	}
 
 	// Only set a new value if any lights are on.
 	// This value will be used as the next "on" value.
-	if(totalAverage > 0 && totalAverage != HomePage::getDimmingValue()) {
-		HomePage::setDimmingValue(totalAverage);
+	if(totalAverageBrightness > 0 && totalAverageBrightness != HomePage::getDimmingValue()) {
+		HomePage::setDimmingValue(totalAverageBrightness);
+	}
+
+	// TODO: Implement so that direction of color temp slider can be reversed in web interface
+	uint8_t totalAverageKelvin;
+	if(averageCeilingKelvin > 0 && averageTableKelvin > 0) {
+		totalAverageKelvin = (averageCeilingKelvin + averageTableKelvin) / 2;
+	} else if (averageCeilingKelvin > 0) {
+		totalAverageKelvin = averageCeilingKelvin;
+	} else if (averageTableKelvin > 0) {
+		totalAverageKelvin = averageTableKelvin;
+	} else {
+		totalAverageKelvin = 0;
+	}
+	// Only set a new value if it is not the same as already set.
+	if(totalAverageKelvin != HomePage::getColorTempValue()) {
+		HomePage::setColorTempValue(totalAverageKelvin);
 	}
 }
 
 bool InterfaceManager::_getPanelConfig()
 {
-    LOG_INFO("Trying to download NSPanel config.");
     WiFiClient client;
     unsigned long contentLength = 0;
     bool isValidContentType = false;
@@ -558,7 +663,6 @@ bool InterfaceManager::_getPanelConfig()
             if (line.startsWith("Content-Length: "))
             {
                 contentLength = atol((getHeaderValue(line, "Content-Length: ")).c_str());
-                LOG_DEBUG("Got ", contentLength, " bytes from server");
             }
 
             // Next, the content type

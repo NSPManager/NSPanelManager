@@ -93,9 +93,7 @@ void taskManageWifiAndMqtt(void *param)
         while (WiFi.isConnected() && !mqttClient.connected())
         {
           mqttClient.setServer(config.mqtt_server.c_str(), config.mqtt_port);
-          // TODO: MQTT Callback
           LOG_INFO("Connecting to MQTT server ", config.mqtt_server.c_str());
-          // mqttClient.connect(config.wifi_hostname.c_str(), config.mqtt_username.c_str(), config.mqtt_password.c_str());
           mqttClient.connect(config.wifi_hostname.c_str(), config.mqtt_username.c_str(), config.mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, 1, "offline");
           vTaskDelay(1000 / portTICK_PERIOD_MS);
           if (mqttClient.connected())
@@ -115,10 +113,6 @@ void taskManageWifiAndMqtt(void *param)
       else if (config.mqtt_server.empty())
       {
         LOG_ERROR("No MQTT server configured!");
-      }
-      else if (WiFi.isConnected() && mqttClient.connected())
-      {
-        // TODO: Send status updates as in RAM usage
       }
       vTaskDelay(10000 / portTICK_PERIOD_MS);
     }
@@ -155,6 +149,13 @@ void taskManageWifiAndMqtt(void *param)
   }
 }
 
+void taskMqttLoop(void* param) {
+	for(;;) {
+		mqttClient.loop();
+		vTaskDelay(10 / portTICK_PERIOD_MS);
+	}
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -173,6 +174,7 @@ void setup()
 
   LOG_INFO("Starting tasks");
   xTaskCreatePinnedToCore(taskManageWifiAndMqtt, "taskManageWifiAndMqtt", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+  xTaskCreatePinnedToCore(taskMqttLoop, "taskMqttLoop", 5000, NULL, 2, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 
   nspanel.init();
   interfaceManager.init(&mqttClient);
@@ -180,6 +182,5 @@ void setup()
 
 void loop()
 {
-  mqttClient.loop();
-  vTaskDelay(5 / portTICK_PERIOD_MS);
+  vTaskDelay(portMAX_DELAY);
 }
