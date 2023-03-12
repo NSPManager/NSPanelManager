@@ -4,11 +4,11 @@ import paho.mqtt.client as mqtt
 from requests import get, post
 from time import sleep
 import json
+import mqtt_manager_libs.home_assistant
 
 settings = {}
 last_settings_file_mtime = 0
 client = mqtt.Client("NSPanelManager")
-
 
 def read_settings():
     global settings
@@ -31,35 +31,8 @@ def on_message(client, userdata, msg):
         if attribute.startswith("state_"):
             return
 
-        service = ""
         if domain == "light":
-            service = "turn_on"
-
-        setHomeassistantState(domain=domain, service=service, entity_id=entity_id, attribute=attribute, state=msg.payload.decode('utf-8'))
-
-
-def setHomeassistantState(domain, service, entity_id, attribute, state):
-    global settings
-    url = settings["home_assistant_address"] + "/api/services/" + domain + "/" + service
-
-    headers = {
-        "Authorization": "Bearer " + settings["home_assistant_token"],
-        "content-type": "application/json",
-    }
-    body = {
-        "entity_id": F"light.{entity_id}",
-        attribute: state
-    }
-    response = post(url, headers=headers, json=body)
-    if response.status_code == 200:
-        send_new_status(domain, service, entity_id, attribute, state)
-    else:
-        print(F"ERROR: Setting {entity_id}.{attribute} = {state} reeturned code: {response.status_code}")
-
-
-def send_new_status(domain, service, entity_id, attribute, state):
-    client.publish(F"nspanel/entities/{domain}/{entity_id}/state_{attribute}", state, retain=True)
-
+            mqtt_manager_libs.home_assistant.set_light_attribute(entity_id, attribute, msg.payload.decode('utf-8'))
 
 def get_config():
     global settings
@@ -77,11 +50,10 @@ def get_config():
 
 
 def connect_and_loop():
-    global settings
+    global settings, home_assistant
     client.on_connect = on_connect
     client.on_message = on_message
-    client.username_pw_set(
-        settings["mqtt_username"], settings["mqtt_password"])
+    client.username_pw_set(settings["mqtt_username"], settings["mqtt_password"])
     # Wait for connection
     connection_return_code = 0
     mqtt_server = settings["mqtt_server"]
@@ -95,6 +67,12 @@ def connect_and_loop():
             print(
                 F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
             sleep(10)
+    
+    # MQTT Connected, start APIs
+    mqtt_manager_libs.home_assistant.init(settings, client)
+    mqtt_manager_libs.home_assistant.connect()
+    
+    # Loop MQTT
     client.loop_forever()
 
 
