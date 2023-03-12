@@ -548,32 +548,41 @@ void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig*> *lights, ui
 
 void InterfaceManager::_updatePanelLightStatus()
 {
-    uint totalLights = 0;
     uint totalBrightness = 0;
+    uint totalBrightnessLights = 0;
     uint totalKelvin = 0;
+    uint totalKelvinLights = 0;
     for (lightConfig &light : this->_cfg.currentRoom->ceilingLights)
     {
-    	totalLights++;
+		totalBrightnessLights++;
 		totalBrightness += light.level;
-		totalKelvin += light.colorTemperature;
+    	if(light.canTemperature) {
+    		totalKelvinLights++;
+    		totalKelvin += light.colorTemperature;
+    	}
     }
 
-    uint8_t averageCeilingBrightness = totalLights == 0 ? 0 : totalBrightness / totalLights;
-    uint8_t averageCeilingKelvin = totalLights == 0 ? 0 : totalKelvin / totalLights;
+    uint8_t averageCeilingBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
+    uint8_t averageCeilingKelvin = totalKelvinLights == 0 ? 0 : totalKelvin / totalKelvinLights;
     HomePage::setCeilingLightsState(averageCeilingBrightness > 0);
     HomePage::setCeilingBrightnessLabelText(averageCeilingBrightness);
 
-    totalLights = 0;
+
 	totalBrightness = 0;
+	totalBrightnessLights = 0;
 	totalKelvin = 0;
+	totalKelvinLights = 0;
 	for (lightConfig &light : this->_cfg.currentRoom->tableLights)
 	{
-		totalLights++;
+		totalBrightnessLights++;
 		totalBrightness += light.level;
-		totalKelvin += light.colorTemperature;
+		if(light.canTemperature) {
+			totalKelvinLights++;
+			totalKelvin += light.colorTemperature;
+		}
 	}
-	uint8_t averageTableBrightness = totalLights == 0 ? 0 : totalBrightness / totalLights;
-	uint8_t averageTableKelvin = totalLights == 0 ? 0 : totalKelvin / totalLights;
+	uint8_t averageTableBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
+	uint8_t averageTableKelvin = totalKelvinLights == 0 ? 0 : totalKelvin / totalKelvinLights;
 	HomePage::setTableLightsState(averageTableBrightness > 0);
 	HomePage::setTableBrightnessLabelText(averageTableBrightness);
 
