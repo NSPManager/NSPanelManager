@@ -68,9 +68,12 @@ def connect_and_loop():
                 F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
             sleep(10)
     
-    # MQTT Connected, start APIs
-    mqtt_manager_libs.home_assistant.init(settings, client)
-    mqtt_manager_libs.home_assistant.connect()
+    # MQTT Connected, start APIs if configured
+    if settings["home_assistant_address"] != "" and settings["home_assistant_token"] != "":
+        mqtt_manager_libs.home_assistant.init(settings, client)
+        mqtt_manager_libs.home_assistant.connect()
+    else:
+        print("Home Assistant values not configured, will not connect.")
     
     # Loop MQTT
     client.loop_forever()
