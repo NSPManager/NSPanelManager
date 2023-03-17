@@ -1,16 +1,16 @@
 #include <Arduino.h>
-#include <MqttLog.h>
 #include <ArduinoJson.h>
+#include <HTTPClient.h>
+#include <InterfaceManager.h>
+#include <LittleFS.h>
+#include <MqttLog.h>
+#include <NSPMConfig.h>
+#include <NSPanel.h>
 #include <PubSubClient.h>
+#include <WebManager.h>
+#include <WiFi.h>
 #include <nspm-bin-version.h>
 #include <string>
-#include <LittleFS.h>
-#include <NSPMConfig.h>
-#include <WiFi.h>
-#include <HTTPClient.h>
-#include <WebManager.h>
-#include <NSPanel.h>
-#include <InterfaceManager.h>
 
 NSPanel nspanel;
 InterfaceManager interfaceManager;
@@ -87,7 +87,8 @@ void taskManageWifiAndMqtt(void *param)
         LOG_ERROR("No WiFi SSID configured!");
       }
 
-      if (WiFi.isConnected() && !mqttClient.connected() && !config.mqtt_server.empty())
+      if (WiFi.isConnected() && !mqttClient.connected() &&
+          !config.mqtt_server.empty())
       {
         LOG_ERROR("MQTT not connected!");
         while (WiFi.isConnected() && !mqttClient.connected())
@@ -98,8 +99,9 @@ void taskManageWifiAndMqtt(void *param)
           vTaskDelay(1000 / portTICK_PERIOD_MS);
           if (mqttClient.connected())
           {
-            // This task only handles connection. The InterfaceManager will take care of subscribing to relevant topics
-            // once the connection is MQTT is established.
+            // This task only handles connection. The InterfaceManager will take
+            // care of subscribing to relevant topics once the connection is
+            // MQTT is established.
             LOG_INFO("Connected to MQTT server ", config.mqtt_server.c_str());
             InterfaceManager::subscribeToMqttTopics();
             mqttClient.publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), "online");
@@ -127,15 +129,18 @@ void taskManageWifiAndMqtt(void *param)
     if (WiFi.softAPConfig(local_ip, gateway, subnet))
     {
       LOG_INFO("Soft-AP configuration applied.");
-      if (WiFi.softAP("Light Controller", "password"))
+      if (WiFi.softAP("NSPMPanel", "password"))
       {
         LOG_INFO("Soft-AP started.");
 
-        LOG_INFO("WiFi SSID: Light Controller");
+        LOG_INFO("WiFi SSID: NSPMPanel");
         LOG_INFO("WiFi PSK : password");
         LOG_INFO("WiFi IP Address: ", WiFi.softAPIP().toString().c_str());
         webMan.init(NSPanelManagerFirmwareVersion);
-        vTaskDelete(NULL); // This task is complete. Stop processing.
+        // Wait indefinitly
+        for(;;) {
+          vTaskDelay(portMAX_DELAY);
+        }
       }
       else
       {
@@ -149,11 +154,13 @@ void taskManageWifiAndMqtt(void *param)
   }
 }
 
-void taskMqttLoop(void* param) {
-	for(;;) {
-		mqttClient.loop();
-		vTaskDelay(10 / portTICK_PERIOD_MS);
-	}
+void taskMqttLoop(void *param)
+{
+  for (;;)
+  {
+    mqttClient.loop();
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+  }
 }
 
 void setup()
@@ -180,7 +187,4 @@ void setup()
   interfaceManager.init(&mqttClient);
 }
 
-void loop()
-{
-  vTaskDelay(portMAX_DELAY);
-}
+void loop() { vTaskDelay(portMAX_DELAY); }

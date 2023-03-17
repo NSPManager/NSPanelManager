@@ -108,10 +108,13 @@ bool NSPMConfig::saveToLittleFS()
 
 bool NSPMConfig::factoryReset()
 {
-    this->wifi_hostname = "lman";
+    this->wifi_hostname = "NSPMPanel";
     this->wifi_ssid = "";
     this->wifi_psk = "";
     this->logging_level = 0;
+
+    this->manager_address = "";
+    this->manager_port = 8000;
 
     this->mqtt_server = "";
     this->mqtt_port = 1883;

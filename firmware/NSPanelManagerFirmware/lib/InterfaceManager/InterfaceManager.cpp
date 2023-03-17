@@ -106,7 +106,11 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
     {
         if (!WiFi.isConnected())
         {
-            NSPanel::instance->setComponentText("bootscreen.t_loading", "Connecting to WiFi...");
+            if(NSPMConfig::instance->NSPMConfig::instance->wifi_ssid.empty()) {
+                NSPanel::instance->setComponentText("bootscreen.t_loading", "Connect to AP NSPMPanel");
+            } else {
+                NSPanel::instance->setComponentText("bootscreen.t_loading", "Connecting to WiFi...");
+            }
         }
         else if (!InterfaceManager::_instance->_mqttClient->connected())
         {

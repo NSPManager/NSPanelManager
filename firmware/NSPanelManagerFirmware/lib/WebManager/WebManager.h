@@ -21,6 +21,7 @@ public:
     static void respondAvailableWiFiNetworks(AsyncWebServerRequest *request);
     static void startOTAUpdate(AsyncWebServerRequest *request);
     static void startTFTOTAUpdate(AsyncWebServerRequest *request);
+    static void factoryReset(AsyncWebServerRequest *request);
 
 private:
     AsyncWebServer _server = AsyncWebServer(80);

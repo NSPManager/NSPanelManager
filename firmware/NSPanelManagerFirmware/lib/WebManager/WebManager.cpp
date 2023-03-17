@@ -24,6 +24,7 @@ void WebManager::init(const char *nspmFirmwareVersion)
     this->_server.on("/save_config", HTTP_POST, WebManager::saveConfigFromWeb);
     this->_server.on("/start_ota_update", HTTP_POST, WebManager::startOTAUpdate);
     this->_server.on("/start_tft_ota_update", HTTP_POST, WebManager::startTFTOTAUpdate);
+    this->_server.on("/factory_reset", HTTP_GET, WebManager::factoryReset);
 
     this->_server.onNotFound([](AsyncWebServerRequest *request)
                              { request->send(404, "text/plain", "Path/File not found!"); });
@@ -108,6 +109,13 @@ void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request)
     }
 
     // TODO: Restart after settings saved
+    request->redirect("/");
+}
+
+void WebManager::factoryReset(AsyncWebServerRequest *request) {
+    LOG_INFO("Performing factory reset!");
+    NSPMConfig::instance->factoryReset();
+    ESP.restart();
     request->redirect("/");
 }
 
