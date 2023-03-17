@@ -9,6 +9,16 @@ import subprocess
 from .models import NSPanel, Room, Light, Settings
 from web.settings_helper import get_setting_with_default, set_setting_value
 
+def restart_mqtt_manager():
+    for proc in psutil.process_iter():
+        if "./mqtt_manager.py" in proc.cmdline():
+            print("Killing existing mqtt_manager")
+            proc.kill()
+    # Restart the process
+    print("Starting a new mqtt_manager")
+    subprocess.Popen(
+        ["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
+
 
 def index(request):
     return render(request, 'index.html', {'nspanels': NSPanel.objects.all()})
@@ -63,7 +73,7 @@ def move_room_down(request, room_id: int):
         room.displayOrder = i
         room.save()
         i += 1
-
+    
     return redirect('rooms_order')
 
 
@@ -87,6 +97,7 @@ def update_room_form(request, room_id: int):
 
 def remove_light_from_room(request, room_id: int, light_id: int):
     Light.objects.filter(id=light_id).delete()
+    restart_mqtt_manager()
     return redirect('edit_room', room_id=room_id)
 
 
@@ -105,7 +116,7 @@ def add_light_to_room(request, room_id: int):
     if "rgb" in request.POST:
         newLight.can_rgb = True
     newLight.save()
-
+    restart_mqtt_manager()
     return redirect('edit_room', room_id=room_id)
 
 
@@ -167,14 +178,7 @@ def save_settings(request):
                       value=request.POST["openhab_rgb_channel_name"])
 
     # Settings saved, restart mqtt_manager
-    for proc in psutil.process_iter():
-        if "./mqtt_manager.py" in proc.cmdline():
-            print("Killing existing mqtt_manager")
-            proc.kill()
-    # Restart the process
-    print("Starting a new mqtt_manager")
-    subprocess.Popen(
-        ["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
+    restart_mqtt_manager()
     return redirect('settings')
 
     # TODO: Make exempt only when Debug = true
