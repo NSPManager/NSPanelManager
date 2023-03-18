@@ -104,7 +104,7 @@ void taskManageWifiAndMqtt(void *param)
             // MQTT is established.
             LOG_INFO("Connected to MQTT server ", config.mqtt_server.c_str());
             InterfaceManager::subscribeToMqttTopics();
-            mqttClient.publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), "online");
+            mqttClient.publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), "online", true);
           }
           else
           {

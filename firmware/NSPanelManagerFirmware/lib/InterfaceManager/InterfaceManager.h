@@ -57,6 +57,13 @@ enum roomMode
     END // Keep END at end of enum
 };
 
+enum editLightMode
+{
+    all_lights,
+    ceiling_lights,
+    table_lights
+};
+
 class InterfaceManager
 {
 public:
@@ -72,12 +79,16 @@ private:
     static inline std::list<mqttMessage> _mqttMessages;
     static inline TaskHandle_t _taskHandleProcessMqttMessages;
     static void _taskProcessMqttMessages(void *param);
+    static inline TaskHandle_t _taskHandleSpecialModeTimer;
+    static void _taskSpecialModeTimer(void *param);
     PubSubClient *_mqttClient;
     roomMode _currentRoomMode;
     DynamicJsonDocument *_roomDataJson;
     interfaceConfig _cfg;
     unsigned long _lastMasterCeilingLightsButtonTouch;
     unsigned long _lastMasterTableLightsButtonTouch;
+    unsigned long _lastSpecialModeEventMillis;
+    editLightMode _currentEditMode;
     void _goToNextRoom();
     void _changeRoom(uint8_t roomId);
     void _updatePanelWithNewRoomInfo();
@@ -87,6 +98,8 @@ private:
     void _changeMode(roomMode mode);
     bool _getPanelConfig();
     void _processPanelConfig();
+    void _setEditLightMode(editLightMode mode);
+    void _startSpecialModeTimer();
 
     void _ceilingMasterButtonEvent();
     void _tableMasterButtonEvent();

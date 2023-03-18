@@ -94,6 +94,7 @@ void InterfaceManager::init(PubSubClient *mqttClient)
     this->_instance = this;
     this->_mqttClient = mqttClient;
     this->_mqttClient->setCallback(&InterfaceManager::mqttCallback);
+    this->_currentEditMode = editLightMode::all_lights;
     NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
     NSPanel::instance->goToPage("bootscreen");
     xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
@@ -219,7 +220,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
                 InterfaceManager::_instance->_ceilingMasterButtonEvent();
             } else {
                 // The "button" was held down
-                LOG_DEBUG("LONG PRESS CEILING LIGHTS");
+                InterfaceManager::_instance->_setEditLightMode(editLightMode::ceiling_lights);
             }
         }
         else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
@@ -230,11 +231,12 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
                 InterfaceManager::_instance->_tableMasterButtonEvent();
             } else {
                 // The "button" was held down
-                LOG_DEBUG("LONG PRESS TABLE LIGHTS");
+                InterfaceManager::_instance->_setEditLightMode(editLightMode::table_lights);
             }
 		}
         else if (component == LIGHT_LEVEL_CHANGE_BUTTON_ID)
         {
+            // Dimmer slider changed
         	if(InterfaceManager::_instance->_cfg.currentRoom->anyLightsOn()) {
         		InterfaceManager::_instance->_updateLightsThatAreOn();
         	} else {
@@ -243,7 +245,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         } else if (component == LIGHT_COLOR_CHANGE_BUTTON_ID) {
         	InterfaceManager::_instance->_updateLightsColorTemp();
         }
-    } else if (page == HOME_PAGE_ID && !pressed) {
+    } else if (page == HOME_PAGE_ID && pressed) {
         if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
             InterfaceManager::_instance->_lastMasterCeilingLightsButtonTouch = millis();
@@ -284,7 +286,14 @@ void InterfaceManager::_tableMasterButtonEvent()
 }
 
 void InterfaceManager::_updateLightsThatAreOn() {
-	std::list<lightConfig*> lights = this->_cfg.currentRoom->getAllLightsThatAreOn();
+	std::list<lightConfig*> lights;
+    if(this->_currentEditMode == editLightMode::all_lights) {
+        lights = this->_cfg.currentRoom->getAllLightsThatAreOn();
+    } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
+        lights = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
+    } else if (this->_currentEditMode == editLightMode::table_lights) {
+        lights = this->_cfg.currentRoom->getTableLightsThatAreOn();
+    }
 
 	uint8_t newLevel = HomePage::getDimmingValue();
 	this->_changeLightsToLevel(&lights, newLevel);
@@ -292,7 +301,14 @@ void InterfaceManager::_updateLightsThatAreOn() {
 }
 
 void InterfaceManager::_updateAllLights() {
-	std::list<lightConfig*> lights = this->_cfg.currentRoom->getAllLights();
+	std::list<lightConfig*> lights;
+    if(this->_currentEditMode == editLightMode::all_lights) {
+        lights = this->_cfg.currentRoom->getAllLightsThatAreOn();
+    } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
+        lights = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
+    } else if (this->_currentEditMode == editLightMode::table_lights) {
+        lights = this->_cfg.currentRoom->getTableLightsThatAreOn();
+    }
 
 	uint8_t newLevel = HomePage::getDimmingValue();
 	this->_changeLightsToLevel(&lights, newLevel);
@@ -300,13 +316,50 @@ void InterfaceManager::_updateAllLights() {
 }
 
 void InterfaceManager::_updateLightsColorTemp() {
-	std::list<lightConfig*> lights = this->_cfg.currentRoom->getAllLights();
+	std::list<lightConfig*> lights;
+    if(this->_currentEditMode == editLightMode::all_lights) {
+        lights = this->_cfg.currentRoom->getAllLights();
+    } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
+        lights = this->_cfg.currentRoom->getAllCeilingLights();
+    } else if (this->_currentEditMode == editLightMode::table_lights) {
+        lights = this->_cfg.currentRoom->getAllTableLights();
+    }
 
 	// Get value from panel and calculate for 2000-6500 kelvin. Also inverse value, warm color temperature on top
 	// TODO: Implement check in management web interface that allows for this to be reversed
 	uint16_t newKelvin = HomePage::getColorTempValue();
 	this->_changeLightsToKelvin(&lights, newKelvin);
 	this->_updatePanelLightStatus();
+}
+
+void InterfaceManager::_setEditLightMode(editLightMode mode) {
+    InterfaceManager::_instance->_currentEditMode = mode; // Set current mode
+    if(mode == editLightMode::all_lights) {
+        HomePage::setSliderLightLevelColor(23243); // Reset to normal color
+        HomePage::setSliderColorTempColor(23243);  // Reset to normal color
+    } else {
+        HomePage::setSliderLightLevelColor(65024); // Change slider color to indicate special mode
+        HomePage::setSliderColorTempColor(65024);  // Change slider color to indicate special mode
+    }
+    this->_updatePanelLightStatus();
+    InterfaceManager::_instance->_startSpecialModeTimer();
+}
+
+void InterfaceManager::_startSpecialModeTimer() {
+    this->_lastSpecialModeEventMillis = millis();
+    if(this->_taskHandleSpecialModeTimer == NULL) {
+        xTaskCreatePinnedToCore(_taskSpecialModeTimer, "taskSpecialModeTimer", 5000, NULL, 1, &InterfaceManager::_taskHandleSpecialModeTimer, CONFIG_ARDUINO_RUNNING_CORE);
+    }
+}
+
+void InterfaceManager::_taskSpecialModeTimer(void* param) {
+    // Wait until no event has occured for 5 seconds before returning to normal mode
+    while(millis() < InterfaceManager::_instance->_lastSpecialModeEventMillis + 5000) {
+        vTaskDelay((InterfaceManager::_instance->_lastSpecialModeEventMillis + 5000 - millis()) / portTICK_PERIOD_MS);
+    }
+    InterfaceManager::_instance->_setEditLightMode(editLightMode::all_lights);
+    InterfaceManager::_taskHandleSpecialModeTimer = NULL;
+    vTaskDelete(NULL); // Task is complete, stop task
 }
 
 void InterfaceManager::_processPanelConfig()
@@ -452,7 +505,6 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
                     {
                     	// TODO: Implement mechanism to reverse color temperature slider
                     	uint8_t colorTemp = (6000 - atoi(msg.payload.c_str())) / 40;
-                    	LOG_DEBUG("Color temp: ", colorTemp);
                     	InterfaceManager::_instance->_setLightColorTemperature(entity, colorTemp);
                     }
                 }
@@ -579,14 +631,17 @@ void InterfaceManager::_updatePanelLightStatus()
     uint totalBrightnessLights = 0;
     uint totalKelvin = 0;
     uint totalKelvinLights = 0;
-    for (lightConfig &light : this->_cfg.currentRoom->ceilingLights)
-    {
-		totalBrightnessLights++;
-		totalBrightness += light.level;
-    	if(light.canTemperature) {
-    		totalKelvinLights++;
-    		totalKelvin += light.colorTemperature;
-    	}
+
+    if(this->_currentEditMode == editLightMode::all_lights || this->_currentEditMode == editLightMode::ceiling_lights) {
+        for (lightConfig &light : this->_cfg.currentRoom->ceilingLights)
+            {
+                totalBrightnessLights++;
+                totalBrightness += light.level;
+                if(light.canTemperature) {
+                    totalKelvinLights++;
+                    totalKelvin += light.colorTemperature;
+                }
+            }
     }
 
     uint8_t averageCeilingBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
@@ -599,15 +654,17 @@ void InterfaceManager::_updatePanelLightStatus()
 	totalBrightnessLights = 0;
 	totalKelvin = 0;
 	totalKelvinLights = 0;
-	for (lightConfig &light : this->_cfg.currentRoom->tableLights)
-	{
-		totalBrightnessLights++;
-		totalBrightness += light.level;
-		if(light.canTemperature) {
-			totalKelvinLights++;
-			totalKelvin += light.colorTemperature;
-		}
-	}
+	if(this->_currentEditMode == editLightMode::all_lights || this->_currentEditMode == editLightMode::table_lights) {
+        for (lightConfig &light : this->_cfg.currentRoom->tableLights)
+        {
+            totalBrightnessLights++;
+            totalBrightness += light.level;
+            if(light.canTemperature) {
+                totalKelvinLights++;
+                totalKelvin += light.colorTemperature;
+            }
+        }
+    }
 	uint8_t averageTableBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
 	uint8_t averageTableKelvin = totalKelvinLights == 0 ? 0 : totalKelvin / totalKelvinLights;
 	HomePage::setTableLightsState(averageTableBrightness > 0);

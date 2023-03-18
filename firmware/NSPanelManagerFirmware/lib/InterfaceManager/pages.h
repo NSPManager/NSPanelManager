@@ -21,6 +21,8 @@ public:
 	static void setTableBrightnessLabelText(uint8_t value);
 	static void setCeilingLightsState(bool state);
 	static void setTableLightsState(bool state);
+	static void setSliderLightLevelColor(uint color);
+	static void setSliderColorTempColor(uint color);
 };
 
 

@@ -10,7 +10,13 @@
 #include <TftDefines.h>
 
 int HomePage::getDimmingValue() {
-	return NSPanel::instance->getComponentIntVal(HOME_DIMMER_SLIDER_NAME);
+	int newValue = NSPanel::instance->getComponentIntVal(HOME_DIMMER_SLIDER_NAME);
+	// TODO: Make configurable
+	if(newValue > 95) {
+		return 100;
+	} else {
+		return newValue;
+	}
 }
 
 void HomePage::setDimmingValue(uint8_t value) {
@@ -39,4 +45,12 @@ void HomePage::setCeilingLightsState(bool state) {
 
 void HomePage::setTableLightsState(bool state) {
 	NSPanel::instance->setComponentVal(HOME_BUTTON_TABLE_NAME, state ? 1 : 0);
+}
+
+void HomePage::setSliderLightLevelColor(uint color) {
+	NSPanel::instance->setComponentForegroundColor(HOME_DIMMER_SLIDER_NAME, color);
+}
+
+void HomePage::setSliderColorTempColor(uint color) {
+	NSPanel::instance->setComponentForegroundColor(HOME_COLOR_TEMP_SLIDER_NAME, color);
 }
