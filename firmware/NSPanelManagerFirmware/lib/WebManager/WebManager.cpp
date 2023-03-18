@@ -110,6 +110,10 @@ void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request)
 
     // TODO: Restart after settings saved
     request->redirect("/");
+
+    // Wait for 5 seconds before restarting.
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
+    ESP.restart();
 }
 
 void WebManager::factoryReset(AsyncWebServerRequest *request) {
