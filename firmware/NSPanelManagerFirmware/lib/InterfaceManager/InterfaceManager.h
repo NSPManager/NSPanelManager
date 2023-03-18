@@ -76,6 +76,8 @@ private:
     roomMode _currentRoomMode;
     DynamicJsonDocument *_roomDataJson;
     interfaceConfig _cfg;
+    unsigned long _lastMasterCeilingLightsButtonTouch;
+    unsigned long _lastMasterTableLightsButtonTouch;
     void _goToNextRoom();
     void _changeRoom(uint8_t roomId);
     void _updatePanelWithNewRoomInfo();

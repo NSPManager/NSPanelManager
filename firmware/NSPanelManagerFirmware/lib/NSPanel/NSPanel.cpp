@@ -62,6 +62,14 @@ void NSPanel::setComponentVal(const char *componentId, uint8_t value)
     this->_sendCommandWithoutResponse(cmd.c_str());
 }
 
+void NSPanel::setComponentForegroundColor(const char *componentId, uint value)
+{
+    std::string cmd = componentId;
+    cmd.append(".pco=");
+    cmd.append(std::to_string(value));
+    this->_sendCommandWithoutResponse(cmd.c_str());
+}
+
 int NSPanel::getComponentIntVal(const char* componentId) {
 	// Wait for command queue to clear
 	while(this->_commandQueue.size() > 0) {

@@ -41,6 +41,7 @@ public:
     void setSleep(bool sleep);
     void setComponentText(const char *componentId, const char *text);
     void setComponentVal(const char *componentId, uint8_t value);
+    void setComponentForegroundColor(const char *componentId, uint value);
     int getComponentIntVal(const char *componentId);
     void restart();
 

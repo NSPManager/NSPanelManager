@@ -213,11 +213,25 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         }
         else if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
-            InterfaceManager::_instance->_ceilingMasterButtonEvent();
+            // TODO: Make configurable
+            if(millis() - InterfaceManager::_instance->_lastMasterCeilingLightsButtonTouch <= 300) {
+                // It was a simple touch
+                InterfaceManager::_instance->_ceilingMasterButtonEvent();
+            } else {
+                // The "button" was held down
+                LOG_DEBUG("LONG PRESS CEILING LIGHTS");
+            }
         }
         else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
 		{
-			InterfaceManager::_instance->_tableMasterButtonEvent();
+            // TODO: Make configurable
+            if(millis() - InterfaceManager::_instance->_lastMasterTableLightsButtonTouch <= 300) {
+                // It was a simple touch
+                InterfaceManager::_instance->_tableMasterButtonEvent();
+            } else {
+                // The "button" was held down
+                LOG_DEBUG("LONG PRESS TABLE LIGHTS");
+            }
 		}
         else if (component == LIGHT_LEVEL_CHANGE_BUTTON_ID)
         {
@@ -229,6 +243,15 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         } else if (component == LIGHT_COLOR_CHANGE_BUTTON_ID) {
         	InterfaceManager::_instance->_updateLightsColorTemp();
         }
+    } else if (page == HOME_PAGE_ID && !pressed) {
+        if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
+        {
+            InterfaceManager::_instance->_lastMasterCeilingLightsButtonTouch = millis();
+        }
+        else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
+		{
+			InterfaceManager::_instance->_lastMasterTableLightsButtonTouch = millis();
+		}
     } else {
     	LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
     }
