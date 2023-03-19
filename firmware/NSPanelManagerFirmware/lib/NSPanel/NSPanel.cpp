@@ -488,9 +488,13 @@ bool NSPanel::_updateTFTOTA() {
 			}
 
 			// Wait for 0x05 to indicate that the display is ready for new data
+			unsigned long startWait = millis();
 			while (Serial2.available() == 0)
 			{
 				vTaskDelay(5); // Leave time for other tasks and display to process
+				if(millis() - startWait >= 2000) {
+					LOG_ERROR("Something went wrong during tft update. Got not response after chunk.");
+				}
 			}
 
 			returnData = Serial2.read();
