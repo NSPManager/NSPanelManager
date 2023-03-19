@@ -485,6 +485,7 @@ bool NSPanel::_updateTFTOTA() {
 		// Upload data to Nextion in 4096 blocks or smaller
 		while (client.available() > 0)
 		{
+			vTaskDelay(250 / portTICK_PERIOD_MS);
 			// Write bytes left or a maximum of 4096
 			uint16_t bytesToWrite = (client.available() < 4096 ? client.available() : 4096);
 			for (int i = 0; i < bytesToWrite; i++)
@@ -497,7 +498,7 @@ bool NSPanel::_updateTFTOTA() {
 			chunkWaitTries = 0;
 			while (Serial2.available() == 0)
 			{
-				vTaskDelay(10); // Leave time for other tasks and display to process
+				vTaskDelay(10 / portTICK_PERIOD_MS); // Leave time for other tasks and display to process
 				if(millis() - startWaitingForOKForNextChunk - (chunkWaitTries*5000) >= 5000) {
 					LOG_ERROR("Something went wrong during tft update. Got no response after chunk, will continue to wait...");
 					chunkWaitTries++;
