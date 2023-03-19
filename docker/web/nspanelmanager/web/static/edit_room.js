@@ -1,5 +1,5 @@
-function add_new_light_to_available_lights_list(light_name, type) {
-    $("#add_new_light_options").append('<a class="panel-block" data-type="' + type + '">' + light_name + '</a>');
+function add_new_light_to_available_lights_list(light, type) {
+    $("#add_new_light_options").append('<a class="panel-block" data-type="' + type + '" data-items=\'' + JSON.stringify(light.items) + '\'>' + light.label + '</a>');
 }
 
 function populate_add_new_light_dialog() {
@@ -28,16 +28,29 @@ function populate_add_new_light_dialog() {
 }
 
 function add_new_light_show_light_page(light_element) {
-    if ($(light_element).data("type") == "openhab") {
+    if ($(this).data("type") == "openhab") {
         $("#openhab_light_options").show();
+        var items = $(this).data("items")
+        items.forEach(item => {
+            $('#openhab_dimming_channel_name').append($('<option>', {
+                value: item,
+                text: item
+            }));
+            $('#openhab_color_temperature_channel_name').append($('<option>', {
+                value: item,
+                text: item
+            }));
+            $('#openhab_RGB_channel_name').append($('<option>', {
+                value: item,
+                text: item
+            }));
+        });
     } else {
         $("#openhab_light_options").hide();
     }
 
     $("#add_new_light_name").val($(this).text()); // Set text field
     $("#add_new_light_type").val($(this).data("type")); // Set the correct type
-
-    // TODO: Populate OpenHAB default channel names
 
     // Finaly show the modal
     $('#modal-add-light').removeClass("is-active");

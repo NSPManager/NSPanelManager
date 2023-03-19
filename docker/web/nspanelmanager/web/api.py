@@ -49,6 +49,8 @@ def get_mqtt_manager_config(request):
         lightConfig["can_dim"] = light.can_dim
         lightConfig["can_color_temperature"] = light.can_color_temperature
         lightConfig["can_rgb"] = light.can_rgb
+        lightConfig["openhab_item_dimmer"] = light.openhab_item_dimmer
+        lightConfig["openhab_item_color_temp"] = light.openhab_item_color_temp
         return_json["lights"].append(lightConfig)
 
     return JsonResponse(return_json)
@@ -70,11 +72,13 @@ def get_all_available_light_entities(request):
         }
         try:
             home_assistant_response = requests.get(
-                get_setting_with_default("home_assistant_address", "") + "/api/states", headers=home_assistant_request_headers, timeout=5)
+                get_setting_with_default("home_assistant_address", "") + "/api/states", headers=home_assistant_request_headers, timeout=5) 
             for entity in home_assistant_response.json():
                 if (entity["entity_id"].startswith("light.")):
-                    return_json["home_assistant_lights"].append(
-                        entity["entity_id"].replace("light.", ""))
+                    return_json["home_assistant_lights"].append({
+                        "label": entity["entity_id"].replace("light.", ""),
+                        "items": []
+                    })
         except:
             print("Failed to get Home Assistant lights!")
 
@@ -85,12 +89,28 @@ def get_all_available_light_entities(request):
             "Authorization": "Bearer " + get_setting_with_default("openhab_token", ""),
             "content-type": "application/json",
         }
-        openhab_response = requests.get(
-            get_setting_with_default("openhab_address", "") + "/rest/things", headers=openhab_request_headers)
+        openhab_response = requests.get(get_setting_with_default("openhab_address", "") + "/rest/things", headers=openhab_request_headers)
 
         for entity in openhab_response.json():
-            if (entity["name"].startswith("light.")):
-                return_json["openhab_lights"].append(entity["name"])
+            if "channels" in entity:
+                add_entity = False
+                items = []
+                for channel in entity["channels"]:
+                    # Check if this thing has a channel that indicates that it might be a light
+                    if "itemType" in channel and (channel["itemType"] == "Dimmer" or channel["itemType"] == "Number" or channel["itemType"] == "Color"):
+                        add_entity = True
+                    if "linkedItems" in channel:
+                        # Add all available items to the list of items for this thing
+                        for linkedItem in channel["linkedItems"]:
+                            if linkedItem not in items:
+                                items.append(linkedItem)
+                if add_entity:
+                    # return_json["openhab_lights"].append(entity["label"])
+                    return_json["openhab_lights"].append({
+                        "label": entity["label"],
+                        "items": items
+                    })
+
 
     return JsonResponse(return_json)
 

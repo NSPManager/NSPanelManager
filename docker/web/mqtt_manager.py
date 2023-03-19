@@ -5,6 +5,7 @@ from requests import get, post
 from time import sleep
 import json
 import mqtt_manager_libs.home_assistant
+import mqtt_manager_libs.openhab
 
 settings = {}
 last_settings_file_mtime = 0
@@ -32,7 +33,12 @@ def on_message(client, userdata, msg):
             return
 
         if domain == "light":
-            mqtt_manager_libs.home_assistant.set_light_attribute(entity_id, attribute, msg.payload.decode('utf-8'))
+            for light in settings["lights"]:
+                if light["name"] == entity_id:
+                    if light["type"] == "home_assistant":
+                        mqtt_manager_libs.home_assistant.set_light_attribute(entity_id, attribute, msg.payload.decode('utf-8'))
+                    elif light["type"] == "openhab":
+                        mqtt_manager_libs.openhab.set_light_attribute(entity_id, attribute, msg.payload.decode('utf-8'))
 
 def get_config():
     global settings
@@ -72,6 +78,13 @@ def connect_and_loop():
     if settings["home_assistant_address"] != "" and settings["home_assistant_token"] != "":
         mqtt_manager_libs.home_assistant.init(settings, client)
         mqtt_manager_libs.home_assistant.connect()
+    else:
+        print("Home Assistant values not configured, will not connect.")
+    
+
+    if settings["openhab_address"] != "" and settings["openhab_token"] != "":
+        mqtt_manager_libs.openhab.init(settings, client)
+        mqtt_manager_libs.openhab.connect()
     else:
         print("Home Assistant values not configured, will not connect.")
     
