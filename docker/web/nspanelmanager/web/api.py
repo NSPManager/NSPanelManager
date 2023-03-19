@@ -128,8 +128,7 @@ def get_client_ip(request):
 def register_nspanel(request):
     """Update the already existing NSPanel OR create a new one"""
     data = json.loads(request.body)
-    new_panel = NSPanel.objects.filter(
-        mac_address=data['mac_address']).first()
+    new_panel = NSPanel.objects.filter(mac_address=data['mac_address']).first()
 
     if not new_panel:
         new_panel = NSPanel()
@@ -141,7 +140,10 @@ def register_nspanel(request):
     new_panel.ip_address = get_client_ip(request)
 
     # If no room is set, select the first one as default
-    if not new_panel.room:
+    try:
+        if not new_panel.room:
+            new_panel.room = Room.objects.first()
+    except NSPanel.room.RelatedObjectDoesNotExist:
         new_panel.room = Room.objects.first()
 
     # Save the update/Create new panel
