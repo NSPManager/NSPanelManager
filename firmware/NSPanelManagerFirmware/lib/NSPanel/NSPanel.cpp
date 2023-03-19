@@ -150,7 +150,7 @@ void NSPanel::_stopListeningToPanel()
 	if(this->_taskHandleReadNSPanelData != NULL) {
 		vTaskDelete(this->_taskHandleReadNSPanelData);
 	}
-	
+
 	if(this->_taskHandleProcessPanelOutput != NULL) {
 		vTaskDelete(this->_taskHandleProcessPanelOutput);
 	}
@@ -503,6 +503,7 @@ bool NSPanel::_updateTFTOTA() {
 					chunkWaitTries++;
 					if(chunkWaitTries > 20) {
 						LOG_ERROR("Waited for 20 tries, continue with next chunk.");
+						break;
 					}
 				}
 			}
