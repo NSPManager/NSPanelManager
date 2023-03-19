@@ -9,7 +9,7 @@ The idea is that by using the same layout on all the different panels all users 
 Logging from NSPanels are done over MQTT to the topic `nspanel/<panel name>/log`. To see everything to and from all the devices, the topic `nspanel/#` can be used.
 
 # Currently working (but might require more work)
-* Integration with Home Assistant
+* Integration with Home Assistant and OpenHAB
 * Toggle ceiling & table lights in a room separetly
 * Dim lights
 * Change color temperature of lights
