@@ -120,7 +120,7 @@ void NSPanel::init()
     // Pin 4 controls screen on/off.
     pinMode(4, OUTPUT);
     digitalWrite(4, LOW);
-    Serial2.begin(115200, SERIAL_8N1, 17, 16);
+    Serial2.begin(921600, SERIAL_8N1, 17, 16);
     NSPanel::instance = this;
     this->_mutexReadSerialData = xSemaphoreCreateMutex();
 
@@ -484,7 +484,7 @@ bool NSPanel::_updateTFTOTA() {
 			uint16_t bytesToWrite = (client.available() < 4096 ? client.available() : 4096);
 			for (int i = 0; i < bytesToWrite; i++)
 			{
-				vTaskDelay(5 / portTICK_PERIOD_MS);
+				// vTaskDelay(1 / portTICK_PERIOD_MS);
 				Serial2.write(client.read());
 			}
 

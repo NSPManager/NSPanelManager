@@ -201,6 +201,9 @@ void WebManager::startOTAUpdate(AsyncWebServerRequest *request)
 
 void WebManager::_taskPerformOTAUpdate(void *param)
 {
+    NSPanel::instance->setComponentText("bootscreen.t_loading", "Updating...");
+    NSPanel::instance->goToPage("bootscreen");
+
     char checksum_holder[32];
     WebManager::_httpGetMD5("/checksum_firmware", checksum_holder);
     LOG_DEBUG("Got firmware MD5 ", checksum_holder);
