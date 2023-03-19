@@ -17,7 +17,7 @@ void WebManager::init(const char *nspmFirmwareVersion)
     this->instance = this;
     this->_nspmFirmwareVersion = nspmFirmwareVersion;
 
-    LOG_DEBUG("Setting up web server routes");
+    LOG_TRACE("Setting up web server routes");
     this->_server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
                      { request->send(LittleFS, "/index.html", String(), false, WebManager::processIndexTemplate); });
 
@@ -282,6 +282,7 @@ void WebManager::_taskPerformOTAUpdate(void *param)
     if (hasAnythingUpdated)
     {
         LOG_INFO("OTA Done, will reboot.");
+        NSPMConfig::instance->saveToLittleFS();
         ESP.restart();
     }
     else
