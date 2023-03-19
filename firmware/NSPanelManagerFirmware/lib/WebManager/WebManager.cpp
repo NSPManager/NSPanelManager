@@ -25,6 +25,7 @@ void WebManager::init(const char *nspmFirmwareVersion)
     this->_server.on("/start_ota_update", HTTP_POST, WebManager::startOTAUpdate);
     this->_server.on("/start_tft_ota_update", HTTP_POST, WebManager::startTFTOTAUpdate);
     this->_server.on("/factory_reset", HTTP_GET, WebManager::factoryReset);
+    this->_server.on("/do_reboot", HTTP_GET, WebManager::doRebootNow);
 
     this->_server.onNotFound([](AsyncWebServerRequest *request)
                              { request->send(404, "text/plain", "Path/File not found!"); });
@@ -121,6 +122,11 @@ void WebManager::factoryReset(AsyncWebServerRequest *request) {
     NSPMConfig::instance->factoryReset();
     ESP.restart();
     request->redirect("/");
+}
+
+void WebManager::doRebootNow(AsyncWebServerRequest *request) {
+    request->send(200);
+    ESP.restart();
 }
 
 //void WebManager::respondAvailableWiFiNetworks(AsyncWebServerRequest *request)

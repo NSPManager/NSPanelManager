@@ -22,6 +22,7 @@ public:
     static void startOTAUpdate(AsyncWebServerRequest *request);
     static void startTFTOTAUpdate(AsyncWebServerRequest *request);
     static void factoryReset(AsyncWebServerRequest *request);
+    static void doRebootNow(AsyncWebServerRequest *request);
 
 private:
     AsyncWebServer _server = AsyncWebServer(80);

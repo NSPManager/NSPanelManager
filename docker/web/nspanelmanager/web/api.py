@@ -175,3 +175,8 @@ def get_nspanel_config(request):
                 room.displayOrder)]["lights"][light.id]["can_rgb"] = light.can_rgb
 
     return JsonResponse(base)
+
+def reboot_nspanel(request):
+    address = request.GET["address"]
+    requests.get(F"http://{address}/do_reboot")
+    return redirect("/")

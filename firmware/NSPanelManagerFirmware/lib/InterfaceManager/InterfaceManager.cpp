@@ -244,6 +244,9 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         	}
         } else if (component == LIGHT_COLOR_CHANGE_BUTTON_ID) {
         	InterfaceManager::_instance->_updateLightsColorTemp();
+        } else if (component == ROOM_BUTTON_ID) {
+            // Show page with all lights
+            NSPanel::instance->goToPage("Room1");
         }
     } else if (page == HOME_PAGE_ID && pressed) {
         if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
@@ -254,6 +257,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
 		{
 			InterfaceManager::_instance->_lastMasterTableLightsButtonTouch = millis();
 		}
+        LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
     } else {
     	LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
     }

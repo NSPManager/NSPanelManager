@@ -127,32 +127,21 @@ def add_light_to_room(request, room_id: int):
 
 def settings_page(request):
     data = {}
-    data["color_temp_min"] = get_setting_with_default(
-        "color_temp_min", 2000)
-    data["color_temp_max"] = get_setting_with_default(
-        "color_temp_max", 6000)
+    data["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
+    data["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
     data["mqtt_server"] = get_setting_with_default("mqtt_server", "")
     data["mqtt_port"] = get_setting_with_default("mqtt_port", 1883)
     data["mqtt_username"] = get_setting_with_default("mqtt_username", "")
     data["mqtt_password"] = get_setting_with_default("mqtt_password", "")
-    data["home_assistant_address"] = get_setting_with_default(
-        "home_assistant_address", "")
-    data["home_assistant_token"] = get_setting_with_default(
-        "home_assistant_token", "")
-    data["openhab_address"] = get_setting_with_default(
-        "openhab_address", "")
-    data["openhab_token"] = get_setting_with_default(
-        "openhab_token", "")
-    data["openhab_brightness_channel_name"] = get_setting_with_default(
-        "openhab_brightness_channel_name", "")
-    data["openhab_brightness_channel_min"] = get_setting_with_default(
-        "openhab_brightness_channel_min", 0)
-    data["openhab_brightness_channel_max"] = get_setting_with_default(
-        "openhab_brightness_channel_max", 255)
-    data["openhab_color_temp_channel_name"] = get_setting_with_default(
-        "openhab_color_temp_channel_name", "")
-    data["openhab_rgb_channel_name"] = get_setting_with_default(
-        "openhab_rgb_channel_name", "")
+    data["home_assistant_address"] = get_setting_with_default("home_assistant_address", "")
+    data["home_assistant_token"] = get_setting_with_default("home_assistant_token", "")
+    data["openhab_address"] = get_setting_with_default("openhab_address", "")
+    data["openhab_token"] = get_setting_with_default("openhab_token", "")
+    data["openhab_brightness_channel_name"] = get_setting_with_default("openhab_brightness_channel_name", "")
+    data["openhab_brightness_channel_min"] = get_setting_with_default("openhab_brightness_channel_min", 0)
+    data["openhab_brightness_channel_max"] = get_setting_with_default("openhab_brightness_channel_max", 255)
+    data["openhab_color_temp_channel_name"] = get_setting_with_default("openhab_color_temp_channel_name", "")
+    data["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name", "")
     return render(request, 'settings.html', data)
 
 
