@@ -149,6 +149,9 @@ void NSPanel::_stopListeningToPanel()
 {
 	if(this->_taskHandleReadNSPanelData != NULL) {
 		vTaskDelete(this->_taskHandleReadNSPanelData);
+	}
+	
+	if(this->_taskHandleProcessPanelOutput != NULL) {
 		vTaskDelete(this->_taskHandleProcessPanelOutput);
 	}
 }
@@ -404,7 +407,7 @@ bool NSPanel::_updateTFTOTA() {
 	{
 		// Stop all other tasks using the panel
 		vTaskDelete(NSPanel::instance->_taskHandleSendCommandQueue);
-		vTaskDelete(NSPanel::instance->_taskHandleReadNSPanelData);
+		NSPanel::instance->_stopListeningToPanel();
 
 		// Clear current read buffer
 		Serial2.flush();
@@ -477,6 +480,8 @@ bool NSPanel::_updateTFTOTA() {
 			return false;
 		}
 
+		unsigned long startWaitingForOKForNextChunk = 0;
+		uint8_t chunkWaitTries = 0;
 		// Upload data to Nextion in 4096 blocks or smaller
 		while (client.available() > 0)
 		{
@@ -484,30 +489,31 @@ bool NSPanel::_updateTFTOTA() {
 			uint16_t bytesToWrite = (client.available() < 4096 ? client.available() : 4096);
 			for (int i = 0; i < bytesToWrite; i++)
 			{
-				// vTaskDelay(1 / portTICK_PERIOD_MS);
 				Serial2.write(client.read());
 			}
 
 			// Wait for 0x05 to indicate that the display is ready for new data
-			unsigned long startWait = millis();
+			unsigned long startWaitingForOKForNextChunk = millis();
+			chunkWaitTries = 0;
 			while (Serial2.available() == 0)
 			{
 				vTaskDelay(10); // Leave time for other tasks and display to process
-				if(millis() - startWait >= 5000) {
+				if(millis() - startWaitingForOKForNextChunk - (chunkWaitTries*5000) >= 5000) {
 					LOG_ERROR("Something went wrong during tft update. Got no response after chunk, will continue to wait...");
-					startWait = millis(); // Reset timer
+					chunkWaitTries++;
+					if(chunkWaitTries > 20) {
+						LOG_ERROR("Waited for 20 tries, continue with next chunk.");
+					}
 				}
 			}
 
-			if(Serial2.available() > 0) {
-				returnData = Serial2.read();
-				if (returnData != 0x05)
-				{
-					LOG_ERROR("Something went wrong during tft update. Got data:");
-					LOG_ERROR(String(returnData, HEX).c_str());
-					while(Serial2.available() > 0) {
-						LOG_ERROR(String(Serial2.read(), HEX).c_str());
-					}
+			returnData = Serial2.read();
+			if (returnData != 0x05)
+			{
+				LOG_ERROR("Something went wrong during tft update. Got data:");
+				LOG_ERROR(String(returnData, HEX).c_str());
+				while(Serial2.available() > 0) {
+					LOG_ERROR(String(Serial2.read(), HEX).c_str());
 				}
 			}
 		}
