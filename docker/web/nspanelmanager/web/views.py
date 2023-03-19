@@ -171,16 +171,6 @@ def save_settings(request):
                       value=request.POST["openhab_address"])
     set_setting_value(name="openhab_token",
                       value=request.POST["openhab_token"])
-    set_setting_value(name="openhab_brightness_channel_name",
-                      value=request.POST["openhab_brightness_channel_name"])
-    set_setting_value(name="openhab_brightness_channel_min",
-                      value=request.POST["openhab_brightness_channel_min"])
-    set_setting_value(name="openhab_brightness_channel_max",
-                      value=request.POST["openhab_brightness_channel_max"])
-    set_setting_value(name="openhab_color_temp_channel_name",
-                      value=request.POST["openhab_color_temp_channel_name"])
-    set_setting_value(name="openhab_rgb_channel_name",
-                      value=request.POST["openhab_rgb_channel_name"])
 
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()
