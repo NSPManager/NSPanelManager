@@ -494,6 +494,7 @@ bool NSPanel::_updateTFTOTA() {
 				vTaskDelay(5); // Leave time for other tasks and display to process
 				if(millis() - startWait >= 2000) {
 					LOG_ERROR("Something went wrong during tft update. Got not response after chunk.");
+					break;
 				}
 			}
 
