@@ -409,7 +409,7 @@ bool NSPanel::_updateTFTOTA() {
 		// Clear current read buffer
 		Serial2.flush();
 
-		int uploadBaudRate = 115200;
+		int uploadBaudRate = 9600;
 
 		// Set fastest baud rate
 		std::string uploadBaudRateString = "baud=";
@@ -484,6 +484,7 @@ bool NSPanel::_updateTFTOTA() {
 			uint16_t bytesToWrite = (client.available() < 4096 ? client.available() : 4096);
 			for (int i = 0; i < bytesToWrite; i++)
 			{
+				vTaskDelay(5 / portTICK_PERIOD_MS);
 				Serial2.write(client.read());
 			}
 
@@ -491,17 +492,23 @@ bool NSPanel::_updateTFTOTA() {
 			unsigned long startWait = millis();
 			while (Serial2.available() == 0)
 			{
-				vTaskDelay(5); // Leave time for other tasks and display to process
+				vTaskDelay(10); // Leave time for other tasks and display to process
 				if(millis() - startWait >= 5000) {
-					LOG_ERROR("Something went wrong during tft update. Got no response after chunk.");
+					LOG_ERROR("Something went wrong during tft update. Got no response after chunk, will send next chunk anyway.");
 					break;
 				}
 			}
 
-			returnData = Serial2.read();
-			if (returnData != 0x05)
-			{
-				LOG_ERROR("Something went wrong during tft update. Got return code: ", String(returnData, HEX).c_str());
+			if(Serial2.available() > 0) {
+				returnData = Serial2.read();
+				if (returnData != 0x05)
+				{
+					LOG_ERROR("Something went wrong during tft update. Got data:");
+					LOG_ERROR(String(returnData, HEX).c_str());
+					while(Serial2.available() > 0) {
+						LOG_ERROR(String(Serial2.read(), HEX).c_str());
+					}
+				}
 			}
 		}
 
