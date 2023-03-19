@@ -120,7 +120,7 @@ void NSPanel::init()
     // Pin 4 controls screen on/off.
     pinMode(4, OUTPUT);
     digitalWrite(4, LOW);
-    Serial2.begin(921600, SERIAL_8N1, 17, 16);
+    Serial2.begin(115200, SERIAL_8N1, 17, 16);
     NSPanel::instance = this;
     this->_mutexReadSerialData = xSemaphoreCreateMutex();
 
@@ -409,7 +409,7 @@ bool NSPanel::_updateTFTOTA() {
 		// Clear current read buffer
 		Serial2.flush();
 
-		int uploadBaudRate = 9600;
+		int uploadBaudRate = 921600;
 
 		// Set fastest baud rate
 		std::string uploadBaudRateString = "baud=";
