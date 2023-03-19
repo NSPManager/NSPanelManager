@@ -101,7 +101,7 @@ void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request)
     NSPMConfig::instance->mqtt_server = request->arg("mqtt_server").c_str();
     NSPMConfig::instance->mqtt_port = request->arg("mqtt_port").toInt();
     NSPMConfig::instance->mqtt_username = request->arg("mqtt_username").c_str();
-    NSPMConfig::instance->mqtt_password = request->arg("mqtt_password").c_str();
+    NSPMConfig::instance->mqtt_password = request->arg("mqtt_psk").c_str();
 
     if (!NSPMConfig::instance->saveToLittleFS())
     {
