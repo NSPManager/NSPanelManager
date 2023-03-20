@@ -432,6 +432,10 @@ bool NSPanel::_updateTFTOTA() {
 		if (Serial2.available() == 0)
 		{
 			LOG_INFO("Baud rate switch successful, switching Serial2 to baud ", uploadBaudRate);
+
+			Serial2.flush();
+			Serial2.end();
+			Serial2.begin(uploadBaudRate, SERIAL_8N1, 17, 16);
 		}
 		else
 		{
@@ -440,16 +444,38 @@ bool NSPanel::_updateTFTOTA() {
 			return false;
 		}
 
-		Serial2.flush();
-		Serial2.end();
-		Serial2.begin(uploadBaudRate, SERIAL_8N1, 17, 16);
+		Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN"); // "disconnect"
+		Serial2.write(0xFF);
+		Serial2.write(0xFF);
+		Serial2.write(0xFF);
+
+		vTaskDelay(50 / portTICK_PERIOD_MS);
+		// Send "connect" string to get data
+		Serial2.print("connect");
+		Serial2.write(0xFF);
+		Serial2.write(0xFF);
+		Serial2.write(0xFF);
+		LOG_DEBUG("Sent connect, waiting for comok string.");
+
+		// Wait for comok return data.
+		while(Serial2.available() == 0) {
+			vTaskDelay(50 / portTICK_PERIOD_MS);
+		}
+
+		LOG_DEBUG("Waiting for comok");
+		std::string comok_string = "";
+		while(Serial2.available() > 0) {
+			comok_string.push_back(Serial2.read());
+		}
+		LOG_DEBUG("Got comok: ", comok_string.c_str());
+		LOG_DEBUG("Will start TFT upload.");
 
 		// Send whmi-wri command to initiate upload
-		std::string commandString = "whmi-wri ";
+		std::string commandString = "whmi-wris ";
 		commandString.append(std::to_string(contentLength));
 		commandString.append(",");
 		commandString.append(std::to_string(uploadBaudRate));
-		commandString.append(",0");
+		commandString.append(",1");
 		Serial2.print(commandString.c_str());
 		Serial2.write(0xFF);
 		Serial2.write(0xFF);
@@ -482,14 +508,37 @@ bool NSPanel::_updateTFTOTA() {
 
 		unsigned long startWaitingForOKForNextChunk = 0;
 		uint8_t chunkWaitTries = 0;
+		uint32_t currentReadOffset = 0;
+		uint32_t nextStartWriteOffset = 0;
 		// Upload data to Nextion in 4096 blocks or smaller
+		LOG_INFO("Starting flash of TFT file, size: ", contentLength);
 		while (client.available() > 0)
 		{
+			if(nextStartWriteOffset > contentLength) {
+				LOG_ERROR("Next chunk outside of file, stopping.");
+				break;
+			}
+			// Read until next chunk
+			if(currentReadOffset < nextStartWriteOffset) {
+				uint8_t dummyBuffer[128]; // Read up to 128 bytes at the time
+				while(currentReadOffset < nextStartWriteOffset) {
+					uint8_t nextReadSize = (nextStartWriteOffset - currentReadOffset) <= 128 ? nextStartWriteOffset - currentReadOffset : 128;
+					client.readBytes(dummyBuffer, nextReadSize);
+					currentReadOffset += nextReadSize;
+
+					if(client.available() <= 0) {
+						LOG_ERROR("Offset outside packet length!");
+						break;
+					}
+				}
+			}
+
 			// Write bytes left or a maximum of 4096
 			uint16_t bytesToWrite = (client.available() < 4096 ? client.available() : 4096);
 			for (int i = 0; i < bytesToWrite; i++)
 			{
 				Serial2.write(client.read());
+				currentReadOffset++;
 			}
 
 			// Wait for 0x05 to indicate that the display is ready for new data
@@ -502,15 +551,33 @@ bool NSPanel::_updateTFTOTA() {
 					LOG_ERROR("Something went wrong during tft update. Got no response after chunk, will continue to wait...");
 					chunkWaitTries++;
 					if(chunkWaitTries > 20) {
-						LOG_ERROR("Waited for 20 tries, continue with next chunk.");
+						LOG_ERROR("Waited for 20 tries, continue with next chunk anyway.");
 						break;
 					}
 				}
 			}
 
 			returnData = Serial2.read();
-			if (returnData != 0x05)
+			if (returnData == 0x05)
 			{
+				// Old protocol, just upload next chunk.
+			} else if (returnData == 0x08) {
+				LOG_DEBUG("Waiting for offset data.");
+				while(Serial2.available() < 4) {
+					vTaskDelay(10 / portTICK_PERIOD_MS); // Wait for data.
+				}
+				uint32_t readNextOffset = Serial2.read();
+				readNextOffset |= Serial2.read() << 8;
+				readNextOffset |= Serial2.read() << 16;
+				readNextOffset |= Serial2.read() << 32;
+				if(readNextOffset > 0) {
+					nextStartWriteOffset = readNextOffset;
+					LOG_INFO("Panel supports new protocol, jumping to offset: ", nextStartWriteOffset, " please wait.");
+				} else {
+					// offset = 0, continue as normal
+				}
+				vTaskDelay(5 / portTICK_PERIOD_MS);
+			} else {
 				LOG_ERROR("Something went wrong during tft update. Got data:");
 				LOG_ERROR(String(returnData, HEX).c_str());
 				while(Serial2.available() > 0) {
