@@ -10,3 +10,4 @@ firmware/NSPanelManagerFirmware/littlefs.md5
 firmware/NSPanelManagerFirmware/.cproject
 firmware/NSPanelManagerFirmware/.project
 firmware/NSPanelManagerFirmware/.settings
+firmware/NSPanelManagerFirmware/nspanels_to_ota.txt

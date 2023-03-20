@@ -469,7 +469,7 @@ bool NSPanel::_updateTFTOTA() {
 		}
 		LOG_DEBUG("Got comok: ", comok_string.c_str());
 		LOG_DEBUG("Will start TFT upload.");
-
+		// TODO: Detect if new protocol is not supported, in that case set flag in flash and restart and then continue flash with legacy mode.
 		// Send whmi-wri command to initiate upload
 		std::string commandString = "whmi-wris ";
 		commandString.append(std::to_string(contentLength));

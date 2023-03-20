@@ -4,7 +4,6 @@
 
 NSPanelManager_address="127.0.0.1"
 NSPanelManager_port="8000"
-NSPanelsToOTA=("10.0.0.226") # Array of NSPanels to call OTA for when upload finished successfully. Space separated
 
 # Update version file.
 current_version="$(grep -oE "[0-9\.]+" include/nspm-bin-version.h)"
@@ -49,15 +48,20 @@ data_file_status="$?"
 sleep 5
 
 if [ "$firmware_status" -eq 0 ] && [ "$data_file_status" -eq 0 ]; then
-	for nspanel in "${NSPanelsToOTA[@]}"; do
-		echo "Calling OTA for $nspanel"
-		curl -X POST http://"$nspanel"/start_ota_update &> /dev/null
-		if [ "$?" -eq 0 ]; then
-			echo "OTA called for $nspanel!"
-		else
-			echo "Failed to call OTA for $nspanel"
-		fi
-	done
+	if [ -e "nspanels_to_ota.txt" ]; then
+		while read nspanel; do
+			echo "Calling OTA for $nspanel"
+			curl -X POST http://"$nspanel"/start_ota_update &> /dev/null
+			if [ "$?" -eq 0 ]; then
+				echo "OTA called for $nspanel!"
+			else
+				echo "Failed to call OTA for $nspanel"
+			fi
+		done < nspanels_to_ota.txt
+	else
+		echo "ERROR: No 'nspanels_to_ota.txt' file, will not auto-call OTA for any panels."
+		echo "Enter one IP-address per line in 'nspanels_to_ota.txt' to automatically start OTA flash when compilation and upload is complete."
+	fi
 else
 	echo "Something went wrong during upload, will not call OTA!"
 fi
