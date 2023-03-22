@@ -25,7 +25,7 @@ $(document).ready(function() {
             add_html += data.message;
             add_html += "</td>";
             add_html += "</tr>";
-            console.log(add_html);
+            
             var row_count = $('#log_body tr').length;
             if(row_count > 25) {
                 $("#log_body tr:first-child").remove();
