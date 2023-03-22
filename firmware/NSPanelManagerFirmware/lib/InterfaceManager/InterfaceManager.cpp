@@ -413,7 +413,7 @@ void InterfaceManager::_updateAllLights() {
 	std::list<lightConfig*> lights;
     if(this->_currentRoomMode == roomMode::room) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->_cfg.currentRoom->getAllLightsThatAreOn();
+            lights = this->_cfg.currentRoom->getAllLights();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
             lights = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::table_lights) {
@@ -421,7 +421,7 @@ void InterfaceManager::_updateAllLights() {
         }
     } else if (this->_currentRoomMode == roomMode::house) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->_cfg.getAllLightsThatAreOn();
+            lights = this->_cfg.getAllLights();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
             lights = this->_cfg.getCeilingLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::table_lights) {
@@ -587,6 +587,7 @@ void InterfaceManager::_changeMode(roomMode mode)
     {
         NSPanel::instance->setComponentText("home.mode", "UNKNOWN");
     }
+    this->_updatePanelLightStatus();
 }
 
 void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int length)
@@ -762,7 +763,8 @@ void InterfaceManager::_updatePanelLightStatus()
     uint totalKelvinLights = 0;
 
     if(this->_currentEditMode == editLightMode::all_lights || this->_currentEditMode == editLightMode::ceiling_lights) {
-        for (lightConfig &light : this->_cfg.currentRoom->ceilingLights)
+        if(this->_currentRoomMode == roomMode::room) {
+            for (lightConfig &light : this->_cfg.currentRoom->ceilingLights)
             {
                 totalBrightnessLights++;
                 totalBrightness += light.level;
@@ -771,6 +773,17 @@ void InterfaceManager::_updatePanelLightStatus()
                     totalKelvin += light.colorTemperature;
                 }
             }
+        } else if (this->_currentRoomMode == roomMode::house) {
+            for (lightConfig *light : this->_cfg.getAllCeilingLights())
+            {
+                totalBrightnessLights++;
+                totalBrightness += light->level;
+                if(light->canTemperature) {
+                    totalKelvinLights++;
+                    totalKelvin += light->colorTemperature;
+                }
+            }
+        }
     }
 
     uint8_t averageCeilingBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
@@ -784,13 +797,25 @@ void InterfaceManager::_updatePanelLightStatus()
 	totalKelvin = 0;
 	totalKelvinLights = 0;
 	if(this->_currentEditMode == editLightMode::all_lights || this->_currentEditMode == editLightMode::table_lights) {
-        for (lightConfig &light : this->_cfg.currentRoom->tableLights)
-        {
-            totalBrightnessLights++;
-            totalBrightness += light.level;
-            if(light.canTemperature) {
-                totalKelvinLights++;
-                totalKelvin += light.colorTemperature;
+        if(this->_currentRoomMode == roomMode::room) {
+            for (lightConfig &light : this->_cfg.currentRoom->tableLights)
+            {
+                totalBrightnessLights++;
+                totalBrightness += light.level;
+                if(light.canTemperature) {
+                    totalKelvinLights++;
+                    totalKelvin += light.colorTemperature;
+                }
+            }
+        } else if (this->_currentRoomMode == roomMode::house) {
+            for (lightConfig *light : this->_cfg.getAllTableLights())
+            {
+                totalBrightnessLights++;
+                totalBrightness += light->level;
+                if(light->canTemperature) {
+                    totalKelvinLights++;
+                    totalKelvin += light->colorTemperature;
+                }
             }
         }
     }
