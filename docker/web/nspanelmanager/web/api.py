@@ -97,7 +97,7 @@ def get_all_available_light_entities(request):
                 items = []
                 for channel in entity["channels"]:
                     # Check if this thing has a channel that indicates that it might be a light
-                    if "itemType" in channel and (channel["itemType"] == "Dimmer" or channel["itemType"] == "Number" or channel["itemType"] == "Color"):
+                    if "itemType" in channel and (channel["itemType"] == "Dimmer" or channel["itemType"] == "Number" or channel["itemType"] == "Color" or channel["itemType"] == "Switch"):
                         add_entity = True
                     if "linkedItems" in channel:
                         # Add all available items to the list of items for this thing

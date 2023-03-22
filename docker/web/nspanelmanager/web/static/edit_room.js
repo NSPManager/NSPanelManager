@@ -30,13 +30,14 @@ function populate_add_new_light_dialog() {
 function add_new_light_show_light_page(light_element) {
     if ($(this).data("type") == "openhab") {
         $("#openhab_light_options").show();
+
+        // Clear any previous options selected
+        $('#openhab_dimming_channel_name').find("option").remove();
+        $('#openhab_color_temperature_channel_name').find("option").remove();
+        $('#openhab_RGB_channel_name').find("option").remove();
+
         var items = $(this).data("items")
         items.forEach(item => {
-            // Clear any previous options selected
-            $('#openhab_dimming_channel_name').find("option").remove();
-            $('#openhab_color_temperature_channel_name').find("option").remove();
-            $('#openhab_RGB_channel_name').find("option").remove();
-
             // Populate new options selected
             $('#openhab_dimming_channel_name').append($('<option>', {
                 value: item,
