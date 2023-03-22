@@ -42,6 +42,12 @@ struct interfaceConfig
     uint8_t homeScreen = 0;
     std::list<roomConfig> rooms;
     std::list<roomConfig>::iterator currentRoom;
+    std::list<lightConfig*> getCeilingLightsThatAreOn();
+    std::list<lightConfig*> getTableLightsThatAreOn();
+    std::list<lightConfig*> getAllLightsThatAreOn();
+    std::list<lightConfig*> getAllCeilingLights();
+    std::list<lightConfig*> getAllTableLights();
+    std::list<lightConfig*> getAllLights();
 };
 
 struct mqttMessage
@@ -83,12 +89,12 @@ private:
     static void _taskSpecialModeTimer(void *param);
     PubSubClient *_mqttClient;
     roomMode _currentRoomMode;
+    editLightMode _currentEditMode;
     DynamicJsonDocument *_roomDataJson;
     interfaceConfig _cfg;
     unsigned long _lastMasterCeilingLightsButtonTouch;
     unsigned long _lastMasterTableLightsButtonTouch;
     unsigned long _lastSpecialModeEventMillis;
-    editLightMode _currentEditMode;
     void _goToNextRoom();
     void _changeRoom(uint8_t roomId);
     void _updatePanelWithNewRoomInfo();

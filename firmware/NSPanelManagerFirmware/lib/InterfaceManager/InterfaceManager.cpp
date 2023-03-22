@@ -89,6 +89,60 @@ bool roomConfig::anyLightsOn() {
 	return this->anyCeilingLightsOn() || this->anyTableLightstOn();
 }
 
+std::list<lightConfig*> interfaceConfig::getCeilingLightsThatAreOn() {
+    std::list<lightConfig*> returnList;
+    for(roomConfig &room : this->rooms) {
+        std::list<lightConfig*> lights = room.getCeilingLightsThatAreOn();
+        returnList.insert(returnList.end(), lights.begin(), lights.end());
+    }
+    return returnList;
+}
+
+std::list<lightConfig*> interfaceConfig::getTableLightsThatAreOn() {
+    std::list<lightConfig*> returnList;
+    for(roomConfig &room : this->rooms) {
+        std::list<lightConfig*> lights = room.getTableLightsThatAreOn();
+        returnList.insert(returnList.end(), lights.begin(), lights.end());
+    }
+    return returnList;
+}
+
+std::list<lightConfig*> interfaceConfig::getAllLightsThatAreOn() {
+    std::list<lightConfig*> returnList;
+    std::list<lightConfig*> ceilingLightsOn = this->getCeilingLightsThatAreOn();
+    std::list<lightConfig*> tableLightsOn = this->getTableLightsThatAreOn();
+    returnList.insert(returnList.end(), ceilingLightsOn.begin(), ceilingLightsOn.end());
+    returnList.insert(returnList.end(), tableLightsOn.begin(), tableLightsOn.end());
+    return returnList;
+}
+
+std::list<lightConfig*> interfaceConfig::getAllCeilingLights() {
+    std::list<lightConfig*> returnList;
+    for(roomConfig &room : this->rooms) {
+        std::list<lightConfig*> lights = room.getAllCeilingLights();
+        returnList.insert(returnList.end(), lights.begin(), lights.end());
+    }
+    return returnList;
+}
+
+std::list<lightConfig*> interfaceConfig::getAllTableLights() {
+    std::list<lightConfig*> returnList;
+    for(roomConfig &room : this->rooms) {
+        std::list<lightConfig*> lights = room.getAllTableLights();
+        returnList.insert(returnList.end(), lights.begin(), lights.end());
+    }
+    return returnList;
+}
+
+std::list<lightConfig*> interfaceConfig::getAllLights() {
+    std::list<lightConfig*> returnList;
+    std::list<lightConfig*> ceilingLightsOn = this->getAllCeilingLights();
+    std::list<lightConfig*> tableLightsOn = this->getAllTableLights();
+    returnList.insert(returnList.end(), ceilingLightsOn.begin(), ceilingLightsOn.end());
+    returnList.insert(returnList.end(), tableLightsOn.begin(), tableLightsOn.end());
+    return returnList;
+}
+
 void InterfaceManager::init(PubSubClient *mqttClient)
 {
     this->_instance = this;
@@ -265,38 +319,89 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
 
 void InterfaceManager::_ceilingMasterButtonEvent()
 {
-    std::list<lightConfig*> onLights = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
-
-    if(onLights.size() > 0) {
-    	this->_changeLightsToLevel(&onLights, 0);
-    } else {
-    	std::list<lightConfig*> lightList = this->_cfg.currentRoom->getAllCeilingLights();
-    	this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
+    if(this->_currentRoomMode == roomMode::room) {
+        std::list<lightConfig*> onLights = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
+        if(onLights.size() > 0) {
+            this->_changeLightsToLevel(&onLights, 0);
+        } else {
+            std::list<lightConfig*> lightList = this->_cfg.currentRoom->getAllCeilingLights();
+            this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
+        }
+    } else if (this->_currentRoomMode == roomMode::house) {
+        std::list<lightConfig*> onLights;
+        for(roomConfig &room : this->_cfg.rooms) {
+            for(lightConfig *light : room.getCeilingLightsThatAreOn()) {
+                onLights.push_back(light);
+            }
+        }
+        if(onLights.size() > 0) {
+            this->_changeLightsToLevel(&onLights, 0);
+        } else {
+            std::list<lightConfig*> lightList;
+            for(roomConfig &room : this->_cfg.rooms) {
+                for(lightConfig *light : room.getAllCeilingLights()) {
+                    lightList.push_back(light);
+                }
+            }
+            this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
+        }
     }
+
+    
     this->_updatePanelLightStatus();
 }
 
 void InterfaceManager::_tableMasterButtonEvent()
 {
-    std::list<lightConfig*> onLights = this->_cfg.currentRoom->getTableLightsThatAreOn();
+    if(this->_currentRoomMode == roomMode::room) {
+        std::list<lightConfig*> onLights = this->_cfg.currentRoom->getTableLightsThatAreOn();
 
-    if(onLights.size() > 0) {
-		this->_changeLightsToLevel(&onLights, 0);
-	} else {
-		std::list<lightConfig*> lightList = this->_cfg.currentRoom->getAllTableLights();
-		this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
-	}
-    this->_updatePanelLightStatus();
+        if(onLights.size() > 0) {
+            this->_changeLightsToLevel(&onLights, 0);
+        } else {
+            std::list<lightConfig*> lightList = this->_cfg.currentRoom->getAllTableLights();
+            this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
+        }
+        this->_updatePanelLightStatus();
+    } else if (this->_currentRoomMode == roomMode::house) {
+        std::list<lightConfig*> onLights;
+        for(roomConfig &room : this->_cfg.rooms) {
+            for(lightConfig *light : room.getAllTableLights()) {
+                onLights.push_back(light);
+            }
+        }
+        if(onLights.size() > 0) {
+            this->_changeLightsToLevel(&onLights, 0);
+        } else {
+            std::list<lightConfig*> lightList;
+            for(roomConfig &room : this->_cfg.rooms) {
+                for(lightConfig *light : room.getAllTableLights()) {
+                    lightList.push_back(light);
+                }
+            }
+            this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
+        }
+    }
 }
 
 void InterfaceManager::_updateLightsThatAreOn() {
 	std::list<lightConfig*> lights;
-    if(this->_currentEditMode == editLightMode::all_lights) {
-        lights = this->_cfg.currentRoom->getAllLightsThatAreOn();
-    } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-        lights = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
-    } else if (this->_currentEditMode == editLightMode::table_lights) {
-        lights = this->_cfg.currentRoom->getTableLightsThatAreOn();
+    if(this->_currentRoomMode == roomMode::room) {
+        if(this->_currentEditMode == editLightMode::all_lights) {
+            lights = this->_cfg.currentRoom->getAllLightsThatAreOn();
+        } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
+            lights = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
+        } else if (this->_currentEditMode == editLightMode::table_lights) {
+            lights = this->_cfg.currentRoom->getTableLightsThatAreOn();
+        }
+    } else if (this->_currentRoomMode == roomMode::house) {
+        if(this->_currentEditMode == editLightMode::all_lights) {
+            lights = this->_cfg.getAllLightsThatAreOn();
+        } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
+            lights = this->_cfg.getCeilingLightsThatAreOn();
+        } else if (this->_currentEditMode == editLightMode::table_lights) {
+            lights = this->_cfg.getTableLightsThatAreOn();
+        }
     }
 
 	uint8_t newLevel = HomePage::getDimmingValue();
@@ -306,12 +411,22 @@ void InterfaceManager::_updateLightsThatAreOn() {
 
 void InterfaceManager::_updateAllLights() {
 	std::list<lightConfig*> lights;
-    if(this->_currentEditMode == editLightMode::all_lights) {
-        lights = this->_cfg.currentRoom->getAllLightsThatAreOn();
-    } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-        lights = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
-    } else if (this->_currentEditMode == editLightMode::table_lights) {
-        lights = this->_cfg.currentRoom->getTableLightsThatAreOn();
+    if(this->_currentRoomMode == roomMode::room) {
+        if(this->_currentEditMode == editLightMode::all_lights) {
+            lights = this->_cfg.currentRoom->getAllLightsThatAreOn();
+        } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
+            lights = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
+        } else if (this->_currentEditMode == editLightMode::table_lights) {
+            lights = this->_cfg.currentRoom->getTableLightsThatAreOn();
+        }
+    } else if (this->_currentRoomMode == roomMode::house) {
+        if(this->_currentEditMode == editLightMode::all_lights) {
+            lights = this->_cfg.getAllLightsThatAreOn();
+        } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
+            lights = this->_cfg.getCeilingLightsThatAreOn();
+        } else if (this->_currentEditMode == editLightMode::table_lights) {
+            lights = this->_cfg.getTableLightsThatAreOn();
+        }
     }
 
 	uint8_t newLevel = HomePage::getDimmingValue();
@@ -321,12 +436,22 @@ void InterfaceManager::_updateAllLights() {
 
 void InterfaceManager::_updateLightsColorTemp() {
 	std::list<lightConfig*> lights;
-    if(this->_currentEditMode == editLightMode::all_lights) {
-        lights = this->_cfg.currentRoom->getAllLights();
-    } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-        lights = this->_cfg.currentRoom->getAllCeilingLights();
-    } else if (this->_currentEditMode == editLightMode::table_lights) {
-        lights = this->_cfg.currentRoom->getAllTableLights();
+    if(this->_currentRoomMode == roomMode::room) {
+        if(this->_currentEditMode == editLightMode::all_lights) {
+            lights = this->_cfg.currentRoom->getAllLights();
+        } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
+            lights = this->_cfg.currentRoom->getAllCeilingLights();
+        } else if (this->_currentEditMode == editLightMode::table_lights) {
+            lights = this->_cfg.currentRoom->getAllTableLights();
+        }
+    } else if (this->_currentRoomMode == roomMode::house) {
+        if(this->_currentEditMode == editLightMode::all_lights) {
+            lights = this->_cfg.getAllLights();
+        } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
+            lights = this->_cfg.getAllCeilingLights();
+        } else if (this->_currentEditMode == editLightMode::table_lights) {
+            lights = this->_cfg.getAllTableLights();
+        }
     }
 
 	// Get value from panel and calculate for 2000-6500 kelvin. Also inverse value, warm color temperature on top
