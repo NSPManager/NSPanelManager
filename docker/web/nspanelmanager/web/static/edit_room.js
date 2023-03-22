@@ -32,6 +32,12 @@ function add_new_light_show_light_page(light_element) {
         $("#openhab_light_options").show();
         var items = $(this).data("items")
         items.forEach(item => {
+            // Clear any previous options selected
+            $('#openhab_dimming_channel_name').find("option").remove();
+            $('#openhab_color_temperature_channel_name').find("option").remove();
+            $('#openhab_RGB_channel_name').find("option").remove();
+
+            // Populate new options selected
             $('#openhab_dimming_channel_name').append($('<option>', {
                 value: item,
                 text: item
