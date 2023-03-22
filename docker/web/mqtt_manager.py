@@ -3,9 +3,11 @@ import os
 import paho.mqtt.client as mqtt
 from requests import get, post
 from time import sleep
+import datetime
 import json
 import mqtt_manager_libs.home_assistant
 import mqtt_manager_libs.openhab
+import mqtt_manager_libs.websocket_server
 
 settings = {}
 last_settings_file_mtime = 0
@@ -21,11 +23,22 @@ def on_connect(client, userdata, flags, rc):
     print("Connected to MQTT Server")
     # Listen for all events sent to and from panels to control states
     client.subscribe("nspanel/entities/#")
+    client.subscribe("nspanel/+/log")
 
 
 def on_message(client, userdata, msg):
     parts = msg.topic.split('/')
-    if len(parts) >= 5:
+    if parts[len(parts)-1] == "log": # Messages received was a status update (online/offline)
+        message_parts = msg.payload.decode('utf-8').split(':')
+        data = {
+            "type": "log",
+            "time": datetime.datetime.now().strftime("%H:%M:%S"),
+            "panel": parts[1],
+            "level": message_parts[0],
+            "message": ':'.join(message_parts[1:])
+        }
+        mqtt_manager_libs.websocket_server.send_message(json.dumps(data))
+    elif len(parts) >= 5:
         domain = parts[2]
         entity_id = parts[3]
         attribute = parts[4]
@@ -87,6 +100,8 @@ def connect_and_loop():
         mqtt_manager_libs.openhab.connect()
     else:
         print("Home Assistant values not configured, will not connect.")
+    
+    mqtt_manager_libs.websocket_server.start_server()
     
     # Loop MQTT
     client.loop_forever()

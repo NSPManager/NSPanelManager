@@ -22,13 +22,11 @@
     <tbody>
         {% for nspanel in nspanels %}
         <tr>
-            <th>{{ nspanel.friendly_name }}</th>
-            <td><a href="{% url 'edit_room' room_id=nspanel.room.id %}"><span class="tag is-link">
-                        {{ nspanel.room.friendly_name }}</span></a>
+            <th><a href="{% url 'edit_nspanel' panel_id=nspanel.id %}">{{ nspanel.friendly_name }}</a></th>
+            <td><a href="{% url 'edit_room' room_id=nspanel.room.id %}"><span class="tag is-link">{{ nspanel.room.friendly_name }}</span></a>
             </td>
             <td>
-                <a href="http://{{ nspanel.ip_address }}" target="_blank"><span class="tag is-link">
-                        {{ nspanel.ip_address }}</span></a>
+                <a href="http://{{ nspanel.ip_address }}" target="_blank"><span class="tag is-link">{{ nspanel.ip_address }}</span></a>
             </td>
             <td>{{ nspanel.mac_address }}</td>
             <td>{{ nspanel.last_seen }}</td>

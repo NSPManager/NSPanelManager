@@ -94,6 +94,9 @@ def update_room_form(request, room_id: int):
     room.save()
     return redirect('edit_room', room_id=room_id)
 
+def edit_nspanel(request, panel_id: int):
+    panel = NSPanel.objects.get(id=panel_id)
+    return render(request, 'edit_nspanel.html', {'panel': panel})
 
 def remove_light_from_room(request, room_id: int, light_id: int):
     Light.objects.filter(id=light_id).delete()
