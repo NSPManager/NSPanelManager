@@ -27,31 +27,35 @@ def on_connect(client, userdata, flags, rc):
 
 
 def on_message(client, userdata, msg):
-    parts = msg.topic.split('/')
-    if parts[len(parts)-1] == "log": # Messages received was a status update (online/offline)
-        message_parts = msg.payload.decode('utf-8').split(':')
-        data = {
-            "type": "log",
-            "time": datetime.datetime.now().strftime("%H:%M:%S"),
-            "panel": parts[1],
-            "level": message_parts[0],
-            "message": ':'.join(message_parts[1:])
-        }
-        mqtt_manager_libs.websocket_server.send_message(json.dumps(data))
-    elif len(parts) >= 5:
-        domain = parts[2]
-        entity_id = parts[3]
-        attribute = parts[4]
-        if attribute.startswith("state_"):
-            return
+    try:
+        parts = msg.topic.split('/')
+        if parts[len(parts)-1] == "log": # Messages received was a status update (online/offline)
+            message_parts = msg.payload.decode('utf-8').split(':')
+            data = {
+                "type": "log",
+                "time": datetime.datetime.now().strftime("%H:%M:%S"),
+                "panel": parts[1],
+                "level": message_parts[0],
+                "message": ':'.join(message_parts[1:])
+            }
+            mqtt_manager_libs.websocket_server.send_message(json.dumps(data))
+        elif len(parts) >= 5:
+            domain = parts[2]
+            entity_id = parts[3]
+            attribute = parts[4]
+            if attribute.startswith("state_"):
+                return
 
-        if domain == "light":
-            for light in settings["lights"]:
-                if light["name"] == entity_id:
-                    if light["type"] == "home_assistant":
-                        mqtt_manager_libs.home_assistant.set_light_attribute(entity_id, attribute, msg.payload.decode('utf-8'))
-                    elif light["type"] == "openhab":
-                        mqtt_manager_libs.openhab.set_light_attribute(entity_id, attribute, msg.payload.decode('utf-8'))
+            if domain == "light":
+                for light in settings["lights"]:
+                    if light["name"] == entity_id:
+                        if light["type"] == "home_assistant":
+                            mqtt_manager_libs.home_assistant.set_light_attribute(entity_id, attribute, msg.payload.decode('utf-8'))
+                        elif light["type"] == "openhab":
+                            mqtt_manager_libs.openhab.set_light_attribute(entity_id, attribute, msg.payload.decode('utf-8'))
+    except:
+        print("Something went wrong during processing of message:")
+        print(msg.payload.decode('utf-8'))
 
 def get_config():
     global settings

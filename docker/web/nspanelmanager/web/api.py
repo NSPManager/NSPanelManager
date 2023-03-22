@@ -178,5 +178,8 @@ def get_nspanel_config(request):
 
 def reboot_nspanel(request):
     address = request.GET["address"]
-    requests.get(F"http://{address}/do_reboot")
+    try:
+        requests.get(F"http://{address}/do_reboot")
+    except:
+        pass
     return redirect("/")
