@@ -634,6 +634,12 @@ void InterfaceManager::_changeMode(roomMode mode)
 
 void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int length)
 {
+    // If an event has just occured, ignore any new events for 
+    // a while as it makes the display flicker
+    if(millis() < InterfaceManager::_instance->_ignoreMqttStatusUpdatesUntil) {
+        return;
+    }
+
     mqttMessage msg;
     msg.topic = topic;
     msg.payload = std::string((char *)payload, length);
@@ -760,6 +766,9 @@ void InterfaceManager::_changeLightsToLevel(std::list<lightConfig*> *lights, uin
 		light->level = level;
 	}
 
+    // TODO: Make timeout configurable
+    this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
+
     for (lightConfig *light : (*lights))
     {
         std::string topic = "nspanel/entities/light/";
@@ -780,6 +789,9 @@ void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig*> *lights, ui
 			light->colorTemperature = kelvin;
 		}
 	}
+
+    // TODO: Make timeout configurable
+    this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
 
 	// TODO: Implement mechanism to reverse color temp
 	uint16_t sendKelvin = 6000 - (kelvin * 40);

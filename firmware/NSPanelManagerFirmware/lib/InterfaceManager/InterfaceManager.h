@@ -102,6 +102,7 @@ private:
     unsigned long _lastSpecialModeEventMillis;
     editLightMode _triggerSpecialEditLightMode;
     bool _ignoreNextTouchRelease;
+    unsigned long _ignoreMqttStatusUpdatesUntil;
     void _goToNextRoom();
     void _changeRoom(uint8_t roomId);
     void _updatePanelWithNewRoomInfo();
