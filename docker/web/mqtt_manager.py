@@ -55,7 +55,10 @@ def on_message(client, userdata, msg):
                             mqtt_manager_libs.openhab.set_light_attribute(entity_id, attribute, msg.payload.decode('utf-8'))
     except:
         print("Something went wrong during processing of message:")
-        print(msg.payload.decode('utf-8'))
+        try:
+            print(msg.payload.decode('utf-8'))
+        except:
+            print("Something went wrong when processing the exception message, couldn't decode payload to utf-8.")
 
 def get_config():
     global settings

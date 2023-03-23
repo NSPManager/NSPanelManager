@@ -86,15 +86,22 @@ private:
     static inline TaskHandle_t _taskHandleProcessMqttMessages;
     static void _taskProcessMqttMessages(void *param);
     static inline TaskHandle_t _taskHandleSpecialModeTimer;
+    /// @brief Task to auto-stop special light mode after X seconds of no press on the display
     static void _taskSpecialModeTimer(void *param);
+    /// @brief Task to auto-trigger special light mode without having to release finger from display.
+    static void _taskSpecialModeTriggerTask(void *param);
     PubSubClient *_mqttClient;
     roomMode _currentRoomMode;
     editLightMode _currentEditMode;
     DynamicJsonDocument *_roomDataJson;
     interfaceConfig _cfg;
     unsigned long _lastMasterCeilingLightsButtonTouch;
+    unsigned long _lastMasterCeilingLightsButtonRelease;
     unsigned long _lastMasterTableLightsButtonTouch;
+    unsigned long _lastMasterTableLightsButtonRelease;
     unsigned long _lastSpecialModeEventMillis;
+    editLightMode _triggerSpecialEditLightMode;
+    bool _ignoreNextTouchRelease;
     void _goToNextRoom();
     void _changeRoom(uint8_t roomId);
     void _updatePanelWithNewRoomInfo();
@@ -104,8 +111,14 @@ private:
     void _changeMode(roomMode mode);
     bool _getPanelConfig();
     void _processPanelConfig();
+    /// @brief Set current light mode, handle starting/stopping special light mode
+    /// @param mode The mode to set
     void _setEditLightMode(editLightMode mode);
+    /// @brief Will start the special mode timer
     void _startSpecialModeTimer();
+    /// @brief Will start the special mode trigger task
+    /// @param triggerMode The new mode to trigger if sucessful
+    void _startSpecialModeTriggerTask(editLightMode triggerMode);
 
     void _ceilingMasterButtonEvent();
     void _tableMasterButtonEvent();

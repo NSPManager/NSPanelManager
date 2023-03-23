@@ -149,6 +149,11 @@ void InterfaceManager::init(PubSubClient *mqttClient)
     this->_mqttClient = mqttClient;
     this->_mqttClient->setCallback(&InterfaceManager::mqttCallback);
     this->_currentEditMode = editLightMode::all_lights;
+    this->_ignoreNextTouchRelease = false;
+    this->_lastMasterCeilingLightsButtonTouch = 0;
+    this->_lastMasterCeilingLightsButtonRelease = 0;
+    this->_lastMasterTableLightsButtonTouch = 0;
+    this->_lastMasterTableLightsButtonRelease = 0;
     NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
     NSPanel::instance->goToPage("bootscreen");
     xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
@@ -256,6 +261,11 @@ void InterfaceManager::_subscribeToLightTopics(lightConfig *cfg) {
 
 void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
 {
+    if(!pressed && InterfaceManager::_instance->_ignoreNextTouchRelease) {
+        InterfaceManager::_instance->_ignoreNextTouchRelease = false; // Reset block
+        return;
+    }
+
     if (page == HOME_PAGE_ID && !pressed)
     {
         if (component == SWITCH_ROOM_BUTTON_ID)
@@ -268,27 +278,13 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         }
         else if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
-            // TODO: Make configurable
-            // TODO: Make it so that, to trigger the event, you dont have to release the button
-            if(millis() - InterfaceManager::_instance->_lastMasterCeilingLightsButtonTouch <= 300) {
-                // It was a simple touch
-                InterfaceManager::_instance->_ceilingMasterButtonEvent();
-            } else {
-                // The "button" was held down
-                InterfaceManager::_instance->_setEditLightMode(editLightMode::ceiling_lights);
-            }
+            InterfaceManager::_instance->_lastMasterCeilingLightsButtonRelease = millis();
+            InterfaceManager::_instance->_ceilingMasterButtonEvent();
         }
         else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
 		{
-            // TODO: Make configurable
-            // TODO: Make it so that, to trigger the event, you dont have to release the button
-            if(millis() - InterfaceManager::_instance->_lastMasterTableLightsButtonTouch <= 300) {
-                // It was a simple touch
-                InterfaceManager::_instance->_tableMasterButtonEvent();
-            } else {
-                // The "button" was held down
-                InterfaceManager::_instance->_setEditLightMode(editLightMode::table_lights);
-            }
+            InterfaceManager::_instance->_lastMasterTableLightsButtonRelease = millis();
+            InterfaceManager::_instance->_tableMasterButtonEvent();
 		}
         else if (component == LIGHT_LEVEL_CHANGE_BUTTON_ID)
         {
@@ -308,10 +304,12 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
             InterfaceManager::_instance->_lastMasterCeilingLightsButtonTouch = millis();
+            InterfaceManager::_instance->_startSpecialModeTriggerTask(editLightMode::ceiling_lights);
         }
         else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
 		{
 			InterfaceManager::_instance->_lastMasterTableLightsButtonTouch = millis();
+            InterfaceManager::_instance->_startSpecialModeTriggerTask(editLightMode::table_lights);
 		}
         LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
     } else {
@@ -500,6 +498,38 @@ void InterfaceManager::_taskSpecialModeTimer(void* param) {
     }
     InterfaceManager::_instance->_setEditLightMode(editLightMode::all_lights);
     InterfaceManager::_taskHandleSpecialModeTimer = NULL;
+    vTaskDelete(NULL); // Task is complete, stop task
+}
+
+void InterfaceManager::_startSpecialModeTriggerTask(editLightMode triggerMode) {
+    this->_triggerSpecialEditLightMode = triggerMode;
+    xTaskCreatePinnedToCore(_taskSpecialModeTriggerTask, "taskSpecialModeTriggerTask", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+}
+
+void InterfaceManager::_taskSpecialModeTriggerTask(void* param) {
+    unsigned long start = millis();
+    unsigned long lastRelease;
+    if(InterfaceManager::_instance->_triggerSpecialEditLightMode == editLightMode::ceiling_lights) {
+        lastRelease = InterfaceManager::_instance->_lastMasterCeilingLightsButtonRelease;
+    } else if(InterfaceManager::_instance->_triggerSpecialEditLightMode == editLightMode::table_lights) {
+        lastRelease = InterfaceManager::_instance->_lastMasterTableLightsButtonRelease;
+    }
+
+    // TODO: Make trigger time configurable
+    vTaskDelay(300 / portTICK_PERIOD_MS);
+
+    if(InterfaceManager::_instance->_triggerSpecialEditLightMode == editLightMode::ceiling_lights) {
+        if(lastRelease == InterfaceManager::_instance->_lastMasterCeilingLightsButtonRelease) {
+            InterfaceManager::_instance->_ignoreNextTouchRelease = true;
+            InterfaceManager::_instance->_setEditLightMode(editLightMode::ceiling_lights);
+        }
+    } else if(InterfaceManager::_instance->_triggerSpecialEditLightMode == editLightMode::table_lights) {
+        if(lastRelease == InterfaceManager::_instance->_lastMasterTableLightsButtonRelease) {
+            InterfaceManager::_instance->_ignoreNextTouchRelease = true;    
+            InterfaceManager::_instance->_setEditLightMode(editLightMode::table_lights);
+        }
+    }
+
     vTaskDelete(NULL); // Task is complete, stop task
 }
 
