@@ -154,6 +154,7 @@ void InterfaceManager::init(PubSubClient *mqttClient)
     this->_lastMasterCeilingLightsButtonRelease = 0;
     this->_lastMasterTableLightsButtonTouch = 0;
     this->_lastMasterTableLightsButtonRelease = 0;
+    this->_isFingerOnDisplay = false;
     NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
     NSPanel::instance->goToPage("bootscreen");
     xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
@@ -261,6 +262,8 @@ void InterfaceManager::_subscribeToLightTopics(lightConfig *cfg) {
 
 void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
 {
+    InterfaceManager::_instance->_isFingerOnDisplay = pressed;
+
     if(!pressed && InterfaceManager::_instance->_ignoreNextTouchRelease) {
         InterfaceManager::_instance->_ignoreNextTouchRelease = false; // Reset block
         return;
@@ -278,11 +281,13 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         }
         else if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
+            InterfaceManager::_instance->_lastSpecialModeEventMillis = millis();
             InterfaceManager::_instance->_lastMasterCeilingLightsButtonRelease = millis();
             InterfaceManager::_instance->_ceilingMasterButtonEvent();
         }
         else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
 		{
+            InterfaceManager::_instance->_lastSpecialModeEventMillis = millis();
             InterfaceManager::_instance->_lastMasterTableLightsButtonRelease = millis();
             InterfaceManager::_instance->_tableMasterButtonEvent();
 		}
@@ -294,8 +299,10 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         	} else {
         		InterfaceManager::_instance->_updateAllLights();
         	}
+            InterfaceManager::_instance->_lastSpecialModeEventMillis = millis();
         } else if (component == LIGHT_COLOR_CHANGE_BUTTON_ID) {
         	InterfaceManager::_instance->_updateLightsColorTemp();
+            InterfaceManager::_instance->_lastSpecialModeEventMillis = millis();
         } else if (component == ROOM_BUTTON_ID) {
             // Show page with all lights
             NSPanel::instance->goToPage("Room1");
@@ -493,8 +500,14 @@ void InterfaceManager::_startSpecialModeTimer() {
 
 void InterfaceManager::_taskSpecialModeTimer(void* param) {
     // Wait until no event has occured for 5 seconds before returning to normal mode
-    while(millis() < InterfaceManager::_instance->_lastSpecialModeEventMillis + 5000) {
-        vTaskDelay((InterfaceManager::_instance->_lastSpecialModeEventMillis + 5000 - millis()) / portTICK_PERIOD_MS);
+    while(true) {
+        // TODO: Make timeout configurable
+        if(!InterfaceManager::_instance->_isFingerOnDisplay && millis() > InterfaceManager::_instance->_lastSpecialModeEventMillis + 5000) {
+            break;
+        } else if(!InterfaceManager::_instance->_isFingerOnDisplay && millis() > InterfaceManager::_instance->_lastSpecialModeEventMillis + 5000) {
+            InterfaceManager::_instance->_lastSpecialModeEventMillis = millis();
+        }
+        vTaskDelay(250 / portTICK_PERIOD_MS);
     }
     InterfaceManager::_instance->_setEditLightMode(editLightMode::all_lights);
     InterfaceManager::_taskHandleSpecialModeTimer = NULL;

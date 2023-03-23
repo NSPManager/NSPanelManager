@@ -102,6 +102,8 @@ private:
     unsigned long _lastSpecialModeEventMillis;
     editLightMode _triggerSpecialEditLightMode;
     bool _ignoreNextTouchRelease;
+    /// @brief Flag of what state the last event was, is the finger still on the display?
+    bool _isFingerOnDisplay;
     unsigned long _ignoreMqttStatusUpdatesUntil;
     void _goToNextRoom();
     void _changeRoom(uint8_t roomId);
