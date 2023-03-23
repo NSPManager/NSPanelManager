@@ -2,10 +2,8 @@
 *.pyc
 docker/web/db.sqlite3
 docker/web/nspanelmanager/firmware.bin
-docker/web/nspanelmanager/littlefs.bin
-docker/web/nspanelmanager/db.sqlite3
-docker/web/nspanelmanager/firmware.bin
 docker/web/nspanelmanager/data_file.bin
+docker/web/nspanelmanager/db.sqlite3
 firmware/NSPanelManagerFirmware/data/config.json
 firmware/NSPanelManagerFirmware/.pio
 firmware/NSPanelManagerFirmware/littlefs.md5
