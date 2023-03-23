@@ -360,26 +360,15 @@ void InterfaceManager::_ceilingMasterButtonEvent()
             this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
         }
     } else if (this->_currentRoomMode == roomMode::house) {
-        std::list<lightConfig*> onLights;
-        for(roomConfig &room : this->_cfg.rooms) {
-            for(lightConfig *light : room.getCeilingLightsThatAreOn()) {
-                onLights.push_back(light);
-            }
-        }
+        std::list<lightConfig*> onLights = this->_cfg.getCeilingLightsThatAreOn();
         if(onLights.size() > 0) {
             this->_changeLightsToLevel(&onLights, 0);
         } else {
-            std::list<lightConfig*> lightList;
-            for(roomConfig &room : this->_cfg.rooms) {
-                for(lightConfig *light : room.getAllCeilingLights()) {
-                    lightList.push_back(light);
-                }
-            }
+            std::list<lightConfig*> lightList = this->_cfg.getAllCeilingLights();
             this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
         }
     }
 
-    
     this->_updatePanelLightStatus();
 }
 
@@ -396,24 +385,16 @@ void InterfaceManager::_tableMasterButtonEvent()
         }
         this->_updatePanelLightStatus();
     } else if (this->_currentRoomMode == roomMode::house) {
-        std::list<lightConfig*> onLights;
-        for(roomConfig &room : this->_cfg.rooms) {
-            for(lightConfig *light : room.getAllTableLights()) {
-                onLights.push_back(light);
-            }
-        }
+        std::list<lightConfig*> onLights = this->_cfg.getTableLightsThatAreOn();
         if(onLights.size() > 0) {
             this->_changeLightsToLevel(&onLights, 0);
         } else {
-            std::list<lightConfig*> lightList;
-            for(roomConfig &room : this->_cfg.rooms) {
-                for(lightConfig *light : room.getAllTableLights()) {
-                    lightList.push_back(light);
-                }
-            }
+            std::list<lightConfig*> lightList = this->_cfg.getAllTableLights();
             this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
         }
     }
+    
+    this->_updatePanelLightStatus();
 }
 
 void InterfaceManager::_updateLightsThatAreOn() {
@@ -799,11 +780,6 @@ void InterfaceManager::_setLightColorTemperature(std::string light, uint8_t leve
 
 void InterfaceManager::_changeLightsToLevel(std::list<lightConfig*> *lights, uint8_t level)
 {
-	for (lightConfig *light : (*lights))
-	{
-		light->level = level;
-	}
-
     // TODO: Make timeout configurable
     this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
 
@@ -812,8 +788,10 @@ void InterfaceManager::_changeLightsToLevel(std::list<lightConfig*> *lights, uin
         std::string topic = "nspanel/entities/light/";
         topic.append(light->name);
         topic.append("/brightness_pct");
-        if(!this->_mqttClient->publish(topic.c_str(), std::to_string(level).c_str())) {
-        	LOG_ERROR("Failed to send light update!");
+        if(this->_mqttClient->publish(topic.c_str(), std::to_string(level).c_str())) {
+            light->level = level;
+        } else {
+            LOG_ERROR("Failed to send light update!");
         }
         vTaskDelay(5 / portTICK_PERIOD_MS);
     }
@@ -821,13 +799,6 @@ void InterfaceManager::_changeLightsToLevel(std::list<lightConfig*> *lights, uin
 
 void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig*> *lights, uint16_t kelvin)
 {
-	for (lightConfig *light : (*lights))
-	{
-		if(light->canTemperature) {
-			light->colorTemperature = kelvin;
-		}
-	}
-
     // TODO: Make timeout configurable
     this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
 
@@ -836,12 +807,15 @@ void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig*> *lights, ui
     for (lightConfig *light : (*lights))
     {
     	if(light->canTemperature) {
+            
     		std::string topic = "nspanel/entities/light/";
 			topic.append(light->name);
 			topic.append("/kelvin");
-			if(!this->_mqttClient->publish(topic.c_str(), std::to_string(sendKelvin).c_str())) {
-				LOG_ERROR("Failed to send light update!");
-			}
+			if(this->_mqttClient->publish(topic.c_str(), std::to_string(sendKelvin).c_str())) {
+                light->colorTemperature = kelvin;
+			} else {
+                LOG_ERROR("Failed to send light update!");
+            }
     	}
         vTaskDelay(5 / portTICK_PERIOD_MS);
     }
