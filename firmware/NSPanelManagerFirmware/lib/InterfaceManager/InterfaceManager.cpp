@@ -143,6 +143,28 @@ std::list<lightConfig*> interfaceConfig::getAllLights() {
     return returnList;
 }
 
+bool interfaceConfig::anyCeilingLightsOn() {
+    for(roomConfig &room : this->rooms) {
+        if(room.anyCeilingLightsOn()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool interfaceConfig::anyTableLightstOn() {
+	for(roomConfig &room : this->rooms) {
+        if(room.anyTableLightstOn()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool interfaceConfig::anyLightsOn() {
+	return this->anyCeilingLightsOn() || this->anyTableLightstOn();
+}
+
 void InterfaceManager::init(PubSubClient *mqttClient)
 {
     this->_instance = this;
@@ -294,11 +316,14 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         else if (component == LIGHT_LEVEL_CHANGE_BUTTON_ID)
         {
             // Dimmer slider changed
-        	if(InterfaceManager::_instance->_cfg.currentRoom->anyLightsOn()) {
-        		InterfaceManager::_instance->_updateLightsThatAreOn();
-        	} else {
-        		InterfaceManager::_instance->_updateAllLights();
-        	}
+            if(InterfaceManager::_instance->_currentRoomMode == roomMode::room && InterfaceManager::_instance->_cfg.currentRoom->anyLightsOn()) {
+                InterfaceManager::_instance->_updateLightsThatAreOn();
+            } else if(InterfaceManager::_instance->_currentRoomMode == roomMode::house && InterfaceManager::_instance->_cfg.anyLightsOn()) {
+                InterfaceManager::_instance->_updateLightsThatAreOn();
+            } else {
+                InterfaceManager::_instance->_updateAllLights();
+            }
+        	
             InterfaceManager::_instance->_lastSpecialModeEventMillis = millis();
         } else if (component == LIGHT_COLOR_CHANGE_BUTTON_ID) {
         	InterfaceManager::_instance->_updateLightsColorTemp();

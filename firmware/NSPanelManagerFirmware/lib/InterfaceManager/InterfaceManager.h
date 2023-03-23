@@ -48,6 +48,9 @@ struct interfaceConfig
     std::list<lightConfig*> getAllCeilingLights();
     std::list<lightConfig*> getAllTableLights();
     std::list<lightConfig*> getAllLights();
+    bool anyCeilingLightsOn();
+    bool anyTableLightstOn();
+    bool anyLightsOn();
 };
 
 struct mqttMessage
