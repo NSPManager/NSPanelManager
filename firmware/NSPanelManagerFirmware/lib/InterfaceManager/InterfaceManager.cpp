@@ -269,6 +269,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         else if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
             // TODO: Make configurable
+            // TODO: Make it so that, to trigger the event, you dont have to release the button
             if(millis() - InterfaceManager::_instance->_lastMasterCeilingLightsButtonTouch <= 300) {
                 // It was a simple touch
                 InterfaceManager::_instance->_ceilingMasterButtonEvent();
@@ -280,6 +281,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
 		{
             // TODO: Make configurable
+            // TODO: Make it so that, to trigger the event, you dont have to release the button
             if(millis() - InterfaceManager::_instance->_lastMasterTableLightsButtonTouch <= 300) {
                 // It was a simple touch
                 InterfaceManager::_instance->_tableMasterButtonEvent();
@@ -466,7 +468,17 @@ void InterfaceManager::_setEditLightMode(editLightMode mode) {
     if(mode == editLightMode::all_lights) {
         HomePage::setSliderLightLevelColor(23243); // Reset to normal color
         HomePage::setSliderColorTempColor(23243);  // Reset to normal color
+        HomePage::setHighlightCeilingVisibility(false);
+        HomePage::setHighlightTableVisibility(false);
     } else {
+        if(mode == editLightMode::ceiling_lights) {
+            HomePage::setHighlightCeilingVisibility(true);
+            HomePage::setHighlightTableVisibility(false);
+        } else if(mode == editLightMode::table_lights) {
+            HomePage::setHighlightTableVisibility(true);
+            HomePage::setHighlightCeilingVisibility(false);
+        }
+
         HomePage::setSliderLightLevelColor(65024); // Change slider color to indicate special mode
         HomePage::setSliderColorTempColor(65024);  // Change slider color to indicate special mode
     }

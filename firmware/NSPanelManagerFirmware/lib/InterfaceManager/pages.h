@@ -23,6 +23,8 @@ public:
 	static void setTableLightsState(bool state);
 	static void setSliderLightLevelColor(uint color);
 	static void setSliderColorTempColor(uint color);
+	static void setHighlightCeilingVisibility(bool visable);
+	static void setHighlightTableVisibility(bool visable);
 };
 
 

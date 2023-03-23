@@ -7,6 +7,9 @@
 #define TABLE_LIGHTS_MASTER_BUTTON_ID 21
 #define ROOM_BUTTON_ID 5
 
+
+#define HOME_PIC_HIGHLIGHT_CEILING_NAME "p_lockceiling" // Should not have "home." in front as visibility command for Nextion is not as other commands
+#define HOME_PIC_HIGHLIGHT_TABLE_NAME "p_locktable"     // Should not have "home." in front as visibility command for Nextion is not as other commands
 #define HOME_PAGE_NAME "home"
 #define HOME_DIMMER_SLIDER_NAME "home.s_brightness"
 #define HOME_COLOR_TEMP_SLIDER_NAME "home.s_kelvin"

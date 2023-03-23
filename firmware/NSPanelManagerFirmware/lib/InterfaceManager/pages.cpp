@@ -54,3 +54,11 @@ void HomePage::setSliderLightLevelColor(uint color) {
 void HomePage::setSliderColorTempColor(uint color) {
 	NSPanel::instance->setComponentForegroundColor(HOME_COLOR_TEMP_SLIDER_NAME, color);
 }
+
+void HomePage::setHighlightCeilingVisibility(bool visibility) {
+	NSPanel::instance->setComponentVisible(HOME_PIC_HIGHLIGHT_CEILING_NAME, visibility);
+}
+
+void HomePage::setHighlightTableVisibility(bool visibility) {
+	NSPanel::instance->setComponentVisible(HOME_PIC_HIGHLIGHT_TABLE_NAME, visibility);
+}

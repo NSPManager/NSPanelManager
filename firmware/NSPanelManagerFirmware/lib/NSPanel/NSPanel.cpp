@@ -70,6 +70,15 @@ void NSPanel::setComponentForegroundColor(const char *componentId, uint value)
     this->_sendCommandWithoutResponse(cmd.c_str());
 }
 
+void NSPanel::setComponentVisible(const char *componentId, bool visible)
+{
+    std::string cmd = "vis ";
+    cmd.append(componentId);
+    cmd.append(",");
+    cmd.append(visible ? "1" : "0");
+    this->_sendCommandWithoutResponse(cmd.c_str());
+}
+
 int NSPanel::getComponentIntVal(const char* componentId) {
 	// Wait for command queue to clear
 	while(this->_commandQueue.size() > 0) {

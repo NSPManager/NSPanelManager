@@ -1,4 +1,4 @@
-$(document).ready(function() {
+function connect_to_websocket() {
     webSocket = new WebSocket("ws://" + location.hostname + ":8001", "proto1");
 
     webSocket.onmessage = (event) => {
@@ -35,4 +35,15 @@ $(document).ready(function() {
 
         }
     }
+
+    webSocket.onclose = (event) => {
+        console.log("Connected to websocket closed, trying in 1 second");
+        setTimeout(function() {
+            connect_to_websocket();
+        }, 1000);
+    };
+}
+
+$(document).ready(function() {
+    connect_to_websocket(); 
 });
