@@ -5,12 +5,25 @@
 NSPanelManager_address="127.0.0.1"
 NSPanelManager_port="8000"
 
-# Update version file.
-current_version="$(grep -oE "[0-9\.]+" include/nspm-bin-version.h)"
-current_major_version="$(echo $current_version | cut -d . -f 1,2)"
-current_minor_version="$(echo $current_version | cut -d . -f 3)"
-current_minor_version="$((current_minor_version+1))"
-echo "#define NSPanelManagerFirmwareVersion \"$current_major_version.$current_minor_version\"" > include/nspm-bin-version.h
+function update_panel_version() {
+	# Update version file.
+	echo "Updating version number"
+	current_version="$(grep -oE "[0-9\.]+" include/nspm-bin-version.h)"
+	current_major_version="$(echo $current_version | cut -d . -f 1,2)"
+	current_minor_version="$(echo $current_version | cut -d . -f 3)"
+	current_minor_version="$((current_minor_version+1))"
+	echo "#define NSPanelManagerFirmwareVersion \"$current_major_version.$current_minor_version\"" > include/nspm-bin-version.h
+}
+
+if [ $# -ne 0 ]; then
+	if [ "$1" != "--no-ver" ]; then
+		update_panel_version
+	else
+		echo "Will not increase version number."
+	fi
+else
+	update_panel_version
+fi
 
 # Build firmware and LittleFS
 platformio run --environment esp32dev
