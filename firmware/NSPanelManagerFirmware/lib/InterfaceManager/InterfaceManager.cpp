@@ -51,7 +51,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
 
     NSPanel::instance->setComponentText("bootscreen.t_loading", "Loading config...");
 
-    InterfaceManager::_instance->_roomDataJson = new DynamicJsonDocument(2048);
+    InterfaceManager::_instance->_roomDataJson = new DynamicJsonDocument(4096);
     uint8_t tries = 0;
     bool successDownloadingConfig = false;
     do
@@ -406,6 +406,10 @@ void InterfaceManager::_taskSpecialModeTriggerTask(void* param) {
 void InterfaceManager::_processPanelConfig()
 {
     this->_cfg.homeScreen = (*this->_roomDataJson)["home"].as<uint8_t>();
+    this->_cfg.colorTempMin = (*this->_roomDataJson)["color_temp_min"].as<uint16_t>();
+    this->_cfg.colorTempMax = (*this->_roomDataJson)["color_temp_min"].as<uint16_t>();
+    this->_cfg.reverseColorTempSlider = (*this->_roomDataJson)["reverse_color_temp"].as<bool>();
+    this->_cfg.raiseToMaxLightLevelAbove = (*this->_roomDataJson)["raise_to_100_light_level"].as<bool>();
     for (JsonPair kv : (*this->_roomDataJson)["rooms"].as<JsonObject>())
     {
         roomConfig roomCfg;
