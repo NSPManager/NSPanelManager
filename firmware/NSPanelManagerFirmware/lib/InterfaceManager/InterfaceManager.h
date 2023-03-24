@@ -77,9 +77,19 @@ class InterfaceManager
 {
 public:
     void init(PubSubClient *mqttClient);
-    static void processTouchEvent(uint8_t, uint8_t, bool);
+    /// @brief Callback for when a touch event occurs on the screen
+    /// @param page Page
+    /// @param component Component
+    /// @param pressed Pressed
+    static void processTouchEvent(uint8_t page, uint8_t component, bool pressed);
+    /// @brief Callback for when the screen goes to sleep
+    static void processSleepEvent();
+    /// @brief Callback for when an entity update comes from MQTT
+    /// @param topic The topic on which the payload was received
+    /// @param payload The payload
+    /// @param length Length of the payload
     static void mqttCallback(char *topic, byte *payload, unsigned int length);
-    static uint8_t roundToNearest(uint8_t original, uint8_t step);
+    /// @brief This function is called whenevent MQTT is connected. Subscribe to all entity status topics
     static void subscribeToMqttTopics();
 
 private:

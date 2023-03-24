@@ -213,6 +213,11 @@ void NSPanel::attachTouchEventCallback(void (*callback)(uint8_t, uint8_t, bool))
     NSPanel::_touchEventCallback = callback;
 }
 
+void NSPanel::attachSleepCallback(void (*callback)())
+{
+    NSPanel::_sleepCallback = callback;
+}
+
 void NSPanel::_taskReadNSPanelData(void *param)
 {
     LOG_INFO("Starting taskReadNSPanelData.");
@@ -249,6 +254,9 @@ void NSPanel::_taskProcessPanelOutput(void* param) {
 					case NEX_OUT_TOUCH_EVENT:
 						NSPanel::_touchEventCallback(itemPayload[1], itemPayload[2], itemPayload[3] == 0x01);
 						break;
+					
+					case NEX_OUT_SLEEP:
+						NSPanel::_sleepCallback();
 
 					default:
 						LOG_DEBUG("Read type ", String(itemPayload[0], HEX).c_str());

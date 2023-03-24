@@ -178,6 +178,7 @@ void InterfaceManager::init(PubSubClient *mqttClient)
     this->_lastMasterTableLightsButtonRelease = 0;
     this->_isFingerOnDisplay = false;
     NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
+    NSPanel::attachSleepCallback(InterfaceManager::processSleepEvent);
     NSPanel::instance->goToPage("bootscreen");
     xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 }
@@ -280,6 +281,16 @@ void InterfaceManager::_subscribeToLightTopics(lightConfig *cfg) {
 		colorTempStateTopic.append("/state_kelvin");
 		this->_mqttClient->subscribe(colorTempStateTopic.c_str());
 	}
+}
+
+void InterfaceManager::processSleepEvent() {
+    LOG_DEBUG("Display went to sleep, resetting display to default.");
+    // Display went to sleep, reset everything
+    InterfaceManager::_instance->_isFingerOnDisplay = false; // Reset in case it got stuck
+    InterfaceManager::_instance->_changeRoom(InterfaceManager::_instance->_cfg.homeScreen);
+    InterfaceManager::_instance->_changeMode(roomMode::room);
+    InterfaceManager::_instance->_setEditLightMode(editLightMode::all_lights);
+    InterfaceManager::_instance->_updatePanelLightStatus();
 }
 
 void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
@@ -1013,11 +1024,4 @@ bool InterfaceManager::_getPanelConfig()
         client.flush();
     }
     return false;
-}
-
-uint8_t InterfaceManager::roundToNearest(uint8_t original, uint8_t step)
-{
-    uint8_t lower = (original / step) * step;
-    uint8_t upper = original + step;
-    return (original - lower > upper - original) ? upper : lower;
 }
