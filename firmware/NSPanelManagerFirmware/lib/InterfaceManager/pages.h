@@ -5,11 +5,11 @@
  *      Author: Tim Panajott
  */
 
-#include <Arduino.h>
-
 #ifndef LIB_INTERFACEMANAGER_PAGES_H_
 #define LIB_INTERFACEMANAGER_PAGES_H_
 
+#include <Arduino.h>
+#include <InterfaceManager.h>
 
 class HomePage {
 public:

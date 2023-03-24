@@ -7,7 +7,7 @@
 
 void InterfaceManager::init(PubSubClient *mqttClient)
 {
-    this->_instance = this;
+    this->instance = this;
     this->_mqttClient = mqttClient;
     this->_mqttClient->setCallback(&InterfaceManager::mqttCallback);
     this->_currentEditMode = editLightMode::all_lights;
@@ -26,7 +26,7 @@ void InterfaceManager::init(PubSubClient *mqttClient)
 void InterfaceManager::_taskLoadConfigAndInit(void *param)
 {
     unsigned long start = millis();
-    while (!WiFi.isConnected() || !InterfaceManager::_instance->_mqttClient->connected())
+    while (!WiFi.isConnected() || !InterfaceManager::instance->_mqttClient->connected())
     {
         if (!WiFi.isConnected())
         {
@@ -36,7 +36,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
                 NSPanel::instance->setComponentText("bootscreen.t_loading", "Connecting to WiFi...");
             }
         }
-        else if (!InterfaceManager::_instance->_mqttClient->connected())
+        else if (!InterfaceManager::instance->_mqttClient->connected())
         {
             NSPanel::instance->setComponentText("bootscreen.t_loading", "Connecting to MQTT...");
         }
@@ -51,12 +51,12 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
 
     NSPanel::instance->setComponentText("bootscreen.t_loading", "Loading config...");
 
-    InterfaceManager::_instance->_roomDataJson = new DynamicJsonDocument(4096);
+    InterfaceManager::instance->_roomDataJson = new DynamicJsonDocument(4096);
     uint8_t tries = 0;
     bool successDownloadingConfig = false;
     do
     {
-        successDownloadingConfig = InterfaceManager::_instance->_getPanelConfig();
+        successDownloadingConfig = InterfaceManager::instance->_getPanelConfig();
         if (!successDownloadingConfig)
         {
             tries++;
@@ -74,11 +74,11 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
         }
     } while (!successDownloadingConfig);
     // Config downloaded, process the raw data
-    InterfaceManager::_instance->_processPanelConfig();
-    delete InterfaceManager::_instance->_roomDataJson; // All JSON-data processed, delete data from memory
+    InterfaceManager::instance->_processPanelConfig();
+    delete InterfaceManager::instance->_roomDataJson; // All JSON-data processed, delete data from memory
 
     // Set some default values before showing page
-    InterfaceManager::_instance->_changeMode(roomMode::room);
+    InterfaceManager::instance->_changeMode(roomMode::room);
 
     // Start task for MQTT processing
     xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskLoadConfigAndInit", 5000, NULL, 1, &InterfaceManager::_taskHandleProcessMqttMessages, CONFIG_ARDUINO_RUNNING_CORE);
@@ -93,16 +93,16 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
 
 void InterfaceManager::subscribeToMqttTopics() {
 	// Every light in every room
-	for (roomConfig &roomCfg : InterfaceManager::_instance->_cfg.rooms)
+	for (roomConfig &roomCfg : InterfaceManager::instance->_cfg.rooms)
 	{
 		for (lightConfig &lightCfg : roomCfg.ceilingLights)
 		{
-			InterfaceManager::_instance->_subscribeToLightTopics(&lightCfg);
+			InterfaceManager::instance->_subscribeToLightTopics(&lightCfg);
 			vTaskDelay(10 / portTICK_PERIOD_MS);
 		}
 		for (lightConfig &lightCfg : roomCfg.tableLights)
 		{
-			InterfaceManager::_instance->_subscribeToLightTopics(&lightCfg);
+			InterfaceManager::instance->_subscribeToLightTopics(&lightCfg);
 			vTaskDelay(10 / portTICK_PERIOD_MS);
 		}
 	}
@@ -126,19 +126,19 @@ void InterfaceManager::_subscribeToLightTopics(lightConfig *cfg) {
 void InterfaceManager::processSleepEvent() {
     LOG_DEBUG("Display went to sleep, resetting display to default.");
     // Display went to sleep, reset everything
-    InterfaceManager::_instance->_isFingerOnDisplay = false; // Reset in case it got stuck
-    InterfaceManager::_instance->_changeRoom(InterfaceManager::_instance->_cfg.homeScreen);
-    InterfaceManager::_instance->_changeMode(roomMode::room);
-    InterfaceManager::_instance->_setEditLightMode(editLightMode::all_lights);
-    InterfaceManager::_instance->_updatePanelLightStatus();
+    InterfaceManager::instance->_isFingerOnDisplay = false; // Reset in case it got stuck
+    InterfaceManager::instance->_changeRoom(InterfaceManager::instance->_cfg.homeScreen);
+    InterfaceManager::instance->_changeMode(roomMode::room);
+    InterfaceManager::instance->_setEditLightMode(editLightMode::all_lights);
+    InterfaceManager::instance->_updatePanelLightStatus();
 }
 
 void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
 {
-    InterfaceManager::_instance->_isFingerOnDisplay = pressed;
+    InterfaceManager::instance->_isFingerOnDisplay = pressed;
 
-    if(!pressed && InterfaceManager::_instance->_ignoreNextTouchRelease) {
-        InterfaceManager::_instance->_ignoreNextTouchRelease = false; // Reset block
+    if(!pressed && InterfaceManager::instance->_ignoreNextTouchRelease) {
+        InterfaceManager::instance->_ignoreNextTouchRelease = false; // Reset block
         return;
     }
 
@@ -146,39 +146,39 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
     {
         if (component == SWITCH_ROOM_BUTTON_ID)
         {
-            InterfaceManager::_instance->_goToNextRoom();
+            InterfaceManager::instance->_goToNextRoom();
         }
         else if (component == SWITCH_MODE_BUTTON_ID)
         {
-            InterfaceManager::_instance->_goToNextMode();
+            InterfaceManager::instance->_goToNextMode();
         }
         else if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
-            InterfaceManager::_instance->_lastSpecialModeEventMillis = millis();
-            InterfaceManager::_instance->_lastMasterCeilingLightsButtonRelease = millis();
-            InterfaceManager::_instance->_ceilingMasterButtonEvent();
+            InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
+            InterfaceManager::instance->_lastMasterCeilingLightsButtonRelease = millis();
+            InterfaceManager::instance->_ceilingMasterButtonEvent();
         }
         else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
 		{
-            InterfaceManager::_instance->_lastSpecialModeEventMillis = millis();
-            InterfaceManager::_instance->_lastMasterTableLightsButtonRelease = millis();
-            InterfaceManager::_instance->_tableMasterButtonEvent();
+            InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
+            InterfaceManager::instance->_lastMasterTableLightsButtonRelease = millis();
+            InterfaceManager::instance->_tableMasterButtonEvent();
 		}
         else if (component == LIGHT_LEVEL_CHANGE_BUTTON_ID)
         {
             // Dimmer slider changed
-            if(InterfaceManager::_instance->_currentRoomMode == roomMode::room && InterfaceManager::_instance->_cfg.currentRoom->anyLightsOn()) {
-                InterfaceManager::_instance->_updateLightsThatAreOn();
-            } else if(InterfaceManager::_instance->_currentRoomMode == roomMode::house && InterfaceManager::_instance->_cfg.anyLightsOn()) {
-                InterfaceManager::_instance->_updateLightsThatAreOn();
+            if(InterfaceManager::instance->_currentRoomMode == roomMode::room && InterfaceManager::instance->_cfg.currentRoom->anyLightsOn()) {
+                InterfaceManager::instance->_updateLightsThatAreOn();
+            } else if(InterfaceManager::instance->_currentRoomMode == roomMode::house && InterfaceManager::instance->_cfg.anyLightsOn()) {
+                InterfaceManager::instance->_updateLightsThatAreOn();
             } else {
-                InterfaceManager::_instance->_updateAllLights();
+                InterfaceManager::instance->_updateAllLights();
             }
         	
-            InterfaceManager::_instance->_lastSpecialModeEventMillis = millis();
+            InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
         } else if (component == LIGHT_COLOR_CHANGE_BUTTON_ID) {
-        	InterfaceManager::_instance->_updateLightsColorTemp();
-            InterfaceManager::_instance->_lastSpecialModeEventMillis = millis();
+        	InterfaceManager::instance->_updateLightsColorTemp();
+            InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
         } else if (component == ROOM_BUTTON_ID) {
             // Show page with all lights
             NSPanel::instance->goToPage("Room1");
@@ -186,13 +186,13 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
     } else if (page == HOME_PAGE_ID && pressed) {
         if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
-            InterfaceManager::_instance->_lastMasterCeilingLightsButtonTouch = millis();
-            InterfaceManager::_instance->_startSpecialModeTriggerTask(editLightMode::ceiling_lights);
+            InterfaceManager::instance->_lastMasterCeilingLightsButtonTouch = millis();
+            InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::ceiling_lights);
         }
         else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
 		{
-			InterfaceManager::_instance->_lastMasterTableLightsButtonTouch = millis();
-            InterfaceManager::_instance->_startSpecialModeTriggerTask(editLightMode::table_lights);
+			InterfaceManager::instance->_lastMasterTableLightsButtonTouch = millis();
+            InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::table_lights);
 		}
         LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
     } else {
@@ -326,7 +326,7 @@ void InterfaceManager::_updateLightsColorTemp() {
 }
 
 void InterfaceManager::_setEditLightMode(editLightMode mode) {
-    InterfaceManager::_instance->_currentEditMode = mode; // Set current mode
+    InterfaceManager::instance->_currentEditMode = mode; // Set current mode
     if(mode == editLightMode::all_lights) {
         HomePage::setSliderLightLevelColor(23243); // Reset to normal color
         HomePage::setSliderColorTempColor(23243);  // Reset to normal color
@@ -345,7 +345,7 @@ void InterfaceManager::_setEditLightMode(editLightMode mode) {
         HomePage::setSliderColorTempColor(65024);  // Change slider color to indicate special mode
     }
     this->_updatePanelLightStatus();
-    InterfaceManager::_instance->_startSpecialModeTimer();
+    InterfaceManager::instance->_startSpecialModeTimer();
 }
 
 void InterfaceManager::_startSpecialModeTimer() {
@@ -359,14 +359,14 @@ void InterfaceManager::_taskSpecialModeTimer(void* param) {
     // Wait until no event has occured for 5 seconds before returning to normal mode
     while(true) {
         // TODO: Make timeout configurable
-        if(!InterfaceManager::_instance->_isFingerOnDisplay && millis() > InterfaceManager::_instance->_lastSpecialModeEventMillis + 5000) {
+        if(!InterfaceManager::instance->_isFingerOnDisplay && millis() > InterfaceManager::instance->_lastSpecialModeEventMillis + 5000) {
             break;
-        } else if(!InterfaceManager::_instance->_isFingerOnDisplay && millis() > InterfaceManager::_instance->_lastSpecialModeEventMillis + 5000) {
-            InterfaceManager::_instance->_lastSpecialModeEventMillis = millis();
+        } else if(!InterfaceManager::instance->_isFingerOnDisplay && millis() > InterfaceManager::instance->_lastSpecialModeEventMillis + 5000) {
+            InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
         }
         vTaskDelay(250 / portTICK_PERIOD_MS);
     }
-    InterfaceManager::_instance->_setEditLightMode(editLightMode::all_lights);
+    InterfaceManager::instance->_setEditLightMode(editLightMode::all_lights);
     InterfaceManager::_taskHandleSpecialModeTimer = NULL;
     vTaskDelete(NULL); // Task is complete, stop task
 }
@@ -379,24 +379,24 @@ void InterfaceManager::_startSpecialModeTriggerTask(editLightMode triggerMode) {
 void InterfaceManager::_taskSpecialModeTriggerTask(void* param) {
     unsigned long start = millis();
     unsigned long lastRelease;
-    if(InterfaceManager::_instance->_triggerSpecialEditLightMode == editLightMode::ceiling_lights) {
-        lastRelease = InterfaceManager::_instance->_lastMasterCeilingLightsButtonRelease;
-    } else if(InterfaceManager::_instance->_triggerSpecialEditLightMode == editLightMode::table_lights) {
-        lastRelease = InterfaceManager::_instance->_lastMasterTableLightsButtonRelease;
+    if(InterfaceManager::instance->_triggerSpecialEditLightMode == editLightMode::ceiling_lights) {
+        lastRelease = InterfaceManager::instance->_lastMasterCeilingLightsButtonRelease;
+    } else if(InterfaceManager::instance->_triggerSpecialEditLightMode == editLightMode::table_lights) {
+        lastRelease = InterfaceManager::instance->_lastMasterTableLightsButtonRelease;
     }
 
     // TODO: Make trigger time configurable
     vTaskDelay(300 / portTICK_PERIOD_MS);
 
-    if(InterfaceManager::_instance->_triggerSpecialEditLightMode == editLightMode::ceiling_lights) {
-        if(lastRelease == InterfaceManager::_instance->_lastMasterCeilingLightsButtonRelease) {
-            InterfaceManager::_instance->_ignoreNextTouchRelease = true;
-            InterfaceManager::_instance->_setEditLightMode(editLightMode::ceiling_lights);
+    if(InterfaceManager::instance->_triggerSpecialEditLightMode == editLightMode::ceiling_lights) {
+        if(lastRelease == InterfaceManager::instance->_lastMasterCeilingLightsButtonRelease) {
+            InterfaceManager::instance->_ignoreNextTouchRelease = true;
+            InterfaceManager::instance->_setEditLightMode(editLightMode::ceiling_lights);
         }
-    } else if(InterfaceManager::_instance->_triggerSpecialEditLightMode == editLightMode::table_lights) {
-        if(lastRelease == InterfaceManager::_instance->_lastMasterTableLightsButtonRelease) {
-            InterfaceManager::_instance->_ignoreNextTouchRelease = true;    
-            InterfaceManager::_instance->_setEditLightMode(editLightMode::table_lights);
+    } else if(InterfaceManager::instance->_triggerSpecialEditLightMode == editLightMode::table_lights) {
+        if(lastRelease == InterfaceManager::instance->_lastMasterTableLightsButtonRelease) {
+            InterfaceManager::instance->_ignoreNextTouchRelease = true;    
+            InterfaceManager::instance->_setEditLightMode(editLightMode::table_lights);
         }
     }
 
@@ -510,7 +510,7 @@ void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int len
 {
     // If an event has just occured, ignore any new events for 
     // a while as it makes the display flicker
-    if(millis() < InterfaceManager::_instance->_ignoreMqttStatusUpdatesUntil) {
+    if(millis() < InterfaceManager::instance->_ignoreMqttStatusUpdatesUntil) {
         return;
     }
 
@@ -551,13 +551,13 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
 
                     if (domain.compare("light") == 0 && attribute.compare("state_brightness_pct") == 0)
                     {
-                        InterfaceManager::_instance->_setLightLevel(entity, atoi(msg.payload.c_str()));
+                        InterfaceManager::instance->_setLightLevel(entity, atoi(msg.payload.c_str()));
                     }
                     else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0)
                     {
                     	// TODO: Implement mechanism to reverse color temperature slider
                     	uint8_t colorTemp = (6000 - atoi(msg.payload.c_str())) / 40;
-                    	InterfaceManager::_instance->_setLightColorTemperature(entity, colorTemp);
+                    	InterfaceManager::instance->_setLightColorTemperature(entity, colorTemp);
                     }
                 }
                 catch (...)
@@ -574,7 +574,7 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
 void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
 {
 	// TODO: Only update the displayed light level after all MQTT messages has processed
-    for (roomConfig &roomCfg : InterfaceManager::_instance->_cfg.rooms)
+    for (roomConfig &roomCfg : InterfaceManager::instance->_cfg.rooms)
     {
         for (lightConfig &lightCfg : roomCfg.ceilingLights)
         {
@@ -605,7 +605,7 @@ void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
 void InterfaceManager::_setLightColorTemperature(std::string light, uint8_t level)
 {
 	// TODO: Only update the displayed light level after all MQTT messages has processed
-    for (roomConfig &roomCfg : InterfaceManager::_instance->_cfg.rooms)
+    for (roomConfig &roomCfg : InterfaceManager::instance->_cfg.rooms)
     {
         for (lightConfig &lightCfg : roomCfg.ceilingLights)
         {

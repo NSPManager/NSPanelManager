@@ -11,6 +11,8 @@
 class InterfaceManager
 {
 public:
+    /// @brief Set default variables, initialize panel and start the user interface
+    /// @param mqttClient MQTT Client used to send MQTT messages
     void init(PubSubClient *mqttClient);
     /// @brief Callback for when a touch event occurs on the screen
     /// @param page Page
@@ -27,9 +29,10 @@ public:
     /// @brief This function is called whenevent MQTT is connected. Subscribe to all entity status topics
     static void subscribeToMqttTopics();
 
-private:
     /// @brief The InfterfaceManager instance
-    static inline InterfaceManager *_instance;
+    static inline InterfaceManager *instance;
+
+private:
     /// @brief The task that handles startup if InterfaceManager. It load the config from the server and processes it and
     /// @brief makes needed adjustments to make the panel ready for use.
     /// @param param Not used

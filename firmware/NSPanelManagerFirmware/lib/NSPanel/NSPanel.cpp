@@ -257,6 +257,7 @@ void NSPanel::_taskProcessPanelOutput(void* param) {
 					
 					case NEX_OUT_SLEEP:
 						NSPanel::_sleepCallback();
+						break;
 
 					default:
 						LOG_DEBUG("Read type ", String(itemPayload[0], HEX).c_str());

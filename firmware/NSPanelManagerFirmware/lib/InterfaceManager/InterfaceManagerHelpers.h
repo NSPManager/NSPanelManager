@@ -63,6 +63,10 @@ public:
 struct interfaceConfig
 {
     uint8_t homeScreen = 0;
+    uint16_t colorTempMin = 2000;
+    uint16_t colorTempMax = 6000;
+    uint8_t raiseToMaxLightLevelAbove = 95;
+    bool reverseColorTempSlider = false;
     std::list<roomConfig> rooms;
     std::list<roomConfig>::iterator currentRoom;
     std::list<lightConfig*> getCeilingLightsThatAreOn();
