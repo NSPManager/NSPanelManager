@@ -28,9 +28,10 @@ public:
     static void mqttCallback(char *topic, byte *payload, unsigned int length);
     /// @brief This function is called whenevent MQTT is connected. Subscribe to all entity status topics
     static void subscribeToMqttTopics();
-
     /// @brief The InfterfaceManager instance
     static inline InterfaceManager *instance;
+    /// @brief The configuration for this panel
+    interfaceConfig config;
 
 private:
     /// @brief The task that handles startup if InterfaceManager. It load the config from the server and processes it and
@@ -58,8 +59,6 @@ private:
     editLightMode _currentEditMode;
     /// @brief Used temporarely to hold JSON-data from the server while initializing the panel
     DynamicJsonDocument *_roomDataJson;
-    /// @brief The configuration for this panel
-    interfaceConfig _cfg;
     /// @brief When was the last time someone pushed down on the master ceiling lights button
     unsigned long _lastMasterCeilingLightsButtonTouch;
     /// @brief When was the last time someone released the fringer from the panel for the master ceiling lights button

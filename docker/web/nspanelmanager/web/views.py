@@ -162,7 +162,7 @@ def save_settings(request):
     set_setting_value(name="raise_to_100_light_level", value=request.POST["raise_to_100_light_level"])
     set_setting_value(name="color_temp_min", value=request.POST["color_temp_min"])
     set_setting_value(name="color_temp_max", value=request.POST["color_temp_max"])
-    set_setting_value(name="reverse_color_temp", value=request.POST["reverse_color_temp"])
+    set_setting_value(name="reverse_color_temp", value=("reverse_color_temp" in request.POST))
 
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()

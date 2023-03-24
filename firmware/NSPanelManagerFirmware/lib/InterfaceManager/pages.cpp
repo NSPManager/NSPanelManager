@@ -8,11 +8,11 @@
 #include <pages.h>
 #include <NSPanel.h>
 #include <TftDefines.h>
+#include <MqttLog.h>
 
 int HomePage::getDimmingValue() {
 	int newValue = NSPanel::instance->getComponentIntVal(HOME_DIMMER_SLIDER_NAME);
-	// TODO: Make configurable
-	if(newValue > 95) {
+	if(newValue > InterfaceManager::instance->config.raiseToMaxLightLevelAbove) {
 		return 100;
 	} else {
 		return newValue;

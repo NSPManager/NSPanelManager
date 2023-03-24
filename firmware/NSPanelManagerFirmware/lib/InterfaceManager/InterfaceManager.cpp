@@ -93,7 +93,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
 
 void InterfaceManager::subscribeToMqttTopics() {
 	// Every light in every room
-	for (roomConfig &roomCfg : InterfaceManager::instance->_cfg.rooms)
+	for (roomConfig &roomCfg : InterfaceManager::instance->config.rooms)
 	{
 		for (lightConfig &lightCfg : roomCfg.ceilingLights)
 		{
@@ -127,7 +127,7 @@ void InterfaceManager::processSleepEvent() {
     LOG_DEBUG("Display went to sleep, resetting display to default.");
     // Display went to sleep, reset everything
     InterfaceManager::instance->_isFingerOnDisplay = false; // Reset in case it got stuck
-    InterfaceManager::instance->_changeRoom(InterfaceManager::instance->_cfg.homeScreen);
+    InterfaceManager::instance->_changeRoom(InterfaceManager::instance->config.homeScreen);
     InterfaceManager::instance->_changeMode(roomMode::room);
     InterfaceManager::instance->_setEditLightMode(editLightMode::all_lights);
     InterfaceManager::instance->_updatePanelLightStatus();
@@ -167,9 +167,9 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         else if (component == LIGHT_LEVEL_CHANGE_BUTTON_ID)
         {
             // Dimmer slider changed
-            if(InterfaceManager::instance->_currentRoomMode == roomMode::room && InterfaceManager::instance->_cfg.currentRoom->anyLightsOn()) {
+            if(InterfaceManager::instance->_currentRoomMode == roomMode::room && InterfaceManager::instance->config.currentRoom->anyLightsOn()) {
                 InterfaceManager::instance->_updateLightsThatAreOn();
-            } else if(InterfaceManager::instance->_currentRoomMode == roomMode::house && InterfaceManager::instance->_cfg.anyLightsOn()) {
+            } else if(InterfaceManager::instance->_currentRoomMode == roomMode::house && InterfaceManager::instance->config.anyLightsOn()) {
                 InterfaceManager::instance->_updateLightsThatAreOn();
             } else {
                 InterfaceManager::instance->_updateAllLights();
@@ -203,19 +203,19 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
 void InterfaceManager::_ceilingMasterButtonEvent()
 {
     if(this->_currentRoomMode == roomMode::room) {
-        std::list<lightConfig*> onLights = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
+        std::list<lightConfig*> onLights = this->config.currentRoom->getCeilingLightsThatAreOn();
         if(onLights.size() > 0) {
             this->_changeLightsToLevel(&onLights, 0);
         } else {
-            std::list<lightConfig*> lightList = this->_cfg.currentRoom->getAllCeilingLights();
+            std::list<lightConfig*> lightList = this->config.currentRoom->getAllCeilingLights();
             this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
         }
     } else if (this->_currentRoomMode == roomMode::house) {
-        std::list<lightConfig*> onLights = this->_cfg.getCeilingLightsThatAreOn();
+        std::list<lightConfig*> onLights = this->config.getCeilingLightsThatAreOn();
         if(onLights.size() > 0) {
             this->_changeLightsToLevel(&onLights, 0);
         } else {
-            std::list<lightConfig*> lightList = this->_cfg.getAllCeilingLights();
+            std::list<lightConfig*> lightList = this->config.getAllCeilingLights();
             this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
         }
     }
@@ -226,21 +226,21 @@ void InterfaceManager::_ceilingMasterButtonEvent()
 void InterfaceManager::_tableMasterButtonEvent()
 {
     if(this->_currentRoomMode == roomMode::room) {
-        std::list<lightConfig*> onLights = this->_cfg.currentRoom->getTableLightsThatAreOn();
+        std::list<lightConfig*> onLights = this->config.currentRoom->getTableLightsThatAreOn();
 
         if(onLights.size() > 0) {
             this->_changeLightsToLevel(&onLights, 0);
         } else {
-            std::list<lightConfig*> lightList = this->_cfg.currentRoom->getAllTableLights();
+            std::list<lightConfig*> lightList = this->config.currentRoom->getAllTableLights();
             this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
         }
         this->_updatePanelLightStatus();
     } else if (this->_currentRoomMode == roomMode::house) {
-        std::list<lightConfig*> onLights = this->_cfg.getTableLightsThatAreOn();
+        std::list<lightConfig*> onLights = this->config.getTableLightsThatAreOn();
         if(onLights.size() > 0) {
             this->_changeLightsToLevel(&onLights, 0);
         } else {
-            std::list<lightConfig*> lightList = this->_cfg.getAllTableLights();
+            std::list<lightConfig*> lightList = this->config.getAllTableLights();
             this->_changeLightsToLevel(&lightList, HomePage::getDimmingValue());
         }
     }
@@ -252,19 +252,19 @@ void InterfaceManager::_updateLightsThatAreOn() {
 	std::list<lightConfig*> lights;
     if(this->_currentRoomMode == roomMode::room) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->_cfg.currentRoom->getAllLightsThatAreOn();
+            lights = this->config.currentRoom->getAllLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            lights = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
+            lights = this->config.currentRoom->getCeilingLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            lights = this->_cfg.currentRoom->getTableLightsThatAreOn();
+            lights = this->config.currentRoom->getTableLightsThatAreOn();
         }
     } else if (this->_currentRoomMode == roomMode::house) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->_cfg.getAllLightsThatAreOn();
+            lights = this->config.getAllLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            lights = this->_cfg.getCeilingLightsThatAreOn();
+            lights = this->config.getCeilingLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            lights = this->_cfg.getTableLightsThatAreOn();
+            lights = this->config.getTableLightsThatAreOn();
         }
     }
 
@@ -277,19 +277,19 @@ void InterfaceManager::_updateAllLights() {
 	std::list<lightConfig*> lights;
     if(this->_currentRoomMode == roomMode::room) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->_cfg.currentRoom->getAllLights();
+            lights = this->config.currentRoom->getAllLights();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            lights = this->_cfg.currentRoom->getCeilingLightsThatAreOn();
+            lights = this->config.currentRoom->getCeilingLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            lights = this->_cfg.currentRoom->getTableLightsThatAreOn();
+            lights = this->config.currentRoom->getTableLightsThatAreOn();
         }
     } else if (this->_currentRoomMode == roomMode::house) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->_cfg.getAllLights();
+            lights = this->config.getAllLights();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            lights = this->_cfg.getCeilingLightsThatAreOn();
+            lights = this->config.getCeilingLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            lights = this->_cfg.getTableLightsThatAreOn();
+            lights = this->config.getTableLightsThatAreOn();
         }
     }
 
@@ -302,24 +302,22 @@ void InterfaceManager::_updateLightsColorTemp() {
 	std::list<lightConfig*> lights;
     if(this->_currentRoomMode == roomMode::room) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->_cfg.currentRoom->getAllLights();
+            lights = this->config.currentRoom->getAllLights();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            lights = this->_cfg.currentRoom->getAllCeilingLights();
+            lights = this->config.currentRoom->getAllCeilingLights();
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            lights = this->_cfg.currentRoom->getAllTableLights();
+            lights = this->config.currentRoom->getAllTableLights();
         }
     } else if (this->_currentRoomMode == roomMode::house) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->_cfg.getAllLights();
+            lights = this->config.getAllLights();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            lights = this->_cfg.getAllCeilingLights();
+            lights = this->config.getAllCeilingLights();
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            lights = this->_cfg.getAllTableLights();
+            lights = this->config.getAllTableLights();
         }
     }
 
-	// Get value from panel and calculate for 2000-6500 kelvin. Also inverse value, warm color temperature on top
-	// TODO: Implement check in management web interface that allows for this to be reversed
 	uint16_t newKelvin = HomePage::getColorTempValue();
 	this->_changeLightsToKelvin(&lights, newKelvin);
 	this->_updatePanelLightStatus();
@@ -405,11 +403,11 @@ void InterfaceManager::_taskSpecialModeTriggerTask(void* param) {
 
 void InterfaceManager::_processPanelConfig()
 {
-    this->_cfg.homeScreen = (*this->_roomDataJson)["home"].as<uint8_t>();
-    this->_cfg.colorTempMin = (*this->_roomDataJson)["color_temp_min"].as<uint16_t>();
-    this->_cfg.colorTempMax = (*this->_roomDataJson)["color_temp_min"].as<uint16_t>();
-    this->_cfg.reverseColorTempSlider = (*this->_roomDataJson)["reverse_color_temp"].as<bool>();
-    this->_cfg.raiseToMaxLightLevelAbove = (*this->_roomDataJson)["raise_to_100_light_level"].as<bool>();
+    this->config.homeScreen = (*this->_roomDataJson)["home"].as<uint8_t>();
+    this->config.colorTempMin = (*this->_roomDataJson)["color_temp_min"].as<uint16_t>();
+    this->config.colorTempMax = (*this->_roomDataJson)["color_temp_max"].as<uint16_t>();
+    this->config.reverseColorTempSlider = (*this->_roomDataJson)["reverse_color_temp"].as<String>().equals("True");
+    this->config.raiseToMaxLightLevelAbove = (*this->_roomDataJson)["raise_to_100_light_level"].as<uint8_t>();
     for (JsonPair kv : (*this->_roomDataJson)["rooms"].as<JsonObject>())
     {
         roomConfig roomCfg;
@@ -435,22 +433,22 @@ void InterfaceManager::_processPanelConfig()
             }
         }
 
-        this->_cfg.rooms.push_back(roomCfg);
+        this->config.rooms.push_back(roomCfg);
     }
 
     // Panel config processed, clear Json data
     this->_roomDataJson->clear();
 
-    this->_changeRoom(this->_cfg.homeScreen);
+    this->_changeRoom(this->config.homeScreen);
     NSPanel::instance->goToPage("home");
 }
 
 void InterfaceManager::_goToNextRoom()
 {
-    this->_cfg.currentRoom++;
-    if (this->_cfg.currentRoom == this->_cfg.rooms.end())
+    this->config.currentRoom++;
+    if (this->config.currentRoom == this->config.rooms.end())
     {
-        this->_cfg.currentRoom = this->_cfg.rooms.begin();
+        this->config.currentRoom = this->config.rooms.begin();
     }
     this->_updatePanelWithNewRoomInfo();
 }
@@ -458,11 +456,11 @@ void InterfaceManager::_goToNextRoom()
 void InterfaceManager::_changeRoom(uint8_t roomId)
 {
     bool foundRoom = false;
-    for (std::list<roomConfig>::iterator it = this->_cfg.rooms.begin(); it != this->_cfg.rooms.end(); it++)
+    for (std::list<roomConfig>::iterator it = this->config.rooms.begin(); it != this->config.rooms.end(); it++)
     {
         if (it->id == roomId)
         {
-            this->_cfg.currentRoom = it;
+            this->config.currentRoom = it;
             this->_updatePanelWithNewRoomInfo();
             return;
         }
@@ -474,7 +472,7 @@ void InterfaceManager::_changeRoom(uint8_t roomId)
 
 void InterfaceManager::_updatePanelWithNewRoomInfo()
 {
-    NSPanel::instance->setComponentText("home.room", this->_cfg.currentRoom->name.c_str());
+    NSPanel::instance->setComponentText("home.room", this->config.currentRoom->name.c_str());
     this->_updatePanelLightStatus();
 }
 
@@ -556,7 +554,13 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
                     else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0)
                     {
                     	// TODO: Implement mechanism to reverse color temperature slider
-                    	uint8_t colorTemp = (6000 - atoi(msg.payload.c_str())) / 40;
+                    	uint8_t colorTemp = atoi(msg.payload.c_str());
+                        if(InterfaceManager::instance->config.reverseColorTempSlider) {
+                            colorTemp = InterfaceManager::instance->config.colorTempMax - colorTemp;
+                        } else {
+                            colorTemp = InterfaceManager::instance->config.colorTempMin + colorTemp;
+                        }
+                        colorTemp = colorTemp / ((InterfaceManager::instance->config.colorTempMax - InterfaceManager::instance->config.colorTempMin) / 100);
                     	InterfaceManager::instance->_setLightColorTemperature(entity, colorTemp);
                     }
                 }
@@ -574,7 +578,7 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
 void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
 {
 	// TODO: Only update the displayed light level after all MQTT messages has processed
-    for (roomConfig &roomCfg : InterfaceManager::instance->_cfg.rooms)
+    for (roomConfig &roomCfg : InterfaceManager::instance->config.rooms)
     {
         for (lightConfig &lightCfg : roomCfg.ceilingLights)
         {
@@ -605,7 +609,7 @@ void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
 void InterfaceManager::_setLightColorTemperature(std::string light, uint8_t level)
 {
 	// TODO: Only update the displayed light level after all MQTT messages has processed
-    for (roomConfig &roomCfg : InterfaceManager::instance->_cfg.rooms)
+    for (roomConfig &roomCfg : InterfaceManager::instance->config.rooms)
     {
         for (lightConfig &lightCfg : roomCfg.ceilingLights)
         {
@@ -658,7 +662,12 @@ void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig*> *lights, ui
     this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
 
 	// TODO: Implement mechanism to reverse color temp
-	uint16_t sendKelvin = 6000 - (kelvin * 40);
+	uint16_t sendKelvin = kelvin * ((this->config.colorTempMax - this->config.colorTempMin) / 100);
+    if(this->config.reverseColorTempSlider) {
+        sendKelvin = this->config.colorTempMax - sendKelvin;
+    } else {
+       sendKelvin = this->config.colorTempMin + sendKelvin; 
+    }
     for (lightConfig *light : (*lights))
     {
     	if(light->canTemperature) {
@@ -685,7 +694,7 @@ void InterfaceManager::_updatePanelLightStatus()
 
     if(this->_currentEditMode == editLightMode::all_lights || this->_currentEditMode == editLightMode::ceiling_lights) {
         if(this->_currentRoomMode == roomMode::room) {
-            for (lightConfig &light : this->_cfg.currentRoom->ceilingLights)
+            for (lightConfig &light : this->config.currentRoom->ceilingLights)
             {
                 totalBrightnessLights++;
                 totalBrightness += light.level;
@@ -695,7 +704,7 @@ void InterfaceManager::_updatePanelLightStatus()
                 }
             }
         } else if (this->_currentRoomMode == roomMode::house) {
-            for (lightConfig *light : this->_cfg.getAllCeilingLights())
+            for (lightConfig *light : this->config.getAllCeilingLights())
             {
                 totalBrightnessLights++;
                 totalBrightness += light->level;
@@ -719,7 +728,7 @@ void InterfaceManager::_updatePanelLightStatus()
 	totalKelvinLights = 0;
 	if(this->_currentEditMode == editLightMode::all_lights || this->_currentEditMode == editLightMode::table_lights) {
         if(this->_currentRoomMode == roomMode::room) {
-            for (lightConfig &light : this->_cfg.currentRoom->tableLights)
+            for (lightConfig &light : this->config.currentRoom->tableLights)
             {
                 totalBrightnessLights++;
                 totalBrightness += light.level;
@@ -729,7 +738,7 @@ void InterfaceManager::_updatePanelLightStatus()
                 }
             }
         } else if (this->_currentRoomMode == roomMode::house) {
-            for (lightConfig *light : this->_cfg.getAllTableLights())
+            for (lightConfig *light : this->config.getAllTableLights())
             {
                 totalBrightnessLights++;
                 totalBrightness += light->level;
