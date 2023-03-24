@@ -150,11 +150,19 @@ def register_nspanel(request):
     new_panel.save()
     return HttpResponse('OK', status=200)
 
+def delete_panel(request, panel_id: int):
+    NSPanel.objects.get(id=panel_id).delete()
+    return redirect('/')
+
 
 def get_nspanel_config(request):
     nspanel = NSPanel.objects.get(mac_address=request.GET["mac"])
     base = {}
     base["home"] = nspanel.room.displayOrder
+    base["raise_to_100_light_level"] = get_setting_with_default("raise_to_100_light_level", 95)
+    base["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
+    base["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
+    base["reverse_color_temp"] = get_setting_with_default("reverse_color_temp", False)
     base["rooms"] = {}
     for room in Room.objects.all().order_by('displayOrder'):
         base["rooms"][str(room.displayOrder)] = {}

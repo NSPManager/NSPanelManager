@@ -9,14 +9,11 @@ urlpatterns = [
     path('rooms', views.rooms, name='rooms'),
     path('rooms/order', views.rooms_order, name='rooms_order'),
     path('moveRoomUp/<int:room_id>', views.move_room_up, name='move_room_up'),
-    path('moveRoomDown/<int:room_id>',
-         views.move_room_down, name='move_room_down'),
+    path('moveRoomDown/<int:room_id>', views.move_room_down, name='move_room_down'),
     path('rooms/<int:room_id>/', views.edit_room, name='edit_room'),
-    path('save_room/<int:room_id>',
-         views.update_room_form, name='update_room_form'),
+    path('save_room/<int:room_id>', views.update_room_form, name='update_room_form'),
     path('nspanel/<int:panel_id>', views.edit_nspanel, name='edit_nspanel'),
-    path('remove_light/<int:room_id>/<int:light_id>',
-         views.remove_light_from_room, name="remove_light_from_room"),
+    path('remove_light/<int:room_id>/<int:light_id>', views.remove_light_from_room, name="remove_light_from_room"),
     path('add_light/<int:room_id>', views.add_light_to_room, name="add_new_light"),
     path('settings', views.settings_page, name="settings"),
     path('save_settings', views.save_settings, name="save_settings"),
@@ -31,11 +28,9 @@ urlpatterns = [
     path('checksum_data_file', views.checksum_data_file, name='checksum_data_file'),
     # Below are API routes
     path('api/register_nspanel', api.register_nspanel, name='register_nspanel'),
+    path('api/delete_nspanel/<int:panel_id>', api.delete_panel, name='delete_nspanel'),
     path('api/reboot_panel', api.reboot_nspanel, name='reboot_panel'),
-    path('api/get_nspanel_config', api.get_nspanel_config,
-         name='get_nspanel_config'),
-    path('api/get_all_available_lights',
-         api.get_all_available_light_entities, name='get_all_available_lights'),
-    path('api/get_mqtt_manager_config', api.get_mqtt_manager_config,
-         name='get_mqtt_manager_config')
+    path('api/get_nspanel_config', api.get_nspanel_config, name='get_nspanel_config'),
+    path('api/get_all_available_lights', api.get_all_available_light_entities, name='get_all_available_lights'),
+    path('api/get_mqtt_manager_config', api.get_mqtt_manager_config, name='get_mqtt_manager_config')
 ]

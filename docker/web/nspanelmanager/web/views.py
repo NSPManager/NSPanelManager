@@ -132,6 +132,7 @@ def settings_page(request):
     data = {}
     data["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
     data["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
+    data["reverse_color_temp"] = get_setting_with_default("reverse_color_temp", False)
     data["mqtt_server"] = get_setting_with_default("mqtt_server", "")
     data["mqtt_port"] = get_setting_with_default("mqtt_port", 1883)
     data["mqtt_username"] = get_setting_with_default("mqtt_username", "")
@@ -145,24 +146,23 @@ def settings_page(request):
     data["openhab_brightness_channel_max"] = get_setting_with_default("openhab_brightness_channel_max", 255)
     data["openhab_color_temp_channel_name"] = get_setting_with_default("openhab_color_temp_channel_name", "")
     data["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name", "")
+    data["raise_to_100_light_level"] = get_setting_with_default("raise_to_100_light_level", 95)
     return render(request, 'settings.html', data)
 
 
 def save_settings(request):
     set_setting_value(name="mqtt_server", value=request.POST["mqtt_server"])
     set_setting_value(name="mqtt_port", value=request.POST["mqtt_port"])
-    set_setting_value(name="mqtt_username",
-                      value=request.POST["mqtt_username"])
-    set_setting_value(name="mqtt_password",
-                      value=request.POST["mqtt_password"])
-    set_setting_value(name="home_assistant_address",
-                      value=request.POST["home_assistant_address"])
-    set_setting_value(name="home_assistant_token",
-                      value=request.POST["home_assistant_token"])
-    set_setting_value(name="openhab_address",
-                      value=request.POST["openhab_address"])
-    set_setting_value(name="openhab_token",
-                      value=request.POST["openhab_token"])
+    set_setting_value(name="mqtt_username", value=request.POST["mqtt_username"])
+    set_setting_value(name="mqtt_password", value=request.POST["mqtt_password"])
+    set_setting_value(name="home_assistant_address", value=request.POST["home_assistant_address"])
+    set_setting_value(name="home_assistant_token", value=request.POST["home_assistant_token"])
+    set_setting_value(name="openhab_address", value=request.POST["openhab_address"])
+    set_setting_value(name="openhab_token", value=request.POST["openhab_token"])
+    set_setting_value(name="raise_to_100_light_level", value=request.POST["raise_to_100_light_level"])
+    set_setting_value(name="color_temp_min", value=request.POST["color_temp_min"])
+    set_setting_value(name="color_temp_max", value=request.POST["color_temp_max"])
+    set_setting_value(name="reverse_color_temp", value=request.POST["reverse_color_temp"])
 
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()
