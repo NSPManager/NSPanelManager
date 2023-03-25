@@ -166,7 +166,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
             InterfaceManager::instance->_lastMasterTableLightsButtonRelease = millis();
             InterfaceManager::instance->_tableMasterButtonEvent();
 		}
-        else if (component == LIGHT_LEVEL_CHANGE_BUTTON_ID)
+        else if (component == HOME_LIGHT_LEVEL_SLIDER_ID)
         {
             // Dimmer slider changed
             if(InterfaceManager::instance->_currentRoomMode == roomMode::room && InterfaceManager::instance->config.currentRoom->anyLightsOn()) {
@@ -178,7 +178,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
             }
         	
             InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
-        } else if (component == LIGHT_COLOR_CHANGE_BUTTON_ID) {
+        } else if (component == HOME_LIGHT_COLOR_SLIDER_ID) {
         	InterfaceManager::instance->_updateLightsColorTemp();
             InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
         } else if (component == ROOM_BUTTON_ID) {
@@ -648,17 +648,26 @@ void InterfaceManager::_changeLightsToLevel(std::list<lightConfig*> *lights, uin
     // TODO: Make timeout configurable
     this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
 
+    DynamicJsonDocument doc(1024);
+    doc["method"] = "set";
+    doc["attribute"] = "brightness";
+    doc["brightness"] = level;
+    JsonArray entity_ids = doc.createNestedArray("entity_ids");
+
     for (lightConfig *light : (*lights))
     {
-        std::string topic = "nspanel/entities/light/";
-        topic.append(light->name);
-        topic.append("/brightness_pct");
-        if(this->_mqttClient->publish(topic.c_str(), std::to_string(level).c_str())) {
+        entity_ids.add(light->id);
+    }
+
+    char buffer[1024];
+    uint json_length = serializeJson(doc, buffer);
+    if(this->_mqttClient->publish("nspanel/mqttmanager/command", buffer, json_length)) {
+        for (lightConfig *light : (*lights))
+        {
             light->level = level;
-        } else {
-            LOG_ERROR("Failed to send light update!");
         }
-        vTaskDelay(5 / portTICK_PERIOD_MS);
+    } else {
+        LOG_ERROR("Failed to send MQTT brightness update.");
     }
 }
 
@@ -673,20 +682,27 @@ void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig*> *lights, ui
     } else {
        sendKelvin = this->config.colorTempMin + sendKelvin; 
     }
+
+    DynamicJsonDocument doc(1024);
+    doc["method"] = "set";
+    doc["attribute"] = "kelvin";
+    doc["kelvin"] = sendKelvin;
+    JsonArray entity_ids = doc.createNestedArray("entity_ids");
+
     for (lightConfig *light : (*lights))
     {
-    	if(light->canTemperature) {
-            
-    		std::string topic = "nspanel/entities/light/";
-			topic.append(light->name);
-			topic.append("/kelvin");
-			if(this->_mqttClient->publish(topic.c_str(), std::to_string(sendKelvin).c_str())) {
-                light->colorTemperature = kelvin;
-			} else {
-                LOG_ERROR("Failed to send light update!");
-            }
-    	}
-        vTaskDelay(5 / portTICK_PERIOD_MS);
+        entity_ids.add(light->id);
+    }
+
+    char buffer[1024];
+    uint json_length = serializeJson(doc, buffer);
+    if(this->_mqttClient->publish("nspanel/mqttmanager/command", buffer, json_length)) {
+        for (lightConfig *light : (*lights))
+        {
+            light->colorTemperature = kelvin;
+        }
+    } else {
+        LOG_ERROR("Failed to send MQTT brightness update.");
     }
 }
 

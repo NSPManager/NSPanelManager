@@ -40,7 +40,7 @@ def get_mqtt_manager_config(request):
     return_json["openhab_rgb_channel_name"] = get_setting_with_default(
         "openhab_rgb_channel_name", "")
     
-    return_json["lights"] = []
+    return_json["lights"] = {}
 
     for light in Light.objects.all():
         lightConfig = {}
@@ -51,13 +51,13 @@ def get_mqtt_manager_config(request):
         lightConfig["can_rgb"] = light.can_rgb
         lightConfig["openhab_item_dimmer"] = light.openhab_item_dimmer
         lightConfig["openhab_item_color_temp"] = light.openhab_item_color_temp
-        return_json["lights"].append(lightConfig)
+        return_json["lights"][light.id] = lightConfig
 
     return JsonResponse(return_json)
 
 
 def get_all_available_light_entities(request):
-    # TODO: Implement OpenHAB and manually entered entities
+    # TODO: Implement manually entered entities
     # Get Home Assistant lights
     return_json = {}
     return_json["home_assistant_lights"] = []

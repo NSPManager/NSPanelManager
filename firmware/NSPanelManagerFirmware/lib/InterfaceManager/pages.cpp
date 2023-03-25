@@ -24,11 +24,11 @@ void HomePage::setDimmingValue(uint8_t value) {
 }
 
 int HomePage::getColorTempValue() {
-	return NSPanel::instance->getComponentIntVal(HOME_COLOR_TEMP_SLIDER_NAME);
+	return NSPanel::instance->getComponentIntVal(HOME_LIGHT_COLOR_SLIDER_NAME);
 }
 
 void HomePage::setColorTempValue(uint8_t value) {
-	NSPanel::instance->setComponentVal(HOME_COLOR_TEMP_SLIDER_NAME, value);
+	NSPanel::instance->setComponentVal(HOME_LIGHT_COLOR_SLIDER_NAME, value);
 }
 
 void HomePage::setCeilingBrightnessLabelText(uint8_t value) {
@@ -52,7 +52,7 @@ void HomePage::setSliderLightLevelColor(uint color) {
 }
 
 void HomePage::setSliderColorTempColor(uint color) {
-	NSPanel::instance->setComponentForegroundColor(HOME_COLOR_TEMP_SLIDER_NAME, color);
+	NSPanel::instance->setComponentForegroundColor(HOME_LIGHT_COLOR_SLIDER_NAME, color);
 }
 
 void HomePage::setHighlightCeilingVisibility(bool visibility) {

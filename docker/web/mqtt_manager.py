@@ -8,28 +8,24 @@ import json
 import mqtt_manager_libs.home_assistant
 import mqtt_manager_libs.openhab
 import mqtt_manager_libs.websocket_server
+import mqtt_manager_libs.light_states
 
 settings = {}
 last_settings_file_mtime = 0
 client = mqtt.Client("NSPanelManager")
 
-def read_settings():
-    global settings
-    with open("nspanelmanager/mqtt_manager.json", "r") as f:
-        settings = json.loads(f.read())
-
 
 def on_connect(client, userdata, flags, rc):
     print("Connected to MQTT Server")
     # Listen for all events sent to and from panels to control states
-    client.subscribe("nspanel/entities/#")
+    client.subscribe("nspanel/mqttmanager/command")
     client.subscribe("nspanel/+/log")
 
 
 def on_message(client, userdata, msg):
     try:
         parts = msg.topic.split('/')
-        if parts[len(parts)-1] == "log": # Messages received was a status update (online/offline)
+        if parts[-1:] == "log": # Messages received was a status update (online/offline)
             message_parts = msg.payload.decode('utf-8').split(':')
             data = {
                 "type": "log",
@@ -39,20 +35,21 @@ def on_message(client, userdata, msg):
                 "message": ':'.join(message_parts[1:])
             }
             mqtt_manager_libs.websocket_server.send_message(json.dumps(data))
-        elif len(parts) >= 5:
-            domain = parts[2]
-            entity_id = parts[3]
-            attribute = parts[4]
-            if attribute.startswith("state_"):
-                return
+        elif msg.topic == "nspanel/mqttmanager/command":
+            data = json.loads(msg.payload.decode('utf-8'))
+            if data["method"] == "set" and data["attribute"] == "brightness": # Got new brightness value
+                for entity_id in data["entity_ids"]:
+                    if mqtt_manager_libs.light_states.states[entity_id]["type"] == "home_assistant":
+                        mqtt_manager_libs.home_assistant.set_entity_brightness(entity_id, data["brightness"])
+                    elif mqtt_manager_libs.light_states.states[entity_id]["type"] == "openhab":
+                        mqtt_manager_libs.openhab.set_entity_brightness(entity_id, data["brightness"])
+            elif data["method"] == "set" and data["attribute"] == "kelvin": # Got new brightness value
+                for entity_id in data["entity_ids"]:
+                    if mqtt_manager_libs.light_states.states[entity_id]["type"] == "home_assistant":
+                        mqtt_manager_libs.home_assistant.set_entity_color_temp(entity_id, data["kelvin"])
+                    elif mqtt_manager_libs.light_states.states[entity_id]["type"] == "openhab":
+                        mqtt_manager_libs.openhab.set_entity_color_temp(entity_id, data["kelvin"])
 
-            if domain == "light":
-                for light in settings["lights"]:
-                    if light["name"] == entity_id:
-                        if light["type"] == "home_assistant":
-                            mqtt_manager_libs.home_assistant.set_light_attribute(entity_id, attribute, msg.payload.decode('utf-8'))
-                        elif light["type"] == "openhab":
-                            mqtt_manager_libs.openhab.set_light_attribute(entity_id, attribute, msg.payload.decode('utf-8'))
     except:
         print("Something went wrong during processing of message:")
         try:
@@ -69,14 +66,25 @@ def get_config():
             if config_request.status_code == 200:
                 print("Got config, will start MQTT Manager.")
                 settings = config_request.json()
+
+                for id, light in settings["lights"].items():
+                    int_id = int(id)
+                    mqtt_manager_libs.light_states.states[int_id] = light
+                    # Set default values
+                    mqtt_manager_libs.light_states.states[int_id]["color_temp"] = 3000
+                    mqtt_manager_libs.light_states.states[int_id]["brightness"] = 0
+                # All light-data sucessfully loaded into light_states, clear own register
+                settings.pop("lights")
                 break
-        except:
+        except Exception as e:
             print("ERROR: Failed to get config. Will try again in 5 seconds.")
+            print(e)
             sleep(5)
 
 
 def connect_and_loop():
     global settings, home_assistant
+    mqtt_manager_libs.websocket_server.start_server() # Start websocket server
     client.on_connect = on_connect
     client.on_message = on_message
     client.username_pw_set(settings["mqtt_username"], settings["mqtt_password"])
@@ -107,8 +115,6 @@ def connect_and_loop():
         mqtt_manager_libs.openhab.connect()
     else:
         print("Home Assistant values not configured, will not connect.")
-    
-    mqtt_manager_libs.websocket_server.start_server()
     
     # Loop MQTT
     client.loop_forever()

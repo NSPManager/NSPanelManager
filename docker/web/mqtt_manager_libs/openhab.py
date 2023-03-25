@@ -3,6 +3,7 @@ import asyncio
 import json
 from time import sleep
 from threading import Thread
+import mqtt_manager_libs.light_states
 
 openhab_url = ""
 openhab_token = ""
@@ -72,44 +73,65 @@ def send_entity_update(json_msg, item):
         for light in settings["lights"]:
             if light["name"] == entity_name:
                 if "brightness" in new_state["attributes"]:
-                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", round(new_state["attributes"]["brightness"] / 2.55), retain=True)
+                    new_brightness = round(new_state["attributes"]["brightness"] / 2.55)
+                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", new_brightness, retain=True)
+                    mqtt_manager_libs.light_states.states[entity_id]["brightness"] = new_brightness
                 else:
                     if new_state["state"] == "on":
                         mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 100, retain=True)
+                        mqtt_manager_libs.light_states.states[entity_id]["brightness"] = 100
                     else:
                         mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 0, retain=True)
+                        mqtt_manager_libs.light_states.states[entity_id]["brightness"] = 0
                 
-                if light["can_color_temperature"]:
+                if "color_temp" in new_state["attributes"]:
                     # Convert from MiRed from OpenHAB to kelvin values
                     color_temp_kelvin = round(1000000 / new_state["attributes"]["color_temp"])
                     mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", color_temp_kelvin, retain=True)
+                    mqtt_manager_libs.light_states.states[entity_id]["color_temp"] = color_temp_kelvin
     except Exception as e:
         print("Failed to send entity update!")
         print(e)
 
-def get_light_by_name(entity_id):
-    for light in settings["lights"]:
-        if light["name"] == entity_id:
-            return light
-    return None
-
-# Set an attribute for a light in OpenHAB
-def set_light_attribute(entity_id, attribute, value):
-    light = get_light_by_name(entity_id)
-    if light:
-        item = ""
-        payload_attr = ""
-        if attribute == "brightness_pct":
-            payload_attr = "Percent"
-            item = light["openhab_item_dimmer"]
-        elif attribute == "kelvin":
-            payload_attr = "Decimal"
-            item = light["openhab_item_color_temp"]
-
+def set_entity_brightness(entity_id: int, new_brightness: int):
+    try:
+        # Get light from state list
+        light = mqtt_manager_libs.light_states.states[entity_id]
+        entity_name = light["name"]
+        # Format Home Assistant state update
         msg = {
             "type": "ItemCommandEvent",
-            "topic": "openhab/items/" + item + "/command",
-            "payload": "{\"type\":\"" + payload_attr + "\",\"value\":\"" + str(value) + "\"}",
+            "topic": "openhab/items/" + light["openhab_item_dimmer"] + "/command",
+            "payload": "{\"type\":\"Percent\",\"value\":\"" + str(new_brightness) + "\"}",
             "source": "WebSocketNSPanelManager"
         }
         ws.send(json.dumps(msg))
+        # Update the stored value
+        mqtt_manager_libs.light_states.states[entity_id]["brightness"] = new_brightness
+        # For OpenHAB it is not possible to send kelvin at the same time as brightness
+        # wait a few milliseconds and then send kelvin update
+        # sleep(5/1000)
+        set_entity_color_temp(entity_id, light["color_temp"])
+    except Exception as e:
+        print("Failed to send entity update to Home Assisatant.")
+        print(e)
+
+def set_entity_color_temp(entity_id: int, color_temp: int):
+    try:
+        # Get light from state list
+        light = mqtt_manager_libs.light_states.states[entity_id]
+        if light["brightness"] > 0:
+            entity_name = light["name"]
+            # Format Home Assistant state update
+            msg = {
+                "type": "ItemCommandEvent",
+                "topic": "openhab/items/" + light["openhab_item_color_temp"] + "/command",
+                "payload": "{\"type\":\"Decimal\",\"value\":\"" + str(color_temp) + "\"}",
+                "source": "WebSocketNSPanelManager"
+            }
+            ws.send(json.dumps(msg))
+        # Update the stored value
+        mqtt_manager_libs.light_states.states[entity_id]["color_temp"] = color_temp
+    except Exception as e:
+        print("Failed to send entity update to Home Assisatant.")
+        print(e)
