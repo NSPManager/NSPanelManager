@@ -146,7 +146,9 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
     {
         if (component == SWITCH_ROOM_BUTTON_ID)
         {
-            InterfaceManager::instance->_goToNextRoom();
+            if(InterfaceManager::instance->_currentRoomMode == roomMode::room) {
+                InterfaceManager::instance->_goToNextRoom();
+            }
         }
         else if (component == SWITCH_MODE_BUTTON_ID)
         {
@@ -472,7 +474,11 @@ void InterfaceManager::_changeRoom(uint8_t roomId)
 
 void InterfaceManager::_updatePanelWithNewRoomInfo()
 {
-    NSPanel::instance->setComponentText("home.room", this->config.currentRoom->name.c_str());
+    if(this->_currentRoomMode == roomMode::room) {
+        NSPanel::instance->setComponentText("home.room", this->config.currentRoom->name.c_str());
+    } else if (this->_currentRoomMode == roomMode::house) {
+        NSPanel::instance->setComponentText("home.room", "<--ALL-->");
+    }
     this->_updatePanelLightStatus();
 }
 
@@ -501,6 +507,7 @@ void InterfaceManager::_changeMode(roomMode mode)
     {
         NSPanel::instance->setComponentText("home.mode", "UNKNOWN");
     }
+    this->_updatePanelWithNewRoomInfo();
     this->_updatePanelLightStatus();
 }
 
@@ -553,7 +560,6 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
                     }
                     else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0)
                     {
-                    	// TODO: Implement mechanism to reverse color temperature slider
                     	uint8_t colorTemp = atoi(msg.payload.c_str());
                         if(InterfaceManager::instance->config.reverseColorTempSlider) {
                             colorTemp = InterfaceManager::instance->config.colorTempMax - colorTemp;
@@ -660,8 +666,7 @@ void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig*> *lights, ui
 {
     // TODO: Make timeout configurable
     this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
-
-	// TODO: Implement mechanism to reverse color temp
+    
 	uint16_t sendKelvin = kelvin * ((this->config.colorTempMax - this->config.colorTempMin) / 100);
     if(this->config.reverseColorTempSlider) {
         sendKelvin = this->config.colorTempMax - sendKelvin;
