@@ -13,3 +13,8 @@ $(document).ready(function () {
         $('.modal').removeClass('is-active');
     });
 });
+
+function addNewRoom() {
+    $('#modal-new-room').addClass('is-active');
+    $('#new_room_name').select();
+}

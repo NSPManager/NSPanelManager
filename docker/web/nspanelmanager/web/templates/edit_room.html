@@ -31,7 +31,6 @@
                 <a id="filter_for_manual" onclick="add_new_lights_filter_for_type('manual');">Manual</a>
             </p>
             <div id="add_new_light_options">
-                <a class="panel-block">Office Ceiling Light</a>
             </div>
             <div id="add_new_light_loader">
                 <center>{% include 'loader.html' %}</center>
@@ -138,6 +137,7 @@
                 </div>
             </div>
             <button class="button is-primary">Save</button>
+            <a href="{% url 'delete_room' room_id=room.id %}" class="button is-danger">Delete</a>
         </form>
     </div>
 </div>

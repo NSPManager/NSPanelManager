@@ -87,6 +87,10 @@ def save_new_room(request):
     new_room.save()
     return redirect('rooms')
 
+def delete_room(request, room_id: int):
+    Room.objects.filter(id=room_id).delete()
+    return redirect('rooms')
+
 
 def update_room_form(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
