@@ -120,19 +120,19 @@ def add_light_to_room(request, room_id: int):
     if request.POST["light_control_mode"] == "dimmer":
         newLight.can_dim = True
         newLight.openhab_control_mode = "dimmer"
+        if newLight.type == "openhab":
+            newLight.openhab_item_dimmer = request.POST["openhab_dimming_channel_name"]
     else:
         newLight.openhab_control_mode = "switch"
+        if newLight.type == "openhab":
+            newLight.openhab_item_switch = request.POST["openhab_switch_channel_name"]
 
     if "color_temperature" in request.POST:
         newLight.can_color_temperature = True
+        newLight.openhab_item_color_temp = request.POST["openhab_color_temperature_channel_name"]
     if "rgb" in request.POST:
         newLight.can_rgb = True
     
-    # If adding a light of type "openhab", save the "items" used for controlling the "thing"
-    if newLight.type == "openhab":
-        newLight.openhab_item_switch = request.POST["openhab_switch_channel_name"]
-        newLight.openhab_item_dimmer = request.POST["openhab_dimming_channel_name"]
-        newLight.openhab_item_color_temp = request.POST["openhab_color_temperature_channel_name"]
     newLight.save()
     restart_mqtt_manager()
     return redirect('edit_room', room_id=room_id)
