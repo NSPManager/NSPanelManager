@@ -9,6 +9,7 @@ home_assistant_token = ""
 settings = {}
 auth_ok = False
 next_id = 0
+request_all_states_id = 0
 
 def init(settings_from_manager, mqtt_client_from_manager):
     global home_assistant_url, home_assistant_token, settings, mqtt_client
@@ -18,13 +19,14 @@ def init(settings_from_manager, mqtt_client_from_manager):
     home_assistant_token = settings["home_assistant_token"]
 
 def on_message(ws, message):
-    global auth_ok
+    global auth_ok, request_all_states_id
     json_msg = json.loads(message)
     if json_msg["type"] == "auth_required":
         authenticate_client()
     elif json_msg["type"] == "auth_ok":
-        print("Home Assistant auth OK.")
+        print("Home Assistant auth OK. Requesting existing states.")
         subscribe_to_events()
+        _get_all_states();
         auth_ok = True
     elif json_msg["type"] == "event" and json_msg["event"]["event_type"] == "state_changed":
         entity_id = json_msg["event"]["data"]["entity_id"]
@@ -35,6 +37,29 @@ def on_message(ws, message):
         print("Failed result: ")
         print(json_msg)
     elif json_msg["type"] == "result" and json_msg["success"]:
+        if json_msg["id"] == request_all_states_id:
+            for entity in json_msg["result"]:
+                for id, state in mqtt_manager_libs.light_states.states.items():
+                    if state["name"] == entity["entity_id"].replace("light.", ""):
+                        try:
+                            entity_name = state["name"]
+                            if entity["state"] == "off":
+                                state["brightness"] = 0
+                            else:
+                                if "brightness" in entity["attributes"]:
+                                    state["brightness"] = round(entity["attributes"]["brightness"] / 2.55)
+                                else:
+                                    state["brightness"] = 100 # Type is a switch and is ON, regard it as 100% on
+                            
+                            if state["can_color_temperature"]:
+                                if "color_temp_kelvin" in entity["attributes"]:
+                                    state["color_temp"] = entity["attributes"]["color_temp_kelvin"]
+                            
+                            mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", state["brightness"], retain=True)
+                            mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", state["color_temp"], retain=True)
+                        except Exception as e:
+                            print("Something went wrong while trying to load current states.")
+                            print(e)
         pass # Ignore success result messages
     else:
         print(message)
@@ -68,6 +93,14 @@ def subscribe_to_events():
     }
     send_message(json.dumps(msg))
 
+def _get_all_states():
+    global next_id, request_all_states_id
+    msg = {
+        "id": next_id,
+        "type": "get_states",
+    }
+    request_all_states_id = next_id
+    send_message(json.dumps(msg))
 
 # Got new value from Home Assistant, publish to MQTT
 def send_entity_update(json_msg):
