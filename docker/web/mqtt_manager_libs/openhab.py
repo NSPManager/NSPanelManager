@@ -97,15 +97,31 @@ def set_entity_brightness(entity_id: int, new_brightness: int):
     try:
         # Get light from state list
         light = mqtt_manager_libs.light_states.states[entity_id]
-        entity_name = light["name"]
-        # Format Home Assistant state update
-        msg = {
-            "type": "ItemCommandEvent",
-            "topic": "openhab/items/" + light["openhab_item_dimmer"] + "/command",
-            "payload": "{\"type\":\"Percent\",\"value\":\"" + str(new_brightness) + "\"}",
-            "source": "WebSocketNSPanelManager"
-        }
-        ws.send(json.dumps(msg))
+        if light["openhab_control_mode"] == "dimmer":
+            # Format OpenHAB state update
+            msg = {
+                "type": "ItemCommandEvent",
+                "topic": "openhab/items/" + light["openhab_item_dimmer"] + "/command",
+                "payload": "{\"type\":\"Percent\",\"value\":\"" + str(new_brightness) + "\"}",
+                "source": "WebSocketNSPanelManager"
+            }
+            ws.send(json.dumps(msg))
+        elif light["openhab_control_mode"] == "switch":
+            # Format OpenHAB state update
+            if new_brightness > 0:
+                onoff = "ON"
+                new_brightness = 100
+            if new_brightness <= 0:
+                onoff = "OFF"
+                new_brightness = 0
+            
+            msg = {
+                "type": "ItemCommandEvent",
+                "topic": "openhab/items/" + light["openhab_item_switch"] + "/command",
+                "payload": "{\"type\":\"OnOff\",\"value\":\"" + onoff + "\"}",
+                "source": "WebSocketNSPanelManager"
+            }
+            ws.send(json.dumps(msg))
         # Update the stored value
         mqtt_manager_libs.light_states.states[entity_id]["brightness"] = new_brightness
         # For OpenHAB it is not possible to send kelvin at the same time as brightness

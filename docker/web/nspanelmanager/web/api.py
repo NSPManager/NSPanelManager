@@ -49,6 +49,8 @@ def get_mqtt_manager_config(request):
         lightConfig["can_dim"] = light.can_dim
         lightConfig["can_color_temperature"] = light.can_color_temperature
         lightConfig["can_rgb"] = light.can_rgb
+        lightConfig["openhab_control_mode"] = light.openhab_control_mode
+        lightConfig["openhab_item_switch"] = light.openhab_item_switch
         lightConfig["openhab_item_dimmer"] = light.openhab_item_dimmer
         lightConfig["openhab_item_color_temp"] = light.openhab_item_color_temp
         return_json["lights"][light.id] = lightConfig

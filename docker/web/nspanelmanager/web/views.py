@@ -116,8 +116,13 @@ def add_light_to_room(request, room_id: int):
     newLight.friendly_name = request.POST["add_new_light_name"]
     if request.POST["light_type"] == "ceiling":
         newLight.is_ceiling_light = True
-    if "dimmable" in request.POST:
+
+    if request.POST["light_control_mode"] == "dimmer":
         newLight.can_dim = True
+        newLight.openhab_control_mode = "dimmer"
+    else:
+        newLight.openhab_control_mode = "switch"
+
     if "color_temperature" in request.POST:
         newLight.can_color_temperature = True
     if "rgb" in request.POST:
@@ -125,6 +130,7 @@ def add_light_to_room(request, room_id: int):
     
     # If adding a light of type "openhab", save the "items" used for controlling the "thing"
     if newLight.type == "openhab":
+        newLight.openhab_item_switch = request.POST["openhab_switch_channel_name"]
         newLight.openhab_item_dimmer = request.POST["openhab_dimming_channel_name"]
         newLight.openhab_item_color_temp = request.POST["openhab_color_temperature_channel_name"]
     newLight.save()
