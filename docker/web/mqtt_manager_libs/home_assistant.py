@@ -147,12 +147,13 @@ def set_entity_brightness(entity_id: int, new_brightness: int):
             "service": "turn_on",
             "service_data": {
                 "brightness_pct": new_brightness,
-                "kelvin": light["color_temp"]
             },
             "target": {
                 "entity_id": F"light.{entity_name}"
             }
         }
+        if light["can_color_temperature"]:
+            msg["service_data"]["kelvin"] = light["color_temp"]
         send_message(json.dumps(msg))
         # Update the stored value
         mqtt_manager_libs.light_states.states[entity_id]["brightness"] = new_brightness
