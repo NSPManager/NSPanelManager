@@ -2,6 +2,29 @@ function add_new_light_to_available_lights_list(light, type) {
     $("#add_new_light_options").append('<a class="panel-block" data-type="' + type + '" data-items=\'' + JSON.stringify(light.items) + '\'>' + light.label + '</a>');
 }
 
+function update_displayed_openhab_selectors() {
+    var light_control_type = $('input[name="light_control_mode"]:checked').val();
+    if(light_control_type == "dimmer") {
+        $("#openhab_dimming_channel_selector").show();
+        $("#openhab_switch_channel_selector").hide();
+    } else {
+        $("#openhab_switch_channel_selector").show();
+        $("#openhab_dimming_channel_selector").hide();
+    }
+
+    if($('input[name="color_temperature"]').prop("checked")) {
+        $('#openhab_color_temp_channel_selector').show();
+    } else {
+        $('#openhab_color_temp_channel_selector').hide();
+    }
+
+    if($('input[name="rgb"]').prop("checked")) {
+        $('#openhab_rgb_channel_selector').show();
+    } else {
+        $('#openhab_rgb_channel_selector').hide();
+    }
+}
+
 function populate_add_new_light_dialog() {
     $("#add_new_light_options").hide();
     $("#add_new_light_loader").show();
@@ -33,6 +56,7 @@ function add_new_light_show_light_page(light_element) {
 
         // Clear any previous options selected
         $('#openhab_dimming_channel_name').find("option").remove();
+        $('#openhab_switch_channel_name').find("option").remove();
         $('#openhab_color_temperature_channel_name').find("option").remove();
         $('#openhab_RGB_channel_name').find("option").remove();
 
@@ -40,6 +64,10 @@ function add_new_light_show_light_page(light_element) {
         items.forEach(item => {
             // Populate new options selected
             $('#openhab_dimming_channel_name').append($('<option>', {
+                value: item,
+                text: item
+            }));
+            $('#openhab_switch_channel_name').append($('<option>', {
                 value: item,
                 text: item
             }));
@@ -58,6 +86,12 @@ function add_new_light_show_light_page(light_element) {
 
     $("#add_new_light_name").val($(this).text()); // Set text field
     $("#add_new_light_type").val($(this).data("type")); // Set the correct type
+
+    $("#light_control_mode_dimmer").click(update_displayed_openhab_selectors);
+    $("#light_control_mode_switch").click(update_displayed_openhab_selectors);
+    $("#color_temperature").click(update_displayed_openhab_selectors);
+    $("#rgb").click(update_displayed_openhab_selectors);
+    update_displayed_openhab_selectors();
 
     // Finaly show the modal
     $('#modal-add-light').removeClass("is-active");

@@ -70,28 +70,43 @@
                     </div>
                 </div>
                 <div class="field">
+                    <label class="label">Control mode</label>
+                    <div class="control">
+                        <label class="radio">
+                            <input type="radio" id="light_control_mode_dimmer" name="light_control_mode" value="dimmer" checked>
+                            Dimmable
+                        </label>
+                        <label class="radio">
+                            <input type="radio" id="light_control_mode_switch" name="light_control_mode" value="switch">
+                            Switch
+                        </label>
+                    </div>
+                </div>
+                <div class="control">
                     <label class="label">Capabilities</label>
                     <div class="control">
                         <label class="checkbox">
-                            <input type="checkbox" name="dimmable" checked>
-                            Dimmable
-                        </label>
-                    </div>
-                    <div class="control">
-                        <label class="checkbox">
-                            <input type="checkbox" name="color_temperature">
+                            <input type="checkbox" id="color_temperature" name="color_temperature">
                             Color temperature
                         </label>
                     </div>
                     <div class="control">
                         <label class="checkbox">
-                            <input type="checkbox" name="rgb">
+                            <input type="checkbox" id="rgb" name="rgb">
                             RGB
                         </label>
                     </div>
                 </div>
                 <div id="openhab_light_options">
-                    <div class="field">
+                    <div class="field" id="openhab_switch_channel_selector">
+                        <label class="label">Switch Item name</label>
+                        <div class="control">
+                            <div class="select">
+                                <select id="openhab_switch_channel_name" name="openhab_switch_channel_name"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field" id="openhab_dimming_channel_selector">
                         <label class="label">Dimming Item name</label>
                         <div class="control">
                             <div class="select">
@@ -99,7 +114,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="field">
+                    <div class="field" id="openhab_color_temp_channel_selector">
                         <label class="label">Color temperature Item name</label>
                         <div class="control">
                             <div class="select">
@@ -107,7 +122,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="field">
+                    <div class="field" id="openhab_rgb_channel_selector">
                         <label class="label">RGB Item name</label>
                         <div class="control">
                             <div class="select">
