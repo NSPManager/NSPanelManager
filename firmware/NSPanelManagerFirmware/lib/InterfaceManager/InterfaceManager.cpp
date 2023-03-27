@@ -582,7 +582,7 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
                     }
                     else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0)
                     {
-                    	uint8_t colorTemp = atoi(msg.payload.c_str());
+                    	uint16_t colorTemp = atoi(msg.payload.c_str());
                         if(InterfaceManager::instance->config.reverseColorTempSlider) {
                             colorTemp = InterfaceManager::instance->config.colorTempMax - colorTemp;
                         } else {
