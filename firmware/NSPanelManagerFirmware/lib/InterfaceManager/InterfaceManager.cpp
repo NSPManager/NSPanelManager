@@ -285,17 +285,33 @@ void InterfaceManager::_updateLightsThatAreOn() {
         if(this->_currentEditMode == editLightMode::all_lights) {
             lights = this->config.currentRoom->getAllLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            lights = this->config.currentRoom->getCeilingLightsThatAreOn();
+            if(this->config.currentRoom->anyCeilingLightsOn()) {
+                lights = this->config.currentRoom->getCeilingLightsThatAreOn();
+            } else {
+                lights = this->config.currentRoom->getAllCeilingLights();
+            }
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            lights = this->config.currentRoom->getTableLightsThatAreOn();
+            if(this->config.currentRoom->anyTableLightstOn()) {
+                lights = this->config.currentRoom->getTableLightsThatAreOn();
+            } else {
+                lights = this->config.currentRoom->getAllTableLights();
+            }
         }
     } else if (this->_currentRoomMode == roomMode::house) {
         if(this->_currentEditMode == editLightMode::all_lights) {
             lights = this->config.getAllLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            lights = this->config.getCeilingLightsThatAreOn();
+            if(this->config.anyCeilingLightsOn()) {
+                lights = this->config.getCeilingLightsThatAreOn();   
+            } else {
+                lights = this->config.getAllCeilingLights();
+            }
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            lights = this->config.getTableLightsThatAreOn();
+            if(this->config.anyTableLightstOn()) {
+                lights = this->config.getTableLightsThatAreOn();
+            } else {
+                lights = this->config.getAllTableLights();
+            }
         }
     }
 
@@ -308,19 +324,35 @@ void InterfaceManager::_updateAllLights() {
 	std::list<lightConfig*> lights;
     if(this->_currentRoomMode == roomMode::room) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->config.currentRoom->getAllLights();
+            lights = this->config.currentRoom->getAllLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            lights = this->config.currentRoom->getCeilingLightsThatAreOn();
+            if(this->config.currentRoom->anyCeilingLightsOn()) {
+                lights = this->config.currentRoom->getCeilingLightsThatAreOn();
+            } else {
+                lights = this->config.currentRoom->getAllCeilingLights();
+            }
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            lights = this->config.currentRoom->getTableLightsThatAreOn();
+            if(this->config.currentRoom->anyTableLightstOn()) {
+                lights = this->config.currentRoom->getTableLightsThatAreOn();
+            } else {
+                lights = this->config.currentRoom->getAllTableLights();
+            }
         }
     } else if (this->_currentRoomMode == roomMode::house) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->config.getAllLights();
+            lights = this->config.getAllLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            lights = this->config.getCeilingLightsThatAreOn();
+            if(this->config.anyCeilingLightsOn()) {
+                lights = this->config.getCeilingLightsThatAreOn();   
+            } else {
+                lights = this->config.getAllCeilingLights();
+            }
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            lights = this->config.getTableLightsThatAreOn();
+            if(this->config.anyTableLightstOn()) {
+                lights = this->config.getTableLightsThatAreOn();
+            } else {
+                lights = this->config.getAllTableLights();
+            }
         }
     }
 
@@ -333,19 +365,35 @@ void InterfaceManager::_updateLightsColorTemp() {
 	std::list<lightConfig*> lights;
     if(this->_currentRoomMode == roomMode::room) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->config.currentRoom->getAllLights();
+            lights = this->config.currentRoom->getAllLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            lights = this->config.currentRoom->getAllCeilingLights();
+            if(this->config.currentRoom->anyCeilingLightsOn()) {
+                lights = this->config.currentRoom->getCeilingLightsThatAreOn();
+            } else {
+                lights = this->config.currentRoom->getAllCeilingLights();
+            }
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            lights = this->config.currentRoom->getAllTableLights();
+            if(this->config.currentRoom->anyTableLightstOn()) {
+                lights = this->config.currentRoom->getTableLightsThatAreOn();
+            } else {
+                lights = this->config.currentRoom->getAllTableLights();
+            }
         }
     } else if (this->_currentRoomMode == roomMode::house) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->config.getAllLights();
+            lights = this->config.getAllLightsThatAreOn();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            lights = this->config.getAllCeilingLights();
+            if(this->config.anyCeilingLightsOn()) {
+                lights = this->config.getCeilingLightsThatAreOn();   
+            } else {
+                lights = this->config.getAllCeilingLights();
+            }
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            lights = this->config.getAllTableLights();
+            if(this->config.anyTableLightstOn()) {
+                lights = this->config.getTableLightsThatAreOn();
+            } else {
+                lights = this->config.getAllTableLights();
+            }
         }
     }
 
