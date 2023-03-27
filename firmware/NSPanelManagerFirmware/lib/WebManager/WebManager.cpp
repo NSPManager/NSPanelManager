@@ -8,6 +8,7 @@
 #include <MqttLog.h>
 #include <HTTPClient.h>
 #include <NSPanel.h>
+#include <InterfaceManager.h>
 
 // Make space for variables in memory
 WebManager *WebManager::instance;
@@ -189,13 +190,14 @@ void WebManager::doRebootNow(AsyncWebServerRequest *request) {
 
 void WebManager::startTFTOTAUpdate(AsyncWebServerRequest *request)
 {
+    InterfaceManager::stop();
     NSPanel::instance->startOTAUpdate();
     request->send(200);
 }
 
 void WebManager::startOTAUpdate(AsyncWebServerRequest *request)
 {
-    xTaskCreatePinnedToCore(WebManager::_taskPerformOTAUpdate, "taskPerformOTAUpdate", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+    xTaskCreatePinnedToCore(WebManager::_taskPerformOTAUpdate, "taskPerformOTAUpdate", 10000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
     request->send(200);
 }
 

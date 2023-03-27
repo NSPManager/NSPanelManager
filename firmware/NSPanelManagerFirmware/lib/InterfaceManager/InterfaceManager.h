@@ -14,6 +14,8 @@ public:
     /// @brief Set default variables, initialize panel and start the user interface
     /// @param mqttClient MQTT Client used to send MQTT messages
     void init(PubSubClient *mqttClient);
+    /// @brief Stop and clear memory from InterfaceManager
+    static void stop();
     /// @brief Callback for when a touch event occurs on the screen
     /// @param page Page
     /// @param component Component
@@ -32,6 +34,7 @@ public:
     static inline InterfaceManager *instance;
     /// @brief The configuration for this panel
     interfaceConfig config;
+    
 
 private:
     /// @brief The task that handles startup if InterfaceManager. It load the config from the server and processes it and

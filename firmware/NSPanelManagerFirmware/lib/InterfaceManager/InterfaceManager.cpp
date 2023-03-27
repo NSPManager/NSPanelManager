@@ -23,6 +23,23 @@ void InterfaceManager::init(PubSubClient *mqttClient)
     xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 }
 
+void InterfaceManager::stop(){
+    LOG_INFO("Stopping interface manager.");
+    if(InterfaceManager::_taskHandleProcessMqttMessages != NULL) {
+        vTaskDelete(InterfaceManager::_taskHandleProcessMqttMessages);
+    }
+    if(InterfaceManager::_taskHandleSpecialModeTimer != NULL) {
+        vTaskDelete(InterfaceManager::_taskHandleSpecialModeTimer);
+    }
+
+    for(roomConfig& room : InterfaceManager::instance->config.rooms) {
+        room.ceilingLights.clear();
+        room.tableLights.clear();
+    }
+
+    InterfaceManager::instance->config.rooms.clear();
+}
+
 void InterfaceManager::_taskLoadConfigAndInit(void *param)
 {
     unsigned long start = millis();
@@ -156,15 +173,19 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         }
         else if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
-            InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
-            InterfaceManager::instance->_lastMasterCeilingLightsButtonRelease = millis();
-            InterfaceManager::instance->_ceilingMasterButtonEvent();
+            if(InterfaceManager::instance->_currentEditMode == editLightMode::ceiling_lights || InterfaceManager::instance->_currentEditMode == editLightMode::all_lights) {
+                InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
+                InterfaceManager::instance->_lastMasterCeilingLightsButtonRelease = millis();
+                InterfaceManager::instance->_ceilingMasterButtonEvent();
+            }
         }
         else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
 		{
-            InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
-            InterfaceManager::instance->_lastMasterTableLightsButtonRelease = millis();
-            InterfaceManager::instance->_tableMasterButtonEvent();
+            if(InterfaceManager::instance->_currentEditMode == editLightMode::ceiling_lights || InterfaceManager::instance->_currentEditMode == editLightMode::all_lights) {
+                InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
+                InterfaceManager::instance->_lastMasterTableLightsButtonRelease = millis();
+                InterfaceManager::instance->_tableMasterButtonEvent();
+            }
 		}
         else if (component == HOME_LIGHT_LEVEL_SLIDER_ID)
         {
