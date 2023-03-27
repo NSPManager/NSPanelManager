@@ -24,7 +24,8 @@ enum editLightMode
 {
     all_lights,
     ceiling_lights,
-    table_lights
+    table_lights,
+    EXIT_SPECIAL_MODE // Used to exit special mode
 };
 
 /// @brief Object used to represent a light with all its configuration

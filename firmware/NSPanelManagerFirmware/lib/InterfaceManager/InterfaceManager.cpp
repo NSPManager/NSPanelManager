@@ -210,12 +210,20 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
             InterfaceManager::instance->_lastMasterCeilingLightsButtonTouch = millis();
-            InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::ceiling_lights);
+            if(InterfaceManager::instance->_currentEditMode == editLightMode::all_lights) {
+                InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::ceiling_lights);
+            } else {
+                InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::EXIT_SPECIAL_MODE);
+            }
         }
         else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
 		{
 			InterfaceManager::instance->_lastMasterTableLightsButtonTouch = millis();
-            InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::table_lights);
+            if(InterfaceManager::instance->_currentEditMode == editLightMode::all_lights) {
+                InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::table_lights);
+            } else {
+                InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::EXIT_SPECIAL_MODE);
+            }
 		}
         LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
     } else {
@@ -418,6 +426,11 @@ void InterfaceManager::_taskSpecialModeTriggerTask(void* param) {
         if(lastRelease == InterfaceManager::instance->_lastMasterTableLightsButtonRelease) {
             InterfaceManager::instance->_ignoreNextTouchRelease = true;    
             InterfaceManager::instance->_setEditLightMode(editLightMode::table_lights);
+        }
+    } else if(InterfaceManager::instance->_triggerSpecialEditLightMode == editLightMode::EXIT_SPECIAL_MODE) {
+        if(lastRelease == InterfaceManager::instance->_lastMasterTableLightsButtonRelease) {
+            InterfaceManager::instance->_ignoreNextTouchRelease = true;    
+            InterfaceManager::instance->_setEditLightMode(editLightMode::all_lights);
         }
     }
 
