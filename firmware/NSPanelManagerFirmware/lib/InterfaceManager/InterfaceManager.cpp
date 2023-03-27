@@ -885,25 +885,21 @@ void InterfaceManager::_updatePanelLightStatus()
         if(this->_currentRoomMode == roomMode::room) {
             for (lightConfig &light : this->config.currentRoom->tableLights)
             {
-                if(light.level > 0){
-                    totalBrightnessLights++;
-                    totalBrightness += light.level;
-                    if(light.canTemperature) {
-                        totalKelvinLights++;
-                        totalKelvin += light.colorTemperature;
-                    }
+                totalBrightnessLights++;
+                totalBrightness += light.level;
+                if(light.canTemperature) {
+                    totalKelvinLights++;
+                    totalKelvin += light.colorTemperature;
                 }
             }
         } else if (this->_currentRoomMode == roomMode::house) {
             for (lightConfig *light : this->config.getAllTableLights())
             {
-                if(light->level > 0) {
-                    totalBrightnessLights++;
-                    totalBrightness += light->level;
-                    if(light->canTemperature) {
-                        totalKelvinLights++;
-                        totalKelvin += light->colorTemperature;
-                    }
+                totalBrightnessLights++;
+                totalBrightness += light->level;
+                if(light->canTemperature) {
+                    totalKelvinLights++;
+                    totalKelvin += light->colorTemperature;
                 }
             }
         }
