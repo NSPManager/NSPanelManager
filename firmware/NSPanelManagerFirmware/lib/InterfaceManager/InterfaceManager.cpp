@@ -412,6 +412,11 @@ void InterfaceManager::_taskSpecialModeTriggerTask(void* param) {
         lastRelease = InterfaceManager::instance->_lastMasterCeilingLightsButtonRelease;
     } else if(InterfaceManager::instance->_triggerSpecialEditLightMode == editLightMode::table_lights) {
         lastRelease = InterfaceManager::instance->_lastMasterTableLightsButtonRelease;
+    } else {
+        lastRelease = InterfaceManager::instance->_lastMasterCeilingLightsButtonRelease;
+        if (InterfaceManager::instance->_lastMasterTableLightsButtonRelease > lastRelease) {
+            lastRelease = InterfaceManager::instance->_lastMasterTableLightsButtonRelease;
+        }
     }
 
     // TODO: Make trigger time configurable
@@ -428,7 +433,7 @@ void InterfaceManager::_taskSpecialModeTriggerTask(void* param) {
             InterfaceManager::instance->_setEditLightMode(editLightMode::table_lights);
         }
     } else if(InterfaceManager::instance->_triggerSpecialEditLightMode == editLightMode::EXIT_SPECIAL_MODE) {
-        if(lastRelease == InterfaceManager::instance->_lastMasterTableLightsButtonRelease) {
+        if(lastRelease == InterfaceManager::instance->_lastMasterCeilingLightsButtonRelease || lastRelease == InterfaceManager::instance->_lastMasterTableLightsButtonRelease) {
             InterfaceManager::instance->_ignoreNextTouchRelease = true;    
             InterfaceManager::instance->_setEditLightMode(editLightMode::all_lights);
         }
