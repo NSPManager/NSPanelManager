@@ -165,11 +165,13 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         {
             if(InterfaceManager::instance->_currentRoomMode == roomMode::room) {
                 InterfaceManager::instance->_goToNextRoom();
+                InterfaceManager::instance->_stopSpecialMode();
             }
         }
         else if (component == SWITCH_MODE_BUTTON_ID)
         {
             InterfaceManager::instance->_goToNextMode();
+            InterfaceManager::instance->_stopSpecialMode();
         }
         else if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
@@ -204,25 +206,35 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
             InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
         } else if (component == ROOM_BUTTON_ID) {
             // Show page with all lights
-            NSPanel::instance->goToPage("Room1");
+            NSPanel::instance->goToPage("Room");
+            InterfaceManager::instance->_ignoreNextTouchRelease = true;
+            InterfaceManager::instance->_stopSpecialMode();
         }
     } else if (page == HOME_PAGE_ID && pressed) {
         if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
         {
-            InterfaceManager::instance->_lastMasterCeilingLightsButtonTouch = millis();
             if(InterfaceManager::instance->_currentEditMode == editLightMode::all_lights) {
+                InterfaceManager::instance->_lastMasterCeilingLightsButtonTouch = millis();
                 InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::ceiling_lights);
-            } else {
+            } else if (InterfaceManager::instance->_currentEditMode == editLightMode::ceiling_lights) {
+                InterfaceManager::instance->_lastMasterCeilingLightsButtonTouch = millis();
                 InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::EXIT_SPECIAL_MODE);
+            } else {
+                InterfaceManager::instance->_ignoreNextTouchRelease = true;
+                InterfaceManager::instance->_stopSpecialMode();
             }
         }
         else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
 		{
-			InterfaceManager::instance->_lastMasterTableLightsButtonTouch = millis();
             if(InterfaceManager::instance->_currentEditMode == editLightMode::all_lights) {
+                InterfaceManager::instance->_lastMasterTableLightsButtonTouch = millis();
                 InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::table_lights);
-            } else {
+            } else if (InterfaceManager::instance->_currentEditMode == editLightMode::table_lights) {
+                InterfaceManager::instance->_lastMasterTableLightsButtonTouch = millis();
                 InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::EXIT_SPECIAL_MODE);
+            } else {
+                InterfaceManager::instance->_ignoreNextTouchRelease = true;
+                InterfaceManager::instance->_stopSpecialMode();
             }
 		}
         LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
@@ -443,14 +455,20 @@ void InterfaceManager::_taskSpecialModeTimer(void* param) {
         }
         vTaskDelay(250 / portTICK_PERIOD_MS);
     }
-    InterfaceManager::instance->_setEditLightMode(editLightMode::all_lights);
-    InterfaceManager::_taskHandleSpecialModeTimer = NULL;
-    vTaskDelete(NULL); // Task is complete, stop task
+    InterfaceManager::instance->_stopSpecialMode();
 }
 
 void InterfaceManager::_startSpecialModeTriggerTask(editLightMode triggerMode) {
     this->_triggerSpecialEditLightMode = triggerMode;
     xTaskCreatePinnedToCore(_taskSpecialModeTriggerTask, "taskSpecialModeTriggerTask", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+}
+
+void InterfaceManager::_stopSpecialMode() {
+    if(InterfaceManager::_taskHandleSpecialModeTimer != NULL) {
+        vTaskDelete(InterfaceManager::_taskHandleSpecialModeTimer);
+    }
+    InterfaceManager::_taskHandleSpecialModeTimer = NULL;
+    InterfaceManager::instance->_setEditLightMode(editLightMode::all_lights);
 }
 
 void InterfaceManager::_taskSpecialModeTriggerTask(void* param) {
@@ -1046,7 +1064,6 @@ bool InterfaceManager::_getRoomConfig(int room_id, DynamicJsonDocument* buffer)
             String line = client.readStringUntil('\n');
             // remove space, to check if the line is end of headers
             line.trim();
-            LOG_DEBUG("Got line: ", line);
 
             if (!line.length())
             {

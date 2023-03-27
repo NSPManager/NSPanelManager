@@ -111,6 +111,8 @@ private:
     /// @brief Will start the special mode trigger task
     /// @param triggerMode The new mode to trigger if sucessful
     void _startSpecialModeTriggerTask(editLightMode triggerMode);
+    /// @brief Stop and exit special mode
+    void _stopSpecialMode();
 
     /// @brief Called when the master ceiling lights button was pressed
     void _ceilingMasterButtonEvent();
