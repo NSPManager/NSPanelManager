@@ -165,26 +165,24 @@ def get_nspanel_config(request):
     base["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
     base["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
     base["reverse_color_temp"] = get_setting_with_default("reverse_color_temp", False)
-    base["rooms"] = {}
+    base["rooms"] = []
     for room in Room.objects.all().order_by('displayOrder'):
-        base["rooms"][str(room.displayOrder)] = {}
-        base["rooms"][str(room.displayOrder)]["name"] = room.friendly_name
-        base["rooms"][str(room.displayOrder)]["lights"] = {}
-        for light in room.light_set.all():
-            base["rooms"][str(room.displayOrder)
-                          ]["lights"][light.id] = {}
-            base["rooms"][str(
-                room.displayOrder)]["lights"][light.id]["name"] = light.friendly_name
-            base["rooms"][str(
-                room.displayOrder)]["lights"][light.id]["ceiling"] = light.is_ceiling_light
-            base["rooms"][str(
-                room.displayOrder)]["lights"][light.id]["can_dim"] = light.can_dim
-            base["rooms"][str(
-                room.displayOrder)]["lights"][light.id]["can_temperature"] = light.can_color_temperature
-            base["rooms"][str(
-                room.displayOrder)]["lights"][light.id]["can_rgb"] = light.can_rgb
-
+        base["rooms"].append(room.id)
     return JsonResponse(base)
+
+def get_room_config(request, room_id: int):
+    room = Room.objects.get(id=room_id)
+    return_json = {}
+    return_json["name"] = room.friendly_name
+    return_json["lights"] = {}
+    for light in room.light_set.all():
+        return_json["lights"][light.id] = {}
+        return_json["lights"][light.id]["name"] = light.friendly_name
+        return_json["lights"][light.id]["ceiling"] = light.is_ceiling_light
+        return_json["lights"][light.id]["can_dim"] = light.can_dim
+        return_json["lights"][light.id]["can_temperature"] = light.can_color_temperature
+        return_json["lights"][light.id]["can_rgb"] = light.can_rgb
+    return JsonResponse(return_json)
 
 def reboot_nspanel(request):
     address = request.GET["address"]

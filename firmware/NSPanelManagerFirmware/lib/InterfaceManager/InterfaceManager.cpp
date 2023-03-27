@@ -51,7 +51,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
 
     NSPanel::instance->setComponentText("bootscreen.t_loading", "Loading config...");
 
-    InterfaceManager::instance->_roomDataJson = new DynamicJsonDocument(4096);
+    InterfaceManager::instance->_roomDataJson = new DynamicJsonDocument(1024);
     uint8_t tries = 0;
     bool successDownloadingConfig = false;
     do
@@ -410,14 +410,34 @@ void InterfaceManager::_processPanelConfig()
     this->config.colorTempMax = (*this->_roomDataJson)["color_temp_max"].as<uint16_t>();
     this->config.reverseColorTempSlider = (*this->_roomDataJson)["reverse_color_temp"].as<String>().equals("True");
     this->config.raiseToMaxLightLevelAbove = (*this->_roomDataJson)["raise_to_100_light_level"].as<uint8_t>();
-    for (JsonPair kv : (*this->_roomDataJson)["rooms"].as<JsonObject>())
+    uint8_t numberOfRooms = (*this->_roomDataJson)["rooms"].as<JsonArray>().size();
+    uint8_t currentRoom = 1;
+    for (uint8_t roomId : (*this->_roomDataJson)["rooms"].as<JsonArray>())
     {
-        roomConfig roomCfg;
-        roomCfg.id = atoi(kv.key().c_str());
-        roomCfg.name = kv.value()["name"] | "ERR";
+        LOG_INFO("Getting config for room ", roomId);
+        // Display what room we are getting configuration for.
+        std::string info_text = "Loading room ";
+        info_text.append(std::to_string(currentRoom));
+        info_text.append("/");
+        info_text.append(std::to_string(numberOfRooms));
 
-        JsonVariant ceilingLights = kv.value()["lights"];
-        for (JsonPair lightPair : ceilingLights.as<JsonObject>())
+        NSPanel::instance->setComponentText("bootscreen.t_loading", info_text.c_str());
+        // Try downloading room config for a long as needed
+        DynamicJsonDocument* buffer = new DynamicJsonDocument(2048);
+        for(;;) {
+            if(this->_getRoomConfig(roomId, buffer)) {
+                break;
+            } else {
+                LOG_ERROR("Failed to download room config, will try again in 5 seconds.");
+                vTaskDelay(5000 / portTICK_PERIOD_MS);
+            }
+        }
+
+        roomConfig roomCfg;
+        roomCfg.id = roomId;
+        roomCfg.name = (*buffer)["name"] | "ERR";
+        JsonVariant json_lights = (*buffer)["lights"];
+        for (JsonPair lightPair : json_lights.as<JsonObject>())
         {
             lightConfig lightCfg;
             lightCfg.id = atoi(lightPair.key().c_str());
@@ -887,6 +907,98 @@ bool InterfaceManager::_getPanelConfig()
     if (contentLength && isValidContentType)
     {
         DeserializationError error = deserializeJson((*this->_roomDataJson), client);
+        if (!error)
+        {
+            return true;
+        }
+    }
+    else
+    {
+        LOG_ERROR("There was no content in the OTA response!");
+        client.flush();
+    }
+    return false;
+}
+
+bool InterfaceManager::_getRoomConfig(int room_id, DynamicJsonDocument* buffer)
+{
+    WiFiClient client;
+    unsigned long contentLength = 0;
+    bool isValidContentType = false;
+    if (client.connect(NSPMConfig::instance->manager_address.c_str(), NSPMConfig::instance->manager_port))
+    {
+        client.print(String("GET /api/get_nspanel_config/room/") + String(room_id) + " HTTP/1.1\r\n" +
+                     "Host: " + NSPMConfig::instance->manager_address.c_str() + "\r\n" +
+                     "Cache-Control: no-cache\r\n" +
+                     "Connection: close\r\n\r\n");
+
+        // Wait for response
+        unsigned long timeout = millis();
+        while (client.available() == 0)
+        {
+            if (millis() - timeout > 5000)
+            {
+                LOG_ERROR("Timeout while downloading firmware!");
+                client.stop();
+            }
+            vTaskDelay(20 / portTICK_PERIOD_MS);
+        }
+
+        while (client.available())
+        {
+            String line = client.readStringUntil('\n');
+            // remove space, to check if the line is end of headers
+            line.trim();
+            LOG_DEBUG("Got line: ", line);
+
+            if (!line.length())
+            {
+                // headers ended
+                break; // and get the OTA started
+            }
+
+            // Check if the HTTP Response is 200
+            // else break and Exit Update
+            if (line.startsWith("HTTP/1.1"))
+            {
+                if (line.indexOf("200") < 0)
+                {
+                    LOG_ERROR("Got a non 200 status code from server. Exiting OTA Update.");
+                    break;
+                }
+            }
+
+            // extract headers here
+            // Start with content length
+            if (line.startsWith("Content-Length: "))
+            {
+                contentLength = atol((getHeaderValue(line, "Content-Length: ")).c_str());
+            }
+
+            // Next, the content type
+            if (line.startsWith("Content-Type: "))
+            {
+                String contentType = getHeaderValue(line, "Content-Type: ");
+                if (contentType == "application/json")
+                {
+                    isValidContentType = true;
+                }
+                else
+                {
+                    LOG_ERROR("Received invalid content type: ", contentType.c_str());
+                }
+            }
+        }
+    }
+    else
+    {
+        LOG_ERROR("Failed to connect to manager!");
+    }
+
+    // check contentLength and content type
+    if (contentLength && isValidContentType)
+    {
+        DeserializationError error = deserializeJson((*buffer), client);
         if (!error)
         {
             return true;

@@ -93,6 +93,11 @@ private:
     /// @brief Try to download the configuration from the server
     /// @return True if sucessful, otherwise false
     bool _getPanelConfig();
+    /// @brief Try to download the configuration for a specified room
+    /// @param room_id The ID of the room
+    /// @param buffer The buffer to put the JSON-data in to
+    /// @return True if sucessful, otherwise false
+    bool _getRoomConfig(int room_id, DynamicJsonDocument* buffer);
     /// @brief Process the config from the server into something useful
     void _processPanelConfig();
     /// @brief Set current light mode, handle starting/stopping special light mode
