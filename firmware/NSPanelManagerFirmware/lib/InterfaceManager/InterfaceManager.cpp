@@ -336,7 +336,11 @@ void InterfaceManager::_updateAllLights() {
 	std::list<lightConfig*> lights;
     if(this->_currentRoomMode == roomMode::room) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->config.currentRoom->getAllLightsThatAreOn();
+            if(this->config.currentRoom->anyLightsOn()) {
+                lights = this->config.currentRoom->getAllLightsThatAreOn();
+            } else {
+                lights = this->config.currentRoom->getAllLights();
+            }
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
             if(this->config.currentRoom->anyCeilingLightsOn()) {
                 lights = this->config.currentRoom->getCeilingLightsThatAreOn();
@@ -352,7 +356,11 @@ void InterfaceManager::_updateAllLights() {
         }
     } else if (this->_currentRoomMode == roomMode::house) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->config.getAllLightsThatAreOn();
+            if(this->config.anyLightsOn()) {
+                lights = this->config.getAllLightsThatAreOn();
+            } else {
+                lights = this->config.getAllLights();
+            }
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
             if(this->config.anyCeilingLightsOn()) {
                 lights = this->config.getCeilingLightsThatAreOn();   
@@ -377,7 +385,11 @@ void InterfaceManager::_updateLightsColorTemp() {
 	std::list<lightConfig*> lights;
     if(this->_currentRoomMode == roomMode::room) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->config.currentRoom->getAllLightsThatAreOn();
+            if(this->config.currentRoom->anyLightsOn()) {
+                lights = this->config.currentRoom->getAllLightsThatAreOn();
+            } else {
+                lights = this->config.currentRoom->getAllLights();
+            }
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
             if(this->config.currentRoom->anyCeilingLightsOn()) {
                 lights = this->config.currentRoom->getCeilingLightsThatAreOn();
@@ -393,7 +405,11 @@ void InterfaceManager::_updateLightsColorTemp() {
         }
     } else if (this->_currentRoomMode == roomMode::house) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            lights = this->config.getAllLightsThatAreOn();
+            if(this->config.anyLightsOn()) {
+                lights = this->config.getAllLightsThatAreOn();
+            } else {
+                lights = this->config.getAllLights();
+            }
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
             if(this->config.anyCeilingLightsOn()) {
                 lights = this->config.getCeilingLightsThatAreOn();   
