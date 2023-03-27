@@ -129,7 +129,8 @@ def add_light_to_room(request, room_id: int):
 
     if "color_temperature" in request.POST:
         newLight.can_color_temperature = True
-        newLight.openhab_item_color_temp = request.POST["openhab_color_temperature_channel_name"]
+        if newLight.type == "openhab":
+            newLight.openhab_item_color_temp = request.POST["openhab_color_temperature_channel_name"]
     if "rgb" in request.POST:
         newLight.can_rgb = True
     
