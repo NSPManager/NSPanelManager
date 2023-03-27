@@ -50,7 +50,6 @@ def on_message(client, userdata, msg):
                         mqtt_manager_libs.home_assistant.set_entity_color_temp(entity_id, data["kelvin"])
                     elif mqtt_manager_libs.light_states.states[entity_id]["type"] == "openhab":
                         mqtt_manager_libs.openhab.set_entity_color_temp(entity_id, data["kelvin"])
-                    sleep(20/1000) # Wait 20ms between each light event
 
     except:
         print("Something went wrong during processing of message:")

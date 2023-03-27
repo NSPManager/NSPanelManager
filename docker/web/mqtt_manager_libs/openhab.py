@@ -129,7 +129,6 @@ def set_entity_brightness(entity_id: int, new_brightness: int):
         if not was_light_already_on and light["can_color_temperature"]:
             # For OpenHAB it is not possible to send kelvin at the same time as brightness
             # wait a few milliseconds and then send kelvin update
-            sleep(5/1000)
             set_entity_color_temp(entity_id, light["color_temp"])
     except Exception as e:
         print("Failed to send entity update to Home Assisatant.")
