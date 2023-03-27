@@ -218,12 +218,12 @@ void WebManager::_taskPerformOTAUpdate(void *param)
         {
             firmwareUpdateSuccessful = WebManager::_update(U_FLASH, "/download_firmware");
             tries++;
-            if (!firmwareUpdateSuccessful && tries <= 3)
+            if (!firmwareUpdateSuccessful && tries <= 10)
             {
-                LOG_ERROR("Failed to run OTA. Will try again in 2 seconds.");
-                vTaskDelay(2000);
+                LOG_ERROR("Failed to run OTA. Will try again in 5 seconds.");
+                vTaskDelay(5000 / portTICK_PERIOD_MS);
             }
-        } while (!firmwareUpdateSuccessful && tries <= 3);
+        } while (!firmwareUpdateSuccessful && tries <= 10);
         if (firmwareUpdateSuccessful)
         {
             LOG_INFO("Successfully updated firmware.");
@@ -235,6 +235,7 @@ void WebManager::_taskPerformOTAUpdate(void *param)
         else
         {
             LOG_ERROR("Something went wrong during firmware upgrade.");
+            NSPanel::instance->setComponentText("bootscreen.t_loading", "Update failed!");
         }
     }
     else
@@ -257,12 +258,12 @@ void WebManager::_taskPerformOTAUpdate(void *param)
             {
                 littleFSUpdateSuccessful = WebManager::_update(U_SPIFFS, "/download_data_file");
                 tries++;
-                if (!firmwareUpdateSuccessful && tries <= 3)
+                if (!firmwareUpdateSuccessful && tries <= 10)
                 {
-                    LOG_ERROR("Failed to run OTA. Will try again in 2 seconds.");
-                    vTaskDelay(2000);
+                    LOG_ERROR("Failed to run OTA. Will try again in 5 seconds.");
+                    vTaskDelay(5000 / portTICK_PERIOD_MS);
                 }
-            } while (!littleFSUpdateSuccessful && tries <= 3);
+            } while (!littleFSUpdateSuccessful && tries <= 10);
             if (littleFSUpdateSuccessful)
             {
                 LOG_INFO("Successfully updated LittleFS.");
@@ -274,6 +275,7 @@ void WebManager::_taskPerformOTAUpdate(void *param)
             else
             {
                 LOG_ERROR("Something went wrong during LittleFS upgrade.");
+                NSPanel::instance->setComponentText("bootscreen.t_loading", "Update failed!");
             }
         }
         else
