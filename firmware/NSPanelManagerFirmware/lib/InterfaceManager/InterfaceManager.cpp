@@ -181,7 +181,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         }
         else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID)
 		{
-            if(InterfaceManager::instance->_currentEditMode == editLightMode::ceiling_lights || InterfaceManager::instance->_currentEditMode == editLightMode::all_lights) {
+            if(InterfaceManager::instance->_currentEditMode == editLightMode::table_lights || InterfaceManager::instance->_currentEditMode == editLightMode::all_lights) {
                 InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
                 InterfaceManager::instance->_lastMasterTableLightsButtonRelease = millis();
                 InterfaceManager::instance->_tableMasterButtonEvent();
