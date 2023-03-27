@@ -455,7 +455,10 @@ void InterfaceManager::_taskSpecialModeTimer(void* param) {
         }
         vTaskDelay(250 / portTICK_PERIOD_MS);
     }
-    InterfaceManager::instance->_stopSpecialMode();
+
+    InterfaceManager::instance->_setEditLightMode(editLightMode::all_lights);
+    InterfaceManager::_taskHandleSpecialModeTimer = NULL;
+    vTaskDelete(NULL);
 }
 
 void InterfaceManager::_startSpecialModeTriggerTask(editLightMode triggerMode) {
@@ -466,8 +469,8 @@ void InterfaceManager::_startSpecialModeTriggerTask(editLightMode triggerMode) {
 void InterfaceManager::_stopSpecialMode() {
     if(InterfaceManager::_taskHandleSpecialModeTimer != NULL) {
         vTaskDelete(InterfaceManager::_taskHandleSpecialModeTimer);
+        InterfaceManager::_taskHandleSpecialModeTimer = NULL;
     }
-    InterfaceManager::_taskHandleSpecialModeTimer = NULL;
     InterfaceManager::instance->_setEditLightMode(editLightMode::all_lights);
 }
 
