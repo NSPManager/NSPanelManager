@@ -1,4 +1,5 @@
 import websocket
+import requests
 import asyncio
 import json
 from time import sleep
@@ -29,12 +30,13 @@ def on_message(ws, message):
                     mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", payload["value"], retain=True)
                 elif item == light["openhab_item_color_temp"]:
                     mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", payload["value"], retain=True)
-                    
-
 
 def connect():
     Thread(target=_do_connection, daemon=True).start()
+    # Open KeepAlive thread
     Thread(target=_send_keepalive, daemon=True).start()
+    # Update all existing states
+    _update_all_light_states()
 
 def _do_connection():
     global openhab_url, ws
@@ -44,7 +46,6 @@ def _do_connection():
     ws_url += "?accessToken=" + openhab_token
     ws = websocket.WebSocketApp(F"{ws_url}", on_message=on_message)
     ws.run_forever()
-    # Open KeepAlive thread
 
 def _send_keepalive():
     while True:
@@ -153,3 +154,39 @@ def set_entity_color_temp(entity_id: int, color_temp: int):
     except Exception as e:
         print("Failed to send entity update to Home Assisatant.")
         print(e)
+
+def _update_all_light_states():
+    for light_id in mqtt_manager_libs.light_states.states:
+        entity_name = mqtt_manager_libs.light_states.states[light_id]["name"]
+        if mqtt_manager_libs.light_states.states[light_id]["type"] == "openhab":
+            if mqtt_manager_libs.light_states.states[light_id]["openhab_control_mode"] == "dimmer":
+                item_state = _get_item_state(mqtt_manager_libs.light_states.states[light_id]["openhab_item_dimmer"])
+                mqtt_manager_libs.light_states.states[light_id]["brightness"] = int(item_state["state"])
+                mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", int(item_state["state"]), retain=True)
+            elif mqtt_manager_libs.light_states.states[light_id]["openhab_control_mode"] == "switch":
+                item_state = _get_item_state(mqtt_manager_libs.light_states.states[light_id]["openhab_item_switch"])
+                if item_state["state"] == "ON":
+                    mqtt_manager_libs.light_states.states[light_id]["brightness"] = 100
+                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 100, retain=True)
+                else:
+                    mqtt_manager_libs.light_states.states[light_id]["brightness"] = 0
+                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 0, retain=True)
+
+            if mqtt_manager_libs.light_states.states[light_id]["can_color_temperature"]:
+                item_state = _get_item_state(mqtt_manager_libs.light_states.states[light_id]["openhab_item_color_temp"])
+                mqtt_manager_libs.light_states.states[light_id]["color_temp"] = int(item_state["state"])
+                mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", int(item_state["state"]), retain=True)
+                
+            
+def _get_item_state(item):
+    global openhab_url, openhab_token
+    url = openhab_url + "/rest/items/" + item
+    headers = {
+        "Authorization": "Bearer " + openhab_token,
+        "content-type": "application/json",
+    }
+    request_result = requests.get(url, headers=headers)
+    if(request_result.status_code == 200):
+        return json.loads(request_result.text)
+    else:
+        print("Something went wrong when trying to get state for item " + item)

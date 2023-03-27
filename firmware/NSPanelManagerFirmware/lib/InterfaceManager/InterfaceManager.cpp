@@ -412,6 +412,7 @@ void InterfaceManager::_processPanelConfig()
     this->config.raiseToMaxLightLevelAbove = (*this->_roomDataJson)["raise_to_100_light_level"].as<uint8_t>();
     uint8_t numberOfRooms = (*this->_roomDataJson)["rooms"].as<JsonArray>().size();
     uint8_t currentRoom = 1;
+    DynamicJsonDocument* buffer = new DynamicJsonDocument(2048);
     for (uint8_t roomId : (*this->_roomDataJson)["rooms"].as<JsonArray>())
     {
         LOG_INFO("Getting config for room ", roomId);
@@ -423,7 +424,7 @@ void InterfaceManager::_processPanelConfig()
 
         NSPanel::instance->setComponentText("bootscreen.t_loading", info_text.c_str());
         // Try downloading room config for a long as needed
-        DynamicJsonDocument* buffer = new DynamicJsonDocument(2048);
+        
         for(;;) {
             if(this->_getRoomConfig(roomId, buffer)) {
                 break;
@@ -454,9 +455,10 @@ void InterfaceManager::_processPanelConfig()
                 roomCfg.tableLights.push_back(lightCfg);
             }
         }
-
+        buffer->clear();
         this->config.rooms.push_back(roomCfg);
     }
+    delete buffer;
 
     // Panel config processed, clear Json data
     this->_roomDataJson->clear();
@@ -681,7 +683,7 @@ void InterfaceManager::_changeLightsToLevel(std::list<lightConfig*> *lights, uin
 
     char buffer[1024];
     uint json_length = serializeJson(doc, buffer);
-    if(this->_mqttClient->publish("nspanel/mqttmanager/command", buffer, json_length)) {
+    if(json_length > 0 && this->_mqttClient->publish("nspanel/mqttmanager/command", buffer)) {
         for (lightConfig *light : (*lights))
         {
             light->level = level;
@@ -716,7 +718,7 @@ void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig*> *lights, ui
 
     char buffer[1024];
     uint json_length = serializeJson(doc, buffer);
-    if(this->_mqttClient->publish("nspanel/mqttmanager/command", buffer, json_length)) {
+    if(json_length > 0 && this->_mqttClient->publish("nspanel/mqttmanager/command", buffer)) {
         for (lightConfig *light : (*lights))
         {
             light->colorTemperature = kelvin;
