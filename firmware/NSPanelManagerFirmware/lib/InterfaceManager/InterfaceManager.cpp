@@ -216,9 +216,6 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
             if(InterfaceManager::instance->_currentEditMode == editLightMode::all_lights) {
                 InterfaceManager::instance->_lastMasterCeilingLightsButtonTouch = millis();
                 InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::ceiling_lights);
-            } else if (InterfaceManager::instance->_currentEditMode == editLightMode::ceiling_lights) {
-                InterfaceManager::instance->_lastMasterCeilingLightsButtonTouch = millis();
-                InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::EXIT_SPECIAL_MODE);
             } else {
                 InterfaceManager::instance->_ignoreNextTouchRelease = true;
                 InterfaceManager::instance->_stopSpecialMode();
@@ -229,9 +226,6 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
             if(InterfaceManager::instance->_currentEditMode == editLightMode::all_lights) {
                 InterfaceManager::instance->_lastMasterTableLightsButtonTouch = millis();
                 InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::table_lights);
-            } else if (InterfaceManager::instance->_currentEditMode == editLightMode::table_lights) {
-                InterfaceManager::instance->_lastMasterTableLightsButtonTouch = millis();
-                InterfaceManager::instance->_startSpecialModeTriggerTask(editLightMode::EXIT_SPECIAL_MODE);
             } else {
                 InterfaceManager::instance->_ignoreNextTouchRelease = true;
                 InterfaceManager::instance->_stopSpecialMode();
@@ -468,36 +462,25 @@ void InterfaceManager::_stopSpecialMode() {
 
 void InterfaceManager::_taskSpecialModeTriggerTask(void* param) {
     unsigned long start = millis();
-    unsigned long lastRelease;
-    if(InterfaceManager::instance->_triggerSpecialEditLightMode == editLightMode::ceiling_lights) {
-        lastRelease = InterfaceManager::instance->_lastMasterCeilingLightsButtonRelease;
-    } else if(InterfaceManager::instance->_triggerSpecialEditLightMode == editLightMode::table_lights) {
-        lastRelease = InterfaceManager::instance->_lastMasterTableLightsButtonRelease;
-    } else {
-        lastRelease = InterfaceManager::instance->_lastMasterCeilingLightsButtonRelease;
-        if (InterfaceManager::instance->_lastMasterTableLightsButtonRelease > lastRelease) {
-            lastRelease = InterfaceManager::instance->_lastMasterTableLightsButtonRelease;
-        }
-    }
 
     // TODO: Make trigger time configurable
-    vTaskDelay(300 / portTICK_PERIOD_MS);
+    while(millis() < start + 300) {
+        if(!InterfaceManager::instance->_isFingerOnDisplay) {
+            // User did not hold finger entire period, do not trigger special mode
+            vTaskDelete(NULL);
+        }
+        vTaskDelay(20 / portTICK_PERIOD_MS);
+    }
 
     if(InterfaceManager::instance->_triggerSpecialEditLightMode == editLightMode::ceiling_lights) {
-        if(lastRelease == InterfaceManager::instance->_lastMasterCeilingLightsButtonRelease) {
-            InterfaceManager::instance->_ignoreNextTouchRelease = true;
-            InterfaceManager::instance->_setEditLightMode(editLightMode::ceiling_lights);
-        }
+        InterfaceManager::instance->_ignoreNextTouchRelease = true;
+        InterfaceManager::instance->_setEditLightMode(editLightMode::ceiling_lights);
     } else if(InterfaceManager::instance->_triggerSpecialEditLightMode == editLightMode::table_lights) {
-        if(lastRelease == InterfaceManager::instance->_lastMasterTableLightsButtonRelease) {
-            InterfaceManager::instance->_ignoreNextTouchRelease = true;    
-            InterfaceManager::instance->_setEditLightMode(editLightMode::table_lights);
-        }
+        InterfaceManager::instance->_ignoreNextTouchRelease = true;    
+        InterfaceManager::instance->_setEditLightMode(editLightMode::table_lights);
     } else if(InterfaceManager::instance->_triggerSpecialEditLightMode == editLightMode::EXIT_SPECIAL_MODE) {
-        if(lastRelease == InterfaceManager::instance->_lastMasterCeilingLightsButtonRelease || lastRelease == InterfaceManager::instance->_lastMasterTableLightsButtonRelease) {
-            InterfaceManager::instance->_ignoreNextTouchRelease = true;    
-            InterfaceManager::instance->_setEditLightMode(editLightMode::all_lights);
-        }
+        InterfaceManager::instance->_ignoreNextTouchRelease = true;    
+        InterfaceManager::instance->_setEditLightMode(editLightMode::all_lights);
     }
 
     vTaskDelete(NULL); // Task is complete, stop task
