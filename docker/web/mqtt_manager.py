@@ -39,14 +39,8 @@ def on_message(client, userdata, msg):
             mqtt_manager_libs.websocket_server.send_message(json.dumps(data))
         elif parts[-1] == "status":
             panel = parts[1]
-            if msg.payload.decode('utf-8') == "online":
-                data = {
-                    "state": "online"
-                }
-            else:
-                {
-                    "state": "offline"
-                }
+            data = json.loads(msg.payload.decode('utf-8'))
+            send_online_status(panel, data)
         elif parts[-1] == "status_report":
             panel = parts[1]
             data = json.loads(msg.payload.decode('utf-8'))
@@ -77,6 +71,9 @@ def on_message(client, userdata, msg):
 
 def send_status_report(panel, new_status):
     post("http://127.0.0.1:8000/api/set_panel_status/" + new_status["mac"] + "/", json=new_status)
+
+def send_online_status(panel, new_status):
+    post("http://127.0.0.1:8000/api/set_panel_online_status/" + new_status["mac"] + "/", json=new_status)
 
 def get_config():
     global settings

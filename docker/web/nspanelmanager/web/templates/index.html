@@ -13,10 +13,9 @@
             <th>NSPanel</th>
             <th>Room</th>
             <th>IP Address</th>
-            <th>MAC Address</th>
+            <th>Status</th>
             <th>WiFI RSSI</th>
             <th>Free heap</th>
-            <th>Last seen</th>
             <th>Version</th>
             <th>Actions</th>
         </tr>
@@ -30,10 +29,15 @@
             <td>
                 <a href="http://{{ nspanel.ip_address }}" target="_blank"><span class="tag is-link">{{ nspanel.ip_address }}</span></a>
             </td>
-            <td>{{ nspanel.mac_address }}</td>
+            <td>
+                {% if nspanel.online_state %}
+                <span class="tag is-success">Online</span>
+                {% else %}
+                <span class="tag is-danger">Offline</span>
+                {% endif %}
+            </td>
             <td>{{ nspanel.status_data.rssi }} dBm</td>
             <td>{{ nspanel.status_data.free_heap }} bytes</td>
-            <td>{{ nspanel.last_seen }}</td>
             <td>{{ nspanel.version }}</td>
             <td>
                 <a type="button" class="button is-primary is-small" href="/api/reboot_panel?address={{ nspanel.ip_address }}">Reboot</a>

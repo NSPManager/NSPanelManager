@@ -92,9 +92,24 @@ void taskManageWifiAndMqtt(void *param)
         LOG_ERROR("MQTT not connected!");
         while (WiFi.isConnected() && !mqttClient.connected())
         {
+          // Build "offline" message
+          DynamicJsonDocument* offline_message_doc = new DynamicJsonDocument(512);
+          (*offline_message_doc)["mac"] = WiFi.macAddress().c_str();
+          (*offline_message_doc)["state"] = "offline";
+          char offline_message_buffer[512];
+          serializeJson(*offline_message_doc, offline_message_buffer);
+          delete offline_message_doc;
+
+          DynamicJsonDocument* online_message_doc = new DynamicJsonDocument(512);
+          (*online_message_doc)["mac"] = WiFi.macAddress().c_str();
+          (*online_message_doc)["state"] = "online";
+          char online_message_buffer[512];
+          serializeJson(*online_message_doc, online_message_buffer);
+          delete online_message_doc;
+
           mqttClient.setServer(config.mqtt_server.c_str(), config.mqtt_port);
           LOG_INFO("Connecting to MQTT server ", config.mqtt_server.c_str());
-          mqttClient.connect(config.wifi_hostname.c_str(), config.mqtt_username.c_str(), config.mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, 1, "offline");
+          mqttClient.connect(config.wifi_hostname.c_str(), config.mqtt_username.c_str(), config.mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, 1, offline_message_buffer);
           vTaskDelay(1000 / portTICK_PERIOD_MS);
           if (mqttClient.connected())
           {
@@ -103,7 +118,7 @@ void taskManageWifiAndMqtt(void *param)
             // MQTT is established.
             LOG_INFO("Connected to MQTT server ", config.mqtt_server.c_str());
             InterfaceManager::subscribeToMqttTopics();
-            mqttClient.publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), "online", true);
+            mqttClient.publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), online_message_buffer, true);
           }
           else
           {

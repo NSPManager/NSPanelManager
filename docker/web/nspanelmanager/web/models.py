@@ -36,6 +36,7 @@ class NSPanel(models.Model):
     version = models.CharField(max_length=15, default="")
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     status_data = models.JSONField(default=_default_nspanel_status_data)
+    online_state = models.BooleanField(default=False)
 
 
 class Light(models.Model):
