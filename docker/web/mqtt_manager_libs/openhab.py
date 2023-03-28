@@ -28,6 +28,11 @@ def on_message(ws, message):
                 entity_name = light["name"]
                 if item == light["openhab_item_dimmer"]:
                     mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", payload["value"], retain=True)
+                elif item == light["openhab_item_switch"]:
+                    if payload["value"] == "ON":
+                        mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 100, retain=True)
+                    else:
+                        mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 0, retain=True)
                 elif item == light["openhab_item_color_temp"]:
                     mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", payload["value"], retain=True)
 
