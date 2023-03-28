@@ -385,43 +385,19 @@ void InterfaceManager::_updateLightsColorTemp() {
 	std::list<lightConfig*> lights;
     if(this->_currentRoomMode == roomMode::room) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            if(this->config.currentRoom->anyLightsOn()) {
-                lights = this->config.currentRoom->getAllLightsThatAreOn();
-            } else {
-                lights = this->config.currentRoom->getAllLights();
-            }
+            lights = this->config.currentRoom->getAllLights();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            if(this->config.currentRoom->anyCeilingLightsOn()) {
-                lights = this->config.currentRoom->getCeilingLightsThatAreOn();
-            } else {
-                lights = this->config.currentRoom->getAllCeilingLights();
-            }
+            lights = this->config.currentRoom->getAllCeilingLights();
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            if(this->config.currentRoom->anyTableLightstOn()) {
-                lights = this->config.currentRoom->getTableLightsThatAreOn();
-            } else {
-                lights = this->config.currentRoom->getAllTableLights();
-            }
+            lights = this->config.currentRoom->getAllTableLights();
         }
     } else if (this->_currentRoomMode == roomMode::house) {
         if(this->_currentEditMode == editLightMode::all_lights) {
-            if(this->config.anyLightsOn()) {
-                lights = this->config.getAllLightsThatAreOn();
-            } else {
-                lights = this->config.getAllLights();
-            }
+            lights = this->config.getAllLights();
         } else if (this->_currentEditMode == editLightMode::ceiling_lights) {
-            if(this->config.anyCeilingLightsOn()) {
-                lights = this->config.getCeilingLightsThatAreOn();   
-            } else {
-                lights = this->config.getAllCeilingLights();
-            }
+            lights = this->config.getAllCeilingLights();
         } else if (this->_currentEditMode == editLightMode::table_lights) {
-            if(this->config.anyTableLightstOn()) {
-                lights = this->config.getTableLightsThatAreOn();
-            } else {
-                lights = this->config.getAllTableLights();
-            }
+            lights = this->config.getAllTableLights();
         }
     }
 
@@ -707,12 +683,18 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
                     else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0)
                     {
                     	uint16_t colorTemp = atoi(msg.payload.c_str());
-                        if(InterfaceManager::instance->config.reverseColorTempSlider) {
-                            colorTemp = InterfaceManager::instance->config.colorTempMax - colorTemp;
-                        } else {
-                            colorTemp = InterfaceManager::instance->config.colorTempMin + colorTemp;
+                        if(colorTemp > InterfaceManager::instance->config.colorTempMax) {
+                            colorTemp = InterfaceManager::instance->config.colorTempMax;
+                        } else if (colorTemp < InterfaceManager::instance->config.colorTempMin) {
+                            colorTemp = InterfaceManager::instance->config.colorTempMin;
                         }
-                        colorTemp = colorTemp / ((InterfaceManager::instance->config.colorTempMax - InterfaceManager::instance->config.colorTempMin) / 100);
+
+                        colorTemp = ((colorTemp - InterfaceManager::instance->config.colorTempMin) * 100) / (InterfaceManager::instance->config.colorTempMax - InterfaceManager::instance->config.colorTempMin);
+
+                        if(InterfaceManager::instance->config.reverseColorTempSlider) {
+                            colorTemp = 100 - colorTemp;
+                        }
+                        
                     	InterfaceManager::instance->_setLightColorTemperature(entity, colorTemp);
                     }
                 }
@@ -856,8 +838,8 @@ void InterfaceManager::_updatePanelLightStatus()
 {
     uint totalBrightness = 0;
     uint totalBrightnessLights = 0;
-    uint totalKelvin = 0;
-    uint totalKelvinLights = 0;
+    uint totalKelvinLightsCeiling = 0;
+    uint16_t totalKelvinValueCeilingLights = 0;
 
     if(this->_currentEditMode == editLightMode::all_lights || this->_currentEditMode == editLightMode::ceiling_lights) {
         if(this->_currentRoomMode == roomMode::room) {
@@ -867,8 +849,8 @@ void InterfaceManager::_updatePanelLightStatus()
                     totalBrightnessLights++;
                     totalBrightness += light.level;
                     if(light.canTemperature) {
-                        totalKelvinLights++;
-                        totalKelvin += light.colorTemperature;
+                        totalKelvinLightsCeiling++;
+                        totalKelvinValueCeilingLights += light.colorTemperature;
                     }
                 }
             }
@@ -879,8 +861,8 @@ void InterfaceManager::_updatePanelLightStatus()
                     totalBrightnessLights++;
                     totalBrightness += light->level;
                     if(light->canTemperature) {
-                        totalKelvinLights++;
-                        totalKelvin += light->colorTemperature;
+                        totalKelvinLightsCeiling++;
+                        totalKelvinValueCeilingLights += light->colorTemperature;
                     }
                 }
             }
@@ -888,15 +870,15 @@ void InterfaceManager::_updatePanelLightStatus()
     }
 
     uint8_t averageCeilingBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
-    uint8_t averageCeilingKelvin = totalKelvinLights == 0 ? 0 : totalKelvin / totalKelvinLights;
+    uint8_t averageCeilingKelvin = totalKelvinLightsCeiling == 0 ? 0 : totalKelvinValueCeilingLights / totalKelvinLightsCeiling;
     HomePage::setCeilingLightsState(averageCeilingBrightness > 0);
     HomePage::setCeilingBrightnessLabelText(averageCeilingBrightness);
 
 
 	totalBrightness = 0;
 	totalBrightnessLights = 0;
-	totalKelvin = 0;
-	totalKelvinLights = 0;
+	uint8_t totalKelvinLightsTable = 0;
+	uint16_t totalKelvinValueTableLights = 0;
 	if(this->_currentEditMode == editLightMode::all_lights || this->_currentEditMode == editLightMode::table_lights) {
         if(this->_currentRoomMode == roomMode::room) {
             for (lightConfig &light : this->config.currentRoom->tableLights)
@@ -904,8 +886,8 @@ void InterfaceManager::_updatePanelLightStatus()
                 totalBrightnessLights++;
                 totalBrightness += light.level;
                 if(light.canTemperature) {
-                    totalKelvinLights++;
-                    totalKelvin += light.colorTemperature;
+                    totalKelvinLightsTable++;
+                    totalKelvinValueTableLights+= light.colorTemperature;
                 }
             }
         } else if (this->_currentRoomMode == roomMode::house) {
@@ -914,14 +896,14 @@ void InterfaceManager::_updatePanelLightStatus()
                 totalBrightnessLights++;
                 totalBrightness += light->level;
                 if(light->canTemperature) {
-                    totalKelvinLights++;
-                    totalKelvin += light->colorTemperature;
+                    totalKelvinLightsTable++;
+                    totalKelvinValueTableLights+= light->colorTemperature;
                 }
             }
         }
     }
 	uint8_t averageTableBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
-	uint8_t averageTableKelvin = totalKelvinLights == 0 ? 0 : totalKelvin / totalKelvinLights;
+	uint8_t averageTableKelvin = totalKelvinLightsTable == 0 ? 0 : totalKelvinValueTableLights/ totalKelvinLightsTable;
 	HomePage::setTableLightsState(averageTableBrightness > 0);
 	HomePage::setTableBrightnessLabelText(averageTableBrightness);
 
@@ -944,11 +926,11 @@ void InterfaceManager::_updatePanelLightStatus()
 
 	// TODO: Implement so that direction of color temp slider can be reversed in web interface
 	uint8_t totalAverageKelvin;
-	if(averageCeilingKelvin > 0 && averageTableKelvin > 0) {
+	if(totalKelvinLightsCeiling > 0 && totalKelvinLightsTable > 0) {
 		totalAverageKelvin = (averageCeilingKelvin + averageTableKelvin) / 2;
-	} else if (averageCeilingKelvin > 0) {
+	} else if (totalKelvinLightsCeiling > 0) {
 		totalAverageKelvin = averageCeilingKelvin;
-	} else if (averageTableKelvin > 0) {
+	} else if (totalKelvinLightsTable > 0) {
 		totalAverageKelvin = averageTableKelvin;
 	} else {
 		totalAverageKelvin = 0;
