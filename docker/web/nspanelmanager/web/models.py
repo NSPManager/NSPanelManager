@@ -21,6 +21,13 @@ class Room(models.Model):
     displayOrder = models.IntegerField(default=number)
 
 
+def _default_nspanel_status_data():
+    return {
+        "rssi": 0,
+        "mac": "??:??:??:??:??:??",
+        "free_heap": 0
+    };
+
 class NSPanel(models.Model):
     mac_address = models.CharField(max_length=17)
     friendly_name = models.CharField(max_length=100)
@@ -28,6 +35,7 @@ class NSPanel(models.Model):
     ip_address = models.CharField(max_length=15, default="")
     version = models.CharField(max_length=15, default="")
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    status_data = models.JSONField(default=_default_nspanel_status_data)
 
 
 class Light(models.Model):

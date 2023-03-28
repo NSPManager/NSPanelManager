@@ -87,8 +87,7 @@ void taskManageWifiAndMqtt(void *param)
         LOG_ERROR("No WiFi SSID configured!");
       }
 
-      if (WiFi.isConnected() && !mqttClient.connected() &&
-          !config.mqtt_server.empty())
+      if (WiFi.isConnected() && !mqttClient.connected() && !config.mqtt_server.empty())
       {
         LOG_ERROR("MQTT not connected!");
         while (WiFi.isConnected() && !mqttClient.connected())
@@ -116,7 +115,20 @@ void taskManageWifiAndMqtt(void *param)
       {
         LOG_ERROR("No MQTT server configured!");
       }
-      vTaskDelay(10000 / portTICK_PERIOD_MS);
+
+      if(WiFi.isConnected() && mqttClient.connected()) {
+        // Report state every 30 seconds
+        DynamicJsonDocument* status_report_doc = new DynamicJsonDocument(512);
+        (*status_report_doc)["rssi"] = WiFi.RSSI();
+        (*status_report_doc)["free_heap"] = ESP.getFreeHeap();
+        (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
+
+        char buffer[512];
+        uint json_length = serializeJson(*status_report_doc, buffer);
+        delete status_report_doc;
+        mqttClient.publish(NSPMConfig::instance->mqtt_panel_status_topic.c_str(), buffer);
+      }
+      vTaskDelay(30000 / portTICK_PERIOD_MS);
     }
   }
   else

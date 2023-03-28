@@ -46,6 +46,8 @@ public:
     std::string mqtt_password;
     /// @brief MQTT Availability topic
     std::string mqtt_availability_topic;
+    /// @brief MQTT panel status topic
+    std::string mqtt_panel_status_topic;
     /// @brief MQTT topic to send logs to
     std::string mqtt_log_topic;
 

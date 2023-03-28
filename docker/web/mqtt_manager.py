@@ -20,12 +20,14 @@ def on_connect(client, userdata, flags, rc):
     # Listen for all events sent to and from panels to control states
     client.subscribe("nspanel/mqttmanager/command")
     client.subscribe("nspanel/+/log")
+    client.subscribe("nspanel/+/status")
+    client.subscribe("nspanel/+/status_report")
 
 
 def on_message(client, userdata, msg):
     try:
         parts = msg.topic.split('/')
-        if parts[-1:] == "log": # Messages received was a status update (online/offline)
+        if parts[-1] == "log": # Messages received was a status update (online/offline)
             message_parts = msg.payload.decode('utf-8').split(':')
             data = {
                 "type": "log",
@@ -35,6 +37,21 @@ def on_message(client, userdata, msg):
                 "message": ':'.join(message_parts[1:])
             }
             mqtt_manager_libs.websocket_server.send_message(json.dumps(data))
+        elif parts[-1] == "status":
+            panel = parts[1]
+            if msg.payload.decode('utf-8') == "online":
+                data = {
+                    "state": "online"
+                }
+            else:
+                {
+                    "state": "offline"
+                }
+        elif parts[-1] == "status_report":
+            panel = parts[1]
+            data = json.loads(msg.payload.decode('utf-8'))
+            data["state"] = "online"
+            send_status_report(panel, data)
         elif msg.topic == "nspanel/mqttmanager/command":
             data = json.loads(msg.payload.decode('utf-8'))
             if data["method"] == "set" and data["attribute"] == "brightness": # Got new brightness value
@@ -57,6 +74,9 @@ def on_message(client, userdata, msg):
             print(msg.payload.decode('utf-8'))
         except:
             print("Something went wrong when processing the exception message, couldn't decode payload to utf-8.")
+
+def send_status_report(panel, new_status):
+    post("http://127.0.0.1:8000/api/set_panel_status/" + new_status["mac"] + "/", json=new_status)
 
 def get_config():
     global settings

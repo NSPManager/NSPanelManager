@@ -191,3 +191,14 @@ def reboot_nspanel(request):
     except:
         pass
     return redirect("/")
+
+@csrf_exempt
+def set_panel_status(request, panel_mac: str):
+    nspanel = NSPanel.objects.get(mac_address=panel_mac)
+    if nspanel:
+        # We got a match
+        nspanel.status_data = json.loads(request.body.decode('utf-8'));
+        nspanel.save()
+        return HttpResponse("", status=200)
+    
+    return HttpResponse("", status=500)

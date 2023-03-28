@@ -34,5 +34,6 @@ urlpatterns = [
     path('api/get_nspanel_config', api.get_nspanel_config, name='get_nspanel_config'),
     path('api/get_nspanel_config/room/<int:room_id>', api.get_room_config, name='get_nspanel_config'),
     path('api/get_all_available_lights', api.get_all_available_light_entities, name='get_all_available_lights'),
-    path('api/get_mqtt_manager_config', api.get_mqtt_manager_config, name='get_mqtt_manager_config')
+    path('api/get_mqtt_manager_config', api.get_mqtt_manager_config, name='get_mqtt_manager_config'),
+    path('api/set_panel_status/<str:panel_mac>/', api.set_panel_status, name='set_panel_status')
 ]
