@@ -18,38 +18,44 @@
 
 #nspanel_room_view > .light_r1 {
     position: absolute;
-    font-size: x-large;
+    display: block;
+    font-size: large;
     left: 4px;
     width: 156px;
+    height: 27px;
+    cursor: pointer;
 }
 
 #nspanel_room_view > .light_r2 {
     position: absolute;
-    font-size: x-large;
+    display: block;
+    font-size: large;
     left: 227px;
     width: 156px;
+    height: 27px;
+    cursor: pointer;
 }
 
 #nspanel_room_view > #light1, #light7 {
-    top: 50px;
+    top: 55px;
 }
 
 #nspanel_room_view > #light2, #light8 {
-    top: 94px;
+    top: 99px;
 }
 
 #nspanel_room_view > #light3, #light9 {
-    top: 138px;
+    top: 142px;
 }
 
 #nspanel_room_view > #light4, #light10 {
-    top: 183px;
+    top: 187px;
 }
 
 #nspanel_room_view > #light5, #light11 {
-    top: 228px;
+    top: 232px;
 }
 
 #nspanel_room_view > #light6, #light12 {
-    top: 272px;
+    top: 277px;
 }

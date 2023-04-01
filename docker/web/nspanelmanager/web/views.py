@@ -78,7 +78,23 @@ def move_room_down(request, room_id: int):
 
 
 def edit_room(request, room_id: int):
-    return render(request, 'edit_room.html', {'room': Room.objects.filter(id=room_id).first()})
+    room = Room.objects.filter(id=room_id).first()
+    data = {
+        'room': room,
+        'light1': Light.objects.filter(room=room, room_view_position=1).first(),
+        'light2': Light.objects.filter(room=room, room_view_position=2).first(),
+        'light3': Light.objects.filter(room=room, room_view_position=3).first(),
+        'light4': Light.objects.filter(room=room, room_view_position=4).first(),
+        'light5': Light.objects.filter(room=room, room_view_position=5).first(),
+        'light6': Light.objects.filter(room=room, room_view_position=6).first(),
+        'light7': Light.objects.filter(room=room, room_view_position=7).first(),
+        'light8': Light.objects.filter(room=room, room_view_position=8).first(),
+        'light9': Light.objects.filter(room=room, room_view_position=9).first(),
+        'light10': Light.objects.filter(room=room, room_view_position=10).first(),
+        'light11': Light.objects.filter(room=room, room_view_position=11).first(),
+        'light12': Light.objects.filter(room=room, room_view_position=11).first(),
+    }
+    return render(request, 'edit_room.html', data)
 
 
 def save_new_room(request):
