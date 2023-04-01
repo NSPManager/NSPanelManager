@@ -38,6 +38,9 @@ class NSPanel(models.Model):
     status_data = models.JSONField(default=_default_nspanel_status_data)
     online_state = models.BooleanField(default=False)
 
+class RoomViewPageLight(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    display_position = models.IntegerField(default=0)
 
 class Light(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
@@ -51,3 +54,4 @@ class Light(models.Model):
     openhab_item_switch = models.CharField(max_length=255, default="")
     openhab_item_dimmer = models.CharField(max_length=255, default="")
     openhab_item_color_temp = models.CharField(max_length=255, default="")
+    room_view_page = models.ForeignKey(RoomViewPageLight, on_delete=models.CASCADE, null=True)

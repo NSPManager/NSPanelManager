@@ -6,11 +6,50 @@
 
 #nspanel_room_view {
     background-image: url('/static/panel_views/nspanel_room_view.png');
+    position: relative;
 }
 
 #nspanel_room_view > #room_name {
-    position: relative;
+    position: absolute;
     font-size: x-large;
     left: 125px;
     top: 6px;
+}
+
+#nspanel_room_view > .light_r1 {
+    position: absolute;
+    font-size: x-large;
+    left: 4px;
+    width: 156px;
+}
+
+#nspanel_room_view > .light_r2 {
+    position: absolute;
+    font-size: x-large;
+    left: 227px;
+    width: 156px;
+}
+
+#nspanel_room_view > #light1, #light7 {
+    top: 50px;
+}
+
+#nspanel_room_view > #light2, #light8 {
+    top: 94px;
+}
+
+#nspanel_room_view > #light3, #light9 {
+    top: 138px;
+}
+
+#nspanel_room_view > #light4, #light10 {
+    top: 183px;
+}
+
+#nspanel_room_view > #light5, #light11 {
+    top: 228px;
+}
+
+#nspanel_room_view > #light6, #light12 {
+    top: 272px;
 }
