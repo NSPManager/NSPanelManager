@@ -1,0 +1,16 @@
+.nspanel_view {
+    width: 455px;
+    height: 320px;
+    color: white;
+}
+
+#nspanel_room_view {
+    background-image: url('/static/panel_views/nspanel_room_view.png');
+}
+
+#nspanel_room_view > #room_name {
+    position: relative;
+    font-size: x-large;
+    left: 125px;
+    top: 6px;
+}

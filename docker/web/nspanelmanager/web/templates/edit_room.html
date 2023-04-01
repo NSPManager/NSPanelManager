@@ -3,6 +3,7 @@
 {% block head %}
 {% load static %}
 <script src="{% static 'edit_room.js' %}"></script>
+<link rel="stylesheet" href="{% static 'edit_room.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -196,4 +197,10 @@
         {% endfor %}
     </tbody>
 </table>
+<h2 class="title is-4">Individual light control</h2>
+<h2 class="subtitle">Click on each "button" to select the light/switch controlled by it.</h2>
+<div class="nspanel_view" id="nspanel_room_view">
+    <span id="room_name">{{ room.friendly_name }}</span>
+    <span class=""
+</div>
 {% endblock %}
