@@ -125,6 +125,9 @@ private:
     /// @brief Update color temperature to all lights dictated by slider
     void _updateLightsColorTemp();
 
+    /// @brief Will populate the state, visibilty and names on lights in the Room page
+    void _populateRoomPage();
+
     /// @brief Given a light, will subscribe to all relevant MQTT status topics for that light
     /// @param cfg The light to subscribe to
     void _subscribeToLightTopics(lightConfig *cfg);

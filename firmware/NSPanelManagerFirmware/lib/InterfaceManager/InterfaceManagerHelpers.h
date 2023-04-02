@@ -31,9 +31,10 @@ enum editLightMode
 /// @brief Object used to represent a light with all its configuration
 struct lightConfig
 {
-    uint8_t id = 0;
+    uint16_t id = 0;
     uint8_t level = 0;
     uint8_t colorTemperature = 0;
+    uint8_t roomViewPosition = 0;
     bool isCeiling = false;
     bool canDim = false;
     bool canTemperature = false;
@@ -55,6 +56,8 @@ public:
     std::list<lightConfig*> getAllCeilingLights();
     std::list<lightConfig*> getAllTableLights();
     std::list<lightConfig*> getAllLights();
+    std::list<lightConfig*> getAllRoomViewLights();
+    lightConfig* getLightAtRoomViewPosition(int room_view_position);
     bool anyCeilingLightsOn();
     bool anyTableLightstOn();
     bool anyLightsOn();

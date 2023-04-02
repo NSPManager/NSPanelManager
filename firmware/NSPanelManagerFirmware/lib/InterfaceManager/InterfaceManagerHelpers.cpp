@@ -84,6 +84,38 @@ bool roomConfig::anyLightsOn() {
 	return this->anyCeilingLightsOn() || this->anyTableLightstOn();
 }
 
+std::list<lightConfig*> roomConfig::getAllRoomViewLights() {
+	std::list<lightConfig*> returnList;
+	for(lightConfig &light : this->ceilingLights) {
+		if(light.roomViewPosition > 0) {
+			returnList.push_back(&light);
+		}
+	}
+
+	for(lightConfig &light : this->tableLights) {
+		if(light.roomViewPosition > 0) {
+			returnList.push_back(&light);
+		}
+	}
+	return returnList;
+}
+
+lightConfig* roomConfig::getLightAtRoomViewPosition(int room_view_position) {
+	for(lightConfig &light : this->ceilingLights) {
+		if(light.roomViewPosition == room_view_position) {
+			return &light;
+		}
+	}
+
+	for(lightConfig &light : this->tableLights) {
+		if(light.roomViewPosition == room_view_position) {
+			return &light;
+		}
+	}
+
+	return nullptr;
+}
+
 std::list<lightConfig*> interfaceConfig::getCeilingLightsThatAreOn() {
     std::list<lightConfig*> returnList;
     for(roomConfig &room : this->rooms) {

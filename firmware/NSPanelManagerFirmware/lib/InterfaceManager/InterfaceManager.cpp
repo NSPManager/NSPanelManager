@@ -209,6 +209,8 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
             NSPanel::instance->goToPage("Room");
             InterfaceManager::instance->_ignoreNextTouchRelease = true;
             InterfaceManager::instance->_stopSpecialMode();
+        } else if (component == ROOM_BUTTON_ID) {
+            InterfaceManager::instance->_populateRoomPage();
         }
     } else if (page == HOME_PAGE_ID && pressed) {
         if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
@@ -232,6 +234,10 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
             }
 		}
         LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
+    } else if (page == ROOM_PAGE_ID && !pressed) {
+        if(component == ROOM_PAGE_BACK_BUTTON_ID) {
+            NSPanel::instance->goToPage("Home");
+        }
     } else {
     	LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
     }
@@ -400,6 +406,15 @@ void InterfaceManager::_updateLightsColorTemp() {
 	this->_updatePanelLightStatus();
 }
 
+void InterfaceManager::_populateRoomPage() {
+    LOG_DEBUG("Populating room view.");
+    for(lightConfig* light : this->config.currentRoom->getAllRoomViewLights()) {
+        RoomPage::setLightName(light->roomViewPosition, light->name.c_str());
+        RoomPage::setLightState(light->roomViewPosition, light->level > 0);
+        RoomPage::setLightVisibility(light->roomViewPosition, true);
+    }
+}
+
 void InterfaceManager::_setEditLightMode(editLightMode mode) {
     InterfaceManager::instance->_currentEditMode = mode; // Set current mode
     if(mode == editLightMode::all_lights) {
@@ -529,6 +544,7 @@ void InterfaceManager::_processPanelConfig()
             lightCfg.canDim = lightPair.value()["can_dim"];
             lightCfg.canTemperature = lightPair.value()["can_temperature"];
             lightCfg.canRgb = lightPair.value()["can_rgb"];
+            lightCfg.roomViewPosition = lightPair.value()["view_position"] | 0;
             if (lightPair.value()["ceiling"] == true)
             {
                 roomCfg.ceilingLights.push_back(lightCfg);

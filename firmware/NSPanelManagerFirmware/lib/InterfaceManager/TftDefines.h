@@ -18,6 +18,9 @@
 #define HOME_BUTTON_CEILING_NAME "home.b_ceiling"
 #define HOME_BUTTON_TABLE_NAME "home.b_table"
 
+#define ROOM_PAGE_ID 4 // ID for "Room"-page
+#define ROOM_PAGE_BACK_BUTTON_ID 25
+
 #define ROOM_LIGHT1_LABEL_NAME "Room.device1"
 #define ROOM_LIGHT2_LABEL_NAME "Room.device2"
 #define ROOM_LIGHT3_LABEL_NAME "Room.device3"
