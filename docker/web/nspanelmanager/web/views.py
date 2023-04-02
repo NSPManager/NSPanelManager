@@ -155,6 +155,27 @@ def add_light_to_room(request, room_id: int):
     return redirect('edit_room', room_id=room_id)
 
 
+def add_light_to_room_view(request, room_id: int):
+    room = Room.objects.filter(id=room_id).first()
+    light_position = int(request.POST["position"])
+    existing_light_at_position = Light.objects.filter(room=room, room_view_position=light_position).first()
+    if existing_light_at_position != None:
+        existing_light_at_position.room_view_position = 0
+        existing_light_at_position.save()
+    new_light = Light.objects.filter(id=int(request.POST["light_id"])).first()
+    new_light.room_view_position = light_position
+    new_light.save()
+    return redirect('edit_room', room_id=room_id)
+
+def remove_light_from_room_view(request, room_id: int):
+    room = Room.objects.filter(id=room_id).first()
+    light_position = int(request.POST["position"])
+    existing_light_at_position = Light.objects.filter(room=room, room_view_position=light_position).first()
+    if existing_light_at_position != None:
+        existing_light_at_position.room_view_position = 0
+        existing_light_at_position.save()
+    return redirect('edit_room', room_id=room_id)
+
 def settings_page(request):
     data = {}
     data["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)

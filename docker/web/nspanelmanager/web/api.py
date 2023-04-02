@@ -172,6 +172,12 @@ def get_room_config(request, room_id: int):
     room = Room.objects.get(id=room_id)
     return_json = {}
     return_json["name"] = room.friendly_name
+    return_json["room_view_lights"] = {}
+    for i in range(12):
+        return_json["room_view_lights"][i] = None
+    for light in room.light_set.all():
+        if light.room_view_position > 0 and light.room_view_position < 13:
+            return_json["room_view_lights"][light.room_view_position-1] = light.id
     return_json["lights"] = {}
     for light in room.light_set.all():
         return_json["lights"][light.id] = {}

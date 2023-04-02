@@ -154,3 +154,8 @@ function add_new_light() {
 $(document).ready(function () {
     $("#add_new_light_search").keyup(add_new_lights_filter);
 });
+
+function add_new_light_to_room_view(position_id) {
+    $("#add_new_light_to_room_view_position").val(position_id);
+    $("#modal-add-light-to-room-view").addClass("is-active");
+}
