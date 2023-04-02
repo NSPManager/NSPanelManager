@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os
+import logging
 import paho.mqtt.client as mqtt
 from requests import get, post
 from time import sleep
@@ -13,6 +13,7 @@ import mqtt_manager_libs.light_states
 settings = {}
 last_settings_file_mtime = 0
 client = mqtt.Client("NSPanelManager")
+logging.basicConfig(level=logging.DEBUG)
 
 
 def on_connect(client, userdata, flags, rc):
@@ -63,11 +64,11 @@ def on_message(client, userdata, msg):
                         mqtt_manager_libs.openhab.set_entity_color_temp(entity_id, data["kelvin"])
 
     except:
-        print("Something went wrong during processing of message:")
+        logging.error("Something went wrong during processing of message:")
         try:
-            print(msg.payload.decode('utf-8'))
+            logging.error(msg.payload.decode('utf-8'))
         except:
-            print("Something went wrong when processing the exception message, couldn't decode payload to utf-8.")
+            logging.error("Something went wrong when processing the exception message, couldn't decode payload to utf-8.")
 
 def send_status_report(panel, new_status):
     post("http://127.0.0.1:8000/api/set_panel_status/" + new_status["mac"] + "/", json=new_status)
@@ -79,10 +80,9 @@ def get_config():
     global settings
     while True:
         try:
-            config_request = get(
-                "http://127.0.0.1:8000/api/get_mqtt_manager_config", timeout=5)
+            config_request = get("http://127.0.0.1:8000/api/get_mqtt_manager_config", timeout=5)
             if config_request.status_code == 200:
-                print("Got config, will start MQTT Manager.")
+                logging.info("Got config, will start MQTT Manager.")
                 settings = config_request.json()
 
                 for id, light in settings["lights"].items():
@@ -95,8 +95,8 @@ def get_config():
                 settings.pop("lights")
                 break
         except Exception as e:
-            print("ERROR: Failed to get config. Will try again in 5 seconds.")
-            print(e)
+            logging.error("ERROR: Failed to get config. Will try again in 5 seconds.")
+            logging.error(e)
             sleep(5)
 
 
@@ -110,14 +110,13 @@ def connect_and_loop():
     connection_return_code = 0
     mqtt_server = settings["mqtt_server"]
     mqtt_port = int(settings["mqtt_port"])
-    print(F"Connecting to {mqtt_server}:{mqtt_port}")
+    logging.info(F"Connecting to {mqtt_server}:{mqtt_port}")
     while True:
         try:
             client.connect(mqtt_server, mqtt_port, 5)
             break  # Connection call did not raise exception, connection is sucessfull
         except:
-            print(
-                F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
+            logging.error(F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
             sleep(10)
     
     # MQTT Connected, start APIs if configured
@@ -125,14 +124,14 @@ def connect_and_loop():
         mqtt_manager_libs.home_assistant.init(settings, client)
         mqtt_manager_libs.home_assistant.connect()
     else:
-        print("Home Assistant values not configured, will not connect.")
+        logging.info("Home Assistant values not configured, will not connect.")
     
 
     if settings["openhab_address"] != "" and settings["openhab_token"] != "":
         mqtt_manager_libs.openhab.init(settings, client)
         mqtt_manager_libs.openhab.connect()
     else:
-        print("Home Assistant values not configured, will not connect.")
+        logging.info("OpenHABA values not configured, will not connect.")
     
     # Loop MQTT
     client.loop_forever()
@@ -143,5 +142,4 @@ if __name__ == '__main__':
     if settings["mqtt_server"] and settings["mqtt_port"]:
         connect_and_loop()
     else:
-        print(
-            "Settings dictate to NOT use MQTT Manager as no MQTT configuration is present.")
+        logging.error("Settings dictate to NOT use MQTT Manager as no MQTT configuration is present.")

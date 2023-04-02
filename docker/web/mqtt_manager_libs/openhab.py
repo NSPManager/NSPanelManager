@@ -1,6 +1,6 @@
 import websocket
 import requests
-import asyncio
+import logging
 import json
 from time import sleep
 from threading import Thread
@@ -16,6 +16,8 @@ def init(settings_from_manager, mqtt_client_from_manager):
     mqtt_client = mqtt_client_from_manager
     openhab_url = settings["openhab_address"]
     openhab_token = settings["openhab_token"]
+    logging.getLogger("websocket").propagate = False # Disable logging from underlying "websocket"
+    logging.getLogger("websockets").propagate = False # Disable logging from underlying "websocket"
 
 def on_message(ws, message):
     json_msg = json.loads(message)
@@ -38,18 +40,20 @@ def on_message(ws, message):
 
 def connect():
     Thread(target=_do_connection, daemon=True).start()
-    # Open KeepAlive thread
-    Thread(target=_send_keepalive, daemon=True).start()
     # Update all existing states
     _update_all_light_states()
+
+def _on_open():
+    # Open KeepAlive thread
+    Thread(target=_send_keepalive, daemon=True).start()
 
 def _do_connection():
     global openhab_url, ws
     ws_url = openhab_url.replace("https://", "wss://").replace("http://", "ws://")
     ws_url += "/ws"
-    print(F"Connecting to OpenHAB at {ws_url}")
+    logging.info(F"Connecting to OpenHAB at {ws_url}")
     ws_url += "?accessToken=" + openhab_token
-    ws = websocket.WebSocketApp(F"{ws_url}", on_message=on_message)
+    ws = websocket.WebSocketApp(F"{ws_url}", on_message=on_message, on_open=_on_open)
     ws.run_forever()
 
 def _send_keepalive():
@@ -64,8 +68,8 @@ def _send_keepalive():
             try:
                 ws.send(json.dumps(keepalive_msg));
             except Exception as e:
-                print("Error! Failed to send keepalive message to OpenHAB websocket.")
-                print(e)
+                logging.error("Error! Failed to send keepalive message to OpenHAB websocket.")
+                logging.error(e)
         sleep(5)
 
 # Got new value from OpenHAB, publish to MQTT
@@ -96,8 +100,8 @@ def send_entity_update(json_msg, item):
                     mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", color_temp_kelvin, retain=True)
                     mqtt_manager_libs.light_states.states[entity_id]["color_temp"] = color_temp_kelvin
     except Exception as e:
-        print("Failed to send entity update!")
-        print(e)
+        logging.error("Failed to send entity update!")
+        logging.error(e)
 
 def set_entity_brightness(entity_id: int, new_brightness: int):
     try:
@@ -136,8 +140,8 @@ def set_entity_brightness(entity_id: int, new_brightness: int):
             # wait a few milliseconds and then send kelvin update
             set_entity_color_temp(entity_id, light["color_temp"])
     except Exception as e:
-        print("Failed to send entity update to Home Assisatant.")
-        print(e)
+        logging.error("Failed to send entity update to Home Assisatant.")
+        logging.error(e)
 
 def set_entity_color_temp(entity_id: int, color_temp: int):
     try:
@@ -156,8 +160,8 @@ def set_entity_color_temp(entity_id: int, color_temp: int):
         # Update the stored value
         mqtt_manager_libs.light_states.states[entity_id]["color_temp"] = color_temp
     except Exception as e:
-        print("Failed to send entity update to Home Assisatant.")
-        print(e)
+        logging.error("Failed to send entity update to Home Assisatant.")
+        logging.error(e)
 
 def _update_all_light_states():
     for light_id in mqtt_manager_libs.light_states.states:
@@ -165,10 +169,16 @@ def _update_all_light_states():
         if mqtt_manager_libs.light_states.states[light_id]["type"] == "openhab":
             if mqtt_manager_libs.light_states.states[light_id]["openhab_control_mode"] == "dimmer":
                 item_state = _get_item_state(mqtt_manager_libs.light_states.states[light_id]["openhab_item_dimmer"])
+                if item_state == None:
+                    logging.error("Failed to get item state for OppenHAB item: " + mqtt_manager_libs.light_states.states[light_id]["openhab_item_dimmer"])
+                    return
                 mqtt_manager_libs.light_states.states[light_id]["brightness"] = int(item_state["state"])
                 mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", int(item_state["state"]), retain=True)
             elif mqtt_manager_libs.light_states.states[light_id]["openhab_control_mode"] == "switch":
                 item_state = _get_item_state(mqtt_manager_libs.light_states.states[light_id]["openhab_item_switch"])
+                if item_state == None:
+                    logging.error("Failed to get item state for OppenHAB item: " + mqtt_manager_libs.light_states.states[light_id]["openhab_item_switch"])
+                    return
                 if item_state["state"] == "ON":
                     mqtt_manager_libs.light_states.states[light_id]["brightness"] = 100
                     mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 100, retain=True)
@@ -178,6 +188,9 @@ def _update_all_light_states():
 
             if mqtt_manager_libs.light_states.states[light_id]["can_color_temperature"]:
                 item_state = _get_item_state(mqtt_manager_libs.light_states.states[light_id]["openhab_item_color_temp"])
+                if item_state == None:
+                    logging.error("Failed to get item state for OppenHAB item: " + mqtt_manager_libs.light_states.states[light_id]["openhab_item_color_temp"])
+                    return
                 mqtt_manager_libs.light_states.states[light_id]["color_temp"] = int(item_state["state"])
                 mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", int(item_state["state"]), retain=True)
                 
@@ -193,4 +206,4 @@ def _get_item_state(item):
     if(request_result.status_code == 200):
         return json.loads(request_result.text)
     else:
-        print("Something went wrong when trying to get state for item " + item)
+        logging.error("Something went wrong when trying to get state for item " + item)

@@ -1,5 +1,5 @@
 import websocket
-import asyncio
+import logging
 import json
 from threading import Thread
 import mqtt_manager_libs.light_states
@@ -17,6 +17,8 @@ def init(settings_from_manager, mqtt_client_from_manager):
     mqtt_client = mqtt_client_from_manager
     home_assistant_url = settings["home_assistant_address"]
     home_assistant_token = settings["home_assistant_token"]
+    logging.getLogger("websocket").propagate = False # Disable logging from underlying "websocket"
+    logging.getLogger("websockets").propagate = False # Disable logging from underlying "websocket"
 
 def on_message(ws, message):
     global auth_ok, request_all_states_id
@@ -24,7 +26,7 @@ def on_message(ws, message):
     if json_msg["type"] == "auth_required":
         authenticate_client()
     elif json_msg["type"] == "auth_ok":
-        print("Home Assistant auth OK. Requesting existing states.")
+        logging.info("Home Assistant auth OK. Requesting existing states.")
         subscribe_to_events()
         _get_all_states();
         auth_ok = True
@@ -34,8 +36,8 @@ def on_message(ws, message):
             # print(json_msg) # Dump light update message
             send_entity_update(json_msg)
     elif json_msg["type"] == "result" and not json_msg["success"]:
-        print("Failed result: ")
-        print(json_msg)
+        logging.error("Failed result: ")
+        logging.error(json_msg)
     elif json_msg["type"] == "result" and json_msg["success"]:
         if json_msg["id"] == request_all_states_id:
             for entity in json_msg["result"]:
@@ -58,11 +60,11 @@ def on_message(ws, message):
                             mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", state["brightness"], retain=True)
                             mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", state["color_temp"], retain=True)
                         except Exception as e:
-                            print("Something went wrong while trying to load current states.")
-                            print(e)
+                            logging.error("Something went wrong while trying to load current states.")
+                            logging.error(e)
         pass # Ignore success result messages
     else:
-        print(message)
+        logging.debug(message)
 
 def connect():
     Thread(target=_do_connection, daemon=True).start()
@@ -71,13 +73,13 @@ def _do_connection():
     global home_assistant_url, ws
     ws_url = home_assistant_url.replace("https://", "wss://").replace("http://", "ws://")
     ws_url += "/api/websocket"
-    print(F"Connecting to Home Assistant at {ws_url}")
+    logging.info(F"Connecting to Home Assistant at {ws_url}")
     ws = websocket.WebSocketApp(F"{ws_url}", on_message=on_message)
     ws.run_forever()
 
 def authenticate_client():
     global home_assistant_token
-    print("Sending auth to Home Assistant")
+    logging.info("Sending auth to Home Assistant")
     msg = {
         "type": "auth",
         "access_token": home_assistant_token
@@ -129,8 +131,8 @@ def send_entity_update(json_msg):
                 mqtt_manager_libs.light_states.states[entity_id]["color_temp"] = new_state["attributes"]["color_temp_kelvin"]
 
     except Exception as e:
-        print("Failed to send entity update!")
-        print(e)
+        logging.error("Failed to send entity update!")
+        logging.error(e)
 
 def set_entity_brightness(entity_id: int, new_brightness: int):
     """Set entity brightness"""
@@ -158,8 +160,8 @@ def set_entity_brightness(entity_id: int, new_brightness: int):
         # Update the stored value
         mqtt_manager_libs.light_states.states[entity_id]["brightness"] = new_brightness
     except Exception as e:
-        print("Failed to send entity update to Home Assisatant.")
-        print(e)
+        logging.error("Failed to send entity update to Home Assisatant.")
+        logging.error(e)
 
 def set_entity_color_temp(entity_id: int, color_temp: int):
     """Set entity brightness"""
@@ -186,8 +188,8 @@ def set_entity_color_temp(entity_id: int, color_temp: int):
         # Update the stored value
         mqtt_manager_libs.light_states.states[entity_id]["color_temp"] = color_temp
     except Exception as e:
-        print("Failed to send entity update to Home Assisatant.")
-        print(e)
+        logging.error("Failed to send entity update to Home Assisatant.")
+        logging.error(e)
 
 def send_message(message):
     global ws, next_id
