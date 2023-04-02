@@ -66,7 +66,6 @@ void HomePage::setHighlightTableVisibility(bool visibility) {
 
 
 void RoomPage::setLightVisibility(uint8_t position, bool visibility) {
-	LOG_DEBUG("Setting pos ", position, " visibility");
 	switch (position)
 	{
 	case 1:

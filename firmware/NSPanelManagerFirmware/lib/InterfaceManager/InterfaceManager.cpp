@@ -348,6 +348,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
         LOG_ERROR("Unknown component touched on room view: ", component_id);
         break;
     }
+    this->_populateRoomPage(); // Update room page with current data
 }
 
 void InterfaceManager::_ceilingMasterButtonEvent()
@@ -827,6 +828,7 @@ void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
             	if(lightCfg.level != level) {
             		lightCfg.level = level;
 					this->_updatePanelLightStatus();
+                    this->_populateRoomPage();
             	}
                 return;
             }
@@ -839,6 +841,7 @@ void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
             	if(lightCfg.level != level) {
 					lightCfg.level = level;
 					this->_updatePanelLightStatus();
+                    this->_populateRoomPage();
             	}
                 return;
             }

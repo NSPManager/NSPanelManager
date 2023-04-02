@@ -135,7 +135,7 @@ void taskManageWifiAndMqtt(void *param)
         // Report state every 30 seconds
         DynamicJsonDocument* status_report_doc = new DynamicJsonDocument(512);
         (*status_report_doc)["rssi"] = WiFi.RSSI();
-        (*status_report_doc)["free_heap"] = ESP.getFreeHeap();
+        (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
         (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
 
         char buffer[512];
