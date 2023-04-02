@@ -24,10 +24,10 @@
         {% for nspanel in nspanels %}
         <tr>
             <th><a href="{% url 'edit_nspanel' panel_id=nspanel.id %}">{{ nspanel.friendly_name }}</a></th>
-            <td><a href="{% url 'edit_room' room_id=nspanel.room.id %}"><span class="tag is-link">{{ nspanel.room.friendly_name }}</span></a>
+            <td><a href="{% url 'edit_room' room_id=nspanel.room.id %}">{{ nspanel.room.friendly_name }}</a>
             </td>
             <td>
-                <a href="http://{{ nspanel.ip_address }}" target="_blank"><span class="tag is-link">{{ nspanel.ip_address }}</span></a>
+                <a href="http://{{ nspanel.ip_address }}" target="_blank">{{ nspanel.ip_address }}</a>
             </td>
             <td>
                 {% if nspanel.online_state %}
