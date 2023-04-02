@@ -127,6 +127,9 @@ private:
 
     /// @brief Will populate the state, visibilty and names on lights in the Room page
     void _populateRoomPage();
+    /// @brief Handle a touch event that has occured on the "Room"-page
+    /// @param component_id The component that was touched
+    void _handleRoomPageComponentTouch(uint8_t component_id);
 
     /// @brief Given a light, will subscribe to all relevant MQTT status topics for that light
     /// @param cfg The light to subscribe to
@@ -141,6 +144,10 @@ private:
 	/// @param light The light to set value for
 	/// @param level The new value
 	void _setLightColorTemperature(std::string light, uint8_t level);
+
+    /// @brief If the light os ON, it will turn off. If the light is OFF, turn it ON
+    /// @param light The light to change
+    void _onOffLight(lightConfig* light);
 
     /// @brief Send out new light level for a list of lights
     /// @param lights The lights to set value for

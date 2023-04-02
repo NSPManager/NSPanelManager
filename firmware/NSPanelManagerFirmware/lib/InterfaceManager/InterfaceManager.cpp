@@ -206,10 +206,9 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
             InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
         } else if (component == ROOM_BUTTON_ID) {
             // Show page with all lights
-            NSPanel::instance->goToPage("Room");
+            NSPanel::instance->goToPage(ROOM_PAGE_NAME);
             InterfaceManager::instance->_ignoreNextTouchRelease = true;
             InterfaceManager::instance->_stopSpecialMode();
-        } else if (component == ROOM_BUTTON_ID) {
             InterfaceManager::instance->_populateRoomPage();
         }
     } else if (page == HOME_PAGE_ID && pressed) {
@@ -235,11 +234,119 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
 		}
         LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
     } else if (page == ROOM_PAGE_ID && !pressed) {
-        if(component == ROOM_PAGE_BACK_BUTTON_ID) {
-            NSPanel::instance->goToPage("Home");
-        }
+        InterfaceManager::instance->_handleRoomPageComponentTouch(component);
+        LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
     } else {
     	LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
+    }
+}
+
+void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
+    switch (component_id)
+    {
+    case ROOM_PAGE_BACK_BUTTON_ID:
+        NSPanel::instance->goToPage(HOME_PAGE_NAME);
+        break;
+    case ROOM_LIGHT1_SW_ID:
+        {
+            lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(1);
+            if(light != nullptr) {
+                this->_onOffLight(light);
+            }   
+            break;
+        }
+    case ROOM_LIGHT2_SW_ID:
+        {
+            lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(2);
+            if(light != nullptr) {
+                this->_onOffLight(light);
+            }   
+            break;
+        }
+    case ROOM_LIGHT3_SW_ID:
+        {
+            lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(3);
+            if(light != nullptr) {
+                this->_onOffLight(light);
+            }   
+            break;
+        }
+    case ROOM_LIGHT4_SW_ID:
+        {
+            lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(4);
+            if(light != nullptr) {
+                this->_onOffLight(light);
+            }   
+            break;
+        }
+    case ROOM_LIGHT5_SW_ID:
+        {
+            lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(5);
+            if(light != nullptr) {
+                this->_onOffLight(light);
+            }   
+            break;
+        }
+    case ROOM_LIGHT6_SW_ID:
+        {
+            lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(6);
+            if(light != nullptr) {
+                this->_onOffLight(light);
+            }   
+            break;
+        }
+    case ROOM_LIGHT7_SW_ID:
+        {
+            lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(7);
+            if(light != nullptr) {
+                this->_onOffLight(light);
+            }   
+            break;
+        }
+    case ROOM_LIGHT8_SW_ID:
+        {
+            lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(8);
+            if(light != nullptr) {
+                this->_onOffLight(light);
+            }   
+            break;
+        }
+    case ROOM_LIGHT9_SW_ID:
+        {
+            lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(9);
+            if(light != nullptr) {
+                this->_onOffLight(light);
+            }   
+            break;
+        }
+    case ROOM_LIGHT10_SW_ID:
+        {
+            lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(10);
+            if(light != nullptr) {
+                this->_onOffLight(light);
+            }   
+            break;
+        }
+    case ROOM_LIGHT11_SW_ID:
+        {
+            lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(11);
+            if(light != nullptr) {
+                this->_onOffLight(light);
+            }   
+            break;
+        }
+    case ROOM_LIGHT12_SW_ID:
+        {
+            lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(12);
+            if(light != nullptr) {
+                this->_onOffLight(light);
+            }   
+            break;
+        }
+    
+    default:
+        LOG_ERROR("Unknown component touched on room view: ", component_id);
+        break;
     }
 }
 
@@ -768,6 +875,17 @@ void InterfaceManager::_setLightColorTemperature(std::string light, uint8_t leve
             }
         }
     }
+}
+
+void InterfaceManager::_onOffLight(lightConfig* light) {
+    std::list<lightConfig*> lightsToChange;
+    lightsToChange.push_back(light);
+    if(light->level == 0) {
+        this->_changeLightsToLevel(&lightsToChange, HomePage::getDimmingValue());
+    } else {
+        this->_changeLightsToLevel(&lightsToChange, 0);
+    }
+    this->_updatePanelLightStatus();
 }
 
 void InterfaceManager::_changeLightsToLevel(std::list<lightConfig*> *lights, uint8_t level)
