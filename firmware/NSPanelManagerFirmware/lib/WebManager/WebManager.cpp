@@ -207,7 +207,12 @@ void WebManager::_taskPerformOTAUpdate(void *param)
     NSPanel::instance->goToPage("bootscreen");
 
     char checksum_holder[32];
-    WebManager::_httpGetMD5("/checksum_firmware", checksum_holder);
+    while(true) {
+        if(WebManager::_httpGetMD5("/checksum_firmware", checksum_holder)) {
+            break;
+        }
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
     LOG_DEBUG("Got firmware MD5 ", checksum_holder);
     LOG_DEBUG("Stored firmware MD5 ", NSPMConfig::instance->md5_firmware.c_str());
     bool hasAnythingUpdated = false;
@@ -215,17 +220,14 @@ void WebManager::_taskPerformOTAUpdate(void *param)
     vTaskDelay(250 / portTICK_PERIOD_MS); // Wait for other tasks.
     if (NSPMConfig::instance->md5_firmware.compare(checksum_holder) != 0)
     {
-        int tries = 0;
         do
         {
             firmwareUpdateSuccessful = WebManager::_update(U_FLASH, "/download_firmware");
-            tries++;
-            if (!firmwareUpdateSuccessful && tries <= 10)
-            {
+            if(!firmwareUpdateSuccessful) {
                 LOG_ERROR("Failed to run OTA. Will try again in 5 seconds.");
                 vTaskDelay(5000 / portTICK_PERIOD_MS);
             }
-        } while (!firmwareUpdateSuccessful && tries <= 10);
+        } while (!firmwareUpdateSuccessful);
         if (firmwareUpdateSuccessful)
         {
             LOG_INFO("Successfully updated firmware.");
@@ -248,24 +250,27 @@ void WebManager::_taskPerformOTAUpdate(void *param)
     if (firmwareUpdateSuccessful)
     {
         LOG_INFO("Firmware update done without errors, will check LittleFS.");
-        WebManager::_httpGetMD5("/checksum_data_file", checksum_holder);
+        while(true) {
+            if(WebManager::_httpGetMD5("/checksum_data_file", checksum_holder)) {
+                break;
+            }
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+        }
         LOG_DEBUG("Got LittleFS MD5 ", checksum_holder);
         LOG_DEBUG("Stored LittleFS MD5 ", NSPMConfig::instance->md5_data_file.c_str());
         vTaskDelay(250 / portTICK_PERIOD_MS); // Wait for other tasks.
         if (NSPMConfig::instance->md5_data_file.compare(checksum_holder) != 0)
         {
             bool littleFSUpdateSuccessful = false;
-            int tries = 0;
             do
             {
                 littleFSUpdateSuccessful = WebManager::_update(U_SPIFFS, "/download_data_file");
-                tries++;
-                if (!firmwareUpdateSuccessful && tries <= 10)
+                if (!littleFSUpdateSuccessful)
                 {
                     LOG_ERROR("Failed to run OTA. Will try again in 5 seconds.");
                     vTaskDelay(5000 / portTICK_PERIOD_MS);
                 }
-            } while (!littleFSUpdateSuccessful && tries <= 10);
+            } while (!littleFSUpdateSuccessful);
             if (littleFSUpdateSuccessful)
             {
                 LOG_INFO("Successfully updated LittleFS.");
