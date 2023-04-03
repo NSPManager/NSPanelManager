@@ -14,6 +14,7 @@ settings = {}
 last_settings_file_mtime = 0
 client = mqtt.Client("NSPanelManager")
 logging.basicConfig(level=logging.DEBUG)
+logging.getLogger("urllib3").propagate = False
 
 
 def on_connect(client, userdata, flags, rc):

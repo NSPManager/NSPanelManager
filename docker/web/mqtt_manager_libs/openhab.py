@@ -167,32 +167,36 @@ def _update_all_light_states():
     for light_id in mqtt_manager_libs.light_states.states:
         entity_name = mqtt_manager_libs.light_states.states[light_id]["name"]
         if mqtt_manager_libs.light_states.states[light_id]["type"] == "openhab":
-            if mqtt_manager_libs.light_states.states[light_id]["openhab_control_mode"] == "dimmer":
-                item_state = _get_item_state(mqtt_manager_libs.light_states.states[light_id]["openhab_item_dimmer"])
-                if item_state == None:
-                    logging.error("Failed to get item state for OppenHAB item: " + mqtt_manager_libs.light_states.states[light_id]["openhab_item_dimmer"])
-                    return
-                mqtt_manager_libs.light_states.states[light_id]["brightness"] = int(item_state["state"])
-                mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", int(item_state["state"]), retain=True)
-            elif mqtt_manager_libs.light_states.states[light_id]["openhab_control_mode"] == "switch":
-                item_state = _get_item_state(mqtt_manager_libs.light_states.states[light_id]["openhab_item_switch"])
-                if item_state == None:
-                    logging.error("Failed to get item state for OppenHAB item: " + mqtt_manager_libs.light_states.states[light_id]["openhab_item_switch"])
-                    return
-                if item_state["state"] == "ON":
-                    mqtt_manager_libs.light_states.states[light_id]["brightness"] = 100
-                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 100, retain=True)
-                else:
-                    mqtt_manager_libs.light_states.states[light_id]["brightness"] = 0
-                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 0, retain=True)
+            try:
+                if mqtt_manager_libs.light_states.states[light_id]["openhab_control_mode"] == "dimmer":
+                    item_state = _get_item_state(mqtt_manager_libs.light_states.states[light_id]["openhab_item_dimmer"])
+                    if item_state == None:
+                        logging.error("Failed to get item state for OppenHAB item: " + mqtt_manager_libs.light_states.states[light_id]["openhab_item_dimmer"])
+                        return
+                    mqtt_manager_libs.light_states.states[light_id]["brightness"] = int(float(item_state["state"]))
+                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", int(float(item_state["state"])), retain=True))
+                elif mqtt_manager_libs.light_states.states[light_id]["openhab_control_mode"] == "switch":
+                    item_state = _get_item_state(mqtt_manager_libs.light_states.states[light_id]["openhab_item_switch"])
+                    if item_state == None:
+                        logging.error("Failed to get item state for OppenHAB item: " + mqtt_manager_libs.light_states.states[light_id]["openhab_item_switch"])
+                        return
+                    if item_state["state"] == "ON":
+                        mqtt_manager_libs.light_states.states[light_id]["brightness"] = 100
+                        mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 100, retain=True)
+                    else:
+                        mqtt_manager_libs.light_states.states[light_id]["brightness"] = 0
+                        mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 0, retain=True)
 
-            if mqtt_manager_libs.light_states.states[light_id]["can_color_temperature"]:
-                item_state = _get_item_state(mqtt_manager_libs.light_states.states[light_id]["openhab_item_color_temp"])
-                if item_state == None:
-                    logging.error("Failed to get item state for OppenHAB item: " + mqtt_manager_libs.light_states.states[light_id]["openhab_item_color_temp"])
-                    return
-                mqtt_manager_libs.light_states.states[light_id]["color_temp"] = int(item_state["state"])
-                mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", int(item_state["state"]), retain=True)
+                if mqtt_manager_libs.light_states.states[light_id]["can_color_temperature"]:
+                    item_state = _get_item_state(mqtt_manager_libs.light_states.states[light_id]["openhab_item_color_temp"])
+                    if item_state == None:
+                        logging.error("Failed to get item state for OppenHAB item: " + mqtt_manager_libs.light_states.states[light_id]["openhab_item_color_temp"])
+                        return
+                    mqtt_manager_libs.light_states.states[light_id]["color_temp"] = int(float(item_state["state"]))
+                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", int(float(item_state["state"])), retain=True)
+            except Exception as e:
+                logging.error("Failed to process light " + entity_name, ". The following error occured:")
+                logging.error(e)
                 
             
 def _get_item_state(item):
