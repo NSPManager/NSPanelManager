@@ -50,9 +50,9 @@ def _do_connection():
     logging.info(F"Connecting to OpenHAB at {ws_url}")
     ws_url += "?accessToken=" + openhab_token
     ws = websocket.WebSocketApp(F"{ws_url}", on_message=on_message)
-    ws.run_forever()
     # Open KeepAlive thread
     Thread(target=_send_keepalive, daemon=True).start()
+    ws.run_forever()
 
 def _send_keepalive():
     while True:
