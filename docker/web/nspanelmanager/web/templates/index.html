@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block content %}
+{% load mathfilters %}
 <h2 class="title is-4">Panels</h2>
 <table class="table is-fullwidth is-hoverable">
     <thead>
@@ -14,7 +15,7 @@
             <th>Room</th>
             <th>IP Address</th>
             <th>Status</th>
-            <th><i class="fa-solid fa-solid fa-wifi" title="WiFi signal strength"></i></th>
+            <th><span class="mdi mdi-wifi"></span></th>
             <th><i class="fa-solid fa-memory" title="Memory used"></i></th>
             <th>Version</th>
             <th>Actions</th>
@@ -37,15 +38,19 @@
                 {% endif %}
             </td>
             <td>
-                {% if nspanel.status_data.rssi < 90 %}
-                <i class="fa-solid fa-wifi-weak" title="{{ nspanel.status_data.rssi }} dBm"></i>
-                {% elif nspanel.state_data.rssi < 67 %}
-                <i class="fa-solid fa-wifi-fair" title="{{ nspanel.status_data.rssi }} dBm"></i>
-                {% else  %}
-                <i class="fa-solid fa-wifi" title="{{ nspanel.status_data.rssi }} dBm"></i>
+                {% if nspanel.wifi_rssi <= -90 %}
+                <span class="mdi mdi-wifi-strength-1-alert" title="{{ nspanel.wifi_rssi }} dBm"></span>
+                {% elif nspanel.wifi_rssi <= -80 %}
+                <span class="mdi mdi-wifi-strength-1" title="{{ nspanel.wifi_rssi }} dBm"></span>
+                {% elif nspanel.wifi_rssi <= -67 %}
+                <span class="mdi mdi-wifi-strength-2" title="{{ nspanel.wifi_rssi }} dBm"></span>
+                {% elif nspanel.wifi_rssi <= -55 %}
+                <span class="mdi mdi-wifi-strength-3" title="{{ nspanel.wifi_rssi }} dBm"></span>
+                {% else %}
+                <span class="mdi mdi-wifi-strength-4" title="{{ nspanel.wifi_rssi }} dBm"></span>
                 {% endif %}
             </td>
-            <td>{{ nspanel.status_data.heap_used_pct }}%</td>
+            <td>{{ nspanel.heap_used_pct }}%</td>
             <td>{{ nspanel.version }}</td>
             <td>
                 <a type="button" class="button is-primary is-small" href="/api/reboot_panel?address={{ nspanel.ip_address }}">Reboot</a>

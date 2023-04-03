@@ -37,7 +37,8 @@ class NSPanel(models.Model):
     ip_address = models.CharField(max_length=15, default="")
     version = models.CharField(max_length=15, default="")
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    status_data = models.JSONField(default=_default_nspanel_status_data)
+    wifi_rssi = models.IntegerField(default=0)
+    heap_used_pct = models.IntegerField(default=0)
     online_state = models.BooleanField(default=False)
 
     def __str__(self) -> str:

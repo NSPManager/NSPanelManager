@@ -2,6 +2,7 @@ asgiref==3.6.0
 certifi==2022.12.7
 charset-normalizer==3.0.1
 Django==4.1.7
+django-mathfilters==1.0.0
 gevent==22.10.2
 greenlet==2.0.2
 idna==3.4
