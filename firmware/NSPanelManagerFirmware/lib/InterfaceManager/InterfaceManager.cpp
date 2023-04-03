@@ -250,7 +250,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
     case ROOM_PAGE_BACK_BUTTON_ID:
         NSPanel::instance->goToPage(HOME_PAGE_NAME);
         break;
-    case ROOM_LIGHT1_SW_ID:
+    case ROOM_LIGHT1_SW_CAP_ID:
         {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(1);
             if(light != nullptr) {
@@ -258,7 +258,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             }   
             break;
         }
-    case ROOM_LIGHT2_SW_ID:
+    case ROOM_LIGHT2_SW_CAP_ID:
         {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(2);
             if(light != nullptr) {
@@ -266,7 +266,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             }   
             break;
         }
-    case ROOM_LIGHT3_SW_ID:
+    case ROOM_LIGHT3_SW_CAP_ID:
         {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(3);
             if(light != nullptr) {
@@ -274,7 +274,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             }   
             break;
         }
-    case ROOM_LIGHT4_SW_ID:
+    case ROOM_LIGHT4_SW_CAP_ID:
         {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(4);
             if(light != nullptr) {
@@ -282,7 +282,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             }   
             break;
         }
-    case ROOM_LIGHT5_SW_ID:
+    case ROOM_LIGHT5_SW_CAP_ID:
         {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(5);
             if(light != nullptr) {
@@ -290,7 +290,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             }   
             break;
         }
-    case ROOM_LIGHT6_SW_ID:
+    case ROOM_LIGHT6_SW_CAP_ID:
         {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(6);
             if(light != nullptr) {
@@ -298,7 +298,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             }   
             break;
         }
-    case ROOM_LIGHT7_SW_ID:
+    case ROOM_LIGHT7_SW_CAP_ID:
         {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(7);
             if(light != nullptr) {
@@ -306,7 +306,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             }   
             break;
         }
-    case ROOM_LIGHT8_SW_ID:
+    case ROOM_LIGHT8_SW_CAP_ID:
         {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(8);
             if(light != nullptr) {
@@ -314,7 +314,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             }   
             break;
         }
-    case ROOM_LIGHT9_SW_ID:
+    case ROOM_LIGHT9_SW_CAP_ID:
         {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(9);
             if(light != nullptr) {
@@ -322,7 +322,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             }   
             break;
         }
-    case ROOM_LIGHT10_SW_ID:
+    case ROOM_LIGHT10_SW_CAP_ID:
         {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(10);
             if(light != nullptr) {
@@ -330,7 +330,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             }   
             break;
         }
-    case ROOM_LIGHT11_SW_ID:
+    case ROOM_LIGHT11_SW_CAP_ID:
         {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(11);
             if(light != nullptr) {
@@ -338,7 +338,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             }   
             break;
         }
-    case ROOM_LIGHT12_SW_ID:
+    case ROOM_LIGHT12_SW_CAP_ID:
         {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(12);
             if(light != nullptr) {

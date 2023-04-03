@@ -43,18 +43,16 @@ def connect():
     # Update all existing states
     _update_all_light_states()
 
-def _on_open():
-    # Open KeepAlive thread
-    Thread(target=_send_keepalive, daemon=True).start()
-
 def _do_connection():
     global openhab_url, ws
     ws_url = openhab_url.replace("https://", "wss://").replace("http://", "ws://")
     ws_url += "/ws"
     logging.info(F"Connecting to OpenHAB at {ws_url}")
     ws_url += "?accessToken=" + openhab_token
-    ws = websocket.WebSocketApp(F"{ws_url}", on_message=on_message, on_open=_on_open)
+    ws = websocket.WebSocketApp(F"{ws_url}", on_message=on_message)
     ws.run_forever()
+    # Open KeepAlive thread
+    Thread(target=_send_keepalive, daemon=True).start()
 
 def _send_keepalive():
     while True:
@@ -140,7 +138,7 @@ def set_entity_brightness(entity_id: int, new_brightness: int):
             # wait a few milliseconds and then send kelvin update
             set_entity_color_temp(entity_id, light["color_temp"])
     except Exception as e:
-        logging.error("Failed to send entity update to Home Assisatant.")
+        logging.error("Failed to send entity update to OpenHAB.")
         logging.error(e)
 
 def set_entity_color_temp(entity_id: int, color_temp: int):
@@ -149,7 +147,7 @@ def set_entity_color_temp(entity_id: int, color_temp: int):
         light = mqtt_manager_libs.light_states.states[entity_id]
         if light["brightness"] > 0:
             entity_name = light["name"]
-            # Format Home Assistant state update
+            # Format OpenHAB state update
             msg = {
                 "type": "ItemCommandEvent",
                 "topic": "openhab/items/" + light["openhab_item_color_temp"] + "/command",
@@ -160,7 +158,7 @@ def set_entity_color_temp(entity_id: int, color_temp: int):
         # Update the stored value
         mqtt_manager_libs.light_states.states[entity_id]["color_temp"] = color_temp
     except Exception as e:
-        logging.error("Failed to send entity update to Home Assisatant.")
+        logging.error("Failed to send entity update to OpenHAB.")
         logging.error(e)
 
 def _update_all_light_states():
