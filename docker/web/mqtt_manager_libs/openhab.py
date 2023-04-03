@@ -174,7 +174,7 @@ def _update_all_light_states():
                         logging.error("Failed to get item state for OppenHAB item: " + mqtt_manager_libs.light_states.states[light_id]["openhab_item_dimmer"])
                         return
                     mqtt_manager_libs.light_states.states[light_id]["brightness"] = int(float(item_state["state"]))
-                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", int(float(item_state["state"])), retain=True))
+                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", int(float(item_state["state"])), retain=True)
                 elif mqtt_manager_libs.light_states.states[light_id]["openhab_control_mode"] == "switch":
                     item_state = _get_item_state(mqtt_manager_libs.light_states.states[light_id]["openhab_item_switch"])
                     if item_state == None:
