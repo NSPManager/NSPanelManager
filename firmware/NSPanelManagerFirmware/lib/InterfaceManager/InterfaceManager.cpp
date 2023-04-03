@@ -43,7 +43,7 @@ void InterfaceManager::stop(){
 void InterfaceManager::_taskLoadConfigAndInit(void *param)
 {
     unsigned long start = millis();
-    while (!WiFi.isConnected() || !InterfaceManager::instance->_mqttClient->connected())
+    while (!WiFi.isConnected() || !InterfaceManager::instance->_mqttClient->connected() && !InterfaceManager::hasRegisteredToManager)
     {
         if (!WiFi.isConnected())
         {
@@ -52,6 +52,9 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
             } else {
                 NSPanel::instance->setComponentText("bootscreen.t_loading", "Connecting to WiFi...");
             }
+        }
+        else if (!InterfaceManager::hasRegisteredToManager) {
+            NSPanel::instance->setComponentText("bootscreen.t_loading", "Registring to manager...");
         }
         else if (!InterfaceManager::instance->_mqttClient->connected())
         {
@@ -64,11 +67,6 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
     if (millis() - start < 4000)
     {
         vTaskDelay((millis() - start) / portTICK_PERIOD_MS);
-    }
-
-    NSPanel::instance->setComponentText("bootscreen.t_loading", "Registring to manager...");
-    while(!InterfaceManager::hasRegisteredToManager) {
-        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 
     NSPanel::instance->setComponentText("bootscreen.t_loading", "Loading config...");
