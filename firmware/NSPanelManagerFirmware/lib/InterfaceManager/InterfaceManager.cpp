@@ -255,6 +255,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(1);
             if(light != nullptr) {
                 this->_onOffLight(light);
+                RoomPage::setLightState(1, light->level > 0);
             }   
             break;
         }
@@ -263,6 +264,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(2);
             if(light != nullptr) {
                 this->_onOffLight(light);
+                RoomPage::setLightState(2, light->level > 0);
             }   
             break;
         }
@@ -271,6 +273,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(3);
             if(light != nullptr) {
                 this->_onOffLight(light);
+                RoomPage::setLightState(3, light->level > 0);
             }   
             break;
         }
@@ -279,6 +282,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(4);
             if(light != nullptr) {
                 this->_onOffLight(light);
+                RoomPage::setLightState(4, light->level > 0);
             }   
             break;
         }
@@ -287,6 +291,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(5);
             if(light != nullptr) {
                 this->_onOffLight(light);
+                RoomPage::setLightState(5, light->level > 0);
             }   
             break;
         }
@@ -295,6 +300,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(6);
             if(light != nullptr) {
                 this->_onOffLight(light);
+                RoomPage::setLightState(6, light->level > 0);
             }   
             break;
         }
@@ -303,6 +309,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(7);
             if(light != nullptr) {
                 this->_onOffLight(light);
+                RoomPage::setLightState(7, light->level > 0);
             }   
             break;
         }
@@ -311,6 +318,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(8);
             if(light != nullptr) {
                 this->_onOffLight(light);
+                RoomPage::setLightState(8, light->level > 0);
             }   
             break;
         }
@@ -319,6 +327,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(9);
             if(light != nullptr) {
                 this->_onOffLight(light);
+                RoomPage::setLightState(9, light->level > 0);
             }   
             break;
         }
@@ -327,6 +336,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(10);
             if(light != nullptr) {
                 this->_onOffLight(light);
+                RoomPage::setLightState(10, light->level > 0);
             }   
             break;
         }
@@ -335,6 +345,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(11);
             if(light != nullptr) {
                 this->_onOffLight(light);
+                RoomPage::setLightState(11, light->level > 0);
             }   
             break;
         }
@@ -343,6 +354,7 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
             lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(12);
             if(light != nullptr) {
                 this->_onOffLight(light);
+                RoomPage::setLightState(12, light->level > 0);
             }   
             break;
         }
@@ -351,7 +363,6 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
         LOG_ERROR("Unknown component touched on room view: ", component_id);
         break;
     }
-    this->_populateRoomPage(); // Update room page with current data
 }
 
 void InterfaceManager::_ceilingMasterButtonEvent()
