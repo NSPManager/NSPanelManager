@@ -30,6 +30,8 @@ public:
     static void mqttCallback(char *topic, byte *payload, unsigned int length);
     /// @brief This function is called whenevent MQTT is connected. Subscribe to all entity status topics
     static void subscribeToMqttTopics();
+    /// @brief This variable will block the panel from communicating with panel before the panel has been registered.
+    static inline bool hasRegisteredToManager = false;
     /// @brief The InfterfaceManager instance
     static inline InterfaceManager *instance;
     /// @brief The configuration for this panel

@@ -25,27 +25,36 @@ void registerToNSPanelManager()
 {
   if (WiFi.isConnected())
   {
-    WiFiClient wifiClient;
-    HTTPClient httpClient;
-    std::string url = "http://";
-    url.append(NSPMConfig::instance->manager_address);
-    url.append(":");
-    url.append(std::to_string(NSPMConfig::instance->manager_port));
-    url.append("/api/register_nspanel");
+    while(true) {
+      WiFiClient wifiClient;
+      HTTPClient httpClient;
+      std::string url = "http://";
+      url.append(NSPMConfig::instance->manager_address);
+      url.append(":");
+      url.append(std::to_string(NSPMConfig::instance->manager_port));
+      url.append("/api/register_nspanel");
 
-    StaticJsonDocument<128> doc;
-    doc["mac_address"] = WiFi.macAddress().c_str();
-    doc["friendly_name"] = NSPMConfig::instance->wifi_hostname.c_str();
-    doc["version"] = NSPanelManagerFirmwareVersion;
+      StaticJsonDocument<128> doc;
+      doc["mac_address"] = WiFi.macAddress().c_str();
+      doc["friendly_name"] = NSPMConfig::instance->wifi_hostname.c_str();
+      doc["version"] = NSPanelManagerFirmwareVersion;
 
-    char buffer[128];
-    serializeJson(doc, buffer);
+      char buffer[128];
+      serializeJson(doc, buffer);
 
-    httpClient.begin(wifiClient, url.c_str());
-    httpClient.addHeader("Content-Type", "application/json");
-    int responseCode = httpClient.POST(buffer);
+      httpClient.begin(wifiClient, url.c_str());
+      httpClient.addHeader("Content-Type", "application/json");
+      int responseCode = httpClient.POST(buffer);
 
-    LOG_INFO("Registration at manager got response code: ", responseCode);
+      if(responseCode == 200) {
+        InterfaceManager::hasRegisteredToManager = true;
+        LOG_INFO("Registered to manager at: ", url.c_str());
+        break;
+      } else {
+        LOG_ERROR("Failed to register panel at: ", url.c_str(), ". Will try again in 5 seconds.");
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
+      }
+    }
   }
 }
 
@@ -131,7 +140,7 @@ void taskManageWifiAndMqtt(void *param)
         LOG_ERROR("No MQTT server configured!");
       }
 
-      if(WiFi.isConnected() && mqttClient.connected()) {
+      if(WiFi.isConnected() && mqttClient.connected() && InterfaceManager::hasRegisteredToManager) {
         // Report state every 30 seconds
         DynamicJsonDocument* status_report_doc = new DynamicJsonDocument(512);
         (*status_report_doc)["rssi"] = WiFi.RSSI();

@@ -66,6 +66,11 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
         vTaskDelay((millis() - start) / portTICK_PERIOD_MS);
     }
 
+    NSPanel::instance->setComponentText("bootscreen.t_loading", "Registring to manager...");
+    while(!InterfaceManager::hasRegisteredToManager) {
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+
     NSPanel::instance->setComponentText("bootscreen.t_loading", "Loading config...");
 
     InterfaceManager::instance->_roomDataJson = new DynamicJsonDocument(1024);
