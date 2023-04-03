@@ -29,14 +29,14 @@ def on_message(ws, message):
                 payload = json.loads(json_msg["payload"])
                 entity_name = light["name"]
                 if item == light["openhab_item_dimmer"]:
-                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", payload["value"], retain=True)
+                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", int(float(payload["value"])), retain=True)
                 elif item == light["openhab_item_switch"]:
                     if payload["value"] == "ON":
                         mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 100, retain=True)
                     else:
                         mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 0, retain=True)
                 elif item == light["openhab_item_color_temp"]:
-                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", payload["value"], retain=True)
+                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", int(float(payload["value"])), retain=True)
 
 def connect():
     Thread(target=_do_connection, daemon=True).start()
