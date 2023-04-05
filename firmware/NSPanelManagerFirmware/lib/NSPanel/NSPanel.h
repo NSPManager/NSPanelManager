@@ -35,6 +35,7 @@ public:
     inline static NSPanel *instance;
     static void attachTouchEventCallback(void (*callback)(uint8_t, uint8_t, bool));
     static void attachSleepCallback(void (*callback)());
+    static void attachWakeCallback(void (*callback)());
     void init();
     void startOTAUpdate();
     void goToPage(const char *page);
@@ -74,6 +75,7 @@ private:
     static inline void (*_touchEventCallback)(uint8_t, uint8_t, bool);
     /// @brief Call registered callback when screen goes to sleep
     static inline void (*_sleepCallback)();
+    static inline void (*_wakeCallback)();
     static void _clearSerialBuffer(NSPanelCommand *cmd);
     static void _clearSerialBuffer();
 };

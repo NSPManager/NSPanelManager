@@ -19,7 +19,9 @@ void InterfaceManager::init(PubSubClient *mqttClient)
     this->_isFingerOnDisplay = false;
     NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
     NSPanel::attachSleepCallback(InterfaceManager::processSleepEvent);
+    NSPanel::attachWakeCallback(InterfaceManager::processWakeEvent);
     NSPanel::instance->goToPage("bootscreen");
+    InterfaceManager::processWakeEvent(); // Send state update to MQTT that the screen turned on
     xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 }
 
@@ -112,6 +114,9 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param)
 }
 
 void InterfaceManager::subscribeToMqttTopics() {
+    // Subscribe to command to wake/put to sleep the display
+	InterfaceManager::instance->_mqttClient->subscribe(NSPMConfig::instance->mqtt_screen_cmd_topic.c_str());
+
 	// Every light in every room
 	for (roomConfig &roomCfg : InterfaceManager::instance->config.rooms)
 	{
@@ -143,6 +148,11 @@ void InterfaceManager::_subscribeToLightTopics(lightConfig *cfg) {
 	}
 }
 
+void InterfaceManager::processWakeEvent() {
+    // Send screen state
+    InterfaceManager::instance->_mqttClient->publish(NSPMConfig::instance->mqtt_screen_state_topic.c_str(), "1");
+}
+
 void InterfaceManager::processSleepEvent() {
     LOG_DEBUG("Display went to sleep, resetting display to default.");
     // Display went to sleep, reset everything
@@ -151,6 +161,9 @@ void InterfaceManager::processSleepEvent() {
     InterfaceManager::instance->_changeMode(roomMode::room);
     InterfaceManager::instance->_setEditLightMode(editLightMode::all_lights);
     InterfaceManager::instance->_updatePanelLightStatus();
+
+    // Send screen state
+    InterfaceManager::instance->_mqttClient->publish(NSPMConfig::instance->mqtt_screen_state_topic.c_str(), "0");
 }
 
 void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
@@ -790,38 +803,52 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
                 mqttMessage msg = InterfaceManager::_mqttMessages.front();
                 try
                 {
-                    std::string domain = msg.topic;
-                    domain = domain.erase(0, strlen("nspanel/entities/"));
-                    domain = domain.substr(0, domain.find('/'));
-
-                    std::string entity = msg.topic;
-                    entity = entity.erase(0, strlen("nspanel/entities/"));
-                    entity = entity.erase(0, entity.find('/')+1);
-                    entity = entity.substr(0, entity.find('/'));
-
-                    std::string attribute = msg.topic;
-                    attribute = attribute.erase(0, attribute.find_last_of('/') + 1);
-
-                    if (domain.compare("light") == 0 && attribute.compare("state_brightness_pct") == 0)
-                    {
-                        InterfaceManager::instance->_setLightLevel(entity, atoi(msg.payload.c_str()));
-                    }
-                    else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0)
-                    {
-                    	uint16_t colorTemp = atoi(msg.payload.c_str());
-                        if(colorTemp > InterfaceManager::instance->config.colorTempMax) {
-                            colorTemp = InterfaceManager::instance->config.colorTempMax;
-                        } else if (colorTemp < InterfaceManager::instance->config.colorTempMin) {
-                            colorTemp = InterfaceManager::instance->config.colorTempMin;
+                    if(msg.topic.compare(NSPMConfig::instance->mqtt_screen_cmd_topic) == 0) {
+                        if(msg.payload.compare("1") == 0) {
+                            NSPanel::instance->setDimLevel(100);
+                            NSPanel::instance->goToPage(HOME_PAGE_NAME);
+                            InterfaceManager::processWakeEvent(); // Send out state information that panel woke from sleep
+                        } else if(msg.payload.compare("0") == 0) {
+                            NSPanel::instance->setDimLevel(0);
+                            NSPanel::instance->goToPage(SCREENSAVE_PAGE_NAME);
+                            //InterfaceManager::processSleepEvent(); // This is triggered by "PostInit events" from the Nextion panel.
+                        } else {
+                            LOG_ERROR("Invalid payload for screen cmd. Valid payload: 1 or 0");
                         }
+                    } else if(msg.topic.find("nspanel/entities/") == 0) { // If topic begins with nspanel/entities/
+                        std::string domain = msg.topic;
+                        domain = domain.erase(0, strlen("nspanel/entities/"));
+                        domain = domain.substr(0, domain.find('/'));
 
-                        colorTemp = ((colorTemp - InterfaceManager::instance->config.colorTempMin) * 100) / (InterfaceManager::instance->config.colorTempMax - InterfaceManager::instance->config.colorTempMin);
+                        std::string entity = msg.topic;
+                        entity = entity.erase(0, strlen("nspanel/entities/"));
+                        entity = entity.erase(0, entity.find('/')+1);
+                        entity = entity.substr(0, entity.find('/'));
 
-                        if(InterfaceManager::instance->config.reverseColorTempSlider) {
-                            colorTemp = 100 - colorTemp;
+                        std::string attribute = msg.topic;
+                        attribute = attribute.erase(0, attribute.find_last_of('/') + 1);
+
+                        if (domain.compare("light") == 0 && attribute.compare("state_brightness_pct") == 0)
+                        {
+                            InterfaceManager::instance->_setLightLevel(entity, atoi(msg.payload.c_str()));
                         }
-                        
-                    	InterfaceManager::instance->_setLightColorTemperature(entity, colorTemp);
+                        else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0)
+                        {
+                            uint16_t colorTemp = atoi(msg.payload.c_str());
+                            if(colorTemp > InterfaceManager::instance->config.colorTempMax) {
+                                colorTemp = InterfaceManager::instance->config.colorTempMax;
+                            } else if (colorTemp < InterfaceManager::instance->config.colorTempMin) {
+                                colorTemp = InterfaceManager::instance->config.colorTempMin;
+                            }
+
+                            colorTemp = ((colorTemp - InterfaceManager::instance->config.colorTempMin) * 100) / (InterfaceManager::instance->config.colorTempMax - InterfaceManager::instance->config.colorTempMin);
+
+                            if(InterfaceManager::instance->config.reverseColorTempSlider) {
+                                colorTemp = 100 - colorTemp;
+                            }
+                            
+                            InterfaceManager::instance->_setLightColorTemperature(entity, colorTemp);
+                        }
                     }
                 }
                 catch (...)

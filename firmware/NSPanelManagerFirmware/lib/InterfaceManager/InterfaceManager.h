@@ -23,6 +23,8 @@ public:
     static void processTouchEvent(uint8_t page, uint8_t component, bool pressed);
     /// @brief Callback for when the screen goes to sleep
     static void processSleepEvent();
+    /// @brief Callback for when the screen wakes from sleep
+    static void processWakeEvent();
     /// @brief Callback for when an entity update comes from MQTT
     /// @param topic The topic on which the payload was received
     /// @param payload The payload

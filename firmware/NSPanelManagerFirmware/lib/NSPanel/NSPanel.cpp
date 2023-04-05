@@ -34,7 +34,7 @@ void NSPanel::goToPage(const char *page)
 
 void NSPanel::setDimLevel(uint8_t dimLevel)
 {
-    float dimLevelToPanel = dimLevel / 100;
+    uint8_t dimLevelToPanel = dimLevel;
     std::string cmd_string = "dim=";
     cmd_string.append(std::to_string(dimLevelToPanel));
     this->_sendCommandWithoutResponse(cmd_string.c_str());
@@ -128,7 +128,9 @@ void NSPanel::init()
 {
     // Pin 4 controls screen on/off.
     pinMode(4, OUTPUT);
-    digitalWrite(4, LOW);
+    digitalWrite(4, HIGH);
+	vTaskDelay(500 / portTICK_PERIOD_MS);
+	digitalWrite(4, LOW);
     Serial2.begin(115200, SERIAL_8N1, 17, 16);
     NSPanel::instance = this;
     this->_mutexReadSerialData = xSemaphoreCreateMutex();
@@ -218,6 +220,11 @@ void NSPanel::attachSleepCallback(void (*callback)())
     NSPanel::_sleepCallback = callback;
 }
 
+void NSPanel::attachWakeCallback(void (*callback)())
+{
+    NSPanel::_wakeCallback = callback;
+}
+
 void NSPanel::_taskReadNSPanelData(void *param)
 {
     LOG_INFO("Starting taskReadNSPanelData.");
@@ -257,6 +264,10 @@ void NSPanel::_taskProcessPanelOutput(void* param) {
 					
 					case NEX_OUT_SLEEP:
 						NSPanel::_sleepCallback();
+						break;
+
+					case NEX_OUT_WAKE:
+						NSPanel::_wakeCallback();
 						break;
 
 					default:

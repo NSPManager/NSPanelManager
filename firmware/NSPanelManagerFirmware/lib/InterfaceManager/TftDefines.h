@@ -7,6 +7,7 @@
 #define TABLE_LIGHTS_MASTER_BUTTON_ID 21   // ID of table lights button on home page
 #define ROOM_BUTTON_ID 5 // ID of button to go into "room"-view
 
+#define SCREENSAVE_PAGE_NAME "screensaver"
 
 #define HOME_PIC_HIGHLIGHT_CEILING_NAME "p_lockceiling" // Should not have "home." in front as visibility command for Nextion is not as other commands
 #define HOME_PIC_HIGHLIGHT_TABLE_NAME "p_locktable"     // Should not have "home." in front as visibility command for Nextion is not as other commands
