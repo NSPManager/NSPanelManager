@@ -154,13 +154,19 @@
             <section class="modal-card-body">
                 <div class="field">
                     <div class="control">
-                        <select class="select" id="add_new_light_to_position_select" name="light_id">
-                            {% for light in room.light_set.all %}
-                            {% if light.room_view_position == 0 %}
-                                <option value="{{ light.id }}">{{ light.friendly_name }}</option>
-                            {% endif %}
-                            {% endfor %}
-                        </select>
+                        {% if room.light_set.all.count > 0 %}
+                        <div class="select">
+                            <select id="add_new_light_to_position_select" name="light_id">
+                                {% for light in room.light_set.all %}
+                                {% if light.room_view_position == 0 %}
+                                    <option value="{{ light.id }}">{{ light.friendly_name }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% else %}
+                            No lights avaiable. Add lights to room.
+                        {% endif %}
                     </div>
                 </div>
             </section>

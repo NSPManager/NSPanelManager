@@ -6,9 +6,33 @@
 {% endblock %}
 
 {% block content %}
-<h2 class="title is-4" id="nspanel_name">{{ panel.friendly_name }}</h2>
-<br>
-<h2 class="title is-6" id="nspanel_name">Live log</h2>
+<h2 class="title is-4" id="nspanel_name">{{ panel.friendly_name }} settings</h2>
+<form method="POST" action="{% url 'save_panel_settings' panel_id=panel.id %}">
+    {% csrf_token %}
+    <div class="field">
+        <label class="label">Default room</label>
+        <div class="control">
+            <div class="select">
+                <select name="room_id">
+                    {% for room in rooms %}
+                    {% if room.id == panel.room.id %}
+                    <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
+                    {% else %}
+                    <option value="{{ room.id }}">{{ room.friendly_name }}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="field is-grouped">
+        <div class="control">
+            <button class="button is-primary">Save</button>
+            <a type="button" class="button is-link" href="/api/reboot_panel?address={{ panel.ip_address }}">Reboot</a>
+        </div>
+    </div>
+</form>
+<h2 class="title is-4 mt-6" id="nspanel_name">{{ panel.friendly_name }} live log</h2>
 <table class="table is-fullwidth is-narrow">
     <thead>
         <tr>
@@ -18,7 +42,7 @@
         </tr>
     </thead>
     <tbody id="log_body">
-        
+
     </tbody>
 </table>
 {% endblock %}

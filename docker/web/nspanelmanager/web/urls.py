@@ -13,6 +13,7 @@ urlpatterns = [
     path('rooms/<int:room_id>/', views.edit_room, name='edit_room'),
     path('save_room/<int:room_id>', views.update_room_form, name='update_room_form'),
     path('nspanel/<int:panel_id>', views.edit_nspanel, name='edit_nspanel'),
+    path('save_nspanel_settings/<int:panel_id>', views.save_panel_settings, name='save_panel_settings'),
     path('remove_light/<int:room_id>/<int:light_id>', views.remove_light_from_room, name="remove_light_from_room"),
     path('add_light/<int:room_id>', views.add_light_to_room, name="add_new_light"),
     path('add_light_to_view/<int:room_id>', views.add_light_to_room_view, name="add_new_light_to_room_view"),

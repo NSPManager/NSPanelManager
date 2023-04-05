@@ -16,8 +16,7 @@ def restart_mqtt_manager():
             proc.kill()
     # Restart the process
     print("Starting a new mqtt_manager")
-    subprocess.Popen(
-        ["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
+    subprocess.Popen(["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
 
 
 def index(request):
@@ -101,7 +100,7 @@ def save_new_room(request):
     new_room = Room()
     new_room.friendly_name = request.POST['friendly_name']
     new_room.save()
-    return redirect('rooms')
+    return redirect('edit_room', room_id=new_room.id)
 
 def delete_room(request, room_id: int):
     Room.objects.filter(id=room_id).delete()
@@ -115,8 +114,16 @@ def update_room_form(request, room_id: int):
     return redirect('edit_room', room_id=room_id)
 
 def edit_nspanel(request, panel_id: int):
+    return render(request, 'edit_nspanel.html', {
+        'panel': NSPanel.objects.get(id=panel_id),
+        'rooms': Room.objects.all()
+    })
+
+def save_panel_settings(request, panel_id: int):
     panel = NSPanel.objects.get(id=panel_id)
-    return render(request, 'edit_nspanel.html', {'panel': panel})
+    panel.room = Room.objects.get(id=request.POST["room_id"])
+    panel.save()
+    return redirect('edit_nspanel', panel_id)
 
 def remove_light_from_room(request, room_id: int, light_id: int):
     Light.objects.filter(id=light_id).delete()

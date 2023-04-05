@@ -158,7 +158,7 @@ def delete_panel(request, panel_id: int):
 def get_nspanel_config(request):
     nspanel = NSPanel.objects.get(mac_address=request.GET["mac"])
     base = {}
-    base["home"] = nspanel.room.displayOrder
+    base["home"] = nspanel.room.id
     base["raise_to_100_light_level"] = get_setting_with_default("raise_to_100_light_level", 95)
     base["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
     base["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)

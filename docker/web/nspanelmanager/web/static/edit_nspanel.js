@@ -27,7 +27,7 @@ function connect_to_websocket() {
             add_html += "</tr>";
             
             var row_count = $('#log_body tr').length;
-            if(row_count > 25) {
+            if(row_count > 10) {
                 $("#log_body tr:first-child").remove();
             }
 
