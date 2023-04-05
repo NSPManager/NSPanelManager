@@ -531,7 +531,12 @@ void InterfaceManager::_updateLightsColorTemp() {
 void InterfaceManager::_populateRoomPage() {
     LOG_DEBUG("Populating room view.");
     for(lightConfig* light : this->config.currentRoom->getAllRoomViewLights()) {
-        RoomPage::setLightName(light->roomViewPosition, light->name.c_str());
+        // Add two spaces to the left of the name before sending name to panel
+        // See issue #22
+        std::string display_name = "  ";
+        display_name.append(light->name);
+
+        RoomPage::setLightName(light->roomViewPosition, display_name.c_str());
         RoomPage::setLightState(light->roomViewPosition, light->level > 0);
         RoomPage::setLightVisibility(light->roomViewPosition, true);
     }
