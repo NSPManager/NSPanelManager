@@ -223,7 +223,6 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         } else if (component == ROOM_BUTTON_ID) {
             // Show page with all lights
             NSPanel::instance->goToPage(ROOM_PAGE_NAME);
-            InterfaceManager::instance->_ignoreNextTouchRelease = true;
             InterfaceManager::instance->_stopSpecialMode();
             InterfaceManager::instance->_populateRoomPage();
         }
@@ -555,6 +554,12 @@ void InterfaceManager::_populateRoomPage() {
     }
 }
 
+void InterfaceManager::_updateRoomPageStates() {
+    for(lightConfig* light : this->config.currentRoom->getAllRoomViewLights()) {
+        RoomPage::setLightState(light->roomViewPosition, light->level > 0);
+    }
+}
+
 void InterfaceManager::_setEditLightMode(editLightMode mode) {
     InterfaceManager::instance->_currentEditMode = mode; // Set current mode
     if(mode == editLightMode::all_lights) {
@@ -874,7 +879,7 @@ void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
             	if(lightCfg.level != level) {
             		lightCfg.level = level;
 					this->_updatePanelLightStatus();
-                    this->_populateRoomPage();
+                    this->_updateRoomPageStates();
             	}
                 return;
             }
@@ -887,7 +892,7 @@ void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
             	if(lightCfg.level != level) {
 					lightCfg.level = level;
 					this->_updatePanelLightStatus();
-                    this->_populateRoomPage();
+                    this->_updateRoomPageStates();
             	}
                 return;
             }

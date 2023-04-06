@@ -131,6 +131,8 @@ private:
 
     /// @brief Will populate the state, visibilty and names on lights in the Room page
     void _populateRoomPage();
+    /// @brief Will update the state of all switches on the Room page
+    void _updateRoomPageStates();
     /// @brief Handle a touch event that has occured on the "Room"-page
     /// @param component_id The component that was touched
     void _handleRoomPageComponentTouch(uint8_t component_id);
