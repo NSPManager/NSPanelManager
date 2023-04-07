@@ -207,7 +207,8 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
 		}
         else if (component == HOME_LIGHT_LEVEL_SLIDER_ID)
         {
-            // Dimmer slider changed
+            // Dimmer slider changed, update cached value
+            HomePage::updateDimmerValueCache();
             if(InterfaceManager::instance->_currentRoomMode == roomMode::room && InterfaceManager::instance->config.currentRoom->anyLightsOn()) {
                 InterfaceManager::instance->_updateLightsThatAreOn();
             } else if(InterfaceManager::instance->_currentRoomMode == roomMode::house && InterfaceManager::instance->config.anyLightsOn()) {
@@ -218,6 +219,8 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
         	
             InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
         } else if (component == HOME_LIGHT_COLOR_SLIDER_ID) {
+            // Color temp slider changed, update cached value
+            HomePage::updateColorTempValueCache();
         	InterfaceManager::instance->_updateLightsColorTemp();
             InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
         } else if (component == ROOM_BUTTON_ID) {

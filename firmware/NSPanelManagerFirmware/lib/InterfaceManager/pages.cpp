@@ -12,24 +12,34 @@
 #include <MqttLog.h>
 
 int HomePage::getDimmingValue() {
-	int newValue = NSPanel::instance->getComponentIntVal(HOME_DIMMER_SLIDER_NAME);
-	if(newValue > InterfaceManager::instance->config.raiseToMaxLightLevelAbove) {
-		return 100;
-	} else {
-		return newValue;
-	}
+	return HomePage::_dimmerValue;
 }
 
 void HomePage::setDimmingValue(uint8_t value) {
 	NSPanel::instance->setComponentVal(HOME_DIMMER_SLIDER_NAME, value);
+	HomePage::_dimmerValue = value;
+}
+
+void HomePage::updateDimmerValueCache() {
+	int newValue = NSPanel::instance->getComponentIntVal(HOME_DIMMER_SLIDER_NAME);
+	if(newValue > InterfaceManager::instance->config.raiseToMaxLightLevelAbove) {
+		HomePage::_dimmerValue = 100;
+	} else {
+		HomePage::_dimmerValue = newValue;
+	}
 }
 
 int HomePage::getColorTempValue() {
-	return NSPanel::instance->getComponentIntVal(HOME_LIGHT_COLOR_SLIDER_NAME);
+	return HomePage::_colorTemp;
 }
 
 void HomePage::setColorTempValue(uint8_t value) {
 	NSPanel::instance->setComponentVal(HOME_LIGHT_COLOR_SLIDER_NAME, value);
+	HomePage::_colorTemp = value;
+}
+
+void HomePage::updateColorTempValueCache() {
+	HomePage::_colorTemp = NSPanel::instance->getComponentIntVal(HOME_LIGHT_COLOR_SLIDER_NAME);
 }
 
 void HomePage::setCeilingBrightnessLabelText(uint8_t value) {

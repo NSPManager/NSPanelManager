@@ -15,8 +15,10 @@ class HomePage {
 public:
 	static void setDimmingValue(uint8_t value);
 	static int getDimmingValue();
+	static void updateDimmerValueCache();
 	static void setColorTempValue(uint8_t value);
 	static int getColorTempValue();
+	static void updateColorTempValueCache();
 	static void setCeilingBrightnessLabelText(uint8_t value);
 	static void setTableBrightnessLabelText(uint8_t value);
 	static void setCeilingLightsState(bool state);
@@ -25,6 +27,10 @@ public:
 	static void setSliderColorTempColor(uint color);
 	static void setHighlightCeilingVisibility(bool visable);
 	static void setHighlightTableVisibility(bool visable);
+
+private:
+	static inline uint8_t _dimmerValue;
+	static inline uint8_t _colorTemp;
 };
 
 class RoomPage {
