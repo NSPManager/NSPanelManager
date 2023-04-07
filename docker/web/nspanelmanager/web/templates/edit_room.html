@@ -43,6 +43,7 @@
 <form method="POST" action="{% url 'add_new_light' room.id %}">
     {% csrf_token %}
     <input class="input" type="hidden" id="add_new_light_type" name="add_new_light_type" readonly>
+    <input class="input" type="hidden" id="home_assistant_name" name="home_assistant_name" readonly>
     <div class="modal" id="modal-add-light-options">
         <div class="modal-background"></div>
         <div class="modal-card">
@@ -54,7 +55,7 @@
                 <div class="field">
                     <label class="label">Name</label>
                     <div class="control">
-                        <input class="input" type="text" placeholder="Text input" id="add_new_light_name" name="add_new_light_name" readonly>
+                        <input class="input" type="text" placeholder="Text input" id="add_new_light_name" name="add_new_light_name" required maxlength="15">
                     </div>
                 </div>
                 <div class="field">

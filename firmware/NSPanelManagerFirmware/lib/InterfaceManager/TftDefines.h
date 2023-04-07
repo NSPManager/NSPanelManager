@@ -20,6 +20,7 @@
 #define HOME_BUTTON_TABLE_NAME "home.b_table"
 
 #define ROOM_PAGE_NAME "Room"
+#define ROOM_PAGE_CURRENT_ROOM_LABEL_NAME "room_current"
 #define ROOM_PAGE_ID 4 // ID for "Room"-page
 #define ROOM_PAGE_BACK_BUTTON_ID 25
 

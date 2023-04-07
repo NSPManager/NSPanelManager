@@ -140,6 +140,9 @@ def add_light_to_room(request, room_id: int):
     if request.POST["light_type"] == "ceiling":
         newLight.is_ceiling_light = True
 
+    if newLight.type == "home_assistant":
+        newLight.home_assistant_name = request.POST["home_assistant_name"]
+
     if request.POST["light_control_mode"] == "dimmer":
         newLight.can_dim = True
         newLight.openhab_control_mode = "dimmer"

@@ -9,6 +9,7 @@ import mqtt_manager_libs.home_assistant
 import mqtt_manager_libs.openhab
 import mqtt_manager_libs.websocket_server
 import mqtt_manager_libs.light_states
+import mqtt_manager_libs.light
 
 settings = {}
 last_settings_file_mtime = 0
@@ -52,17 +53,10 @@ def on_message(client, userdata, msg):
             data = json.loads(msg.payload.decode('utf-8'))
             if data["method"] == "set" and data["attribute"] == "brightness": # Got new brightness value
                 for entity_id in data["entity_ids"]:
-                    if mqtt_manager_libs.light_states.states[entity_id]["type"] == "home_assistant":
-                        mqtt_manager_libs.home_assistant.set_entity_brightness(entity_id, data["brightness"])
-                    elif mqtt_manager_libs.light_states.states[entity_id]["type"] == "openhab":
-                        mqtt_manager_libs.openhab.set_entity_brightness(entity_id, data["brightness"])
-                    sleep(20/1000) # Wait 20ms between each light event
+                    mqtt_manager_libs.light_states.states[entity_id].set_light_level(data["brightness"])
             elif data["method"] == "set" and data["attribute"] == "kelvin": # Got new brightness value
                 for entity_id in data["entity_ids"]:
-                    if mqtt_manager_libs.light_states.states[entity_id]["type"] == "home_assistant":
-                        mqtt_manager_libs.home_assistant.set_entity_color_temp(entity_id, data["kelvin"])
-                    elif mqtt_manager_libs.light_states.states[entity_id]["type"] == "openhab":
-                        mqtt_manager_libs.openhab.set_entity_color_temp(entity_id, data["kelvin"])
+                    mqtt_manager_libs.light_states.states[entity_id].set_color_temp(data["kelvin"])
 
     except:
         logging.error("Something went wrong during processing of message:")
@@ -88,10 +82,7 @@ def get_config():
 
                 for id, light in settings["lights"].items():
                     int_id = int(id)
-                    mqtt_manager_libs.light_states.states[int_id] = light
-                    # Set default values
-                    mqtt_manager_libs.light_states.states[int_id]["color_temp"] = 3000
-                    mqtt_manager_libs.light_states.states[int_id]["brightness"] = 0
+                    mqtt_manager_libs.light_states.states[int_id] = mqtt_manager_libs.light.Light.from_dict(light)
                 # All light-data sucessfully loaded into light_states, clear own register
                 settings.pop("lights")
                 break

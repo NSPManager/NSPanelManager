@@ -136,13 +136,13 @@ void InterfaceManager::subscribeToMqttTopics() {
 void InterfaceManager::_subscribeToLightTopics(lightConfig *cfg) {
 	// Build topic from name
 	std::string levelStatusTopic = "nspanel/entities/light/";
-	levelStatusTopic.append(cfg->name);
+	levelStatusTopic.append(std::to_string(cfg->id));
 	levelStatusTopic.append("/state_brightness_pct");
 	this->_mqttClient->subscribe(levelStatusTopic.c_str());
 
 	if(cfg->canTemperature) {
 		std::string colorTempStateTopic = "nspanel/entities/light/";
-		colorTempStateTopic.append(cfg->name);
+		colorTempStateTopic.append(std::to_string(cfg->id));
 		colorTempStateTopic.append("/state_kelvin");
 		this->_mqttClient->subscribe(colorTempStateTopic.c_str());
 	}
@@ -542,6 +542,7 @@ void InterfaceManager::_updateLightsColorTemp() {
 
 void InterfaceManager::_populateRoomPage() {
     LOG_DEBUG("Populating room view.");
+    RoomPage::setCurrentRoomLabel(this->config.currentRoom->name.c_str());
     for(lightConfig* light : this->config.currentRoom->getAllRoomViewLights()) {
         // Add two spaces to the left of the name before sending name to panel
         // See issue #22
@@ -835,7 +836,7 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
 
                         if (domain.compare("light") == 0 && attribute.compare("state_brightness_pct") == 0)
                         {
-                            InterfaceManager::instance->_setLightLevel(entity, atoi(msg.payload.c_str()));
+                            InterfaceManager::instance->_setLightLevel(atoi(entity.c_str()), atoi(msg.payload.c_str()));
                         }
                         else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0)
                         {
@@ -852,7 +853,7 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
                                 colorTemp = 100 - colorTemp;
                             }
                             
-                            InterfaceManager::instance->_setLightColorTemperature(entity, colorTemp);
+                            InterfaceManager::instance->_setLightColorTemperature(atoi(entity.c_str()), colorTemp);
                         }
                     }
                 }
@@ -867,14 +868,14 @@ void InterfaceManager::_taskProcessMqttMessages(void *param)
     }
 }
 
-void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
+void InterfaceManager::_setLightLevel(uint16_t light_id, uint8_t level)
 {
 	// TODO: Only update the displayed light level after all MQTT messages has processed
     for (roomConfig &roomCfg : InterfaceManager::instance->config.rooms)
     {
         for (lightConfig &lightCfg : roomCfg.ceilingLights)
         {
-            if (lightCfg.name.compare(light) == 0)
+            if (lightCfg.id == light_id)
             {
             	if(lightCfg.level != level) {
             		lightCfg.level = level;
@@ -887,7 +888,7 @@ void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
 
         for (lightConfig &lightCfg : roomCfg.tableLights)
         {
-            if (lightCfg.name.compare(light) == 0)
+            if (lightCfg.id == light_id)
             {
             	if(lightCfg.level != level) {
 					lightCfg.level = level;
@@ -900,14 +901,14 @@ void InterfaceManager::_setLightLevel(std::string light, uint8_t level)
     }
 }
 
-void InterfaceManager::_setLightColorTemperature(std::string light, uint8_t level)
+void InterfaceManager::_setLightColorTemperature(uint16_t light_id, uint8_t level)
 {
 	// TODO: Only update the displayed light level after all MQTT messages has processed
     for (roomConfig &roomCfg : InterfaceManager::instance->config.rooms)
     {
         for (lightConfig &lightCfg : roomCfg.ceilingLights)
         {
-            if (lightCfg.name.compare(light) == 0)
+            if (lightCfg.id == light_id)
             {
             	if(lightCfg.colorTemperature != level) {
             		lightCfg.colorTemperature = level;
@@ -919,7 +920,7 @@ void InterfaceManager::_setLightColorTemperature(std::string light, uint8_t leve
 
         for (lightConfig &lightCfg : roomCfg.tableLights)
         {
-            if (lightCfg.name.compare(light) == 0)
+            if (lightCfg.id == light_id)
             {
             	if(lightCfg.colorTemperature != level) {
 					lightCfg.colorTemperature = level;

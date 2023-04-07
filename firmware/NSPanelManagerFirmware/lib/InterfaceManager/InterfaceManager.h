@@ -142,14 +142,14 @@ private:
     void _subscribeToLightTopics(lightConfig *cfg);
 
     /// @brief Set internal light representation level
-    /// @param light The light to set value for
+    /// @param light_id The light ID to set value for
     /// @param level The new value
-    void _setLightLevel(std::string light, uint8_t level);
+    void _setLightLevel(uint16_t light_id, uint8_t level);
 
     /// @brief Set internal light representation color temperature
-	/// @param light The light to set value for
+	/// @param light_id The light ID to set value for
 	/// @param level The new value
-	void _setLightColorTemperature(std::string light, uint8_t level);
+	void _setLightColorTemperature(uint16_t light_id, uint8_t level);
 
     /// @brief If the light os ON, it will turn off. If the light is OFF, turn it ON
     /// @param light The light to change

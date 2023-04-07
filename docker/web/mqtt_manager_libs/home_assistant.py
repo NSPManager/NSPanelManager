@@ -42,23 +42,21 @@ def on_message(ws, message):
         if json_msg["id"] == request_all_states_id:
             for entity in json_msg["result"]:
                 for id, state in mqtt_manager_libs.light_states.states.items():
-                    if state["name"] == entity["entity_id"].replace("light.", ""):
+                    if state.home_assistant_name == entity["entity_id"].replace("light.", ""):
                         try:
-                            entity_name = state["name"]
                             if entity["state"] == "off":
-                                state["brightness"] = 0
+                                state.light_level = 0
                             else:
                                 if "brightness" in entity["attributes"]:
-                                    state["brightness"] = round(entity["attributes"]["brightness"] / 2.55)
+                                    state.light_level = round(entity["attributes"]["brightness"] / 2.55)
                                 else:
-                                    state["brightness"] = 100 # Type is a switch and is ON, regard it as 100% on
+                                    state.light_level = 100 # Type is a switch and is ON, regard it as 100% on
                             
-                            if state["can_color_temperature"]:
-                                if "color_temp_kelvin" in entity["attributes"]:
-                                    state["color_temp"] = entity["attributes"]["color_temp_kelvin"]
-                            
-                            mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", state["brightness"], retain=True)
-                            mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", state["color_temp"], retain=True)
+                            mqtt_client.publish(F"nspanel/entities/light/{state.id}/state_brightness_pct", state.light_level, retain=True)
+
+                            if state.can_color_temperature and "color_temp_kelvin" in entity["attributes"]:
+                                state.color_temp = entity["attributes"]["color_temp_kelvin"]
+                                mqtt_client.publish(F"nspanel/entities/light/{state.id}/state_kelvin", state.color_temp, retain=True)
                         except Exception as e:
                             logging.error("Something went wrong while trying to load current states.")
                             logging.error(e)
@@ -113,34 +111,31 @@ def send_entity_update(json_msg):
         entity_name = entity_id.replace("light.", "")
         new_state = json_msg["event"]["data"]["new_state"]
         entity_id = mqtt_manager_libs.light_states.get_id_by_name(entity_name)
-        if entity_id > 0:
+        if entity_id >= 0:
             if "brightness" in new_state["attributes"]:
                 new_brightness = round(new_state["attributes"]["brightness"] / 2.55)
-                mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", new_brightness, retain=True)
-                mqtt_manager_libs.light_states.states[entity_id]["brightness"] = new_brightness
+                mqtt_client.publish(F"nspanel/entities/light/{entity_id}/state_brightness_pct", new_brightness, retain=True)
+                mqtt_manager_libs.light_states.states[entity_id].light_level = new_brightness
             else:
                 if new_state["state"] == "on":
-                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 100, retain=True)
-                    mqtt_manager_libs.light_states.states[entity_id]["brightness"] = 100
+                    mqtt_client.publish(F"nspanel/entities/light/{entity_id}/state_brightness_pct", 100, retain=True)
+                    mqtt_manager_libs.light_states.states[entity_id].light_level = 100
                 else:
-                    mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_brightness_pct", 0, retain=True)
-                    mqtt_manager_libs.light_states.states[entity_id]["brightness"] = 0
+                    mqtt_client.publish(F"nspanel/entities/light/{entity_id}/state_brightness_pct", 0, retain=True)
+                    mqtt_manager_libs.light_states.states[entity_id].light_level = 0
             
             if "color_temp_kelvin" in new_state["attributes"]:
-                mqtt_client.publish(F"nspanel/entities/light/{entity_name}/state_kelvin", new_state["attributes"]["color_temp_kelvin"], retain=True)
-                mqtt_manager_libs.light_states.states[entity_id]["color_temp"] = new_state["attributes"]["color_temp_kelvin"]
+                mqtt_client.publish(F"nspanel/entities/light/{entity_id}/state_kelvin", new_state["attributes"]["color_temp_kelvin"], retain=True)
+                mqtt_manager_libs.light_states.states[entity_id].color_temp = new_state["attributes"]["color_temp_kelvin"]
 
     except Exception as e:
         logging.error("Failed to send entity update!")
         logging.error(e)
 
-def set_entity_brightness(entity_id: int, new_brightness: int):
+def set_entity_brightness(home_assistant_name: str, light_level: int, color_temp: int) -> bool:
     """Set entity brightness"""
     global next_id
     try:
-        # Get light from state list
-        light = mqtt_manager_libs.light_states.states[entity_id]
-        entity_name = light["name"]
         # Format Home Assistant state update
         msg = {
             "id": next_id,
@@ -148,48 +143,47 @@ def set_entity_brightness(entity_id: int, new_brightness: int):
             "domain": "light",
             "service": "turn_on",
             "service_data": {
-                "brightness_pct": new_brightness,
+                "brightness_pct": light_level,
+            },
+            "target": {
+                "entity_id": F"light.{home_assistant_name}"
+            }
+        }
+        if color_temp > 0:
+            msg["service_data"]["kelvin"] = color_temp
+
+        send_message(json.dumps(msg))
+        # Update the stored value
+        # mqtt_manager_libs.light_states.states[entity_id]["brightness"] = new_brightness
+        return True
+    except Exception as e:
+        logging.error("Failed to send entity update to Home Assisatant.")
+        logging.error(e)
+        return False
+
+def set_entity_color_temp(entity_name: str, color_temp: int) -> bool:
+    """Set entity brightness"""
+    global next_id
+    try:
+        # Format Home Assistant state update
+        msg = {
+            "id": next_id,
+            "type": "call_service",
+            "domain": "light",
+            "service": "turn_on",
+            "service_data": {
+                "kelvin": color_temp
             },
             "target": {
                 "entity_id": F"light.{entity_name}"
             }
         }
-        if light["can_color_temperature"]:
-            msg["service_data"]["kelvin"] = light["color_temp"]
         send_message(json.dumps(msg))
-        # Update the stored value
-        mqtt_manager_libs.light_states.states[entity_id]["brightness"] = new_brightness
+        return True
     except Exception as e:
         logging.error("Failed to send entity update to Home Assisatant.")
         logging.error(e)
-
-def set_entity_color_temp(entity_id: int, color_temp: int):
-    """Set entity brightness"""
-    global next_id
-    try:
-        # Get light from state list
-        light = mqtt_manager_libs.light_states.states[entity_id]
-        if light["brightness"] > 0:
-            entity_name = light["name"]
-            # Format Home Assistant state update
-            msg = {
-                "id": next_id,
-                "type": "call_service",
-                "domain": "light",
-                "service": "turn_on",
-                "service_data": {
-                    "kelvin": color_temp
-                },
-                "target": {
-                    "entity_id": F"light.{entity_name}"
-                }
-            }
-            send_message(json.dumps(msg))
-        # Update the stored value
-        mqtt_manager_libs.light_states.states[entity_id]["color_temp"] = color_temp
-    except Exception as e:
-        logging.error("Failed to send entity update to Home Assisatant.")
-        logging.error(e)
+        return False
 
 def send_message(message):
     global ws, next_id

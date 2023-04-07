@@ -214,3 +214,7 @@ void RoomPage::setLightState(uint8_t position, bool state) {
 		break;
 	}
 }
+
+void RoomPage::setCurrentRoomLabel(const char* label) {
+	NSPanel::instance->setComponentText(ROOM_PAGE_CURRENT_ROOM_LABEL_NAME, label);
+}
