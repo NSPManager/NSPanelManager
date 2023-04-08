@@ -225,9 +225,9 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
             InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
         } else if (component == ROOM_BUTTON_ID) {
             // Show page with all lights
-            NSPanel::instance->goToPage(ROOM_PAGE_NAME);
             InterfaceManager::instance->_stopSpecialMode();
             InterfaceManager::instance->_populateRoomPage();
+            NSPanel::instance->goToPage(ROOM_PAGE_NAME);
         }
     } else if (page == HOME_PAGE_ID && pressed) {
         if (component == CEILING_LIGHTS_MASTER_BUTTON_ID)
@@ -544,17 +544,28 @@ void InterfaceManager::_updateLightsColorTemp() {
 }
 
 void InterfaceManager::_populateRoomPage() {
-    LOG_DEBUG("Populating room view.");
     RoomPage::setCurrentRoomLabel(this->config.currentRoom->name.c_str());
-    for(lightConfig* light : this->config.currentRoom->getAllRoomViewLights()) {
-        // Add two spaces to the left of the name before sending name to panel
-        // See issue #22
-        std::string display_name = "  ";
-        display_name.append(light->name);
+    for(int i = 0; i < 12; i++) {
+        lightConfig* displayLight = nullptr;
+        for(lightConfig* light : this->config.currentRoom->getAllRoomViewLights()) {
+            if(light->roomViewPosition - 1 == i) {
+                displayLight = light;
+                break;
+            }
+        }
 
-        RoomPage::setLightName(light->roomViewPosition, display_name.c_str());
-        RoomPage::setLightState(light->roomViewPosition, light->level > 0);
-        RoomPage::setLightVisibility(light->roomViewPosition, true);
+        if(displayLight != nullptr) {
+            // Add two spaces to the left of the name before sending name to panel
+            // See issue #22
+            std::string display_name = "  ";
+            display_name.append(displayLight->name);
+
+            RoomPage::setLightName(displayLight->roomViewPosition, display_name.c_str());
+            RoomPage::setLightState(displayLight->roomViewPosition, displayLight->level > 0);
+            RoomPage::setLightVisibility(displayLight->roomViewPosition, true);
+        } else {
+            RoomPage::setLightVisibility(i + 1, false); // If no light was found, hide the position
+        }
     }
 }
 
