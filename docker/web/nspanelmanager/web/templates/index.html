@@ -9,57 +9,63 @@
 {% load mathfilters %}
 <h2 class="title is-4">Panels</h2>
 <table class="table is-fullwidth is-hoverable">
-    <thead>
-        <tr>
-            <th>NSPanel</th>
-            <th>Room</th>
-            <th>IP Address</th>
-            <th>Status</th>
-            <th><span class="mdi mdi-wifi"></span></th>
-            <th><span class="mdi mdi-memory" title="Memory used"></span></i></th>
-            <th>Version</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for nspanel in nspanels %}
-        <tr>
-            <th><a href="{% url 'edit_nspanel' panel_id=nspanel.id %}">{{ nspanel.friendly_name }}</a></th>
-            <td><a href="{% url 'edit_room' room_id=nspanel.room.id %}">{{ nspanel.room.friendly_name }}</a>
-            </td>
-            <td>
-                <a href="http://{{ nspanel.ip_address }}" target="_blank">{{ nspanel.ip_address }}</a>
-            </td>
-            <td>
-                {% if nspanel.online_state %}
-                <span class="tag is-success">Online</span>
+  <thead>
+    <tr>
+      <th>NSPanel</th>
+      <th>Room</th>
+      <th>IP Address</th>
+      <th>Status</th>
+      <th><span class="mdi mdi-wifi"></span></th>
+      <th><span class="mdi mdi-memory" title="Memory used"></span></i></th>
+      <th>Version</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for nspanel in nspanels %}
+    <tr>
+      <th><a href="{% url 'edit_nspanel' panel_id=nspanel.id %}">{{ nspanel.friendly_name }}</a></th>
+      <td><a href="{% url 'edit_room' room_id=nspanel.room.id %}">{{ nspanel.room.friendly_name }}</a>
+      </td>
+      <td>
+        <a href="http://{{ nspanel.ip_address }}" target="_blank">{{ nspanel.ip_address }}</a>
+      </td>
+      <td>
+        {% if nspanel.online_state %}
+        <span class="tag is-success" id="online_offline_state_{{ nspanel.mac_address }}">Online</span>
+        {% else %}
+        <span class="tag is-danger" id="online_offline_state_{{ nspanel.mac_address }}">Offline</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if nspanel.wifi_rssi <= -90 %} <span class="mdi mdi-wifi-strength-1-alert"
+          id="wifi_signal_strength_{{ nspanel.mac_address }}" title="{{ nspanel.wifi_rssi }} dBm"></span>
+          {% elif nspanel.wifi_rssi <= -80 %} <span class="mdi mdi-wifi-strength-1"
+            id="wifi_signal_strength_{{ nspanel.mac_address }}" title="{{ nspanel.wifi_rssi }} dBm">
+            </span>
+            {% elif nspanel.wifi_rssi <= -67 %} <span class="mdi mdi-wifi-strength-2"
+              id="wifi_signal_strength_{{ nspanel.mac_address }}" title="{{ nspanel.wifi_rssi }} dBm"></span>
+              {% elif nspanel.wifi_rssi <= -55 %} <span class="mdi mdi-wifi-strength-3"
+                id="wifi_signal_strength_{{ nspanel.mac_address }}" title="{{ nspanel.wifi_rssi }} dBm"></span>
                 {% else %}
-                <span class="tag is-danger">Offline</span>
+                <span class="mdi mdi-wifi-strength-4" id="wifi_signal_strength_{{ nspanel.mac_address }}"
+                  title="{{ nspanel.wifi_rssi }} dBm"></span>
                 {% endif %}
-            </td>
-            <td>
-                {% if nspanel.wifi_rssi <= -90 %}
-                <span class="mdi mdi-wifi-strength-1-alert" title="{{ nspanel.wifi_rssi }} dBm"></span>
-                {% elif nspanel.wifi_rssi <= -80 %}
-                <span class="mdi mdi-wifi-strength-1" title="{{ nspanel.wifi_rssi }} dBm"></span>
-                {% elif nspanel.wifi_rssi <= -67 %}
-                <span class="mdi mdi-wifi-strength-2" title="{{ nspanel.wifi_rssi }} dBm"></span>
-                {% elif nspanel.wifi_rssi <= -55 %}
-                <span class="mdi mdi-wifi-strength-3" title="{{ nspanel.wifi_rssi }} dBm"></span>
-                {% else %}
-                <span class="mdi mdi-wifi-strength-4" title="{{ nspanel.wifi_rssi }} dBm"></span>
-                {% endif %}
-            </td>
-            <td>{{ nspanel.heap_used_pct }}%</td>
-            <td>{{ nspanel.version }}</td>
-            <td>
-                <a type="button" class="button is-primary is-small" href="/api/reboot_panel?address={{ nspanel.ip_address }}">Reboot</a>
-                <button type="button" class="button is-link is-small" onclick="startNSPanelOtaUpdate('{{ nspanel.ip_address }}');">OTA Update</button>
-                <button type="button" class="button is-link is-small" onclick="startNSPanelTftUpdate('{{ nspanel.ip_address }}');">TFT Update</button>
-                <a href="{% url 'delete_nspanel' panel_id=nspanel.id %}" type="button" class="button is-danger is-small" >Delete</button>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
+      </td>
+      <td id="heap_used_{{ nspanel.mac_address }}">{{ nspanel.heap_used_pct }}%</td>
+      <td>{{ nspanel.version }}</td>
+      <td>
+        <a type="button" class="button is-primary is-small"
+          href="/api/reboot_panel?address={{ nspanel.ip_address }}">Reboot</a>
+        <button type="button" class="button is-link is-small"
+          onclick="startNSPanelOtaUpdate('{{ nspanel.ip_address }}');">OTA Update</button>
+        <button type="button" class="button is-link is-small"
+          onclick="startNSPanelTftUpdate('{{ nspanel.ip_address }}');">TFT Update</button>
+        <a href="{% url 'delete_nspanel' panel_id=nspanel.id %}" type="button"
+          class="button is-danger is-small">Delete</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
 {% endblock %}

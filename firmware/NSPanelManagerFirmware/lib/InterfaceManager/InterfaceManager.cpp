@@ -209,8 +209,8 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
     } else if (component == ROOM_BUTTON_ID) {
       // Show page with all lights
       InterfaceManager::instance->_stopSpecialMode();
-      InterfaceManager::instance->_populateRoomPage();
       NSPanel::instance->goToPage(ROOM_PAGE_NAME);
+      InterfaceManager::instance->_populateRoomPage();
     }
   } else if (page == HOME_PAGE_ID && pressed) {
     if (component == CEILING_LIGHTS_MASTER_BUTTON_ID) {
@@ -243,6 +243,14 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
   switch (component_id) {
   case ROOM_PAGE_BACK_BUTTON_ID:
     NSPanel::instance->goToPage(HOME_PAGE_NAME);
+    break;
+  case ROOM_PAGE_PREVIOUS_ROOM_BUTTON_ID:
+    this->_goToPreviousRoom();
+    this->_populateRoomPage();
+    break;
+  case ROOM_PAGE_NEXT_ROOM_BUTTON_ID:
+    this->_goToNextRoom();
+    this->_populateRoomPage();
     break;
   case ROOM_LIGHT1_SW_CAP_ID: {
     lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(1);
@@ -511,13 +519,7 @@ void InterfaceManager::_updateLightsColorTemp() {
 void InterfaceManager::_populateRoomPage() {
   RoomPage::setCurrentRoomLabel(this->config.currentRoom->name.c_str());
   for (int i = 0; i < 12; i++) {
-    lightConfig *displayLight = nullptr;
-    for (lightConfig *light : this->config.currentRoom->getAllRoomViewLights()) {
-      if (light->roomViewPosition - 1 == i) {
-        displayLight = light;
-        break;
-      }
-    }
+    lightConfig *displayLight = this->config.currentRoom->getLightAtRoomViewPosition(i + 1);
 
     if (displayLight != nullptr) {
       // Add two spaces to the left of the name before sending name to panel
@@ -689,6 +691,16 @@ void InterfaceManager::_goToNextRoom() {
   this->config.currentRoom++;
   if (this->config.currentRoom == this->config.rooms.end()) {
     this->config.currentRoom = this->config.rooms.begin();
+  }
+  this->_updatePanelWithNewRoomInfo();
+}
+
+void InterfaceManager::_goToPreviousRoom() {
+  if (this->config.currentRoom == this->config.rooms.begin()) {
+    this->config.currentRoom = this->config.rooms.end();
+    this->config.currentRoom--;
+  } else {
+    this->config.currentRoom--;
   }
   this->_updatePanelWithNewRoomInfo();
 }

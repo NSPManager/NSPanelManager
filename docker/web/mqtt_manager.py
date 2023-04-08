@@ -30,7 +30,8 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     try:
         parts = msg.topic.split('/')
-        if parts[-1] == "log": # Messages received was a status update (online/offline)
+        # Messages received was a status update (online/offline)
+        if parts[-1] == "log":
             message_parts = msg.payload.decode('utf-8').split(':')
             data = {
                 "type": "log",
@@ -44,60 +45,84 @@ def on_message(client, userdata, msg):
             panel = parts[1]
             data = json.loads(msg.payload.decode('utf-8'))
             send_online_status(panel, data)
+            ws_data = {
+                "type": "status",
+                "payload": data
+            }
+            mqtt_manager_libs.websocket_server.send_message(
+                json.dumps(ws_data))
         elif parts[-1] == "status_report":
             panel = parts[1]
             data = json.loads(msg.payload.decode('utf-8'))
             data["state"] = "online"
             send_status_report(panel, data)
+            ws_data = {
+                "type": "status_report",
+                "payload": data
+            }
+            mqtt_manager_libs.websocket_server.send_message(
+                json.dumps(ws_data))
         elif msg.topic == "nspanel/mqttmanager/command":
             data = json.loads(msg.payload.decode('utf-8'))
-            if data["method"] == "set" and data["attribute"] == "brightness": # Got new brightness value
+            if data["method"] == "set" and data["attribute"] == "brightness":  # Got new brightness value
                 for entity_id in data["entity_ids"]:
-                    mqtt_manager_libs.light_states.states[entity_id].set_light_level(data["brightness"])
-            elif data["method"] == "set" and data["attribute"] == "kelvin": # Got new brightness value
+                    mqtt_manager_libs.light_states.states[entity_id].set_light_level(
+                        data["brightness"])
+            elif data["method"] == "set" and data["attribute"] == "kelvin":  # Got new brightness value
                 for entity_id in data["entity_ids"]:
-                    mqtt_manager_libs.light_states.states[entity_id].set_color_temp(data["kelvin"])
+                    mqtt_manager_libs.light_states.states[entity_id].set_color_temp(
+                        data["kelvin"])
 
     except:
         logging.error("Something went wrong during processing of message:")
         try:
             logging.error(msg.payload.decode('utf-8'))
         except:
-            logging.error("Something went wrong when processing the exception message, couldn't decode payload to utf-8.")
+            logging.error(
+                "Something went wrong when processing the exception message, couldn't decode payload to utf-8.")
+
 
 def send_status_report(panel, new_status):
-    post("http://127.0.0.1:8000/api/set_panel_status/" + new_status["mac"] + "/", json=new_status)
+    post("http://127.0.0.1:8000/api/set_panel_status/" +
+         new_status["mac"] + "/", json=new_status)
+
 
 def send_online_status(panel, new_status):
-    post("http://127.0.0.1:8000/api/set_panel_online_status/" + new_status["mac"] + "/", json=new_status)
+    post("http://127.0.0.1:8000/api/set_panel_online_status/" +
+         new_status["mac"] + "/", json=new_status)
+
 
 def get_config():
     global settings
     while True:
         try:
-            config_request = get("http://127.0.0.1:8000/api/get_mqtt_manager_config", timeout=5)
+            config_request = get(
+                "http://127.0.0.1:8000/api/get_mqtt_manager_config", timeout=5)
             if config_request.status_code == 200:
                 logging.info("Got config, will start MQTT Manager.")
                 settings = config_request.json()
 
                 for id, light in settings["lights"].items():
                     int_id = int(id)
-                    mqtt_manager_libs.light_states.states[int_id] = mqtt_manager_libs.light.Light.from_dict(light)
+                    mqtt_manager_libs.light_states.states[int_id] = mqtt_manager_libs.light.Light.from_dict(
+                        light)
                 # All light-data sucessfully loaded into light_states, clear own register
                 settings.pop("lights")
                 break
         except Exception as e:
-            logging.error("ERROR: Failed to get config. Will try again in 5 seconds.")
+            logging.error(
+                "ERROR: Failed to get config. Will try again in 5 seconds.")
             logging.error(e)
             sleep(5)
 
 
 def connect_and_loop():
     global settings, home_assistant
-    mqtt_manager_libs.websocket_server.start_server() # Start websocket server
+    mqtt_manager_libs.websocket_server.start_server()  # Start websocket server
     client.on_connect = on_connect
     client.on_message = on_message
-    client.username_pw_set(settings["mqtt_username"], settings["mqtt_password"])
+    client.username_pw_set(
+        settings["mqtt_username"], settings["mqtt_password"])
     # Wait for connection
     connection_return_code = 0
     mqtt_server = settings["mqtt_server"]
@@ -108,23 +133,23 @@ def connect_and_loop():
             client.connect(mqtt_server, mqtt_port, 5)
             break  # Connection call did not raise exception, connection is sucessfull
         except:
-            logging.error(F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
+            logging.error(
+                F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
             sleep(10)
-    
+
     # MQTT Connected, start APIs if configured
     if settings["home_assistant_address"] != "" and settings["home_assistant_token"] != "":
         mqtt_manager_libs.home_assistant.init(settings, client)
         mqtt_manager_libs.home_assistant.connect()
     else:
         logging.info("Home Assistant values not configured, will not connect.")
-    
 
     if settings["openhab_address"] != "" and settings["openhab_token"] != "":
         mqtt_manager_libs.openhab.init(settings, client)
         mqtt_manager_libs.openhab.connect()
     else:
         logging.info("OpenHABA values not configured, will not connect.")
-    
+
     # Loop MQTT
     client.loop_forever()
 
@@ -134,4 +159,5 @@ if __name__ == '__main__':
     if settings["mqtt_server"] and settings["mqtt_port"]:
         connect_and_loop()
     else:
-        logging.error("Settings dictate to NOT use MQTT Manager as no MQTT configuration is present.")
+        logging.error(
+            "Settings dictate to NOT use MQTT Manager as no MQTT configuration is present.")
