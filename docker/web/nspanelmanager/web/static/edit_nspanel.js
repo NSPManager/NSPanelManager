@@ -10,7 +10,7 @@ function connect_to_websocket() {
             if(data.level == "ERROR") {
                 add_html += '<span class="tag is-danger">ERROR</span>';
             } else if (data.level == "WARNING") {
-                add_html += '<span class="tag is-danger">WARNING</span>';
+                add_html += '<span class="tag is-warning">WARNING</span>';
             } else if (data.level == "INFO") {
                 add_html += '<span class="tag is-info">INFO</span>';
             } else if (data.level == "DEBUG") {
