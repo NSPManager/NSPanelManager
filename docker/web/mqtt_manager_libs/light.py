@@ -14,6 +14,7 @@ class Light:
     openhab_control_mode: str = ""
     openhab_item_name: str = ""
     openhab_item_color_temp: str = ""
+    openhab_item_rgb: str = ""
 
     light_level: int = 0
     color_temp: int = 0
@@ -53,11 +54,14 @@ class Light:
 
     def set_light_level(self, light_level: int):
         if self.type == "home_assistant":
-            if mqtt_manager_libs.home_assistant.set_entity_brightness(self.home_assistant_name, light_level, self.color_temp):
+            send_color_temp = 0
+            if self.last_command_sent == "color_temp":
+                send_color_temp = self.color_temp
+            if mqtt_manager_libs.home_assistant.set_entity_brightness(self.home_assistant_name, light_level, send_color_temp):
                 self.light_level = light_level
         elif self.type == "openhab":
             if mqtt_manager_libs.openhab.set_entity_brightness(self.openhab_item_name, self.openhab_control_mode, light_level):
-                if self.can_color_temperature and self.light_level == 0:
+                if self.can_color_temperature and self.light_level == 0 and self.last_command_sent == "rgb":
                     mqtt_manager_libs.openhab.set_entity_color_temp(
                         self.openhab_item_color_temp, self.color_temp)
                 self.light_level = light_level
@@ -83,7 +87,7 @@ class Light:
                 self.home_assistant_name, self.light_level, color_saturation, self.color_hue)
         elif self.type == "openhab":
             mqtt_manager_libs.home_assistant.set_entity_color_saturation(
-                self.openhab_item_color_temp, self.light_level, color_saturation, self.color_hue)
+                self.openhab_item_rgb, self.light_level, color_saturation, self.color_hue)
         self.color_saturation = color_saturation
         self.last_command_sent = "rgb"
 
@@ -93,6 +97,6 @@ class Light:
                 self.home_assistant_name, self.light_level, self.color_saturation, color_hue)
         elif self.type == "openhab":
             mqtt_manager_libs.home_assistant.set_entity_color_saturation(
-                self.openhab_item_color_temp, self.light_level, self.color_saturation, color_hue)
+                self.openhab_item_rgb, self.light_level, self.color_saturation, color_hue)
         self.color_hue = color_hue
         self.last_command_sent = "rgb"

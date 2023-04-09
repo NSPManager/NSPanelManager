@@ -174,8 +174,21 @@ def set_entity_color_temp(openhab_item_name: str, color_temp: int) -> bool:
         return False
 
 
-def set_entity_color_saturation(entity_name: str, light_level: int, color_saturation: int, color_hue: int) -> bool:
-    logging.error("Color not implemented for OpenHAB yet.")
+def set_entity_color_saturation(openhab_item_name: str, light_level: int, color_saturation: int, color_hue: int) -> bool:
+    try:
+        # Format OpenHAB state update
+        msg = {
+            "type": "ItemCommandEvent",
+            "topic": F"openhab/items/{openhab_item_name}/command",
+            "payload": "{\"type\":\"HSB\",\"value\":\"" + color_hue + "," + color_saturation + "," + light_level + "\"}",
+            "source": "WebSocketNSPanelManager"
+        }
+        ws.send(json.dumps(msg))
+        return True
+    except Exception as e:
+        logging.error("Failed to send entity update to OpenHAB.")
+        logging.error(e)
+        return False
 
 
 def _update_all_light_states():
