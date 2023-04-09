@@ -19,6 +19,8 @@ class Light:
     color_temp: int = 0
     color_saturation: int = 0
     color_hue: int = 0
+    # "color_temp" or "rgb". Used to restore correct state when using scenes
+    last_command_sent: str = "color_temp"
 
     @staticmethod
     def from_dict(dict_data):
@@ -73,6 +75,7 @@ class Light:
                 mqtt_manager_libs.home_assistant.set_entity_color_temp(
                     self.openhab_item_color_temp, color_temp)
         self.color_temp = color_temp
+        self.last_command_sent = "color_temp"
 
     def set_color_saturation(self, color_saturation: int):
         if self.type == "home_assistant":
@@ -82,6 +85,7 @@ class Light:
             mqtt_manager_libs.home_assistant.set_entity_color_saturation(
                 self.openhab_item_color_temp, self.light_level, color_saturation, self.color_hue)
         self.color_saturation = color_saturation
+        self.last_command_sent = "rgb"
 
     def set_color_hue(self, color_hue: int):
         if self.type == "home_assistant":
@@ -91,3 +95,4 @@ class Light:
             mqtt_manager_libs.home_assistant.set_entity_color_saturation(
                 self.openhab_item_color_temp, self.light_level, self.color_saturation, color_hue)
         self.color_hue = color_hue
+        self.last_command_sent = "rgb"

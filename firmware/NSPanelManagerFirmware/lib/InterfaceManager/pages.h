@@ -53,7 +53,7 @@ public:
   static void show();
   static uint8_t getBrightnessValue();
   static uint8_t getKelvinSatValue();
-  static uint8_t getHueValue();
+  static uint16_t getHueValue();
   static inline lightConfig *selectedLight;
   static LIGHT_PAGE_MODE getCurrentMode();
   static void switchMode();

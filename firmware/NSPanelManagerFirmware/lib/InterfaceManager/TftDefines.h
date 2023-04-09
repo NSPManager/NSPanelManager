@@ -101,6 +101,8 @@
 #define LIGHT_PAGE_HUE_SLIDER_ID 6
 #define LIGHT_PAGE_HUE_SLIDER_NAME "hue"
 #define LIGHT_PAGE_KELVIN_SLIDER_PIC 10   // Pic for "currentmode"
-#define LIGHT_PAGE_SAT_SLIDER_PIC 15      // Pic for "currentmode"
+#define LIGHT_PAGE_KELVIN_SLIDER_PIC1 11  // Pic for "currentmode"
+#define LIGHT_PAGE_SAT_SLIDER_PIC 14      // Pic for "currentmode"
+#define LIGHT_PAGE_SAT_SLIDER_PIC1 15     // Pic for "currentmode"
 #define LIGHT_PAGE_COLOR_TEMP_MODE_PIC 18 // Pic for kelvin/sat slider
 #define LIGHT_PAGE_COLOR_RGB_MODE_PIC 19  // Pic for kelvin/sat slider
