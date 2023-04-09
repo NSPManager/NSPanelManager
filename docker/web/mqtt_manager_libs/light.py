@@ -44,6 +44,8 @@ class Light:
 
             if newLight.can_color_temperature:
                 newLight.openhab_item_color_temp = dict_data["openhab_item_color_temp"]
+            if newLight.can_rgb:
+                newLight.openhab_item_rgb = dict_data["openhab_item_rgb"]
 
         logging.info(
             F"Loaded light '{newLight.type}::{newLight.friendly_name}'")

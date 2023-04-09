@@ -9,6 +9,7 @@ import subprocess
 from .models import NSPanel, Room, Light, Settings
 from web.settings_helper import get_setting_with_default, set_setting_value
 
+
 def restart_mqtt_manager():
     for proc in psutil.process_iter():
         if "./mqtt_manager.py" in proc.cmdline():
@@ -16,7 +17,8 @@ def restart_mqtt_manager():
             proc.kill()
     # Restart the process
     print("Starting a new mqtt_manager")
-    subprocess.Popen(["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
+    subprocess.Popen(
+        ["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
 
 
 def index(request):
@@ -72,7 +74,7 @@ def move_room_down(request, room_id: int):
         room.displayOrder = i
         room.save()
         i += 1
-    
+
     return redirect('rooms_order')
 
 
@@ -102,6 +104,7 @@ def save_new_room(request):
     new_room.save()
     return redirect('edit_room', room_id=new_room.id)
 
+
 def delete_room(request, room_id: int):
     Room.objects.filter(id=room_id).delete()
     return redirect('rooms')
@@ -113,17 +116,20 @@ def update_room_form(request, room_id: int):
     room.save()
     return redirect('edit_room', room_id=room_id)
 
+
 def edit_nspanel(request, panel_id: int):
     return render(request, 'edit_nspanel.html', {
         'panel': NSPanel.objects.get(id=panel_id),
         'rooms': Room.objects.all()
     })
 
+
 def save_panel_settings(request, panel_id: int):
     panel = NSPanel.objects.get(id=panel_id)
     panel.room = Room.objects.get(id=request.POST["room_id"])
     panel.save()
     return redirect('edit_nspanel', panel_id)
+
 
 def remove_light_from_room(request, room_id: int, light_id: int):
     Light.objects.filter(id=light_id).delete()
@@ -159,7 +165,9 @@ def add_light_to_room(request, room_id: int):
             newLight.openhab_item_color_temp = request.POST["openhab_color_temperature_channel_name"]
     if "rgb" in request.POST:
         newLight.can_rgb = True
-    
+        if newLight.type == "openhab":
+            newLight.openhab_item_rgb = request.POST["openhab_RGB_channel_name"]
+
     newLight.save()
     restart_mqtt_manager()
     return redirect('edit_room', room_id=room_id)
@@ -168,7 +176,8 @@ def add_light_to_room(request, room_id: int):
 def add_light_to_room_view(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
     light_position = int(request.POST["position"])
-    existing_light_at_position = Light.objects.filter(room=room, room_view_position=light_position).first()
+    existing_light_at_position = Light.objects.filter(
+        room=room, room_view_position=light_position).first()
     if existing_light_at_position != None:
         existing_light_at_position.room_view_position = 0
         existing_light_at_position.save()
@@ -177,50 +186,72 @@ def add_light_to_room_view(request, room_id: int):
     new_light.save()
     return redirect('edit_room', room_id=room_id)
 
+
 def remove_light_from_room_view(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
     light_position = int(request.POST["position"])
-    existing_light_at_position = Light.objects.filter(room=room, room_view_position=light_position).first()
+    existing_light_at_position = Light.objects.filter(
+        room=room, room_view_position=light_position).first()
     if existing_light_at_position != None:
         existing_light_at_position.room_view_position = 0
         existing_light_at_position.save()
     return redirect('edit_room', room_id=room_id)
 
+
 def settings_page(request):
     data = {}
     data["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
     data["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
-    data["reverse_color_temp"] = get_setting_with_default("reverse_color_temp", False)
+    data["reverse_color_temp"] = get_setting_with_default(
+        "reverse_color_temp", False)
     data["mqtt_server"] = get_setting_with_default("mqtt_server", "")
     data["mqtt_port"] = get_setting_with_default("mqtt_port", 1883)
     data["mqtt_username"] = get_setting_with_default("mqtt_username", "")
     data["mqtt_password"] = get_setting_with_default("mqtt_password", "")
-    data["home_assistant_address"] = get_setting_with_default("home_assistant_address", "")
-    data["home_assistant_token"] = get_setting_with_default("home_assistant_token", "")
+    data["home_assistant_address"] = get_setting_with_default(
+        "home_assistant_address", "")
+    data["home_assistant_token"] = get_setting_with_default(
+        "home_assistant_token", "")
     data["openhab_address"] = get_setting_with_default("openhab_address", "")
     data["openhab_token"] = get_setting_with_default("openhab_token", "")
-    data["openhab_brightness_channel_name"] = get_setting_with_default("openhab_brightness_channel_name", "")
-    data["openhab_brightness_channel_min"] = get_setting_with_default("openhab_brightness_channel_min", 0)
-    data["openhab_brightness_channel_max"] = get_setting_with_default("openhab_brightness_channel_max", 255)
-    data["openhab_color_temp_channel_name"] = get_setting_with_default("openhab_color_temp_channel_name", "")
-    data["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name", "")
-    data["raise_to_100_light_level"] = get_setting_with_default("raise_to_100_light_level", 95)
+    data["openhab_brightness_channel_name"] = get_setting_with_default(
+        "openhab_brightness_channel_name", "")
+    data["openhab_brightness_channel_min"] = get_setting_with_default(
+        "openhab_brightness_channel_min", 0)
+    data["openhab_brightness_channel_max"] = get_setting_with_default(
+        "openhab_brightness_channel_max", 255)
+    data["openhab_color_temp_channel_name"] = get_setting_with_default(
+        "openhab_color_temp_channel_name", "")
+    data["openhab_rgb_channel_name"] = get_setting_with_default(
+        "openhab_rgb_channel_name", "")
+    data["raise_to_100_light_level"] = get_setting_with_default(
+        "raise_to_100_light_level", 95)
     return render(request, 'settings.html', data)
 
 
 def save_settings(request):
     set_setting_value(name="mqtt_server", value=request.POST["mqtt_server"])
     set_setting_value(name="mqtt_port", value=request.POST["mqtt_port"])
-    set_setting_value(name="mqtt_username", value=request.POST["mqtt_username"])
-    set_setting_value(name="mqtt_password", value=request.POST["mqtt_password"])
-    set_setting_value(name="home_assistant_address", value=request.POST["home_assistant_address"])
-    set_setting_value(name="home_assistant_token", value=request.POST["home_assistant_token"])
-    set_setting_value(name="openhab_address", value=request.POST["openhab_address"])
-    set_setting_value(name="openhab_token", value=request.POST["openhab_token"])
-    set_setting_value(name="raise_to_100_light_level", value=request.POST["raise_to_100_light_level"])
-    set_setting_value(name="color_temp_min", value=request.POST["color_temp_min"])
-    set_setting_value(name="color_temp_max", value=request.POST["color_temp_max"])
-    set_setting_value(name="reverse_color_temp", value=("reverse_color_temp" in request.POST))
+    set_setting_value(name="mqtt_username",
+                      value=request.POST["mqtt_username"])
+    set_setting_value(name="mqtt_password",
+                      value=request.POST["mqtt_password"])
+    set_setting_value(name="home_assistant_address",
+                      value=request.POST["home_assistant_address"])
+    set_setting_value(name="home_assistant_token",
+                      value=request.POST["home_assistant_token"])
+    set_setting_value(name="openhab_address",
+                      value=request.POST["openhab_address"])
+    set_setting_value(name="openhab_token",
+                      value=request.POST["openhab_token"])
+    set_setting_value(name="raise_to_100_light_level",
+                      value=request.POST["raise_to_100_light_level"])
+    set_setting_value(name="color_temp_min",
+                      value=request.POST["color_temp_min"])
+    set_setting_value(name="color_temp_max",
+                      value=request.POST["color_temp_max"])
+    set_setting_value(name="reverse_color_temp", value=(
+        "reverse_color_temp" in request.POST))
 
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()

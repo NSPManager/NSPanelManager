@@ -61,6 +61,7 @@ class Light(models.Model):
     openhab_item_switch = models.CharField(max_length=255, default="")
     openhab_item_dimmer = models.CharField(max_length=255, default="")
     openhab_item_color_temp = models.CharField(max_length=255, default="")
+    openhab_item_rgb = models.CharField(max_length=255, default="")
     room_view_position = models.IntegerField(default=0)
 
     def __str__(self) -> str:
