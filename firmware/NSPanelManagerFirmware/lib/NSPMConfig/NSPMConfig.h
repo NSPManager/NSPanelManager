@@ -54,6 +54,11 @@ public:
   /// @brief The MQTT topic to receive on/off command for the panel from.
   std::string mqtt_screen_cmd_topic;
 
+  /// @brief The upload baud rate for the serial connection when uploading a new TFT file
+  uint32_t tft_upload_baud;
+  /// @brief Wether or not to use the "v1.2" protcol or the v1.0
+  bool use_new_upload_protocol;
+
   std::string md5_firmware;
   std::string md5_data_file;
 };

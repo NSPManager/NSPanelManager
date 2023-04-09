@@ -104,8 +104,8 @@ void taskManageWifiAndMqtt(void *param) {
           serializeJson(*online_message_doc, online_message_buffer);
           delete online_message_doc;
 
-          mqttClient.setServer(config.mqtt_server.c_str(), config.mqtt_port);
           LOG_INFO("Connecting to MQTT server ", config.mqtt_server.c_str());
+          mqttClient.setServer(config.mqtt_server.c_str(), config.mqtt_port);
           mqttClient.connect(config.wifi_hostname.c_str(), config.mqtt_username.c_str(), config.mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, 1, offline_message_buffer);
           vTaskDelay(1000 / portTICK_PERIOD_MS);
           if (mqttClient.connected()) {

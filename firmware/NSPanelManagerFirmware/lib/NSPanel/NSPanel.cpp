@@ -397,6 +397,8 @@ size_t NSPanel::_getTFTFileSize(const char *address) {
 }
 
 bool NSPanel::_updateTFTOTA() {
+  LOG_INFO("_updateTFTOTA Started.");
+
   // Stop all other tasks using the panel
   vTaskDelete(NSPanel::instance->_taskHandleSendCommandQueue);
   NSPanel::instance->_stopListeningToPanel();
@@ -417,65 +419,70 @@ bool NSPanel::_updateTFTOTA() {
   httpClient.begin(downloadUrl.c_str());
   const char *header_names[] = {"Content-Length"};
   httpClient.collectHeaders(header_names, 1);
+  httpClient.setTimeout(8);
   int httpReturnCode = httpClient.GET();
 
-  // Set fastest baud rate
-  int uploadBaudRate = 921600;
-  std::string uploadBaudRateString = "baud=";
-  uploadBaudRateString.append(std::to_string(uploadBaudRate));
-  Serial2.print(uploadBaudRateString.c_str());
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-
-  // Wait for 1 second to see if any data is returned, if it is
-  // we failed to set baud data
-  unsigned long startMillis = millis();
-  while (Serial2.available() == 0 && millis() - startMillis < 1000) {
-    vTaskDelay(10 / portTICK_PERIOD_MS);
+  // Change baud rate if needed
+  int32_t baud_diff = NSPMConfig::instance->tft_upload_baud - Serial2.baudRate();
+  if (baud_diff < 0) {
+    baud_diff = baud_diff / -1;
   }
-  if (Serial2.available() == 0) {
-    LOG_INFO("Baud rate switch successful, switching Serial2 to baud ", uploadBaudRate);
+  if (baud_diff >= 10) {
+    std::string uploadBaudRateString = "baud=";
+    uploadBaudRateString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
+    Serial2.print(uploadBaudRateString.c_str());
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
 
-    Serial2.flush();
-    Serial2.end();
-    Serial2.begin(uploadBaudRate, SERIAL_8N1, 17, 16);
-  } else {
-    LOG_ERROR("Baud rate switch failed. Will restart.");
-    ESP.restart();
-    return false;
-  }
-
-  Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN"); // "disconnect"
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-
-  vTaskDelay(50 / portTICK_PERIOD_MS);
-  // Send "connect" string to get data
-  Serial2.print("connect");
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  LOG_DEBUG("Sent connect, waiting for comok string.");
-
-  // Wait for comok return data.
-  while (Serial2.available() == 0) {
-    vTaskDelay(50 / portTICK_PERIOD_MS);
-  }
-
-  LOG_DEBUG("Waiting for comok");
-  std::string comok_string = "";
-  while (Serial2.available() > 0) {
-    uint8_t read_char = Serial2.read();
-    if (read_char != 0xFF) {
-      comok_string.push_back(read_char);
+    // Wait for 1 second to see if any data is returned, if it is
+    // we failed to set baud data
+    unsigned long startMillis = millis();
+    while (Serial2.available() == 0 && millis() - startMillis < 1000) {
+      vTaskDelay(10 / portTICK_PERIOD_MS);
     }
+    if (Serial2.available() == 0) {
+      LOG_INFO("Baud rate switch successful, switching Serial2 from ", Serial2.baudRate(), " to ", NSPMConfig::instance->tft_upload_baud);
+
+      Serial2.flush();
+      Serial2.end();
+      Serial2.begin(NSPMConfig::instance->tft_upload_baud, SERIAL_8N1, 17, 16);
+    } else {
+      LOG_ERROR("Baud rate switch failed. Will restart.");
+      ESP.restart();
+      return false;
+    }
+
+    Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN"); // "disconnect"
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
+
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+    // Send "connect" string to get data
+    Serial2.print("connect");
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
+    LOG_DEBUG("Sent connect, waiting for comok string.");
+
+    // Wait for comok return data.
+    while (Serial2.available() == 0) {
+      vTaskDelay(50 / portTICK_PERIOD_MS);
+    }
+
+    LOG_DEBUG("Waiting for comok");
+    std::string comok_string = "";
+    while (Serial2.available() > 0) {
+      uint8_t read_char = Serial2.read();
+      if (read_char != 0xFF) {
+        comok_string.push_back(read_char);
+      }
+    }
+    LOG_DEBUG("Got comok: ", comok_string.c_str());
   }
-  LOG_DEBUG("Got comok: ", comok_string.c_str());
 
   // Get size of TFT file
-
   size_t totalTftFileSize = httpClient.header("Content-Length").toInt();
   while (totalTftFileSize == 0) {
     LOG_ERROR("Failed to get content length for TFT-file.");
@@ -485,11 +492,22 @@ bool NSPanel::_updateTFTOTA() {
   LOG_DEBUG("Will start TFT upload, TFT file size: ", totalTftFileSize);
   // TODO: Detect if new protocol is not supported, in that case set flag in flash and restart and then continue flash with legacy mode.
   // Send whmi-wri command to initiate upload
-  std::string commandString = "whmi-wris ";
-  commandString.append(std::to_string(totalTftFileSize));
-  commandString.append(",");
-  commandString.append(std::to_string(Serial2.baudRate()));
-  commandString.append(",1");
+  std::string commandString;
+  if (NSPMConfig::instance->use_new_upload_protocol) {
+    LOG_INFO("Starting upload using v1.2 protocol.");
+    commandString = "whmi-wris ";
+    commandString.append(std::to_string(totalTftFileSize));
+    commandString.append(",");
+    commandString.append(std::to_string(Serial2.baudRate()));
+    commandString.append(",1");
+  } else {
+    LOG_INFO("Starting upload using v1.1 protocol.");
+    commandString = "whmi-wri ";
+    commandString.append(std::to_string(totalTftFileSize));
+    commandString.append(",");
+    commandString.append(std::to_string(Serial2.baudRate()));
+    commandString.append(",1");
+  }
   Serial2.print(commandString.c_str());
   Serial2.write(0xFF);
   Serial2.write(0xFF);
