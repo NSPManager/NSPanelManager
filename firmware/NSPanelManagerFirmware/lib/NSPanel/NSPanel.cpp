@@ -56,6 +56,20 @@ void NSPanel::setComponentVal(const char *componentId, uint8_t value) {
   this->_sendCommandWithoutResponse(cmd.c_str());
 }
 
+void NSPanel::setComponentPic(const char *componentId, uint8_t value) {
+  std::string cmd = componentId;
+  cmd.append(".pic=");
+  cmd.append(std::to_string(value));
+  this->_sendCommandWithoutResponse(cmd.c_str());
+}
+
+void NSPanel::setComponentPic1(const char *componentId, uint8_t value) {
+  std::string cmd = componentId;
+  cmd.append(".pic1=");
+  cmd.append(std::to_string(value));
+  this->_sendCommandWithoutResponse(cmd.c_str());
+}
+
 void NSPanel::setComponentForegroundColor(const char *componentId, uint value) {
   std::string cmd = componentId;
   cmd.append(".pco=");

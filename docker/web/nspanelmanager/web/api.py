@@ -11,8 +11,10 @@ from web.settings_helper import get_setting_with_default
 
 def get_mqtt_manager_config(request):
     return_json = {}
-    return_json["color_temp_min"] = int(get_setting_with_default("color_temp_min", 2000))
-    return_json["color_temp_max"] = int(get_setting_with_default("color_temp_max", 6000))
+    return_json["color_temp_min"] = int(
+        get_setting_with_default("color_temp_min", 2000))
+    return_json["color_temp_max"] = int(
+        get_setting_with_default("color_temp_max", 6000))
     return_json["mqtt_server"] = get_setting_with_default("mqtt_server", "")
     return_json["mqtt_port"] = int(get_setting_with_default("mqtt_port", 1883))
     return_json["mqtt_username"] = get_setting_with_default(
@@ -37,7 +39,7 @@ def get_mqtt_manager_config(request):
         "openhab_color_temp_channel_name", "")
     return_json["openhab_rgb_channel_name"] = get_setting_with_default(
         "openhab_rgb_channel_name", "")
-    
+
     return_json["lights"] = {}
 
     for light in Light.objects.all():
@@ -53,6 +55,7 @@ def get_mqtt_manager_config(request):
         lightConfig["openhab_item_switch"] = light.openhab_item_switch
         lightConfig["openhab_item_dimmer"] = light.openhab_item_dimmer
         lightConfig["openhab_item_color_temp"] = light.openhab_item_color_temp
+        lightConfig["openhab_item_rgb"] = light.openhab_item_rgb
         return_json["lights"][light.id] = lightConfig
 
     return JsonResponse(return_json)
@@ -74,7 +77,7 @@ def get_all_available_light_entities(request):
         }
         try:
             home_assistant_response = requests.get(
-                get_setting_with_default("home_assistant_address", "") + "/api/states", headers=home_assistant_request_headers, timeout=5) 
+                get_setting_with_default("home_assistant_address", "") + "/api/states", headers=home_assistant_request_headers, timeout=5)
             for entity in home_assistant_response.json():
                 if (entity["entity_id"].startswith("light.")):
                     return_json["home_assistant_lights"].append({
@@ -91,7 +94,8 @@ def get_all_available_light_entities(request):
             "Authorization": "Bearer " + get_setting_with_default("openhab_token", ""),
             "content-type": "application/json",
         }
-        openhab_response = requests.get(get_setting_with_default("openhab_address", "") + "/rest/things", headers=openhab_request_headers)
+        openhab_response = requests.get(get_setting_with_default(
+            "openhab_address", "") + "/rest/things", headers=openhab_request_headers)
 
         for entity in openhab_response.json():
             if "channels" in entity:
@@ -112,7 +116,6 @@ def get_all_available_light_entities(request):
                         "label": entity["label"],
                         "items": items
                     })
-
 
     return JsonResponse(return_json)
 
@@ -152,6 +155,7 @@ def register_nspanel(request):
     new_panel.save()
     return HttpResponse('OK', status=200)
 
+
 def delete_panel(request, panel_id: int):
     NSPanel.objects.get(id=panel_id).delete()
     return redirect('/')
@@ -161,14 +165,17 @@ def get_nspanel_config(request):
     nspanel = NSPanel.objects.get(mac_address=request.GET["mac"])
     base = {}
     base["home"] = nspanel.room.id
-    base["raise_to_100_light_level"] = get_setting_with_default("raise_to_100_light_level", 95)
+    base["raise_to_100_light_level"] = get_setting_with_default(
+        "raise_to_100_light_level", 95)
     base["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
     base["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
-    base["reverse_color_temp"] = get_setting_with_default("reverse_color_temp", False)
+    base["reverse_color_temp"] = get_setting_with_default(
+        "reverse_color_temp", False)
     base["rooms"] = []
     for room in Room.objects.all().order_by('displayOrder'):
         base["rooms"].append(room.id)
     return JsonResponse(base)
+
 
 def get_room_config(request, room_id: int):
     room = Room.objects.get(id=room_id)
@@ -185,6 +192,7 @@ def get_room_config(request, room_id: int):
         return_json["lights"][light.id]["view_position"] = light.room_view_position
     return JsonResponse(return_json)
 
+
 def reboot_nspanel(request):
     address = request.GET["address"]
     try:
@@ -193,18 +201,20 @@ def reboot_nspanel(request):
         pass
     return redirect("/")
 
+
 @csrf_exempt
 def set_panel_status(request, panel_mac: str):
     nspanel = NSPanel.objects.get(mac_address=panel_mac)
     if nspanel:
         # We got a match
         json_payload = json.loads(request.body.decode('utf-8'))
-        nspanel.wifi_rssi = int(json_payload["rssi"]);
-        nspanel.heap_used_pct = int(json_payload["heap_used_pct"]);
+        nspanel.wifi_rssi = int(json_payload["rssi"])
+        nspanel.heap_used_pct = int(json_payload["heap_used_pct"])
         nspanel.save()
         return HttpResponse("", status=200)
-    
+
     return HttpResponse("", status=500)
+
 
 @csrf_exempt
 def set_panel_online_status(request, panel_mac: str):
@@ -215,5 +225,5 @@ def set_panel_online_status(request, panel_mac: str):
         nspanel.online_state = (payload["state"] == "online")
         nspanel.save()
         return HttpResponse("", status=200)
-    
+
     return HttpResponse("", status=500)

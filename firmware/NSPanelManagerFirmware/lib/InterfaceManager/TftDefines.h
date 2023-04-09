@@ -1,11 +1,11 @@
-#define HOME_PAGE_ID 2 // ID of "Home"-page
-#define SWITCH_ROOM_BUTTON_ID 10 // ID of button to switch room
-#define SWITCH_MODE_BUTTON_ID 6  // ID of button to change light mode (room/home)
-#define HOME_LIGHT_COLOR_SLIDER_ID 1 // ID of "kelvin" slider on home page
-#define HOME_LIGHT_LEVEL_SLIDER_ID 2 // ID of light level slider on home page
+#define HOME_PAGE_ID 2                     // ID of "Home"-page
+#define SWITCH_ROOM_BUTTON_ID 10           // ID of button to switch room
+#define SWITCH_MODE_BUTTON_ID 6            // ID of button to change light mode (room/home)
+#define HOME_LIGHT_COLOR_SLIDER_ID 1       // ID of "kelvin" slider on home page
+#define HOME_LIGHT_LEVEL_SLIDER_ID 2       // ID of light level slider on home page
 #define CEILING_LIGHTS_MASTER_BUTTON_ID 22 // ID of ceiling lights button on home page
 #define TABLE_LIGHTS_MASTER_BUTTON_ID 21   // ID of table lights button on home page
-#define ROOM_BUTTON_ID 5 // ID of button to go into "room"-view
+#define ROOM_BUTTON_ID 5                   // ID of button to go into "room"-view
 
 #define SCREENSAVE_PAGE_NAME "screensaver"
 
@@ -23,6 +23,8 @@
 #define ROOM_PAGE_CURRENT_ROOM_LABEL_NAME "room_current"
 #define ROOM_PAGE_ID 4 // ID for "Room"-page
 #define ROOM_PAGE_BACK_BUTTON_ID 25
+#define ROOM_PAGE_PREVIOUS_ROOM_BUTTON_ID 26
+#define ROOM_PAGE_NEXT_ROOM_BUTTON_ID 28
 
 #define ROOM_LIGHT1_LABEL_NAME "device1"
 #define ROOM_LIGHT2_LABEL_NAME "device2"
@@ -85,3 +87,22 @@
 #define ROOM_LIGHT10_SW_CAP_ID 40
 #define ROOM_LIGHT11_SW_CAP_ID 41
 #define ROOM_LIGHT12_SW_CAP_ID 42
+
+#define LIGHT_PAGE_ID 5
+#define LIGHT_PAGE_NAME "Lights"
+#define LIGHT_PAGE_BACK_BUTTON_ID 1
+#define LIGHT_PAGE_LIGHT_LABEL_NAME "currentLight"
+#define LIGHT_PAGE_SWITCH_MODE_BUTTON_ID 8
+#define LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME "colormode"
+#define LIGHT_PAGE_BRIGHTNESS_SLIDER_ID 7
+#define LIGHT_PAGE_BRIGHTNESS_SLIDER_NAME "brightness"
+#define LIGHT_PAGE_KELVIN_SLIDER_ID 5
+#define LIGHT_PAGE_KELVIN_SLIDER_NAME "kelvin_sat"
+#define LIGHT_PAGE_HUE_SLIDER_ID 6
+#define LIGHT_PAGE_HUE_SLIDER_NAME "hue"
+#define LIGHT_PAGE_KELVIN_SLIDER_PIC 10   // Pic for "currentmode"
+#define LIGHT_PAGE_KELVIN_SLIDER_PIC1 11  // Pic for "currentmode"
+#define LIGHT_PAGE_SAT_SLIDER_PIC 14      // Pic for "currentmode"
+#define LIGHT_PAGE_SAT_SLIDER_PIC1 15     // Pic for "currentmode"
+#define LIGHT_PAGE_COLOR_TEMP_MODE_PIC 18 // Pic for kelvin/sat slider
+#define LIGHT_PAGE_COLOR_RGB_MODE_PIC 19  // Pic for kelvin/sat slider

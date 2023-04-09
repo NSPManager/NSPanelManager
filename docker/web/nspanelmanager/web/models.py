@@ -19,6 +19,7 @@ class Room(models.Model):
 
     friendly_name = models.CharField(max_length=30)
     displayOrder = models.IntegerField(default=number)
+
     def __str__(self) -> str:
         return self.friendly_name
 
@@ -28,7 +29,8 @@ def _default_nspanel_status_data():
         "rssi": 0,
         "mac": "??:??:??:??:??:??",
         "free_heap": 0
-    };
+    }
+
 
 class NSPanel(models.Model):
     mac_address = models.CharField(max_length=17)
@@ -44,19 +46,23 @@ class NSPanel(models.Model):
     def __str__(self) -> str:
         return self.friendly_name
 
+
 class Light(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     friendly_name = models.CharField(max_length=255, default="")
-    type = models.CharField(max_length=16, default="manual") # "home_assistant", "openhab" or "manual"
+    # "home_assistant", "openhab" or "manual"
+    type = models.CharField(max_length=16, default="manual")
     is_ceiling_light = models.BooleanField(default=False)
     can_dim = models.BooleanField(default=False)
     can_rgb = models.BooleanField(default=False)
     can_color_temperature = models.BooleanField(default=False)
     home_assistant_name = models.CharField(max_length=255, default="")
-    openhab_control_mode =models.CharField(max_length=32, default="dimmer") 
+    openhab_control_mode = models.CharField(max_length=32, default="dimmer")
     openhab_item_switch = models.CharField(max_length=255, default="")
     openhab_item_dimmer = models.CharField(max_length=255, default="")
     openhab_item_color_temp = models.CharField(max_length=255, default="")
+    openhab_item_rgb = models.CharField(max_length=255, default="")
     room_view_position = models.IntegerField(default=0)
+
     def __str__(self) -> str:
-        return self.friendly_name
+        return F"{self.room.friendly_name} -> {self.friendly_name}"
