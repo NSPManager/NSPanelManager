@@ -140,6 +140,18 @@ void InterfaceManager::_subscribeToLightTopics(lightConfig *cfg) {
     colorTempStateTopic.append("/state_kelvin");
     this->_mqttClient->subscribe(colorTempStateTopic.c_str());
   }
+
+  if (cfg->canRgb) {
+    std::string colorSaturationTopic = "nspanel/entities/light/";
+    colorSaturationTopic.append(std::to_string(cfg->id));
+    colorSaturationTopic.append("/state_sat");
+    this->_mqttClient->subscribe(colorSaturationTopic.c_str());
+
+    std::string colorHueTopic = "nspanel/entities/light/";
+    colorHueTopic.append(std::to_string(cfg->id));
+    colorHueTopic.append("/state_hue");
+    this->_mqttClient->subscribe(colorHueTopic.c_str());
+  }
 }
 
 void InterfaceManager::processWakeEvent() {
@@ -169,11 +181,9 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
   }
 
   if (page == HOME_PAGE_ID && !pressed) {
-    if (component == SWITCH_ROOM_BUTTON_ID) {
-      if (InterfaceManager::instance->_currentRoomMode == roomMode::room) {
-        InterfaceManager::instance->_goToNextRoom();
-        InterfaceManager::instance->_stopSpecialMode();
-      }
+    if (component == SWITCH_ROOM_BUTTON_ID && InterfaceManager::instance->_currentRoomMode == roomMode::room) {
+      InterfaceManager::instance->_goToNextRoom();
+      InterfaceManager::instance->_stopSpecialMode();
     } else if (component == SWITCH_MODE_BUTTON_ID) {
       InterfaceManager::instance->_goToNextMode();
       InterfaceManager::instance->_stopSpecialMode();
@@ -206,7 +216,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
       HomePage::updateColorTempValueCache();
       InterfaceManager::instance->_updateLightsColorTemp();
       InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
-    } else if (component == ROOM_BUTTON_ID) {
+    } else if (component == ROOM_BUTTON_ID && InterfaceManager::instance->_currentRoomMode == roomMode::room) {
       // Show page with all lights
       InterfaceManager::instance->_stopSpecialMode();
       NSPanel::instance->goToPage(ROOM_PAGE_NAME);
@@ -233,6 +243,9 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
     LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
   } else if (page == ROOM_PAGE_ID && !pressed) {
     InterfaceManager::instance->_handleRoomPageComponentTouch(component);
+    LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
+  } else if (page == LIGHT_PAGE_ID && !pressed) {
+    InterfaceManager::instance->_handleLightPageComponentTouch(component);
     LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
   } else {
     LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
@@ -348,9 +361,164 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
     }
     break;
   }
+  case ROOM_LIGHT1_LABEL_ID: {
+    lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(1);
+    if (light != nullptr) {
+      LightPage::selectedLight = light;
+      LightPage::show();
+      LightPage::updateValues();
+    }
+    break;
+  }
+  case ROOM_LIGHT2_LABEL_ID: {
+    lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(2);
+    if (light != nullptr) {
+      LightPage::selectedLight = light;
+      LightPage::show();
+      LightPage::updateValues();
+    }
+    break;
+  }
+  case ROOM_LIGHT3_LABEL_ID: {
+    lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(3);
+    if (light != nullptr) {
+      LightPage::selectedLight = light;
+      LightPage::show();
+      LightPage::updateValues();
+    }
+    break;
+  }
+  case ROOM_LIGHT4_LABEL_ID: {
+    lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(4);
+    if (light != nullptr) {
+      LightPage::selectedLight = light;
+      LightPage::show();
+      LightPage::updateValues();
+    }
+    break;
+  }
+  case ROOM_LIGHT5_LABEL_ID: {
+    lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(5);
+    if (light != nullptr) {
+      LightPage::selectedLight = light;
+      LightPage::show();
+      LightPage::updateValues();
+    }
+    break;
+  }
+  case ROOM_LIGHT6_LABEL_ID: {
+    lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(6);
+    if (light != nullptr) {
+      LightPage::selectedLight = light;
+      LightPage::show();
+      LightPage::updateValues();
+    }
+    break;
+  }
+  case ROOM_LIGHT7_LABEL_ID: {
+    lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(7);
+    if (light != nullptr) {
+      LightPage::selectedLight = light;
+      LightPage::show();
+      LightPage::updateValues();
+    }
+    break;
+  }
+  case ROOM_LIGHT8_LABEL_ID: {
+    lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(8);
+    if (light != nullptr) {
+      LightPage::selectedLight = light;
+      LightPage::show();
+      LightPage::updateValues();
+    }
+    break;
+  }
+  case ROOM_LIGHT9_LABEL_ID: {
+    lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(9);
+    if (light != nullptr) {
+      LightPage::selectedLight = light;
+      LightPage::show();
+      LightPage::updateValues();
+    }
+    break;
+  }
+  case ROOM_LIGHT10_LABEL_ID: {
+    lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(10);
+    if (light != nullptr) {
+      LightPage::selectedLight = light;
+      LightPage::show();
+      LightPage::updateValues();
+    }
+    break;
+  }
+  case ROOM_LIGHT11_LABEL_ID: {
+    lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(11);
+    if (light != nullptr) {
+      LightPage::selectedLight = light;
+      LightPage::show();
+      LightPage::updateValues();
+    }
+    break;
+  }
+  case ROOM_LIGHT12_LABEL_ID: {
+    lightConfig *light = this->config.currentRoom->getLightAtRoomViewPosition(12);
+    if (light != nullptr) {
+      LightPage::selectedLight = light;
+      LightPage::show();
+      LightPage::updateValues();
+    }
+    break;
+  }
 
   default:
     LOG_ERROR("Unknown component touched on room view: ", component_id);
+    break;
+  }
+}
+
+void InterfaceManager::_handleLightPageComponentTouch(uint8_t component_id) {
+  switch (component_id) {
+  case LIGHT_PAGE_BACK_BUTTON_ID: {
+    NSPanel::instance->goToPage(ROOM_PAGE_NAME);
+    InterfaceManager::instance->_populateRoomPage();
+    break;
+  }
+  case LIGHT_PAGE_BRIGHTNESS_SLIDER_ID: {
+    if (LightPage::selectedLight != nullptr) {
+      std::list<lightConfig *> lights;
+      lights.push_back(LightPage::selectedLight);
+      this->_changeLightsToLevel(&lights, LightPage::getBrightnessValue());
+      // LightPage::updateValues(); Not needed as slider changes directly
+    }
+    break;
+  }
+  case LIGHT_PAGE_KELVIN_SLIDER_ID: {
+    if (LightPage::selectedLight != nullptr) {
+      std::list<lightConfig *> lights;
+      lights.push_back(LightPage::selectedLight);
+      if (LightPage::getCurrentMode() == LIGHT_PAGE_MODE::COLOR_TEMP) {
+        this->_changeLightsToKelvin(&lights, LightPage::getKelvinSatValue());
+      } else if (LightPage::getCurrentMode() == LIGHT_PAGE_MODE::COLOR_RGB) {
+        this->_changeLightsToColorSaturation(&lights, LightPage::getKelvinSatValue());
+      }
+      // LightPage::updateValues(); Not needed as slider changes directly
+    }
+    break;
+  }
+  case LIGHT_PAGE_HUE_SLIDER_ID: {
+    if (LightPage::selectedLight != nullptr) {
+      std::list<lightConfig *> lights;
+      lights.push_back(LightPage::selectedLight);
+      this->_changeLightsToColorHue(&lights, LightPage::getHueValue());
+    }
+    break;
+  }
+  case LIGHT_PAGE_SWITCH_MODE_BUTTON_ID: {
+    LightPage::switchMode();
+    break;
+  }
+
+  default:
     break;
   }
 }
@@ -942,6 +1110,56 @@ void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig *> *lights, u
   if (json_length > 0 && this->_mqttClient->publish("nspanel/mqttmanager/command", buffer)) {
     for (lightConfig *light : (*lights)) {
       light->colorTemperature = kelvin;
+    }
+  } else {
+    LOG_ERROR("Failed to send MQTT brightness update.");
+  }
+}
+
+void InterfaceManager::_changeLightsToColorSaturation(std::list<lightConfig *> *lights, uint8_t saturation) {
+  // TODO: Make timeout configurable
+  this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
+
+  DynamicJsonDocument doc(1024);
+  doc["method"] = "set";
+  doc["attribute"] = "saturation";
+  doc["saturation"] = saturation;
+  JsonArray entity_ids = doc.createNestedArray("entity_ids");
+
+  for (lightConfig *light : (*lights)) {
+    entity_ids.add(light->id);
+  }
+
+  char buffer[1024];
+  uint json_length = serializeJson(doc, buffer);
+  if (json_length > 0 && this->_mqttClient->publish("nspanel/mqttmanager/command", buffer)) {
+    for (lightConfig *light : (*lights)) {
+      light->colorSat = saturation;
+    }
+  } else {
+    LOG_ERROR("Failed to send MQTT brightness update.");
+  }
+}
+
+void InterfaceManager::_changeLightsToColorHue(std::list<lightConfig *> *lights, uint16_t hue) {
+  // TODO: Make timeout configurable
+  this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
+
+  DynamicJsonDocument doc(1024);
+  doc["method"] = "set";
+  doc["attribute"] = "hue";
+  doc["hue"] = hue;
+  JsonArray entity_ids = doc.createNestedArray("entity_ids");
+
+  for (lightConfig *light : (*lights)) {
+    entity_ids.add(light->id);
+  }
+
+  char buffer[1024];
+  uint json_length = serializeJson(doc, buffer);
+  if (json_length > 0 && this->_mqttClient->publish("nspanel/mqttmanager/command", buffer)) {
+    for (lightConfig *light : (*lights)) {
+      light->colorHue = hue;
     }
   } else {
     LOG_ERROR("Failed to send MQTT brightness update.");

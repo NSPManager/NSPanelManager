@@ -4,23 +4,25 @@
 <h2 class="title is-4">Rooms</h2>
 <button type="button" class="button is-primary" onclick="addNewRoom();">Add new room</button>
 <table class="table is-fullwidth is-hoverable">
-    <thead>
-        <tr>
-            <th>Friendly name</th>
-            <th>NSPanels</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for room in rooms %}
-        <tr>
-            <th><a href="{% url 'edit_room' room_id=room.id %}">{{ room.friendly_name }}</a></th>
-            <td>
-                {% for nspanel in room.nspanel_set.all %}
-                <span class="tag is-light is-small">{{ nspanel.friendly_name }}</span>
-                {% endfor %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
+  <thead>
+    <tr>
+      <th>Friendly name</th>
+      <th>NSPanels</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for room in rooms %}
+    <tr>
+      <th><a href="{% url 'edit_room' room_id=room.id %}">{{ room.friendly_name }}</a></th>
+      <td>
+        <div class="tags">
+          {% for nspanel in room.nspanel_set.all %}
+          <span class="tag is-light is-small">{{ nspanel.friendly_name }}</span>
+          {% endfor %}
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
 {% endblock %}

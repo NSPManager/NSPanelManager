@@ -64,14 +64,22 @@ def on_message(client, userdata, msg):
                 json.dumps(ws_data))
         elif msg.topic == "nspanel/mqttmanager/command":
             data = json.loads(msg.payload.decode('utf-8'))
-            if data["method"] == "set" and data["attribute"] == "brightness":  # Got new brightness value
+            if data["method"] == "set" and data["attribute"] == "brightness":
                 for entity_id in data["entity_ids"]:
                     mqtt_manager_libs.light_states.states[entity_id].set_light_level(
                         data["brightness"])
-            elif data["method"] == "set" and data["attribute"] == "kelvin":  # Got new brightness value
+            elif data["method"] == "set" and data["attribute"] == "kelvin":
                 for entity_id in data["entity_ids"]:
                     mqtt_manager_libs.light_states.states[entity_id].set_color_temp(
                         data["kelvin"])
+            elif data["method"] == "set" and data["attribute"] == "saturation":
+                for entity_id in data["entity_ids"]:
+                    mqtt_manager_libs.light_states.states[entity_id].set_color_saturation(
+                        data["saturation"])
+            elif data["method"] == "set" and data["attribute"] == "hue":
+                for entity_id in data["entity_ids"]:
+                    mqtt_manager_libs.light_states.states[entity_id].set_color_hue(
+                        data["hue"])
 
     except:
         logging.error("Something went wrong during processing of message:")

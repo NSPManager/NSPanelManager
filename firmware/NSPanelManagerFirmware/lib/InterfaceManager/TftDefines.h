@@ -87,3 +87,20 @@
 #define ROOM_LIGHT10_SW_CAP_ID 40
 #define ROOM_LIGHT11_SW_CAP_ID 41
 #define ROOM_LIGHT12_SW_CAP_ID 42
+
+#define LIGHT_PAGE_ID 5
+#define LIGHT_PAGE_NAME "Lights"
+#define LIGHT_PAGE_BACK_BUTTON_ID 1
+#define LIGHT_PAGE_LIGHT_LABEL_NAME "currentLight"
+#define LIGHT_PAGE_SWITCH_MODE_BUTTON_ID 8
+#define LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME "colormode"
+#define LIGHT_PAGE_BRIGHTNESS_SLIDER_ID 7
+#define LIGHT_PAGE_BRIGHTNESS_SLIDER_NAME "brightness"
+#define LIGHT_PAGE_KELVIN_SLIDER_ID 5
+#define LIGHT_PAGE_KELVIN_SLIDER_NAME "kelvin_sat"
+#define LIGHT_PAGE_HUE_SLIDER_ID 6
+#define LIGHT_PAGE_HUE_SLIDER_NAME "hue"
+#define LIGHT_PAGE_KELVIN_SLIDER_PIC 10   // Pic for "currentmode"
+#define LIGHT_PAGE_SAT_SLIDER_PIC 15      // Pic for "currentmode"
+#define LIGHT_PAGE_COLOR_TEMP_MODE_PIC 18 // Pic for kelvin/sat slider
+#define LIGHT_PAGE_COLOR_RGB_MODE_PIC 19  // Pic for kelvin/sat slider

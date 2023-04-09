@@ -41,6 +41,7 @@ public:
   void setSleep(bool sleep);
   void setComponentText(const char *componentId, const char *text);
   void setComponentVal(const char *componentId, uint8_t value);
+  void setComponentPic(const char *componentId, uint8_t value);
   void setComponentForegroundColor(const char *componentId, uint value);
   void setComponentVisible(const char *componentId, bool visible);
   int getComponentIntVal(const char *componentId);

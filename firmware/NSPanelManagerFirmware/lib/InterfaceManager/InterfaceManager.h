@@ -136,6 +136,9 @@ private:
   /// @brief Handle a touch event that has occured on the "Room"-page
   /// @param component_id The component that was touched
   void _handleRoomPageComponentTouch(uint8_t component_id);
+  /// @brief Handle a touch event that has occured on the "Light"-page
+  /// @param component_id The component that was touched
+  void _handleLightPageComponentTouch(uint8_t component_id);
 
   /// @brief Given a light, will subscribe to all relevant MQTT status topics for that light
   /// @param cfg The light to subscribe to
@@ -163,6 +166,14 @@ private:
   /// @param lights The lights to set value for
   /// @param level The new value
   void _changeLightsToKelvin(std::list<lightConfig *> *lights, uint16_t kelvin);
+  /// @brief Send out new color saturation for a list of lights
+  /// @param lights The lights to set value for
+  /// @param level The new value
+  void _changeLightsToColorSaturation(std::list<lightConfig *> *lights, uint8_t kelvin);
+  /// @brief Send out new color hue for a list of lights
+  /// @param lights The lights to set value for
+  /// @param level The new value
+  void _changeLightsToColorHue(std::list<lightConfig *> *lights, uint16_t kelvin);
 };
 
 #endif
