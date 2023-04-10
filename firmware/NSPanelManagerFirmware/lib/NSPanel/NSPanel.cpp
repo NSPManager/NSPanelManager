@@ -304,7 +304,6 @@ void NSPanel::_sendCommand(NSPanelCommand *command) {
     while (Serial2.available() == 0) {
       vTaskDelay(5);
     }
-
     // Give back serial read mutex.
     xSemaphoreGive(this->_mutexReadSerialData);
 
@@ -383,6 +382,15 @@ uint16_t NSPanel::_readDataToString(std::string *data, uint32_t timeout, bool fi
 
 void NSPanel::_taskUpdateTFTConfigOTA(void *param) {
   LOG_INFO("Starting TFT update...");
+
+  while (true) {
+    if (!xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, 5000 / portTICK_PERIOD_MS) == pdTRUE) {
+      LOG_ERROR("Failed to get Serial read mutex when updating TFT!");
+    } else {
+      break;
+    }
+  }
+
   for (;;) {
     bool updateResult = NSPanel::_updateTFTOTA();
     if (updateResult) {
