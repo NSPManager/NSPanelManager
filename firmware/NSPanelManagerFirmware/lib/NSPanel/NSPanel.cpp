@@ -658,16 +658,7 @@ bool NSPanel::_updateTFTOTA() {
     // }
 
     std::string return_string;
-    uint16_t recevied_bytes = 0;
-    unsigned long start_wait = millis();
-    while (recevied_bytes == 0) {
-      return_string.clear();
-      recevied_bytes = NSPanel::instance->_readDataToString(&return_string, 3000, true);
-
-      if (recevied_bytes == 0) {
-        LOG_DEBUG("Still waiting for NSPanel reponse data.");
-      }
-    }
+    uint16_t recevied_bytes = NSPanel::instance->_readDataToString(&return_string, 2000, true);
     LOG_DEBUG("Received ", recevied_bytes, " bytes: ");
     for (int i = 0; i < recevied_bytes; i++) {
       LOG_DEBUG("0x", String(return_string[i], HEX).c_str());
