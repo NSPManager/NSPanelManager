@@ -611,11 +611,12 @@ bool NSPanel::_updateTFTOTA() {
     // Jump to read offset
     while (lastReadByte < nextStartWriteOffset) {
       size_t seekLength;
-      if (httpClient.getStreamPtr()->available() - nextStartWriteOffset > 4096) {
+      if (totalTftFileSize - nextStartWriteOffset > 4096) {
         seekLength = 4096;
       } else {
-        seekLength = httpClient.getStreamPtr()->available() - nextStartWriteOffset;
+        seekLength = totalTftFileSize - nextStartWriteOffset;
       }
+
       httpClient.getStreamPtr()->readBytes(dataBuffer, seekLength);
       lastReadByte += seekLength;
       vTaskDelay(20 / portTICK_PERIOD_MS);
@@ -629,9 +630,19 @@ bool NSPanel::_updateTFTOTA() {
       next_write_size = httpClient.getStreamPtr()->available();
     }
 
-    // Read chunk and write it
-    httpClient.getStreamPtr()->readBytes(dataBuffer, next_write_size);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    // Keep trying to gather data until we have gathered all the bytes for next chunk
+    uint16_t bytes_read = 0;
+    while (bytes_read < next_write_size) {
+      size_t data_available = httpClient.getStreamPtr()->available();
+      if (!data_available) { // No data avilable from WiFi, wait 20ms and try again
+        vTaskDelay(20);
+        continue;
+      }
+
+      bytes_read += httpClient.getStreamPtr()->readBytes(&dataBuffer[bytes_read], data_available >= next_write_size - bytes_read ? next_write_size - bytes_read : data_available);
+    }
+    // Write the chunk to the display
+    // vTaskDelay(500 / portTICK_PERIOD_MS);
     for (int i = 0; i < next_write_size; i++) {
       Serial2.write(dataBuffer[i]);
       nextStartWriteOffset++;
@@ -670,7 +681,7 @@ bool NSPanel::_updateTFTOTA() {
       while (return_string.length() < 4) {
         LOG_DEBUG("Waiting for offset data byte ", return_string.length() - 1);
         while (Serial2.available() <= 0) {
-          vTaskDelay(5 / portTICK_PERIOD_MS);
+          vTaskDelay(20 / portTICK_PERIOD_MS);
         }
         return_string.push_back(Serial2.read());
       }
