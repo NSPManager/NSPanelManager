@@ -328,6 +328,40 @@ void NSPanel::_clearSerialBuffer() {
   }
 }
 
+uint16_t NSPanel::_readDataToString(std::string *data, uint32_t timeout, bool find_05_return) {
+  uint16_t number_of_FF_bytes = 0;
+  unsigned long start_read = millis();
+  bool recevied_ff_flag = false;
+  bool recevied_05_flag = false;
+
+  while (millis() - start_read < timeout && !recevied_05_flag && !recevied_ff_flag) {
+    uint8_t received_byte = Serial2.read();
+    data->push_back(received_byte);
+    if (received_byte == 0xFF) {
+      number_of_FF_bytes++;
+
+      if (number_of_FF_bytes >= 3) {
+        recevied_ff_flag = true;
+      }
+    } else {
+      number_of_FF_bytes = 0; // Reset counter as new data is provided, any previous 0xFF byte was part of payload
+      recevied_ff_flag = false;
+    }
+
+    if (find_05_return && data->find(0x05) != std::string::npos) {
+      recevied_05_flag = true;
+    }
+    vTaskDelay(5 / portTICK_PERIOD_MS);
+  }
+
+  if (recevied_ff_flag) {
+    // Remove last three 0xFF off of the end to only return payload
+    *data = data->substr(0, data->length() - 3);
+  }
+
+  return data->length();
+}
+
 void NSPanel::_taskUpdateTFTConfigOTA(void *param) {
   LOG_INFO("Starting TFT update...");
   for (;;) {
@@ -581,10 +615,11 @@ bool NSPanel::_updateTFTOTA() {
       }
     }
 
-    returnData = Serial2.read();
-    if (returnData == 0x05) {
+    std::string return_string;
+    NSPanel::instance->_readDataToString(&return_string, 3000, true);
+    if (return_string[0] == 0x05) {
       // Old protocol, just upload next chunk.
-    } else if (returnData == 0x08) {
+    } else if (return_string[0] == 0x08) {
       LOG_DEBUG("Getting offset data.");
       while (Serial2.available() < 4) {
         vTaskDelay(10 / portTICK_PERIOD_MS); // Wait for data.
@@ -603,20 +638,15 @@ bool NSPanel::_updateTFTOTA() {
       break;
     } else {
       LOG_ERROR("Something went wrong during tft update. Got data:");
-      LOG_ERROR(String(returnData, HEX).c_str());
-      while (Serial2.available() > 0) {
-        LOG_ERROR(String(Serial2.read(), HEX).c_str());
-      }
+      LOG_ERROR(String(return_string.c_str(), HEX).c_str());
     }
 
     // vTaskDelay(50 / portTICK_PERIOD_MS);
   }
 
   LOG_INFO("TFT Upload complete, wrote ", nextStartWriteOffset, " bytes.");
-  LOG_INFO(" Will restart after TFT has completed.");
-  while (Serial2.available() == 0) {
-    vTaskDelay(50 / portTICK_PERIOD_MS);
-  }
+  LOG_INFO(" Will restart in 10 seconds.");
+  vTaskDelay(10000 / portTICK_PERIOD_MS);
   ESP.restart();
 
   vTaskDelay(portMAX_DELAY);

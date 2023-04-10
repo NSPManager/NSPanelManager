@@ -78,6 +78,7 @@ private:
   void _sendRawCommand(const char *command, int length);
   void _startListeningToPanel();
   void _stopListeningToPanel();
+  uint16_t _readDataToString(std::string *data, uint32_t timeout, bool receive_flag);
 
   /// @brief Call reigstered callback when a touch event occured
   static inline void (*_touchEventCallback)(uint8_t, uint8_t, bool);

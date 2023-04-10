@@ -228,6 +228,23 @@ def _update_all_light_states():
                     else:
                         logging.error(
                             "Failed to get item state for OppenHAB item: " + light.openhab_item_color_temp)
+
+                if light.can_rgb:
+                    item_state = _get_item_state(light.openhab_item_rgb)
+                    if item_state != None:
+                        hue, sat, brightness = item_state["state"].split(",")
+                        mqtt_client.publish(
+                            F"nspanel/entities/light/{light_id}/state_hue", int(float(hue)), retain=True)
+                        mqtt_client.publish(
+                            F"nspanel/entities/light/{light_id}/state_sat", int(float(sat)), retain=True)
+                        mqtt_client.publish(
+                            F"nspanel/entities/light/{light_id}/state_brightness_pct", brightness, retain=True)
+                        light.color_hue = hue
+                        light.color_saturation = sat
+                        light.light_level = brightness
+                    else:
+                        logging.error(
+                            "Failed to get item state for OppenHAB item: " + light.openhab_item_color_temp)
             except Exception as e:
                 logging.error(
                     F"Failed to process light ID:{light_id}. The following error occured:")

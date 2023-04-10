@@ -49,7 +49,7 @@ bool NSPMConfig::loadFromLittleFS() {
   this->mqtt_password = doc["mqtt_password"] | "";
 
   this->tft_upload_baud = doc["upload_baud"] | 115200;
-  this->use_new_upload_protocol = doc["use_new_upload_protocol"].as<String>() == "true";
+  this->use_new_upload_protocol = doc.containsKey("use_new_upload_protocol") ? doc["use_new_upload_protocol"].as<String>() == "true" : true;
 
   // Load calculated values
   this->mqtt_availability_topic = "nspanel/";

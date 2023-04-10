@@ -45,25 +45,36 @@ def on_message(ws, message):
     elif json_msg["type"] == "result" and json_msg["success"]:
         if json_msg["id"] == request_all_states_id:
             for entity in json_msg["result"]:
-                for id, state in mqtt_manager_libs.light_states.states.items():
-                    if state.home_assistant_name == entity["entity_id"].replace("light.", ""):
+                for id, light in mqtt_manager_libs.light_states.states.items():
+                    if light.home_assistant_name == entity["entity_id"].replace("light.", ""):
                         try:
                             if entity["state"] == "off":
-                                state.light_level = 0
+                                light.light_level = 0
                             else:
                                 if "brightness" in entity["attributes"]:
-                                    state.light_level = round(
+                                    light.light_level = round(
                                         entity["attributes"]["brightness"] / 2.55)
                                 else:
-                                    state.light_level = 100  # Type is a switch and is ON, regard it as 100% on
+                                    light.light_level = 100  # Type is a switch and is ON, regard it as 100% on
 
                             mqtt_client.publish(
-                                F"nspanel/entities/light/{state.id}/state_brightness_pct", state.light_level, retain=True)
+                                F"nspanel/entities/light/{light.id}/state_brightness_pct", light.light_level, retain=True)
 
-                            if state.can_color_temperature and "color_temp_kelvin" in entity["attributes"]:
-                                state.color_temp = entity["attributes"]["color_temp_kelvin"]
+                            if light.can_rgb and entity["attributes"]["color_mode"] != "color_temp":
+                                light.last_command_sent = "rgb"
                                 mqtt_client.publish(
-                                    F"nspanel/entities/light/{state.id}/state_kelvin", state.color_temp, retain=True)
+                                    F"nspanel/entities/light/{light.id}/state_hue", entity["attributes"]["hs_color"][0], retain=True)
+                                mqtt_manager_libs.light_states.states[
+                                    light.id].color_hue = entity["attributes"]["hs_color"][0]
+                                mqtt_client.publish(
+                                    F"nspanel/entities/light/{light.id}/state_sat", entity["attributes"]["hs_color"][1], retain=True)
+                                mqtt_manager_libs.light_states.states[
+                                    light.id].color_saturation = entity["attributes"]["hs_color"][1]
+                            elif light.can_color_temperature and "color_temp_kelvin" in entity["attributes"]:
+                                light.last_command_sent = "color_temp"
+                                light.color_temp = entity["attributes"]["color_temp_kelvin"]
+                                mqtt_client.publish(
+                                    F"nspanel/entities/light/{light.id}/state_kelvin", light.color_temp, retain=True)
                         except Exception as e:
                             logging.error(
                                 "Something went wrong while trying to load current states.")
@@ -144,7 +155,17 @@ def send_entity_update(json_msg):
                         F"nspanel/entities/light/{entity_id}/state_brightness_pct", 0, retain=True)
                     mqtt_manager_libs.light_states.states[entity_id].light_level = 0
 
-            if "color_temp_kelvin" in new_state["attributes"]:
+            if mqtt_manager_libs.light_states.states[entity_id].can_rgb and new_state["attributes"]["color_mode"] != "color_temp":
+                mqtt_manager_libs.light_states.states[entity_id].last_command_sent = "rgb"
+                mqtt_client.publish(
+                    F"nspanel/entities/light/{entity_id}/state_hue", new_state["attributes"]["hs_color"][0], retain=True)
+                mqtt_manager_libs.light_states.states[entity_id].color_hue = new_state["attributes"]["hs_color"][0]
+                mqtt_client.publish(
+                    F"nspanel/entities/light/{entity_id}/state_sat", new_state["attributes"]["hs_color"][1], retain=True)
+                mqtt_manager_libs.light_states.states[
+                    entity_id].color_saturation = new_state["attributes"]["hs_color"][1]
+            elif "color_temp_kelvin" in new_state["attributes"]:
+                mqtt_manager_libs.light_states.states[entity_id].last_command_sent = "color_temp"
                 mqtt_client.publish(
                     F"nspanel/entities/light/{entity_id}/state_kelvin", new_state["attributes"]["color_temp_kelvin"], retain=True)
                 mqtt_manager_libs.light_states.states[entity_id].color_temp = new_state["attributes"]["color_temp_kelvin"]
