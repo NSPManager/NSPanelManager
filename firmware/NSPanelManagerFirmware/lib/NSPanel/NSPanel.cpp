@@ -289,6 +289,10 @@ void NSPanel::_sendCommand(NSPanelCommand *command) {
     Serial2.read();
   }
 
+  while (!NSPanel::instance->_writeCommandsToSerial) {
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+  }
+
   if (command->expectResponse && !xSemaphoreTake(this->_mutexReadSerialData, 250 / portTICK_PERIOD_MS) == pdTRUE) {
     LOG_ERROR("Failed to get serial read mutex! Will not continue call.");
     return;
@@ -301,8 +305,12 @@ void NSPanel::_sendCommand(NSPanelCommand *command) {
   this->_lastCommandSent = millis();
 
   if (command->expectResponse) {
+    unsigned int start_wait = millis();
     while (Serial2.available() == 0) {
       vTaskDelay(5);
+      if (millis() - start_wait >= 3000) {
+        break;
+      }
     }
     // Give back serial read mutex.
     xSemaphoreGive(this->_mutexReadSerialData);
@@ -313,6 +321,10 @@ void NSPanel::_sendCommand(NSPanelCommand *command) {
 }
 
 void NSPanel::_sendRawCommand(const char *command, int length) {
+  while (!NSPanel::instance->_writeCommandsToSerial) {
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+  }
+
   for (int i = 0; i < length; i++) {
     Serial2.print(command[i]);
   }
@@ -386,6 +398,12 @@ void NSPanel::_taskUpdateTFTConfigOTA(void *param) {
   while (true) {
     if (!xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, 5000 / portTICK_PERIOD_MS) == pdTRUE) {
       LOG_ERROR("Failed to get Serial read mutex when updating TFT!");
+      TaskHandle_t owning_task = xSemaphoreGetMutexHolder(NSPanel::instance->_mutexReadSerialData);
+      if (owning_task == NULL) {
+        LOG_ERROR("Could not find owning task of mutex.");
+      } else {
+        LOG_INFO("Mutex holder: ", pcTaskGetName(owning_task));
+      }
     } else {
       break;
     }
@@ -459,6 +477,8 @@ size_t NSPanel::_getTFTFileSize(const char *address) {
 
 bool NSPanel::_updateTFTOTA() {
   LOG_INFO("_updateTFTOTA Started.");
+
+  NSPanel::instance->_writeCommandsToSerial = false;
 
   // Stop all other tasks using the panel
   if (NSPanel::instance->_taskHandleSendCommandQueue != NULL) {
@@ -649,24 +669,15 @@ bool NSPanel::_updateTFTOTA() {
       bytes_read += httpClient.getStreamPtr()->readBytes(&dataBuffer[bytes_read], data_available >= next_write_size - bytes_read ? next_write_size - bytes_read : data_available);
     }
     // Write the chunk to the display
-    for (int i = 0; i < next_write_size; i++) {
-      Serial2.write(dataBuffer[i]);
-      nextStartWriteOffset++;
+    uint16_t bytes_written = 0;
+    while (bytes_written < next_write_size) {
+      bytes_written += Serial2.write(&dataBuffer[bytes_written], next_write_size - bytes_written);
     }
+    nextStartWriteOffset += bytes_written;
     lastReadByte = nextStartWriteOffset;
 
-    // Wait for 0x05 to indicate that the display is ready for new data
-    // unsigned long startWaitingForOKForNextChunk = millis();
-    // while (Serial2.available() == 0) {
-    //   vTaskDelay(10 / portTICK_PERIOD_MS); // Leave time for other tasks and display to process
-    //   if (startWaitingForOKForNextChunk + 5000 <= millis()) {
-    //     LOG_ERROR("Something went wrong during tft update. Got no response after 5 seconds, will continue with next chunk anyway.");
-    //     break;
-    //   }
-    // }
-
     std::string return_string;
-    uint16_t recevied_bytes = NSPanel::instance->_readDataToString(&return_string, 2000, true);
+    uint16_t recevied_bytes = NSPanel::instance->_readDataToString(&return_string, 5000, true);
     LOG_DEBUG("Received ", recevied_bytes, " bytes: ");
     for (int i = 0; i < recevied_bytes; i++) {
       LOG_DEBUG("0x", String(return_string[i], HEX).c_str());
