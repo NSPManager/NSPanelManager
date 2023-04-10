@@ -611,14 +611,13 @@ bool NSPanel::_updateTFTOTA() {
     // Jump to read offset
     while (lastReadByte < nextStartWriteOffset) {
       size_t seekLength;
-      if (totalTftFileSize - nextStartWriteOffset > 4096) {
+      if (totalTftFileSize - lastReadByte > 4096) {
         seekLength = 4096;
       } else {
-        seekLength = totalTftFileSize - nextStartWriteOffset;
+        seekLength = totalTftFileSize - lastReadByte;
       }
 
-      httpClient.getStreamPtr()->readBytes(dataBuffer, seekLength);
-      lastReadByte += seekLength;
+      lastReadByte += httpClient.getStreamPtr()->readBytes(dataBuffer, seekLength);
       vTaskDelay(20 / portTICK_PERIOD_MS);
     }
 
@@ -642,7 +641,6 @@ bool NSPanel::_updateTFTOTA() {
       bytes_read += httpClient.getStreamPtr()->readBytes(&dataBuffer[bytes_read], data_available >= next_write_size - bytes_read ? next_write_size - bytes_read : data_available);
     }
     // Write the chunk to the display
-    // vTaskDelay(500 / portTICK_PERIOD_MS);
     for (int i = 0; i < next_write_size; i++) {
       Serial2.write(dataBuffer[i]);
       nextStartWriteOffset++;
