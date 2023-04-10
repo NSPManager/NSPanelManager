@@ -333,25 +333,35 @@ uint16_t NSPanel::_readDataToString(std::string *data, uint32_t timeout, bool fi
   unsigned long start_read = millis();
   bool recevied_ff_flag = false;
   bool recevied_05_flag = false;
+  while (millis() - start_read <= timeout) {
+    while (millis() - start_read <= timeout && Serial2.available() <= 0) {
+      vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
 
-  while (millis() - start_read < timeout && !recevied_05_flag && !recevied_ff_flag) {
-    uint8_t received_byte = Serial2.read();
-    data->push_back(received_byte);
-    if (received_byte == 0xFF) {
-      number_of_FF_bytes++;
+    if (Serial2.available() > 0) {
+      uint8_t received_byte = Serial2.read();
+      data->push_back(received_byte);
+      if (received_byte == 0xFF) {
+        number_of_FF_bytes++;
 
-      if (number_of_FF_bytes >= 3) {
-        recevied_ff_flag = true;
+        if (number_of_FF_bytes >= 3) {
+          recevied_ff_flag = true;
+        }
+      } else {
+        number_of_FF_bytes = 0; // Reset counter as new data is provided, any previous 0xFF byte was part of payload
+        recevied_ff_flag = false;
       }
-    } else {
-      number_of_FF_bytes = 0; // Reset counter as new data is provided, any previous 0xFF byte was part of payload
-      recevied_ff_flag = false;
-    }
 
-    if (find_05_return && data->find(0x05) != std::string::npos) {
-      recevied_05_flag = true;
+      if (find_05_return && data->find(0x05) != std::string::npos) {
+        recevied_05_flag = true;
+      }
+
+      if (recevied_05_flag || recevied_ff_flag) {
+        break;
+      }
+
+      vTaskDelay(20 / portTICK_PERIOD_MS);
     }
-    vTaskDelay(5 / portTICK_PERIOD_MS);
   }
 
   if (recevied_ff_flag) {
@@ -599,6 +609,7 @@ bool NSPanel::_updateTFTOTA() {
 
     // Read chunk and write it
     httpClient.getStreamPtr()->readBytes(dataBuffer, next_write_size);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
     for (int i = 0; i < next_write_size; i++) {
       Serial2.write(dataBuffer[i]);
       nextStartWriteOffset++;
@@ -606,45 +617,62 @@ bool NSPanel::_updateTFTOTA() {
     lastReadByte = nextStartWriteOffset;
 
     // Wait for 0x05 to indicate that the display is ready for new data
-    unsigned long startWaitingForOKForNextChunk = millis();
-    while (Serial2.available() == 0) {
-      vTaskDelay(10 / portTICK_PERIOD_MS); // Leave time for other tasks and display to process
-      if (startWaitingForOKForNextChunk + 5000 <= millis()) {
-        LOG_ERROR("Something went wrong during tft update. Got no response after 5 seconds, will continue with next chunk anyway.");
-        break;
-      }
-    }
+    // unsigned long startWaitingForOKForNextChunk = millis();
+    // while (Serial2.available() == 0) {
+    //   vTaskDelay(10 / portTICK_PERIOD_MS); // Leave time for other tasks and display to process
+    //   if (startWaitingForOKForNextChunk + 5000 <= millis()) {
+    //     LOG_ERROR("Something went wrong during tft update. Got no response after 5 seconds, will continue with next chunk anyway.");
+    //     break;
+    //   }
+    // }
 
     std::string return_string;
-    NSPanel::instance->_readDataToString(&return_string, 3000, true);
+    uint16_t recevied_bytes = 0;
+    unsigned long start_wait = millis();
+    while (recevied_bytes == 0) {
+      return_string.clear();
+      recevied_bytes = NSPanel::instance->_readDataToString(&return_string, 3000, true);
+
+      if (millis() + 5000 <= millis()) {
+        LOG_DEBUG("Still waiting for NSPanel reponse data.");
+      }
+    }
+    LOG_DEBUG("Received ", recevied_bytes, " bytes: ");
+    for (int i = 0; i < recevied_bytes; i++) {
+      LOG_DEBUG("0x", String(return_string[i], HEX).c_str());
+    }
     if (return_string[0] == 0x05) {
       // Old protocol, just upload next chunk.
+      LOG_DEBUG("Got 0x05, uploading next chunk.");
     } else if (return_string[0] == 0x08) {
-      LOG_DEBUG("Getting offset data.");
-      while (Serial2.available() < 4) {
-        vTaskDelay(10 / portTICK_PERIOD_MS); // Wait for data.
+      while (return_string.length() < 4) {
+        LOG_DEBUG("Waiting for offset data byte ", return_string.length() - 1);
+        while (Serial2.available() <= 0) {
+          vTaskDelay(5 / portTICK_PERIOD_MS);
+        }
+        return_string.push_back(Serial2.read());
       }
-      uint32_t readNextOffset = Serial2.read();
-      readNextOffset |= Serial2.read() << 8;
-      readNextOffset |= Serial2.read() << 16;
-      readNextOffset |= Serial2.read() << 24;
+      uint32_t readNextOffset = return_string[1];
+      readNextOffset |= return_string[2] << 8;
+      readNextOffset |= return_string[3] << 16;
+      readNextOffset |= return_string[4] << 24;
       if (readNextOffset > 0) {
         nextStartWriteOffset = readNextOffset;
-        LOG_INFO("Panel supports new protocol, jumping to offset: ", nextStartWriteOffset, " please wait.");
-      } else {
-        // offset = 0, continue as normal
+        LOG_INFO("Got 0x08 with offset, jumping to: ", nextStartWriteOffset, " please wait.");
       }
     } else if (httpClient.getStreamPtr()->available() == 0) {
+      LOG_INFO("TFT Upload complete, wrote ", nextStartWriteOffset, " bytes.");
       break;
     } else {
-      LOG_ERROR("Something went wrong during tft update. Got data:");
-      LOG_ERROR(String(return_string.c_str(), HEX).c_str());
+      LOG_DEBUG("Got unexpected return data from panel. Received ", recevied_bytes, " bytes: ");
+      for (int i = 0; i < recevied_bytes; i++) {
+        LOG_DEBUG("0x", String(return_string[i], HEX).c_str());
+      }
     }
 
     // vTaskDelay(50 / portTICK_PERIOD_MS);
   }
 
-  LOG_INFO("TFT Upload complete, wrote ", nextStartWriteOffset, " bytes.");
   LOG_INFO(" Will restart in 10 seconds.");
   vTaskDelay(10000 / portTICK_PERIOD_MS);
   ESP.restart();
