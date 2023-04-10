@@ -138,6 +138,7 @@ void NSPanel::init() {
   Serial2.begin(115200, SERIAL_8N1, 17, 16);
   NSPanel::instance = this;
   this->_mutexReadSerialData = xSemaphoreCreateMutex();
+  this->_writeCommandsToSerial = true;
 
   LOG_INFO("Init NSPanel.");
   xTaskCreatePinnedToCore(_taskSendCommandQueue, "taskSendCommandQueue", 5000, NULL, 1, &this->_taskHandleSendCommandQueue, CONFIG_ARDUINO_RUNNING_CORE);
@@ -162,10 +163,12 @@ void NSPanel::_startListeningToPanel() {
 void NSPanel::_stopListeningToPanel() {
   if (this->_taskHandleReadNSPanelData != NULL) {
     vTaskDelete(this->_taskHandleReadNSPanelData);
+    this->_taskHandleReadNSPanelData = NULL;
   }
 
   if (this->_taskHandleProcessPanelOutput != NULL) {
     vTaskDelete(this->_taskHandleProcessPanelOutput);
+    this->_taskHandleProcessPanelOutput = NULL;
   }
 }
 
@@ -184,8 +187,10 @@ void NSPanel::_sendCommandClearResponse(const char *command) {
 }
 
 void NSPanel::_addCommandToQueue(NSPanelCommand command) {
-  this->_commandQueue.push(command);
-  xTaskNotifyGive(this->_taskHandleSendCommandQueue);
+  if (this->_taskHandleSendCommandQueue != NULL) {
+    this->_commandQueue.push(command);
+    xTaskNotifyGive(this->_taskHandleSendCommandQueue);
+  }
 }
 
 void NSPanel::_taskSendCommandQueue(void *param) {
@@ -193,6 +198,10 @@ void NSPanel::_taskSendCommandQueue(void *param) {
   for (;;) {
     // Wait for commands
     if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY)) {
+      while (NSPanel::_writeCommandsToSerial == false) {
+        vTaskDelay(50 / portTICK_PERIOD_MS);
+      }
+
       // Process all commands in queue
       while (NSPanel::instance->_commandQueue.size() > 0) {
         NSPanelCommand cmd = NSPanel::instance->_commandQueue.front();
@@ -314,7 +323,7 @@ void NSPanel::_sendRawCommand(const char *command, int length) {
 }
 
 void NSPanel::startOTAUpdate() {
-  xTaskCreatePinnedToCore(_taskUpdateTFTConfigOTA, "taskUpdateTFTConfigOTA", 20000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+  xTaskCreatePinnedToCore(_taskUpdateTFTConfigOTA, "taskUpdateTFTConfigOTA", 30000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 }
 
 void NSPanel::_clearSerialBuffer(NSPanelCommand *cmd) {
@@ -444,7 +453,10 @@ bool NSPanel::_updateTFTOTA() {
   LOG_INFO("_updateTFTOTA Started.");
 
   // Stop all other tasks using the panel
-  vTaskDelete(NSPanel::instance->_taskHandleSendCommandQueue);
+  if (NSPanel::instance->_taskHandleSendCommandQueue != NULL) {
+    vTaskDelete(NSPanel::instance->_taskHandleSendCommandQueue);
+    NSPanel::instance->_taskHandleSendCommandQueue = NULL;
+  }
   NSPanel::instance->_stopListeningToPanel();
 
   // Clear current read buffer
@@ -460,11 +472,20 @@ bool NSPanel::_updateTFTOTA() {
   LOG_INFO("Will download TFT file from: ", downloadUrl.c_str());
 
   HTTPClient httpClient;
-  httpClient.begin(downloadUrl.c_str());
+  if (!httpClient.begin(downloadUrl.c_str())) {
+    LOG_ERROR("Failed to create httpClient object with .begin.");
+    return false;
+  }
   const char *header_names[] = {"Content-Length"};
   httpClient.collectHeaders(header_names, 1);
-  httpClient.setTimeout(8);
+  httpClient.setTimeout(20);
   int httpReturnCode = httpClient.GET();
+
+  if (httpReturnCode != 200) {
+    LOG_ERROR("Failed get TFT-file from server. Got HTTP return code: ", httpReturnCode);
+    httpClient.end();
+    return false;
+  }
 
   // Change baud rate if needed
   int32_t baud_diff = NSPMConfig::instance->tft_upload_baud - Serial2.baudRate();
@@ -542,14 +563,14 @@ bool NSPanel::_updateTFTOTA() {
     commandString = "whmi-wris ";
     commandString.append(std::to_string(totalTftFileSize));
     commandString.append(",");
-    commandString.append(std::to_string(Serial2.baudRate()));
+    commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(",1");
   } else {
     LOG_INFO("Starting upload using v1.1 protocol.");
     commandString = "whmi-wri ";
     commandString.append(std::to_string(totalTftFileSize));
     commandString.append(",");
-    commandString.append(std::to_string(Serial2.baudRate()));
+    commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(",1");
   }
   Serial2.print(commandString.c_str());
@@ -558,6 +579,7 @@ bool NSPanel::_updateTFTOTA() {
   Serial2.write(0xFF);
 
   // Wait until Nextion returns okay to transmit tft
+  LOG_DEBUG("Waiting for panel reponse");
   while (Serial2.available() == 0) {
     vTaskDelay(10 / portTICK_PERIOD_MS);
   }
@@ -633,7 +655,7 @@ bool NSPanel::_updateTFTOTA() {
       return_string.clear();
       recevied_bytes = NSPanel::instance->_readDataToString(&return_string, 3000, true);
 
-      if (millis() + 5000 <= millis()) {
+      if (recevied_bytes == 0) {
         LOG_DEBUG("Still waiting for NSPanel reponse data.");
       }
     }

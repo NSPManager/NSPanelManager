@@ -87,6 +87,7 @@ private:
   static inline void (*_wakeCallback)();
   static void _clearSerialBuffer(NSPanelCommand *cmd);
   static void _clearSerialBuffer();
+  static inline bool _writeCommandsToSerial;
 };
 
 #endif
