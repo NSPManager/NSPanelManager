@@ -93,7 +93,7 @@ def edit_room(request, room_id: int):
         'light9': Light.objects.filter(room=room, room_view_position=9).first(),
         'light10': Light.objects.filter(room=room, room_view_position=10).first(),
         'light11': Light.objects.filter(room=room, room_view_position=11).first(),
-        'light12': Light.objects.filter(room=room, room_view_position=11).first(),
+        'light12': Light.objects.filter(room=room, room_view_position=12).first(),
     }
     return render(request, 'edit_room.html', data)
 
