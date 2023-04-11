@@ -135,6 +135,7 @@ void NSPanel::init() {
   digitalWrite(4, HIGH);
   vTaskDelay(500 / portTICK_PERIOD_MS);
   digitalWrite(4, LOW);
+  Serial2.setTxBufferSize(0);
   Serial2.begin(115200, SERIAL_8N1, 17, 16);
   NSPanel::instance = this;
   this->_mutexReadSerialData = xSemaphoreCreateMutex();
@@ -539,6 +540,7 @@ bool NSPanel::_updateTFTOTA() {
 
       Serial2.flush();
       Serial2.end();
+      Serial2.setTxBufferSize(0);
       Serial2.begin(NSPMConfig::instance->tft_upload_baud, SERIAL_8N1, 17, 16);
     } else {
       LOG_ERROR("Baud rate switch failed. Will restart.");
@@ -651,10 +653,11 @@ bool NSPanel::_updateTFTOTA() {
 
     // Calculate next chunk size
     int next_write_size;
-    if (httpClient.getStreamPtr()->available() > 4096) {
+
+    if (totalTftFileSize - lastReadByte > 4096) {
       next_write_size = 4096;
     } else {
-      next_write_size = httpClient.getStreamPtr()->available();
+      next_write_size = totalTftFileSize - lastReadByte;
     }
 
     // Keep trying to gather data until we have gathered all the bytes for next chunk
@@ -662,13 +665,14 @@ bool NSPanel::_updateTFTOTA() {
     while (bytes_read < next_write_size) {
       size_t data_available = httpClient.getStreamPtr()->available();
       if (!data_available) { // No data avilable from WiFi, wait 20ms and try again
-        vTaskDelay(20);
+        vTaskDelay(20 / portTICK_PERIOD_MS);
         continue;
       }
 
       bytes_read += httpClient.getStreamPtr()->readBytes(&dataBuffer[bytes_read], data_available >= next_write_size - bytes_read ? next_write_size - bytes_read : data_available);
     }
     // Write the chunk to the display
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
     uint16_t bytes_written = 0;
     while (bytes_written < next_write_size) {
       bytes_written += Serial2.write(&dataBuffer[bytes_written], next_write_size - bytes_written);
@@ -701,8 +705,8 @@ bool NSPanel::_updateTFTOTA() {
         nextStartWriteOffset = readNextOffset;
         LOG_INFO("Got 0x08 with offset, jumping to: ", nextStartWriteOffset, " please wait.");
       }
-    } else if (httpClient.getStreamPtr()->available() == 0) {
-      LOG_INFO("TFT Upload complete, wrote ", nextStartWriteOffset, " bytes.");
+    } else if (lastReadByte == totalTftFileSize) {
+      LOG_INFO("TFT Upload complete, processed ", lastReadByte, " bytes.");
       break;
     } else {
       LOG_DEBUG("Got unexpected return data from panel. Received ", recevied_bytes, " bytes: ");

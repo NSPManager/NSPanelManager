@@ -136,12 +136,10 @@ def set_entity_brightness(openhab_item_name: str, openhab_control_mode: str, lig
             ws.send(json.dumps(msg))
         elif openhab_control_mode == "switch":
             # Format OpenHAB state update
-            if new_brightness > 0:
+            if light_level > 0:
                 onoff = "ON"
-                new_brightness = 100
-            if new_brightness <= 0:
+            if light_level <= 0:
                 onoff = "OFF"
-                new_brightness = 0
 
             msg = {
                 "type": "ItemCommandEvent",
@@ -150,7 +148,7 @@ def set_entity_brightness(openhab_item_name: str, openhab_control_mode: str, lig
                 "source": "WebSocketNSPanelManager"
             }
             ws.send(json.dumps(msg))
-            return True
+        return True
     except Exception as e:
         logging.error("Failed to send entity update to OpenHAB.")
         logging.error(e)
