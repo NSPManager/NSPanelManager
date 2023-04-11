@@ -237,9 +237,9 @@ def _update_all_light_states():
                             F"nspanel/entities/light/{light_id}/state_sat", int(float(sat)), retain=True)
                         mqtt_client.publish(
                             F"nspanel/entities/light/{light_id}/state_brightness_pct", brightness, retain=True)
-                        light.color_hue = int(hue)
-                        light.color_saturation = int(sat)
-                        light.light_level = int(brightness)
+                        light.color_hue = int(float(hue))
+                        light.color_saturation = int(float(sat))
+                        light.light_level = int(float(brightness))
                     else:
                         logging.error(
                             "Failed to get item state for OppenHAB item: " + light.openhab_item_color_temp)
