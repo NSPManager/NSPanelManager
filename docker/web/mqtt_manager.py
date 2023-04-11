@@ -81,8 +81,9 @@ def on_message(client, userdata, msg):
                     mqtt_manager_libs.light_states.states[entity_id].set_color_hue(
                         data["hue"])
 
-    except:
+    except Exception as e:
         logging.error("Something went wrong during processing of message:")
+        logging.error(e)
         try:
             logging.error(msg.payload.decode('utf-8'))
         except:
