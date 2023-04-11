@@ -60,13 +60,13 @@ class Light:
             if self.last_command_sent == "color_temp":
                 send_color_temp = self.color_temp
             if mqtt_manager_libs.home_assistant.set_entity_brightness(self.home_assistant_name, light_level, send_color_temp):
-                self.light_level = light_level
+                self.light_level = int(light_level)
         elif self.type == "openhab":
             if mqtt_manager_libs.openhab.set_entity_brightness(self.openhab_item_name, self.openhab_control_mode, light_level):
                 if self.can_color_temperature and self.light_level == 0 and self.last_command_sent == "rgb":
                     mqtt_manager_libs.openhab.set_entity_color_temp(
                         self.openhab_item_color_temp, self.color_temp)
-                self.light_level = light_level
+                self.light_level = int(light_level)
 
     def get_color_temp(self) -> int:
         return self.color_temp
@@ -80,7 +80,7 @@ class Light:
             elif self.type == "openhab":
                 mqtt_manager_libs.openhab.set_entity_color_temp(
                     self.openhab_item_color_temp, color_temp)
-        self.color_temp = color_temp
+        self.color_temp = int(color_temp)
         self.last_command_sent = "color_temp"
 
     def set_color_saturation(self, color_saturation: int):
@@ -90,7 +90,7 @@ class Light:
         elif self.type == "openhab":
             mqtt_manager_libs.openhab.set_entity_color_saturation(
                 self.openhab_item_rgb, self.light_level, color_saturation, self.color_hue)
-        self.color_saturation = color_saturation
+        self.color_saturation = int(color_saturation)
         self.last_command_sent = "rgb"
 
     def set_color_hue(self, color_hue: int):
@@ -100,5 +100,5 @@ class Light:
         elif self.type == "openhab":
             mqtt_manager_libs.openhab.set_entity_color_saturation(
                 self.openhab_item_rgb, self.light_level, self.color_saturation, color_hue)
-        self.color_hue = color_hue
+        self.color_hue = int(color_hue)
         self.last_command_sent = "rgb"
