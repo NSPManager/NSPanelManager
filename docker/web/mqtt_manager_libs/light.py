@@ -78,7 +78,7 @@ class Light:
                 mqtt_manager_libs.home_assistant.set_entity_color_temp(
                     self.home_assistant_name, color_temp)
             elif self.type == "openhab":
-                mqtt_manager_libs.home_assistant.set_entity_color_temp(
+                mqtt_manager_libs.openhab.set_entity_color_temp(
                     self.openhab_item_color_temp, color_temp)
         self.color_temp = color_temp
         self.last_command_sent = "color_temp"
@@ -88,7 +88,7 @@ class Light:
             mqtt_manager_libs.home_assistant.set_entity_color_saturation(
                 self.home_assistant_name, self.light_level, color_saturation, self.color_hue)
         elif self.type == "openhab":
-            mqtt_manager_libs.home_assistant.set_entity_color_saturation(
+            mqtt_manager_libs.openhab.set_entity_color_saturation(
                 self.openhab_item_rgb, self.light_level, color_saturation, self.color_hue)
         self.color_saturation = color_saturation
         self.last_command_sent = "rgb"
@@ -98,7 +98,7 @@ class Light:
             mqtt_manager_libs.home_assistant.set_entity_color_saturation(
                 self.home_assistant_name, self.light_level, self.color_saturation, color_hue)
         elif self.type == "openhab":
-            mqtt_manager_libs.home_assistant.set_entity_color_saturation(
+            mqtt_manager_libs.openhab.set_entity_color_saturation(
                 self.openhab_item_rgb, self.light_level, self.color_saturation, color_hue)
         self.color_hue = color_hue
         self.last_command_sent = "rgb"
