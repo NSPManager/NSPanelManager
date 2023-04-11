@@ -178,7 +178,7 @@ def set_entity_color_saturation(openhab_item_name: str, light_level: int, color_
         msg = {
             "type": "ItemCommandEvent",
             "topic": F"openhab/items/{openhab_item_name}/command",
-            "payload": "{\"type\":\"HSB\",\"value\":\"" + color_hue + "," + color_saturation + "," + light_level + "\"}",
+            "payload": "{\"type\":\"HSB\",\"value\":\"" + str(color_hue) + "," + str(color_saturation) + "," + str(light_level) + "\"}",
             "source": "WebSocketNSPanelManager"
         }
         ws.send(json.dumps(msg))
