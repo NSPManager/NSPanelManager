@@ -11,7 +11,7 @@ function startNSPanelTftUpdate(ip_address) {
 }
 
 function connect_to_websocket() {
-  webSocket = new WebSocket("ws://" + location.hostname + ":8001", "proto1");
+  webSocket = new WebSocket("ws://" + location.hostname + ":8001");
 
   webSocket.onmessage = (event) => {
     console.log("Got message.");

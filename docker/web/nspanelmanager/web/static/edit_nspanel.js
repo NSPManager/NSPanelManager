@@ -1,5 +1,5 @@
 function connect_to_websocket() {
-    webSocket = new WebSocket("ws://" + location.hostname + ":8001", "proto1");
+    webSocket = new WebSocket("ws://" + location.hostname + ":8001");
 
     webSocket.onmessage = (event) => {
         data = JSON.parse(event.data);
