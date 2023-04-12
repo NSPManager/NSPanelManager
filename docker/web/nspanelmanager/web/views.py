@@ -24,6 +24,7 @@ def restart_mqtt_manager():
 
 
 def index(request):
+    print(len(Room.objects.all()))
     return render(request, 'index.html', {'nspanels': NSPanel.objects.all()})
 
 
