@@ -10,6 +10,11 @@ NSPMConfig *NSPMConfig::instance;
 
 bool NSPMConfig::init() {
   NSPMConfig::instance = this;
+  this->manager_port = 8000;
+  this->logging_level = 3;
+  this->mqtt_port = 1883;
+  this->tft_upload_baud = 115200;
+  this->use_new_upload_protocol = true;
   if (LittleFS.begin(false)) {
     Serial.println("LittleFS mounted.");
     return true;
@@ -40,15 +45,15 @@ bool NSPMConfig::loadFromLittleFS() {
   this->wifi_ssid = doc["wifi_ssid"] | "";
   this->wifi_psk = doc["wifi_psk"] | "";
   this->manager_address = doc["manager_address"] | "";
-  this->manager_port = doc["manager_port"] | 8000;
-  this->logging_level = doc["log_level"] | 3; // Set logging to info if no level was read from file.
+  this->manager_port = doc.containsKey("manager_port") ? doc["manager_port"].as<uint16_t>() : 8000;
+  this->logging_level = doc.containsKey("log_level") ? doc["log_level"].as<uint8_t>() : 3; // Set logging to info if no level was read from file.
 
   this->mqtt_server = doc["mqtt_server"] | "";
-  this->mqtt_port = doc["mqtt_port"] | 1883;
+  this->mqtt_port = doc.containsKey("mqtt_port") ? doc["mqtt_port"].as<uint16_t>() : 1883;
   this->mqtt_username = doc["mqtt_username"] | "";
   this->mqtt_password = doc["mqtt_password"] | "";
 
-  this->tft_upload_baud = doc["upload_baud"] | 115200;
+  this->tft_upload_baud = doc.containsKey("mqtt_port") ? doc["upload_baud"].as<uint16_t>() : 115200;
   this->use_new_upload_protocol = doc.containsKey("use_new_upload_protocol") ? doc["use_new_upload_protocol"].as<String>() == "true" : true;
 
   // Load calculated values
