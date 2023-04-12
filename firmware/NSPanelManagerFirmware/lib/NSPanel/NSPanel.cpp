@@ -443,9 +443,13 @@ size_t NSPanel::_downloadTFTChunk(uint8_t *buffer, const char *address, size_t o
   }
 
   size_t sizeReceived = 0;
-  size_t dataAvailable = httpClient.getStreamPtr()->available();
-  if (dataAvailable > 0) {
-    sizeReceived = httpClient.getStreamPtr()->readBytes(buffer, dataAvailable >= size ? size : dataAvailable);
+  while (sizeReceived < size) {
+    if (!httpClient.getStreamPtr()->available()) { // No data avilable from WiFi, wait 20ms and try again
+      vTaskDelay(100 / portTICK_PERIOD_MS);
+      LOG_DEBUG("Still waiting for data.");
+      continue;
+    }
+    sizeReceived += httpClient.getStreamPtr()->readBytes(&buffer[sizeReceived], httpClient.getStreamPtr()->available() >= size - sizeReceived ? size - sizeReceived : httpClient.getStreamPtr()->available());
   }
   httpClient.end();
 
@@ -639,17 +643,17 @@ bool NSPanel::_updateTFTOTA() {
   // Loop until break when all firmware has finished uploading (data available in stream == 0)
   while (true) {
     // Jump to read offset
-    while (lastReadByte < nextStartWriteOffset) {
-      size_t seekLength;
-      if (totalTftFileSize - lastReadByte > 4096) {
-        seekLength = 4096;
-      } else {
-        seekLength = totalTftFileSize - lastReadByte;
-      }
+    // while (lastReadByte < nextStartWriteOffset) {
+    //   size_t seekLength;
+    //   if (totalTftFileSize - lastReadByte > 4096) {
+    //     seekLength = 4096;
+    //   } else {
+    //     seekLength = totalTftFileSize - lastReadByte;
+    //   }
 
-      lastReadByte += httpClient.getStreamPtr()->readBytes(dataBuffer, seekLength);
-      vTaskDelay(20 / portTICK_PERIOD_MS);
-    }
+    //   lastReadByte += httpClient.getStreamPtr()->readBytes(dataBuffer, seekLength);
+    //   vTaskDelay(20 / portTICK_PERIOD_MS);
+    // }
 
     // Calculate next chunk size
     int next_write_size;
@@ -661,18 +665,21 @@ bool NSPanel::_updateTFTOTA() {
     }
 
     // Keep trying to gather data until we have gathered all the bytes for next chunk
-    uint16_t bytes_read = 0;
-    while (bytes_read < next_write_size) {
-      size_t data_available = httpClient.getStreamPtr()->available();
-      if (!data_available) { // No data avilable from WiFi, wait 20ms and try again
-        vTaskDelay(20 / portTICK_PERIOD_MS);
-        continue;
-      }
+    // uint16_t bytes_read = 0;
+    // while (bytes_read < next_write_size) {
+    //   size_t data_available = httpClient.getStreamPtr()->available();
+    //   if (!data_available) { // No data avilable from WiFi, wait 20ms and try again
+    //     vTaskDelay(20 / portTICK_PERIOD_MS);
+    //     continue;
+    //   }
 
-      bytes_read += httpClient.getStreamPtr()->readBytes(&dataBuffer[bytes_read], data_available >= next_write_size - bytes_read ? next_write_size - bytes_read : data_available);
-    }
+    //   bytes_read += httpClient.getStreamPtr()->readBytes(&dataBuffer[bytes_read], data_available >= next_write_size - bytes_read ? next_write_size - bytes_read : data_available);
+    // }
     // Write the chunk to the display
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    size_t bytesReceived = NSPanel::_downloadTFTChunk(dataBuffer, downloadUrl.c_str(), nextStartWriteOffset, next_write_size);
+    LOG_DEBUG("Bytes received: ", bytesReceived, " requested ", next_write_size);
+
+    vTaskDelay(500 / portTICK_PERIOD_MS);
     uint16_t bytes_written = 0;
     while (bytes_written < next_write_size) {
       bytes_written += Serial2.write(&dataBuffer[bytes_written], next_write_size - bytes_written);

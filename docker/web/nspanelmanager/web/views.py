@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, HttpResponse
 from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
 
+from ranged_response import RangedFileResponse
+
 import hashlib
 import psutil
 import subprocess
@@ -306,7 +308,15 @@ def download_data_file(request):
 
 def download_tft(request):
     fs = FileSystemStorage()
-    return HttpResponse(fs.open("gui.tft").read(), content_type="application/octet-stream")
+    if "Range" in request.headers and request.headers["Range"].startswith("bytes="):
+        parts = request.headers["Range"][6:].split('-')
+        range_start = int(parts[0])
+        range_end = int(parts[1])
+        # print(F"Range: {range_start} -> {range_end}")
+        data = fs.open("gui.tft").read()
+        return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
+    else:
+        return HttpResponse(fs.open("gui.tft").read(), content_type="application/octet-stream")
 
 
 def checksum_firmware(request):
