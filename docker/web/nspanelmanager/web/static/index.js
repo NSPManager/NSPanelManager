@@ -14,19 +14,24 @@ function connect_to_websocket() {
   webSocket = new WebSocket("ws://" + location.hostname + ":8001");
 
   webSocket.onmessage = (event) => {
-    console.log("Got message.");
       data = JSON.parse(event.data);
       if(data.type == "status") {
         let mac_selector = data.payload.mac;
         mac_selector = mac_selector.replaceAll(":", "\\:");
-        if(data.payload.state == "online" && $("#online_offline_state_" + mac_selector).text() == "Offline") {
-          $("#online_offline_state_" + mac_selector).text("Online");
-          $("#online_offline_state_" + mac_selector).removeClass("is-danger");
-          $("#online_offline_state_" + mac_selector).addClass("is-success");
-        } else if(data.payload.state == "offline" && $("#online_offline_state_" + mac_selector).text() == "Online") {
-          $("#online_offline_state_" + mac_selector).text("Offline");
-          $("#online_offline_state_" + mac_selector).addClass("is-danger");
-          $("#online_offline_state_" + mac_selector).removeClass("is-success");
+        // if(data.payload.state == "online" && $("#online_offline_state_" + mac_selector).text() == "Offline") {
+          if(data.payload.state == "online") {
+          // $("#online_offline_state_" + mac_selector).text("Online");
+          // $("#online_offline_state_" + mac_selector).removeClass("is-danger");
+          // $("#online_offline_state_" + mac_selector).addClass("is-success");
+          var new_html = '<span class="tag is-success" id="online_offline_state_' + data.payload.mac + '">Online</span>';
+          $("#online_offline_tag_parent_" + mac_selector).html(new_html);
+        // } else if(data.payload.state == "offline" && $("#online_offline_state_" + mac_selector).text() == "Online") {
+        } else if(data.payload.state == "offline") {
+          // $("#online_offline_state_" + mac_selector).text("Offline");
+          // $("#online_offline_state_" + mac_selector).addClass("is-danger");
+          // $("#online_offline_state_" + mac_selector).removeClass("is-success");
+          var new_html = '<span class="tag is-danger" id="online_offline_state_' + data.payload.mac + '">Offline</span>';
+          $("#online_offline_tag_parent_" + mac_selector).html(new_html);
         }
       } else if (data.type == "status_report") {
         let mac_selector = data.payload.mac;
@@ -46,6 +51,31 @@ function connect_to_websocket() {
         }
         $("#wifi_signal_strength_" + mac_selector).attr("class", new_rssi_classes);
         $("#wifi_signal_strength_" + mac_selector).attr("title", data.payload.rssi + " dBm");
+
+        if (data.payload.state == "online") {
+          var new_html = '<span class="tag is-success" id="online_offline_state_' + data.payload.mac + '">Online</span>';
+          $("#online_offline_tag_parent_" + mac_selector).html(new_html);
+        } else if (data.payload.state == "offline") {
+          var new_html = '<span class="tag is-danger" id="online_offline_state_' + data.payload.mac + '">Offline</span>';
+          $("#online_offline_tag_parent_" + mac_selector).html(new_html);
+        } else {
+          // Update panel tag to show update progress if any
+          update_text = ""
+          update_progress = 0
+          if (data.payload.state == "updating_fw") {
+            update_text = "Updating firmware"
+            update_progress = data.payload.progress
+          } else if (data.payload.state == "updating_fs") {
+            update_text = "Updating LittleFS"
+            update_progress = data.payload.progress
+          } else if (data.payload.state == "updating_tft") {
+            update_text = "Updating GUI"
+            update_progress = data.payload.progress
+          }
+
+          var new_html = '<div class="tags has-addons"><span class="tag is-dark">' + update_text + '</span><span class="tag is-info">' + update_progress + '%</span></div>';
+          $("#online_offline_tag_parent_" + mac_selector).html(new_html);
+        }
       }
   }
 

@@ -30,7 +30,7 @@
       <td>
         <a href="http://{{ nspanel.ip_address }}" target="_blank">{{ nspanel.ip_address }}</a>
       </td>
-      <td>
+      <td id="online_offline_tag_parent_{{ nspanel.mac_address }}">
         {% if nspanel.online_state %}
         <span class="tag is-success" id="online_offline_state_{{ nspanel.mac_address }}">Online</span>
         {% else %}

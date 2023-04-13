@@ -16,6 +16,8 @@ WebManager *WebManager::instance;
 void WebManager::init(const char *nspmFirmwareVersion) {
   this->instance = this;
   this->_nspmFirmwareVersion = nspmFirmwareVersion;
+  this->_state = WebManagerState::ONLINE;
+  this->_update_progress = 0;
 
   LOG_TRACE("Setting up web server routes");
   this->_server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) { request->send(LittleFS, "/index.html", String(), false, WebManager::processIndexTemplate); });
@@ -265,6 +267,14 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
   vTaskDelete(NULL); // Task complete. Delete FreeRTOS task
 }
 
+WebManagerState WebManager::getState() {
+  return WebManager::_state;
+}
+
+uint8_t WebManager::getUpdateProgress() {
+  return WebManager::_update_progress;
+}
+
 bool WebManager::_httpGetMD5(const char *path, char *buffer) {
   std::string serverUrl = "http://";
   serverUrl.append(NSPMConfig::instance->manager_address);
@@ -287,6 +297,12 @@ bool WebManager::_httpGetMD5(const char *path, char *buffer) {
 
 bool WebManager::_update(uint8_t type, const char *url) {
   LOG_INFO("Starting ", type == U_FLASH ? "FLASH" : "LittleFS", " OTA update...");
+  WebManager::_update_progress = 0;
+  if (type == U_FLASH) {
+    WebManager::_state = WebManagerState::UPDATING_FIRMWARE;
+  } else {
+    WebManager::_state = WebManagerState::UPDATING_LITTLEFS;
+  }
   WiFiClient client;
   unsigned long contentLength = 0;
   bool isValidContentType = false;
@@ -361,6 +377,7 @@ bool WebManager::_update(uint8_t type, const char *url) {
       }
 
       if (Update.end()) {
+        WebManager::_update_progress = 100;
         LOG_INFO("OTA Successful!");
         if (Update.isFinished()) {
           LOG_WARNING("OTA Done, will reboot!");

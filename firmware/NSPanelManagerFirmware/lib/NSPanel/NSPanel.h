@@ -45,6 +45,8 @@ public:
   void setComponentPic1(const char *componentId, uint8_t value);
   void setComponentForegroundColor(const char *componentId, uint value);
   void setComponentVisible(const char *componentId, bool visible);
+  bool getUpdateState();
+  uint8_t getUpdateProgress();
   int getComponentIntVal(const char *componentId);
   void restart();
 
@@ -88,6 +90,10 @@ private:
   static void _clearSerialBuffer(NSPanelCommand *cmd);
   static void _clearSerialBuffer();
   static inline bool _writeCommandsToSerial;
+  /// @brief Flag indicating wether or not a TFT update is ongoing
+  bool _isUpdating;
+  /// @brief If updating, contains the % done of the update
+  uint8_t _update_progress;
 };
 
 #endif

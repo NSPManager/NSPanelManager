@@ -54,7 +54,6 @@ def on_message(client, userdata, msg):
         elif parts[-1] == "status_report":
             panel = parts[1]
             data = json.loads(msg.payload.decode('utf-8'))
-            data["state"] = "online"
             send_status_report(panel, data)
             ws_data = {
                 "type": "status_report",

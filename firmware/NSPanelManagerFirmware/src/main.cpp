@@ -123,12 +123,52 @@ void taskManageWifiAndMqtt(void *param) {
         LOG_ERROR("No MQTT server configured!");
       }
 
-      if (WiFi.isConnected() && mqttClient.connected() && InterfaceManager::hasRegisteredToManager && lastStatusReport + 30000 <= millis()) {
+      if (WiFi.isConnected() && mqttClient.connected() && NSPanel::instance->getUpdateState()) {
+        DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
+        (*status_report_doc)["rssi"] = WiFi.RSSI();
+        (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
+        (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
+        (*status_report_doc)["state"] = "updating_tft";
+        (*status_report_doc)["progress"] = NSPanel::instance->getUpdateProgress();
+
+        char buffer[512];
+        uint json_length = serializeJson(*status_report_doc, buffer);
+        delete status_report_doc;
+        mqttClient.publish(NSPMConfig::instance->mqtt_panel_status_topic.c_str(), buffer);
+        lastStatusReport = millis();
+      } else if (WiFi.isConnected() && mqttClient.connected() && WebManager::getState() == WebManagerState::UPDATING_FIRMWARE) {
+        DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
+        (*status_report_doc)["rssi"] = WiFi.RSSI();
+        (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
+        (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
+        (*status_report_doc)["state"] = "updating_fw";
+        (*status_report_doc)["progress"] = WebManager::getUpdateProgress();
+
+        char buffer[512];
+        uint json_length = serializeJson(*status_report_doc, buffer);
+        delete status_report_doc;
+        mqttClient.publish(NSPMConfig::instance->mqtt_panel_status_topic.c_str(), buffer);
+        lastStatusReport = millis();
+      } else if (WiFi.isConnected() && mqttClient.connected() && WebManager::getState() == WebManagerState::UPDATING_LITTLEFS) {
+        DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
+        (*status_report_doc)["rssi"] = WiFi.RSSI();
+        (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
+        (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
+        (*status_report_doc)["state"] = "updating_fs";
+        (*status_report_doc)["progress"] = WebManager::getUpdateProgress();
+
+        char buffer[512];
+        uint json_length = serializeJson(*status_report_doc, buffer);
+        delete status_report_doc;
+        mqttClient.publish(NSPMConfig::instance->mqtt_panel_status_topic.c_str(), buffer);
+        lastStatusReport = millis();
+      } else if (WiFi.isConnected() && mqttClient.connected() && InterfaceManager::hasRegisteredToManager && lastStatusReport + 30000 <= millis()) {
         // Report state every 30 seconds
         DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
         (*status_report_doc)["rssi"] = WiFi.RSSI();
         (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
         (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
+        (*status_report_doc)["state"] = "online";
 
         char buffer[512];
         uint json_length = serializeJson(*status_report_doc, buffer);

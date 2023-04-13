@@ -1,59 +1,59 @@
 <nav class="navbar is-black" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-        <a class="navbar-item" href="/">
-            <h1 class="title is-4" style="color: white;">NSPanelManager</h1>
+  <div class="navbar-brand">
+    <a class="navbar-item" href="/">
+      <h1 class="title is-4 has-text-white">NSPanelManager</h1>
+    </a>
+
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbar" class="navbar-menu">
+    <div class="navbar-start">
+      <a class="navbar-item" href="/">
+        NSPanels
+      </a>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link" href="/rooms">
+          Rooms
         </a>
-
-        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-        </a>
-    </div>
-
-    <div id="navbar" class="navbar-menu">
-        <div class="navbar-start">
-            <a class="navbar-item" href="/">
-                NSPanels
-            </a>
-
-            <div class="navbar-item has-dropdown is-hoverable">
-                <a class="navbar-link" href="/rooms">
-                    Rooms
-                </a>
-                <div class="navbar-dropdown">
-                    <a class="navbar-item" href="/rooms">
-                        Rooms
-                    </a>
-                    <a class="navbar-item" href="{% url 'rooms_order' %}">
-                        Change order
-                    </a>
-                    <a class="navbar-item" onclick="$('#modal-new-room').addClass('is-active');">
-                        New room
-                    </a>
-                </div>
-            </div>
-
-            <div class="navbar-item has-dropdown is-hoverable">
-                <a class="navbar-link">
-                    Upload
-                </a>
-                <div class="navbar-dropdown">
-                    <a class="navbar-item" onclick="$('#modal-upload-firmware').addClass('is-active');">
-                        Upload new firmware
-                    </a>
-                    <a class="navbar-item" onclick="$('#modal-upload-data-file').addClass('is-active');">
-                        Upload new data file
-                    </a>
-                    <a class="navbar-item" onclick="$('#modal-upload-tft-file').addClass('is-active');">
-                        Upload new GUI tft file
-                    </a>
-                </div>
-            </div>
-
-            <a class="navbar-item" href="{% url 'settings' %}">
-                Settings
-            </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="/rooms">
+            Rooms
+          </a>
+          <a class="navbar-item" href="{% url 'rooms_order' %}">
+            Change order
+          </a>
+          <a class="navbar-item" onclick="$('#modal-new-room').addClass('is-active');">
+            New room
+          </a>
         </div>
+      </div>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          Upload
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" onclick="$('#modal-upload-firmware').addClass('is-active');">
+            Upload new firmware
+          </a>
+          <a class="navbar-item" onclick="$('#modal-upload-data-file').addClass('is-active');">
+            Upload new data file
+          </a>
+          <a class="navbar-item" onclick="$('#modal-upload-tft-file').addClass('is-active');">
+            Upload new GUI tft file
+          </a>
+        </div>
+      </div>
+
+      <a class="navbar-item" href="{% url 'settings' %}">
+        Settings
+      </a>
     </div>
+  </div>
 </nav>

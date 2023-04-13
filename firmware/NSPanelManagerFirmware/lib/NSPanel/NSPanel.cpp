@@ -140,6 +140,8 @@ void NSPanel::init() {
   NSPanel::instance = this;
   this->_mutexReadSerialData = xSemaphoreCreateMutex();
   this->_writeCommandsToSerial = true;
+  this->_isUpdating = false;
+  this->_update_progress = 0;
 
   LOG_INFO("Init NSPanel.");
   xTaskCreatePinnedToCore(_taskSendCommandQueue, "taskSendCommandQueue", 5000, NULL, 1, &this->_taskHandleSendCommandQueue, CONFIG_ARDUINO_RUNNING_CORE);
@@ -456,6 +458,14 @@ size_t NSPanel::_downloadTFTChunk(uint8_t *buffer, const char *address, size_t o
   return sizeReceived;
 }
 
+bool NSPanel::getUpdateState() {
+  return this->_isUpdating;
+}
+
+uint8_t NSPanel::getUpdateProgress() {
+  return this->_update_progress;
+}
+
 size_t NSPanel::_getTFTFileSize(const char *address) {
   HTTPClient httpClient;
   httpClient.begin(address);
@@ -484,6 +494,8 @@ bool NSPanel::_updateTFTOTA() {
   LOG_INFO("_updateTFTOTA Started.");
 
   NSPanel::instance->_writeCommandsToSerial = false;
+  NSPanel::instance->_update_progress = 0;
+  NSPanel::instance->_isUpdating = true;
 
   // Stop all other tasks using the panel
   if (NSPanel::instance->_taskHandleSendCommandQueue != NULL) {
@@ -686,13 +698,10 @@ bool NSPanel::_updateTFTOTA() {
     }
     nextStartWriteOffset += bytes_written;
     lastReadByte = nextStartWriteOffset;
+    NSPanel::instance->_update_progress = ((float)lastReadByte / (float)totalTftFileSize) * 100;
 
     std::string return_string;
     uint16_t recevied_bytes = NSPanel::instance->_readDataToString(&return_string, 5000, true);
-    LOG_DEBUG("Received ", recevied_bytes, " bytes: ");
-    for (int i = 0; i < recevied_bytes; i++) {
-      LOG_DEBUG("0x", String(return_string[i], HEX).c_str());
-    }
     if (return_string[0] == 0x05) {
       // Old protocol, just upload next chunk.
       LOG_DEBUG("Got 0x05, uploading next chunk.");
@@ -713,6 +722,7 @@ bool NSPanel::_updateTFTOTA() {
         LOG_INFO("Got 0x08 with offset, jumping to: ", nextStartWriteOffset, " please wait.");
       }
     } else if (lastReadByte == totalTftFileSize) {
+      NSPanel::instance->_update_progress = 100;
       LOG_INFO("TFT Upload complete, processed ", lastReadByte, " bytes.");
       break;
     } else {
