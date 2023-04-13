@@ -53,7 +53,7 @@ bool NSPMConfig::loadFromLittleFS() {
   this->mqtt_username = doc["mqtt_username"] | "";
   this->mqtt_password = doc["mqtt_password"] | "";
 
-  this->tft_upload_baud = doc.containsKey("mqtt_port") ? doc["upload_baud"].as<uint16_t>() : 115200;
+  this->tft_upload_baud = doc.containsKey("upload_baud") ? doc["upload_baud"].as<uint32_t>() : 115200;
   this->use_new_upload_protocol = doc.containsKey("use_new_upload_protocol") ? doc["use_new_upload_protocol"].as<String>() == "true" : true;
 
   // Load calculated values
