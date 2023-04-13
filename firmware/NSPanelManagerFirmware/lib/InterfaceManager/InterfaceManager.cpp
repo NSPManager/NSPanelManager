@@ -1064,6 +1064,7 @@ void InterfaceManager::_changeLightsToLevel(std::list<lightConfig *> *lights, ui
   this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
 
   DynamicJsonDocument doc(1024);
+  doc["mac_origin"] = WiFi.macAddress().c_str();
   doc["method"] = "set";
   doc["attribute"] = "brightness";
   doc["brightness"] = level;
@@ -1096,6 +1097,7 @@ void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig *> *lights, u
   }
 
   DynamicJsonDocument doc(1024);
+  doc["mac_origin"] = WiFi.macAddress().c_str();
   doc["method"] = "set";
   doc["attribute"] = "kelvin";
   doc["kelvin"] = sendKelvin;
@@ -1121,6 +1123,7 @@ void InterfaceManager::_changeLightsToColorSaturation(std::list<lightConfig *> *
   this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
 
   DynamicJsonDocument doc(1024);
+  doc["mac_origin"] = WiFi.macAddress().c_str();
   doc["method"] = "set";
   doc["attribute"] = "saturation";
   doc["saturation"] = saturation;
@@ -1146,6 +1149,7 @@ void InterfaceManager::_changeLightsToColorHue(std::list<lightConfig *> *lights,
   this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
 
   DynamicJsonDocument doc(1024);
+  doc["mac_origin"] = WiFi.macAddress().c_str();
   doc["method"] = "set";
   doc["attribute"] = "hue";
   doc["hue"] = hue;

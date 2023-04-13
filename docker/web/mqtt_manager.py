@@ -64,22 +64,32 @@ def on_message(client, userdata, msg):
                 json.dumps(ws_data))
         elif msg.topic == "nspanel/mqttmanager/command":
             data = json.loads(msg.payload.decode('utf-8'))
-            if data["method"] == "set" and data["attribute"] == "brightness":
-                for entity_id in data["entity_ids"]:
-                    mqtt_manager_libs.light_states.states[entity_id].set_light_level(
-                        data["brightness"])
-            elif data["method"] == "set" and data["attribute"] == "kelvin":
-                for entity_id in data["entity_ids"]:
-                    mqtt_manager_libs.light_states.states[entity_id].set_color_temp(
-                        data["kelvin"])
-            elif data["method"] == "set" and data["attribute"] == "saturation":
-                for entity_id in data["entity_ids"]:
-                    mqtt_manager_libs.light_states.states[entity_id].set_color_saturation(
-                        data["saturation"])
-            elif data["method"] == "set" and data["attribute"] == "hue":
-                for entity_id in data["entity_ids"]:
-                    mqtt_manager_libs.light_states.states[entity_id].set_color_hue(
-                        data["hue"])
+            # Verify that the mac_origin is off a panel that is controlled by this instance
+            origin_panel = None
+            for nspanel in settings["nspanels"].values():
+                if nspanel["mac"] == data["mac_origin"]:
+                    origin_panel = nspanel
+                    break
+            if origin_panel:
+                if data["method"] == "set" and data["attribute"] == "brightness":
+                    for entity_id in data["entity_ids"]:
+                        mqtt_manager_libs.light_states.states[entity_id].set_light_level(
+                            data["brightness"])
+                elif data["method"] == "set" and data["attribute"] == "kelvin":
+                    for entity_id in data["entity_ids"]:
+                        mqtt_manager_libs.light_states.states[entity_id].set_color_temp(
+                            data["kelvin"])
+                elif data["method"] == "set" and data["attribute"] == "saturation":
+                    for entity_id in data["entity_ids"]:
+                        mqtt_manager_libs.light_states.states[entity_id].set_color_saturation(
+                            data["saturation"])
+                elif data["method"] == "set" and data["attribute"] == "hue":
+                    for entity_id in data["entity_ids"]:
+                        mqtt_manager_libs.light_states.states[entity_id].set_color_hue(
+                            data["hue"])
+            else:
+                logging.info(
+                    "Received command but from panel not controlled by us: " + data["mac_origin"])
 
     except Exception as e:
         logging.error("Something went wrong during processing of message:")

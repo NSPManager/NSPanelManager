@@ -41,7 +41,6 @@ def get_mqtt_manager_config(request):
         "openhab_rgb_channel_name", "")
 
     return_json["lights"] = {}
-
     for light in Light.objects.all():
         lightConfig = {}
         lightConfig["id"] = light.id
@@ -57,6 +56,15 @@ def get_mqtt_manager_config(request):
         lightConfig["openhab_item_color_temp"] = light.openhab_item_color_temp
         lightConfig["openhab_item_rgb"] = light.openhab_item_rgb
         return_json["lights"][light.id] = lightConfig
+
+    return_json["nspanels"] = {}
+    for panel in NSPanel.objects.all():
+        panel_config = {
+            "id": panel.id,
+            "mac": panel.mac_address,
+            "name": panel.friendly_name
+        }
+        return_json["nspanels"][panel.id] = panel_config
 
     return JsonResponse(return_json)
 
