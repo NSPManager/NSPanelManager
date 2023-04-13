@@ -212,8 +212,9 @@ def reboot_nspanel(request):
 
 @csrf_exempt
 def set_panel_status(request, panel_mac: str):
-    nspanel = NSPanel.objects.get(mac_address=panel_mac)
-    if nspanel:
+    nspanels = NSPanel.objects.filter(mac_address=panel_mac)
+    if nspanels.exists():
+        nspanel = nspanels.first()
         # We got a match
         json_payload = json.loads(request.body.decode('utf-8'))
         nspanel.wifi_rssi = int(json_payload["rssi"])
@@ -226,12 +227,13 @@ def set_panel_status(request, panel_mac: str):
 
 @csrf_exempt
 def set_panel_online_status(request, panel_mac: str):
-    nspanel = NSPanel.objects.get(mac_address=panel_mac)
-    if nspanel:
+    nspanels = NSPanel.objects.filter(mac_address=panel_mac)
+    if nspanels.exists():
+        nspanel = nspanels.first()
         # We got a match
         payload = json.loads(request.body.decode('utf-8'))
         nspanel.online_state = (payload["state"] == "online")
         nspanel.save()
         return HttpResponse("", status=200)
 
-    return HttpResponse("", status=500)
+    return HttpResponse("Panel is not registered", status=500)

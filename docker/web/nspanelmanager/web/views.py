@@ -171,6 +171,11 @@ def add_light_to_room(request, room_id: int):
         if newLight.type == "openhab":
             newLight.openhab_item_rgb = request.POST["openhab_RGB_channel_name"]
 
+    for i in range(1, 13):
+        if not Light.objects.filter(room=room, room_view_position=i).exists():
+            newLight.room_view_position = i
+            break
+
     newLight.save()
     restart_mqtt_manager()
     return redirect('edit_room', room_id=room_id)
