@@ -8,6 +8,8 @@ import mqtt_manager_libs.light_states
 
 openhab_url = ""
 openhab_token = ""
+keepalive_thread = None
+stop_keepalive = False
 settings = {}
 
 
@@ -52,6 +54,25 @@ def connect():
     _update_all_light_states()
 
 
+def _ws_connection_open(ws):
+    global keepalive_thread
+    logging.info("WebSocket connection to OpenHAB opened.")
+    if keepalive_thread == None:
+        keepalive_thread = Thread(target=_send_keepalive, daemon=True)
+        keepalive_thread.start()
+
+
+def _ws_connection_close(ws, close_status_code, close_msg):
+    global keepalive_thread, stop_keepalive
+    if keepalive_thread != None:
+        stop_keepalive = True
+        keepalive_thread.join()
+        logging.info("Keep-alive thread stopped.")
+        stop_keepalive = False
+        keepalive_thread = None
+    logging.error("WebSocket connection closed!")
+
+
 def _do_connection():
     global openhab_url, ws
     ws_url = openhab_url.replace(
@@ -59,14 +80,14 @@ def _do_connection():
     ws_url += "/ws"
     logging.info(F"Connecting to OpenHAB at {ws_url}")
     ws_url += "?accessToken=" + openhab_token
-    ws = websocket.WebSocketApp(F"{ws_url}", on_message=on_message)
-    # Open KeepAlive thread
-    Thread(target=_send_keepalive, daemon=True).start()
-    ws.run_forever()
+    ws = websocket.WebSocketApp(
+        F"{ws_url}", on_message=on_message, on_open=_ws_connection_open, on_close=_ws_connection_close)
+    ws.run_forever(reconnect=5)
 
 
 def _send_keepalive():
-    while True:
+    num_error = 0
+    while True and num_error < 5 and not stop_keepalive:
         if ws:
             keepalive_msg = {
                 "type": "WebSocketEvent",
@@ -76,17 +97,20 @@ def _send_keepalive():
             }
             try:
                 ws.send(json.dumps(keepalive_msg))
+                num_error = 0
             except Exception as e:
+                num_error += 1
                 logging.error(
                     "Error! Failed to send keepalive message to OpenHAB websocket.")
                 logging.error(e)
         sleep(5)
-
-# Got new value from OpenHAB, publish to MQTT
+    logging.error(
+        "More than 5 keep-alive messages have failed. Stopping keep-alive thread.")
 
 
 def send_entity_update(json_msg, item):
     global mqtt_client
+    # Got new value from OpenHAB, publish to MQTT
     # Check if the light is used on any nspanel and if so, send MQTT state update
     try:
         entity_id = json_msg["event"]["data"]["entity_id"]
@@ -99,16 +123,16 @@ def send_entity_update(json_msg, item):
                         new_state["attributes"]["brightness"] / 2.55)
                     mqtt_client.publish(
                         F"nspanel/entities/light/{entity_name}/state_brightness_pct", new_brightness, retain=True)
-                    mqtt_manager_libs.light_states.states[entity_id]["brightness"] = new_brightness
+                    mqtt_manager_libs.light_states.states[entity_id].light_level = new_brightness
                 else:
                     if new_state["state"] == "on":
                         mqtt_client.publish(
                             F"nspanel/entities/light/{entity_name}/state_brightness_pct", 100, retain=True)
-                        mqtt_manager_libs.light_states.states[entity_id]["brightness"] = 100
+                        mqtt_manager_libs.light_states.states[entity_id].light_level = 100
                     else:
                         mqtt_client.publish(
                             F"nspanel/entities/light/{entity_name}/state_brightness_pct", 0, retain=True)
-                        mqtt_manager_libs.light_states.states[entity_id]["brightness"] = 0
+                        mqtt_manager_libs.light_states.states[entity_id].light_level = 0
 
                 if "color_temp" in new_state["attributes"]:
                     # Convert from MiRed from OpenHAB to kelvin values
@@ -116,7 +140,8 @@ def send_entity_update(json_msg, item):
                         1000000 / new_state["attributes"]["color_temp"])
                     mqtt_client.publish(
                         F"nspanel/entities/light/{entity_name}/state_kelvin", color_temp_kelvin, retain=True)
-                    mqtt_manager_libs.light_states.states[entity_id]["color_temp"] = color_temp_kelvin
+                    mqtt_manager_libs.light_states.states[entity_id].color_temp = color_temp_kelvin
+                    mqtt_manager_libs.light_states.states[entity_id].last_command_sent = "color_temp"
     except Exception as e:
         logging.error("Failed to send entity update!")
         logging.error(e)

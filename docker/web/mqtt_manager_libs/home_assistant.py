@@ -95,7 +95,7 @@ def _do_connection():
     ws_url += "/api/websocket"
     logging.info(F"Connecting to Home Assistant at {ws_url}")
     ws = websocket.WebSocketApp(F"{ws_url}", on_message=on_message)
-    ws.run_forever()
+    ws.run_forever(reconnect=5)
 
 
 def authenticate_client():
