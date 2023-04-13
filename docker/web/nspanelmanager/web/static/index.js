@@ -18,18 +18,18 @@ function connect_to_websocket() {
       if(data.type == "status") {
         let mac_selector = data.payload.mac;
         mac_selector = mac_selector.replaceAll(":", "\\:");
-        // if(data.payload.state == "online" && $("#online_offline_state_" + mac_selector).text() == "Offline") {
-          if(data.payload.state == "online") {
-          // $("#online_offline_state_" + mac_selector).text("Online");
-          // $("#online_offline_state_" + mac_selector).removeClass("is-danger");
-          // $("#online_offline_state_" + mac_selector).addClass("is-success");
+
+        if (!$("#online_offline_tag_parent_" + mac_selector).length) {
+          // Got a state update for a panel that does not exist in this page, reload to show it if it has registered
+          setTimeout(function() {
+            location.reload();
+          }, 5000);
+        }
+
+        if(data.payload.state == "online") {
           var new_html = '<span class="tag is-success" id="online_offline_state_' + data.payload.mac + '">Online</span>';
           $("#online_offline_tag_parent_" + mac_selector).html(new_html);
-        // } else if(data.payload.state == "offline" && $("#online_offline_state_" + mac_selector).text() == "Online") {
         } else if(data.payload.state == "offline") {
-          // $("#online_offline_state_" + mac_selector).text("Offline");
-          // $("#online_offline_state_" + mac_selector).addClass("is-danger");
-          // $("#online_offline_state_" + mac_selector).removeClass("is-success");
           var new_html = '<span class="tag is-danger" id="online_offline_state_' + data.payload.mac + '">Offline</span>';
           $("#online_offline_tag_parent_" + mac_selector).html(new_html);
         }
