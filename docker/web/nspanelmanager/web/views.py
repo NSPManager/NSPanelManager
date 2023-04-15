@@ -186,10 +186,11 @@ def add_light_to_room(request, room_id: int):
         newLight.can_rgb = False
         newLight.openhab_item_rgb = ""
 
-    for i in range(1, 13):
-        if not Light.objects.filter(room=room, room_view_position=i).exists():
-            newLight.room_view_position = i
-            break
+    if newLight.room_view_position == 0:
+        for i in range(1, 13):
+            if not Light.objects.filter(room=room, room_view_position=i).exists():
+                newLight.room_view_position = i
+                break
 
     newLight.save()
     restart_mqtt_manager()
