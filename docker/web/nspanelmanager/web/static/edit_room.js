@@ -99,6 +99,7 @@ function add_new_light_show_light_page(light_element) {
     update_displayed_openhab_selectors();
 
     // Finaly show the modal
+    $("#add_save_light_button").text("Add");
     $('#modal-add-light').removeClass("is-active");
     $('#modal-add-light-options').addClass("is-active");
 }
@@ -234,6 +235,7 @@ function edit_light(light_id) {
     update_displayed_openhab_selectors();
 
     // Finaly show the modal
+    $("#add_save_light_button").text("Save");
     $('#modal-add-light').removeClass("is-active");
     $('#modal-add-light-options').addClass("is-active");
   });
