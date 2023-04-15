@@ -50,6 +50,7 @@ def get_mqtt_manager_config(request):
         lightConfig["can_color_temperature"] = light.can_color_temperature
         lightConfig["can_rgb"] = light.can_rgb
         lightConfig["home_assistant_name"] = light.home_assistant_name
+        lightConfig["openhab_name"] = light.openhab_name
         lightConfig["openhab_control_mode"] = light.openhab_control_mode
         lightConfig["openhab_item_switch"] = light.openhab_item_switch
         lightConfig["openhab_item_dimmer"] = light.openhab_item_dimmer
@@ -198,6 +199,26 @@ def get_room_config(request, room_id: int):
         return_json["lights"][light.id]["can_temperature"] = light.can_color_temperature
         return_json["lights"][light.id]["can_rgb"] = light.can_rgb
         return_json["lights"][light.id]["view_position"] = light.room_view_position
+    return JsonResponse(return_json)
+
+
+def get_light_config(request, light_id: int):
+    light = Light.objects.get(id=light_id)
+    return_json = {}
+    return_json["id"] = light.id
+    return_json["name"] = light.friendly_name
+    return_json["type"] = light.type
+    return_json["ceiling"] = light.is_ceiling_light
+    return_json["can_dim"] = light.can_dim
+    return_json["can_color_temperature"] = light.can_color_temperature
+    return_json["can_rgb"] = light.can_rgb
+    return_json["home_assistant_name"] = light.home_assistant_name
+    return_json["openhab_name"] = light.openhab_name
+    return_json["openhab_control_mode"] = light.openhab_control_mode
+    return_json["openhab_item_switch"] = light.openhab_item_switch
+    return_json["openhab_item_dimmer"] = light.openhab_item_dimmer
+    return_json["openhab_item_color_temp"] = light.openhab_item_color_temp
+    return_json["openhab_item_rgb"] = light.openhab_item_rgb
     return JsonResponse(return_json)
 
 

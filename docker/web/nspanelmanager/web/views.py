@@ -142,15 +142,22 @@ def remove_light_from_room(request, room_id: int, light_id: int):
 
 def add_light_to_room(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
-    newLight = Light()
+    if int(request.POST["edit_light_id"]) >= 0:
+        newLight = Light.objects.get(id=int(request.POST["edit_light_id"]))
+    else:
+        newLight = Light()
     newLight.room = room
     newLight.type = request.POST["add_new_light_type"]
     newLight.friendly_name = request.POST["add_new_light_name"]
     if request.POST["light_type"] == "ceiling":
         newLight.is_ceiling_light = True
+    else:
+        newLight.is_ceiling_light = False
 
     if newLight.type == "home_assistant":
         newLight.home_assistant_name = request.POST["home_assistant_name"]
+    elif newLight.type == "openhab":
+        newLight.openhab_name = request.POST["openhab_name"]
 
     if request.POST["light_control_mode"] == "dimmer":
         newLight.can_dim = True
@@ -159,6 +166,7 @@ def add_light_to_room(request, room_id: int):
             newLight.openhab_item_dimmer = request.POST["openhab_dimming_channel_name"]
     else:
         newLight.openhab_control_mode = "switch"
+        newLight.can_dim = False
         if newLight.type == "openhab":
             newLight.openhab_item_switch = request.POST["openhab_switch_channel_name"]
 
@@ -166,10 +174,17 @@ def add_light_to_room(request, room_id: int):
         newLight.can_color_temperature = True
         if newLight.type == "openhab":
             newLight.openhab_item_color_temp = request.POST["openhab_color_temperature_channel_name"]
+    else:
+        newLight.can_color_temperature = False
+        newLight.openhab_item_color_temp = ""
+
     if "rgb" in request.POST:
         newLight.can_rgb = True
         if newLight.type == "openhab":
             newLight.openhab_item_rgb = request.POST["openhab_RGB_channel_name"]
+    else:
+        newLight.can_rgb = False
+        newLight.openhab_item_rgb = ""
 
     for i in range(1, 13):
         if not Light.objects.filter(room=room, room_view_position=i).exists():

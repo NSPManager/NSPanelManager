@@ -57,6 +57,7 @@ class Light(models.Model):
     can_rgb = models.BooleanField(default=False)
     can_color_temperature = models.BooleanField(default=False)
     home_assistant_name = models.CharField(max_length=255, default="")
+    openhab_name = models.CharField(max_length=255, default="")
     openhab_control_mode = models.CharField(max_length=32, default="dimmer")
     openhab_item_switch = models.CharField(max_length=255, default="")
     openhab_item_dimmer = models.CharField(max_length=255, default="")

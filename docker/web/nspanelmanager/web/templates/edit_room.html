@@ -10,255 +10,265 @@
 {% load static %}
 
 <div class="modal" id="modal-add-light">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-        <nav class="panel" style="background-color: white;">
-            <p class="panel-heading">
-                Choose a light
-            </p>
-            <div class="panel-block">
-                <p class="control has-icons-left">
-                    <input class="input" type="text" placeholder="Search" id="add_new_light_search">
-                    <span class="icon is-left">
-                        <i class="fas fa-search" aria-hidden="true"></i>
-                    </span>
-                </p>
-            </div>
-            <p class="panel-tabs" id="add_new_light_tabs">
-                <a class="is-active" id="filter_for_all" onclick="add_new_lights_filter_for_type('all');">All</a>
-                <a id="filter_for_home_assistant" onclick="add_new_lights_filter_for_type('home_assistant');">Home
-                    Assistant</a>
-                <a id="filter_for_openhab" onclick="add_new_lights_filter_for_type('openhab');">OpenHAB</a>
-                <a id="filter_for_manual" onclick="add_new_lights_filter_for_type('manual');">Manual</a>
-            </p>
-            <div id="add_new_light_options">
-            </div>
-            <div id="add_new_light_loader">
-                <center>{% include 'loader.html' %}</center>
-            </div>
-        </nav>
-    </div>
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <nav class="panel" style="background-color: white;">
+      <p class="panel-heading">
+        Choose a light
+      </p>
+      <div class="panel-block">
+        <p class="control has-icons-left">
+          <input class="input" type="text" placeholder="Search" id="add_new_light_search">
+          <span class="icon is-left">
+            <i class="fas fa-search" aria-hidden="true"></i>
+          </span>
+        </p>
+      </div>
+      <p class="panel-tabs" id="add_new_light_tabs">
+        <a class="is-active" id="filter_for_all" onclick="add_new_lights_filter_for_type('all');">All</a>
+        <a id="filter_for_home_assistant" onclick="add_new_lights_filter_for_type('home_assistant');">Home
+          Assistant</a>
+        <a id="filter_for_openhab" onclick="add_new_lights_filter_for_type('openhab');">OpenHAB</a>
+        <a id="filter_for_manual" onclick="add_new_lights_filter_for_type('manual');">Manual</a>
+      </p>
+      <div id="add_new_light_options">
+      </div>
+      <div id="add_new_light_loader">
+        <center>{% include 'loader.html' %}</center>
+      </div>
+    </nav>
+  </div>
 </div>
 
 <form method="POST" action="{% url 'add_new_light' room.id %}">
-    {% csrf_token %}
-    <input class="input" type="hidden" id="add_new_light_type" name="add_new_light_type" readonly>
-    <input class="input" type="hidden" id="home_assistant_name" name="home_assistant_name" readonly>
-    <div class="modal" id="modal-add-light-options">
-        <div class="modal-background"></div>
-        <div class="modal-card">
-            <header class="modal-card-head">
-                <p class="modal-card-title">Add new light to room</p>
-                <button type="button" class="delete" aria-label="close"></button>
-            </header>
-            <section class="modal-card-body">
-                <div class="field">
-                    <label class="label">Name</label>
-                    <div class="control">
-                        <input class="input" type="text" placeholder="Text input" id="add_new_light_name" name="add_new_light_name" required maxlength="15">
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">Type</label>
-                    <div class="control">
-                        <label class="radio">
-                            <input type="radio" name="light_type" value="ceiling" checked>
-                            Ceiling light
-                        </label>
-                        <label class="radio">
-                            <input type="radio" name="light_type" value="table">
-                            Table light
-                        </label>
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">Control mode</label>
-                    <div class="control">
-                        <label class="radio">
-                            <input type="radio" id="light_control_mode_dimmer" name="light_control_mode" value="dimmer" checked>
-                            Dimmable
-                        </label>
-                        <label class="radio">
-                            <input type="radio" id="light_control_mode_switch" name="light_control_mode" value="switch">
-                            Switch
-                        </label>
-                    </div>
-                </div>
-                <div class="control">
-                    <label class="label">Capabilities</label>
-                    <div class="control">
-                        <label class="checkbox">
-                            <input type="checkbox" id="color_temperature" name="color_temperature">
-                            Color temperature
-                        </label>
-                    </div>
-                    <div class="control">
-                        <label class="checkbox">
-                            <input type="checkbox" id="rgb" name="rgb">
-                            RGB
-                        </label>
-                    </div>
-                </div>
-                <div id="openhab_light_options">
-                    <div class="field" id="openhab_switch_channel_selector">
-                        <label class="label">Switch Item name</label>
-                        <div class="control">
-                            <div class="select">
-                                <select id="openhab_switch_channel_name" name="openhab_switch_channel_name"></select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="field" id="openhab_dimming_channel_selector">
-                        <label class="label">Dimming Item name</label>
-                        <div class="control">
-                            <div class="select">
-                                <select id="openhab_dimming_channel_name" name="openhab_dimming_channel_name"></select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="field" id="openhab_color_temp_channel_selector">
-                        <label class="label">Color temperature Item name</label>
-                        <div class="control">
-                            <div class="select">
-                                <select id="openhab_color_temperature_channel_name" name="openhab_color_temperature_channel_name"></select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="field" id="openhab_rgb_channel_selector">
-                        <label class="label">RGB Item name</label>
-                        <div class="control">
-                            <div class="select">
-                                <select id="openhab_RGB_channel_name" name="openhab_RGB_channel_name"></select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <footer class="modal-card-foot">
-                <button type="button" class="button modal-cancel-button">Cancel</button>
-                <button type="submit" class="button is-primary">Add</button>
-            </footer>
+  {% csrf_token %}
+  <input class="input" type="hidden" id="add_new_light_type" name="add_new_light_type">
+  <input class="input" type="hidden" id="home_assistant_name" name="home_assistant_name">
+  <input class="input" type="hidden" id="openhab_name" name="openhab_name">
+  <input class="input" type="hidden" id="edit_light_id" name="edit_light_id" default="-1">
+  <div class="modal" id="modal-add-light-options">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Add new light to room</p>
+        <button type="button" class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+        <div id="edit_light_loader">
+          <center>{% include 'loader.html' %}</center>
         </div>
+        <div id="modal-add-light-options-inputs">
+          <div class="field">
+            <label class="label">Name</label>
+            <div class="control">
+              <input class="input" type="text" placeholder="Text input" id="add_new_light_name"
+                name="add_new_light_name" required maxlength="15">
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Type</label>
+            <div class="control">
+              <label class="radio">
+                <input type="radio" name="light_type" id="light_type_ceiling" value="ceiling" checked>
+                Ceiling light
+              </label>
+              <label class="radio">
+                <input type="radio" name="light_type" id="light_type_table" value="table">
+                Table light
+              </label>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Control mode</label>
+            <div class="control">
+              <label class="radio">
+                <input type="radio" id="light_control_mode_dimmer" name="light_control_mode" value="dimmer" checked>
+                Dimmable
+              </label>
+              <label class="radio">
+                <input type="radio" id="light_control_mode_switch" name="light_control_mode" value="switch">
+                Switch
+              </label>
+            </div>
+          </div>
+          <div class="control">
+            <label class="label">Capabilities</label>
+            <div class="control">
+              <label class="checkbox">
+                <input type="checkbox" id="color_temperature" name="color_temperature">
+                Color temperature
+              </label>
+            </div>
+            <div class="control">
+              <label class="checkbox">
+                <input type="checkbox" id="rgb" name="rgb">
+                RGB
+              </label>
+            </div>
+          </div>
+          <div id="openhab_light_options">
+            <div class="field" id="openhab_switch_channel_selector">
+              <label class="label">Switch Item name</label>
+              <div class="control">
+                <div class="select">
+                  <select id="openhab_switch_channel_name" name="openhab_switch_channel_name"></select>
+                </div>
+              </div>
+            </div>
+            <div class="field" id="openhab_dimming_channel_selector">
+              <label class="label">Dimming Item name</label>
+              <div class="control">
+                <div class="select">
+                  <select id="openhab_dimming_channel_name" name="openhab_dimming_channel_name"></select>
+                </div>
+              </div>
+            </div>
+            <div class="field" id="openhab_color_temp_channel_selector">
+              <label class="label">Color temperature Item name</label>
+              <div class="control">
+                <div class="select">
+                  <select id="openhab_color_temperature_channel_name"
+                    name="openhab_color_temperature_channel_name"></select>
+                </div>
+              </div>
+            </div>
+            <div class="field" id="openhab_rgb_channel_selector">
+              <label class="label">RGB Item name</label>
+              <div class="control">
+                <div class="select">
+                  <select id="openhab_RGB_channel_name" name="openhab_RGB_channel_name"></select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button type="button" class="button modal-cancel-button">Cancel</button>
+        <button type="submit" class="button is-primary">Add</button>
+      </footer>
     </div>
+  </div>
 </form>
 
 <form method="POST" action="{% url 'add_new_light_to_room_view' room.id %}">
-    {% csrf_token %}
-    <input type="hidden" id="add_new_light_to_room_view_position" name="position">
-    <div class="modal" id="modal-add-light-to-room-view">
-        <div class="modal-background"></div>
-        <div class="modal-card">
-            <header class="modal-card-head">
-                <p class="modal-card-title">Select a light</p>
-                <button type="button" class="delete" aria-label="close"></button>
-            </header>
-            <section class="modal-card-body">
-                <div class="field">
-                    <div class="control">
-                        {% if room.light_set.all.count > 0 %}
-                        <div class="select">
-                            <select id="add_new_light_to_position_select" name="light_id">
-                                {% for light in room.light_set.all %}
-                                {% if light.room_view_position == 0 %}
-                                    <option value="{{ light.id }}">{{ light.friendly_name }}</option>
-                                {% endif %}
-                                {% endfor %}
-                            </select>
-                        </div>
-                        {% else %}
-                            No lights avaiable. Add lights to room.
-                        {% endif %}
-                    </div>
-                </div>
-            </section>
-            <footer class="modal-card-foot">
-                <button type="submit" class="button is-success">Save changes</button>
-                <button type="submit" class="button is-warning" formaction="{% url 'remove_light_from_room_view' room.id %}">Clear</button>
-                <button type="button" class="button modal-cancel-button">Cancel</button>
-            </footer>
+  {% csrf_token %}
+  <input type="hidden" id="add_new_light_to_room_view_position" name="position">
+  <div class="modal" id="modal-add-light-to-room-view">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Select a light</p>
+        <button type="button" class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <div class="control">
+            {% if room.light_set.all.count > 0 %}
+            <div class="select">
+              <select id="add_new_light_to_position_select" name="light_id">
+                {% for light in room.light_set.all %}
+                {% if light.room_view_position == 0 %}
+                <option value="{{ light.id }}">{{ light.friendly_name }}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+            {% else %}
+            No lights avaiable. Add lights to room.
+            {% endif %}
+          </div>
         </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button type="submit" class="button is-success">Save changes</button>
+        <button type="submit" class="button is-warning"
+          formaction="{% url 'remove_light_from_room_view' room.id %}">Clear</button>
+        <button type="button" class="button modal-cancel-button">Cancel</button>
+      </footer>
     </div>
+  </div>
 </form>
 
 <form method="POST" action="{% url 'save_new_room' %}">
-    {% csrf_token %}
-    
+  {% csrf_token %}
+
 </form>
 <div class="block">
-    <h2 class="title is-4">Room settings</h2>
-    <form method="POST" action="{% url 'update_room_form' room_id=room.id %}">
-        {% csrf_token %}
-        <div class="field">
-            <label class="label">Friendly name</label>
-            <div class="control">
-                <input class="input" type="text" name="friendly_name" value="{{ room.friendly_name }}">
-            </div>
-        </div>
-        <button class="button is-primary">Save</button>
-        <a href="{% url 'delete_room' room_id=room.id %}" class="button is-danger">Delete</a>
-    </form>
+  <h2 class="title is-4">Room settings</h2>
+  <form method="POST" action="{% url 'update_room_form' room_id=room.id %}">
+    {% csrf_token %}
+    <div class="field">
+      <label class="label">Friendly name</label>
+      <div class="control">
+        <input class="input" type="text" name="friendly_name" value="{{ room.friendly_name }}">
+      </div>
+    </div>
+    <button class="button is-primary">Save</button>
+    <a href="{% url 'delete_room' room_id=room.id %}" class="button is-danger">Delete</a>
+  </form>
 </div>
 <hr>
 <div class="block">
-    <h2 class="title is-4">Lights in room</h2>
-    <button type="button" class="button is-primary" onclick="add_new_light();">Add new light</button>
-    <table class="table is-fullwidth is-hoverable">
-        <thead>
-            <tr>
-                <th>Light</th>
-                <th>Source</th>
-                <th>Type</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for light in room.light_set.all %}
-            <tr>
-                <th>{{ light.friendly_name }}</th>
-                <td>
-                    {% if light.type == "home_assistant" %}
-                    <span class="tag is-info">Home Assistant</span>
-                    {% elif light.type == "openhab" %}
-                    <span class="tag is-warning">OpenHAB</span>
-                    {% elif light.type == "manual" %}
-                    <span class="tag is-black">Manual</span>
-                    {% else %}
-                    <span class="tag is-danger">Unknown: {{ light.type }}</span>
-                    {% endif %}
-                </td>
-                {% if light.is_ceiling_light %}
-                <td>Ceiling</td>
-                {% else %}
-                <td>Table</td>
-                {% endif %}
-                <td>
-                    <a href='{% url "remove_light_from_room" room.id light.id %}'
-                        class="button is-small is-danger">Remove</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <h2 class="title is-4">Lights in room</h2>
+  <button type="button" class="button is-primary" onclick="add_new_light();">Add new light</button>
+  <table class="table is-fullwidth is-hoverable">
+    <thead>
+      <tr>
+        <th>Light</th>
+        <th>Source</th>
+        <th>Type</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for light in room.light_set.all %}
+      <tr>
+        <th>{{ light.friendly_name }}</th>
+        <td>
+          {% if light.type == "home_assistant" %}
+          <span class="tag is-info">Home Assistant</span>
+          {% elif light.type == "openhab" %}
+          <span class="tag is-warning">OpenHAB</span>
+          {% elif light.type == "manual" %}
+          <span class="tag is-black">Manual</span>
+          {% else %}
+          <span class="tag is-danger">Unknown: {{ light.type }}</span>
+          {% endif %}
+        </td>
+        {% if light.is_ceiling_light %}
+        <td>Ceiling</td>
+        {% else %}
+        <td>Table</td>
+        {% endif %}
+        <td>
+          <button onclick="edit_light({{ light.id }});" class=" button is-small is-primary">Edit</button>
+          <a href='{% url "remove_light_from_room" room.id light.id %}' class="button is-small is-danger">Remove</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 <hr>
 <div class="block">
-    <h2 class="title is-4">Individual light control</h2>
-    <h2 class="subtitle is-6">Click on each "button" to select the light/switch controlled by it.</h2>
-    <div class="nspanel_view" id="nspanel_room_view">
-        <div id="room_name">{{ room.friendly_name }}</div>
-        <span class="light_r1" id="light1" onclick="add_new_light_to_room_view(1);">{{ light1.friendly_name }}</span>
-        <span class="light_r1" id="light2" onclick="add_new_light_to_room_view(2);">{{ light2.friendly_name }}</span>
-        <span class="light_r1" id="light3" onclick="add_new_light_to_room_view(3);">{{ light3.friendly_name }}</span>
-        <span class="light_r1" id="light4" onclick="add_new_light_to_room_view(4);">{{ light4.friendly_name }}</span>
-        <span class="light_r1" id="light5" onclick="add_new_light_to_room_view(5);">{{ light5.friendly_name }}</span>
-        <span class="light_r1" id="light6" onclick="add_new_light_to_room_view(6);">{{ light6.friendly_name }}</span>
+  <h2 class="title is-4">Individual light control</h2>
+  <h2 class="subtitle is-6">Click on each "button" to select the light/switch controlled by it.</h2>
+  <div class="nspanel_view" id="nspanel_room_view">
+    <div id="room_name">{{ room.friendly_name }}</div>
+    <span class="light_r1" id="light1" onclick="add_new_light_to_room_view(1);">{{ light1.friendly_name }}</span>
+    <span class="light_r1" id="light2" onclick="add_new_light_to_room_view(2);">{{ light2.friendly_name }}</span>
+    <span class="light_r1" id="light3" onclick="add_new_light_to_room_view(3);">{{ light3.friendly_name }}</span>
+    <span class="light_r1" id="light4" onclick="add_new_light_to_room_view(4);">{{ light4.friendly_name }}</span>
+    <span class="light_r1" id="light5" onclick="add_new_light_to_room_view(5);">{{ light5.friendly_name }}</span>
+    <span class="light_r1" id="light6" onclick="add_new_light_to_room_view(6);">{{ light6.friendly_name }}</span>
 
-        <span class="light_r2" id="light7" onclick="add_new_light_to_room_view(7);">{{ light7.friendly_name }}</span>
-        <span class="light_r2" id="light8" onclick="add_new_light_to_room_view(8);">{{ light8.friendly_name }}</span>
-        <span class="light_r2" id="light9" onclick="add_new_light_to_room_view(9);">{{ light9.friendly_name }}</span>
-        <span class="light_r2" id="light10" onclick="add_new_light_to_room_view(10);"">{{ light10.friendly_name }}</span>
-        <span class="light_r2" id="light11" onclick="add_new_light_to_room_view(11);"">{{ light11.friendly_name }}</span>
-        <span class="light_r2" id="light12" onclick="add_new_light_to_room_view(12);"">{{ light12.friendly_name }}</span>
+    <span class="light_r2" id="light7" onclick="add_new_light_to_room_view(7);">{{ light7.friendly_name }}</span>
+    <span class="light_r2" id="light8" onclick="add_new_light_to_room_view(8);">{{ light8.friendly_name }}</span>
+    <span class="light_r2" id="light9" onclick="add_new_light_to_room_view(9);">{{ light9.friendly_name }}</span>
+    <span class="light_r2" id="light10" onclick="add_new_light_to_room_view(10);"">{{ light10.friendly_name }}</span>
+        <span class=" light_r2" id="light11" onclick="add_new_light_to_room_view(11);"">{{ light11.friendly_name }}</span>
+        <span class=" light_r2" id="light12" onclick="add_new_light_to_room_view(12);"">{{ light12.friendly_name }}</span>
     </div>
 </div>
 {% endblock %}

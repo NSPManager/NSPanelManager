@@ -84,8 +84,12 @@ function add_new_light_show_light_page(light_element) {
         $("#openhab_light_options").hide();
     }
 
+    $("#edit_light_loader").hide();
+    $("#modal-add-light-options-inputs").show();
+    $("#edit_light_id").val("-1"); // Set text field
     $("#add_new_light_name").val($(this).text()); // Set text field
     $("#home_assistant_name").val($(this).text()); // Set text field
+    $("#openhab_name").val($(this).text()); // Set text field
     $("#add_new_light_type").val($(this).data("type")); // Set the correct type
 
     $("#light_control_mode_dimmer").click(update_displayed_openhab_selectors);
@@ -152,11 +156,89 @@ function add_new_light() {
     $('#add_new_light_search').select();
 }
 
-$(document).ready(function () {
-    $("#add_new_light_search").keyup(add_new_lights_filter);
-});
-
 function add_new_light_to_room_view(position_id) {
     $("#add_new_light_to_room_view_position").val(position_id);
     $("#modal-add-light-to-room-view").addClass("is-active");
 }
+
+function edit_light(light_id) {
+  console.log("Edit light: " + light_id);
+  $("#edit_light_loader").show();
+  $("#modal-add-light-options-inputs").hide();
+  $("#modal-add-light-options").addClass("is-active");
+
+  $.get("/api/get_light_config/" + light_id, function(result) {
+    if (result.type == "openhab") {
+        $("#openhab_light_options").show();
+
+        // Clear any previous options selected
+        $('#openhab_dimming_channel_name').find("option").remove();
+        $('#openhab_switch_channel_name').find("option").remove();
+        $('#openhab_color_temperature_channel_name').find("option").remove();
+        $('#openhab_RGB_channel_name').find("option").remove();
+
+        $.get("/api/get_all_available_lights", function (data) {   
+          
+          data.openhab_lights.forEach(function(light) {
+            if (light.label == result.openhab_name) {
+              light.items.forEach(item => {
+                // Populate new options selected
+                $('#openhab_dimming_channel_name').append($('<option>', {
+                    value: item,
+                    text: item
+                }));
+                $('#openhab_switch_channel_name').append($('<option>', {
+                  value: item,
+                  text: item
+                }));
+                $('#openhab_color_temperature_channel_name').append($('<option>', {
+                  value: item,
+                  text: item
+                }));
+                $('#openhab_RGB_channel_name').append($('<option>', {
+                  value: item,
+                  text: item
+                }));
+                $('#openhab_dimming_channel_name').val(result.openhab_item_dimmer).change();
+                $('#openhab_switch_channel_name').val(result.openhab_item_switch).change();
+                $('#openhab_color_temperature_channel_name').val(result.openhab_item_color_temp).change();
+                $('#openhab_RGB_channel_name').val(result.openhab_item_rgb).change();
+            });
+            }
+          });
+        });
+    } else {
+        $("#openhab_light_options").hide();
+    }
+
+    $("#edit_light_loader").hide();
+    $("#modal-add-light-options-inputs").show();
+    $("#edit_light_id").val(result.id); // Set text field
+    $("#add_new_light_name").val(result.name); // Set text field
+    $("#home_assistant_name").val(result.home_assistant_name); // Set text field
+    $("#openhab_name").val(result.openhab_name); // Set text field
+    $("#add_new_light_type").val(result.type); // Set the correct type
+
+    $("#light_control_mode_dimmer").prop("checked", result.can_dim);
+    $("#light_control_mode_switch").prop("checked", !result.can_dim);
+    $("#color_temperature").prop("checked", result.can_color_temperature);
+    $("#rgb").prop("checked", result.can_rgb);
+
+    $("#light_type_ceiling").prop("checked", result.ceiling);
+    $("#light_type_table").prop("checked", !result.ceiling);
+
+    $("#light_control_mode_dimmer").click(update_displayed_openhab_selectors);
+    $("#light_control_mode_switch").click(update_displayed_openhab_selectors);
+    $("#color_temperature").click(update_displayed_openhab_selectors);
+    $("#rgb").click(update_displayed_openhab_selectors);
+    update_displayed_openhab_selectors();
+
+    // Finaly show the modal
+    $('#modal-add-light').removeClass("is-active");
+    $('#modal-add-light-options').addClass("is-active");
+  });
+}
+
+$(document).ready(function () {
+  $("#add_new_light_search").keyup(add_new_lights_filter);
+});
