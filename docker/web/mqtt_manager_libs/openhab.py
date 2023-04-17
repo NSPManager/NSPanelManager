@@ -47,8 +47,12 @@ def on_message(ws, message):
                             F"nspanel/entities/light/{light.id}/state_brightness_pct", 0, retain=True)
                         break
                 elif item == light.openhab_item_color_temp:
+                    received_color_temp_percent = 100 - int(float(payload["value"]))
+                    # logging.debug(F"Recevied color temp from OpenHAB: {received_color_temp_percent}%")
+                    kelvin_max_floored = settings["color_temp_max"] - settings["color_temp_min"]
+                    send_color_temp = settings["color_temp_min"] + int((received_color_temp_percent / 100) * kelvin_max_floored)
                     mqtt_client.publish(
-                        F"nspanel/entities/light/{light.id}/state_kelvin", int(float(payload["value"])), retain=True)
+                        F"nspanel/entities/light/{light.id}/state_kelvin", send_color_temp, retain=True)
                     break
 
 
@@ -186,11 +190,19 @@ def set_entity_brightness(openhab_item_name: str, openhab_control_mode: str, lig
 
 def set_entity_color_temp(openhab_item_name: str, color_temp: int) -> bool:
     try:
+        # Convert kelvin to %
+        kelvin_max_floored = settings["color_temp_max"] - settings["color_temp_min"]
+        color_temp_floored = color_temp - settings["color_temp_min"]
+        send_color_temp = 100 - int((color_temp_floored / kelvin_max_floored) * 100)
+        if send_color_temp < 0:
+            send_color_temp = 0
+        elif send_color_temp > 100:
+            send_color_temp = 100
         # Format OpenHAB state update
         msg = {
             "type": "ItemCommandEvent",
             "topic": F"openhab/items/{openhab_item_name}/command",
-            "payload": "{\"type\":\"Decimal\",\"value\":\"" + str(color_temp) + "\"}",
+            "payload": "{\"type\":\"Percent\",\"value\":\"" + str(send_color_temp) + "\"}",
             "source": "WebSocketNSPanelManager"
         }
         ws.send(json.dumps(msg))

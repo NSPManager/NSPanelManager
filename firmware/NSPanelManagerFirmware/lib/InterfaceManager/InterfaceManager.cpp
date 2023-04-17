@@ -1176,6 +1176,7 @@ void InterfaceManager::_updatePanelLightStatus() {
   uint totalKelvinLightsCeiling = 0;
   uint16_t totalKelvinValueCeilingLights = 0;
 
+  // Calculate average for ceiling lights
   if (this->_currentEditMode == editLightMode::all_lights || this->_currentEditMode == editLightMode::ceiling_lights) {
     if (this->_currentRoomMode == roomMode::room) {
       for (lightConfig &light : this->config.currentRoom->ceilingLights) {
@@ -1207,6 +1208,7 @@ void InterfaceManager::_updatePanelLightStatus() {
   HomePage::setCeilingLightsState(averageCeilingBrightness > 0);
   HomePage::setCeilingBrightnessLabelText(averageCeilingBrightness);
 
+  // Calculate average for table lights
   totalBrightness = 0;
   totalBrightnessLights = 0;
   uint8_t totalKelvinLightsTable = 0;
@@ -1214,20 +1216,24 @@ void InterfaceManager::_updatePanelLightStatus() {
   if (this->_currentEditMode == editLightMode::all_lights || this->_currentEditMode == editLightMode::table_lights) {
     if (this->_currentRoomMode == roomMode::room) {
       for (lightConfig &light : this->config.currentRoom->tableLights) {
-        totalBrightnessLights++;
-        totalBrightness += light.level;
-        if (light.canTemperature) {
-          totalKelvinLightsTable++;
-          totalKelvinValueTableLights += light.colorTemperature;
+        if (light.level > 0) {
+          totalBrightnessLights++;
+          totalBrightness += light.level;
+          if (light.canTemperature) {
+            totalKelvinLightsTable++;
+            totalKelvinValueTableLights += light.colorTemperature;
+          }
         }
       }
     } else if (this->_currentRoomMode == roomMode::house) {
       for (lightConfig *light : this->config.getAllTableLights()) {
-        totalBrightnessLights++;
-        totalBrightness += light->level;
-        if (light->canTemperature) {
-          totalKelvinLightsTable++;
-          totalKelvinValueTableLights += light->colorTemperature;
+        if (light->level > 0) {
+          totalBrightnessLights++;
+          totalBrightness += light->level;
+          if (light->canTemperature) {
+            totalKelvinLightsTable++;
+            totalKelvinValueTableLights += light->colorTemperature;
+          }
         }
       }
     }
@@ -1265,8 +1271,8 @@ void InterfaceManager::_updatePanelLightStatus() {
   } else {
     totalAverageKelvin = 0;
   }
-  // Only set a new value if it is not the same as already set.
-  if (totalAverageKelvin != HomePage::getColorTempValue()) {
+  // Only set a new value if it is not the same as already set and a new value was discovered (ie, > 0).
+  if (totalAverageKelvin > 0 and totalAverageKelvin != HomePage::getColorTempValue()) {
     HomePage::setColorTempValue(totalAverageKelvin);
   }
 }
