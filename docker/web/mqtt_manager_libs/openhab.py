@@ -28,24 +28,28 @@ def init(settings_from_manager, mqtt_client_from_manager):
 def on_message(ws, message):
     json_msg = json.loads(message)
     if json_msg["type"] == "ItemStateEvent":
+        topic_parts = json_msg["topic"].split("/")
+        item = topic_parts[2]
+        payload = json.loads(json_msg["payload"])
         for light in mqtt_manager_libs.light_states.states.values():
             if light.type == "openhab":
-                topic_parts = json_msg["topic"].split("/")
-                item = topic_parts[2]
-                payload = json.loads(json_msg["payload"])
                 if light.openhab_control_mode == "dimmer" and item == light.openhab_item_name:
                     mqtt_client.publish(
                         F"nspanel/entities/light/{light.id}/state_brightness_pct", int(float(payload["value"])), retain=True)
+                    break
                 elif light.openhab_control_mode == "switch" and item == light.openhab_item_name:
                     if payload["value"] == "ON":
                         mqtt_client.publish(
                             F"nspanel/entities/light/{light.id}/state_brightness_pct", 100, retain=True)
+                        break
                     else:
                         mqtt_client.publish(
                             F"nspanel/entities/light/{light.id}/state_brightness_pct", 0, retain=True)
-                elif item == light["openhab_item_color_temp"]:
+                        break
+                elif item == light.openhab_item_color_temp:
                     mqtt_client.publish(
                         F"nspanel/entities/light/{light.id}/state_kelvin", int(float(payload["value"])), retain=True)
+                    break
 
 
 def connect():

@@ -5,8 +5,23 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import requests
 
+import hashlib
+import psutil
+import subprocess
+
 from .models import NSPanel, Room, Light
 from web.settings_helper import get_setting_with_default
+
+
+def restart_mqtt_manager():
+    for proc in psutil.process_iter():
+        if "./mqtt_manager.py" in proc.cmdline():
+            print("Killing existing mqtt_manager")
+            proc.kill()
+    # Restart the process
+    print("Starting a new mqtt_manager")
+    subprocess.Popen(
+        ["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
 
 
 def get_mqtt_manager_config(request):
@@ -162,6 +177,7 @@ def register_nspanel(request):
 
     # Save the update/Create new panel
     new_panel.save()
+    restart_mqtt_manager()
     return HttpResponse('OK', status=200)
 
 
