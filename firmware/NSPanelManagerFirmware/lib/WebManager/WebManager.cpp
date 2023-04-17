@@ -256,13 +256,10 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
     }
   }
 
-  if (hasAnythingUpdated) {
-    LOG_INFO("OTA Done, will reboot.");
-    NSPMConfig::instance->saveToLittleFS();
-    ESP.restart();
-  } else {
-    LOG_INFO("No OTA was performed, will not reboot.");
-  }
+  LOG_INFO("Will restart in 5 seconds.");
+  vTaskDelay(5000 / portTICK_PERIOD_MS);
+  NSPMConfig::instance->saveToLittleFS();
+  ESP.restart();
 
   vTaskDelete(NULL); // Task complete. Delete FreeRTOS task
 }
