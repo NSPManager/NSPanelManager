@@ -63,8 +63,6 @@ private:
   /// @param offset Offset to request data from (bytes)
   /// @param size Maximum download chunk size
   /// @return The number of bytes downloaded
-  static size_t _downloadTFTChunk(uint8_t *buffer, const char *address, size_t offset, size_t size);
-  static size_t _getTFTFileSize(const char *address);
   static bool _updateTFTOTA();
   std::queue<std::vector<char>> _processQueue;
   TaskHandle_t _taskHandleProcessPanelOutput;

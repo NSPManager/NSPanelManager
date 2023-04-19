@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <HTTPClient.h>
+#include <HttpLib.h>
 #include <MqttLog.h>
 #include <NSPanel.h>
 #include <NSPanelReturnData.h>
@@ -426,68 +427,12 @@ void NSPanel::_taskUpdateTFTConfigOTA(void *param) {
   vTaskDelete(NULL);
 }
 
-size_t NSPanel::_downloadTFTChunk(uint8_t *buffer, const char *address, size_t offset, size_t size) {
-  HTTPClient httpClient;
-  httpClient.begin(address);
-
-  std::string rangeHeader = "bytes=";
-  rangeHeader.append(std::to_string(offset));
-  rangeHeader.append("-");
-  rangeHeader.append(std::to_string(offset + size));
-  httpClient.addHeader("Range", rangeHeader.c_str());
-
-  int httpReturnCode = httpClient.GET();
-  // LOG_TRACE("Downloading TFT ", rangeHeader.c_str(), " got return code: ", httpReturnCode);
-  if (httpReturnCode != 200 && httpReturnCode != 206) {
-    httpClient.end();
-    LOG_ERROR("Failed to retrive firmware, got return code: ", httpReturnCode);
-    return 0;
-  }
-
-  size_t sizeReceived = 0;
-  while (sizeReceived < size) {
-    if (!httpClient.getStreamPtr()->available()) { // No data avilable from WiFi, wait 20ms and try again
-      vTaskDelay(100 / portTICK_PERIOD_MS);
-      LOG_DEBUG("Still waiting for data.");
-      continue;
-    }
-    sizeReceived += httpClient.getStreamPtr()->readBytes(&buffer[sizeReceived], httpClient.getStreamPtr()->available() >= size - sizeReceived ? size - sizeReceived : httpClient.getStreamPtr()->available());
-  }
-  httpClient.end();
-
-  return sizeReceived;
-}
-
 bool NSPanel::getUpdateState() {
   return this->_isUpdating;
 }
 
 uint8_t NSPanel::getUpdateProgress() {
   return this->_update_progress;
-}
-
-size_t NSPanel::_getTFTFileSize(const char *address) {
-  HTTPClient httpClient;
-  httpClient.begin(address);
-  const char *header_names[] = {"Content-Length"};
-  httpClient.collectHeaders(header_names, 1);
-  httpClient.addHeader("Range", "bytes=0-255");
-  int httpReturnCode = httpClient.GET();
-
-  if (httpReturnCode != 200) {
-    LOG_ERROR("Failed to retrive firmware, got return code: ", httpReturnCode);
-    return 0;
-  }
-
-  try {
-    size_t content_length = httpClient.header("Content-Length").toInt();
-    httpClient.end();
-    return content_length;
-  } catch (...) {
-    LOG_ERROR("Something went wrong when checking TFT file size.");
-  }
-  httpClient.end();
-  return 0;
 }
 
 bool NSPanel::_updateTFTOTA() {
@@ -516,20 +461,9 @@ bool NSPanel::_updateTFTOTA() {
 
   LOG_INFO("Will download TFT file from: ", downloadUrl.c_str());
 
-  HTTPClient httpClient;
-  if (!httpClient.begin(downloadUrl.c_str())) {
-    LOG_ERROR("Failed to create httpClient object with .begin.");
-    return false;
-  }
-  const char *header_names[] = {"Content-Length"};
-  httpClient.collectHeaders(header_names, 1);
-  httpClient.setTimeout(20);
-  int httpReturnCode = httpClient.GET();
-
-  if (httpReturnCode != 200) {
-    LOG_ERROR("Failed get TFT-file from server. Got HTTP return code: ", httpReturnCode);
-    httpClient.end();
-    return false;
+  size_t totalTftFileSize = 0;
+  while (totalTftFileSize == 0) {
+    totalTftFileSize = HttpLib::GetFileSize(downloadUrl.c_str());
   }
 
   // Change baud rate if needed
@@ -593,13 +527,6 @@ bool NSPanel::_updateTFTOTA() {
     LOG_DEBUG("Got comok: ", comok_string.c_str());
   }
 
-  // Get size of TFT file
-  size_t totalTftFileSize = httpClient.header("Content-Length").toInt();
-  while (totalTftFileSize == 0) {
-    LOG_ERROR("Failed to get content length for TFT-file.");
-    return false;
-  }
-
   LOG_DEBUG("Will start TFT upload, TFT file size: ", totalTftFileSize);
   // TODO: Detect if new protocol is not supported, in that case set flag in flash and restart and then continue flash with legacy mode.
   // Send whmi-wri command to initiate upload
@@ -654,18 +581,6 @@ bool NSPanel::_updateTFTOTA() {
 
   // Loop until break when all firmware has finished uploading (data available in stream == 0)
   while (true) {
-    // Jump to read offset
-    // while (lastReadByte < nextStartWriteOffset) {
-    //   size_t seekLength;
-    //   if (totalTftFileSize - lastReadByte > 4096) {
-    //     seekLength = 4096;
-    //   } else {
-    //     seekLength = totalTftFileSize - lastReadByte;
-    //   }
-
-    //   lastReadByte += httpClient.getStreamPtr()->readBytes(dataBuffer, seekLength);
-    //   vTaskDelay(20 / portTICK_PERIOD_MS);
-    // }
 
     // Calculate next chunk size
     int next_write_size;
@@ -676,19 +591,8 @@ bool NSPanel::_updateTFTOTA() {
       next_write_size = totalTftFileSize - lastReadByte;
     }
 
-    // Keep trying to gather data until we have gathered all the bytes for next chunk
-    // uint16_t bytes_read = 0;
-    // while (bytes_read < next_write_size) {
-    //   size_t data_available = httpClient.getStreamPtr()->available();
-    //   if (!data_available) { // No data avilable from WiFi, wait 20ms and try again
-    //     vTaskDelay(20 / portTICK_PERIOD_MS);
-    //     continue;
-    //   }
-
-    //   bytes_read += httpClient.getStreamPtr()->readBytes(&dataBuffer[bytes_read], data_available >= next_write_size - bytes_read ? next_write_size - bytes_read : data_available);
-    // }
     // Write the chunk to the display
-    size_t bytesReceived = NSPanel::_downloadTFTChunk(dataBuffer, downloadUrl.c_str(), nextStartWriteOffset, next_write_size);
+    size_t bytesReceived = HttpLib::DownloadChunk(dataBuffer, downloadUrl.c_str(), nextStartWriteOffset, next_write_size);
     LOG_DEBUG("Bytes received: ", bytesReceived, " requested ", next_write_size);
 
     vTaskDelay(500 / portTICK_PERIOD_MS);

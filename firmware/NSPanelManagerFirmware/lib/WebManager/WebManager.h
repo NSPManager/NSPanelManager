@@ -34,7 +34,6 @@ public:
 private:
   AsyncWebServer _server = AsyncWebServer(80);
   static bool _update(uint8_t type, const char *url);
-  static bool _httpGetMD5(const char *path, char *buffer);
   static void _taskPerformOTAUpdate(void *param);
   std::string _nspmFirmwareVersion;
   /// @brief Contains the current state of actions.
