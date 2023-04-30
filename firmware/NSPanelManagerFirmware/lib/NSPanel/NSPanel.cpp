@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <HTTPClient.h>
-#include <HttpLib.h>
-#include <MqttLog.h>
-#include <NSPanel.h>
+#include <HttpLib.hpp>
+#include <MqttLog.hpp>
+#include <NSPanel.hpp>
 #include <NSPanelReturnData.h>
 #include <WiFiClient.h>
 #include <esp_task_wdt.h>

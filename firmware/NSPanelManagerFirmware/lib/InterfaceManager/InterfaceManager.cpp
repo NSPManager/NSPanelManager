@@ -1,14 +1,12 @@
-#include <InterfaceManager.h>
-#include <MqttLog.h>
+#include <InterfaceManager.hpp>
+#include <MqttLog.hpp>
 #include <TftDefines.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
-#include <pages.h>
+#include <pages.hpp>
 
-void InterfaceManager::init(PubSubClient *mqttClient) {
+void InterfaceManager::init() {
   this->instance = this;
-  this->_mqttClient = mqttClient;
-  this->_mqttClient->setCallback(&InterfaceManager::mqttCallback);
   this->_currentEditMode = editLightMode::all_lights;
   this->_ignoreNextTouchRelease = false;
   this->_lastMasterCeilingLightsButtonTouch = 0;
@@ -47,7 +45,7 @@ void InterfaceManager::stop() {
 
 void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   unsigned long start = millis();
-  while (!WiFi.isConnected() || !InterfaceManager::instance->_mqttClient->connected() && !InterfaceManager::hasRegisteredToManager) {
+  while (!WiFi.isConnected() || !MqttManager::connected() && !InterfaceManager::hasRegisteredToManager) {
     if (!WiFi.isConnected()) {
       if (NSPMConfig::instance->NSPMConfig::instance->wifi_ssid.empty()) {
         NSPanel::instance->setComponentText("bootscreen.t_loading", "Connect to AP NSPMPanel");
@@ -56,7 +54,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
       }
     } else if (!InterfaceManager::hasRegisteredToManager) {
       NSPanel::instance->setComponentText("bootscreen.t_loading", "Registring to manager...");
-    } else if (!InterfaceManager::instance->_mqttClient->connected()) {
+    } else if (!MqttManager::connected()) {
       NSPanel::instance->setComponentText("bootscreen.t_loading", "Connecting to MQTT...");
     }
     vTaskDelay(500 / portTICK_PERIOD_MS);
@@ -100,7 +98,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   HomePage::updateColorTempValueCache();
 
   // Start task for MQTT processing
-  xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskLoadConfigAndInit", 5000, NULL, 1, &InterfaceManager::_taskHandleProcessMqttMessages, CONFIG_ARDUINO_RUNNING_CORE);
+  xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskProcessMqttMessages", 5000, NULL, 1, &InterfaceManager::_taskHandleProcessMqttMessages, CONFIG_ARDUINO_RUNNING_CORE);
 
   // As there may be may be MANY topics to subscribe to, do it in checks of 5 with delays
   // between them to allow for processing all the incoming data.
@@ -112,7 +110,8 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
 
 void InterfaceManager::subscribeToMqttTopics() {
   // Subscribe to command to wake/put to sleep the display
-  InterfaceManager::instance->_mqttClient->subscribe(NSPMConfig::instance->mqtt_screen_cmd_topic.c_str());
+  vTaskDelay(100 / portTICK_PERIOD_MS);
+  MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_screen_cmd_topic.c_str(), &InterfaceManager::mqttCallback);
 
   // Every light in every room
   for (roomConfig &roomCfg : InterfaceManager::instance->config.rooms) {
@@ -132,31 +131,32 @@ void InterfaceManager::_subscribeToLightTopics(lightConfig *cfg) {
   std::string levelStatusTopic = "nspanel/entities/light/";
   levelStatusTopic.append(std::to_string(cfg->id));
   levelStatusTopic.append("/state_brightness_pct");
-  this->_mqttClient->subscribe(levelStatusTopic.c_str());
+  MqttManager::subscribeToTopic(levelStatusTopic.c_str(), &InterfaceManager::mqttCallback);
+  
 
   if (cfg->canTemperature) {
     std::string colorTempStateTopic = "nspanel/entities/light/";
     colorTempStateTopic.append(std::to_string(cfg->id));
     colorTempStateTopic.append("/state_kelvin");
-    this->_mqttClient->subscribe(colorTempStateTopic.c_str());
+    MqttManager::subscribeToTopic(colorTempStateTopic.c_str(), &InterfaceManager::mqttCallback);
   }
 
   if (cfg->canRgb) {
     std::string colorSaturationTopic = "nspanel/entities/light/";
     colorSaturationTopic.append(std::to_string(cfg->id));
     colorSaturationTopic.append("/state_sat");
-    this->_mqttClient->subscribe(colorSaturationTopic.c_str());
+    MqttManager::subscribeToTopic(colorSaturationTopic.c_str(), &InterfaceManager::mqttCallback);
 
     std::string colorHueTopic = "nspanel/entities/light/";
     colorHueTopic.append(std::to_string(cfg->id));
     colorHueTopic.append("/state_hue");
-    this->_mqttClient->subscribe(colorHueTopic.c_str());
+    MqttManager::subscribeToTopic(colorHueTopic.c_str(), &InterfaceManager::mqttCallback);
   }
 }
 
 void InterfaceManager::processWakeEvent() {
   // Send screen state
-  InterfaceManager::instance->_mqttClient->publish(NSPMConfig::instance->mqtt_screen_state_topic.c_str(), "1");
+  MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1");
 }
 
 void InterfaceManager::processSleepEvent() {
@@ -169,7 +169,7 @@ void InterfaceManager::processSleepEvent() {
   InterfaceManager::instance->_updatePanelLightStatus();
 
   // Send screen state
-  InterfaceManager::instance->_mqttClient->publish(NSPMConfig::instance->mqtt_screen_state_topic.c_str(), "0");
+  MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "0");
 }
 
 void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
@@ -934,6 +934,7 @@ void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int len
 }
 
 void InterfaceManager::_taskProcessMqttMessages(void *param) {
+  LOG_INFO("Started _taskProcessMqttMessages.");
   vTaskDelay(100 / portTICK_PERIOD_MS);
   for (;;) {
     // Wait for notification that we need to process messages.
@@ -1075,8 +1076,8 @@ void InterfaceManager::_changeLightsToLevel(std::list<lightConfig *> *lights, ui
   }
 
   char buffer[1024];
-  uint json_length = serializeJson(doc, buffer);
-  if (json_length > 0 && this->_mqttClient->publish("nspanel/mqttmanager/command", buffer)) {
+  size_t json_length = serializeJson(doc, buffer);
+  if (json_length > 0 && MqttManager::publish("nspanel/mqttmanager/command", buffer)) {
     for (lightConfig *light : (*lights)) {
       light->level = level;
     }
@@ -1109,7 +1110,7 @@ void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig *> *lights, u
 
   char buffer[1024];
   uint json_length = serializeJson(doc, buffer);
-  if (json_length > 0 && this->_mqttClient->publish("nspanel/mqttmanager/command", buffer)) {
+  if (json_length > 0 && MqttManager::publish("nspanel/mqttmanager/command", buffer)) {
     for (lightConfig *light : (*lights)) {
       light->colorTemperature = kelvin;
     }
@@ -1135,7 +1136,7 @@ void InterfaceManager::_changeLightsToColorSaturation(std::list<lightConfig *> *
 
   char buffer[1024];
   uint json_length = serializeJson(doc, buffer);
-  if (json_length > 0 && this->_mqttClient->publish("nspanel/mqttmanager/command", buffer)) {
+  if (json_length > 0 && MqttManager::publish("nspanel/mqttmanager/command", buffer)) {
     for (lightConfig *light : (*lights)) {
       light->colorSat = saturation;
     }
@@ -1161,7 +1162,7 @@ void InterfaceManager::_changeLightsToColorHue(std::list<lightConfig *> *lights,
 
   char buffer[1024];
   uint json_length = serializeJson(doc, buffer);
-  if (json_length > 0 && this->_mqttClient->publish("nspanel/mqttmanager/command", buffer)) {
+  if (json_length > 0 && MqttManager::publish("nspanel/mqttmanager/command", buffer)) {
     for (lightConfig *light : (*lights)) {
       light->colorHue = hue;
     }
@@ -1260,7 +1261,6 @@ void InterfaceManager::_updatePanelLightStatus() {
     HomePage::setDimmingValue(totalAverageBrightness);
   }
 
-  // TODO: Implement so that direction of color temp slider can be reversed in web interface
   uint8_t totalAverageKelvin;
   if (totalKelvinLightsCeiling > 0 && totalKelvinLightsTable > 0) {
     totalAverageKelvin = (averageCeilingKelvin + averageTableKelvin) / 2;

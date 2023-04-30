@@ -12,3 +12,6 @@ firmware/NSPanelManagerFirmware/.project
 firmware/NSPanelManagerFirmware/.settings
 firmware/NSPanelManagerFirmware/nspanels_to_ota.txt
 firmware/NSPanelManagerFirmware/merged-flash.bin
+firmware/NSPanelManagerFirmware/.cache
+firmware/NSPanelManagerFirmware/.ccls
+firmware/NSPanelManagerFirmware/.ccls-cache

@@ -5,11 +5,10 @@
  *      Author: Tim Panajott
  */
 
-#include <InterfaceManager.h>
-#include <MqttLog.h>
-#include <NSPanel.h>
+#include <MqttLog.hpp>
+#include <NSPanel.hpp>
 #include <TftDefines.h>
-#include <pages.h>
+#include <pages.hpp>
 
 int HomePage::getDimmingValue() {
   return HomePage::_dimmerValue;

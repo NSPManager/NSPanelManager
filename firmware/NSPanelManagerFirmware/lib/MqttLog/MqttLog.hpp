@@ -4,16 +4,7 @@
 #include <Arduino.h>
 #include <string>
 #include <PubSubClient.h>
-
-enum class MqttLogLevel
-{
-    None,
-    Error,
-    Warning,
-    Info,
-    Debug,
-    Trace
-};
+#include <MqttManager.hpp>
 
 #define LOG_SHORT_FILENAME                                   \
     (strrchr(__FILE__, '/')    ? strrchr(__FILE__, '/') + 1  \
@@ -36,13 +27,22 @@ enum class MqttLogLevel
     MqttLog::instance->logToMqtt(MqttLogLevel::Trace, LOG_SHORT_FILENAME, \
                                  __LINE__, __func__, __VA_ARGS__)
 
+enum MqttLogLevel
+{
+    None,
+    Error,
+    Warning,
+    Info,
+    Debug,
+    Trace
+};
+
 class MqttLog
 {
 public:
     inline static MqttLog *instance;
     /// @brief Will initialize the library
-    /// @param mqttClient The PubSubClient to use to send logs
-    void init(PubSubClient *mqttClient, std::string *mqttLogTopic);
+    void init(std::string *mqttLogTopic);
     /// @brief Set the highest log level to log
     /// @param logLevel The highest log level to send to mqtt server
     void setLogLevel(const MqttLogLevel logLevel);
@@ -95,9 +95,9 @@ public:
 
         // Reset message holder before giving up the mutex
         this->_messageBuild.clear();
-        this->_mqttClient->publish(this->_mqttLogTopic->c_str(), mqttLogMessage.c_str());
-
         xSemaphoreGive(this->_messageBuilderMutex);
+        // Queue log message for sending
+        MqttManager::publish(this->_mqttLogTopic->c_str(), mqttLogMessage);
     }
 
     template <typename LogMessageT, typename... Args>
@@ -118,7 +118,6 @@ public:
     }
 
 private:
-    PubSubClient *_mqttClient;
     std::string *_mqttLogTopic;
     MqttLogLevel _logLevel{MqttLogLevel::Info};
     String _messageBuild;

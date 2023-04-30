@@ -1,16 +1,17 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
-#include <InterfaceManager.h>
+#include <InterfaceManager.hpp>
 #include <LittleFS.h>
-#include <MqttLog.h>
+#include <MqttLog.hpp>
 #include <NSPMConfig.h>
-#include <NSPanel.h>
+#include <NSPanel.hpp>
 #include <PubSubClient.h>
-#include <WebManager.h>
+#include <WebManager.hpp>
 #include <WiFi.h>
 #include <nspm-bin-version.h>
 #include <string>
+#include <MqttManager.hpp>
 
 NSPanel nspanel;
 InterfaceManager interfaceManager;
@@ -19,7 +20,7 @@ NSPMConfig config;
 WebManager webMan;
 TaskHandle_t _taskWifiAndMqttManager;
 WiFiClient espClient;
-PubSubClient mqttClient(espClient);
+MqttManager mqttManager;
 
 unsigned long lastStatusReport = 0;
 
@@ -60,18 +61,23 @@ void registerToNSPanelManager() {
 
 void taskManageWifiAndMqtt(void *param) {
   LOG_INFO("taskWiFiMqttHandler started!");
+  Serial.print("Configured to connect to WiFi: "); Serial.println(config.wifi_ssid.c_str());
+  Serial.print("with hostname: "); Serial.println(config.wifi_hostname.c_str());
   if (!NSPMConfig::instance->wifi_ssid.empty()) {
     for (;;) {
-      if (!WiFi.isConnected() && !config.wifi_ssid.empty()) {
+      if (!WiFi.isConnected()) {
         LOG_ERROR("WiFi not connected!");
+        Serial.println("WiFi not connected!");
         WiFi.mode(WIFI_STA);
         WiFi.setHostname(config.wifi_hostname.c_str());
         while (!WiFi.isConnected()) {
+          Serial.print("Connecting to WiFi "); Serial.println(config.wifi_ssid.c_str());
           WiFi.begin(config.wifi_ssid.c_str(), config.wifi_psk.c_str());
-          LOG_INFO("Connecting to WiFi ", config.wifi_ssid.c_str());
           vTaskDelay(1000 / portTICK_PERIOD_MS);
           if (WiFi.isConnected()) {
+            Serial.println("Connected to WiFi!");
             LOG_INFO("Connected to WiFi ", config.wifi_ssid.c_str());
+            Serial.print("Connected to WiFi "); Serial.println(config.wifi_ssid.c_str());
             LOG_INFO("IP Address: ", WiFi.localIP());
             LOG_INFO("Netmask:    ", WiFi.subnetMask());
             LOG_INFO("Gateway:    ", WiFi.gatewayIP());
@@ -80,50 +86,14 @@ void taskManageWifiAndMqtt(void *param) {
             registerToNSPanelManager();
           } else {
             LOG_ERROR("Failed to connect to WiFi. Will try again in 10 seconds");
+            Serial.println("Failed to connect to WiFi. Will try again in 10 seconds");
           }
         }
       } else if (config.wifi_ssid.empty()) {
         LOG_ERROR("No WiFi SSID configured!");
       }
 
-      if (WiFi.isConnected() && !mqttClient.connected() && !config.mqtt_server.empty()) {
-        LOG_ERROR("MQTT not connected!");
-        while (WiFi.isConnected() && !mqttClient.connected()) {
-          // Build "offline" message
-          DynamicJsonDocument *offline_message_doc = new DynamicJsonDocument(512);
-          (*offline_message_doc)["mac"] = WiFi.macAddress().c_str();
-          (*offline_message_doc)["state"] = "offline";
-          char offline_message_buffer[512];
-          serializeJson(*offline_message_doc, offline_message_buffer);
-          delete offline_message_doc;
-
-          DynamicJsonDocument *online_message_doc = new DynamicJsonDocument(512);
-          (*online_message_doc)["mac"] = WiFi.macAddress().c_str();
-          (*online_message_doc)["state"] = "online";
-          char online_message_buffer[512];
-          serializeJson(*online_message_doc, online_message_buffer);
-          delete online_message_doc;
-
-          LOG_INFO("Connecting to MQTT server ", config.mqtt_server.c_str());
-          mqttClient.setServer(config.mqtt_server.c_str(), config.mqtt_port);
-          mqttClient.connect(config.wifi_hostname.c_str(), config.mqtt_username.c_str(), config.mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, 1, offline_message_buffer);
-          vTaskDelay(1000 / portTICK_PERIOD_MS);
-          if (mqttClient.connected()) {
-            // This task only handles connection. The InterfaceManager will take
-            // care of subscribing to relevant topics once the connection is
-            // MQTT is established.
-            LOG_INFO("Connected to MQTT server ", config.mqtt_server.c_str());
-            InterfaceManager::subscribeToMqttTopics();
-            mqttClient.publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), online_message_buffer, true);
-          } else {
-            LOG_ERROR("Failed to connect to MQTT. Will try again in 10 seconds");
-          }
-        }
-      } else if (config.mqtt_server.empty()) {
-        LOG_ERROR("No MQTT server configured!");
-      }
-
-      if (WiFi.isConnected() && mqttClient.connected() && NSPanel::instance->getUpdateState()) {
+      if (WiFi.isConnected() && MqttManager::connected() && NSPanel::instance->getUpdateState()) {
         DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
         (*status_report_doc)["rssi"] = WiFi.RSSI();
         (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
@@ -134,9 +104,9 @@ void taskManageWifiAndMqtt(void *param) {
         char buffer[512];
         uint json_length = serializeJson(*status_report_doc, buffer);
         delete status_report_doc;
-        mqttClient.publish(NSPMConfig::instance->mqtt_panel_status_topic.c_str(), buffer);
+        MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer);
         lastStatusReport = millis();
-      } else if (WiFi.isConnected() && mqttClient.connected() && WebManager::getState() == WebManagerState::UPDATING_FIRMWARE) {
+      } else if (WiFi.isConnected() && MqttManager::connected() && WebManager::getState() == WebManagerState::UPDATING_FIRMWARE) {
         DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
         (*status_report_doc)["rssi"] = WiFi.RSSI();
         (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
@@ -147,9 +117,9 @@ void taskManageWifiAndMqtt(void *param) {
         char buffer[512];
         uint json_length = serializeJson(*status_report_doc, buffer);
         delete status_report_doc;
-        mqttClient.publish(NSPMConfig::instance->mqtt_panel_status_topic.c_str(), buffer);
+        MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer);
         lastStatusReport = millis();
-      } else if (WiFi.isConnected() && mqttClient.connected() && WebManager::getState() == WebManagerState::UPDATING_LITTLEFS) {
+      } else if (WiFi.isConnected() && MqttManager::connected() && WebManager::getState() == WebManagerState::UPDATING_LITTLEFS) {
         DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
         (*status_report_doc)["rssi"] = WiFi.RSSI();
         (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
@@ -160,9 +130,9 @@ void taskManageWifiAndMqtt(void *param) {
         char buffer[512];
         uint json_length = serializeJson(*status_report_doc, buffer);
         delete status_report_doc;
-        mqttClient.publish(NSPMConfig::instance->mqtt_panel_status_topic.c_str(), buffer);
+        MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer);
         lastStatusReport = millis();
-      } else if (WiFi.isConnected() && mqttClient.connected() && InterfaceManager::hasRegisteredToManager && lastStatusReport + 30000 <= millis()) {
+      } else if (WiFi.isConnected() && MqttManager::connected() && InterfaceManager::hasRegisteredToManager && lastStatusReport + 30000 <= millis()) {
         // Report state every 30 seconds
         DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
         (*status_report_doc)["rssi"] = WiFi.RSSI();
@@ -173,25 +143,25 @@ void taskManageWifiAndMqtt(void *param) {
         char buffer[512];
         uint json_length = serializeJson(*status_report_doc, buffer);
         delete status_report_doc;
-        mqttClient.publish(NSPMConfig::instance->mqtt_panel_status_topic.c_str(), buffer);
+        MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer);
         lastStatusReport = millis();
       }
       vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
   } else {
-    LOG_ERROR("No WiFi configuration exists. Starting AP!");
+    Serial.println("No WiFi configuration exists. Starting AP!");
     IPAddress local_ip(192, 168, 1, 1);
     IPAddress gateway(192, 168, 1, 1);
     IPAddress subnet(255, 255, 255, 0);
 
     if (WiFi.softAPConfig(local_ip, gateway, subnet)) {
-      LOG_INFO("Soft-AP configuration applied.");
+      Serial.println("Soft-AP configuration applied.");
       if (WiFi.softAP("NSPMPanel", "password")) {
-        LOG_INFO("Soft-AP started.");
+        Serial.println("Soft-AP started.");
 
-        LOG_INFO("WiFi SSID: NSPMPanel");
-        LOG_INFO("WiFi PSK : password");
-        LOG_INFO("WiFi IP Address: ", WiFi.softAPIP().toString().c_str());
+        Serial.println("WiFi SSID: NSPMPanel");
+        Serial.println("WiFi PSK : password");
+        Serial.print("WiFi IP Address: "); Serial.println(WiFi.softAPIP().toString().c_str());
         webMan.init(NSPanelManagerFirmwareVersion);
         // Wait indefinitly
         for (;;) {
@@ -206,16 +176,8 @@ void taskManageWifiAndMqtt(void *param) {
   }
 }
 
-void taskMqttLoop(void *param) {
-  for (;;) {
-    mqttClient.loop();
-    vTaskDelay(10 / portTICK_PERIOD_MS);
-  }
-}
-
 void setup() {
   Serial.begin(115200);
-  mqttClient.setBufferSize(2048);
 
   // Load config if any, and if it fails. Factory reset!
   if (!(config.init() && config.loadFromLittleFS())) {
@@ -223,16 +185,18 @@ void setup() {
   }
 
   // Setup logging
-  logger.init(&mqttClient, &(NSPMConfig::instance->mqtt_log_topic));
+  logger.init(&(NSPMConfig::instance->mqtt_log_topic));
   logger.setLogLevel(static_cast<MqttLogLevel>(config.logging_level));
   // logger.setLogLevel(MqttLogLevel::Debug);
+  //
+  mqttManager.init();
 
   LOG_INFO("Starting tasks");
-  xTaskCreatePinnedToCore(taskManageWifiAndMqtt, "taskManageWifiAndMqtt", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
-  xTaskCreatePinnedToCore(taskMqttLoop, "taskMqttLoop", 5000, NULL, 2, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+  Serial.println("Starting wifi and mqtt task.");
+  xTaskCreatePinnedToCore(taskManageWifiAndMqtt, "taskManageWifi", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 
   nspanel.init();
-  interfaceManager.init(&mqttClient);
+  interfaceManager.init();
 }
 
 void loop() { vTaskDelay(portMAX_DELAY); }

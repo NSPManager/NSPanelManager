@@ -9,7 +9,7 @@
 #define LIB_INTERFACEMANAGER_PAGES_H_
 
 #include <Arduino.h>
-#include <InterfaceManager.h>
+#include <InterfaceManager.hpp>
 
 enum LIGHT_PAGE_MODE {
   COLOR_TEMP,

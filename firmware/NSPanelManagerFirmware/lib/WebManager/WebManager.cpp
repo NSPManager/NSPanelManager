@@ -1,13 +1,13 @@
 #include <Arduino.h>
 #include <HTTPClient.h>
-#include <HttpLib.h>
-#include <InterfaceManager.h>
+#include <HttpLib.hpp>
+#include <InterfaceManager.hpp>
 #include <LittleFS.h>
-#include <MqttLog.h>
+#include <MqttLog.hpp>
 #include <NSPMConfig.h>
-#include <NSPanel.h>
+#include <NSPanel.hpp>
 #include <Update.h>
-#include <WebManager.h>
+#include <WebManager.hpp>
 #include <WiFi.h>
 #include <list>
 
@@ -95,7 +95,6 @@ void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request) {
     LOG_ERROR("Failed to save new configuration!");
   }
 
-  // TODO: Restart after settings saved
   request->redirect("/");
 
   // Wait for 2 seconds before restarting.

@@ -3,16 +3,14 @@
 
 #include <ArduinoJson.h>
 #include <InterfaceManagerHelpers.h>
-#include <NSPanel.h>
-#include <PubSubClient.h>
+#include <NSPanel.hpp>
 #include <list>
 #include <string>
 
 class InterfaceManager {
 public:
   /// @brief Set default variables, initialize panel and start the user interface
-  /// @param mqttClient MQTT Client used to send MQTT messages
-  void init(PubSubClient *mqttClient);
+  void init();
   /// @brief Stop and clear memory from InterfaceManager
   static void stop();
   /// @brief Callback for when a touch event occurs on the screen
@@ -56,8 +54,6 @@ private:
   static void _taskSpecialModeTimer(void *param);
   /// @brief Task to auto-trigger special light mode without having to release finger from display.
   static void _taskSpecialModeTriggerTask(void *param);
-  /// @brief MQTT Client, used to see MQTT status and send messages
-  PubSubClient *_mqttClient;
   /// @brief What is the currently selected room mode
   roomMode _currentRoomMode;
   /// @brief What is the currently selected edit mode

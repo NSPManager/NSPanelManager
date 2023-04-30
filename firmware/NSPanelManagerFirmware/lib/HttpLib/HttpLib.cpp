@@ -1,6 +1,6 @@
 #include <HTTPClient.h>
-#include <HttpLib.h>
-#include <MqttLog.h>
+#include <HttpLib.hpp>
+#include <MqttLog.hpp>
 
 size_t HttpLib::GetFileSize(const char *url) {
   HTTPClient httpClient;
