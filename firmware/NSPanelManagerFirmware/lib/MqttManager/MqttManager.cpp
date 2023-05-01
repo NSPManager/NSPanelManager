@@ -124,6 +124,7 @@ void MqttManager::_mqttClientCallback(char *topic, byte *payload, unsigned int l
   for(SubscribeTopic &tpc : MqttManager::_subscribeTopics) {
     if (tpc.topic.compare(topic) == 0) {
       tpc.callback(topic, payload, length);
+      break;
     }
   }
 }

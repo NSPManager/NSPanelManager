@@ -12,6 +12,7 @@
 #include <nspm-bin-version.h>
 #include <string>
 #include <MqttManager.hpp>
+#include <ButtonManager.hpp>
 
 NSPanel nspanel;
 InterfaceManager interfaceManager;
@@ -187,9 +188,9 @@ void setup() {
   // Setup logging
   logger.init(&(NSPMConfig::instance->mqtt_log_topic));
   logger.setLogLevel(static_cast<MqttLogLevel>(config.logging_level));
-  // logger.setLogLevel(MqttLogLevel::Debug);
-  //
+  
   mqttManager.init();
+  ButtonManager::init();
 
   LOG_INFO("Starting tasks");
   Serial.println("Starting wifi and mqtt task.");

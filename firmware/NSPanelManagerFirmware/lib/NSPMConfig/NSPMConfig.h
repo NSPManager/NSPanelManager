@@ -53,6 +53,14 @@ public:
   std::string mqtt_screen_state_topic;
   /// @brief The MQTT topic to receive on/off command for the panel from.
   std::string mqtt_screen_cmd_topic;
+  /// @brief The MQTT topic to receive on/off command for relay 1
+  std::string mqtt_relay1_cmd_topic;
+  /// @brief The MQTT topic to send on/off state updates for relay 1
+  std::string mqtt_relay1_state_topic;
+  /// @brief The MQTT topic to receive on/off command for relay 2
+  std::string mqtt_relay2_cmd_topic;
+  /// @brief The MQTT topic to send on/off state updates for relay 2
+  std::string mqtt_relay2_state_topic;
 
   /// @brief The upload baud rate for the serial connection when uploading a new TFT file
   uint32_t tft_upload_baud;

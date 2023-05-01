@@ -78,6 +78,22 @@ bool NSPMConfig::loadFromLittleFS() {
   this->mqtt_screen_cmd_topic.append(NSPMConfig::instance->wifi_hostname);
   this->mqtt_screen_cmd_topic.append("/screen_cmd");
 
+  this->mqtt_relay1_cmd_topic = "nspanel/";
+  this->mqtt_relay1_cmd_topic.append(NSPMConfig::instance->wifi_hostname);
+  this->mqtt_relay1_cmd_topic.append("/r1_cmd");
+
+  this->mqtt_relay1_state_topic = "nspanel/";
+  this->mqtt_relay1_state_topic.append(NSPMConfig::instance->wifi_hostname);
+  this->mqtt_relay1_state_topic.append("/r1_state");
+
+  this->mqtt_relay2_cmd_topic = "nspanel/";
+  this->mqtt_relay2_cmd_topic.append(NSPMConfig::instance->wifi_hostname);
+  this->mqtt_relay2_cmd_topic.append("/r2_cmd");
+
+  this->mqtt_relay2_state_topic = "nspanel/";
+  this->mqtt_relay2_state_topic.append(NSPMConfig::instance->wifi_hostname);
+  this->mqtt_relay2_state_topic.append("/r2_state");
+
   this->md5_firmware = doc["md5_firmware"] | "";
   this->md5_data_file = doc["md5_data_file"] | "";
 
