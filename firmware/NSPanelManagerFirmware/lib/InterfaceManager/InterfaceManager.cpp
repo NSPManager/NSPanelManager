@@ -17,7 +17,6 @@ void InterfaceManager::init() {
   NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
   NSPanel::attachSleepCallback(InterfaceManager::processSleepEvent);
   NSPanel::attachWakeCallback(InterfaceManager::processWakeEvent);
-  NSPanel::instance->goToPage("bootscreen");
   InterfaceManager::processWakeEvent(); // Send state update to MQTT that the screen turned on
   xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 }
@@ -45,17 +44,19 @@ void InterfaceManager::stop() {
 
 void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   unsigned long start = millis();
+  // TODO: Implement "connect"-command before proceeding. Wait for "connect"-command to succeed
+  NspanelManagerPage::show();
   while (!WiFi.isConnected() || !MqttManager::connected() && !InterfaceManager::hasRegisteredToManager) {
     if (!WiFi.isConnected()) {
       if (NSPMConfig::instance->NSPMConfig::instance->wifi_ssid.empty()) {
-        NSPanel::instance->setComponentText("bootscreen.t_loading", "Connect to AP NSPMPanel");
+        NspanelManagerPage::setText("Connect to AP NSPMPanel");
       } else {
-        NSPanel::instance->setComponentText("bootscreen.t_loading", "Connecting to WiFi...");
+        NspanelManagerPage::setText("Connecting to WiFi...");
       }
     } else if (!InterfaceManager::hasRegisteredToManager) {
-      NSPanel::instance->setComponentText("bootscreen.t_loading", "Registring to manager...");
+      NspanelManagerPage::setText("Registring to manager...");
     } else if (!MqttManager::connected()) {
-      NSPanel::instance->setComponentText("bootscreen.t_loading", "Connecting to MQTT...");
+      NspanelManagerPage::setText("Connecting to MQTT...");
     }
     vTaskDelay(500 / portTICK_PERIOD_MS);
   }
@@ -65,7 +66,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
     vTaskDelay((millis() - start) / portTICK_PERIOD_MS);
   }
 
-  NSPanel::instance->setComponentText("bootscreen.t_loading", "Loading config...");
+  NspanelManagerPage::setText("Loading config...");
 
   InterfaceManager::instance->_roomDataJson = new DynamicJsonDocument(1024);
   uint8_t tries = 0;
@@ -80,7 +81,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
       // 30 failed tries to download config, restart and try again.
       if (tries == 30) {
         LOG_ERROR("Failed to download config, will restart and try again.");
-        NSPanel::instance->setComponentText("bootscreen.t_loading", "Restarting...");
+        NspanelManagerPage::setText("Restarting...");
         vTaskDelay(5000 / portTICK_PERIOD_MS);
         ESP.restart();
       }
@@ -102,7 +103,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
 
   // As there may be may be MANY topics to subscribe to, do it in checks of 5 with delays
   // between them to allow for processing all the incoming data.
-  NSPanel::instance->setComponentText("bootscreen.t_loading", "Subscribing...");
+  NspanelManagerPage::setText("Subscribing...");
   InterfaceManager::subscribeToMqttTopics();
 
   vTaskDelete(NULL); // Delete task, we are done
@@ -813,7 +814,7 @@ void InterfaceManager::_processPanelConfig() {
     info_text.append("/");
     info_text.append(std::to_string(numberOfRooms));
 
-    NSPanel::instance->setComponentText("bootscreen.t_loading", info_text.c_str());
+    NspanelManagerPage::setText(info_text.c_str());
     // Try downloading room config for a long as needed
 
     for (;;) {

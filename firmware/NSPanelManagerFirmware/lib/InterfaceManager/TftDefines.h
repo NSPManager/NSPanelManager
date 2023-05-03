@@ -7,6 +7,9 @@
 #define TABLE_LIGHTS_MASTER_BUTTON_ID 21   // ID of table lights button on home page
 #define ROOM_BUTTON_ID 5                   // ID of button to go into "room"-view
 
+#define NSPANELMANAGER_PAGE_NAME "bootscreen"
+#define NSPANELMANAGER_TEXT_NAME "bootscreen.t_loading"
+
 #define SCREENSAVE_PAGE_NAME "screensaver"
 
 #define HOME_PIC_HIGHLIGHT_CEILING_NAME "p_lockceiling" // Should not have "home." in front as visibility command for Nextion is not as other commands

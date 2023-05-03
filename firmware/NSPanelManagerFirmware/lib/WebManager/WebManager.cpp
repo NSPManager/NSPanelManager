@@ -10,6 +10,7 @@
 #include <WebManager.hpp>
 #include <WiFi.h>
 #include <list>
+#include <pages.hpp>
 
 // Make space for variables in memory
 WebManager *WebManager::instance;
@@ -184,8 +185,8 @@ void WebManager::startOTAUpdate(AsyncWebServerRequest *request) {
 }
 
 void WebManager::_taskPerformOTAUpdate(void *param) {
-  NSPanel::instance->setComponentText("bootscreen.t_loading", "Updating...");
-  NSPanel::instance->goToPage("bootscreen");
+  NspanelManagerPage::setText("Updating...");
+  NspanelManagerPage::show();
 
   char checksum_holder[32];
   while (true) {
@@ -220,7 +221,7 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
       hasAnythingUpdated = true;
     } else {
       LOG_ERROR("Something went wrong during firmware upgrade.");
-      NSPanel::instance->setComponentText("bootscreen.t_loading", "Update failed!");
+      NspanelManagerPage::setText("Update failed!");
     }
   } else {
     LOG_INFO("Firmware is the same, will not update.");
@@ -259,13 +260,14 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
         hasAnythingUpdated = true;
       } else {
         LOG_ERROR("Something went wrong during LittleFS upgrade.");
-        NSPanel::instance->setComponentText("bootscreen.t_loading", "Update failed!");
+        NspanelManagerPage::setText("Update failed!");
       }
     } else {
       LOG_INFO("LittleFS is the same, will not update.");
     }
   }
 
+  NspanelManagerPage::setText("Restarting...");
   LOG_INFO("Will restart in 5 seconds.");
   vTaskDelay(5000 / portTICK_PERIOD_MS);
   NSPMConfig::instance->saveToLittleFS();
@@ -324,6 +326,17 @@ bool WebManager::_update(uint8_t type, const char *url) {
 
     // Update percent update completed
     WebManager::_update_progress = (uint8_t)(((float)writtenSize / (float)totalSize) * 100);
+    if (type == U_FLASH) {
+      std::string update_string = "Updating FW ";
+      update_string.append(std::to_string(WebManager::_update_progress));
+      update_string.append("%");
+      NspanelManagerPage::setText(update_string);
+    } else {
+      std::string update_string = "Updating FS ";
+      update_string.append(std::to_string(WebManager::_update_progress));
+      update_string.append("%");
+      NspanelManagerPage::setText(update_string);
+    }
     vTaskDelay(50 / portTICK_PERIOD_MS);
   }
 

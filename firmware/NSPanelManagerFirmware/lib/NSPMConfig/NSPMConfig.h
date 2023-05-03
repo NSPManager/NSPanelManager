@@ -67,7 +67,9 @@ public:
   /// @brief Wether or not to use the "v1.2" protcol or the v1.0
   bool use_new_upload_protocol;
 
+  /// @brief MD5 checksum for currently installed firmware.
   std::string md5_firmware;
+  /// @brief MD5 checksum for currently installed LittleFS.
   std::string md5_data_file;
 };
 

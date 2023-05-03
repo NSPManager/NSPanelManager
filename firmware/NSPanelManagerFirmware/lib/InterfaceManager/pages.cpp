@@ -304,3 +304,15 @@ uint8_t LightPage::getKelvinSatValue() {
 uint16_t LightPage::getHueValue() {
   return NSPanel::instance->getComponentIntVal(LIGHT_PAGE_HUE_SLIDER_NAME);
 }
+
+void NspanelManagerPage::show() {
+  NSPanel::instance->goToPage("bootscreen");
+}
+
+void NspanelManagerPage::setText(std::string &text) {
+  NSPanel::instance->setComponentText(NSPANELMANAGER_TEXT_NAME, text.c_str());
+}
+
+void NspanelManagerPage::setText(const char* text) {
+  NSPanel::instance->setComponentText(NSPANELMANAGER_TEXT_NAME, text);
+}
