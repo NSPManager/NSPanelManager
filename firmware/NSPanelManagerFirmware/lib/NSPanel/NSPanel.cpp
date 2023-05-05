@@ -136,13 +136,39 @@ void NSPanel::init() {
   digitalWrite(4, HIGH);
   vTaskDelay(500 / portTICK_PERIOD_MS);
   digitalWrite(4, LOW);
-  Serial2.setTxBufferSize(0);
+  Serial2.setTxBufferSize(128);
   Serial2.begin(115200, SERIAL_8N1, 17, 16);
   NSPanel::instance = this;
   this->_mutexReadSerialData = xSemaphoreCreateMutex();
   this->_writeCommandsToSerial = true;
   this->_isUpdating = false;
   this->_update_progress = 0;
+
+  while(Serial2.available() == 0) {
+    LOG_INFO("Trying to connect to display.");
+    Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN");
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
+    Serial2.print("connect");
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
+    Serial2.print("connect");
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
+    Serial2.write(0xFF);
+
+    vTaskDelay((1000000 / Serial2.baudRate())+30 / portTICK_PERIOD_MS);
+  }
+  std::string reply_data = "";
+  while(Serial2.available() > 0) {
+    reply_data.push_back(Serial2.read());
+  }
+  LOG_INFO("Got reply from display: ", reply_data.c_str());
+  reply_data.clear();
 
   LOG_INFO("Init NSPanel.");
   xTaskCreatePinnedToCore(_taskSendCommandQueue, "taskSendCommandQueue", 5000, NULL, 1, &this->_taskHandleSendCommandQueue, CONFIG_ARDUINO_RUNNING_CORE);
