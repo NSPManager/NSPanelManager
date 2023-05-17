@@ -5,15 +5,23 @@ from requests import get, post
 from time import sleep
 import datetime
 import json
+import subprocess
 import mqtt_manager_libs.home_assistant
 import mqtt_manager_libs.openhab
 import mqtt_manager_libs.websocket_server
 import mqtt_manager_libs.light_states
 import mqtt_manager_libs.light
+import re 
+
+def get_machine_mac():
+    pid = subprocess.Popen(["arp", "-n"], stdout=subprocess.PIPE)
+    s = pid.communicate()[0].decode()
+    mac = re.search(r"(([a-f\d]{1,2}\:){5}[a-f\d]{1,2})", s).groups()[0]
+    return mac
 
 settings = {}
 last_settings_file_mtime = 0
-client = mqtt.Client("NSPanelManager")
+client = mqtt.Client("NSPanelManager_" + get_machine_mac())
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("urllib3").propagate = False
 
@@ -139,13 +147,12 @@ def connect_and_loop():
     mqtt_manager_libs.websocket_server.start_server()  # Start websocket server
     client.on_connect = on_connect
     client.on_message = on_message
-    client.username_pw_set(
-        settings["mqtt_username"], settings["mqtt_password"])
+    client.username_pw_set(settings["mqtt_username"], settings["mqtt_password"])
     # Wait for connection
     connection_return_code = 0
     mqtt_server = settings["mqtt_server"]
     mqtt_port = int(settings["mqtt_port"])
-    logging.info(F"Connecting to {mqtt_server}:{mqtt_port}")
+    logging.info(F"Connecting to {mqtt_server}:{mqtt_port} as 'NSPanelManager_" + get_machine_mac() + "'")
     while True:
         try:
             client.connect(mqtt_server, mqtt_port, 5)
