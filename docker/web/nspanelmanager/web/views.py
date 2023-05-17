@@ -250,6 +250,11 @@ def settings_page(request):
         "openhab_rgb_channel_name", "")
     data["raise_to_100_light_level"] = get_setting_with_default(
         "raise_to_100_light_level", 95)
+    data["min_button_push_time"] = get_setting_with_default("min_button_push_time", 50)
+    data["button_long_press_time"] = get_setting_with_default("button_long_press_time", 300)
+    data["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time", 300)
+    data["special_mode_release_time"] = get_setting_with_default("special_mode_release_time", 5000)
+    data["mqtt_ignore_time"] = get_setting_with_default("mqtt_ignore_time", 3000)
     return render(request, 'settings.html', data)
 
 
@@ -276,6 +281,11 @@ def save_settings(request):
                       value=request.POST["color_temp_max"])
     set_setting_value(name="reverse_color_temp", value=(
         "reverse_color_temp" in request.POST))
+    set_setting_value(name="min_button_push_time", value=request.POST["min_button_push_time"])
+    set_setting_value(name="button_long_press_time", value=request.POST["button_long_press_time"])
+    set_setting_value(name="special_mode_trigger_time", value=request.POST["special_mode_trigger_time"])
+    set_setting_value(name="special_mode_release_time", value=request.POST["special_mode_release_time"])
+    set_setting_value(name="mqtt_ignore_time", value=request.POST["mqtt_ignore_time"])
 
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()

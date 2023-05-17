@@ -144,7 +144,7 @@ void NSPanel::init() {
   this->_isUpdating = false;
   this->_update_progress = 0;
 
-  while(Serial2.available() == 0) {
+  while (Serial2.available() == 0) {
     LOG_INFO("Trying to connect to display.");
     Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN");
     Serial2.write(0xFF);
@@ -161,10 +161,10 @@ void NSPanel::init() {
     Serial2.write(0xFF);
     Serial2.write(0xFF);
 
-    vTaskDelay((1000000 / Serial2.baudRate())+30 / portTICK_PERIOD_MS);
+    vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
   }
   std::string reply_data = "";
-  while(Serial2.available() > 0) {
+  while (Serial2.available() > 0) {
     reply_data.push_back(Serial2.read());
   }
   LOG_INFO("Got reply from display: ", reply_data.c_str());

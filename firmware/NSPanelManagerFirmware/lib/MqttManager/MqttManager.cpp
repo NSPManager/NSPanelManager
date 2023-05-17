@@ -90,7 +90,7 @@ bool MqttManager::publish(const char *topic, const char *message, bool retain) {
   return MqttManager::publish(str_topic, str_message, retain);
 }
 
-void MqttManager::subscribeToTopic(const char* topic, std::function<void(char *topic, byte *payload, unsigned int length)> callback) {
+void MqttManager::subscribeToTopic(const char *topic, std::function<void(char *topic, byte *payload, unsigned int length)> callback) {
   LOG_DEBUG("Adding topic ", topic, " to subscribe list.");
   SubscribeTopic tpc;
   tpc.topic = std::string(topic);
@@ -121,7 +121,7 @@ void MqttManager::_subscribeToAllRegisteredTopics() {
 }
 
 void MqttManager::_mqttClientCallback(char *topic, byte *payload, unsigned int length) {
-  for(SubscribeTopic &tpc : MqttManager::_subscribeTopics) {
+  for (SubscribeTopic &tpc : MqttManager::_subscribeTopics) {
     if (tpc.topic.compare(topic) == 0) {
       tpc.callback(topic, payload, length);
       break;

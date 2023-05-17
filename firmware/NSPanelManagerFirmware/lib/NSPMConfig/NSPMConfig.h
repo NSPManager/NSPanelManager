@@ -71,6 +71,19 @@ public:
   std::string md5_firmware;
   /// @brief MD5 checksum for currently installed LittleFS.
   std::string md5_data_file;
+
+  /// @brief Mimimum time for a button to be pressed to register as a press
+  uint16_t button_min_press_time;
+  /// @brief Mimimum time for a button to be held to register as a long press
+  uint16_t button_long_press_time;
+
+  /// @brief Mimimum time to hold a button to start special mode
+  uint16_t special_mode_trigger_time;
+  /// @brief Time to exit special mode after no actions has been taken
+  uint16_t special_mode_release_time;
+
+  /// @brief Time to ignore incomming MQTT messages after a command is sent out
+  uint16_t mqtt_ignore_time;
 };
 
 #endif

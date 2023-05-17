@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 
+{% block head %}
+{% load static %}
+  <script src="{% static 'question.js' %}"></script>
+{% endblock head %}
+
 {% block content %}
 <form method="POST" action="{% url 'save_settings' %}" id="config">
     {% csrf_token %}
@@ -8,16 +13,22 @@
             <h5 class="title is-5">NSPanel settings</h5>
         </div>
         <div class="field">
-            <label class="label">Color temperature min & max</label>
+            <label class="label">Color temperature min & max <span class="question">
+              <span class="icon question_icon">
+                <i class="mdi mdi-help"></i>
+              </span>
+              <div class="question_help_text notification is-info is-light">
+                The min and max color temperature of your lights.
+              </div>
+            </span>
+          </label>
         </div>
         <div class="field is-grouped">
             <div class="control">
-                <input class="input" type="number" name="color_temp_min" id="color_temp_min" placeholder="Min"
-                    value="{{ color_temp_min }}" required>
+                <input class="input" type="number" name="color_temp_min" id="color_temp_min" placeholder="Min" value="{{ color_temp_min }}" required>
             </div>
             <div class="control">
-                <input class="input" type="number" name="color_temp_max" id="color_temp_max" placeholder="Max"
-                    value="{{ color_temp_max }}" required>
+                <input class="input" type="number" name="color_temp_max" id="color_temp_max" placeholder="Max" value="{{ color_temp_max }}" required>
             </div>
         </div>
         <div class="field">
@@ -28,15 +39,84 @@
                     <input type="checkbox" name="reverse_color_temp">
                 {% endif %}
                 Reverse color temperature slider
+                <span class="question">
+                  <span class="icon question_icon">
+                    <i class="mdi mdi-help"></i>
+                  </span>
+                  <div class="question_help_text notification is-info is-light">
+                    Reverse the color temp slider? <br>Unchecked: warm temperature at the bottom, cool temperature at the top.<br>Checked: warm temperature at the top, cool temperature at the bottom.
+                  </div>
+                </span>
             </label>
         </div>
         <div class="field">
-            <label class="label">Set lights level to 100% above</label>
+            <label class="label">Set lights level to 100% above<span class="question">
+              <span class="icon question_icon">
+                <i class="mdi mdi-help"></i>
+              </span>
+              <div class="question_help_text notification is-info is-light">
+                When setting the light level slider is set to this many percent or above, consider it to be 100%.
+              </div>
+            </span>
+          </label>
         </div>
         <div class="field is-grouped">
             <div class="control">
-                <input class="input" type="number" name="raise_to_100_light_level" id="raise_to_100_light_level" placeholder="95"
-                    value="{{ raise_to_100_light_level }}" required>
+                <input class="input" type="number" name="raise_to_100_light_level" id="raise_to_100_light_level" placeholder="95" value="{{ raise_to_100_light_level }}" required>
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Button min push time & time for long press<span class="question">
+              <span class="icon question_icon">
+                <i class="mdi mdi-help"></i>
+              </span>
+              <div class="question_help_text notification is-info is-light">
+                These times are used to decide wether or not it was a short press or a long press. A short press is when the button has been pressed anywhere between "min push time" and "long press time". Anything longer than "long press time" is considered a long press.
+              </div>
+            </span>
+          </label>
+        </div>
+        <div class="field is-grouped">
+            <div class="control">
+                <input class="input" type="number" name="min_button_push_time" id="min_button_push_time" placeholder="Press time" value="{{ min_button_push_time }}" required>
+            </div>
+            <div class="control">
+                <input class="input" type="number" name="button_long_press_time" id="button_long_press_time" placeholder="Long press time" value="{{ button_long_press_time }}" required>
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Special mode trigger & release time <span class="question">
+              <span class="icon question_icon">
+                <i class="mdi mdi-help"></i>
+              </span>
+              <div class="question_help_text notification is-info is-light">
+                These times are used to trigger the special mode (long pressing the ceiling / table lights button). The first value is of how long to press to trigger the mode, the second value is the timeout to exit the "special mode".
+              </div>
+            </span>
+          </label>
+        </div>
+        <div class="field is-grouped">
+            <div class="control">
+                <input class="input" type="number" name="special_mode_trigger_time" id="special_mode_trigger_time" placeholder="Trigger time" value="{{ special_mode_trigger_time }}" required>
+            </div>
+            <div class="control">
+                <input class="input" type="number" name="special_mode_release_time" id="special_mode_release_time" placeholder="Release time" value="{{ special_mode_release_time }}" required>
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">MQTT ignore time<span class="question">
+              <span class="icon question_icon">
+                <i class="mdi mdi-help"></i>
+              </span>
+              <div class="question_help_text notification is-info is-light">
+                When a command is sent from the NSPanel over MQTT, this item decides for how many milliseconds the NSPanel should ignore events from MQTT. Settings this value to 0 disables the ignore function.
+              </div>
+            </span>
+          </label>
+        </div>
+        <div class="field is-grouped">
+            <div class="control">
+                <input class="input" type="number" name="mqtt_ignore_time" id="mqtt_ignore_time" placeholder="Trigger time" value="{{ mqtt_ignore_time }}" required>
             </div>
         </div>
     </div>

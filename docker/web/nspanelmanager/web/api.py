@@ -194,8 +194,12 @@ def get_nspanel_config(request):
         "raise_to_100_light_level", 95)
     base["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
     base["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
-    base["reverse_color_temp"] = get_setting_with_default(
-        "reverse_color_temp", False)
+    base["reverse_color_temp"] = get_setting_with_default("reverse_color_temp", False)
+    base["min_button_push_time"] = get_setting_with_default("min_button_push_time", 50)
+    base["button_long_press_time"] = get_setting_with_default("button_long_press_time", 5000)
+    base["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time", 300)
+    base["special_mode_release_time"] = get_setting_with_default("special_mode_release_time", 5000)
+    base["mqtt_ignore_time"] = get_setting_with_default("mqtt_ignore_time", 3000)
     base["rooms"] = []
     for room in Room.objects.all().order_by('displayOrder'):
         base["rooms"].append(room.id)

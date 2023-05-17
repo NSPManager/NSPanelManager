@@ -44,7 +44,6 @@ void InterfaceManager::stop() {
 
 void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   unsigned long start = millis();
-  // TODO: Implement "connect"-command before proceeding. Wait for "connect"-command to succeed
   NspanelManagerPage::show();
   while (!WiFi.isConnected() || !MqttManager::connected() && !InterfaceManager::hasRegisteredToManager) {
     if (!WiFi.isConnected()) {
@@ -68,7 +67,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
 
   NspanelManagerPage::setText("Loading config...");
 
-  InterfaceManager::instance->_roomDataJson = new DynamicJsonDocument(1024);
+  InterfaceManager::instance->_roomDataJson = new DynamicJsonDocument(2048);
   uint8_t tries = 0;
   bool successDownloadingConfig = false;
   do {
@@ -133,7 +132,6 @@ void InterfaceManager::_subscribeToLightTopics(lightConfig *cfg) {
   levelStatusTopic.append(std::to_string(cfg->id));
   levelStatusTopic.append("/state_brightness_pct");
   MqttManager::subscribeToTopic(levelStatusTopic.c_str(), &InterfaceManager::mqttCallback);
-  
 
   if (cfg->canTemperature) {
     std::string colorTempStateTopic = "nspanel/entities/light/";
@@ -744,10 +742,9 @@ void InterfaceManager::_startSpecialModeTimer() {
 void InterfaceManager::_taskSpecialModeTimer(void *param) {
   // Wait until no event has occured for 5 seconds before returning to normal mode
   while (true) {
-    // TODO: Make timeout configurable
-    if (!InterfaceManager::instance->_isFingerOnDisplay && millis() > InterfaceManager::instance->_lastSpecialModeEventMillis + 5000) {
+    if (!InterfaceManager::instance->_isFingerOnDisplay && millis() > InterfaceManager::instance->_lastSpecialModeEventMillis + InterfaceManager::instance->config.special_mode_release_time) {
       break;
-    } else if (!InterfaceManager::instance->_isFingerOnDisplay && millis() > InterfaceManager::instance->_lastSpecialModeEventMillis + 5000) {
+    } else if (!InterfaceManager::instance->_isFingerOnDisplay && millis() > InterfaceManager::instance->_lastSpecialModeEventMillis + InterfaceManager::instance->config.special_mode_release_time) {
       InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
     }
     vTaskDelay(250 / portTICK_PERIOD_MS);
@@ -774,8 +771,7 @@ void InterfaceManager::_stopSpecialMode() {
 void InterfaceManager::_taskSpecialModeTriggerTask(void *param) {
   unsigned long start = millis();
 
-  // TODO: Make trigger time configurable
-  while (millis() < start + 300) {
+  while (millis() < start + InterfaceManager::instance->config.special_mode_trigger_time) {
     if (!InterfaceManager::instance->_isFingerOnDisplay) {
       // User did not hold finger entire period, do not trigger special mode
       vTaskDelete(NULL);
@@ -803,6 +799,11 @@ void InterfaceManager::_processPanelConfig() {
   this->config.colorTempMax = (*this->_roomDataJson)["color_temp_max"].as<uint16_t>();
   this->config.reverseColorTempSlider = (*this->_roomDataJson)["reverse_color_temp"].as<String>().equals("True");
   this->config.raiseToMaxLightLevelAbove = (*this->_roomDataJson)["raise_to_100_light_level"].as<uint8_t>();
+  this->config.button_min_press_time = (*this->_roomDataJson)["min_button_push_time"].as<uint16_t>();
+  this->config.button_long_press_time = (*this->_roomDataJson)["button_long_press_time"].as<uint16_t>();
+  this->config.special_mode_trigger_time = (*this->_roomDataJson)["special_mode_trigger_time"].as<uint16_t>();
+  this->config.special_mode_release_time = (*this->_roomDataJson)["special_mode_release_time"].as<uint16_t>();
+  this->config.mqtt_ignore_time = (*this->_roomDataJson)["mqtt_ignore_time"].as<uint16_t>();
   uint8_t numberOfRooms = (*this->_roomDataJson)["rooms"].as<JsonArray>().size();
   uint8_t currentRoom = 1;
   DynamicJsonDocument *buffer = new DynamicJsonDocument(2048);
@@ -1062,8 +1063,7 @@ void InterfaceManager::_onOffLight(lightConfig *light) {
 }
 
 void InterfaceManager::_changeLightsToLevel(std::list<lightConfig *> *lights, uint8_t level) {
-  // TODO: Make timeout configurable
-  this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
+  this->_ignoreMqttStatusUpdatesUntil = millis() + this->config.mqtt_ignore_time;
 
   DynamicJsonDocument doc(1024);
   doc["mac_origin"] = WiFi.macAddress().c_str();
@@ -1088,8 +1088,7 @@ void InterfaceManager::_changeLightsToLevel(std::list<lightConfig *> *lights, ui
 }
 
 void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig *> *lights, uint16_t kelvin) {
-  // TODO: Make timeout configurable
-  this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
+  this->_ignoreMqttStatusUpdatesUntil = millis() + this->config.mqtt_ignore_time;
 
   uint16_t sendKelvin = kelvin * ((this->config.colorTempMax - this->config.colorTempMin) / 100);
   if (this->config.reverseColorTempSlider) {
@@ -1121,8 +1120,7 @@ void InterfaceManager::_changeLightsToKelvin(std::list<lightConfig *> *lights, u
 }
 
 void InterfaceManager::_changeLightsToColorSaturation(std::list<lightConfig *> *lights, uint8_t saturation) {
-  // TODO: Make timeout configurable
-  this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
+  this->_ignoreMqttStatusUpdatesUntil = millis() + this->config.mqtt_ignore_time;
 
   DynamicJsonDocument doc(1024);
   doc["mac_origin"] = WiFi.macAddress().c_str();
@@ -1147,8 +1145,7 @@ void InterfaceManager::_changeLightsToColorSaturation(std::list<lightConfig *> *
 }
 
 void InterfaceManager::_changeLightsToColorHue(std::list<lightConfig *> *lights, uint16_t hue) {
-  // TODO: Make timeout configurable
-  this->_ignoreMqttStatusUpdatesUntil = millis() + 3000;
+  this->_ignoreMqttStatusUpdatesUntil = millis() + this->config.mqtt_ignore_time;
 
   DynamicJsonDocument doc(1024);
   doc["mac_origin"] = WiFi.macAddress().c_str();
