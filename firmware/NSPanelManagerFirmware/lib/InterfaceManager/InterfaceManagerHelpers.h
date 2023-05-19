@@ -85,6 +85,7 @@ struct interfaceConfig {
   std::list<lightConfig *> getAllCeilingLights();
   std::list<lightConfig *> getAllTableLights();
   std::list<lightConfig *> getAllLights();
+  lightConfig *getLightById(uint16_t id);
   bool anyCeilingLightsOn();
   bool anyTableLightstOn();
   bool anyLightsOn();

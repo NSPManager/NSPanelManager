@@ -35,6 +35,25 @@ public:
   static inline InterfaceManager *instance;
   /// @brief The configuration for this panel
   interfaceConfig config;
+  /// @brief If the light os ON, it will turn off. If the light is OFF, turn it ON
+  /// @param light The light to change
+  void _onOffLight(lightConfig *light);
+  /// @brief Send out new light level for a list of lights
+  /// @param lights The lights to set value for
+  /// @param level The new value
+  void _changeLightsToLevel(std::list<lightConfig *> *lights, uint8_t level);
+  /// @brief Send out new color temperature for a list of lights
+  /// @param lights The lights to set value for
+  /// @param level The new value
+  void _changeLightsToKelvin(std::list<lightConfig *> *lights, uint16_t kelvin);
+  /// @brief Send out new color saturation for a list of lights
+  /// @param lights The lights to set value for
+  /// @param level The new value
+  void _changeLightsToColorSaturation(std::list<lightConfig *> *lights, uint8_t kelvin);
+  /// @brief Send out new color hue for a list of lights
+  /// @param lights The lights to set value for
+  /// @param level The new value
+  void _changeLightsToColorHue(std::list<lightConfig *> *lights, uint16_t kelvin);
 
 private:
   /// @brief The task that handles startup if InterfaceManager. It load the config from the server and processes it and
@@ -149,27 +168,6 @@ private:
   /// @param light_id The light ID to set value for
   /// @param level The new value
   void _setLightColorTemperature(uint16_t light_id, uint8_t level);
-
-  /// @brief If the light os ON, it will turn off. If the light is OFF, turn it ON
-  /// @param light The light to change
-  void _onOffLight(lightConfig *light);
-
-  /// @brief Send out new light level for a list of lights
-  /// @param lights The lights to set value for
-  /// @param level The new value
-  void _changeLightsToLevel(std::list<lightConfig *> *lights, uint8_t level);
-  /// @brief Send out new color temperature for a list of lights
-  /// @param lights The lights to set value for
-  /// @param level The new value
-  void _changeLightsToKelvin(std::list<lightConfig *> *lights, uint16_t kelvin);
-  /// @brief Send out new color saturation for a list of lights
-  /// @param lights The lights to set value for
-  /// @param level The new value
-  void _changeLightsToColorSaturation(std::list<lightConfig *> *lights, uint8_t kelvin);
-  /// @brief Send out new color hue for a list of lights
-  /// @param lights The lights to set value for
-  /// @param level The new value
-  void _changeLightsToColorHue(std::list<lightConfig *> *lights, uint16_t kelvin);
 };
 
 #endif

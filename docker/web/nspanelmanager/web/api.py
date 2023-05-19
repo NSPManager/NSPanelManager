@@ -209,7 +209,7 @@ def get_nspanel_config(request):
     if nspanel.button2_detached_mode_light:
         base["button2_detached_light"] = nspanel.button2_detached_mode_light.id
     else:
-        base["button2_detached_mode_light"] = -1
+        base["button2_detached_light"] = -1
     base["rooms"] = []
     for room in Room.objects.all().order_by('displayOrder'):
         base["rooms"].append(room.id)

@@ -7,17 +7,21 @@
 #define BUTTON_MANAGER_RELAY1_PIN 22
 #define BUTTON_MANAGER_RELAY2_PIN 19
 
-
 #include <Arduino.h>
+#include <InterfaceManagerHelpers.h>
 
 class ButtonManager {
 public:
   static void init();
   static void mqttCallback(char *topic, byte *payload, unsigned int length);
+  static inline lightConfig *button1_detached_mode_light;
+  static inline lightConfig *button2_detached_mode_light;
+
 private:
-  static void _loop(void* param);
+  static void _loop(void *param);
   static void _setRelayState(uint8_t relay, bool state);
-  
+  static void _processButtonStateChange(uint8_t button, bool new_state);
+
   static inline bool _lastButton1State;
   static inline bool _newButton1State;
   static inline unsigned long _lastButton1StateChange;

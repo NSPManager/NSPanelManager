@@ -3,6 +3,11 @@
 
 #include <string>
 
+enum BUTTON_MODE {
+  DIRECT,
+  DETACHED
+};
+
 class NSPMConfig {
 public:
   /// @brief Will try to initialize and load LittleFS
@@ -84,6 +89,10 @@ public:
 
   /// @brief Time to ignore incomming MQTT messages after a command is sent out
   uint16_t mqtt_ignore_time;
+
+  // Button modes. 0 = direct mode. 1 = detached mode.
+  BUTTON_MODE button1_mode;
+  BUTTON_MODE button2_mode;
 };
 
 #endif

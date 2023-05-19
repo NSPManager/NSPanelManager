@@ -1,3 +1,4 @@
+#include <ButtonManager.hpp>
 #include <InterfaceManager.hpp>
 #include <MqttLog.hpp>
 #include <TftDefines.h>
@@ -804,6 +805,9 @@ void InterfaceManager::_processPanelConfig() {
   this->config.special_mode_trigger_time = (*this->_roomDataJson)["special_mode_trigger_time"].as<uint16_t>();
   this->config.special_mode_release_time = (*this->_roomDataJson)["special_mode_release_time"].as<uint16_t>();
   this->config.mqtt_ignore_time = (*this->_roomDataJson)["mqtt_ignore_time"].as<uint16_t>();
+  NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>((*this->_roomDataJson)["button1_mode"].as<uint8_t>());
+  NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>((*this->_roomDataJson)["button2_mode"].as<uint8_t>());
+
   uint8_t numberOfRooms = (*this->_roomDataJson)["rooms"].as<JsonArray>().size();
   uint8_t currentRoom = 1;
   DynamicJsonDocument *buffer = new DynamicJsonDocument(2048);
@@ -849,6 +853,28 @@ void InterfaceManager::_processPanelConfig() {
     this->config.rooms.push_back(roomCfg);
   }
   delete buffer;
+
+  // All rooms and lights has loaded, prep buttonmanager
+  if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DETACHED) {
+    ButtonManager::button1_detached_mode_light = InterfaceManager::instance->config.getLightById((*this->_roomDataJson)["button1_detached_light"].as<uint16_t>());
+    if (ButtonManager::button1_detached_mode_light != nullptr) {
+      LOG_DEBUG("Button 1 detached mode light: ", ButtonManager::button1_detached_mode_light->name.c_str());
+    } else {
+      LOG_ERROR("Coudln't find Button 1 detached mode light with ID: ", (*this->_roomDataJson)["button1_detached_light"].as<uint16_t>());
+    }
+  } else {
+    ButtonManager::button1_detached_mode_light = nullptr;
+  }
+  if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DETACHED) {
+    ButtonManager::button2_detached_mode_light = InterfaceManager::instance->config.getLightById((*this->_roomDataJson)["button2_detached_light"].as<uint16_t>());
+    if (ButtonManager::button2_detached_mode_light != nullptr) {
+      LOG_DEBUG("Button 2 detached mode light: ", ButtonManager::button2_detached_mode_light->name.c_str());
+    } else {
+      LOG_ERROR("Coudln't find Button 2 detached mode light with ID: ", (*this->_roomDataJson)["button2_detached_light"].as<uint16_t>());
+    }
+  } else {
+    ButtonManager::button2_detached_mode_light = nullptr;
+  }
 
   // Panel config processed, clear Json data
   this->_roomDataJson->clear();

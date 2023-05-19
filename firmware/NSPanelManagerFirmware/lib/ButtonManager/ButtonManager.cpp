@@ -1,4 +1,5 @@
 #include "ButtonManager.hpp"
+#include <InterfaceManager.hpp>
 #include <MqttLog.hpp>
 #include <MqttManager.hpp>
 #include <NSPMConfig.h>
@@ -49,6 +50,24 @@ void ButtonManager::_setRelayState(uint8_t relay, bool state) {
   }
 }
 
+void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
+  if (button == 1) {
+    if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DIRECT) {
+      ButtonManager::_setRelayState(1, !digitalRead(BUTTON_MANAGER_RELAY1_PIN));
+    } else if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DETACHED && ButtonManager::button1_detached_mode_light != nullptr) {
+      LOG_DEBUG("Button 1 pressed, detached light: ", ButtonManager::button1_detached_mode_light->name.c_str());
+      InterfaceManager::instance->_onOffLight(ButtonManager::button1_detached_mode_light);
+    }
+  } else if (button == 2) {
+    if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DIRECT) {
+      ButtonManager::_setRelayState(2, !digitalRead(BUTTON_MANAGER_RELAY2_PIN));
+    } else if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DETACHED && ButtonManager::button2_detached_mode_light != nullptr) {
+      LOG_DEBUG("Button 2 pressed, detached light: ", ButtonManager::button2_detached_mode_light->name.c_str());
+      InterfaceManager::instance->_onOffLight(ButtonManager::button2_detached_mode_light);
+    }
+  }
+}
+
 void ButtonManager::_loop(void *param) {
   LOG_DEBUG("Started ButtonManager _loop.");
 
@@ -61,7 +80,7 @@ void ButtonManager::_loop(void *param) {
       ButtonManager::_lastButton1State = ButtonManager::_newButton1State;
     } else if (ButtonManager::_newButton1State == ButtonManager::_lastButton1State && millis() - ButtonManager::_lastButton1StateChange <= BUTTON_MANAGER_BUTTON_DEBOUNCE_MS) {
       if (ButtonManager::_newButton1State) {
-        ButtonManager::_setRelayState(1, !digitalRead(BUTTON_MANAGER_RELAY1_PIN));
+        ButtonManager::_processButtonStateChange(1, ButtonManager::_newButton1State);
       }
     }
 
@@ -70,7 +89,7 @@ void ButtonManager::_loop(void *param) {
       ButtonManager::_lastButton2State = ButtonManager::_newButton2State;
     } else if (ButtonManager::_newButton2State == ButtonManager::_lastButton2State && millis() - ButtonManager::_lastButton2StateChange <= BUTTON_MANAGER_BUTTON_DEBOUNCE_MS) {
       if (ButtonManager::_newButton2State) {
-        ButtonManager::_setRelayState(2, !digitalRead(BUTTON_MANAGER_RELAY2_PIN));
+        ButtonManager::_processButtonStateChange(2, ButtonManager::_newButton2State);
       }
     }
 
