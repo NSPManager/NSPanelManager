@@ -33,7 +33,6 @@ void ButtonManager::mqttCallback(char *topic, byte *payload, unsigned int length
   }
 
   if (relay > 0) {
-    LOG_DEBUG("Got relay state: ", (*payload));
     ButtonManager::_setRelayState(relay, (*payload) == '1');
   }
 }
@@ -51,7 +50,7 @@ void ButtonManager::_setRelayState(uint8_t relay, bool state) {
 }
 
 void ButtonManager::_loop(void *param) {
-  LOG_DEBUG("Started Button Manager loop.");
+  LOG_DEBUG("Started ButtonManager _loop.");
 
   for (;;) {
     ButtonManager::_newButton1State = !digitalRead(BUTTON_MANAGER_BUTTON1_PIN);

@@ -130,6 +130,16 @@ def edit_nspanel(request, panel_id: int):
 def save_panel_settings(request, panel_id: int):
     panel = NSPanel.objects.get(id=panel_id)
     panel.room = Room.objects.get(id=request.POST["room_id"])
+    panel.button1_mode = request.POST["button1_mode"]
+    if request.POST["button1_mode"] == "1":
+        panel.button1_detached_mode_light = Light.objects.get(id=request.POST["button1_detached_mode_light"])
+    else:
+        panel.button1_detached_mode_light = None
+    panel.button2_mode = request.POST["button2_mode"]
+    if request.POST["button2_mode"] == "1":
+        panel.button2_detached_mode_light = Light.objects.get(id=request.POST["button2_detached_mode_light"])
+    else:
+        panel.button2_detached_mode_light = None
     panel.save()
     return redirect('edit_nspanel', panel_id)
 

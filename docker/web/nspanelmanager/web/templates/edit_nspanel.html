@@ -3,6 +3,7 @@
 {% block head %}
 {% load static %}
 <script src="{% static 'edit_nspanel.js' %}"></script>
+<script src="{% static 'question.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -25,7 +26,84 @@
             </div>
         </div>
     </div>
-    <div class="field is-grouped">
+    <div class="field">
+        <label class="label">Button 1 mode<span class="question">
+              <span class="icon question_icon">
+                <i class="mdi mdi-help"></i>
+              </span>
+              <div class="question_help_text notification is-info is-light">
+                Direct mode: The button directly controls the relay.<br>
+                Detached mode: The button does not directly control the relay but is instead coupled to a light added in the room. In case the lights is removed from the room, the button will will remain in detached mode but will no longed be coupled to any button.
+              </div>
+            </span>
+        </label>
+        <div class="control">
+            <div class="select">
+              <select name="button1_mode">
+                <option value="0" {% if panel.button1_mode == 0 %}selected{% endif %}>Direct mode</option>
+                <option value="1" {% if panel.button1_mode == 1 %}selected{% endif %}>Detached mode</option>
+              </select>
+            </div>
+        </div>
+        <label class="label">Button 1 controls light in room {{ panel.room.friendly_name }}</label>
+        <div class="control">
+            <div class="select">
+              <select name="button1_detached_mode_light">
+                {% if panel.button1_detached_mode_light == None %}
+                <option value="-1" selected>-</option>
+                {% else %}
+                <option value="-1">-</option>
+                {% endif %}
+                {% for light in panel.room.light_set.all %}
+                    {% if panel.button1_detached_mode_light == light %}
+                    <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
+                    {% else %}
+                    <option value="{{ light.id }}">{{ light.friendly_name }}</option>
+                    {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+        </div>
+    </div>
+    <div class="field">
+       <label class="label">Button 2 mode<span class="question">
+             <span class="icon question_icon">
+               <i class="mdi mdi-help"></i>
+             </span>
+             <div class="question_help_text notification is-info is-light">
+               Direct mode: The button directly controls the relay.<br>
+               Detached mode: The button does not directly control the relay but is instead coupled to a light added in the room. In case the lights is removed from the room, the button will will remain in detached mode but will no longed be coupled to any button.
+             </div>
+           </span>
+       </label>
+       <div class="control">
+           <div class="select">
+             <select name="button2_mode">
+               <option value="0" {% if panel.button2_mode == 0 %}selected{% endif %}>Direct mode</option>
+               <option value="1" {% if panel.button2_mode == 1 %}selected{% endif %}>Detached mode</option>             </select>
+           </div>
+       </div>
+       <label class="label">Button 2 controls light in room {{ panel.room.friendly_name }}</label>
+       <div class="control">
+           <div class="select">
+             <select name="button2_detached_mode_light">
+               {% if panel.button2_detached_mode_light == None %}
+               <option value="-1" selected>-</option>
+               {% else %}
+               <option value="-1">-</option>
+               {% endif %}
+               {% for light in panel.room.light_set.all %}
+                   {% if panel.button2_detached_mode_light == light %}
+                   <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
+                   {% else %}
+                   <option value="{{ light.id }}">{{ light.friendly_name }}</option>
+                   {% endif %}
+               {% endfor %}
+             </select>
+           </div>
+       </div>
+    </div>
+     <div class="field is-grouped">
         <div class="control">
             <button class="button is-primary">Save</button>
             <a type="button" class="button is-link" href="/api/reboot_panel?address={{ panel.ip_address }}">Reboot</a>

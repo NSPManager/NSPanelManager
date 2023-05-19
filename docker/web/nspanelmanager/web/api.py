@@ -200,6 +200,16 @@ def get_nspanel_config(request):
     base["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time", 300)
     base["special_mode_release_time"] = get_setting_with_default("special_mode_release_time", 5000)
     base["mqtt_ignore_time"] = get_setting_with_default("mqtt_ignore_time", 3000)
+    base["button1_mode"] = nspanel.button1_mode
+    if nspanel.button1_detached_mode_light:
+        base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
+    else:
+        base["button1_detached_mode_light"] = -1
+    base["button2_mode"] = nspanel.button2_mode
+    if nspanel.button2_detached_mode_light:
+        base["button2_detached_light"] = nspanel.button2_detached_mode_light.id
+    else:
+        base["button2_detached_mode_light"] = -1
     base["rooms"] = []
     for room in Room.objects.all().order_by('displayOrder'):
         base["rooms"].append(room.id)

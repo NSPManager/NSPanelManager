@@ -14,7 +14,7 @@ import mqtt_manager_libs.light
 import re 
 
 def get_machine_mac():
-    pid = subprocess.Popen(["arp", "-n"], stdout=subprocess.PIPE)
+    pid = subprocess.Popen(["ifconfig" ], stdout=subprocess.PIPE)
     s = pid.communicate()[0].decode()
     mac = re.search(r"(([a-f\d]{1,2}\:){5}[a-f\d]{1,2})", s).groups()[0]
     return mac
