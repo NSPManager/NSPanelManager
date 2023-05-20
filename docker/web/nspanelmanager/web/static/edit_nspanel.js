@@ -44,6 +44,29 @@ function connect_to_websocket() {
     };
 }
 
+function update_shown_elements() {
+  if($("#button1_mode").val() == 0) { // Direct mode
+    $("#button1_detached_mode_light_label").hide();
+    $("#button1_detached_mode_light_select").hide();
+  } else {
+    $("#button1_detached_mode_light_label").show();
+    $("#button1_detached_mode_light_select").show();
+  }
+
+  if($("#button2_mode").val() == 0) { // Direct mode
+    $("#button2_detached_mode_light_label").hide();
+    $("#button2_detached_mode_light_select").hide();
+  } else {
+    $("#button2_detached_mode_light_label").show();
+    $("#button2_detached_mode_light_select").show();
+  }
+
+}
+
 $(document).ready(function() {
-    connect_to_websocket(); 
+  connect_to_websocket(); 
+  update_shown_elements();
+
+  $("#button1_mode").change(update_shown_elements);
+  $("#button2_mode").change(update_shown_elements);
 });

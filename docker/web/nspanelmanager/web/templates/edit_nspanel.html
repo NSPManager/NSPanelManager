@@ -39,16 +39,16 @@
         </label>
         <div class="control">
             <div class="select">
-              <select name="button1_mode">
+              <select name="button1_mode" id="button1_mode">
                 <option value="0" {% if panel.button1_mode == 0 %}selected{% endif %}>Direct mode</option>
                 <option value="1" {% if panel.button1_mode == 1 %}selected{% endif %}>Detached mode</option>
               </select>
             </div>
         </div>
-        <label class="label">Button 1 controls light in room {{ panel.room.friendly_name }}</label>
-        <div class="control">
+        <label class="label" id="button1_detached_mode_light_label">Button 1 controls light in room {{ panel.room.friendly_name }}</label>
+        <div class="control" id="button1_detached_mode_light_select">
             <div class="select">
-              <select name="button1_detached_mode_light">
+              <select name="button1_detached_mode_light" id="button1_detached_mode_light">
                 {% if panel.button1_detached_mode_light == None %}
                 <option value="-1" selected>-</option>
                 {% else %}
@@ -78,15 +78,15 @@
        </label>
        <div class="control">
            <div class="select">
-             <select name="button2_mode">
+             <select name="button2_mode" id="button2_mode">
                <option value="0" {% if panel.button2_mode == 0 %}selected{% endif %}>Direct mode</option>
                <option value="1" {% if panel.button2_mode == 1 %}selected{% endif %}>Detached mode</option>             </select>
            </div>
        </div>
-       <label class="label">Button 2 controls light in room {{ panel.room.friendly_name }}</label>
-       <div class="control">
+       <label class="label" id="button2_detached_mode_light_label">Button 2 controls light in room {{ panel.room.friendly_name }}</label>
+       <div class="control" id="button2_detached_mode_light_select">
            <div class="select">
-             <select name="button2_detached_mode_light">
+             <select name="button2_detached_mode_light" id="button2_detached_mode_light">
                {% if panel.button2_detached_mode_light == None %}
                <option value="-1" selected>-</option>
                {% else %}
