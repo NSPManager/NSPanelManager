@@ -8,7 +8,7 @@ import hashlib
 import psutil
 import subprocess
 
-from .models import NSPanel, Room, Light, Settings
+from .models import NSPanel, Room, Light, Settings, Scene
 from web.settings_helper import get_setting_with_default, set_setting_value
 
 
@@ -99,7 +99,6 @@ def edit_room(request, room_id: int):
         'light12': Light.objects.filter(room=room, room_view_position=12).first(),
     }
     return render(request, 'edit_room.html', data)
-
 
 def save_new_room(request):
     new_room = Room()
@@ -206,6 +205,22 @@ def add_light_to_room(request, room_id: int):
     restart_mqtt_manager()
     return redirect('edit_room', room_id=room_id)
 
+def add_scene_to_room(request, room_id: int):
+    room = Room.objects.filter(id=room_id).first()
+    if int(request.POST["edit_scene_id"]) >= 0:
+        new_scene = Scene.objects.get(id=int(request.POST["edit_scene_id"]))
+    else:
+        new_scene = Scene()
+    new_scene.friendly_name = request.POST["scene_name"]
+    new_scene.room = room
+    new_scene.save()
+    return redirect('edit_room', room_id=room_id)
+
+def delete_scene(request, scene_id: int):
+    scene = Scene.objects.get(id=scene_id)
+    if scene:
+        scene.delete()
+    return redirect('edit_room', room_id=scene.room.id)
 
 def add_light_to_room_view(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()

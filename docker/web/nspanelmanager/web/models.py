@@ -70,3 +70,9 @@ class Light(models.Model):
 
     def __str__(self) -> str:
         return F"{self.room.friendly_name} -> {self.friendly_name}"
+
+class Scene(models.Model):
+    friendly_name = models.CharField(max_length=32)
+    room = models.ForeignKey(Room, null=True, blank=True, on_delete=models.CASCADE)
+    lights = models.ManyToManyField(Light)
+

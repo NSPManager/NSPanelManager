@@ -151,6 +151,31 @@
   </div>
 </form>
 
+<form method="POST" action="{% url 'add_new_scene_to_room' room.id %}">
+  {% csrf_token %}
+  <input type="hidden" id="edit_scene_id" name="edit_scene_id">
+  <div class="modal" id="add_new_scene_to_room_modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Create new scene</p>
+        <button type="button" class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <div class="control">
+            <input class="input" type="text" placeholder="Scene name" name="scene_name" id="scene_name">
+          </div>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button type="submit" class="button is-success">Save changes</button>
+        <button type="button" class="button modal-cancel-button">Cancel</button>
+      </footer>
+    </div>
+  </div>
+</form>
+
 <form method="POST" action="{% url 'add_new_light_to_room_view' room.id %}">
   {% csrf_token %}
   <input type="hidden" id="add_new_light_to_room_view_position" name="position">
@@ -210,7 +235,31 @@
 </div>
 <hr>
 <div class="block">
-  <h2 class="title is-4">Lights in room</h2>
+  <h2 class="title is-4">{{ room.friendly_name }} scenes</h2>
+  <button type="button" class="button is-primary" onclick="add_new_scene();">Add new scene</button>
+  <table class="table is-fullwidth is-hoverable">
+    <thead>
+      <tr>
+        <th>Scene name</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for scene in room.scene_set.all %}
+      <tr>
+        <th>{{ scene.friendly_name }}</th>
+        <td>
+          <button onclick="edit_scene({{ scene.id }}, '{{ scene.friendly_name }}');" class="button is-small is-primary">Edit</button>
+          <a href='{% url "delete_scene" scene.id %}' class="button is-small is-danger">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<hr>
+<div class="block">
+  <h2 class="title is-4">{{ room.friendly_name }} lights</h2>
   <button type="button" class="button is-primary" onclick="add_new_light();">Add new light</button>
   <table class="table is-fullwidth is-hoverable">
     <thead>
