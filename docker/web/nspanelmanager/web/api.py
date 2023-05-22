@@ -9,7 +9,7 @@ import hashlib
 import psutil
 import subprocess
 
-from .models import NSPanel, Room, Light
+from .models import NSPanel, Room, Light, LightState, Scene
 from web.settings_helper import get_setting_with_default
 
 
@@ -229,6 +229,10 @@ def get_room_config(request, room_id: int):
         return_json["lights"][light.id]["can_temperature"] = light.can_color_temperature
         return_json["lights"][light.id]["can_rgb"] = light.can_rgb
         return_json["lights"][light.id]["view_position"] = light.room_view_position
+    return_json["scenes"] = {}
+    for scene in room.scene_set.all():
+        return_json["scenes"][scene.id] = {}
+        return_json["scenes"][scene.id]["name"] = scene.friendly_name
     return JsonResponse(return_json)
 
 
@@ -288,3 +292,53 @@ def set_panel_online_status(request, panel_mac: str):
         return HttpResponse("", status=200)
 
     return HttpResponse("Panel is not registered", status=500)
+
+def get_scenes(request):
+    return_json = {}
+    return_json["scenes"] = []
+    for scene in Scene.objects.all():
+        scene_info = {
+            "scene_id": scene.id,
+            "scene_name": scene.friendly_name,
+            "room_name": scene.room.friendly_name,
+            "room_id": scene.room.id,
+            "light_states": []
+        }
+        for state in scene.lightstate_set.all():
+            scene_info["light_states"].append({
+                "light_id": state.light.id,
+                "light_type": state.light.type,
+                "color_mode": state.color_mode,
+                "light_level": state.light_level,
+                "hue": state.hue,
+                "saturation": state.saturation
+            })
+        return_json["scenes"].append(scene_info)
+    return JsonResponse(return_json)
+
+@csrf_exempt
+def save_scene(request):
+    data = json.loads(request.body)
+    scene = Scene.objects.filter(id=data["scene_id"]).first()
+    if scene:
+        scene.lightstate_set.all().delete() # Remove all old states
+        for light_state in data["light_states"]:
+            light = Light.objects.filter(id=light_state["light_id"]).first()
+            if light:
+                new_state = LightState()
+                new_state.light = light
+                new_state.scene = scene
+                if light_state["mode"] == "dimmer":
+                    new_state.color_mode = "dimmer"
+                    new_state.light_level = light_state["level"]
+                elif light_state["mode"] == "color":
+                    new_state.color_mode = "color"
+                    new_state.light_level = light_state["level"]
+                    new_state.hue = light_state["hue"]
+                    new_state.saturation = light_state["sat"]
+                new_state.save()
+            else:
+                print("ERROR: Couldn't find a light with ID " + light_state["light_id"] + ". Will skip light!")
+        return HttpResponse("OK", status=200)
+    else:
+        return HttpResponse("Scene does not exist!", status=500)

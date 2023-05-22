@@ -40,6 +40,11 @@ struct lightConfig {
   std::string name;
 };
 
+struct sceneConfig {
+  uint16_t id = 0;
+  std::string name;
+};
+
 /// @brief Object/container used to represent a room
 class roomConfig {
 public:
@@ -47,6 +52,7 @@ public:
   std::string name;
   std::list<lightConfig> ceilingLights;
   std::list<lightConfig> tableLights;
+  std::list<sceneConfig> scenes;
   std::list<lightConfig *> getCeilingLightsThatAreOn();
   std::list<lightConfig *> getTableLightsThatAreOn();
   std::list<lightConfig *> getAllLightsThatAreOn();

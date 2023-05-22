@@ -74,5 +74,11 @@ class Light(models.Model):
 class Scene(models.Model):
     friendly_name = models.CharField(max_length=32)
     room = models.ForeignKey(Room, null=True, blank=True, on_delete=models.CASCADE)
-    lights = models.ManyToManyField(Light)
 
+class LightState(models.Model):
+    light = models.ForeignKey(Light, on_delete=models.CASCADE)
+    scene = models.ForeignKey(Scene, on_delete=models.CASCADE)
+    color_mode = models.CharField(max_length=32, default="dimmer")
+    light_level = models.IntegerField(default=0)
+    hue = models.IntegerField(default=0)
+    saturation = models.IntegerField(default=0)

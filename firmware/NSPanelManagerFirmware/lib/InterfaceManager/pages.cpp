@@ -313,6 +313,64 @@ void NspanelManagerPage::setText(std::string &text) {
   NSPanel::instance->setComponentText(NSPANELMANAGER_TEXT_NAME, text.c_str());
 }
 
-void NspanelManagerPage::setText(const char* text) {
+void NspanelManagerPage::setText(const char *text) {
   NSPanel::instance->setComponentText(NSPANELMANAGER_TEXT_NAME, text);
+}
+
+void ScenePage::show() {
+  // TODO: Enter correct name given in TftDefines
+  NSPanel::instance->goToPage(SCENES_PAGE_NAME);
+}
+
+void ScenePage::showScenes(std::list<sceneConfig> &scenes) {
+  // Hide any elements that wont be used
+  // 4 is the number of scenes we can show on the screen.
+  for (uint8_t i = scenes.size() - 1; i < 4; i++) {
+    switch (i) {
+    case 0:
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_LABEL_NAME, false);
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, false);
+    case 1:
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, false);
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, false);
+    case 2:
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, false);
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, false);
+    case 3:
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, false);
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, false);
+    default:
+      break;
+    }
+  }
+
+  // TODO: Loop over scenes and populate scenes list in room. Use names from TftDefines
+  uint8_t i = 0;
+  for (sceneConfig &scene : scenes) {
+    switch (i) {
+    case 0:
+      NSPanel::instance->setComponentText(SCENES_PAGE_SCENE1_LABEL_NAME, scene.name.c_str());
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_LABEL_NAME, true);
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, true);
+      break;
+    case 1:
+      NSPanel::instance->setComponentText(SCENES_PAGE_SCENE2_LABEL_NAME, scene.name.c_str());
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, true);
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, true);
+      break;
+    case 2:
+      NSPanel::instance->setComponentText(SCENES_PAGE_SCENE3_LABEL_NAME, scene.name.c_str());
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, true);
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, true);
+      break;
+    case 3:
+      NSPanel::instance->setComponentText(SCENES_PAGE_SCENE4_LABEL_NAME, scene.name.c_str());
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, true);
+      NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, true);
+      break;
+    default:
+      break;
+    }
+    i++;
+  }
 }

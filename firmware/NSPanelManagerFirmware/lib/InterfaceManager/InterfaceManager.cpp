@@ -818,10 +818,9 @@ void InterfaceManager::_processPanelConfig() {
     info_text.append(std::to_string(currentRoom));
     info_text.append("/");
     info_text.append(std::to_string(numberOfRooms));
-
     NspanelManagerPage::setText(info_text.c_str());
-    // Try downloading room config for a long as needed
 
+    // Try downloading room config for a long as needed
     for (;;) {
       if (this->_getRoomConfig(roomId, buffer)) {
         break;
@@ -848,6 +847,13 @@ void InterfaceManager::_processPanelConfig() {
       } else {
         roomCfg.tableLights.push_back(lightCfg);
       }
+    }
+
+    JsonVariant json_scenes = (*buffer)["scenes"];
+    for (JsonPair lightPair : json_lights.as<JsonObject>()) {
+      sceneConfig sceneCfg;
+      sceneCfg.id = atoi(lightPair.key().c_str());
+      sceneCfg.name = lightPair.value()["name"] | "ERR-S";
     }
     buffer->clear();
     this->config.rooms.push_back(roomCfg);
@@ -952,13 +958,17 @@ void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int len
     return;
   }
 
-  mqttMessage msg;
-  msg.topic = topic;
-  msg.payload = std::string((char *)payload, length);
-  InterfaceManager::_mqttMessages.push_back(msg);
-  // Notify task that a new message needs processing
-  vTaskNotifyGiveFromISR(InterfaceManager::_taskHandleProcessMqttMessages, NULL);
-  portYIELD_FROM_ISR();
+  if (InterfaceManager::_mqttMessages.size() < 10) {
+    mqttMessage msg;
+    msg.topic = topic;
+    msg.payload = std::string((char *)payload, length);
+    InterfaceManager::_mqttMessages.push_back(msg);
+    if (InterfaceManager::_taskHandleProcessMqttMessages) {
+      // Notify task that a new message needs processing
+      vTaskNotifyGiveFromISR(InterfaceManager::_taskHandleProcessMqttMessages, NULL);
+      portYIELD_FROM_ISR();
+    }
+  }
 }
 
 void InterfaceManager::_taskProcessMqttMessages(void *param) {
@@ -1193,6 +1203,20 @@ void InterfaceManager::_changeLightsToColorHue(std::list<lightConfig *> *lights,
   } else {
     LOG_ERROR("Failed to send MQTT brightness update.");
   }
+}
+
+void InterfaceManager::activateScene(sceneConfig scene) {
+  std::string mqtt_topic = "nspanel/";
+  mqtt_topic.append(std::to_string(scene.id));
+  mqtt_topic.append("/activate");
+  MqttManager::publish(mqtt_topic, "1");
+}
+
+void InterfaceManager::saveScene(sceneConfig scene) {
+  std::string mqtt_topic = "nspanel/";
+  mqtt_topic.append(std::to_string(scene.id));
+  mqtt_topic.append("/save");
+  MqttManager::publish(mqtt_topic, "1");
 }
 
 void InterfaceManager::_updatePanelLightStatus() {

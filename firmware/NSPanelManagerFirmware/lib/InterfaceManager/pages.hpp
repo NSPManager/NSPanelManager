@@ -62,10 +62,15 @@ private:
   static inline LIGHT_PAGE_MODE _currentMode;
 };
 
+class ScenePage {
+  static void show();
+  static void showScenes(std::list<sceneConfig> &scenes);
+};
+
 class NspanelManagerPage {
 public:
   static void show();
-  static void setText(const char* text);
+  static void setText(const char *text);
   static void setText(std::string &text);
 };
 

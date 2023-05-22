@@ -42,5 +42,7 @@ urlpatterns = [
     path('api/get_light_config/<int:light_id>', api.get_light_config, name='get_all_available_lights'),
     path('api/get_mqtt_manager_config', api.get_mqtt_manager_config, name='get_mqtt_manager_config'),
     path('api/set_panel_status/<str:panel_mac>/', api.set_panel_status, name='set_panel_status'),
-    path('api/set_panel_online_status/<str:panel_mac>/', api.set_panel_online_status, name='set_panel_online_status')
+    path('api/set_panel_online_status/<str:panel_mac>/', api.set_panel_online_status, name='set_panel_online_status'),
+    path('api/save_scene', api.save_scene, name='save_scene'),
+    path('api/get_scenes', api.get_scenes, name='get_scenes')
 ]

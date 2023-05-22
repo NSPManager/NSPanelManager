@@ -6,7 +6,7 @@
 #define CEILING_LIGHTS_MASTER_BUTTON_ID 22 // ID of ceiling lights button on home page
 #define TABLE_LIGHTS_MASTER_BUTTON_ID 21   // ID of table lights button on home page
 #define ROOM_BUTTON_ID 5                   // ID of button to go into "room"-view
-#define SCENES_BUTTON_ID 17                 // ID of button to go into Scenes page
+#define SCENES_BUTTON_ID 17                // ID of button to go into Scenes page
 
 #define NSPANELMANAGER_PAGE_NAME "bootscreen"
 #define NSPANELMANAGER_TEXT_NAME "bootscreen.t_loading"
@@ -23,31 +23,31 @@
 #define HOME_BUTTON_CEILING_NAME "home.b_ceiling"
 #define HOME_BUTTON_TABLE_NAME "home.b_table"
 #define HOME_BUTTON_SCENES_NAME "home.b_scenes"
-#define HOME_BUTTON_SCENES_ROOM_MODE_PIC "24"           // Pictures to use on button when panel is in Room Lights mode
-#define HOME_BUTTON_SCENES_ROOM_MODE_PIC2 "25"          // Pictures to use on button when panel is in Room Lights mode
-#define HOME_BUTTON_SCENES_ALL_MODE_PIC "26"            // Pictures to use on button when panel is in All Lights mode
-#define HOME_BUTTON_SCENES_ALL_MODE_PIC2 "27"           // Pictures to use on button when panel is in All Lights mode
+#define HOME_BUTTON_SCENES_ROOM_MODE_PIC "24"  // Pictures to use on button when panel is in Room Lights mode
+#define HOME_BUTTON_SCENES_ROOM_MODE_PIC2 "25" // Pictures to use on button when panel is in Room Lights mode
+#define HOME_BUTTON_SCENES_ALL_MODE_PIC "26"   // Pictures to use on button when panel is in All Lights mode
+#define HOME_BUTTON_SCENES_ALL_MODE_PIC2 "27"  // Pictures to use on button when panel is in All Lights mode
 
 #define SCENES_PAGE_NAME "Scenes"
-#define SCENES_PAGE_ID 6  //ID for "Scenes"-page
+#define SCENES_PAGE_ID 6 // ID for "Scenes"-page
 #define SCENES_PAGE_CURRENT_SCENES_LABEL_NAME "scenes_current"
 #define SCENES_PAGE_CURRENT_SCENES_LABEL_ID 14
 #define SCENES_PAGE_BACK_BUTTON_ID 10
 #define SCENES_PAGE_PREVIOUS_SCENES_BUTTON_ID 11
 #define SCENES_PAGE_NEXT_SCENES_BUTTON_ID 12
 
-#define SCENES_PAGE_SCENE1_LABEL_NAME scene1
-#define SCENES_PAGE_SCENE2_LABEL_NAME scene2
-#define SCENES_PAGE_SCENE3_LABEL_NAME scene3
-#define SCENES_PAGE_SCENE4_LABEL_NAME scene4
+#define SCENES_PAGE_SCENE1_LABEL_NAME "scene1"
+#define SCENES_PAGE_SCENE2_LABEL_NAME "scene2"
+#define SCENES_PAGE_SCENE3_LABEL_NAME "scene3"
+#define SCENES_PAGE_SCENE4_LABEL_NAME "scene4"
 #define SCENES_PAGE_SCENE1_LABEL_ID 1
 #define SCENES_PAGE_SCENE2_LABEL_ID 2
 #define SCENES_PAGE_SCENE3_LABEL_ID 3
 #define SCENES_PAGE_SCENE4_LABEL_ID 4
-#define SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME scene1_save
-#define SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME scene2_save
-#define SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME scene3_save
-#define SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME scene4_save
+#define SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME "scene1_save"
+#define SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME "scene2_save"
+#define SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME "scene3_save"
+#define SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME "scene4_save"
 #define SCENES_PAGE_SCENE1_SAVE_BUTTON_ID 5
 #define SCENES_PAGE_SCENE2_SAVE_BUTTON_ID 5
 #define SCENES_PAGE_SCENE3_SAVE_BUTTON_ID 6

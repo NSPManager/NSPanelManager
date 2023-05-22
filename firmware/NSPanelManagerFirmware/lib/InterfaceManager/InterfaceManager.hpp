@@ -54,6 +54,12 @@ public:
   /// @param lights The lights to set value for
   /// @param level The new value
   void _changeLightsToColorHue(std::list<lightConfig *> *lights, uint16_t kelvin);
+  /// @brief Active the given scene
+  /// @param scene The scene to activate
+  void activateScene(sceneConfig scene);
+  /// @brief Save the current values of the lights to the given scene
+  /// @param scene The scene to save current values to
+  void saveScene(sceneConfig scene);
 
 private:
   /// @brief The task that handles startup if InterfaceManager. It load the config from the server and processes it and
