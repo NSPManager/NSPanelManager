@@ -60,6 +60,10 @@ public:
   /// @brief Save the current values of the lights to the given scene
   /// @param scene The scene to save current values to
   void saveScene(sceneConfig scene);
+  /// @brief Go to the next room and update relevant values, if at last room, go to first
+  void _goToNextRoom();
+  /// @brief Go to the previous room and update relevant values, if at first room, go to last
+  void _goToPreviousRoom();
 
 private:
   /// @brief The task that handles startup if InterfaceManager. It load the config from the server and processes it and
@@ -104,10 +108,6 @@ private:
   /// @brief When sending new values from the panel, the values might flucuate before setteling
   /// @brief this variable indicates for how long MQTT messages should be ignored
   unsigned long _ignoreMqttStatusUpdatesUntil;
-  /// @brief Go to the next room and update relevant values, if at last room, go to first
-  void _goToNextRoom();
-  /// @brief Go to the previous room and update relevant values, if at first room, go to last
-  void _goToPreviousRoom();
   /// @brief Change to a room with a specific ID
   void _changeRoom(uint8_t roomId);
   /// @brief Update panel with new values for the new room

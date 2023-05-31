@@ -225,6 +225,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
     } else if (component == SCENES_BUTTON_ID) {
       ScenePage::show();
       ScenePage::showScenes(InterfaceManager::instance->config.currentRoom->scenes);
+      ScenePage::setRoomLabelText(InterfaceManager::instance->config.currentRoom->name.c_str());
     }
   } else if (page == HOME_PAGE_ID && pressed) {
     if (component == CEILING_LIGHTS_MASTER_BUTTON_ID) {

@@ -66,6 +66,7 @@ private:
 class ScenePage {
 public:
   static void show();
+  static void setRoomLabelText(const char *text);
   static void showScenes(std::vector<sceneConfig> &scenes);
   static void processTouchEvent(uint8_t page, uint8_t component, bool pressed);
 };

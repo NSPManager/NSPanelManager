@@ -325,6 +325,10 @@ void ScenePage::show() {
   NSPanel::instance->goToPage(SCENES_PAGE_NAME);
 }
 
+void ScenePage::setRoomLabelText(const char *text) {
+  NSPanel::instance->setComponentText(SCENES_PAGE_CURRENT_SCENES_LABEL_NAME, text);
+}
+
 void ScenePage::showScenes(std::vector<sceneConfig> &scenes) {
   // Hide any elements that wont be used
   // Update the correct name and enable components that are to be used
@@ -383,60 +387,6 @@ void ScenePage::showScenes(std::vector<sceneConfig> &scenes) {
       break;
     }
   }
-
-  // 4 is the number of scenes we can show on the screen.
-  // for (uint8_t i = scenes.size() - 1; i < 4; i++) {
-  //   switch (i) {
-  //   case 0:
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_LABEL_NAME, false);
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, false);
-  //   case 1:
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, false);
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, false);
-  //   case 2:
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, false);
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, false);
-  //   case 3:
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, false);
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, false);
-  //   default:
-  //     break;
-  //   }
-  // }
-
-  // // TODO: Loop over scenes and populate scenes list in room. Use names from TftDefines
-  // uint8_t i = 0;
-  // for (sceneConfig &scene : scenes) {
-  //   switch (i) {
-  //   case 0:
-  //     NSPanel::instance->setComponentText(SCENES_PAGE_SCENE1_LABEL_NAME, scene.name.c_str());
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_LABEL_NAME, true);
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, true);
-  //     LOG_DEBUG("Showing scene: ", scene.name.c_str(), " in slot 1");
-  //     break;
-  //   case 1:
-  //     NSPanel::instance->setComponentText(SCENES_PAGE_SCENE2_LABEL_NAME, scene.name.c_str());
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, true);
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, true);
-  //     LOG_DEBUG("Showing scene: ", scene.name.c_str(), " in slot 2");
-  //     break;
-  //   case 2:
-  //     NSPanel::instance->setComponentText(SCENES_PAGE_SCENE3_LABEL_NAME, scene.name.c_str());
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, true);
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, true);
-  //     LOG_DEBUG("Showing scene: ", scene.name.c_str(), " in slot 3");
-  //     break;
-  //   case 3:
-  //     NSPanel::instance->setComponentText(SCENES_PAGE_SCENE4_LABEL_NAME, scene.name.c_str());
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, true);
-  //     NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, true);
-  //     LOG_DEBUG("Showing scene: ", scene.name.c_str(), " in slot 4");
-  //     break;
-  //   default:
-  //     break;
-  //   }
-  //   i++;
-  // }
 }
 
 void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
@@ -476,25 +426,49 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
   case SCENES_PAGE_SCENE1_SAVE_BUTTON_ID: {
     if (InterfaceManager::instance->config.currentRoom->scenes.size() >= 1) {
       InterfaceManager::instance->config.currentRoom->scenes[0].save();
+      ScenePage::setRoomLabelText("Saved");
+      vTaskDelay(500 / portTICK_PERIOD_MS);
+      ScenePage::setRoomLabelText(InterfaceManager::instance->config.currentRoom->name.c_str());
     }
     break;
   }
   case SCENES_PAGE_SCENE2_SAVE_BUTTON_ID: {
     if (InterfaceManager::instance->config.currentRoom->scenes.size() >= 2) {
       InterfaceManager::instance->config.currentRoom->scenes[1].save();
+      ScenePage::setRoomLabelText("Saved");
+      vTaskDelay(500 / portTICK_PERIOD_MS);
+      ScenePage::setRoomLabelText(InterfaceManager::instance->config.currentRoom->name.c_str());
     }
     break;
   }
   case SCENES_PAGE_SCENE3_SAVE_BUTTON_ID: {
     if (InterfaceManager::instance->config.currentRoom->scenes.size() >= 3) {
       InterfaceManager::instance->config.currentRoom->scenes[2].save();
+      ScenePage::setRoomLabelText("Saved");
+      vTaskDelay(500 / portTICK_PERIOD_MS);
+      ScenePage::setRoomLabelText(InterfaceManager::instance->config.currentRoom->name.c_str());
     }
     break;
   }
   case SCENES_PAGE_SCENE4_SAVE_BUTTON_ID: {
     if (InterfaceManager::instance->config.currentRoom->scenes.size() >= 4) {
       InterfaceManager::instance->config.currentRoom->scenes[3].save();
+      ScenePage::setRoomLabelText("Saved");
+      vTaskDelay(500 / portTICK_PERIOD_MS);
+      ScenePage::setRoomLabelText(InterfaceManager::instance->config.currentRoom->name.c_str());
     }
+    break;
+  }
+  case SCENES_PAGE_PREVIOUS_SCENES_BUTTON_ID: {
+    InterfaceManager::instance->_goToPreviousRoom();
+    ScenePage::showScenes(InterfaceManager::instance->config.currentRoom->scenes);
+    ScenePage::setRoomLabelText(InterfaceManager::instance->config.currentRoom->name.c_str());
+    break;
+  }
+  case SCENES_PAGE_NEXT_SCENES_BUTTON_ID: {
+    InterfaceManager::instance->_goToNextRoom();
+    ScenePage::showScenes(InterfaceManager::instance->config.currentRoom->scenes);
+    ScenePage::setRoomLabelText(InterfaceManager::instance->config.currentRoom->name.c_str());
     break;
   }
   default:
