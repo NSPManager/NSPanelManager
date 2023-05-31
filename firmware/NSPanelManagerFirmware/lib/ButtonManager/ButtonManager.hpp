@@ -8,7 +8,7 @@
 #define BUTTON_MANAGER_RELAY2_PIN 19
 
 #include <Arduino.h>
-#include <InterfaceManagerHelpers.h>
+#include <InterfaceManagerHelpers.hpp>
 
 class ButtonManager {
 public:

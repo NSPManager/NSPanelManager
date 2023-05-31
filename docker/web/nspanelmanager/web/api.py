@@ -60,6 +60,7 @@ def get_mqtt_manager_config(request):
         lightConfig = {}
         lightConfig["id"] = light.id
         lightConfig["name"] = light.friendly_name
+        lightConfig["room_name"] = light.room.friendly_name
         lightConfig["type"] = light.type
         lightConfig["can_dim"] = light.can_dim
         lightConfig["can_color_temperature"] = light.can_color_temperature
@@ -310,6 +311,7 @@ def get_scenes(request):
                 "light_type": state.light.type,
                 "color_mode": state.color_mode,
                 "light_level": state.light_level,
+                "color_temp": state.color_temperature,
                 "hue": state.hue,
                 "saturation": state.saturation
             })
@@ -331,11 +333,12 @@ def save_scene(request):
                 if light_state["mode"] == "dimmer":
                     new_state.color_mode = "dimmer"
                     new_state.light_level = light_state["level"]
+                    new_state.color_temperature = light_state["color_temp"]
                 elif light_state["mode"] == "color":
                     new_state.color_mode = "color"
                     new_state.light_level = light_state["level"]
                     new_state.hue = light_state["hue"]
-                    new_state.saturation = light_state["sat"]
+                    new_state.saturation = light_state["saturation"]
                 new_state.save()
             else:
                 print("ERROR: Couldn't find a light with ID " + light_state["light_id"] + ". Will skip light!")

@@ -11,6 +11,7 @@ import mqtt_manager_libs.openhab
 import mqtt_manager_libs.websocket_server
 import mqtt_manager_libs.light_states
 import mqtt_manager_libs.light
+import mqtt_manager_libs.scenes
 import re 
 
 def get_machine_mac():
@@ -33,7 +34,10 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("nspanel/+/log")
     client.subscribe("nspanel/+/status")
     client.subscribe("nspanel/+/status_report")
-
+    client.subscribe("nspanel/scenes/room/+/+/save")
+    client.subscribe("nspanel/scenes/room/+/+/activate")
+    client.subscribe("nspanel/scenes/global/+/+/save")
+    client.subscribe("nspanel/scenes/global/+/+/activate")
 
 def on_message(client, userdata, msg):
     try:
@@ -80,23 +84,24 @@ def on_message(client, userdata, msg):
             if origin_panel:
                 if data["method"] == "set" and data["attribute"] == "brightness":
                     for entity_id in data["entity_ids"]:
-                        mqtt_manager_libs.light_states.states[entity_id].set_light_level(
-                            data["brightness"])
+                        mqtt_manager_libs.light_states.states[entity_id].set_light_level(data["brightness"])
                 elif data["method"] == "set" and data["attribute"] == "kelvin":
                     for entity_id in data["entity_ids"]:
-                        mqtt_manager_libs.light_states.states[entity_id].set_color_temp(
-                            data["kelvin"])
+                        mqtt_manager_libs.light_states.states[entity_id].set_color_temp(data["kelvin"])
                 elif data["method"] == "set" and data["attribute"] == "saturation":
                     for entity_id in data["entity_ids"]:
-                        mqtt_manager_libs.light_states.states[entity_id].set_color_saturation(
-                            data["saturation"])
+                        mqtt_manager_libs.light_states.states[entity_id].set_color_saturation(data["saturation"])
                 elif data["method"] == "set" and data["attribute"] == "hue":
                     for entity_id in data["entity_ids"]:
-                        mqtt_manager_libs.light_states.states[entity_id].set_color_hue(
-                            data["hue"])
+                        mqtt_manager_libs.light_states.states[entity_id].set_color_hue(data["hue"])
             else:
-                logging.info(
-                    "Received command but from panel not controlled by us: " + data["mac_origin"])
+                logging.info("Received command but from panel not controlled by us: " + data["mac_origin"])
+        elif msg.topic.startswith("nspanel/scenes/room/") and msg.topic.endswith("/activate") and msg.payload.decode('utf-8') == "1":
+            mqtt_manager_libs.scenes.activate_scene(parts[3], parts[4]) # Activate scene were part[3] is room and part[4] is scene name
+        elif msg.topic.startswith("nspanel/scenes/room/") and msg.topic.endswith("/save") and msg.payload.decode('utf-8') == "1":
+            mqtt_manager_libs.scenes.save_scene(parts[3], parts[4]) # Save scene were part[3] is room and part[4] is scene name
+        else:
+            logging.debug(F"Received unhandled message on topic: {msg.topic}")
 
     except Exception as e:
         logging.error("Something went wrong during processing of message:")
@@ -104,34 +109,29 @@ def on_message(client, userdata, msg):
         try:
             logging.error(msg.payload.decode('utf-8'))
         except:
-            logging.error(
-                "Something went wrong when processing the exception message, couldn't decode payload to utf-8.")
+            logging.error("Something went wrong when processing the exception message, couldn't decode payload to utf-8.")
 
 
 def send_status_report(panel, new_status):
-    post("http://127.0.0.1:8000/api/set_panel_status/" +
-         new_status["mac"] + "/", json=new_status)
+    post("http://127.0.0.1:8000/api/set_panel_status/" + new_status["mac"] + "/", json=new_status)
 
 
 def send_online_status(panel, new_status):
-    post("http://127.0.0.1:8000/api/set_panel_online_status/" +
-         new_status["mac"] + "/", json=new_status)
+    post("http://127.0.0.1:8000/api/set_panel_online_status/" + new_status["mac"] + "/", json=new_status)
 
 
 def get_config():
     global settings
     while True:
         try:
-            config_request = get(
-                "http://127.0.0.1:8000/api/get_mqtt_manager_config", timeout=5)
+            config_request = get("http://127.0.0.1:8000/api/get_mqtt_manager_config", timeout=5)
             if config_request.status_code == 200:
                 logging.info("Got config, will start MQTT Manager.")
                 settings = config_request.json()
 
                 for id, light in settings["lights"].items():
                     int_id = int(id)
-                    mqtt_manager_libs.light_states.states[int_id] = mqtt_manager_libs.light.Light.from_dict(
-                        light)
+                    mqtt_manager_libs.light_states.states[int_id] = mqtt_manager_libs.light.Light.from_dict(light)
                 # All light-data sucessfully loaded into light_states, clear own register
                 settings.pop("lights")
                 break

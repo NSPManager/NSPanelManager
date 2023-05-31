@@ -80,5 +80,6 @@ class LightState(models.Model):
     scene = models.ForeignKey(Scene, on_delete=models.CASCADE)
     color_mode = models.CharField(max_length=32, default="dimmer")
     light_level = models.IntegerField(default=0)
+    color_temperature = models.IntegerField(default=4000)
     hue = models.IntegerField(default=0)
     saturation = models.IntegerField(default=0)

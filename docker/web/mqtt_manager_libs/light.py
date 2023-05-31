@@ -6,6 +6,7 @@ import logging
 class Light:
     id: int = 0
     friendly_name: str = ""
+    room_name: str = ""
     type: str = ""
     can_dim: bool = False
     can_color_temperature: bool = False
@@ -18,8 +19,8 @@ class Light:
 
     light_level: int = 0
     color_temp: int = 0
-    color_saturation: int = 0
     color_hue: int = 0
+    color_saturation: int = 0
     # "color_temp" or "rgb". Used to restore correct state when using scenes
     last_command_sent: str = "color_temp"
 
@@ -28,6 +29,7 @@ class Light:
         newLight = Light()
         newLight.id = dict_data["id"]
         newLight.friendly_name = dict_data["name"]
+        newLight.room_name = dict_data["room_name"]
         newLight.type = dict_data["type"]
         newLight.can_dim = dict_data["can_dim"]
         newLight.can_color_temperature = dict_data["can_color_temperature"]
@@ -97,6 +99,9 @@ class Light:
         self.color_saturation = int(color_saturation)
         self.last_command_sent = "rgb"
 
+    def get_color_saturation(self):
+        return self.color_saturation
+
     def set_color_hue(self, color_hue: int):
         if self.type == "home_assistant":
             mqtt_manager_libs.home_assistant.set_entity_color_saturation(
@@ -106,3 +111,32 @@ class Light:
                 self.openhab_item_rgb, self.light_level, self.color_saturation, color_hue)
         self.color_hue = int(color_hue)
         self.last_command_sent = "rgb"
+
+    def get_color_hue(self):
+        return self.color_hue
+
+    def set_from_scene_data(self, scene_data: dict):
+        if int(scene_data["light_level"]) == 0:
+            self.set_light_level(0)
+        elif scene_data["color_mode"] == "dimmer":
+            self.set_color_temp(scene_data["color_temp"])
+            self.set_light_level(scene_data["light_level"])
+        elif scene_data["color_mode"] == "color":
+            self.set_light_level(scene_data["light_level"])
+            self.set_color_hue(scene_data["hue"])
+            self.set_color_saturation(scene_data["saturation"])
+
+    def to_scene_data_dict(self):
+        return_dict = {
+            "light_id": self.id,
+            "level": self.get_light_level()
+        }
+        if self.last_command_sent == "color_temp":
+            return_dict["mode"] = "dimmer"
+            return_dict["color_temp"] = self.get_color_temp()
+        elif self.last_command_sent == "rgb":
+            return_dict["mode"] = "color"
+            return_dict["hue"] = self.get_color_hue()
+            return_dict["saturation"] = self.get_color_saturation()
+
+        return return_dict

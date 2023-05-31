@@ -34,25 +34,21 @@ def on_message(ws, message):
         for light in mqtt_manager_libs.light_states.states.values():
             if light.type == "openhab":
                 if light.openhab_control_mode == "dimmer" and item == light.openhab_item_name:
-                    mqtt_client.publish(
-                        F"nspanel/entities/light/{light.id}/state_brightness_pct", int(float(payload["value"])), retain=True)
+                    mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", int(float(payload["value"])), retain=True)
                     break
                 elif light.openhab_control_mode == "switch" and item == light.openhab_item_name:
                     if payload["value"] == "ON":
-                        mqtt_client.publish(
-                            F"nspanel/entities/light/{light.id}/state_brightness_pct", 100, retain=True)
+                        mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", 100, retain=True)
                         break
                     else:
-                        mqtt_client.publish(
-                            F"nspanel/entities/light/{light.id}/state_brightness_pct", 0, retain=True)
+                        mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", 0, retain=True)
                         break
                 elif item == light.openhab_item_color_temp:
                     received_color_temp_percent = 100 - int(float(payload["value"]))
                     # logging.debug(F"Recevied color temp from OpenHAB: {received_color_temp_percent}%")
                     kelvin_max_floored = settings["color_temp_max"] - settings["color_temp_min"]
                     send_color_temp = settings["color_temp_min"] + int((received_color_temp_percent / 100) * kelvin_max_floored)
-                    mqtt_client.publish(
-                        F"nspanel/entities/light/{light.id}/state_kelvin", send_color_temp, retain=True)
+                    mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_kelvin", send_color_temp, retain=True)
                     break
 
 

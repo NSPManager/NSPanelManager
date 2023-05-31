@@ -2,7 +2,7 @@
 #define INTERFACE_MANAGER_H
 
 #include <ArduinoJson.h>
-#include <InterfaceManagerHelpers.h>
+#include <InterfaceManagerHelpers.hpp>
 #include <NSPanel.hpp>
 #include <list>
 #include <string>

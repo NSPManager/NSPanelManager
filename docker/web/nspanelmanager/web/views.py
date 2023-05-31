@@ -207,7 +207,7 @@ def add_light_to_room(request, room_id: int):
 
 def add_scene_to_room(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
-    if int(request.POST["edit_scene_id"]) >= 0:
+    if request.POST["edit_scene_id"].strip() != "" and int(request.POST["edit_scene_id"]) >= 0:
         new_scene = Scene.objects.get(id=int(request.POST["edit_scene_id"]))
     else:
         new_scene = Scene()

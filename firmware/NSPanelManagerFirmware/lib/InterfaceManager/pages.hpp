@@ -18,6 +18,7 @@ enum LIGHT_PAGE_MODE {
 
 class HomePage {
 public:
+  static void show();
   static void setDimmingValue(uint8_t value);
   static int getDimmingValue();
   static void updateDimmerValueCache();
@@ -63,8 +64,10 @@ private:
 };
 
 class ScenePage {
+public:
   static void show();
-  static void showScenes(std::list<sceneConfig> &scenes);
+  static void showScenes(std::vector<sceneConfig> &scenes);
+  static void processTouchEvent(uint8_t page, uint8_t component, bool pressed);
 };
 
 class NspanelManagerPage {

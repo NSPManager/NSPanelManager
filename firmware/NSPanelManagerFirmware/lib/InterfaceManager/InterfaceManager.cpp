@@ -173,6 +173,7 @@ void InterfaceManager::processSleepEvent() {
 }
 
 void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
+  // TODO: Split processing of touch events to a function in each page and make this the router to the correct page
   InterfaceManager::instance->_isFingerOnDisplay = pressed;
 
   if (!pressed && InterfaceManager::instance->_ignoreNextTouchRelease) {
@@ -221,6 +222,9 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
       InterfaceManager::instance->_stopSpecialMode();
       NSPanel::instance->goToPage(ROOM_PAGE_NAME);
       InterfaceManager::instance->_populateRoomPage();
+    } else if (component == SCENES_BUTTON_ID) {
+      ScenePage::show();
+      ScenePage::showScenes(InterfaceManager::instance->config.currentRoom->scenes);
     }
   } else if (page == HOME_PAGE_ID && pressed) {
     if (component == CEILING_LIGHTS_MASTER_BUTTON_ID) {
@@ -247,8 +251,10 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
   } else if (page == LIGHT_PAGE_ID && !pressed) {
     InterfaceManager::instance->_handleLightPageComponentTouch(component);
     LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
+  } else if (page == SCENES_PAGE_ID) {
+    ScenePage::processTouchEvent(page, component, pressed);
   } else {
-    LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
+    LOG_DEBUG("Unhandled touch event: Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
   }
 }
 
@@ -850,13 +856,20 @@ void InterfaceManager::_processPanelConfig() {
     }
 
     JsonVariant json_scenes = (*buffer)["scenes"];
-    for (JsonPair lightPair : json_lights.as<JsonObject>()) {
+    for (JsonPair scenePair : json_scenes.as<JsonObject>()) {
       sceneConfig sceneCfg;
-      sceneCfg.id = atoi(lightPair.key().c_str());
-      sceneCfg.name = lightPair.value()["name"] | "ERR-S";
+      sceneCfg.id = atoi(scenePair.key().c_str());
+      sceneCfg.name = scenePair.value()["name"] | "ERR-S";
+      roomCfg.scenes.push_back(sceneCfg);
+      LOG_DEBUG("Loaded scene ", sceneCfg.id, "::", sceneCfg.name.c_str());
+    }
+    this->config.rooms.push_back(roomCfg);
+
+    // Update the reference back from the scene to the room
+    for (sceneConfig &sceneCfg : this->config.rooms.back().scenes) {
+      sceneCfg.room = &this->config.rooms.back();
     }
     buffer->clear();
-    this->config.rooms.push_back(roomCfg);
   }
   delete buffer;
 
