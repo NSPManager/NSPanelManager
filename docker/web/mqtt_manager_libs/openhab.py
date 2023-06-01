@@ -55,7 +55,17 @@ def on_message(ws, message):
                     mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_kelvin", send_color_temp, retain=True)
                     light.color_temp = send_color_temp
                     break
-
+                elif item == light.openhab_item_rgb:
+                   hue, sat, brightness = payload["value"]
+                   mqtt_client.publish(
+                       F"nspanel/entities/light/{light_id}/state_hue", int(float(hue)), retain=True)
+                   mqtt_client.publish(
+                       F"nspanel/entities/light/{light_id}/state_sat", int(float(sat)), retain=True)
+                   mqtt_client.publish(
+                       F"nspanel/entities/light/{light_id}/state_brightness_pct", brightness, retain=True)
+                   light.color_hue = int(float(hue))
+                   light.color_saturation = int(float(sat))
+                   light.light_level = int(float(brightness))
 
 def connect():
     Thread(target=_do_connection, daemon=True).start()
@@ -115,45 +125,6 @@ def _send_keepalive():
         sleep(5)
     logging.error(
         "More than 5 keep-alive messages have failed. Stopping keep-alive thread.")
-
-
-def send_entity_update(json_msg, item):
-    global mqtt_client
-    # Got new value from OpenHAB, publish to MQTT
-    # Check if the light is used on any nspanel and if so, send MQTT state update
-    try:
-        entity_id = json_msg["event"]["data"]["entity_id"]
-        entity_name = entity_id.replace("light.", "")
-        new_state = json_msg["event"]["data"]["new_state"]
-        for light in settings["lights"]:
-            if light["name"] == entity_name:
-                if "brightness" in new_state["attributes"]:
-                    new_brightness = round(
-                        new_state["attributes"]["brightness"] / 2.55)
-                    mqtt_client.publish(
-                        F"nspanel/entities/light/{entity_name}/state_brightness_pct", new_brightness, retain=True)
-                    mqtt_manager_libs.light_states.states[entity_id].light_level = new_brightness
-                else:
-                    if new_state["state"] == "on":
-                        mqtt_client.publish(
-                            F"nspanel/entities/light/{entity_name}/state_brightness_pct", 100, retain=True)
-                        mqtt_manager_libs.light_states.states[entity_id].light_level = 100
-                    else:
-                        mqtt_client.publish(
-                            F"nspanel/entities/light/{entity_name}/state_brightness_pct", 0, retain=True)
-                        mqtt_manager_libs.light_states.states[entity_id].light_level = 0
-
-                if "color_temp" in new_state["attributes"]:
-                    # Convert from MiRed from OpenHAB to kelvin values
-                    color_temp_kelvin = round(
-                        1000000 / new_state["attributes"]["color_temp"])
-                    mqtt_client.publish(
-                        F"nspanel/entities/light/{entity_name}/state_kelvin", color_temp_kelvin, retain=True)
-                    mqtt_manager_libs.light_states.states[entity_id].color_temp = color_temp_kelvin
-                    mqtt_manager_libs.light_states.states[entity_id].last_command_sent = "color_temp"
-    except Exception as e:
-        logging.error("Failed to send entity update!")
-        logging.error(e)
 
 
 def set_entity_brightness(openhab_item_name: str, openhab_control_mode: str, light_level: int) -> bool:
