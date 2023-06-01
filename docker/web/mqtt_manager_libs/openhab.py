@@ -57,13 +57,11 @@ def on_message(ws, message):
                     light.last_command_sent = "color_temp"
                     break
                 elif item == light.openhab_item_rgb:
-                    hue, sat, brightness = payload["value"]
-                    mqtt_client.publish(
-                        F"nspanel/entities/light/{light_id}/state_hue", int(float(hue)), retain=True)
-                    mqtt_client.publish(
-                        F"nspanel/entities/light/{light_id}/state_sat", int(float(sat)), retain=True)
-                    mqtt_client.publish(
-                        F"nspanel/entities/light/{light_id}/state_brightness_pct", brightness, retain=True)
+                    #hue, sat, brightness = payload["value"]
+                    hue, sat, brightness = payload["value"].split(",")
+                    mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_hue", int(float(hue)), retain=True)
+                    mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_sat", int(float(sat)), retain=True)
+                    mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_brightness_pct", brightness, retain=True)
                     light.color_hue = int(float(hue))
                     light.color_saturation = int(float(sat))
                     light.light_level = int(float(brightness))
@@ -213,55 +211,44 @@ def _update_all_light_states():
                     item_state = _get_item_state(light.openhab_item_name)
                     if item_state != None:
                         light.light_level = int(float(item_state["state"]))
-                        mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_brightness_pct", int(
-                            float(item_state["state"])), retain=True)
+                        mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_brightness_pct", int(float(item_state["state"])), retain=True)
                     else:
-                        logging.error(
-                            "Failed to get item state for OppenHAB item: " + light.openhab_item_name)
+                        logging.error("Failed to get item state for OppenHAB item: " + light.openhab_item_name)
                 elif light.openhab_control_mode == "switch":
                     item_state = _get_item_state(light.openhab_item_name)
                     if item_state != None:
                         if item_state["state"] == "ON":
                             light.light_level = 100
-                            mqtt_client.publish(
-                                F"nspanel/entities/light/{light_id}/state_brightness_pct", 100, retain=True)
+                            mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_brightness_pct", 100, retain=True)
                         else:
                             light.light_level = 0
-                            mqtt_client.publish(
-                                F"nspanel/entities/light/{light_id}/state_brightness_pct", 0, retain=True)
+                            mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_brightness_pct", 0, retain=True)
                     else:
-                        logging.error(
-                            F"Failed to get item state for OppenHAB item: {light.openhab_item_name}")
+                        logging.error(F"Failed to get item state for OppenHAB item: {light.openhab_item_name}")
 
                 if light.can_color_temperature:
                     item_state = _get_item_state(light.openhab_item_color_temp)
                     if item_state != None:
                         light.color_temp = int(float(item_state["state"]))
-                        mqtt_client.publish(
-                            F"nspanel/entities/light/{light_id}/state_kelvin", int(float(item_state["state"])), retain=True)
+                        mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_kelvin", int(float(item_state["state"])), retain=True)
                     else:
-                        logging.error(
-                            "Failed to get item state for OppenHAB item: " + light.openhab_item_color_temp)
+                        logging.error("Failed to get item state for OppenHAB item: " + light.openhab_item_color_temp)
 
                 if light.can_rgb:
                     item_state = _get_item_state(light.openhab_item_rgb)
                     if item_state != None:
+                        #hue, sat, brightness = item_state["state"].split(",")
                         hue, sat, brightness = item_state["state"].split(",")
-                        mqtt_client.publish(
-                            F"nspanel/entities/light/{light_id}/state_hue", int(float(hue)), retain=True)
-                        mqtt_client.publish(
-                            F"nspanel/entities/light/{light_id}/state_sat", int(float(sat)), retain=True)
-                        mqtt_client.publish(
-                            F"nspanel/entities/light/{light_id}/state_brightness_pct", brightness, retain=True)
+                        mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_hue", int(float(hue)), retain=True)
+                        mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_sat", int(float(sat)), retain=True)
+                        mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_brightness_pct", brightness, retain=True)
                         light.color_hue = int(float(hue))
                         light.color_saturation = int(float(sat))
                         light.light_level = int(float(brightness))
                     else:
-                        logging.error(
-                            "Failed to get item state for OppenHAB item: " + light.openhab_item_color_temp)
+                        logging.error("Failed to get item state for OppenHAB item: " + light.openhab_item_color_temp)
             except Exception as e:
-                logging.error(
-                    F"Failed to process light ID:{light_id}. The following error occured:")
+                logging.error(F"Failed to process light ID:{light_id}. The following error occured:")
                 logging.error(e)
 
 
@@ -276,5 +263,4 @@ def _get_item_state(item):
     if (request_result.status_code == 200):
         return json.loads(request_result.text)
     else:
-        logging.error(
-            "Something went wrong when trying to get state for item " + item)
+        logging.error("Something went wrong when trying to get state for item " + item)
