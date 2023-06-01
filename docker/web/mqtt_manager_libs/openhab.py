@@ -34,14 +34,18 @@ def on_message(ws, message):
         for light in mqtt_manager_libs.light_states.states.values():
             if light.type == "openhab":
                 if light.openhab_control_mode == "dimmer" and item == light.openhab_item_name:
-                    mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", int(float(payload["value"])), retain=True)
+                    light_level_pct = int(float(payload["value"]))
+                    mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", light_level_pct, retain=True)
+                    light.light_level = light_level_pct
                     break
                 elif light.openhab_control_mode == "switch" and item == light.openhab_item_name:
                     if payload["value"] == "ON":
                         mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", 100, retain=True)
+                        light.light_level = 100
                         break
                     else:
                         mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", 0, retain=True)
+                        light.light_level = 0
                         break
                 elif item == light.openhab_item_color_temp:
                     received_color_temp_percent = 100 - int(float(payload["value"]))
@@ -49,6 +53,7 @@ def on_message(ws, message):
                     kelvin_max_floored = settings["color_temp_max"] - settings["color_temp_min"]
                     send_color_temp = settings["color_temp_min"] + int((received_color_temp_percent / 100) * kelvin_max_floored)
                     mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_kelvin", send_color_temp, retain=True)
+                    light.color_temp = send_color_temp
                     break
 
 
