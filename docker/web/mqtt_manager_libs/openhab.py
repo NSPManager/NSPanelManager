@@ -54,18 +54,21 @@ def on_message(ws, message):
                     send_color_temp = settings["color_temp_min"] + int((received_color_temp_percent / 100) * kelvin_max_floored)
                     mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_kelvin", send_color_temp, retain=True)
                     light.color_temp = send_color_temp
+                    light.last_command_sent = "color_temp"
                     break
                 elif item == light.openhab_item_rgb:
-                   hue, sat, brightness = payload["value"]
-                   mqtt_client.publish(
-                       F"nspanel/entities/light/{light_id}/state_hue", int(float(hue)), retain=True)
-                   mqtt_client.publish(
-                       F"nspanel/entities/light/{light_id}/state_sat", int(float(sat)), retain=True)
-                   mqtt_client.publish(
-                       F"nspanel/entities/light/{light_id}/state_brightness_pct", brightness, retain=True)
-                   light.color_hue = int(float(hue))
-                   light.color_saturation = int(float(sat))
-                   light.light_level = int(float(brightness))
+                    hue, sat, brightness = payload["value"]
+                    mqtt_client.publish(
+                        F"nspanel/entities/light/{light_id}/state_hue", int(float(hue)), retain=True)
+                    mqtt_client.publish(
+                        F"nspanel/entities/light/{light_id}/state_sat", int(float(sat)), retain=True)
+                    mqtt_client.publish(
+                        F"nspanel/entities/light/{light_id}/state_brightness_pct", brightness, retain=True)
+                    light.color_hue = int(float(hue))
+                    light.color_saturation = int(float(sat))
+                    light.light_level = int(float(brightness))
+                    light.last_command_sent = "rgb"
+                    break
 
 def connect():
     Thread(target=_do_connection, daemon=True).start()
