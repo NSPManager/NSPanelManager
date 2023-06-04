@@ -8,14 +8,14 @@
 #define BUTTON_MANAGER_RELAY2_PIN 19
 
 #include <Arduino.h>
-#include <InterfaceManagerHelpers.hpp>
+#include <Light.hpp>
 
 class ButtonManager {
 public:
   static void init();
   static void mqttCallback(char *topic, byte *payload, unsigned int length);
-  static inline lightConfig *button1_detached_mode_light;
-  static inline lightConfig *button2_detached_mode_light;
+  static inline Light *button1_detached_mode_light;
+  static inline Light *button2_detached_mode_light;
 
 private:
   static void _loop(void *param);

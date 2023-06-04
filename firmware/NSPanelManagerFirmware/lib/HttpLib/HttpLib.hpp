@@ -2,6 +2,7 @@
 #define HTTP_LIB_H
 
 #include <Arduino.h>
+#include <ArduinoJson.h>
 
 class HttpLib {
 public:
@@ -17,6 +18,8 @@ public:
   /// @return The number of bytes downloaded
   static size_t DownloadChunk(uint8_t *buffer, const char *address, size_t offset, size_t size);
   static bool GetMD5sum(const char *address, char *buffer);
+
+  static bool DownloadJSON(const char *address, JsonDocument *document);
 };
 
 #endif

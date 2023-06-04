@@ -23,10 +23,10 @@
 #define HOME_BUTTON_CEILING_NAME "home.b_ceiling"
 #define HOME_BUTTON_TABLE_NAME "home.b_table"
 #define HOME_BUTTON_SCENES_NAME "home.b_scenes"
-#define HOME_BUTTON_SCENES_ROOM_MODE_PIC "24"  // Pictures to use on button when panel is in Room Lights mode
-#define HOME_BUTTON_SCENES_ROOM_MODE_PIC2 "25" // Pictures to use on button when panel is in Room Lights mode
-#define HOME_BUTTON_SCENES_ALL_MODE_PIC "26"   // Pictures to use on button when panel is in All Lights mode
-#define HOME_BUTTON_SCENES_ALL_MODE_PIC2 "27"  // Pictures to use on button when panel is in All Lights mode
+#define HOME_BUTTON_SCENES_ROOM_MODE_PIC 24  // Pictures to use on button when panel is in Room Lights mode
+#define HOME_BUTTON_SCENES_ROOM_MODE_PIC2 25 // Pictures to use on button when panel is in Room Lights mode
+#define HOME_BUTTON_SCENES_ALL_MODE_PIC 26   // Pictures to use on button when panel is in All Lights mode
+#define HOME_BUTTON_SCENES_ALL_MODE_PIC2 27  // Pictures to use on button when panel is in All Lights mode
 
 #define SCENES_PAGE_NAME "Scenes"
 #define SCENES_PAGE_ID 6 // ID for "Scenes"-page

@@ -50,31 +50,3 @@ if [ "$current_littlefs_md5" != "$new_littlefs_md5" ] || [ ! -f ".pio/build/esp3
 else
 	echo "LittleFS has not changed. Will not build."
 fi
-
-# Upload firmware and LittleFS to NSPanelManager
-curl http://"$NSPanelManager_address":"$NSPanelManager_port"/save_new_firmware -F firmware=@.pio/build/esp32dev/firmware.bin
-firmware_status="$?"
-curl http://"$NSPanelManager_address":"$NSPanelManager_port"/save_new_data_file -F data_file=@.pio/build/esp32dev/littlefs.bin
-data_file_status="$?"
-
-# Wait for Django to process files.
-sleep 5
-
-if [ "$firmware_status" -eq 0 ] && [ "$data_file_status" -eq 0 ]; then
-	if [ -e "nspanels_to_ota.txt" ]; then
-		while read nspanel; do
-			echo "Calling OTA for $nspanel"
-			curl -X POST http://"$nspanel"/start_ota_update &>/dev/null
-			if [ "$?" -eq 0 ]; then
-				echo "OTA called for $nspanel!"
-			else
-				echo "Failed to call OTA for $nspanel"
-			fi
-		done <nspanels_to_ota.txt
-	else
-		echo "ERROR: No 'nspanels_to_ota.txt' file, will not auto-call OTA for any panels."
-		echo "Enter one IP-address per line in 'nspanels_to_ota.txt' to automatically start OTA flash when compilation and upload is complete."
-	fi
-else
-	echo "Something went wrong during upload, will not call OTA!"
-fi

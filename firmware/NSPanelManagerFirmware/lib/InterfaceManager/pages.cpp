@@ -5,6 +5,8 @@
  *      Author: Tim Panajott
  */
 
+#include <InterfaceConfig.hpp>
+#include <Light.hpp>
 #include <MqttLog.hpp>
 #include <NSPanel.hpp>
 #include <TftDefines.h>
@@ -25,7 +27,7 @@ void HomePage::setDimmingValue(uint8_t value) {
 
 void HomePage::updateDimmerValueCache() {
   int newValue = NSPanel::instance->getComponentIntVal(HOME_DIMMER_SLIDER_NAME);
-  if (newValue > InterfaceManager::instance->config.raiseToMaxLightLevelAbove) {
+  if (newValue > InterfaceConfig::raiseToMaxLightLevelAbove) {
     HomePage::_dimmerValue = 100;
   } else {
     HomePage::_dimmerValue = newValue;
@@ -233,9 +235,9 @@ void LightPage::show() {
   NSPanel::instance->goToPage(LIGHT_PAGE_NAME);
 
   if (LightPage::selectedLight != nullptr) {
-    if (LightPage::selectedLight->canTemperature) {
+    if (LightPage::selectedLight->canTemperature()) {
       LightPage::_currentMode = LIGHT_PAGE_MODE::COLOR_TEMP;
-    } else if (LightPage::selectedLight->canRgb) {
+    } else if (LightPage::selectedLight->canRgb()) {
       LightPage::_currentMode = LIGHT_PAGE_MODE::COLOR_RGB;
     } else {
       LightPage::_currentMode = LIGHT_PAGE_MODE::COLOR_TEMP; // Default to color temp although this wont be shown.
@@ -245,38 +247,38 @@ void LightPage::show() {
 
 void LightPage::updateValues() {
   if (LightPage::selectedLight != nullptr) {
-    NSPanel::instance->setComponentText(LIGHT_PAGE_LIGHT_LABEL_NAME, LightPage::selectedLight->name.c_str());
-    NSPanel::instance->setComponentVal(LIGHT_PAGE_BRIGHTNESS_SLIDER_NAME, LightPage::selectedLight->level);
+    NSPanel::instance->setComponentText(LIGHT_PAGE_LIGHT_LABEL_NAME, LightPage::selectedLight->getName().c_str());
+    NSPanel::instance->setComponentVal(LIGHT_PAGE_BRIGHTNESS_SLIDER_NAME, LightPage::selectedLight->getLightLevel());
 
-    LOG_DEBUG("Selected light can Color Temp? ", LightPage::selectedLight->canTemperature ? "Yes" : "No");
-    LOG_DEBUG("Selected light can RGB? ", LightPage::selectedLight->canRgb ? "Yes" : "No");
+    LOG_DEBUG("Selected light can Color Temp? ", LightPage::selectedLight->canTemperature() ? "Yes" : "No");
+    LOG_DEBUG("Selected light can RGB? ", LightPage::selectedLight->canRgb() ? "Yes" : "No");
 
-    if (LightPage::selectedLight->canTemperature && LightPage::_currentMode == LIGHT_PAGE_MODE::COLOR_TEMP) {
-      NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, LightPage::selectedLight->colorTemperature);
+    if (LightPage::selectedLight->canTemperature() && LightPage::_currentMode == LIGHT_PAGE_MODE::COLOR_TEMP) {
+      NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, LightPage::selectedLight->getColorTemperature());
       NSPanel::instance->setComponentPic(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_KELVIN_SLIDER_PIC);
       NSPanel::instance->setComponentPic1(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_KELVIN_SLIDER_PIC1);
       NSPanel::instance->setComponentPic(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, LIGHT_PAGE_COLOR_TEMP_MODE_PIC);
-    } else if (LightPage::selectedLight->canRgb && LightPage::_currentMode == LIGHT_PAGE_MODE::COLOR_RGB) {
-      NSPanel::instance->setComponentVal(LIGHT_PAGE_HUE_SLIDER_NAME, LightPage::selectedLight->colorHue);
-      NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, LightPage::selectedLight->colorSat);
+    } else if (LightPage::selectedLight->canRgb() && LightPage::_currentMode == LIGHT_PAGE_MODE::COLOR_RGB) {
+      NSPanel::instance->setComponentVal(LIGHT_PAGE_HUE_SLIDER_NAME, LightPage::selectedLight->getHue());
+      NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, LightPage::selectedLight->getSaturation());
       NSPanel::instance->setComponentPic(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_SAT_SLIDER_PIC);
       NSPanel::instance->setComponentPic1(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_SAT_SLIDER_PIC1);
       NSPanel::instance->setComponentPic(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, LIGHT_PAGE_COLOR_RGB_MODE_PIC);
     }
 
-    if (LightPage::selectedLight->canTemperature && LightPage::selectedLight->canRgb) {
+    if (LightPage::selectedLight->canTemperature() && LightPage::selectedLight->canRgb()) {
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, true);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, true);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, true);
-    } else if (LightPage::selectedLight->canTemperature && !LightPage::selectedLight->canRgb) {
+    } else if (LightPage::selectedLight->canTemperature() && !LightPage::selectedLight->canRgb()) {
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, true);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, false);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, false);
-    } else if (!LightPage::selectedLight->canTemperature && LightPage::selectedLight->canRgb) {
+    } else if (!LightPage::selectedLight->canTemperature() && LightPage::selectedLight->canRgb()) {
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, true);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, true);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, false);
-    } else if (!LightPage::selectedLight->canTemperature && !LightPage::selectedLight->canRgb) {
+    } else if (!LightPage::selectedLight->canTemperature() && !LightPage::selectedLight->canRgb()) {
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, false);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, false);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, false);
@@ -329,7 +331,7 @@ void ScenePage::setRoomLabelText(const char *text) {
   NSPanel::instance->setComponentText(SCENES_PAGE_CURRENT_SCENES_LABEL_NAME, text);
 }
 
-void ScenePage::showScenes(std::vector<sceneConfig> &scenes) {
+void ScenePage::showScenes(std::vector<Scene *> &scenes) {
   // Hide any elements that wont be used
   // Update the correct name and enable components that are to be used
   // 4 is the number of scene we can display on the screen
@@ -337,10 +339,10 @@ void ScenePage::showScenes(std::vector<sceneConfig> &scenes) {
     switch (i) {
     case 0: {
       if (scenes.size() >= 1) {
-        NSPanel::instance->setComponentText(SCENES_PAGE_SCENE1_LABEL_NAME, scenes[0].name.c_str());
+        NSPanel::instance->setComponentText(SCENES_PAGE_SCENE1_LABEL_NAME, scenes[0]->name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_LABEL_NAME, true);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, true);
-        LOG_DEBUG("Showing scene: ", scenes[0].name.c_str(), " in slot 1");
+        LOG_DEBUG("Showing scene: ", scenes[0]->name.c_str(), " in slot 1");
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, false);
@@ -349,10 +351,10 @@ void ScenePage::showScenes(std::vector<sceneConfig> &scenes) {
     }
     case 1: {
       if (scenes.size() >= 2) {
-        NSPanel::instance->setComponentText(SCENES_PAGE_SCENE2_LABEL_NAME, scenes[1].name.c_str());
+        NSPanel::instance->setComponentText(SCENES_PAGE_SCENE2_LABEL_NAME, scenes[1]->name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, true);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, true);
-        LOG_DEBUG("Showing scene: ", scenes[1].name.c_str(), " in slot 2");
+        LOG_DEBUG("Showing scene: ", scenes[1]->name.c_str(), " in slot 2");
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, false);
@@ -361,10 +363,10 @@ void ScenePage::showScenes(std::vector<sceneConfig> &scenes) {
     }
     case 2: {
       if (scenes.size() >= 3) {
-        NSPanel::instance->setComponentText(SCENES_PAGE_SCENE3_LABEL_NAME, scenes[2].name.c_str());
+        NSPanel::instance->setComponentText(SCENES_PAGE_SCENE3_LABEL_NAME, scenes[2]->name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, true);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, true);
-        LOG_DEBUG("Showing scene: ", scenes[2].name.c_str(), " in slot 3");
+        LOG_DEBUG("Showing scene: ", scenes[2]->name.c_str(), " in slot 3");
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, false);
@@ -373,10 +375,10 @@ void ScenePage::showScenes(std::vector<sceneConfig> &scenes) {
     }
     case 3: {
       if (scenes.size() >= 4) {
-        NSPanel::instance->setComponentText(SCENES_PAGE_SCENE4_LABEL_NAME, scenes[3].name.c_str());
+        NSPanel::instance->setComponentText(SCENES_PAGE_SCENE4_LABEL_NAME, scenes[3]->name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, true);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, true);
-        LOG_DEBUG("Showing scene: ", scenes[3].name.c_str(), " in slot 1");
+        LOG_DEBUG("Showing scene: ", scenes[3]->name.c_str(), " in slot 1");
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, false);
@@ -400,75 +402,75 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
     break;
   }
   case SCENES_PAGE_SCENE1_LABEL_ID: {
-    if (InterfaceManager::instance->config.currentRoom->scenes.size() >= 1) {
-      InterfaceManager::instance->config.currentRoom->scenes[0].activate();
+    if ((*RoomManager::currentRoom)->scenes.size() >= 1) {
+      (*RoomManager::currentRoom)->scenes[0]->activate();
     }
     break;
   }
   case SCENES_PAGE_SCENE2_LABEL_ID: {
-    if (InterfaceManager::instance->config.currentRoom->scenes.size() >= 2) {
-      InterfaceManager::instance->config.currentRoom->scenes[1].activate();
+    if ((*RoomManager::currentRoom)->scenes.size() >= 2) {
+      (*RoomManager::currentRoom)->scenes[1]->activate();
     }
     break;
   }
   case SCENES_PAGE_SCENE3_LABEL_ID: {
-    if (InterfaceManager::instance->config.currentRoom->scenes.size() >= 3) {
-      InterfaceManager::instance->config.currentRoom->scenes[2].activate();
+    if ((*RoomManager::currentRoom)->scenes.size() >= 3) {
+      (*RoomManager::currentRoom)->scenes[2]->activate();
     }
     break;
   }
   case SCENES_PAGE_SCENE4_LABEL_ID: {
-    if (InterfaceManager::instance->config.currentRoom->scenes.size() >= 4) {
-      InterfaceManager::instance->config.currentRoom->scenes[3].activate();
+    if ((*RoomManager::currentRoom)->scenes.size() >= 4) {
+      (*RoomManager::currentRoom)->scenes[3]->activate();
     }
     break;
   }
   case SCENES_PAGE_SCENE1_SAVE_BUTTON_ID: {
-    if (InterfaceManager::instance->config.currentRoom->scenes.size() >= 1) {
-      InterfaceManager::instance->config.currentRoom->scenes[0].save();
+    if ((*RoomManager::currentRoom)->scenes.size() >= 1) {
+      (*RoomManager::currentRoom)->scenes[0]->save();
       ScenePage::setRoomLabelText("Saved");
       vTaskDelay(500 / portTICK_PERIOD_MS);
-      ScenePage::setRoomLabelText(InterfaceManager::instance->config.currentRoom->name.c_str());
+      ScenePage::setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
     }
     break;
   }
   case SCENES_PAGE_SCENE2_SAVE_BUTTON_ID: {
-    if (InterfaceManager::instance->config.currentRoom->scenes.size() >= 2) {
-      InterfaceManager::instance->config.currentRoom->scenes[1].save();
+    if ((*RoomManager::currentRoom)->scenes.size() >= 2) {
+      (*RoomManager::currentRoom)->scenes[1]->save();
       ScenePage::setRoomLabelText("Saved");
       vTaskDelay(500 / portTICK_PERIOD_MS);
-      ScenePage::setRoomLabelText(InterfaceManager::instance->config.currentRoom->name.c_str());
+      ScenePage::setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
     }
     break;
   }
   case SCENES_PAGE_SCENE3_SAVE_BUTTON_ID: {
-    if (InterfaceManager::instance->config.currentRoom->scenes.size() >= 3) {
-      InterfaceManager::instance->config.currentRoom->scenes[2].save();
+    if ((*RoomManager::currentRoom)->scenes.size() >= 3) {
+      (*RoomManager::currentRoom)->scenes[2]->save();
       ScenePage::setRoomLabelText("Saved");
       vTaskDelay(500 / portTICK_PERIOD_MS);
-      ScenePage::setRoomLabelText(InterfaceManager::instance->config.currentRoom->name.c_str());
+      ScenePage::setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
     }
     break;
   }
   case SCENES_PAGE_SCENE4_SAVE_BUTTON_ID: {
-    if (InterfaceManager::instance->config.currentRoom->scenes.size() >= 4) {
-      InterfaceManager::instance->config.currentRoom->scenes[3].save();
+    if ((*RoomManager::currentRoom)->scenes.size() >= 4) {
+      (*RoomManager::currentRoom)->scenes[3]->save();
       ScenePage::setRoomLabelText("Saved");
       vTaskDelay(500 / portTICK_PERIOD_MS);
-      ScenePage::setRoomLabelText(InterfaceManager::instance->config.currentRoom->name.c_str());
+      ScenePage::setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
     }
     break;
   }
   case SCENES_PAGE_PREVIOUS_SCENES_BUTTON_ID: {
-    InterfaceManager::instance->_goToPreviousRoom();
-    ScenePage::showScenes(InterfaceManager::instance->config.currentRoom->scenes);
-    ScenePage::setRoomLabelText(InterfaceManager::instance->config.currentRoom->name.c_str());
+    RoomManager::goToPreviousRoom();
+    ScenePage::showScenes((*RoomManager::currentRoom)->scenes);
+    ScenePage::setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
     break;
   }
   case SCENES_PAGE_NEXT_SCENES_BUTTON_ID: {
-    InterfaceManager::instance->_goToNextRoom();
-    ScenePage::showScenes(InterfaceManager::instance->config.currentRoom->scenes);
-    ScenePage::setRoomLabelText(InterfaceManager::instance->config.currentRoom->name.c_str());
+    RoomManager::goToNextRoom();
+    ScenePage::showScenes((*RoomManager::currentRoom)->scenes);
+    ScenePage::setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
     break;
   }
   default:

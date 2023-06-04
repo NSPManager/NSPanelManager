@@ -3,7 +3,10 @@
 
 #include <ArduinoJson.h>
 #include <InterfaceManagerHelpers.hpp>
+#include <Light.hpp>
 #include <NSPanel.hpp>
+#include <RoomManager.hpp>
+#include <Scene.hpp>
 #include <list>
 #include <string>
 
@@ -33,37 +36,9 @@ public:
   static inline bool hasRegisteredToManager = false;
   /// @brief The InfterfaceManager instance
   static inline InterfaceManager *instance;
-  /// @brief The configuration for this panel
-  interfaceConfig config;
   /// @brief If the light os ON, it will turn off. If the light is OFF, turn it ON
   /// @param light The light to change
-  void _onOffLight(lightConfig *light);
-  /// @brief Send out new light level for a list of lights
-  /// @param lights The lights to set value for
-  /// @param level The new value
-  void _changeLightsToLevel(std::list<lightConfig *> *lights, uint8_t level);
-  /// @brief Send out new color temperature for a list of lights
-  /// @param lights The lights to set value for
-  /// @param level The new value
-  void _changeLightsToKelvin(std::list<lightConfig *> *lights, uint16_t kelvin);
-  /// @brief Send out new color saturation for a list of lights
-  /// @param lights The lights to set value for
-  /// @param level The new value
-  void _changeLightsToColorSaturation(std::list<lightConfig *> *lights, uint8_t kelvin);
-  /// @brief Send out new color hue for a list of lights
-  /// @param lights The lights to set value for
-  /// @param level The new value
-  void _changeLightsToColorHue(std::list<lightConfig *> *lights, uint16_t kelvin);
-  /// @brief Active the given scene
-  /// @param scene The scene to activate
-  void activateScene(sceneConfig scene);
-  /// @brief Save the current values of the lights to the given scene
-  /// @param scene The scene to save current values to
-  void saveScene(sceneConfig scene);
-  /// @brief Go to the next room and update relevant values, if at last room, go to first
-  void _goToNextRoom();
-  /// @brief Go to the previous room and update relevant values, if at first room, go to last
-  void _goToPreviousRoom();
+  void _onOffLight(Light *light);
 
 private:
   /// @brief The task that handles startup if InterfaceManager. It load the config from the server and processes it and
@@ -108,8 +83,6 @@ private:
   /// @brief When sending new values from the panel, the values might flucuate before setteling
   /// @brief this variable indicates for how long MQTT messages should be ignored
   unsigned long _ignoreMqttStatusUpdatesUntil;
-  /// @brief Change to a room with a specific ID
-  void _changeRoom(uint8_t roomId);
   /// @brief Update panel with new values for the new room
   void _updatePanelWithNewRoomInfo();
   /// @brief Update all relevant light values on the panel
@@ -126,8 +99,6 @@ private:
   /// @param buffer The buffer to put the JSON-data in to
   /// @return True if sucessful, otherwise false
   bool _getRoomConfig(int room_id, DynamicJsonDocument *buffer);
-  /// @brief Process the config from the server into something useful
-  void _processPanelConfig();
   /// @brief Set current light mode, handle starting/stopping special light mode
   /// @param mode The mode to set
   void _setEditLightMode(editLightMode mode);
@@ -163,7 +134,7 @@ private:
 
   /// @brief Given a light, will subscribe to all relevant MQTT status topics for that light
   /// @param cfg The light to subscribe to
-  void _subscribeToLightTopics(lightConfig *cfg);
+  void _subscribeToLightTopics(Light *cfg);
 
   /// @brief Set internal light representation level
   /// @param light_id The light ID to set value for

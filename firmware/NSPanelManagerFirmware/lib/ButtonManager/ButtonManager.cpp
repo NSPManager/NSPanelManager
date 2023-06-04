@@ -1,5 +1,6 @@
 #include "ButtonManager.hpp"
 #include <InterfaceManager.hpp>
+#include <Light.hpp>
 #include <MqttLog.hpp>
 #include <MqttManager.hpp>
 #include <NSPMConfig.h>
@@ -55,14 +56,14 @@ void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
     if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DIRECT) {
       ButtonManager::_setRelayState(1, !digitalRead(BUTTON_MANAGER_RELAY1_PIN));
     } else if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DETACHED && ButtonManager::button1_detached_mode_light != nullptr) {
-      LOG_DEBUG("Button 1 pressed, detached light: ", ButtonManager::button1_detached_mode_light->name.c_str());
+      LOG_DEBUG("Button 1 pressed, detached light: ", ButtonManager::button1_detached_mode_light->getName().c_str());
       InterfaceManager::instance->_onOffLight(ButtonManager::button1_detached_mode_light);
     }
   } else if (button == 2) {
     if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DIRECT) {
       ButtonManager::_setRelayState(2, !digitalRead(BUTTON_MANAGER_RELAY2_PIN));
     } else if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DETACHED && ButtonManager::button2_detached_mode_light != nullptr) {
-      LOG_DEBUG("Button 2 pressed, detached light: ", ButtonManager::button2_detached_mode_light->name.c_str());
+      LOG_DEBUG("Button 2 pressed, detached light: ", ButtonManager::button2_detached_mode_light->getName().c_str());
       InterfaceManager::instance->_onOffLight(ButtonManager::button2_detached_mode_light);
     }
   }
