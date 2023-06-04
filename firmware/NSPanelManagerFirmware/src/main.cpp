@@ -1,9 +1,10 @@
 #include <Arduino.h>
-#include <ArduinoJson.h>
+#include <ButtonManager.hpp>
 #include <HTTPClient.h>
 #include <InterfaceManager.hpp>
 #include <LittleFS.h>
 #include <MqttLog.hpp>
+#include <MqttManager.hpp>
 #include <NSPMConfig.h>
 #include <NSPanel.hpp>
 #include <PubSubClient.h>
@@ -11,8 +12,6 @@
 #include <WiFi.h>
 #include <nspm-bin-version.h>
 #include <string>
-#include <MqttManager.hpp>
-#include <ButtonManager.hpp>
 
 NSPanel nspanel;
 InterfaceManager interfaceManager;
@@ -62,8 +61,10 @@ void registerToNSPanelManager() {
 
 void taskManageWifiAndMqtt(void *param) {
   LOG_INFO("taskWiFiMqttHandler started!");
-  Serial.print("Configured to connect to WiFi: "); Serial.println(config.wifi_ssid.c_str());
-  Serial.print("with hostname: "); Serial.println(config.wifi_hostname.c_str());
+  Serial.print("Configured to connect to WiFi: ");
+  Serial.println(config.wifi_ssid.c_str());
+  Serial.print("with hostname: ");
+  Serial.println(config.wifi_hostname.c_str());
   if (!NSPMConfig::instance->wifi_ssid.empty()) {
     for (;;) {
       if (!WiFi.isConnected()) {
@@ -72,13 +73,15 @@ void taskManageWifiAndMqtt(void *param) {
         WiFi.mode(WIFI_STA);
         WiFi.setHostname(config.wifi_hostname.c_str());
         while (!WiFi.isConnected()) {
-          Serial.print("Connecting to WiFi "); Serial.println(config.wifi_ssid.c_str());
+          Serial.print("Connecting to WiFi ");
+          Serial.println(config.wifi_ssid.c_str());
           WiFi.begin(config.wifi_ssid.c_str(), config.wifi_psk.c_str());
           vTaskDelay(1000 / portTICK_PERIOD_MS);
           if (WiFi.isConnected()) {
             Serial.println("Connected to WiFi!");
             LOG_INFO("Connected to WiFi ", config.wifi_ssid.c_str());
-            Serial.print("Connected to WiFi "); Serial.println(config.wifi_ssid.c_str());
+            Serial.print("Connected to WiFi ");
+            Serial.println(config.wifi_ssid.c_str());
             LOG_INFO("IP Address: ", WiFi.localIP());
             LOG_INFO("Netmask:    ", WiFi.subnetMask());
             LOG_INFO("Gateway:    ", WiFi.gatewayIP());
@@ -162,7 +165,8 @@ void taskManageWifiAndMqtt(void *param) {
 
         Serial.println("WiFi SSID: NSPMPanel");
         Serial.println("WiFi PSK : password");
-        Serial.print("WiFi IP Address: "); Serial.println(WiFi.softAPIP().toString().c_str());
+        Serial.print("WiFi IP Address: ");
+        Serial.println(WiFi.softAPIP().toString().c_str());
         webMan.init(NSPanelManagerFirmwareVersion);
         // Wait indefinitly
         for (;;) {
@@ -188,7 +192,7 @@ void setup() {
   // Setup logging
   logger.init(&(NSPMConfig::instance->mqtt_log_topic));
   logger.setLogLevel(static_cast<MqttLogLevel>(config.logging_level));
-  
+
   mqttManager.init();
   ButtonManager::init();
 

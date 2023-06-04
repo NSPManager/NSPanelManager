@@ -10,6 +10,8 @@
 
 #include <Arduino.h>
 #include <InterfaceManager.hpp>
+#include <Light.hpp>
+#include <Scene.hpp>
 
 enum LIGHT_PAGE_MODE {
   COLOR_TEMP,
@@ -45,7 +47,7 @@ public:
   static void setLightName(uint8_t position, const char *name);
   static void setLightState(uint8_t position, bool state);
   static void setCurrentRoomLabel(const char *label);
-  static inline lightConfig *_selectedLight;
+  static inline Light *_selectedLight;
 };
 
 class LightPage {
@@ -55,7 +57,7 @@ public:
   static uint8_t getBrightnessValue();
   static uint8_t getKelvinSatValue();
   static uint16_t getHueValue();
-  static inline lightConfig *selectedLight;
+  static inline Light *selectedLight;
   static LIGHT_PAGE_MODE getCurrentMode();
   static void switchMode();
 
@@ -67,7 +69,7 @@ class ScenePage {
 public:
   static void show();
   static void setRoomLabelText(const char *text);
-  static void showScenes(std::vector<sceneConfig> &scenes);
+  static void showScenes(std::vector<Scene *> &scenes);
   static void processTouchEvent(uint8_t page, uint8_t component, bool pressed);
 };
 

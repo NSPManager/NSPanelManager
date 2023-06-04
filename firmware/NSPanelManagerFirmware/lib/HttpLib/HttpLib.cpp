@@ -71,3 +71,17 @@ bool HttpLib::GetMD5sum(const char *address, char *buffer) {
   http.end();
   return false;
 }
+
+bool HttpLib::DownloadJSON(const char *address, JsonDocument *document) {
+  HTTPClient http;
+  http.begin(address);
+  int responseCode = http.GET();
+
+  if (responseCode == 200) {
+    DeserializationError error = deserializeJson(*document, http.getStream());
+    http.end();
+    return !error; // Return true or false depending on there was a deserialization error
+  }
+  http.end();
+  return false;
+}
