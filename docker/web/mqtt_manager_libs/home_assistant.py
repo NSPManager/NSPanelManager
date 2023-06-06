@@ -62,19 +62,14 @@ def on_message(ws, message):
 
                             if light.can_rgb and entity["attributes"]["color_mode"] != "color_temp":
                                 light.last_command_sent = "rgb"
-                                mqtt_client.publish(
-                                    F"nspanel/entities/light/{light.id}/state_hue", entity["attributes"]["hs_color"][0], retain=True)
-                                mqtt_manager_libs.light_states.states[
-                                    light.id].color_hue = entity["attributes"]["hs_color"][0]
-                                mqtt_client.publish(
-                                    F"nspanel/entities/light/{light.id}/state_sat", entity["attributes"]["hs_color"][1], retain=True)
-                                mqtt_manager_libs.light_states.states[
-                                    light.id].color_saturation = entity["attributes"]["hs_color"][1]
+                                mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_hue", entity["attributes"]["hs_color"][0], retain=True)
+                                mqtt_manager_libs.light_states.states[light.id].color_hue = entity["attributes"]["hs_color"][0]
+                                mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_sat", entity["attributes"]["hs_color"][1], retain=True)
+                                mqtt_manager_libs.light_states.states[light.id].color_saturation = entity["attributes"]["hs_color"][1]
                             elif light.can_color_temperature and "color_temp_kelvin" in entity["attributes"]:
                                 light.last_command_sent = "color_temp"
                                 light.color_temp = entity["attributes"]["color_temp_kelvin"]
-                                mqtt_client.publish(
-                                    F"nspanel/entities/light/{light.id}/state_kelvin", light.color_temp, retain=True)
+                                mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_kelvin", light.color_temp, retain=True)
                         except Exception as e:
                             logging.error(
                                 "Something went wrong while trying to load current states.")

@@ -22,6 +22,7 @@ def get_machine_mac():
 
 settings = {}
 last_settings_file_mtime = 0
+has_sent_reload_command = False
 client = mqtt.Client("NSPanelManager_" + get_machine_mac())
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("urllib3").propagate = False
@@ -161,6 +162,11 @@ def connect_and_loop():
             logging.error(
                 F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
             sleep(10)
+
+    # Send reload command to panels for them to reload config as MQTT manager JUST restarted (probably because of config change)
+    if has_sent_reload_command == False:
+        client.publish(F"nspanel/config/reload", 1, retain=True)
+        
 
     # MQTT Connected, start APIs if configured
     if settings["home_assistant_address"] != "" and settings["home_assistant_token"] != "":

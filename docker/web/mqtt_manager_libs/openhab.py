@@ -4,6 +4,7 @@ import logging
 import json
 from time import sleep
 from threading import Thread
+import traceback
 import mqtt_manager_libs.light_states
 
 openhab_url = ""
@@ -31,42 +32,49 @@ def on_message(ws, message):
         topic_parts = json_msg["topic"].split("/")
         item = topic_parts[2]
         payload = json.loads(json_msg["payload"])
+        logging.info(F"Got ItemStateEvent on topic: " + json_msg["topic"])
+        logging.info("Payload: " + payload)
         for light in mqtt_manager_libs.light_states.states.values():
-            if light.type == "openhab":
-                if light.openhab_control_mode == "dimmer" and item == light.openhab_item_name:
-                    light_level_pct = int(float(payload["value"]))
-                    mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", light_level_pct, retain=True)
-                    light.light_level = light_level_pct
-                    break
-                elif light.openhab_control_mode == "switch" and item == light.openhab_item_name:
-                    if payload["value"] == "ON":
-                        mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", 100, retain=True)
-                        light.light_level = 100
-                        break
-                    else:
-                        mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", 0, retain=True)
-                        light.light_level = 0
-                        break
-                elif item == light.openhab_item_color_temp:
-                    received_color_temp_percent = 100 - int(float(payload["value"]))
-                    # logging.debug(F"Recevied color temp from OpenHAB: {received_color_temp_percent}%")
-                    kelvin_max_floored = settings["color_temp_max"] - settings["color_temp_min"]
-                    send_color_temp = settings["color_temp_min"] + int((received_color_temp_percent / 100) * kelvin_max_floored)
-                    mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_kelvin", send_color_temp, retain=True)
-                    light.color_temp = send_color_temp
-                    light.last_command_sent = "color_temp"
-                    break
-                elif item == light.openhab_item_rgb:
-                    #hue, sat, brightness = payload["value"]
-                    hue, sat, brightness = payload["value"].split(",")
-                    mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_hue", int(float(hue)), retain=True)
-                    mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_sat", int(float(sat)), retain=True)
-                    mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_brightness_pct", brightness, retain=True)
-                    light.color_hue = int(float(hue))
-                    light.color_saturation = int(float(sat))
-                    light.light_level = int(float(brightness))
-                    light.last_command_sent = "rgb"
-                    break
+            try:
+                if light.type == "openhab":
+                    if light.openhab_control_mode == "dimmer" and item == light.openhab_item_name:
+                        light_level_pct = int(float(payload["value"]))
+                        mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", light_level_pct, retain=True)
+                        light.light_level = light_level_pct
+                        return None
+                    elif light.openhab_control_mode == "switch" and item == light.openhab_item_name:
+                        if payload["value"] == "ON":
+                            mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", 100, retain=True)
+                            light.light_level = 100
+                            return None
+                        else:
+                            mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", 0, retain=True)
+                            light.light_level = 0
+                            return None
+                    elif item == light.openhab_item_color_temp:
+                        received_color_temp_percent = 100 - int(float(payload["value"]))
+                        # logging.debug(F"Recevied color temp from OpenHAB: {received_color_temp_percent}%")
+                        kelvin_max_floored = settings["color_temp_max"] - settings["color_temp_min"]
+                        send_color_temp = settings["color_temp_min"] + int((received_color_temp_percent / 100) * kelvin_max_floored)
+                        mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_kelvin", send_color_temp, retain=True)
+                        light.color_temp = send_color_temp
+                        light.last_command_sent = "color_temp"
+                        return None
+                    elif item == light.openhab_item_rgb:
+                        #hue, sat, brightness = payload["value"]
+                        hue, sat, brightness = payload["value"].split(",")
+                        mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_hue", int(float(hue)), retain=True)
+                        mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_sat", int(float(sat)), retain=True)
+                        mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_brightness_pct", brightness, retain=True)
+                        light.color_hue = int(float(hue))
+                        light.color_saturation = int(float(sat))
+                        light.light_level = int(float(brightness))
+                        light.last_command_sent = "rgb"
+                        return None
+
+                logging.info(F"Got state update event for light not managed by NSPanelManager. Topic: " + json_msg["topic"])
+            except Exception as e:
+                traceback.print_exc()
 
 def connect():
     Thread(target=_do_connection, daemon=True).start()
@@ -157,7 +165,7 @@ def set_entity_brightness(openhab_item_name: str, openhab_control_mode: str, lig
         return True
     except Exception as e:
         logging.error("Failed to send entity update to OpenHAB.")
-        logging.error(e)
+        traceback.print_exc()
         return False
 
 
@@ -182,7 +190,7 @@ def set_entity_color_temp(openhab_item_name: str, color_temp: int) -> bool:
         return True
     except Exception as e:
         logging.error("Failed to send entity update to OpenHAB.")
-        logging.error(e)
+        traceback.print_exc()
         return False
 
 
@@ -199,7 +207,7 @@ def set_entity_color_saturation(openhab_item_name: str, light_level: int, color_
         return True
     except Exception as e:
         logging.error("Failed to send entity update to OpenHAB.")
-        logging.error(e)
+        traceback.print_exc()
         return False
 
 
@@ -249,7 +257,7 @@ def _update_all_light_states():
                         logging.error("Failed to get item state for OppenHAB item: " + light.openhab_item_color_temp)
             except Exception as e:
                 logging.error(F"Failed to process light ID:{light_id}. The following error occured:")
-                logging.error(e)
+                traceback.print_exc()
 
 
 def _get_item_state(item):
