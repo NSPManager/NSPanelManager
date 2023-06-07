@@ -33,16 +33,17 @@ def on_message(ws, message):
         item = topic_parts[2]
         payload = json.loads(json_msg["payload"])
         logging.info(F"Got ItemStateEvent on topic: " + json_msg["topic"])
-        logging.info("Payload: " + payload)
         for light in mqtt_manager_libs.light_states.states.values():
             try:
                 if light.type == "openhab":
                     if light.openhab_control_mode == "dimmer" and item == light.openhab_item_name:
+                        logging.info("Item matches light: " + light.friendly_name + " dimmer item.")
                         light_level_pct = int(float(payload["value"]))
                         mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", light_level_pct, retain=True)
                         light.light_level = light_level_pct
                         return None
                     elif light.openhab_control_mode == "switch" and item == light.openhab_item_name:
+                        logging.info("Item matches light: " + light.friendly_name + " switch item.")
                         if payload["value"] == "ON":
                             mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", 100, retain=True)
                             light.light_level = 100
@@ -52,6 +53,7 @@ def on_message(ws, message):
                             light.light_level = 0
                             return None
                     elif item == light.openhab_item_color_temp:
+                        logging.info("Item matches light: " + light.friendly_name + " color temp item.")
                         received_color_temp_percent = 100 - int(float(payload["value"]))
                         # logging.debug(F"Recevied color temp from OpenHAB: {received_color_temp_percent}%")
                         kelvin_max_floored = settings["color_temp_max"] - settings["color_temp_min"]
@@ -62,6 +64,8 @@ def on_message(ws, message):
                         return None
                     elif item == light.openhab_item_rgb:
                         #hue, sat, brightness = payload["value"]
+                        logging.info("Item matches light: " + light.friendly_name + " RGB item.")
+                        logging.info("RGB Payload: " + payload["value"])
                         hue, sat, brightness = payload["value"].split(",")
                         mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_hue", int(float(hue)), retain=True)
                         mqtt_client.publish(F"nspanel/entities/light/{light_id}/state_sat", int(float(sat)), retain=True)
