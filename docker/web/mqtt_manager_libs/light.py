@@ -69,12 +69,11 @@ class Light:
             if self.last_command_sent == "color_temp":
                 if mqtt_manager_libs.openhab.set_entity_brightness(self.openhab_item_name, self.openhab_control_mode, light_level):
                     if self.light_level == 0:
-                        mqtt_manager_libs.openhab.set_entity_color_temp(
-                            self.openhab_item_color_temp, self.color_temp)
+                        mqtt_manager_libs.openhab.set_entity_color_temp(self.openhab_item_color_temp, self.color_temp)
                     self.light_level = int(light_level)
-                elif self.last_command_sent == "rgb":
-                    if mqtt_manager_libs.openhab.set_entity_color_saturation(int(light_level), self.color_saturation, self.color_hue):
-                        self.light_level = int(light_level)
+            elif self.last_command_sent == "rgb":
+                if mqtt_manager_libs.openhab.set_entity_color_saturation(int(light_level), self.color_saturation, self.color_hue):
+                    self.light_level = int(light_level)
 
     def get_color_temp(self) -> int:
         return self.color_temp
