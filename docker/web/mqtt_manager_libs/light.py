@@ -67,13 +67,18 @@ class Light:
                 self.light_level = int(light_level)
         elif self.type == "openhab":
             if self.last_command_sent == "color_temp":
+                logging.info("Sending light update to OpenHAB for light {self.friendly_name}. Sending brightness value: {light_level}")
                 if mqtt_manager_libs.openhab.set_entity_brightness(self.openhab_item_name, self.openhab_control_mode, light_level):
                     if self.light_level == 0:
+                        logging.info("Sending kelvin update to OpenHAB for light {self.friendly_name}. Light was off previously.")
                         mqtt_manager_libs.openhab.set_entity_color_temp(self.openhab_item_color_temp, self.color_temp)
                     self.light_level = int(light_level)
             elif self.last_command_sent == "rgb":
+                logging.info("Sending light update to OpenHAB for light {self.friendly_name}. Sending RGB value: {light_level}")
                 if mqtt_manager_libs.openhab.set_entity_color_saturation(int(light_level), self.color_saturation, self.color_hue):
                     self.light_level = int(light_level)
+            else:
+                logging.error("Unknown OpenHAB light state. Last command sent: " + self.last_command_sent)
 
     def get_color_temp(self) -> int:
         return self.color_temp
