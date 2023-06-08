@@ -29,6 +29,7 @@ def init(settings_from_manager, mqtt_client_from_manager):
 def on_message(ws, message):
     json_msg = json.loads(message)
     if json_msg["type"] == "ItemStateEvent":
+        logging.info(F"Received command payload: {message}")
         topic_parts = json_msg["topic"].split("/")
         item = topic_parts[2]
         payload = json.loads(json_msg["payload"])
