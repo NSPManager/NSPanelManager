@@ -67,12 +67,12 @@ def on_message(ws, message):
                         #logging.info("Item matches light: " + light.friendly_name + " RGB item.")
                         #logging.info("RGB Payload: " + payload["value"])
                         hue, sat, brightness = payload["value"].split(",")
-                        mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_hue", int(float(hue)), retain=True)
-                        mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_sat", int(float(sat)), retain=True)
-                        mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", brightness, retain=True)
                         light.color_hue = int(float(hue))
                         light.color_saturation = int(float(sat))
                         light.light_level = int(float(brightness))
+                        mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_hue", light.color_hue, retain=True)
+                        mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_sat", light.color_saturation, retain=True)
+                        mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", light.light_level, retain=True)
                         light.last_command_sent = "rgb"
                         return None
 
