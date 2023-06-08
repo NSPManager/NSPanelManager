@@ -32,7 +32,7 @@ def on_message(ws, message):
         topic_parts = json_msg["topic"].split("/")
         item = topic_parts[2]
         payload = json.loads(json_msg["payload"])
-        logging.info(F"Got ItemStateEvent on topic: " + json_msg["topic"])
+        #logging.info(F"Got ItemStateEvent on topic: " + json_msg["topic"])
         for light in mqtt_manager_libs.light_states.states.values():
             try:
                 if light.type == "openhab":
@@ -64,8 +64,8 @@ def on_message(ws, message):
                         return None
                     elif item == light.openhab_item_rgb:
                         #hue, sat, brightness = payload["value"]
-                        logging.info("Item matches light: " + light.friendly_name + " RGB item.")
-                        logging.info("RGB Payload: " + payload["value"])
+                        #logging.info("Item matches light: " + light.friendly_name + " RGB item.")
+                        #logging.info("RGB Payload: " + payload["value"])
                         hue, sat, brightness = payload["value"].split(",")
                         mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_hue", int(float(hue)), retain=True)
                         mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_sat", int(float(sat)), retain=True)
