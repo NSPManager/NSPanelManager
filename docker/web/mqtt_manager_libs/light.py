@@ -1,6 +1,7 @@
 import mqtt_manager_libs.home_assistant
 import mqtt_manager_libs.openhab
 import logging
+import time
 
 
 class Light:
@@ -23,6 +24,7 @@ class Light:
     color_saturation: int = 0
     # "color_temp" or "rgb". Used to restore correct state when using scenes
     last_command_sent: str = "color_temp"
+    last_mode_change = 0
 
     @staticmethod
     def from_dict(dict_data):
@@ -94,6 +96,7 @@ class Light:
                     self.openhab_item_color_temp, color_temp)
         self.color_temp = int(color_temp)
         self.last_command_sent = "color_temp"
+        self.last_mode_change = time.time()*1000
 
     def set_color_saturation(self, color_saturation: int):
         if self.type == "home_assistant":
@@ -104,6 +107,7 @@ class Light:
                 self.openhab_item_rgb, self.light_level, color_saturation, self.color_hue)
         self.color_saturation = int(color_saturation)
         self.last_command_sent = "rgb"
+        self.last_mode_change = time.time()*1000
 
     def get_color_saturation(self):
         return self.color_saturation
@@ -117,6 +121,7 @@ class Light:
                 self.openhab_item_rgb, self.light_level, self.color_saturation, color_hue)
         self.color_hue = int(color_hue)
         self.last_command_sent = "rgb"
+        self.last_mode_change = time.time()*1000
 
     def get_color_hue(self):
         return self.color_hue
@@ -135,10 +140,10 @@ class Light:
     def to_scene_data_dict(self):
         return_dict = {
             "light_id": self.id,
-            "level": self.get_light_level()
+            "level": self.get_light_level(),
+            "mode": "dimmer"
         }
         if self.last_command_sent == "color_temp":
-            return_dict["mode"] = "dimmer"
             return_dict["color_temp"] = self.get_color_temp()
         elif self.last_command_sent == "rgb":
             return_dict["mode"] = "color"

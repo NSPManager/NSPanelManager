@@ -2,7 +2,7 @@ import websocket
 import requests
 import logging
 import json
-from time import sleep
+from time import sleep, time
 from threading import Thread
 import traceback
 import mqtt_manager_libs.light_states
@@ -38,6 +38,7 @@ def on_message(ws, message):
         for light in mqtt_manager_libs.light_states.states.values():
             try:
                 if light.type == "openhab":
+                    current_time_ms = time()*1000
                     if light.openhab_control_mode == "dimmer" and item == light.openhab_item_name:
                         light_level_pct = int(float(payload["value"]))
                         mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", light_level_pct, retain=True)
@@ -52,7 +53,7 @@ def on_message(ws, message):
                             mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", 0, retain=True)
                             light.light_level = 0
                             return None
-                    elif item == light.openhab_item_color_temp:
+                    elif item == light.openhab_item_color_temp and (current_time_ms >= light.last_mode_change + 1000 or light.last_command_sent == "color_temp"):
                         received_color_temp_percent = 100 - int(float(payload["value"]))
                         # logging.debug(F"Recevied color temp from OpenHAB: {received_color_temp_percent}%")
                         kelvin_max_floored = settings["color_temp_max"] - settings["color_temp_min"]
@@ -61,7 +62,7 @@ def on_message(ws, message):
                         light.color_temp = send_color_temp
                         light.last_command_sent = "color_temp"
                         return None
-                    elif item == light.openhab_item_rgb:
+                    elif item == light.openhab_item_rgb and (current_time_ms >= light.last_mode_change + 1000 or light.last_command_sent == "rgb"):
                         #hue, sat, brightness = payload["value"]
                         #logging.info("Item matches light: " + light.friendly_name + " RGB item.")
                         #logging.info("RGB Payload: " + payload["value"])
