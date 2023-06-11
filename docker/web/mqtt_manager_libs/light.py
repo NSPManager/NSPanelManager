@@ -52,9 +52,9 @@ class Light:
                 newLight.openhab_item_rgb = dict_data["openhab_item_rgb"]
 
         logging.info(F"Loaded light '{newLight.type}::{newLight.friendly_name}'")
-        logging.info(F"Loaded light '{newLight.type}::{newLight.friendly_name}', can dim? " + "Yes" if newLight.can_dim else "No")
-        logging.info(F"Loaded light '{newLight.type}::{newLight.friendly_name}', can color temp? " + "Yes" if newLight.can_color_temperature else "No")
-        logging.info(F"Loaded light '{newLight.type}::{newLight.friendly_name}', can rgb? " + "Yes" if newLight.can_rgb else "No")
+        logging.info(F"Loaded light '{newLight.type}::{newLight.friendly_name}', can dim? " + ("Yes" if newLight.can_dim else "No"))
+        logging.info(F"Loaded light '{newLight.type}::{newLight.friendly_name}', can color temp? " + ("Yes" if newLight.can_color_temperature else "No"))
+        logging.info(F"Loaded light '{newLight.type}::{newLight.friendly_name}', can rgb? " + ("Yes" if newLight.can_rgb else "No"))
         return newLight
 
     def get_light_level(self) -> int:
