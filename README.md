@@ -8,7 +8,7 @@ The idea is that by using the same layout on all the different panels all users 
 ## Logging
 Logging from NSPanels are done over MQTT to the topic `nspanel/<panel name>/log`. To see everything to and from all the devices, the topic `nspanel/#` can be used.
 
-# MQTT topics
+## MQTT topics
 |Topic|Messages|Description|
 |---|---|---|
 |nspanel/panel_name/screen_cmd| 1 or 0 |Control screen state, 1 or 0|
