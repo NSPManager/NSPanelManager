@@ -8,6 +8,16 @@ The idea is that by using the same layout on all the different panels all users 
 ## Logging
 Logging from NSPanels are done over MQTT to the topic `nspanel/<panel name>/log`. To see everything to and from all the devices, the topic `nspanel/#` can be used.
 
+# MQTT topics
+|Topic|Messages|Description|
+|---|---|---|
+|nspanel/panel_name/screen_cmd| 1 or 0 |Control screen state, 1 or 0|
+|nspanel/panel_name/screen_state| 1 or 0 |Current screen state, 1 or 0|
+|nspanel/panel_name/r1_cmd| 1 or 0 |Control relay 1 state, 1 or 0|
+|nspanel/panel_name/r1_state| 1 or 0 |Current relay 1 state, 1 or 0|
+|nspanel/panel_name/r2_cmd| 1 or 0 |Control relay 2 state, 1 or 0|
+|nspanel/panel_name/r2_state| 1 or 0 |Current relay 2 state, 1 or 0|
+
 # Currently working (but might require more work)
 * Integration with Home Assistant and OpenHAB
 * Toggle ceiling & table lights in a room separetly
