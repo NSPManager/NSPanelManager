@@ -228,7 +228,7 @@ def set_entity_color_temp(entity_name: str, color_temp: int) -> bool:
                 "kelvin": color_temp
             },
             "target": {
-                "entity_id": F"light.{entity_name}"
+                "entity_id": entity_name
             }
         }
         send_message(json.dumps(msg))
@@ -257,7 +257,7 @@ def set_entity_color_saturation(entity_name: str, light_level: int, color_satura
                 "brightness_pct": light_level
             },
             "target": {
-                "entity_id": F"light.{entity_name}"
+                "entity_id": entity_name
             }
         }
         send_message(json.dumps(msg))
