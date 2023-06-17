@@ -28,7 +28,7 @@ bool NSPMConfig::loadFromLittleFS() {
   Serial.println("Loading config from LittleFS");
   File configFile = LittleFS.open("/config.json");
   if (!configFile) {
-    Serial.println("Failed to load config.json!");
+    Serial.println("Failed to open config.json!");
     return false;
   }
 
@@ -96,6 +96,7 @@ bool NSPMConfig::loadFromLittleFS() {
 
   this->md5_firmware = doc["md5_firmware"] | "";
   this->md5_data_file = doc["md5_data_file"] | "";
+  this->md5_tft_file = doc["md5_tft_file"] | "";
 
   Serial.println("Config data loaded.");
   return true;
@@ -116,6 +117,7 @@ bool NSPMConfig::saveToLittleFS() {
   config_json["log_level"] = this->logging_level;
   config_json["md5_firmware"] = this->md5_firmware;
   config_json["md5_data_file"] = this->md5_data_file;
+  config_json["md5_tft_file"] = this->md5_tft_file;
   config_json["upload_baud"] = this->tft_upload_baud;
   config_json["use_new_upload_protocol"] = this->use_new_upload_protocol ? "true" : "false";
 

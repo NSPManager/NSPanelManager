@@ -92,7 +92,7 @@ int NSPanel::getComponentIntVal(const char *componentId) {
     vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 
-  if (!xSemaphoreTake(this->_mutexReadSerialData, 1000 / portTICK_PERIOD_MS) == pdTRUE) {
+  if (xSemaphoreTake(this->_mutexReadSerialData, 1000 / portTICK_PERIOD_MS) != pdTRUE) {
     LOG_ERROR("Failed to get Serial read mutex when reading response from panel!");
     return -255;
   }
@@ -105,12 +105,20 @@ int NSPanel::getComponentIntVal(const char *componentId) {
   this->_sendRawCommand(cmd.c_str(), cmd.length());
 
   // Wait for data to become available
+  int value = -1;
+  unsigned long _startWait = millis();
   while (Serial2.available() == 0) {
     vTaskDelay(10 / portTICK_PERIOD_MS);
+
+    // 3 second timeout for reading data.
+    if (millis() >= _startWait + 3000) {
+      LOG_ERROR("3 second timeout while getting int value from display trigged. Return -253");
+      value = -253;
+      break;
+    }
   }
 
-  int value = -1;
-  if (Serial2.read() == 0x71) {
+  if (Serial2.available() > 0 && Serial2.read() == 0x71) {
     value = Serial2.read();
     value += Serial2.read() << 8;
     value += Serial2.read() << 16;
@@ -130,12 +138,12 @@ void NSPanel::restart() {
   this->_sendCommandWithoutResponse("rest");
 }
 
-void NSPanel::init() {
+bool NSPanel::init() {
   // Pin 4 controls screen on/off.
   pinMode(4, OUTPUT);
-  digitalWrite(4, HIGH);
+  digitalWrite(4, HIGH); // Turn off power to the display
   vTaskDelay(500 / portTICK_PERIOD_MS);
-  digitalWrite(4, LOW);
+  digitalWrite(4, LOW); // Turn on power to the display
   Serial2.setTxBufferSize(128);
   Serial2.begin(115200, SERIAL_8N1, 17, 16);
   NSPanel::instance = this;
@@ -144,25 +152,37 @@ void NSPanel::init() {
   this->_isUpdating = false;
   this->_update_progress = 0;
 
-  while (Serial2.available() == 0) {
-    LOG_INFO("Trying to connect to display.");
-    Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN");
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-    Serial2.print("connect");
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-    Serial2.print("connect");
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-
-    vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
+  // Clear Serial2 read buffer
+  while (Serial2.available() > 0) {
+    Serial2.read();
+    if (Serial2.available() == 0) {
+      vTaskDelay(250 / portTICK_PERIOD_MS);
+    }
   }
+
+  LOG_INFO("Trying to connect to display."); // Send bogus to the panel to make is "clear" any reading state
+  Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN");
+  Serial2.write(0xFF);
+  Serial2.write(0xFF);
+  Serial2.write(0xFF);
+  Serial2.flush(true);
+  vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
+  // Clear Serial2 read buffer
+  while (Serial2.available() > 0) {
+    Serial2.read();
+    if (Serial2.available() == 0) {
+      vTaskDelay(250 / portTICK_PERIOD_MS);
+    }
+  }
+
+  LOG_DEBUG("Sending final connect to panel");
+  Serial2.print("connect");
+  Serial2.write(0xFF);
+  Serial2.write(0xFF);
+  Serial2.write(0xFF);
+  Serial2.flush(true);
+  vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
+
   std::string reply_data = "";
   while (Serial2.available() > 0) {
     reply_data.push_back(Serial2.read());
@@ -170,19 +190,24 @@ void NSPanel::init() {
   LOG_INFO("Got reply from display: ", reply_data.c_str());
   reply_data.clear();
 
-  LOG_INFO("Init NSPanel.");
+  if (NSPMConfig::instance->md5_tft_file.empty()) {
+    LOG_WARNING("No stored MD5 for TFT. Is the panel flashed with NSPanel Manager TFT?");
+    // LOG_ERROR("TFT file not flashed! Will not init NSPanel communication further.");
+    // return false;
+  }
+
+  LOG_INFO("Trying to init NSPanel.");
   xTaskCreatePinnedToCore(_taskSendCommandQueue, "taskSendCommandQueue", 5000, NULL, 1, &this->_taskHandleSendCommandQueue, CONFIG_ARDUINO_RUNNING_CORE);
   this->_startListeningToPanel();
 
   // Connect to display and start it
-  this->_sendCommandWithoutResponse("boguscommand=0");
-  this->_sendCommandWithoutResponse("connect");
   this->_sendCommandWithoutResponse("bkcmd=0");
   this->_sendCommandWithoutResponse("sleep=0");
   this->_sendCommandWithoutResponse("bkcmd=0");
   this->_sendCommandWithoutResponse("sleep=0");
   this->_sendCommandClearResponse("rest");
   this->_sendCommandClearResponse("dim=1.0");
+  return true;
 }
 
 void NSPanel::_startListeningToPanel() {
@@ -216,10 +241,21 @@ void NSPanel::_sendCommandClearResponse(const char *command) {
   this->_addCommandToQueue(cmd);
 }
 
+void NSPanel::_sendCommandClearResponse(const char *command, uint16_t timeout) {
+  NSPanelCommand cmd;
+  cmd.command = command;
+  cmd.expectResponse = true;
+  cmd.callback = &NSPanel::_clearSerialBuffer;
+  cmd.timeout = timeout;
+  this->_addCommandToQueue(cmd);
+}
+
 void NSPanel::_addCommandToQueue(NSPanelCommand command) {
   if (this->_taskHandleSendCommandQueue != NULL) {
     this->_commandQueue.push(command);
     xTaskNotifyGive(this->_taskHandleSendCommandQueue);
+  } else {
+    LOG_ERROR("Trying to add command to queue before a queue exists!");
   }
 }
 
@@ -266,6 +302,9 @@ void NSPanel::_taskReadNSPanelData(void *param) {
         std::vector<char> data;
         while (Serial2.available() > 0) {
           data.push_back(Serial2.read());
+          if (Serial2.available() == 0) {
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+          }
         }
         NSPanel::instance->_processQueue.push(data);
         xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
@@ -274,7 +313,7 @@ void NSPanel::_taskReadNSPanelData(void *param) {
     }
 
     // Wait 10ms between each read.
-    vTaskDelay(10 / portTICK_PERIOD_MS);
+    vTaskDelay(25 / portTICK_PERIOD_MS);
   }
 }
 
@@ -323,9 +362,11 @@ void NSPanel::_sendCommand(NSPanelCommand *command) {
     vTaskDelay(50 / portTICK_PERIOD_MS);
   }
 
-  if (command->expectResponse && !xSemaphoreTake(this->_mutexReadSerialData, 250 / portTICK_PERIOD_MS) == pdTRUE) {
-    LOG_ERROR("Failed to get serial read mutex! Will not continue call.");
-    return;
+  if (command->expectResponse) {
+    if (xSemaphoreTake(this->_mutexReadSerialData, 500 / portTICK_PERIOD_MS) != pdTRUE) {
+      LOG_ERROR("Failed to get serial read mutex! Will not continue call.");
+      return;
+    }
   }
 
   Serial2.print(command->command.c_str());
@@ -337,16 +378,17 @@ void NSPanel::_sendCommand(NSPanelCommand *command) {
   if (command->expectResponse) {
     unsigned int start_wait = millis();
     while (Serial2.available() == 0) {
-      vTaskDelay(5);
-      if (millis() - start_wait >= 3000) {
+      vTaskDelay(20);
+      if (millis() - start_wait >= command->timeout) {
         break;
       }
     }
-    // Give back serial read mutex.
-    xSemaphoreGive(this->_mutexReadSerialData);
 
     // Call callback function for command when data is available at Serial2
     command->callback(command);
+
+    // Give back serial read mutex.
+    xSemaphoreGive(this->_mutexReadSerialData);
   }
 }
 
@@ -375,6 +417,9 @@ void NSPanel::_clearSerialBuffer(NSPanelCommand *cmd) {
 void NSPanel::_clearSerialBuffer() {
   while (Serial2.available() > 0) {
     Serial2.read();
+    if (Serial2.available() == 0) {
+      vTaskDelay(250 / portTICK_PERIOD_MS);
+    }
   }
 }
 
@@ -426,11 +471,11 @@ void NSPanel::_taskUpdateTFTConfigOTA(void *param) {
   LOG_INFO("Starting TFT update...");
 
   while (true) {
-    if (!xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, 5000 / portTICK_PERIOD_MS) == pdTRUE) {
+    if (xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, 5000 / portTICK_PERIOD_MS) != pdTRUE) {
       LOG_ERROR("Failed to get Serial read mutex when updating TFT!");
       TaskHandle_t owning_task = xSemaphoreGetMutexHolder(NSPanel::instance->_mutexReadSerialData);
       if (owning_task == NULL) {
-        LOG_ERROR("Could not find owning task of mutex.");
+        LOG_ERROR("Could not find owner of task mutex.");
       } else {
         LOG_INFO("Mutex holder: ", pcTaskGetName(owning_task));
       }
@@ -523,35 +568,42 @@ bool NSPanel::_updateTFTOTA() {
       ESP.restart();
       return false;
     }
-
-    Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN"); // "disconnect"
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-
-    vTaskDelay(50 / portTICK_PERIOD_MS);
-    // Send "connect" string to get data
-    Serial2.print("connect");
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-    LOG_DEBUG("Sent connect, waiting for comok string.");
-
-    // Wait for comok return data.
-    while (Serial2.available() == 0) {
-      vTaskDelay(50 / portTICK_PERIOD_MS);
-    }
-
-    LOG_DEBUG("Waiting for comok");
-    std::string comok_string = "";
-    while (Serial2.available() > 0) {
-      uint8_t read_char = Serial2.read();
-      if (read_char != 0xFF) {
-        comok_string.push_back(read_char);
-      }
-    }
-    LOG_DEBUG("Got comok: ", comok_string.c_str());
   }
+
+  Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN"); // "disconnect"
+  Serial2.write(0xFF);
+  Serial2.write(0xFF);
+  Serial2.write(0xFF);
+  Serial2.flush(true);
+  vTaskDelay(2000 / portTICK_PERIOD_MS);
+  NSPanel::instance->_clearSerialBuffer();
+
+  // Send "connect" string to get data
+  Serial2.print("connect");
+  Serial2.write(0xFF);
+  Serial2.write(0xFF);
+  Serial2.write(0xFF);
+  Serial2.flush(true);
+  LOG_DEBUG("Sent connect, waiting for comok string.");
+
+  // Wait for comok return data.
+  while (Serial2.available() == 0) {
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+  }
+
+  LOG_DEBUG("Waiting for comok");
+  std::string comok_string = "";
+  while (Serial2.available() > 0) {
+    uint8_t read_char = Serial2.read();
+    if (read_char != 0xFF) {
+      comok_string.push_back(read_char);
+    }
+    if (Serial2.available() == 0) {
+      vTaskDelay(500 / portTICK_PERIOD_MS);
+    }
+  }
+  NSPanel::instance->_clearSerialBuffer();
+  LOG_DEBUG("Got comok: ", comok_string.c_str());
 
   LOG_DEBUG("Will start TFT upload, TFT file size: ", totalTftFileSize);
   // TODO: Detect if new protocol is not supported, in that case set flag in flash and restart and then continue flash with legacy mode.
@@ -632,7 +684,11 @@ bool NSPanel::_updateTFTOTA() {
 
     std::string return_string;
     uint16_t recevied_bytes = NSPanel::instance->_readDataToString(&return_string, 5000, true);
-    if (return_string[0] == 0x05) {
+    if (lastReadByte >= totalTftFileSize) {
+      NSPanel::instance->_update_progress = 100;
+      LOG_INFO("TFT Upload complete, processed ", lastReadByte, " bytes.");
+      break;
+    } else if (return_string[0] == 0x05) {
       // Old protocol, just upload next chunk.
       LOG_DEBUG("Got 0x05, uploading next chunk.");
     } else if (return_string[0] == 0x08) {
@@ -651,10 +707,6 @@ bool NSPanel::_updateTFTOTA() {
         nextStartWriteOffset = readNextOffset;
         LOG_INFO("Got 0x08 with offset, jumping to: ", nextStartWriteOffset, " please wait.");
       }
-    } else if (lastReadByte == totalTftFileSize) {
-      NSPanel::instance->_update_progress = 100;
-      LOG_INFO("TFT Upload complete, processed ", lastReadByte, " bytes.");
-      break;
     } else {
       LOG_DEBUG("Got unexpected return data from panel. Received ", recevied_bytes, " bytes: ");
       for (int i = 0; i < recevied_bytes; i++) {
@@ -665,8 +717,24 @@ bool NSPanel::_updateTFTOTA() {
     // vTaskDelay(50 / portTICK_PERIOD_MS);
   }
 
-  LOG_INFO(" Will restart in 10 seconds.");
-  vTaskDelay(10000 / portTICK_PERIOD_MS);
+  LOG_INFO("Getting TFT MD5 checksum to store in flash.");
+  char checksum_holder[32];
+  while (true) {
+    std::string checksumUrl = "http://";
+    checksumUrl.append(NSPMConfig::instance->manager_address);
+    checksumUrl.append(":");
+    checksumUrl.append(std::to_string(NSPMConfig::instance->manager_port));
+    checksumUrl.append("/checksum_tft_file");
+    if (HttpLib::GetMD5sum(checksumUrl.c_str(), checksum_holder)) {
+      break;
+    }
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+  }
+  NSPMConfig::instance->md5_tft_file = checksum_holder;
+  NSPMConfig::instance->saveToLittleFS();
+
+  LOG_INFO(" Will restart in 5 seconds.");
+  vTaskDelay(5000 / portTICK_PERIOD_MS);
   ESP.restart();
 
   vTaskDelay(portMAX_DELAY);

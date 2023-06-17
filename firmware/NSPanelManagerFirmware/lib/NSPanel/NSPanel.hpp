@@ -26,6 +26,8 @@ struct NSPanelCommand {
   void (*callback)(NSPanelCommand *cmd);
   /// @brief Used to indicate that the callback function is done
   bool callbackFinished = false;
+  /// @brief Timeout for reading any response data, 0 = no timeout.
+  uint16_t timeout = 3000;
 };
 
 class NSPanel {
@@ -34,7 +36,7 @@ public:
   static void attachTouchEventCallback(void (*callback)(uint8_t, uint8_t, bool));
   static void attachSleepCallback(void (*callback)());
   static void attachWakeCallback(void (*callback)());
-  void init();
+  bool init();
   void startOTAUpdate();
   void goToPage(const char *page);
   void setDimLevel(uint8_t dimLevel);
@@ -73,6 +75,7 @@ private:
   std::queue<NSPanelCommand> _commandQueue;
   void _sendCommandWithoutResponse(const char *command);
   void _sendCommandClearResponse(const char *command);
+  void _sendCommandClearResponse(const char *command, uint16_t timeout);
   void _addCommandToQueue(NSPanelCommand command);
   void _sendCommand(NSPanelCommand *command);
   void _sendRawCommand(const char *command, int length);

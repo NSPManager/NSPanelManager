@@ -98,6 +98,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   // Loading is done, show Home page
   NSPanel::instance->goToPage(HOME_PAGE_NAME);
 
+  LOG_INFO("Config initialized. Closing taskLoadConfigAndInit");
   vTaskDelete(NULL); // Delete task, we are done
 }
 

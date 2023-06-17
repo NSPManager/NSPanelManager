@@ -11,7 +11,11 @@ void MqttManager::init() {
   MqttManager::_mqttClient = new PubSubClient(*MqttManager::_wifiClient); // Create MQTT Client used to communicate with MQTT
   MqttManager::_mqttClient->setBufferSize(2048);
   MqttManager::_mqttClient->setCallback(&MqttManager::_mqttClientCallback);
-  MqttManager::setBufferSize(8); // Set default buffer to 8 messages
+  if (MqttLog::instance->getLogLevel() == MqttLogLevel::Debug) {
+    MqttManager::setBufferSize(32);
+  } else {
+    MqttManager::setBufferSize(8);
+  }
   xTaskCreatePinnedToCore(MqttManager::_taskMqttRunTask, "taskRunMQTT", 50000, NULL, 2, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 }
 

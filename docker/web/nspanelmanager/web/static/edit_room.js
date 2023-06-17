@@ -1,5 +1,20 @@
 function add_new_light_to_available_lights_list(light, type) {
-    $("#add_new_light_options").append('<a class="panel-block" data-type="' + type + '" data-items=\'' + JSON.stringify(light.items) + '\'>' + light.label + '</a>');
+  var icon = "";
+  if(type == "home_assistant") {
+    if(light.label.startsWith("light.")) {
+      icon = "mdi-lightbulb";
+    } else if (light.label.startsWith("switch.")) {
+      // icon = "mdi-toggle-switch-off";
+      icon = "mdi-lightning-bolt";
+    } else {
+      icon = "mdi-help";
+    }
+  } else {
+      icon = "mdi-help";
+  }
+
+
+  $("#add_new_light_options").append('<a class="panel-block" data-type="' + type + '" data-items=\'' + JSON.stringify(light.items) + '\'><span class="mdi ' + icon + ' add_item_icon"></span>' + light.label + '</a>');
 }
 
 function update_displayed_openhab_selectors() {

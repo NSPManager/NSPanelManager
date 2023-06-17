@@ -36,7 +36,7 @@ def on_message(ws, message):
         auth_ok = True
     elif json_msg["type"] == "event" and json_msg["event"]["event_type"] == "state_changed":
         entity_id = json_msg["event"]["data"]["entity_id"]
-        if entity_id.startswith("light."):
+        if entity_id.startswith("light.") or entity_id.startswith("switch."):
             # print(json_msg) # Dump light update message
             send_entity_update(json_msg)
     elif json_msg["type"] == "result" and not json_msg["success"]:
@@ -46,8 +46,9 @@ def on_message(ws, message):
         if json_msg["id"] == request_all_states_id:
             for entity in json_msg["result"]:
                 for id, light in mqtt_manager_libs.light_states.states.items():
-                    if light.home_assistant_name == entity["entity_id"].replace("light.", ""):
+                    if light.home_assistant_name == entity["entity_id"]:
                         try:
+                            logging.debug(F"Processing entity: " + entity["entity_id"])
                             if entity["state"] == "off":
                                 light.light_level = 0
                             else:
@@ -70,10 +71,8 @@ def on_message(ws, message):
                                 light.last_command_sent = "color_temp"
                                 light.color_temp = entity["attributes"]["color_temp_kelvin"]
                                 mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_kelvin", light.color_temp, retain=True)
-                        except Exception as e:
-                            logging.error(
-                                "Something went wrong while trying to load current states.")
-                            logging.error(e)
+                        except:
+                            logging.exception("Something went wrong while trying to load current states.")
         pass  # Ignore success result messages
     else:
         logging.debug(message)
@@ -130,9 +129,11 @@ def send_entity_update(json_msg):
     # Check if the light is used on any nspanel and if so, send MQTT state update
     try:
         entity_id = json_msg["event"]["data"]["entity_id"]
-        entity_name = entity_id.replace("light.", "")
+        entity_name = entity_id
         new_state = json_msg["event"]["data"]["new_state"]
+        logging.debug(F"Trying to find entity with name: {entity_name}")
         entity_id = mqtt_manager_libs.light_states.get_id_by_name(entity_name)
+        logging.debug(F"Got ID {entity_id}")
         if entity_id >= 0:
             if "brightness" in new_state["attributes"]:
                 new_brightness = round(
@@ -175,28 +176,41 @@ def set_entity_brightness(home_assistant_name: str, light_level: int, color_temp
     global next_id
     try:
         # Format Home Assistant state update
-        msg = {
-            "id": next_id,
-            "type": "call_service",
-            "domain": "light",
-            "service": "turn_on",
-            "service_data": {
-                "brightness_pct": light_level,
-            },
-            "target": {
-                "entity_id": F"light.{home_assistant_name}"
+        msg = None
+        if home_assistant_name.startswith("light."):
+            msg = {
+                "id": next_id,
+                "type": "call_service",
+                "domain": "light",
+                "service": "turn_on",
+                "service_data": {
+                    "brightness_pct": light_level,
+                },
+                "target": {
+                    "entity_id": home_assistant_name
+                }
             }
-        }
-        if color_temp > 0:
-            msg["service_data"]["kelvin"] = color_temp
+            if color_temp > 0:
+                msg["service_data"]["kelvin"] = color_temp
+        elif home_assistant_name.startswith("switch."):
+            msg = {
+                "id": next_id,
+                "type": "call_service",
+                "domain": "switch",
+                "service": "turn_on" if light_level > 0 else "turn_off",
+                "target": {
+                    "entity_id": home_assistant_name
+                }
+            }
 
-        send_message(json.dumps(msg))
-        # Update the stored value
-        # mqtt_manager_libs.light_states.states[entity_id]["brightness"] = new_brightness
-        return True
-    except Exception as e:
-        logging.error("Failed to send entity update to Home Assisatant.")
-        logging.error(e)
+        if msg:
+            send_message(json.dumps(msg))
+            return True
+        else:
+            logging.error(F"{home_assistant_name} is now a recognized domain.")
+            return False
+    except:
+        logging.exception("Failed to send entity update to Home Assisatant.")
         return False
 
 

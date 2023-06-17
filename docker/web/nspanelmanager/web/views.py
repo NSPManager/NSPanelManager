@@ -401,3 +401,7 @@ def checksum_firmware(request):
 def checksum_data_file(request):
     fs = FileSystemStorage()
     return HttpResponse(hashlib.md5(fs.open("data_file.bin").read()).hexdigest())
+
+def checksum_tft_file(request):
+    fs = FileSystemStorage()
+    return HttpResponse(hashlib.md5(fs.open("gui.tft").read()).hexdigest())

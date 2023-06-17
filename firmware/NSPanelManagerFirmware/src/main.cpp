@@ -82,9 +82,9 @@ void taskManageWifiAndMqtt(void *param) {
             LOG_INFO("Connected to WiFi ", config.wifi_ssid.c_str());
             Serial.print("Connected to WiFi ");
             Serial.println(config.wifi_ssid.c_str());
-            LOG_INFO("IP Address: ", WiFi.localIP());
-            LOG_INFO("Netmask:    ", WiFi.subnetMask());
-            LOG_INFO("Gateway:    ", WiFi.gatewayIP());
+            LOG_INFO("IP Address: ", WiFi.localIP().toString());
+            LOG_INFO("Netmask:    ", WiFi.subnetMask().toString());
+            LOG_INFO("Gateway:    ", WiFi.gatewayIP().toString());
             // Start web server
             webMan.init(NSPanelManagerFirmwareVersion);
             registerToNSPanelManager();
@@ -193,15 +193,20 @@ void setup() {
   logger.init(&(NSPMConfig::instance->mqtt_log_topic));
   logger.setLogLevel(static_cast<MqttLogLevel>(config.logging_level));
 
-  mqttManager.init();
-  ButtonManager::init();
-
-  LOG_INFO("Starting tasks");
   Serial.println("Starting wifi and mqtt task.");
-  xTaskCreatePinnedToCore(taskManageWifiAndMqtt, "taskManageWifi", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+  // xTaskCreatePinnedToCore(taskManageWifiAndMqtt, "taskManageWifi", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+  mqttManager.init();
 
-  nspanel.init();
-  interfaceManager.init();
+  LOG_INFO("Initializing NSPanel communication");
+  if (nspanel.init()) {
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+
+    LOG_INFO("Starting tasks");
+    ButtonManager::init();
+    interfaceManager.init();
+  }
 }
 
-void loop() { vTaskDelay(portMAX_DELAY); }
+void loop() {
+  taskManageWifiAndMqtt(NULL);
+}

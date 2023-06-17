@@ -4,6 +4,14 @@
     color: white;
 }
 
+.add_item_icon {
+  padding-right: 1rem;
+}
+
+#add_new_light_modal_panel {
+  overflow: scroll;
+}
+
 #nspanel_room_view {
     background-image: url('/static/panel_views/nspanel_room_view.png');
     position: relative;

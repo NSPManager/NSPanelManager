@@ -76,6 +76,8 @@ public:
   std::string md5_firmware;
   /// @brief MD5 checksum for currently installed LittleFS.
   std::string md5_data_file;
+  /// @brief MD5 checksum for the currently installed TFT file.
+  std::string md5_tft_file;
 
   /// @brief Mimimum time for a button to be pressed to register as a press
   uint16_t button_min_press_time;

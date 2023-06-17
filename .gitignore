@@ -15,3 +15,4 @@ firmware/NSPanelManagerFirmware/merged-flash.bin
 firmware/NSPanelManagerFirmware/.cache
 firmware/NSPanelManagerFirmware/.ccls
 firmware/NSPanelManagerFirmware/.ccls-cache
+MQTTManager-RUST/

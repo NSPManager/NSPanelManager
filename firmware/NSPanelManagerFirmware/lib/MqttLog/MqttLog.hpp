@@ -46,6 +46,7 @@ public:
   /// @brief Set the highest log level to log
   /// @param logLevel The highest log level to send to mqtt server
   void setLogLevel(const MqttLogLevel logLevel);
+  MqttLogLevel getLogLevel();
 
   template <typename... Args>
   void logToMqtt(const MqttLogLevel logLevel, const char *filename, int lineNumber, const char *functionName, Args &&...args) {

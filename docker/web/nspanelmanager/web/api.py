@@ -104,9 +104,9 @@ def get_all_available_light_entities(request):
             home_assistant_response = requests.get(
                 get_setting_with_default("home_assistant_address", "") + "/api/states", headers=home_assistant_request_headers, timeout=5)
             for entity in home_assistant_response.json():
-                if (entity["entity_id"].startswith("light.")):
+                if (entity["entity_id"].startswith("light.") or entity["entity_id"].startswith("switch.")):
                     return_json["home_assistant_lights"].append({
-                        "label": entity["entity_id"].replace("light.", ""),
+                        "label": entity["entity_id"],
                         "items": []
                     })
         except:
