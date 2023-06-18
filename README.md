@@ -36,6 +36,8 @@ All configuration for panels are done via a web interface running in a docker co
 |register_dummy_panel.sh|Used to register a dummy panel in the web interface. This is only used for development purposes.|
 |docker-build_and_run_dev.sh|Will build the container and drop you in a shell inside the container. Execute `./run.sh` to start the web interface and MQTTManager application to handle state communication with panels and Home Assistant or OpenHAB. The whole `web` directory is mapped as a volume into the container to aid in development. When exiting the container will be destroyed.|
 
+If you are setting up the container manually using some other tool, make sure to publish port 8000 and 8001 for web interface and websocket. To set the timezone, make sure you pass though the /etc/timezone file.
+
 ## NSPanel
 The NSPanelManager firmware is written as a PlatformIO-project and this is by far the easiest method to flash the firmware. Perform the following steps to flash you NSPanel:
 * Install PlatformIO for you platform.
