@@ -2,7 +2,7 @@
 #define ROOMMANAGER_HPP
 
 #include <Arduino.h>
-#include <Room.hpp>
+class Room;
 #include <vector>
 
 class RoomManager {

@@ -12,6 +12,7 @@
 #define NSPANELMANAGER_TEXT_NAME "bootscreen.t_loading"
 
 #define SCREENSAVE_PAGE_NAME "screensaver"
+#define SCREENSAVE_PAGE_TEXT_NAME SCREENSAVE_PAGE_NAME ".t_label"
 
 #define HOME_PIC_HIGHLIGHT_CEILING_NAME "p_lockceiling" // Should not have "home." in front as visibility command for Nextion is not as other commands
 #define HOME_PIC_HIGHLIGHT_TABLE_NAME "p_locktable"     // Should not have "home." in front as visibility command for Nextion is not as other commands
@@ -27,6 +28,7 @@
 #define HOME_BUTTON_SCENES_ROOM_MODE_PIC2 25 // Pictures to use on button when panel is in Room Lights mode
 #define HOME_BUTTON_SCENES_ALL_MODE_PIC 26   // Pictures to use on button when panel is in All Lights mode
 #define HOME_BUTTON_SCENES_ALL_MODE_PIC2 27  // Pictures to use on button when panel is in All Lights mode
+#define HOME_PAGE_SCREENSAVER_TIMER_NAME "home.sleep_display"
 
 #define SCENES_PAGE_NAME "Scenes"
 #define SCENES_PAGE_ID 6 // ID for "Scenes"-page

@@ -3,10 +3,11 @@
 
 #include <ArduinoJson.h>
 #include <InterfaceManagerHelpers.hpp>
-#include <Light.hpp>
-#include <NSPanel.hpp>
-#include <RoomManager.hpp>
-#include <Scene.hpp>
+// #include <Light.hpp>
+class Light;
+class NSPanel;
+class RoomManager;
+class Scene;
 #include <list>
 #include <string>
 
@@ -39,6 +40,8 @@ public:
   /// @brief If the light os ON, it will turn off. If the light is OFF, turn it ON
   /// @param light The light to change
   void _onOffLight(Light *light);
+  /// @brief Update all relevant light values on the panel
+  void _updatePanelLightStatus();
 
 private:
   /// @brief The task that handles startup if InterfaceManager. It load the config from the server and processes it and
@@ -85,8 +88,6 @@ private:
   unsigned long _ignoreMqttStatusUpdatesUntil;
   /// @brief Update panel with new values for the new room
   void _updatePanelWithNewRoomInfo();
-  /// @brief Update all relevant light values on the panel
-  void _updatePanelLightStatus();
   /// @brief Go to next edit mode (room, ceiling)
   void _goToNextMode();
   /// @brief Change the currently selected light mode (room, ceiling)

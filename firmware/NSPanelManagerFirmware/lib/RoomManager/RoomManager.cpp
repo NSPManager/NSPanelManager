@@ -6,6 +6,7 @@
 #include <LightManager.hpp>
 #include <MqttLog.hpp>
 #include <NSPMConfig.h>
+#include <Room.hpp>
 #include <RoomManager.hpp>
 #include <Scene.hpp>
 #include <WiFi.h>
@@ -52,6 +53,11 @@ void RoomManager::loadAllRooms() {
   InterfaceConfig::special_mode_trigger_time = (*roomData)["special_mode_trigger_time"].as<uint16_t>();
   InterfaceConfig::special_mode_release_time = (*roomData)["special_mode_release_time"].as<uint16_t>();
   InterfaceConfig::mqtt_ignore_time = (*roomData)["mqtt_ignore_time"].as<uint16_t>();
+  InterfaceConfig::screen_dim_level = (*roomData)["screen_dim_level"].as<uint8_t>();
+  InterfaceConfig::screensaver_dim_level = (*roomData)["screensaver_dim_level"].as<uint8_t>();
+  InterfaceConfig::screensaver_activation_timeout = (*roomData)["screensaver_activation_timeout"].as<uint16_t>();
+  InterfaceConfig::show_screensaver_clock = (*roomData)["show_screensaver_clock"].as<String>().equals("True");
+  InterfaceConfig::clock_us_style = (*roomData)["clock_us_style"].as<String>().equals("True");
   NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>((*roomData)["button1_mode"].as<uint8_t>());
   NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>((*roomData)["button2_mode"].as<uint8_t>());
   // Init rooms
@@ -153,7 +159,7 @@ Room *RoomManager::loadRoom(uint16_t roomId) {
     newScene->id = atoi(scenePair.key().c_str());
     newScene->name = scenePair.value()["name"] | "ERR-S";
     newRoom->scenes.push_back(newScene);
-    LOG_DEBUG("Loaded scene ", newScene->id, "::", newScene->name.c_str());
+    LOG_TRACE("Loaded scene ", newScene->id, "::", newScene->name.c_str());
   }
 
   delete roomData;

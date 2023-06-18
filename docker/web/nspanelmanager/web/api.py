@@ -52,8 +52,8 @@ def get_mqtt_manager_config(request):
         "openhab_brightness_channel_max", 255)
     return_json["openhab_color_temp_channel_name"] = get_setting_with_default(
         "openhab_color_temp_channel_name", "")
-    return_json["openhab_rgb_channel_name"] = get_setting_with_default(
-        "openhab_rgb_channel_name", "")
+    return_json["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name", "")
+    return_json["clock_us_style"] = get_setting_with_default("clock_us_style", False)
 
     return_json["lights"] = {}
     for light in Light.objects.all():
@@ -201,6 +201,11 @@ def get_nspanel_config(request):
     base["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time", 300)
     base["special_mode_release_time"] = get_setting_with_default("special_mode_release_time", 5000)
     base["mqtt_ignore_time"] = get_setting_with_default("mqtt_ignore_time", 3000)
+    base["screen_dim_level"] = get_setting_with_default("screen_dim_level", 100)
+    base["screensaver_dim_level"] = get_setting_with_default("screensaver_dim_level", 0)
+    base["show_screensaver_clock"] = get_setting_with_default("show_screensaver_clock", False)
+    base["clock_us_style"] = get_setting_with_default("clock_us_style", False)
+    base["screensaver_activation_timeout"] = get_setting_with_default("screensaver_activation_timeout", 30000)
     base["button1_mode"] = nspanel.button1_mode
     if nspanel.button1_detached_mode_light:
         base["button1_detached_light"] = nspanel.button1_detached_mode_light.id

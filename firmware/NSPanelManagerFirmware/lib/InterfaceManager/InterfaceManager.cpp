@@ -1,11 +1,17 @@
 #include <ArduinoJson.h>
 #include <ButtonManager.hpp>
+#include <HomePage.hpp>
 #include <InterfaceConfig.hpp>
 #include <InterfaceManager.hpp>
 #include <Light.hpp>
 #include <LightManager.hpp>
+#include <LightPage.hpp>
 #include <MqttLog.hpp>
+#include <NSPanel.hpp>
+#include <PageManager.hpp>
+#include <Room.hpp>
 #include <RoomManager.hpp>
+#include <Scene.hpp>
 #include <TftDefines.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
@@ -20,10 +26,7 @@ void InterfaceManager::init() {
   this->_lastMasterTableLightsButtonTouch = 0;
   this->_lastMasterTableLightsButtonRelease = 0;
   this->_isFingerOnDisplay = false;
-  NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
-  NSPanel::attachSleepCallback(InterfaceManager::processSleepEvent);
-  NSPanel::attachWakeCallback(InterfaceManager::processWakeEvent);
-  InterfaceManager::processWakeEvent(); // Send state update to MQTT that the screen turned on
+  MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1");
   xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 }
 
@@ -56,18 +59,19 @@ void InterfaceManager::stop() {
 
 void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   unsigned long start = millis();
-  NspanelManagerPage::show();
+  PageManager::GetNSPanelManagerPage()->show();
+  NSPanel::instance->setDimLevel(100);
   while (!WiFi.isConnected() || !MqttManager::connected() && !InterfaceManager::hasRegisteredToManager) {
     if (!WiFi.isConnected()) {
       if (NSPMConfig::instance->NSPMConfig::instance->wifi_ssid.empty()) {
-        NspanelManagerPage::setText("Connect to AP NSPMPanel");
+        PageManager::GetNSPanelManagerPage()->setText("Connect to AP NSPMPanel");
       } else {
-        NspanelManagerPage::setText("Connecting to WiFi...");
+        PageManager::GetNSPanelManagerPage()->setText("Connecting to WiFi...");
       }
     } else if (!InterfaceManager::hasRegisteredToManager) {
-      NspanelManagerPage::setText("Registring to manager...");
+      PageManager::GetNSPanelManagerPage()->setText("Registring to manager...");
     } else if (!MqttManager::connected()) {
-      NspanelManagerPage::setText("Connecting to MQTT...");
+      PageManager::GetNSPanelManagerPage()->setText("Connecting to MQTT...");
     }
     vTaskDelay(500 / portTICK_PERIOD_MS);
   }
@@ -77,26 +81,32 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
     vTaskDelay((millis() - start) / portTICK_PERIOD_MS);
   }
 
-  NspanelManagerPage::setText("Loading config...");
+  PageManager::GetNSPanelManagerPage()->setText("Loading config...");
   RoomManager::loadAllRooms();
 
   // Set some default values before showing page
   InterfaceManager::instance->_changeMode(roomMode::room);
 
   // Update Home page cache
-  HomePage::updateDimmerValueCache();
-  HomePage::updateColorTempValueCache();
+  PageManager::GetHomePage()->updateDimmerValueCache();
+  PageManager::GetHomePage()->updateColorTempValueCache();
 
   // Start task for MQTT processing
   xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskProcessMqttMessages", 5000, NULL, 1, &InterfaceManager::_taskHandleProcessMqttMessages, CONFIG_ARDUINO_RUNNING_CORE);
 
   // As there may be may be MANY topics to subscribe to, do it in checks of 5 with delays
   // between them to allow for processing all the incoming data.
-  NspanelManagerPage::setText("Subscribing...");
+  PageManager::GetNSPanelManagerPage()->setText("Subscribing...");
   InterfaceManager::subscribeToMqttTopics();
 
   // Loading is done, show Home page
-  NSPanel::instance->goToPage(HOME_PAGE_NAME);
+  PageManager::GetHomePage()->show();
+  PageManager::GetHomePage()->setScreensaverTimeout(InterfaceConfig::screensaver_activation_timeout);
+  NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
+
+  NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
+  NSPanel::attachSleepCallback(InterfaceManager::processSleepEvent);
+  NSPanel::attachWakeCallback(InterfaceManager::processWakeEvent);
 
   LOG_INFO("Config initialized. Closing taskLoadConfigAndInit");
   vTaskDelete(NULL); // Delete task, we are done
@@ -106,6 +116,11 @@ void InterfaceManager::subscribeToMqttTopics() {
   // Subscribe to command to wake/put to sleep the display
   vTaskDelay(100 / portTICK_PERIOD_MS);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_screen_cmd_topic.c_str(), &InterfaceManager::mqttCallback);
+  if (InterfaceConfig::show_screensaver_clock) {
+    PageManager::GetScreensaverPage()->attachMqttTimeCallback();
+  } else {
+    LOG_DEBUG("Not attaching MQTT clock callback is panel is confiugred to now show clock on screensaver.");
+  }
 
   // Every light in every room
   for (Light *light : LightManager::getAllLights()) {
@@ -128,11 +143,15 @@ void InterfaceManager::_subscribeToLightTopics(Light *light) {
 
 void InterfaceManager::processWakeEvent() {
   // Send screen state
+  NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
+  PageManager::GetHomePage()->show();
   MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1");
 }
 
 void InterfaceManager::processSleepEvent() {
-  LOG_DEBUG("Display went to sleep, resetting display to default.");
+  // Dim to 0. TODO: Show clock?
+  NSPanel::instance->setDimLevel(InterfaceConfig::screensaver_dim_level);
+
   // Display went to sleep, reset everything
   InterfaceManager::instance->_isFingerOnDisplay = false; // Reset in case it got stuck
   RoomManager::goToRoomId(InterfaceConfig::homeScreen);
@@ -175,7 +194,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
       }
     } else if (component == HOME_LIGHT_LEVEL_SLIDER_ID) {
       // Dimmer slider changed, update cached value
-      HomePage::updateDimmerValueCache();
+      PageManager::GetHomePage()->updateDimmerValueCache();
       if (InterfaceManager::instance->_currentRoomMode == roomMode::room && (*RoomManager::currentRoom)->anyLightsOn()) {
         InterfaceManager::instance->_updateLightsThatAreOn();
       } else if (InterfaceManager::instance->_currentRoomMode == roomMode::house && (*RoomManager::currentRoom)->anyLightsOn()) {
@@ -187,7 +206,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
       InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
     } else if (component == HOME_LIGHT_COLOR_SLIDER_ID) {
       // Color temp slider changed, update cached value
-      HomePage::updateColorTempValueCache();
+      PageManager::GetHomePage()->updateColorTempValueCache();
       InterfaceManager::instance->_updateLightsColorTemp();
       InterfaceManager::instance->_lastSpecialModeEventMillis = millis();
     } else if (component == ROOM_BUTTON_ID && InterfaceManager::instance->_currentRoomMode == roomMode::room) {
@@ -200,6 +219,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
       ScenePage::showScenes((*RoomManager::currentRoom)->scenes);
       ScenePage::setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
     }
+    LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
   } else if (page == HOME_PAGE_ID && pressed) {
     if (component == CEILING_LIGHTS_MASTER_BUTTON_ID) {
       if (InterfaceManager::instance->_currentEditMode == editLightMode::all_lights) {
@@ -346,108 +366,108 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
   case ROOM_LIGHT1_LABEL_ID: {
     Light *light = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(1);
     if (light != nullptr) {
-      LightPage::selectedLight = light;
-      LightPage::show();
-      LightPage::updateValues();
+      PageManager::GetLightPage()->selectedLight = light;
+      PageManager::GetLightPage()->show();
+      PageManager::GetLightPage()->updateValues();
     }
     break;
   }
   case ROOM_LIGHT2_LABEL_ID: {
     Light *light = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(2);
     if (light != nullptr) {
-      LightPage::selectedLight = light;
-      LightPage::show();
-      LightPage::updateValues();
+      PageManager::GetLightPage()->selectedLight = light;
+      PageManager::GetLightPage()->show();
+      PageManager::GetLightPage()->updateValues();
     }
     break;
   }
   case ROOM_LIGHT3_LABEL_ID: {
     Light *light = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(3);
     if (light != nullptr) {
-      LightPage::selectedLight = light;
-      LightPage::show();
-      LightPage::updateValues();
+      PageManager::GetLightPage()->selectedLight = light;
+      PageManager::GetLightPage()->show();
+      PageManager::GetLightPage()->updateValues();
     }
     break;
   }
   case ROOM_LIGHT4_LABEL_ID: {
     Light *light = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(4);
     if (light != nullptr) {
-      LightPage::selectedLight = light;
-      LightPage::show();
-      LightPage::updateValues();
+      PageManager::GetLightPage()->selectedLight = light;
+      PageManager::GetLightPage()->show();
+      PageManager::GetLightPage()->updateValues();
     }
     break;
   }
   case ROOM_LIGHT5_LABEL_ID: {
     Light *light = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(5);
     if (light != nullptr) {
-      LightPage::selectedLight = light;
-      LightPage::show();
-      LightPage::updateValues();
+      PageManager::GetLightPage()->selectedLight = light;
+      PageManager::GetLightPage()->show();
+      PageManager::GetLightPage()->updateValues();
     }
     break;
   }
   case ROOM_LIGHT6_LABEL_ID: {
     Light *light = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(6);
     if (light != nullptr) {
-      LightPage::selectedLight = light;
-      LightPage::show();
-      LightPage::updateValues();
+      PageManager::GetLightPage()->selectedLight = light;
+      PageManager::GetLightPage()->show();
+      PageManager::GetLightPage()->updateValues();
     }
     break;
   }
   case ROOM_LIGHT7_LABEL_ID: {
     Light *light = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(7);
     if (light != nullptr) {
-      LightPage::selectedLight = light;
-      LightPage::show();
-      LightPage::updateValues();
+      PageManager::GetLightPage()->selectedLight = light;
+      PageManager::GetLightPage()->show();
+      PageManager::GetLightPage()->updateValues();
     }
     break;
   }
   case ROOM_LIGHT8_LABEL_ID: {
     Light *light = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(8);
     if (light != nullptr) {
-      LightPage::selectedLight = light;
-      LightPage::show();
-      LightPage::updateValues();
+      PageManager::GetLightPage()->selectedLight = light;
+      PageManager::GetLightPage()->show();
+      PageManager::GetLightPage()->updateValues();
     }
     break;
   }
   case ROOM_LIGHT9_LABEL_ID: {
     Light *light = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(9);
     if (light != nullptr) {
-      LightPage::selectedLight = light;
-      LightPage::show();
-      LightPage::updateValues();
+      PageManager::GetLightPage()->selectedLight = light;
+      PageManager::GetLightPage()->show();
+      PageManager::GetLightPage()->updateValues();
     }
     break;
   }
   case ROOM_LIGHT10_LABEL_ID: {
     Light *light = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(10);
     if (light != nullptr) {
-      LightPage::selectedLight = light;
-      LightPage::show();
-      LightPage::updateValues();
+      PageManager::GetLightPage()->selectedLight = light;
+      PageManager::GetLightPage()->show();
+      PageManager::GetLightPage()->updateValues();
     }
     break;
   }
   case ROOM_LIGHT11_LABEL_ID: {
     Light *light = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(11);
     if (light != nullptr) {
-      LightPage::selectedLight = light;
-      LightPage::show();
-      LightPage::updateValues();
+      PageManager::GetLightPage()->selectedLight = light;
+      PageManager::GetLightPage()->show();
+      PageManager::GetLightPage()->updateValues();
     }
     break;
   }
   case ROOM_LIGHT12_LABEL_ID: {
     Light *light = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(12);
     if (light != nullptr) {
-      LightPage::selectedLight = light;
-      LightPage::show();
-      LightPage::updateValues();
+      PageManager::GetLightPage()->selectedLight = light;
+      PageManager::GetLightPage()->show();
+      PageManager::GetLightPage()->updateValues();
     }
     break;
   }
@@ -466,37 +486,37 @@ void InterfaceManager::_handleLightPageComponentTouch(uint8_t component_id) {
     break;
   }
   case LIGHT_PAGE_BRIGHTNESS_SLIDER_ID: {
-    if (LightPage::selectedLight != nullptr) {
+    if (PageManager::GetLightPage()->selectedLight != nullptr) {
       std::list<Light *> lights;
-      lights.push_back(LightPage::selectedLight);
-      LightManager::ChangeLightsToLevel(&lights, LightPage::getBrightnessValue());
-      // LightPage::updateValues(); Not needed as slider changes directly
+      lights.push_back(PageManager::GetLightPage()->selectedLight);
+      LightManager::ChangeLightsToLevel(&lights, PageManager::GetLightPage()->getBrightnessValue());
+      // PageManager::GetLightPage()->updateValues(); Not needed as slider changes directly
     }
     break;
   }
   case LIGHT_PAGE_KELVIN_SLIDER_ID: {
-    if (LightPage::selectedLight != nullptr) {
+    if (PageManager::GetLightPage()->selectedLight != nullptr) {
       std::list<Light *> lights;
-      lights.push_back(LightPage::selectedLight);
-      if (LightPage::getCurrentMode() == LIGHT_PAGE_MODE::COLOR_TEMP) {
-        LightManager::ChangeLightToColorTemperature(&lights, LightPage::getKelvinSatValue());
-      } else if (LightPage::getCurrentMode() == LIGHT_PAGE_MODE::COLOR_RGB) {
-        LightManager::ChangeLightsToColorSaturation(&lights, LightPage::getKelvinSatValue());
+      lights.push_back(PageManager::GetLightPage()->selectedLight);
+      if (PageManager::GetLightPage()->getCurrentMode() == LIGHT_PAGE_MODE::COLOR_TEMP) {
+        LightManager::ChangeLightToColorTemperature(&lights, PageManager::GetLightPage()->getKelvinSatValue());
+      } else if (PageManager::GetLightPage()->getCurrentMode() == LIGHT_PAGE_MODE::COLOR_RGB) {
+        LightManager::ChangeLightsToColorSaturation(&lights, PageManager::GetLightPage()->getKelvinSatValue());
       }
-      // LightPage::updateValues(); Not needed as slider changes directly
+      // PageManager::GetLightPage()->updateValues(); Not needed as slider changes directly
     }
     break;
   }
   case LIGHT_PAGE_HUE_SLIDER_ID: {
-    if (LightPage::selectedLight != nullptr) {
+    if (PageManager::GetLightPage()->selectedLight != nullptr) {
       std::list<Light *> lights;
-      lights.push_back(LightPage::selectedLight);
-      LightManager::ChangeLightsToColorHue(&lights, LightPage::getHueValue());
+      lights.push_back(PageManager::GetLightPage()->selectedLight);
+      LightManager::ChangeLightsToColorHue(&lights, PageManager::GetLightPage()->getHueValue());
     }
     break;
   }
   case LIGHT_PAGE_SWITCH_MODE_BUTTON_ID: {
-    LightPage::switchMode();
+    PageManager::GetLightPage()->switchMode();
     break;
   }
 
@@ -512,7 +532,7 @@ void InterfaceManager::_ceilingMasterButtonEvent() {
       LightManager::ChangeLightsToLevel(&onLights, 0);
     } else {
       std::list<Light *> lightList = (*RoomManager::currentRoom)->getAllCeilingLights();
-      LightManager::ChangeLightsToLevel(&lightList, HomePage::getDimmingValue());
+      LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
     }
   } else if (this->_currentRoomMode == roomMode::house) {
     std::list<Light *> onLights = LightManager::getCeilingLightsThatAreOn();
@@ -520,7 +540,7 @@ void InterfaceManager::_ceilingMasterButtonEvent() {
       LightManager::ChangeLightsToLevel(&onLights, 0);
     } else {
       std::list<Light *> lightList = LightManager::getAllCeilingLights();
-      LightManager::ChangeLightsToLevel(&lightList, HomePage::getDimmingValue());
+      LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
     }
   }
 
@@ -535,7 +555,7 @@ void InterfaceManager::_tableMasterButtonEvent() {
       LightManager::ChangeLightsToLevel(&onLights, 0);
     } else {
       std::list<Light *> lightList = (*RoomManager::currentRoom)->getAllTableLights();
-      LightManager::ChangeLightsToLevel(&lightList, HomePage::getDimmingValue());
+      LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
     }
     this->_updatePanelLightStatus();
   } else if (this->_currentRoomMode == roomMode::house) {
@@ -544,7 +564,7 @@ void InterfaceManager::_tableMasterButtonEvent() {
       LightManager::ChangeLightsToLevel(&onLights, 0);
     } else {
       std::list<Light *> lightList = LightManager::getAllTableLights();
-      LightManager::ChangeLightsToLevel(&lightList, HomePage::getDimmingValue());
+      LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
     }
   }
 
@@ -587,7 +607,7 @@ void InterfaceManager::_updateLightsThatAreOn() {
     }
   }
 
-  uint8_t newLevel = HomePage::getDimmingValue();
+  uint8_t newLevel = PageManager::GetHomePage()->getDimmingValue();
   LightManager::ChangeLightsToLevel(&lights, newLevel);
   this->_updatePanelLightStatus();
 }
@@ -636,7 +656,7 @@ void InterfaceManager::_updateAllLights() {
     }
   }
 
-  uint8_t newLevel = HomePage::getDimmingValue();
+  uint8_t newLevel = PageManager::GetHomePage()->getDimmingValue();
   LightManager::ChangeLightsToLevel(&lights, newLevel);
   this->_updatePanelLightStatus();
 }
@@ -661,7 +681,7 @@ void InterfaceManager::_updateLightsColorTemp() {
     }
   }
 
-  uint16_t newKelvin = HomePage::getColorTempValue();
+  uint16_t newKelvin = PageManager::GetHomePage()->getColorTempValue();
   LightManager::ChangeLightToColorTemperature(&lights, newKelvin);
   this->_updatePanelLightStatus();
 }
@@ -695,21 +715,21 @@ void InterfaceManager::_updateRoomPageStates() {
 void InterfaceManager::_setEditLightMode(editLightMode mode) {
   InterfaceManager::instance->_currentEditMode = mode; // Set current mode
   if (mode == editLightMode::all_lights) {
-    HomePage::setSliderLightLevelColor(23243); // Reset to normal color
-    HomePage::setSliderColorTempColor(23243);  // Reset to normal color
-    HomePage::setHighlightCeilingVisibility(false);
-    HomePage::setHighlightTableVisibility(false);
+    PageManager::GetHomePage()->setSliderLightLevelColor(23243); // Reset to normal color
+    PageManager::GetHomePage()->setSliderColorTempColor(23243);  // Reset to normal color
+    PageManager::GetHomePage()->setHighlightCeilingVisibility(false);
+    PageManager::GetHomePage()->setHighlightTableVisibility(false);
   } else {
     if (mode == editLightMode::ceiling_lights) {
-      HomePage::setHighlightCeilingVisibility(true);
-      HomePage::setHighlightTableVisibility(false);
+      PageManager::GetHomePage()->setHighlightCeilingVisibility(true);
+      PageManager::GetHomePage()->setHighlightTableVisibility(false);
     } else if (mode == editLightMode::table_lights) {
-      HomePage::setHighlightTableVisibility(true);
-      HomePage::setHighlightCeilingVisibility(false);
+      PageManager::GetHomePage()->setHighlightTableVisibility(true);
+      PageManager::GetHomePage()->setHighlightCeilingVisibility(false);
     }
 
-    HomePage::setSliderLightLevelColor(65024); // Change slider color to indicate special mode
-    HomePage::setSliderColorTempColor(65024);  // Change slider color to indicate special mode
+    PageManager::GetHomePage()->setSliderLightLevelColor(65024); // Change slider color to indicate special mode
+    PageManager::GetHomePage()->setSliderColorTempColor(65024);  // Change slider color to indicate special mode
   }
   this->_updatePanelLightStatus();
   InterfaceManager::instance->_startSpecialModeTimer();
@@ -842,7 +862,7 @@ void InterfaceManager::_taskProcessMqttMessages(void *param) {
             if (msg.payload.compare("1") == 0) {
               NSPanel::instance->setDimLevel(100);
               NSPanel::instance->goToPage(HOME_PAGE_NAME);
-              InterfaceManager::processWakeEvent(); // Send out state information that panel woke from sleep
+              MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1"); // Send out state information that panel woke from sleep
             } else if (msg.payload.compare("0") == 0) {
               NSPanel::instance->setDimLevel(0);
               NSPanel::instance->goToPage(SCREENSAVE_PAGE_NAME);
@@ -899,6 +919,7 @@ void InterfaceManager::_setLightLevel(uint16_t light_id, uint8_t level) {
     light->setLightLevel(level);
     this->_updatePanelLightStatus();
     this->_updateRoomPageStates();
+    light->callUpdateCallbacks();
   }
 }
 
@@ -910,6 +931,7 @@ void InterfaceManager::_setLightColorTemperature(uint16_t light_id, uint8_t leve
     light->setColorTemperature(level);
     this->_updatePanelLightStatus();
     this->_updateRoomPageStates();
+    light->callUpdateCallbacks();
   }
 }
 
@@ -917,7 +939,7 @@ void InterfaceManager::_onOffLight(Light *light) {
   std::list<Light *> lightsToChange;
   lightsToChange.push_back(light);
   if (light->getLightLevel() == 0) {
-    LightManager::ChangeLightsToLevel(&lightsToChange, HomePage::getDimmingValue());
+    LightManager::ChangeLightsToLevel(&lightsToChange, PageManager::GetHomePage()->getDimmingValue());
   } else {
     LightManager::ChangeLightsToLevel(&lightsToChange, 0);
   }
@@ -925,6 +947,7 @@ void InterfaceManager::_onOffLight(Light *light) {
 }
 
 void InterfaceManager::_updatePanelLightStatus() {
+  // TODO: Move this function to the "update" function on page HomeScreen
   uint totalBrightness = 0;
   uint totalBrightnessLights = 0;
   uint totalKelvinLightsCeiling = 0;
@@ -959,8 +982,8 @@ void InterfaceManager::_updatePanelLightStatus() {
 
   uint8_t averageCeilingBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
   uint8_t averageCeilingKelvin = totalKelvinLightsCeiling == 0 ? 0 : totalKelvinValueCeilingLights / totalKelvinLightsCeiling;
-  HomePage::setCeilingLightsState(averageCeilingBrightness > 0);
-  HomePage::setCeilingBrightnessLabelText(averageCeilingBrightness);
+  PageManager::GetHomePage()->setCeilingLightsState(averageCeilingBrightness > 0);
+  PageManager::GetHomePage()->setCeilingBrightnessLabelText(averageCeilingBrightness);
 
   // Calculate average for table lights
   totalBrightness = 0;
@@ -994,8 +1017,8 @@ void InterfaceManager::_updatePanelLightStatus() {
   }
   uint8_t averageTableBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
   uint8_t averageTableKelvin = totalKelvinLightsTable == 0 ? 0 : totalKelvinValueTableLights / totalKelvinLightsTable;
-  HomePage::setTableLightsState(averageTableBrightness > 0);
-  HomePage::setTableBrightnessLabelText(averageTableBrightness);
+  PageManager::GetHomePage()->setTableLightsState(averageTableBrightness > 0);
+  PageManager::GetHomePage()->setTableBrightnessLabelText(averageTableBrightness);
 
   uint8_t totalAverageBrightness;
   if (averageCeilingBrightness > 0 && averageTableBrightness > 0) {
@@ -1010,8 +1033,8 @@ void InterfaceManager::_updatePanelLightStatus() {
 
   // Only set a new value if any lights are on.
   // This value will be used as the next "on" value.
-  if (totalAverageBrightness > 0 && totalAverageBrightness != HomePage::getDimmingValue()) {
-    HomePage::setDimmingValue(totalAverageBrightness);
+  if (totalAverageBrightness > 0 && totalAverageBrightness != PageManager::GetHomePage()->getDimmingValue()) {
+    PageManager::GetHomePage()->setDimmingValue(totalAverageBrightness);
   }
 
   uint8_t totalAverageKelvin;
@@ -1025,8 +1048,8 @@ void InterfaceManager::_updatePanelLightStatus() {
     totalAverageKelvin = 0;
   }
   // Only set a new value if it is not the same as already set and a new value was discovered (ie, > 0).
-  if (totalAverageKelvin > 0 and totalAverageKelvin != HomePage::getColorTempValue()) {
-    HomePage::setColorTempValue(totalAverageKelvin);
+  if (totalAverageKelvin > 0 and totalAverageKelvin != PageManager::GetHomePage()->getColorTempValue()) {
+    PageManager::GetHomePage()->setColorTempValue(totalAverageKelvin);
   }
 }
 

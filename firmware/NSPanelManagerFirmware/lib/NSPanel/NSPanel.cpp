@@ -57,6 +57,13 @@ void NSPanel::setComponentVal(const char *componentId, uint8_t value) {
   this->_sendCommandWithoutResponse(cmd.c_str());
 }
 
+void NSPanel::setTimerTimeout(const char *componentId, uint16_t timeout) {
+  std::string cmd = componentId;
+  cmd.append(".tim=");
+  cmd.append(std::to_string(timeout));
+  this->_sendCommandWithoutResponse(cmd.c_str());
+}
+
 void NSPanel::setComponentPic(const char *componentId, uint8_t value) {
   std::string cmd = componentId;
   cmd.append(".pic=");
@@ -144,10 +151,12 @@ bool NSPanel::init() {
   digitalWrite(4, HIGH); // Turn off power to the display
   vTaskDelay(500 / portTICK_PERIOD_MS);
   digitalWrite(4, LOW); // Turn on power to the display
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
   Serial2.setTxBufferSize(128);
   Serial2.begin(115200, SERIAL_8N1, 17, 16);
   NSPanel::instance = this;
   this->_mutexReadSerialData = xSemaphoreCreateMutex();
+  this->_mutexWriteSerialData = xSemaphoreCreateMutex();
   this->_writeCommandsToSerial = true;
   this->_isUpdating = false;
   this->_update_progress = 0;
@@ -157,6 +166,15 @@ bool NSPanel::init() {
     Serial2.read();
     if (Serial2.available() == 0) {
       vTaskDelay(250 / portTICK_PERIOD_MS);
+    }
+  }
+
+  while (true) {
+    if (xSemaphoreTake(NSPanel::instance->_mutexWriteSerialData, portMAX_DELAY)) {
+      break;
+    } else {
+      LOG_ERROR("Failed to take serial write mutex, trying again in 3 seconds.");
+      vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
   }
 
@@ -186,6 +204,10 @@ bool NSPanel::init() {
   std::string reply_data = "";
   while (Serial2.available() > 0) {
     reply_data.push_back(Serial2.read());
+
+    if (Serial2.available() == 0) {
+      vTaskDelay(25 / portTICK_PERIOD_MS);
+    }
   }
   LOG_INFO("Got reply from display: ", reply_data.c_str());
   reply_data.clear();
@@ -206,7 +228,8 @@ bool NSPanel::init() {
   this->_sendCommandWithoutResponse("bkcmd=0");
   this->_sendCommandWithoutResponse("sleep=0");
   this->_sendCommandClearResponse("rest");
-  this->_sendCommandClearResponse("dim=1.0");
+
+  xSemaphoreGive(NSPanel::instance->_mutexWriteSerialData);
   return true;
 }
 
@@ -295,9 +318,12 @@ void NSPanel::attachWakeCallback(void (*callback)()) {
 void NSPanel::_taskReadNSPanelData(void *param) {
   LOG_INFO("Starting taskReadNSPanelData.");
   for (;;) {
-    // Wait until access is given to serial
+
+    while (Serial2.available() == 0) {
+      vTaskDelay(25 / portTICK_PERIOD_MS);
+    }
+
     if (xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, portMAX_DELAY) == pdTRUE) {
-      // Read the output from the panel if any and add the payload to the process queue
       if (Serial2.available() > 0) {
         std::vector<char> data;
         while (Serial2.available() > 0) {
@@ -311,9 +337,6 @@ void NSPanel::_taskReadNSPanelData(void *param) {
       }
       xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
     }
-
-    // Wait 10ms between each read.
-    vTaskDelay(25 / portTICK_PERIOD_MS);
   }
 }
 
@@ -369,6 +392,15 @@ void NSPanel::_sendCommand(NSPanelCommand *command) {
     }
   }
 
+  while (true) {
+    if (xSemaphoreTake(NSPanel::instance->_mutexWriteSerialData, portMAX_DELAY)) {
+      break;
+    } else {
+      LOG_ERROR("Failed to take serial write mutex, trying again in 3 seconds.");
+      vTaskDelay(3000 / portTICK_PERIOD_MS);
+    }
+  }
+
   Serial2.print(command->command.c_str());
   Serial2.write(0xFF);
   Serial2.write(0xFF);
@@ -390,11 +422,22 @@ void NSPanel::_sendCommand(NSPanelCommand *command) {
     // Give back serial read mutex.
     xSemaphoreGive(this->_mutexReadSerialData);
   }
+
+  xSemaphoreGive(this->_mutexWriteSerialData);
 }
 
 void NSPanel::_sendRawCommand(const char *command, int length) {
   while (!NSPanel::instance->_writeCommandsToSerial) {
     vTaskDelay(50 / portTICK_PERIOD_MS);
+  }
+
+  while (true) {
+    if (xSemaphoreTake(NSPanel::instance->_mutexWriteSerialData, portMAX_DELAY)) {
+      break;
+    } else {
+      LOG_ERROR("Failed to take serial write mutex, trying again in 3 seconds.");
+      vTaskDelay(3000 / portTICK_PERIOD_MS);
+    }
   }
 
   for (int i = 0; i < length; i++) {
@@ -403,6 +446,8 @@ void NSPanel::_sendRawCommand(const char *command, int length) {
   Serial2.write(0xFF);
   Serial2.write(0xFF);
   Serial2.write(0xFF);
+
+  xSemaphoreGive(this->_mutexWriteSerialData);
 }
 
 void NSPanel::startOTAUpdate() {
@@ -418,7 +463,7 @@ void NSPanel::_clearSerialBuffer() {
   while (Serial2.available() > 0) {
     Serial2.read();
     if (Serial2.available() == 0) {
-      vTaskDelay(250 / portTICK_PERIOD_MS);
+      vTaskDelay(50 / portTICK_PERIOD_MS);
     }
   }
 }
@@ -481,6 +526,15 @@ void NSPanel::_taskUpdateTFTConfigOTA(void *param) {
       }
     } else {
       break;
+    }
+  }
+
+  while (true) {
+    if (xSemaphoreTake(NSPanel::instance->_mutexWriteSerialData, portMAX_DELAY)) {
+      break;
+    } else {
+      LOG_ERROR("Failed to take serial write mutex, trying again in 3 seconds.");
+      vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
   }
 

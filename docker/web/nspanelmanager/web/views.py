@@ -280,6 +280,11 @@ def settings_page(request):
     data["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time", 300)
     data["special_mode_release_time"] = get_setting_with_default("special_mode_release_time", 5000)
     data["mqtt_ignore_time"] = get_setting_with_default("mqtt_ignore_time", 3000)
+    data["screensaver_activation_timeout"] = get_setting_with_default("screensaver_activation_timeout", 30000)
+    data["screen_dim_level"] = get_setting_with_default("screen_dim_level", 100)
+    data["screensaver_dim_level"] = get_setting_with_default("screensaver_dim_level", 0)
+    data["show_screensaver_clock"] = get_setting_with_default("show_screensaver_clock", False)
+    data["clock_us_style"] = get_setting_with_default("clock_us_style", False)
     return render(request, 'settings.html', data)
 
 
@@ -312,6 +317,11 @@ def save_settings(request):
     set_setting_value(name="special_mode_release_time", value=request.POST["special_mode_release_time"])
     set_setting_value(name="mqtt_ignore_time", value=request.POST["mqtt_ignore_time"])
 
+    set_setting_value(name="screensaver_activation_timeout", value=request.POST["screensaver_activation_timeout"])
+    set_setting_value(name="screen_dim_level", value=request.POST["screen_dim_level"])
+    set_setting_value(name="screensaver_dim_level", value=request.POST["screensaver_dim_level"])
+    set_setting_value(name="show_screensaver_clock", value=("show_screensaver_clock" in request.POST))
+    set_setting_value(name="clock_us_style", value=("clock_us_style" in request.POST))
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()
     return redirect('settings')

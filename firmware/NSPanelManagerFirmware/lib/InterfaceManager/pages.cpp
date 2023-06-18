@@ -1,83 +1,13 @@
-/*
- * pages.cpp
- *
- *  Created on: Mar 6, 2023
- *      Author: Tim Panajott
- */
-
 #include <InterfaceConfig.hpp>
 #include <Light.hpp>
 #include <MqttLog.hpp>
 #include <NSPanel.hpp>
+#include <PageManager.hpp>
+#include <Room.hpp>
+#include <RoomManager.hpp>
+#include <Scene.hpp>
 #include <TftDefines.h>
 #include <pages.hpp>
-
-void HomePage::show() {
-  NSPanel::instance->goToPage(HOME_PAGE_NAME);
-}
-
-int HomePage::getDimmingValue() {
-  return HomePage::_dimmerValue;
-}
-
-void HomePage::setDimmingValue(uint8_t value) {
-  NSPanel::instance->setComponentVal(HOME_DIMMER_SLIDER_NAME, value);
-  HomePage::_dimmerValue = value;
-}
-
-void HomePage::updateDimmerValueCache() {
-  int newValue = NSPanel::instance->getComponentIntVal(HOME_DIMMER_SLIDER_NAME);
-  if (newValue > InterfaceConfig::raiseToMaxLightLevelAbove) {
-    HomePage::_dimmerValue = 100;
-  } else {
-    HomePage::_dimmerValue = newValue;
-  }
-}
-
-int HomePage::getColorTempValue() {
-  return HomePage::_colorTemp;
-}
-
-void HomePage::setColorTempValue(uint8_t value) {
-  NSPanel::instance->setComponentVal(HOME_LIGHT_COLOR_SLIDER_NAME, value);
-  HomePage::_colorTemp = value;
-}
-
-void HomePage::updateColorTempValueCache() {
-  HomePage::_colorTemp = NSPanel::instance->getComponentIntVal(HOME_LIGHT_COLOR_SLIDER_NAME);
-}
-
-void HomePage::setCeilingBrightnessLabelText(uint8_t value) {
-  NSPanel::instance->setComponentVal(HOME_LABEL_CEILING_BRIGHTNESS, value);
-}
-
-void HomePage::setTableBrightnessLabelText(uint8_t value) {
-  NSPanel::instance->setComponentVal(HOME_LABEL_TABLE_BRIGHTNESS, value);
-}
-
-void HomePage::setCeilingLightsState(bool state) {
-  NSPanel::instance->setComponentVal(HOME_BUTTON_CEILING_NAME, state ? 1 : 0);
-}
-
-void HomePage::setTableLightsState(bool state) {
-  NSPanel::instance->setComponentVal(HOME_BUTTON_TABLE_NAME, state ? 1 : 0);
-}
-
-void HomePage::setSliderLightLevelColor(uint color) {
-  NSPanel::instance->setComponentForegroundColor(HOME_DIMMER_SLIDER_NAME, color);
-}
-
-void HomePage::setSliderColorTempColor(uint color) {
-  NSPanel::instance->setComponentForegroundColor(HOME_LIGHT_COLOR_SLIDER_NAME, color);
-}
-
-void HomePage::setHighlightCeilingVisibility(bool visibility) {
-  NSPanel::instance->setComponentVisible(HOME_PIC_HIGHLIGHT_CEILING_NAME, visibility);
-}
-
-void HomePage::setHighlightTableVisibility(bool visibility) {
-  NSPanel::instance->setComponentVisible(HOME_PIC_HIGHLIGHT_TABLE_NAME, visibility);
-}
 
 void RoomPage::setLightVisibility(uint8_t position, bool visibility) {
   switch (position) {
@@ -230,99 +160,6 @@ void RoomPage::setCurrentRoomLabel(const char *label) {
   NSPanel::instance->setComponentText(ROOM_PAGE_CURRENT_ROOM_LABEL_NAME, label);
 }
 
-void LightPage::show() {
-  LightPage::_currentMode = LIGHT_PAGE_MODE::COLOR_TEMP;
-  NSPanel::instance->goToPage(LIGHT_PAGE_NAME);
-
-  if (LightPage::selectedLight != nullptr) {
-    if (LightPage::selectedLight->canTemperature()) {
-      LightPage::_currentMode = LIGHT_PAGE_MODE::COLOR_TEMP;
-    } else if (LightPage::selectedLight->canRgb()) {
-      LightPage::_currentMode = LIGHT_PAGE_MODE::COLOR_RGB;
-    } else {
-      LightPage::_currentMode = LIGHT_PAGE_MODE::COLOR_TEMP; // Default to color temp although this wont be shown.
-    }
-  }
-}
-
-void LightPage::updateValues() {
-  if (LightPage::selectedLight != nullptr) {
-    NSPanel::instance->setComponentText(LIGHT_PAGE_LIGHT_LABEL_NAME, LightPage::selectedLight->getName().c_str());
-    NSPanel::instance->setComponentVal(LIGHT_PAGE_BRIGHTNESS_SLIDER_NAME, LightPage::selectedLight->getLightLevel());
-
-    LOG_DEBUG("Selected light can Color Temp? ", LightPage::selectedLight->canTemperature() ? "Yes" : "No");
-    LOG_DEBUG("Selected light can RGB? ", LightPage::selectedLight->canRgb() ? "Yes" : "No");
-
-    if (LightPage::selectedLight->canTemperature() && LightPage::_currentMode == LIGHT_PAGE_MODE::COLOR_TEMP) {
-      NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, LightPage::selectedLight->getColorTemperature());
-      NSPanel::instance->setComponentPic(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_KELVIN_SLIDER_PIC);
-      NSPanel::instance->setComponentPic1(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_KELVIN_SLIDER_PIC1);
-      NSPanel::instance->setComponentPic(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, LIGHT_PAGE_COLOR_TEMP_MODE_PIC);
-    } else if (LightPage::selectedLight->canRgb() && LightPage::_currentMode == LIGHT_PAGE_MODE::COLOR_RGB) {
-      NSPanel::instance->setComponentVal(LIGHT_PAGE_HUE_SLIDER_NAME, LightPage::selectedLight->getHue());
-      NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, LightPage::selectedLight->getSaturation());
-      NSPanel::instance->setComponentPic(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_SAT_SLIDER_PIC);
-      NSPanel::instance->setComponentPic1(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_SAT_SLIDER_PIC1);
-      NSPanel::instance->setComponentPic(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, LIGHT_PAGE_COLOR_RGB_MODE_PIC);
-    }
-
-    if (LightPage::selectedLight->canTemperature() && LightPage::selectedLight->canRgb()) {
-      NSPanel::instance->setComponentVisible(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, true);
-      NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, true);
-      NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, true);
-    } else if (LightPage::selectedLight->canTemperature() && !LightPage::selectedLight->canRgb()) {
-      NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, true);
-      NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, false);
-      NSPanel::instance->setComponentVisible(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, false);
-    } else if (!LightPage::selectedLight->canTemperature() && LightPage::selectedLight->canRgb()) {
-      NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, true);
-      NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, true);
-      NSPanel::instance->setComponentVisible(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, false);
-    } else if (!LightPage::selectedLight->canTemperature() && !LightPage::selectedLight->canRgb()) {
-      NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, false);
-      NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, false);
-      NSPanel::instance->setComponentVisible(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, false);
-    }
-  }
-}
-
-LIGHT_PAGE_MODE LightPage::getCurrentMode() {
-  return LightPage::_currentMode;
-}
-
-void LightPage::switchMode() {
-  if (LightPage::_currentMode == LIGHT_PAGE_MODE::COLOR_TEMP) {
-    LightPage::_currentMode = LIGHT_PAGE_MODE::COLOR_RGB;
-  } else if (LightPage::_currentMode == LIGHT_PAGE_MODE::COLOR_RGB) {
-    LightPage::_currentMode = LIGHT_PAGE_MODE::COLOR_TEMP;
-  }
-  LightPage::updateValues();
-}
-
-uint8_t LightPage::getBrightnessValue() {
-  return NSPanel::instance->getComponentIntVal(LIGHT_PAGE_BRIGHTNESS_SLIDER_NAME);
-}
-
-uint8_t LightPage::getKelvinSatValue() {
-  return NSPanel::instance->getComponentIntVal(LIGHT_PAGE_KELVIN_SLIDER_NAME);
-}
-
-uint16_t LightPage::getHueValue() {
-  return NSPanel::instance->getComponentIntVal(LIGHT_PAGE_HUE_SLIDER_NAME);
-}
-
-void NspanelManagerPage::show() {
-  NSPanel::instance->goToPage(NSPANELMANAGER_PAGE_NAME);
-}
-
-void NspanelManagerPage::setText(std::string &text) {
-  NSPanel::instance->setComponentText(NSPANELMANAGER_TEXT_NAME, text.c_str());
-}
-
-void NspanelManagerPage::setText(const char *text) {
-  NSPanel::instance->setComponentText(NSPANELMANAGER_TEXT_NAME, text);
-}
-
 void ScenePage::show() {
   NSPanel::instance->goToPage(SCENES_PAGE_NAME);
 }
@@ -398,7 +235,9 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
 
   switch (component) {
   case SCENES_PAGE_BACK_BUTTON_ID: {
-    HomePage::show();
+    // PageManager::GoBack();
+    // TODO: Use GoBack function from PageManager
+    PageManager::GetHomePage()->show();
     break;
   }
   case SCENES_PAGE_SCENE1_LABEL_ID: {

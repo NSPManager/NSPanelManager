@@ -48,7 +48,6 @@ def on_message(ws, message):
                 for id, light in mqtt_manager_libs.light_states.states.items():
                     if light.home_assistant_name == entity["entity_id"]:
                         try:
-                            logging.debug(F"Processing entity: " + entity["entity_id"])
                             if entity["state"] == "off":
                                 light.light_level = 0
                             else:
@@ -58,10 +57,8 @@ def on_message(ws, message):
                                 else:
                                     light.light_level = 100  # Type is a switch and is ON, regard it as 100% on
 
-                            mqtt_client.publish(
-                                F"nspanel/entities/light/{light.id}/state_brightness_pct", light.light_level, retain=True)
-
-                            if light.can_rgb and entity["attributes"]["color_mode"] != "color_temp":
+                            mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", light.light_level, retain=True)
+                            if light.can_rgb and "color_mode" in entity["attributes"] and entity["attributes"]["color_mode"] != "color_temp":
                                 light.last_command_sent = "rgb"
                                 mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_hue", entity["attributes"]["hs_color"][0], retain=True)
                                 mqtt_manager_libs.light_states.states[light.id].color_hue = entity["attributes"]["hs_color"][0]
@@ -73,7 +70,7 @@ def on_message(ws, message):
                                 mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_kelvin", light.color_temp, retain=True)
                         except:
                             logging.exception("Something went wrong while trying to load current states.")
-        pass  # Ignore success result messages
+        return None # Ignore success result messages
     else:
         logging.debug(message)
 
@@ -131,9 +128,7 @@ def send_entity_update(json_msg):
         entity_id = json_msg["event"]["data"]["entity_id"]
         entity_name = entity_id
         new_state = json_msg["event"]["data"]["new_state"]
-        logging.debug(F"Trying to find entity with name: {entity_name}")
         entity_id = mqtt_manager_libs.light_states.get_id_by_name(entity_name)
-        logging.debug(F"Got ID {entity_id}")
         if entity_id >= 0:
             if "brightness" in new_state["attributes"]:
                 new_brightness = round(

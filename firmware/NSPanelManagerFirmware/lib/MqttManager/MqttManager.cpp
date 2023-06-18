@@ -95,7 +95,7 @@ bool MqttManager::publish(const char *topic, const char *message, bool retain) {
 }
 
 void MqttManager::subscribeToTopic(const char *topic, std::function<void(char *topic, byte *payload, unsigned int length)> callback) {
-  LOG_DEBUG("Adding topic ", topic, " to subscribe list.");
+  LOG_TRACE("Adding topic ", topic, " to subscribe list.");
   SubscribeTopic tpc;
   tpc.topic = std::string(topic);
   tpc.callback = callback;
@@ -198,11 +198,15 @@ bool MqttManager::_connect() {
   serializeJson(*online_message_doc, online_message_buffer);
   delete online_message_doc;
 
+  std::string mqtt_device_name = "NSPM_";
+  mqtt_device_name.append(NSPMConfig::instance->wifi_hostname);
+  mqtt_device_name.append(WiFi.macAddress().c_str());
+
   LOG_INFO("Connecting to MQTT server ", NSPMConfig::instance->mqtt_server.c_str());
   Serial.print("Connecting to MQTT server ");
   Serial.println(NSPMConfig::instance->mqtt_server.c_str());
   MqttManager::_mqttClient->setServer(NSPMConfig::instance->mqtt_server.c_str(), NSPMConfig::instance->mqtt_port);
-  MqttManager::_mqttClient->connect(NSPMConfig::instance->wifi_hostname.c_str(), NSPMConfig::instance->mqtt_username.c_str(), NSPMConfig::instance->mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, 1, offline_message_buffer);
+  MqttManager::_mqttClient->connect(mqtt_device_name.c_str(), NSPMConfig::instance->mqtt_username.c_str(), NSPMConfig::instance->mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, 1, offline_message_buffer);
   vTaskDelay(1000 / portTICK_PERIOD_MS);
   if (MqttManager::_mqttClient->connected()) {
     MqttManager::_mqttClient->publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), online_message_buffer, true);

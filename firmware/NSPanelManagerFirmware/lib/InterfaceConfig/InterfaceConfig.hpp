@@ -22,6 +22,16 @@ public:
   static inline uint16_t mqtt_ignore_time;
   /// @brief Ignore any MQTT state updates until this time is reached (millis() time)
   static inline unsigned long ignore_mqtt_state_events_until = 0;
+  /// @brief Screen dim level.
+  static inline uint8_t screen_dim_level = 100;
+  /// @brief Screensaver dim level.
+  static inline uint8_t screensaver_dim_level = 0;
+  /// @brief Time before screensaver is activated. Time in milliseconds.
+  static inline unsigned long screensaver_activation_timeout = 30000;
+  /// @brief Wether or not to show clock on screensaver.
+  static inline bool show_screensaver_clock = false;
+  /// @brief Show clock in US style. AM/PM?
+  static inline bool clock_us_style = false;
 };
 
 #endif

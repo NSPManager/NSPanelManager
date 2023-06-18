@@ -43,6 +43,7 @@ public:
   void setSleep(bool sleep);
   void setComponentText(const char *componentId, const char *text);
   void setComponentVal(const char *componentId, uint8_t value);
+  void setTimerTimeout(const char *componentId, uint16_t timeout);
   void setComponentPic(const char *componentId, uint8_t value);
   void setComponentPic1(const char *componentId, uint8_t value);
   void setComponentForegroundColor(const char *componentId, uint value);
@@ -70,6 +71,7 @@ private:
   TaskHandle_t _taskHandleProcessPanelOutput;
   static void _taskProcessPanelOutput(void *param);
   SemaphoreHandle_t _mutexReadSerialData;
+  SemaphoreHandle_t _mutexWriteSerialData;
 
   unsigned long _lastCommandSent = 0;
   std::queue<NSPanelCommand> _commandQueue;
