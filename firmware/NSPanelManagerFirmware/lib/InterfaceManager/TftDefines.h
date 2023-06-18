@@ -12,7 +12,7 @@
 #define NSPANELMANAGER_TEXT_NAME "bootscreen.t_loading"
 
 #define SCREENSAVE_PAGE_NAME "screensaver"
-#define SCREENSAVE_PAGE_TEXT_NAME SCREENSAVE_PAGE_NAME ".t_screensaver"
+#define SCREENSAVE_PAGE_TEXT_NAME SCREENSAVE_PAGE_NAME ".t_label"
 
 #define HOME_PIC_HIGHLIGHT_CEILING_NAME "p_lockceiling" // Should not have "home." in front as visibility command for Nextion is not as other commands
 #define HOME_PIC_HIGHLIGHT_TABLE_NAME "p_locktable"     // Should not have "home." in front as visibility command for Nextion is not as other commands

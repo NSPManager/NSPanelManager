@@ -52,8 +52,8 @@ def get_mqtt_manager_config(request):
         "openhab_brightness_channel_max", 255)
     return_json["openhab_color_temp_channel_name"] = get_setting_with_default(
         "openhab_color_temp_channel_name", "")
-    return_json["openhab_rgb_channel_name"] = get_setting_with_default(
-        "openhab_rgb_channel_name", "")
+    return_json["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name", "")
+    return_json["clock_us_style"] = get_setting_with_default("clock_us_style", False)
 
     return_json["lights"] = {}
     for light in Light.objects.all():

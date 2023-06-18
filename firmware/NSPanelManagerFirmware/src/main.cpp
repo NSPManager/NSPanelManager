@@ -202,8 +202,10 @@ void setup() {
     vTaskDelay(500 / portTICK_PERIOD_MS);
 
     LOG_INFO("Starting tasks");
-    ButtonManager::init();
     interfaceManager.init();
+    ButtonManager::init();
+  } else {
+    LOG_ERROR("Failed to initialize NSPanel");
   }
 }
 

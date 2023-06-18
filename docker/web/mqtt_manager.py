@@ -42,7 +42,11 @@ def send_time_thread():
 
     while(True):
         if(client.is_connected()):
-            time_string = datetime.datetime.now(use_timezone).strftime("%H:%M")
+            if "clock_us_style" in settings and settings["clock_us_style"] == "True":
+                time_format = "%-I:%M %p" 
+            else:
+                time_format = "%H:%M"
+            time_string = datetime.datetime.now(use_timezone).strftime(time_format)
             if time_string != last_sent_time_string:
                 client.publish("nspanel/status/time", time_string, retain=True)
                 last_sent_time_string = time_string

@@ -26,10 +26,7 @@ void InterfaceManager::init() {
   this->_lastMasterTableLightsButtonTouch = 0;
   this->_lastMasterTableLightsButtonRelease = 0;
   this->_isFingerOnDisplay = false;
-  NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
-  NSPanel::attachSleepCallback(InterfaceManager::processSleepEvent);
-  NSPanel::attachWakeCallback(InterfaceManager::processWakeEvent);
-  InterfaceManager::processWakeEvent(); // Send state update to MQTT that the screen turned on
+  MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1");
   xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 }
 
@@ -63,6 +60,7 @@ void InterfaceManager::stop() {
 void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   unsigned long start = millis();
   PageManager::GetNSPanelManagerPage()->show();
+  NSPanel::instance->setDimLevel(100);
   while (!WiFi.isConnected() || !MqttManager::connected() && !InterfaceManager::hasRegisteredToManager) {
     if (!WiFi.isConnected()) {
       if (NSPMConfig::instance->NSPMConfig::instance->wifi_ssid.empty()) {
@@ -105,6 +103,10 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   PageManager::GetHomePage()->show();
   PageManager::GetHomePage()->setScreensaverTimeout(InterfaceConfig::screensaver_activation_timeout);
   NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
+
+  NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
+  NSPanel::attachSleepCallback(InterfaceManager::processSleepEvent);
+  NSPanel::attachWakeCallback(InterfaceManager::processWakeEvent);
 
   LOG_INFO("Config initialized. Closing taskLoadConfigAndInit");
   vTaskDelete(NULL); // Delete task, we are done
@@ -860,7 +862,7 @@ void InterfaceManager::_taskProcessMqttMessages(void *param) {
             if (msg.payload.compare("1") == 0) {
               NSPanel::instance->setDimLevel(100);
               NSPanel::instance->goToPage(HOME_PAGE_NAME);
-              InterfaceManager::processWakeEvent(); // Send out state information that panel woke from sleep
+              MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1"); // Send out state information that panel woke from sleep
             } else if (msg.payload.compare("0") == 0) {
               NSPanel::instance->setDimLevel(0);
               NSPanel::instance->goToPage(SCREENSAVE_PAGE_NAME);

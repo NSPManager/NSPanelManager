@@ -151,6 +151,7 @@ bool NSPanel::init() {
   digitalWrite(4, HIGH); // Turn off power to the display
   vTaskDelay(500 / portTICK_PERIOD_MS);
   digitalWrite(4, LOW); // Turn on power to the display
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
   Serial2.setTxBufferSize(128);
   Serial2.begin(115200, SERIAL_8N1, 17, 16);
   NSPanel::instance = this;
@@ -193,6 +194,10 @@ bool NSPanel::init() {
   std::string reply_data = "";
   while (Serial2.available() > 0) {
     reply_data.push_back(Serial2.read());
+
+    if (Serial2.available() == 0) {
+      vTaskDelay(25 / portTICK_PERIOD_MS);
+    }
   }
   LOG_INFO("Got reply from display: ", reply_data.c_str());
   reply_data.clear();
@@ -213,7 +218,6 @@ bool NSPanel::init() {
   this->_sendCommandWithoutResponse("bkcmd=0");
   this->_sendCommandWithoutResponse("sleep=0");
   this->_sendCommandClearResponse("rest");
-  this->_sendCommandClearResponse("dim=100");
   return true;
 }
 
