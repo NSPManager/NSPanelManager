@@ -71,6 +71,7 @@ private:
   TaskHandle_t _taskHandleProcessPanelOutput;
   static void _taskProcessPanelOutput(void *param);
   SemaphoreHandle_t _mutexReadSerialData;
+  SemaphoreHandle_t _mutexWriteSerialData;
 
   unsigned long _lastCommandSent = 0;
   std::queue<NSPanelCommand> _commandQueue;

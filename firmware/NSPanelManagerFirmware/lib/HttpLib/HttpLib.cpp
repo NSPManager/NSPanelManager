@@ -47,7 +47,7 @@ size_t HttpLib::DownloadChunk(uint8_t *buffer, const char *address, size_t offse
   size_t sizeReceived = 0;
   while (sizeReceived < size) {
     if (!httpClient.getStreamPtr()->available()) { // No data avilable from WiFi, wait 100ms and try again
-      vTaskDelay(100 / portTICK_PERIOD_MS);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
       LOG_DEBUG("Still waiting for data from address '", address, "'.");
       continue;
     }

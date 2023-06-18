@@ -1,8 +1,6 @@
 .vscode
 *.pyc
 docker/web/db.sqlite3
-docker/web/nspanelmanager/firmware.bin
-docker/web/nspanelmanager/data_file.bin
 docker/web/nspanelmanager/db.sqlite3
 firmware/NSPanelManagerFirmware/data/config.json
 firmware/NSPanelManagerFirmware/.pio
@@ -11,7 +9,6 @@ firmware/NSPanelManagerFirmware/.cproject
 firmware/NSPanelManagerFirmware/.project
 firmware/NSPanelManagerFirmware/.settings
 firmware/NSPanelManagerFirmware/nspanels_to_ota.txt
-firmware/NSPanelManagerFirmware/merged-flash.bin
 firmware/NSPanelManagerFirmware/.cache
 firmware/NSPanelManagerFirmware/.ccls
 firmware/NSPanelManagerFirmware/.ccls-cache
