@@ -1,6 +1,16 @@
 #include <PageManager.hpp>
 
 void PageManager::GoBack() {
+  if (PageManager::_page_history.size() > 1) {
+    PageManager::_page_history.pop_front();
+  }
+
+  if (PageManager::_page_history.size() > 0) {
+    PageBase *show_page = PageManager::_page_history.front();
+    PageManager::_page_history.pop_front();
+    PageManager::_page_history.front()->show();
+    PageManager::_page_history.front()->update();
+  }
 }
 
 PageBase *PageManager::GetCurrentPage() {
@@ -13,6 +23,10 @@ void PageManager::UnshowCurrentPage() {
 void PageManager::SetCurrentPage(PageBase *page) {
   PageManager::_current_page = page;
   PageManager::_page_history.push_front(page);
+
+  while (PageManager::_page_history.size() > 5) {
+    PageManager::_page_history.pop_back();
+  }
 }
 
 LightPage *PageManager::GetLightPage() {

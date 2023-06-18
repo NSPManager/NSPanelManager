@@ -947,6 +947,7 @@ void InterfaceManager::_onOffLight(Light *light) {
 }
 
 void InterfaceManager::_updatePanelLightStatus() {
+  // TODO: Move this function to the "update" function on page HomeScreen
   uint totalBrightness = 0;
   uint totalBrightnessLights = 0;
   uint totalKelvinLightsCeiling = 0;

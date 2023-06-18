@@ -1,5 +1,6 @@
 #include <HomePage.hpp>
 #include <InterfaceConfig.hpp>
+#include <InterfaceManager.hpp>
 #include <Light.hpp>
 #include <NSPanel.hpp>
 #include <PageManager.hpp>
@@ -11,7 +12,7 @@ void HomePage::show() {
 }
 
 void HomePage::update() {
-  // TODO: Update values on display. Move from InterfaceManager
+  InterfaceManager::instance->_updatePanelLightStatus();
 }
 
 void HomePage::unshow() {
