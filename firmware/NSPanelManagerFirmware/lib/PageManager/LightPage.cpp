@@ -47,9 +47,6 @@ void LightPage::updateValues() {
     NSPanel::instance->setComponentText(LIGHT_PAGE_LIGHT_LABEL_NAME, LightPage::selectedLight->getName().c_str());
     NSPanel::instance->setComponentVal(LIGHT_PAGE_BRIGHTNESS_SLIDER_NAME, LightPage::selectedLight->getLightLevel());
 
-    // LOG_DEBUG("Selected light can Color Temp? ", LightPage::selectedLight->canTemperature() ? "Yes" : "No");
-    // LOG_DEBUG("Selected light can RGB? ", LightPage::selectedLight->canRgb() ? "Yes" : "No");
-
     if (LightPage::selectedLight->canTemperature() && this->_currentMode == LIGHT_PAGE_MODE::COLOR_TEMP) {
       NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, LightPage::selectedLight->getColorTemperature());
       NSPanel::instance->setComponentPic(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_KELVIN_SLIDER_PIC);

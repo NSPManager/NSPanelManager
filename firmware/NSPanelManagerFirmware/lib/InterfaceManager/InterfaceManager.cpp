@@ -919,7 +919,7 @@ void InterfaceManager::_setLightLevel(uint16_t light_id, uint8_t level) {
     light->setLightLevel(level);
     this->_updatePanelLightStatus();
     this->_updateRoomPageStates();
-    // light->callUpdateCallbacks();
+    light->callUpdateCallbacks();
   }
 }
 
@@ -931,7 +931,7 @@ void InterfaceManager::_setLightColorTemperature(uint16_t light_id, uint8_t leve
     light->setColorTemperature(level);
     this->_updatePanelLightStatus();
     this->_updateRoomPageStates();
-    // light->callUpdateCallbacks();
+    light->callUpdateCallbacks();
   }
 }
 
