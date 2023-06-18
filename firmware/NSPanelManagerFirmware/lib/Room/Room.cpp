@@ -1,5 +1,6 @@
 #include <Light.hpp>
 #include <Room.hpp>
+#include <Scene.hpp>
 
 std::list<Light *> Room::getCeilingLightsThatAreOn() {
   std::list<Light *> returnList;

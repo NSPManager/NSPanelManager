@@ -1,6 +1,7 @@
 #include <Light.hpp>
 #include <LightManager.hpp>
 #include <MqttLog.hpp>
+#include <functional>
 
 void Light::initFromJson(ArduinoJson::JsonPair *json) {
   this->_id = atoi(json->key().c_str());
@@ -11,7 +12,7 @@ void Light::initFromJson(ArduinoJson::JsonPair *json) {
   this->_roomViewPosition = json->value()["view_position"] | 0;
   this->_isCeiling = json->value()["ceiling"];
 
-  LOG_DEBUG("Loaded light ", this->_name.c_str(), " as type: ", this->_isCeiling ? "CEILING" : "TABLE");
+  LOG_TRACE("Loaded light ", this->_name.c_str(), " as type: ", this->_isCeiling ? "CEILING" : "TABLE");
 }
 
 void Light::setLightLevel(uint8_t lightLevel) {
@@ -60,6 +61,38 @@ uint16_t Light::getSaturation() {
 
 uint8_t Light::getRoomViewPosition() {
   return this->_roomViewPosition;
+}
+
+void Light::attachDeconstructCallback(DeviceEntityObserver *observer) {
+  this->_deconstructObservers.push_back(observer);
+}
+
+void Light::detachDeconstructCallback(DeviceEntityObserver *observer) {
+  this->_deconstructObservers.remove(observer);
+}
+
+void Light::callDeconstructCallbacks() {
+  for (DeviceEntityObserver *observer : this->_deconstructObservers) {
+    observer->entityDeconstructCallback(this);
+  }
+}
+
+void Light::attachUpdateCallback(DeviceEntityObserver *observer) {
+  this->_updateObservers.push_back(observer);
+}
+
+void Light::detachUpdateCallback(DeviceEntityObserver *observer) {
+  this->_updateObservers.remove(observer);
+}
+
+void Light::callUpdateCallbacks() {
+  for (DeviceEntityObserver *observer : this->_updateObservers) {
+    observer->entityUpdateCallback(this);
+  }
+}
+
+DeviceEntityType Light::getType() {
+  return DeviceEntityType::LIGHT;
 }
 
 bool Light::canDim() {

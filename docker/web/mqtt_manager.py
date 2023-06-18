@@ -2,7 +2,7 @@
 import logging
 import paho.mqtt.client as mqtt
 from requests import get, post
-from time import sleep
+import time
 import datetime
 import json
 import subprocess
@@ -13,6 +13,9 @@ import mqtt_manager_libs.light_states
 import mqtt_manager_libs.light
 import mqtt_manager_libs.scenes
 import re 
+import threading
+import os
+import pytz
 
 def get_machine_mac():
     pid = subprocess.Popen(["ifconfig" ], stdout=subprocess.PIPE)
@@ -26,6 +29,24 @@ has_sent_reload_command = False
 client = mqtt.Client("NSPanelManager_" + get_machine_mac())
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("urllib3").propagate = False
+last_sent_time_string = ""
+
+def send_time_thread():
+    global last_sent_time_string
+    use_timezone = pytz.utc
+    if os.path.exists("/etc/timezone"):
+        with open("/etc/timezone", "r") as f:
+            tz = pytz.timezone(f.read().strip())
+            if tz:
+                use_timezone = tz
+
+    while(True):
+        if(client.is_connected()):
+            time_string = datetime.datetime.now(use_timezone).strftime("%H:%M")
+            if time_string != last_sent_time_string:
+                client.publish("nspanel/status/time", time_string, retain=True)
+                last_sent_time_string = time_string
+        time.sleep(1)
 
 
 def on_connect(client, userdata, flags, rc):
@@ -140,7 +161,7 @@ def get_config():
             logging.error(
                 "ERROR: Failed to get config. Will try again in 5 seconds.")
             logging.error(e)
-            sleep(5)
+            time.sleep(5)
 
 
 def connect_and_loop():
@@ -161,12 +182,15 @@ def connect_and_loop():
         except:
             logging.error(
                 F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
-            sleep(10)
+            time.sleep(10)
 
     # Send reload command to panels for them to reload config as MQTT manager JUST restarted (probably because of config change)
     if has_sent_reload_command == False:
         client.publish(F"nspanel/config/reload", 1, retain=True)
-        
+    
+    send_clock_thread = threading.Thread(target=send_time_thread)
+    send_clock_thread.daemon = True
+    send_clock_thread.start()
 
     # MQTT Connected, start APIs if configured
     if settings["home_assistant_address"] != "" and settings["home_assistant_token"] != "":

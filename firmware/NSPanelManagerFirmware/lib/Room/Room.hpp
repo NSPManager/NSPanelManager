@@ -4,7 +4,7 @@
 #include <Arduino.h>
 // #include <Light.hpp>
 class Light;
-#include <Scene.hpp>
+class Scene;
 #include <list>
 #include <unordered_map>
 #include <vector>

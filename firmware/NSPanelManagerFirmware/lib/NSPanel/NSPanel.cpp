@@ -57,6 +57,13 @@ void NSPanel::setComponentVal(const char *componentId, uint8_t value) {
   this->_sendCommandWithoutResponse(cmd.c_str());
 }
 
+void NSPanel::setTimerTimeout(const char *componentId, uint16_t timeout) {
+  std::string cmd = componentId;
+  cmd.append(".tim=");
+  cmd.append(std::to_string(timeout));
+  this->_sendCommandWithoutResponse(cmd.c_str());
+}
+
 void NSPanel::setComponentPic(const char *componentId, uint8_t value) {
   std::string cmd = componentId;
   cmd.append(".pic=");
@@ -206,7 +213,7 @@ bool NSPanel::init() {
   this->_sendCommandWithoutResponse("bkcmd=0");
   this->_sendCommandWithoutResponse("sleep=0");
   this->_sendCommandClearResponse("rest");
-  this->_sendCommandClearResponse("dim=1.0");
+  this->_sendCommandClearResponse("dim=100");
   return true;
 }
 
@@ -295,9 +302,12 @@ void NSPanel::attachWakeCallback(void (*callback)()) {
 void NSPanel::_taskReadNSPanelData(void *param) {
   LOG_INFO("Starting taskReadNSPanelData.");
   for (;;) {
-    // Wait until access is given to serial
+
+    while (Serial2.available() == 0) {
+      vTaskDelay(25 / portTICK_PERIOD_MS);
+    }
+
     if (xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, portMAX_DELAY) == pdTRUE) {
-      // Read the output from the panel if any and add the payload to the process queue
       if (Serial2.available() > 0) {
         std::vector<char> data;
         while (Serial2.available() > 0) {
@@ -311,9 +321,6 @@ void NSPanel::_taskReadNSPanelData(void *param) {
       }
       xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
     }
-
-    // Wait 10ms between each read.
-    vTaskDelay(25 / portTICK_PERIOD_MS);
   }
 }
 
@@ -418,7 +425,7 @@ void NSPanel::_clearSerialBuffer() {
   while (Serial2.available() > 0) {
     Serial2.read();
     if (Serial2.available() == 0) {
-      vTaskDelay(250 / portTICK_PERIOD_MS);
+      vTaskDelay(50 / portTICK_PERIOD_MS);
     }
   }
 }

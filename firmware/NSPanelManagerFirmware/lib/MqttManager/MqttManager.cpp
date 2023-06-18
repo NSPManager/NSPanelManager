@@ -95,7 +95,7 @@ bool MqttManager::publish(const char *topic, const char *message, bool retain) {
 }
 
 void MqttManager::subscribeToTopic(const char *topic, std::function<void(char *topic, byte *payload, unsigned int length)> callback) {
-  LOG_DEBUG("Adding topic ", topic, " to subscribe list.");
+  LOG_TRACE("Adding topic ", topic, " to subscribe list.");
   SubscribeTopic tpc;
   tpc.topic = std::string(topic);
   tpc.callback = callback;

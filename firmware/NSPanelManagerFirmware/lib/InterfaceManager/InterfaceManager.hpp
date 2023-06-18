@@ -3,10 +3,11 @@
 
 #include <ArduinoJson.h>
 #include <InterfaceManagerHelpers.hpp>
-#include <Light.hpp>
-#include <NSPanel.hpp>
-#include <RoomManager.hpp>
-#include <Scene.hpp>
+// #include <Light.hpp>
+class Light;
+class NSPanel;
+class RoomManager;
+class Scene;
 #include <list>
 #include <string>
 

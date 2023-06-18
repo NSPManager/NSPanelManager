@@ -43,6 +43,7 @@ public:
   void setSleep(bool sleep);
   void setComponentText(const char *componentId, const char *text);
   void setComponentVal(const char *componentId, uint8_t value);
+  void setTimerTimeout(const char *componentId, uint16_t timeout);
   void setComponentPic(const char *componentId, uint8_t value);
   void setComponentPic1(const char *componentId, uint8_t value);
   void setComponentForegroundColor(const char *componentId, uint value);

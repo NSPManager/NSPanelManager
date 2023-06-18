@@ -8,7 +8,8 @@
 #define BUTTON_MANAGER_RELAY2_PIN 19
 
 #include <Arduino.h>
-#include <Light.hpp>
+// #include <Light.hpp>
+class Light;
 
 class ButtonManager {
 public:

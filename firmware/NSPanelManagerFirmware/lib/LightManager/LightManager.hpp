@@ -2,7 +2,8 @@
 #define LIGHTMANAGER_HPP
 
 #include <Arduino.h>
-#include <Light.hpp>
+// #include <Light.hpp>
+class Light;
 #include <list>
 
 class LightManager {

@@ -3,8 +3,10 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <DeviceEntity.hpp>
+#include <list>
 
-class Light {
+class Light : public DeviceEntity {
 public:
   void initFromJson(ArduinoJson::JsonPair *json);
 
@@ -20,6 +22,7 @@ public:
   uint16_t getHue();
   uint16_t getSaturation();
   uint8_t getRoomViewPosition();
+
   bool canDim();
   bool canTemperature();
   bool canRgb();
@@ -33,6 +36,15 @@ public:
   std::string getColorTemperatureStateTopic();
   std::string getHueStateTopic();
   std::string getSaturationStateTopic();
+
+  DeviceEntityType getType();
+  void attachDeconstructCallback(DeviceEntityObserver *callback);
+  void detachDeconstructCallback(DeviceEntityObserver *callback);
+  void callDeconstructCallbacks();
+
+  void attachUpdateCallback(DeviceEntityObserver *callback);
+  void detachUpdateCallback(DeviceEntityObserver *callback);
+  void callUpdateCallbacks();
 
 private:
   uint16_t _id = 0;
@@ -51,6 +63,8 @@ private:
   bool _hasColorTemperatureChanged = false;
   bool _hasHueChanged = false;
   bool _hasSaturationChaned = false;
+  std::list<DeviceEntityObserver *> _deconstructObservers;
+  std::list<DeviceEntityObserver *> _updateObservers;
 };
 
 #endif

@@ -3,6 +3,7 @@
 #include <LightManager.hpp>
 #include <MqttLog.hpp>
 #include <MqttManager.hpp>
+#include <Room.hpp>
 #include <RoomManager.hpp>
 #include <WiFi.h>
 #include <hash_map>
