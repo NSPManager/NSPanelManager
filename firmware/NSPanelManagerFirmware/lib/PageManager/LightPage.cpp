@@ -36,6 +36,10 @@ void LightPage::entityUpdateCallback(DeviceEntity *entity) {
   this->update();
 }
 
+void LightPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
+  LOG_DEBUG("Got touch event, component ", page, ".", component, " ", pressed ? "pressed" : "released");
+}
+
 void LightPage::unshow() {
   LightPage::selectedLight->detachDeconstructCallback(this);
   LightPage::selectedLight->detachUpdateCallback(this);

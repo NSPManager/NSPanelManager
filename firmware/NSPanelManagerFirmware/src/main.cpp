@@ -7,6 +7,7 @@
 #include <MqttManager.hpp>
 #include <NSPMConfig.h>
 #include <NSPanel.hpp>
+#include <PageManager.hpp>
 #include <PubSubClient.h>
 #include <WebManager.hpp>
 #include <WiFi.h>
@@ -52,6 +53,7 @@ void registerToNSPanelManager() {
         LOG_INFO("Registered to manager at: ", url.c_str());
         break;
       } else {
+        InterfaceManager::hasRegisteredToManager = false;
         LOG_ERROR("Failed to register panel at: ", url.c_str(), ". Will try again in 5 seconds.");
         vTaskDelay(5000 / portTICK_PERIOD_MS);
       }
@@ -200,6 +202,7 @@ void setup() {
   LOG_INFO("Initializing NSPanel communication");
   if (nspanel.init()) {
     vTaskDelay(500 / portTICK_PERIOD_MS);
+    PageManager::init(); // Attach event callbacks
 
     LOG_INFO("Starting tasks");
     interfaceManager.init();

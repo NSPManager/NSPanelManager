@@ -24,6 +24,10 @@ void HomePage::entityUpdateCallback(DeviceEntity *entity) {
 void HomePage::entityDeconstructCallback(DeviceEntity *entity) {
 }
 
+void HomePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
+  LOG_DEBUG("Got touch event, component ", page, ".", component, " ", pressed ? "pressed" : "released");
+}
+
 int HomePage::getDimmingValue() {
   return this->_dimmerValue;
 }
@@ -89,4 +93,12 @@ void HomePage::setHighlightTableVisibility(bool visibility) {
 
 void HomePage::setScreensaverTimeout(uint16_t timeout) {
   NSPanel::instance->setTimerTimeout(HOME_PAGE_SCREENSAVER_TIMER_NAME, timeout);
+}
+
+void HomePage::setRoomText(const char *text) {
+  NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, text);
+}
+
+void HomePage::setModeText(const char *text) {
+  NSPanel::instance->setComponentText(HOME_PAGE_MODE_LABEL_NAME, text);
 }

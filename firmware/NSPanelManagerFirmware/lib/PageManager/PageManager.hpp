@@ -11,8 +11,11 @@
 
 class PageManager {
 public:
+  static void init();
+
   static void UnshowCurrentPage();
   static void UpdateCurrentPage();
+  static void ProcessTouchEventOnCurrentPage(uint8_t page, uint8_t component, bool pressed);
   static void GoBack();
   static void SetCurrentPage(PageBase *page);
   static PageBase *GetCurrentPage();
@@ -24,7 +27,7 @@ public:
 
 private:
   static inline std::list<PageBase *> _page_history;
-  static inline PageBase *_current_page;
+  static inline PageBase *_current_page = nullptr;
 
   static inline LightPage *_lightPage;
   static inline NSpanelManagerPage *_nspanel_manager_page;

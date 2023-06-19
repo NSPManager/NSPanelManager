@@ -11,6 +11,7 @@ public:
   void show();
   void update();
   void unshow();
+  void processTouchEvent(uint8_t page, uint8_t component, bool pressed);
 
   virtual void entityDeconstructCallback(DeviceEntity *);
   virtual void entityUpdateCallback(DeviceEntity *);
@@ -30,6 +31,8 @@ public:
   void setHighlightCeilingVisibility(bool visable);
   void setHighlightTableVisibility(bool visable);
   void setScreensaverTimeout(uint16_t timeout);
+  void setRoomText(const char *text);
+  void setModeText(const char *text);
 
 private:
   uint8_t _dimmerValue;

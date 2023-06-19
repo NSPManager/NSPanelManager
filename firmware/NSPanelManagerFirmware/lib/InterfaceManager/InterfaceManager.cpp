@@ -60,7 +60,7 @@ void InterfaceManager::stop() {
 void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   unsigned long start = millis();
   PageManager::GetNSPanelManagerPage()->show();
-  NSPanel::instance->setDimLevel(100);
+  NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
   while (!WiFi.isConnected() || !MqttManager::connected() && !InterfaceManager::hasRegisteredToManager) {
     if (!WiFi.isConnected()) {
       if (NSPMConfig::instance->NSPMConfig::instance->wifi_ssid.empty()) {
@@ -100,11 +100,11 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   InterfaceManager::subscribeToMqttTopics();
 
   // Loading is done, show Home page
+  NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
   PageManager::GetHomePage()->show();
   PageManager::GetHomePage()->setScreensaverTimeout(InterfaceConfig::screensaver_activation_timeout);
-  NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
 
-  NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
+  // NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
   NSPanel::attachSleepCallback(InterfaceManager::processSleepEvent);
   NSPanel::attachWakeCallback(InterfaceManager::processWakeEvent);
 
@@ -142,25 +142,20 @@ void InterfaceManager::_subscribeToLightTopics(Light *light) {
 }
 
 void InterfaceManager::processWakeEvent() {
-  // Send screen state
-  NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
+  LOG_DEBUG("Got wake event from panel, activating home page.");
   PageManager::GetHomePage()->show();
-  MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1");
 }
 
 void InterfaceManager::processSleepEvent() {
-  // Dim to 0. TODO: Show clock?
-  NSPanel::instance->setDimLevel(InterfaceConfig::screensaver_dim_level);
-
   // Display went to sleep, reset everything
+  LOG_DEBUG("Got sleep event from panel, activating screensaver.");
   InterfaceManager::instance->_isFingerOnDisplay = false; // Reset in case it got stuck
   RoomManager::goToRoomId(InterfaceConfig::homeScreen);
   InterfaceManager::instance->_changeMode(roomMode::room);
   InterfaceManager::instance->_setEditLightMode(editLightMode::all_lights);
   InterfaceManager::instance->_updatePanelLightStatus();
-
-  // Send screen state
-  MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "0");
+  // Display auto-magically goes to screensaver page. Only ajust dim-level
+  PageManager::GetScreensaverPage()->show();
 }
 
 void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
@@ -860,13 +855,10 @@ void InterfaceManager::_taskProcessMqttMessages(void *param) {
         try {
           if (msg.topic.compare(NSPMConfig::instance->mqtt_screen_cmd_topic) == 0) {
             if (msg.payload.compare("1") == 0) {
-              NSPanel::instance->setDimLevel(100);
-              NSPanel::instance->goToPage(HOME_PAGE_NAME);
+              PageManager::GetHomePage()->show();
               MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1"); // Send out state information that panel woke from sleep
             } else if (msg.payload.compare("0") == 0) {
-              NSPanel::instance->setDimLevel(0);
-              NSPanel::instance->goToPage(SCREENSAVE_PAGE_NAME);
-              // InterfaceManager::processSleepEvent(); // This is triggered by "PostInit events" from the Nextion panel.
+              PageManager::GetScreensaverPage()->show();
             } else {
               LOG_ERROR("Invalid payload for screen cmd. Valid payload: 1 or 0");
             }

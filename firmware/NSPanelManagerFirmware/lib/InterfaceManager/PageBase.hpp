@@ -6,17 +6,13 @@
 class PageBase {
 public:
   /// @brief Show the intended page and do everything need to get it working
-  void show() {
-    LOG_ERROR("Not implemented!");
-  }
+  virtual void show() = 0;
   /// @brief Update the page according to new values
-  void update() {
-    LOG_ERROR("Not implemented!");
-  }
+  virtual void update() = 0;
   /// @brief Remove and event handlers or simular
-  void unshow() {
-    LOG_ERROR("Not implemented!");
-  }
+  virtual void unshow() = 0;
+  /// @brief Handle events from panel
+  virtual void processTouchEvent(uint8_t page, uint8_t component, bool pressed) = 0;
 };
 
 #endif
