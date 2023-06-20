@@ -1,1 +1,1 @@
-#define NSPanelManagerFirmwareVersion "0.0.1110"
+#define NSPanelManagerFirmwareVersion "0.0.1111"

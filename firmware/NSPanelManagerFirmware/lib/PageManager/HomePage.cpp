@@ -63,6 +63,11 @@ void HomePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
 
   HomePage::_isFingerOnDisplay = pressed;
 
+  if (!pressed && this->_ignoreNextTouchRelease) {
+    this->_ignoreNextTouchRelease = false; // Reset block
+    return;
+  }
+
   if (!pressed) {
     if (component == SWITCH_ROOM_BUTTON_ID && this->_currentRoomMode == roomMode::room) {
       RoomManager::goToNextRoom();
