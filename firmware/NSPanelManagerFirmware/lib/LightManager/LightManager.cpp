@@ -237,3 +237,85 @@ bool LightManager::anyTableLightsOn() {
 bool LightManager::anyLightsOn() {
   return LightManager::anyCeilingLightsOn() || LightManager::anyTableLightsOn();
 }
+
+void LightManager::subscribeToMqttLightUpdates() {
+  if (LightManager::_mqttMessageQueue == NULL) {
+    LightManager::_mqttMessageQueue = xQueueCreate(8, sizeof(mqttMessage *));
+    if (LightManager::_taskHandleProcessMqttMessage == NULL) {
+      xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskProcessMqttMessages", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+    }
+  }
+
+  for (Light *light : LightManager::getAllLights()) {
+    MqttManager::subscribeToTopic(light->getLevelStateTopic().c_str(), &LightManager::mqttCallback);
+
+    if (light->canTemperature()) {
+      MqttManager::subscribeToTopic(light->getColorTemperatureStateTopic().c_str(), &LightManager::mqttCallback);
+    }
+
+    if (light->canRgb()) {
+      MqttManager::subscribeToTopic(light->getSaturationStateTopic().c_str(), &LightManager::mqttCallback);
+      MqttManager::subscribeToTopic(light->getHueStateTopic().c_str(), &LightManager::mqttCallback);
+    }
+  }
+}
+
+void LightManager::mqttCallback(char *topic, byte *payload, unsigned int length) {
+  // TODO: Ignore MQTT light updates for X millis
+  mqttMessage *msg = new mqttMessage;
+  msg->topic = topic;
+  msg->payload = std::string((char *)payload, length);
+  if (xQueueSendToBack(LightManager::_mqttMessageQueue, (void *)&msg, 20 / portTICK_PERIOD_MS) != pdTRUE) {
+    delete msg;
+  }
+}
+
+void LightManager::_taskProcessMqttMessages(void *param) {
+  LOG_DEBUG("Started task to process MQTT messages.");
+  mqttMessage *msg;
+  for (;;) {
+    if (xQueueReceive(LightManager::_mqttMessageQueue, &msg, portMAX_DELAY) == pdTRUE) {
+      if (msg->topic.find("nspanel/entities/") == 0) { // If topic begins with nspanel/entities/
+        std::string domain = msg->topic;
+        domain = domain.erase(0, strlen("nspanel/entities/"));
+        domain = domain.substr(0, domain.find('/'));
+
+        std::string entity = msg->topic;
+        entity = entity.erase(0, strlen("nspanel/entities/"));
+        entity = entity.erase(0, entity.find('/') + 1);
+        entity = entity.substr(0, entity.find('/'));
+
+        std::string attribute = msg->topic;
+        attribute = attribute.erase(0, attribute.find_last_of('/') + 1);
+
+        if (domain.compare("light") == 0 && attribute.compare("state_brightness_pct") == 0) {
+          Light *light = LightManager::getLightById(atoi(entity.c_str()));
+          if (light != nullptr) {
+            light->setLightLevel(atoi(msg->payload.c_str()));
+            light->callUpdateCallbacks();
+          }
+        } else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0) {
+          uint16_t colorTemp = atoi(msg->payload.c_str());
+          if (colorTemp > InterfaceConfig::colorTempMax) {
+            colorTemp = InterfaceConfig::colorTempMax;
+          } else if (colorTemp < InterfaceConfig::colorTempMin) {
+            colorTemp = InterfaceConfig::colorTempMin;
+          }
+
+          colorTemp = ((colorTemp - InterfaceConfig::colorTempMin) * 100) / (InterfaceConfig::colorTempMax - InterfaceConfig::colorTempMin);
+
+          if (InterfaceConfig::reverseColorTempSlider) {
+            colorTemp = 100 - colorTemp;
+          }
+
+          Light *light = LightManager::getLightById(atoi(entity.c_str()));
+          if (light != nullptr) {
+            light->setColorTemperature(colorTemp);
+            light->callUpdateCallbacks();
+          }
+        }
+      }
+      delete msg;
+    }
+  }
+}

@@ -7,9 +7,15 @@
 #include <list>
 #include <string>
 
+class mqttMessage {
+public:
+  std::string topic;
+  std::string payload;
+};
+
 struct SubscribeTopic {
   std::string topic;
-  //void *callback(char *topic, byte *payload, unsigned int length);
+  // void *callback(char *topic, byte *payload, unsigned int length);
   std::function<void(char *topic, byte *payload, unsigned int length)> callback;
 };
 
@@ -31,8 +37,8 @@ public:
   static bool publish(std::string &topic, std::string &message, bool retain);
   static bool publish(const char *topic, const char *message);
   static bool publish(const char *topic, const char *message, bool retain);
-  static void subscribeToTopic(const char* topic, std::function<void(char *topic, byte *payload, unsigned int length)>);
-  //static void subscribeToTopic(const char* topic, void (*callback)(char* topic, byte* payload, unsigned int length));
+  static void subscribeToTopic(const char *topic, std::function<void(char *topic, byte *payload, unsigned int length)>);
+  // static void subscribeToTopic(const char* topic, void (*callback)(char* topic, byte* payload, unsigned int length));
   static void subscribeToTopic(SubscribeTopic &topic);
   static bool connected();
 

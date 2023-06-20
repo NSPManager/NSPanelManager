@@ -24,11 +24,14 @@ public:
   static bool anyCeilingLightsOn();
   static bool anyTableLightsOn();
   static bool anyLightsOn();
+  static void subscribeToMqttLightUpdates();
+
+  static void mqttCallback(char *topic, byte *payload, unsigned int length);
 
 private:
-  static inline std::list<Light *> _levelUpdates;
-  static inline std::list<Light *> _temperatureUpdates;
-  static inline std::list<Light *> _rgbUpdates;
+  static inline QueueHandle_t _mqttMessageQueue = NULL;
+  static inline TaskHandle_t _taskHandleProcessMqttMessage = NULL;
+  static void _taskProcessMqttMessages(void *param);
 };
 
 #endif

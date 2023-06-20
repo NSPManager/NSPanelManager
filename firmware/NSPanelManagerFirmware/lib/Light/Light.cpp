@@ -64,6 +64,11 @@ uint8_t Light::getRoomViewPosition() {
 }
 
 void Light::attachDeconstructCallback(DeviceEntityObserver *observer) {
+  for (DeviceEntityObserver *obs : this->_updateObservers) {
+    if (observer == obs) {
+      break;
+    }
+  }
   this->_deconstructObservers.push_back(observer);
 }
 
@@ -78,6 +83,12 @@ void Light::callDeconstructCallbacks() {
 }
 
 void Light::attachUpdateCallback(DeviceEntityObserver *observer) {
+  // Do not add a subsriber twice
+  for (DeviceEntityObserver *obs : this->_updateObservers) {
+    if (observer == obs) {
+      break;
+    }
+  }
   this->_updateObservers.push_back(observer);
 }
 

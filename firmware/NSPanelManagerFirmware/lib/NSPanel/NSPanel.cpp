@@ -318,6 +318,21 @@ void NSPanel::attachWakeCallback(void (*callback)()) {
 void NSPanel::_taskReadNSPanelData(void *param) {
   LOG_INFO("Starting taskReadNSPanelData.");
   for (;;) {
+    // if (xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, portMAX_DELAY) == pdTRUE) {
+    //   if (Serial2.available() > 0) {
+    //     std::vector<char> data;
+    //     while (Serial2.available() > 0) {
+    //       data.push_back(Serial2.read());
+    //       if (Serial2.available() == 0) {
+    //         vTaskDelay(50 / portTICK_PERIOD_MS);
+    //       }
+    //     }
+    //     NSPanel::instance->_processQueue.push(data);
+    //     xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
+    //   }
+    //   xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
+    // }
+    // vTaskDelay(25 / portTICK_PERIOD_MS);
 
     while (Serial2.available() == 0) {
       vTaskDelay(25 / portTICK_PERIOD_MS);
@@ -326,14 +341,31 @@ void NSPanel::_taskReadNSPanelData(void *param) {
     if (xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, portMAX_DELAY) == pdTRUE) {
       if (Serial2.available() > 0) {
         std::vector<char> data;
+        bool read_to_end = false;
+        uint8_t num_ff_read_in_row = 0;
+
         while (Serial2.available() > 0) {
-          data.push_back(Serial2.read());
+          uint8_t read = Serial2.read();
+          data.push_back((char)read);
+          if (read == 0xFF) {
+            num_ff_read_in_row++;
+            if (num_ff_read_in_row >= 3) { // End of command, clear bugger and read next if any
+              NSPanel::instance->_processQueue.push(data);
+              xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
+              data.clear();
+            }
+          } else {
+            num_ff_read_in_row = 0;
+          }
           if (Serial2.available() == 0) {
             vTaskDelay(50 / portTICK_PERIOD_MS);
           }
         }
-        NSPanel::instance->_processQueue.push(data);
-        xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
+
+        if (data.size() > 0) { // This will only trigger if data did not end in 0xFF 0xFF 0xFF which should never happen
+          NSPanel::instance->_processQueue.push(data);
+          xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
+        }
       }
       xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
     }

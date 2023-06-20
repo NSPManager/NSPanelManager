@@ -27,18 +27,24 @@ PageBase *PageManager::GetCurrentPage() {
 void PageManager::UpdateCurrentPage() {
   if (PageManager::GetCurrentPage() != nullptr) {
     PageManager::GetCurrentPage()->update();
+  } else {
+    LOG_ERROR("Trying to update current page but no current page is set.");
   }
 }
 
 void PageManager::UnshowCurrentPage() {
   if (PageManager::GetCurrentPage() != nullptr) {
     PageManager::GetCurrentPage()->unshow();
+  } else {
+    LOG_ERROR("Trying to unshow current page but no current page is set.");
   }
 }
 
 void PageManager::ProcessTouchEventOnCurrentPage(uint8_t page, uint8_t component, bool pressed) {
   if (PageManager::GetCurrentPage() != nullptr) {
     PageManager::GetCurrentPage()->processTouchEvent(page, component, pressed);
+  } else {
+    LOG_ERROR("Trying to process touch event on current page but no current page is set.");
   }
 }
 

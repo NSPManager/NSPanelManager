@@ -59,6 +59,7 @@ void InterfaceManager::stop() {
 
 void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   unsigned long start = millis();
+  PageManager::GetHomePage()->init();
   PageManager::GetNSPanelManagerPage()->show();
   NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
   while (!WiFi.isConnected() || !MqttManager::connected() && !InterfaceManager::hasRegisteredToManager) {
@@ -98,6 +99,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   // between them to allow for processing all the incoming data.
   PageManager::GetNSPanelManagerPage()->setText("Subscribing...");
   InterfaceManager::subscribeToMqttTopics();
+  LightManager::subscribeToMqttLightUpdates();
 
   // Loading is done, show Home page
   NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
@@ -123,9 +125,9 @@ void InterfaceManager::subscribeToMqttTopics() {
   }
 
   // Every light in every room
-  for (Light *light : LightManager::getAllLights()) {
-    InterfaceManager::instance->_subscribeToLightTopics(light);
-  }
+  // for (Light *light : LightManager::getAllLights()) {
+  //   InterfaceManager::instance->_subscribeToLightTopics(light);
+  // }
 }
 
 void InterfaceManager::_subscribeToLightTopics(Light *light) {
@@ -237,11 +239,6 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
   } else if (page == ROOM_PAGE_ID && !pressed) {
     InterfaceManager::instance->_handleRoomPageComponentTouch(component);
     LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
-  } else if (page == LIGHT_PAGE_ID && !pressed) {
-    InterfaceManager::instance->_handleLightPageComponentTouch(component);
-    LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
-  } else if (page == SCENES_PAGE_ID) {
-    ScenePage::processTouchEvent(page, component, pressed);
   } else {
     LOG_DEBUG("Unhandled touch event: Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
   }
@@ -250,7 +247,8 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
 void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
   switch (component_id) {
   case ROOM_PAGE_BACK_BUTTON_ID:
-    NSPanel::instance->goToPage(HOME_PAGE_NAME);
+    // NSPanel::instance->goToPage(HOME_PAGE_NAME);
+    PageManager::GoBack();
     break;
   case ROOM_PAGE_PREVIOUS_ROOM_BUTTON_ID:
     RoomManager::goToPreviousRoom();
@@ -469,53 +467,6 @@ void InterfaceManager::_handleRoomPageComponentTouch(uint8_t component_id) {
 
   default:
     LOG_ERROR("Unknown component touched on room view: ", component_id);
-    break;
-  }
-}
-
-void InterfaceManager::_handleLightPageComponentTouch(uint8_t component_id) {
-  switch (component_id) {
-  case LIGHT_PAGE_BACK_BUTTON_ID: {
-    NSPanel::instance->goToPage(ROOM_PAGE_NAME);
-    InterfaceManager::instance->_populateRoomPage();
-    break;
-  }
-  case LIGHT_PAGE_BRIGHTNESS_SLIDER_ID: {
-    if (PageManager::GetLightPage()->selectedLight != nullptr) {
-      std::list<Light *> lights;
-      lights.push_back(PageManager::GetLightPage()->selectedLight);
-      LightManager::ChangeLightsToLevel(&lights, PageManager::GetLightPage()->getBrightnessValue());
-      // PageManager::GetLightPage()->updateValues(); Not needed as slider changes directly
-    }
-    break;
-  }
-  case LIGHT_PAGE_KELVIN_SLIDER_ID: {
-    if (PageManager::GetLightPage()->selectedLight != nullptr) {
-      std::list<Light *> lights;
-      lights.push_back(PageManager::GetLightPage()->selectedLight);
-      if (PageManager::GetLightPage()->getCurrentMode() == LIGHT_PAGE_MODE::COLOR_TEMP) {
-        LightManager::ChangeLightToColorTemperature(&lights, PageManager::GetLightPage()->getKelvinSatValue());
-      } else if (PageManager::GetLightPage()->getCurrentMode() == LIGHT_PAGE_MODE::COLOR_RGB) {
-        LightManager::ChangeLightsToColorSaturation(&lights, PageManager::GetLightPage()->getKelvinSatValue());
-      }
-      // PageManager::GetLightPage()->updateValues(); Not needed as slider changes directly
-    }
-    break;
-  }
-  case LIGHT_PAGE_HUE_SLIDER_ID: {
-    if (PageManager::GetLightPage()->selectedLight != nullptr) {
-      std::list<Light *> lights;
-      lights.push_back(PageManager::GetLightPage()->selectedLight);
-      LightManager::ChangeLightsToColorHue(&lights, PageManager::GetLightPage()->getHueValue());
-    }
-    break;
-  }
-  case LIGHT_PAGE_SWITCH_MODE_BUTTON_ID: {
-    PageManager::GetLightPage()->switchMode();
-    break;
-  }
-
-  default:
     break;
   }
 }
@@ -830,16 +781,15 @@ void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int len
     return;
   }
 
-  if (InterfaceManager::_mqttMessages.size() < 10) {
-    mqttMessage msg;
-    msg.topic = topic;
-    msg.payload = std::string((char *)payload, length);
-    InterfaceManager::_mqttMessages.push_back(msg);
-    if (InterfaceManager::_taskHandleProcessMqttMessages) {
-      // Notify task that a new message needs processing
-      vTaskNotifyGiveFromISR(InterfaceManager::_taskHandleProcessMqttMessages, NULL);
-      portYIELD_FROM_ISR();
-    }
+  // if (InterfaceManager::_mqttMessages.size() < 10) {
+  mqttMessage msg;
+  msg.topic = topic;
+  msg.payload = std::string((char *)payload, length);
+  InterfaceManager::_mqttMessages.push_back(msg);
+  if (InterfaceManager::_taskHandleProcessMqttMessages) {
+    // Notify task that a new message needs processing
+    vTaskNotifyGiveFromISR(InterfaceManager::_taskHandleProcessMqttMessages, NULL);
+    portYIELD_FROM_ISR();
   }
 }
 

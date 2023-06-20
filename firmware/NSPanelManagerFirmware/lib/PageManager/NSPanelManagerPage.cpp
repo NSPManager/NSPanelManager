@@ -1,8 +1,11 @@
 #include <NSPanel.hpp>
 #include <NSPanelManagerPage.hpp>
+#include <PageManager.hpp>
 #include <TftDefines.h>
 
 void NSpanelManagerPage::show() {
+
+  PageManager::SetCurrentPage(this);
   NSPanel::instance->goToPage(NSPANELMANAGER_PAGE_NAME);
 }
 

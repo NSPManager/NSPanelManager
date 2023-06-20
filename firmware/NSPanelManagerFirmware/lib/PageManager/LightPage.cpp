@@ -1,4 +1,5 @@
 #include <Light.hpp>
+#include <LightManager.hpp>
 #include <LightPage.hpp>
 #include <MqttLog.hpp>
 #include <NSPanel.hpp>
@@ -7,8 +8,8 @@
 
 void LightPage::show() {
   this->_currentMode = LIGHT_PAGE_MODE::COLOR_TEMP;
-  NSPanel::instance->goToPage(LIGHT_PAGE_NAME);
   PageManager::SetCurrentPage(this);
+  NSPanel::instance->goToPage(LIGHT_PAGE_NAME);
 
   if (LightPage::selectedLight != nullptr) {
     if (LightPage::selectedLight->canTemperature()) {
@@ -38,6 +39,51 @@ void LightPage::entityUpdateCallback(DeviceEntity *entity) {
 
 void LightPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
   LOG_DEBUG("Got touch event, component ", page, ".", component, " ", pressed ? "pressed" : "released");
+
+  switch (component) {
+  case LIGHT_PAGE_BACK_BUTTON_ID: {
+    // NSPanel::instance->goToPage(ROOM_PAGE_NAME);
+    // InterfaceManager::instance->_populateRoomPage();
+    PageManager::GoBack();
+    break;
+  }
+  case LIGHT_PAGE_BRIGHTNESS_SLIDER_ID: {
+    if (PageManager::GetLightPage()->selectedLight != nullptr) {
+      std::list<Light *> lights;
+      lights.push_back(PageManager::GetLightPage()->selectedLight);
+      LightManager::ChangeLightsToLevel(&lights, PageManager::GetLightPage()->getBrightnessValue());
+      // PageManager::GetLightPage()->updateValues(); Not needed as slider changes directly
+    }
+    break;
+  }
+  case LIGHT_PAGE_KELVIN_SLIDER_ID: {
+    if (PageManager::GetLightPage()->selectedLight != nullptr) {
+      std::list<Light *> lights;
+      lights.push_back(PageManager::GetLightPage()->selectedLight);
+      if (PageManager::GetLightPage()->getCurrentMode() == LIGHT_PAGE_MODE::COLOR_TEMP) {
+        LightManager::ChangeLightToColorTemperature(&lights, PageManager::GetLightPage()->getKelvinSatValue());
+      } else if (PageManager::GetLightPage()->getCurrentMode() == LIGHT_PAGE_MODE::COLOR_RGB) {
+        LightManager::ChangeLightsToColorSaturation(&lights, PageManager::GetLightPage()->getKelvinSatValue());
+      }
+      // PageManager::GetLightPage()->updateValues(); Not needed as slider changes directly
+    }
+    break;
+  }
+  case LIGHT_PAGE_HUE_SLIDER_ID: {
+    if (PageManager::GetLightPage()->selectedLight != nullptr) {
+      std::list<Light *> lights;
+      lights.push_back(PageManager::GetLightPage()->selectedLight);
+      LightManager::ChangeLightsToColorHue(&lights, PageManager::GetLightPage()->getHueValue());
+    }
+    break;
+  }
+  case LIGHT_PAGE_SWITCH_MODE_BUTTON_ID: {
+    PageManager::GetLightPage()->switchMode();
+    break;
+  }
+  default:
+    break;
+  }
 }
 
 void LightPage::unshow() {

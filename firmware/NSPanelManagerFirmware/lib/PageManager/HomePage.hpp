@@ -4,17 +4,19 @@
 #include <Arduino.h>
 #include <DeviceEntity.hpp>
 class Light;
+#include <InterfaceManagerHelpers.hpp>
 #include <PageBase.hpp>
 
 class HomePage : public PageBase, DeviceEntityObserver {
 public:
+  void init();
   void show();
   void update();
   void unshow();
   void processTouchEvent(uint8_t page, uint8_t component, bool pressed);
 
-  virtual void entityDeconstructCallback(DeviceEntity *);
-  virtual void entityUpdateCallback(DeviceEntity *);
+  void entityDeconstructCallback(DeviceEntity *);
+  void entityUpdateCallback(DeviceEntity *);
 
   void setDimmingValue(uint8_t value);
   int getDimmingValue();
@@ -34,9 +36,47 @@ public:
   void setRoomText(const char *text);
   void setModeText(const char *text);
 
+  void updateDeviceEntitySubscriptions();
+  void updateLightStatus();
+  void updateRoomInfo();
+
+  void setEditLightMode(editLightMode new_mode);
+
+  void goToNextMode();
+  void setCurrentMode(roomMode mode);
+
 private:
   uint8_t _dimmerValue;
   uint8_t _colorTemp;
+
+  unsigned long _lastSpecialModeEventMillis;
+  unsigned long _lastMasterCeilingLightsButtonTouch;
+  unsigned long _lastMasterTableLightsButtonTouch;
+  unsigned long _lastMasterCeilingLightsButtonRelease;
+  unsigned long _lastMasterTableLightsButtonRelease;
+  bool _ignoreNextTouchRelease;
+  bool _isFingerOnDisplay;
+
+  void _ceilingMasterButtonEvent();
+  void _tableMasterButtonEvent();
+
+  void _updateLightsThatAreOnWithNewBrightness(uint8_t brightness);
+  void _updateAllLightsWithNewBrightness(uint8_t brightness);
+  void _updateLightsColorTempAccordingToSlider();
+  void _startSpecialModeTriggerTask(editLightMode mode);
+  void _startSpecialModeTimerTask();
+  void _stopSpecialMode();
+
+  static void _taskTriggerSpecialModeTriggerTask(void *param);
+  static inline TaskHandle_t _specialModeTimerTaskHandle;
+  static void _taskSpecialModeTimerTask(void *param);
+  static inline unsigned long _lastDeviceEntityUpdate;
+  static inline TaskHandle_t _taskHandleUpdateDisplay = NULL;
+  static void _taskUpdateDisplay(void *param);
+
+  editLightMode _currentEditLightMode;
+  editLightMode _triggerSpecialEditLightsMode;
+  roomMode _currentRoomMode;
 };
 
 #endif
