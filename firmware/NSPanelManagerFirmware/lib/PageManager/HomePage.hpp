@@ -54,6 +54,7 @@ private:
   unsigned long _lastMasterTableLightsButtonTouch;
   unsigned long _lastMasterCeilingLightsButtonRelease;
   unsigned long _lastMasterTableLightsButtonRelease;
+  unsigned long _ignoreMqttMessagesUntil;
   bool _ignoreNextTouchRelease;
   bool _isFingerOnDisplay;
 

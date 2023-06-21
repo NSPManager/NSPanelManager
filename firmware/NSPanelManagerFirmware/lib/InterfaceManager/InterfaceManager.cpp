@@ -62,7 +62,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   PageManager::GetHomePage()->init();
   PageManager::GetNSPanelManagerPage()->show();
   NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
-  while (!WiFi.isConnected() || !MqttManager::connected() && !InterfaceManager::hasRegisteredToManager) {
+  while (!WiFi.isConnected() || !MqttManager::connected() || !InterfaceManager::hasRegisteredToManager) {
     if (!WiFi.isConnected()) {
       if (NSPMConfig::instance->NSPMConfig::instance->wifi_ssid.empty()) {
         PageManager::GetNSPanelManagerPage()->setText("Connect to AP NSPMPanel");
@@ -212,9 +212,7 @@ void InterfaceManager::processTouchEvent(uint8_t page, uint8_t component, bool p
       NSPanel::instance->goToPage(ROOM_PAGE_NAME);
       InterfaceManager::instance->_populateRoomPage();
     } else if (component == SCENES_BUTTON_ID) {
-      ScenePage::show();
-      ScenePage::showScenes((*RoomManager::currentRoom)->scenes);
-      ScenePage::setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
+      PageManager::GetScenePage()->show();
     }
     LOG_DEBUG("Component ", page, ".", component, " ", pressed ? "PRESSED" : "DEPRESSED");
   } else if (page == HOME_PAGE_ID && pressed) {

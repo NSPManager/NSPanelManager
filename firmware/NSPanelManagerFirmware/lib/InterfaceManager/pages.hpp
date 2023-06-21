@@ -15,12 +15,4 @@ public:
   static inline Light *_selectedLight;
 };
 
-class ScenePage {
-public:
-  static void show();
-  static void setRoomLabelText(const char *text);
-  static void showScenes(std::vector<Scene *> &scenes);
-  static void processTouchEvent(uint8_t page, uint8_t component, bool pressed);
-};
-
 #endif /* LIB_INTERFACEMANAGER_PAGES_H_ */

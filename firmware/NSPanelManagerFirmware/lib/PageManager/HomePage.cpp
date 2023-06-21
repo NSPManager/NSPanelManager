@@ -12,6 +12,8 @@
 void HomePage::init() {
   this->_currentEditLightMode = editLightMode::all_lights;
   this->_currentRoomMode = roomMode::room;
+  this->_ignoreMqttMessagesUntil = 0;
+  this->_ignoreNextTouchRelease = false;
 }
 
 void HomePage::show() {
@@ -36,6 +38,10 @@ void HomePage::unshow() {
 }
 
 void HomePage::entityUpdateCallback(DeviceEntity *entity) {
+  if (millis() < this->_ignoreMqttMessagesUntil) {
+    return;
+  }
+
   HomePage::_lastDeviceEntityUpdate = millis();
   if (HomePage::_taskHandleUpdateDisplay == NULL) {
     xTaskCreatePinnedToCore(_taskUpdateDisplay, "taskUpdateDisplay", 5000, NULL, 1, &HomePage::_taskHandleUpdateDisplay, CONFIG_ARDUINO_RUNNING_CORE);
@@ -102,20 +108,14 @@ void HomePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_lastSpecialModeEventMillis = millis();
     } else if (component == HOME_LIGHT_COLOR_SLIDER_ID) {
       // Color temp slider changed, update cached value
-      PageManager::GetHomePage()->updateColorTempValueCache();
+      this->updateColorTempValueCache();
       this->_lastSpecialModeEventMillis = millis();
       this->_updateLightsColorTempAccordingToSlider();
     } else if (component == ROOM_BUTTON_ID && this->_currentRoomMode == roomMode::room) {
-      // Show page with all lights
       this->_stopSpecialMode();
-      // PageManager::GetRoomPage()->show(); // TODO: Go to Room page
-      // NSPanel::instance->goToPage(ROOM_PAGE_NAME);
-      // InterfaceManager::instance->_populateRoomPage();
     } else if (component == SCENES_BUTTON_ID) {
-      // PageManager::GetScenePage()->show(); // TODO: Go to scenes page
-      // ScenePage::show();
-      // ScenePage::showScenes((*RoomManager::currentRoom)->scenes);
-      // ScenePage::setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
+      LOG_DEBUG("Trying to go to Scene page.");
+      PageManager::GetScenePage()->show();
     }
   } else if (pressed) {
     if (component == CEILING_LIGHTS_MASTER_BUTTON_ID) {
@@ -279,6 +279,7 @@ void HomePage::_updateLightsThatAreOnWithNewBrightness(uint8_t brightness) {
   }
 
   LightManager::ChangeLightsToLevel(&lights, brightness);
+  this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
   this->updateLightStatus();
 }
 
@@ -328,6 +329,7 @@ void HomePage::_updateAllLightsWithNewBrightness(uint8_t brightness) {
 
   uint8_t newLevel = PageManager::GetHomePage()->getDimmingValue();
   LightManager::ChangeLightsToLevel(&lights, newLevel);
+  this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
   this->updateLightStatus();
 }
 
@@ -409,9 +411,8 @@ void HomePage::_ceilingMasterButtonEvent() {
       std::list<Light *> lightList = LightManager::getAllCeilingLights();
       LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
     }
+    this->updateLightStatus();
   }
-
-  this->updateLightStatus();
 }
 
 void HomePage::_tableMasterButtonEvent() {
@@ -424,6 +425,7 @@ void HomePage::_tableMasterButtonEvent() {
       std::list<Light *> lightList = (*RoomManager::currentRoom)->getAllTableLights();
       LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
     }
+    this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
     this->updateLightStatus();
   } else if (this->_currentRoomMode == roomMode::house) {
     std::list<Light *> onLights = LightManager::getTableLightsThatAreOn();
@@ -433,9 +435,9 @@ void HomePage::_tableMasterButtonEvent() {
       std::list<Light *> lightList = LightManager::getAllTableLights();
       LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
     }
+    this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
+    this->updateLightStatus();
   }
-
-  this->updateLightStatus();
 }
 
 void HomePage::_updateLightsColorTempAccordingToSlider() {
@@ -459,6 +461,7 @@ void HomePage::_updateLightsColorTempAccordingToSlider() {
   }
 
   LightManager::ChangeLightToColorTemperature(&lights, this->getColorTempValue());
+  this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
   this->updateLightStatus();
 }
 

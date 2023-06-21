@@ -171,6 +171,7 @@ void RoomManager::goToNextRoom() {
   if (RoomManager::currentRoom == RoomManager::rooms.end()) {
     RoomManager::currentRoom = RoomManager::rooms.begin();
   }
+  RoomManager::_callRoomChangeCallbacks();
 }
 
 void RoomManager::goToPreviousRoom() {
@@ -180,6 +181,7 @@ void RoomManager::goToPreviousRoom() {
   } else {
     RoomManager::currentRoom--;
   }
+  RoomManager::_callRoomChangeCallbacks();
 }
 
 void RoomManager::goToRoomId(uint16_t roomId) {
@@ -187,10 +189,25 @@ void RoomManager::goToRoomId(uint16_t roomId) {
   for (std::vector<Room *>::iterator it = RoomManager::rooms.begin(); it != RoomManager::rooms.end(); it++) {
     if ((*it)->id == roomId) {
       RoomManager::currentRoom = it;
+      RoomManager::_callRoomChangeCallbacks();
       return;
     }
   }
 
   LOG_ERROR("Did not find requested room. Will cancel operation.");
   return;
+}
+
+void RoomManager::attachRoomChangeCallback(RoomManagerObserver *observer) {
+  RoomManager::_roomChangeObservers.push_back(observer);
+}
+
+void RoomManager::detachRoomChangeCallback(RoomManagerObserver *observer) {
+  RoomManager::_roomChangeObservers.remove(observer);
+}
+
+void RoomManager::_callRoomChangeCallbacks() {
+  for (RoomManagerObserver *observer : RoomManager::_roomChangeObservers) {
+    observer->roomChangedCallback();
+  }
 }

@@ -33,3 +33,47 @@ void Scene::save() {
 
   MqttManager::publish(mqtt_activation_topic, "1");
 }
+
+void Scene::attachDeconstructCallback(DeviceEntityObserver *observer) {
+  // Do not add a subsriber twice
+  for (DeviceEntityObserver *obs : this->_updateObservers) {
+    if (observer == obs) {
+      break;
+    }
+  }
+  this->_deconstructObservers.push_back(observer);
+}
+
+void Scene::detachDeconstructCallback(DeviceEntityObserver *observer) {
+  this->_deconstructObservers.remove(observer);
+}
+
+void Scene::callDeconstructCallbacks() {
+  for (DeviceEntityObserver *observer : this->_deconstructObservers) {
+    observer->entityDeconstructCallback(this);
+  }
+}
+
+void Scene::attachUpdateCallback(DeviceEntityObserver *observer) {
+  // Do not add a subsriber twice
+  for (DeviceEntityObserver *obs : this->_updateObservers) {
+    if (observer == obs) {
+      break;
+    }
+  }
+  this->_updateObservers.push_back(observer);
+}
+
+void Scene::detachUpdateCallback(DeviceEntityObserver *observer) {
+  this->_updateObservers.remove(observer);
+}
+
+void Scene::callUpdateCallbacks() {
+  for (DeviceEntityObserver *observer : this->_updateObservers) {
+    observer->entityUpdateCallback(this);
+  }
+}
+
+DeviceEntityType Scene::getType() {
+  return DeviceEntityType::SCENE;
+}

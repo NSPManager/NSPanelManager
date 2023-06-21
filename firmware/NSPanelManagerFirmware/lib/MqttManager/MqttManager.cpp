@@ -204,6 +204,7 @@ bool MqttManager::_connect() {
 
   LOG_INFO("Connecting to MQTT server ", NSPMConfig::instance->mqtt_server.c_str());
   Serial.print("Connecting to MQTT server ");
+  MqttManager::_mqttClient->setSocketTimeout(5); // Set tighter timeout. Default: 15 seconds.
   Serial.println(NSPMConfig::instance->mqtt_server.c_str());
   MqttManager::_mqttClient->setServer(NSPMConfig::instance->mqtt_server.c_str(), NSPMConfig::instance->mqtt_port);
   MqttManager::_mqttClient->connect(mqtt_device_name.c_str(), NSPMConfig::instance->mqtt_username.c_str(), NSPMConfig::instance->mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, 1, offline_message_buffer);

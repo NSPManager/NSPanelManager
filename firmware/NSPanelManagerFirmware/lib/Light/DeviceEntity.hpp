@@ -4,7 +4,8 @@
 #include <list>
 
 enum DeviceEntityType {
-  LIGHT
+  LIGHT,
+  SCENE
 };
 
 class DeviceEntity; // Real Entity-class defined below

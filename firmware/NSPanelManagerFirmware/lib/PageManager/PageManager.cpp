@@ -12,7 +12,7 @@ void PageManager::GoBack() {
   }
 
   if (PageManager::_page_history.size() > 0) {
-    PageManager::UnshowCurrentPage();
+    // PageManager::UnshowCurrentPage(); Unshow will be done when the new page calls setCurrentPage
     PageBase *show_page = PageManager::_page_history.front();
     PageManager::_page_history.front()->show();
     PageManager::_page_history.front()->update();
@@ -77,6 +77,13 @@ HomePage *PageManager::GetHomePage() {
     PageManager::_home_page = new HomePage;
   }
   return PageManager::_home_page;
+}
+
+ScenePage *PageManager::GetScenePage() {
+  if (PageManager::_scene_page == nullptr) {
+    PageManager::_scene_page = new ScenePage;
+  }
+  return PageManager::_scene_page;
 }
 
 ScreensaverPage *PageManager::GetScreensaverPage() {
