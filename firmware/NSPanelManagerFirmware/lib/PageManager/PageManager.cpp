@@ -86,6 +86,13 @@ ScenePage *PageManager::GetScenePage() {
   return PageManager::_scene_page;
 }
 
+RoomPage *PageManager::GetRoomPage() {
+  if (PageManager::_room_page == nullptr) {
+    PageManager::_room_page = new RoomPage;
+  }
+  return PageManager::_room_page;
+}
+
 ScreensaverPage *PageManager::GetScreensaverPage() {
   if (PageManager::_screensaver_page == nullptr) {
     PageManager::_screensaver_page = new ScreensaverPage;

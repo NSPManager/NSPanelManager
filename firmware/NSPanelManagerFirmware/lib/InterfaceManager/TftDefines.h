@@ -34,6 +34,8 @@
 #define HOME_PAGE_MODE_LABEL_NAME HOME_PAGE_NAME ".mode"
 #define HOME_PAGE_MODE_LABEL_ID 6
 #define SWITCH_MODE_BUTTON_ID 6 // ID of button to change light mode (room/home)
+#define HOME_PAGE_SLIDER_NORMAL_COLOR 65535
+#define HOME_PAGE_SLIDER_LOCK_COLOR 65024
 
 #define SCENES_PAGE_NAME "Scenes"
 #define SCENES_PAGE_ID 6 // ID for "Scenes"-page

@@ -6,6 +6,7 @@
 #include <LightPage.hpp>
 #include <NSPanelManagerPage.hpp>
 #include <PageBase.hpp>
+#include <RoomPage.hpp>
 #include <ScenePage.hpp>
 #include <ScreensaverPage.hpp>
 #include <list>
@@ -24,6 +25,7 @@ public:
   static LightPage *GetLightPage();
   static HomePage *GetHomePage();
   static ScenePage *GetScenePage();
+  static RoomPage *GetRoomPage();
   static ScreensaverPage *GetScreensaverPage();
   static NSpanelManagerPage *GetNSPanelManagerPage();
 
@@ -36,6 +38,7 @@ private:
   static inline HomePage *_home_page;
   static inline ScenePage *_scene_page;
   static inline ScreensaverPage *_screensaver_page;
+  static inline RoomPage *_room_page;
 };
 
 #endif

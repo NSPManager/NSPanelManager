@@ -113,8 +113,8 @@ void HomePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_updateLightsColorTempAccordingToSlider();
     } else if (component == ROOM_BUTTON_ID && this->_currentRoomMode == roomMode::room) {
       this->_stopSpecialMode();
+      PageManager::GetRoomPage()->show();
     } else if (component == SCENES_BUTTON_ID) {
-      LOG_DEBUG("Trying to go to Scene page.");
       PageManager::GetScenePage()->show();
     }
   } else if (pressed) {
@@ -222,8 +222,8 @@ void HomePage::setModeText(const char *text) {
 void HomePage::setEditLightMode(editLightMode new_mode) {
   this->_currentEditLightMode = new_mode; // Set current mode
   if (new_mode == editLightMode::all_lights) {
-    PageManager::GetHomePage()->setSliderLightLevelColor(23243); // Reset to normal color
-    PageManager::GetHomePage()->setSliderColorTempColor(23243);  // Reset to normal color
+    PageManager::GetHomePage()->setSliderLightLevelColor(HOME_PAGE_SLIDER_NORMAL_COLOR); // Reset to normal color
+    PageManager::GetHomePage()->setSliderColorTempColor(HOME_PAGE_SLIDER_NORMAL_COLOR);  // Reset to normal color
     PageManager::GetHomePage()->setHighlightCeilingVisibility(false);
     PageManager::GetHomePage()->setHighlightTableVisibility(false);
   } else {
@@ -235,8 +235,8 @@ void HomePage::setEditLightMode(editLightMode new_mode) {
       PageManager::GetHomePage()->setHighlightCeilingVisibility(false);
     }
 
-    PageManager::GetHomePage()->setSliderLightLevelColor(65024); // Change slider color to indicate special mode
-    PageManager::GetHomePage()->setSliderColorTempColor(65024);  // Change slider color to indicate special mode
+    PageManager::GetHomePage()->setSliderLightLevelColor(HOME_PAGE_SLIDER_LOCK_COLOR); // Change slider color to indicate special mode
+    PageManager::GetHomePage()->setSliderColorTempColor(HOME_PAGE_SLIDER_LOCK_COLOR);  // Change slider color to indicate special mode
   }
   this->updateLightStatus();
   this->_startSpecialModeTimerTask();
