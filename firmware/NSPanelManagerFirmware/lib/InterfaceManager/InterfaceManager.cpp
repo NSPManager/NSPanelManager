@@ -54,8 +54,10 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   PageManager::GetHomePage()->init();
   PageManager::GetNSPanelManagerPage()->show();
   NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
-  while (!WiFi.isConnected() || !MqttManager::connected() || !InterfaceManager::hasRegisteredToManager) {
-    if (!WiFi.isConnected()) {
+  while (!WiFi.isConnected() || !MqttManager::connected() || !InterfaceManager::hasRegisteredToManager || !NSPMConfig::instance->littlefs_mount_successfull) {
+    if (!NSPMConfig::instance->littlefs_mount_successfull) {
+      PageManager::GetNSPanelManagerPage()->setText("LittleFS mount failed!");
+    } else if (!WiFi.isConnected()) {
       if (NSPMConfig::instance->NSPMConfig::instance->wifi_ssid.empty()) {
         PageManager::GetNSPanelManagerPage()->setText("Connect to AP NSPMPanel");
       } else {

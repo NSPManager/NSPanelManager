@@ -1,0 +1,41 @@
+# Name,   Type, SubType,  Offset,   Size,  Flags
+# nvs, data, nvs, 0x9000, 0x5000
+# otadata, data, ota, 0xE000, 0x2000
+# ota_0, app, ota_0, 0x10000, 0x1A0000
+# ota_1, app, ota_1, 0x1B0000, 0x1A0000
+# spiffs, data, spiffs, 0x350000, 0xAF000
+# coredump, data, coredump, 0x3FF000, 0x1000
+
+# Name,   Type, SubType, Offset,  Size, Flags
+nvs, data, nvs, 0x9000, 0x5000
+otadata, data, ota, 0xE000, 0x2000
+ota_0, app, ota_0, 0x10000, 0x1B0000
+ota_1, app, ota_1, 0x1C0000, 0x1B0000
+spiffs, data, spiffs, 0x370000, 0x8F000
+coredump, data, coredump, 0x3FF000, 0x1000
+
+# nvs,      data, nvs,     0x9000,  0x5000,
+# otadata,  data, ota,     0xe000,  0x2000,
+# app0,     app,  ota_0,   0xe000, 0x1C1F70,
+# app1,     app,  ota_1,   0x1CFF70,0x1C1F70,
+# spiffs,   data, spiffs,  0x391EE0,0x7A120,
+# coredump, data, coredump,0x40C000,0x10000,
+
+# Custom default:
+# Name,   Type, SubType,  Offset,   Size,  Flags
+# ota_0,     app, ota_0,   0x10000,  0x1A0000,
+# ota_1,     app, ota_1,          ,  0x1A0000,
+# otadata,  data, ota,    0x350000,  0x2000,
+# nvs,      data, nvs,            ,  0x6000,
+# data,     data, spiffs,         ,  0xA8000,
+
+
+
+# DEFAULT:
+# Name,   Type, SubType, Offset,  Size, Flags
+# nvs,      data, nvs,     0x9000,  0x5000,
+# otadata,  data, ota,     0xe000,  0x2000,
+# app0,     app,  ota_0,   0x10000, 0x140000,
+# app1,     app,  ota_1,   0x150000,0x140000,
+# spiffs,   data, spiffs,  0x290000,0x160000,
+# coredump, data, coredump,0x3F0000,0x10000,

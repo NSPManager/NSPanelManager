@@ -95,6 +95,9 @@ public:
   // Button modes. 0 = direct mode. 1 = detached mode.
   BUTTON_MODE button1_mode;
   BUTTON_MODE button2_mode;
+
+  // Indicates wether or not LittleFS was mounted or not.
+  bool littlefs_mount_successfull;
 };
 
 #endif

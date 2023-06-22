@@ -17,9 +17,11 @@ bool NSPMConfig::init() {
   this->use_new_upload_protocol = true;
   if (LittleFS.begin(false)) {
     Serial.println("LittleFS mounted.");
+    this->littlefs_mount_successfull = true;
     return true;
   } else {
     Serial.println("Failed to mount LittleFS");
+    this->littlefs_mount_successfull = false;
     return false;
   }
 }
