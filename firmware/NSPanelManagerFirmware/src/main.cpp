@@ -195,8 +195,6 @@ void setup() {
   logger.init(&(NSPMConfig::instance->mqtt_log_topic));
   logger.setLogLevel(static_cast<MqttLogLevel>(config.logging_level));
 
-  Serial.println("Starting wifi and mqtt task.");
-  // xTaskCreatePinnedToCore(taskManageWifiAndMqtt, "taskManageWifi", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
   mqttManager.init();
 
   LOG_INFO("Initializing NSPanel communication");

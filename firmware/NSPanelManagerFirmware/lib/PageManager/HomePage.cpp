@@ -54,8 +54,6 @@ void HomePage::_taskUpdateDisplay(void *param) {
     vTaskDelay(25 / portTICK_PERIOD_MS);
   }
 
-  LOG_DEBUG("MQTT Waiting done, updating display.");
-
   PageManager::GetHomePage()->updateLightStatus();
   HomePage::_taskHandleUpdateDisplay = NULL;
   vTaskDelete(NULL);
@@ -65,7 +63,7 @@ void HomePage::entityDeconstructCallback(DeviceEntity *entity) {
 }
 
 void HomePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
-  LOG_DEBUG("Got touch event, component ", page, ".", component, " ", pressed ? "pressed" : "released");
+  LOG_DEBUG("Got event, component ", page, ".", component, " ", pressed ? "pressed" : "released");
 
   HomePage::_isFingerOnDisplay = pressed;
 

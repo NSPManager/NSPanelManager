@@ -2,6 +2,7 @@
 #include <HTTPClient.h>
 #include <HttpLib.hpp>
 #include <MqttLog.hpp>
+#include <MqttManager.hpp>
 #include <NSPanel.hpp>
 #include <NSPanelReturnData.h>
 #include <WiFiClient.h>
@@ -162,12 +163,7 @@ bool NSPanel::init() {
   this->_update_progress = 0;
 
   // Clear Serial2 read buffer
-  while (Serial2.available() > 0) {
-    Serial2.read();
-    if (Serial2.available() == 0) {
-      vTaskDelay(250 / portTICK_PERIOD_MS);
-    }
-  }
+  this->_clearSerialBuffer();
 
   while (true) {
     if (xSemaphoreTake(NSPanel::instance->_mutexWriteSerialData, portMAX_DELAY)) {
@@ -178,12 +174,18 @@ bool NSPanel::init() {
     }
   }
 
+  while (true) {
+    if (xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, portMAX_DELAY)) {
+      break;
+    } else {
+      LOG_ERROR("Failed to take serial read mutex, trying again in 3 seconds.");
+      vTaskDelay(3000 / portTICK_PERIOD_MS);
+    }
+  }
+
   LOG_INFO("Trying to connect to display."); // Send bogus to the panel to make is "clear" any reading state
   Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN");
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.flush(true);
+  NSPanel::_sendCommandEndSequence();
   vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
   // Clear Serial2 read buffer
   while (Serial2.available() > 0) {
@@ -195,10 +197,7 @@ bool NSPanel::init() {
 
   LOG_DEBUG("Sending final connect to panel");
   Serial2.print("connect");
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.flush(true);
+  NSPanel::_sendCommandEndSequence();
   vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
 
   std::string reply_data = "";
@@ -230,6 +229,7 @@ bool NSPanel::init() {
   this->_sendCommandClearResponse("rest");
 
   xSemaphoreGive(NSPanel::instance->_mutexWriteSerialData);
+  xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
   return true;
 }
 
@@ -262,6 +262,13 @@ void NSPanel::_sendCommandClearResponse(const char *command) {
   cmd.expectResponse = true;
   cmd.callback = &NSPanel::_clearSerialBuffer;
   this->_addCommandToQueue(cmd);
+}
+
+void NSPanel::_sendCommandEndSequence() {
+  Serial2.write(0xFF);
+  Serial2.write(0xFF);
+  Serial2.write(0xFF);
+  Serial2.flush(true);
 }
 
 void NSPanel::_sendCommandClearResponse(const char *command, uint16_t timeout) {
@@ -434,9 +441,7 @@ void NSPanel::_sendCommand(NSPanelCommand *command) {
   }
 
   Serial2.print(command->command.c_str());
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
+  NSPanel::instance->_sendCommandEndSequence();
   this->_lastCommandSent = millis();
 
   if (command->expectResponse) {
@@ -475,10 +480,7 @@ void NSPanel::_sendRawCommand(const char *command, int length) {
   for (int i = 0; i < length; i++) {
     Serial2.print(command[i]);
   }
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-
+  NSPanel::instance->_sendCommandEndSequence();
   xSemaphoreGive(this->_mutexWriteSerialData);
 }
 
@@ -532,7 +534,9 @@ uint16_t NSPanel::_readDataToString(std::string *data, uint32_t timeout, bool fi
         break;
       }
 
-      vTaskDelay(20 / portTICK_PERIOD_MS);
+      if (Serial2.available() == 0) {
+        vTaskDelay(20 / portTICK_PERIOD_MS);
+      }
     }
   }
 
@@ -548,16 +552,11 @@ void NSPanel::_taskUpdateTFTConfigOTA(void *param) {
   LOG_INFO("Starting TFT update...");
 
   while (true) {
-    if (xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, 5000 / portTICK_PERIOD_MS) != pdTRUE) {
-      LOG_ERROR("Failed to get Serial read mutex when updating TFT!");
-      TaskHandle_t owning_task = xSemaphoreGetMutexHolder(NSPanel::instance->_mutexReadSerialData);
-      if (owning_task == NULL) {
-        LOG_ERROR("Could not find owner of task mutex.");
-      } else {
-        LOG_INFO("Mutex holder: ", pcTaskGetName(owning_task));
-      }
-    } else {
+    if (xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, portMAX_DELAY)) {
       break;
+    } else {
+      LOG_ERROR("Failed to take serial read mutex, trying again in 3 seconds.");
+      vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
   }
 
@@ -632,20 +631,14 @@ bool NSPanel::_updateTFTOTA() {
     std::string uploadBaudRateString = "baud=";
     uploadBaudRateString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     Serial2.print(uploadBaudRateString.c_str());
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
-    Serial2.write(0xFF);
+    NSPanel::instance->_sendCommandEndSequence();
 
-    // Wait for 1 second to see if any data is returned, if it is
-    // we failed to set baud data
-    unsigned long startMillis = millis();
-    while (Serial2.available() == 0 && millis() - startMillis < 1000) {
-      vTaskDelay(10 / portTICK_PERIOD_MS);
-    }
-    if (Serial2.available() == 0) {
+    std::string read_data = "";
+    NSPanel::instance->_readDataToString(&read_data, 1000, false);
+    if (read_data.compare("") != 0) {
       LOG_INFO("Baud rate switch successful, switching Serial2 from ", Serial2.baudRate(), " to ", NSPMConfig::instance->tft_upload_baud);
 
-      Serial2.flush();
+      NSPanel::_clearSerialBuffer();
       Serial2.end();
       Serial2.setTxBufferSize(0);
       Serial2.begin(NSPMConfig::instance->tft_upload_baud, SERIAL_8N1, 17, 16);
@@ -654,22 +647,35 @@ bool NSPanel::_updateTFTOTA() {
       ESP.restart();
       return false;
     }
+
+    // Wait for 1 second to see if any data is returned, if it is
+    // we failed to set baud data
+    // unsigned long startMillis = millis();
+    // while (Serial2.available() == 0 && millis() - startMillis < 1000) {
+    //  vTaskDelay(10 / portTICK_PERIOD_MS);
+    //}
+    // if (Serial2.available() == 0) {
+    //  LOG_INFO("Baud rate switch successful, switching Serial2 from ", Serial2.baudRate(), " to ", NSPMConfig::instance->tft_upload_baud);
+
+    //  Serial2.flush();
+    //  Serial2.end();
+    //  Serial2.setTxBufferSize(0);
+    //  Serial2.begin(NSPMConfig::instance->tft_upload_baud, SERIAL_8N1, 17, 16);
+    //} else {
+    //  LOG_ERROR("Baud rate switch failed. Will restart.");
+    //  ESP.restart();
+    //  return false;
+    //}
   }
 
   Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN"); // "disconnect"
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.flush(true);
+  NSPanel::instance->_sendCommandEndSequence();
   vTaskDelay(2000 / portTICK_PERIOD_MS);
   NSPanel::instance->_clearSerialBuffer();
 
   // Send "connect" string to get data
   Serial2.print("connect");
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.flush(true);
+  NSPanel::instance->_sendCommandEndSequence();
   LOG_DEBUG("Sent connect, waiting for comok string.");
 
   // Wait for comok return data.
@@ -679,15 +685,7 @@ bool NSPanel::_updateTFTOTA() {
 
   LOG_DEBUG("Waiting for comok");
   std::string comok_string = "";
-  while (Serial2.available() > 0) {
-    uint8_t read_char = Serial2.read();
-    if (read_char != 0xFF) {
-      comok_string.push_back(read_char);
-    }
-    if (Serial2.available() == 0) {
-      vTaskDelay(500 / portTICK_PERIOD_MS);
-    }
-  }
+  NSPanel::instance->_readDataToString(&comok_string, 5000, false);
   NSPanel::instance->_clearSerialBuffer();
   LOG_DEBUG("Got comok: ", comok_string.c_str());
 
@@ -711,14 +709,12 @@ bool NSPanel::_updateTFTOTA() {
     commandString.append(",1");
   }
   Serial2.print(commandString.c_str());
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
-  Serial2.write(0xFF);
+  NSPanel::instance->_sendCommandEndSequence();
 
   // Wait until Nextion returns okay to transmit tft
   LOG_DEBUG("Waiting for panel reponse");
   while (Serial2.available() == 0) {
-    vTaskDelay(10 / portTICK_PERIOD_MS);
+    vTaskDelay(25 / portTICK_PERIOD_MS);
   }
 
   uint8_t returnData = Serial2.read();

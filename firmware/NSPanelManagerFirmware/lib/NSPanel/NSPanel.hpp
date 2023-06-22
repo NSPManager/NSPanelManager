@@ -78,6 +78,7 @@ private:
   void _sendCommandWithoutResponse(const char *command);
   void _sendCommandClearResponse(const char *command);
   void _sendCommandClearResponse(const char *command, uint16_t timeout);
+  void _sendCommandEndSequence();
   void _addCommandToQueue(NSPanelCommand command);
   void _sendCommand(NSPanelCommand *command);
   void _sendRawCommand(const char *command, int length);

@@ -45,8 +45,8 @@ void RoomPage::unshow() {
   for (int i = 0; i < 12; i++) {
     Light *displayLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(i + 1);
     if (displayLight != nullptr) {
-      displayLight->attachUpdateCallback(this);
-      displayLight->attachDeconstructCallback(this);
+      displayLight->detachUpdateCallback(this);
+      displayLight->detachDeconstructCallback(this);
     }
   }
 }
