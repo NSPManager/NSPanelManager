@@ -37,6 +37,9 @@ function connect_to_websocket() {
         let mac_selector = data.payload.mac;
         mac_selector = mac_selector.replaceAll(":", "\\:");
         $("#heap_used_" + mac_selector).text(data.payload.heap_used_pct + "%");
+        $("#temperature_" + mac_selector).text(Math.round(data.payload.temperature*100)/100 + "C");
+
+
         var new_rssi_classes = "";
         if(data.payload.rssi <= -90) {
           new_rssi_classes = "mdi mdi-wifi-strength-1-alert";

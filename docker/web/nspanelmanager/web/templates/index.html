@@ -15,8 +15,9 @@
       <th>Room</th>
       <th>IP Address</th>
       <th>Status</th>
-      <th><span class="mdi mdi-wifi"></span></th>
+      <th><span class="mdi mdi-wifi" title="WiFi signal strength"></span></th>
       <th><span class="mdi mdi-memory" title="Memory used"></span></i></th>
+      <th><span class="mdi mdi-thermometer" title="Temperature"></span></i></th>
       <th>Version</th>
       <th>Actions</th>
     </tr>
@@ -53,6 +54,7 @@
                 {% endif %}
       </td>
       <td id="heap_used_{{ nspanel.mac_address }}">{{ nspanel.heap_used_pct }}%</td>
+      <td id="temperature_{{ nspanel.mac_address }}">{{ nspanel.temperature }}C</td>
       <td>{{ nspanel.version }}</td>
       <td>
         <a type="button" class="button is-primary is-small"

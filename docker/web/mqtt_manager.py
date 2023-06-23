@@ -87,8 +87,7 @@ def on_message(client, userdata, msg):
                 "type": "status",
                 "payload": data
             }
-            mqtt_manager_libs.websocket_server.send_message(
-                json.dumps(ws_data))
+            mqtt_manager_libs.websocket_server.send_message(json.dumps(ws_data))
         elif parts[-1] == "status_report":
             panel = parts[1]
             data = json.loads(msg.payload.decode('utf-8'))
@@ -97,8 +96,7 @@ def on_message(client, userdata, msg):
                 "type": "status_report",
                 "payload": data
             }
-            mqtt_manager_libs.websocket_server.send_message(
-                json.dumps(ws_data))
+            mqtt_manager_libs.websocket_server.send_message(json.dumps(ws_data))
         elif msg.topic == "nspanel/mqttmanager/command":
             data = json.loads(msg.payload.decode('utf-8'))
             # Verify that the mac_origin is off a panel that is controlled by this instance

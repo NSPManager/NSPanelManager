@@ -280,6 +280,7 @@ def set_panel_status(request, panel_mac: str):
         json_payload = json.loads(request.body.decode('utf-8'))
         nspanel.wifi_rssi = int(json_payload["rssi"])
         nspanel.heap_used_pct = int(json_payload["heap_used_pct"])
+        nspanel.temperature = round(json_payload["temperature"], 2)
         nspanel.save()
         return HttpResponse("", status=200)
 

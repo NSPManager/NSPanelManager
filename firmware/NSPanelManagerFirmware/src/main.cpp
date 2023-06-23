@@ -25,6 +25,22 @@ MqttManager mqttManager;
 
 unsigned long lastStatusReport = 0;
 
+float readNTCTemperature(bool farenheit) {
+  float temperature = analogRead(38);
+  if (temperature > 0) {
+    temperature = temperature * 3.3 / 4095.0;
+    temperature = 11200 * temperature / (3.3 - temperature);
+    temperature = 1 / (1 / 298.15 + log(temperature / 10000) / 3950);
+    if (!farenheit) {
+      temperature = temperature - 273.15; // Celsius
+    } else {
+      temperature = temperature * 9 / 5 + 32; // Fahrenheit
+    }
+    return temperature;
+  }
+  return -254;
+}
+
 void registerToNSPanelManager() {
   if (WiFi.isConnected()) {
     while (true) {
@@ -106,6 +122,7 @@ void taskManageWifiAndMqtt(void *param) {
         (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
         (*status_report_doc)["state"] = "updating_tft";
         (*status_report_doc)["progress"] = NSPanel::instance->getUpdateProgress();
+        (*status_report_doc)["temperature"] = readNTCTemperature(false);
 
         char buffer[512];
         uint json_length = serializeJson(*status_report_doc, buffer);
@@ -119,6 +136,7 @@ void taskManageWifiAndMqtt(void *param) {
         (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
         (*status_report_doc)["state"] = "updating_fw";
         (*status_report_doc)["progress"] = WebManager::getUpdateProgress();
+        (*status_report_doc)["temperature"] = readNTCTemperature(false);
 
         char buffer[512];
         uint json_length = serializeJson(*status_report_doc, buffer);
@@ -132,6 +150,7 @@ void taskManageWifiAndMqtt(void *param) {
         (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
         (*status_report_doc)["state"] = "updating_fs";
         (*status_report_doc)["progress"] = WebManager::getUpdateProgress();
+        (*status_report_doc)["temperature"] = readNTCTemperature(false);
 
         char buffer[512];
         uint json_length = serializeJson(*status_report_doc, buffer);
@@ -145,6 +164,7 @@ void taskManageWifiAndMqtt(void *param) {
         (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
         (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
         (*status_report_doc)["state"] = "online";
+        (*status_report_doc)["temperature"] = readNTCTemperature(false);
 
         char buffer[512];
         uint json_length = serializeJson(*status_report_doc, buffer);
@@ -208,6 +228,8 @@ void setup() {
   } else {
     LOG_ERROR("Failed to initialize NSPanel");
   }
+
+  pinMode(38, INPUT);
 }
 
 void loop() {
