@@ -14,6 +14,7 @@ void HomePage::init() {
   this->_currentRoomMode = roomMode::room;
   this->_ignoreMqttMessagesUntil = 0;
   this->_ignoreNextTouchRelease = false;
+  RoomManager::attachRoomChangeCallback(this);
 }
 
 void HomePage::show() {
@@ -26,12 +27,16 @@ void HomePage::show() {
 void HomePage::updateDeviceEntitySubscriptions() {
   for (Light *light : LightManager::getAllLights()) {
     light->attachUpdateCallback(this);
+    light->attachDeconstructCallback(this);
   }
 }
 
 void HomePage::update() {
-  // InterfaceManager::instance->_updatePanelLightStatus();
   this->updateRoomInfo();
+}
+
+void HomePage::roomChangedCallback() {
+  this->update();
 }
 
 void HomePage::unshow() {
@@ -60,6 +65,12 @@ void HomePage::_taskUpdateDisplay(void *param) {
 }
 
 void HomePage::entityDeconstructCallback(DeviceEntity *entity) {
+  LOG_DEBUG("Got entity deconstruct callback, detaching deconstruct from entity.");
+  entity->detachDeconstructCallback(this);
+  LOG_DEBUG("Detaching update callback.");
+  entity->detachUpdateCallback(this);
+  LOG_DEBUG("Updating display.");
+  this->update();
 }
 
 void HomePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
@@ -75,7 +86,6 @@ void HomePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
   if (!pressed) {
     if (component == SWITCH_ROOM_BUTTON_ID && this->_currentRoomMode == roomMode::room) {
       RoomManager::goToNextRoom();
-      this->update();
       this->_stopSpecialMode();
     } else if (component == SWITCH_MODE_BUTTON_ID) {
       this->goToNextMode();
@@ -409,8 +419,10 @@ void HomePage::_ceilingMasterButtonEvent() {
       std::list<Light *> lightList = LightManager::getAllCeilingLights();
       LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
     }
-    this->updateLightStatus();
   }
+
+  this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
+  this->updateLightStatus();
 }
 
 void HomePage::_tableMasterButtonEvent() {
@@ -423,8 +435,6 @@ void HomePage::_tableMasterButtonEvent() {
       std::list<Light *> lightList = (*RoomManager::currentRoom)->getAllTableLights();
       LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
     }
-    this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
-    this->updateLightStatus();
   } else if (this->_currentRoomMode == roomMode::house) {
     std::list<Light *> onLights = LightManager::getTableLightsThatAreOn();
     if (onLights.size() > 0) {
@@ -433,9 +443,10 @@ void HomePage::_tableMasterButtonEvent() {
       std::list<Light *> lightList = LightManager::getAllTableLights();
       LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
     }
-    this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
-    this->updateLightStatus();
   }
+
+  this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
+  this->updateLightStatus();
 }
 
 void HomePage::_updateLightsColorTempAccordingToSlider() {

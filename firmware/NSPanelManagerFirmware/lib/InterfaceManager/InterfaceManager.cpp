@@ -18,6 +18,7 @@
 
 void InterfaceManager::init() {
   this->instance = this;
+  RoomManager::init();
   MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1");
   xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 }
@@ -77,7 +78,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   }
 
   PageManager::GetNSPanelManagerPage()->setText("Loading config...");
-  RoomManager::loadAllRooms();
+  RoomManager::loadAllRooms(false);
 
   // Update Home page cache
   PageManager::GetHomePage()->updateDimmerValueCache();

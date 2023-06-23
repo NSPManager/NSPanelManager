@@ -104,11 +104,13 @@ def save_new_room(request):
     new_room = Room()
     new_room.friendly_name = request.POST['friendly_name']
     new_room.save()
+    restart_mqtt_manager()
     return redirect('edit_room', room_id=new_room.id)
 
 
 def delete_room(request, room_id: int):
     Room.objects.filter(id=room_id).delete()
+    restart_mqtt_manager()
     return redirect('rooms')
 
 
@@ -116,6 +118,7 @@ def update_room_form(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
     room.friendly_name = request.POST['friendly_name']
     room.save()
+    restart_mqtt_manager()
     return redirect('edit_room', room_id=room_id)
 
 

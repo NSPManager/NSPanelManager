@@ -29,6 +29,8 @@ public:
   std::list<Light *> getAllLights();
   std::list<Light *> getAllRoomViewLights();
   Light *getLightAtRoomViewPosition(int room_view_position);
+  Light *getLightById(uint16_t id);
+  Scene *getSceneById(uint16_t id);
   bool anyCeilingLightsOn();
   bool anyTableLightsOn();
   bool anyLightsOn();

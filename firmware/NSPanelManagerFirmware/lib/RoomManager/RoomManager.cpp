@@ -5,13 +5,27 @@
 #include <Light.hpp>
 #include <LightManager.hpp>
 #include <MqttLog.hpp>
+#include <MqttManager.hpp>
 #include <NSPMConfig.h>
 #include <Room.hpp>
 #include <RoomManager.hpp>
 #include <Scene.hpp>
 #include <WiFi.h>
 
-void RoomManager::loadAllRooms() {
+void RoomManager::init() {
+  MqttManager::subscribeToTopic("nspanel/config/reload", &RoomManager::reloadCallback);
+  RoomManager::currentRoom = RoomManager::rooms.end();
+}
+
+void RoomManager::reloadCallback(char *topic, byte *payload, unsigned int length) {
+  std::string payload_str = std::string((char *)payload, 1);
+  if (payload_str.compare("1") == 0) {
+    LOG_DEBUG("Got reload command, reloading rooms.");
+    RoomManager::loadAllRooms(true);
+  }
+}
+
+void RoomManager::loadAllRooms(bool is_update) {
   DynamicJsonDocument *roomData = new DynamicJsonDocument(2048);
   uint8_t tries = 0;
   bool successDownloadingConfig = false;
@@ -61,25 +75,23 @@ void RoomManager::loadAllRooms() {
   NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>((*roomData)["button1_mode"].as<uint8_t>());
   NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>((*roomData)["button2_mode"].as<uint8_t>());
   // Init rooms
-  uint8_t numberOfRooms = (*roomData)["rooms"].as<JsonArray>().size();
-  RoomManager::rooms.resize(numberOfRooms);
 
-  uint8_t i = 0;
   for (uint16_t roomId : (*roomData)["rooms"].as<JsonArray>()) {
     LOG_INFO("Getting config for room ", roomId);
-    // Display what room we are getting configuration for.
-    // std::string info_text = "Loading room ";
-    // info_text.append(std::to_string(roomId));
-    // info_text.append("/");
-    // info_text.append(std::to_string(numberOfRooms));
-    // NspanelManagerPage::setText(info_text.c_str());
-    // Download and process room JSON from NspanelManager into a Room instance
-    Room *room = RoomManager::loadRoom(roomId);
-    RoomManager::rooms[i] = room;
-    i++;
+    Room *room = RoomManager::loadRoom(roomId, is_update);
+    if (RoomManager::getRoomById(roomId) == nullptr) {
+      // If a nullptr is returned, a room by that id was not found
+      RoomManager::rooms.push_back(room);
+    }
   }
 
-  RoomManager::goToRoomId(InterfaceConfig::homeScreen); // Set currentRoom to the default room for this panel
+  if (!is_update) {
+    RoomManager::goToRoomId(InterfaceConfig::homeScreen); // Set currentRoom to the default room for this panel
+  } else {
+    // TODO: Implement function that remove any rooms currecntly loaded but not configured (ie. removed through manager)
+    LOG_DEBUG("Calling roomChangedCallback");
+    RoomManager::_callRoomChangeCallbacks(); // Call room change update to force an update for other components
+  }
 
   // All rooms and lights has loaded, prep buttonmanager
   if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DETACHED) {
@@ -104,7 +116,7 @@ void RoomManager::loadAllRooms() {
   }
 }
 
-Room *RoomManager::loadRoom(uint16_t roomId) {
+Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
   DynamicJsonDocument *roomData = new DynamicJsonDocument(2048);
   uint8_t tries = 0;
   bool successDownloadingConfig = false;
@@ -116,7 +128,6 @@ Room *RoomManager::loadRoom(uint16_t roomId) {
   roomDataJsonUrl.append(std::to_string(roomId));
 
   do {
-
     successDownloadingConfig = HttpLib::DownloadJSON(roomDataJsonUrl.c_str(), roomData);
 
     if (!successDownloadingConfig) {
@@ -135,31 +146,98 @@ Room *RoomManager::loadRoom(uint16_t roomId) {
   } while (!successDownloadingConfig);
   roomDataJsonUrl.end();
   // Sucessfully downloaded config, proceed to process it
-  Room *newRoom = new Room();
+  // Load already existing room or if a nullptr was returned, create a new room.
+  Room *newRoom = RoomManager::getRoomById(roomId);
+  if (newRoom == nullptr) {
+    newRoom = new Room();
+  }
   newRoom->id = roomId;
   newRoom->name = (*roomData)["name"] | "ERR";
 
   // Load and init all lights for the room
   JsonVariant json_lights = (*roomData)["lights"];
   for (JsonPair lightPair : json_lights.as<JsonObject>()) {
-    Light *newLight = new Light();
-    newLight->initFromJson(&lightPair);
-    if (lightPair.value()["ceiling"] == true) {
-      newRoom->ceilingLights.insert(std::make_pair(newLight->getId(), newLight));
+    bool existing_light;
+    Light *newLight = newRoom->getLightById(atoi(lightPair.key().c_str()));
+    if (newLight == nullptr) {
+      existing_light = false;
+      newLight = new Light();
     } else {
-      newRoom->tableLights.insert(std::make_pair(newLight->getId(), newLight));
+      existing_light = true;
+    }
+    newLight->initFromJson(&lightPair);
+    // If the light is new (ie. not updated from existing) push it into the correct list.
+    if (!existing_light) {
+      if (lightPair.value()["ceiling"] == true) {
+        newRoom->ceilingLights.insert(std::make_pair(newLight->getId(), newLight));
+      } else {
+        newRoom->tableLights.insert(std::make_pair(newLight->getId(), newLight));
+      }
+    }
+  }
+
+  if (is_update) {
+    for (auto it = newRoom->ceilingLights.cbegin(); it != newRoom->ceilingLights.cend();) {
+      // Check if this light ID exist in JSON config
+      bool light_id_found = false;
+      for (JsonPair jsonLightPair : json_lights.as<JsonObject>()) {
+        if (atoi(jsonLightPair.key().c_str()) == (*it).first) {
+          light_id_found = true;
+          break;
+        }
+      }
+
+      if (!light_id_found) {
+        Light *light_to_remove = (*it).second;
+        LOG_DEBUG("Removing light: ", light_to_remove->getName().c_str(), ". ID: ", light_to_remove->getId());
+        newRoom->ceilingLights.erase(it++);
+        light_to_remove->callDeconstructCallbacks();
+        delete light_to_remove;
+      } else {
+        it++;
+      }
+    }
+
+    for (auto it = newRoom->tableLights.cbegin(); it != newRoom->tableLights.cend();) {
+      // Check if this light ID exist in JSON config
+      bool light_id_found = false;
+      for (JsonPair jsonLightPair : json_lights.as<JsonObject>()) {
+        if (atoi(jsonLightPair.key().c_str()) == (*it).first) {
+          light_id_found = true;
+          break;
+        }
+      }
+
+      if (!light_id_found) {
+        Light *light_to_remove = (*it).second;
+        LOG_DEBUG("Removing light: ", light_to_remove->getName().c_str(), ". ID: ", light_to_remove->getId());
+        newRoom->tableLights.erase(it++);
+        light_to_remove->callDeconstructCallbacks();
+        delete light_to_remove;
+      } else {
+        it++;
+      }
     }
   }
 
   // Load and init all the scenes for the room
   JsonVariant json_scenes = (*roomData)["scenes"];
   for (JsonPair scenePair : json_scenes.as<JsonObject>()) {
-    Scene *newScene = new Scene();
+    bool existing_scene;
+    Scene *newScene = newRoom->getSceneById(atoi(scenePair.key().c_str()));
+    if (newScene == nullptr) {
+      existing_scene = false;
+      newScene = new Scene();
+    } else {
+      existing_scene = true;
+    }
     newScene->room = newRoom;
     newScene->id = atoi(scenePair.key().c_str());
     newScene->name = scenePair.value()["name"] | "ERR-S";
-    newRoom->scenes.push_back(newScene);
-    LOG_TRACE("Loaded scene ", newScene->id, "::", newScene->name.c_str());
+    if (!existing_scene) {
+      newRoom->scenes.push_back(newScene);
+      LOG_TRACE("Loaded scene ", newScene->id, "::", newScene->name.c_str());
+    }
   }
 
   delete roomData;
@@ -186,7 +264,7 @@ void RoomManager::goToPreviousRoom() {
 
 void RoomManager::goToRoomId(uint16_t roomId) {
   bool foundRoom = false;
-  for (std::vector<Room *>::iterator it = RoomManager::rooms.begin(); it != RoomManager::rooms.end(); it++) {
+  for (std::list<Room *>::iterator it = RoomManager::rooms.begin(); it != RoomManager::rooms.end(); it++) {
     if ((*it)->id == roomId) {
       RoomManager::currentRoom = it;
       RoomManager::_callRoomChangeCallbacks();
@@ -198,6 +276,17 @@ void RoomManager::goToRoomId(uint16_t roomId) {
   return;
 }
 
+Room *RoomManager::getRoomById(uint16_t roomId) {
+  bool foundRoom = false;
+  for (std::list<Room *>::iterator it = RoomManager::rooms.begin(); it != RoomManager::rooms.end(); it++) {
+    if ((*it)->id == roomId) {
+      return (*it);
+    }
+  }
+
+  return nullptr;
+}
+
 void RoomManager::attachRoomChangeCallback(RoomManagerObserver *observer) {
   RoomManager::_roomChangeObservers.push_back(observer);
 }
@@ -207,7 +296,9 @@ void RoomManager::detachRoomChangeCallback(RoomManagerObserver *observer) {
 }
 
 void RoomManager::_callRoomChangeCallbacks() {
-  for (RoomManagerObserver *observer : RoomManager::_roomChangeObservers) {
-    observer->roomChangedCallback();
+  if (RoomManager::currentRoom != RoomManager::rooms.end()) {
+    for (RoomManagerObserver *observer : RoomManager::_roomChangeObservers) {
+      observer->roomChangedCallback();
+    }
   }
 }

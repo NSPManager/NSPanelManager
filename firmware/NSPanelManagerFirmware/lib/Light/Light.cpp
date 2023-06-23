@@ -12,6 +12,8 @@ void Light::initFromJson(ArduinoJson::JsonPair *json) {
   this->_roomViewPosition = json->value()["view_position"] | 0;
   this->_isCeiling = json->value()["ceiling"];
 
+  this->callUpdateCallbacks();
+
   LOG_TRACE("Loaded light ", this->_name.c_str(), " as type: ", this->_isCeiling ? "CEILING" : "TABLE");
 }
 
@@ -65,9 +67,9 @@ uint8_t Light::getRoomViewPosition() {
 
 void Light::attachDeconstructCallback(DeviceEntityObserver *observer) {
   // Do not add a subsriber twice
-  for (DeviceEntityObserver *obs : this->_updateObservers) {
+  for (DeviceEntityObserver *obs : this->_deconstructObservers) {
     if (observer == obs) {
-      break;
+      return;
     }
   }
   this->_deconstructObservers.push_back(observer);
@@ -78,8 +80,14 @@ void Light::detachDeconstructCallback(DeviceEntityObserver *observer) {
 }
 
 void Light::callDeconstructCallbacks() {
-  for (DeviceEntityObserver *observer : this->_deconstructObservers) {
+  LOG_DEBUG("Trying to call deconstruct callback, number of callbacks: ", this->_deconstructObservers.size());
+  vTaskDelay(500 / portTICK_PERIOD_MS);
+  std::list<DeviceEntityObserver *> loop_list;
+  std::copy(this->_deconstructObservers.begin(), this->_deconstructObservers.end(), std::back_inserter(loop_list));
+  for (DeviceEntityObserver *observer : loop_list) {
+    LOG_DEBUG("Calling deconstruct callback!");
     observer->entityDeconstructCallback(this);
+    vTaskDelay(25 / portTICK_PERIOD_MS);
   }
 }
 
@@ -87,7 +95,7 @@ void Light::attachUpdateCallback(DeviceEntityObserver *observer) {
   // Do not add a subsriber twice
   for (DeviceEntityObserver *obs : this->_updateObservers) {
     if (observer == obs) {
-      break;
+      return;
     }
   }
   this->_updateObservers.push_back(observer);
@@ -98,7 +106,9 @@ void Light::detachUpdateCallback(DeviceEntityObserver *observer) {
 }
 
 void Light::callUpdateCallbacks() {
-  for (DeviceEntityObserver *observer : this->_updateObservers) {
+  std::list<DeviceEntityObserver *> loop_list;
+  std::copy(this->_updateObservers.begin(), this->_updateObservers.end(), std::back_inserter(loop_list));
+  for (DeviceEntityObserver *observer : loop_list) {
     observer->entityUpdateCallback(this);
   }
 }

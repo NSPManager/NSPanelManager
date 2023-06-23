@@ -6,8 +6,9 @@
 class Light;
 #include <InterfaceManagerHelpers.hpp>
 #include <PageBase.hpp>
+#include <RoomManager.hpp>
 
-class HomePage : public PageBase, DeviceEntityObserver {
+class HomePage : public PageBase, DeviceEntityObserver, RoomManagerObserver {
 public:
   void init();
   void show();
@@ -17,6 +18,7 @@ public:
 
   void entityDeconstructCallback(DeviceEntity *);
   void entityUpdateCallback(DeviceEntity *);
+  void roomChangedCallback();
 
   void setDimmingValue(uint8_t value);
   int getDimmingValue();
