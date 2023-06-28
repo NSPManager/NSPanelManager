@@ -17,7 +17,7 @@ Logging from NSPanels are done over MQTT to the topic `nspanel/<panel name>/log`
 |nspanel/panel_name/r1_state| 1 or 0 |Current relay 1 state, 1 or 0|
 |nspanel/panel_name/r2_cmd| 1 or 0 |Control relay 2 state, 1 or 0|
 |nspanel/panel_name/r2_state| 1 or 0 |Current relay 2 state, 1 or 0|
-|nspanel/panel_name/state_temperature| temperature reading |Current temperature reading|
+|nspanel/panel_name/temperature_state| temperature reading |Current temperature reading|
 
 # Currently working (but might require more work)
 * Integration with Home Assistant and OpenHAB
