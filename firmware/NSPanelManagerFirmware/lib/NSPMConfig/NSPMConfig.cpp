@@ -70,7 +70,7 @@ bool NSPMConfig::loadFromLittleFS() {
 
   this->mqtt_panel_temperature_topic = "nspanel/";
   this->mqtt_panel_temperature_topic.append(NSPMConfig::instance->wifi_hostname);
-  this->mqtt_panel_temperature_topic.append("/state_temperature");
+  this->mqtt_panel_temperature_topic.append("/temperature_state");
 
   this->mqtt_log_topic = "nspanel/";
   this->mqtt_log_topic.append(NSPMConfig::instance->wifi_hostname);
