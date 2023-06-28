@@ -17,6 +17,7 @@ Logging from NSPanels are done over MQTT to the topic `nspanel/<panel name>/log`
 |nspanel/panel_name/r1_state| 1 or 0 |Current relay 1 state, 1 or 0|
 |nspanel/panel_name/r2_cmd| 1 or 0 |Control relay 2 state, 1 or 0|
 |nspanel/panel_name/r2_state| 1 or 0 |Current relay 2 state, 1 or 0|
+|nspanel/panel_name/state_temperature| temperature reading |Current temperature reading|
 
 # Currently working (but might require more work)
 * Integration with Home Assistant and OpenHAB
@@ -42,15 +43,14 @@ If you are setting up the container manually using some other tool, make sure to
 The NSPanelManager firmware is written as a PlatformIO-project and this is by far the easiest method to flash the firmware. Perform the following steps to flash you NSPanel:
 * Install PlatformIO for you platform.
 * Navigate to the `firmware/NSPanelManagerFirmware/` directory.
-* Execute `platformio run --target upload --environment esp32dev` to upload the firmware.
-* Restart the panel by removing power and applying it again.
-* Execute `platformio run --target uploadfs --environment esp32dev`.
+* Execute `./build_image.sh` to build the firmware image.
+* Execute `./upload_image.sh` while connected to the NSPanel with serial programmer. Repeat for all panels.
 * Restart the panel by removing power and applying it again.
 * Connect to the access point named `NSPMPanel` with the password `password`.
 * Enter a friendly name for this panel.
 * Enter the IP address and port to where the docker-container with the web-interface is running.
 * Enter your Wifi SSID (Name) and password .
 * Enter your MQTT address and port (enter username and password if used).
-* Press the save button and the panel will restart and try to connect to the given SSID, MQTT and manager address.
+* Press the save button. The panel will restart and try to connect to the given SSID, MQTT and manager address.
 
 For more information on how to connect to the NSPanel to flash it, see [this tutorial](https://www.youtube.com/watch?v=sCrdiCzxMOQ).
