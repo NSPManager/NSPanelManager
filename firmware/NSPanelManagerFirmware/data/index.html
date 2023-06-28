@@ -6,21 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8">
   <script src="/static/jquery.min.js"></script>
+  <script src="/static/index.js"></script>
   <link rel="stylesheet" href="/static/bulma.min.css">
-
-  <style>
-    html {
-      background-color: #101410;
-    }
-
-    #page-title {
-      color: #ffffff;
-    }
-
-    #page-subtitle {
-      color: #ffffff;
-    }
-  </style>
+  <link rel="stylesheet" href="/static/index.css">
 
   <script>
     $('document').ready(function () {
@@ -32,74 +20,73 @@
 
 <body>
   <!-- Modal to show that connected to the device has been lost -->
-  <!-- <div class="modal" id="not_connected_modal">
-        <div class="modal-background"></div>
-        <div class="modal-card">
-            <header class="modal-card-head">
-                <p class="modal-card-title">Connection lost</p>
-            </header>
-            <section class="modal-card-body">
-                <center>
-                    <div class="lds-dual-ring"></div>
-                    <br>
-                    Please wait, you will be automatically reconnected (if the address is still the same).
-                </center>
-            </section>
-            <footer class="modal-card-foot"></footer>
-        </div>
-    </div> -->
-  <!-- Select WiFi SSID modal -->
-  <!-- <div class="modal" id="select_wifi_modal">
-        <div class="modal-background" id="select_wifi_modal_close_background"></div>
-        <div class="modal-card">
-            <header class="modal-card-head">
-                <p class="modal-card-title">Select network</p>
-                <button class="delete" aria-label="close" id="select_wifi_modal_close_button"></button>
-            </header>
-            <section class="modal-card-body">
-                <div id="wifi_wait_div">
-                    <center>
-                        <div class="lds-dual-ring"></div>
-                        <br>
-                        Please wait, while fetching available Wifi networks.
-                    </center>
-                </div>
-                <div id="wifi_failed_to_get_networks">
-                    <div class="notification is-danger">
-                        Failed to get a list of available networks!
-                    </div>
-                </div>
-                <div id="wifi_no_networks_found">
-                    <div class="notification is-danger">
-                        No networks found.
-                    </div>
-                </div>
-                <div id="available_wifi_networks">
-                    <table class="table is-fullwidth">
-                        <thead>
-                            <tr>
-                                <th>SSID</th>
-                                <th>RSSI</th>
-                                <th>Channel</th>
-                                <th>Security</th>
-                            </tr>
-                        </thead>
-                        <tbody id="available_wifi_networks_tbody">
-                            <tr>
-                                <th>1</th>
-                                <td>2</td>
-                                <td>3</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-            <footer class="modal-card-foot">
-                <button class="button" id="select_wifi_modal_cancel_button">Cancel</button>
-            </footer>
-        </div>
+  <div class="modal" id="not_connected_modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Connection lost</p>
+      </header>
+      <section class="modal-card-body">
+        <center>
+          <div class="lds-dual-ring"></div>
+          <br>
+          Please wait, you will be automatically reconnected (if the address is still the same).
+        </center>
+      </section>
+      <footer class="modal-card-foot"></footer>
     </div>
-    -->
+  </div> -->
+  <!-- Select WiFi SSID modal -->
+  <div class="modal" id="select_wifi_modal">
+    <div class="modal-background" id="select_wifi_modal_close_background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Select network</p>
+        <button class="delete" aria-label="close" id="select_wifi_modal_close_button"></button>
+      </header>
+      <section class="modal-card-body">
+        <div id="wifi_wait_div">
+          <center>
+            <div class="lds-dual-ring"></div>
+            <br>
+            Please wait, while fetching available Wifi networks.
+          </center>
+        </div>
+        <div id="wifi_failed_to_get_networks">
+          <div class="notification is-danger">
+            Failed to get a list of available networks!
+          </div>
+        </div>
+        <div id="wifi_no_networks_found">
+          <div class="notification is-danger">
+            No networks found.
+          </div>
+        </div>
+        <div id="available_wifi_networks">
+          <table class="table is-fullwidth">
+            <thead>
+              <tr>
+                <th>SSID</th>
+                <th>RSSI</th>
+                <th>Channel</th>
+                <th>Security</th>
+              </tr>
+            </thead>
+            <tbody id="available_wifi_networks_tbody">
+              <tr>
+                <th>1</th>
+                <td>2</td>
+                <td>3</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button class="button" id="select_wifi_modal_cancel_button">Cancel</button>
+      </footer>
+    </div>
+  </div>
 
   <!-- Modal to confirm factory reset -->
   <!-- <div class="modal" id="factory_reset_modal">

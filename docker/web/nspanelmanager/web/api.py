@@ -160,9 +160,11 @@ def register_nspanel(request):
     """Update the already existing NSPanel OR create a new one"""
     data = json.loads(request.body)
     new_panel = NSPanel.objects.filter(mac_address=data['mac_address']).first()
+    panel_already_exists = True
 
     if not new_panel:
         new_panel = NSPanel()
+        panel_already_exists = False
 
     new_panel.friendly_name = data['friendly_name']
     new_panel.mac_address = data['mac_address']
@@ -179,7 +181,8 @@ def register_nspanel(request):
 
     # Save the update/Create new panel
     new_panel.save()
-    restart_mqtt_manager()
+    if not panel_already_exists:
+        restart_mqtt_manager()
     return HttpResponse('OK', status=200)
 
 
@@ -280,6 +283,7 @@ def set_panel_status(request, panel_mac: str):
         nspanel = nspanels.first()
         # We got a match
         json_payload = json.loads(request.body.decode('utf-8'))
+        print(json_payload);
         nspanel.wifi_rssi = int(json_payload["rssi"])
         nspanel.heap_used_pct = int(json_payload["heap_used_pct"])
         nspanel.temperature = round(json_payload["temperature"], 2)

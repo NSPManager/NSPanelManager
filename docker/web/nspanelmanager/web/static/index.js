@@ -15,6 +15,7 @@ function connect_to_websocket() {
 
   webSocket.onmessage = (event) => {
       data = JSON.parse(event.data);
+      console.log(data);
       if(data.type == "status") {
         let mac_selector = data.payload.mac;
         mac_selector = mac_selector.replaceAll(":", "\\:");
@@ -87,6 +88,7 @@ function connect_to_websocket() {
       console.log("Websocket closed, trying in 1 second");
       setTimeout(function() {
           connect_to_websocket();
+          // location.reload();
       }, 1000);
   };
 }
