@@ -23,7 +23,7 @@ function connect_to_websocket() {
           // Got a state update for a panel that does not exist in this page, reload to show it if it has registered
           setTimeout(function() {
             location.reload();
-          }, 5000);
+          }, 2000);
         }
 
         if(data.payload.state == "online") {
@@ -37,7 +37,8 @@ function connect_to_websocket() {
         let mac_selector = data.payload.mac;
         mac_selector = mac_selector.replaceAll(":", "\\:");
         $("#heap_used_" + mac_selector).text(data.payload.heap_used_pct + "%");
-        $("#temperature_" + mac_selector).text(Math.round(data.payload.temperature*100)/100 + "C");
+        var temperature_unit = $("#temperature_" + mac_selector).text().slice(-2);
+        $("#temperature_" + mac_selector).text(Math.round(data.payload.temperature*100)/100 + " " + temperature_unit);
 
 
         var new_rssi_classes = "";

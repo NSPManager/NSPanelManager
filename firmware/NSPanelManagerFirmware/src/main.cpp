@@ -31,10 +31,9 @@ float readNTCTemperature(bool farenheit) {
     temperature = temperature * 3.3 / 4095.0;
     temperature = 11200 * temperature / (3.3 - temperature);
     temperature = 1 / (1 / 298.15 + log(temperature / 10000) / 3950);
-    if (!farenheit) {
-      temperature = temperature - 273.15; // Celsius
-    } else {
-      temperature = temperature * 9 / 5 + 32; // Fahrenheit
+    temperature = temperature - 273.15; // Celsius
+    if (farenheit) {
+      temperature = (temperature * 9 / 5) + 32;
     }
     return temperature;
   }
@@ -114,63 +113,35 @@ void taskManageWifiAndMqtt(void *param) {
       } else if (config.wifi_ssid.empty()) {
         LOG_ERROR("No WiFi SSID configured!");
       }
-
-      if (WiFi.isConnected() && MqttManager::connected() && NSPanel::instance->getUpdateState()) {
+      if (WiFi.isConnected() && MqttManager::connected()) {
         DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
-        (*status_report_doc)["rssi"] = WiFi.RSSI();
-        (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
-        (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
-        (*status_report_doc)["state"] = "updating_tft";
-        (*status_report_doc)["progress"] = NSPanel::instance->getUpdateProgress();
-        (*status_report_doc)["temperature"] = readNTCTemperature(false);
+        if (NSPanel::instance->getUpdateState()) {
+          (*status_report_doc)["state"] = "updating_tft";
+          (*status_report_doc)["progress"] = NSPanel::instance->getUpdateProgress();
+        } else if (WebManager::getState() == WebManagerState::UPDATING_FIRMWARE) {
+          (*status_report_doc)["state"] = "updating_fw";
+          (*status_report_doc)["progress"] = WebManager::getUpdateProgress();
+        } else if (WebManager::getState() == WebManagerState::UPDATING_LITTLEFS) {
+          (*status_report_doc)["state"] = "updating_fs";
+          (*status_report_doc)["progress"] = WebManager::getUpdateProgress();
+        } else {
+          (*status_report_doc)["state"] = "online";
+        }
 
-        char buffer[512];
-        uint json_length = serializeJson(*status_report_doc, buffer);
-        delete status_report_doc;
-        MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer);
-        lastStatusReport = millis();
-      } else if (WiFi.isConnected() && MqttManager::connected() && WebManager::getState() == WebManagerState::UPDATING_FIRMWARE) {
-        DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
-        (*status_report_doc)["rssi"] = WiFi.RSSI();
-        (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
-        (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
-        (*status_report_doc)["state"] = "updating_fw";
-        (*status_report_doc)["progress"] = WebManager::getUpdateProgress();
-        (*status_report_doc)["temperature"] = readNTCTemperature(false);
+        if ((*status_report_doc)["state"] != "online" || ((*status_report_doc)["state"] == "online" && millis() >= lastStatusReport + 30000)) {
+          float temperature = readNTCTemperature(NSPMConfig::instance->use_farenheit);
+          (*status_report_doc)["rssi"] = WiFi.RSSI();
+          (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
+          (*status_report_doc)["mac"] = WiFi.macAddress();
+          (*status_report_doc)["temperature"] = temperature;
+          MqttManager::publish(NSPMConfig::instance->mqtt_panel_temperature_topic, std::to_string(temperature).c_str());
 
-        char buffer[512];
-        uint json_length = serializeJson(*status_report_doc, buffer);
+          char buffer[512];
+          uint json_length = serializeJson(*status_report_doc, buffer);
+          MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer);
+          lastStatusReport = millis();
+        }
         delete status_report_doc;
-        MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer);
-        lastStatusReport = millis();
-      } else if (WiFi.isConnected() && MqttManager::connected() && WebManager::getState() == WebManagerState::UPDATING_LITTLEFS) {
-        DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
-        (*status_report_doc)["rssi"] = WiFi.RSSI();
-        (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
-        (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
-        (*status_report_doc)["state"] = "updating_fs";
-        (*status_report_doc)["progress"] = WebManager::getUpdateProgress();
-        (*status_report_doc)["temperature"] = readNTCTemperature(false);
-
-        char buffer[512];
-        uint json_length = serializeJson(*status_report_doc, buffer);
-        delete status_report_doc;
-        MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer);
-        lastStatusReport = millis();
-      } else if (WiFi.isConnected() && MqttManager::connected() && InterfaceManager::hasRegisteredToManager && lastStatusReport + 30000 <= millis()) {
-        // Report state every 30 seconds
-        DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
-        (*status_report_doc)["rssi"] = WiFi.RSSI();
-        (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
-        (*status_report_doc)["mac"] = WiFi.macAddress().c_str();
-        (*status_report_doc)["state"] = "online";
-        (*status_report_doc)["temperature"] = readNTCTemperature(false);
-
-        char buffer[512];
-        uint json_length = serializeJson(*status_report_doc, buffer);
-        delete status_report_doc;
-        MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer);
-        lastStatusReport = millis();
       }
       vTaskDelay(1000 / portTICK_PERIOD_MS);
     }

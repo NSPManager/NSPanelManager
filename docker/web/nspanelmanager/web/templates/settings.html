@@ -206,6 +206,24 @@
                 </span>
             </label>
         </div>
+        <div class="field">
+            <label class="checkbox">
+                {% if use_farenheit == "True" %}
+                    <input type="checkbox" name="use_farenheit" checked>
+                {% else %}
+                    <input type="checkbox" name="use_farenheit">
+                {% endif %}
+                Use farenheit
+                <span class="question">
+                  <span class="icon question_icon">
+                    <i class="mdi mdi-help"></i>
+                  </span>
+                  <div class="question_help_text notification is-info is-light">
+                    Wether to report temperature in farenheit. Default: Unchecked = report in celcius.
+                  </div>
+                </span>
+            </label>
+        </div>
     </div>
     <div class="box">
         <div class="field">

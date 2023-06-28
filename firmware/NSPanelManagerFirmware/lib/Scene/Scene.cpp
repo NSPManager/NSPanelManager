@@ -2,6 +2,14 @@
 #include <Room.hpp>
 #include <Scene.hpp>
 
+uint16_t Scene::getId() {
+  return this->id;
+}
+
+std::string Scene::getName() {
+  return this->name;
+}
+
 void Scene::activate() {
   std::string mqtt_activation_topic = "nspanel/scenes/";
   if (this->room != nullptr) {

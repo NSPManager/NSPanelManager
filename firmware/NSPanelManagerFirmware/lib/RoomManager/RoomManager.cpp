@@ -74,6 +74,7 @@ void RoomManager::loadAllRooms(bool is_update) {
   InterfaceConfig::clock_us_style = (*roomData)["clock_us_style"].as<String>().equals("True");
   NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>((*roomData)["button1_mode"].as<uint8_t>());
   NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>((*roomData)["button2_mode"].as<uint8_t>());
+  NSPMConfig::instance->use_farenheit = (*roomData)["use_farenheit"].as<String>().equals("True");
   // Init rooms
 
   for (uint16_t roomId : (*roomData)["rooms"].as<JsonArray>()) {
@@ -190,7 +191,7 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
       if (!light_id_found) {
         Light *light_to_remove = (*it).second;
         LOG_DEBUG("Removing light: ", light_to_remove->getName().c_str(), ". ID: ", light_to_remove->getId());
-        newRoom->ceilingLights.erase(it++);
+        it = newRoom->ceilingLights.erase(it);
         light_to_remove->callDeconstructCallbacks();
         delete light_to_remove;
       } else {
@@ -211,9 +212,30 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
       if (!light_id_found) {
         Light *light_to_remove = (*it).second;
         LOG_DEBUG("Removing light: ", light_to_remove->getName().c_str(), ". ID: ", light_to_remove->getId());
-        newRoom->tableLights.erase(it++);
+        it = newRoom->tableLights.erase(it);
         light_to_remove->callDeconstructCallbacks();
         delete light_to_remove;
+      } else {
+        it++;
+      }
+    }
+
+    for (auto it = newRoom->scenes.cbegin(); it != newRoom->scenes.cend();) {
+      // Check if this light ID exist in JSON config
+      bool light_id_found = false;
+      for (JsonPair jsonLightPair : json_lights.as<JsonObject>()) {
+        if (atoi(jsonLightPair.key().c_str()) == (*it)->getId()) {
+          light_id_found = true;
+          break;
+        }
+      }
+
+      if (!light_id_found) {
+        Scene *scene_to_remove = (*it);
+        LOG_DEBUG("Removing light: ", scene_to_remove->getName().c_str(), ". ID: ", scene_to_remove->getId());
+        it = newRoom->scenes.erase(it);
+        scene_to_remove->callDeconstructCallbacks();
+        delete scene_to_remove;
       } else {
         it++;
       }

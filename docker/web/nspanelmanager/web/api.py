@@ -54,6 +54,7 @@ def get_mqtt_manager_config(request):
         "openhab_color_temp_channel_name", "")
     return_json["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name", "")
     return_json["clock_us_style"] = get_setting_with_default("clock_us_style", False)
+    return_json["use_farenheit"] = get_setting_with_default("use_farenheit", False)
 
     return_json["lights"] = {}
     for light in Light.objects.all():
@@ -207,6 +208,7 @@ def get_nspanel_config(request):
     base["clock_us_style"] = get_setting_with_default("clock_us_style", False)
     base["screensaver_activation_timeout"] = get_setting_with_default("screensaver_activation_timeout", 30000)
     base["button1_mode"] = nspanel.button1_mode
+    base["use_farenheit"] = get_setting_with_default("use_farenheit", False)
     if nspanel.button1_detached_mode_light:
         base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
     else:

@@ -12,7 +12,7 @@
 
 void LightManager::ChangeLightsToLevel(std::list<Light *> *lights, uint8_t level) {
   DynamicJsonDocument doc(1024);
-  doc["mac_origin"] = WiFi.macAddress().c_str();
+  doc["mac_origin"] = WiFi.macAddress();
   doc["method"] = "set";
   doc["attribute"] = "brightness";
   doc["brightness"] = level;
@@ -44,7 +44,7 @@ void LightManager::ChangeLightToColorTemperature(std::list<Light *> *lights, uin
   }
 
   DynamicJsonDocument doc(1024);
-  doc["mac_origin"] = WiFi.macAddress().c_str();
+  doc["mac_origin"] = WiFi.macAddress();
   doc["method"] = "set";
   doc["attribute"] = "kelvin";
   doc["kelvin"] = sendKelvin;
@@ -69,7 +69,7 @@ void LightManager::ChangeLightsToColorSaturation(std::list<Light *> *lights, uin
   InterfaceConfig::ignore_mqtt_state_events_until = millis() + InterfaceConfig::mqtt_ignore_time;
 
   DynamicJsonDocument doc(1024);
-  doc["mac_origin"] = WiFi.macAddress().c_str();
+  doc["mac_origin"] = WiFi.macAddress();
   doc["method"] = "set";
   doc["attribute"] = "saturation";
   doc["saturation"] = saturation;
@@ -94,7 +94,7 @@ void LightManager::ChangeLightsToColorHue(std::list<Light *> *lights, uint16_t h
   InterfaceConfig::ignore_mqtt_state_events_until = millis() + InterfaceConfig::mqtt_ignore_time;
 
   DynamicJsonDocument doc(1024);
-  doc["mac_origin"] = WiFi.macAddress().c_str();
+  doc["mac_origin"] = WiFi.macAddress();
   doc["method"] = "set";
   doc["attribute"] = "hue";
   doc["hue"] = hue;

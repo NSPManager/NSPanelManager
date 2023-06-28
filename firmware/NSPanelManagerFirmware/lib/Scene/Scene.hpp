@@ -12,6 +12,8 @@ public:
   Room *room = nullptr;
   void save();
   void activate();
+  uint16_t getId();
+  std::string getName();
 
   DeviceEntityType getType();
   void attachDeconstructCallback(DeviceEntityObserver *callback);

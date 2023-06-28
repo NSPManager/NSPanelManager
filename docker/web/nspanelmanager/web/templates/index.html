@@ -54,7 +54,7 @@
                 {% endif %}
       </td>
       <td id="heap_used_{{ nspanel.mac_address }}">{{ nspanel.heap_used_pct }}%</td>
-      <td id="temperature_{{ nspanel.mac_address }}">{{ nspanel.temperature }}C</td>
+      <td id="temperature_{{ nspanel.mac_address }}">{{ nspanel.temperature }} {{ temperature_unit }}</td>
       <td>{{ nspanel.version }}</td>
       <td>
         <a type="button" class="button is-primary is-small"
