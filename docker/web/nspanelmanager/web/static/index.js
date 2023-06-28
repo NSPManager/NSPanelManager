@@ -93,4 +93,23 @@ function connect_to_websocket() {
 
 $(document).ready(function() {
   connect_to_websocket(); 
+
+  $("#firmware_upload_file_input").change(function (){
+    var fileName = $(this).val().replace("C:\\fakepath\\", "");
+    $("#firmware_upload_file_name").html(fileName);
+  });
+
+
+  $("#data_upload_file_input").change(function (){
+    var fileName = $(this).val().replace("C:\\fakepath\\", "");
+    $("#data_upload_file_name").html(fileName);
+  });
+
+
+  $("#tft_upload_file_input").change(function (){
+    var fileName = $(this).val().replace("C:\\fakepath\\", "");
+    $("#tft_upload_file_name").html(fileName);
+  });
 });
+
+
