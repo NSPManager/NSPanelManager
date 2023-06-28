@@ -79,6 +79,13 @@ function populateModalWithWiFiNetworks(networks) {
   $("#available_wifi_networks").show();
 }
 
+function selectNetwork(network) {
+    $("#wifi_ssid").val(network);
+    $("#select_wifi_modal").removeClass("is-active");
+    $("#wifi_psk").select(); // Select the PSK field to accept the PSK for the select WiFi
+    doConnectionCheck = true;
+}
+
 $(document).ready(function () {
   setupWifiSelectModal();
 });
