@@ -33,6 +33,7 @@ void HomePage::updateDeviceEntitySubscriptions() {
 
 void HomePage::update() {
   this->updateRoomInfo();
+  this->updateModeText();
 }
 
 void HomePage::roomChangedCallback() {
@@ -484,15 +485,7 @@ void HomePage::goToNextMode() {
 
 void HomePage::setCurrentMode(roomMode mode) {
   this->_currentRoomMode = mode;
-  if (this->_currentRoomMode == roomMode::room) {
-    NSPanel::instance->setComponentText(HOME_PAGE_MODE_LABEL_NAME, "Room lights");
-    NSPanel::instance->setComponentPic(HOME_BUTTON_SCENES_NAME, HOME_BUTTON_SCENES_ROOM_MODE_PIC);
-  } else if (this->_currentRoomMode == roomMode::house) {
-    NSPanel::instance->setComponentText(HOME_PAGE_MODE_LABEL_NAME, "All lights");
-    NSPanel::instance->setComponentPic(HOME_BUTTON_SCENES_NAME, HOME_BUTTON_SCENES_ALL_MODE_PIC);
-  } else {
-    NSPanel::instance->setComponentText(HOME_PAGE_MODE_LABEL_NAME, "UNKNOWN");
-  }
+  this->updateModeText();
   this->updateRoomInfo();
 }
 
@@ -604,9 +597,21 @@ void HomePage::updateLightStatus() {
 
 void HomePage::updateRoomInfo() {
   if (this->_currentRoomMode == roomMode::room) {
-    NSPanel::instance->setComponentText("home.room", (*RoomManager::currentRoom)->name.c_str());
+    NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, (*RoomManager::currentRoom)->name.c_str());
   } else if (this->_currentRoomMode == roomMode::house) {
-    NSPanel::instance->setComponentText("home.room", "<--ALL-->");
+    NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, "<--ALL-->");
   }
   this->updateLightStatus();
+}
+
+void HomePage::updateModeText() {
+  if (this->_currentRoomMode == roomMode::room) {
+    NSPanel::instance->setComponentText(HOME_PAGE_MODE_LABEL_NAME, "Room lights");
+    NSPanel::instance->setComponentPic(HOME_BUTTON_SCENES_NAME, HOME_BUTTON_SCENES_ROOM_MODE_PIC);
+  } else if (this->_currentRoomMode == roomMode::house) {
+    NSPanel::instance->setComponentText(HOME_PAGE_MODE_LABEL_NAME, "All lights");
+    NSPanel::instance->setComponentPic(HOME_BUTTON_SCENES_NAME, HOME_BUTTON_SCENES_ALL_MODE_PIC);
+  } else {
+    NSPanel::instance->setComponentText(HOME_PAGE_MODE_LABEL_NAME, "UNKNOWN");
+  }
 }

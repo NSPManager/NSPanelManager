@@ -35,8 +35,6 @@ void PageManager::UpdateCurrentPage() {
 void PageManager::UnshowCurrentPage() {
   if (PageManager::GetCurrentPage() != nullptr) {
     PageManager::GetCurrentPage()->unshow();
-  } else {
-    LOG_ERROR("Trying to unshow current page but no current page is set.");
   }
 }
 

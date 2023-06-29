@@ -41,6 +41,7 @@ public:
   void updateDeviceEntitySubscriptions();
   void updateLightStatus();
   void updateRoomInfo();
+  void updateModeText();
 
   void setEditLightMode(editLightMode new_mode);
 
