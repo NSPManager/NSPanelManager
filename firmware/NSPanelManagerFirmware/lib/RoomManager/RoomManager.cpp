@@ -57,7 +57,7 @@ void RoomManager::loadAllRooms(bool is_update) {
   } while (!successDownloadingConfig);
   // Config downloaded, process the raw data
   // The config also contains other config values for the interface. Populate InterfaceConfig
-  InterfaceConfig::homeScreen = (*roomData)["home"].as<uint8_t>();
+  InterfaceConfig::homeScreen = (*roomData)["home"].as<uint16_t>();
   InterfaceConfig::colorTempMin = (*roomData)["color_temp_min"].as<uint16_t>();
   InterfaceConfig::colorTempMax = (*roomData)["color_temp_max"].as<uint16_t>();
   InterfaceConfig::reverseColorTempSlider = (*roomData)["reverse_color_temp"].as<String>().equals("True");

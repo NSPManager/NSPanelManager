@@ -16,6 +16,8 @@ void ScreensaverPage::show() {
   NSPanel::instance->setDimLevel(InterfaceConfig::screensaver_dim_level);
   NSPanel::instance->goToPage(SCREENSAVE_PAGE_NAME);
   MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "0");
+  PageManager::GetHomePage()->setCurrentMode(roomMode::room);
+  RoomManager::goToRoomId(InterfaceConfig::homeScreen);
 }
 
 void ScreensaverPage::update() {

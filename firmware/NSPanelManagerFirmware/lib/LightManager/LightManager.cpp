@@ -116,11 +116,27 @@ void LightManager::ChangeLightsToColorHue(std::list<Light *> *lights, uint16_t h
 }
 
 std::list<Light *> LightManager::getCeilingLightsThatAreOn() {
-  return (*RoomManager::currentRoom)->getCeilingLightsThatAreOn();
+  std::list<Light *> lightsThatAreOn;
+  for (auto room : RoomManager::rooms) {
+    for (auto ceilingLight : room->ceilingLights) {
+      if (ceilingLight.second->getLightLevel() > 0) {
+        lightsThatAreOn.push_back(ceilingLight.second);
+      }
+    }
+  }
+  return lightsThatAreOn;
 }
 
 std::list<Light *> LightManager::getTableLightsThatAreOn() {
-  return (*RoomManager::currentRoom)->getTableLightsThatAreOn();
+  std::list<Light *> lightsThatAreOn;
+  for (auto room : RoomManager::rooms) {
+    for (auto tableLight : room->tableLights) {
+      if (tableLight.second->getLightLevel() > 0) {
+        lightsThatAreOn.push_back(tableLight.second);
+      }
+    }
+  }
+  return lightsThatAreOn;
 }
 
 std::list<Light *> LightManager::getAllLightsThatAreOn() {

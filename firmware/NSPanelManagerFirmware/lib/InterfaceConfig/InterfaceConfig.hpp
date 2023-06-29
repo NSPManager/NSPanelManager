@@ -5,7 +5,7 @@
 
 class InterfaceConfig {
 public:
-  static inline uint8_t homeScreen = 0;
+  static inline uint16_t homeScreen = 0;
   static inline uint16_t colorTempMin = 2000;
   static inline uint16_t colorTempMax = 6000;
   static inline uint8_t raiseToMaxLightLevelAbove = 95;
