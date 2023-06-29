@@ -3,7 +3,7 @@ function connect_to_websocket() {
 
     webSocket.onmessage = (event) => {
         data = JSON.parse(event.data);
-        if(data.type == "log") {
+        if(data.type == "log" && data.mac == $('#nspanel_mac').text()) {
             var add_html = "<tr><td>";
             add_html += data.time;
             add_html += "</td><td>";

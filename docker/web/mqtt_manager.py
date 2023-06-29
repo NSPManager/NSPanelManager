@@ -70,13 +70,14 @@ def on_message(client, userdata, msg):
         parts = msg.topic.split('/')
         # Messages received was a status update (online/offline)
         if parts[-1] == "log":
-            message_parts = msg.payload.decode('utf-8').split(':')
+            message_parts = msg.payload.decode('utf-8').split(';')
             data = {
                 "type": "log",
                 "time": datetime.datetime.now().strftime("%H:%M:%S"),
                 "panel": parts[1],
-                "level": message_parts[0],
-                "message": ':'.join(message_parts[1:])
+                "mac": message_parts[0],
+                "level": message_parts[1],
+                "message": ':'.join(message_parts[2:])
             }
             mqtt_manager_libs.websocket_server.send_message(json.dumps(data))
         elif parts[-1] == "status":
