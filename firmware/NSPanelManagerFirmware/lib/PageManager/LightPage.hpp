@@ -17,6 +17,7 @@ public:
   void updateValues();
   void show();
   void unshow();
+  void processTouchEvent(uint8_t page, uint8_t component, bool pressed);
   uint8_t getBrightnessValue();
   uint8_t getKelvinSatValue();
   uint16_t getHueValue();

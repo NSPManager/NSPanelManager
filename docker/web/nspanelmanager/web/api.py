@@ -54,6 +54,7 @@ def get_mqtt_manager_config(request):
         "openhab_color_temp_channel_name", "")
     return_json["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name", "")
     return_json["clock_us_style"] = get_setting_with_default("clock_us_style", False)
+    return_json["use_farenheit"] = get_setting_with_default("use_farenheit", False)
 
     return_json["lights"] = {}
     for light in Light.objects.all():
@@ -159,9 +160,11 @@ def register_nspanel(request):
     """Update the already existing NSPanel OR create a new one"""
     data = json.loads(request.body)
     new_panel = NSPanel.objects.filter(mac_address=data['mac_address']).first()
+    panel_already_exists = True
 
     if not new_panel:
         new_panel = NSPanel()
+        panel_already_exists = False
 
     new_panel.friendly_name = data['friendly_name']
     new_panel.mac_address = data['mac_address']
@@ -178,7 +181,8 @@ def register_nspanel(request):
 
     # Save the update/Create new panel
     new_panel.save()
-    restart_mqtt_manager()
+    if not panel_already_exists:
+        restart_mqtt_manager()
     return HttpResponse('OK', status=200)
 
 
@@ -207,6 +211,7 @@ def get_nspanel_config(request):
     base["clock_us_style"] = get_setting_with_default("clock_us_style", False)
     base["screensaver_activation_timeout"] = get_setting_with_default("screensaver_activation_timeout", 30000)
     base["button1_mode"] = nspanel.button1_mode
+    base["use_farenheit"] = get_setting_with_default("use_farenheit", False)
     if nspanel.button1_detached_mode_light:
         base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
     else:
@@ -278,8 +283,10 @@ def set_panel_status(request, panel_mac: str):
         nspanel = nspanels.first()
         # We got a match
         json_payload = json.loads(request.body.decode('utf-8'))
+        print(json_payload);
         nspanel.wifi_rssi = int(json_payload["rssi"])
         nspanel.heap_used_pct = int(json_payload["heap_used_pct"])
+        nspanel.temperature = round(json_payload["temperature"], 2)
         nspanel.save()
         return HttpResponse("", status=200)
 

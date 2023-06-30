@@ -8,6 +8,7 @@
 
 {% block content %}
 <h2 class="title is-4" id="nspanel_name">{{ panel.friendly_name }} settings</h2>
+<h2 class="subtitle is-6">MAC: <span id="nspanel_mac">{{ panel.mac_address }}</span></h2>
 <form method="POST" action="{% url 'save_panel_settings' panel_id=panel.id %}">
     {% csrf_token %}
     <div class="field">

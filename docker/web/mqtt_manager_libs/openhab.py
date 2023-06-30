@@ -13,6 +13,9 @@ keepalive_thread = None
 stop_keepalive = False
 settings = {}
 
+def millis():
+    return round(time() * 1000)
+
 
 def init(settings_from_manager, mqtt_client_from_manager):
     global openhab_url, openhab_token, settings, mqtt_client
@@ -38,7 +41,7 @@ def on_message(ws, message):
         for light in mqtt_manager_libs.light_states.states.values():
             try:
                 if light.type == "openhab":
-                    current_time_ms = time()*1000
+                    current_time_ms = millis()
                     if light.openhab_control_mode == "dimmer" and item == light.openhab_item_name:
                         light_level_pct = int(float(payload["value"]))
                         mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", light_level_pct, retain=True)
@@ -61,6 +64,7 @@ def on_message(ws, message):
                         mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_kelvin", send_color_temp, retain=True)
                         light.color_temp = send_color_temp
                         light.last_command_sent = "color_temp"
+                        light.last_mode_change = current_time_ms
                         return None
                     elif item == light.openhab_item_rgb and (current_time_ms >= light.last_mode_change + 1000 or light.last_command_sent == "rgb"):
                         #hue, sat, brightness = payload["value"]
@@ -74,9 +78,10 @@ def on_message(ws, message):
                         mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_sat", light.color_saturation, retain=True)
                         mqtt_client.publish(F"nspanel/entities/light/{light.id}/state_brightness_pct", light.light_level, retain=True)
                         light.last_command_sent = "rgb"
+                        light.last_mode_change = current_time_ms
                         return None
-
-                logging.info(F"Got state update event for light not managed by NSPanelManager. Topic: " + json_msg["topic"])
+                    else:
+                        logging.info(F"Got state update event for light not managed by NSPanelManager. Message: {message}")
             except Exception as e:
                 traceback.print_exc()
 
@@ -156,7 +161,7 @@ def set_entity_brightness(openhab_item_name: str, openhab_control_mode: str, lig
             # Format OpenHAB state update
             if light_level > 0:
                 onoff = "ON"
-            if light_level <= 0:
+            elif light_level <= 0:
                 onoff = "OFF"
 
             msg = {

@@ -52,6 +52,8 @@ public:
   std::string mqtt_availability_topic;
   /// @brief MQTT panel status topic
   std::string mqtt_panel_status_topic;
+  /// @brief MQTT panel temperature topic
+  std::string mqtt_panel_temperature_topic;
   /// @brief MQTT topic to send logs to
   std::string mqtt_log_topic;
   /// @brief The MQTT topic to send panel on/off status events to
@@ -95,6 +97,12 @@ public:
   // Button modes. 0 = direct mode. 1 = detached mode.
   BUTTON_MODE button1_mode;
   BUTTON_MODE button2_mode;
+
+  // Indicates wether or not LittleFS was mounted or not.
+  bool littlefs_mount_successfull;
+
+  /// @brief Should we report time in farenheit or celcius? True = farenheit, false = Celcius
+  bool use_farenheit;
 };
 
 #endif

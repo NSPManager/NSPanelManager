@@ -17,9 +17,11 @@ bool NSPMConfig::init() {
   this->use_new_upload_protocol = true;
   if (LittleFS.begin(false)) {
     Serial.println("LittleFS mounted.");
+    this->littlefs_mount_successfull = true;
     return true;
   } else {
     Serial.println("Failed to mount LittleFS");
+    this->littlefs_mount_successfull = false;
     return false;
   }
 }
@@ -65,6 +67,10 @@ bool NSPMConfig::loadFromLittleFS() {
   this->mqtt_panel_status_topic = "nspanel/";
   this->mqtt_panel_status_topic.append(NSPMConfig::instance->wifi_hostname);
   this->mqtt_panel_status_topic.append("/status_report");
+
+  this->mqtt_panel_temperature_topic = "nspanel/";
+  this->mqtt_panel_temperature_topic.append(NSPMConfig::instance->wifi_hostname);
+  this->mqtt_panel_temperature_topic.append("/temperature_state");
 
   this->mqtt_log_topic = "nspanel/";
   this->mqtt_log_topic.append(NSPMConfig::instance->wifi_hostname);

@@ -1,6 +1,4 @@
-#define HOME_PAGE_ID 2                     // ID of "Home"-page
 #define SWITCH_ROOM_BUTTON_ID 10           // ID of button to switch room
-#define SWITCH_MODE_BUTTON_ID 6            // ID of button to change light mode (room/home)
 #define HOME_LIGHT_COLOR_SLIDER_ID 1       // ID of "kelvin" slider on home page
 #define HOME_LIGHT_LEVEL_SLIDER_ID 2       // ID of light level slider on home page
 #define CEILING_LIGHTS_MASTER_BUTTON_ID 22 // ID of ceiling lights button on home page
@@ -16,6 +14,7 @@
 
 #define HOME_PIC_HIGHLIGHT_CEILING_NAME "p_lockceiling" // Should not have "home." in front as visibility command for Nextion is not as other commands
 #define HOME_PIC_HIGHLIGHT_TABLE_NAME "p_locktable"     // Should not have "home." in front as visibility command for Nextion is not as other commands
+#define HOME_PAGE_ID 2                                  // ID of "Home"-page
 #define HOME_PAGE_NAME "home"
 #define HOME_DIMMER_SLIDER_NAME "home.s_brightness"
 #define HOME_LIGHT_COLOR_SLIDER_NAME "home.s_kelvin"
@@ -29,6 +28,14 @@
 #define HOME_BUTTON_SCENES_ALL_MODE_PIC 26   // Pictures to use on button when panel is in All Lights mode
 #define HOME_BUTTON_SCENES_ALL_MODE_PIC2 27  // Pictures to use on button when panel is in All Lights mode
 #define HOME_PAGE_SCREENSAVER_TIMER_NAME "home.sleep_display"
+#define HOME_PAGE_ROOM_LABEL_NAME HOME_PAGE_NAME ".room"
+#define HOME_PAGE_ROOM_LABEL_ID 5
+#define HOME_PAGE_SWITCH_ROOM_BUTTON_ID 10
+#define HOME_PAGE_MODE_LABEL_NAME HOME_PAGE_NAME ".mode"
+#define HOME_PAGE_MODE_LABEL_ID 6
+#define SWITCH_MODE_BUTTON_ID 6 // ID of button to change light mode (room/home)
+#define HOME_PAGE_SLIDER_NORMAL_COLOR 65535
+#define HOME_PAGE_SLIDER_LOCK_COLOR 65024
 
 #define SCENES_PAGE_NAME "Scenes"
 #define SCENES_PAGE_ID 6 // ID for "Scenes"-page

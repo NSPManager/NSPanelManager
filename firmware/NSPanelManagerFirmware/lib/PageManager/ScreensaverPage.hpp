@@ -9,6 +9,8 @@ public:
   void update();
   void show();
   void unshow();
+  void processTouchEvent(uint8_t page, uint8_t component, bool pressed);
+
   void attachMqttTimeCallback();
   static void clockMqttCallback(char *topic, byte *payload, unsigned int length);
 };

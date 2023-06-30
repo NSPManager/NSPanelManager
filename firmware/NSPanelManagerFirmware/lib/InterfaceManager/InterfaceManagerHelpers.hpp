@@ -5,13 +5,6 @@
 #include <string>
 #include <vector>
 
-/// @brief MQTT Messages container
-class mqttMessage {
-public:
-  std::string topic;
-  std::string payload;
-};
-
 /// @brief Edit mode (room or house)
 enum roomMode {
   room,

@@ -24,8 +24,11 @@ def restart_mqtt_manager():
 
 
 def index(request):
-    print(len(Room.objects.all()))
-    return render(request, 'index.html', {'nspanels': NSPanel.objects.all()})
+    if get_setting_with_default("use_farenheit", False) == "True":
+        temperature_unit = "°F"
+    else:
+        temperature_unit = "°C"
+    return render(request, 'index.html', {'nspanels': NSPanel.objects.all(), "temperature_unit": temperature_unit})
 
 
 def rooms(request):
@@ -104,11 +107,13 @@ def save_new_room(request):
     new_room = Room()
     new_room.friendly_name = request.POST['friendly_name']
     new_room.save()
+    restart_mqtt_manager()
     return redirect('edit_room', room_id=new_room.id)
 
 
 def delete_room(request, room_id: int):
     Room.objects.filter(id=room_id).delete()
+    restart_mqtt_manager()
     return redirect('rooms')
 
 
@@ -116,6 +121,7 @@ def update_room_form(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
     room.friendly_name = request.POST['friendly_name']
     room.save()
+    restart_mqtt_manager()
     return redirect('edit_room', room_id=room_id)
 
 
@@ -214,12 +220,14 @@ def add_scene_to_room(request, room_id: int):
     new_scene.friendly_name = request.POST["scene_name"]
     new_scene.room = room
     new_scene.save()
+    restart_mqtt_manager()
     return redirect('edit_room', room_id=room_id)
 
 def delete_scene(request, scene_id: int):
     scene = Scene.objects.get(id=scene_id)
     if scene:
         scene.delete()
+        restart_mqtt_manager()
     return redirect('edit_room', room_id=scene.room.id)
 
 def add_light_to_room_view(request, room_id: int):
@@ -285,6 +293,7 @@ def settings_page(request):
     data["screensaver_dim_level"] = get_setting_with_default("screensaver_dim_level", 0)
     data["show_screensaver_clock"] = get_setting_with_default("show_screensaver_clock", False)
     data["clock_us_style"] = get_setting_with_default("clock_us_style", False)
+    data["use_farenheit"] = get_setting_with_default("use_farenheit", False)
     return render(request, 'settings.html', data)
 
 
@@ -322,6 +331,7 @@ def save_settings(request):
     set_setting_value(name="screensaver_dim_level", value=request.POST["screensaver_dim_level"])
     set_setting_value(name="show_screensaver_clock", value=("show_screensaver_clock" in request.POST))
     set_setting_value(name="clock_us_style", value=("clock_us_style" in request.POST))
+    set_setting_value(name="use_farenheit", value=("use_farenheit" in request.POST))
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()
     return redirect('settings')

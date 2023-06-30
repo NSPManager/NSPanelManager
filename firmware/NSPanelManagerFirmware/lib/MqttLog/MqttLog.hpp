@@ -1,11 +1,12 @@
 #ifndef MqttLog_H
 #define MqttLog_H
 
-#define LOG_TO_SERIAL 0 // Set to 1 to enable
+#define LOG_TO_SERIAL 1 // Set to 1 to enable
 
 #include <Arduino.h>
 #include <MqttManager.hpp>
 #include <PubSubClient.h>
+#include <WiFi.h>
 #include <string>
 
 #define LOG_SHORT_FILENAME                                 \
@@ -57,31 +58,32 @@ public:
     xSemaphoreTake(this->_messageBuilderMutex, portMAX_DELAY);
     this->buildMessageFromArgs(args...); // Build all parts into one message string
 
-    std::string mqttLogMessage;
+    std::string mqttLogMessage = WiFi.macAddress().c_str();
+    mqttLogMessage.append(";");
     switch (logLevel) {
     case MqttLogLevel::Error:
-      mqttLogMessage = "ERROR";
+      mqttLogMessage.append("ERROR");
       break;
     case MqttLogLevel::Warning:
-      mqttLogMessage = "WARNING";
+      mqttLogMessage.append("WARNING");
       break;
     case MqttLogLevel::Info:
-      mqttLogMessage = "INFO";
+      mqttLogMessage.append("INFO");
       break;
     case MqttLogLevel::Debug:
-      mqttLogMessage = "DEBUG";
+      mqttLogMessage.append("DEBUG");
       break;
     case MqttLogLevel::Trace:
-      mqttLogMessage = "TRACE";
+      mqttLogMessage.append("TRACE");
       break;
 
     default:
-      mqttLogMessage = "-UKN-";
+      mqttLogMessage.append("-UKN-");
       break;
     }
 
     // Build log message
-    mqttLogMessage.append(": ");
+    mqttLogMessage.append("; ");
     mqttLogMessage.append(filename);
     mqttLogMessage.append("");
     mqttLogMessage.append(":");

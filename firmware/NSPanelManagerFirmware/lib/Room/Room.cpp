@@ -117,3 +117,28 @@ Light *Room::getLightAtRoomViewPosition(int room_view_position) {
 
   return nullptr;
 }
+
+Light *Room::getLightById(uint16_t id) {
+  for (auto lightPair : this->ceilingLights) {
+    if (lightPair.first == id) {
+      return lightPair.second;
+    }
+  }
+
+  for (auto lightPair : this->tableLights) {
+    if (lightPair.first == id) {
+      return lightPair.second;
+    }
+  }
+
+  return nullptr;
+}
+
+Scene *Room::getSceneById(uint16_t id) {
+  for (auto scene : this->scenes) {
+    if (scene->id == id) {
+      return scene;
+    }
+  }
+  return nullptr;
+}
