@@ -4,6 +4,7 @@ from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 import json
 import requests
+import logging
 
 import hashlib
 import psutil
@@ -16,12 +17,11 @@ from web.settings_helper import get_setting_with_default
 def restart_mqtt_manager():
     for proc in psutil.process_iter():
         if "./mqtt_manager.py" in proc.cmdline():
-            print("Killing existing mqtt_manager")
+            logging.info("Killing existing mqtt_manager")
             proc.kill()
     # Restart the process
-    print("Starting a new mqtt_manager")
-    subprocess.Popen(
-        ["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
+    logging.info("Starting a new mqtt_manager")
+    subprocess.Popen(["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
 
 
 def get_mqtt_manager_config(request):
@@ -111,7 +111,7 @@ def get_all_available_light_entities(request):
                         "items": []
                     })
         except:
-            print("Failed to get Home Assistant lights!")
+            logging.exception("Failed to get Home Assistant lights!")
 
     # OpenHAB
     if get_setting_with_default("openhab_token", "") != "":
@@ -284,7 +284,6 @@ def set_panel_status(request, panel_mac: str):
         nspanel = nspanels.first()
         # We got a match
         json_payload = json.loads(request.body.decode('utf-8'))
-        print(json_payload);
         nspanel.wifi_rssi = int(json_payload["rssi"])
         nspanel.heap_used_pct = int(json_payload["heap_used_pct"])
         nspanel.temperature = round(json_payload["temperature"], 2)
@@ -354,7 +353,7 @@ def save_scene(request):
                     new_state.saturation = light_state["saturation"]
                 new_state.save()
             else:
-                print("ERROR: Couldn't find a light with ID " + light_state["light_id"] + ". Will skip light!")
+                logging.error("ERROR: Couldn't find a light with ID " + light_state["light_id"] + ". Will skip light!")
         return HttpResponse("OK", status=200)
     else:
         return HttpResponse("Scene does not exist!", status=500)

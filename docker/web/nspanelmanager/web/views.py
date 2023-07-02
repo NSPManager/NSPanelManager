@@ -7,6 +7,7 @@ from ranged_response import RangedFileResponse
 import hashlib
 import psutil
 import subprocess
+import logging
 
 from .models import NSPanel, Room, Light, Settings, Scene
 from web.settings_helper import get_setting_with_default, set_setting_value
@@ -15,10 +16,10 @@ from web.settings_helper import get_setting_with_default, set_setting_value
 def restart_mqtt_manager():
     for proc in psutil.process_iter():
         if "./mqtt_manager.py" in proc.cmdline():
-            print("Killing existing mqtt_manager")
+            logging.info("Killing existing mqtt_manager")
             proc.kill()
     # Restart the process
-    print("Starting a new mqtt_manager")
+    logging.info("Starting a new mqtt_manager")
     subprocess.Popen(
         ["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
 
@@ -369,7 +370,6 @@ def save_new_tft_file(request):
         fs = FileSystemStorage()
         fs.delete("gui.tft")
         fs.save("gui.tft", uploaded_file)
-        print("Saved new GUI tft file.")
     return redirect('/')
 
 

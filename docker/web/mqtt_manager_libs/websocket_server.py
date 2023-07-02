@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import random
 import websockets
+import logging
 from threading import Thread
 
 CONNECTIONS = set()
@@ -21,9 +22,9 @@ async def _run_server():
         await asyncio.Future()  # run forever
 
 def _main():
-    print("Starting websocket server")
+    logging.info("Starting websocket server")
     asyncio.run(_run_server())
-    print("Stopping websocket server")
+    logging.info("Stopping websocket server")
 
 def start_server():
     Thread(target=_main, daemon=True).start()

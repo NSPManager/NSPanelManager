@@ -226,7 +226,7 @@ bool NSPanel::init() {
   this->_sendCommandWithoutResponse("sleep=0");
   this->_sendCommandWithoutResponse("bkcmd=0");
   this->_sendCommandWithoutResponse("sleep=0");
-  this->_sendCommandClearResponse("rest");
+  // this->_sendCommandClearResponse("rest");
 
   xSemaphoreGive(NSPanel::instance->_mutexWriteSerialData);
   xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);

@@ -37,7 +37,6 @@ def on_message(ws, message):
     elif json_msg["type"] == "event" and json_msg["event"]["event_type"] == "state_changed":
         entity_id = json_msg["event"]["data"]["entity_id"]
         if entity_id.startswith("light.") or entity_id.startswith("switch."):
-            # print(json_msg) # Dump light update message
             send_entity_update(json_msg)
     elif json_msg["type"] == "result" and not json_msg["success"]:
         logging.error("Failed result: ")
@@ -161,9 +160,8 @@ def send_entity_update(json_msg):
                     F"nspanel/entities/light/{entity_id}/state_kelvin", new_state["attributes"]["color_temp_kelvin"], retain=True)
                 mqtt_manager_libs.light_states.states[entity_id].color_temp = new_state["attributes"]["color_temp_kelvin"]
 
-    except Exception as e:
-        logging.error("Failed to send entity update!")
-        logging.error(e)
+    except:
+        logging.exception("Failed to send entity update!")
 
 
 def set_entity_brightness(home_assistant_name: str, light_level: int, color_temp: int) -> bool:
@@ -228,9 +226,8 @@ def set_entity_color_temp(entity_name: str, color_temp: int) -> bool:
         }
         send_message(json.dumps(msg))
         return True
-    except Exception as e:
-        logging.error("Failed to send entity update to Home Assisatant.")
-        logging.error(e)
+    except:
+        logging.exception("Failed to send entity update to Home Assisatant.")
         return False
 
 
@@ -258,8 +255,7 @@ def set_entity_color_saturation(entity_name: str, light_level: int, color_satura
         send_message(json.dumps(msg))
         return True
     except Exception as e:
-        logging.error("Failed to send entity update to Home Assisatant.")
-        logging.error(e)
+        logging.exception("Failed to send entity update to Home Assisatant.")
         return False
 
 

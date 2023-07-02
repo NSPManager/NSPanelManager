@@ -54,7 +54,7 @@ def send_time_thread():
 
 
 def on_connect(client, userdata, flags, rc):
-    print("Connected to MQTT Server")
+    logging.info("Connected to MQTT Server")
     # Listen for all events sent to and from panels to control states
     client.subscribe("nspanel/mqttmanager/command")
     client.subscribe("nspanel/+/log")

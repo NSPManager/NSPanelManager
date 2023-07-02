@@ -34,9 +34,8 @@ def save_scene(room_name: str, scene_name: str):
 
                     post("http://127.0.0.1:8000/api/save_scene", json=scene_save_data)
                     break # We found the matching scene, no need to keep looping
-    except Exception as e:
-        logging.error("ERROR: Failed to save scene, giving up.")
-        traceback.print_exc()
+    except:
+        logging.exception("ERROR: Failed to save scene, giving up.")
 
 def activate_scene(room_name: str, scene_name: str):
     logging.debug(F"Trying to turn on scene {room_name}->{scene_name}")
@@ -55,6 +54,5 @@ def activate_scene(room_name: str, scene_name: str):
                             logging.debug(F"Setting light '{light.friendly_name}' according to saved scene.")
                             light.set_from_scene_data(light_state)
                     break # We found the matching scene, no need to keep looping
-    except Exception as e:
-        logging.error("ERROR: Failed to get scenes, giving up.")
-        traceback.print_exc()
+    except:
+        logging.exception("ERROR: Failed to get scenes, giving up.")

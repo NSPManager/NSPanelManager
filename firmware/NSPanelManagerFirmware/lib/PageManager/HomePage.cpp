@@ -32,6 +32,7 @@ void HomePage::updateDeviceEntitySubscriptions() {
 }
 
 void HomePage::update() {
+  this->updateLightStatus(true, true);
   this->updateRoomInfo();
   this->updateModeText();
 }
@@ -494,12 +495,31 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
   uint totalBrightnessLights = 0;
   uint totalKelvinLightsCeiling = 0;
   uint16_t totalKelvinValueCeilingLights = 0;
+  bool anyLightsOn = false;
+
+  if (this->_currentRoomMode == roomMode::room) {
+    if (this->_currentEditLightMode == editLightMode::all_lights) {
+      anyLightsOn = (*RoomManager::currentRoom)->anyLightsOn();
+    } else if (this->_currentEditLightMode == editLightMode::ceiling_lights) {
+      anyLightsOn = (*RoomManager::currentRoom)->anyCeilingLightsOn();
+    } else if (this->_currentEditLightMode == editLightMode::table_lights) {
+      anyLightsOn = (*RoomManager::currentRoom)->anyTableLightsOn();
+    }
+  } else if (this->_currentRoomMode == roomMode::house) {
+    if (this->_currentEditLightMode == editLightMode::all_lights) {
+      anyLightsOn = LightManager::anyLightsOn();
+    } else if (this->_currentEditLightMode == editLightMode::ceiling_lights) {
+      anyLightsOn = LightManager::anyCeilingLightsOn();
+    } else if (this->_currentEditLightMode == editLightMode::table_lights) {
+      anyLightsOn = LightManager::anyTableLightsOn();
+    }
+  }
 
   // Calculate average for ceiling lights
   if (this->_currentEditLightMode == editLightMode::all_lights || this->_currentEditLightMode == editLightMode::ceiling_lights) {
     if (this->_currentRoomMode == roomMode::room) {
       for (auto lightPair : (*RoomManager::currentRoom)->ceilingLights) {
-        if (lightPair.second->getLightLevel() > 0) {
+        if (lightPair.second->getLightLevel() > 0 || !anyLightsOn) {
           totalBrightnessLights++;
           totalBrightness += lightPair.second->getLightLevel();
           if (lightPair.second->canTemperature()) {
@@ -510,7 +530,7 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
       }
     } else if (this->_currentRoomMode == roomMode::house) {
       for (Light *light : LightManager::getAllCeilingLights()) {
-        if (light->getLightLevel() > 0) {
+        if (light->getLightLevel() > 0 || !anyLightsOn) {
           totalBrightnessLights++;
           totalBrightness += light->getLightLevel();
           if (light->canTemperature()) {
@@ -537,7 +557,7 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
   if (this->_currentEditLightMode == editLightMode::all_lights || this->_currentEditLightMode == editLightMode::table_lights) {
     if (this->_currentRoomMode == roomMode::room) {
       for (auto lightPair : (*RoomManager::currentRoom)->tableLights) {
-        if (lightPair.second->getLightLevel() > 0) {
+        if (lightPair.second->getLightLevel() > 0 || !anyLightsOn) {
           totalBrightnessLights++;
           totalBrightness += lightPair.second->getLightLevel();
           if (lightPair.second->canTemperature()) {
@@ -548,7 +568,7 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
       }
     } else if (this->_currentRoomMode == roomMode::house) {
       for (Light *light : LightManager::getAllTableLights()) {
-        if (light->getLightLevel() > 0) {
+        if (light->getLightLevel() > 0 || !anyLightsOn) {
           totalBrightnessLights++;
           totalBrightness += light->getLightLevel();
           if (light->canTemperature()) {
@@ -559,6 +579,7 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
       }
     }
   }
+
   uint8_t averageTableBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
   uint8_t averageTableKelvin = totalKelvinLightsTable == 0 ? 0 : totalKelvinValueTableLights / totalKelvinLightsTable;
   if (updateLightLevel) {
@@ -593,8 +614,9 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
   } else {
     totalAverageKelvin = 0;
   }
+
   // Only set a new value if it is not the same as already set and a new value was discovered (ie, > 0).
-  if (updateColorTemperature && totalAverageKelvin > 0 and totalAverageKelvin != PageManager::GetHomePage()->getColorTempValue()) {
+  if (updateColorTemperature && totalAverageKelvin != PageManager::GetHomePage()->getColorTempValue()) {
     PageManager::GetHomePage()->setColorTempValue(totalAverageKelvin);
   }
 }
