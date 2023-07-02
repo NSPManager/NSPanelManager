@@ -93,6 +93,11 @@ function connect_to_websocket() {
   };
 }
 
+function show_dropdown_menu(event) {
+  $(this).closest('.dropdown').toggleClass("is-active");
+  event.stopPropagation();
+}
+
 $(document).ready(function() {
   connect_to_websocket(); 
 
@@ -111,6 +116,11 @@ $(document).ready(function() {
   $("#tft_upload_file_input").change(function (){
     var fileName = $(this).val().replace("C:\\fakepath\\", "");
     $("#tft_upload_file_name").html(fileName);
+  });
+
+  $(".dropdown").click(show_dropdown_menu);
+  $(window).click(function() {
+    $(".dropdown").removeClass("is-active");
   });
 });
 
