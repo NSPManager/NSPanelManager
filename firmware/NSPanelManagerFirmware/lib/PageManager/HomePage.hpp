@@ -39,7 +39,7 @@ public:
   void setModeText(const char *text);
 
   void updateDeviceEntitySubscriptions();
-  void updateLightStatus();
+  void updateLightStatus(bool updateLightLevel, bool updateColorTemperature);
   void updateRoomInfo();
   void updateModeText();
 

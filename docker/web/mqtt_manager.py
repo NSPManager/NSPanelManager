@@ -64,9 +64,12 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("nspanel/scenes/room/+/+/activate")
     client.subscribe("nspanel/scenes/global/+/+/save")
     client.subscribe("nspanel/scenes/global/+/+/activate")
+    client.subscribe("nspanel/entities/#")
 
 def on_message(client, userdata, msg):
     try:
+        if msg.payload.decode() == "":
+            return
         parts = msg.topic.split('/')
         # Messages received was a status update (online/offline)
         if parts[-1] == "log":
@@ -81,14 +84,24 @@ def on_message(client, userdata, msg):
             }
             mqtt_manager_libs.websocket_server.send_message(json.dumps(data))
         elif parts[-1] == "status":
-            panel = parts[1]
-            data = json.loads(msg.payload.decode('utf-8'))
-            send_online_status(panel, data)
-            ws_data = {
-                "type": "status",
-                "payload": data
-            }
-            mqtt_manager_libs.websocket_server.send_message(json.dumps(ws_data))
+            panel_found = False
+            for panel in settings["nspanels"].values():
+                if panel["name"] == parts[-2]:
+                    panel_found = True
+                    break
+
+            if panel_found:
+                panel = parts[1]
+                data = json.loads(msg.payload.decode('utf-8'))
+                send_online_status(panel, data)
+                ws_data = {
+                    "type": "status",
+                    "payload": data
+                }
+                mqtt_manager_libs.websocket_server.send_message(json.dumps(ws_data))
+            else:
+                logging.warning(F"Removing mqtt topic: {msg.topic} as panel does not exist any more.")
+                client.publish('/'.join(parts), payload=None, qos=0, retain=True)
         elif parts[-1] == "status_report":
             panel = parts[1]
             data = json.loads(msg.payload.decode('utf-8'))
@@ -125,6 +138,11 @@ def on_message(client, userdata, msg):
             mqtt_manager_libs.scenes.activate_scene(parts[3], parts[4]) # Activate scene were part[3] is room and part[4] is scene name
         elif msg.topic.startswith("nspanel/scenes/room/") and msg.topic.endswith("/save") and msg.payload.decode('utf-8') == "1":
             mqtt_manager_libs.scenes.save_scene(parts[3], parts[4]) # Save scene were part[3] is room and part[4] is scene name
+        elif msg.topic.startswith("nspanel/entities/light/"):
+            light_id =int(parts[3])
+            if not light_id in mqtt_manager_libs.light_states.states:
+                logging.warning(F"Removing MQTT topic '{msg.topic}' for light that does not exist any more.")
+                client.publish('/'.join(parts), payload=None, qos=0, retain=True)
         else:
             logging.debug(F"Received unhandled message on topic: {msg.topic}")
 

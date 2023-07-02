@@ -188,6 +188,7 @@ def register_nspanel(request):
 
 def delete_panel(request, panel_id: int):
     NSPanel.objects.get(id=panel_id).delete()
+    restart_mqtt_manager()
     return redirect('/')
 
 

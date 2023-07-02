@@ -291,7 +291,12 @@ void LightManager::_taskProcessMqttMessages(void *param) {
   mqttMessage *msg;
   for (;;) {
     if (xQueueReceive(LightManager::_mqttMessageQueue, &msg, portMAX_DELAY) == pdTRUE) {
+      if (msg->payload.size() <= 0) {
+        delete msg;
+        continue;
+      }
       if (msg->topic.find("nspanel/entities/") == 0) { // If topic begins with nspanel/entities/
+        LOG_DEBUG("Got entity state update at topic: ", msg->topic.c_str());
         std::string domain = msg->topic;
         domain = domain.erase(0, strlen("nspanel/entities/"));
         domain = domain.substr(0, domain.find('/'));
@@ -305,12 +310,14 @@ void LightManager::_taskProcessMqttMessages(void *param) {
         attribute = attribute.erase(0, attribute.find_last_of('/') + 1);
 
         if (domain.compare("light") == 0 && attribute.compare("state_brightness_pct") == 0) {
+          LOG_DEBUG("Got level update!");
           Light *light = LightManager::getLightById(atoi(entity.c_str()));
           if (light != nullptr) {
             light->setLightLevel(atoi(msg->payload.c_str()));
             light->callUpdateCallbacks();
           }
         } else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0) {
+          LOG_DEBUG("Got kelvin update!");
           uint16_t colorTemp = atoi(msg->payload.c_str());
           if (colorTemp > InterfaceConfig::colorTempMax) {
             colorTemp = InterfaceConfig::colorTempMax;
@@ -329,6 +336,8 @@ void LightManager::_taskProcessMqttMessages(void *param) {
             light->setColorTemperature(colorTemp);
             light->callUpdateCallbacks();
           }
+        } else {
+          LOG_ERROR("Got state update for unknown attribute: ", attribute.c_str());
         }
       }
       delete msg;

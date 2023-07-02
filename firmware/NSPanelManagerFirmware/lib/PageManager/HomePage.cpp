@@ -60,7 +60,7 @@ void HomePage::_taskUpdateDisplay(void *param) {
     vTaskDelay(25 / portTICK_PERIOD_MS);
   }
 
-  PageManager::GetHomePage()->updateLightStatus();
+  PageManager::GetHomePage()->updateLightStatus(true, true);
   HomePage::_taskHandleUpdateDisplay = NULL;
   vTaskDelete(NULL);
 }
@@ -247,7 +247,7 @@ void HomePage::setEditLightMode(editLightMode new_mode) {
     PageManager::GetHomePage()->setSliderLightLevelColor(HOME_PAGE_SLIDER_LOCK_COLOR); // Change slider color to indicate special mode
     PageManager::GetHomePage()->setSliderColorTempColor(HOME_PAGE_SLIDER_LOCK_COLOR);  // Change slider color to indicate special mode
   }
-  this->updateLightStatus();
+  this->updateLightStatus(true, true);
   this->_startSpecialModeTimerTask();
 }
 
@@ -289,7 +289,7 @@ void HomePage::_updateLightsThatAreOnWithNewBrightness(uint8_t brightness) {
 
   LightManager::ChangeLightsToLevel(&lights, brightness);
   this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
-  this->updateLightStatus();
+  this->updateLightStatus(true, false);
 }
 
 void HomePage::_updateAllLightsWithNewBrightness(uint8_t brightness) {
@@ -339,7 +339,7 @@ void HomePage::_updateAllLightsWithNewBrightness(uint8_t brightness) {
   uint8_t newLevel = PageManager::GetHomePage()->getDimmingValue();
   LightManager::ChangeLightsToLevel(&lights, newLevel);
   this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
-  this->updateLightStatus();
+  this->updateLightStatus(true, false);
 }
 
 void HomePage::_startSpecialModeTriggerTask(editLightMode triggerMode) {
@@ -423,7 +423,7 @@ void HomePage::_ceilingMasterButtonEvent() {
   }
 
   this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
-  this->updateLightStatus();
+  this->updateLightStatus(true, false);
 }
 
 void HomePage::_tableMasterButtonEvent() {
@@ -447,7 +447,7 @@ void HomePage::_tableMasterButtonEvent() {
   }
 
   this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
-  this->updateLightStatus();
+  this->updateLightStatus(true, false);
 }
 
 void HomePage::_updateLightsColorTempAccordingToSlider() {
@@ -472,7 +472,7 @@ void HomePage::_updateLightsColorTempAccordingToSlider() {
 
   LightManager::ChangeLightToColorTemperature(&lights, this->getColorTempValue());
   this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
-  this->updateLightStatus();
+  this->updateLightStatus(false, true);
 }
 
 void HomePage::goToNextMode() {
@@ -489,7 +489,7 @@ void HomePage::setCurrentMode(roomMode mode) {
   this->updateRoomInfo();
 }
 
-void HomePage::updateLightStatus() {
+void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperature) {
   uint totalBrightness = 0;
   uint totalBrightnessLights = 0;
   uint totalKelvinLightsCeiling = 0;
@@ -524,8 +524,10 @@ void HomePage::updateLightStatus() {
 
   uint8_t averageCeilingBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
   uint8_t averageCeilingKelvin = totalKelvinLightsCeiling == 0 ? 0 : totalKelvinValueCeilingLights / totalKelvinLightsCeiling;
-  PageManager::GetHomePage()->setCeilingLightsState(averageCeilingBrightness > 0);
-  PageManager::GetHomePage()->setCeilingBrightnessLabelText(averageCeilingBrightness);
+  if (updateLightLevel) {
+    PageManager::GetHomePage()->setCeilingLightsState(averageCeilingBrightness > 0);
+    PageManager::GetHomePage()->setCeilingBrightnessLabelText(averageCeilingBrightness);
+  }
 
   // Calculate average for table lights
   totalBrightness = 0;
@@ -559,8 +561,10 @@ void HomePage::updateLightStatus() {
   }
   uint8_t averageTableBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
   uint8_t averageTableKelvin = totalKelvinLightsTable == 0 ? 0 : totalKelvinValueTableLights / totalKelvinLightsTable;
-  PageManager::GetHomePage()->setTableLightsState(averageTableBrightness > 0);
-  PageManager::GetHomePage()->setTableBrightnessLabelText(averageTableBrightness);
+  if (updateLightLevel) {
+    PageManager::GetHomePage()->setTableLightsState(averageTableBrightness > 0);
+    PageManager::GetHomePage()->setTableBrightnessLabelText(averageTableBrightness);
+  }
 
   uint8_t totalAverageBrightness;
   if (averageCeilingBrightness > 0 && averageTableBrightness > 0) {
@@ -575,7 +579,7 @@ void HomePage::updateLightStatus() {
 
   // Only set a new value if any lights are on.
   // This value will be used as the next "on" value.
-  if (totalAverageBrightness > 0 && totalAverageBrightness != PageManager::GetHomePage()->getDimmingValue()) {
+  if (updateLightLevel && totalAverageBrightness > 0 && totalAverageBrightness != PageManager::GetHomePage()->getDimmingValue()) {
     PageManager::GetHomePage()->setDimmingValue(totalAverageBrightness);
   }
 
@@ -590,7 +594,7 @@ void HomePage::updateLightStatus() {
     totalAverageKelvin = 0;
   }
   // Only set a new value if it is not the same as already set and a new value was discovered (ie, > 0).
-  if (totalAverageKelvin > 0 and totalAverageKelvin != PageManager::GetHomePage()->getColorTempValue()) {
+  if (updateColorTemperature && totalAverageKelvin > 0 and totalAverageKelvin != PageManager::GetHomePage()->getColorTempValue()) {
     PageManager::GetHomePage()->setColorTempValue(totalAverageKelvin);
   }
 }
@@ -601,7 +605,7 @@ void HomePage::updateRoomInfo() {
   } else if (this->_currentRoomMode == roomMode::house) {
     NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, "<--ALL-->");
   }
-  this->updateLightStatus();
+  this->updateLightStatus(true, true);
 }
 
 void HomePage::updateModeText() {
