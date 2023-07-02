@@ -22,9 +22,9 @@ async def _run_server():
         await asyncio.Future()  # run forever
 
 def _main():
-    logging.info("Starting websocket server")
+    #logging.info("Starting websocket server")
     asyncio.run(_run_server())
-    logging.info("Stopping websocket server")
+    #logging.info("Stopping websocket server")
 
 def start_server():
     Thread(target=_main, daemon=True).start()

@@ -201,8 +201,7 @@ def connect_and_loop():
             client.connect(mqtt_server, mqtt_port, 5)
             break  # Connection call did not raise exception, connection is sucessfull
         except:
-            logging.error(
-                F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
+            logging.exception(F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
             time.sleep(10)
 
     # Send reload command to panels for them to reload config as MQTT manager JUST restarted (probably because of config change)
