@@ -40,8 +40,8 @@ All configuration for panels are done via a web interface running in a docker co
 
 If you are setting up the container manually using some other tool, make sure to publish port 8000 and 8001 for web interface and websocket. To set the timezone, make sure you pass though the /etc/timezone file.
 
-To access web interface, enter IP-address and port to where the container is running.
-Go to settings:
+To access web interface, enter IP-address and port (standard 8000) to where the container is running.
+* Press settings for some initial settings:
 * Insert your MQTT settings
 * Insert API information to Home Assistant or Openhab
 * Save
@@ -49,6 +49,7 @@ Go to settings:
 
 ## 2. Flash firmware to NSPanel
 The NSPanelManager firmware is written as a PlatformIO-project and this is by far the easiest method to flash the firmware. Perform the following steps to flash you NSPanel: (if not using PlatformIO or unable to run the below scripts you can use whatever tool you prefer to flash the panel. File to flash is: `merged-flash.bin` in the `firmware/NSPanelManagerFirmware/`)
+
 * Install PlatformIO for you platform.
 * Navigate to the `firmware/NSPanelManagerFirmware/` directory.
 * Execute `./upload_image.sh` while connected to the NSPanel with serial programmer. Repeat for all panels.
@@ -89,5 +90,6 @@ For more information on how to connect to the NSPanel to flash it, see [this tut
 * Light is automactically given a place below on the room page.
 * Press room page rows to edit the order of the lights on the room page.
 * New lights and changes is sent out to all panels instantly.
+* Try controling your newly added lights through the NSPanel. Hope it works!
 
 
