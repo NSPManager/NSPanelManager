@@ -496,14 +496,23 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
   uint totalKelvinLightsCeiling = 0;
   uint16_t totalKelvinValueCeilingLights = 0;
   bool anyLightsOn = false;
+  std::list<Light *> ceilingLights;
+  std::list<Light *> tableLights;
 
   if (this->_currentRoomMode == roomMode::room) {
     if (this->_currentEditLightMode == editLightMode::all_lights) {
       anyLightsOn = (*RoomManager::currentRoom)->anyLightsOn();
+
     } else if (this->_currentEditLightMode == editLightMode::ceiling_lights) {
       anyLightsOn = (*RoomManager::currentRoom)->anyCeilingLightsOn();
     } else if (this->_currentEditLightMode == editLightMode::table_lights) {
       anyLightsOn = (*RoomManager::currentRoom)->anyTableLightsOn();
+    }
+    for (auto lightPair : (*RoomManager::currentRoom)->ceilingLights) {
+      ceilingLights.push_back(lightPair.second);
+    }
+    for (auto lightPair : (*RoomManager::currentRoom)->tableLights) {
+      tableLights.push_back(lightPair.second);
     }
   } else if (this->_currentRoomMode == roomMode::house) {
     if (this->_currentEditLightMode == editLightMode::all_lights) {
@@ -513,30 +522,19 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
     } else if (this->_currentEditLightMode == editLightMode::table_lights) {
       anyLightsOn = LightManager::anyTableLightsOn();
     }
+    ceilingLights = LightManager::getAllCeilingLights();
+    tableLights = LightManager::getAllTableLights();
   }
 
   // Calculate average for ceiling lights
   if (this->_currentEditLightMode == editLightMode::all_lights || this->_currentEditLightMode == editLightMode::ceiling_lights) {
-    if (this->_currentRoomMode == roomMode::room) {
-      for (auto lightPair : (*RoomManager::currentRoom)->ceilingLights) {
-        if (lightPair.second->getLightLevel() > 0 || !anyLightsOn) {
-          totalBrightnessLights++;
-          totalBrightness += lightPair.second->getLightLevel();
-          if (lightPair.second->canTemperature()) {
-            totalKelvinLightsCeiling++;
-            totalKelvinValueCeilingLights += lightPair.second->getColorTemperature();
-          }
-        }
-      }
-    } else if (this->_currentRoomMode == roomMode::house) {
-      for (Light *light : LightManager::getAllCeilingLights()) {
-        if (light->getLightLevel() > 0 || !anyLightsOn) {
-          totalBrightnessLights++;
-          totalBrightness += light->getLightLevel();
-          if (light->canTemperature()) {
-            totalKelvinLightsCeiling++;
-            totalKelvinValueCeilingLights += light->canTemperature();
-          }
+    for (Light *light : ceilingLights) {
+      if (light->getLightLevel() > 0 || !anyLightsOn) {
+        totalBrightnessLights++;
+        totalBrightness += light->getLightLevel();
+        if (light->canTemperature()) {
+          totalKelvinLightsCeiling++;
+          totalKelvinValueCeilingLights += light->getColorTemperature();
         }
       }
     }
@@ -555,26 +553,13 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
   uint8_t totalKelvinLightsTable = 0;
   uint16_t totalKelvinValueTableLights = 0;
   if (this->_currentEditLightMode == editLightMode::all_lights || this->_currentEditLightMode == editLightMode::table_lights) {
-    if (this->_currentRoomMode == roomMode::room) {
-      for (auto lightPair : (*RoomManager::currentRoom)->tableLights) {
-        if (lightPair.second->getLightLevel() > 0 || !anyLightsOn) {
-          totalBrightnessLights++;
-          totalBrightness += lightPair.second->getLightLevel();
-          if (lightPair.second->canTemperature()) {
-            totalKelvinLightsTable++;
-            totalKelvinValueTableLights += lightPair.second->getColorTemperature();
-          }
-        }
-      }
-    } else if (this->_currentRoomMode == roomMode::house) {
-      for (Light *light : LightManager::getAllTableLights()) {
-        if (light->getLightLevel() > 0 || !anyLightsOn) {
-          totalBrightnessLights++;
-          totalBrightness += light->getLightLevel();
-          if (light->canTemperature()) {
-            totalKelvinLightsTable++;
-            totalKelvinValueTableLights += light->getColorTemperature();
-          }
+    for (Light *light : tableLights) {
+      if (light->getLightLevel() > 0 || !anyLightsOn) {
+        totalBrightnessLights++;
+        totalBrightness += light->getLightLevel();
+        if (light->canTemperature()) {
+          totalKelvinLightsTable++;
+          totalKelvinValueTableLights += light->getColorTemperature();
         }
       }
     }
