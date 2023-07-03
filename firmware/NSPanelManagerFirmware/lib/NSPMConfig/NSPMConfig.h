@@ -98,6 +98,10 @@ public:
   BUTTON_MODE button1_mode;
   BUTTON_MODE button2_mode;
 
+  // @brief default relay state
+  bool relay1_default_mode;
+  bool relay2_default_mode;
+
   // Indicates wether or not LittleFS was mounted or not.
   bool littlefs_mount_successfull;
 

@@ -72,12 +72,42 @@ void RoomManager::loadAllRooms(bool is_update) {
   InterfaceConfig::screensaver_activation_timeout = (*roomData)["screensaver_activation_timeout"].as<uint16_t>();
   InterfaceConfig::show_screensaver_clock = (*roomData)["show_screensaver_clock"].as<String>().equals("True");
   InterfaceConfig::clock_us_style = (*roomData)["clock_us_style"].as<String>().equals("True");
+  InterfaceConfig::lock_to_default_room = (*roomData)["lock_to_default_room"].as<String>().equals("True");
   NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>((*roomData)["button1_mode"].as<uint8_t>());
   NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>((*roomData)["button2_mode"].as<uint8_t>());
   NSPMConfig::instance->use_farenheit = (*roomData)["use_farenheit"].as<String>().equals("True");
+
+  bool relay1_default_mode = (*roomData)["relay1_default_mode"].as<String>().equals("True");
+  bool relay2_default_mode = (*roomData)["relay2_default_mode"].as<String>().equals("True");
+
+  ButtonManager::setRelayState(1, relay1_default_mode);
+  ButtonManager::setRelayState(2, relay2_default_mode);
+
+  if (NSPMConfig::instance->relay1_default_mode != relay1_default_mode) {
+    NSPMConfig::instance->relay1_default_mode = relay1_default_mode;
+    NSPMConfig::instance->saveToLittleFS();
+  }
+
+  if (NSPMConfig::instance->relay2_default_mode != relay2_default_mode) {
+    NSPMConfig::instance->relay2_default_mode = relay2_default_mode;
+    NSPMConfig::instance->saveToLittleFS();
+  }
+
+  if (NSPMConfig::instance->wifi_hostname.compare((*roomData)["name"].as<String>().c_str()) != 0) {
+    NSPMConfig::instance->wifi_hostname = (*roomData)["name"].as<String>().c_str();
+    NSPMConfig::instance->saveToLittleFS();
+    LOG_DEBUG("Name has changed. Restarting.");
+    vTaskDelay(250 / portTICK_PERIOD_MS);
+    ESP.restart();
+    vTaskDelay(portMAX_DELAY);
+    vTaskDelete(NULL);
+  }
   // Init rooms
 
   for (uint16_t roomId : (*roomData)["rooms"].as<JsonArray>()) {
+    if (InterfaceConfig::lock_to_default_room && roomId != InterfaceConfig::homeScreen) {
+      continue;
+    }
     LOG_INFO("Getting config for room ", roomId);
     Room *room = RoomManager::loadRoom(roomId, is_update);
     if (RoomManager::getRoomById(roomId) == nullptr) {

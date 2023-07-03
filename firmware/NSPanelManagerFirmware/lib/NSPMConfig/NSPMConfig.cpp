@@ -43,7 +43,7 @@ bool NSPMConfig::loadFromLittleFS() {
   }
 
   // Load config data
-  this->wifi_hostname = doc["wifi_hostname"] | "NSPanelManager-ESP";
+  this->wifi_hostname = doc["wifi_hostname"] | "NSPMPanel";
   this->wifi_ssid = doc["wifi_ssid"] | "";
   this->wifi_psk = doc["wifi_psk"] | "";
   this->manager_address = doc["manager_address"] | "";
@@ -57,6 +57,9 @@ bool NSPMConfig::loadFromLittleFS() {
 
   this->tft_upload_baud = doc.containsKey("upload_baud") ? doc["upload_baud"].as<uint32_t>() : 115200;
   this->use_new_upload_protocol = doc.containsKey("use_new_upload_protocol") ? doc["use_new_upload_protocol"].as<String>() == "true" : true;
+
+  this->relay1_default_mode = doc["relay1_default_mode"].as<String>() == "True";
+  this->relay2_default_mode = doc["relay2_default_mode"].as<String>() == "True";
 
   // Load calculated values
   this->mqtt_availability_topic = "nspanel/";

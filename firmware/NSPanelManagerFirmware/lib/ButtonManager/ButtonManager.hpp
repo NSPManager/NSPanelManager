@@ -17,10 +17,10 @@ public:
   static void mqttCallback(char *topic, byte *payload, unsigned int length);
   static inline Light *button1_detached_mode_light;
   static inline Light *button2_detached_mode_light;
+  static void setRelayState(uint8_t relay, bool state);
 
 private:
   static void _loop(void *param);
-  static void _setRelayState(uint8_t relay, bool state);
   static void _processButtonStateChange(uint8_t button, bool new_state);
 
   static inline bool _lastButton1State;

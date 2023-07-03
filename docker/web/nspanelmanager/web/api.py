@@ -11,7 +11,7 @@ import psutil
 import subprocess
 
 from .models import NSPanel, Room, Light, LightState, Scene
-from web.settings_helper import get_setting_with_default
+from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default
 
 
 def restart_mqtt_manager():
@@ -164,9 +164,9 @@ def register_nspanel(request):
 
     if not new_panel:
         new_panel = NSPanel()
+        new_panel.friendly_name = data['friendly_name']
         panel_already_exists = False
 
-    new_panel.friendly_name = data['friendly_name']
     new_panel.mac_address = data['mac_address']
     new_panel.version = data["version"]
     new_panel.last_seen = datetime.now()
@@ -195,6 +195,7 @@ def delete_panel(request, panel_id: int):
 def get_nspanel_config(request):
     nspanel = NSPanel.objects.get(mac_address=request.GET["mac"])
     base = {}
+    base["name"] = nspanel.friendly_name
     base["home"] = nspanel.room.id
     base["raise_to_100_light_level"] = get_setting_with_default(
         "raise_to_100_light_level", 95)
@@ -206,13 +207,16 @@ def get_nspanel_config(request):
     base["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time", 300)
     base["special_mode_release_time"] = get_setting_with_default("special_mode_release_time", 5000)
     base["mqtt_ignore_time"] = get_setting_with_default("mqtt_ignore_time", 3000)
-    base["screen_dim_level"] = get_setting_with_default("screen_dim_level", 100)
-    base["screensaver_dim_level"] = get_setting_with_default("screensaver_dim_level", 0)
-    base["show_screensaver_clock"] = get_setting_with_default("show_screensaver_clock", False)
+    base["screen_dim_level"] = get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level", 100))
+    base["screensaver_dim_level"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level", 0))
+    base["screensaver_activation_timeout"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout", 30000))
+    base["show_screensaver_clock"] = get_nspanel_setting_with_default(nspanel.id, "show_screensaver_clock", get_setting_with_default("show_screensaver_clock", False))
     base["clock_us_style"] = get_setting_with_default("clock_us_style", False)
-    base["screensaver_activation_timeout"] = get_setting_with_default("screensaver_activation_timeout", 30000)
     base["button1_mode"] = nspanel.button1_mode
     base["use_farenheit"] = get_setting_with_default("use_farenheit", False)
+    base["lock_to_default_room"] = get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False")
+    base["relay1_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", False)
+    base["relay2_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", False)
     if nspanel.button1_detached_mode_light:
         base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
     else:

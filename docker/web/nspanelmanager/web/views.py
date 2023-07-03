@@ -1,3 +1,4 @@
+from requests import delete
 from django.shortcuts import render, redirect, HttpResponse
 from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
@@ -10,7 +11,7 @@ import subprocess
 import logging
 
 from .models import NSPanel, Room, Light, Settings, Scene
-from web.settings_helper import get_setting_with_default, set_setting_value
+from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
 
 
 def restart_mqtt_manager():
@@ -127,15 +128,27 @@ def update_room_form(request, room_id: int):
 
 
 def edit_nspanel(request, panel_id: int):
+    settings = {
+        "lock_to_default_room": get_nspanel_setting_with_default(panel_id, "lock_to_default_room", "False"),
+        "screen_dim_level": get_nspanel_setting_with_default(panel_id, "screen_dim_level", ""),
+        "screensaver_dim_level": get_nspanel_setting_with_default(panel_id, "screensaver_dim_level", ""),
+        "screensaver_activation_timeout": get_nspanel_setting_with_default(panel_id, "screensaver_activation_timeout", ""),
+        "show_screensaver_clock": get_nspanel_setting_with_default(panel_id, "show_screensaver_clock", "Global"),
+        "relay1_default_mode": get_nspanel_setting_with_default(panel_id, "relay1_default_mode", "False"),
+        "relay2_default_mode": get_nspanel_setting_with_default(panel_id, "relay2_default_mode", "False"),
+    }
+
     return render(request, 'edit_nspanel.html', {
         'panel': NSPanel.objects.get(id=panel_id),
-        'rooms': Room.objects.all()
+        'rooms': Room.objects.all(),
+        'settings': settings
     })
 
 
 def save_panel_settings(request, panel_id: int):
     panel = NSPanel.objects.get(id=panel_id)
     panel.room = Room.objects.get(id=request.POST["room_id"])
+    panel.friendly_name = request.POST["name"]
     panel.button1_mode = request.POST["button1_mode"]
     if request.POST["button1_mode"] == "1":
         panel.button1_detached_mode_light = Light.objects.get(id=request.POST["button1_detached_mode_light"])
@@ -146,6 +159,28 @@ def save_panel_settings(request, panel_id: int):
         panel.button2_detached_mode_light = Light.objects.get(id=request.POST["button2_detached_mode_light"])
     else:
         panel.button2_detached_mode_light = None
+    if "lock_to_default_room" in request.POST:
+        set_nspanel_setting_value(panel_id, "lock_to_default_room", "True")
+    else:
+        set_nspanel_setting_value(panel_id, "lock_to_default_room", "False")
+    if request.POST["screen_dim_level"].strip():
+        set_nspanel_setting_value(panel_id, "screen_dim_level", request.POST["screen_dim_level"])
+    else:
+        delete_nspanel_setting(panel_id, "screen_dim_level")
+    if request.POST["screensaver_dim_level"].strip():
+        set_nspanel_setting_value(panel_id, "screensaver_dim_level", request.POST["screensaver_dim_level"])
+    else:
+        delete_nspanel_setting(panel_id, "screensaver_dim_level")
+    if request.POST["screensaver_activation_timeout"].strip():
+        set_nspanel_setting_value(panel_id, "screensaver_activation_timeout", request.POST["screensaver_activation_timeout"])
+    else:
+        delete_nspanel_setting(panel_id, "screensaver_activation_timeout")
+    if request.POST["show_screensaver_clock"] == "Global":
+        delete_nspanel_setting(panel_id, "show_screensaver_clock")
+    else:
+        set_nspanel_setting_value(panel_id, "show_screensaver_clock", request.POST["show_screensaver_clock"])
+    set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
+    set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
     panel.save()
     return redirect('edit_nspanel', panel_id)
 
