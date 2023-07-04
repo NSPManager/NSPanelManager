@@ -12,6 +12,7 @@ import mqtt_manager_libs.websocket_server
 import mqtt_manager_libs.light_states
 import mqtt_manager_libs.light
 import mqtt_manager_libs.scenes
+import mqtt_manager_libs.home_assistant_autoreg
 import re 
 import threading
 import os
@@ -175,6 +176,7 @@ def get_config():
                 for id, light in settings["lights"].items():
                     int_id = int(id)
                     mqtt_manager_libs.light_states.states[int_id] = mqtt_manager_libs.light.Light.from_dict(light)
+
                 # All light-data sucessfully loaded into light_states, clear own register
                 settings.pop("lights")
                 break
@@ -224,6 +226,10 @@ def connect_and_loop():
         mqtt_manager_libs.openhab.connect()
     else:
         logging.info("OpenHABA values not configured, will not connect.")
+
+
+    for id, nspanel in settings["nspanels"].items():
+        mqtt_manager_libs.home_assistant_autoreg.register_panel(nspanel, client, settings)
 
     # Loop MQTT
     client.loop_forever()
