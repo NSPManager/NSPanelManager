@@ -173,16 +173,19 @@ def register_nspanel(request):
     new_panel.last_seen = datetime.now()
     new_panel.ip_address = get_client_ip(request)
     fs = FileSystemStorage()
-    if data["md5_firmware"] == "":
-        new_panel.md5_firmware = hashlib.md5(fs.open("firmware.bin").read()).hexdigest()
-    else:
-        new_panel.md5_firmware = data["md5_firmware"]
-    if data["md5_data_file"] == "":
-        new_panel.md5_data_file = hashlib.md5(fs.open("data_file.bin").read()).hexdigest()
-    else:
-        new_panel.md5_data_file = data["md5_data_file"]
+    if "md5_firmware" in data:
+        if data["md5_firmware"] == "":
+            new_panel.md5_firmware = hashlib.md5(fs.open("firmware.bin").read()).hexdigest()
+        else:
+            new_panel.md5_firmware = data["md5_firmware"]
+    if "md5_data_file" in data:
+        if data["md5_data_file"] == "":
+            new_panel.md5_data_file = hashlib.md5(fs.open("data_file.bin").read()).hexdigest()
+        else:
+            new_panel.md5_data_file = data["md5_data_file"]
     # TFT file will never be flashed by default with a new panel, always set the MD5 from registration
-    new_panel.md5_tft_file = data["md5_tft_file"]
+    if "md5_tft_file" in data:
+        new_panel.md5_tft_file = data["md5_tft_file"]
 
     # If no room is set, select the first one as default
     try:
