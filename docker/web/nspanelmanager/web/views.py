@@ -13,6 +13,9 @@ import logging
 from .models import NSPanel, Room, Light, Settings, Scene
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
 
+def get_file_md5sum(filename):
+    fs = FileSystemStorage()
+    return hashlib.md5(fs.open(filename).read()).hexdigest()
 
 def restart_mqtt_manager():
     for proc in psutil.process_iter():
@@ -30,7 +33,27 @@ def index(request):
         temperature_unit = "°F"
     else:
         temperature_unit = "°C"
-    return render(request, 'index.html', {'nspanels': NSPanel.objects.all(), "temperature_unit": temperature_unit})
+
+    nspanels = []
+    md5_firmware = get_file_md5sum("firmware.bin")
+    md5_data_file = get_file_md5sum("data_file.bin")
+    md5_tft_file = get_file_md5sum("gui.tft")
+
+    for nspanel in NSPanel.objects.all():
+        panel_info = {}
+        panel_info["nspanel"] = nspanel
+        panel_info["warnings"] = ""
+        if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
+            panel_info["warnings"] += "Firmware update available.\n"
+        if nspanel.md5_tft_file != md5_tft_file:
+            panel_info["warnings"] += "GUI update available.\n"
+        nspanels.append(panel_info)
+
+
+    return render(request, 'index.html', {
+        'nspanels': nspanels,
+        "temperature_unit": temperature_unit,
+    })
 
 
 def rooms(request):
@@ -449,14 +472,11 @@ def download_tft(request):
 
 
 def checksum_firmware(request):
-    fs = FileSystemStorage()
-    return HttpResponse(hashlib.md5(fs.open("firmware.bin").read()).hexdigest())
+    return HttpResponse(get_file_md5sum("firmware.bin"))
 
 
 def checksum_data_file(request):
-    fs = FileSystemStorage()
-    return HttpResponse(hashlib.md5(fs.open("data_file.bin").read()).hexdigest())
+    return HttpResponse(get_file_md5sum("data_file.bin"))
 
 def checksum_tft_file(request):
-    fs = FileSystemStorage()
-    return HttpResponse(hashlib.md5(fs.open("gui.tft").read()).hexdigest())
+    return HttpResponse(get_file_md5sum("gui.tft"))

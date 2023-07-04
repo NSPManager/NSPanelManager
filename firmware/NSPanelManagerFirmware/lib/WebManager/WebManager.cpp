@@ -181,7 +181,7 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
   PageManager::GetNSPanelManagerPage()->setText("Updating...");
   PageManager::GetNSPanelManagerPage()->show();
 
-  char checksum_holder[32];
+  char checksum_holder[33];
   while (true) {
     std::string checksumUrl = "http://";
     checksumUrl.append(NSPMConfig::instance->manager_address);

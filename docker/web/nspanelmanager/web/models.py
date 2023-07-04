@@ -1,3 +1,4 @@
+from requests.models import default_hooks
 from django.db import models
 from datetime import datetime
 import django.utils
@@ -52,6 +53,9 @@ class NSPanel(models.Model):
     button1_detached_mode_light = models.ForeignKey("Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
     button2_mode = models.IntegerField(default=0)
     button2_detached_mode_light = models.ForeignKey("Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
+    md5_firmware = models.CharField(max_length=64, default="")
+    md5_data_file = models.CharField(max_length=64, default="")
+    md5_tft_file = models.CharField(max_length=64, default="")
     def __str__(self) -> str:
         return self.friendly_name
 

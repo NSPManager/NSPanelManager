@@ -17,7 +17,7 @@
       <td>
         <div class="tags">
           {% for nspanel in room.nspanel_set.all %}
-          <span class="tag is-light is-small">{{ nspanel.friendly_name }}</span>
+          <a href="{% url 'edit_nspanel' panel_id=nspanel.id %}" class="tag is-light is-link is-small">{{ nspanel.friendly_name }}</a>
           {% endfor %}
         </div>
       </td>
