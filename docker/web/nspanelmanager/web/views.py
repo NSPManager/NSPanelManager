@@ -43,6 +43,12 @@ def index(request):
         panel_info = {}
         panel_info["nspanel"] = nspanel
         panel_info["warnings"] = ""
+        for panel in NSPanel.objects.all():
+            if panel == nspanel:
+                continue
+            elif panel.friendly_name == nspanel.friendly_name:
+                panel_info["warnings"] += "Two or more panels exists with the same name. This may have cunintended consequences\n"
+                break
         if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
             panel_info["warnings"] += "Firmware update available.\n"
         if nspanel.md5_tft_file != md5_tft_file:
