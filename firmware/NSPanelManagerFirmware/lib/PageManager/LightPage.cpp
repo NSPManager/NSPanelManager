@@ -12,13 +12,6 @@ void LightPage::show() {
   NSPanel::instance->goToPage(LIGHT_PAGE_NAME);
 
   if (this->selectedLight != nullptr) {
-    this->selectedLight->attachDeconstructCallback(this);
-    this->selectedLight->attachUpdateCallback(this);
-  }
-}
-
-void LightPage::update() {
-  if (this->selectedLight != nullptr) {
     if (this->selectedLight->canTemperature()) {
       this->_currentMode = LIGHT_PAGE_MODE::COLOR_TEMP;
     } else if (this->selectedLight->canRgb()) {
@@ -28,6 +21,15 @@ void LightPage::update() {
     }
     this->updateValues();
   }
+
+  if (this->selectedLight != nullptr) {
+    this->selectedLight->attachDeconstructCallback(this);
+    this->selectedLight->attachUpdateCallback(this);
+  }
+}
+
+void LightPage::update() {
+  this->updateValues();
 }
 
 void LightPage::entityDeconstructCallback(DeviceEntity *entity) {
@@ -107,19 +109,23 @@ void LightPage::updateValues() {
       NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, this->selectedLight->getColorTemperature());
       NSPanel::instance->setComponentPic(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_KELVIN_SLIDER_PIC);
       NSPanel::instance->setComponentPic1(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_KELVIN_SLIDER_PIC1);
-      NSPanel::instance->setComponentPic(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, LIGHT_PAGE_COLOR_TEMP_MODE_PIC);
+      NSPanel::instance->setComponentPic(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, LIGHT_PAGE_COLOR_RGB_MODE_PIC);
     } else if (this->selectedLight->canRgb() && this->_currentMode == LIGHT_PAGE_MODE::COLOR_RGB) {
       NSPanel::instance->setComponentVal(LIGHT_PAGE_HUE_SLIDER_NAME, this->selectedLight->getHue());
       NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, this->selectedLight->getSaturation());
       NSPanel::instance->setComponentPic(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_SAT_SLIDER_PIC);
       NSPanel::instance->setComponentPic1(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_SAT_SLIDER_PIC1);
-      NSPanel::instance->setComponentPic(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, LIGHT_PAGE_COLOR_RGB_MODE_PIC);
+      NSPanel::instance->setComponentPic(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, LIGHT_PAGE_COLOR_TEMP_MODE_PIC);
     }
 
     if (this->selectedLight->canTemperature() && LightPage::selectedLight->canRgb()) {
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, true);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, true);
-      NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, true);
+      if (this->_currentMode == LIGHT_PAGE_MODE::COLOR_TEMP) {
+        NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, false);
+      } else {
+        NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, true);
+      }
     } else if (this->selectedLight->canTemperature() && !LightPage::selectedLight->canRgb()) {
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, true);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, false);
