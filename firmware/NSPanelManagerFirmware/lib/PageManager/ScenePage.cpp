@@ -34,11 +34,41 @@ void ScenePage::entityDeconstructCallback(DeviceEntity *entity) {
   this->_updateDisplay();
 }
 
-void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
-  if (pressed) {
-    return; // We only care about when the user releases the finger from the panel
+void ScenePage::doSceneSaveProgress(void *param) {
+  LOG_DEBUG("Started scene save progress.");
+  unsigned long countStarted = millis();
+  NSPanel::instance->setComponentVisible(SCENES_PAGE_SAVE_SLIDER_NAME, true);
+  uint8_t lastSaveProgress = 255;
+  while (millis() - countStarted < 3000 && ScenePage::_doSceneSaveProgress) { // TODO: Make timeout configurable
+    uint8_t saveProgress = (millis() - countStarted) / 30;
+    if (saveProgress > 100) {
+      saveProgress = 100;
+    }
+    if (saveProgress != lastSaveProgress) {
+      NSPanel::instance->setComponentVal(SCENES_PAGE_SAVE_SLIDER_NAME, saveProgress);
+    }
+    vTaskDelay(10 / portTICK_PERIOD_MS);
   }
 
+  if (ScenePage::_doSceneSaveProgress) {
+    // Finger is still held at save button after timeout. Save the page.
+    if (ScenePage::_sceneToSave != nullptr) {
+      ScenePage::_sceneToSave->save();
+      PageManager::GetScenePage()->_setRoomLabelText("Saved");
+      vTaskDelay(500 / portTICK_PERIOD_MS);
+    }
+  }
+
+  if (InterfaceConfig::currentRoomMode == roomMode::room) {
+    PageManager::GetScenePage()->_setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
+  } else {
+    PageManager::GetScenePage()->_setRoomLabelText("<--ALL-->");
+  }
+  NSPanel::instance->setComponentVisible(SCENES_PAGE_SAVE_SLIDER_NAME, false);
+  vTaskDelete(NULL);
+}
+
+void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
   std::vector<Scene *> scenes;
   if (InterfaceConfig::currentRoomMode == roomMode::room) {
     scenes = (*RoomManager::currentRoom)->scenes;
@@ -46,6 +76,48 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
     scenes = InterfaceConfig::global_scenes;
   }
 
+  if (pressed) {
+    switch (component) {
+    case SCENES_PAGE_SCENE1_SAVE_BUTTON_ID: {
+      if (scenes.size() >= 1) {
+        ScenePage::_sceneToSave = scenes[0];
+        ScenePage::_doSceneSaveProgress = true;
+        xTaskCreatePinnedToCore(doSceneSaveProgress, "taskSceneSave", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+      }
+      break;
+    }
+    case SCENES_PAGE_SCENE2_SAVE_BUTTON_ID: {
+      if (scenes.size() >= 2) {
+        ScenePage::_sceneToSave = scenes[1];
+        ScenePage::_doSceneSaveProgress = true;
+        xTaskCreatePinnedToCore(doSceneSaveProgress, "taskSceneSave", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+      }
+      break;
+    }
+    case SCENES_PAGE_SCENE3_SAVE_BUTTON_ID: {
+      if (scenes.size() >= 3) {
+        ScenePage::_sceneToSave = scenes[2];
+        ScenePage::_doSceneSaveProgress = true;
+        xTaskCreatePinnedToCore(doSceneSaveProgress, "taskSceneSave", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+      }
+      break;
+    }
+    case SCENES_PAGE_SCENE4_SAVE_BUTTON_ID: {
+      if (scenes.size() >= 4) {
+        ScenePage::_sceneToSave = scenes[3];
+        ScenePage::_doSceneSaveProgress = true;
+        xTaskCreatePinnedToCore(doSceneSaveProgress, "taskSceneSave", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+      }
+      break;
+    }
+    default:
+      break;
+    }
+    LOG_DEBUG("Touch event on component: ", page, ".", component);
+    return;
+  }
+
+  // Release events
   switch (component) {
   case SCENES_PAGE_BACK_BUTTON_ID: {
     PageManager::GoBack();
@@ -77,37 +149,29 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
   }
   case SCENES_PAGE_SCENE1_SAVE_BUTTON_ID: {
     if (scenes.size() >= 1) {
-      scenes[0]->save();
-      ScenePage::_setRoomLabelText("Saved");
-      vTaskDelay(500 / portTICK_PERIOD_MS);
-      this->update();
+      ScenePage::_sceneToSave = nullptr;
+      ScenePage::_doSceneSaveProgress = false;
     }
     break;
   }
   case SCENES_PAGE_SCENE2_SAVE_BUTTON_ID: {
     if (scenes.size() >= 2) {
-      scenes[1]->save();
-      ScenePage::_setRoomLabelText("Saved");
-      vTaskDelay(500 / portTICK_PERIOD_MS);
-      this->update();
+      ScenePage::_sceneToSave = nullptr;
+      ScenePage::_doSceneSaveProgress = false;
     }
     break;
   }
   case SCENES_PAGE_SCENE3_SAVE_BUTTON_ID: {
     if (scenes.size() >= 3) {
-      scenes[2]->save();
-      ScenePage::_setRoomLabelText("Saved");
-      vTaskDelay(500 / portTICK_PERIOD_MS);
-      this->update();
+      ScenePage::_sceneToSave = nullptr;
+      ScenePage::_doSceneSaveProgress = false;
     }
     break;
   }
   case SCENES_PAGE_SCENE4_SAVE_BUTTON_ID: {
     if (scenes.size() >= 4) {
-      scenes[3]->save();
-      ScenePage::_setRoomLabelText("Saved");
-      vTaskDelay(500 / portTICK_PERIOD_MS);
-      this->update();
+      ScenePage::_sceneToSave = nullptr;
+      ScenePage::_doSceneSaveProgress = false;
     }
     break;
   }
