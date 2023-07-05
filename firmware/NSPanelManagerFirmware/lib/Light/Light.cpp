@@ -7,11 +7,11 @@
 void Light::initFromMap(std::map<std::string, std::string> &data) {
   this->_id = atoi(data["id"].c_str());
   this->_name = data["name"];
-  this->_canDim = data["can_dim"].compare("True") == 0;
-  this->_canTemperature = data["can_temperature"].compare("True") == 0;
-  this->_canRgb = data["can_rgb"].compare("True") == 0;
+  this->_canDim = data["can_dim"].compare("true") == 0;
+  this->_canTemperature = data["can_temperature"].compare("true") == 0;
+  this->_canRgb = data["can_rgb"].compare("true") == 0;
   this->_roomViewPosition = atoi(data["view_position"].c_str());
-  this->_isCeiling = data["ceiling"].compare("True") == 0;
+  this->_isCeiling = data["ceiling"].compare("true") == 0;
 
   this->callUpdateCallbacks();
 
