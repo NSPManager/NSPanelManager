@@ -125,6 +125,27 @@ void RoomManager::loadAllRooms(bool is_update) {
     }
   }
 
+  for (auto it = InterfaceConfig::global_scenes.cbegin(); it != InterfaceConfig::global_scenes.cend();) {
+    // Check if this light ID exist in JSON config
+    bool scene_found = false;
+    for (JsonPair jsonLightPair : json_scenes.as<JsonObject>()) {
+      if (atoi(jsonLightPair.key().c_str()) == (*it)->getId()) {
+        scene_found = true;
+        break;
+      }
+    }
+
+    if (!scene_found) {
+      Scene *scene_to_remove = (*it);
+      LOG_DEBUG("Removing global scene: ", scene_to_remove->getName().c_str(), ". ID: ", scene_to_remove->getId());
+      it = InterfaceConfig::global_scenes.erase(it);
+      scene_to_remove->callDeconstructCallbacks();
+      delete scene_to_remove;
+    } else {
+      it++;
+    }
+  }
+
   // Init rooms
 
   for (uint16_t roomId : (*roomData)["rooms"].as<JsonArray>()) {
@@ -225,12 +246,6 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
       data[lightSettingsPair.key().c_str()] = lightSettingsPair.value().as<String>().c_str();
     }
     newLight->initFromMap(data);
-    // data["id"] = lightPair.value()["id"].as<String>().c_str();
-    // data["name"] = lightPair.value()["name"].as<String>().c_str();
-    // data["can_dim"] = lightPair.value()["can_dim"].as<String>().c_str();
-    // data["can_temperature"] = lightPair.value()["can_temperature"].as<String>().c_str();
-    // data["can_rgb"] = lightPair.value()["can_rgb"].as<String>().c_str();
-    // newLight->initFromJson(&lightPair);
 
     //  If the light is new (ie. not updated from existing) push it into the correct list.
     if (!existing_light) {
