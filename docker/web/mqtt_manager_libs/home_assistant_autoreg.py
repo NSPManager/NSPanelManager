@@ -9,6 +9,9 @@ def register_panel(nspanel, mqtt_client, settings):
             "identifiers": [
                 "NSPanel-" + nspanel["mac"]
             ],
+            "connections": [
+                ["mac", nspanel["mac"]]
+            ],
             "name": nspanel["name"],
             "model": "NSPanel",
             "manufacturer": "Sonoff",
@@ -52,7 +55,7 @@ def register_relays(nspanel, mqtt_client, settings, base_config):
     config["command_topic"] = "nspanel/" + nspanel["name"] + "/r2_cmd"
     mqtt_client.publish("homeassistant/switch/nspanelmanager/" + nspanel["name"] + "_relay2/config", json.dumps(config), retain=True)
 
-    
+
 def register_screen_switch(nspanel, mqtt_client, settings, base_config):
     config = base_config
     config["name"] = nspanel["name"] + " screen"

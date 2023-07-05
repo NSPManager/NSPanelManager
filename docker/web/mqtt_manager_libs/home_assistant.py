@@ -145,7 +145,7 @@ def send_entity_update(json_msg):
                         F"nspanel/entities/light/{entity_id}/state_brightness_pct", 0, retain=True)
                     mqtt_manager_libs.light_states.states[entity_id].light_level = 0
 
-            if mqtt_manager_libs.light_states.states[entity_id].can_rgb and new_state["attributes"]["color_mode"] != "color_temp":
+            if mqtt_manager_libs.light_states.states[entity_id].can_rgb and "color_mode" in new_state["attributes"] and new_state["attributes"]["color_mode"] != "color_temp":
                 mqtt_manager_libs.light_states.states[entity_id].last_command_sent = "rgb"
                 mqtt_client.publish(
                     F"nspanel/entities/light/{entity_id}/state_hue", new_state["attributes"]["hs_color"][0], retain=True)

@@ -1,9 +1,5 @@
-#ifndef NSPM_ROOM_CONFIG_H
-#define NSPM_ROOM_CONFIG_H
-
-#include <list>
-#include <string>
-#include <vector>
+#ifndef INTERFACE_CONFIG_ENUMS_HPP
+#define INTERFACE_CONFIG_ENUMS_HPP
 
 /// @brief Edit mode (room or house)
 enum roomMode {

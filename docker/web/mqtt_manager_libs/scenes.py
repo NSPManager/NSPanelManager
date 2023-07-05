@@ -10,7 +10,7 @@ def init(settings_from_manager, mqtt_client_from_manager):
     settings = settings_from_manager
     mqtt_client = mqtt_client_from_manager
 
-def save_scene(room_name: str, scene_name: str):
+def save_scene(room_name, scene_name: str):
     logging.debug(F"Trying to save scene {scene_name}")
     try:
         scenes_request = get("http://127.0.0.1:8000/api/get_scenes", timeout=5)
@@ -29,7 +29,7 @@ def save_scene(room_name: str, scene_name: str):
                     }
 
                     for light in mqtt_manager_libs.light_states.states.values():
-                        if light.room_name == scene["room_name"]:
+                        if room_name == None or light.room_name == scene["room_name"]:
                             scene_save_data["light_states"].append(light.to_scene_data_dict())
 
                     post("http://127.0.0.1:8000/api/save_scene", json=scene_save_data)
@@ -37,7 +37,7 @@ def save_scene(room_name: str, scene_name: str):
     except:
         logging.exception("ERROR: Failed to save scene, giving up.")
 
-def activate_scene(room_name: str, scene_name: str):
+def activate_scene(room_name, scene_name: str):
     logging.debug(F"Trying to turn on scene {room_name}->{scene_name}")
     try:
         scenes_request = get("http://127.0.0.1:8000/api/get_scenes", timeout=5)
@@ -46,7 +46,7 @@ def activate_scene(room_name: str, scene_name: str):
             scenes = scenes_request.json()
 
             for scene in scenes["scenes"]:
-                if scene["scene_name"] == scene_name and scene["room_name"] == room_name:
+                if scene["scene_name"] == scene_name and scene["room_name"] == None:
                     logging.debug("Found scene matching room and scene name: scene_id::" + str(scene["scene_id"]))
                     for light_state in scene["light_states"]:
                         if light_state["light_id"] in mqtt_manager_libs.light_states.states:

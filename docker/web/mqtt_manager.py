@@ -63,8 +63,8 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("nspanel/+/status_report")
     client.subscribe("nspanel/scenes/room/+/+/save")
     client.subscribe("nspanel/scenes/room/+/+/activate")
-    client.subscribe("nspanel/scenes/global/+/+/save")
-    client.subscribe("nspanel/scenes/global/+/+/activate")
+    client.subscribe("nspanel/scenes/global/+/save")
+    client.subscribe("nspanel/scenes/global/+/activate")
     client.subscribe("nspanel/entities/#")
 
 def on_message(client, userdata, msg):
@@ -139,6 +139,10 @@ def on_message(client, userdata, msg):
             mqtt_manager_libs.scenes.activate_scene(parts[3], parts[4]) # Activate scene were part[3] is room and part[4] is scene name
         elif msg.topic.startswith("nspanel/scenes/room/") and msg.topic.endswith("/save") and msg.payload.decode('utf-8') == "1":
             mqtt_manager_libs.scenes.save_scene(parts[3], parts[4]) # Save scene were part[3] is room and part[4] is scene name
+        elif msg.topic.startswith("nspanel/scenes/global/") and msg.topic.endswith("/activate") and msg.payload.decode('utf-8') == "1":
+            mqtt_manager_libs.scenes.activate_scene(None, parts[3]) # Activate scene were part[3] is scene name
+        elif msg.topic.startswith("nspanel/scenes/global/") and msg.topic.endswith("/save") and msg.payload.decode('utf-8') == "1":
+            mqtt_manager_libs.scenes.save_scene(None, parts[3]) # Save scene were part[3] is scene name
         elif msg.topic.startswith("nspanel/entities/light/"):
             light_id =int(parts[3])
             if not light_id in mqtt_manager_libs.light_states.states:
@@ -225,8 +229,7 @@ def connect_and_loop():
         mqtt_manager_libs.openhab.init(settings, client)
         mqtt_manager_libs.openhab.connect()
     else:
-        logging.info("OpenHABA values not configured, will not connect.")
-
+        logging.info("OpenHAB values not configured, will not connect.")
 
     for id, nspanel in settings["nspanels"].items():
         mqtt_manager_libs.home_assistant_autoreg.register_panel(nspanel, client, settings)

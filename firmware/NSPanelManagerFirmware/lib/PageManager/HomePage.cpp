@@ -10,8 +10,8 @@
 #include <TftDefines.h>
 
 void HomePage::init() {
-  this->_currentEditLightMode = editLightMode::all_lights;
-  this->_currentRoomMode = roomMode::room;
+  InterfaceConfig::currentEditLightMode = editLightMode::all_lights;
+  InterfaceConfig::currentRoomMode = roomMode::room;
   this->_ignoreMqttMessagesUntil = 0;
   this->_ignoreNextTouchRelease = false;
   RoomManager::attachRoomChangeCallback(this);
@@ -86,20 +86,20 @@ void HomePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
   }
 
   if (!pressed) {
-    if (component == SWITCH_ROOM_BUTTON_ID && this->_currentRoomMode == roomMode::room) {
+    if (component == SWITCH_ROOM_BUTTON_ID && InterfaceConfig::currentRoomMode == roomMode::room) {
       RoomManager::goToNextRoom();
       this->_stopSpecialMode();
     } else if (component == SWITCH_MODE_BUTTON_ID) {
       this->goToNextMode();
       this->_stopSpecialMode();
     } else if (component == CEILING_LIGHTS_MASTER_BUTTON_ID) {
-      if (this->_currentEditLightMode == editLightMode::ceiling_lights || this->_currentEditLightMode == editLightMode::all_lights) {
+      if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights || InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
         this->_lastSpecialModeEventMillis = millis();
         this->_lastMasterCeilingLightsButtonRelease = millis();
         this->_ceilingMasterButtonEvent();
       }
     } else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID) {
-      if (this->_currentEditLightMode == editLightMode::table_lights || this->_currentEditLightMode == editLightMode::all_lights) {
+      if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights || InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
         this->_lastSpecialModeEventMillis = millis();
         this->_lastMasterTableLightsButtonRelease = millis();
         this->_tableMasterButtonEvent();
@@ -107,9 +107,9 @@ void HomePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
     } else if (component == HOME_LIGHT_LEVEL_SLIDER_ID) {
       // Dimmer slider changed, update cached value
       this->updateDimmerValueCache();
-      if (this->_currentRoomMode == roomMode::room && (*RoomManager::currentRoom)->anyLightsOn()) {
+      if (InterfaceConfig::currentRoomMode == roomMode::room && (*RoomManager::currentRoom)->anyLightsOn()) {
         this->_updateLightsThatAreOnWithNewBrightness(this->getDimmingValue());
-      } else if (this->_currentRoomMode == roomMode::house && (*RoomManager::currentRoom)->anyLightsOn()) {
+      } else if (InterfaceConfig::currentRoomMode == roomMode::house && (*RoomManager::currentRoom)->anyLightsOn()) {
         this->_updateLightsThatAreOnWithNewBrightness(this->getDimmingValue());
       } else {
         this->_updateAllLightsWithNewBrightness(this->getDimmingValue());
@@ -121,7 +121,7 @@ void HomePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->updateColorTempValueCache();
       this->_lastSpecialModeEventMillis = millis();
       this->_updateLightsColorTempAccordingToSlider();
-    } else if (component == ROOM_BUTTON_ID && this->_currentRoomMode == roomMode::room) {
+    } else if (component == ROOM_BUTTON_ID && InterfaceConfig::currentRoomMode == roomMode::room) {
       this->_stopSpecialMode();
       PageManager::GetRoomPage()->show();
     } else if (component == SCENES_BUTTON_ID) {
@@ -129,7 +129,7 @@ void HomePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
     }
   } else if (pressed) {
     if (component == CEILING_LIGHTS_MASTER_BUTTON_ID) {
-      if (this->_currentEditLightMode == editLightMode::all_lights) {
+      if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
         this->_lastMasterCeilingLightsButtonTouch = millis();
         this->_startSpecialModeTriggerTask(editLightMode::ceiling_lights);
       } else {
@@ -137,7 +137,7 @@ void HomePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
         this->_stopSpecialMode();
       }
     } else if (component == TABLE_LIGHTS_MASTER_BUTTON_ID) {
-      if (this->_currentEditLightMode == editLightMode::all_lights) {
+      if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
         this->_lastMasterTableLightsButtonTouch = millis();
         this->_startSpecialModeTriggerTask(editLightMode::table_lights);
       } else {
@@ -230,7 +230,7 @@ void HomePage::setModeText(const char *text) {
 }
 
 void HomePage::setEditLightMode(editLightMode new_mode) {
-  this->_currentEditLightMode = new_mode; // Set current mode
+  InterfaceConfig::currentEditLightMode = new_mode; // Set current mode
   if (new_mode == editLightMode::all_lights) {
     PageManager::GetHomePage()->setSliderLightLevelColor(HOME_PAGE_SLIDER_NORMAL_COLOR); // Reset to normal color
     PageManager::GetHomePage()->setSliderColorTempColor(HOME_PAGE_SLIDER_NORMAL_COLOR);  // Reset to normal color
@@ -254,32 +254,32 @@ void HomePage::setEditLightMode(editLightMode new_mode) {
 
 void HomePage::_updateLightsThatAreOnWithNewBrightness(uint8_t brightness) {
   std::list<Light *> lights;
-  if (this->_currentRoomMode == roomMode::room) {
-    if (this->_currentEditLightMode == editLightMode::all_lights) {
+  if (InterfaceConfig::currentRoomMode == roomMode::room) {
+    if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
       lights = (*RoomManager::currentRoom)->getAllLightsThatAreOn();
-    } else if (this->_currentEditLightMode == editLightMode::ceiling_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
       if ((*RoomManager::currentRoom)->anyCeilingLightsOn()) {
         lights = (*RoomManager::currentRoom)->getCeilingLightsThatAreOn();
       } else {
         lights = (*RoomManager::currentRoom)->getAllCeilingLights();
       }
-    } else if (this->_currentEditLightMode == editLightMode::table_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
       if ((*RoomManager::currentRoom)->anyTableLightsOn()) {
         lights = (*RoomManager::currentRoom)->getTableLightsThatAreOn();
       } else {
         lights = (*RoomManager::currentRoom)->getAllTableLights();
       }
     }
-  } else if (this->_currentRoomMode == roomMode::house) {
-    if (this->_currentEditLightMode == editLightMode::all_lights) {
+  } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
+    if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
       lights = LightManager::getAllLightsThatAreOn();
-    } else if (this->_currentEditLightMode == editLightMode::ceiling_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
       if (LightManager::anyCeilingLightsOn()) {
         lights = LightManager::getCeilingLightsThatAreOn();
       } else {
         lights = LightManager::getAllCeilingLights();
       }
-    } else if (this->_currentEditLightMode == editLightMode::table_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
       if (LightManager::anyTableLightsOn()) {
         lights = LightManager::getTableLightsThatAreOn();
       } else {
@@ -295,40 +295,40 @@ void HomePage::_updateLightsThatAreOnWithNewBrightness(uint8_t brightness) {
 
 void HomePage::_updateAllLightsWithNewBrightness(uint8_t brightness) {
   std::list<Light *> lights;
-  if (this->_currentRoomMode == roomMode::room) {
-    if (this->_currentEditLightMode == editLightMode::all_lights) {
+  if (InterfaceConfig::currentRoomMode == roomMode::room) {
+    if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
       if ((*RoomManager::currentRoom)->anyLightsOn()) {
         lights = (*RoomManager::currentRoom)->getAllLightsThatAreOn();
       } else {
         lights = (*RoomManager::currentRoom)->getAllLights();
       }
-    } else if (this->_currentEditLightMode == editLightMode::ceiling_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
       if ((*RoomManager::currentRoom)->anyCeilingLightsOn()) {
         lights = (*RoomManager::currentRoom)->getCeilingLightsThatAreOn();
       } else {
         lights = (*RoomManager::currentRoom)->getAllCeilingLights();
       }
-    } else if (this->_currentEditLightMode == editLightMode::table_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
       if ((*RoomManager::currentRoom)->anyTableLightsOn()) {
         lights = (*RoomManager::currentRoom)->getTableLightsThatAreOn();
       } else {
         lights = (*RoomManager::currentRoom)->getAllTableLights();
       }
     }
-  } else if (this->_currentRoomMode == roomMode::house) {
-    if (this->_currentEditLightMode == editLightMode::all_lights) {
+  } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
+    if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
       if (LightManager::anyLightsOn()) {
         lights = LightManager::getAllLightsThatAreOn();
       } else {
         lights = LightManager::getAllLights();
       }
-    } else if (this->_currentEditLightMode == editLightMode::ceiling_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
       if (LightManager::anyCeilingLightsOn()) {
         lights = LightManager::getCeilingLightsThatAreOn();
       } else {
         lights = LightManager::getAllCeilingLights();
       }
-    } else if (this->_currentEditLightMode == editLightMode::table_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
       if (LightManager::anyTableLightsOn()) {
         lights = LightManager::getTableLightsThatAreOn();
       } else {
@@ -344,7 +344,7 @@ void HomePage::_updateAllLightsWithNewBrightness(uint8_t brightness) {
 }
 
 void HomePage::_startSpecialModeTriggerTask(editLightMode triggerMode) {
-  this->_triggerSpecialEditLightsMode = triggerMode;
+  InterfaceConfig::_triggerSpecialLightMode = triggerMode;
   xTaskCreatePinnedToCore(_taskTriggerSpecialModeTriggerTask, "taskSpecialModeTriggerTask", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 }
 
@@ -359,13 +359,13 @@ void HomePage::_taskTriggerSpecialModeTriggerTask(void *param) {
     vTaskDelay(20 / portTICK_PERIOD_MS);
   }
 
-  if (PageManager::GetHomePage()->_triggerSpecialEditLightsMode == editLightMode::ceiling_lights) {
+  if (InterfaceConfig::_triggerSpecialLightMode == editLightMode::ceiling_lights) {
     PageManager::GetHomePage()->_ignoreNextTouchRelease = true;
     PageManager::GetHomePage()->setEditLightMode(editLightMode::ceiling_lights);
-  } else if (PageManager::GetHomePage()->_triggerSpecialEditLightsMode == editLightMode::table_lights) {
+  } else if (InterfaceConfig::_triggerSpecialLightMode == editLightMode::table_lights) {
     PageManager::GetHomePage()->_ignoreNextTouchRelease = true;
     PageManager::GetHomePage()->setEditLightMode(editLightMode::table_lights);
-  } else if (PageManager::GetHomePage()->_triggerSpecialEditLightsMode == editLightMode::EXIT_SPECIAL_MODE) {
+  } else if (InterfaceConfig::_triggerSpecialLightMode == editLightMode::EXIT_SPECIAL_MODE) {
     PageManager::GetHomePage()->_ignoreNextTouchRelease = true;
     PageManager::GetHomePage()->setEditLightMode(editLightMode::all_lights);
   }
@@ -405,7 +405,7 @@ void HomePage::_stopSpecialMode() {
 }
 
 void HomePage::_ceilingMasterButtonEvent() {
-  if (this->_currentRoomMode == roomMode::room) {
+  if (InterfaceConfig::currentRoomMode == roomMode::room) {
     std::list<Light *> onLights = (*RoomManager::currentRoom)->getCeilingLightsThatAreOn();
     if (onLights.size() > 0) {
       LightManager::ChangeLightsToLevel(&onLights, 0);
@@ -413,7 +413,7 @@ void HomePage::_ceilingMasterButtonEvent() {
       std::list<Light *> lightList = (*RoomManager::currentRoom)->getAllCeilingLights();
       LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
     }
-  } else if (this->_currentRoomMode == roomMode::house) {
+  } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
     std::list<Light *> onLights = LightManager::getCeilingLightsThatAreOn();
     if (onLights.size() > 0) {
       LightManager::ChangeLightsToLevel(&onLights, 0);
@@ -428,7 +428,7 @@ void HomePage::_ceilingMasterButtonEvent() {
 }
 
 void HomePage::_tableMasterButtonEvent() {
-  if (this->_currentRoomMode == roomMode::room) {
+  if (InterfaceConfig::currentRoomMode == roomMode::room) {
     std::list<Light *> onLights = (*RoomManager::currentRoom)->getTableLightsThatAreOn();
 
     if (onLights.size() > 0) {
@@ -437,7 +437,7 @@ void HomePage::_tableMasterButtonEvent() {
       std::list<Light *> lightList = (*RoomManager::currentRoom)->getAllTableLights();
       LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
     }
-  } else if (this->_currentRoomMode == roomMode::house) {
+  } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
     std::list<Light *> onLights = LightManager::getTableLightsThatAreOn();
     if (onLights.size() > 0) {
       LightManager::ChangeLightsToLevel(&onLights, 0);
@@ -453,20 +453,20 @@ void HomePage::_tableMasterButtonEvent() {
 
 void HomePage::_updateLightsColorTempAccordingToSlider() {
   std::list<Light *> lights;
-  if (this->_currentRoomMode == roomMode::room) {
-    if (this->_currentEditLightMode == editLightMode::all_lights) {
+  if (InterfaceConfig::currentRoomMode == roomMode::room) {
+    if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
       lights = (*RoomManager::currentRoom)->getAllLights();
-    } else if (this->_currentEditLightMode == editLightMode::ceiling_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
       lights = (*RoomManager::currentRoom)->getAllCeilingLights();
-    } else if (this->_currentEditLightMode == editLightMode::table_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
       lights = (*RoomManager::currentRoom)->getAllTableLights();
     }
-  } else if (this->_currentRoomMode == roomMode::house) {
-    if (this->_currentEditLightMode == editLightMode::all_lights) {
+  } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
+    if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
       lights = LightManager::getAllLights();
-    } else if (this->_currentEditLightMode == editLightMode::ceiling_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
       lights = LightManager::getAllCeilingLights();
-    } else if (this->_currentEditLightMode == editLightMode::table_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
       lights = LightManager::getAllTableLights();
     }
   }
@@ -477,7 +477,7 @@ void HomePage::_updateLightsColorTempAccordingToSlider() {
 }
 
 void HomePage::goToNextMode() {
-  roomMode newMode = static_cast<roomMode>(static_cast<int>(this->_currentRoomMode) + 1);
+  roomMode newMode = static_cast<roomMode>(static_cast<int>(InterfaceConfig::currentRoomMode) + 1);
   if (newMode == roomMode::END) {
     newMode = roomMode::room;
   }
@@ -485,7 +485,7 @@ void HomePage::goToNextMode() {
 }
 
 void HomePage::setCurrentMode(roomMode mode) {
-  this->_currentRoomMode = mode;
+  InterfaceConfig::currentRoomMode = mode;
   this->updateModeText();
   this->updateRoomInfo();
 }
@@ -499,13 +499,13 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
   std::list<Light *> ceilingLights;
   std::list<Light *> tableLights;
 
-  if (this->_currentRoomMode == roomMode::room) {
-    if (this->_currentEditLightMode == editLightMode::all_lights) {
+  if (InterfaceConfig::currentRoomMode == roomMode::room) {
+    if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
       anyLightsOn = (*RoomManager::currentRoom)->anyLightsOn();
 
-    } else if (this->_currentEditLightMode == editLightMode::ceiling_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
       anyLightsOn = (*RoomManager::currentRoom)->anyCeilingLightsOn();
-    } else if (this->_currentEditLightMode == editLightMode::table_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
       anyLightsOn = (*RoomManager::currentRoom)->anyTableLightsOn();
     }
     for (auto lightPair : (*RoomManager::currentRoom)->ceilingLights) {
@@ -514,12 +514,12 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
     for (auto lightPair : (*RoomManager::currentRoom)->tableLights) {
       tableLights.push_back(lightPair.second);
     }
-  } else if (this->_currentRoomMode == roomMode::house) {
-    if (this->_currentEditLightMode == editLightMode::all_lights) {
+  } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
+    if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
       anyLightsOn = LightManager::anyLightsOn();
-    } else if (this->_currentEditLightMode == editLightMode::ceiling_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
       anyLightsOn = LightManager::anyCeilingLightsOn();
-    } else if (this->_currentEditLightMode == editLightMode::table_lights) {
+    } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
       anyLightsOn = LightManager::anyTableLightsOn();
     }
     ceilingLights = LightManager::getAllCeilingLights();
@@ -527,7 +527,7 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
   }
 
   // Calculate average for ceiling lights
-  if (this->_currentEditLightMode == editLightMode::all_lights || this->_currentEditLightMode == editLightMode::ceiling_lights) {
+  if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights || InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
     for (Light *light : ceilingLights) {
       if (light->getLightLevel() > 0 || !anyLightsOn) {
         totalBrightnessLights++;
@@ -552,7 +552,7 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
   totalBrightnessLights = 0;
   uint8_t totalKelvinLightsTable = 0;
   uint16_t totalKelvinValueTableLights = 0;
-  if (this->_currentEditLightMode == editLightMode::all_lights || this->_currentEditLightMode == editLightMode::table_lights) {
+  if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights || InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
     for (Light *light : tableLights) {
       if (light->getLightLevel() > 0 || !anyLightsOn) {
         totalBrightnessLights++;
@@ -607,19 +607,19 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
 }
 
 void HomePage::updateRoomInfo() {
-  if (this->_currentRoomMode == roomMode::room) {
+  if (InterfaceConfig::currentRoomMode == roomMode::room) {
     NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, (*RoomManager::currentRoom)->name.c_str());
-  } else if (this->_currentRoomMode == roomMode::house) {
+  } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
     NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, "<--ALL-->");
   }
   this->updateLightStatus(true, true);
 }
 
 void HomePage::updateModeText() {
-  if (this->_currentRoomMode == roomMode::room) {
+  if (InterfaceConfig::currentRoomMode == roomMode::room) {
     NSPanel::instance->setComponentText(HOME_PAGE_MODE_LABEL_NAME, "Room lights");
     NSPanel::instance->setComponentPic(HOME_BUTTON_SCENES_NAME, HOME_BUTTON_SCENES_ROOM_MODE_PIC);
-  } else if (this->_currentRoomMode == roomMode::house) {
+  } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
     NSPanel::instance->setComponentText(HOME_PAGE_MODE_LABEL_NAME, "All lights");
     NSPanel::instance->setComponentPic(HOME_BUTTON_SCENES_NAME, HOME_BUTTON_SCENES_ALL_MODE_PIC);
   } else {

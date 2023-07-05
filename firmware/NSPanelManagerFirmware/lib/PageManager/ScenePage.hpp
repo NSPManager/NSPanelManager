@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <DeviceEntity.hpp>
 #include <PageBase.hpp>
-#include <RoomManager.hpp>
+#include <RoomManagerObserver.hpp>
 
 class ScenePage : public PageBase, DeviceEntityObserver, RoomManagerObserver {
 public:

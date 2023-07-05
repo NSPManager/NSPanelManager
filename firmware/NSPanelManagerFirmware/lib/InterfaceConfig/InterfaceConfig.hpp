@@ -2,6 +2,9 @@
 #define INTERFACECONFIG_HPP
 
 #include <Arduino.h>
+#include <InterfaceConfigEnums.hpp>
+#include <vector>
+class Scene;
 
 class InterfaceConfig {
 public:
@@ -33,6 +36,12 @@ public:
   static inline bool show_screensaver_clock = false;
   /// @brief Show clock in US style. AM/PM?
   static inline bool clock_us_style = false;
+  /// @brief All the global scenes.
+  static inline std::vector<Scene *> global_scenes;
+  static Scene *getSceneById(uint16_t id);
+  static inline roomMode currentRoomMode;
+  static inline editLightMode currentEditLightMode;
+  static inline editLightMode _triggerSpecialLightMode;
 };
 
 #endif

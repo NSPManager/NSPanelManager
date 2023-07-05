@@ -2,13 +2,9 @@
 #define ROOMMANAGER_HPP
 
 #include <Arduino.h>
+#include <RoomManagerObserver.hpp>
 class Room;
 #include <list>
-
-class RoomManagerObserver {
-public:
-  virtual void roomChangedCallback() = 0;
-};
 
 class RoomManager {
 public:

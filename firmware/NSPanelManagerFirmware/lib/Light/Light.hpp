@@ -2,13 +2,13 @@
 #define LIGHT_HPP
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include <DeviceEntity.hpp>
 #include <list>
+#include <map>
 
 class Light : public DeviceEntity {
 public:
-  void initFromJson(ArduinoJson::JsonPair *json);
+  void initFromMap(std::map<std::string, std::string> &json);
 
   void setLightLevel(uint8_t lightLevel);
   void setColorTemperature(uint16_t colorTemperature);

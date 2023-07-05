@@ -11,6 +11,7 @@
 #include <RoomManager.hpp>
 #include <Scene.hpp>
 #include <WiFi.h>
+#include <map>
 
 void RoomManager::init() {
   MqttManager::subscribeToTopic("nspanel/config/reload", &RoomManager::reloadCallback);
@@ -102,6 +103,28 @@ void RoomManager::loadAllRooms(bool is_update) {
     vTaskDelay(portMAX_DELAY);
     vTaskDelete(NULL);
   }
+
+  // Load global scenes
+  JsonVariant json_scenes = (*roomData)["scenes"];
+  for (JsonPair scenePair : json_scenes.as<JsonObject>()) {
+    bool existing_scene;
+    Scene *newScene = InterfaceConfig::getSceneById(atoi(scenePair.key().c_str()));
+    if (newScene == nullptr) {
+      existing_scene = false;
+      newScene = new Scene();
+    } else {
+      existing_scene = true;
+    }
+    newScene->room = nullptr;
+    newScene->id = atoi(scenePair.key().c_str());
+    newScene->name = scenePair.value()["name"] | "ERR-S";
+    newScene->callUpdateCallbacks();
+    if (!existing_scene) {
+      InterfaceConfig::global_scenes.push_back(newScene);
+      LOG_TRACE("Loaded scene ", newScene->id, "::", newScene->name.c_str());
+    }
+  }
+
   // Init rooms
 
   for (uint16_t roomId : (*roomData)["rooms"].as<JsonArray>()) {
@@ -196,8 +219,20 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
     } else {
       existing_light = true;
     }
-    newLight->initFromJson(&lightPair);
-    // If the light is new (ie. not updated from existing) push it into the correct list.
+    std::map<std::string, std::string> data;
+    data["id"] = lightPair.key().c_str();
+    for (JsonPair lightSettingsPair : lightPair.value().as<JsonObject>()) {
+      data[lightSettingsPair.key().c_str()] = lightSettingsPair.value().as<String>().c_str();
+    }
+    newLight->initFromMap(data);
+    // data["id"] = lightPair.value()["id"].as<String>().c_str();
+    // data["name"] = lightPair.value()["name"].as<String>().c_str();
+    // data["can_dim"] = lightPair.value()["can_dim"].as<String>().c_str();
+    // data["can_temperature"] = lightPair.value()["can_temperature"].as<String>().c_str();
+    // data["can_rgb"] = lightPair.value()["can_rgb"].as<String>().c_str();
+    // newLight->initFromJson(&lightPair);
+
+    //  If the light is new (ie. not updated from existing) push it into the correct list.
     if (!existing_light) {
       if (lightPair.value()["ceiling"] == true) {
         newRoom->ceilingLights.insert(std::make_pair(newLight->getId(), newLight));
@@ -286,6 +321,7 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
     newScene->room = newRoom;
     newScene->id = atoi(scenePair.key().c_str());
     newScene->name = scenePair.value()["name"] | "ERR-S";
+    newScene->callUpdateCallbacks();
     if (!existing_scene) {
       newRoom->scenes.push_back(newScene);
       LOG_TRACE("Loaded scene ", newScene->id, "::", newScene->name.c_str());

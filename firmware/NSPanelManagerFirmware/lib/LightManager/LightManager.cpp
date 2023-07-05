@@ -1,3 +1,4 @@
+#include <ArduinoJson.h>
 #include <InterfaceConfig.hpp>
 #include <Light.hpp>
 #include <LightManager.hpp>

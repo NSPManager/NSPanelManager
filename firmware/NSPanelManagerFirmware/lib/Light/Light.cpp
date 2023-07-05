@@ -2,15 +2,16 @@
 #include <LightManager.hpp>
 #include <MqttLog.hpp>
 #include <functional>
+#include <map>
 
-void Light::initFromJson(ArduinoJson::JsonPair *json) {
-  this->_id = atoi(json->key().c_str());
-  this->_name = json->value()["name"] | "ERR-L";
-  this->_canDim = json->value()["can_dim"];
-  this->_canTemperature = json->value()["can_temperature"];
-  this->_canRgb = json->value()["can_rgb"];
-  this->_roomViewPosition = json->value()["view_position"] | 0;
-  this->_isCeiling = json->value()["ceiling"];
+void Light::initFromMap(std::map<std::string, std::string> &data) {
+  this->_id = atoi(data["id"].c_str());
+  this->_name = data["name"];
+  this->_canDim = data["can_dim"].compare("True") == 0;
+  this->_canTemperature = data["can_temperature"].compare("True") == 0;
+  this->_canRgb = data["can_rgb"].compare("True") == 0;
+  this->_roomViewPosition = atoi(data["view_position"].c_str());
+  this->_isCeiling = data["ceiling"].compare("True") == 0;
 
   this->callUpdateCallbacks();
 

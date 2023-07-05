@@ -295,6 +295,24 @@ def delete_scene(request, scene_id: int):
         restart_mqtt_manager()
     return redirect('edit_room', room_id=scene.room.id)
 
+def delete_global_scene(request, scene_id: int):
+    scene = Scene.objects.get(id=scene_id)
+    if scene:
+        scene.delete()
+        restart_mqtt_manager()
+    return redirect('settings')
+
+def add_scene_to_global(request):
+    if request.POST["edit_scene_id"].strip() != "" and int(request.POST["edit_scene_id"]) >= 0:
+        new_scene = Scene.objects.get(id=int(request.POST["edit_scene_id"]))
+    else:
+        new_scene = Scene()
+    new_scene.friendly_name = request.POST["scene_name"]
+    new_scene.room = None
+    new_scene.save()
+    restart_mqtt_manager()
+    return redirect('settings')
+
 def add_light_to_room_view(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
     light_position = int(request.POST["position"])
@@ -359,6 +377,7 @@ def settings_page(request):
     data["show_screensaver_clock"] = get_setting_with_default("show_screensaver_clock", False)
     data["clock_us_style"] = get_setting_with_default("clock_us_style", False)
     data["use_farenheit"] = get_setting_with_default("use_farenheit", False)
+    data["global_scenes"] = Scene.objects.filter(room__isnull=True)
     return render(request, 'settings.html', data)
 
 

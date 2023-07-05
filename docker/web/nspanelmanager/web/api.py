@@ -244,6 +244,10 @@ def get_nspanel_config(request):
     base["rooms"] = []
     for room in Room.objects.all().order_by('displayOrder'):
         base["rooms"].append(room.id)
+    base["scenes"] = {}
+    for scene in Scene.objects.filter(room__isnull=True):
+        base["scenes"][scene.id] = {}
+        base["scenes"][scene.id]["name"] = scene.friendly_name
     return JsonResponse(base)
 
 
@@ -332,8 +336,8 @@ def get_scenes(request):
         scene_info = {
             "scene_id": scene.id,
             "scene_name": scene.friendly_name,
-            "room_name": scene.room.friendly_name,
-            "room_id": scene.room.id,
+            "room_name": scene.room.friendly_name if scene.room != None else None,
+            "room_id": scene.room.id if scene.room != None else None,
             "light_states": []
         }
         for state in scene.lightstate_set.all():
