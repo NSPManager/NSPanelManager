@@ -46,7 +46,7 @@ void ScenePage::doSceneSaveProgress(void *param) {
     if (saveProgress != lastSaveProgress) {
       NSPanel::instance->setComponentVal(SCENES_PAGE_SAVE_SLIDER_NAME, saveProgress);
     }
-    vTaskDelay(10 / portTICK_PERIOD_MS);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
   }
 
   if (ScenePage::_doSceneSaveProgress) {
@@ -112,7 +112,6 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
     default:
       break;
     }
-    LOG_DEBUG("Touch event on component: ", page, ".", component);
     return;
   }
 
