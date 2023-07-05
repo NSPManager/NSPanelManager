@@ -46,7 +46,7 @@ def activate_scene(room_name, scene_name: str):
             scenes = scenes_request.json()
 
             for scene in scenes["scenes"]:
-                if scene["scene_name"] == scene_name and scene["room_name"] == None:
+                if scene["scene_name"] == scene_name and ((room_name == None and scene["room_name"] == None) or room_name == scene["room_name"]):
                     logging.debug("Found scene matching room and scene name: scene_id::" + str(scene["scene_id"]))
                     for light_state in scene["light_states"]:
                         if light_state["light_id"] in mqtt_manager_libs.light_states.states:
