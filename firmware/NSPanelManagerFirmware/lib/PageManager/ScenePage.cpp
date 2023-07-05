@@ -35,7 +35,6 @@ void ScenePage::entityDeconstructCallback(DeviceEntity *entity) {
 }
 
 void ScenePage::doSceneSaveProgress(void *param) {
-  LOG_DEBUG("Started scene save progress.");
   unsigned long countStarted = millis();
   NSPanel::instance->setComponentVisible(SCENES_PAGE_SAVE_SLIDER_NAME, true);
   uint8_t lastSaveProgress = 255;
