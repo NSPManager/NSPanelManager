@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'nspanelmanager.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/config/nspanelmanager_db.sqlite3' if ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true") else BASE_DIR / 'db.sqlite3',
+        'NAME': '/data/nspanelmanager_db.sqlite3' if ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true") else BASE_DIR / 'db.sqlite3',
     }
 }
 

@@ -10,6 +10,7 @@ import logging
 import hashlib
 import psutil
 import subprocess
+import environ
 
 from .models import NSPanel, Room, Light, LightState, Scene
 from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default
@@ -103,16 +104,26 @@ def get_all_available_light_entities(request):
             "content-type": "application/json",
         }
         try:
-            home_assistant_response = requests.get(
-                get_setting_with_default("home_assistant_address", "") + "/api/states", headers=home_assistant_request_headers, timeout=5)
-            for entity in home_assistant_response.json():
-                if (entity["entity_id"].startswith("light.") or entity["entity_id"].startswith("switch.")):
-                    return_json["home_assistant_lights"].append({
-                        "label": entity["entity_id"],
-                        "items": []
-                    })
+            environment = environ.Env()
+            if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
+                home_assistant_api_address = get_setting_with_default("home_assistant_address", "") + "/core/api/states"
+            else:
+                home_assistant_api_address = get_setting_with_default("home_assistant_address", "") + "/api/states"
+            print("Trying to get Home Assistant entities via api address: " + home_assistant_api_address)
+            home_assistant_response = requests.get(home_assistant_api_address, headers=home_assistant_request_headers, timeout=5)
+            if home_assistant_response.status_code == 200:
+                for entity in home_assistant_response.json():
+                    if (entity["entity_id"].startswith("light.") or entity["entity_id"].startswith("switch.")):
+                        return_json["home_assistant_lights"].append({
+                            "label": entity["entity_id"],
+                            "items": []
+                        })
+            else:
+                print("ERROR! Got status code other than 200. Got code: " + str(home_assistant_response.status_code))
         except:
             logging.exception("Failed to get Home Assistant lights!")
+    else:
+        print("No home assistant configuration values. Will not gather Home Assistant entities.")
 
     # OpenHAB
     if get_setting_with_default("openhab_token", "") != "":
@@ -143,6 +154,8 @@ def get_all_available_light_entities(request):
                         "label": entity["label"],
                         "items": items
                     })
+    else:
+        print("No OpenHAB configuration values. Will not gather OpenHAB entities.")
 
     return JsonResponse(return_json)
 

@@ -1,6 +1,6 @@
 name: "NSPanel Manager"
-description: "NSPanel Manager container for Sonoff NSPanel management with a simple and intuitive UI."
-version: "0.0.6"
+description: "NSPanel Manager container for Sonoff NSPanel management with a simple and intuitive UI"
+version: "0.0.11"
 slug: "nspanelmanager"
 url: "https://nspanelmanager.com"
 webui: http://[HOST]:[PORT:8000]/
@@ -10,9 +10,8 @@ ports:
   8001/tcp: 8001
 environment:
   IS_HOME_ASSISTANT_ADDON: "true"
-map:
-  - config:rw
 init: false
+homeassistant_api: true
 arch:
   - aarch64
   - amd64

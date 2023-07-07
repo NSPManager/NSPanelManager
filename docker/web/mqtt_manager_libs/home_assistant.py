@@ -3,6 +3,7 @@ import logging
 import json
 from threading import Thread
 import mqtt_manager_libs.light_states
+import environ
 
 home_assistant_url = ""
 home_assistant_token = ""
@@ -82,7 +83,11 @@ def _do_connection():
     global home_assistant_url, ws
     ws_url = home_assistant_url.replace(
         "https://", "wss://").replace("http://", "ws://")
-    ws_url += "/api/websocket"
+    environment = environ.Env()
+    if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
+        ws_url += "/core/websocket"
+    else:
+        ws_url += "/api/websocket"
     logging.info(F"Connecting to Home Assistant at {ws_url}")
     ws = websocket.WebSocketApp(F"{ws_url}", on_message=on_message)
     ws.run_forever(reconnect=5)

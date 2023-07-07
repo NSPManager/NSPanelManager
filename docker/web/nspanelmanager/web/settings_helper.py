@@ -8,6 +8,9 @@ def get_setting_with_default(name, default):
     else:
         return default
 
+def does_setting_exist(name):
+    objects = Settings.objects.filter(name=name)
+    return objects.count() > 0
 
 def set_setting_value(name, value):
     Settings.objects.update_or_create(name=name, defaults={
