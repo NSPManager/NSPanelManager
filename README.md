@@ -29,6 +29,7 @@ Logging from NSPanels are done over MQTT to the topic `nspanel/<panel name>/log`
 # Setup
 
 ## 1. Docker container
+### As a standalone container
 All configuration for panels are done via a web interface running in a docker container. This container is available in the `docker` directory. Use one of the following scripts to get it running:
 |Script|Explination|
 |---|---|
@@ -46,6 +47,17 @@ To access web interface, enter IP-address and port (standard 8000) to where the 
 * Insert API information to Home Assistant or Openhab
 * Save
 * Now we're ready to add some NSPanels!
+* 
+### As a Home Assistant addon (only for Home Assistant OS)
+In order to install the NSPanel Manager as a Home Assistant addon at the moment, this has to be done manually. This is because this repository is private. To get up and running manually, do the following:  
+* add the Samba or SSH addon to Home Assistant.
+* Access the "addons"-directory in Home Assistant and create a new directory call "nspanelmanager".
+* Copy all the files from the "docker"-directory in the GitHub repo to the new "nspanelmanager"-directory.
+* In Home Assistant, navgiate to Settings -> Addons -> Addon store.
+* In the upper right corner, press the three dots and choose "Check for update". In a few seconds the "NSPanel Manager" addon show show up under "Local add-ons". If this is not the cast, refresh the page.
+* Install the addon, run it up and continue below.
+
+**Note:** If you change the port 8001 to something else, live update of the web interface will not work properly. This is a known bug and we are working on fixing it.
 
 ## 2. Flash firmware to NSPanel
 The NSPanelManager firmware is written as a PlatformIO-project and this is by far the easiest method to flash the firmware. Perform the following steps to flash you NSPanel: (if not using PlatformIO or unable to run the below scripts you can use whatever tool you prefer to flash the panel. File to flash is: `merged-flash.bin` in the `firmware/NSPanelManagerFirmware/`)
