@@ -512,7 +512,7 @@ def download_tft(request):
     fs = FileSystemStorage()
     panel_ip = get_client_ip(request)
     nspanel = NSPanel.objects.filter(ip_address = panel_ip).first()
-    if get_nspanel_setting_with_default(nspanel.id, "is_us_version", "False") == "True":
+    if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True":
         filename = "gui_us.tft"
     else:
         filename = "gui.tft"
@@ -537,7 +537,7 @@ def checksum_data_file(request):
 def checksum_tft_file(request):
     panel_ip = get_client_ip(request)
     nspanel = NSPanel.objects.filter(ip_address = panel_ip).first()
-    if get_nspanel_setting_with_default(nspanel.id, "is_us_version", "False") == "True":
+    if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True":
         filename = "gui_us.tft"
     else:
         filename = "gui.tft"
