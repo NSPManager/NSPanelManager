@@ -51,12 +51,15 @@ void registerToNSPanelManager() {
       url.append(std::to_string(NSPMConfig::instance->manager_port));
       url.append("/api/register_nspanel");
 
-      StaticJsonDocument<128> doc;
+      StaticJsonDocument<512> doc;
       doc["mac_address"] = WiFi.macAddress().c_str();
       doc["friendly_name"] = NSPMConfig::instance->wifi_hostname.c_str();
       doc["version"] = NSPanelManagerFirmwareVersion;
+      doc["md5_firmware"] = NSPMConfig::instance->md5_firmware;
+      doc["md5_data_file"] = NSPMConfig::instance->md5_data_file;
+      doc["md5_tft_file"] = NSPMConfig::instance->md5_tft_file;
 
-      char buffer[128];
+      char buffer[512];
       serializeJson(doc, buffer);
 
       httpClient.begin(wifiClient, url.c_str());

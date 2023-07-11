@@ -2,26 +2,28 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import FileSystemStorage
 import json
 import requests
+import logging
 
 import hashlib
 import psutil
 import subprocess
+import environ
 
 from .models import NSPanel, Room, Light, LightState, Scene
-from web.settings_helper import get_setting_with_default
+from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default
 
 
 def restart_mqtt_manager():
     for proc in psutil.process_iter():
         if "./mqtt_manager.py" in proc.cmdline():
-            print("Killing existing mqtt_manager")
+            logging.info("Killing existing mqtt_manager")
             proc.kill()
     # Restart the process
-    print("Starting a new mqtt_manager")
-    subprocess.Popen(
-        ["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
+    logging.info("Starting a new mqtt_manager")
+    subprocess.Popen(["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
 
 
 def get_mqtt_manager_config(request):
@@ -102,16 +104,26 @@ def get_all_available_light_entities(request):
             "content-type": "application/json",
         }
         try:
-            home_assistant_response = requests.get(
-                get_setting_with_default("home_assistant_address", "") + "/api/states", headers=home_assistant_request_headers, timeout=5)
-            for entity in home_assistant_response.json():
-                if (entity["entity_id"].startswith("light.") or entity["entity_id"].startswith("switch.")):
-                    return_json["home_assistant_lights"].append({
-                        "label": entity["entity_id"],
-                        "items": []
-                    })
+            environment = environ.Env()
+            if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
+                home_assistant_api_address = get_setting_with_default("home_assistant_address", "") + "/core/api/states"
+            else:
+                home_assistant_api_address = get_setting_with_default("home_assistant_address", "") + "/api/states"
+            print("Trying to get Home Assistant entities via api address: " + home_assistant_api_address)
+            home_assistant_response = requests.get(home_assistant_api_address, headers=home_assistant_request_headers, timeout=5)
+            if home_assistant_response.status_code == 200:
+                for entity in home_assistant_response.json():
+                    if (entity["entity_id"].startswith("light.") or entity["entity_id"].startswith("switch.")):
+                        return_json["home_assistant_lights"].append({
+                            "label": entity["entity_id"],
+                            "items": []
+                        })
+            else:
+                print("ERROR! Got status code other than 200. Got code: " + str(home_assistant_response.status_code))
         except:
-            print("Failed to get Home Assistant lights!")
+            logging.exception("Failed to get Home Assistant lights!")
+    else:
+        print("No home assistant configuration values. Will not gather Home Assistant entities.")
 
     # OpenHAB
     if get_setting_with_default("openhab_token", "") != "":
@@ -142,6 +154,8 @@ def get_all_available_light_entities(request):
                         "label": entity["label"],
                         "items": items
                     })
+    else:
+        print("No OpenHAB configuration values. Will not gather OpenHAB entities.")
 
     return JsonResponse(return_json)
 
@@ -164,13 +178,27 @@ def register_nspanel(request):
 
     if not new_panel:
         new_panel = NSPanel()
+        new_panel.friendly_name = data['friendly_name']
         panel_already_exists = False
 
-    new_panel.friendly_name = data['friendly_name']
     new_panel.mac_address = data['mac_address']
     new_panel.version = data["version"]
     new_panel.last_seen = datetime.now()
     new_panel.ip_address = get_client_ip(request)
+    fs = FileSystemStorage()
+    if "md5_firmware" in data:
+        if data["md5_firmware"] == "":
+            new_panel.md5_firmware = hashlib.md5(fs.open("firmware.bin").read()).hexdigest()
+        else:
+            new_panel.md5_firmware = data["md5_firmware"]
+    if "md5_data_file" in data:
+        if data["md5_data_file"] == "":
+            new_panel.md5_data_file = hashlib.md5(fs.open("data_file.bin").read()).hexdigest()
+        else:
+            new_panel.md5_data_file = data["md5_data_file"]
+    # TFT file will never be flashed by default with a new panel, always set the MD5 from registration
+    if "md5_tft_file" in data:
+        new_panel.md5_tft_file = data["md5_tft_file"]
 
     # If no room is set, select the first one as default
     try:
@@ -188,12 +216,14 @@ def register_nspanel(request):
 
 def delete_panel(request, panel_id: int):
     NSPanel.objects.get(id=panel_id).delete()
+    restart_mqtt_manager()
     return redirect('/')
 
 
 def get_nspanel_config(request):
     nspanel = NSPanel.objects.get(mac_address=request.GET["mac"])
     base = {}
+    base["name"] = nspanel.friendly_name
     base["home"] = nspanel.room.id
     base["raise_to_100_light_level"] = get_setting_with_default(
         "raise_to_100_light_level", 95)
@@ -205,13 +235,16 @@ def get_nspanel_config(request):
     base["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time", 300)
     base["special_mode_release_time"] = get_setting_with_default("special_mode_release_time", 5000)
     base["mqtt_ignore_time"] = get_setting_with_default("mqtt_ignore_time", 3000)
-    base["screen_dim_level"] = get_setting_with_default("screen_dim_level", 100)
-    base["screensaver_dim_level"] = get_setting_with_default("screensaver_dim_level", 0)
-    base["show_screensaver_clock"] = get_setting_with_default("show_screensaver_clock", False)
+    base["screen_dim_level"] = get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level", 100))
+    base["screensaver_dim_level"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level", 0))
+    base["screensaver_activation_timeout"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout", 30000))
+    base["show_screensaver_clock"] = get_nspanel_setting_with_default(nspanel.id, "show_screensaver_clock", get_setting_with_default("show_screensaver_clock", False))
     base["clock_us_style"] = get_setting_with_default("clock_us_style", False)
-    base["screensaver_activation_timeout"] = get_setting_with_default("screensaver_activation_timeout", 30000)
     base["button1_mode"] = nspanel.button1_mode
     base["use_farenheit"] = get_setting_with_default("use_farenheit", False)
+    base["lock_to_default_room"] = get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False")
+    base["relay1_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", False)
+    base["relay2_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", False)
     if nspanel.button1_detached_mode_light:
         base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
     else:
@@ -224,6 +257,10 @@ def get_nspanel_config(request):
     base["rooms"] = []
     for room in Room.objects.all().order_by('displayOrder'):
         base["rooms"].append(room.id)
+    base["scenes"] = {}
+    for scene in Scene.objects.filter(room__isnull=True):
+        base["scenes"][scene.id] = {}
+        base["scenes"][scene.id]["name"] = scene.friendly_name
     return JsonResponse(base)
 
 
@@ -283,7 +320,6 @@ def set_panel_status(request, panel_mac: str):
         nspanel = nspanels.first()
         # We got a match
         json_payload = json.loads(request.body.decode('utf-8'))
-        print(json_payload);
         nspanel.wifi_rssi = int(json_payload["rssi"])
         nspanel.heap_used_pct = int(json_payload["heap_used_pct"])
         nspanel.temperature = round(json_payload["temperature"], 2)
@@ -313,8 +349,8 @@ def get_scenes(request):
         scene_info = {
             "scene_id": scene.id,
             "scene_name": scene.friendly_name,
-            "room_name": scene.room.friendly_name,
-            "room_id": scene.room.id,
+            "room_name": scene.room.friendly_name if scene.room != None else None,
+            "room_id": scene.room.id if scene.room != None else None,
             "light_states": []
         }
         for state in scene.lightstate_set.all():
@@ -353,7 +389,7 @@ def save_scene(request):
                     new_state.saturation = light_state["saturation"]
                 new_state.save()
             else:
-                print("ERROR: Couldn't find a light with ID " + light_state["light_id"] + ". Will skip light!")
+                logging.error("ERROR: Couldn't find a light with ID " + light_state["light_id"] + ". Will skip light!")
         return HttpResponse("OK", status=200)
     else:
         return HttpResponse("Scene does not exist!", status=500)

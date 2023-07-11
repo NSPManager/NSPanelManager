@@ -1,210 +1,220 @@
 <form method="POST" action="{% url 'save_new_room' %}">
-    {% csrf_token %}
-    <div class="modal" id="modal-new-room">
-        <div class="modal-background"></div>
-        <div class="modal-card">
-            <header class="modal-card-head">
-                <p class="modal-card-title">Create new room</p>
-                <button type="button" class="delete" aria-label="close"></button>
-            </header>
-            <section class="modal-card-body">
-                <div class="field">
-                    <label class="label">Friendly name</label>
-                    <div class="control">
-                        <input class="input" type="text" id="new_room_name" name="friendly_name" placeholder="Office">
-                    </div>
-                </div>
-            </section>
-            <footer class="modal-card-foot">
-                <button type="submit" class="button is-success">Save changes</button>
-                <button type="button" class="button modal-cancel-button">Cancel</button>
-            </footer>
+  {% csrf_token %}
+  <div class="modal" id="modal-new-room">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Create new room</p>
+        <button type="button" class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <label class="label">Friendly name</label>
+          <div class="control">
+            <input class="input" type="text" id="new_room_name" name="friendly_name" placeholder="Office">
+          </div>
         </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button type="submit" class="button is-success">Save changes</button>
+        <button type="button" class="button modal-cancel-button">Cancel</button>
+      </footer>
     </div>
+  </div>
 </form>
 
 <form method="POST" action="{% url 'save_new_firmware' %}" enctype="multipart/form-data">
-    {% csrf_token %}
-    <div class="modal" id="modal-upload-firmware">
-        <div class="modal-background"></div>
-        <div class="modal-card">
-            <header class="modal-card-head">
-                <p class="modal-card-title">Upload new firmware</p>
-                <button type="button" class="delete" aria-label="close"></button>
-            </header>
-            <section class="modal-card-body">
-                <div class="file has-name">
-                    <label class="file-label">
-                        <input class="file-input" type="file" name="firmware" accept=".bin" id="firmware_upload_file_input">
-                        <span class="file-cta">
-                            <span class="mdi mdi-upload mr-1"></span>
-                            <span class="file-label">
-                                Choose a file…
-                            </span>
-                        </span>
-                    </label>
-                   <span class="file-name" id="firmware_upload_file_name">
-                     - No file selected -
-                   </span>
-                </div>
-            </section>
-            <footer class="modal-card-foot">
-                <button type="submit" class="button is-success">Upload</button>
-                <button type="button" class="button modal-cancel-button">Cancel</button>
-            </footer>
+  {% csrf_token %}
+  <div class="modal" id="modal-upload-firmware">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Upload new firmware</p>
+        <button type="button" class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="file has-name">
+          <label class="file-label">
+            <input class="file-input" type="file" name="firmware" accept=".bin" id="firmware_upload_file_input">
+            <span class="file-cta">
+              <span class="mdi mdi-upload mr-1"></span>
+              <span class="file-label">
+                Choose a file…
+              </span>
+            </span>
+          </label>
+          <span class="file-name" id="firmware_upload_file_name">
+            - No file selected -
+          </span>
         </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button type="submit" class="button is-success">Upload</button>
+        <button type="button" class="button modal-cancel-button">Cancel</button>
+      </footer>
     </div>
+  </div>
 </form>
 
 <form method="POST" action="{% url 'save_new_data_file' %}" enctype="multipart/form-data">
-    {% csrf_token %}
-    <div class="modal" id="modal-upload-data-file">
-        <div class="modal-background"></div>
-        <div class="modal-card">
-            <header class="modal-card-head">
-                <p class="modal-card-title">Upload new data file</p>
-                <button type="button" class="delete" aria-label="close"></button>
-            </header>
-            <section class="modal-card-body">
-                <div class="file has-name">
-                    <label class="file-label">
-                        <input class="file-input" type="file" name="data_file" accept=".bin" id="data_upload_file_input">
-                        <span class="file-cta">
-                            <span class="mdi mdi-upload mr-1"></span>
-                            <span class="file-label">
-                                Choose a file…
-                            </span>
-                        </span>
-                    </label>
-                   <span class="file-name" id="data_upload_file_name">
-                     - No file selected -
-                   </span>
-                </div>
-            </section>
-            <footer class="modal-card-foot">
-                <button type="submit" class="button is-success">Upload</button>
-                <button type="button" class="button modal-cancel-button">Cancel</button>
-            </footer>
+  {% csrf_token %}
+  <div class="modal" id="modal-upload-data-file">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Upload new data file</p>
+        <button type="button" class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="file has-name">
+          <label class="file-label">
+            <input class="file-input" type="file" name="data_file" accept=".bin" id="data_upload_file_input">
+            <span class="file-cta">
+              <span class="mdi mdi-upload mr-1"></span>
+              <span class="file-label">
+                Choose a file…
+              </span>
+            </span>
+          </label>
+          <span class="file-name" id="data_upload_file_name">
+            - No file selected -
+          </span>
         </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button type="submit" class="button is-success">Upload</button>
+        <button type="button" class="button modal-cancel-button">Cancel</button>
+      </footer>
     </div>
+  </div>
 </form>
 
 <form method="POST" action="{% url 'save_new_tft_file' %}" enctype="multipart/form-data">
-    {% csrf_token %}
-    <div class="modal" id="modal-upload-tft-file">
-        <div class="modal-background"></div>
-        <div class="modal-card">
-            <header class="modal-card-head">
-                <p class="modal-card-title">Upload new GUI tft file</p>
-                <button type="button" class="delete" aria-label="close"></button>
-            </header>
-            <section class="modal-card-body">
-                <div class="file has-name">
-                    <label class="file-label">
-                        <input class="file-input" type="file" name="tft_file" accept=".tft" id="tft_upload_file_input">
-                        <span class="file-cta">
-                            <span class="mdi mdi-upload mr-1"></span>
-                            <span class="file-label">
-                                Choose a file…
-                            </span>
-                        </span>
-                    </label>
-                   <span class="file-name" id="tft_upload_file_name">
-                     - No file selected -
-                   </span>
-                </div>
-            </section>
-            <footer class="modal-card-foot">
-                <button type="submit" class="button is-success">Upload</button>
-                <button type="button" class="button modal-cancel-button">Cancel</button>
-            </footer>
+  {% csrf_token %}
+  <div class="modal" id="modal-upload-tft-file">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Upload new GUI tft file</p>
+        <button type="button" class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <div class="control">
+            <div class="select">
+              <select name="file_version">
+                <option>Europe</option>
+                <option>US</option>
+              </select>
+            </div>
+          </div>
         </div>
+        <div class="file has-name">
+          <label class="file-label">
+            <input class="file-input" type="file" name="tft_file" accept=".tft" id="tft_upload_file_input">
+            <span class="file-cta">
+              <span class="mdi mdi-upload mr-1"></span>
+              <span class="file-label">
+                Choose a file…
+              </span>
+            </span>
+          </label>
+          <span class="file-name" id="tft_upload_file_name">
+            - No file selected -
+          </span>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button type="submit" class="button is-success">Upload</button>
+        <button type="button" class="button modal-cancel-button">Cancel</button>
+      </footer>
     </div>
+  </div>
 </form>
 
 <div class="modal" id="modal-command-sent">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-        <header class="modal-card-head">
-            <p class="modal-card-title">Command sent</p>
-            <button type="button" class="delete" aria-label="close"></button>
-        </header>
-        <section class="modal-card-body">
-            <p>Command sent</p>
-        </section>
-        <footer class="modal-card-foot">
-            <button type="button" class="button is-primary modal-cancel-button">OK</button>
-        </footer>
-    </div>
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Command sent</p>
+      <button type="button" class="delete" aria-label="close"></button>
+    </header>
+    <section class="modal-card-body">
+      <p>Command sent</p>
+    </section>
+    <footer class="modal-card-foot">
+      <button type="button" class="button is-primary modal-cancel-button">OK</button>
+    </footer>
+  </div>
 </div>
 
 <div class="modal" id="modal-test">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-        <nav class="panel" style="background-color: white;">
-            <p class="panel-heading">
-                Choose a light
-            </p>
-            <div class="panel-block">
-                <p class="control has-icons-left">
-                    <input class="input" type="text" placeholder="Search">
-                    <span class="icon is-left">
-                        <i class="fas fa-search" aria-hidden="true"></i>
-                    </span>
-                </p>
-            </div>
-            <p class="panel-tabs">
-                <a class="is-active">All</a>
-                <a>Public</a>
-                <a>Private</a>
-                <a>Sources</a>
-                <a>Forks</a>
-            </p>
-            <a class="panel-block is-active">
-                <span class="panel-icon">
-                    <i class="fas fa-book" aria-hidden="true"></i>
-                </span>
-                bulma
-            </a>
-            <a class="panel-block">
-                <span class="panel-icon">
-                    <i class="fas fa-book" aria-hidden="true"></i>
-                </span>
-                marksheet
-            </a>
-            <a class="panel-block">
-                <span class="panel-icon">
-                    <i class="fas fa-book" aria-hidden="true"></i>
-                </span>
-                minireset.css
-            </a>
-            <a class="panel-block">
-                <span class="panel-icon">
-                    <i class="fas fa-book" aria-hidden="true"></i>
-                </span>
-                jgthms.github.io
-            </a>
-            <a class="panel-block">
-                <span class="panel-icon">
-                    <i class="fas fa-code-branch" aria-hidden="true"></i>
-                </span>
-                daniellowtw/infboard
-            </a>
-            <a class="panel-block">
-                <span class="panel-icon">
-                    <i class="fas fa-code-branch" aria-hidden="true"></i>
-                </span>
-                mojs
-            </a>
-            <label class="panel-block">
-                <input type="checkbox">
-                remember me
-            </label>
-            <div class="panel-block">
-                <button class="button is-link is-outlined is-fullwidth">
-                    Reset all filters
-                </button>
-            </div>
-        </nav>
-    </div>
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <nav class="panel" style="background-color: white;">
+      <p class="panel-heading">
+        Choose a light
+      </p>
+      <div class="panel-block">
+        <p class="control has-icons-left">
+          <input class="input" type="text" placeholder="Search">
+          <span class="icon is-left">
+            <i class="fas fa-search" aria-hidden="true"></i>
+          </span>
+        </p>
+      </div>
+      <p class="panel-tabs">
+        <a class="is-active">All</a>
+        <a>Public</a>
+        <a>Private</a>
+        <a>Sources</a>
+        <a>Forks</a>
+      </p>
+      <a class="panel-block is-active">
+        <span class="panel-icon">
+          <i class="fas fa-book" aria-hidden="true"></i>
+        </span>
+        bulma
+      </a>
+      <a class="panel-block">
+        <span class="panel-icon">
+          <i class="fas fa-book" aria-hidden="true"></i>
+        </span>
+        marksheet
+      </a>
+      <a class="panel-block">
+        <span class="panel-icon">
+          <i class="fas fa-book" aria-hidden="true"></i>
+        </span>
+        minireset.css
+      </a>
+      <a class="panel-block">
+        <span class="panel-icon">
+          <i class="fas fa-book" aria-hidden="true"></i>
+        </span>
+        jgthms.github.io
+      </a>
+      <a class="panel-block">
+        <span class="panel-icon">
+          <i class="fas fa-code-branch" aria-hidden="true"></i>
+        </span>
+        daniellowtw/infboard
+      </a>
+      <a class="panel-block">
+        <span class="panel-icon">
+          <i class="fas fa-code-branch" aria-hidden="true"></i>
+        </span>
+        mojs
+      </a>
+      <label class="panel-block">
+        <input type="checkbox">
+        remember me
+      </label>
+      <div class="panel-block">
+        <button class="button is-link is-outlined is-fullwidth">
+          Reset all filters
+        </button>
+      </div>
+    </nav>
+  </div>
 </div>

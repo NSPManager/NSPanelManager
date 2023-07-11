@@ -12,6 +12,7 @@ import mqtt_manager_libs.websocket_server
 import mqtt_manager_libs.light_states
 import mqtt_manager_libs.light
 import mqtt_manager_libs.scenes
+import mqtt_manager_libs.home_assistant_autoreg
 import re 
 import threading
 import os
@@ -54,7 +55,7 @@ def send_time_thread():
 
 
 def on_connect(client, userdata, flags, rc):
-    print("Connected to MQTT Server")
+    logging.info("Connected to MQTT Server")
     # Listen for all events sent to and from panels to control states
     client.subscribe("nspanel/mqttmanager/command")
     client.subscribe("nspanel/+/log")
@@ -62,11 +63,14 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("nspanel/+/status_report")
     client.subscribe("nspanel/scenes/room/+/+/save")
     client.subscribe("nspanel/scenes/room/+/+/activate")
-    client.subscribe("nspanel/scenes/global/+/+/save")
-    client.subscribe("nspanel/scenes/global/+/+/activate")
+    client.subscribe("nspanel/scenes/global/+/save")
+    client.subscribe("nspanel/scenes/global/+/activate")
+    client.subscribe("nspanel/entities/#")
 
 def on_message(client, userdata, msg):
     try:
+        if msg.payload.decode() == "":
+            return
         parts = msg.topic.split('/')
         # Messages received was a status update (online/offline)
         if parts[-1] == "log":
@@ -81,14 +85,24 @@ def on_message(client, userdata, msg):
             }
             mqtt_manager_libs.websocket_server.send_message(json.dumps(data))
         elif parts[-1] == "status":
-            panel = parts[1]
-            data = json.loads(msg.payload.decode('utf-8'))
-            send_online_status(panel, data)
-            ws_data = {
-                "type": "status",
-                "payload": data
-            }
-            mqtt_manager_libs.websocket_server.send_message(json.dumps(ws_data))
+            panel_found = False
+            for panel in settings["nspanels"].values():
+                if panel["name"] == parts[-2]:
+                    panel_found = True
+                    break
+
+            if panel_found:
+                panel = parts[1]
+                data = json.loads(msg.payload.decode('utf-8'))
+                send_online_status(panel, data)
+                ws_data = {
+                    "type": "status",
+                    "payload": data
+                }
+                mqtt_manager_libs.websocket_server.send_message(json.dumps(ws_data))
+            else:
+                logging.warning(F"Removing mqtt topic: {msg.topic} as panel does not exist any more.")
+                client.publish('/'.join(parts), payload=None, qos=0, retain=True)
         elif parts[-1] == "status_report":
             panel = parts[1]
             data = json.loads(msg.payload.decode('utf-8'))
@@ -125,6 +139,15 @@ def on_message(client, userdata, msg):
             mqtt_manager_libs.scenes.activate_scene(parts[3], parts[4]) # Activate scene were part[3] is room and part[4] is scene name
         elif msg.topic.startswith("nspanel/scenes/room/") and msg.topic.endswith("/save") and msg.payload.decode('utf-8') == "1":
             mqtt_manager_libs.scenes.save_scene(parts[3], parts[4]) # Save scene were part[3] is room and part[4] is scene name
+        elif msg.topic.startswith("nspanel/scenes/global/") and msg.topic.endswith("/activate") and msg.payload.decode('utf-8') == "1":
+            mqtt_manager_libs.scenes.activate_scene(None, parts[3]) # Activate scene were part[3] is scene name
+        elif msg.topic.startswith("nspanel/scenes/global/") and msg.topic.endswith("/save") and msg.payload.decode('utf-8') == "1":
+            mqtt_manager_libs.scenes.save_scene(None, parts[3]) # Save scene were part[3] is scene name
+        elif msg.topic.startswith("nspanel/entities/light/"):
+            light_id =int(parts[3])
+            if not light_id in mqtt_manager_libs.light_states.states:
+                logging.warning(F"Removing MQTT topic '{msg.topic}' for light that does not exist any more.")
+                client.publish('/'.join(parts), payload=None, qos=0, retain=True)
         else:
             logging.debug(F"Received unhandled message on topic: {msg.topic}")
 
@@ -157,6 +180,7 @@ def get_config():
                 for id, light in settings["lights"].items():
                     int_id = int(id)
                     mqtt_manager_libs.light_states.states[int_id] = mqtt_manager_libs.light.Light.from_dict(light)
+
                 # All light-data sucessfully loaded into light_states, clear own register
                 settings.pop("lights")
                 break
@@ -183,8 +207,7 @@ def connect_and_loop():
             client.connect(mqtt_server, mqtt_port, 5)
             break  # Connection call did not raise exception, connection is sucessfull
         except:
-            logging.error(
-                F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
+            logging.exception(F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
             time.sleep(10)
 
     # Send reload command to panels for them to reload config as MQTT manager JUST restarted (probably because of config change)
@@ -206,7 +229,10 @@ def connect_and_loop():
         mqtt_manager_libs.openhab.init(settings, client)
         mqtt_manager_libs.openhab.connect()
     else:
-        logging.info("OpenHABA values not configured, will not connect.")
+        logging.info("OpenHAB values not configured, will not connect.")
+
+    for id, nspanel in settings["nspanels"].items():
+        mqtt_manager_libs.home_assistant_autoreg.register_panel(nspanel, client, settings)
 
     # Loop MQTT
     client.loop_forever()

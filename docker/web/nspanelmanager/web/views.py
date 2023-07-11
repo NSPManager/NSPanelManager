@@ -1,3 +1,4 @@
+from requests import delete
 from django.shortcuts import render, redirect, HttpResponse
 from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
@@ -7,18 +8,25 @@ from ranged_response import RangedFileResponse
 import hashlib
 import psutil
 import subprocess
+import logging
 
 from .models import NSPanel, Room, Light, Settings, Scene
-from web.settings_helper import get_setting_with_default, set_setting_value
+from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
 
+def get_file_md5sum(filename):
+    fs = FileSystemStorage()
+    if fs.exists(filename):
+        return hashlib.md5(fs.open(filename).read()).hexdigest()
+    else:
+        return None
 
 def restart_mqtt_manager():
     for proc in psutil.process_iter():
         if "./mqtt_manager.py" in proc.cmdline():
-            print("Killing existing mqtt_manager")
+            logging.info("Killing existing mqtt_manager")
             proc.kill()
     # Restart the process
-    print("Starting a new mqtt_manager")
+    logging.info("Starting a new mqtt_manager")
     subprocess.Popen(
         ["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
 
@@ -28,7 +36,36 @@ def index(request):
         temperature_unit = "°F"
     else:
         temperature_unit = "°C"
-    return render(request, 'index.html', {'nspanels': NSPanel.objects.all(), "temperature_unit": temperature_unit})
+
+    nspanels = []
+    md5_firmware = get_file_md5sum("firmware.bin")
+    md5_data_file = get_file_md5sum("data_file.bin")
+    md5_tft_file = get_file_md5sum("gui.tft")
+    md5_us_tft_file = get_file_md5sum("gui_us.tft")
+
+    for nspanel in NSPanel.objects.all():
+        panel_info = {}
+        panel_info["nspanel"] = nspanel
+        panel_info["warnings"] = ""
+        for panel in NSPanel.objects.all():
+            if panel == nspanel:
+                continue
+            elif panel.friendly_name == nspanel.friendly_name:
+                panel_info["warnings"] += "Two or more panels exists with the same name. This may have cunintended consequences\n"
+                break
+        if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
+            panel_info["warnings"] += "Firmware update available.\n"
+        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "False" and nspanel.md5_tft_file != md5_tft_file:
+            panel_info["warnings"] += "GUI update available.\n"
+        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True" and nspanel.md5_tft_file != md5_us_tft_file:
+            panel_info["warnings"] += "GUI update available.\n"
+        nspanels.append(panel_info)
+
+
+    return render(request, 'index.html', {
+        'nspanels': nspanels,
+        "temperature_unit": temperature_unit,
+    })
 
 
 def rooms(request):
@@ -126,15 +163,28 @@ def update_room_form(request, room_id: int):
 
 
 def edit_nspanel(request, panel_id: int):
+    settings = {
+        "lock_to_default_room": get_nspanel_setting_with_default(panel_id, "lock_to_default_room", "False"),
+        "screen_dim_level": get_nspanel_setting_with_default(panel_id, "screen_dim_level", ""),
+        "screensaver_dim_level": get_nspanel_setting_with_default(panel_id, "screensaver_dim_level", ""),
+        "is_us_panel": get_nspanel_setting_with_default(panel_id, "is_us_panel", "False"),
+        "screensaver_activation_timeout": get_nspanel_setting_with_default(panel_id, "screensaver_activation_timeout", ""),
+        "show_screensaver_clock": get_nspanel_setting_with_default(panel_id, "show_screensaver_clock", "Global"),
+        "relay1_default_mode": get_nspanel_setting_with_default(panel_id, "relay1_default_mode", "False"),
+        "relay2_default_mode": get_nspanel_setting_with_default(panel_id, "relay2_default_mode", "False"),
+    }
+
     return render(request, 'edit_nspanel.html', {
         'panel': NSPanel.objects.get(id=panel_id),
-        'rooms': Room.objects.all()
+        'rooms': Room.objects.all(),
+        'settings': settings
     })
 
 
 def save_panel_settings(request, panel_id: int):
     panel = NSPanel.objects.get(id=panel_id)
     panel.room = Room.objects.get(id=request.POST["room_id"])
+    panel.friendly_name = request.POST["name"]
     panel.button1_mode = request.POST["button1_mode"]
     if request.POST["button1_mode"] == "1":
         panel.button1_detached_mode_light = Light.objects.get(id=request.POST["button1_detached_mode_light"])
@@ -145,6 +195,32 @@ def save_panel_settings(request, panel_id: int):
         panel.button2_detached_mode_light = Light.objects.get(id=request.POST["button2_detached_mode_light"])
     else:
         panel.button2_detached_mode_light = None
+    if "lock_to_default_room" in request.POST:
+        set_nspanel_setting_value(panel_id, "lock_to_default_room", "True")
+    else:
+        set_nspanel_setting_value(panel_id, "lock_to_default_room", "False")
+    if "is_us_panel" in request.POST:
+        set_nspanel_setting_value(panel_id, "is_us_panel", "True")
+    else:
+        set_nspanel_setting_value(panel_id, "is_us_panel", "False")
+    if request.POST["screen_dim_level"].strip():
+        set_nspanel_setting_value(panel_id, "screen_dim_level", request.POST["screen_dim_level"])
+    else:
+        delete_nspanel_setting(panel_id, "screen_dim_level")
+    if request.POST["screensaver_dim_level"].strip():
+        set_nspanel_setting_value(panel_id, "screensaver_dim_level", request.POST["screensaver_dim_level"])
+    else:
+        delete_nspanel_setting(panel_id, "screensaver_dim_level")
+    if request.POST["screensaver_activation_timeout"].strip():
+        set_nspanel_setting_value(panel_id, "screensaver_activation_timeout", request.POST["screensaver_activation_timeout"])
+    else:
+        delete_nspanel_setting(panel_id, "screensaver_activation_timeout")
+    if request.POST["show_screensaver_clock"] == "Global":
+        delete_nspanel_setting(panel_id, "show_screensaver_clock")
+    else:
+        set_nspanel_setting_value(panel_id, "show_screensaver_clock", request.POST["show_screensaver_clock"])
+    set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
+    set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
     panel.save()
     return redirect('edit_nspanel', panel_id)
 
@@ -230,6 +306,24 @@ def delete_scene(request, scene_id: int):
         restart_mqtt_manager()
     return redirect('edit_room', room_id=scene.room.id)
 
+def delete_global_scene(request, scene_id: int):
+    scene = Scene.objects.get(id=scene_id)
+    if scene:
+        scene.delete()
+        restart_mqtt_manager()
+    return redirect('settings')
+
+def add_scene_to_global(request):
+    if request.POST["edit_scene_id"].strip() != "" and int(request.POST["edit_scene_id"]) >= 0:
+        new_scene = Scene.objects.get(id=int(request.POST["edit_scene_id"]))
+    else:
+        new_scene = Scene()
+    new_scene.friendly_name = request.POST["scene_name"]
+    new_scene.room = None
+    new_scene.save()
+    restart_mqtt_manager()
+    return redirect('settings')
+
 def add_light_to_room_view(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
     light_position = int(request.POST["position"])
@@ -294,6 +388,7 @@ def settings_page(request):
     data["show_screensaver_clock"] = get_setting_with_default("show_screensaver_clock", False)
     data["clock_us_style"] = get_setting_with_default("clock_us_style", False)
     data["use_farenheit"] = get_setting_with_default("use_farenheit", False)
+    data["global_scenes"] = Scene.objects.filter(room__isnull=True)
     return render(request, 'settings.html', data)
 
 
@@ -361,15 +456,27 @@ def save_new_data_file(request):
 
 # TODO: Make exempt only when Debug = true
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
 
 @csrf_exempt
 def save_new_tft_file(request):
     if request.method == 'POST':
+        if request.POST["file_version"] == "Europe":
+            filename = "gui.tft"
+        else:
+            filename = "gui_us.tft"
+
         uploaded_file = request.FILES['tft_file']
         fs = FileSystemStorage()
-        fs.delete("gui.tft")
-        fs.save("gui.tft", uploaded_file)
-        print("Saved new GUI tft file.")
+        fs.delete(filename)
+        fs.save(filename, uploaded_file)
     return redirect('/')
 
 
@@ -393,7 +500,7 @@ def download_data_file(request):
         parts = request.headers["Range"][6:].split('-')
         range_start = int(parts[0])
         range_end = int(parts[1])
-        if range_end == 255:  # Workaround for copy-paste error in firmware
+        if range_end == 255:  # Workaround for copy-paste error in firmware. TODO: Remove once all panels has been updated.
             return HttpResponse(fs.open("data_file.bin").read(), content_type="application/octet-stream")
         data = fs.open("data_file.bin").read()
         return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
@@ -403,25 +510,35 @@ def download_data_file(request):
 
 def download_tft(request):
     fs = FileSystemStorage()
+    panel_ip = get_client_ip(request)
+    nspanel = NSPanel.objects.filter(ip_address = panel_ip).first()
+    if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True":
+        filename = "gui_us.tft"
+    else:
+        filename = "gui.tft"
+
     if "Range" in request.headers and request.headers["Range"].startswith("bytes="):
         parts = request.headers["Range"][6:].split('-')
         range_start = int(parts[0])
         range_end = int(parts[1])
-        data = fs.open("gui.tft").read()
+        data = fs.open(filename).read()
         return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
     else:
-        return HttpResponse(fs.open("gui.tft").read(), content_type="application/octet-stream")
+        return HttpResponse(fs.open(filename).read(), content_type="application/octet-stream")
 
 
 def checksum_firmware(request):
-    fs = FileSystemStorage()
-    return HttpResponse(hashlib.md5(fs.open("firmware.bin").read()).hexdigest())
+    return HttpResponse(get_file_md5sum("firmware.bin"))
 
 
 def checksum_data_file(request):
-    fs = FileSystemStorage()
-    return HttpResponse(hashlib.md5(fs.open("data_file.bin").read()).hexdigest())
+    return HttpResponse(get_file_md5sum("data_file.bin"))
 
 def checksum_tft_file(request):
-    fs = FileSystemStorage()
-    return HttpResponse(hashlib.md5(fs.open("gui.tft").read()).hexdigest())
+    panel_ip = get_client_ip(request)
+    nspanel = NSPanel.objects.filter(ip_address = panel_ip).first()
+    if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True":
+        filename = "gui_us.tft"
+    else:
+        filename = "gui.tft"
+    return HttpResponse(get_file_md5sum(filename))

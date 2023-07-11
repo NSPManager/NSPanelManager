@@ -3,6 +3,7 @@
 #include <NSPanel.hpp>
 #include <PageManager.hpp>
 #include <Room.hpp>
+#include <RoomManager.hpp>
 #include <RoomPage.hpp>
 #include <TftDefines.h>
 

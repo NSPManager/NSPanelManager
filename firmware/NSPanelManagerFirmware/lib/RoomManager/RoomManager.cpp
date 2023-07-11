@@ -11,6 +11,7 @@
 #include <RoomManager.hpp>
 #include <Scene.hpp>
 #include <WiFi.h>
+#include <map>
 
 void RoomManager::init() {
   MqttManager::subscribeToTopic("nspanel/config/reload", &RoomManager::reloadCallback);
@@ -72,12 +73,85 @@ void RoomManager::loadAllRooms(bool is_update) {
   InterfaceConfig::screensaver_activation_timeout = (*roomData)["screensaver_activation_timeout"].as<uint16_t>();
   InterfaceConfig::show_screensaver_clock = (*roomData)["show_screensaver_clock"].as<String>().equals("True");
   InterfaceConfig::clock_us_style = (*roomData)["clock_us_style"].as<String>().equals("True");
+  InterfaceConfig::lock_to_default_room = (*roomData)["lock_to_default_room"].as<String>().equals("True");
   NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>((*roomData)["button1_mode"].as<uint8_t>());
   NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>((*roomData)["button2_mode"].as<uint8_t>());
   NSPMConfig::instance->use_farenheit = (*roomData)["use_farenheit"].as<String>().equals("True");
+
+  bool relay1_default_mode = (*roomData)["relay1_default_mode"].as<String>().equals("True");
+  bool relay2_default_mode = (*roomData)["relay2_default_mode"].as<String>().equals("True");
+
+  ButtonManager::setRelayState(1, relay1_default_mode);
+  ButtonManager::setRelayState(2, relay2_default_mode);
+
+  if (NSPMConfig::instance->relay1_default_mode != relay1_default_mode) {
+    NSPMConfig::instance->relay1_default_mode = relay1_default_mode;
+    NSPMConfig::instance->saveToLittleFS();
+  }
+
+  if (NSPMConfig::instance->relay2_default_mode != relay2_default_mode) {
+    NSPMConfig::instance->relay2_default_mode = relay2_default_mode;
+    NSPMConfig::instance->saveToLittleFS();
+  }
+
+  if (NSPMConfig::instance->wifi_hostname.compare((*roomData)["name"].as<String>().c_str()) != 0) {
+    NSPMConfig::instance->wifi_hostname = (*roomData)["name"].as<String>().c_str();
+    NSPMConfig::instance->saveToLittleFS();
+    LOG_DEBUG("Name has changed. Restarting.");
+    vTaskDelay(250 / portTICK_PERIOD_MS);
+    ESP.restart();
+    vTaskDelay(portMAX_DELAY);
+    vTaskDelete(NULL);
+  }
+
+  // Load global scenes
+  JsonVariant json_scenes = (*roomData)["scenes"];
+  for (JsonPair scenePair : json_scenes.as<JsonObject>()) {
+    bool existing_scene;
+    Scene *newScene = InterfaceConfig::getSceneById(atoi(scenePair.key().c_str()));
+    if (newScene == nullptr) {
+      existing_scene = false;
+      newScene = new Scene();
+    } else {
+      existing_scene = true;
+    }
+    newScene->room = nullptr;
+    newScene->id = atoi(scenePair.key().c_str());
+    newScene->name = scenePair.value()["name"] | "ERR-S";
+    newScene->callUpdateCallbacks();
+    if (!existing_scene) {
+      InterfaceConfig::global_scenes.push_back(newScene);
+      LOG_TRACE("Loaded scene ", newScene->id, "::", newScene->name.c_str());
+    }
+  }
+
+  for (auto it = InterfaceConfig::global_scenes.cbegin(); it != InterfaceConfig::global_scenes.cend();) {
+    // Check if this light ID exist in JSON config
+    bool scene_found = false;
+    for (JsonPair jsonLightPair : json_scenes.as<JsonObject>()) {
+      if (atoi(jsonLightPair.key().c_str()) == (*it)->getId()) {
+        scene_found = true;
+        break;
+      }
+    }
+
+    if (!scene_found) {
+      Scene *scene_to_remove = (*it);
+      LOG_DEBUG("Removing global scene: ", scene_to_remove->getName().c_str(), ". ID: ", scene_to_remove->getId());
+      it = InterfaceConfig::global_scenes.erase(it);
+      scene_to_remove->callDeconstructCallbacks();
+      delete scene_to_remove;
+    } else {
+      it++;
+    }
+  }
+
   // Init rooms
 
   for (uint16_t roomId : (*roomData)["rooms"].as<JsonArray>()) {
+    if (InterfaceConfig::lock_to_default_room && roomId != InterfaceConfig::homeScreen) {
+      continue;
+    }
     LOG_INFO("Getting config for room ", roomId);
     Room *room = RoomManager::loadRoom(roomId, is_update);
     if (RoomManager::getRoomById(roomId) == nullptr) {
@@ -166,8 +240,14 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
     } else {
       existing_light = true;
     }
-    newLight->initFromJson(&lightPair);
-    // If the light is new (ie. not updated from existing) push it into the correct list.
+    std::map<std::string, std::string> data;
+    data["id"] = lightPair.key().c_str();
+    for (JsonPair lightSettingsPair : lightPair.value().as<JsonObject>()) {
+      data[lightSettingsPair.key().c_str()] = lightSettingsPair.value().as<String>().c_str();
+    }
+    newLight->initFromMap(data);
+
+    //  If the light is new (ie. not updated from existing) push it into the correct list.
     if (!existing_light) {
       if (lightPair.value()["ceiling"] == true) {
         newRoom->ceilingLights.insert(std::make_pair(newLight->getId(), newLight));
@@ -256,6 +336,7 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
     newScene->room = newRoom;
     newScene->id = atoi(scenePair.key().c_str());
     newScene->name = scenePair.value()["name"] | "ERR-S";
+    newScene->callUpdateCallbacks();
     if (!existing_scene) {
       newRoom->scenes.push_back(newScene);
       LOG_TRACE("Loaded scene ", newScene->id, "::", newScene->name.c_str());

@@ -4,7 +4,8 @@
 #include <Arduino.h>
 #include <DeviceEntity.hpp>
 #include <PageBase.hpp>
-#include <RoomManager.hpp>
+#include <RoomManagerObserver.hpp>
+class Scene;
 
 class ScenePage : public PageBase, DeviceEntityObserver, RoomManagerObserver {
 public:
@@ -12,6 +13,7 @@ public:
   void show();
   void unshow();
   void processTouchEvent(uint8_t page, uint8_t component, bool pressed);
+  static void doSceneSaveProgress(void *param);
 
   void entityDeconstructCallback(DeviceEntity *);
   void entityUpdateCallback(DeviceEntity *);
@@ -21,6 +23,8 @@ public:
 private:
   void _updateDisplay();
   void _setRoomLabelText(const char *text);
+  static inline bool _doSceneSaveProgress;
+  static inline Scene *_sceneToSave;
 };
 
 #endif

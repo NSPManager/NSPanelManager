@@ -4,9 +4,9 @@
 #include <Arduino.h>
 #include <DeviceEntity.hpp>
 class Light;
-#include <InterfaceManagerHelpers.hpp>
+#include <InterfaceConfigEnums.hpp>
 #include <PageBase.hpp>
-#include <RoomManager.hpp>
+#include <RoomManagerObserver.hpp>
 
 class HomePage : public PageBase, DeviceEntityObserver, RoomManagerObserver {
 public:
@@ -39,7 +39,7 @@ public:
   void setModeText(const char *text);
 
   void updateDeviceEntitySubscriptions();
-  void updateLightStatus();
+  void updateLightStatus(bool updateLightLevel, bool updateColorTemperature);
   void updateRoomInfo();
   void updateModeText();
 
@@ -77,10 +77,6 @@ private:
   static inline unsigned long _lastDeviceEntityUpdate;
   static inline TaskHandle_t _taskHandleUpdateDisplay = NULL;
   static void _taskUpdateDisplay(void *param);
-
-  editLightMode _currentEditLightMode;
-  editLightMode _triggerSpecialEditLightsMode;
-  roomMode _currentRoomMode;
 };
 
 #endif

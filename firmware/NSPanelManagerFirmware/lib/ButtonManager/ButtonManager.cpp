@@ -19,8 +19,10 @@ void ButtonManager::init() {
   ButtonManager::_lastButton2State = !digitalRead(BUTTON_MANAGER_BUTTON2_PIN);
   ButtonManager::_newButton2State = ButtonManager::_lastButton2State;
 
-  ButtonManager::_setRelayState(1, ButtonManager::_newButton1State);
-  ButtonManager::_setRelayState(2, ButtonManager::_newButton2State);
+  // Leave button state alone. Default states are set as soon as a config
+  // is received from the NSPanel Manager. This is done in RoomManager.cpp.
+  // ButtonManager::setRelayState(1, ButtonManager::_newButton1State);
+  // ButtonManager::setRelayState(2, ButtonManager::_newButton2State);
 
   xTaskCreatePinnedToCore(ButtonManager::_loop, "_taskButtonManagerLoop", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 
@@ -37,11 +39,11 @@ void ButtonManager::mqttCallback(char *topic, byte *payload, unsigned int length
   }
 
   if (relay > 0) {
-    ButtonManager::_setRelayState(relay, (*payload) == '1');
+    ButtonManager::setRelayState(relay, (*payload) == '1');
   }
 }
 
-void ButtonManager::_setRelayState(uint8_t relay, bool state) {
+void ButtonManager::setRelayState(uint8_t relay, bool state) {
   // a press has been detected.
   // TODO: Detect long press and make action(s) configurable from web interface
   if (relay == 1) {
@@ -56,7 +58,7 @@ void ButtonManager::_setRelayState(uint8_t relay, bool state) {
 void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
   if (button == 1) {
     if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DIRECT) {
-      ButtonManager::_setRelayState(1, !digitalRead(BUTTON_MANAGER_RELAY1_PIN));
+      ButtonManager::setRelayState(1, !digitalRead(BUTTON_MANAGER_RELAY1_PIN));
     } else if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DETACHED && ButtonManager::button1_detached_mode_light != nullptr) {
       LOG_DEBUG("Button 1 pressed, detached light: ", ButtonManager::button1_detached_mode_light->getName().c_str());
       std::list<Light *> lightsToChange;
@@ -69,7 +71,7 @@ void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
     }
   } else if (button == 2) {
     if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DIRECT) {
-      ButtonManager::_setRelayState(2, !digitalRead(BUTTON_MANAGER_RELAY2_PIN));
+      ButtonManager::setRelayState(2, !digitalRead(BUTTON_MANAGER_RELAY2_PIN));
     } else if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DETACHED && ButtonManager::button2_detached_mode_light != nullptr) {
       LOG_DEBUG("Button 2 pressed, detached light: ", ButtonManager::button2_detached_mode_light->getName().c_str());
       std::list<Light *> lightsToChange;

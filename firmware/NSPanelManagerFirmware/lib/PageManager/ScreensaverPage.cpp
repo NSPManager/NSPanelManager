@@ -4,6 +4,7 @@
 #include <NSPMConfig.h>
 #include <NSPanel.hpp>
 #include <PageManager.hpp>
+#include <RoomManager.hpp>
 #include <ScreensaverPage.hpp>
 #include <TftDefines.h>
 

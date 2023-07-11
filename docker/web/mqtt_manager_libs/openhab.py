@@ -4,7 +4,6 @@ import logging
 import json
 from time import sleep, time
 from threading import Thread
-import traceback
 import mqtt_manager_libs.light_states
 
 openhab_url = ""
@@ -83,12 +82,10 @@ def on_message(ws, message):
                     else:
                         logging.info(F"Got state update event for light not managed by NSPanelManager. Message: {message}")
             except Exception as e:
-                traceback.print_exc()
+                logging.exception("Error while processing OpenHAB event: ")
 
 def connect():
     Thread(target=_do_connection, daemon=True).start()
-    # Update all existing states
-    _update_all_light_states()
 
 
 def _ws_connection_open(ws):
@@ -120,6 +117,8 @@ def _do_connection():
     ws = websocket.WebSocketApp(
         F"{ws_url}", on_message=on_message, on_open=_ws_connection_open, on_close=_ws_connection_close)
     ws.run_forever(reconnect=5)
+    # Update all existing states
+    _update_all_light_states()
 
 
 def _send_keepalive():
@@ -137,9 +136,7 @@ def _send_keepalive():
                 num_error = 0
             except Exception as e:
                 num_error += 1
-                logging.error(
-                    "Error! Failed to send keepalive message to OpenHAB websocket.")
-                logging.error(e)
+                logging.exception("Error! Failed to send keepalive message to OpenHAB websocket.")
         sleep(5)
     logging.error(
         "More than 5 keep-alive messages have failed. Stopping keep-alive thread.")
@@ -173,8 +170,7 @@ def set_entity_brightness(openhab_item_name: str, openhab_control_mode: str, lig
             ws.send(json.dumps(msg))
         return True
     except Exception as e:
-        logging.error("Failed to send entity update to OpenHAB.")
-        traceback.print_exc()
+        logging.exception("Failed to send entity update to OpenHAB.")
         return False
 
 
@@ -198,8 +194,7 @@ def set_entity_color_temp(openhab_item_name: str, color_temp: int) -> bool:
         ws.send(json.dumps(msg))
         return True
     except Exception as e:
-        logging.error("Failed to send entity update to OpenHAB.")
-        traceback.print_exc()
+        logging.exception("Failed to send entity update to OpenHAB.")
         return False
 
 
@@ -214,9 +209,8 @@ def set_entity_color_saturation(openhab_item_name: str, light_level: int, color_
         }
         ws.send(json.dumps(msg))
         return True
-    except Exception as e:
-        logging.error("Failed to send entity update to OpenHAB.")
-        traceback.print_exc()
+    except:
+        logging.exception("Failed to send entity update to OpenHAB.")
         return False
 
 
@@ -264,9 +258,8 @@ def _update_all_light_states():
                         light.light_level = int(float(brightness))
                     else:
                         logging.error("Failed to get item state for OppenHAB item: " + light.openhab_item_color_temp)
-            except Exception as e:
-                logging.error(F"Failed to process light ID:{light_id}. The following error occured:")
-                traceback.print_exc()
+            except:
+                logging.exception(F"Failed to process light ID:{light_id}. The following error occured:")
 
 
 def _get_item_state(item):

@@ -13,5 +13,5 @@ echo "Starting server"
 
 echo "Stopping all python applications"
 for app in "$(pgrep python)"; do
-    kill $app
+	kill $app
 done

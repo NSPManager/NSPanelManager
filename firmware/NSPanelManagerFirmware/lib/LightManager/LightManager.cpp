@@ -1,3 +1,4 @@
+#include <ArduinoJson.h>
 #include <InterfaceConfig.hpp>
 #include <Light.hpp>
 #include <LightManager.hpp>
@@ -17,6 +18,8 @@ void LightManager::ChangeLightsToLevel(std::list<Light *> *lights, uint8_t level
   doc["attribute"] = "brightness";
   doc["brightness"] = level;
   JsonArray entity_ids = doc.createNestedArray("entity_ids");
+
+  std::list<Light *> send_color_temp_update;
 
   for (Light *light : (*lights)) {
     entity_ids.add(light->getId());
@@ -291,6 +294,10 @@ void LightManager::_taskProcessMqttMessages(void *param) {
   mqttMessage *msg;
   for (;;) {
     if (xQueueReceive(LightManager::_mqttMessageQueue, &msg, portMAX_DELAY) == pdTRUE) {
+      if (msg->payload.size() <= 0) {
+        delete msg;
+        continue;
+      }
       if (msg->topic.find("nspanel/entities/") == 0) { // If topic begins with nspanel/entities/
         std::string domain = msg->topic;
         domain = domain.erase(0, strlen("nspanel/entities/"));
@@ -311,13 +318,12 @@ void LightManager::_taskProcessMqttMessages(void *param) {
             light->callUpdateCallbacks();
           }
         } else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0) {
-          uint16_t colorTemp = atoi(msg->payload.c_str());
+          unsigned long colorTemp = atoi(msg->payload.c_str());
           if (colorTemp > InterfaceConfig::colorTempMax) {
             colorTemp = InterfaceConfig::colorTempMax;
           } else if (colorTemp < InterfaceConfig::colorTempMin) {
             colorTemp = InterfaceConfig::colorTempMin;
           }
-
           colorTemp = ((colorTemp - InterfaceConfig::colorTempMin) * 100) / (InterfaceConfig::colorTempMax - InterfaceConfig::colorTempMin);
 
           if (InterfaceConfig::reverseColorTempSlider) {
@@ -328,7 +334,11 @@ void LightManager::_taskProcessMqttMessages(void *param) {
           if (light != nullptr) {
             light->setColorTemperature(colorTemp);
             light->callUpdateCallbacks();
+          } else {
+            LOG_ERROR("Got kelvin update for unknown light ID: ", entity.c_str());
           }
+        } else {
+          LOG_ERROR("Got state update for unknown attribute: ", attribute.c_str());
         }
       }
       delete msg;

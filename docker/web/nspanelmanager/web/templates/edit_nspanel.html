@@ -9,119 +9,281 @@
 {% block content %}
 <h2 class="title is-4" id="nspanel_name">{{ panel.friendly_name }} settings</h2>
 <h2 class="subtitle is-6">MAC: <span id="nspanel_mac">{{ panel.mac_address }}</span></h2>
+<div class="notification is-info is-light">
+  Changes to NSPanel settings on this page requires a reboot of each panel to take effect.
+</div>
 <form method="POST" action="{% url 'save_panel_settings' panel_id=panel.id %}">
-    {% csrf_token %}
-    <div class="field">
-        <label class="label">Default room</label>
-        <div class="control">
-            <div class="select">
-                <select name="room_id">
-                    {% for room in rooms %}
-                    {% if room.id == panel.room.id %}
-                    <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
-                    {% else %}
-                    <option value="{{ room.id }}">{{ room.friendly_name }}</option>
-                    {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
+  {% csrf_token %}
+  <div class="field">
+    <label class="label">Name</label>
+    <div class="control">
+      <input type="text" class="input" name="name" value="{{ panel.friendly_name }}">
     </div>
-    <div class="field">
-        <label class="label">Button 1 mode<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-help"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                Direct mode: The button directly controls the relay.<br>
-                Detached mode: The button does not directly control the relay but is instead coupled to a light added in the room. In case the lights is removed from the room, the button will will remain in detached mode but will no longed be coupled to any button.
-              </div>
-            </span>
-        </label>
-        <div class="control">
-            <div class="select">
-              <select name="button1_mode" id="button1_mode">
-                <option value="0" {% if panel.button1_mode == 0 %}selected{% endif %}>Direct mode</option>
-                <option value="1" {% if panel.button1_mode == 1 %}selected{% endif %}>Detached mode</option>
-              </select>
-            </div>
-        </div>
-        <label class="label" id="button1_detached_mode_light_label">Button 1 controls light in room {{ panel.room.friendly_name }}</label>
-        <div class="control" id="button1_detached_mode_light_select">
-            <div class="select">
-              <select name="button1_detached_mode_light" id="button1_detached_mode_light">
-                {% if panel.button1_detached_mode_light == None %}
-                <option value="-1" selected>-</option>
-                {% else %}
-                <option value="-1">-</option>
-                {% endif %}
-                {% for light in panel.room.light_set.all %}
-                    {% if panel.button1_detached_mode_light == light %}
-                    <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
-                    {% else %}
-                    <option value="{{ light.id }}">{{ light.friendly_name }}</option>
-                    {% endif %}
-                {% endfor %}
-              </select>
-            </div>
-        </div>
+  </div>
+  <div class="field">
+    <label class="label">Default room</label>
+    <div class="control">
+      <div class="select">
+        <select name="room_id">
+          {% for room in rooms %}
+          {% if room.id == panel.room.id %}
+          <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
+          {% else %}
+          <option value="{{ room.id }}">{{ room.friendly_name }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+      </div>
     </div>
-    <div class="field">
-       <label class="label">Button 2 mode<span class="question">
-             <span class="icon question_icon">
-               <i class="mdi mdi-help"></i>
-             </span>
-             <div class="question_help_text notification is-info is-light">
-               Direct mode: The button directly controls the relay.<br>
-               Detached mode: The button does not directly control the relay but is instead coupled to a light added in the room. In case the lights is removed from the room, the button will will remain in detached mode but will no longed be coupled to any button.
-             </div>
-           </span>
-       </label>
-       <div class="control">
-           <div class="select">
-             <select name="button2_mode" id="button2_mode">
-               <option value="0" {% if panel.button2_mode == 0 %}selected{% endif %}>Direct mode</option>
-               <option value="1" {% if panel.button2_mode == 1 %}selected{% endif %}>Detached mode</option>             </select>
-           </div>
-       </div>
-       <label class="label" id="button2_detached_mode_light_label">Button 2 controls light in room {{ panel.room.friendly_name }}</label>
-       <div class="control" id="button2_detached_mode_light_select">
-           <div class="select">
-             <select name="button2_detached_mode_light" id="button2_detached_mode_light">
-               {% if panel.button2_detached_mode_light == None %}
-               <option value="-1" selected>-</option>
-               {% else %}
-               <option value="-1">-</option>
-               {% endif %}
-               {% for light in panel.room.light_set.all %}
-                   {% if panel.button2_detached_mode_light == light %}
-                   <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
-                   {% else %}
-                   <option value="{{ light.id }}">{{ light.friendly_name }}</option>
-                   {% endif %}
-               {% endfor %}
-             </select>
-           </div>
-       </div>
-    </div>
-     <div class="field is-grouped">
-        <div class="control">
-            <button class="button is-primary">Save</button>
-            <a type="button" class="button is-link" href="/api/reboot_panel?address={{ panel.ip_address }}">Reboot</a>
+  </div>
+  <div class="field">
+    <label class="checkbox">
+      {% if settings.lock_to_default_room == "True" %}
+          <input type="checkbox" name="lock_to_default_room" checked>
+      {% else %}
+          <input type="checkbox" name="lock_to_default_room">
+      {% endif %}
+      Lock to default room
+      <span class="question">
+        <span class="icon question_icon">
+          <i class="mdi mdi-help"></i>
+        </span>
+        <div class="question_help_text notification is-info is-light">
+          Wether this panel control other rooms other than the default room. This setting causes the panel to only load the selected room.
         </div>
+      </span>
+    </label>
+  </div>
+  <div class="field">
+    <label class="label">Button 1 mode<span class="question">
+        <span class="icon question_icon">
+          <i class="mdi mdi-help"></i>
+        </span>
+        <div class="question_help_text notification is-info is-light">
+          Direct mode: The button directly controls the relay.<br>
+          Detached mode: The button does not directly control the relay but is instead coupled to a light added in the
+          room. In case the lights is removed from the room, the button will will remain in detached mode but will no
+          longed be coupled to any button.
+        </div>
+      </span>
+    </label>
+    <div class="control">
+      <div class="select">
+        <select name="button1_mode" id="button1_mode">
+          <option value="0" {% if panel.button1_mode == 0 %}selected{% endif %}>Direct mode</option>
+          <option value="1" {% if panel.button1_mode == 1 %}selected{% endif %}>Detached mode</option>
+        </select>
+      </div>
     </div>
+    <label class="label" id="button1_detached_mode_light_label">Button 1 controls light in room {{ panel.room.friendly_name }}</label>
+    <div class="control" id="button1_detached_mode_light_select">
+      <div class="select">
+        <select name="button1_detached_mode_light" id="button1_detached_mode_light">
+          {% if panel.button1_detached_mode_light == None %}
+          <option value="-1" selected>-</option>
+          {% else %}
+          <option value="-1">-</option>
+          {% endif %}
+          {% for light in panel.room.light_set.all %}
+          {% if panel.button1_detached_mode_light == light %}
+          <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
+          {% else %}
+          <option value="{{ light.id }}">{{ light.friendly_name }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <label class="label">Button 2 mode<span class="question">
+        <span class="icon question_icon">
+          <i class="mdi mdi-help"></i>
+        </span>
+        <div class="question_help_text notification is-info is-light">
+          Direct mode: The button directly controls the relay.<br>
+          Detached mode: The button does not directly control the relay but is instead coupled to a light added in the
+          room. In case the lights is removed from the room, the button will will remain in detached mode but will no
+          longed be coupled to any button.
+        </div>
+      </span>
+    </label>
+    <div class="control">
+      <div class="select">
+        <select name="button2_mode" id="button2_mode">
+          <option value="0" {% if panel.button2_mode == 0 %}selected{% endif %}>Direct mode</option>
+          <option value="1" {% if panel.button2_mode == 1 %}selected{% endif %}>Detached mode</option>
+        </select>
+      </div>
+    </div>
+    <label class="label" id="button2_detached_mode_light_label">Button 2 controls light in room {{ panel.room.friendly_name }}</label>
+    <div class="control" id="button2_detached_mode_light_select">
+      <div class="select">
+        <select name="button2_detached_mode_light" id="button2_detached_mode_light">
+          {% if panel.button2_detached_mode_light == None %}
+          <option value="-1" selected>-</option>
+          {% else %}
+          <option value="-1">-</option>
+          {% endif %}
+          {% for light in panel.room.light_set.all %}
+          {% if panel.button2_detached_mode_light == light %}
+          <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
+          {% else %}
+          <option value="{{ light.id }}">{{ light.friendly_name }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <label class="label">Relay 1 default mode<span class="question">
+        <span class="icon question_icon">
+          <i class="mdi mdi-help"></i>
+        </span>
+        <div class="question_help_text notification is-info is-light">
+          Controls the default power state of relay 1 after power on.<br>
+          On: The relay is powered and power is flowing to the connected device.<br>
+          Off: The relay is not powered and power is not flowing to the connected device. This is the default behavior<br>
+        </div>
+      </span>
+    </label>
+    <div class="control">
+      <div class="select">
+        <select name="relay1_default_mode" id="relay1_default_mode">
+          <option value="True" {% if settings.relay1_default_mode == "True" %}selected{% endif %}>On</option>
+          <option value="False" {% if settings.relay1_default_mode == "False" %}selected{% endif %}>Off</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <label class="label">Relay 2 default mode<span class="question">
+        <span class="icon question_icon">
+          <i class="mdi mdi-help"></i>
+        </span>
+        <div class="question_help_text notification is-info is-light">
+          Controls the default power state of relay 2 after power on.<br>
+          On: The relay is powered and power is flowing to the connected device.<br>
+          Off: The relay is not powered and power is not flowing to the connected device. This is the default behavior<br>
+        </div>
+      </span>
+    </label>
+    <div class="control">
+      <div class="select">
+        <select name="relay2_default_mode" id="relay2_default_mode">
+          <option value="True" {% if settings.relay2_default_mode == "True" %}selected{% endif %}>On</option>
+          <option value="False" {% if settings.relay2_default_mode == "False" %}selected{% endif %}>Off</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <label class="checkbox">
+      {% if settings.is_us_panel == "True" %}
+          <input type="checkbox" name="is_us_panel" checked>
+      {% else %}
+          <input type="checkbox" name="is_us_panel">
+      {% endif %}
+      Is US panel
+      <span class="question">
+        <span class="icon question_icon">
+          <i class="mdi mdi-help"></i>
+        </span>
+        <div class="question_help_text notification is-info is-light">
+          Wether this panel is a US version or Europe version. Check for US version.
+        </div>
+      </span>
+    </label>
+  </div>
+  <div class="field">
+      <label class="label">Screen brightness<span class="question">
+        <span class="icon question_icon">
+          <i class="mdi mdi-help"></i>
+        </span>
+        <div class="question_help_text notification is-info is-light">
+          Brightness when the panel is on. 1-100%. Leave empty to use global setting.
+        </div>
+      </span>
+    </label>
+  </div>
+  <div class="field is-grouped">
+      <div class="control">
+          <input class="input" type="number" name="screen_dim_level" id="screen_dim_level" placeholder="Global" min=1 max=100 value="{{ settings.screen_dim_level }}">
+      </div>
+  </div>
+  <div class="field">
+      <label class="label">Screensaver brightness<span class="question">
+        <span class="icon question_icon">
+          <i class="mdi mdi-help"></i>
+        </span>
+        <div class="question_help_text notification is-info is-light">
+          Brightness level during screensaver. 0-100%. Leave empty to use global setting.
+        </div>
+      </span>
+    </label>
+  </div>
+  <div class="field is-grouped">
+      <div class="control">
+          <input class="input" type="number" name="screensaver_dim_level" id="screensaver_dim_level" placeholder="Global" min=0 max=100 value="{{ settings.screensaver_dim_level }}">
+      </div>
+  </div>
+  <div class="field">
+      <label class="label">Screensaver activation timeout<span class="question">
+        <span class="icon question_icon">
+          <i class="mdi mdi-help"></i>
+        </span>
+        <div class="question_help_text notification is-info is-light">
+          The amount of time before the screensaver is activated. Time is in milliseconds. Default: 30000 (30 seconds). Leave empty to use global setting.
+        </div>
+      </span>
+    </label>
+  </div>
+  <div class="field is-grouped">
+      <div class="control">
+          <input class="input" type="number" name="screensaver_activation_timeout" id="screensaver_activation_timeout" placeholder="Global" value="{{ settings.screensaver_activation_timeout }}">
+      </div>
+  </div>
+  <div class="field">
+    <label class="label">Show clock on screensaver<span class="question">
+        <span class="icon question_icon">
+          <i class="mdi mdi-help"></i>
+        </span>
+        <div class="question_help_text notification is-info is-light">
+          True: show clock on screensaver<br>
+          False: do not show clock on screensaver<br>
+          Global: use global setting.
+        </div>
+      </span>
+    </label>
+    <div class="control">
+      <div class="select">
+        <select name="show_screensaver_clock" id="show_screensaver_clock">
+          <option value="True" {% if settings.show_screensaver_clock == "True" %}selected{% endif %}>True</option>
+          <option value="False" {% if settings.show_screensaver_clock == "False" %}selected{% endif %}>False</option>
+          <option value="Global" {% if settings.show_screensaver_clock == "Global" %}selected{% endif %}>Global</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="field is-grouped">
+    <div class="control">
+      <button class="button is-primary">Save</button>
+      <a type="button" class="button is-link" href="/api/reboot_panel?address={{ panel.ip_address }}">Reboot</a>
+    </div>
+  </div>
 </form>
 <h2 class="title is-4 mt-6" id="nspanel_name">{{ panel.friendly_name }} live log</h2>
 <table class="table is-fullwidth is-narrow">
-    <thead>
-        <tr>
-            <th>Time</th>
-            <th>Level</th>
-            <th>Message</th>
-        </tr>
-    </thead>
-    <tbody id="log_body">
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Level</th>
+      <th>Message</th>
+    </tr>
+  </thead>
+  <tbody id="log_body">
 
-    </tbody>
+  </tbody>
 </table>
 {% endblock %}

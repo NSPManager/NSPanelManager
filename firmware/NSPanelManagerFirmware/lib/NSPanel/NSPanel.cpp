@@ -226,7 +226,7 @@ bool NSPanel::init() {
   this->_sendCommandWithoutResponse("sleep=0");
   this->_sendCommandWithoutResponse("bkcmd=0");
   this->_sendCommandWithoutResponse("sleep=0");
-  this->_sendCommandClearResponse("rest");
+  // this->_sendCommandClearResponse("rest");
 
   xSemaphoreGive(NSPanel::instance->_mutexWriteSerialData);
   xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
@@ -800,7 +800,7 @@ bool NSPanel::_updateTFTOTA() {
   }
 
   LOG_INFO("Getting TFT MD5 checksum to store in flash.");
-  char checksum_holder[32];
+  char checksum_holder[33];
   while (true) {
     std::string checksumUrl = "http://";
     checksumUrl.append(NSPMConfig::instance->manager_address);

@@ -64,7 +64,7 @@ bool HttpLib::GetMD5sum(const char *address, char *buffer) {
   int responseCode = http.GET();
 
   if (responseCode == 200) {
-    http.getString().toCharArray(buffer, 32);
+    http.getString().toCharArray(buffer, 33);
     http.end();
     return true;
   }

@@ -2,6 +2,7 @@ asgiref==3.6.0
 certifi==2022.12.7
 charset-normalizer==3.0.1
 Django==4.1.7
+django-environ==0.10.0
 django-mathfilters==1.0.0
 django-ranged-response==0.2.0
 gevent==22.10.2

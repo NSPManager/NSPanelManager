@@ -9,11 +9,6 @@ class Scene;
 #include <unordered_map>
 #include <vector>
 
-// TODO: Create LightManager that can handle lights so that, for example the following can be done
-// light->setLightLevel(100);
-// light->setColorTemperature(2200);
-// LightManager::sendLightUpdates();
-
 class Room {
 public:
   uint8_t id = 0;
