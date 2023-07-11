@@ -27,7 +27,8 @@ Logging from NSPanels are done over MQTT to the topic `nspanel/<panel name>/log`
 * Special mode where control of only ceiling or table lights are activated
 
 # Setup
-## Docker container
+
+## 1. Docker container
 All configuration for panels are done via a web interface running in a docker container. This container is available in the `docker` directory. Use one of the following scripts to get it running:
 |Script|Explination|
 |---|---|
@@ -39,21 +40,65 @@ All configuration for panels are done via a web interface running in a docker co
 
 If you are setting up the container manually using some other tool, make sure to publish port 8000 and 8001 for web interface and websocket. To set the timezone, make sure you pass though the /etc/timezone file.
 
-## NSPanel
-The NSPanelManager firmware is written as a PlatformIO-project and this is by far the easiest method to flash the firmware. Perform the following steps to flash you NSPanel:
+To access web interface, enter IP-address and port (standard 8000) to where the container is running.
+* Press settings for some initial settings:
+* Insert your MQTT settings
+* Insert API information to Home Assistant or Openhab
+* Save
+* Now we're ready to add some NSPanels!
+
+## 2. Flash firmware to NSPanel
+The NSPanelManager firmware is written as a PlatformIO-project and this is by far the easiest method to flash the firmware. Perform the following steps to flash you NSPanel: (if not using PlatformIO or unable to run the below scripts you can use whatever tool you prefer to flash the panel. File to flash is: `merged-flash.bin` in the `firmware/NSPanelManagerFirmware/`)
+
 * Install PlatformIO for you platform.
 * Navigate to the `firmware/NSPanelManagerFirmware/` directory.
-* Execute `./build_image.sh` to build the firmware image.
 * Execute `./upload_image.sh` while connected to the NSPanel with serial programmer. Repeat for all panels.
-* Restart the panel by removing power and applying it again.
-* Connect to the access point named `NSPMPanel` with the password `password`.
+* Power up one panel at a time. 
+* On boot the newly flahsed panel will start a WIFI Access point called `NSPMPanel`
+* Connect to the access point with the password `password`.
+* On successfull connect to accesspoint, enter panels web interface on 192.168.1.1 and enter settings as follows.
 * Enter a friendly name for this panel.
 * Enter the IP address and port to where the docker-container with the web-interface is running.
-* Enter your Wifi SSID (Name) and password .
+* Enter your Wifi SSID (Name) and password.
 * Enter your MQTT address and port (enter username and password if used).
 * Press the save button. The panel will restart and try to connect to the given SSID, MQTT and manager address.
+  
+* Switch back your home WIFI to check if panel successfully connected to the manager by doing the following steps:
+* Go to web interface on docker container.
+* Update page.
+* Panel should appear in first page. Panel is added to a dummy room if no room exists.
 
 For more information on how to connect to the NSPanel to flash it, see [this tutorial](https://www.youtube.com/watch?v=sCrdiCzxMOQ).
+
+
+## 3. Upload TFT file
+Before uploading:
+EU or US version tft file i chosen based on the panel settings you have chosen. There is a 'Is US panel' flag to activate on the settings pages for each panel. Do that on all your US panels before proceeding. 
+
+Upload:
+* Go to web interface
+* Actions column ro the right
+* Press 'Actions' button on the row of the panel you want to upload the tft file to.
+* Press 'Update firmware' to start.
+* Watch the magic and pray to god
+
+The Upload button in the main menu bar in the web interface is only used if you want to upload another tft or firmware file than the one included in the current NSPanel Manager version.
+
+## 4. Build your home and start controlling stuff!
+* Go to web interface
+* Rooms
+* Add new room
+* Enter room
+* Add new light (if API connection was successfully setup pop up window should be filled with entities from your smart home)
+* Choose light
+* Light is automactically given a place below on the room page.
+* Press room page rows to edit the order of the lights on the room page.
+* New lights and changes is sent out to all panels instantly.
+* Try controling your newly added lights through the NSPanel. Hope it works!
+
+# Further questions or discussion?
+Head over to our [Discord](https://discord.gg/RwXvAH56fE)!
+
 
 # Web interface
 ## Navigation
@@ -72,3 +117,4 @@ Here you can create, edit (rename) and delete scenes assigned to the room. Savin
 Here you can assign, edit, and remove lights assigned to the room. Each light is of type Ceiling or Table, have certain capabilities and a friendly name.  
 **Individual light control**  
 The *Picture* shows a preview of what the panel will look like when on the "Individual light control"-page. Here you can assign up to 12 lights. Each light will get assigned to the first free slot on the page when assigned to the room. To manually assign a light to a slot, press the slot on the picture. Each light may only be assigned once, so when all lights assigned to this room has been assigned a place, the list will be empty. By pressing the *clear*-button you may remove a light from the indivivudal light control page but still have it assigned to the room and controlled by the sliders and button on the front page.
+
