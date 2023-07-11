@@ -54,3 +54,12 @@ The NSPanelManager firmware is written as a PlatformIO-project and this is by fa
 * Press the save button. The panel will restart and try to connect to the given SSID, MQTT and manager address.
 
 For more information on how to connect to the NSPanel to flash it, see [this tutorial](https://www.youtube.com/watch?v=sCrdiCzxMOQ).
+
+# Web interface
+## Navigation
+|Path|Description|
+|----|----|
+|NSPanels|The default page so see status and information about all your NSPanels registered to this controller. By pressing the name of the NSPanel you will navgiate to more in depth information about the panel, live logs and also panel specific settings that you may wish to apply. To set a panel to a US version, use this page.|
+|Rooms|Here you can manage rooms. By pressing "Rooms" you will get a list of all available rooms.|
+|Upload|If given a new firmware, data file or GUI file, this is where to upload them. They will usally be bundled with the container though.|
+|Settings|Global settings that apply to everything|
