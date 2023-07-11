@@ -71,14 +71,17 @@ The NSPanelManager firmware is written as a PlatformIO-project and this is by fa
 For more information on how to connect to the NSPanel to flash it, see [this tutorial](https://www.youtube.com/watch?v=sCrdiCzxMOQ).
 
 ## 3. Upload TFT file
+Before uploading:
+EU or US version tft file i chosen based on the panel settings you have chosen. There is a 'Is US panel' flag to activate on the settings pages for each panel. Do that on all your US panels before proceeding. 
+
+Upload:
 * Go to web interface
-* Upload
-* Upload new GUI tft file
-* Choose a file...
-* Navigate to NSPanelManager/HMI files/nspmanager.tft
-* Upload
-* Press `GUI Update` on the right side on the row of the panel you want to update.
+* Actions column ro the right
+* Press 'Actions' button on the row of the panel you want to upload the tft file to.
+* Press 'Update firmware' to start.
 * Watch the magic and pray to god
+
+The Upload button in the main menu bar in the web interface is only used if you want to upload another tft or firmware file than the one included in the current NSPanel Manager version.
 
 ## 4. Build your home and start controlling stuff!
 * Go to web interface
