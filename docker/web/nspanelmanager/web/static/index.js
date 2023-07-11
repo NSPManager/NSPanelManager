@@ -31,12 +31,12 @@ function connect_to_websocket() {
         if(data.payload.state == "online") {
           var new_html = '<span class="tag is-success" id="online_offline_state_' + data.payload.mac + '">Online</span>';
           $("#online_offline_tag_parent_" + mac_selector).html(new_html);
-          if(panels_that_are_updating.includes(data.mac)) {
-            location.reload();
-          }
         } else if(data.payload.state == "offline") {
           var new_html = '<span class="tag is-danger" id="online_offline_state_' + data.payload.mac + '">Offline</span>';
           $("#online_offline_tag_parent_" + mac_selector).html(new_html);
+          if(panels_that_are_updating.includes(data.mac)) {
+            location.reload();
+          }
         }
       } else if (data.type == "status_report") {
         let mac_selector = data.payload.mac;

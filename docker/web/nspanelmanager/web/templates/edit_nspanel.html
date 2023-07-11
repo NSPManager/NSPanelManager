@@ -179,6 +179,24 @@
     </div>
   </div>
   <div class="field">
+    <label class="checkbox">
+      {% if settings.is_us_panel == "True" %}
+          <input type="checkbox" name="is_us_panel" checked>
+      {% else %}
+          <input type="checkbox" name="is_us_panel">
+      {% endif %}
+      Is US panel
+      <span class="question">
+        <span class="icon question_icon">
+          <i class="mdi mdi-help"></i>
+        </span>
+        <div class="question_help_text notification is-info is-light">
+          Wether this panel is a US version or Europe version. Check for US version.
+        </div>
+      </span>
+    </label>
+  </div>
+  <div class="field">
       <label class="label">Screen brightness<span class="question">
         <span class="icon question_icon">
           <i class="mdi mdi-help"></i>
