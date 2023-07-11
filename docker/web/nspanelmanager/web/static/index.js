@@ -30,13 +30,19 @@ function connect_to_websocket() {
 
         if(data.payload.state == "online") {
           var new_html = '<span class="tag is-success" id="online_offline_state_' + data.payload.mac + '">Online</span>';
+          
+          if(panels_that_are_updating.includes(data.payload.mac)) {
+            if($("#online_offline_tag_parent_" + mac_selector).text().trim() == "Offline") {
+              setTimeout(function() {
+                location.reload();
+              }, 1000);
+            }
+          } else {
           $("#online_offline_tag_parent_" + mac_selector).html(new_html);
+          }
         } else if(data.payload.state == "offline") {
           var new_html = '<span class="tag is-danger" id="online_offline_state_' + data.payload.mac + '">Offline</span>';
           $("#online_offline_tag_parent_" + mac_selector).html(new_html);
-          if(panels_that_are_updating.includes(data.mac)) {
-            location.reload();
-          }
         }
       } else if (data.type == "status_report") {
         let mac_selector = data.payload.mac;
@@ -63,9 +69,14 @@ function connect_to_websocket() {
 
         if (data.payload.state == "online") {
           var new_html = '<span class="tag is-success" id="online_offline_state_' + data.payload.mac + '">Online</span>';
-          $("#online_offline_tag_parent_" + mac_selector).html(new_html);
-          if(panels_that_are_updating.includes(data.mac)) {
-            location.reload();
+          if(!panels_that_are_updating.includes(data.payload.mac)) {
+            if($("#online_offline_tag_parent_" + mac_selector).text().trim() == "Online") {
+              $("#online_offline_tag_parent_" + mac_selector).html(new_html);
+            } else {
+              setTimeout(function() {
+                location.reload();
+              }, 1000);
+            }
           }
         } else if (data.payload.state == "offline") {
           var new_html = '<span class="tag is-danger" id="online_offline_state_' + data.payload.mac + '">Offline</span>';
@@ -77,20 +88,23 @@ function connect_to_websocket() {
           if (data.payload.state == "updating_fw") {
             update_text = "Updating firmware"
             update_progress = data.payload.progress
-            if(!panels_that_are_updating.includes(data.mac)) {
-              panels_that_are_updating.push(data.mac);
+            if(!panels_that_are_updating.includes(data.payload.mac)) {
+              console.log("Adding " + data.payload.mac + " to updating panels.");
+              panels_that_are_updating.push(data.payload.mac);
             }
           } else if (data.payload.state == "updating_fs") {
             update_text = "Updating LittleFS"
             update_progress = data.payload.progress
-            if(!panels_that_are_updating.includes(data.mac)) {
-              panels_that_are_updating.push(data.mac);
+            if(!panels_that_are_updating.includes(data.payload.mac)) {
+              console.log("Adding " + data.payload.mac + " to updating panels.");
+              panels_that_are_updating.push(data.payload.mac);
             }
           } else if (data.payload.state == "updating_tft") {
             update_text = "Updating GUI"
             update_progress = data.payload.progress
-            if(!panels_that_are_updating.includes(data.mac)) {
-              panels_that_are_updating.push(data.mac);
+            if(!panels_that_are_updating.includes(data.payload.mac)) {
+              console.log("Adding " + data.payload.mac + " to updating panels.");
+              panels_that_are_updating.push(data.payload.mac);
             }
           }
 
