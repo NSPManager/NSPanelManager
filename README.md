@@ -92,4 +92,6 @@ For more information on how to connect to the NSPanel to flash it, see [this tut
 * New lights and changes is sent out to all panels instantly.
 * Try controling your newly added lights through the NSPanel. Hope it works!
 
+# Further questions or discussion?
+Head over to our [Discord](https://discord.gg/RwXvAH56fE)!
 
