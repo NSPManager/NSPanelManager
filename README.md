@@ -66,9 +66,9 @@ For more information on how to connect to the NSPanel to flash it, see [this tut
 
 ### Room
 When on the "Room settings" page, you can change the name of the room and manage all entities assigned to that room.  
-**Scenes**
-Here you can create, edit (rename) and delete scenes assigned to the room. Saving and recalling scenes are done though the panel.
-**Lights**
-Here you can assign, edit, and remove lights assigned to the room. Each light is of type Ceiling or Table, have certain capabilities and a friendly name.
-**Individual light control**
+**Scenes**  
+Here you can create, edit (rename) and delete scenes assigned to the room. Saving and recalling scenes are done though the panel.  
+**Lights**  
+Here you can assign, edit, and remove lights assigned to the room. Each light is of type Ceiling or Table, have certain capabilities and a friendly name.  
+**Individual light control**  
 The *Picture* shows a preview of what the panel will look like when on the "Individual light control"-page. Here you can assign up to 12 lights. Each light will get assigned to the first free slot on the page when assigned to the room. To manually assign a light to a slot, press the slot on the picture. Each light may only be assigned once, so when all lights assigned to this room has been assigned a place, the list will be empty. By pressing the *clear*-button you may remove a light from the indivivudal light control page but still have it assigned to the room and controlled by the sliders and button on the front page.
