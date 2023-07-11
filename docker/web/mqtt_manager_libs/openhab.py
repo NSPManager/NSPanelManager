@@ -86,8 +86,6 @@ def on_message(ws, message):
 
 def connect():
     Thread(target=_do_connection, daemon=True).start()
-    # Update all existing states
-    _update_all_light_states()
 
 
 def _ws_connection_open(ws):
@@ -119,6 +117,8 @@ def _do_connection():
     ws = websocket.WebSocketApp(
         F"{ws_url}", on_message=on_message, on_open=_ws_connection_open, on_close=_ws_connection_close)
     ws.run_forever(reconnect=5)
+    # Update all existing states
+    _update_all_light_states()
 
 
 def _send_keepalive():
