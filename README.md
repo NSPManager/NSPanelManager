@@ -54,7 +54,7 @@ In order to install the NSPanel Manager as a Home Assistant addon at the moment,
 * Access the "addons"-directory in Home Assistant and create a new directory call "nspanelmanager".
 * Copy all the files from the "docker"-directory in the GitHub repo to the new "nspanelmanager"-directory.
 * In Home Assistant, navgiate to Settings -> Addons -> Addon store.
-* In the upper right corner, press the three dots and choose "Check for update". In a few seconds the "NSPanel Manager" addon show show up under "Local add-ons". If this is not the cast, refresh the page.
+* In the upper right corner, press the three dots and choose "Check for update". In a few seconds the "NSPanel Manager" addon show show up under "Local add-ons". If this is not the cast, refresh the page.If it still doesn't show, try restarting Home Assistant. Some users has reported that Home Assistant needs to be restarted for it to rekognize the new addon.
 * Install the addon, run it up and continue below.
 
 **Note:** If you change the port 8001 to something else, live update of the web interface will not work properly. This is a known bug and we are working on fixing it.
