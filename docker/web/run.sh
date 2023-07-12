@@ -1,4 +1,8 @@
 #!/bin/bash
+if [ "$TZ" != "" ]; then
+	echo "Setting /etc/timezone to $TZ"
+	echo "$TZ" >/etc/timezone
+fi
 
 echo "Starting mqtt_manager.py in background"
 /usr/local/bin/python ./mqtt_manager.py &
