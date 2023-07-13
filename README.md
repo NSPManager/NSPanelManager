@@ -29,7 +29,7 @@ Logging from NSPanels are done over MQTT to the topic `nspanel/<panel name>/log`
 # Setup
 
 ## 1. Docker container
-### As a standalone container
+### 1.1 As a standalone container
 All configuration for panels are done via a web interface running in a docker container. This container is available in the `docker` directory. Use one of the following scripts to get it running:
 |Script|Explination|
 |---|---|
@@ -47,8 +47,8 @@ To access web interface, enter IP-address and port (standard 8000) to where the 
 * Insert API information to Home Assistant or Openhab
 * Save
 * Now we're ready to add some NSPanels!
-* 
-### As a Home Assistant addon (only for Home Assistant OS)
+
+### 1.2 As a Home Assistant addon (only for Home Assistant OS)
 In order to install the NSPanel Manager as a Home Assistant addon at the moment, this has to be done manually. This is because this repository is private. To get up and running manually, do the following:  
 * add the Samba or SSH addon to Home Assistant.
 * Access the "addons"-directory in Home Assistant and create a new directory call "nspanelmanager".
@@ -56,28 +56,36 @@ In order to install the NSPanel Manager as a Home Assistant addon at the moment,
 * In Home Assistant, navgiate to Settings -> Addons -> Addon store.
 * In the upper right corner, press the three dots and choose "Check for update". In a few seconds the "NSPanel Manager" addon show show up under "Local add-ons". If this is not the case, refresh the page.If it still doesn't show, try restarting Home Assistant. Some users has reported that Home Assistant needs to be restarted for it to rekognize the new addon.
 * Install the addon, run it up.
-* * Press settings for some initial settings:
-* Insert your MQTT settings
-* Insert API information to Home Assistant or Openhab
-* Save
+* Open the web UI for the manager.
+* Navigate to the "Settings"-page.
+* Insert your MQTT settings.
+* Insert API information to Home Assistant or Openhab.
+* Save.
 * Now we're ready to add some NSPanels!
 
 **Note:** If you change the port 8001 to something else, live update of the web interface will not work properly. This is a known bug and we are working on fixing it.
 
 ## 2. Flash firmware to NSPanel
-The NSPanelManager firmware is written as a PlatformIO-project and this is by far the easiest method to flash the firmware. Perform the following steps to flash you NSPanel: (if not using PlatformIO or unable to run the below scripts you can use whatever tool you prefer to flash the panel. File to flash is: `merged-flash.bin` in the `firmware/NSPanelManagerFirmware/`)
+### 2.1 ESP FLASH DOWNLOADED TOOl (Windows only)
+The easiest way to flash the firmware is by using the ESP FLASH DOWNLOAD TOOL from Espressif (can be downloaded [here](https://www.espressif.com/en/support/download/other-tools)). Select the merged_flash.bin file from the docker/web/nspanelmanager/-directory, choose to upload to address 0x0. Select the COM-port and BUAD-rate and press start.
 
-* Install PlatformIO for you platform.
-* Navigate to the `firmware/NSPanelManagerFirmware/` directory.
-* Execute `./upload_image.sh` while connected to the NSPanel with serial programmer. Repeat for all panels.
+![Image example of ESP32 FLASH DOWNLOAD TOOL](/docs/images/esp_flash_download_tool.png)
+
+### 2.2 esptool (all operating systems)
+By installing esptool it is possible to upload the merged flash using the command line. Do the following:
+* Open a terminal.
+* Navigate to the docker/web/nspanelmanager/-directory.
+* Execute `esptool.py --baud 921600 --port /dev/ttyUSB0 write_flash 0x0 merged-flash.bin` (on Windows it might be just `esptool` without the .py at the end). You will have to replace `/dev/ttyUSB0` with the port to use. For Windows, this might be something like COM4, while on Linux it might be something like /dev/ttyUSB0.
+
+## 3. Panel configuration
 * Power up one panel at a time. 
-* On boot the newly flahsed panel will start a WIFI Access point called `NSPMPanel`
+* On boot the newly flashed panel will start a WIFI Access point called `NSPMPanel`
 * Connect to the access point with the password `password`.
 * On successfull connect to accesspoint, enter panels web interface on 192.168.1.1 and enter settings as follows.
 * Enter a friendly name for this panel.
 * Enter the IP address and port to where the docker-container with the web-interface is running.
 * Enter your Wifi SSID (Name) and password.
-* Enter your MQTT address and port (enter username and password if used).
+* Enter your MQTT address and port (enter username and password if used). **Note:** In case you are running an MQTT server as an addon to Home Assistant, enter the IP-address of the Home Assistant machine as the MQTT address.
 * Press the save button. The panel will restart and try to connect to the given SSID, MQTT and manager address.
   
 * Switch back your home WIFI to check if panel successfully connected to the manager by doing the following steps:
@@ -85,10 +93,11 @@ The NSPanelManager firmware is written as a PlatformIO-project and this is by fa
 * Update page.
 * Panel should appear in first page. Panel is added to a dummy room if no room exists.
 
+**Note:** At the moment, if the wrong WiFi-settings are entered the panel has to be reflashed to be able to change the settings.
+
 For more information on how to connect to the NSPanel to flash it, see [this tutorial](https://www.youtube.com/watch?v=sCrdiCzxMOQ).
 
-
-## 3. Upload TFT file
+## 4. Upload TFT file
 Before uploading:
 EU or US version tft file i chosen based on the panel settings you have chosen. There is a 'Is US panel' flag to activate on the settings pages for each panel. Do that on all your US panels before proceeding. 
 
