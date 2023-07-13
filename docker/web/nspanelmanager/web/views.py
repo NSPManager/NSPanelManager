@@ -454,6 +454,14 @@ def save_new_data_file(request):
         fs.save("data_file.bin", uploaded_file)
     return redirect('/')
 
+@csrf_exempt
+def save_new_merged_flash(request):
+    if request.method == 'POST':
+        uploaded_file = request.FILES['bin']
+        fs = FileSystemStorage()
+        fs.delete("merged_flash.bin")
+        fs.save("merged_flash.bin", uploaded_file)
+    return redirect('/')
 # TODO: Make exempt only when Debug = true
 
 def get_client_ip(request):

@@ -28,6 +28,7 @@ urlpatterns = [
     path('rooms/<int:room_id>/delete', views.delete_room, name='delete_room'),
     path('save_new_firmware', views.save_new_firmware, name='save_new_firmware'),
     path('save_new_data_file', views.save_new_data_file, name='save_new_data_file'),
+    path('save_new_merged_flash', views.save_new_merged_flash, name='save_new_merged_flash'),
     path('save_new_tft_file', views.save_new_tft_file, name='save_new_tft_file'),
     path('download_firmware', views.download_firmware, name='download_firmware'),
     path('download_data_file', views.download_data_file, name='download_data_file'),

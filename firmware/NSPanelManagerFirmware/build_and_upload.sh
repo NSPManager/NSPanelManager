@@ -57,6 +57,11 @@ firmware_status="$?"
 curl http://"$NSPanelManager_address":"$NSPanelManager_port"/save_new_data_file -F data_file=@.pio/build/esp32dev/littlefs.bin
 data_file_status="$?"
 
+/bin/bash ./build_image.sh
+
+curl http://"$NSPanelManager_address":"$NSPanelManager_port"/save_new_merged_flash -F bin=@merged-flash.bin
+data_file_status="$?"
+
 # Wait for Django to process files.
 sleep 5
 

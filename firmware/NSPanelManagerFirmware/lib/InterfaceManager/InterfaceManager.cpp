@@ -59,7 +59,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
     if (!NSPMConfig::instance->littlefs_mount_successfull) {
       PageManager::GetNSPanelManagerPage()->setText("LittleFS mount failed!");
     } else if (!WiFi.isConnected()) {
-      if (NSPMConfig::instance->NSPMConfig::instance->wifi_ssid.empty()) {
+      if (WiFi.getMode() == WIFI_MODE_AP) {
         PageManager::GetNSPanelManagerPage()->setText("Connect to AP NSPMPanel");
       } else {
         PageManager::GetNSPanelManagerPage()->setText("Connecting to WiFi...");
