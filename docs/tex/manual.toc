@@ -14,6 +14,7 @@
 \contentsline {subsection}{\numberline {3.3}Room page}{9}{subsection.3.3}%
 \contentsline {subsubsection}{\numberline {3.3.1}Scenes}{10}{subsubsection.3.3.1}%
 \contentsline {subsubsection}{\numberline {3.3.2}Lights}{10}{subsubsection.3.3.2}%
+\contentsline {subsubsection}{\numberline {3.3.3}Individual light control}{11}{subsubsection.3.3.3}%
 \contentsline {section}{\numberline {4}Panel functions}{12}{section.4}%
 \contentsline {subsection}{\numberline {4.1}Main page logic}{12}{subsection.4.1}%
 \contentsline {subsubsection}{\numberline {4.1.1}One or more lights on}{12}{subsubsection.4.1.1}%
