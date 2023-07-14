@@ -1,4 +1,6 @@
 \documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows}
 \usetikzlibrary{positioning}
@@ -208,6 +210,7 @@
       \note{The flashing of the GUI file may be finicky and might require multiple tries before it succeeds. If it fails and reboots or you see a "System data error", just try again.}
     \end{itemize}
 
+    \clearpage
     \section{NSPanel Manager web interface}
     The web interface is partitioned into 4 main sections.
     \begin{enumerate}
@@ -242,7 +245,7 @@
     At the moment, only NSPanel Manager scenes are available. They are easy enough to use. Simply create a scenes in the room page and they will be available in the "Scenes"-list for the room on all NSPanels.
     \\ To save a scene, on the NSPanel hold the save button for the scenes for 3 seconds to save all the states of lights \textbf{currently added to the room}.
     \\ To recall/activate a scene, on the NSPanel press the name of the scene and all the saved light states will be restored for that scene.
-    \note{If a light was added after a scenes was saved, that light is not affected by that scenes until the scene is saved again.}
+    \note{If a light was added after a scene was saved, that light is not affected by that scenes until the scene is saved again.}
     \subsubsection{Lights}
     To add a new light, simply press the "Add new light"-button. When doing so, a list of all lights and switches gathered from Home Assistant and OpenHAB will be shown. Simply search or scroll to find the desired light and press it.
     \begin{figure}[H]
@@ -264,6 +267,7 @@
     When adding a Home Assistant entity, simply set a friendly name for it, select the type (Ceiling or Table light), select if it's a switch or dimmable light and what other capabilities it has.\\
     If you are adding an OpenHAB light or switch, things aren't as simple unfortunately. There is really no way around this but the user has to chose all the same settings as for Home Assistant but also has to select the appropriate OpenHAB items that corresponds to each capability of the light.
 
+    \clearpage
     \section{Panel functions}
     \subsection{Main page logic}
     The NSPanel main page might be a bit have some behavior that seems odd at first but the logic of it will be described here. The first page will affect entities in the selected room (if in room-mode) or all the configured lights (if in "All lights"-mode). The two left button for ceiling and table lights will always behave the same. Pressing a button that is "off" will turn on all the lights of that type. Pressing a button that is "on" will turn off all lights of that type. The sliders will always display an average value of all entities that will be affected of changes. There is really a few different scenarios:
@@ -301,6 +305,7 @@
     If you wish to change where the database is stored, replace "\$(pwd)/web/nspanelmanager/db.sqlite3" with where you wish your database to be stored on the local machine.
 
 
+    \clearpage
     \section{Functional information}
     \subsection{Data flow}
 
@@ -320,6 +325,39 @@
       \draw [doublearrow] (MQTT) -- (panel2);
 
     \end{tikzpicture}
+
+    The data flow within NSPanel Manager might look intimidating but it's not that bad. Below is an explination of all the arrows above.
+
     
+    \subsubsection{Home Assistant and/or OpenHAB to/from NSPanel Manager container}
+    There is two types of trafic flowing between these nodes:
+    \begin{itemize}
+      \item \textbf{Websocket:} A websocket connection is setup in order for the NSPanel Manager container to receive entity updates from Home Assistant and/or OpenHAB but also to sent entity commands (ex. turn light X on typ 20\%). A websocket is used to speed up the communication and also to not have to poll the home automation software for information.
+      \item \textbf{HTTP GET API:} The usual HTTP GET API is also used. This is used when adding entities to a room, as an example. When pressing the "Add new light" button, the NSPanel Manager container will make an HTTP GET request to gather all available entities and then send them back to the client (browser) so that the user may choose what entitiy to add to the room.
+    \end{itemize}
+    \subsubsection{NSPanel Manager container to/from MQTT}
+    MQTT is used to send updated entity states received from the home automation software out to all NSPanels and also receive states and commands from NSPanels.
+    \subsubsection{Home Assistant and/or OpenHAB to/from MQTT}
+    Home Assistant and OpenHAB can leverage the MQTT integration through "Home Assistant MQTT Auto-discovery" (which OpenHAB can also use) to auto-discover NSPanels and automatically register entities for panel temperature reading, panel relays, screen state and so on.
+    \subsubsection{NSPanel Manager container to/from NSPanels}
+    The configuration of lights, scenes and so on does not reside on each panel. The panel only has localy the bare minimum configuration for setup. When the panel starts and has connected to WiFi it will do a HTTP GET request to the NSPanel Manager container in order to receive all configuration of entities, screen brightness and really, all settings available in the NSPanel Manager web interface.
+    \subsubsection{MQTT to/from NSPanels}
+    Each NSPanel send states (ex. temperature) and commands (ex. turning on a light) over MQTT for the NSPanel Manager container to pickup. The panel also received commands, ex. turn on relay 1, turn on screen and os on.
+
+    \subsection{MQTT Topics}
+    Below table is a description of all MQTT topics used by the NSPanel Manager. Replace <panel\_name> with the friendly name of your NSPanel:
+    \begin{table}[H]
+    \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{Topic} & \textbf{Payload}  & \textbf{Description}  \\ \hline
+    nspanel/panel\_name/screen\_cmd & 1 or 0 & Send a 1 or 0 to turn on/off the display. \\ \hline
+    nspanel/panel\_name/screen\_state & 1 or 0 & Current state of the screen. \\ \hline
+    nspanel/panel\_name/r1\_cmd & 1 or 0 & Send a 1 or 0 to turn on/off relay 1. \\ \hline
+    nspanel/panel\_name/r1\_state & 1 or 0 & The current state of relay 1. \\ \hline
+    nspanel/panel\_name/r2\_cmd & 1 or 0 & Send a 1 or 0 to turn on/off relay 2. \\ \hline
+    nspanel/panel\_name/r2\_state & 1 or 0 & The current state of relay 2. \\ \hline
+    nspanel/panel\_name/temperature\_state & Current temperature & The current temperature reading. \\ \hline
+    \end{tabular}
+    \end{table}
 
 \end{document} % This is the end of the document

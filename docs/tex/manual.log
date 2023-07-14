@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Arch Linux) (preloaded format=pdflatex 2023.7.13)  14 JUL 2023 13:23
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Arch Linux) (preloaded format=pdflatex 2023.7.13)  14 JUL 2023 22:34
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -22,6 +22,42 @@ File: size10.clo 2022/07/02 v1.4n Standard LaTeX file (size option)
 \abovecaptionskip=\skip48
 \belowcaptionskip=\skip49
 \bibindent=\dimen140
+) (/usr/share/texmf-dist/tex/latex/base/fontenc.sty
+Package: fontenc 2021/04/29 v2.0v Standard LaTeX package
+) (/usr/share/texmf-dist/tex/latex/lm/lmodern.sty
+Package: lmodern 2015/05/01 v1.6.1 Latin Modern Fonts
+LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
+(Font)                  OT1/cmr/m/n --> OT1/lmr/m/n on input line 22.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `normal'
+(Font)                  OML/cmm/m/it --> OML/lmm/m/it on input line 23.
+LaTeX Font Info:    Overwriting symbol font `symbols' in version `normal'
+(Font)                  OMS/cmsy/m/n --> OMS/lmsy/m/n on input line 24.
+LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `normal'
+(Font)                  OMX/cmex/m/n --> OMX/lmex/m/n on input line 25.
+LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
+(Font)                  OT1/cmr/bx/n --> OT1/lmr/bx/n on input line 26.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `bold'
+(Font)                  OML/cmm/b/it --> OML/lmm/b/it on input line 27.
+LaTeX Font Info:    Overwriting symbol font `symbols' in version `bold'
+(Font)                  OMS/cmsy/b/n --> OMS/lmsy/b/n on input line 28.
+LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `bold'
+(Font)                  OMX/cmex/m/n --> OMX/lmex/m/n on input line 29.
+LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
+(Font)                  OT1/cmr/bx/n --> OT1/lmr/bx/n on input line 31.
+LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `normal'
+(Font)                  OT1/cmss/m/n --> OT1/lmss/m/n on input line 32.
+LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
+(Font)                  OT1/cmr/m/it --> OT1/lmr/m/it on input line 33.
+LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
+(Font)                  OT1/cmtt/m/n --> OT1/lmtt/m/n on input line 34.
+LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `bold'
+(Font)                  OT1/cmr/bx/n --> OT1/lmr/bx/n on input line 35.
+LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
+(Font)                  OT1/cmss/bx/n --> OT1/lmss/bx/n on input line 36.
+LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
+(Font)                  OT1/cmr/bx/it --> OT1/lmr/bx/it on input line 37.
+LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
+(Font)                  OT1/cmtt/m/n --> OT1/lmtt/m/n on input line 38.
 ) (/usr/share/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty (/usr/share/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty (/usr/share/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty (/usr/share/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex
 \pgfutil@everybye=\toks16
 \pgfutil@tempdima=\dimen141
@@ -110,15 +146,15 @@ Package xcolor Info: Model `Gray' substituted by `gray' on input line 1375.
 Package xcolor Info: Model `wave' substituted by `hsb' on input line 1376.
 ) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
 Package: pgfcore 2023-01-15 v3.1.10 (3.1.10)
- (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex
+ (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex
 \pgfmath@dimen=\dimen155
 \pgfmath@count=\count266
 \pgfmath@box=\box52
 \pgfmath@toks=\toks24
 \pgfmath@stack@operand=\toks25
 \pgfmath@stack@operation=\toks26
-)
-(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonometric.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerarithmetics.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex
+) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonometric.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerarithmetics.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex
 \c@pgfmathroundto@lastzeros=\count267
 )) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfint.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.tex
 File: pgfcorepoints.code.tex 2023-01-15 v3.1.10 (3.1.10)
@@ -177,10 +213,10 @@ File: pgfcoreimage.code.tex 2023-01-15 v3.1.10 (3.1.10)
 ) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.tex
 File: pgfcoreexternal.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgfexternal@startupbox=\box56
-) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.tex
-File: pgfcorelayers.code.tex 2023-01-15 v3.1.10 (3.1.10)
 )
-(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.tex
+File: pgfcorelayers.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.code.tex
 File: pgfcoretransparency.code.tex 2023-01-15 v3.1.10 (3.1.10)
 ) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.tex
 File: pgfcorepatterns.code.tex 2023-01-15 v3.1.10 (3.1.10)
@@ -259,7 +295,8 @@ Package: environ 2014/05/04 v0.3 A new way to define environments
 Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 )
 \@envbody=\toks31
-) (/usr/share/texmf-dist/tex/latex/etoolbox/etoolbox.sty
+)
+(/usr/share/texmf-dist/tex/latex/etoolbox/etoolbox.sty
 Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
 \etb@tempcnta=\count280
 )
@@ -274,8 +311,7 @@ Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
 \tcb@temp=\box67
 \tcb@temp=\box68
 \tcb@temp=\box69
-
-(/usr/share/texmf-dist/tex/latex/tcolorbox/tcbraster.code.tex
+ (/usr/share/texmf-dist/tex/latex/tcolorbox/tcbraster.code.tex
 Library (tcolorbox): 'tcbraster.code.tex' version '6.0.1'
 \c@tcbrastercolumn=\count284
 \c@tcbrasterrow=\count285
@@ -624,28 +660,31 @@ Package: titling 2009/09/04 v2.1d maketitle typesetting
 \thanksmargin=\skip60
 \droptitle=\skip61
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 51.
- (./manual.aux)
+Package hyperref Info: Option `colorlinks' set `true' on input line 53.
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 97.
+ (/usr/share/texmf-dist/tex/latex/lm/t1lmr.fd
+File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+) (./manual.aux)
 \openout1 = `manual.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
  (/usr/share/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count336
@@ -671,7 +710,7 @@ Package: inputenc 2021/02/14 v1.3d Input encoding file
 \inpenc@prehook=\toks45
 \inpenc@posthook=\toks46
 )
-Package hyperref Info: Link coloring ON on input line 95.
+Package hyperref Info: Link coloring ON on input line 97.
  (./manual.out) (./manual.out)
 \@outlinefile=\write4
 \openout4 = `manual.out'.
@@ -715,14 +754,43 @@ Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: subfig package v1.3 is loaded.
 Package caption Info: float package is loaded.
 Package caption Info: End \AtBeginDocument code.
-<.././images//logo.png, id=147, 271.998pt x 85.41pt>
+<.././images//logo.png, id=171, 271.998pt x 85.41pt>
 File: .././images//logo.png Graphic file (type png)
 <use .././images//logo.png>
-Package pdftex.def Info: .././images//logo.png  used on input line 96.
+Package pdftex.def Info: .././images//logo.png  used on input line 98.
 (pdftex.def)             Requested size: 271.99733pt x 85.40977pt.
-[1
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 98.
+(/usr/share/texmf-dist/tex/latex/lm/ot1lmr.fd
+File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 98.
+ (/usr/share/texmf-dist/tex/latex/lm/omllmm.fd
+File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 98.
+ (/usr/share/texmf-dist/tex/latex/lm/omslmsy.fd
+File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 98.
+ (/usr/share/texmf-dist/tex/latex/lm/omxlmex.fd
+File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <12> on input line 98.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <8> on input line 98.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <6> on input line 98.
+ [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <.././images//logo.png>] (./manual.toc)
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc} <.././images//logo.png>] (./manual.toc
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <10> on input line 3.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <7> on input line 3.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5> on input line 3.
+)
 \tf@toc=\write5
 \openout5 = `manual.toc'.
 
@@ -730,86 +798,96 @@ Package pdftex.def Info: .././images//logo.png  used on input line 96.
 
 ] [3
 
-] (/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty
+]
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 114.
+ (/usr/share/texmf-dist/tex/latex/lm/ts1lmr.fd
+File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+) (/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2023/02/27 1.9 listings language file
 ) (/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2023/02/27 1.9 listings language file
 )
-LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 119.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 121.
+ (/usr/share/texmf-dist/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 121.
  [4
 
-{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
-<.././images//esp_flash_download_tool.png, id=205, 346.29375pt x 531.48563pt>
+{/usr/share/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}]
+<.././images//esp_flash_download_tool.png, id=236, 346.29375pt x 531.48563pt>
 File: .././images//esp_flash_download_tool.png Graphic file (type png)
 <use .././images//esp_flash_download_tool.png>
-Package pdftex.def Info: .././images//esp_flash_download_tool.png  used on input line 172.
+Package pdftex.def Info: .././images//esp_flash_download_tool.png  used on input line 174.
 (pdftex.def)             Requested size: 138.51503pt x 212.59048pt.
- [5 <.././images//esp_flash_download_tool.png>] [6]
-<.././images//index_page.png, id=219, 1927.2pt x 357.335pt>
+ [5 <.././images//esp_flash_download_tool.png>] [6] [7]
+<.././images//index_page.png, id=255, 1927.2pt x 357.335pt>
 File: .././images//index_page.png Graphic file (type png)
 <use .././images//index_page.png>
-Package pdftex.def Info: .././images//index_page.png  used on input line 230.
+Package pdftex.def Info: .././images//index_page.png  used on input line 233.
 (pdftex.def)             Requested size: 540.58275pt x 100.23305pt.
-<.././images//nspanel_page.png, id=220, 1926.19624pt x 1455.4375pt>
+<.././images//nspanel_page.png, id=256, 1926.19624pt x 1455.4375pt>
 File: .././images//nspanel_page.png Graphic file (type png)
 <use .././images//nspanel_page.png>
-Package pdftex.def Info: .././images//nspanel_page.png  used on input line 235.
+Package pdftex.def Info: .././images//nspanel_page.png  used on input line 238.
 (pdftex.def)             Requested size: 540.59511pt x 408.47467pt.
- [7 <.././images//index_page.png>]
-<.././images//room_page.png, id=231, 1926.19624pt x 1460.45625pt>
+ [8
+
+ <.././images//index_page.png>]
+<.././images//room_page.png, id=266, 1926.19624pt x 1460.45625pt>
 File: .././images//room_page.png Graphic file (type png)
 <use .././images//room_page.png>
-Package pdftex.def Info: .././images//room_page.png  used on input line 240.
+Package pdftex.def Info: .././images//room_page.png  used on input line 243.
 (pdftex.def)             Requested size: 540.59511pt x 409.88321pt.
- [8 <.././images//nspanel_page.png>]
-<.././images//add_new_light.png, id=237, 700.6175pt x 954.56625pt>
+ [9 <.././images//nspanel_page.png>]
+<.././images//add_new_light.png, id=272, 700.6175pt x 954.56625pt>
 File: .././images//add_new_light.png Graphic file (type png)
 <use .././images//add_new_light.png>
-Package pdftex.def Info: .././images//add_new_light.png  used on input line 250.
+Package pdftex.def Info: .././images//add_new_light.png  used on input line 253.
 (pdftex.def)             Requested size: 175.15395pt x 238.64098pt.
- [9 <.././images//room_page.png>]
-<.././images//edit_new_light_ha.png, id=243, 700.6175pt x 530.98375pt>
+ [10 <.././images//room_page.png>]
+<.././images//edit_new_light_ha.png, id=278, 700.6175pt x 530.98375pt>
 File: .././images//edit_new_light_ha.png Graphic file (type png)
 <use .././images//edit_new_light_ha.png>
-Package pdftex.def Info: .././images//edit_new_light_ha.png  used on input line 258.
+Package pdftex.def Info: .././images//edit_new_light_ha.png  used on input line 261.
 (pdftex.def)             Requested size: 142.26378pt x 107.81529pt.
-<.././images//edit_new_light_openhab.png, id=244, 700.6175pt x 715.67375pt>
+<.././images//edit_new_light_openhab.png, id=279, 700.6175pt x 715.67375pt>
 File: .././images//edit_new_light_openhab.png Graphic file (type png)
 <use .././images//edit_new_light_openhab.png>
-Package pdftex.def Info: .././images//edit_new_light_openhab.png  used on input line 260.
+Package pdftex.def Info: .././images//edit_new_light_openhab.png  used on input line 263.
 (pdftex.def)             Requested size: 142.26378pt x 145.31627pt.
- [10 <.././images//add_new_light.png> <.././images//edit_new_light_ha.png> <.././images//edit_new_light_openhab.png>] [11]
-<.././images//putty_serial.png, id=261, 460.72125pt x 488.57532pt>
+ [11 <.././images//add_new_light.png> <.././images//edit_new_light_ha.png> <.././images//edit_new_light_openhab.png>] [12
+
+]
+<.././images//putty_serial.png, id=296, 460.72125pt x 488.57532pt>
 File: .././images//putty_serial.png Graphic file (type png)
 <use .././images//putty_serial.png>
-Package pdftex.def Info: .././images//putty_serial.png  used on input line 285.
+Package pdftex.def Info: .././images//putty_serial.png  used on input line 289.
 (pdftex.def)             Requested size: 230.36006pt x 244.28706pt.
- [12
+ [13
 
- <.././images//putty_serial.png>]
-LaTeX Font Info:    Trying to load font information for TS1+cmtt on input line 296.
- (/usr/share/texmf-dist/tex/latex/base/ts1cmtt.fd
-File: ts1cmtt.fd 2022/07/10 v2.5l Standard LaTeX font definitions
-) [13
+ <.././images//putty_serial.png>] [14
 
-] (./manual.aux)
+] [15
+
+] [16] (./manual.aux)
 Package rerunfilecheck Info: File `manual.out' has not changed.
-(rerunfilecheck)             Checksum: 0E773EB73CFBA3929DFE81C3C6DECF8C;4005.
+(rerunfilecheck)             Checksum: E9F41591908FE800E329F58A45EC6696;5557.
  ) 
 Here is how much of TeX's memory you used:
- 30798 strings out of 477985
- 622881 string characters out of 5840058
+ 31224 strings out of 477985
+ 629275 string characters out of 5840058
  1873388 words of memory out of 5000000
- 50436 multiletter control sequences out of 15000+600000
- 518816 words of font info for 55 fonts, out of 8000000 for 9000
+ 50814 multiletter control sequences out of 15000+600000
+ 564112 words of font info for 64 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 102i,10n,133p,654b,1388s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sftt1000.pfb>
-Output written on manual.pdf (13 pages, 654361 bytes).
+ 102i,10n,133p,654b,1368s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/share/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr17.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr8.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmri10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
+Output written on manual.pdf (16 pages, 751224 bytes).
 PDF statistics:
- 333 PDF objects out of 1000 (max. 8388607)
- 255 compressed objects within 3 object streams
- 54 named destinations out of 1000 (max. 500000)
- 410 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 377 PDF objects out of 1000 (max. 8388607)
+ 297 compressed objects within 3 object streams
+ 64 named destinations out of 1000 (max. 500000)
+ 458 words of extra memory for PDF output out of 10000 (max. 10000000)
 
