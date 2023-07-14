@@ -389,6 +389,7 @@ def settings_page(request):
     data["clock_us_style"] = get_setting_with_default("clock_us_style", False)
     data["use_farenheit"] = get_setting_with_default("use_farenheit", False)
     data["global_scenes"] = Scene.objects.filter(room__isnull=True)
+    data["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
     return render(request, 'settings.html', data)
 
 
@@ -434,6 +435,7 @@ def save_settings(request):
     set_setting_value(name="show_screensaver_clock", value=("show_screensaver_clock" in request.POST))
     set_setting_value(name="clock_us_style", value=("clock_us_style" in request.POST))
     set_setting_value(name="use_farenheit", value=("use_farenheit" in request.POST))
+    set_setting_value(name="turn_on_behavior", value=request.POST["turn_on_behavior"])
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()
     return redirect('settings')

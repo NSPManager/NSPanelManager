@@ -52,8 +52,7 @@ def on_message(ws, message):
                                 light.light_level = 0
                             else:
                                 if "brightness" in entity["attributes"]:
-                                    light.light_level = round(
-                                        entity["attributes"]["brightness"] / 2.55)
+                                    light.light_level = round(entity["attributes"]["brightness"] / 2.55)
                                 else:
                                     light.light_level = 100  # Type is a switch and is ON, regard it as 100% on
 

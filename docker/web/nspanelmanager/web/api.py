@@ -57,6 +57,7 @@ def get_mqtt_manager_config(request):
     return_json["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name", "")
     return_json["clock_us_style"] = get_setting_with_default("clock_us_style", False)
     return_json["use_farenheit"] = get_setting_with_default("use_farenheit", False)
+    return_json["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
 
     return_json["lights"] = {}
     for light in Light.objects.all():

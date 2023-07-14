@@ -179,7 +179,7 @@ def get_config():
 
                 for id, light in settings["lights"].items():
                     int_id = int(id)
-                    mqtt_manager_libs.light_states.states[int_id] = mqtt_manager_libs.light.Light.from_dict(light)
+                    mqtt_manager_libs.light_states.states[int_id] = mqtt_manager_libs.light.Light.from_dict(light, settings)
 
                 # All light-data sucessfully loaded into light_states, clear own register
                 settings.pop("lights")
@@ -243,5 +243,4 @@ if __name__ == '__main__':
     if settings["mqtt_server"] and settings["mqtt_port"]:
         connect_and_loop()
     else:
-        logging.error(
-            "Settings dictate to NOT use MQTT Manager as no MQTT configuration is present.")
+        logging.error("Settings dictate to NOT use MQTT Manager as no MQTT configuration is present.")

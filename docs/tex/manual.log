@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Arch Linux) (preloaded format=pdflatex 2023.7.13)  14 JUL 2023 23:01
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Arch Linux) (preloaded format=pdflatex 2023.7.13)  15 JUL 2023 01:54
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -869,7 +869,7 @@ Package pdftex.def Info: .././images//settings_page.png  used on input line 287.
 <.././images//putty_serial.png, id=322, 460.72125pt x 488.57532pt>
 File: .././images//putty_serial.png Graphic file (type png)
 <use .././images//putty_serial.png>
-Package pdftex.def Info: .././images//putty_serial.png  used on input line 310.
+Package pdftex.def Info: .././images//putty_serial.png  used on input line 311.
 (pdftex.def)             Requested size: 230.36006pt x 244.28706pt.
  [15
 
@@ -882,15 +882,15 @@ Package rerunfilecheck Info: File `manual.out' has not changed.
 (rerunfilecheck)             Checksum: B7BEE3D2607614BCB4F396198485A943;5887.
  ) 
 Here is how much of TeX's memory you used:
- 31247 strings out of 477985
- 629752 string characters out of 5840058
+ 31248 strings out of 477985
+ 629768 string characters out of 5840058
  1873388 words of memory out of 5000000
- 50829 multiletter control sequences out of 15000+600000
+ 50830 multiletter control sequences out of 15000+600000
  564112 words of font info for 64 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  102i,10n,133p,654b,1368s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr17.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr8.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmri10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on manual.pdf (18 pages, 898113 bytes).
+Output written on manual.pdf (18 pages, 898472 bytes).
 PDF statistics:
  403 PDF objects out of 1000 (max. 8388607)
  318 compressed objects within 4 object streams

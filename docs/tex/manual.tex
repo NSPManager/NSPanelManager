@@ -294,7 +294,8 @@
     The NSPanel main page might be a bit have some behavior that seems odd at first but the logic of it will be described here. The first page will affect entities in the selected room (if in room-mode) or all the configured lights (if in "All lights"-mode). The two left button for ceiling and table lights will always behave the same. Pressing a button that is "off" will turn on all the lights of that type. Pressing a button that is "on" will turn off all lights of that type. The sliders will always display an average value of all entities that will be affected of changes. There is really a few different scenarios:
     \subsubsection{One or more lights on}
     When changing the sliders, the changes will only be sent out to the lights currently on.
-    If turning on a group of lights or individual lights they will be turned on to the current settings of the sliders. I.e. average dimming level and color temperature currently active.
+    If turning on a group of lights or individual lights they will be turned on to the current brightness of the slider. I.e. average dimming level in the room.
+    \info{If you wish for the light to always turn on with color temperature even though you turned it off from RGB, there is a setting in the global settings.}
     \subsubsection{No lights on}
     When changing the sliders, the changes will be sent out to all lights selected (depending on room or "all lights"-mode).
     \subsubsection{Lock mode}

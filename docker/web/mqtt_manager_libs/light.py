@@ -25,10 +25,15 @@ class Light:
     # "color_temp" or "rgb". Used to restore correct state when using scenes
     last_command_sent: str = "color_temp"
     last_mode_change = 0
+    last_light_level_change = 0
+    settings = {} # This is ALL the settings data gathered from NSPanel Manager web
 
     @staticmethod
-    def from_dict(dict_data):
+    def from_dict(dict_data, settings):
         newLight = Light()
+        newLight.settings = settings
+        # Set default color temp to be 50%
+        newLight.color_temp = settings["color_temp_min"] + ((settings["color_temp_max"] - settings["color_temp_min"]) * 0.5)
         newLight.id = dict_data["id"]
         newLight.friendly_name = dict_data["name"]
         newLight.room_name = dict_data["room_name"]
@@ -63,7 +68,7 @@ class Light:
     def set_light_level(self, light_level: int):
         if self.type == "home_assistant":
             send_color_temp = 0
-            if self.last_command_sent == "color_temp":
+            if self.last_command_sent == "color_temp" or self.settings["turn_on_behavior"] == "color_temp":
                 send_color_temp = self.color_temp
             if mqtt_manager_libs.home_assistant.set_entity_brightness(self.home_assistant_name, light_level, send_color_temp):
                 self.light_level = int(light_level)
