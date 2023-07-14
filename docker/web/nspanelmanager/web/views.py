@@ -393,6 +393,13 @@ def settings_page(request):
 
 
 def save_settings(request):
+    home_assistant_address = request.POST["home_assistant_address"]
+    if home_assistant_address.endswith("/"):
+        home_assistant_address = home_assistant_address[:-1]
+    openhab_address = request.POST["openhab_address"]
+    if openhab_address.endswith("/"):
+        openhab_address = openhab_address[:-1]
+
     set_setting_value(name="mqtt_server", value=request.POST["mqtt_server"])
     set_setting_value(name="mqtt_port", value=request.POST["mqtt_port"])
     set_setting_value(name="mqtt_username",
@@ -400,11 +407,11 @@ def save_settings(request):
     set_setting_value(name="mqtt_password",
                       value=request.POST["mqtt_password"])
     set_setting_value(name="home_assistant_address",
-                      value=request.POST["home_assistant_address"])
+                      value=home_assistant_address)
     set_setting_value(name="home_assistant_token",
                       value=request.POST["home_assistant_token"])
     set_setting_value(name="openhab_address",
-                      value=request.POST["openhab_address"])
+                      value=openhab_address)
     set_setting_value(name="openhab_token",
                       value=request.POST["openhab_token"])
     set_setting_value(name="raise_to_100_light_level",
