@@ -208,10 +208,12 @@
       \info{If this is a US NSPanel version then it has to be set in the panel settings. Press the name of the NSPanel in the list and check the "Is US panel"-checkbox.}
       \item Flash the new GUI file to the panel by pressing the "Actions"-button on the right and select "Update screen".
       \note{The flashing of the GUI file may be finicky and might require multiple tries before it succeeds. If it fails and reboots or you see a "System data error", just try again.}
+    \item Continue on to create new rooms and add entities to your configuration. Continue with the section on the web interface and how it work \hyperref[sec:nspanelmanager_web_interface]{here}.
     \end{itemize}
 
     \clearpage
     \section{NSPanel Manager web interface}
+    \label{sec:nspanelmanager_web_interface}
     The web interface is partitioned into 4 main sections.
     \begin{enumerate}
       \item The first page where panel status and management can be done.
@@ -270,6 +272,21 @@
     \subsubsection{Individual light control}
     There is place for up to 12 lights (per room) to be controlled individually from the NSPanel. The image on the bottom shows a preview on how this might look. When a new light is added to the room it will automatically be assigned to the next free slot on the page. By pressing a slot with an assigned entity you can chose to assign a new entity (if any entity is unasigned) or "clear" the slot which will remove the light from the page but it will still be attached to the room.
     \info{Each entity may only be assigned to one slot. If the list of entities is empty then all entities has been assigned a slot.}
+
+    \subsection{Global settings}
+    These settings will apply to all NSPanels (if they do not have specific configurations), and the NSPanel Manager container. There are two things that need to be set in order to get up and running. Those are:
+    \begin{enumerate}
+      \item Connection details to the same MQTT server that were set in the NSPanel configuration.
+      \item Connection details to Home Assistant and/or OpenHAB.
+    \end{enumerate}
+    \important{Failing to meet both requirements listed above will result in a non-working setup!}
+    \info{If running the NSPanel Manager container as a Home Assistant add-on then the Home Assistant connection details will already be configured.}
+    There are also other settings that might be worth taking a look at while here, such as global scenes that apply to all entities, showing a clock on the screensaver, how bright the NSPanels should be, the Min & Max of color temperature and so on. Go ahead and explore by yourself.
+    \begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.25]{settings_page.png}
+    \caption{Global settings}%
+    \end{figure}
 
     \clearpage
     \section{Panel functions}

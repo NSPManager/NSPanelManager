@@ -15,19 +15,20 @@
 \contentsline {subsubsection}{\numberline {3.3.1}Scenes}{10}{subsubsection.3.3.1}%
 \contentsline {subsubsection}{\numberline {3.3.2}Lights}{10}{subsubsection.3.3.2}%
 \contentsline {subsubsection}{\numberline {3.3.3}Individual light control}{11}{subsubsection.3.3.3}%
-\contentsline {section}{\numberline {4}Panel functions}{12}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Main page logic}{12}{subsection.4.1}%
-\contentsline {subsubsection}{\numberline {4.1.1}One or more lights on}{12}{subsubsection.4.1.1}%
-\contentsline {subsubsection}{\numberline {4.1.2}No lights on}{12}{subsubsection.4.1.2}%
-\contentsline {subsubsection}{\numberline {4.1.3}Lock mode}{12}{subsubsection.4.1.3}%
-\contentsline {section}{\numberline {5}Logs}{13}{section.5}%
-\contentsline {section}{\numberline {6}Advanced setup}{14}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Manual Docker container setup}{14}{subsection.6.1}%
-\contentsline {section}{\numberline {7}Functional information}{15}{section.7}%
-\contentsline {subsection}{\numberline {7.1}Data flow}{15}{subsection.7.1}%
-\contentsline {subsubsection}{\numberline {7.1.1}Home Assistant and/or OpenHAB to/from NSPanel Manager container}{15}{subsubsection.7.1.1}%
-\contentsline {subsubsection}{\numberline {7.1.2}NSPanel Manager container to/from MQTT}{15}{subsubsection.7.1.2}%
-\contentsline {subsubsection}{\numberline {7.1.3}Home Assistant and/or OpenHAB to/from MQTT}{15}{subsubsection.7.1.3}%
-\contentsline {subsubsection}{\numberline {7.1.4}NSPanel Manager container to/from NSPanels}{15}{subsubsection.7.1.4}%
-\contentsline {subsubsection}{\numberline {7.1.5}MQTT to/from NSPanels}{15}{subsubsection.7.1.5}%
-\contentsline {subsection}{\numberline {7.2}MQTT Topics}{15}{subsection.7.2}%
+\contentsline {subsection}{\numberline {3.4}Global settings}{12}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Panel functions}{14}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Main page logic}{14}{subsection.4.1}%
+\contentsline {subsubsection}{\numberline {4.1.1}One or more lights on}{14}{subsubsection.4.1.1}%
+\contentsline {subsubsection}{\numberline {4.1.2}No lights on}{14}{subsubsection.4.1.2}%
+\contentsline {subsubsection}{\numberline {4.1.3}Lock mode}{14}{subsubsection.4.1.3}%
+\contentsline {section}{\numberline {5}Logs}{15}{section.5}%
+\contentsline {section}{\numberline {6}Advanced setup}{16}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Manual Docker container setup}{16}{subsection.6.1}%
+\contentsline {section}{\numberline {7}Functional information}{17}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Data flow}{17}{subsection.7.1}%
+\contentsline {subsubsection}{\numberline {7.1.1}Home Assistant and/or OpenHAB to/from NSPanel Manager container}{17}{subsubsection.7.1.1}%
+\contentsline {subsubsection}{\numberline {7.1.2}NSPanel Manager container to/from MQTT}{17}{subsubsection.7.1.2}%
+\contentsline {subsubsection}{\numberline {7.1.3}Home Assistant and/or OpenHAB to/from MQTT}{17}{subsubsection.7.1.3}%
+\contentsline {subsubsection}{\numberline {7.1.4}NSPanel Manager container to/from NSPanels}{17}{subsubsection.7.1.4}%
+\contentsline {subsubsection}{\numberline {7.1.5}MQTT to/from NSPanels}{17}{subsubsection.7.1.5}%
+\contentsline {subsection}{\numberline {7.2}MQTT Topics}{17}{subsection.7.2}%

@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1689367800 "manual.tex" "manual.pdf" "manual" 1689367801 0
+["pdflatex"] 1689368466 "manual.tex" "manual.pdf" "manual" 1689368468 2
   ".././images//add_new_light.png" 1689290824 92973 a375c9453c8ffe7b6eed658e87b4b312 ""
   ".././images//edit_new_light_ha.png" 1689291045 34081 7e84edff89281dada63a339efba62635 ""
   ".././images//edit_new_light_openhab.png" 1689291082 52638 a9953ab06ac76e54b54029e5f3420941 ""
@@ -9,6 +9,7 @@
   ".././images//nspanel_page.png" 1689289848 148477 464845d88fac83929026f738fbe550d9 ""
   ".././images//putty_serial.png" 1689332561 57090 48e2b3d40b80937873cbeb7fd1334303 ""
   ".././images//room_page.png" 1689289889 289261 682a6c0f5b1ec91f559f77d9f9944eaa ""
+  ".././images//settings_page.png" 1689368434 269979 7d52b305d703e63da266125608fb5352 ""
   "/usr/share/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc" 1687799903 2375 baa924870cfb487815765f9094cf3728 ""
   "/usr/share/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc" 1687799903 3031 6c4d3515bf7115d8518af1c9ab97ca44 ""
   "/usr/share/texmf-dist/fonts/map/fontname/texfonts.map" 1687799903 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -228,10 +229,10 @@
   "/usr/share/texmf-dist/web2c/texmf.cnf" 1687799903 40684 9b9ec0b4288972636ff6a3b9c4238efc ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1689243894 4483110 adb1e1d04498b9576f1f17c4219c5e03 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1689243891 6768053 7920635eaf2904293ab58a0248a46a1f ""
-  "manual.aux" 1689367801 6059 2b5c25915a76499868a9a737903453ec "pdflatex"
-  "manual.out" 1689367801 5751 7649e8f0ebb665b640b9c045fae5a931 "pdflatex"
-  "manual.tex" 1689367798 25427 744c3e2069a4deb5bc82430963a6118a ""
-  "manual.toc" 1689367801 2992 73e8c3f9cf04821dc481aaad2db51543 "pdflatex"
+  "manual.aux" 1689368468 6420 adb2f46be9deb92e78dae5c231041ea8 "pdflatex"
+  "manual.out" 1689368468 5887 b7bee3d2607614bcb4f396198485a943 "pdflatex"
+  "manual.tex" 1689368465 26790 16c6861a2a7ab52890bcc04c464a423b ""
+  "manual.toc" 1689368468 3074 24e84fb69c4fcb3c0eba7ce2cebf6a55 "pdflatex"
   (generated)
   "manual.aux"
   "manual.log"

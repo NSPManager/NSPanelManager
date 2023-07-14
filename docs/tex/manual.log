@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Arch Linux) (preloaded format=pdflatex 2023.7.13)  14 JUL 2023 22:50
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Arch Linux) (preloaded format=pdflatex 2023.7.13)  14 JUL 2023 23:01
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -754,7 +754,7 @@ Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: subfig package v1.3 is loaded.
 Package caption Info: float package is loaded.
 Package caption Info: End \AtBeginDocument code.
-<.././images//logo.png, id=175, 271.998pt x 85.41pt>
+<.././images//logo.png, id=179, 271.998pt x 85.41pt>
 File: .././images//logo.png Graphic file (type png)
 <use .././images//logo.png>
 Package pdftex.def Info: .././images//logo.png  used on input line 98.
@@ -816,78 +816,94 @@ LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
  [4
 
 {/usr/share/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}]
-<.././images//esp_flash_download_tool.png, id=241, 346.29375pt x 531.48563pt>
+<.././images//esp_flash_download_tool.png, id=246, 346.29375pt x 531.48563pt>
 File: .././images//esp_flash_download_tool.png Graphic file (type png)
 <use .././images//esp_flash_download_tool.png>
 Package pdftex.def Info: .././images//esp_flash_download_tool.png  used on input line 174.
 (pdftex.def)             Requested size: 138.51503pt x 212.59048pt.
  [5 <.././images//esp_flash_download_tool.png>] [6] [7]
-<.././images//index_page.png, id=260, 1927.2pt x 357.335pt>
+<.././images//index_page.png, id=266, 1927.2pt x 357.335pt>
 File: .././images//index_page.png Graphic file (type png)
 <use .././images//index_page.png>
-Package pdftex.def Info: .././images//index_page.png  used on input line 233.
+Package pdftex.def Info: .././images//index_page.png  used on input line 235.
 (pdftex.def)             Requested size: 540.58275pt x 100.23305pt.
-<.././images//nspanel_page.png, id=261, 1926.19624pt x 1455.4375pt>
+<.././images//nspanel_page.png, id=267, 1926.19624pt x 1455.4375pt>
 File: .././images//nspanel_page.png Graphic file (type png)
 <use .././images//nspanel_page.png>
-Package pdftex.def Info: .././images//nspanel_page.png  used on input line 238.
+Package pdftex.def Info: .././images//nspanel_page.png  used on input line 240.
 (pdftex.def)             Requested size: 540.59511pt x 408.47467pt.
  [8
 
  <.././images//index_page.png>]
-<.././images//room_page.png, id=271, 1926.19624pt x 1460.45625pt>
+<.././images//room_page.png, id=277, 1926.19624pt x 1460.45625pt>
 File: .././images//room_page.png Graphic file (type png)
 <use .././images//room_page.png>
-Package pdftex.def Info: .././images//room_page.png  used on input line 243.
+Package pdftex.def Info: .././images//room_page.png  used on input line 245.
 (pdftex.def)             Requested size: 540.59511pt x 409.88321pt.
  [9 <.././images//nspanel_page.png>]
-<.././images//add_new_light.png, id=277, 700.6175pt x 954.56625pt>
+<.././images//add_new_light.png, id=283, 700.6175pt x 954.56625pt>
 File: .././images//add_new_light.png Graphic file (type png)
 <use .././images//add_new_light.png>
-Package pdftex.def Info: .././images//add_new_light.png  used on input line 253.
+Package pdftex.def Info: .././images//add_new_light.png  used on input line 255.
 (pdftex.def)             Requested size: 175.15395pt x 238.64098pt.
  [10 <.././images//room_page.png>]
-<.././images//edit_new_light_ha.png, id=283, 700.6175pt x 530.98375pt>
+<.././images//edit_new_light_ha.png, id=289, 700.6175pt x 530.98375pt>
 File: .././images//edit_new_light_ha.png Graphic file (type png)
 <use .././images//edit_new_light_ha.png>
-Package pdftex.def Info: .././images//edit_new_light_ha.png  used on input line 261.
+Package pdftex.def Info: .././images//edit_new_light_ha.png  used on input line 263.
 (pdftex.def)             Requested size: 142.26378pt x 107.81529pt.
-<.././images//edit_new_light_openhab.png, id=284, 700.6175pt x 715.67375pt>
+<.././images//edit_new_light_openhab.png, id=290, 700.6175pt x 715.67375pt>
 File: .././images//edit_new_light_openhab.png Graphic file (type png)
 <use .././images//edit_new_light_openhab.png>
-Package pdftex.def Info: .././images//edit_new_light_openhab.png  used on input line 263.
+Package pdftex.def Info: .././images//edit_new_light_openhab.png  used on input line 265.
 (pdftex.def)             Requested size: 142.26378pt x 145.31627pt.
- [11 <.././images//add_new_light.png> <.././images//edit_new_light_ha.png> <.././images//edit_new_light_openhab.png>] [12
+ [11 <.././images//add_new_light.png> <.././images//edit_new_light_ha.png> <.././images//edit_new_light_openhab.png>]
+./manual.tex:284: Misplaced alignment tab character &.
+l.284 ... bright the NSPanels should be, the Min &
+                                                   Max of color temperature ...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+<.././images//settings_page.png, id=303, 1926.19624pt x 2595.6975pt>
+File: .././images//settings_page.png Graphic file (type png)
+<use .././images//settings_page.png>
+Package pdftex.def Info: .././images//settings_page.png  used on input line 287.
+(pdftex.def)             Requested size: 481.54788pt x 648.92279pt.
+[12] [13 <.././images//settings_page.png>] [14
 
 ]
-<.././images//putty_serial.png, id=301, 460.72125pt x 488.57532pt>
+<.././images//putty_serial.png, id=322, 460.72125pt x 488.57532pt>
 File: .././images//putty_serial.png Graphic file (type png)
 <use .././images//putty_serial.png>
-Package pdftex.def Info: .././images//putty_serial.png  used on input line 293.
+Package pdftex.def Info: .././images//putty_serial.png  used on input line 310.
 (pdftex.def)             Requested size: 230.36006pt x 244.28706pt.
- [13
+ [15
 
- <.././images//putty_serial.png>] [14
+ <.././images//putty_serial.png>] [16
 
-] [15
+] [17
 
-] [16] (./manual.aux)
+] [18] (./manual.aux)
 Package rerunfilecheck Info: File `manual.out' has not changed.
-(rerunfilecheck)             Checksum: 7649E8F0EBB665B640B9C045FAE5A931;5751.
+(rerunfilecheck)             Checksum: B7BEE3D2607614BCB4F396198485A943;5887.
  ) 
 Here is how much of TeX's memory you used:
- 31227 strings out of 477985
- 629331 string characters out of 5840058
+ 31247 strings out of 477985
+ 629752 string characters out of 5840058
  1873388 words of memory out of 5000000
- 50816 multiletter control sequences out of 15000+600000
+ 50829 multiletter control sequences out of 15000+600000
  564112 words of font info for 64 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  102i,10n,133p,654b,1368s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr17.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr8.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmri10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on manual.pdf (16 pages, 752429 bytes).
+Output written on manual.pdf (18 pages, 898117 bytes).
 PDF statistics:
- 383 PDF objects out of 1000 (max. 8388607)
- 302 compressed objects within 4 object streams
- 65 named destinations out of 1000 (max. 500000)
- 466 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 403 PDF objects out of 1000 (max. 8388607)
+ 318 compressed objects within 4 object streams
+ 71 named destinations out of 1000 (max. 500000)
+ 479 words of extra memory for PDF output out of 10000 (max. 10000000)
 
