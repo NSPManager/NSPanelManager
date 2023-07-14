@@ -288,9 +288,18 @@
 
     \clearpage
     \section{Advanced setup}
-    \important{This section is not complete!}
     \label{sec:advanced_setup}
-    TODO: Write this section.
+    \subsection{Manual Docker container setup}
+    If you wish to manually build and setup the Docker container. To build the container, use the command \\ \lstinline[language=bash]{docker build -t nspanelmanager}. This will always be the same. To then start the container, the following command can be used:
+    \begin{lstlisting}[language=bash]
+    docker run --name nspanelmanager -v /etc/timezone:/etc/timezone:ro -v \
+    "$(pwd)/web/nspanelmanager/db.sqlite3":"/usr/src/app/nspanelmanager/db.sqlite3" \
+    -d -p 8000:8000 -p 8001:8001 nspanelmanager
+    \end{lstlisting}
+    If you wish to change the timezone, there are two options. Either, do as the command above, pass in the local machine /etc/timezone. This might not always work though as you'r server might be set to Etc/UTC then you can set the environment variable like this, for example: \lstinline[language=bash]{-E TZ=Europe/Stockholm} and remove the volume mapping for /etc/timezone.
+
+    If you wish to change where the database is stored, replace "\$(pwd)/web/nspanelmanager/db.sqlite3" with where you wish your database to be stored on the local machine.
+
 
     \section{Functional information}
     \subsection{Data flow}
