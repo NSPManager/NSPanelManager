@@ -96,6 +96,7 @@ def get_all_available_light_entities(request):
     return_json["home_assistant_lights"] = []
     return_json["openhab_lights"] = []
     return_json["manual_lights"] = []
+    return_json["errors"] = []
 
     # Home Assistant
     if get_setting_with_default("home_assistant_token", "") != "":
@@ -119,8 +120,10 @@ def get_all_available_light_entities(request):
                             "items": []
                         })
             else:
+                return_json["errors"].append("Failed to get Home Assistant lights, got return code: " + str(home_assistant_response.status_code))
                 print("ERROR! Got status code other than 200. Got code: " + str(home_assistant_response.status_code))
-        except:
+        except Exception as e:
+            return_json["errors"].append("Failed to get Home Assistant lights: " + str(e))
             logging.exception("Failed to get Home Assistant lights!")
     else:
         print("No home assistant configuration values. Will not gather Home Assistant entities.")
@@ -132,28 +135,36 @@ def get_all_available_light_entities(request):
             "Authorization": "Bearer " + get_setting_with_default("openhab_token", ""),
             "content-type": "application/json",
         }
-        openhab_response = requests.get(get_setting_with_default(
-            "openhab_address", "") + "/rest/things", headers=openhab_request_headers)
+        try:
+            openhab_response = requests.get(get_setting_with_default(
+                "openhab_address", "") + "/rest/things", headers=openhab_request_headers)
 
-        for entity in openhab_response.json():
-            if "channels" in entity:
-                add_entity = False
-                items = []
-                for channel in entity["channels"]:
-                    # Check if this thing has a channel that indicates that it might be a light
-                    if "itemType" in channel and (channel["itemType"] == "Dimmer" or channel["itemType"] == "Number" or channel["itemType"] == "Color" or channel["itemType"] == "Switch"):
-                        add_entity = True
-                    if "linkedItems" in channel:
-                        # Add all available items to the list of items for this thing
-                        for linkedItem in channel["linkedItems"]:
-                            if linkedItem not in items:
-                                items.append(linkedItem)
-                if add_entity:
-                    # return_json["openhab_lights"].append(entity["label"])
-                    return_json["openhab_lights"].append({
-                        "label": entity["label"],
-                        "items": items
-                    })
+            if openhab_response.status_code == 200:
+                for entity in openhab_response.json():
+                    if "channels" in entity:
+                        add_entity = False
+                        items = []
+                        for channel in entity["channels"]:
+                            # Check if this thing has a channel that indicates that it might be a light
+                            if "itemType" in channel and (channel["itemType"] == "Dimmer" or channel["itemType"] == "Number" or channel["itemType"] == "Color" or channel["itemType"] == "Switch"):
+                                add_entity = True
+                            if "linkedItems" in channel:
+                                # Add all available items to the list of items for this thing
+                                for linkedItem in channel["linkedItems"]:
+                                    if linkedItem not in items:
+                                        items.append(linkedItem)
+                        if add_entity:
+                            # return_json["openhab_lights"].append(entity["label"])
+                            return_json["openhab_lights"].append({
+                                "label": entity["label"],
+                                "items": items
+                            })
+            else:
+                return_json["errors"].append("Failed to get OpenHAB lights, got return code: " + str(openhab_response.status_code))
+                print("ERROR! Got status code other than 200. Got code: " + str(openhab_response.status_code))
+        except Exception as e:
+            return_json["errors"].append("Failed to get OpenHAB lights: " + str(e))
+            logging.exception("Failed to get OpenHAB lights!")
     else:
         print("No OpenHAB configuration values. Will not gather OpenHAB entities.")
 

@@ -45,7 +45,13 @@ function populate_add_new_light_dialog() {
     $("#add_new_light_loader").show();
 
     $.get("/api/get_all_available_lights", function (data) {
+        console.log(data);
+        $("#add_new_light_errors").html("");
         $("#add_new_light_options").html("");
+        data.errors.forEach(error => {
+          var error_element = '<div class="notification is-danger">' + error + '</div>';
+          $("#add_new_light_errors").html($("#add_new_light_errors").html() + error_element);
+        })
         data.home_assistant_lights.forEach(light => {
             add_new_light_to_available_lights_list(light, "home_assistant");
         });
