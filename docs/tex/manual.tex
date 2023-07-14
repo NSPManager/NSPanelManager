@@ -276,6 +276,17 @@
     You can lock which light to affect by pressing and holding either the ceiling or table-lights button. This will enter a special mode where changes to the sliders will only affect the selected type of lights. By pressing the same button again you can exit the "special mode". The "special mode" will also time out after a few seconds.
 
     \clearpage
+    \section{Logs}
+    \label{sec:logs}
+    While logs are normally sent over MQTT, any logs that are created before WiFi-connection are sent out on Serial. IF you wish to see the logs going over MQTT, you can look at the topic \lstinline[language=bash]{nspanel/<panel name>/log}. If you wish to look at the logs going over serial, you can use programs like Putty. Connect to the NSPanel with the serial programmer as usual but \textbf{dont't} connect IO0 to GND. In Putty enter your serial port in the "Serial line" box and choose baud 115200. You should then be able to connect by pressing the "Open"-button. Example:
+    \info{On Windows "/dev/ttyUSB0" will have to be replaced by something like "COM4". If using MacOS or Linux the port will be something similar to "/dev/ttyUSB0".}
+    \begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{putty_serial.png}
+    \caption{Connecting to Serial with Putty}%
+    \end{figure}
+
+    \clearpage
     \section{Advanced setup}
     \important{This section is not complete!}
     \label{sec:advanced_setup}

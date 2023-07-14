@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Arch Linux) (preloaded format=pdflatex 2023.7.13)  14 JUL 2023 02:17
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Arch Linux) (preloaded format=pdflatex 2023.7.13)  14 JUL 2023 13:06
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -715,7 +715,7 @@ Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: subfig package v1.3 is loaded.
 Package caption Info: float package is loaded.
 Package caption Info: End \AtBeginDocument code.
-<.././images//logo.png, id=139, 271.998pt x 85.41pt>
+<.././images//logo.png, id=143, 271.998pt x 85.41pt>
 File: .././images//logo.png Graphic file (type png)
 <use .././images//logo.png>
 Package pdftex.def Info: .././images//logo.png  used on input line 96.
@@ -740,64 +740,72 @@ LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
  [4
 
 {/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
-<.././images//esp_flash_download_tool.png, id=195, 346.29375pt x 531.48563pt>
+<.././images//esp_flash_download_tool.png, id=200, 346.29375pt x 531.48563pt>
 File: .././images//esp_flash_download_tool.png Graphic file (type png)
 <use .././images//esp_flash_download_tool.png>
 Package pdftex.def Info: .././images//esp_flash_download_tool.png  used on input line 172.
 (pdftex.def)             Requested size: 138.51503pt x 212.59048pt.
  [5 <.././images//esp_flash_download_tool.png>] [6]
-<.././images//index_page.png, id=209, 1927.2pt x 357.335pt>
+<.././images//index_page.png, id=214, 1927.2pt x 357.335pt>
 File: .././images//index_page.png Graphic file (type png)
 <use .././images//index_page.png>
 Package pdftex.def Info: .././images//index_page.png  used on input line 230.
 (pdftex.def)             Requested size: 540.58275pt x 100.23305pt.
-<.././images//nspanel_page.png, id=210, 1926.19624pt x 1455.4375pt>
+<.././images//nspanel_page.png, id=215, 1926.19624pt x 1455.4375pt>
 File: .././images//nspanel_page.png Graphic file (type png)
 <use .././images//nspanel_page.png>
 Package pdftex.def Info: .././images//nspanel_page.png  used on input line 235.
 (pdftex.def)             Requested size: 540.59511pt x 408.47467pt.
  [7 <.././images//index_page.png>]
-<.././images//room_page.png, id=221, 1926.19624pt x 1460.45625pt>
+<.././images//room_page.png, id=226, 1926.19624pt x 1460.45625pt>
 File: .././images//room_page.png Graphic file (type png)
 <use .././images//room_page.png>
 Package pdftex.def Info: .././images//room_page.png  used on input line 240.
 (pdftex.def)             Requested size: 540.59511pt x 409.88321pt.
  [8 <.././images//nspanel_page.png>]
-<.././images//add_new_light.png, id=227, 700.6175pt x 954.56625pt>
+<.././images//add_new_light.png, id=232, 700.6175pt x 954.56625pt>
 File: .././images//add_new_light.png Graphic file (type png)
 <use .././images//add_new_light.png>
 Package pdftex.def Info: .././images//add_new_light.png  used on input line 250.
 (pdftex.def)             Requested size: 175.15395pt x 238.64098pt.
  [9 <.././images//room_page.png>]
-<.././images//edit_new_light_ha.png, id=233, 700.6175pt x 530.98375pt>
+<.././images//edit_new_light_ha.png, id=238, 700.6175pt x 530.98375pt>
 File: .././images//edit_new_light_ha.png Graphic file (type png)
 <use .././images//edit_new_light_ha.png>
 Package pdftex.def Info: .././images//edit_new_light_ha.png  used on input line 258.
 (pdftex.def)             Requested size: 142.26378pt x 107.81529pt.
-<.././images//edit_new_light_openhab.png, id=234, 700.6175pt x 715.67375pt>
+<.././images//edit_new_light_openhab.png, id=239, 700.6175pt x 715.67375pt>
 File: .././images//edit_new_light_openhab.png Graphic file (type png)
 <use .././images//edit_new_light_openhab.png>
 Package pdftex.def Info: .././images//edit_new_light_openhab.png  used on input line 260.
 (pdftex.def)             Requested size: 142.26378pt x 145.31627pt.
- [10 <.././images//add_new_light.png> <.././images//edit_new_light_ha.png> <.././images//edit_new_light_openhab.png>] [11] [12
+ [10 <.././images//add_new_light.png> <.././images//edit_new_light_ha.png> <.././images//edit_new_light_openhab.png>] [11]
+<.././images//putty_serial.png, id=256, 460.72125pt x 488.57532pt>
+File: .././images//putty_serial.png Graphic file (type png)
+<use .././images//putty_serial.png>
+Package pdftex.def Info: .././images//putty_serial.png  used on input line 285.
+(pdftex.def)             Requested size: 230.36006pt x 244.28706pt.
+ [12
+
+ <.././images//putty_serial.png>] [13
 
 ] (./manual.aux)
 Package rerunfilecheck Info: File `manual.out' has not changed.
-(rerunfilecheck)             Checksum: 4DE187DB3AF67AEF0A597D57C1B98333;3729.
+(rerunfilecheck)             Checksum: DB2A9D0E267E491B3EEF2A8F0026F78A;3793.
  ) 
 Here is how much of TeX's memory you used:
- 30743 strings out of 477985
- 621817 string characters out of 5840058
+ 30762 strings out of 477985
+ 622190 string characters out of 5840058
  1873388 words of memory out of 5000000
- 50394 multiletter control sequences out of 15000+600000
+ 50409 multiletter control sequences out of 15000+600000
  518519 words of font info for 54 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  102i,10n,133p,654b,1368s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
-Output written on manual.pdf (12 pages, 605966 bytes).
+Output written on manual.pdf (13 pages, 648161 bytes).
 PDF statistics:
- 305 PDF objects out of 1000 (max. 8388607)
- 232 compressed objects within 3 object streams
- 46 named destinations out of 1000 (max. 500000)
- 389 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 319 PDF objects out of 1000 (max. 8388607)
+ 243 compressed objects within 3 object streams
+ 49 named destinations out of 1000 (max. 500000)
+ 402 words of extra memory for PDF output out of 10000 (max. 10000000)
 
