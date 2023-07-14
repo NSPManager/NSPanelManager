@@ -5,6 +5,11 @@ This project aims to solve the issue with having multiple Sonoff NSPanels instal
 ## The concept
 The idea is that by using the same layout on all the different panels all users will quickly become accustomed to the layout and usage of the panel.
 
+# IMPORTANT
+All information below is only here for the moment, it will be removed once the manual is fully up to date. The "User & Technical reference manual" is where most information and up to date information can be found. The PDF is available [here](docs/tex/manual.pdf).
+
+**Note:** For the best experience, download the PDF. It has helpful links (any text in blue) that doesn't work in the GitHub PDF viewer. Also, the GitHub PDF viewer only shows a few pages at the time.
+
 ## Logging
 Logging from NSPanels are done over MQTT to the topic `nspanel/<panel name>/log`. To see everything to and from all the devices, the topic `nspanel/#` can be used.
 
