@@ -1,0 +1,24 @@
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}%
+\contentsline {section}{\numberline {2}Quick start guide}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Container setup}{4}{subsection.2.1}%
+\contentsline {subsubsection}{\numberline {2.1.1}Standalone Docker container}{4}{subsubsection.2.1.1}%
+\contentsline {subsubsection}{\numberline {2.1.2}Home Assistant add-on}{4}{subsubsection.2.1.2}%
+\contentsline {subsection}{\numberline {2.2}Container settings}{4}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}NSPanel flashing}{5}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}Flashing with Espressif ESP32 DOWNLOADER TOOL (Windows only)}{5}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2}Flashing with ESPtool (all operating systems)}{6}{subsubsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.4}NSPanel configuration}{6}{subsection.2.4}%
+\contentsline {section}{\numberline {3}NSPanel Manager web interface}{7}{section.3}%
+\contentsline {subsection}{\numberline {3.1}First page}{7}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}NSPanel page}{8}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Room page}{8}{subsection.3.3}%
+\contentsline {subsubsection}{\numberline {3.3.1}Scenes}{9}{subsubsection.3.3.1}%
+\contentsline {subsubsection}{\numberline {3.3.2}Lights}{9}{subsubsection.3.3.2}%
+\contentsline {section}{\numberline {4}Panel functions}{10}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Main page logic}{10}{subsection.4.1}%
+\contentsline {subsubsection}{\numberline {4.1.1}One or more lights on}{11}{subsubsection.4.1.1}%
+\contentsline {subsubsection}{\numberline {4.1.2}No lights on}{11}{subsubsection.4.1.2}%
+\contentsline {subsubsection}{\numberline {4.1.3}Lock mode}{11}{subsubsection.4.1.3}%
+\contentsline {section}{\numberline {5}Advanced setup}{12}{section.5}%
+\contentsline {section}{\numberline {6}Functional information}{12}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Data flow}{12}{subsection.6.1}%
