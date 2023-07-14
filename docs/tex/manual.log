@@ -858,22 +858,12 @@ File: .././images//edit_new_light_openhab.png Graphic file (type png)
 Package pdftex.def Info: .././images//edit_new_light_openhab.png  used on input line 265.
 (pdftex.def)             Requested size: 142.26378pt x 145.31627pt.
  [11 <.././images//add_new_light.png> <.././images//edit_new_light_ha.png> <.././images//edit_new_light_openhab.png>]
-./manual.tex:284: Misplaced alignment tab character &.
-l.284 ... bright the NSPanels should be, the Min &
-                                                   Max of color temperature ...
-I can't figure out why you would want to use a tab mark
-here. If you just want an ampersand, the remedy is
-simple: Just type `I\&' now. But if some right brace
-up above has ended a previous alignment prematurely,
-you're probably due for more error messages, and you
-might try typing `S' now just to see what is salvageable.
-
 <.././images//settings_page.png, id=303, 1926.19624pt x 2595.6975pt>
 File: .././images//settings_page.png Graphic file (type png)
 <use .././images//settings_page.png>
 Package pdftex.def Info: .././images//settings_page.png  used on input line 287.
 (pdftex.def)             Requested size: 481.54788pt x 648.92279pt.
-[12] [13 <.././images//settings_page.png>] [14
+ [12] [13 <.././images//settings_page.png>] [14
 
 ]
 <.././images//putty_serial.png, id=322, 460.72125pt x 488.57532pt>
@@ -900,7 +890,7 @@ Here is how much of TeX's memory you used:
  14 hyphenation exceptions out of 8191
  102i,10n,133p,654b,1368s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr17.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr8.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmri10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on manual.pdf (18 pages, 898117 bytes).
+Output written on manual.pdf (18 pages, 898113 bytes).
 PDF statistics:
  403 PDF objects out of 1000 (max. 8388607)
  318 compressed objects within 4 object streams
