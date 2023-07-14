@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1689332770 "manual.tex" "manual.pdf" "manual" 1689332771 0
+["pdflatex"] 1689332875 "manual.tex" "manual.pdf" "manual" 1689332877 0
   ".././images//add_new_light.png" 1689290824 92973 a375c9453c8ffe7b6eed658e87b4b312 ""
   ".././images//edit_new_light_ha.png" 1689291045 34081 7e84edff89281dada63a339efba62635 ""
   ".././images//edit_new_light_openhab.png" 1689291082 52638 a9953ab06ac76e54b54029e5f3420941 ""
@@ -207,10 +207,10 @@
   "/usr/share/texmf-dist/web2c/texmf.cnf" 1687799903 40684 9b9ec0b4288972636ff6a3b9c4238efc ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1689243894 4483110 adb1e1d04498b9576f1f17c4219c5e03 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1689243891 6768053 7920635eaf2904293ab58a0248a46a1f ""
-  "manual.aux" 1689332771 4863 e290752e9d7b019472c1aec02e628667 "pdflatex"
-  "manual.out" 1689332771 3793 db2a9d0e267e491b3eef2a8f0026f78a "pdflatex"
-  "manual.tex" 1689332769 20175 ceff5c123d377d4fc0644ebba3920618 ""
-  "manual.toc" 1689332771 2124 67f0da1b3054b301286e0c8d26e6ee31 "pdflatex"
+  "manual.aux" 1689332876 4863 e290752e9d7b019472c1aec02e628667 "pdflatex"
+  "manual.out" 1689332876 3793 db2a9d0e267e491b3eef2a8f0026f78a "pdflatex"
+  "manual.tex" 1689332875 20175 2a9f4b525e979ab3604faae4018bd65f ""
+  "manual.toc" 1689332876 2124 67f0da1b3054b301286e0c8d26e6ee31 "pdflatex"
   (generated)
   "manual.aux"
   "manual.log"
