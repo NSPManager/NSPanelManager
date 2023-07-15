@@ -30,6 +30,6 @@
 \contentsline {subsubsection}{\numberline {7.2.1}Home Assistant and/or OpenHAB to/from NSPanel Manager container}{17}{subsubsection.7.2.1}%
 \contentsline {subsubsection}{\numberline {7.2.2}NSPanel Manager container to/from MQTT}{17}{subsubsection.7.2.2}%
 \contentsline {subsubsection}{\numberline {7.2.3}Home Assistant and/or OpenHAB to/from MQTT}{17}{subsubsection.7.2.3}%
-\contentsline {subsubsection}{\numberline {7.2.4}NSPanel Manager container to/from NSPanels}{17}{subsubsection.7.2.4}%
+\contentsline {subsubsection}{\numberline {7.2.4}NSPanel Manager container to/from NSPanels}{18}{subsubsection.7.2.4}%
 \contentsline {subsubsection}{\numberline {7.2.5}MQTT to/from NSPanels}{18}{subsubsection.7.2.5}%
 \contentsline {subsection}{\numberline {7.3}MQTT Topics}{18}{subsection.7.3}%

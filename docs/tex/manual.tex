@@ -342,6 +342,9 @@
     \end{itemize}
 
     \subsection{Data flow}
+
+    \begin{figure}[H]
+    \centering
     \begin{tikzpicture}
       \node (HAOpenHab) [startstop] {Home Assistant/OpenHAB};
       \node (NSPMcontainer) [startstop, right=of HAOpenHab] {NSPanel Manager container};
@@ -356,8 +359,9 @@
       \draw [doublearrow] (NSPMcontainer) -- (panel2);
       \draw [doublearrow] (MQTT) -- (panel1);
       \draw [doublearrow] (MQTT) -- (panel2);
-
     \end{tikzpicture}
+    \caption{NSPanel Manager data flow}%
+    \end{figure}
 
     The data flow within NSPanel Manager might look intimidating but it's not that bad. Below is an explination of all the arrows above.
 

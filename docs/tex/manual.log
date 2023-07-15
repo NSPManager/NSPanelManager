@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Arch Linux) (preloaded format=pdflatex 2023.7.13)  15 JUL 2023 02:44
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Arch Linux) (preloaded format=pdflatex 2023.7.13)  15 JUL 2023 02:46
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -891,18 +891,18 @@ Package rerunfilecheck Info: File `manual.out' has not changed.
 (rerunfilecheck)             Checksum: D6855E5612EA7B6E793C8720E07F3F7C;6043.
  ) 
 Here is how much of TeX's memory you used:
- 31322 strings out of 477985
- 630867 string characters out of 5840058
+ 31323 strings out of 477985
+ 630883 string characters out of 5840058
  1873388 words of memory out of 5000000
  50900 multiletter control sequences out of 15000+600000
  564112 words of font info for 64 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  102i,11n,133p,654b,1368s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr17.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmr8.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmri10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/share/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on manual.pdf (18 pages, 900752 bytes).
+Output written on manual.pdf (18 pages, 900894 bytes).
 PDF statistics:
- 411 PDF objects out of 1000 (max. 8388607)
- 326 compressed objects within 4 object streams
- 73 named destinations out of 1000 (max. 500000)
+ 412 PDF objects out of 1000 (max. 8388607)
+ 327 compressed objects within 4 object streams
+ 74 named destinations out of 1000 (max. 500000)
  487 words of extra memory for PDF output out of 10000 (max. 10000000)
 
