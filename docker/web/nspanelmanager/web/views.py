@@ -222,7 +222,7 @@ def save_panel_settings(request, panel_id: int):
         set_nspanel_setting_value(panel_id, "show_screensaver_clock", request.POST["show_screensaver_clock"])
     set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
     set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
-    set_nspanel_setting_value(panel_id, "temperature_calibration", int(request.POST["temperature_calibration"]))
+    set_nspanel_setting_value(panel_id, "temperature_calibration", float(request.POST["temperature_calibration"]))
     panel.save()
     return redirect('edit_nspanel', panel_id)
 

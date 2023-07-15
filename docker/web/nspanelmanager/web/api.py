@@ -257,7 +257,7 @@ def get_nspanel_config(request):
     base["lock_to_default_room"] = get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False")
     base["relay1_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", False)
     base["relay2_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", False)
-    base["temperature_calibration"] = int(get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0))
+    base["temperature_calibration"] = float(get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0))
     if nspanel.button1_detached_mode_light:
         base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
     else:

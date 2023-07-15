@@ -74,6 +74,14 @@ def on_message(ws, message):
         logging.debug(message)
 
 
+def _ws_connection_open(ws):
+    logging.info("WebSocket connection to OpenHAB opened.")
+
+
+def _ws_connection_close(ws, close_status_code, close_msg):
+    logging.error("WebSocket connection closed!")
+
+
 def connect():
     Thread(target=_do_connection, daemon=True).start()
 
@@ -88,7 +96,7 @@ def _do_connection():
     else:
         ws_url += "/api/websocket"
     logging.info(F"Connecting to Home Assistant at {ws_url}")
-    ws = websocket.WebSocketApp(F"{ws_url}", on_message=on_message)
+    ws = websocket.WebSocketApp(F"{ws_url}", on_message=on_message, on_open=_ws_connection_open, on_close=_ws_connection_close)
     ws.run_forever(reconnect=5)
 
 

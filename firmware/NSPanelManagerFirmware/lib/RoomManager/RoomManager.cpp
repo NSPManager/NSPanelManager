@@ -77,7 +77,7 @@ void RoomManager::loadAllRooms(bool is_update) {
   NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>((*roomData)["button1_mode"].as<uint8_t>());
   NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>((*roomData)["button2_mode"].as<uint8_t>());
   NSPMConfig::instance->use_farenheit = (*roomData)["use_farenheit"].as<String>().equals("True");
-  NSPMConfig::instance->temperature_calibration = (*roomData)["temperature_calibration"].as<int>();
+  NSPMConfig::instance->temperature_calibration = (*roomData)["temperature_calibration"].as<float>();
 
   bool relay1_default_mode = (*roomData)["relay1_default_mode"].as<String>().equals("True");
   bool relay2_default_mode = (*roomData)["relay2_default_mode"].as<String>().equals("True");

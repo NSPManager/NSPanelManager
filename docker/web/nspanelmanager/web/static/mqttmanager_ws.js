@@ -1,6 +1,10 @@
 command_counter = 0;
+commands_sent_queue = {};
 
-function process_message(message) {}
+function process_message(message) {
+  if ("msg_id" in message) {
+  }
+}
 
 function send_command(command) {
   command["cmd_id"] = command_counter;
