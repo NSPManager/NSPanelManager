@@ -25,10 +25,11 @@
 \contentsline {section}{\numberline {6}Advanced setup}{16}{section.6}%
 \contentsline {subsection}{\numberline {6.1}Manual Docker container setup}{16}{subsection.6.1}%
 \contentsline {section}{\numberline {7}Functional information}{17}{section.7}%
-\contentsline {subsection}{\numberline {7.1}Data flow}{17}{subsection.7.1}%
-\contentsline {subsubsection}{\numberline {7.1.1}Home Assistant and/or OpenHAB to/from NSPanel Manager container}{17}{subsubsection.7.1.1}%
-\contentsline {subsubsection}{\numberline {7.1.2}NSPanel Manager container to/from MQTT}{17}{subsubsection.7.1.2}%
-\contentsline {subsubsection}{\numberline {7.1.3}Home Assistant and/or OpenHAB to/from MQTT}{17}{subsubsection.7.1.3}%
-\contentsline {subsubsection}{\numberline {7.1.4}NSPanel Manager container to/from NSPanels}{17}{subsubsection.7.1.4}%
-\contentsline {subsubsection}{\numberline {7.1.5}MQTT to/from NSPanels}{17}{subsubsection.7.1.5}%
-\contentsline {subsection}{\numberline {7.2}MQTT Topics}{17}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.1}Software components}{17}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Data flow}{17}{subsection.7.2}%
+\contentsline {subsubsection}{\numberline {7.2.1}Home Assistant and/or OpenHAB to/from NSPanel Manager container}{17}{subsubsection.7.2.1}%
+\contentsline {subsubsection}{\numberline {7.2.2}NSPanel Manager container to/from MQTT}{17}{subsubsection.7.2.2}%
+\contentsline {subsubsection}{\numberline {7.2.3}Home Assistant and/or OpenHAB to/from MQTT}{17}{subsubsection.7.2.3}%
+\contentsline {subsubsection}{\numberline {7.2.4}NSPanel Manager container to/from NSPanels}{17}{subsubsection.7.2.4}%
+\contentsline {subsubsection}{\numberline {7.2.5}MQTT to/from NSPanels}{18}{subsubsection.7.2.5}%
+\contentsline {subsection}{\numberline {7.3}MQTT Topics}{18}{subsection.7.3}%

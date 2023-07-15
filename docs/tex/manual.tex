@@ -333,8 +333,15 @@
 
     \clearpage
     \section{Functional information}
-    \subsection{Data flow}
+    \subsection{Software components}
+    There are really three software components written for the NSPanel Manager project. These are described as below:
+    \begin{itemize}
+      \item \textbf{Web interface:} The web interface that you interact with is built on top of the Django framework. This software gives the user an interface to interact and configure the project with. This software also manages the database with settings.
+      \item \textbf{MQTT Manager:} There is a second software running in the background on the NSPanel Manager container that hosts the web interface. This component is named "MQTTManager". The MQTTManager handles all things with MQTT. It loads the config from the web interface via the API and then processes all commands from panels, state updates from Home Assistant and OpenHAB and so on. It's basically the glue that makes the panel's actions affect Home Assistant and OpenHAB. The MQTTManager is also the software that send state updates from Home Assistant and OpenHAB to the panels when changes occur.
+      \item \textbf{The NSPanel firmware:} The firmware written for the NSPanel has been specifically designed to be as response and easy to use as possible. The firmware handles all communication with the TFT (Nextion) display and with MQTTManager via MQTT.
+    \end{itemize}
 
+    \subsection{Data flow}
     \begin{tikzpicture}
       \node (HAOpenHab) [startstop] {Home Assistant/OpenHAB};
       \node (NSPMcontainer) [startstop, right=of HAOpenHab] {NSPanel Manager container};
