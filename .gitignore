@@ -13,3 +13,8 @@ firmware/NSPanelManagerFirmware/.cache
 firmware/NSPanelManagerFirmware/.ccls
 firmware/NSPanelManagerFirmware/.ccls-cache
 MQTTManager-RUST/
+
+# Ignore only neccesary files from LaTeX manual
+docs/tex/*
+!docs/tex/*.pdf
+!docs/tex/*.tex

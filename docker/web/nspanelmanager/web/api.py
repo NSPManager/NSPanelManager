@@ -175,7 +175,7 @@ def get_all_available_light_entities(request):
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
+        ip = x_forwarded_for.split(',')[-1]
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
@@ -257,6 +257,7 @@ def get_nspanel_config(request):
     base["lock_to_default_room"] = get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False")
     base["relay1_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", False)
     base["relay2_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", False)
+    base["temperature_calibration"] = int(get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0))
     if nspanel.button1_detached_mode_light:
         base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
     else:

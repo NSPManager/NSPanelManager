@@ -172,6 +172,7 @@ def edit_nspanel(request, panel_id: int):
         "show_screensaver_clock": get_nspanel_setting_with_default(panel_id, "show_screensaver_clock", "Global"),
         "relay1_default_mode": get_nspanel_setting_with_default(panel_id, "relay1_default_mode", "False"),
         "relay2_default_mode": get_nspanel_setting_with_default(panel_id, "relay2_default_mode", "False"),
+        "temperature_calibration": get_nspanel_setting_with_default(panel_id, "temperature_calibration", 0),
     }
 
     return render(request, 'edit_nspanel.html', {
@@ -221,6 +222,7 @@ def save_panel_settings(request, panel_id: int):
         set_nspanel_setting_value(panel_id, "show_screensaver_clock", request.POST["show_screensaver_clock"])
     set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
     set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
+    set_nspanel_setting_value(panel_id, "temperature_calibration", int(request.POST["temperature_calibration"]))
     panel.save()
     return redirect('edit_nspanel', panel_id)
 
@@ -325,10 +327,11 @@ def add_scene_to_global(request):
     return redirect('settings')
 
 def add_light_to_room_view(request, room_id: int):
+    if "light_id" not in request.POST:
+        return redirect('edit_room', room_id=room_id)
     room = Room.objects.filter(id=room_id).first()
     light_position = int(request.POST["position"])
-    existing_light_at_position = Light.objects.filter(
-        room=room, room_view_position=light_position).first()
+    existing_light_at_position = Light.objects.filter(room=room, room_view_position=light_position).first()
     if existing_light_at_position != None:
         existing_light_at_position.room_view_position = 0
         existing_light_at_position.save()
@@ -476,7 +479,7 @@ def save_new_merged_flash(request):
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
+        ip = x_forwarded_for.split(',')[-1]
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip

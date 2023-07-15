@@ -102,6 +102,9 @@ public:
   bool relay1_default_mode;
   bool relay2_default_mode;
 
+  // @brief The temperature calibration in degrees
+  int temperature_calibration;
+
   // Indicates wether or not LittleFS was mounted or not.
   bool littlefs_mount_successfull;
 

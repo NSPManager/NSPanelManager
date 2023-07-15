@@ -36,7 +36,7 @@ float readNTCTemperature(bool farenheit) {
     if (farenheit) {
       temperature = (temperature * 9 / 5) + 32;
     }
-    return temperature;
+    return temperature + NSPMConfig::instance->temperature_calibration;
   }
   return -254;
 }

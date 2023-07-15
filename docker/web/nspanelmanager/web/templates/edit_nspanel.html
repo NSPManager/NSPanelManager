@@ -266,6 +266,22 @@
       </div>
     </div>
   </div>
+  <div class="field">
+      <label class="label">Temperature calibration<span class="question">
+        <span class="icon question_icon">
+          <i class="mdi mdi-help"></i>
+        </span>
+        <div class="question_help_text notification is-info is-light">
+          Enter the number of degrees to calibrate. Entering a positive number (ex. 5) will add 5 degrees to the read temperature. Entering a negative number (ex. -5) will subtract 5 degrees from the read temperature.
+        </div>
+      </span>
+    </label>
+  </div>
+  <div class="field is-grouped">
+      <div class="control">
+          <input class="input" type="number" name="temperature_calibration" id="temperature_calibration" placeholder="Temperature Calibration" value="{{ settings.temperature_calibration }}" required>
+      </div>
+  </div>
   <div class="field is-grouped">
     <div class="control">
       <button class="button is-primary">Save</button>
