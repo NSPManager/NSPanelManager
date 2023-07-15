@@ -4,6 +4,7 @@ import json
 from threading import Thread
 import mqtt_manager_libs.light_states
 import environ
+import time
 
 home_assistant_url = ""
 home_assistant_token = ""
@@ -11,7 +12,6 @@ settings = {}
 auth_ok = False
 next_id = 0
 request_all_states_id = 0
-
 
 def init(settings_from_manager, mqtt_client_from_manager):
     global home_assistant_url, home_assistant_token, settings, mqtt_client
@@ -75,12 +75,13 @@ def on_message(ws, message):
 
 
 def _ws_connection_open(ws):
-    logging.info("WebSocket connection to OpenHAB opened.")
+    global ws_connected
+    ws_connected = False
+    logging.info("WebSocket connection to Home Assistant opened.")
 
 
 def _ws_connection_close(ws, close_status_code, close_msg):
     logging.error("WebSocket connection closed!")
-
 
 def connect():
     Thread(target=_do_connection, daemon=True).start()
@@ -95,9 +96,13 @@ def _do_connection():
         ws_url += "/core/websocket"
     else:
         ws_url += "/api/websocket"
-    logging.info(F"Connecting to Home Assistant at {ws_url}")
     ws = websocket.WebSocketApp(F"{ws_url}", on_message=on_message, on_open=_ws_connection_open, on_close=_ws_connection_close)
-    ws.run_forever(reconnect=5)
+    while True:
+        logging.info(F"Connecting to Home Assistant at {ws_url}")
+        ws.close()
+        time.sleep(1)
+        ws.run_forever()
+        time.sleep(10)
 
 
 def authenticate_client():
