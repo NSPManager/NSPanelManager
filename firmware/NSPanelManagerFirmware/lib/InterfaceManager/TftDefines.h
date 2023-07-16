@@ -36,6 +36,9 @@
 #define SWITCH_MODE_BUTTON_ID 6 // ID of button to change light mode (room/home)
 #define HOME_PAGE_SLIDER_NORMAL_COLOR 65535
 #define HOME_PAGE_SLIDER_LOCK_COLOR 65024
+#define HOME_PAGE_TIME_LABEL_NAME "t_time" //Top right corner. Can be pressed to get to settings page
+#define HOME_PAGE_TIME_LABEL_ID "7
+
 
 #define SCENES_PAGE_NAME "Scenes"
 #define SCENES_PAGE_ID 6 // ID for "Scenes"-page
@@ -150,3 +153,15 @@
 #define LIGHT_PAGE_SAT_SLIDER_PIC1 15     // Pic for "currentmode"
 #define LIGHT_PAGE_COLOR_TEMP_MODE_PIC 18 // Pic for kelvin/sat slider
 #define LIGHT_PAGE_COLOR_RGB_MODE_PIC 19  // Pic for kelvin/sat slider
+
+#define SETTINGS_PAGE_NAME "settings"
+#define SETTINGS_PAGE_ID 3 // ID for "Settings"-page
+#define SETTINGS_PAGE_BACK_BUTTON_ID 4
+#define SETTINGS_PAGE_LABEL_NAME "label" //Currently in tft file label.txt is set to "Settings"
+#define SETTINGS_PAGE_LABEL_ID 5
+#define SETTINGS_PAGE_SAVE_SLIDER_NAME "slider_save"
+#define SETTINGS_PAGE_SAVE_SLIDER_ID 3
+#define SETTINGS_PAGE_RESTART_BUTTON_NAME "b_restart"
+#define SETTINGS_PAGE_RESTART_BUTTON_ID 6
+#define SETTINGS_PAGE_FACTORYRESET_BUTTON_NAME "b_factory"
+#define SETTINGS_PAGE_FACTORYRESET_BUTTON_ID 7
