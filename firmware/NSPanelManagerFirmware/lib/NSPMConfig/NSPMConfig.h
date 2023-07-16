@@ -52,6 +52,8 @@ public:
   std::string mqtt_availability_topic;
   /// @brief MQTT panel status topic
   std::string mqtt_panel_status_topic;
+  /// @brief MQTT panel command topic
+  std::string mqtt_panel_cmd_topic;
   /// @brief MQTT panel temperature topic
   std::string mqtt_panel_temperature_topic;
   /// @brief MQTT topic to send logs to

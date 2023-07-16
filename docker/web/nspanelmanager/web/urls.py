@@ -39,9 +39,9 @@ urlpatterns = [
     # Below are API routes
     path('api/register_nspanel', api.register_nspanel, name='register_nspanel'),
     path('api/delete_nspanel/<int:panel_id>', api.delete_panel, name='delete_nspanel'),
-    path('api/reboot_panel', api.reboot_nspanel, name='reboot_panel'),
     path('api/get_nspanel_config', api.get_nspanel_config, name='get_nspanel_config'),
     path('api/get_nspanel_config/room/<int:room_id>', api.get_room_config, name='get_nspanel_config'),
+    path('api/get_nspanels_warnings', api.get_nspanels_warnings, name='get_nspanels_warnings'),
     path('api/get_all_available_lights', api.get_all_available_light_entities, name='get_all_available_lights'),
     path('api/get_light_config/<int:light_id>', api.get_light_config, name='get_all_available_lights'),
     path('api/get_mqtt_manager_config', api.get_mqtt_manager_config, name='get_mqtt_manager_config'),

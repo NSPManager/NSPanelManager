@@ -2,7 +2,7 @@
 
 {% block head %}
 {% load static %}
-<script src="{% static 'edit_room.js' %}"></script>
+<script src="{% static 'edit_room.js' %}?refresh={% now 'U' %}"></script>
 <link rel="stylesheet" href="{% static 'edit_room.css' %}">
 {% endblock %}
 

@@ -24,8 +24,7 @@ public:
   static String processIndexTemplate(const String &templateVar);
   static void saveConfigFromWeb(AsyncWebServerRequest *request);
   static void respondAvailableWiFiNetworks(AsyncWebServerRequest *request);
-  static void startOTAUpdate(AsyncWebServerRequest *request);
-  static void startTFTOTAUpdate(AsyncWebServerRequest *request);
+  static void startOTAUpdate();
   static void factoryReset(AsyncWebServerRequest *request);
   static void doRebootNow(AsyncWebServerRequest *request);
   static WebManagerState getState();

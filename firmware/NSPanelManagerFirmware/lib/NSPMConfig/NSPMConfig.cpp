@@ -66,7 +66,10 @@ bool NSPMConfig::loadFromLittleFS() {
   this->mqtt_availability_topic.append(NSPMConfig::instance->wifi_hostname);
   this->mqtt_availability_topic.append("/status");
 
-  // Load calculated values
+  this->mqtt_panel_cmd_topic = "nspanel/";
+  this->mqtt_panel_cmd_topic.append(NSPMConfig::instance->wifi_hostname);
+  this->mqtt_panel_cmd_topic.append("/command");
+
   this->mqtt_panel_status_topic = "nspanel/";
   this->mqtt_panel_status_topic.append(NSPMConfig::instance->wifi_hostname);
   this->mqtt_panel_status_topic.append("/status_report");

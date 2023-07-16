@@ -38,29 +38,10 @@ def index(request):
         temperature_unit = "°C"
 
     nspanels = []
-    md5_firmware = get_file_md5sum("firmware.bin")
-    md5_data_file = get_file_md5sum("data_file.bin")
-    md5_tft_file = get_file_md5sum("gui.tft")
-    md5_us_tft_file = get_file_md5sum("gui_us.tft")
-
     for nspanel in NSPanel.objects.all():
         panel_info = {}
         panel_info["nspanel"] = nspanel
-        panel_info["warnings"] = ""
-        for panel in NSPanel.objects.all():
-            if panel == nspanel:
-                continue
-            elif panel.friendly_name == nspanel.friendly_name:
-                panel_info["warnings"] += "Two or more panels exists with the same name. This may have cunintended consequences\n"
-                break
-        if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
-            panel_info["warnings"] += "Firmware update available.\n"
-        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "False" and nspanel.md5_tft_file != md5_tft_file:
-            panel_info["warnings"] += "GUI update available.\n"
-        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True" and nspanel.md5_tft_file != md5_us_tft_file:
-            panel_info["warnings"] += "GUI update available.\n"
         nspanels.append(panel_info)
-
 
     return render(request, 'index.html', {
         'nspanels': nspanels,

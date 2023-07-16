@@ -8,7 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="{% static 'jquery.min.js' %}"></script>
-    <script src="{% static 'base.js' %}"></script>
+    <script src="{% static 'base.js' %}?refresh={% now 'U' %}"></script>
     <link rel="stylesheet" href="{% static 'bulma/css/bulma.min.css' %}">
     <link rel="stylesheet" href="{% static 'bulma_extentions/bulma_tooltips.min.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css">

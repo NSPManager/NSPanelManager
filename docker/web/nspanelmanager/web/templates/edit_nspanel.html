@@ -2,8 +2,8 @@
 
 {% block head %}
 {% load static %}
-<script src="{% static 'edit_nspanel.js' %}"></script>
-<script src="{% static 'question.js' %}"></script>
+<script src="{% static 'edit_nspanel.js' %}?refresh={% now 'U' %}"></script>
+<script src="{% static 'question.js' %}?refresh={% now 'U' %}"></script>
 {% endblock %}
 
 {% block content %}

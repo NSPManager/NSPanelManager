@@ -126,7 +126,8 @@
       \item Execute \lstinline[language=bash]|cd docker| to navigate to the "docker"-directory.
       \item Run the script "docker-build\_and\_run.sh" to build the container \& start it up using the default values. This can be done by executing \lstinline[language=bash]|bash docker-build_and_run.sh|.
     \end{itemize}
-    If you wish to manually build and run the container, see below for \hyperref[sec:advanced_setup]{advanced setup}.
+    \important{By using the included script, the database with all settings and stored data will be stored within the downloaded directory. If you remove this directory, all data will be destroyed.}
+    If you wish to manually build and run the container or change options or settings, see below for \hyperref[sec:advanced_setup]{advanced setup}.
 
     \subsubsection{Home Assistant add-on}
     As the repository is set to private currently, there is no way of adding it as a repository to Home Assistant. This can be worked around by doing the following:

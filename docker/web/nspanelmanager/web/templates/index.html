@@ -2,11 +2,13 @@
 
 {% block head %}
 {% load static %}
-<script src="{% static 'index.js' %}"></script>
+<script src="{% static 'mqttmanager_ws.js' %}?refresh={% now 'U' %}"></script>
+<script src="{% static 'index.js' %}?refresh={% now 'U' %}"></script>
 {% endblock %}
 
 {% block content %}
 {% load mathfilters %}
+<div id="notification_holder"></div> <!-- Displays any warnings or errors -->
 <h2 class="title is-4">Panels</h2>
 <table class="table is-fullwidth is-hoverable">
   <thead>
@@ -31,35 +33,14 @@
         <a href="http://{{ panel_info.nspanel.ip_address }}" target="_blank">{{ panel_info.nspanel.ip_address }}</a>
       </td>
       <td id="online_offline_tag_parent_{{ panel_info.nspanel.mac_address }}">
-        {% if panel_info.nspanel.online_state %}
-        <span class="tag is-success" id="online_offline_state_{{ panel_info.nspanel.mac_address }}">Online</span>
-        {% else %}
-        <span class="tag is-danger" id="online_offline_state_{{ panel_info.nspanel.mac_address }}">Offline</span>
-        {% endif %}
+        <span class="tag is-light" id="online_offline_state_{{ panel_info.nspanel.mac_address }}">?</span>
       </td>
-      <td>
-        {% if panel_info.nspanel.wifi_rssi <= -90 %} <span class="mdi mdi-wifi-strength-1-alert"
-          id="wifi_signal_strength_{{ panel_info.nspanel.mac_address }}" title="{{ panel_info.nspanel.wifi_rssi }} dBm"></span>
-          {% elif panel_info.nspanel.wifi_rssi <= -80 %} <span class="mdi mdi-wifi-strength-1"
-            id="wifi_signal_strength_{{ panel_info.nspanel.mac_address }}" title="{{ panel_info.nspanel.wifi_rssi }} dBm">
-            </span>
-            {% elif panel_info.nspanel.wifi_rssi <= -67 %} <span class="mdi mdi-wifi-strength-2"
-              id="wifi_signal_strength_{{ panel_info.nspanel.mac_address }}" title="{{ panel_info.nspanel.wifi_rssi }} dBm"></span>
-              {% elif panel_info.nspanel.wifi_rssi <= -55 %} <span class="mdi mdi-wifi-strength-3"
-                id="wifi_signal_strength_{{ panel_info.nspanel.mac_address }}" title="{{ panel_info.nspanel.wifi_rssi }} dBm"></span>
-                {% else %}
-                <span class="mdi mdi-wifi-strength-4" id="wifi_signal_strength_{{ panel_info.nspanel.mac_address }}"
-                  title="{{ panel_info.nspanel.wifi_rssi }} dBm"></span>
-                {% endif %}
+      <td id="wifi_signal_strength_{{ panel_info.nspanel.mac_address }}">
+        <span class="mdi mdi-help" title="?"></span>
       </td>
-      <td id="heap_used_{{ panel_info.nspanel.mac_address }}">{{ panel_info.nspanel.heap_used_pct }}%</td>
-      <td id="temperature_{{ panel_info.nspanel.mac_address }}">{{ panel_info.nspanel.temperature }} {{ temperature_unit }}</td>
+      <td id="heap_used_{{ panel_info.nspanel.mac_address }}">?</td>
+      <td id="temperature_{{ panel_info.nspanel.mac_address }}">? {{ temperature_unit }}</td>
       <td>
-        <span class="{% if panel_info.warnings == "" %}is-hidden{% endif %}" id="warnings">
-          <span data-tooltip="{{ panel_info.warnings }}" class="icon is-medium has-tooltipl-multiline has-tooltip-warning">
-            <span class="mdi mdi-alert has-text-warning mdi-24px"></span>
-          </span>
-        </span>
         <div class="dropdown">
           <div class="dropdown-trigger">
             <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu">
@@ -71,15 +52,15 @@
           </div>
           <div class="dropdown-menu" id="dropdown-menu" role="menu">
             <div class="dropdown-content">
-              <a href="/api/reboot_panel?address={{ panel_info.nspanel.ip_address }}" class="dropdown-item"
-                onclick="startNSPanelTftUpdate('{{ panel_info.nspanel.ip_address }}');">
+              <a class="dropdown-item"
+                onclick="rebootNSPanel('{{ panel_info.nspanel.id }}');">
                 <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot
               </a>
               <hr class="dropdown-divider">
-              <a class="dropdown-item" onclick="startNSPanelOtaUpdate('{{ panel_info.nspanel.ip_address }}');">
+              <a class="dropdown-item" onclick="startNSPanelOtaUpdate('{{ panel_info.nspanel.id }}');">
                 <span class="mdi mdi-upload pr-2 has-text-info"></span>Update firmware
               </a>
-              <a class="dropdown-item" onclick="startNSPanelTftUpdate('{{ panel_info.nspanel.ip_address }}');">
+              <a class="dropdown-item" onclick="startNSPanelTftUpdate('{{ panel_info.nspanel.id }}');">
                 <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update screen
               </a>
               <hr class="dropdown-divider">
@@ -89,6 +70,9 @@
             </div>
           </div>
         </div>
+        <span data-tooltip="" class="icon is-medium has-tooltipl-multiline has-tooltip-warning is-hidden" id="nspanel_{{ panel_info.nspanel.mac_address}}_warnings">
+          <span class="mdi mdi-alert has-text-warning mdi-24px"></span>
+        </span>
       </td>
     </tr>
     {% endfor %}

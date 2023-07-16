@@ -186,11 +186,12 @@ void taskManageWifiAndMqtt(void *param) {
           (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
           (*status_report_doc)["mac"] = WiFi.macAddress();
           (*status_report_doc)["temperature"] = temperature;
+          (*status_report_doc)["ip"] = WiFi.localIP().toString();
           MqttManager::publish(NSPMConfig::instance->mqtt_panel_temperature_topic, std::to_string(temperature).c_str());
 
           char buffer[512];
           uint json_length = serializeJson(*status_report_doc, buffer);
-          MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer);
+          MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer, true);
           lastStatusReport = millis();
         }
         delete status_report_doc;

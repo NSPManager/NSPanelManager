@@ -10,6 +10,7 @@ import mqtt_manager_libs.home_assistant
 import mqtt_manager_libs.openhab
 import mqtt_manager_libs.websocket_server
 import mqtt_manager_libs.light_states
+import mqtt_manager_libs.nspanel_states
 import mqtt_manager_libs.light
 import mqtt_manager_libs.scenes
 import mqtt_manager_libs.home_assistant_autoreg
@@ -31,6 +32,13 @@ client = mqtt.Client("NSPanelManager_" + get_machine_mac())
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("urllib3").propagate = False
 last_sent_time_string = ""
+
+def get_md5_sum(url):
+    req = get(url)
+    if req.status_code == 200:
+        return req.text
+    else:
+        return None
 
 def send_time_thread():
     global last_sent_time_string
@@ -67,6 +75,47 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("nspanel/scenes/global/+/activate")
     client.subscribe("nspanel/entities/#")
 
+def send_nspanel_command(panel_id, command_data):
+    panel_id = int(panel_id)
+    if panel_id in mqtt_manager_libs.nspanel_states.states:
+        if "address" in mqtt_manager_libs.nspanel_states.states[panel_id]:
+            nspanel = mqtt_manager_libs.nspanel_states.states[panel_id]
+            client.publish("nspanel/" + nspanel["name"] + "/command", json.dumps(command_data))
+
+
+async def on_websocket_message(websocket, message):
+    reply = {"cmd_id": message["cmd_id"]}
+    if message["command"] == "get_nspanel_status":
+        reply["nspanels"] = mqtt_manager_libs.nspanel_states.states
+    elif message["command"] == "reboot_nspanels":
+        if "nspanels" in message["args"]:
+            for nspanel_id in message["args"]["nspanels"]:
+                nspanel_id = int(nspanel_id)
+                if nspanel_id in mqtt_manager_libs.nspanel_states.states:
+                    send_nspanel_command(nspanel_id, {"command": "reboot"})
+                    if "address" in mqtt_manager_libs.nspanel_states.states[nspanel_id]: # TODO: Remove old HTTP GET method after a few updates as it is not longed in us.
+                        get("http://" + mqtt_manager_libs.nspanel_states.states[nspanel_id]["address"] + "/do_reboot")
+    elif message["command"] == "firmware_update_nspanels":
+        if "nspanels" in message["args"]:
+            for nspanel_id in message["args"]["nspanels"]:
+                nspanel_id = int(nspanel_id)
+                if nspanel_id in mqtt_manager_libs.nspanel_states.states:
+                    send_nspanel_command(nspanel_id, {"command": "firmware_update"})
+                    if "address" in mqtt_manager_libs.nspanel_states.states[nspanel_id]: # TODO: Remove old HTTP GET method after a few updates as it is not longed in us.
+                        post("http://" + mqtt_manager_libs.nspanel_states.states[nspanel_id]["address"] + "/start_ota_update")
+
+    elif message["command"] == "tft_update_nspanels":
+        if "nspanels" in message["args"]:
+            for nspanel_id in message["args"]["nspanels"]:
+                nspanel_id = int(nspanel_id)
+                if nspanel_id in mqtt_manager_libs.nspanel_states.states:
+                    send_nspanel_command(nspanel_id, {"command": "tft_update"})
+                    if "address" in mqtt_manager_libs.nspanel_states.states[nspanel_id]: # TODO: Remove old HTTP GET method after a few updates as it is not longed in us.
+                        post("http://" + mqtt_manager_libs.nspanel_states.states[nspanel_id]["address"] + "/start_tft_ota_update")
+
+    await websocket.send(json.dumps(reply))
+
+
 def on_message(client, userdata, msg):
     try:
         if msg.payload.decode() == "":
@@ -94,24 +143,30 @@ def on_message(client, userdata, msg):
             if panel_found:
                 panel = parts[1]
                 data = json.loads(msg.payload.decode('utf-8'))
-                send_online_status(panel, data)
-                ws_data = {
-                    "type": "status",
-                    "payload": data
-                }
-                mqtt_manager_libs.websocket_server.send_message(json.dumps(ws_data))
+                panel_id = mqtt_manager_libs.nspanel_states.get_id_by_mac(data["mac"])
+                if panel_id >= 0:
+                    send_online_status(panel, data)
+                    mqtt_manager_libs.nspanel_states.states[panel_id].update(data)
+                    ws_data = {
+                        "type": "status",
+                        "payload": mqtt_manager_libs.nspanel_states.states[panel_id]
+                    }
+                    mqtt_manager_libs.websocket_server.send_message(json.dumps(ws_data))
             else:
                 logging.warning(F"Removing mqtt topic: {msg.topic} as panel does not exist any more.")
                 client.publish('/'.join(parts), payload=None, qos=0, retain=True)
         elif parts[-1] == "status_report":
             panel = parts[1]
             data = json.loads(msg.payload.decode('utf-8'))
-            send_status_report(panel, data)
-            ws_data = {
-                "type": "status_report",
-                "payload": data
-            }
-            mqtt_manager_libs.websocket_server.send_message(json.dumps(ws_data))
+            panel_id = mqtt_manager_libs.nspanel_states.get_id_by_mac(data["mac"])
+            if panel_id >= 0:
+                send_online_status(panel, data)
+                mqtt_manager_libs.nspanel_states.states[panel_id].update(data)
+                ws_data = {
+                    "type": "status",
+                    "payload": mqtt_manager_libs.nspanel_states.states[panel_id]
+                }
+                mqtt_manager_libs.websocket_server.send_message(json.dumps(ws_data))
         elif msg.topic == "nspanel/mqttmanager/command":
             data = json.loads(msg.payload.decode('utf-8'))
             # Verify that the mac_origin is off a panel that is controlled by this instance
@@ -152,8 +207,7 @@ def on_message(client, userdata, msg):
             logging.debug(F"Received unhandled message on topic: {msg.topic}")
 
     except Exception as e:
-        logging.error("Something went wrong during processing of message:")
-        logging.error(e)
+        logging.exception("Something went wrong during processing of message:")
         try:
             logging.error(msg.payload.decode('utf-8'))
         except:
@@ -181,6 +235,9 @@ def get_config():
                     int_id = int(id)
                     mqtt_manager_libs.light_states.states[int_id] = mqtt_manager_libs.light.Light.from_dict(light, settings)
 
+                for id, nspanel in settings["nspanels"].items():
+                    mqtt_manager_libs.nspanel_states.states[int(id)] = nspanel
+
                 # All light-data sucessfully loaded into light_states, clear own register
                 settings.pop("lights")
                 break
@@ -193,6 +250,7 @@ def get_config():
 
 def connect_and_loop():
     global settings, home_assistant
+    mqtt_manager_libs.websocket_server.register_message_handler(on_websocket_message)
     mqtt_manager_libs.websocket_server.start_server()  # Start websocket server
     client.on_connect = on_connect
     client.on_message = on_message
