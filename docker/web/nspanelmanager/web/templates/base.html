@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{% static 'bulma_extentions/bulma_tooltips.min.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="{% static 'loader.css' %}">
+    <script src="{% static 'mqttmanager_ws.js' %}?refresh={% now 'U' %}"></script>
     <!-- <script type="module" src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"></script> -->
     {% block head %}
     {% endblock %}
@@ -24,6 +25,7 @@
     {% include 'navbar.html' %}
 
     <div class="container mt-4">
+        <div id="notification_holder" class="pb-4"></div> <!-- Displays any warnings or errors -->
         {% block content %}
         {% endblock %}
     </div>

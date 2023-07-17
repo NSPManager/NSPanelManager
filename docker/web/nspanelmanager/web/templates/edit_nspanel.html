@@ -9,6 +9,7 @@
 {% block content %}
 <h2 class="title is-4" id="nspanel_name">{{ panel.friendly_name }} settings</h2>
 <h2 class="subtitle is-6">MAC: <span id="nspanel_mac">{{ panel.mac_address }}</span></h2>
+<span class="is-hidden" id="nspanel_id">{{ panel.id }}</span>
 <div class="notification is-info is-light">
   Changes to NSPanel settings on this page requires a reboot of each panel to take effect.
 </div>
@@ -49,7 +50,7 @@
           <i class="mdi mdi-help"></i>
         </span>
         <div class="question_help_text notification is-info is-light">
-          Wether this panel control other rooms other than the default room. This setting causes the panel to only load the selected room.
+          Wether this panel control other rooms other than the default room. T setting causes the panel to only load the selected room.
         </div>
       </span>
     </label>
@@ -285,7 +286,7 @@
   <div class="field is-grouped">
     <div class="control">
       <button class="button is-primary">Save</button>
-      <a type="button" class="button is-link" href="/api/reboot_panel?address={{ panel.ip_address }}">Reboot</a>
+      <a type="button" class="button is-link" onclick="rebootNSPanel();">Reboot</a>
     </div>
   </div>
 </form>

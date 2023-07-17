@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import asyncio
 import logging
 import paho.mqtt.client as mqtt
 from requests import get, post
@@ -61,6 +62,34 @@ def send_time_thread():
                 last_sent_time_string = time_string
         time.sleep(1)
 
+async def send_mqttmanager_status(websocket = None):
+    logging.debug("Sending mqttmanager_status.")
+    status = {
+        "type": "mqttmanager_status",
+        "mqtt": {
+            "connected": client.is_connected()
+        },
+        "home_assistant": {
+            "configured": settings["home_assistant_token"] != "",
+            "connected": mqtt_manager_libs.home_assistant.ws_connected,
+            "auth_ok": mqtt_manager_libs.home_assistant.auth_ok
+        },
+        "openhab": {
+            "configured": settings["openhab_token"] != "",
+            "connected": mqtt_manager_libs.openhab.ws_connected
+        }
+    }
+    if websocket is None:
+        mqtt_manager_libs.websocket_server.send_message(json.dumps(status))
+    else:
+        await websocket.send(json.dumps(status))
+
+def send_mqttmanager_status_sync():
+    logging.debug("Sending MQTTManager status from sync.")
+    asyncio.run(send_mqttmanager_status())
+    # loop = asyncio.get_event_loop()
+    # coroutine = send_mqttmanager_status()
+    # loop.run_until_complete(coroutine)
 
 def on_connect(client, userdata, flags, rc):
     logging.info("Connected to MQTT Server")
@@ -82,6 +111,8 @@ def send_nspanel_command(panel_id, command_data):
             nspanel = mqtt_manager_libs.nspanel_states.states[panel_id]
             client.publish("nspanel/" + nspanel["name"] + "/command", json.dumps(command_data))
 
+async def on_websocket_client_connect(websocket):
+    await send_mqttmanager_status(websocket)
 
 async def on_websocket_message(websocket, message):
     reply = {"cmd_id": message["cmd_id"]}
@@ -251,6 +282,7 @@ def get_config():
 def connect_and_loop():
     global settings, home_assistant
     mqtt_manager_libs.websocket_server.register_message_handler(on_websocket_message)
+    mqtt_manager_libs.websocket_server.register_on_connect_handler(on_websocket_client_connect)
     mqtt_manager_libs.websocket_server.start_server()  # Start websocket server
     client.on_connect = on_connect
     client.on_message = on_message
@@ -279,12 +311,16 @@ def connect_and_loop():
     # MQTT Connected, start APIs if configured
     if settings["home_assistant_address"] != "" and settings["home_assistant_token"] != "":
         mqtt_manager_libs.home_assistant.init(settings, client)
+        mqtt_manager_libs.home_assistant.register_on_connect_handler(send_mqttmanager_status_sync)
+        mqtt_manager_libs.home_assistant.register_on_disconnect_handler(send_mqttmanager_status_sync)
         mqtt_manager_libs.home_assistant.connect()
     else:
         logging.info("Home Assistant values not configured, will not connect.")
 
     if settings["openhab_address"] != "" and settings["openhab_token"] != "":
         mqtt_manager_libs.openhab.init(settings, client)
+        mqtt_manager_libs.openhab.register_on_connect_handler(send_mqttmanager_status_sync)
+        mqtt_manager_libs.openhab.register_on_disconnect_handler(send_mqttmanager_status_sync)
         mqtt_manager_libs.openhab.connect()
     else:
         logging.info("OpenHAB values not configured, will not connect.")

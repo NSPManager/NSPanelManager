@@ -2,16 +2,10 @@ var panels_that_are_updating = [];
 const ws = new MQTTManager_WS();
 
 function startNSPanelOtaUpdate(panel_id) {
-  // $.post("http://" + ip_address + "/start_ota_update", function (data) {
-  //   $("#modal-command-sent").addClass("is-active");
-  // });
   ws.send_command("firmware_update_nspanels", { nspanels: [panel_id] }, null);
 }
 
 function startNSPanelTftUpdate(panel_id) {
-  // $.post("http://" + ip_address + "/start_tft_ota_update", function (data) {
-  //  $("#modal-command-sent").addClass("is-active");
-  // });
   ws.send_command("tft_update_nspanels", { nspanels: [panel_id] }, null);
 }
 
@@ -131,11 +125,60 @@ function update_nspanel_status(data) {
 }
 
 $(document).ready(function () {
-  //connect_to_websocket();
   ws.register_message_handler((message) => {
     if ("type" in message) {
       if (message.type == "status" || message.type == "status_report") {
         update_nspanel_status(message.payload);
+      } else if (message.type == "mqttmanager_status") {
+        if (message.mqtt.connected == false) {
+          if ($("#failed_to_connect_mqtt_error").length == 0) {
+            $("#notification_holder").append(
+              '<div class="notification is-danger" id="failed_to_connect_mqtt_error">Failed to connect to MQTT server. Retrying...</div>'
+            );
+          }
+        } else if (message.mqtt.connected) {
+          $("#failed_to_connect_mqtt_error").remove();
+          if (
+            message.home_assistant.configured &&
+            !message.home_assistant.connected
+          ) {
+            if ($("#failed_to_connect_home_assistant_error").length == 0) {
+              $("#notification_holder").append(
+                '<div class="notification is-danger" id="failed_to_connect_home_assistant_error">Failed to connect to Home Assistant websocket API. Retrying...</div>'
+              );
+            }
+          } else if (
+            message.home_assistant.configured &&
+            message.home_assistant.connected
+          ) {
+            $("#failed_to_connect_home_assistant_error").remove();
+            if (!message.home_assistant.auth_ok) {
+              if ($("#failed_to_auth_home_assistant_error").length == 0) {
+                $("#notification_holder").append(
+                  '<div class="notification is-danger" id="failed_to_auth_home_assistant_error">Authentication error while connecting to Home Assistant. Retrying...</div>'
+                );
+              }
+            } else {
+              $("#failed_to_auth_home_assistant_error").remove();
+            }
+          } else if (
+            !message.home_assistant.configured ||
+            message.home_assistant.connected
+          ) {
+            $("#failed_to_connect_home_assistant_error").remove();
+          }
+
+          if (message.openhab.configured && !message.openhab.connected) {
+            if ($("#failed_to_connect_openhab_error").length == 0) {
+              $("#notification_holder").append(
+                '<div class="notification is-danger" id="failed_to_connect_openhab_error">Failed to connect to OpenHAB websocket API. Retrying...</div>'
+              );
+            }
+          } else if (!message.openhab.configured || message.openhab.connected) {
+            $("#failed_to_connect_openhab_error").remove();
+          }
+        }
+      } else {
       }
     }
   });

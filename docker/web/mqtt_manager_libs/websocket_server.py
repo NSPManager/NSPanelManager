@@ -8,6 +8,7 @@ import json
 
 CONNECTIONS = set()
 MESSAGE_HANDLER = None
+ON_CONNECT_HANDLER = None
 
 def send_message(raw_data):
     websockets.broadcast(CONNECTIONS, raw_data)
@@ -16,9 +17,16 @@ def register_message_handler(handler):
     global MESSAGE_HANDLER
     MESSAGE_HANDLER = handler
 
+
+def register_on_connect_handler(handler):
+    global ON_CONNECT_HANDLER
+    ON_CONNECT_HANDLER = handler
+
 async def _connection_handler(websocket):
     CONNECTIONS.add(websocket)
     try:
+        if ON_CONNECT_HANDLER is not None:
+            await ON_CONNECT_HANDLER(websocket)
         async for message in websocket:
             if MESSAGE_HANDLER is not None:
                 try:

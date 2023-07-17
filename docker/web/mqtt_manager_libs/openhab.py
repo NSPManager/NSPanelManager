@@ -10,10 +10,24 @@ openhab_url = ""
 openhab_token = ""
 keepalive_thread = None
 stop_keepalive = False
+ws_connected = False
 settings = {}
+
+ON_CONNECT_HANDLER = None
+ON_DISCONNECT_HANDLER = None
 
 def millis():
     return round(time() * 1000)
+
+
+def register_on_connect_handler(handler):
+    global ON_CONNECT_HANDLER
+    ON_CONNECT_HANDLER = handler
+
+
+def register_on_disconnect_handler(handler):
+    global ON_DISCONNECT_HANDLER
+    ON_DISCONNECT_HANDLER = handler
 
 
 def init(settings_from_manager, mqtt_client_from_manager):
@@ -89,15 +103,19 @@ def connect():
 
 
 def _ws_connection_open(ws):
-    global keepalive_thread
+    global keepalive_thread, ws_connected
+    ws_connected = True
     logging.info("WebSocket connection to OpenHAB opened.")
     if keepalive_thread == None:
         keepalive_thread = Thread(target=_send_keepalive, daemon=True)
         keepalive_thread.start()
+    if ON_CONNECT_HANDLER is not None:
+        ON_CONNECT_HANDLER()
 
 
 def _ws_connection_close(ws, close_status_code, close_msg):
-    global keepalive_thread, stop_keepalive
+    global keepalive_thread, stop_keepalive, ws_connected
+    ws_connected = False
     if keepalive_thread != None:
         stop_keepalive = True
         keepalive_thread.join()
@@ -105,6 +123,8 @@ def _ws_connection_close(ws, close_status_code, close_msg):
         stop_keepalive = False
         keepalive_thread = None
     logging.error("WebSocket connection closed!")
+    if ON_DISCONNECT_HANDLER is not None:
+        ON_DISCONNECT_HANDLER()
 
 
 def _do_connection():

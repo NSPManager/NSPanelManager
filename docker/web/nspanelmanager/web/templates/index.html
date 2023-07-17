@@ -2,13 +2,11 @@
 
 {% block head %}
 {% load static %}
-<script src="{% static 'mqttmanager_ws.js' %}?refresh={% now 'U' %}"></script>
 <script src="{% static 'index.js' %}?refresh={% now 'U' %}"></script>
 {% endblock %}
 
 {% block content %}
 {% load mathfilters %}
-<div id="notification_holder"></div> <!-- Displays any warnings or errors -->
 <h2 class="title is-4">Panels</h2>
 <table class="table is-fullwidth is-hoverable">
   <thead>

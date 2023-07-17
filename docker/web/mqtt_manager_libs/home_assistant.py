@@ -12,6 +12,10 @@ settings = {}
 auth_ok = False
 next_id = 0
 request_all_states_id = 0
+ws_connected = False
+
+ON_CONNECT_HANDLER = None
+ON_DISCONNECT_HANDLER = None
 
 def init(settings_from_manager, mqtt_client_from_manager):
     global home_assistant_url, home_assistant_token, settings, mqtt_client
@@ -24,6 +28,15 @@ def init(settings_from_manager, mqtt_client_from_manager):
     # Disable logging from underlying "websocket"
     logging.getLogger("websockets").propagate = False
 
+def register_on_connect_handler(handler):
+    global ON_CONNECT_HANDLER
+    ON_CONNECT_HANDLER = handler
+
+
+def register_on_disconnect_handler(handler):
+    global ON_DISCONNECT_HANDLER
+    ON_DISCONNECT_HANDLER = handler
+
 
 def on_message(ws, message):
     global auth_ok, request_all_states_id
@@ -31,10 +44,12 @@ def on_message(ws, message):
     if json_msg["type"] == "auth_required":
         authenticate_client()
     elif json_msg["type"] == "auth_ok":
+        auth_ok = True
         logging.info("Home Assistant auth OK. Requesting existing states.")
         subscribe_to_events()
         _get_all_states()
-        auth_ok = True
+        if ON_CONNECT_HANDLER is not None:
+            ON_CONNECT_HANDLER()
     elif json_msg["type"] == "event" and json_msg["event"]["event_type"] == "state_changed":
         entity_id = json_msg["event"]["data"]["entity_id"]
         if entity_id.startswith("light.") or entity_id.startswith("switch."):
@@ -76,12 +91,18 @@ def on_message(ws, message):
 
 def _ws_connection_open(ws):
     global ws_connected
-    ws_connected = False
+    ws_connected = True
     logging.info("WebSocket connection to Home Assistant opened.")
+    if ON_CONNECT_HANDLER is not None:
+        ON_CONNECT_HANDLER()
 
 
 def _ws_connection_close(ws, close_status_code, close_msg):
+    global ws_connected
+    ws_connected = False
     logging.error("WebSocket connection closed!")
+    if ON_DISCONNECT_HANDLER is not None:
+        ON_DISCONNECT_HANDLER()
 
 def connect():
     Thread(target=_do_connection, daemon=True).start()
