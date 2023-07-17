@@ -144,6 +144,10 @@ def update_room_form(request, room_id: int):
 
 
 def edit_nspanel(request, panel_id: int):
+    if get_setting_with_default("use_farenheit", False) == "True":
+        temperature_unit = "°F"
+    else:
+        temperature_unit = "°C"
     settings = {
         "lock_to_default_room": get_nspanel_setting_with_default(panel_id, "lock_to_default_room", "False"),
         "screen_dim_level": get_nspanel_setting_with_default(panel_id, "screen_dim_level", ""),
@@ -159,7 +163,8 @@ def edit_nspanel(request, panel_id: int):
     return render(request, 'edit_nspanel.html', {
         'panel': NSPanel.objects.get(id=panel_id),
         'rooms': Room.objects.all(),
-        'settings': settings
+        'settings': settings,
+        "temperature_unit": temperature_unit
     })
 
 
@@ -262,6 +267,7 @@ def add_light_to_room(request, room_id: int):
 
     if newLight.room_view_position == 0:
         for i in range(1, 13):
+            # TODO: Review to only make one call to database.
             if not Light.objects.filter(room=room, room_view_position=i).exists():
                 newLight.room_view_position = i
                 break
