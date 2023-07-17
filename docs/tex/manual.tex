@@ -114,12 +114,15 @@
     \clearpage
     \section{Quick start guide}
     \subsection{Container setup}
+    \subsubsection{Windows}
+    \important{There are currently problems running NSPanel Manager container on WSL2 as WSL2 does not handle networking properly. For more information, see the following \href{https://github.com/microsoft/WSL/issues/4150}{issue} on GitHub.}
+    If you wish to run the NSPanel Manager container on Windows the current solution is to run it in a virtual machine. When you have your virtual machine up and running, you can follow the "Standalone docker container" installation below.
+    \subsubsection{Standalone Docker container}
     Prerequisites:
     \begin{itemize}
       \item Repository cloned/downloaded.
       \item Working Docker installation.
     \end{itemize}
-    \subsubsection{Standalone Docker container}
     At the moment, the container image is not available on any registry. This means that the image has to be built manually to start it. If running MacOS or Linux this is easy enough to do, perform the following to build and start the container:
     \begin{itemize}
       \item Open a terminal and navigate to the downloaded repository.
