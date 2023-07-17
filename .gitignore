@@ -14,6 +14,9 @@ firmware/NSPanelManagerFirmware/.ccls
 firmware/NSPanelManagerFirmware/.ccls-cache
 MQTTManager-RUST/
 
+# MacOS
+.DS_Store
+
 # Ignore only neccesary files from LaTeX manual
 docs/tex/*
 !docs/tex/*.pdf
