@@ -185,7 +185,7 @@
       \item Open a terminal.
       \item Navigate to the "docker/web/nspanelmanager/"-directory.
       \item To determine if you have selected the right port, run \lstinline[language=bash]|esptool.py flash_id --port <port>|. You will have to replace "<port>" with the actual port connected to the NSPanel. This will do a check and see if the tool can communicate with the NSPanel.
-      \item Run \lstinline[language=bash]|esptool.py --baud 921600 --port /dev/ttyUSB0 write_flash 0x0 merged-flash.bin|. You will have to replace "/dev/ttyUSB0" with the actual port connected to the NSPanel.
+      \item Run \lstinline[language=bash]|esptool.py --baud 921600 --port /dev/ttyUSB0 write_flash 0x0 merged_flash.bin|. You will have to replace "/dev/ttyUSB0" with the actual port connected to the NSPanel.
       \info{On Windows it might be just "esptool" without the ".py" at the end.}
       \info{On Windows "/dev/ttyUSB0" will have to be replaced by something like "COM4". If using MacOS or Linux the port will be something similar to "/dev/ttyUSB0".}
     \end{itemize}
