@@ -3,77 +3,130 @@
 {% block head %}
 {% load static %}
 <script src="{% static 'index.js' %}?refresh={% now 'U' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'index.css' %}?refresh={% now 'U' %}">
 {% endblock %}
 
 {% block content %}
+<span class="is-hidden" id="temperature_unit">{{ temperature_unit }}</span>
 {% load mathfilters %}
-<h2 class="title is-4">Panels</h2>
-<table class="table is-fullwidth is-hoverable">
-  <thead>
-    <tr>
-      <th>NSPanel</th>
-      <th>Room</th>
-      <th>IP Address</th>
-      <th>Status</th>
-      <th><span class="mdi mdi-wifi" title="WiFi signal strength"></span></th>
-      <th><span class="mdi mdi-memory" title="Memory used"></span></i></th>
-      <th><span class="mdi mdi-thermometer" title="Temperature"></span></i></th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for panel_info in nspanels %}
-    <tr>
-      <th><a href="{% url 'edit_nspanel' panel_id=panel_info.nspanel.id %}">{{ panel_info.nspanel.friendly_name }}</a></th>
-      <td><a href="{% url 'edit_room' room_id=panel_info.nspanel.room.id %}">{{ panel_info.nspanel.room.friendly_name }}</a>
-      </td>
-      <td>
-        <a href="http://{{ panel_info.nspanel.ip_address }}" target="_blank">{{ panel_info.nspanel.ip_address }}</a>
-      </td>
-      <td id="online_offline_tag_parent_{{ panel_info.nspanel.mac_address }}">
-        <span class="tag is-light" id="online_offline_state_{{ panel_info.nspanel.mac_address }}">?</span>
-      </td>
-      <td id="wifi_signal_strength_{{ panel_info.nspanel.mac_address }}">
-        <span class="mdi mdi-help" title="?"></span>
-      </td>
-      <td id="heap_used_{{ panel_info.nspanel.mac_address }}">?</td>
-      <td id="temperature_{{ panel_info.nspanel.mac_address }}">? {{ temperature_unit }}</td>
-      <td>
-        <div class="dropdown">
-          <div class="dropdown-trigger">
-            <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu">
-              <span><span class="mdi mdi-cog pr-2"></span>Actions</span>
-              <span class="icon is-small">
-                <i class="mdi mdi-menu-down" aria-hidden="true"></i>
-              </span>
-            </button>
-          </div>
-          <div class="dropdown-menu" id="dropdown-menu" role="menu">
-            <div class="dropdown-content">
-              <a class="dropdown-item"
-                onclick="rebootNSPanel('{{ panel_info.nspanel.id }}');">
-                <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot
-              </a>
-              <hr class="dropdown-divider">
-              <a class="dropdown-item" onclick="startNSPanelOtaUpdate('{{ panel_info.nspanel.id }}');">
-                <span class="mdi mdi-upload pr-2 has-text-info"></span>Update firmware
-              </a>
-              <a class="dropdown-item" onclick="startNSPanelTftUpdate('{{ panel_info.nspanel.id }}');">
-                <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update screen
-              </a>
-              <hr class="dropdown-divider">
-              <a href="{% url 'delete_nspanel' panel_id=panel_info.nspanel.id %}" class="dropdown-item has-text-danger">
-                <span class="mdi mdi-minus-circle pr-2"></span>Delete
-              </a>
-            </div>
+<div class="level">
+  <div class="level-left">
+    <div class="level-item">
+      <h2 class="title is-4">Panels</h2>
+    </div>
+  </div>
+  <div class="level-right">
+    <div class="level-item">
+      <div class="dropdown">
+        <div class="dropdown-trigger">
+          <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu">
+            <span><span class="mdi mdi-cog pr-2"></span>Actions</span>
+            <span class="icon is-small">
+              <i class="mdi mdi-menu-down" aria-hidden="true"></i>
+            </span>
+          </button>
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+          <div class="dropdown-content">
+            <a class="dropdown-item"
+              onclick="rebootNSPanelAll();">
+              <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot all panels
+            </a>
+            <hr class="dropdown-divider">
+            <a class="dropdown-item" onclick="startNSPanelOtaUpdateAll();">
+              <span class="mdi mdi-upload pr-2 has-text-info"></span>Update firmware on all panels
+            </a>
+            <a class="dropdown-item" onclick="startNSPanelTftUpdateAll();">
+              <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update screen on all panels
+            </a>
           </div>
         </div>
-        <span data-tooltip="" class="icon is-medium has-tooltipl-multiline has-tooltip-warning is-hidden" id="nspanel_{{ panel_info.nspanel.mac_address}}_warnings">
-          <span class="mdi mdi-alert has-text-warning mdi-24px"></span>
-        </span>
-      </td>
-    </tr>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="is-flex flex-wrap" style="flex-wrap: wrap;">
+    {% for panel_info in nspanels %}
+    <div class="box nspanel-box m-2" id="panel_status_box_{{ panel_info.nspanel.mac_address }}">
+      <span id="nspanel_id_{{ panel_info.nspanel.mac_address }}" class="is-hidden nspanel_id_container">{{ panel_info.nspanel.id }}</span>
+      <span class="is-hidden nspanel_mac_container">{{ panel_info.nspanel.mac_address }}</span>
+      <div class="nspanel-status-header">
+        <div class="has-background-grey nspanel-status-header-await" id="panel_header_{{ panel_info.nspanel.mac_address }}"></div>
+      </div>
+      <div class="nspanel-status-content-box">
+        <div class="level">
+          <div class="level-left">
+            <div class="level-item">
+              <div class="is-pulled-left">
+                <span class="has-text-weight-bold"><a href="{% url 'edit_nspanel' panel_id=panel_info.nspanel.id %}" class="has-text-dark">{{ panel_info.nspanel.friendly_name }}</a></span>
+              </div>
+            </div>
+          </div>
+          <div class="level-right">
+            <span class="has-text-weight-light is-italic is-size-7" id="panel_header_text_{{ panel_info.nspanel.mac_address }}">Unknown status</span>
+          </div>
+        </div>
+
+
+        <div class="info-item">
+          <span class="icon-text">
+            <span class="icon">
+              <i class="mdi mdi-help" id="wifi_signal_strength_{{ panel_info.nspanel.mac_address }}"></i>
+            </span>
+            <span id="wifi_signal_strength_text_{{ panel_info.nspanel.mac_address }}" class="is-size-7">-</span>
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="icon-text">
+            <span class="icon">
+              <i class="mdi mdi-thermometer"></i>
+            </span>
+            <span id="temperature_{{ panel_info.nspanel.mac_address }}" class="nspanel-status-temperature is-size-7">-</span>
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="icon-text">
+            <span class="icon">
+              <i class="mdi mdi-memory"></i>
+            </span>
+            <span class="is-size-7" id="heap_used_{{ panel_info.nspanel.mac_address }}">-</span>
+          </span>
+        </div>
+
+      </div>
+      <div class="nspanel-status-footer">
+          <span data-tooltip="" class="icon is-small has-tooltipl-multiline has-tooltip-warning pl-3 is-hidden" id="nspanel_{{ panel_info.nspanel.mac_address}}_warnings">
+            <span class="mdi mdi-alert-circle has-text-warning mdi-24px"></span>
+          </span>
+          <div class="dropdown nspanel-actions-button">
+            <div class="dropdown-trigger">
+              <span class="mdi mdi-cog pr-2"></span>
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu" role="menu">
+              <div class="dropdown-content">
+                <a class="dropdown-item"
+                  onclick="rebootNSPanel('{{ panel_info.nspanel.mac_address }}');">
+                  <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot
+                </a>
+                <a class="dropdown-item" href="http://{{ panel_info.nspanel.ip_address }}" target="_blank">
+                  <span class="mdi mdi-web pr-2 has-text-primary"></span>Visit panel page
+                </a>
+                <hr class="dropdown-divider">
+                <a class="dropdown-item" onclick="startNSPanelOtaUpdate('{{ panel_info.nspanel.mac_address }}');">
+                  <span class="mdi mdi-upload pr-2 has-text-info"></span>Update firmware
+                </a>
+                <a class="dropdown-item" onclick="startNSPanelTftUpdate('{{ panel_info.nspanel.mac_address }}');">
+                  <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update screen
+                </a>
+                <hr class="dropdown-divider">
+                <a href="{% url 'delete_nspanel' panel_id=panel_info.nspanel.id %}" class="dropdown-item has-text-danger">
+                  <span class="mdi mdi-minus-circle pr-2"></span>Delete
+                </a>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
     {% endfor %}
-  </tbody>
-</table>
+</div>
 {% endblock %}

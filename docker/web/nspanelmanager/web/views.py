@@ -164,7 +164,8 @@ def edit_nspanel(request, panel_id: int):
         'panel': NSPanel.objects.get(id=panel_id),
         'rooms': Room.objects.all(),
         'settings': settings,
-        "temperature_unit": temperature_unit
+        "temperature_unit": temperature_unit,
+        "multiple": [1, 2, 3, 4]
     })
 
 

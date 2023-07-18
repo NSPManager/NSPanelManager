@@ -1,0 +1,3 @@
+.has-tooltip-warning {
+  border-bottom: none !important; /* Remove dashed underline from warning symbols */
+}

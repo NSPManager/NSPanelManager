@@ -166,21 +166,24 @@ void taskManageWifiAndMqtt(void *param) {
         startAndManageWiFiAccessPoint();
       }
       if (WiFi.isConnected() && MqttManager::connected()) {
+        bool force_send_mqtt_update = false;
         DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
         if (NSPanel::instance->getUpdateState()) {
+          force_send_mqtt_update = true;
           (*status_report_doc)["state"] = "updating_tft";
           (*status_report_doc)["progress"] = NSPanel::instance->getUpdateProgress();
         } else if (WebManager::getState() == WebManagerState::UPDATING_FIRMWARE) {
+          force_send_mqtt_update = true;
           (*status_report_doc)["state"] = "updating_fw";
           (*status_report_doc)["progress"] = WebManager::getUpdateProgress();
         } else if (WebManager::getState() == WebManagerState::UPDATING_LITTLEFS) {
+          force_send_mqtt_update = true;
           (*status_report_doc)["state"] = "updating_fs";
           (*status_report_doc)["progress"] = WebManager::getUpdateProgress();
-        } else {
-          (*status_report_doc)["state"] = "online";
         }
+        // Online/Offline state is handled in /status topic managed by MQTTManager.
 
-        if ((*status_report_doc)["state"] != "online" || ((*status_report_doc)["state"] == "online" && millis() >= lastStatusReport + 30000)) {
+        if (force_send_mqtt_update || millis() >= lastStatusReport + 30000) {
           float temperature = readNTCTemperature(NSPMConfig::instance->use_farenheit);
           (*status_report_doc)["rssi"] = WiFi.RSSI();
           (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);

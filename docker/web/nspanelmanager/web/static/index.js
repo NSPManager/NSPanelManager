@@ -1,15 +1,69 @@
 var panels_that_are_updating = [];
 const ws = new MQTTManager_WS();
 
-function startNSPanelOtaUpdate(panel_id) {
+function get_all_online_panel_macs() {
+  var panel_macs = [];
+  $(".nspanel_mac_container").each((index, obj) => {
+    var panel_mac = $(obj).text();
+    let mac_selector = panel_mac.replaceAll(":", "\\:");
+    if ($("#panel_header_" + mac_selector).hasClass("has-background-success")) {
+      panel_macs.push(panel_mac);
+    }
+  });
+  return panel_macs;
+}
+
+function startNSPanelOtaUpdateAll() {
+  get_all_online_panel_macs().forEach((mac) => {
+    startNSPanelOtaUpdate(mac);
+  });
+}
+
+function startNSPanelOtaUpdate(mac) {
+  let mac_selector = mac;
+  mac_selector = mac_selector.replaceAll(":", "\\:");
+  $("#panel_header_" + mac_selector).attr(
+    "class",
+    "nspanel-status-header has-background-info nspanel-status-header-await"
+  );
+  $("#panel_header_text_" + mac_selector).text("Awaiting status");
+  var panel_id = $("#nspanel_id_" + mac_selector).text();
   ws.send_command("firmware_update_nspanels", { nspanels: [panel_id] }, null);
 }
 
-function startNSPanelTftUpdate(panel_id) {
+function startNSPanelTftUpdateAll() {
+  get_all_online_panel_macs().forEach((mac) => {
+    startNSPanelTftUpdate(mac);
+  });
+}
+
+function startNSPanelTftUpdate(mac) {
+  let mac_selector = mac;
+  mac_selector = mac_selector.replaceAll(":", "\\:");
+  $("#panel_header_" + mac_selector).attr(
+    "class",
+    "nspanel-status-header has-background-info nspanel-status-header-await"
+  );
+  $("#panel_header_text_" + mac_selector).text("Awaiting status");
+  var panel_id = $("#nspanel_id_" + mac_selector).text();
   ws.send_command("tft_update_nspanels", { nspanels: [panel_id] }, null);
 }
 
-function rebootNSPanel(panel_id) {
+function rebootNSPanelAll() {
+  get_all_online_panel_macs().forEach((mac) => {
+    rebootNSPanel(mac);
+  });
+}
+
+function rebootNSPanel(mac) {
+  let mac_selector = mac;
+  mac_selector = mac_selector.replaceAll(":", "\\:");
+  $("#panel_header_" + mac_selector).attr(
+    "class",
+    "nspanel-status-header has-background-info nspanel-status-header-await"
+  );
+  $("#panel_header_text_" + mac_selector).text("Awaiting status");
+  var panel_id = $("#nspanel_id_" + mac_selector).text();
   ws.send_command("reboot_nspanels", { nspanels: [panel_id] }, null);
 }
 
@@ -43,21 +97,29 @@ function update_nspanel_status(data) {
     if ("state" in data) {
       var new_html = "";
       if (data.state == "online") {
-        if ($("#online_offline_state_" + mac_selector).text() == "Offline") {
+        if ($("#panel_header_" + mac_selector).length == 0) {
+          // We got an online message from a newly registed panel. Updated page in about 1 second.
+          setTimeout(() => {
+            location.reload();
+          }, 1000);
+        }
+        if (
+          $("#panel_header_" + mac_selector).hasClass("has-background-danger")
+        ) {
           // Current state is offline, just about to update to online. Check if the panel has any warnings.
           updateNSPanelsWarnings();
         }
-        $("#online_offline_tag_parent_" + mac_selector).html(
-          '<span class="tag is-success" id="online_offline_state_' +
-            data.mac +
-            '">Online</span>'
+        $("#panel_header_" + mac_selector).attr(
+          "class",
+          "nspanel-status-header has-background-success"
         );
+        $("#panel_header_text_" + mac_selector).text("");
       } else if (data.state == "offline") {
-        $("#online_offline_tag_parent_" + mac_selector).html(
-          '<span class="tag is-danger" id="online_offline_state_' +
-            data.mac +
-            '">Offline</span>'
+        $("#panel_header_" + mac_selector).attr(
+          "class",
+          "nspanel-status-header has-background-danger"
         );
+        $("#panel_header_text_" + mac_selector).text("Offline");
       } else {
         // Update panel tag to show update progress if any
         update_text = "";
@@ -79,6 +141,15 @@ function update_nspanel_status(data) {
           '</span><span class="tag is-info">' +
           update_progress +
           "%</span></div>";
+
+        $("#panel_header_" + mac_selector).attr(
+          "class",
+          "nspanel-status-header has-background-info"
+        );
+        $("#panel_header_" + mac_selector).css("width", update_progress + "%");
+        $("#panel_header_text_" + mac_selector).text(
+          update_text + ", " + update_progress + "%"
+        );
         $("#online_offline_tag_parent_" + mac_selector).html(new_html);
       }
     }
@@ -95,14 +166,14 @@ function update_nspanel_status(data) {
       } else {
         new_rssi_classes = "mdi mdi-wifi-strength-4";
       }
-      $("#wifi_signal_strength_" + mac_selector).html(
-        '<span class="' +
-          new_rssi_classes +
-          '" id="wifi_signal_strength_' +
-          data.mac +
-          '" title="' +
-          data.rssi +
-          ' dBm"></span>'
+      $("#wifi_signal_strength_text_" + mac_selector).html(data.rssi + " dBm");
+      $("#wifi_signal_strength_" + mac_selector).attr(
+        "class",
+        new_rssi_classes
+      );
+      $("#wifi_signal_strength_" + mac_selector).attr(
+        "title",
+        data.rssi + " dBm"
       );
     }
 
@@ -114,9 +185,7 @@ function update_nspanel_status(data) {
     }
 
     if ("temperature" in data) {
-      var temperature_unit = $("#temperature_" + mac_selector)
-        .text()
-        .slice(-2);
+      var temperature_unit = $("#temperature_unit").text();
       $("#temperature_" + mac_selector).html(
         Math.round(data.temperature * 100) / 100 + " " + temperature_unit
       );
