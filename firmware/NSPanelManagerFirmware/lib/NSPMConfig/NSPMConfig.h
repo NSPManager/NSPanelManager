@@ -52,6 +52,8 @@ public:
   std::string mqtt_availability_topic;
   /// @brief MQTT panel status topic
   std::string mqtt_panel_status_topic;
+  /// @brief MQTT panel command topic
+  std::string mqtt_panel_cmd_topic;
   /// @brief MQTT panel temperature topic
   std::string mqtt_panel_temperature_topic;
   /// @brief MQTT topic to send logs to
@@ -101,6 +103,9 @@ public:
   // @brief default relay state
   bool relay1_default_mode;
   bool relay2_default_mode;
+
+  // @brief The temperature calibration in degrees
+  float temperature_calibration;
 
   // Indicates wether or not LittleFS was mounted or not.
   bool littlefs_mount_successfull;

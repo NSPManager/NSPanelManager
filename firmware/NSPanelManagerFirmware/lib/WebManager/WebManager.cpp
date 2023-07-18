@@ -25,8 +25,6 @@ void WebManager::init(const char *nspmFirmwareVersion) {
   this->_server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) { request->send(LittleFS, "/index.html", String(), false, WebManager::processIndexTemplate); });
 
   this->_server.on("/save_config", HTTP_POST, WebManager::saveConfigFromWeb);
-  this->_server.on("/start_ota_update", HTTP_POST, WebManager::startOTAUpdate);
-  this->_server.on("/start_tft_ota_update", HTTP_POST, WebManager::startTFTOTAUpdate);
   this->_server.on("/factory_reset", HTTP_GET, WebManager::factoryReset);
   this->_server.on("/do_reboot", HTTP_GET, WebManager::doRebootNow);
   this->_server.on("/available_wifi_networks", HTTP_GET, WebManager::respondAvailableWiFiNetworks);
@@ -166,15 +164,8 @@ void WebManager::respondAvailableWiFiNetworks(AsyncWebServerRequest *request) {
   json = String();
 }
 
-void WebManager::startTFTOTAUpdate(AsyncWebServerRequest *request) {
-  InterfaceManager::stop();
-  NSPanel::instance->startOTAUpdate();
-  request->send(200);
-}
-
-void WebManager::startOTAUpdate(AsyncWebServerRequest *request) {
-  xTaskCreatePinnedToCore(WebManager::_taskPerformOTAUpdate, "taskPerformOTAUpdate", 20000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
-  request->send(200);
+void WebManager::startOTAUpdate() {
+  xTaskCreatePinnedToCore(WebManager::_taskPerformOTAUpdate, "taskPerformOTAUpdate", 20000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE); // TODO: Move function to InterfaceManager
 }
 
 void WebManager::_taskPerformOTAUpdate(void *param) {

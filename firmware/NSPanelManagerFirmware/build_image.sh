@@ -15,11 +15,5 @@ function get_partition_offset {
 	echo $partition_offset
 }
 
-echo "Compile firmware"
-platformio run --environment esp32dev
-
-echo "Build LittleFS image"
-platformio run --target buildfs --environment esp32dev
-
-echo "Building image"
+echo "Building image from existing .bin-files"
 esptool.py --chip esp32 merge_bin -o merged-flash.bin --flash_mode dio --flash_size 4MB 0x1000 .pio/build/esp32dev/bootloader.bin 0x8000 .pio/build/esp32dev/partitions.bin 0xe000 "$boot_app0_bin_path" 0x10000 .pio/build/esp32dev/firmware.bin $(get_partition_offset spiffs) .pio/build/esp32dev/littlefs.bin

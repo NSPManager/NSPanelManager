@@ -38,29 +38,10 @@ def index(request):
         temperature_unit = "°C"
 
     nspanels = []
-    md5_firmware = get_file_md5sum("firmware.bin")
-    md5_data_file = get_file_md5sum("data_file.bin")
-    md5_tft_file = get_file_md5sum("gui.tft")
-    md5_us_tft_file = get_file_md5sum("gui_us.tft")
-
     for nspanel in NSPanel.objects.all():
         panel_info = {}
         panel_info["nspanel"] = nspanel
-        panel_info["warnings"] = ""
-        for panel in NSPanel.objects.all():
-            if panel == nspanel:
-                continue
-            elif panel.friendly_name == nspanel.friendly_name:
-                panel_info["warnings"] += "Two or more panels exists with the same name. This may have cunintended consequences\n"
-                break
-        if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
-            panel_info["warnings"] += "Firmware update available.\n"
-        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "False" and nspanel.md5_tft_file != md5_tft_file:
-            panel_info["warnings"] += "GUI update available.\n"
-        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True" and nspanel.md5_tft_file != md5_us_tft_file:
-            panel_info["warnings"] += "GUI update available.\n"
         nspanels.append(panel_info)
-
 
     return render(request, 'index.html', {
         'nspanels': nspanels,
@@ -163,6 +144,10 @@ def update_room_form(request, room_id: int):
 
 
 def edit_nspanel(request, panel_id: int):
+    if get_setting_with_default("use_farenheit", False) == "True":
+        temperature_unit = "°F"
+    else:
+        temperature_unit = "°C"
     settings = {
         "lock_to_default_room": get_nspanel_setting_with_default(panel_id, "lock_to_default_room", "False"),
         "screen_dim_level": get_nspanel_setting_with_default(panel_id, "screen_dim_level", ""),
@@ -172,12 +157,14 @@ def edit_nspanel(request, panel_id: int):
         "show_screensaver_clock": get_nspanel_setting_with_default(panel_id, "show_screensaver_clock", "Global"),
         "relay1_default_mode": get_nspanel_setting_with_default(panel_id, "relay1_default_mode", "False"),
         "relay2_default_mode": get_nspanel_setting_with_default(panel_id, "relay2_default_mode", "False"),
+        "temperature_calibration": get_nspanel_setting_with_default(panel_id, "temperature_calibration", 0),
     }
 
     return render(request, 'edit_nspanel.html', {
         'panel': NSPanel.objects.get(id=panel_id),
         'rooms': Room.objects.all(),
-        'settings': settings
+        'settings': settings,
+        "temperature_unit": temperature_unit
     })
 
 
@@ -221,6 +208,7 @@ def save_panel_settings(request, panel_id: int):
         set_nspanel_setting_value(panel_id, "show_screensaver_clock", request.POST["show_screensaver_clock"])
     set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
     set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
+    set_nspanel_setting_value(panel_id, "temperature_calibration", float(request.POST["temperature_calibration"]))
     panel.save()
     return redirect('edit_nspanel', panel_id)
 
@@ -279,6 +267,7 @@ def add_light_to_room(request, room_id: int):
 
     if newLight.room_view_position == 0:
         for i in range(1, 13):
+            # TODO: Review to only make one call to database.
             if not Light.objects.filter(room=room, room_view_position=i).exists():
                 newLight.room_view_position = i
                 break
@@ -325,10 +314,11 @@ def add_scene_to_global(request):
     return redirect('settings')
 
 def add_light_to_room_view(request, room_id: int):
+    if "light_id" not in request.POST:
+        return redirect('edit_room', room_id=room_id)
     room = Room.objects.filter(id=room_id).first()
     light_position = int(request.POST["position"])
-    existing_light_at_position = Light.objects.filter(
-        room=room, room_view_position=light_position).first()
+    existing_light_at_position = Light.objects.filter(room=room, room_view_position=light_position).first()
     if existing_light_at_position != None:
         existing_light_at_position.room_view_position = 0
         existing_light_at_position.save()
@@ -389,10 +379,18 @@ def settings_page(request):
     data["clock_us_style"] = get_setting_with_default("clock_us_style", False)
     data["use_farenheit"] = get_setting_with_default("use_farenheit", False)
     data["global_scenes"] = Scene.objects.filter(room__isnull=True)
+    data["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
     return render(request, 'settings.html', data)
 
 
 def save_settings(request):
+    home_assistant_address = request.POST["home_assistant_address"]
+    if home_assistant_address.endswith("/"):
+        home_assistant_address = home_assistant_address[:-1]
+    openhab_address = request.POST["openhab_address"]
+    if openhab_address.endswith("/"):
+        openhab_address = openhab_address[:-1]
+
     set_setting_value(name="mqtt_server", value=request.POST["mqtt_server"])
     set_setting_value(name="mqtt_port", value=request.POST["mqtt_port"])
     set_setting_value(name="mqtt_username",
@@ -400,11 +398,11 @@ def save_settings(request):
     set_setting_value(name="mqtt_password",
                       value=request.POST["mqtt_password"])
     set_setting_value(name="home_assistant_address",
-                      value=request.POST["home_assistant_address"])
+                      value=home_assistant_address)
     set_setting_value(name="home_assistant_token",
                       value=request.POST["home_assistant_token"])
     set_setting_value(name="openhab_address",
-                      value=request.POST["openhab_address"])
+                      value=openhab_address)
     set_setting_value(name="openhab_token",
                       value=request.POST["openhab_token"])
     set_setting_value(name="raise_to_100_light_level",
@@ -427,6 +425,7 @@ def save_settings(request):
     set_setting_value(name="show_screensaver_clock", value=("show_screensaver_clock" in request.POST))
     set_setting_value(name="clock_us_style", value=("clock_us_style" in request.POST))
     set_setting_value(name="use_farenheit", value=("use_farenheit" in request.POST))
+    set_setting_value(name="turn_on_behavior", value=request.POST["turn_on_behavior"])
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()
     return redirect('settings')
@@ -454,12 +453,20 @@ def save_new_data_file(request):
         fs.save("data_file.bin", uploaded_file)
     return redirect('/')
 
+@csrf_exempt
+def save_new_merged_flash(request):
+    if request.method == 'POST':
+        uploaded_file = request.FILES['bin']
+        fs = FileSystemStorage()
+        fs.delete("merged_flash.bin")
+        fs.save("merged_flash.bin", uploaded_file)
+    return redirect('/')
 # TODO: Make exempt only when Debug = true
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
+        ip = x_forwarded_for.split(',')[-1]
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip

@@ -2,8 +2,8 @@
 
 {% block head %}
 {% load static %}
-  <script src="{% static 'question.js' %}"></script>
-  <script src="{% static 'settings.js' %}"></script>
+  <script src="{% static 'question.js' %}?refresh={% now 'U' %}"></script>
+  <script src="{% static 'settings.js' %}?refresh={% now 'U' %}"></script>
 {% endblock head %}
 
 {% block content %}
@@ -101,6 +101,27 @@
                   </div>
                 </span>
             </label>
+        </div>
+        <div class="field">
+            <label class="label">Turn on behavior<span class="question">
+              <span class="icon question_icon">
+                <i class="mdi mdi-help"></i>
+              </span>
+              <div class="question_help_text notification is-info is-light">
+                If a light is off, turning it back on should:<br>
+                Color temperature: The light will be set to the current value of the color temperature slider.<br>
+                Restore: The light will we set to the current value of the color temperature slider IF the light was in color temperature mode when it was turned off. Otherwise, it will turn on the last powered on state.
+              </div>
+            </span>
+          </label>
+          <div class="control">
+            <div class="select">
+              <select name="turn_on_behavior">
+                <option value="color_temp" {% if turn_on_behavior == "color_temp" %}selected{% endif %}>Color temperature</option>
+                <option value="restore" {% if turn_on_behavior == "restore" %}selected{% endif %}>Restore</option>
+              </select>
+            </div>
+          </div>
         </div>
         <div class="field">
             <label class="label">Set lights level to 100% above<span class="question">

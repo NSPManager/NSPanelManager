@@ -26,6 +26,14 @@ def restart_mqtt_manager():
     subprocess.Popen(["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
 
 
+def get_file_md5sum(filename):
+    fs = FileSystemStorage()
+    if fs.exists(filename):
+        return hashlib.md5(fs.open(filename).read()).hexdigest()
+    else:
+        return None
+
+
 def get_mqtt_manager_config(request):
     return_json = {}
     return_json["color_temp_min"] = int(
@@ -57,6 +65,7 @@ def get_mqtt_manager_config(request):
     return_json["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name", "")
     return_json["clock_us_style"] = get_setting_with_default("clock_us_style", False)
     return_json["use_farenheit"] = get_setting_with_default("use_farenheit", False)
+    return_json["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
 
     return_json["lights"] = {}
     for light in Light.objects.all():
@@ -82,11 +91,43 @@ def get_mqtt_manager_config(request):
         panel_config = {
             "id": panel.id,
             "mac": panel.mac_address,
-            "name": panel.friendly_name
+            "name": panel.friendly_name,
+            "is_us_panel": get_nspanel_setting_with_default(panel.id, "is_us_panel", "False"),
+            "address": panel.ip_address
         }
         return_json["nspanels"][panel.id] = panel_config
 
     return JsonResponse(return_json)
+
+
+def get_nspanels_warnings(request):
+    md5_firmware = get_file_md5sum("firmware.bin")
+    md5_data_file = get_file_md5sum("data_file.bin")
+    md5_tft_file = get_file_md5sum("gui.tft")
+    md5_us_tft_file = get_file_md5sum("gui_us.tft")
+    nspanels = []
+
+    for nspanel in NSPanel.objects.all():
+        panel_info = {}
+        panel_info["nspanel"] = {
+            "name": nspanel.friendly_name,
+            "mac": nspanel.mac_address
+        }
+        panel_info["warnings"] = ""
+        for panel in NSPanel.objects.all():
+            if panel == nspanel:
+                continue
+            elif panel.friendly_name == nspanel.friendly_name:
+                panel_info["warnings"] += "Two or more panels exists with the same name. This may have cunintended consequences\n"
+                break
+        if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
+            panel_info["warnings"] += "Firmware update available.\n"
+        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "False" and nspanel.md5_tft_file != md5_tft_file:
+            panel_info["warnings"] += "GUI update available.\n"
+        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True" and nspanel.md5_tft_file != md5_us_tft_file:
+            panel_info["warnings"] += "GUI update available.\n"
+        nspanels.append(panel_info)
+    return JsonResponse({"panels": nspanels})
 
 
 def get_all_available_light_entities(request):
@@ -96,6 +137,7 @@ def get_all_available_light_entities(request):
     return_json["home_assistant_lights"] = []
     return_json["openhab_lights"] = []
     return_json["manual_lights"] = []
+    return_json["errors"] = []
 
     # Home Assistant
     if get_setting_with_default("home_assistant_token", "") != "":
@@ -119,8 +161,10 @@ def get_all_available_light_entities(request):
                             "items": []
                         })
             else:
+                return_json["errors"].append("Failed to get Home Assistant lights, got return code: " + str(home_assistant_response.status_code))
                 print("ERROR! Got status code other than 200. Got code: " + str(home_assistant_response.status_code))
-        except:
+        except Exception as e:
+            return_json["errors"].append("Failed to get Home Assistant lights: " + str(e))
             logging.exception("Failed to get Home Assistant lights!")
     else:
         print("No home assistant configuration values. Will not gather Home Assistant entities.")
@@ -132,28 +176,36 @@ def get_all_available_light_entities(request):
             "Authorization": "Bearer " + get_setting_with_default("openhab_token", ""),
             "content-type": "application/json",
         }
-        openhab_response = requests.get(get_setting_with_default(
-            "openhab_address", "") + "/rest/things", headers=openhab_request_headers)
+        try:
+            openhab_response = requests.get(get_setting_with_default(
+                "openhab_address", "") + "/rest/things", headers=openhab_request_headers)
 
-        for entity in openhab_response.json():
-            if "channels" in entity:
-                add_entity = False
-                items = []
-                for channel in entity["channels"]:
-                    # Check if this thing has a channel that indicates that it might be a light
-                    if "itemType" in channel and (channel["itemType"] == "Dimmer" or channel["itemType"] == "Number" or channel["itemType"] == "Color" or channel["itemType"] == "Switch"):
-                        add_entity = True
-                    if "linkedItems" in channel:
-                        # Add all available items to the list of items for this thing
-                        for linkedItem in channel["linkedItems"]:
-                            if linkedItem not in items:
-                                items.append(linkedItem)
-                if add_entity:
-                    # return_json["openhab_lights"].append(entity["label"])
-                    return_json["openhab_lights"].append({
-                        "label": entity["label"],
-                        "items": items
-                    })
+            if openhab_response.status_code == 200:
+                for entity in openhab_response.json():
+                    if "channels" in entity:
+                        add_entity = False
+                        items = []
+                        for channel in entity["channels"]:
+                            # Check if this thing has a channel that indicates that it might be a light
+                            if "itemType" in channel and (channel["itemType"] == "Dimmer" or channel["itemType"] == "Number" or channel["itemType"] == "Color" or channel["itemType"] == "Switch"):
+                                add_entity = True
+                            if "linkedItems" in channel:
+                                # Add all available items to the list of items for this thing
+                                for linkedItem in channel["linkedItems"]:
+                                    if linkedItem not in items:
+                                        items.append(linkedItem)
+                        if add_entity:
+                            # return_json["openhab_lights"].append(entity["label"])
+                            return_json["openhab_lights"].append({
+                                "label": entity["label"],
+                                "items": items
+                            })
+            else:
+                return_json["errors"].append("Failed to get OpenHAB lights, got return code: " + str(openhab_response.status_code))
+                print("ERROR! Got status code other than 200. Got code: " + str(openhab_response.status_code))
+        except Exception as e:
+            return_json["errors"].append("Failed to get OpenHAB lights: " + str(e))
+            logging.exception("Failed to get OpenHAB lights!")
     else:
         print("No OpenHAB configuration values. Will not gather OpenHAB entities.")
 
@@ -163,7 +215,7 @@ def get_all_available_light_entities(request):
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
+        ip = x_forwarded_for.split(',')[-1]
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
@@ -245,6 +297,7 @@ def get_nspanel_config(request):
     base["lock_to_default_room"] = get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False")
     base["relay1_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", False)
     base["relay2_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", False)
+    base["temperature_calibration"] = float(get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0))
     if nspanel.button1_detached_mode_light:
         base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
     else:
@@ -302,15 +355,6 @@ def get_light_config(request, light_id: int):
     return_json["openhab_item_color_temp"] = light.openhab_item_color_temp
     return_json["openhab_item_rgb"] = light.openhab_item_rgb
     return JsonResponse(return_json)
-
-
-def reboot_nspanel(request):
-    address = request.GET["address"]
-    try:
-        requests.get(F"http://{address}/do_reboot")
-    except:
-        pass
-    return redirect("/")
 
 
 @csrf_exempt

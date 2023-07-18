@@ -1,15 +1,19 @@
 #!/bin/bash
+if [ "$TZ" != "" ]; then
+	echo "Setting /etc/timezone to $TZ"
+	echo "$TZ" >/etc/timezone
+fi
 
 echo "Starting mqtt_manager.py in background"
-./mqtt_manager.py &
+/usr/local/bin/python ./mqtt_manager.py &
 
 cd nspanelmanager
 
 echo "Running migrations..."
-./manage.py migrate
+/usr/local/bin/python ./manage.py migrate
 
 echo "Starting server"
-./manage.py runserver 0.0.0.0:8000
+/usr/local/bin/python ./manage.py runserver 0.0.0.0:8000
 
 echo "Stopping all python applications"
 for app in "$(pgrep python)"; do

@@ -2,7 +2,7 @@
 
 {% block head %}
 {% load static %}
-<script src="{% static 'edit_room.js' %}"></script>
+<script src="{% static 'edit_room.js' %}?refresh={% now 'U' %}"></script>
 <link rel="stylesheet" href="{% static 'edit_room.css' %}">
 {% endblock %}
 
@@ -23,6 +23,8 @@
             <i class="fas fa-search" aria-hidden="true"></i>
           </span>
         </p>
+      </div>
+      <div id="add_new_light_errors">
       </div>
       <p class="panel-tabs" id="add_new_light_tabs">
         <a class="is-active" id="filter_for_all" onclick="add_new_lights_filter_for_type('all');">All</a>
@@ -186,7 +188,7 @@
         <p class="modal-card-title">Select a light</p>
         <button type="button" class="delete" aria-label="close"></button>
       </header>
-      <section class="modal-card-body">
+      <section class="modal-card-body" id="add_new_light_to_room_view_position_card_body">
         <div class="field">
           <div class="control">
             {% if room.light_set.all.count > 0 %}

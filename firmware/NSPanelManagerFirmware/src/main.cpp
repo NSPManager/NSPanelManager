@@ -24,6 +24,7 @@ WiFiClient espClient;
 MqttManager mqttManager;
 
 unsigned long lastStatusReport = 0;
+unsigned long lastWiFiconnected = 0;
 
 float readNTCTemperature(bool farenheit) {
   float temperature = analogRead(38);
@@ -35,7 +36,7 @@ float readNTCTemperature(bool farenheit) {
     if (farenheit) {
       temperature = (temperature * 9 / 5) + 32;
     }
-    return temperature;
+    return temperature + NSPMConfig::instance->temperature_calibration;
   }
   return -254;
 }
@@ -79,6 +80,52 @@ void registerToNSPanelManager() {
   }
 }
 
+void startAndManageWiFiAccessPoint() {
+  for (;;) {
+    Serial.println("Starting AP!");
+    WiFi.mode(WIFI_MODE_AP);
+    IPAddress local_ip(192, 168, 1, 1);
+    IPAddress gateway(192, 168, 1, 1);
+    IPAddress subnet(255, 255, 255, 0);
+
+    if (WiFi.softAPConfig(local_ip, gateway, subnet)) {
+      Serial.println("Soft-AP configuration applied.");
+      if (WiFi.softAP("NSPMPanel", "password")) {
+        Serial.println("Soft-AP started.");
+
+        Serial.println("WiFi SSID: NSPMPanel");
+        Serial.println("WiFi PSK : password");
+        Serial.print("WiFi IP Address: ");
+        Serial.println(WiFi.softAPIP().toString().c_str());
+        webMan.init(NSPanelManagerFirmwareVersion);
+        // Wait indefinitly
+        for (;;) {
+          vTaskDelay(60000 / portTICK_PERIOD_MS); // Scan for the configured network every 60 seconds.
+
+          int n = WiFi.scanComplete();
+          if (n == -2) {
+            WiFi.scanNetworks(true);
+          } else if (n) {
+            for (int i = 0; i < n; ++i) {
+              if (!WiFi.SSID(i).isEmpty()) {
+                if (WiFi.SSID(i).equals(config.wifi_ssid.c_str())) {
+                  ESP.restart(); // The configured network was discovered. Reboot.
+                }
+              }
+            }
+          }
+          WiFi.scanDelete();
+        }
+      } else {
+        LOG_ERROR("Failed to start Soft-AP!");
+      }
+    } else {
+      LOG_ERROR("Failed to apply Soft-AP configuration!");
+    }
+    vTaskDelay(10000 / portTICK_PERIOD_MS);
+  }
+}
+
 void taskManageWifiAndMqtt(void *param) {
   LOG_INFO("taskWiFiMqttHandler started!");
   Serial.print("Configured to connect to WiFi: ");
@@ -87,16 +134,16 @@ void taskManageWifiAndMqtt(void *param) {
   Serial.println(config.wifi_hostname.c_str());
   if (!NSPMConfig::instance->wifi_ssid.empty()) {
     for (;;) {
-      if (!WiFi.isConnected()) {
+      if (!WiFi.isConnected() && millis() - lastWiFiconnected < 180 * 1000) {
         LOG_ERROR("WiFi not connected!");
         Serial.println("WiFi not connected!");
         WiFi.mode(WIFI_STA);
         WiFi.setHostname(config.wifi_hostname.c_str());
-        while (!WiFi.isConnected()) {
+        for (uint8_t wifi_connect_tries = 0; wifi_connect_tries < 10 && !WiFi.isConnected(); wifi_connect_tries++) {
           Serial.print("Connecting to WiFi ");
           Serial.println(config.wifi_ssid.c_str());
           WiFi.begin(config.wifi_ssid.c_str(), config.wifi_psk.c_str());
-          vTaskDelay(1000 / portTICK_PERIOD_MS);
+          vTaskDelay(2000 / portTICK_PERIOD_MS);
           if (WiFi.isConnected()) {
             Serial.println("Connected to WiFi!");
             LOG_INFO("Connected to WiFi ", config.wifi_ssid.c_str());
@@ -109,12 +156,14 @@ void taskManageWifiAndMqtt(void *param) {
             webMan.init(NSPanelManagerFirmwareVersion);
             registerToNSPanelManager();
           } else {
-            LOG_ERROR("Failed to connect to WiFi. Will try again in 10 seconds");
-            Serial.println("Failed to connect to WiFi. Will try again in 10 seconds");
+            LOG_ERROR("Failed to connect to WiFi. Will try again in 5 seconds");
+            Serial.println("Failed to connect to WiFi. Will try again in 5 seconds");
+            vTaskDelay(5000 / portTICK_PERIOD_MS);
           }
         }
-      } else if (config.wifi_ssid.empty()) {
-        LOG_ERROR("No WiFi SSID configured!");
+      } else if (!config.wifi_ssid.empty() && !WiFi.isConnected() && millis() - lastWiFiconnected >= 180 * 1000) {
+        // Three minutes or more has passed since last successfull WiFi connection. Start the AP by breaking the loop.
+        startAndManageWiFiAccessPoint();
       }
       if (WiFi.isConnected() && MqttManager::connected()) {
         DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
@@ -137,43 +186,25 @@ void taskManageWifiAndMqtt(void *param) {
           (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
           (*status_report_doc)["mac"] = WiFi.macAddress();
           (*status_report_doc)["temperature"] = temperature;
+          (*status_report_doc)["ip"] = WiFi.localIP().toString();
           MqttManager::publish(NSPMConfig::instance->mqtt_panel_temperature_topic, std::to_string(temperature).c_str());
 
           char buffer[512];
           uint json_length = serializeJson(*status_report_doc, buffer);
-          MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer);
+          MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer, true);
           lastStatusReport = millis();
         }
         delete status_report_doc;
       }
+
+      if (WiFi.isConnected()) {
+        lastWiFiconnected = millis();
+      }
       vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
   } else {
-    Serial.println("No WiFi configuration exists. Starting AP!");
-    IPAddress local_ip(192, 168, 1, 1);
-    IPAddress gateway(192, 168, 1, 1);
-    IPAddress subnet(255, 255, 255, 0);
-
-    if (WiFi.softAPConfig(local_ip, gateway, subnet)) {
-      Serial.println("Soft-AP configuration applied.");
-      if (WiFi.softAP("NSPMPanel", "password")) {
-        Serial.println("Soft-AP started.");
-
-        Serial.println("WiFi SSID: NSPMPanel");
-        Serial.println("WiFi PSK : password");
-        Serial.print("WiFi IP Address: ");
-        Serial.println(WiFi.softAPIP().toString().c_str());
-        webMan.init(NSPanelManagerFirmwareVersion);
-        // Wait indefinitly
-        for (;;) {
-          vTaskDelay(portMAX_DELAY);
-        }
-      } else {
-        LOG_ERROR("Failed to start Soft-AP!");
-      }
-    } else {
-      LOG_ERROR("Failed to apply Soft-AP configuration!");
-    }
+    // No WiFi SSID configured.
+    startAndManageWiFiAccessPoint();
   }
 }
 

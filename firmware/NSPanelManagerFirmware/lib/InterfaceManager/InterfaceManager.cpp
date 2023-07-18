@@ -13,6 +13,7 @@
 #include <RoomManager.hpp>
 #include <Scene.hpp>
 #include <TftDefines.h>
+#include <WebManager.hpp>
 #include <WiFi.h>
 #include <WiFiClient.h>
 
@@ -59,7 +60,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
     if (!NSPMConfig::instance->littlefs_mount_successfull) {
       PageManager::GetNSPanelManagerPage()->setText("LittleFS mount failed!");
     } else if (!WiFi.isConnected()) {
-      if (NSPMConfig::instance->NSPMConfig::instance->wifi_ssid.empty()) {
+      if (WiFi.getMode() == WIFI_MODE_AP) {
         PageManager::GetNSPanelManagerPage()->setText("Connect to AP NSPMPanel");
       } else {
         PageManager::GetNSPanelManagerPage()->setText("Connecting to WiFi...");
@@ -148,6 +149,28 @@ void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int len
   }
 }
 
+void InterfaceConfig::handleNSPanelCommand(char *topic, byte *payload, unsigned int length) {
+  std::string payload_str = std::string((char *)payload, length);
+  StaticJsonDocument<256> json;
+  DeserializationError error = deserializeJson(json, payload_str);
+  if (error) {
+    LOG_ERROR("Failed to serialize NSPanel command.");
+    return;
+  }
+
+  std::string command = json["command"].as<String>().c_str();
+  if (command.compare("reboot") == 0) {
+    ESP.restart();
+  } else if (command.compare("firmware_update") == 0) {
+    WebManager::startOTAUpdate();
+  } else if (command.compare("tft_update") == 0) {
+    InterfaceManager::stop();
+    NSPanel::instance->startOTAUpdate();
+  } else {
+    LOG_WARNING("Received unknown command on MQTT: ", command.c_str());
+  }
+}
+
 void InterfaceManager::subscribeToMqttTopics() {
   // Subscribe to command to wake/put to sleep the display
   vTaskDelay(100 / portTICK_PERIOD_MS);
@@ -157,6 +180,8 @@ void InterfaceManager::subscribeToMqttTopics() {
   } else {
     LOG_DEBUG("Not attaching MQTT clock callback is panel is confiugred to now show clock on screensaver.");
   }
+
+  MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_cmd_topic.c_str(), &InterfaceConfig::handleNSPanelCommand);
 
   // Every light in every room
   // for (Light *light : LightManager::getAllLights()) {

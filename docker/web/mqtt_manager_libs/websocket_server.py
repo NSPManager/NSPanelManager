@@ -4,21 +4,42 @@ import random
 import websockets
 import logging
 from threading import Thread
+import json
 
 CONNECTIONS = set()
+MESSAGE_HANDLER = None
+ON_CONNECT_HANDLER = None
 
 def send_message(raw_data):
     websockets.broadcast(CONNECTIONS, raw_data)
 
-async def _register_connection(websocket):
+def register_message_handler(handler):
+    global MESSAGE_HANDLER
+    MESSAGE_HANDLER = handler
+
+
+def register_on_connect_handler(handler):
+    global ON_CONNECT_HANDLER
+    ON_CONNECT_HANDLER = handler
+
+async def _connection_handler(websocket):
     CONNECTIONS.add(websocket)
     try:
+        if ON_CONNECT_HANDLER is not None:
+            await ON_CONNECT_HANDLER(websocket)
+        async for message in websocket:
+            if MESSAGE_HANDLER is not None:
+                try:
+                    json_message = json.loads(message)
+                    await MESSAGE_HANDLER(websocket, json_message)
+                except:
+                    logging.exception("Exception occured while trying to decode message from websocket.")
         await websocket.wait_closed()
     finally:
         CONNECTIONS.remove(websocket)
 
 async def _run_server():
-    async with websockets.serve(_register_connection, host=None, port=8001):
+    async with websockets.serve(_connection_handler, host=None, port=8001):
         await asyncio.Future()  # run forever
 
 def _main():

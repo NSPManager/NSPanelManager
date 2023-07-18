@@ -8,10 +8,16 @@ class Settings(models.Model):
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
 
+    def __str__(self) -> str:
+        return self.name
+
 class NSPanelSettings(models.Model):
     nspanel = models.ForeignKey("NSPanel", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return F"{self.nspanel.friendly_name}::{self.name}"
 
 
 class Room(models.Model):
