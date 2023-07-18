@@ -47,17 +47,17 @@ function update_nspanel_status(data) {
           // Current state is offline, just about to update to online. Check if the panel has any warnings.
           updateNSPanelsWarnings();
         }
-        $("#online_offline_tag_parent_" + mac_selector).html(
-          '<span class="tag is-success" id="online_offline_state_' +
-            data.mac +
-            '">Online</span>'
+        $("#panel_header_" + mac_selector).attr(
+          "class",
+          "nspanel-status-header has-background-success"
         );
+        $("#panel_header_text_" + mac_selector).text("");
       } else if (data.state == "offline") {
-        $("#online_offline_tag_parent_" + mac_selector).html(
-          '<span class="tag is-danger" id="online_offline_state_' +
-            data.mac +
-            '">Offline</span>'
+        $("#panel_header_" + mac_selector).attr(
+          "class",
+          "nspanel-status-header has-background-danger"
         );
+        $("#panel_header_text_" + mac_selector).text("Offline");
       } else {
         // Update panel tag to show update progress if any
         update_text = "";
@@ -79,6 +79,15 @@ function update_nspanel_status(data) {
           '</span><span class="tag is-info">' +
           update_progress +
           "%</span></div>";
+
+        $("#panel_header_" + mac_selector).attr(
+          "class",
+          "nspanel-status-header has-background-info"
+        );
+        $("#panel_header_" + mac_selector).css("width", update_progress + "%");
+        $("#panel_header_text_" + mac_selector).text(
+          update_text + ", " + update_progress + "%"
+        );
         $("#online_offline_tag_parent_" + mac_selector).html(new_html);
       }
     }
@@ -95,6 +104,7 @@ function update_nspanel_status(data) {
       } else {
         new_rssi_classes = "mdi mdi-wifi-strength-4";
       }
+      $("#wifi_signal_strength_text_" + mac_selector).html(data.rssi + " dBm");
       $("#wifi_signal_strength_" + mac_selector).html(
         '<span class="' +
           new_rssi_classes +

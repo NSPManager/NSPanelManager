@@ -1,0 +1,67 @@
+.nspanel-box {
+  padding: 0px;
+  height: 7rem;
+  width: 20rem;
+}
+
+.nspanel-status-header {
+  border-radius: 6px 6px 0px 0px;
+  min-height: 0.25rem;
+  margin: 0px;
+  padding: 0px;
+}
+
+.nspanel-status-footer {
+  border-radius: 6px 6px 0px 0px;
+  padding: 6px;
+  position: absolute;
+  bottom: 3px;
+  min-width: 20rem;
+}
+
+.dropdown-trigger > span {
+  cursor: pointer;
+}
+
+.nspanel-status-header > .has-background-success {
+  animation-duration: 1s;
+  animation-name: slide-up;
+  animation-fill-mode: forwards;
+}
+
+.nspanel-status-header > .has-background-danger {
+  animation-duration: 1s;
+  animation-name: slide-down;
+  animation-fill-mode: forwards;
+}
+
+.nspanel-actions-button {
+  position: absolute;
+  right: 0px;
+  bottom: 6px;
+}
+
+.nspanel-status-content-box {
+  padding: 6px;
+}
+
+.nspanel-status-content-box > .level {
+  margin: 0px;
+}
+
+@keyframes slide-up {
+  from {
+    min-height: 1rem;
+  }
+  to {
+    min-height: 0.25rem;
+  }
+}
+@keyframes slide-down {
+  from {
+    min-height: 0.25rem;
+  }
+  to {
+    min-height: 1rem;
+  }
+}

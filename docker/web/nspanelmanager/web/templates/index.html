@@ -3,27 +3,88 @@
 {% block head %}
 {% load static %}
 <script src="{% static 'index.js' %}?refresh={% now 'U' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'index.css' %}?refresh={% now 'U' %}">
 {% endblock %}
 
 {% block content %}
 {% load mathfilters %}
 <h2 class="title is-4">Panels</h2>
-<table class="table is-fullwidth is-hoverable">
-  <thead>
-    <tr>
-      <th>NSPanel</th>
-      <th>Room</th>
-      <th>IP Address</th>
-      <th>Status</th>
-      <th><span class="mdi mdi-wifi" title="WiFi signal strength"></span></th>
-      <th><span class="mdi mdi-memory" title="Memory used"></span></i></th>
-      <th><span class="mdi mdi-thermometer" title="Temperature"></span></i></th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
+<div class="columns is-flex flex-wrap is-flex-direction-row">
     {% for panel_info in nspanels %}
-    <tr>
+    <div class="box nspanel-box m-2">
+      <div class="nspanel-status-header has-background-success" id="panel_header_{{ panel_info.nspanel.mac_address }}"></div>
+      <div class="nspanel-status-content-box">
+        <div class="level">
+          <div class="level-left">
+            <div class="level-item">
+              <div class="is-pulled-left">
+                <span class="has-text-weight-bold"><a href="{% url 'edit_nspanel' panel_id=panel_info.nspanel.id %}" class="has-text-dark">{{ panel_info.nspanel.friendly_name }}</a></span>
+                <span data-tooltip="" class="icon is-small has-tooltipl-multiline has-tooltip-warning pl-3 is-hidden" id="nspanel_{{ panel_info.nspanel.mac_address}}_warnings">
+                  <span class="mdi mdi-alert-circle has-text-warning mdi-24px"></span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="level-right">
+            <span class="has-text-weight-light is-italic is-size-7" id="panel_header_text_{{ panel_info.nspanel.mac_address }}"></span>
+          </div>
+        </div>
+
+
+        <div class="info-item">
+          <span class="icon-text">
+            <span class="icon">
+              <i class="mdi mdi-question" id="wifi_signal_strength_{{ panel_info.nspanel.mac_address }}"></i>
+            </span>
+            <span id="wifi_signal_strength_text_{{ panel_info.nspanel.mac_address }}" class="is-size-7">?</span>
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="icon-text">
+            <span class="icon">
+              <i class="mdi mdi-thermometer"></i>
+            </span>
+            <span id="temperature_{{ panel_info.nspanel.mac_address }}" class="nspanel-status-temperature is-size-7">? {{ temperature_unit }}</span>
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="icon-text">
+            <span class="icon">
+              <i class="mdi mdi-memory"></i>
+            </span>
+            <span class="is-size-7" id="heap_used_{{ panel_info.nspanel.mac_address }}">?</span>
+          </span>
+        </div>
+
+      </div>
+      <div class="nspanel-status-footer">
+          <div class="dropdown nspanel-actions-button">
+            <div class="dropdown-trigger">
+              <span class="mdi mdi-cog pr-2"></span>
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu" role="menu">
+              <div class="dropdown-content">
+                <a class="dropdown-item"
+                  onclick="rebootNSPanel('{{ panel_info.nspanel.id }}');">
+                  <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot
+                </a>
+                <hr class="dropdown-divider">
+                <a class="dropdown-item" onclick="startNSPanelOtaUpdate('{{ panel_info.nspanel.id }}');">
+                  <span class="mdi mdi-upload pr-2 has-text-info"></span>Update firmware
+                </a>
+                <a class="dropdown-item" onclick="startNSPanelTftUpdate('{{ panel_info.nspanel.id }}');">
+                  <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update screen
+                </a>
+                <hr class="dropdown-divider">
+                <a href="{% url 'delete_nspanel' panel_id=panel_info.nspanel.id %}" class="dropdown-item has-text-danger">
+                  <span class="mdi mdi-minus-circle pr-2"></span>Delete
+                </a>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+    <!-- <tr>
       <th><a href="{% url 'edit_nspanel' panel_id=panel_info.nspanel.id %}">{{ panel_info.nspanel.friendly_name }}</a></th>
       <td><a href="{% url 'edit_room' room_id=panel_info.nspanel.room.id %}">{{ panel_info.nspanel.room.friendly_name }}</a>
       </td>
@@ -72,8 +133,7 @@
           <span class="mdi mdi-alert has-text-warning mdi-24px"></span>
         </span>
       </td>
-    </tr>
+    </tr> -->
     {% endfor %}
-  </tbody>
-</table>
+</div>
 {% endblock %}
