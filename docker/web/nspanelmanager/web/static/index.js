@@ -1,15 +1,39 @@
 var panels_that_are_updating = [];
 const ws = new MQTTManager_WS();
 
-function startNSPanelOtaUpdate(panel_id) {
+function startNSPanelOtaUpdate(mac) {
+  let mac_selector = mac;
+  mac_selector = mac_selector.replaceAll(":", "\\:");
+  $("#panel_header_" + mac_selector).attr(
+    "class",
+    "nspanel-status-header has-background-info nspanel-status-header-await"
+  );
+  $("#panel_header_text_" + mac_selector).text("Awaiting status");
+  var panel_id = $("#nspanel_id_" + mac_selector).text();
   ws.send_command("firmware_update_nspanels", { nspanels: [panel_id] }, null);
 }
 
-function startNSPanelTftUpdate(panel_id) {
+function startNSPanelTftUpdate(mac) {
+  let mac_selector = mac;
+  mac_selector = mac_selector.replaceAll(":", "\\:");
+  $("#panel_header_" + mac_selector).attr(
+    "class",
+    "nspanel-status-header has-background-info nspanel-status-header-await"
+  );
+  $("#panel_header_text_" + mac_selector).text("Awaiting status");
+  var panel_id = $("#nspanel_id_" + mac_selector).text();
   ws.send_command("tft_update_nspanels", { nspanels: [panel_id] }, null);
 }
 
-function rebootNSPanel(panel_id) {
+function rebootNSPanel(mac) {
+  let mac_selector = mac;
+  mac_selector = mac_selector.replaceAll(":", "\\:");
+  $("#panel_header_" + mac_selector).attr(
+    "class",
+    "nspanel-status-header has-background-info nspanel-status-header-await"
+  );
+  $("#panel_header_text_" + mac_selector).text("Awaiting status");
+  var panel_id = $("#nspanel_id_" + mac_selector).text();
   ws.send_command("reboot_nspanels", { nspanels: [panel_id] }, null);
 }
 
@@ -43,7 +67,15 @@ function update_nspanel_status(data) {
     if ("state" in data) {
       var new_html = "";
       if (data.state == "online") {
-        if ($("#online_offline_state_" + mac_selector).text() == "Offline") {
+        if ($("#panel_header_" + mac_selector).length == 0) {
+          // We got an online message from a newly registed panel. Updated page in about 1 second.
+          setTimeout(() => {
+            location.reload();
+          }, 1000);
+        }
+        if (
+          $("#panel_header_" + mac_selector).hasClass("has-background-danger")
+        ) {
           // Current state is offline, just about to update to online. Check if the panel has any warnings.
           updateNSPanelsWarnings();
         }
