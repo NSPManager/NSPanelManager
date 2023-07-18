@@ -7,14 +7,15 @@
 {% endblock %}
 
 {% block content %}
+<span class="is-hidden" id="temperature_unit">{{ temperature_unit }}</span>
 {% load mathfilters %}
 <h2 class="title is-4">Panels</h2>
-<div class="columns is-flex flex-wrap is-flex-direction-row">
+<div class="is-flex flex-wrap" style="flex-wrap: wrap;">
     {% for panel_info in nspanels %}
-    <div class="box nspanel-box m-2">
+    <div class="box nspanel-box m-2" id="panel_status_box_{{ panel_info.nspanel.mac_address }}">
       <span id="nspanel_id_{{ panel_info.nspanel.mac_address }}" class="is-hidden">{{ panel_info.nspanel.id }}</span>
       <div class="nspanel-status-header">
-        <div class="has-background-danger nspanel-status-header-await" id="panel_header_{{ panel_info.nspanel.mac_address }}"></div>
+        <div class="has-background-grey nspanel-status-header-await" id="panel_header_{{ panel_info.nspanel.mac_address }}"></div>
       </div>
       <div class="nspanel-status-content-box">
         <div class="level">
@@ -34,9 +35,9 @@
         <div class="info-item">
           <span class="icon-text">
             <span class="icon">
-              <i class="mdi mdi-question" id="wifi_signal_strength_{{ panel_info.nspanel.mac_address }}"></i>
+              <i class="mdi mdi-help" id="wifi_signal_strength_{{ panel_info.nspanel.mac_address }}"></i>
             </span>
-            <span id="wifi_signal_strength_text_{{ panel_info.nspanel.mac_address }}" class="is-size-7">?</span>
+            <span id="wifi_signal_strength_text_{{ panel_info.nspanel.mac_address }}" class="is-size-7">-</span>
           </span>
         </div>
         <div class="info-item">
@@ -44,7 +45,7 @@
             <span class="icon">
               <i class="mdi mdi-thermometer"></i>
             </span>
-            <span id="temperature_{{ panel_info.nspanel.mac_address }}" class="nspanel-status-temperature is-size-7">? {{ temperature_unit }}</span>
+            <span id="temperature_{{ panel_info.nspanel.mac_address }}" class="nspanel-status-temperature is-size-7">-</span>
           </span>
         </div>
         <div class="info-item">
@@ -52,7 +53,7 @@
             <span class="icon">
               <i class="mdi mdi-memory"></i>
             </span>
-            <span class="is-size-7" id="heap_used_{{ panel_info.nspanel.mac_address }}">?</span>
+            <span class="is-size-7" id="heap_used_{{ panel_info.nspanel.mac_address }}">-</span>
           </span>
         </div>
 

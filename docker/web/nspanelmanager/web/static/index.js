@@ -137,14 +137,13 @@ function update_nspanel_status(data) {
         new_rssi_classes = "mdi mdi-wifi-strength-4";
       }
       $("#wifi_signal_strength_text_" + mac_selector).html(data.rssi + " dBm");
-      $("#wifi_signal_strength_" + mac_selector).html(
-        '<span class="' +
-          new_rssi_classes +
-          '" id="wifi_signal_strength_' +
-          data.mac +
-          '" title="' +
-          data.rssi +
-          ' dBm"></span>'
+      $("#wifi_signal_strength_" + mac_selector).attr(
+        "class",
+        new_rssi_classes
+      );
+      $("#wifi_signal_strength_" + mac_selector).attr(
+        "title",
+        data.rssi + " dBm"
       );
     }
 
@@ -156,9 +155,7 @@ function update_nspanel_status(data) {
     }
 
     if ("temperature" in data) {
-      var temperature_unit = $("#temperature_" + mac_selector)
-        .text()
-        .slice(-2);
+      var temperature_unit = $("#temperature_unit").text();
       $("#temperature_" + mac_selector).html(
         Math.round(data.temperature * 100) / 100 + " " + temperature_unit
       );

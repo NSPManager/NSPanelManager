@@ -1,7 +1,7 @@
 .nspanel-box {
   padding: 0px;
   height: 7rem;
-  width: 20rem;
+  min-width: 20rem;
 }
 
 .nspanel-status-header-await {
@@ -37,8 +37,8 @@
 .nspanel-status-footer {
   border-radius: 6px 6px 0px 0px;
   padding: 6px;
-  position: absolute;
-  bottom: 3px;
+  position: relative;
+  bottom: 6px;
   min-width: 20rem;
 }
 
