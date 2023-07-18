@@ -250,7 +250,8 @@ def send_status_report(panel, new_status):
 
 
 def send_online_status(panel, new_status):
-    post("http://127.0.0.1:8000/api/set_panel_online_status/" + new_status["mac"] + "/", json=new_status)
+    pass
+    #post("http://127.0.0.1:8000/api/set_panel_online_status/" + new_status["mac"] + "/", json=new_status)
 
 
 def get_config():
