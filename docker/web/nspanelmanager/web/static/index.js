@@ -1,6 +1,24 @@
 var panels_that_are_updating = [];
 const ws = new MQTTManager_WS();
 
+function get_all_online_panel_macs() {
+  var panel_macs = [];
+  $(".nspanel_mac_container").each((index, obj) => {
+    var panel_mac = $(obj).text();
+    let mac_selector = panel_mac.replaceAll(":", "\\:");
+    if ($("#panel_header_" + mac_selector).hasClass("has-background-success")) {
+      panel_macs.push(panel_mac);
+    }
+  });
+  return panel_macs;
+}
+
+function startNSPanelOtaUpdateAll() {
+  get_all_online_panel_macs().forEach((mac) => {
+    startNSPanelOtaUpdate(mac);
+  });
+}
+
 function startNSPanelOtaUpdate(mac) {
   let mac_selector = mac;
   mac_selector = mac_selector.replaceAll(":", "\\:");
@@ -13,6 +31,12 @@ function startNSPanelOtaUpdate(mac) {
   ws.send_command("firmware_update_nspanels", { nspanels: [panel_id] }, null);
 }
 
+function startNSPanelTftUpdateAll() {
+  get_all_online_panel_macs().forEach((mac) => {
+    startNSPanelTftUpdate(mac);
+  });
+}
+
 function startNSPanelTftUpdate(mac) {
   let mac_selector = mac;
   mac_selector = mac_selector.replaceAll(":", "\\:");
@@ -23,6 +47,12 @@ function startNSPanelTftUpdate(mac) {
   $("#panel_header_text_" + mac_selector).text("Awaiting status");
   var panel_id = $("#nspanel_id_" + mac_selector).text();
   ws.send_command("tft_update_nspanels", { nspanels: [panel_id] }, null);
+}
+
+function rebootNSPanelAll() {
+  get_all_online_panel_macs().forEach((mac) => {
+    rebootNSPanel(mac);
+  });
 }
 
 function rebootNSPanel(mac) {

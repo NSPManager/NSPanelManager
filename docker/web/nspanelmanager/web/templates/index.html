@@ -9,11 +9,47 @@
 {% block content %}
 <span class="is-hidden" id="temperature_unit">{{ temperature_unit }}</span>
 {% load mathfilters %}
-<h2 class="title is-4">Panels</h2>
+<div class="level">
+  <div class="level-left">
+    <div class="level-item">
+      <h2 class="title is-4">Panels</h2>
+    </div>
+  </div>
+  <div class="level-right">
+    <div class="level-item">
+      <div class="dropdown">
+        <div class="dropdown-trigger">
+          <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu">
+            <span><span class="mdi mdi-cog pr-2"></span>Actions</span>
+            <span class="icon is-small">
+              <i class="mdi mdi-menu-down" aria-hidden="true"></i>
+            </span>
+          </button>
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+          <div class="dropdown-content">
+            <a class="dropdown-item"
+              onclick="rebootNSPanelAll();">
+              <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot all panels
+            </a>
+            <hr class="dropdown-divider">
+            <a class="dropdown-item" onclick="startNSPanelOtaUpdateAll();">
+              <span class="mdi mdi-upload pr-2 has-text-info"></span>Update firmware on all panels
+            </a>
+            <a class="dropdown-item" onclick="startNSPanelTftUpdateAll();">
+              <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update screen on all panels
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="is-flex flex-wrap" style="flex-wrap: wrap;">
     {% for panel_info in nspanels %}
     <div class="box nspanel-box m-2" id="panel_status_box_{{ panel_info.nspanel.mac_address }}">
-      <span id="nspanel_id_{{ panel_info.nspanel.mac_address }}" class="is-hidden">{{ panel_info.nspanel.id }}</span>
+      <span id="nspanel_id_{{ panel_info.nspanel.mac_address }}" class="is-hidden nspanel_id_container">{{ panel_info.nspanel.id }}</span>
+      <span class="is-hidden nspanel_mac_container">{{ panel_info.nspanel.mac_address }}</span>
       <div class="nspanel-status-header">
         <div class="has-background-grey nspanel-status-header-await" id="panel_header_{{ panel_info.nspanel.mac_address }}"></div>
       </div>
