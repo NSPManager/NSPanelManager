@@ -1,2 +1,2 @@
 CompileFlags:
-    Add: [-std=c++17]
+  Add: -ferror-limit=0

@@ -4,7 +4,10 @@
 #include <MqttManager.hpp>
 #include <NSPMConfig.h>
 #include <WiFi.h>
+#include <WiFiManager.hpp>
 #include <esp_task_wdt.h>
+#include <stdio.h>
+#include <string>
 
 void MqttManager::init() {
   MqttManager::_wifiClient = new WiFiClient();                            // Create WifiClient for MQTT Client
@@ -25,12 +28,13 @@ void MqttManager::setBufferSize(uint8_t size) {
   MqttManager::_sendQueue = xQueueCreate(size, sizeof(PublishMessage *));
 
   if (MqttManager::_sendQueue == NULL) {
-    Serial.println("Failed to create queue!");
+    printf("Failed to create queue!");
   } else {
-    Serial.print("Created _sendQueue of size: ");
-    Serial.print(size);
-    Serial.print(" * ");
-    Serial.println(sizeof(PublishMessage));
+    printf("Created _sendQueue of size: ");
+    printf("%i", size);
+    printf(" * ");
+    printf("%lu", sizeof(PublishMessage));
+    printf("\n");
   }
 }
 
@@ -178,7 +182,7 @@ void MqttManager::_taskMqttRunTask(void *param) {
 
 bool MqttManager::_connect() {
   // Stop processing if not connected to WiFi
-  if (!WiFi.isConnected()) {
+  if (!WiFiManager::is_connected()) {
     return false;
   }
 

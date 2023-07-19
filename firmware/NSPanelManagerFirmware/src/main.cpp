@@ -11,6 +11,7 @@
 #include <PubSubClient.h>
 #include <WebManager.hpp>
 #include <WiFi.h>
+#include <WiFiManager.hpp>
 #include <nspm-bin-version.h>
 #include <string>
 
@@ -42,7 +43,7 @@ float readNTCTemperature(bool farenheit) {
 }
 
 void registerToNSPanelManager() {
-  if (WiFi.isConnected()) {
+  if (WiFiManager::is_connected()) {
     while (true) {
       WiFiClient wifiClient;
       HTTPClient httpClient;
@@ -132,40 +133,45 @@ void taskManageWifiAndMqtt(void *param) {
   Serial.println(config.wifi_ssid.c_str());
   Serial.print("with hostname: ");
   Serial.println(config.wifi_hostname.c_str());
+  WiFiManager::init();
   if (!NSPMConfig::instance->wifi_ssid.empty()) {
     for (;;) {
-      if (!WiFi.isConnected() && millis() - lastWiFiconnected < 180 * 1000) {
+      if (!WiFiManager::is_connected() && millis() - lastWiFiconnected < 180 * 1000) {
         LOG_ERROR("WiFi not connected!");
         Serial.println("WiFi not connected!");
-        WiFi.mode(WIFI_STA);
-        WiFi.setHostname(config.wifi_hostname.c_str());
-        for (uint8_t wifi_connect_tries = 0; wifi_connect_tries < 10 && !WiFi.isConnected(); wifi_connect_tries++) {
+        // WiFi.mode(WIFI_STA);
+        // WiFi.setHostname(config.wifi_hostname.c_str());
+        for (uint8_t wifi_connect_tries = 0; wifi_connect_tries < 10 && !WiFiManager::is_connected(); wifi_connect_tries++) {
           Serial.print("Connecting to WiFi ");
           Serial.println(config.wifi_ssid.c_str());
-          WiFi.begin(config.wifi_ssid.c_str(), config.wifi_psk.c_str());
-          vTaskDelay(2000 / portTICK_PERIOD_MS);
-          if (WiFi.isConnected()) {
-            Serial.println("Connected to WiFi!");
-            LOG_INFO("Connected to WiFi ", config.wifi_ssid.c_str());
-            Serial.print("Connected to WiFi ");
-            Serial.println(config.wifi_ssid.c_str());
-            LOG_INFO("IP Address: ", WiFi.localIP().toString());
-            LOG_INFO("Netmask:    ", WiFi.subnetMask().toString());
-            LOG_INFO("Gateway:    ", WiFi.gatewayIP().toString());
-            // Start web server
-            webMan.init(NSPanelManagerFirmwareVersion);
-            registerToNSPanelManager();
-          } else {
-            LOG_ERROR("Failed to connect to WiFi. Will try again in 5 seconds");
-            Serial.println("Failed to connect to WiFi. Will try again in 5 seconds");
-            vTaskDelay(5000 / portTICK_PERIOD_MS);
+          WiFiManager::try_connect(config.wifi_ssid, config.wifi_psk);
+          if (WiFiManager::is_connected()) {
+            break;
           }
+          // WiFi.begin(config.wifi_ssid.c_str(), config.wifi_psk.c_str());
+          vTaskDelay(2000 / portTICK_PERIOD_MS);
+          // if (WiFiManager::is_connected()) {
+          //   Serial.println("Connected to WiFi!");
+          //   LOG_INFO("Connected to WiFi ", config.wifi_ssid.c_str());
+          //   Serial.print("Connected to WiFi ");
+          //   Serial.println(config.wifi_ssid.c_str());
+          //   LOG_INFO("IP Address: ", WiFi.localIP().toString());
+          //   LOG_INFO("Netmask:    ", WiFi.subnetMask().toString());
+          //   LOG_INFO("Gateway:    ", WiFi.gatewayIP().toString());
+          //   // Start web server
+          //   webMan.init(NSPanelManagerFirmwareVersion);
+          //   registerToNSPanelManager();
+          // } else {
+          //   LOG_ERROR("Failed to connect to WiFi. Will try again in 5 seconds");
+          //   Serial.println("Failed to connect to WiFi. Will try again in 5 seconds");
+          //   vTaskDelay(5000 / portTICK_PERIOD_MS);
+          // }
         }
-      } else if (!config.wifi_ssid.empty() && !WiFi.isConnected() && millis() - lastWiFiconnected >= 180 * 1000) {
+      } else if (!config.wifi_ssid.empty() && !WiFiManager::is_connected() && millis() - lastWiFiconnected >= 180 * 1000) {
         // Three minutes or more has passed since last successfull WiFi connection. Start the AP by breaking the loop.
         startAndManageWiFiAccessPoint();
       }
-      if (WiFi.isConnected() && MqttManager::connected()) {
+      if (WiFiManager::is_connected() && MqttManager::connected()) {
         bool force_send_mqtt_update = false;
         DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
         if (NSPanel::instance->getUpdateState()) {
@@ -200,7 +206,7 @@ void taskManageWifiAndMqtt(void *param) {
         delete status_report_doc;
       }
 
-      if (WiFi.isConnected()) {
+      if (WiFiManager::is_connected()) {
         lastWiFiconnected = millis();
       }
       vTaskDelay(1000 / portTICK_PERIOD_MS);

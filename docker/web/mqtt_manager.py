@@ -274,8 +274,7 @@ def get_config():
                 settings.pop("lights")
                 break
         except Exception as e:
-            logging.error(
-                "ERROR: Failed to get config. Will try again in 5 seconds.")
+            logging.error("ERROR: Failed to get config. Will try again in 5 seconds.")
             logging.error(e)
             time.sleep(5)
 

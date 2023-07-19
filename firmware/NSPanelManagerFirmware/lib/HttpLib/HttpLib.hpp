@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <esp_http_client.h>
 
 class HttpLib {
 public:
@@ -20,6 +21,11 @@ public:
   static bool GetMD5sum(const char *address, char *buffer);
 
   static bool DownloadJSON(const char *address, JsonDocument *document);
+
+  static bool http_post_json(const char *IP, uint16_t port, const char *path, const char *post_data, char *buffer);
+
+private:
+  esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 };
 
 #endif

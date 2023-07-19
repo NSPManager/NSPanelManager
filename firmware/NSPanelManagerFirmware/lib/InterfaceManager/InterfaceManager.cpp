@@ -16,6 +16,7 @@
 #include <WebManager.hpp>
 #include <WiFi.h>
 #include <WiFiClient.h>
+#include <WiFiManager.hpp>
 
 void InterfaceManager::init() {
   this->instance = this;
@@ -56,10 +57,10 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   PageManager::GetHomePage()->init();
   PageManager::GetNSPanelManagerPage()->show();
   NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
-  while (!WiFi.isConnected() || !MqttManager::connected() || !InterfaceManager::hasRegisteredToManager || !NSPMConfig::instance->littlefs_mount_successfull) {
+  while (!WiFiManager::is_connected() || !MqttManager::connected() || !InterfaceManager::hasRegisteredToManager || !NSPMConfig::instance->littlefs_mount_successfull) {
     if (!NSPMConfig::instance->littlefs_mount_successfull) {
       PageManager::GetNSPanelManagerPage()->setText("LittleFS mount failed!");
-    } else if (!WiFi.isConnected()) {
+    } else if (!WiFiManager::is_connected()) {
       if (WiFi.getMode() == WIFI_MODE_AP) {
         PageManager::GetNSPanelManagerPage()->setText("Connect to AP NSPMPanel");
       } else {
