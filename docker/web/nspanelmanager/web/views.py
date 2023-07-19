@@ -165,7 +165,8 @@ def edit_nspanel(request, panel_id: int):
         'rooms': Room.objects.all(),
         'settings': settings,
         "temperature_unit": temperature_unit,
-        "multiple": [1, 2, 3, 4]
+        "multiple": [1, 2, 3, 4],
+        "max_live_log_messages": get_setting_with_default("max_live_log_messages", 10),
     })
 
 
@@ -381,6 +382,7 @@ def settings_page(request):
     data["use_farenheit"] = get_setting_with_default("use_farenheit", False)
     data["global_scenes"] = Scene.objects.filter(room__isnull=True)
     data["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
+    data["max_live_log_messages"] = get_setting_with_default("max_live_log_messages", 10)
     return render(request, 'settings.html', data)
 
 
@@ -427,6 +429,7 @@ def save_settings(request):
     set_setting_value(name="clock_us_style", value=("clock_us_style" in request.POST))
     set_setting_value(name="use_farenheit", value=("use_farenheit" in request.POST))
     set_setting_value(name="turn_on_behavior", value=request.POST["turn_on_behavior"])
+    set_setting_value(name="max_live_log_messages", value=request.POST["max_live_log_messages"])
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()
     return redirect('settings')

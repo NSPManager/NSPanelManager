@@ -644,6 +644,7 @@ bool NSPanel::_updateTFTOTA() {
       Serial2.begin(NSPMConfig::instance->tft_upload_baud, SERIAL_8N1, 17, 16);
     } else {
       LOG_ERROR("Baud rate switch failed. Will restart.");
+      vTaskDelay(5000 / portTICK_PERIOD_MS);
       ESP.restart();
       return false;
     }
@@ -727,7 +728,7 @@ bool NSPanel::_updateTFTOTA() {
       vTaskDelay(5 / portTICK_PERIOD_MS);
     }
     LOG_ERROR("Will now restart.");
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
     ESP.restart();
     return false;
   }
@@ -815,7 +816,7 @@ bool NSPanel::_updateTFTOTA() {
   NSPMConfig::instance->md5_tft_file = checksum_holder;
   NSPMConfig::instance->saveToLittleFS();
 
-  LOG_INFO(" Will restart in 5 seconds.");
+  LOG_INFO("Will restart in 5 seconds.");
   vTaskDelay(5000 / portTICK_PERIOD_MS);
   ESP.restart();
 

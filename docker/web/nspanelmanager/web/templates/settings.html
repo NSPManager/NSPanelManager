@@ -60,6 +60,27 @@
     {% csrf_token %}
     <div class="box">
         <div class="field">
+            <h5 class="title is-5">NSPanel Manager settings</h5>
+        </div>
+        <div class="field">
+            <label class="label">Number of messages to display on live log<span class="question">
+              <span class="icon question_icon">
+                <i class="mdi mdi-help"></i>
+              </span>
+              <div class="question_help_text notification is-info is-light">
+                The number of messages to display in the live log view on the settings page for individual NSPanels.
+              </div>
+            </span>
+          </label>
+        </div>
+        <div class="field is-grouped">
+            <div class="control">
+                <input class="input" type="number" name="max_live_log_messages" id="max_live_log_messages" placeholder="10" value="{{ max_live_log_messages }}" required>
+            </div>
+        </div>
+    </div>
+    <div class="box">
+        <div class="field">
             <h5 class="title is-5">Global NSPanel settings</h5>
         </div>
         <div class="notification is-info is-light">

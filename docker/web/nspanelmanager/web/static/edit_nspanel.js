@@ -142,11 +142,11 @@ $(document).ready(() => {
       add_html += "</tr>";
 
       var row_count = $("#log_body tr").length;
-      if (row_count > 10) {
+      if (row_count >= $("#max_live_log_messages").text()) {
         $("#log_body tr:first-child").remove();
       }
 
-      $("#log_body").append(add_html);
+      $("#log_body").prepend(add_html);
     }
   });
 
