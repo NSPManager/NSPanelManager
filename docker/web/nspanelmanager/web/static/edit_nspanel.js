@@ -143,7 +143,7 @@ $(document).ready(() => {
 
       var row_count = $("#log_body tr").length;
       if (row_count >= $("#max_live_log_messages").text()) {
-        $("#log_body tr:first-child").remove();
+        $("#log_body tr:last-child").remove();
       }
 
       $("#log_body").prepend(add_html);
