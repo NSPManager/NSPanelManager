@@ -7,19 +7,19 @@ def register_panel(nspanel, mqtt_client, settings):
     base_config = {
         "device": {
             "identifiers": [
-                "NSPanel-" + nspanel["mac"]
+                ("mac_" + nspanel["mac"].replace(":", "_").lower()).strip()
             ],
-            "connections": [
-                ["mac", nspanel["mac"]]
-            ],
-            "name": nspanel["name"],
-            "model": "NSPanel",
             "manufacturer": "Sonoff",
+            "model": "NSPanel",
+            "name": nspanel["name"].strip(),
+            "sw_version": "0.0.27"
         },
-        "availability": {
-            "topic": "nspanel/" + nspanel["name"] + "/status",
-            "value_template": "{{ value_json.state }}"
-        }
+        "availability": [
+            {
+                "topic": "nspanel/" + nspanel["name"] + "/status",
+                "value_template": "{{ value_json.state }}"
+            }
+        ]
     }
     register_temperature_sensor(nspanel, mqtt_client, settings, base_config)
     register_relays(nspanel, mqtt_client, settings, base_config)
@@ -27,7 +27,7 @@ def register_panel(nspanel, mqtt_client, settings):
 
 
 def register_temperature_sensor(nspanel, mqtt_client, settings, base_config):
-    config = base_config
+    config = dict(base_config)
     config["device_class"] = "temperature"
     if settings["use_farenheit"] == "True":
         config["unit_of_measurement"] = "°F"
@@ -35,11 +35,12 @@ def register_temperature_sensor(nspanel, mqtt_client, settings, base_config):
         config["unit_of_measurement"] = "°C"
     config["name"] = nspanel["name"] + " temperature"
     config["state_topic"] = "nspanel/" + nspanel["name"] + "/temperature_state"
-    mqtt_client.publish("homeassistant/sensor/nspanelmanager/" + nspanel["name"] + "_temperature/config", json.dumps(config), retain=True)
+    config["unique_id"] = nspanel["mac"].replace(":", "_").lower() + "_temperature"
+    mqtt_client.publish("homeassistant/sensor/nspanelmanager/" + nspanel["mac"].replace(":", "_").lower() + "_temperature/config", json.dumps(config), retain=True)
 
 
 def register_relays(nspanel, mqtt_client, settings, base_config):
-    config = base_config
+    config = dict(base_config)
     config["name"] = nspanel["name"] + " relay 1"
     config["device_class"] = "switch"
     config["state_topic"] = "nspanel/" + nspanel["name"] + "/r1_state"
@@ -48,16 +49,18 @@ def register_relays(nspanel, mqtt_client, settings, base_config):
     config["state_off"] = "0"
     config["payload_on"] = "1"
     config["payload_off"] = "0"
-    mqtt_client.publish("homeassistant/switch/nspanelmanager/" + nspanel["name"] + "_relay1/config", json.dumps(config), retain=True)
+    config["unique_id"] = nspanel["mac"].replace(":", "_").lower() + "_relay1"
+    mqtt_client.publish("homeassistant/switch/nspanelmanager/" + nspanel["mac"].replace(":", "_").lower() + "_relay1/config", json.dumps(config), retain=True)
     
     config["name"] = nspanel["name"] + " relay 2"
     config["state_topic"] = "nspanel/" + nspanel["name"] + "/r2_state"
     config["command_topic"] = "nspanel/" + nspanel["name"] + "/r2_cmd"
-    mqtt_client.publish("homeassistant/switch/nspanelmanager/" + nspanel["name"] + "_relay2/config", json.dumps(config), retain=True)
+    config["unique_id"] = nspanel["mac"].replace(":", "_").lower() + "_relay2"
+    mqtt_client.publish("homeassistant/switch/nspanelmanager/" + nspanel["mac"].replace(":", "_").lower() + "_relay2/config", json.dumps(config), retain=True)
 
 
 def register_screen_switch(nspanel, mqtt_client, settings, base_config):
-    config = base_config
+    config = dict(base_config)
     config["name"] = nspanel["name"] + " screen"
     config["device_class"] = "switch"
     config["state_topic"] = "nspanel/" + nspanel["name"] + "/screen_state"
@@ -66,6 +69,7 @@ def register_screen_switch(nspanel, mqtt_client, settings, base_config):
     config["state_off"] = "0"
     config["payload_on"] = "1"
     config["payload_off"] = "0"
-    mqtt_client.publish("homeassistant/switch/nspanelmanager/" + nspanel["name"] + "_screen/config", json.dumps(config), retain=True)
+    config["unique_id"] = nspanel["mac"].replace(":", "_").lower() + "_screen_state"
+    mqtt_client.publish("homeassistant/switch/nspanelmanager/" + nspanel["mac"].replace(":", "_").lower() + "_screen/config", json.dumps(config), retain=True)
 
 
