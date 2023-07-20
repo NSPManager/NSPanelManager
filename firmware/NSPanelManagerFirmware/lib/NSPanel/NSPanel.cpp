@@ -625,6 +625,12 @@ bool NSPanel::_updateTFTOTA() {
     totalTftFileSize = HttpLib::GetFileSize(downloadUrl.c_str());
   }
 
+  LOG_INFO("Force restarting screen via power switch.");
+  digitalWrite(4, HIGH); // Turn off power to the display
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  digitalWrite(4, LOW); // Turn on power to the display
+  vTaskDelay(5000 / portTICK_PERIOD_MS);
+
   // Change baud rate if needed
   int32_t baud_diff = NSPMConfig::instance->tft_upload_baud - Serial2.baudRate();
   if (baud_diff < 0) {
@@ -672,25 +678,29 @@ bool NSPanel::_updateTFTOTA() {
     //}
   }
 
-  Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN"); // "disconnect"
-  NSPanel::instance->_sendCommandEndSequence();
-  vTaskDelay(2000 / portTICK_PERIOD_MS);
-  NSPanel::instance->_clearSerialBuffer();
-
   // Send "connect" string to get data
-  Serial2.print("connect");
+  Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN");
   NSPanel::instance->_sendCommandEndSequence();
-  LOG_DEBUG("Sent connect, waiting for comok string.");
-
-  // Wait for comok return data.
-  while (Serial2.available() == 0) {
-    vTaskDelay(50 / portTICK_PERIOD_MS);
+  vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
+  // Clear Serial2 read buffer
+  while (Serial2.available() > 0) {
+    Serial2.read();
+    if (Serial2.available() == 0) {
+      vTaskDelay(250 / portTICK_PERIOD_MS);
+    }
   }
 
-  LOG_DEBUG("Waiting for comok");
+  LOG_DEBUG("Sending connect to panel");
+  Serial2.print("connect");
+  NSPanel::instance->_sendCommandEndSequence();
+  vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
+
   std::string comok_string = "";
   NSPanel::instance->_readDataToString(&comok_string, 5000, false);
   NSPanel::instance->_clearSerialBuffer();
+  if (comok_string.length() > 3) {
+    comok_string.erase(comok_string.length() - 3);
+  }
   LOG_DEBUG("Got comok: ", comok_string.c_str());
 
   LOG_DEBUG("Will start TFT upload, TFT file size: ", totalTftFileSize);
