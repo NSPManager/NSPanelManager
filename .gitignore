@@ -14,6 +14,11 @@ firmware/NSPanelManagerFirmware/.ccls
 firmware/NSPanelManagerFirmware/.ccls-cache
 MQTTManager-RUST/
 
+# User/computer specific files that is user depandant
+firmware/NSPanelManagerFirmware/src/CMakeLists.txt
+firmware/NSPanelManagerFirmware/compile_commands.json
+firmware/NSPanelManagerFirmware/CMakeLists.txt
+
 # MacOS
 .DS_Store
 

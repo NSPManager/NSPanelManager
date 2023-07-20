@@ -208,6 +208,9 @@ bool NSPanel::init() {
       vTaskDelay(25 / portTICK_PERIOD_MS);
     }
   }
+  if (reply_data.length() > 3) {
+    reply_data.erase(reply_data.length() - 3); // Remove last three 0xFF bytes from panel connect line.
+  }
   LOG_INFO("Got reply from display: ", reply_data.c_str());
   reply_data.clear();
 

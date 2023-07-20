@@ -42,40 +42,38 @@ float readNTCTemperature(bool farenheit) {
 }
 
 void registerToNSPanelManager() {
-  if (WiFi.isConnected()) {
-    while (true) {
-      WiFiClient wifiClient;
-      HTTPClient httpClient;
-      std::string url = "http://";
-      url.append(NSPMConfig::instance->manager_address);
-      url.append(":");
-      url.append(std::to_string(NSPMConfig::instance->manager_port));
-      url.append("/api/register_nspanel");
+  while (true) {
+    WiFiClient wifiClient;
+    HTTPClient httpClient;
+    std::string url = "http://";
+    url.append(NSPMConfig::instance->manager_address);
+    url.append(":");
+    url.append(std::to_string(NSPMConfig::instance->manager_port));
+    url.append("/api/register_nspanel");
 
-      StaticJsonDocument<512> doc;
-      doc["mac_address"] = WiFi.macAddress().c_str();
-      doc["friendly_name"] = NSPMConfig::instance->wifi_hostname.c_str();
-      doc["version"] = NSPanelManagerFirmwareVersion;
-      doc["md5_firmware"] = NSPMConfig::instance->md5_firmware;
-      doc["md5_data_file"] = NSPMConfig::instance->md5_data_file;
-      doc["md5_tft_file"] = NSPMConfig::instance->md5_tft_file;
+    StaticJsonDocument<512> doc;
+    doc["mac_address"] = WiFi.macAddress().c_str();
+    doc["friendly_name"] = NSPMConfig::instance->wifi_hostname.c_str();
+    doc["version"] = NSPanelManagerFirmwareVersion;
+    doc["md5_firmware"] = NSPMConfig::instance->md5_firmware;
+    doc["md5_data_file"] = NSPMConfig::instance->md5_data_file;
+    doc["md5_tft_file"] = NSPMConfig::instance->md5_tft_file;
 
-      char buffer[512];
-      serializeJson(doc, buffer);
+    char buffer[512];
+    serializeJson(doc, buffer);
 
-      httpClient.begin(wifiClient, url.c_str());
-      httpClient.addHeader("Content-Type", "application/json");
-      int responseCode = httpClient.POST(buffer);
+    httpClient.begin(wifiClient, url.c_str());
+    httpClient.addHeader("Content-Type", "application/json");
+    int responseCode = httpClient.POST(buffer);
 
-      if (responseCode == 200) {
-        InterfaceManager::hasRegisteredToManager = true;
-        LOG_INFO("Registered to manager at: ", url.c_str());
-        break;
-      } else {
-        InterfaceManager::hasRegisteredToManager = false;
-        LOG_ERROR("Failed to register panel at: ", url.c_str(), ". Will try again in 5 seconds.");
-        vTaskDelay(5000 / portTICK_PERIOD_MS);
-      }
+    if (responseCode == 200) {
+      InterfaceManager::hasRegisteredToManager = true;
+      LOG_INFO("Registered to manager at: ", url.c_str());
+      break;
+    } else {
+      InterfaceManager::hasRegisteredToManager = false;
+      LOG_ERROR("Failed to register panel at: ", url.c_str(), ". Will try again in 5 seconds.");
+      vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
   }
 }
