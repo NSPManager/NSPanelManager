@@ -155,8 +155,8 @@
       \item Enter MQTT port if changed from default \textbf{1883}.
       \item If authentication is used for MQTT, enter username and password.
       \item If running Home Assistant, enter address with http or https and port, Ex. \textit{http://192.168.1.5:8123}. Also enter Home Assistant access token.
+      \important{If you are running the container as an Home Assistant add-on, the address and access token will already be set. Do not change these!}
       \info{To get an access token in Home Assistant, navigate to Home Assistant and press your username in the bottom left. Scroll down and create a "Long-Lived Access Token".}
-      \info{If you are running the container as an Home Assistant add-on, the address and access token will already be set. Do not change these.}
       \item If running OpenHAB, enter address with http or https and port, Ex. \textit{http://192.168.1.5:8080}. Also enter OpenHAB access token.
       \info{To get an access token in OpenHAB, navigate to OpenHAB and press your username in the bottom left. Scroll down and create an "API Token".}
     \item Save the new settings and continue to \hyperref[sec:nspanel_flashing]{NSPanel flashing}.
@@ -239,20 +239,41 @@
       \item GUI update.
       \item Delete.
     \end{itemize}
-    By pressing the name of the NSPanel you will get to the \hyperref[sec:nspanel_page]{NSPanel settings page}. By pressing the room name you will get to the relevant \hyperref[sec:room_page]{room settings page}. By pressing the IP-address of the panel a new tab will open with the configuration page on the actual NSPanel.
-    \\    
-    \\
+    By pressing the name of the NSPanel you will get to the \hyperref[sec:nspanel_page]{NSPanel settings page}. Any action you want to perform on a specific panel is available as a dropdown menu from the cog. This menu includes the following options:
+    \begin{itemize}
+      \item \textbf{Reboot} This will send a reboot command to the NSPanel.
+      \item \textbf{Visit panel page} This will open and new tab (or window) to enter the settings page on the actual NSPanel. See \hyperref[sec:nspanel_configuration]{NSPanel Configuration} for more information.
+      \item \textbf{Update firmware} This will send a command to the NSPanel to start a firmware update (the update is pulled from the manager).
+      \item \textbf{Update screen} This will send a command to the NSPanel to start a TFT update to the screen (the update is pulled from the manager).
+      \item \textbf{Delete} Will remove the panel from this manager. The panel might still register again on next boot if the settings on the NSPanel itself are not changed.
+    \end{itemize}
+    There is also the "Actions"-button on the top right where you can perform some of the actions from the list above to all panels.
+
+    \begin{figure}[H]
+    \centering
     \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{index_page.png}
+    \caption{Index page}%
+    \end{figure}
     \subsection{NSPanel page}
     \label{sec:nspanel_page}
+
     On the NSPanel settings page, settings specific for one NSPanel can be made. This is things like name, default room and so on. There is also a live display of any log messages sent from the chosen NSPanel. This depends on the selected log level in the NSPanel configuration page which is available at the IP address of the NSPanel itself.
-    \\
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{nspanel_page.png}
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.25,keepaspectratio]{nspanel_page.png}
+    \caption{NSPanel page}%
+    \end{figure}
     \subsection{Room page}
     \label{sec:room_page}
+    
     This section will describe how to manage rooms. Most of the configuration done with NSPanel Manager will be done in rooms, please read this chapter for a full understanding on how to work with rooms.
-    \\
+
+    \begin{figure}[H]
+    \centering
     \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{room_page.png}
+    \caption{Room page}%
+    \end{figure}
     \subsubsection{Scenes}
     At the moment, only NSPanel Manager scenes are available. They are easy enough to use. Simply create a scenes in the room page and they will be available in the "Scenes"-list for the room on all NSPanels.
     \\ To save a scene, on the NSPanel hold the save button for the scenes for 3 seconds to save all the states of lights \textbf{currently added to the room}.
