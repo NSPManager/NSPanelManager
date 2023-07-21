@@ -386,8 +386,7 @@ def settings_page(request):
     data["global_scenes"] = Scene.objects.filter(room__isnull=True)
     data["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
     data["max_live_log_messages"] = get_setting_with_default("max_live_log_messages", 10)
-    #data["is_home_assistant_addon"] = ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
-    data["is_home_assistant_addon"] = True
+    data["is_home_assistant_addon"] = ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
     return render(request, 'settings.html', data)
 
 
