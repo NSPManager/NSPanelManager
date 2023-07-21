@@ -9,6 +9,7 @@ import hashlib
 import psutil
 import subprocess
 import logging
+import environ
 
 from .models import NSPanel, Room, Light, Settings, Scene
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
@@ -342,6 +343,8 @@ def remove_light_from_room_view(request, room_id: int):
 
 
 def settings_page(request):
+    environment = environ.Env()
+
     data = {}
     data["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
     data["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
@@ -383,6 +386,8 @@ def settings_page(request):
     data["global_scenes"] = Scene.objects.filter(room__isnull=True)
     data["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
     data["max_live_log_messages"] = get_setting_with_default("max_live_log_messages", 10)
+    #data["is_home_assistant_addon"] = ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
+    data["is_home_assistant_addon"] = True
     return render(request, 'settings.html', data)
 
 

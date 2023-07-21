@@ -355,18 +355,23 @@
         <div class="field">
             <h5 class="title is-5">Home Assistant API</h5>
         </div>
+        {% if is_home_assistant_addon %}
+            <div class="notification is-info is-light">
+              You are running NSPanel Manager as a Home Assistant addon. These settings are managed by Home Assistant for you.
+            </div>
+        {% endif %}
         <div class="field">
             <label class="label">Address</label>
             <div class="control">
                 <input class="input" type="text" name="home_assistant_address" id="home_assistant_address"
-                    placeholder="http://192.168.1.5:8123" value="{{ home_assistant_address }}">
+                    placeholder="http://192.168.1.5:8123" value="{{ home_assistant_address }}" {% if is_home_assistant_addon %}disabled{% endif %}>
             </div>
         </div>
         <div class="field">
             <label class="label">Access token</label>
             <div class="control">
                 <input class="input" type="password" name="home_assistant_token" id="home_assistant_token"
-                    value="{{ home_assistant_token }}" placeholder="ey...">
+                    value="{{ home_assistant_token }}" placeholder="ey..." {% if is_home_assistant_addon %}disabled{% endif %}>
             </div>
         </div>
     </div>
