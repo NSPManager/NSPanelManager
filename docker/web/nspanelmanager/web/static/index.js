@@ -216,7 +216,7 @@ function update_nspanel_status(data) {
       );
     }
 
-    if ("warnings" in data && data["warnings"] != "") {
+    if ("warnings" in data) {
       if (!(data["mac"] in panel_warnings)) {
         panel_warnings[data["mac"]] = {
           api: "",
