@@ -128,11 +128,17 @@ function update_nspanel_status(data) {
           }, 1000);
         }
         if (
-          $("#panel_header_" + mac_selector).hasClass("has-background-danger")
+          $("#panel_header_" + mac_selector).hasClass(
+            "has-background-danger"
+          ) ||
+          $("#panel_header_" + mac_selector).hasClass(
+            "has-background-success-dark"
+          )
         ) {
           // Current state is offline, just about to update to online. Check if the panel has any warnings.
           updateNSPanelsWarnings();
         }
+
         $("#panel_header_" + mac_selector).attr(
           "class",
           "nspanel-status-header has-background-success"
