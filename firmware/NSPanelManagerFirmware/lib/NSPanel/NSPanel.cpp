@@ -147,14 +147,6 @@ void NSPanel::restart() {
 }
 
 bool NSPanel::init() {
-  // Pin 4 controls screen on/off.
-  pinMode(4, OUTPUT);
-  digitalWrite(4, HIGH); // Turn off power to the display
-  vTaskDelay(500 / portTICK_PERIOD_MS);
-  digitalWrite(4, LOW); // Turn on power to the display
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
-  Serial2.setTxBufferSize(128);
-  Serial2.begin(115200, SERIAL_8N1, 17, 16);
   NSPanel::instance = this;
   this->_mutexReadSerialData = xSemaphoreCreateMutex();
   this->_mutexWriteSerialData = xSemaphoreCreateMutex();
@@ -162,8 +154,26 @@ bool NSPanel::init() {
   this->_isUpdating = false;
   this->_update_progress = 0;
 
+  Serial2.setTxBufferSize(128);
+  Serial2.setRxBufferSize(256);
+  Serial2.begin(115200, SERIAL_8N1, 17, 16);
   // Clear Serial2 read buffer
-  this->_clearSerialBuffer();
+  // this->_clearSerialBuffer();
+
+  // Pin 4 controls screen on/off.
+  pinMode(4, OUTPUT);
+  digitalWrite(4, HIGH); // Turn off power to the display
+  vTaskDelay(500 / portTICK_PERIOD_MS);
+  digitalWrite(4, LOW); // Turn on power to the display
+  vTaskDelay(500 / portTICK_PERIOD_MS);
+
+  std::string result = "";
+  this->_readDataToString(&result, 2500, false);
+  if (result.compare("NSPM") == 0) {
+    this->_has_received_nspm = true;
+  }
+
+  LOG_DEBUG("Got text from panel: ", result.c_str());
 
   while (true) {
     if (xSemaphoreTake(NSPanel::instance->_mutexWriteSerialData, portMAX_DELAY)) {
@@ -233,7 +243,7 @@ bool NSPanel::init() {
 
   xSemaphoreGive(NSPanel::instance->_mutexWriteSerialData);
   xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
-  return true;
+  return this->_has_received_nspm;
 }
 
 void NSPanel::_startListeningToPanel() {
@@ -594,6 +604,18 @@ uint8_t NSPanel::getUpdateProgress() {
   return this->_update_progress;
 }
 
+std::string NSPanel::getWarnings() {
+  std::string return_string = "";
+  if (!NSPanel::instance->_has_received_nspm) {
+    return_string.append("Did not receive NSPM-flag from screen. Is the screen running the NSPanel Manager TFT file?\n");
+  }
+  return return_string;
+}
+
+bool NSPanel::ready() {
+  return this->_has_received_nspm;
+}
+
 bool NSPanel::_updateTFTOTA() {
   LOG_INFO("_updateTFTOTA Started.");
 
@@ -631,53 +653,6 @@ bool NSPanel::_updateTFTOTA() {
   digitalWrite(4, LOW); // Turn on power to the display
   vTaskDelay(5000 / portTICK_PERIOD_MS);
 
-  // Change baud rate if needed
-  int32_t baud_diff = NSPMConfig::instance->tft_upload_baud - Serial2.baudRate();
-  if (baud_diff < 0) {
-    baud_diff = baud_diff / -1;
-  }
-  if (baud_diff >= 10) {
-    std::string uploadBaudRateString = "baud=";
-    uploadBaudRateString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
-    Serial2.print(uploadBaudRateString.c_str());
-    NSPanel::instance->_sendCommandEndSequence();
-
-    std::string read_data = "";
-    NSPanel::instance->_readDataToString(&read_data, 1000, false);
-    if (read_data.compare("") != 0) {
-      LOG_INFO("Baud rate switch successful, switching Serial2 from ", Serial2.baudRate(), " to ", NSPMConfig::instance->tft_upload_baud);
-
-      NSPanel::_clearSerialBuffer();
-      Serial2.end();
-      Serial2.setTxBufferSize(0);
-      Serial2.begin(NSPMConfig::instance->tft_upload_baud, SERIAL_8N1, 17, 16);
-    } else {
-      LOG_ERROR("Baud rate switch failed. Will restart.");
-      vTaskDelay(5000 / portTICK_PERIOD_MS);
-      ESP.restart();
-      return false;
-    }
-
-    // Wait for 1 second to see if any data is returned, if it is
-    // we failed to set baud data
-    // unsigned long startMillis = millis();
-    // while (Serial2.available() == 0 && millis() - startMillis < 1000) {
-    //  vTaskDelay(10 / portTICK_PERIOD_MS);
-    //}
-    // if (Serial2.available() == 0) {
-    //  LOG_INFO("Baud rate switch successful, switching Serial2 from ", Serial2.baudRate(), " to ", NSPMConfig::instance->tft_upload_baud);
-
-    //  Serial2.flush();
-    //  Serial2.end();
-    //  Serial2.setTxBufferSize(0);
-    //  Serial2.begin(NSPMConfig::instance->tft_upload_baud, SERIAL_8N1, 17, 16);
-    //} else {
-    //  LOG_ERROR("Baud rate switch failed. Will restart.");
-    //  ESP.restart();
-    //  return false;
-    //}
-  }
-
   // Send "connect" string to get data
   Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN");
   NSPanel::instance->_sendCommandEndSequence();
@@ -711,16 +686,12 @@ bool NSPanel::_updateTFTOTA() {
     LOG_INFO("Starting upload using v1.2 protocol.");
     commandString = "whmi-wris ";
     commandString.append(std::to_string(totalTftFileSize));
-    commandString.append(",");
-    commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
-    commandString.append(",1");
+    commandString.append(",115200,1");
   } else {
     LOG_INFO("Starting upload using v1.1 protocol.");
     commandString = "whmi-wri ";
     commandString.append(std::to_string(totalTftFileSize));
-    commandString.append(",");
-    commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
-    commandString.append(",1");
+    commandString.append(",115200,1");
   }
   Serial2.print(commandString.c_str());
   NSPanel::instance->_sendCommandEndSequence();

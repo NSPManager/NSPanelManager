@@ -36,6 +36,9 @@ public:
   static void attachTouchEventCallback(void (*callback)(uint8_t, uint8_t, bool));
   static void attachSleepCallback(void (*callback)());
   static void attachWakeCallback(void (*callback)());
+  /// @brief Return a string of any warnings to show in the warning tooltip in the manager web interface.
+  static std::string getWarnings();
+  bool ready();
   bool init();
   void startOTAUpdate();
   void goToPage(const char *page);
@@ -98,6 +101,8 @@ private:
   bool _isUpdating;
   /// @brief If updating, contains the % done of the update
   uint8_t _update_progress;
+  /// @brief A boolean indicating wether or not we have received the "NSPM"-text from the panel once it started.
+  bool _has_received_nspm;
 };
 
 #endif

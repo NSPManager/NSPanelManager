@@ -1,3 +1,9 @@
 .has-tooltip-warning {
   border-bottom: none !important; /* Remove dashed underline from warning symbols */
 }
+
+[data-tooltip]:not(.is-disabled).has-tooltip-warning::before,
+[data-tooltip]:not(.is-loading).has-tooltip-warning::before,
+[data-tooltip]:not([disabled]).has-tooltip-warning::before {
+  width: 10rem !important;
+}

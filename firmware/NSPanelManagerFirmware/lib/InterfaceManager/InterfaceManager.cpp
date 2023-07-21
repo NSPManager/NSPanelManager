@@ -57,18 +57,20 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   PageManager::GetNSPanelManagerPage()->show();
   NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
   while (!WiFi.isConnected() || !MqttManager::connected() || !InterfaceManager::hasRegisteredToManager || !NSPMConfig::instance->littlefs_mount_successfull) {
-    if (!NSPMConfig::instance->littlefs_mount_successfull) {
-      PageManager::GetNSPanelManagerPage()->setText("LittleFS mount failed!");
-    } else if (!WiFi.isConnected()) {
-      if (WiFi.getMode() == WIFI_MODE_AP) {
-        PageManager::GetNSPanelManagerPage()->setText("Connect to AP NSPMPanel");
-      } else {
-        PageManager::GetNSPanelManagerPage()->setText("Connecting to WiFi...");
+    if (NSPanel::instance->ready()) {
+      if (!NSPMConfig::instance->littlefs_mount_successfull) {
+        PageManager::GetNSPanelManagerPage()->setText("LittleFS mount failed!");
+      } else if (!WiFi.isConnected()) {
+        if (WiFi.getMode() == WIFI_MODE_AP) {
+          PageManager::GetNSPanelManagerPage()->setText("Connect to AP NSPMPanel");
+        } else {
+          PageManager::GetNSPanelManagerPage()->setText("Connecting to WiFi...");
+        }
+      } else if (!InterfaceManager::hasRegisteredToManager) {
+        PageManager::GetNSPanelManagerPage()->setText("Registring to manager...");
+      } else if (!MqttManager::connected()) {
+        PageManager::GetNSPanelManagerPage()->setText("Connecting to MQTT...");
       }
-    } else if (!InterfaceManager::hasRegisteredToManager) {
-      PageManager::GetNSPanelManagerPage()->setText("Registring to manager...");
-    } else if (!MqttManager::connected()) {
-      PageManager::GetNSPanelManagerPage()->setText("Connecting to MQTT...");
     }
     vTaskDelay(500 / portTICK_PERIOD_MS);
   }
@@ -78,26 +80,29 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
     vTaskDelay((millis() - start) / portTICK_PERIOD_MS);
   }
 
-  PageManager::GetNSPanelManagerPage()->setText("Loading config...");
-  RoomManager::loadAllRooms(false);
-
-  // Update Home page cache
-  PageManager::GetHomePage()->updateDimmerValueCache();
-  PageManager::GetHomePage()->updateColorTempValueCache();
-
+  InterfaceManager::subscribeToMqttTopics();
   // Start task for MQTT processing
   xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskProcessMqttMessages", 5000, NULL, 1, &InterfaceManager::_taskHandleProcessMqttMessages, CONFIG_ARDUINO_RUNNING_CORE);
 
-  // As there may be may be MANY topics to subscribe to, do it in checks of 5 with delays
-  // between them to allow for processing all the incoming data.
-  PageManager::GetNSPanelManagerPage()->setText("Subscribing...");
-  InterfaceManager::subscribeToMqttTopics();
-  LightManager::subscribeToMqttLightUpdates();
+  if (NSPanel::instance->ready()) {
 
-  // Loading is done, show Home page
-  NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
-  PageManager::GetHomePage()->show();
-  PageManager::GetHomePage()->setScreensaverTimeout(InterfaceConfig::screensaver_activation_timeout);
+    PageManager::GetNSPanelManagerPage()->setText("Loading config...");
+    RoomManager::loadAllRooms(false);
+
+    // Update Home page cache
+    PageManager::GetHomePage()->updateDimmerValueCache();
+    PageManager::GetHomePage()->updateColorTempValueCache();
+
+    // As there may be may be MANY topics to subscribe to, do it in checks of 5 with delays
+    // between them to allow for processing all the incoming data.
+    PageManager::GetNSPanelManagerPage()->setText("Subscribing...");
+    LightManager::subscribeToMqttLightUpdates();
+
+    // Loading is done, show Home page
+    NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
+    PageManager::GetHomePage()->show();
+    PageManager::GetHomePage()->setScreensaverTimeout(InterfaceConfig::screensaver_activation_timeout);
+  }
 
   // NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
   NSPanel::attachSleepCallback(InterfaceManager::processSleepEvent);

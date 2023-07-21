@@ -12,6 +12,7 @@
 #include <Scene.hpp>
 #include <WiFi.h>
 #include <map>
+#include <string>
 
 void RoomManager::init() {
   MqttManager::subscribeToTopic("nspanel/config/reload", &RoomManager::reloadCallback);

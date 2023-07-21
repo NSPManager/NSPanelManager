@@ -1,5 +1,6 @@
 var panels_that_are_updating = [];
 const ws = new MQTTManager_WS();
+var panel_warnings = {};
 
 function get_all_online_panel_macs() {
   var panel_macs = [];
@@ -70,19 +71,42 @@ function rebootNSPanel(mac) {
 function updateNSPanelsWarnings() {
   $.get("/api/get_nspanels_warnings", (data) => {
     data.panels.forEach((panel) => {
-      let mac_selector = panel.nspanel.mac;
-      mac_selector = mac_selector.replaceAll(":", "\\:");
-      if (panel.warnings == "") {
-        $("#nspanel_" + mac_selector + "_warnings").addClass("is-hidden");
-      } else if (panel.warnings != "") {
-        $("#nspanel_" + mac_selector + "_warnings").removeClass("is-hidden");
-        $("#nspanel_" + mac_selector + "_warnings").attr(
-          "data-tooltip",
-          panel.warnings
-        );
+      if (!(panel.nspanel.mac in panel_warnings)) {
+        panel_warnings[panel.nspanel.mac] = {
+          api: "",
+          websocket: "",
+        };
       }
+      panel_warnings[panel.nspanel.mac]["api"] = panel.warnings;
     });
+
+    updateDisplayedWarnings();
   });
+}
+
+function updateDisplayedWarnings() {
+  for (const [mac, data] of Object.entries(panel_warnings)) {
+    var total_warning_string = "";
+    if (data["api"] != "") {
+      total_warning_string = data["api"];
+    }
+    if (data["websocket"] != "") {
+      if (total_warning_string != "") {
+        total_warning_string += "\n";
+      }
+      total_warning_string += data["websocket"];
+    }
+    let mac_selector = mac.replaceAll(":", "\\:");
+    if (total_warning_string == "") {
+      $("#nspanel_" + mac_selector + "_warnings").addClass("is-hidden");
+    } else if (total_warning_string != "") {
+      $("#nspanel_" + mac_selector + "_warnings").removeClass("is-hidden");
+      $("#nspanel_" + mac_selector + "_warnings").attr(
+        "data-tooltip",
+        total_warning_string
+      );
+    }
+  }
 }
 
 function show_dropdown_menu(event) {
@@ -135,22 +159,23 @@ function update_nspanel_status(data) {
           update_progress = data.progress;
         }
 
-        var new_html =
-          '<div class="tags has-addons"><span class="tag is-dark">' +
-          update_text +
-          '</span><span class="tag is-info">' +
-          update_progress +
-          "%</span></div>";
+        if (update_progress == 100) {
+          update_text = "Rebooting";
+          $("#panel_header_" + mac_selector).attr(
+            "class",
+            "nspanel-status-header has-background-success-dark"
+          );
+        } else {
+          $("#panel_header_" + mac_selector).attr(
+            "class",
+            "nspanel-status-header has-background-info"
+          );
+        }
 
-        $("#panel_header_" + mac_selector).attr(
-          "class",
-          "nspanel-status-header has-background-info"
-        );
         $("#panel_header_" + mac_selector).css("width", update_progress + "%");
         $("#panel_header_text_" + mac_selector).text(
           update_text + ", " + update_progress + "%"
         );
-        $("#online_offline_tag_parent_" + mac_selector).html(new_html);
       }
     }
     if ("rssi" in data) {
@@ -189,6 +214,17 @@ function update_nspanel_status(data) {
       $("#temperature_" + mac_selector).html(
         Math.round(data.temperature * 100) / 100 + " " + temperature_unit
       );
+    }
+
+    if ("warnings" in data && data["warnings"] != "") {
+      if (!(data["mac"] in panel_warnings)) {
+        panel_warnings[data["mac"]] = {
+          api: "",
+          websocket: "",
+        };
+      }
+      panel_warnings[data["mac"]]["websocket"] = data.warnings;
+      updateDisplayedWarnings();
     }
   }
 }

@@ -188,6 +188,10 @@ void taskManageWifiAndMqtt(void *param) {
           (*status_report_doc)["mac"] = WiFi.macAddress();
           (*status_report_doc)["temperature"] = temperature;
           (*status_report_doc)["ip"] = WiFi.localIP().toString();
+
+          std::string warning_string = NSPanel::instance->getWarnings();
+          (*status_report_doc)["warnings"] = warning_string.c_str();
+
           MqttManager::publish(NSPMConfig::instance->mqtt_panel_temperature_topic, std::to_string(temperature).c_str());
 
           char buffer[512];
@@ -222,18 +226,19 @@ void setup() {
   logger.setLogLevel(static_cast<MqttLogLevel>(config.logging_level));
 
   mqttManager.init();
+  ButtonManager::init();
 
   LOG_INFO("Initializing NSPanel communication");
   if (nspanel.init()) {
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    PageManager::init(); // Attach event callbacks
-
-    LOG_INFO("Starting tasks");
-    interfaceManager.init();
-    ButtonManager::init();
+    LOG_INFO("Successfully initiated NSPanel.");
   } else {
-    LOG_ERROR("Failed to initialize NSPanel");
+    LOG_ERROR("Failed to initiate NSPanel.");
   }
+  vTaskDelay(500 / portTICK_PERIOD_MS);
+  PageManager::init(); // Attach event callbacks
+
+  LOG_INFO("Starting tasks");
+  interfaceManager.init();
 
   pinMode(38, INPUT);
 }

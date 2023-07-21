@@ -60,8 +60,6 @@ String WebManager::processIndexTemplate(const String &templateVar) {
     return NSPMConfig::instance->mqtt_password.c_str();
   } else if (templateVar == "log_level") {
     return String(NSPMConfig::instance->logging_level);
-  } else if (templateVar == "upload_buad_rate") {
-    return String(NSPMConfig::instance->tft_upload_baud);
   } else if (templateVar == "upload_proto_latest_checked") {
     return NSPMConfig::instance->use_new_upload_protocol ? "checked" : "";
   } else if (templateVar == "upload_proto_legacy_checked") {
@@ -88,7 +86,6 @@ void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request) {
   NSPMConfig::instance->mqtt_username = request->arg("mqtt_username").c_str();
   NSPMConfig::instance->mqtt_password = request->arg("mqtt_psk").c_str();
 
-  NSPMConfig::instance->tft_upload_baud = request->arg("upload_buad_rate").toInt();
   NSPMConfig::instance->use_new_upload_protocol = request->arg("upload_protocol") == "latest";
 
   if (!NSPMConfig::instance->saveToLittleFS()) {

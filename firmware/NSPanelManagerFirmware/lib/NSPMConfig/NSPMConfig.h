@@ -71,8 +71,6 @@ public:
   /// @brief The MQTT topic to send on/off state updates for relay 2
   std::string mqtt_relay2_state_topic;
 
-  /// @brief The upload baud rate for the serial connection when uploading a new TFT file
-  uint32_t tft_upload_baud;
   /// @brief Wether or not to use the "v1.2" protcol or the v1.0
   bool use_new_upload_protocol;
 

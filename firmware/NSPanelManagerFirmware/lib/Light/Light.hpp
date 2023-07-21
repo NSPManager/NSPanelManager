@@ -5,6 +5,7 @@
 #include <DeviceEntity.hpp>
 #include <list>
 #include <map>
+#include <string>
 
 class Light : public DeviceEntity {
 public:

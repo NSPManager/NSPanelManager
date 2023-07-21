@@ -13,7 +13,6 @@ bool NSPMConfig::init() {
   this->manager_port = 8000;
   this->logging_level = 3;
   this->mqtt_port = 1883;
-  this->tft_upload_baud = 115200;
   this->use_new_upload_protocol = true;
   if (LittleFS.begin(false)) {
     Serial.println("LittleFS mounted.");
@@ -55,7 +54,6 @@ bool NSPMConfig::loadFromLittleFS() {
   this->mqtt_username = doc["mqtt_username"] | "";
   this->mqtt_password = doc["mqtt_password"] | "";
 
-  this->tft_upload_baud = doc.containsKey("upload_baud") ? doc["upload_baud"].as<uint32_t>() : 115200;
   this->use_new_upload_protocol = doc.containsKey("use_new_upload_protocol") ? doc["use_new_upload_protocol"].as<String>() == "true" : true;
 
   this->relay1_default_mode = doc["relay1_default_mode"].as<String>() == "True";
@@ -130,7 +128,6 @@ bool NSPMConfig::saveToLittleFS() {
   config_json["md5_firmware"] = this->md5_firmware;
   config_json["md5_data_file"] = this->md5_data_file;
   config_json["md5_tft_file"] = this->md5_tft_file;
-  config_json["upload_baud"] = this->tft_upload_baud;
   config_json["use_new_upload_protocol"] = this->use_new_upload_protocol ? "true" : "false";
 
   File config_file = LittleFS.open("/config.json", "w");
