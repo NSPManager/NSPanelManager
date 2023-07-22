@@ -1,8 +1,10 @@
 #include <Arduino.h>
+#include <ChunkDownloader.hpp>
 #include <HTTPClient.h>
 #include <HttpLib.hpp>
 #include <MqttLog.hpp>
 #include <MqttManager.hpp>
+#include <NSPMConfig.h>
 #include <NSPanel.hpp>
 #include <NSPanelReturnData.h>
 #include <WiFiClient.h>
@@ -641,11 +643,7 @@ bool NSPanel::_updateTFTOTA() {
   downloadUrl.append("/download_tft");
 
   LOG_INFO("Will download TFT file from: ", downloadUrl.c_str());
-
-  size_t totalTftFileSize = 0;
-  while (totalTftFileSize == 0) {
-    totalTftFileSize = HttpLib::GetFileSize(downloadUrl.c_str());
-  }
+  ChunkDownloader *cd = new ChunkDownloader(downloadUrl, 4096, 4);
 
   LOG_INFO("Force restarting screen via power switch.");
   digitalWrite(4, HIGH); // Turn off power to the display
@@ -678,20 +676,52 @@ bool NSPanel::_updateTFTOTA() {
   }
   LOG_DEBUG("Got comok: ", comok_string.c_str());
 
-  LOG_DEBUG("Will start TFT upload, TFT file size: ", totalTftFileSize);
+  // Switch to desiered upload buad rate.
+  int32_t baud_diff = NSPMConfig::instance->tft_upload_baud - Serial2.baudRate();
+  if (baud_diff < 0) {
+    baud_diff = baud_diff / -1;
+  }
+  if (baud_diff >= 10) {
+    std::string uploadBaudRateString = "baud=";
+    uploadBaudRateString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
+    Serial2.print(uploadBaudRateString.c_str());
+    NSPanel::instance->_sendCommandEndSequence();
+
+    std::string read_data = "";
+    NSPanel::instance->_readDataToString(&read_data, 1000, false);
+    if (read_data.compare("") != 0) {
+      LOG_INFO("Baud rate switch successful, switching Serial2 from ", Serial2.baudRate(), " to ", NSPMConfig::instance->tft_upload_baud);
+
+      NSPanel::_clearSerialBuffer();
+      Serial2.end();
+      Serial2.setTxBufferSize(0);
+      Serial2.begin(NSPMConfig::instance->tft_upload_baud, SERIAL_8N1, 17, 16);
+    } else {
+      LOG_ERROR("Baud rate switch failed. Will restart. Try setting the default 115200.");
+      vTaskDelay(5000 / portTICK_PERIOD_MS);
+      ESP.restart();
+      return false;
+    }
+  }
+
+  LOG_DEBUG("Will start TFT upload, TFT file size: ", cd->getTotalFileSize());
   // TODO: Detect if new protocol is not supported, in that case set flag in flash and restart and then continue flash with legacy mode.
   // Send whmi-wri command to initiate upload
   std::string commandString;
   if (NSPMConfig::instance->use_new_upload_protocol) {
     LOG_INFO("Starting upload using v1.2 protocol.");
     commandString = "whmi-wris ";
-    commandString.append(std::to_string(totalTftFileSize));
-    commandString.append(",115200,1");
+    commandString.append(std::to_string(cd->getTotalFileSize()));
+    commandString.append(",");
+    commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
+    commandString.append(",1");
   } else {
     LOG_INFO("Starting upload using v1.1 protocol.");
     commandString = "whmi-wri ";
-    commandString.append(std::to_string(totalTftFileSize));
-    commandString.append(",115200,1");
+    commandString.append(std::to_string(cd->getTotalFileSize()));
+    commandString.append(",");
+    commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
+    commandString.append(",1");
   }
   Serial2.print(commandString.c_str());
   NSPanel::instance->_sendCommandEndSequence();
@@ -720,38 +750,23 @@ bool NSPanel::_updateTFTOTA() {
   unsigned long startWaitingForOKForNextChunk = 0;
   uint32_t nextStartWriteOffset = 0;
   size_t lastReadByte = 0;
-
-  // Download next chunk
   uint8_t dataBuffer[4096];
 
   // Loop until break when all firmware has finished uploading (data available in stream == 0)
   while (true) {
 
-    // Calculate next chunk size
-    int next_write_size;
-
-    if (totalTftFileSize - lastReadByte > 4096) {
-      next_write_size = 4096;
-    } else {
-      next_write_size = totalTftFileSize - lastReadByte;
-    }
-
     // Write the chunk to the display
-    size_t bytesReceived = HttpLib::DownloadChunk(dataBuffer, downloadUrl.c_str(), nextStartWriteOffset, next_write_size);
-    LOG_DEBUG("Bytes received: ", bytesReceived, " requested ", next_write_size);
+    uint32_t current_location = cd->getCurrentChunkPosition();
+    size_t bytesReceived = cd->readNextChunk(dataBuffer);
+    lastReadByte = current_location + bytesReceived;
 
     vTaskDelay(500 / portTICK_PERIOD_MS);
-    uint16_t bytes_written = 0;
-    while (bytes_written < next_write_size) {
-      bytes_written += Serial2.write(&dataBuffer[bytes_written], next_write_size - bytes_written);
-    }
-    nextStartWriteOffset += bytes_written;
-    lastReadByte = nextStartWriteOffset;
-    NSPanel::instance->_update_progress = ((float)lastReadByte / (float)totalTftFileSize) * 100;
+    Serial2.write(dataBuffer, bytesReceived);
+    NSPanel::instance->_update_progress = ((float)lastReadByte / (float)cd->getTotalFileSize()) * 100;
 
     std::string return_string;
     uint16_t recevied_bytes = NSPanel::instance->_readDataToString(&return_string, 5000, true);
-    if (lastReadByte >= totalTftFileSize) {
+    if (lastReadByte >= cd->getTotalFileSize()) {
       NSPanel::instance->_update_progress = 100;
       LOG_INFO("TFT Upload complete, processed ", lastReadByte, " bytes.");
       break;
@@ -773,6 +788,7 @@ bool NSPanel::_updateTFTOTA() {
       if (readNextOffset > 0) {
         nextStartWriteOffset = readNextOffset;
         LOG_INFO("Got 0x08 with offset, jumping to: ", nextStartWriteOffset, " please wait.");
+        cd->seek(readNextOffset);
       }
     } else {
       LOG_DEBUG("Got unexpected return data from panel. Received ", recevied_bytes, " bytes: ");

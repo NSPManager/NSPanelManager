@@ -86,6 +86,7 @@ void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request) {
   NSPMConfig::instance->mqtt_username = request->arg("mqtt_username").c_str();
   NSPMConfig::instance->mqtt_password = request->arg("mqtt_psk").c_str();
 
+  NSPMConfig::instance->tft_upload_baud = request->arg("upload_buad_rate").toInt();
   NSPMConfig::instance->use_new_upload_protocol = request->arg("upload_protocol") == "latest";
 
   if (!NSPMConfig::instance->saveToLittleFS()) {
