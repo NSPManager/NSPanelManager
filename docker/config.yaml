@@ -1,6 +1,6 @@
 name: "NSPanel Manager"
 description: "Container for Sonoff NSPanel management with a simple and intuitive UI"
-version: "0.0.27"
+version: "0.0.28"
 slug: "nspanelmanager"
 url: "https://nspanelmanager.com"
 webui: http://[HOST]:[PORT:8000]/
