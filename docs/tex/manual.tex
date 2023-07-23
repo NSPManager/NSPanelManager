@@ -322,49 +322,55 @@
     \clearpage
     \section{Panel functions}
     \subsection{Main page}
-    \includegraphics[scale=1]{../images/main_page_numbers.png}
-    \\
-    1. Ceiling Lights button\\ 
-    \textbf{Short press} - Toggle Ceiling lights ON/OFF. \\
-    \textbf{Long press} - Enter lock mode, sliders will now only effect ceiling lights. Short press to exit lock mode.\\
-    \\
-    2. Table Lights button\\
-    \textbf{Short press} - Toggle Table lights ON/OFF \\
-    \textbf{Long press} - Enter lock mode, sliders will now only effect table lights. Short press to exit lock mode.\\
-    \\
-    3. Brightness Dimmer\\
-    Control over Ceiling and Table Lights group. (More under Lights control logic below) \\
-    \\
-    4. Kelvin Dimmer\\
-    Control over Ceiling and Table Lights group. (More under Lights control logic below) \\
-    \\
-    5. Room toggle button\\
-    \textbf{Short press} - Change room.\\
-    \\
-    6. Room button\\
-    \textbf{Short press} - Enter room page for individual device control.\\
-    \\
-    7. Lights mode button\\
-    \textbf{Short press} - Toggle between Room Lights mode and All Lights mode\\
-	\\    
-    8. Scenes button.\\
-     \textbf{Short press} - Enter Scenes page. If 7 is in Room Lights mode user will enter Room Scenes. If 7 is in All Lights mode user will enter Global Scenes page. \\
-    	\subsubsection{Lights control logic}
-    The NSPanel main page might be a bit have some behavior that seems odd at first but the logic of it will be described here. The first page will affect entities in the selected room (if in room-mode) or all the configured lights (if in "All lights"-mode). The two left button for ceiling and table lights will always behave the same. Pressing a button that is "off" will turn on all the lights of that type. Pressing a button that is "on" will turn off all lights of that type. The sliders will always display an average value of all entities that will be affected of changes. There is really a few different scenarios:				
-    \paragraph{One or more lights on}
+    \begin{figure}[H]
+    \centering
+    \includegraphics{main_page_numbers.png}
+    \caption{Main page}%
+    \end{figure}
+    \bigbreak
+    1. Ceiling Lights button \newline
+    \textbf{Short press} - Toggle Ceiling lights ON/OFF. \newline
+    \textbf{Long press} - Enter lock mode, sliders will now only effect ceiling lights. Short press to exit lock mode.
+    \bigbreak
+    2. Table Lights button \newline
+    \textbf{Short press} - Toggle Table lights ON/OFF \newline
+    \textbf{Long press} - Enter lock mode, sliders will now only effect table lights. Short press to exit lock mode.
+    \bigbreak
+    3. Brightness Dimmer \newline
+    Control over Ceiling and Table Lights group. (More under Lights control logic below)
+    \bigbreak
+    4. Kelvin Dimmer \newline
+    Control over Ceiling and Table Lights group. (More under Lights control logic below)
+    \bigbreak
+    5. Room toggle button \newline
+    \textbf{Short press} - Change room.
+    \bigbreak
+    6. Room button \newline
+    \textbf{Short press} - Enter room page for individual device control.
+    \bigbreak
+    7. Lights mode button \newline
+    \textbf{Short press} - Toggle between Room Lights mode and All Lights mode
+	  \bigbreak
+    8. Scenes button. \newline
+    \textbf{Short press} - Enter Scenes page. If 7 is in Room Lights mode user will enter Room Scenes. If 7 is in All Lights mode user will enter Global Scenes page.
+
+   	\subsubsection{Lights control logic}
+    The NSPanel main page might have some behavior that seems odd at first but the logic of it will be described here. The first page will affect entities in the selected room (if in room-mode) or all the configured lights (if in "All lights"-mode). The two left buttons for ceiling and table lights will always behave the same. Pressing a button that is "off" will turn on all the lights of that type. Pressing a button that is "on" will turn off all lights of that type. The sliders will always display an average value of all entities that will be affected of changes. There are few different scenarios:				
+
+    \paragraph{One or more lights on}\mbox{} \\
     When changing the sliders, the changes will only be sent out to the lights currently on.
     If turning on a group of lights or individual lights they will be turned on to the current brightness of the slider. I.e. average dimming level in the room.
     \info{If you wish for the light to always turn on with color temperature even though you turned it off from RGB, there is a setting in the global settings.}
     
-    \paragraph{No lights on}
+    \paragraph{No lights on}\mbox{} \\
     When changing the sliders, the changes will be sent out to all lights selected (depending on room or "all lights"-mode).
     
-    \paragraph{Lock mode}
+    \paragraph{Lock mode}\mbox{} \\
     You can lock which light to affect by pressing and holding either the ceiling or table-lights button. This will enter a special mode where changes to the sliders will only affect the selected type of lights. By pressing the same button again you can exit the "special mode". The "special mode" will also time out after a few seconds.
     
-    	\subsubsection{Scenes button (top left corner)}
+    \subsubsection{Scenes button (top left corner)}
     The little cute functional house in the top left corner is for entering the Scenes page. In NSPanel Manager there are both Room Scenes and Global Scenes. If you're in Room Lights mode (button in lower right corner) you will enter the Room Scenes page. If you're in All Lights mode you will enter the Global Scenes page. You'll also see that the house icon changes when toggling between Room Lights and All Lights mode. One yellow window and you will enter Room Scenes page when pressing it. All windows yellow and you will enter the Global Scenes page.
-    	\subsubsection{Swipe down}
+    \subsubsection{Swipe down}
     You can swipe downwards when on the first page to enter the Smart Home Control page.
     This page is a work in progress. Design and funcionality is not finished or decided yet.
     \subsection{Smart Home Control page}
