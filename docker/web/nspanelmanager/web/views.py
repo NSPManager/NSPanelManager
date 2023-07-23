@@ -391,35 +391,27 @@ def settings_page(request):
 
 
 def save_settings(request):
-    home_assistant_address = request.POST["home_assistant_address"]
-    if home_assistant_address.endswith("/"):
-        home_assistant_address = home_assistant_address[:-1]
-    openhab_address = request.POST["openhab_address"]
-    if openhab_address.endswith("/"):
-        openhab_address = openhab_address[:-1]
 
     set_setting_value(name="mqtt_server", value=request.POST["mqtt_server"])
     set_setting_value(name="mqtt_port", value=request.POST["mqtt_port"])
-    set_setting_value(name="mqtt_username",
-                      value=request.POST["mqtt_username"])
-    set_setting_value(name="mqtt_password",
-                      value=request.POST["mqtt_password"])
+    set_setting_value(name="mqtt_username", value=request.POST["mqtt_username"])
+    set_setting_value(name="mqtt_password", value=request.POST["mqtt_password"])
     if "home_assistant_address" in request.POST:
+        home_assistant_address = request.POST["home_assistant_address"]
+        if home_assistant_address.endswith("/"):
+            home_assistant_address = home_assistant_address[:-1]
         set_setting_value(name="home_assistant_address", value=home_assistant_address)
     if "home_assistant_token" in request.POST:
         set_setting_value(name="home_assistant_token", value=request.POST["home_assistant_token"])
-    set_setting_value(name="openhab_address",
-                      value=openhab_address)
-    set_setting_value(name="openhab_token",
-                      value=request.POST["openhab_token"])
-    set_setting_value(name="raise_to_100_light_level",
-                      value=request.POST["raise_to_100_light_level"])
-    set_setting_value(name="color_temp_min",
-                      value=request.POST["color_temp_min"])
-    set_setting_value(name="color_temp_max",
-                      value=request.POST["color_temp_max"])
-    set_setting_value(name="reverse_color_temp", value=(
-        "reverse_color_temp" in request.POST))
+    openhab_address = request.POST["openhab_address"]
+    if openhab_address.endswith("/"):
+        openhab_address = openhab_address[:-1]
+    set_setting_value(name="openhab_address", value=openhab_address)
+    set_setting_value(name="openhab_token", value=request.POST["openhab_token"])
+    set_setting_value(name="raise_to_100_light_level", value=request.POST["raise_to_100_light_level"])
+    set_setting_value(name="color_temp_min", value=request.POST["color_temp_min"])
+    set_setting_value(name="color_temp_max", value=request.POST["color_temp_max"])
+    set_setting_value(name="reverse_color_temp", value=( "reverse_color_temp" in request.POST))
     set_setting_value(name="min_button_push_time", value=request.POST["min_button_push_time"])
     set_setting_value(name="button_long_press_time", value=request.POST["button_long_press_time"])
     set_setting_value(name="special_mode_trigger_time", value=request.POST["special_mode_trigger_time"])
