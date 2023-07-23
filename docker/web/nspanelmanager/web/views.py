@@ -404,10 +404,10 @@ def save_settings(request):
                       value=request.POST["mqtt_username"])
     set_setting_value(name="mqtt_password",
                       value=request.POST["mqtt_password"])
-    set_setting_value(name="home_assistant_address",
-                      value=home_assistant_address)
-    set_setting_value(name="home_assistant_token",
-                      value=request.POST["home_assistant_token"])
+    if "home_assistant_address" in request.POST:
+        set_setting_value(name="home_assistant_address", value=home_assistant_address)
+    if "home_assistant_token" in request.POST:
+        set_setting_value(name="home_assistant_token", value=request.POST["home_assistant_token"])
     set_setting_value(name="openhab_address",
                       value=openhab_address)
     set_setting_value(name="openhab_token",

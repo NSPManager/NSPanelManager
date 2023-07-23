@@ -144,12 +144,14 @@ function update_nspanel_status(data) {
           "nspanel-status-header has-background-success"
         );
         $("#panel_header_text_" + mac_selector).text("");
+        $("#panel_header_" + mac_selector).css("width", "100%");
       } else if (data.state == "offline") {
         $("#panel_header_" + mac_selector).attr(
           "class",
           "nspanel-status-header has-background-danger"
         );
         $("#panel_header_text_" + mac_selector).text("Offline");
+        $("#panel_header_" + mac_selector).css("width", "100%");
       } else {
         // Update panel tag to show update progress if any
         update_text = "";
