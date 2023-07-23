@@ -113,11 +113,12 @@
 
     \clearpage
     \section{Quick start guide}
-    \subsection{Container setup}
+    \subsection{Container installation/update}
     \subsubsection{Windows}
     \important{There are currently problems running NSPanel Manager container on WSL2 as WSL2 does not handle networking properly. For more information, see the following \href{https://github.com/microsoft/WSL/issues/4150}{issue} on GitHub.}
     If you wish to run the NSPanel Manager container on Windows the current solution is to run it in a virtual machine. When you have your virtual machine up and running, you can follow the "Standalone docker container" installation below.
     \subsubsection{Standalone Docker container}
+    \textbf{Installation}\newline
     Prerequisites:
     \begin{itemize}
       \item Repository cloned/downloaded.
@@ -131,20 +132,44 @@
     \end{itemize}
     \important{By using the included script, the database with all settings and stored data will be stored within the downloaded directory. If you remove this directory, all data will be destroyed.}
     If you wish to manually build and run the container or change options or settings, see below for \hyperref[sec:advanced_setup]{advanced setup}.
+    \bigbreak
+    \textbf{Update an existing installation}\newline
+    When a new updated is released, do the following to update the standalone docker container:
+    \important{Create a backup of the "docker/nspanelmanager/db.sqlite3"-file as it contains all settings and stored data for the container.}
+    \begin{itemize}
+      \item If you have downloaded the project via git, simply navigate to the directory where the "docker"-directory is stored and run the command \lstinline[language=bash]{git pull}.
+      \item If you have downloaded the project as a ZIP, you will have to remove all the files for the project. \textbf{Make sure to make a backup of the "docker/nspanelmanager/db.sqlite3"-file before removing it!} After all the files have been removed, copy the newly downloaded files to the directory. Once the copying is complete, restore the "db.sqlite3"-file to its original location.
+      \item \textbf{For both git and zip-download}, navgiate to the "docker"-directory and run \lstinline[language=bash]{bash docker-stop\_and\_rm.sh} to stop and remove the current container. Once that is done, run \lstinline[language=bash]{docker-build\_and\_run.sh} to build and start the new container.
+    \end{itemize}
 
     \subsubsection{Home Assistant add-on}
+    \textbf{Installation}\newline
     As the repository is set to private currently, there is no way of adding it as a repository to Home Assistant. This can be worked around by doing the following:
     \begin{itemize}
       \item In Home Assistant, install the Samba or SSH add-on.
       \item Access the "add-ons"-directory in Home Assistant and create a new directory called "nspanelmanager".
       \item Copy all the files in the "docker"-directory from the GitHub repository to the newly created "nspanelmanager"-directory on the Home Assistant machine.
-      \item In the Home Assistant web interface, navigate to Settings -> Add-ons -> Add-on store.
+      \item In the Home Assistant web interface, navigate to Settings $\rightarrow$ Add-ons $\rightarrow$ Add-on store.
       \item In the upper right corner, press the three dots and choose "Check for updates".In a few seconds the "NSPanel Manager" add-on should show up under "Local add-ons".
       \note{If the add-on has not appeared within 30 seconds, try refreshing the page and trying again.}
       \note{Some users have reported that Home Assistant has to be restarted for it to show the new add-on.}
       \item Select the "NSPanel Manager" add-on and install it.
       \item Check that the add-on should start automatically.
       \item Start the add-on.
+    \end{itemize}
+    \bigbreak
+    \textbf{Update an existing installation}\newline
+    When a new update is release, do the following to update the container currently installed in Home Assistant:
+    \begin{itemize}
+      \item Access the "add-ons"-directory in Home Assistant via Samba or SSH as you did during the installation.
+      \item Enter the "nspanelmanager"-directory.
+      \item Remove all the files and directories in this directory.
+      \info{As long as you don't uninstall the add-on in the Home Assistant web ui, all your settings and other data will be retained.}
+      \item Copy all the files in the "docker"-directory from the GitHub repository to the "nspanelmanager"-directory on the Home Assistant machine.
+      \item In the Home Assistant web interface, navigate to Settings $\rightarrow$ Add-ons and check for updates.
+      \note{Some problems have been observed when trying to create a backup the currently installed version before updating.}
+      \note{If the add-on has not appeared within 30 seconds, try refreshing the page and trying again.}
+      \note{Some users have reported that Home Assistant has to be restarted for it to show the new add-on.}
     \end{itemize}
     \subsection{Container settings}
     The following has to be done in order to get a fully working container:
