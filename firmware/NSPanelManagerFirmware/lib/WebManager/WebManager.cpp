@@ -64,6 +64,8 @@ String WebManager::processIndexTemplate(const String &templateVar) {
     return NSPMConfig::instance->use_new_upload_protocol ? "checked" : "";
   } else if (templateVar == "upload_proto_legacy_checked") {
     return NSPMConfig::instance->use_new_upload_protocol ? "" : "checked";
+  } else if (templateVar == "tft_upload_baud") {
+    return String(NSPMConfig::instance->tft_upload_baud);
   }
 
   return "-- UNKNOWN TEMPLATE --";
