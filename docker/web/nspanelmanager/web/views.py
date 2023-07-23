@@ -549,3 +549,9 @@ def checksum_tft_file(request):
     else:
         filename = "gui.tft"
     return HttpResponse(get_file_md5sum(filename))
+
+def get_manual(request):
+    fs = FileSystemStorage()
+    response = HttpResponse(fs.open("manual.pdf").read(), content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="manual.pdf"'
+    return response
