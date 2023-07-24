@@ -42,8 +42,6 @@ public:
   static inline roomMode currentRoomMode;
   static inline editLightMode currentEditLightMode;
   static inline editLightMode _triggerSpecialLightMode;
-
-  static inline void handleNSPanelCommand(char *topic, byte *payload, unsigned int length);
 };
 
 #endif

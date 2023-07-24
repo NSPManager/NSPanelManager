@@ -24,6 +24,7 @@ def register_panel(nspanel, mqtt_client, settings):
     register_temperature_sensor(nspanel, mqtt_client, settings, base_config)
     register_relays(nspanel, mqtt_client, settings, base_config)
     register_screen_switch(nspanel, mqtt_client, settings, base_config)
+    register_screen_brightness_controls(nspanel, mqtt_client, settings, base_config)
 
 
 def register_temperature_sensor(nspanel, mqtt_client, settings, base_config):
@@ -73,3 +74,18 @@ def register_screen_switch(nspanel, mqtt_client, settings, base_config):
     mqtt_client.publish("homeassistant/switch/nspanelmanager/" + nspanel["mac"].replace(":", "_").lower() + "_screen/config", json.dumps(config), retain=True)
 
 
+def register_screen_brightness_controls(nspanel, mqtt_client, settings, base_config):
+    config = dict(base_config)
+    config["name"] = nspanel["name"] + " screen brightness"
+    config["command_topic"] = "nspanel/" + nspanel["name"] + "/brightness"
+    config["min"] = "1"
+    config["max"] = "100"
+    config["unique_id"] = nspanel["mac"].replace(":", "_").lower() + "_screen_brightness"
+    mqtt_client.publish("homeassistant/number/nspanelmanager/" + nspanel["mac"].replace(":", "_").lower() + "_screen_brightness/config", json.dumps(config), retain=True)
+
+    config["name"] = nspanel["name"] + " screensaver brightness"
+    config["command_topic"] = "nspanel/" + nspanel["name"] + "/brightness_screensaver"
+    config["min"] = "0"
+    config["max"] = "100"
+    config["unique_id"] = nspanel["mac"].replace(":", "_").lower() + "_screensaver_brightness"
+    mqtt_client.publish("homeassistant/number/nspanelmanager/" + nspanel["mac"].replace(":", "_").lower() + "_screensaver_brightness/config", json.dumps(config), retain=True)

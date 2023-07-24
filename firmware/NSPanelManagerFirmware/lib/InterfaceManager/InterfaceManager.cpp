@@ -16,6 +16,7 @@
 #include <WebManager.hpp>
 #include <WiFi.h>
 #include <WiFiClient.h>
+#include <string>
 
 void InterfaceManager::init() {
   this->instance = this;
@@ -154,7 +155,7 @@ void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int len
   }
 }
 
-void InterfaceConfig::handleNSPanelCommand(char *topic, byte *payload, unsigned int length) {
+void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned int length) {
   std::string payload_str = std::string((char *)payload, length);
   StaticJsonDocument<256> json;
   DeserializationError error = deserializeJson(json, payload_str);
@@ -176,6 +177,34 @@ void InterfaceConfig::handleNSPanelCommand(char *topic, byte *payload, unsigned 
   }
 }
 
+void InterfaceManager::handleNSPanelScreenBrightnessCommand(char *topic, byte *payload, unsigned int length) {
+  std::string payload_str = std::string((char *)payload, length);
+  int new_brightness = std::stoi(payload_str);
+  if (new_brightness < 1) {
+    new_brightness = 1;
+  } else if (new_brightness > 100) {
+    new_brightness = 100;
+  }
+  InterfaceConfig::screen_dim_level = new_brightness;
+  if (PageManager::GetCurrentPage() != PageManager::GetScreensaverPage()) {
+    NSPanel::instance->setDimLevel(new_brightness);
+  }
+}
+
+void InterfaceManager::handleNSPanelScreensaverBrightnessCommand(char *topic, byte *payload, unsigned int length) {
+  std::string payload_str = std::string((char *)payload, length);
+  int new_brightness = std::stoi(payload_str);
+  if (new_brightness < 0) {
+    new_brightness = 0;
+  } else if (new_brightness > 100) {
+    new_brightness = 100;
+  }
+  InterfaceConfig::screensaver_dim_level = new_brightness;
+  if (PageManager::GetCurrentPage() == PageManager::GetScreensaverPage()) {
+    NSPanel::instance->setDimLevel(new_brightness);
+  }
+}
+
 void InterfaceManager::subscribeToMqttTopics() {
   // Subscribe to command to wake/put to sleep the display
   vTaskDelay(100 / portTICK_PERIOD_MS);
@@ -186,12 +215,9 @@ void InterfaceManager::subscribeToMqttTopics() {
     LOG_DEBUG("Not attaching MQTT clock callback is panel is confiugred to now show clock on screensaver.");
   }
 
-  MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_cmd_topic.c_str(), &InterfaceConfig::handleNSPanelCommand);
-
-  // Every light in every room
-  // for (Light *light : LightManager::getAllLights()) {
-  //   InterfaceManager::instance->_subscribeToLightTopics(light);
-  // }
+  MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_cmd_topic.c_str(), &InterfaceManager::handleNSPanelCommand);
+  MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_screen_brightness_topic.c_str(), &InterfaceManager::handleNSPanelScreenBrightnessCommand);
+  MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_screensaver_brightness.c_str(), &InterfaceManager::handleNSPanelScreensaverBrightnessCommand);
 }
 
 void InterfaceManager::processWakeEvent() {

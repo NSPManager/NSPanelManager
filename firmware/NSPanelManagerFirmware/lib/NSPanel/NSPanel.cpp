@@ -677,32 +677,32 @@ bool NSPanel::_updateTFTOTA() {
   LOG_DEBUG("Got comok: ", comok_string.c_str());
 
   // Switch to desiered upload buad rate.
-  int32_t baud_diff = NSPMConfig::instance->tft_upload_baud - Serial2.baudRate();
-  if (baud_diff < 0) {
-    baud_diff = baud_diff / -1;
-  }
-  if (baud_diff >= 10) {
-    std::string uploadBaudRateString = "baud=";
-    uploadBaudRateString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
-    Serial2.print(uploadBaudRateString.c_str());
-    NSPanel::instance->_sendCommandEndSequence();
+  // int32_t baud_diff = NSPMConfig::instance->tft_upload_baud - Serial2.baudRate();
+  // if (baud_diff < 0) {
+  //   baud_diff = baud_diff / -1;
+  // }
+  // if (baud_diff >= 10) {
+  //   std::string uploadBaudRateString = "baud=";
+  //   uploadBaudRateString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
+  //   Serial2.print(uploadBaudRateString.c_str());
+  //   NSPanel::instance->_sendCommandEndSequence();
 
-    std::string read_data = "";
-    NSPanel::instance->_readDataToString(&read_data, 1000, false);
-    if (read_data.compare("") != 0) {
-      LOG_INFO("Baud rate switch successful, switching Serial2 from ", Serial2.baudRate(), " to ", NSPMConfig::instance->tft_upload_baud);
+  //   std::string read_data = "";
+  //   NSPanel::instance->_readDataToString(&read_data, 1000, false);
+  //   if (read_data.compare("") != 0) {
+  //     LOG_INFO("Baud rate switch successful, switching Serial2 from ", Serial2.baudRate(), " to ", NSPMConfig::instance->tft_upload_baud);
 
-      NSPanel::_clearSerialBuffer();
-      Serial2.end();
-      Serial2.setTxBufferSize(0);
-      Serial2.begin(NSPMConfig::instance->tft_upload_baud, SERIAL_8N1, 17, 16);
-    } else {
-      LOG_ERROR("Baud rate switch failed. Will restart. Try setting the default 115200.");
-      vTaskDelay(5000 / portTICK_PERIOD_MS);
-      ESP.restart();
-      return false;
-    }
-  }
+  //     NSPanel::_clearSerialBuffer();
+  //     Serial2.end();
+  //     Serial2.setTxBufferSize(0);
+  //     Serial2.begin(NSPMConfig::instance->tft_upload_baud, SERIAL_8N1, 17, 16);
+  //   } else {
+  //     LOG_ERROR("Baud rate switch failed. Will restart. Try setting the default 115200.");
+  //     vTaskDelay(5000 / portTICK_PERIOD_MS);
+  //     ESP.restart();
+  //     return false;
+  //   }
+  // }
 
   LOG_DEBUG("Will start TFT upload, TFT file size: ", cd->getTotalFileSize());
   // TODO: Detect if new protocol is not supported, in that case set flag in flash and restart and then continue flash with legacy mode.
@@ -713,14 +713,16 @@ bool NSPanel::_updateTFTOTA() {
     commandString = "whmi-wris ";
     commandString.append(std::to_string(cd->getTotalFileSize()));
     commandString.append(",");
-    commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
+    // commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
+    commandString.append("115200");
     commandString.append(",1");
   } else {
     LOG_INFO("Starting upload using v1.1 protocol.");
     commandString = "whmi-wri ";
     commandString.append(std::to_string(cd->getTotalFileSize()));
     commandString.append(",");
-    commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
+    // commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
+    commandString.append("115200");
     commandString.append(",1");
   }
   Serial2.print(commandString.c_str());

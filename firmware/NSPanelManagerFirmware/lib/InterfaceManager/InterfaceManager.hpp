@@ -32,6 +32,10 @@ public:
   /// @brief The InfterfaceManager instance
   static inline InterfaceManager *instance;
 
+  static inline void handleNSPanelCommand(char *topic, byte *payload, unsigned int length);
+  static inline void handleNSPanelScreenBrightnessCommand(char *topic, byte *payload, unsigned int length);
+  static inline void handleNSPanelScreensaverBrightnessCommand(char *topic, byte *payload, unsigned int length);
+
 private:
   /// @brief The task that handles startup if InterfaceManager. It load the config from the server and processes it and
   /// @brief makes needed adjustments to make the panel ready for use.

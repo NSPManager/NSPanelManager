@@ -54,6 +54,10 @@ public:
   std::string mqtt_panel_status_topic;
   /// @brief MQTT panel command topic
   std::string mqtt_panel_cmd_topic;
+  /// @brief MQTT screen brightness topic
+  std::string mqtt_panel_screen_brightness_topic;
+  /// @brief MQTT screensaver brightness topic
+  std::string mqtt_panel_screensaver_brightness;
   /// @brief MQTT panel temperature topic
   std::string mqtt_panel_temperature_topic;
   /// @brief MQTT topic to send logs to
