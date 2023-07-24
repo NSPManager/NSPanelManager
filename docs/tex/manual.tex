@@ -475,7 +475,7 @@
     \subsubsection{Home Assistant and/or OpenHAB to/from NSPanel Manager container}
     There is two types of trafic flowing between these nodes:
     \begin{itemize}
-      \item \textbf{Websocket:} A websocket connection is setup in order for the NSPanel Manager container to receive entity updates from Home Assistant and/or OpenHAB but also to sent entity commands (ex. turn light X on typ 20\%). A websocket is used to speed up the communication and also to not have to poll the home automation software for information.
+      \item \textbf{Websocket:} A websocket connection is setup in order for the NSPanel Manager container to receive entity updates from Home Assistant and/or OpenHAB but also to sent entity commands (ex. turn light X on to 20\%). A websocket is used to speed up the communication and also to not have to poll the home automation software for information.
       \item \textbf{HTTP GET API:} The usual HTTP GET API is also used. This is used when adding entities to a room, as an example. When pressing the "Add new light" button, the NSPanel Manager container will make an HTTP GET request to gather all available entities and then send them back to the client (browser) so that the user may choose what entitiy to add to the room.
     \end{itemize}
     \subsubsection{NSPanel Manager container to/from MQTT}
