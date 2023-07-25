@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+from django.core.management.utils import get_random_secret_key
 import environ
+import os
 
 environment = environ.Env()
 
@@ -23,7 +25,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ihwiwwg=$-s#j+i02&hl7yujj*nvollnodt=edhhaakrto=%tl'
+SECRET_KEY = ''
+if os.path.exists("secret.key"):
+    with open("secret.key") as f:
+        SECRET_KEY = f.read()
+else:
+    print("No secret key file exists, creating!")
+    SECRET_KEY = get_random_secret_key()
+    with open("secret.key", "w") as f:
+        f.write(SECRET_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
