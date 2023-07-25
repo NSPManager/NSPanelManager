@@ -19,6 +19,7 @@ import re
 import threading
 import os
 import pytz
+import environ
 
 def get_machine_mac():
     pid = subprocess.Popen(["ifconfig" ], stdout=subprocess.PIPE)
@@ -261,7 +262,16 @@ def get_config():
             config_request = get("http://127.0.0.1:8000/api/get_mqtt_manager_config", timeout=5)
             if config_request.status_code == 200:
                 logging.info("Got config, will start MQTT Manager.")
+                environment = environ.Env()
                 settings = config_request.json()
+                settings["mqtt_server"] = environment("MQTT_SERVER")
+                settings["mqtt_port"] = int(environment("MQTT_PORT"))
+                settings["mqtt_username"] = environment("MQTT_USERNAME")
+                settings["mqtt_password"] = environment("MQTT_PASSWORD")
+                settings["home_assistant_address"] = environment("HOME_ASSISTANT_ADDRESS")
+                settings["home_assistant_token"] = environment("HOME_ASSISTANT_TOKEN")
+                settings["openhab_address"] = environment("OPENHAB_ADDRESS")
+                settings["openhab_token"] = environment("OPENHAB_TOKEN")
 
                 for id, light in settings["lights"].items():
                     int_id = int(id)

@@ -4,9 +4,6 @@ if [ "$TZ" != "" ]; then
 	echo "$TZ" >/etc/timezone
 fi
 
-echo "Starting mqtt_manager.py in background"
-/usr/local/bin/python ./mqtt_manager.py &
-
 cd nspanelmanager
 
 echo "Running migrations..."

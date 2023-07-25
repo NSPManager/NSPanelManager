@@ -10,6 +10,7 @@ import psutil
 import subprocess
 import logging
 import environ
+import os
 
 from .models import NSPanel, Room, Light, Settings, Scene
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
@@ -27,9 +28,17 @@ def restart_mqtt_manager():
             logging.info("Killing existing mqtt_manager")
             proc.kill()
     # Restart the process
-    logging.info("Starting a new mqtt_manager")
-    subprocess.Popen(
-        ["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
+    logging.info("Restarting MQTT Manager")
+    mqttmanager_env = os.environ.copy()
+    mqttmanager_env["MQTT_SERVER"] = get_setting_with_default("mqtt_server", "")
+    mqttmanager_env["MQTT_PORT"] = get_setting_with_default("mqtt_port", "1883")
+    mqttmanager_env["MQTT_USERNAME"] = get_setting_with_default("mqtt_username", "")
+    mqttmanager_env["MQTT_PASSWORD"] = get_setting_with_default("mqtt_password", "")
+    mqttmanager_env["HOME_ASSISTANT_ADDRESS"] = get_setting_with_default("home_assistant_address", "")
+    mqttmanager_env["HOME_ASSISTANT_TOKEN"] = get_setting_with_default("home_assistant_token", "")
+    mqttmanager_env["OPENHAB_ADDRESS"] = get_setting_with_default("openhab_address", "")
+    mqttmanager_env["OPENHAB_TOKEN"] = get_setting_with_default("openhab_token", "")
+    subprocess.Popen(["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/", env=mqttmanager_env)
 
 
 def index(request):

@@ -11,6 +11,7 @@ import hashlib
 import psutil
 import subprocess
 import environ
+import os
 
 from .models import NSPanel, Room, Light, LightState, Scene
 from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default
@@ -22,8 +23,17 @@ def restart_mqtt_manager():
             logging.info("Killing existing mqtt_manager")
             proc.kill()
     # Restart the process
-    logging.info("Starting a new mqtt_manager")
-    subprocess.Popen(["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/")
+    logging.info("Restarting MQTT Manager")
+    mqttmanager_env = os.environ.copy()
+    mqttmanager_env["MQTT_SERVER"] = get_setting_with_default("mqtt_server", "")
+    mqttmanager_env["MQTT_PORT"] = get_setting_with_default("mqtt_port", "1883")
+    mqttmanager_env["MQTT_USERNAME"] = get_setting_with_default("mqtt_username", "")
+    mqttmanager_env["MQTT_PASSWORD"] = get_setting_with_default("mqtt_password", "")
+    mqttmanager_env["HOME_ASSISTANT_ADDRESS"] = get_setting_with_default("home_assistant_address", "")
+    mqttmanager_env["HOME_ASSISTANT_TOKEN"] = get_setting_with_default("home_assistant_token", "")
+    mqttmanager_env["OPENHAB_ADDRESS"] = get_setting_with_default("openhab_address", "")
+    mqttmanager_env["OPENHAB_TOKEN"] = get_setting_with_default("openhab_token", "")
+    subprocess.Popen(["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/", env=mqttmanager_env)
 
 
 def get_file_md5sum(filename):
@@ -40,20 +50,6 @@ def get_mqtt_manager_config(request):
         get_setting_with_default("color_temp_min", 2000))
     return_json["color_temp_max"] = int(
         get_setting_with_default("color_temp_max", 6000))
-    return_json["mqtt_server"] = get_setting_with_default("mqtt_server", "")
-    return_json["mqtt_port"] = int(get_setting_with_default("mqtt_port", 1883))
-    return_json["mqtt_username"] = get_setting_with_default(
-        "mqtt_username", "")
-    return_json["mqtt_password"] = get_setting_with_default(
-        "mqtt_password", "")
-    return_json["home_assistant_address"] = get_setting_with_default(
-        "home_assistant_address", "")
-    return_json["home_assistant_token"] = get_setting_with_default(
-        "home_assistant_token", "")
-    return_json["openhab_address"] = get_setting_with_default(
-        "openhab_address", "")
-    return_json["openhab_token"] = get_setting_with_default(
-        "openhab_token", "")
     return_json["openhab_brightness_channel_name"] = get_setting_with_default(
         "openhab_brightness_channel_name", "")
     return_json["openhab_brightness_channel_min"] = get_setting_with_default(
