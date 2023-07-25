@@ -430,6 +430,7 @@
     \begin{lstlisting}[language=bash]
     docker run --name nspanelmanager -v /etc/timezone:/etc/timezone:ro -v \
     "$(pwd)/web/nspanelmanager/db.sqlite3":"/usr/src/app/nspanelmanager/db.sqlite3" \
+    "$(pwd)/web/nspanelmanager/secret.key":"/usr/src/app/nspanelmanager/secret.key" \
     -d -p 8000:8000 -p 8001:8001 nspanelmanager
     \end{lstlisting}
     If you wish to change the timezone, there are two options. Either, do as the command above, pass in the local machine /etc/timezone. This might not always work though as you'r server might be set to Etc/UTC then you can set the environment variable like this, for example: \lstinline[language=bash]{-E TZ=Europe/Stockholm} and remove the volume mapping for /etc/timezone.
