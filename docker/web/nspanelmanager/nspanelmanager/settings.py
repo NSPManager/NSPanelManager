@@ -25,12 +25,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
+SECRET_KEY = ""
 if os.path.exists("secret.key"):
     with open("secret.key") as f:
         SECRET_KEY = f.read()
-else:
-    print("No secret key file exists, creating!")
+
+if SECRET_KEY.strip() == "":
+    print("No secret key exists, creating!")
     SECRET_KEY = get_random_secret_key()
     with open("secret.key", "w") as f:
         f.write(SECRET_KEY)
