@@ -8,6 +8,9 @@ jobs:
   copy_config_template:
     name: Update Home Assistant add-on version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      deployments: read
     steps:
       - uses: actions/checkout@v2
       - name: Update Home Assistant config.yaml version
