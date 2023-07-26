@@ -21,7 +21,7 @@ jobs:
         with:
           args: |
             --all \
-            --target docker \
+            --target NSPanelManager \
             --image NSPanelManager-{arch} \
             --version ${{ github.ref_name }} \
             --release ${{ github.ref_name }} \
