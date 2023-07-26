@@ -20,11 +20,7 @@ jobs:
           replace: "${{ github.ref_name }}"
           regex: true
           include: "docker/config.yaml"
-      - name: Push changes to repo
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+      - uses: stefanzweifel/git-auto-commit-action@v4
   publish:
     name: Publish
     runs-on: ubuntu-latest
