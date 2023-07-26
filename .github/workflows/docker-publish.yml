@@ -5,6 +5,16 @@ on:
     types: [published]
 
 jobs:
+  write-version:
+    runs-on: ubuntu-latest
+    name: Update Home Assistant add-on version
+    steps:
+      - uses: actions/checkout@master
+      - name: Update version
+        uses: brettdorrans/write-version-to-file@master
+        with:
+          filename: "/docker/config.yaml"
+          placeholder: "${VERSION}"
   publish:
     name: Publish
     runs-on: ubuntu-latest
