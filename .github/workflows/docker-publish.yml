@@ -5,16 +5,6 @@ on:
     types: [published]
 
 jobs:
-  write-version:
-    runs-on: ubuntu-latest
-    name: Update Home Assistant add-on version
-    steps:
-      - uses: actions/checkout@master
-      - name: Update version
-        uses: brettdorrans/write-version-to-file@master
-        with:
-          filename: "docker/config.yaml"
-          placeholder: "${VERSION}"
   publish:
     name: Publish
     runs-on: ubuntu-latest
@@ -33,5 +23,6 @@ jobs:
             --all \
             --target docker \
             --image NSPanelManager-{arch} \
+            --version ${{ github.ref_name }} \
             --release ${{ github.ref_name }} \
             --docker-hub ${{ secrets.DOCKERHUB_USERNAME }}
