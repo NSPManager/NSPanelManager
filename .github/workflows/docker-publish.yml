@@ -22,5 +22,5 @@ jobs:
           args: |
             --all \
             --target docker \
-            --image nspanelmanager-{arch}
-            --docker-hub ${{ secrets.DOCKERHUB_USERNAME }}
+            --image NSPanelManager-{arch} \
+            --docker-hub ${{ secrets.DOCKERHUB_TOKEN }}
