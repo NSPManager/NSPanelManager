@@ -12,7 +12,7 @@ jobs:
       contents: write
       deployments: read
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Update Home Assistant config.yaml version
         uses: jacobtomlinson/gha-find-replace@v3
         with:
