@@ -1,6 +1,6 @@
 name: "NSPanel Manager"
 description: "Container for Sonoff NSPanel management with a simple and intuitive UI"
-version: "${VERSION}"
+version: "0.0.28"
 image: nspanelmanager/nspanelmanager-{arch}:latest
 slug: "nspanelmanager"
 url: "https://nspanelmanager.com"
