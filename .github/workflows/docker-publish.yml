@@ -13,7 +13,7 @@ jobs:
       - name: Update version
         uses: brettdorrans/write-version-to-file@master
         with:
-          filename: "/docker/config.yaml"
+          filename: "docker/config.yaml"
           placeholder: "${VERSION}"
   publish:
     name: Publish
