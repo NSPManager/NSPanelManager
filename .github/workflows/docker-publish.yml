@@ -23,4 +23,5 @@ jobs:
             --all \
             --target docker \
             --image NSPanelManager-{arch} \
+            --release-tag ${{  github.ref_name }} \
             --docker-hub ${{ secrets.DOCKERHUB_USERNAME }}
