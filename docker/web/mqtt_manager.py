@@ -194,7 +194,7 @@ def on_message(client, userdata, msg):
                         "payload": mqtt_manager_libs.nspanel_states.states[panel_id]
                     }
                     mqtt_manager_libs.websocket_server.send_message(json.dumps(ws_data))
-            elif mqtt_connect_time + 30000 <= millis():
+            elif mqtt_connect_time + 30000 >= millis():
                 logging.warning(F"Removing mqtt topic: {msg.topic} as panel does not exist any more.")
                 client.publish('/'.join(parts), payload=None, qos=0, retain=True)
         elif parts[-1] == "status_report":
@@ -241,7 +241,7 @@ def on_message(client, userdata, msg):
             mqtt_manager_libs.scenes.save_scene(None, parts[3]) # Save scene were part[3] is scene name
         elif msg.topic.startswith("nspanel/entities/light/"):
             light_id =int(parts[3])
-            if not light_id in mqtt_manager_libs.light_states.states and mqtt_connect_time + 10000 <= millis():
+            if not light_id in mqtt_manager_libs.light_states.states and mqtt_connect_time + 10000 >= millis():
                 logging.warning(F"Removing MQTT topic '{msg.topic}' for light that does not exist any more.")
                 client.publish('/'.join(parts), payload=None, qos=0, retain=True)
         else:
