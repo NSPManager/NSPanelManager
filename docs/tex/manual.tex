@@ -434,7 +434,7 @@
     "$(pwd)/data/":"/data/" \
     -d -p 8000:8000 -p 8001:8001 nspanelmanager
     \end{lstlisting}
-    If you wish to change the timezone, there are two options. Either, do as the command above, pass in the local machine /etc/timezone. This might not always work though as your server might be set to Etc/UTC then you can set the TZ-environment variable, for example: \lstinline[language=bash]{-E TZ=Europe/Stockholm} and remove the volume mapping for /etc/timezone.
+    If you wish to change the timezone, there are two options. Either, do as the command above, pass in the local machine /etc/timezone. This might not always work though as your server might be set to Etc/UTC then you can set the TZ-environment variable, for example: \lstinline[language=bash]{-e TZ=Europe/Stockholm} and remove the volume mapping for /etc/timezone.
     \important{All data for NSPanel Manager is stored in the directory mapped to "/data" in the container. In this case, the "data"-directory where you are currently standing.}
 
     \clearpage
