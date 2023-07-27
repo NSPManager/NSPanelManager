@@ -1,6 +1,7 @@
 .vscode
 *.pyc
 docker/web/db.sqlite3
+docker/data/
 docker/web/nspanelmanager/db.sqlite3
 docker/web/nspanelmanager/secret.key
 firmware/NSPanelManagerFirmware/data/config.json
