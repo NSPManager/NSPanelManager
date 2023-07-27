@@ -120,41 +120,54 @@
     \important{There are currently problems running NSPanel Manager container on WSL2 as WSL2 does not handle networking properly. For more information, see the following \href{https://github.com/microsoft/WSL/issues/4150}{issue} on GitHub.}
     If you wish to run the NSPanel Manager container on Windows the current solution is to run it in a virtual machine. When you have your virtual machine up and running, you can follow the "Standalone docker container" installation below.
     \subsubsection{Standalone Docker container}
+    \label{sec:standalone_docker_container}
     \textbf{Installation}\newline
     Prerequisites:
     \begin{itemize}
       \item Repository cloned/downloaded.
       \item Working Docker installation.
+      \item A directory to store all data. In the example below, this is referred to as \textbf{data\_dir}.
     \end{itemize}
-    At the moment, the container image is not available on any registry. This means that the image has to be built manually to start it. If running MacOS or Linux this is easy enough to do, perform the following to build and start the container:
+    The pre-built container image is available on Docker hub as several different architectures, the following architectures are available:
+    \begin{itemize}
+      \item armhf
+      \item armv7
+      \item aarch64
+      \item i386
+      \item amd64
+    \end{itemize}
+    In order to run one of these images, issue the docker run command with the appropriate image for your hardware. The following is an example on how to start the image on a x64 PC with timezone Europe/Stockholm:
+    \begin{lstlisting}[language=bash]
+    docker run --name nspanelmanager -e TZ=Europe/Stockholm -v \
+    "data_dir/":"/data/" \
+    -d -p 8000:8000 -p 8001:8001 nspanelmanager/nspanelmanager-amd64:latest
+    \end{lstlisting}
     \begin{itemize}
       \item Open a terminal and navigate to the downloaded repository.
       \item Execute \lstinline[language=bash]|cd docker| to navigate to the "docker"-directory.
       \item Run the script "docker-build\_and\_run.sh" to build the container \& start it up using the default values. This can be done by executing \lstinline[language=bash]|bash docker-build_and_run.sh|.
     \end{itemize}
-    \important{By using the included script, the database with all settings and stored data will be stored within the downloaded directory. If you remove this directory, all data will be destroyed.}
+    \important{All the data for the container will be stored in the directory mapped to /data/ in the container.}
     If you wish to manually build and run the container or change options or settings, see below for \hyperref[sec:advanced_setup]{advanced setup}.
     \bigbreak
     \textbf{Update an existing installation}\newline
     When a new updated is released, do the following to update the standalone docker container:
-    \important{Create a backup of the "docker/nspanelmanager/db.sqlite3"-file as it contains all settings and stored data for the container.}
+    \important{Create a backup of the "nspanelmanager\_db.sqlite3"-file in the data\_dir as it contains all settings and stored data for the container.}
+    In order to update to the latest version of the container you have to remove the current image and recreate it. Perform the following in order to update:
     \begin{itemize}
-      \item If you have downloaded the project via git, simply navigate to the directory where the "docker"-directory is stored and run the command \lstinline[language=bash]{git pull}.
-      \item If you have downloaded the project as a ZIP, you will have to remove all the files for the project. \textbf{Make sure to make a backup of the "docker/nspanelmanager/db.sqlite3"-file before removing it!} After all the files have been removed, copy the newly downloaded files to the directory. Once the copying is complete, restore the "db.sqlite3"-file to its original location.
-      \item \textbf{For both git and zip-download}, navgiate to the "docker"-directory and run \lstinline[language=bash]{bash docker-stop_and_rm.sh} to stop and remove the current container. Once that is done, run \lstinline[language=bash]{docker-build_and_run.sh} to build and start the new container.
+      \item Run \lstinline[language=bash]{docker rm -f nspanelmanager}.
+      \item Run \lstinline[language=bash]{docker rmi nspanelmanager}.
+      \item Redo the installation steps \hyperref[sec:standalone_docker_container]{above} and make sure to point to the same data\_dir as previously.
     \end{itemize}
+    \info{Container management can be made much easier with the help of tools like \href{https://www.portainer.io/}{portainer}.}
 
     \subsubsection{Home Assistant add-on}
     \textbf{Installation}\newline
     As the repository is set to private currently, there is no way of adding it as a repository to Home Assistant. This can be worked around by doing the following:
     \begin{itemize}
-      \item In Home Assistant, install the Samba or SSH add-on.
-      \item Access the "add-ons"-directory in Home Assistant and create a new directory called "nspanelmanager".
-      \item Copy all the files in the "docker"-directory from the GitHub repository to the newly created "nspanelmanager"-directory on the Home Assistant machine.
       \item In the Home Assistant web interface, navigate to Settings $\rightarrow$ Add-ons $\rightarrow$ Add-on store.
-      \item In the upper right corner, press the three dots and choose "Check for updates".In a few seconds the "NSPanel Manager" add-on should show up under "Local add-ons".
-      \note{If the add-on has not appeared within 30 seconds, try refreshing the page and trying again.}
-      \note{Some users have reported that Home Assistant has to be restarted for it to show the new add-on.}
+      \item In the upper right corner, press the three dots and choose "Repositories".
+      \item Add \textbf{https://github.com/NSPManager/NSPanelManager} to the list of repositories and close the dialog.
       \item Select the "NSPanel Manager" add-on and install it.
       \item Check that the add-on should start automatically.
       \item Start the add-on.
@@ -163,15 +176,8 @@
     \textbf{Update an existing installation}\newline
     When a new update is release, do the following to update the container currently installed in Home Assistant:
     \begin{itemize}
-      \item Access the "add-ons"-directory in Home Assistant via Samba or SSH as you did during the installation.
-      \item Enter the "nspanelmanager"-directory.
-      \item Remove all the files and directories in this directory.
-      \info{As long as you don't uninstall the add-on in the Home Assistant web ui, all your settings and other data will be retained.}
-      \item Copy all the files in the "docker"-directory from the GitHub repository to the "nspanelmanager"-directory on the Home Assistant machine.
       \item In the Home Assistant web interface, navigate to Settings $\rightarrow$ Add-ons and check for updates.
-      \note{Some problems have been observed when trying to create a backup the currently installed version before updating.}
-      \note{If the add-on has not appeared within 30 seconds, try refreshing the page and trying again.}
-      \note{Some users have reported that Home Assistant has to be restarted for it to show the new add-on.}
+      \item Select the "NSPanel Manager"-add-on and choose to update it.
     \end{itemize}
     \subsection{Container settings}
     The following has to be done in order to get a fully working container:
@@ -181,10 +187,10 @@
         \note{If you are running the MQTT server as an add-on to Home Assistant, enter the IP-address of your Home Assistant server.}
       \item Enter MQTT port if changed from default \textbf{1883}.
       \item If authentication is used for MQTT, enter username and password.
-      \item If running Home Assistant, enter address with http or https and port, Ex. \textit{http://192.168.1.5:8123}. Also enter Home Assistant access token.
+      \item If running Home Assistant, enter address with http or https and port, E.g. \textit{http://192.168.1.5:8123}. Also enter Home Assistant access token.
       \important{If you are running the container as an Home Assistant add-on, the address and access token will already be set. Do not change these!}
       \info{To get an access token in Home Assistant, navigate to Home Assistant and press your username in the bottom left. Scroll down and create a "Long-Lived Access Token".}
-      \item If running OpenHAB, enter address with http or https and port, Ex. \textit{http://192.168.1.5:8080}. Also enter OpenHAB access token.
+      \item If running OpenHAB, enter address with http or https and port, E.g. \textit{http://192.168.1.5:8080}. Also enter OpenHAB access token.
       \info{To get an access token in OpenHAB, navigate to OpenHAB and press your username in the bottom left. Scroll down and create an "API Token".}
     \item Save the new settings and continue to \hyperref[sec:nspanel_flashing]{NSPanel flashing}.
     \end{itemize}
@@ -230,7 +236,7 @@
       \info{The GUI file has not been flashed yet so there will not be any visible change on the NSPanel screen.}
       \item Connect to the new WiFi network "NSPMPanel" when the panel has started. WiFi password is \textbf{password}.
       \item When connected to the new WiFi network, make sure your device does not disconnect because it detects no internet access. Then open a browser and navigate to "http://192.168.1.1".
-      \info{There have been issues when using Android and the Chrome browser that it sometimes just shows a blank page. If this is the case, either use a different browser (Ex. Firefox) or another device with WiFi to access the web page.}
+      \info{There have been issues when using Android and the Chrome browser that it sometimes just shows a blank page. If this is the case, either use a different browser (E.g. Firefox) or another device with WiFi to access the web page.}
       \item Enter a friendly name for the NSpanel.
       \note{This name is only used to register the NSPanel the first time. After the panel has been registered the name can be changed from the manager web interface.}
       \item Enter the IP-address for the manager docker container.
@@ -426,17 +432,14 @@
     \section{Advanced setup}
     \label{sec:advanced_setup}
     \subsection{Manual Docker container setup}
-    If you wish to manually build and setup the Docker container. To build the container, use the command \\ \lstinline[language=bash]{docker build -t nspanelmanager}. This will always be the same. To then start the container, the following command can be used:
+    If you wish to manually build and setup the Docker container from source, use the command \\ \lstinline[language=bash]{docker build -t nspanelmanager}. This will always be the same. To then start the container, the following command can be used:
     \begin{lstlisting}[language=bash]
     docker run --name nspanelmanager -v /etc/timezone:/etc/timezone:ro -v \
-    "$(pwd)/web/nspanelmanager/db.sqlite3":"/usr/src/app/nspanelmanager/db.sqlite3" \
-    "$(pwd)/web/nspanelmanager/secret.key":"/usr/src/app/nspanelmanager/secret.key" \
+    "$(pwd)/data/":"/data/" \
     -d -p 8000:8000 -p 8001:8001 nspanelmanager
     \end{lstlisting}
-    If you wish to change the timezone, there are two options. Either, do as the command above, pass in the local machine /etc/timezone. This might not always work though as you'r server might be set to Etc/UTC then you can set the environment variable like this, for example: \lstinline[language=bash]{-E TZ=Europe/Stockholm} and remove the volume mapping for /etc/timezone.
-
-    If you wish to change where the database is stored, replace "\$(pwd)/web/nspanelmanager/db.sqlite3" with where you wish your database to be stored on the local machine.
-
+    If you wish to change the timezone, there are two options. Either, do as the command above, pass in the local machine /etc/timezone. This might not always work though as your server might be set to Etc/UTC then you can set the TZ-environment variable, for example: \lstinline[language=bash]{-E TZ=Europe/Stockholm} and remove the volume mapping for /etc/timezone.
+    \important{All data for NSPanel Manager is stored in the directory mapped to "/data" in the container. In this case, the "data"-directory where you are currently standing.}
 
     \clearpage
     \section{Functional information}
@@ -474,9 +477,9 @@
 
     
     \subsubsection{Home Assistant and/or OpenHAB to/from NSPanel Manager container}
-    There is two types of trafic flowing between these nodes:
+    There is two types of traffic flowing between these nodes:
     \begin{itemize}
-      \item \textbf{Websocket:} A websocket connection is setup in order for the NSPanel Manager container to receive entity updates from Home Assistant and/or OpenHAB but also to sent entity commands (ex. turn light X on to 20\%). A websocket is used to speed up the communication and also to not have to poll the home automation software for information.
+      \item \textbf{Websocket:} A websocket connection is setup in order for the NSPanel Manager container to receive entity updates from Home Assistant and/or OpenHAB but also to sent entity commands (E.g. turn light X on to 20\%). A websocket is used to speed up the communication and also to not have to poll the home automation software for information.
       \item \textbf{HTTP GET API:} The usual HTTP GET API is also used. This is used when adding entities to a room, as an example. When pressing the "Add new light" button, the NSPanel Manager container will make an HTTP GET request to gather all available entities and then send them back to the client (browser) so that the user may choose what entitiy to add to the room.
     \end{itemize}
     \subsubsection{NSPanel Manager container to/from MQTT}
@@ -486,7 +489,7 @@
     \subsubsection{NSPanel Manager container to/from NSPanels}
     The configuration of lights, scenes and so on does not reside on each panel. The panel only has localy the bare minimum configuration for setup. When the panel starts and has connected to WiFi it will do a HTTP GET request to the NSPanel Manager container in order to receive all configuration of entities, screen brightness and really, all settings available in the NSPanel Manager web interface.
     \subsubsection{MQTT to/from NSPanels}
-    Each NSPanel send states (ex. temperature) and commands (ex. turning on a light) over MQTT for the NSPanel Manager container to pickup. The panel also received commands, ex. turn on relay 1, turn on screen and os on.
+    Each NSPanel send states (E.g. temperature) and commands (E.g. turning on a light) over MQTT for the NSPanel Manager container to pickup. The panel also received commands, E.g. turn on relay 1, turn on screen and so on.
 
     \subsection{MQTT Topics}
     Below table is a description of all MQTT topics that might be of use by a user. Replace <panel\_name> with the friendly name of your NSPanel:

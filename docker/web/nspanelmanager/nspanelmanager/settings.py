@@ -26,14 +26,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = ""
-if os.path.exists("secret.key"):
-    with open("secret.key") as f:
+SECRET_KEY_PATH = "/data/secret.key"
+if os.path.exists(SECRET_KEY_PATH):
+    with open(SECRET_KEY_PATH) as f:
         SECRET_KEY = f.read()
 
 if SECRET_KEY.strip() == "":
     print("No secret key exists, creating!")
     SECRET_KEY = get_random_secret_key()
-    with open("secret.key", "w") as f:
+    with open(SECRET_KEY_PATH, "w") as f:
         f.write(SECRET_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -92,7 +93,7 @@ WSGI_APPLICATION = 'nspanelmanager.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/data/nspanelmanager_db.sqlite3' if ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true") else BASE_DIR / 'db.sqlite3',
+        'NAME': '/data/nspanelmanager_db.sqlite3'
     }
 }
 
