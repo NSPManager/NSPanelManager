@@ -269,48 +269,52 @@ def delete_panel(request, panel_id: int):
 
 
 def get_nspanel_config(request):
-    nspanel = NSPanel.objects.get(mac_address=request.GET["mac"])
-    base = {}
-    base["name"] = nspanel.friendly_name
-    base["home"] = nspanel.room.id
-    base["raise_to_100_light_level"] = get_setting_with_default(
-        "raise_to_100_light_level", 95)
-    base["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
-    base["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
-    base["reverse_color_temp"] = get_setting_with_default("reverse_color_temp", False)
-    base["min_button_push_time"] = get_setting_with_default("min_button_push_time", 50)
-    base["button_long_press_time"] = get_setting_with_default("button_long_press_time", 5000)
-    base["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time", 300)
-    base["special_mode_release_time"] = get_setting_with_default("special_mode_release_time", 5000)
-    base["mqtt_ignore_time"] = get_setting_with_default("mqtt_ignore_time", 3000)
-    base["screen_dim_level"] = get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level", 100))
-    base["screensaver_dim_level"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level", 0))
-    base["screensaver_activation_timeout"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout", 30000))
-    base["show_screensaver_clock"] = get_nspanel_setting_with_default(nspanel.id, "show_screensaver_clock", get_setting_with_default("show_screensaver_clock", False))
-    base["clock_us_style"] = get_setting_with_default("clock_us_style", False)
-    base["button1_mode"] = nspanel.button1_mode
-    base["use_farenheit"] = get_setting_with_default("use_farenheit", False)
-    base["lock_to_default_room"] = get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False")
-    base["relay1_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", False)
-    base["relay2_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", False)
-    base["temperature_calibration"] = float(get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0))
-    if nspanel.button1_detached_mode_light:
-        base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
-    else:
-        base["button1_detached_mode_light"] = -1
-    base["button2_mode"] = nspanel.button2_mode
-    if nspanel.button2_detached_mode_light:
-        base["button2_detached_light"] = nspanel.button2_detached_mode_light.id
-    else:
-        base["button2_detached_light"] = -1
-    base["rooms"] = []
-    for room in Room.objects.all().order_by('displayOrder'):
-        base["rooms"].append(room.id)
-    base["scenes"] = {}
-    for scene in Scene.objects.filter(room__isnull=True):
-        base["scenes"][scene.id] = {}
-        base["scenes"][scene.id]["name"] = scene.friendly_name
-    return JsonResponse(base)
+    try:
+        nspanel = NSPanel.objects.get(mac_address=request.GET["mac"])
+        base = {}
+        base["name"] = nspanel.friendly_name
+        base["home"] = nspanel.room.id
+        base["raise_to_100_light_level"] = get_setting_with_default(
+            "raise_to_100_light_level", 95)
+        base["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
+        base["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
+        base["reverse_color_temp"] = get_setting_with_default("reverse_color_temp", False)
+        base["min_button_push_time"] = get_setting_with_default("min_button_push_time", 50)
+        base["button_long_press_time"] = get_setting_with_default("button_long_press_time", 5000)
+        base["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time", 300)
+        base["special_mode_release_time"] = get_setting_with_default("special_mode_release_time", 5000)
+        base["mqtt_ignore_time"] = get_setting_with_default("mqtt_ignore_time", 3000)
+        base["screen_dim_level"] = get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level", 100))
+        base["screensaver_dim_level"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level", 0))
+        base["screensaver_activation_timeout"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout", 30000))
+        base["show_screensaver_clock"] = get_nspanel_setting_with_default(nspanel.id, "show_screensaver_clock", get_setting_with_default("show_screensaver_clock", False))
+        base["clock_us_style"] = get_setting_with_default("clock_us_style", False)
+        base["button1_mode"] = nspanel.button1_mode
+        base["use_farenheit"] = get_setting_with_default("use_farenheit", False)
+        base["lock_to_default_room"] = get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False")
+        base["relay1_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", False)
+        base["relay2_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", False)
+        base["temperature_calibration"] = float(get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0))
+        if nspanel.button1_detached_mode_light:
+            base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
+        else:
+            base["button1_detached_mode_light"] = -1
+        base["button2_mode"] = nspanel.button2_mode
+        if nspanel.button2_detached_mode_light:
+            base["button2_detached_light"] = nspanel.button2_detached_mode_light.id
+        else:
+            base["button2_detached_light"] = -1
+        base["rooms"] = []
+        for room in Room.objects.all().order_by('displayOrder'):
+            base["rooms"].append(room.id)
+        base["scenes"] = {}
+        for scene in Scene.objects.filter(room__isnull=True):
+            base["scenes"][scene.id] = {}
+            base["scenes"][scene.id]["name"] = scene.friendly_name
+        return JsonResponse(base)
+    except:
+        print("Tried to get NSPanel config for panel that was not registered.")
+        return HttpResponse("", status=500)
 
 
 def get_room_config(request, room_id: int):

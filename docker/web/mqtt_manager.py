@@ -29,11 +29,16 @@ def get_machine_mac():
 
 settings = {}
 last_settings_file_mtime = 0
+mqtt_connect_time = 0
 has_sent_reload_command = False
 client = mqtt.Client("NSPanelManager_" + get_machine_mac())
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("urllib3").propagate = False
 last_sent_time_string = ""
+
+def millis():
+    return round(time.time() * 1000)
+
 
 def get_md5_sum(url):
     req = get(url)
@@ -86,11 +91,7 @@ async def send_mqttmanager_status(websocket = None):
         await websocket.send(json.dumps(status))
 
 def send_mqttmanager_status_sync():
-    logging.debug("Sending MQTTManager status from sync.")
     asyncio.run(send_mqttmanager_status())
-    # loop = asyncio.get_event_loop()
-    # coroutine = send_mqttmanager_status()
-    # loop.run_until_complete(coroutine)
 
 def on_connect(client, userdata, flags, rc):
     logging.info("Connected to MQTT Server")
@@ -126,7 +127,10 @@ async def on_websocket_message(websocket, message):
                 if nspanel_id in mqtt_manager_libs.nspanel_states.states:
                     send_nspanel_command(nspanel_id, {"command": "reboot"})
                     if "address" in mqtt_manager_libs.nspanel_states.states[nspanel_id]: # TODO: Remove old HTTP GET method after a few updates as it is not longed in us.
-                        get("http://" + mqtt_manager_libs.nspanel_states.states[nspanel_id]["address"] + "/do_reboot")
+                        try:
+                            get("http://" + mqtt_manager_libs.nspanel_states.states[nspanel_id]["address"] + "/do_reboot")
+                        except:
+                            pass
     elif message["command"] == "firmware_update_nspanels":
         if "nspanels" in message["args"]:
             for nspanel_id in message["args"]["nspanels"]:
@@ -134,7 +138,10 @@ async def on_websocket_message(websocket, message):
                 if nspanel_id in mqtt_manager_libs.nspanel_states.states:
                     send_nspanel_command(nspanel_id, {"command": "firmware_update"})
                     if "address" in mqtt_manager_libs.nspanel_states.states[nspanel_id]: # TODO: Remove old HTTP GET method after a few updates as it is not longed in us.
-                        post("http://" + mqtt_manager_libs.nspanel_states.states[nspanel_id]["address"] + "/start_ota_update")
+                        try:
+                            post("http://" + mqtt_manager_libs.nspanel_states.states[nspanel_id]["address"] + "/start_ota_update")
+                        except:
+                            pass
 
     elif message["command"] == "tft_update_nspanels":
         if "nspanels" in message["args"]:
@@ -143,7 +150,10 @@ async def on_websocket_message(websocket, message):
                 if nspanel_id in mqtt_manager_libs.nspanel_states.states:
                     send_nspanel_command(nspanel_id, {"command": "tft_update"})
                     if "address" in mqtt_manager_libs.nspanel_states.states[nspanel_id]: # TODO: Remove old HTTP GET method after a few updates as it is not longed in us.
-                        post("http://" + mqtt_manager_libs.nspanel_states.states[nspanel_id]["address"] + "/start_tft_ota_update")
+                        try:
+                            post("http://" + mqtt_manager_libs.nspanel_states.states[nspanel_id]["address"] + "/start_tft_ota_update")
+                        except:
+                            pass
 
     await websocket.send(json.dumps(reply))
 
@@ -153,7 +163,6 @@ def on_message(client, userdata, msg):
         if msg.payload.decode() == "":
             return
         parts = msg.topic.split('/')
-        # Messages received was a status update (online/offline)
         if parts[-1] == "log":
             message_parts = msg.payload.decode('utf-8').split(';')
             data = {
@@ -166,6 +175,7 @@ def on_message(client, userdata, msg):
             }
             mqtt_manager_libs.websocket_server.send_message(json.dumps(data))
         elif parts[-1] == "status":
+            # Messages received was a status update (online/offline)
             panel_found = False
             for panel in settings["nspanels"].values():
                 if panel["name"] == parts[-2]:
@@ -173,18 +183,18 @@ def on_message(client, userdata, msg):
                     break
 
             if panel_found:
+                logging.debug("Got status from existing panel.")
                 panel = parts[1]
                 data = json.loads(msg.payload.decode('utf-8'))
                 panel_id = mqtt_manager_libs.nspanel_states.get_id_by_mac(data["mac"])
                 if panel_id >= 0:
-                    send_online_status(panel, data)
                     mqtt_manager_libs.nspanel_states.states[panel_id].update(data)
                     ws_data = {
                         "type": "status",
                         "payload": mqtt_manager_libs.nspanel_states.states[panel_id]
                     }
                     mqtt_manager_libs.websocket_server.send_message(json.dumps(ws_data))
-            else:
+            elif mqtt_connect_time + 30000 <= millis():
                 logging.warning(F"Removing mqtt topic: {msg.topic} as panel does not exist any more.")
                 client.publish('/'.join(parts), payload=None, qos=0, retain=True)
         elif parts[-1] == "status_report":
@@ -192,7 +202,6 @@ def on_message(client, userdata, msg):
             data = json.loads(msg.payload.decode('utf-8'))
             panel_id = mqtt_manager_libs.nspanel_states.get_id_by_mac(data["mac"])
             if panel_id >= 0:
-                send_online_status(panel, data)
                 mqtt_manager_libs.nspanel_states.states[panel_id].update(data)
                 ws_data = {
                     "type": "status",
@@ -232,7 +241,7 @@ def on_message(client, userdata, msg):
             mqtt_manager_libs.scenes.save_scene(None, parts[3]) # Save scene were part[3] is scene name
         elif msg.topic.startswith("nspanel/entities/light/"):
             light_id =int(parts[3])
-            if not light_id in mqtt_manager_libs.light_states.states:
+            if not light_id in mqtt_manager_libs.light_states.states and mqtt_connect_time + 10000 <= millis():
                 logging.warning(F"Removing MQTT topic '{msg.topic}' for light that does not exist any more.")
                 client.publish('/'.join(parts), payload=None, qos=0, retain=True)
         else:
@@ -248,11 +257,6 @@ def on_message(client, userdata, msg):
 
 def send_status_report(panel, new_status):
     post("http://127.0.0.1:8000/api/set_panel_status/" + new_status["mac"] + "/", json=new_status)
-
-
-def send_online_status(panel, new_status):
-    pass
-    #post("http://127.0.0.1:8000/api/set_panel_online_status/" + new_status["mac"] + "/", json=new_status)
 
 
 def get_config():
@@ -310,6 +314,7 @@ def connect_and_loop():
         except:
             logging.exception(F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
             time.sleep(10)
+    mqtt_connect_time = millis()
 
     # Send reload command to panels for them to reload config as MQTT manager JUST restarted (probably because of config change)
     if has_sent_reload_command == False:
