@@ -126,7 +126,6 @@
     \begin{itemize}
       \item Repository cloned/downloaded.
       \item Working Docker installation.
-      \item A directory to store all data. In the example below, this is referred to as \textbf{data\_dir}.
     \end{itemize}
     The pre-built container image is available on Docker hub as several different architectures, the following architectures are available:
     \begin{itemize}
@@ -136,17 +135,12 @@
       \item i386
       \item amd64
     \end{itemize}
-    In order to run one of these images, issue the docker run command with the appropriate image for your hardware. The following is an example on how to start the image on a x64 PC with timezone Europe/Stockholm:
+    In order to run one of these images, issue the docker run command with the appropriate image for your hardware. The following is an example on how to start the image on a x64 PC with timezone Europe/Stockholm and store the data from the container in the "/nspmdata/"-directory:
     \begin{lstlisting}[language=bash]
     docker run --name nspanelmanager -e TZ=Europe/Stockholm -v \
-    "data_dir/":"/data/" \
+    "/nspmdata/":"/data/" \
     -d -p 8000:8000 -p 8001:8001 nspanelmanager/nspanelmanager-amd64:latest
     \end{lstlisting}
-    \begin{itemize}
-      \item Open a terminal and navigate to the downloaded repository.
-      \item Execute \lstinline[language=bash]|cd docker| to navigate to the "docker"-directory.
-      \item Run the script "docker-build\_and\_run.sh" to build the container \& start it up using the default values. This can be done by executing \lstinline[language=bash]|bash docker-build_and_run.sh|.
-    \end{itemize}
     \important{All the data for the container will be stored in the directory mapped to /data/ in the container.}
     If you wish to manually build and run the container or change options or settings, see below for \hyperref[sec:advanced_setup]{advanced setup}.
     \bigbreak
@@ -479,7 +473,7 @@
     \subsubsection{Home Assistant and/or OpenHAB to/from NSPanel Manager container}
     There is two types of traffic flowing between these nodes:
     \begin{itemize}
-      \item \textbf{Websocket:} A websocket connection is setup in order for the NSPanel Manager container to receive entity updates from Home Assistant and/or OpenHAB but also to sent entity commands (E.g. turn light X on to 20\%). A websocket is used to speed up the communication and also to not have to poll the home automation software for information.
+      \item \textbf{Websocket:} A websocket connection is setup in order for the NSPanel Manager container to receive entity updates from Home Assistant and/or OpenHAB but also to sent entity commands (E.. turn light X on to 20\%). A websocket is used to speed up the communication and also to not have to poll the home automation software for information.
       \item \textbf{HTTP GET API:} The usual HTTP GET API is also used. This is used when adding entities to a room, as an example. When pressing the "Add new light" button, the NSPanel Manager container will make an HTTP GET request to gather all available entities and then send them back to the client (browser) so that the user may choose what entitiy to add to the room.
     \end{itemize}
     \subsubsection{NSPanel Manager container to/from MQTT}
