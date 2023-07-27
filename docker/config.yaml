@@ -1,6 +1,6 @@
 name: "NSPanel Manager"
 description: "Container for Sonoff NSPanel management with a simple and intuitive UI"
-version: "0.1.16"
+version: "0.1.17"
 image: docker.io/nspanelmanager/nspanelmanager-{arch}
 slug: "nspanelmanager"
 url: "https://nspanelmanager.com"
