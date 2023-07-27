@@ -147,7 +147,7 @@
     \bigbreak
     \textbf{Update an existing installation}\newline
     When a new updated is released, do the following to update the standalone docker container:
-    \important{Create a backup of the "nspanelmanager\_db.sqlite3"-file in the data\_dir as it contains all settings and stored data for the container.}
+    \important{Create a backup of the "nspanelmanager\_db.sqlite3"-file in the /nspmdata/-directory as it contains all settings and stored data for the container.}
     In order to update to the latest version of the container you have to remove the current image and recreate it. Perform the following in order to update:
     \begin{itemize}
       \item Run \lstinline[language=bash]{docker rm -f nspanelmanager}.
