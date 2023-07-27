@@ -427,7 +427,8 @@
     \section{Advanced setup}
     \label{sec:advanced_setup}
     \subsection{Manual Docker container setup}
-    If you wish to manually build and setup the Docker container from source, use the command \\ \lstinline[language=bash]{docker build -t nspanelmanager}. This will always be the same. To then start the container, the following command can be used:
+    If you wish to manually build and setup the Docker container from source, use the command \\ \lstinline[language=bash]{docker build -t nspanelmanager .} while standing in the downloaded "docker"-directory. This will always be the same. To then start the container, the following command can be used:
+    \note{The extra dot at the end of the "docker build"-command is essential.}
     \begin{lstlisting}[language=bash]
     docker run --name nspanelmanager -v /etc/timezone:/etc/timezone:ro -v \
     "$(pwd)/data/":"/data/" \
