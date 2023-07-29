@@ -12,3 +12,6 @@ All information about this project on how it works and how to use it is availabl
 
 # Further questions or discussion?
 Head over to our [Discord](https://discord.gg/RwXvAH56fE)!
+
+# Support
+<a href="https://www.buymeacoffee.com/nspanelmanager" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Us A Coffee" height="41" width="174"></a>
