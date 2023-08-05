@@ -289,17 +289,24 @@ def get_nspanel_config(request):
         base["screensaver_activation_timeout"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout", 30000))
         base["show_screensaver_clock"] = get_nspanel_setting_with_default(nspanel.id, "show_screensaver_clock", get_setting_with_default("show_screensaver_clock", False))
         base["clock_us_style"] = get_setting_with_default("clock_us_style", False)
-        base["button1_mode"] = nspanel.button1_mode
         base["use_farenheit"] = get_setting_with_default("use_farenheit", False)
         base["lock_to_default_room"] = get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False")
+        base["reverse_relays"] = get_nspanel_setting_with_default(nspanel.id, "reverse_relays", False)
         base["relay1_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", False)
         base["relay2_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", False)
         base["temperature_calibration"] = float(get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0))
+        base["button1_mode"] = nspanel.button1_mode
+        base["button1_mqtt_topic"] = get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_topic", "")
+        base["button1_mqtt_payload"] = get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_payload", "")
+        base["button2_mode"] = nspanel.button2_mode
+        base["button2_mqtt_topic"] = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_topic", "")
+        base["button2_mqtt_payload"] = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_payload", "")
+
         if nspanel.button1_detached_mode_light:
             base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
         else:
             base["button1_detached_mode_light"] = -1
-        base["button2_mode"] = nspanel.button2_mode
+
         if nspanel.button2_detached_mode_light:
             base["button2_detached_light"] = nspanel.button2_detached_mode_light.id
         else:

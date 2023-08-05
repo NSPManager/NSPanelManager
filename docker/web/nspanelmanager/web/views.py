@@ -165,9 +165,14 @@ def edit_nspanel(request, panel_id: int):
         "is_us_panel": get_nspanel_setting_with_default(panel_id, "is_us_panel", "False"),
         "screensaver_activation_timeout": get_nspanel_setting_with_default(panel_id, "screensaver_activation_timeout", ""),
         "show_screensaver_clock": get_nspanel_setting_with_default(panel_id, "show_screensaver_clock", "Global"),
+        "reverse_relays": get_nspanel_setting_with_default(panel_id, "reverse_relays", "False"),
         "relay1_default_mode": get_nspanel_setting_with_default(panel_id, "relay1_default_mode", "False"),
         "relay2_default_mode": get_nspanel_setting_with_default(panel_id, "relay2_default_mode", "False"),
         "temperature_calibration": get_nspanel_setting_with_default(panel_id, "temperature_calibration", 0),
+        "button1_custom_mqtt_topic": get_nspanel_setting_with_default(panel_id, "button1_mqtt_topic", ""),
+        "button1_custom_mqtt_payload": get_nspanel_setting_with_default(panel_id, "button1_mqtt_payload", ""),
+        "button2_custom_mqtt_topic": get_nspanel_setting_with_default(panel_id, "button2_mqtt_topic", ""),
+        "button2_custom_mqtt_payload": get_nspanel_setting_with_default(panel_id, "button2_mqtt_payload", ""),
     }
 
     return render(request, 'edit_nspanel.html', {
@@ -185,39 +190,66 @@ def save_panel_settings(request, panel_id: int):
     panel.room = Room.objects.get(id=request.POST["room_id"])
     panel.friendly_name = request.POST["name"]
     panel.button1_mode = request.POST["button1_mode"]
-    if request.POST["button1_mode"] == "1":
+    if request.POST["button1_mode"] == "1": # Detached mode
         panel.button1_detached_mode_light = Light.objects.get(id=request.POST["button1_detached_mode_light"])
     else:
         panel.button1_detached_mode_light = None
+
+    if request.POST["button1_mode"] == "2": # Custom MQTT Mode
+        set_nspanel_setting_value(panel_id, "button1_mqtt_topic", request.POST["button1_custom_mqtt_topic"])
+        set_nspanel_setting_value(panel_id, "button1_mqtt_payload", request.POST["button1_custom_mqtt_payload"])
+    else:
+        delete_nspanel_setting(panel_id, "button1_mqtt_topic")
+        delete_nspanel_setting(panel_id, "button1_mqtt_payload")
+
     panel.button2_mode = request.POST["button2_mode"]
-    if request.POST["button2_mode"] == "1":
+    if request.POST["button2_mode"] == "1": # Detached mode
         panel.button2_detached_mode_light = Light.objects.get(id=request.POST["button2_detached_mode_light"])
     else:
         panel.button2_detached_mode_light = None
+
+    if request.POST["button1_mode"] == "2": # Custom MQTT Mode
+        set_nspanel_setting_value(panel_id, "button2_mqtt_topic", request.POST["button2_custom_mqtt_topic"])
+        set_nspanel_setting_value(panel_id, "button2_mqtt_payload", request.POST["button2_custom_mqtt_payload"])
+    else:
+        delete_nspanel_setting(panel_id, "button2_mqtt_topic")
+        delete_nspanel_setting(panel_id, "button2_mqtt_payload")
+
     if "lock_to_default_room" in request.POST:
         set_nspanel_setting_value(panel_id, "lock_to_default_room", "True")
     else:
         set_nspanel_setting_value(panel_id, "lock_to_default_room", "False")
+
     if "is_us_panel" in request.POST:
         set_nspanel_setting_value(panel_id, "is_us_panel", "True")
     else:
         set_nspanel_setting_value(panel_id, "is_us_panel", "False")
+
+    if "reverse_relays" in request.POST:
+        set_nspanel_setting_value(panel_id, "reverse_relays", "True")
+    else:
+        set_nspanel_setting_value(panel_id, "reverse_relays", "False")
+
     if request.POST["screen_dim_level"].strip():
         set_nspanel_setting_value(panel_id, "screen_dim_level", request.POST["screen_dim_level"])
     else:
         delete_nspanel_setting(panel_id, "screen_dim_level")
+
     if request.POST["screensaver_dim_level"].strip():
         set_nspanel_setting_value(panel_id, "screensaver_dim_level", request.POST["screensaver_dim_level"])
     else:
         delete_nspanel_setting(panel_id, "screensaver_dim_level")
+
     if request.POST["screensaver_activation_timeout"].strip():
         set_nspanel_setting_value(panel_id, "screensaver_activation_timeout", request.POST["screensaver_activation_timeout"])
     else:
         delete_nspanel_setting(panel_id, "screensaver_activation_timeout")
+
     if request.POST["show_screensaver_clock"] == "Global":
         delete_nspanel_setting(panel_id, "show_screensaver_clock")
     else:
         set_nspanel_setting_value(panel_id, "show_screensaver_clock", request.POST["show_screensaver_clock"])
+
     set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
     set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
     set_nspanel_setting_value(panel_id, "temperature_calibration", float(request.POST["temperature_calibration"]))

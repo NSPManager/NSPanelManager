@@ -5,7 +5,9 @@
 
 enum BUTTON_MODE {
   DIRECT,
-  DETACHED
+  DETACHED,
+  CUSTOM_MQTT,
+  FOLLOW
 };
 
 class NSPMConfig {
@@ -103,6 +105,16 @@ public:
   // Button modes. 0 = direct mode. 1 = detached mode.
   BUTTON_MODE button1_mode;
   BUTTON_MODE button2_mode;
+
+  // Button 1 custom MQTT message paramaters
+  std::string button1_mqtt_topic;
+  std::string button1_mqtt_payload;
+
+  // Button 2 custom MQTT message paramaters
+  std::string button2_mqtt_topic;
+  std::string button2_mqtt_payload;
+
+  bool reverse_relays;
 
   // @brief default relay state
   bool relay1_default_mode;
