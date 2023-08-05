@@ -44,8 +44,13 @@ void ButtonManager::mqttCallback(char *topic, byte *payload, unsigned int length
 }
 
 void ButtonManager::setRelayState(uint8_t relay, bool state) {
-  // a press has been detected.
-  // TODO: Detect long press and make action(s) configurable from web interface
+  if (NSPMConfig::instance->reverse_relays) {
+    if (relay == 1) {
+      relay = 2;
+    } else if (relay == 2) {
+      relay = 1;
+    }
+  }
   if (relay == 1) {
     digitalWrite(BUTTON_MANAGER_RELAY1_PIN, state);
     MqttManager::publish(NSPMConfig::instance->mqtt_relay1_state_topic, state ? "1" : "0");
@@ -57,9 +62,15 @@ void ButtonManager::setRelayState(uint8_t relay, bool state) {
 
 void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
   if (button == 1) {
-    if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DIRECT) {
-      ButtonManager::setRelayState(1, !digitalRead(BUTTON_MANAGER_RELAY1_PIN));
-    } else if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DETACHED && ButtonManager::button1_detached_mode_light != nullptr) {
+    if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DIRECT && new_state) {
+      if (NSPMConfig::instance->reverse_relays) {
+        ButtonManager::setRelayState(1, !digitalRead(BUTTON_MANAGER_RELAY2_PIN));
+      } else {
+        ButtonManager::setRelayState(1, !digitalRead(BUTTON_MANAGER_RELAY1_PIN));
+      }
+    } else if (NSPMConfig::instance->button1_mode == BUTTON_MODE::FOLLOW) {
+      ButtonManager::setRelayState(1, new_state);
+    } else if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DETACHED && ButtonManager::button1_detached_mode_light != nullptr && new_state) {
       LOG_DEBUG("Button 1 pressed, detached light: ", ButtonManager::button1_detached_mode_light->getName().c_str());
       std::list<Light *> lightsToChange;
       lightsToChange.push_back(ButtonManager::button1_detached_mode_light);
@@ -68,11 +79,19 @@ void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
       } else {
         LightManager::ChangeLightsToLevel(&lightsToChange, 0);
       }
+    } else if (NSPMConfig::instance->button1_mode == BUTTON_MODE::CUSTOM_MQTT && new_state) {
+      MqttManager::publish(NSPMConfig::instance->button1_mqtt_topic, NSPMConfig::instance->button1_mqtt_payload);
     }
   } else if (button == 2) {
-    if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DIRECT) {
-      ButtonManager::setRelayState(2, !digitalRead(BUTTON_MANAGER_RELAY2_PIN));
-    } else if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DETACHED && ButtonManager::button2_detached_mode_light != nullptr) {
+    if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DIRECT && new_state) {
+      if (NSPMConfig::instance->reverse_relays) {
+        ButtonManager::setRelayState(2, !digitalRead(BUTTON_MANAGER_RELAY1_PIN));
+      } else {
+        ButtonManager::setRelayState(2, !digitalRead(BUTTON_MANAGER_RELAY2_PIN));
+      }
+    } else if (NSPMConfig::instance->button2_mode == BUTTON_MODE::FOLLOW) {
+      ButtonManager::setRelayState(2, new_state);
+    } else if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DETACHED && ButtonManager::button2_detached_mode_light != nullptr && new_state) {
       LOG_DEBUG("Button 2 pressed, detached light: ", ButtonManager::button2_detached_mode_light->getName().c_str());
       std::list<Light *> lightsToChange;
       lightsToChange.push_back(ButtonManager::button2_detached_mode_light);
@@ -81,6 +100,8 @@ void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
       } else {
         LightManager::ChangeLightsToLevel(&lightsToChange, 0);
       }
+    } else if (NSPMConfig::instance->button2_mode == BUTTON_MODE::CUSTOM_MQTT && new_state) {
+      MqttManager::publish(NSPMConfig::instance->button2_mqtt_topic, NSPMConfig::instance->button2_mqtt_payload);
     }
   }
 }
@@ -96,18 +117,14 @@ void ButtonManager::_loop(void *param) {
       ButtonManager::_lastButton1StateChange = millis();
       ButtonManager::_lastButton1State = ButtonManager::_newButton1State;
     } else if (ButtonManager::_newButton1State == ButtonManager::_lastButton1State && millis() - ButtonManager::_lastButton1StateChange <= BUTTON_MANAGER_BUTTON_DEBOUNCE_MS) {
-      if (ButtonManager::_newButton1State) {
-        ButtonManager::_processButtonStateChange(1, ButtonManager::_newButton1State);
-      }
+      ButtonManager::_processButtonStateChange(1, ButtonManager::_newButton1State);
     }
 
     if (ButtonManager::_newButton2State != ButtonManager::_lastButton2State) {
       ButtonManager::_lastButton2StateChange = millis();
       ButtonManager::_lastButton2State = ButtonManager::_newButton2State;
     } else if (ButtonManager::_newButton2State == ButtonManager::_lastButton2State && millis() - ButtonManager::_lastButton2StateChange <= BUTTON_MANAGER_BUTTON_DEBOUNCE_MS) {
-      if (ButtonManager::_newButton2State) {
-        ButtonManager::_processButtonStateChange(2, ButtonManager::_newButton2State);
-      }
+      ButtonManager::_processButtonStateChange(2, ButtonManager::_newButton2State);
     }
 
     vTaskDelay(BUTTON_MANAGER_BUTTON_DEBOUNCE_MS / portTICK_PERIOD_MS);

@@ -97,18 +97,38 @@ function update_shown_elements() {
     // Direct mode
     $("#button1_detached_mode_light_label").hide();
     $("#button1_detached_mode_light_select").hide();
-  } else {
+    $("#button1_custom_mqtt_container").hide();
+  } else if ($("#button1_mode").val() == 1) {
     $("#button1_detached_mode_light_label").show();
     $("#button1_detached_mode_light_select").show();
+    $("#button1_custom_mqtt_container").hide();
+  } else if ($("#button1_mode").val() == 2) {
+    $("#button1_detached_mode_light_label").hide();
+    $("#button1_detached_mode_light_select").hide();
+    $("#button1_custom_mqtt_container").show();
+  } else if ($("#button1_mode").val() == 3) {
+    $("#button1_detached_mode_light_label").hide();
+    $("#button1_detached_mode_light_select").hide();
+    $("#button1_custom_mqtt_container").hide();
   }
 
   if ($("#button2_mode").val() == 0) {
     // Direct mode
     $("#button2_detached_mode_light_label").hide();
     $("#button2_detached_mode_light_select").hide();
-  } else {
+    $("#button2_custom_mqtt_container").hide();
+  } else if ($("#button2_mode").val() == 1) {
     $("#button2_detached_mode_light_label").show();
     $("#button2_detached_mode_light_select").show();
+    $("#button2_custom_mqtt_container").hide();
+  } else if ($("#button2_mode").val() == 2) {
+    $("#button2_detached_mode_light_label").hide();
+    $("#button2_detached_mode_light_select").hide();
+    $("#button2_custom_mqtt_container").show();
+  } else if ($("#button2_mode").val() == 3) {
+    $("#button2_detached_mode_light_label").hide();
+    $("#button2_detached_mode_light_select").hide();
+    $("#button2_custom_mqtt_container").hide();
   }
 }
 

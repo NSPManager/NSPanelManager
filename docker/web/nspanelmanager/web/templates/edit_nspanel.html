@@ -75,7 +75,7 @@
         Lock to default room
         <span class="question">
           <span class="icon question_icon">
-            <i class="mdi mdi-help"></i>
+            <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
             Wether this panel control other rooms other than the default room. T setting causes the panel to only load the selected room.
@@ -84,15 +84,35 @@
       </label>
     </div>
     <div class="field">
-      <label class="label">Button 1 mode<span class="question">
+      <label class="checkbox">
+        {% if settings.reverse_relays == "True" %}
+            <input type="checkbox" name="reverse_relays" checked>
+        {% else %}
+            <input type="checkbox" name="reverse_relays">
+        {% endif %}
+        Reverse relays
+        <span class="question">
           <span class="icon question_icon">
-            <i class="mdi mdi-help"></i>
+            <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
-            Direct mode: The button directly controls the relay.<br>
-            Detached mode: The button does not directly control the relay but is instead coupled to a light added in the
+            When this box i checked, it is like you have switches places of the cables for the relays on the back of the unit. All options in the web interface named for "relay 1" are applied to relay 2 and vice versa.
+          </div>
+        </span>
+      </label>
+    </div>
+    <div class="field">
+      <label class="label">Button 1 mode<span class="question">
+          <span class="icon question_icon">
+            <i class="mdi mdi-information has-text-info"></i>
+          </span>
+          <div class="question_help_text notification is-info is-light">
+            <b>Direct mode</b>: The button directly controls the relay.<br>
+            <b>Detached mode</b>: The button does not directly control the relay but is instead coupled to a light added in the
             room. In case the lights is removed from the room, the button will will remain in detached mode but will no
-            longed be coupled to any button.
+            longed be coupled to any button.<br>
+            <b>Custom MQTT</b>: Send a custom MQTT payload to a custom MQTT topic.<br>
+            <b>Follow mode</b>: The relay state will follow the button state. If the button is pressed, the relay is on, if the button is released, the relay is off.<br>
           </div>
         </span>
       </label>
@@ -101,6 +121,8 @@
           <select name="button1_mode" id="button1_mode">
             <option value="0" {% if panel.button1_mode == 0 %}selected{% endif %}>Direct mode</option>
             <option value="1" {% if panel.button1_mode == 1 %}selected{% endif %}>Detached mode</option>
+            <option value="2" {% if panel.button1_mode == 2 %}selected{% endif %}>Custom MQTT</option>
+            <option value="3" {% if panel.button1_mode == 3 %}selected{% endif %}>Follow mode</option>
           </select>
         </div>
       </div>
@@ -123,17 +145,29 @@
           </select>
         </div>
       </div>
+      <div id="button1_custom_mqtt_container">
+        <label class="label">MQTT Topic:</label>
+        <div class="control" id="">
+          <input type="text" class="input" name="button1_custom_mqtt_topic" value="{{ settings.button1_custom_mqtt_topic }}">
+        </div>
+        <label class="label">MQTT Payload:</label>
+        <div class="control" id="">
+          <input type="text" class="input" name="button1_custom_mqtt_payload" value="{{ settings.button1_custom_mqtt_payload }}" maxlength=128>
+        </div>
+      </div>
     </div>
     <div class="field">
       <label class="label">Button 2 mode<span class="question">
           <span class="icon question_icon">
-            <i class="mdi mdi-help"></i>
+            <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
-            Direct mode: The button directly controls the relay.<br>
-            Detached mode: The button does not directly control the relay but is instead coupled to a light added in the
+            <b>Direct mode</b>: The button directly controls the relay.<br>
+            <b>Detached mode</b>: The button does not directly control the relay but is instead coupled to a light added in the
             room. In case the lights is removed from the room, the button will will remain in detached mode but will no
-            longed be coupled to any button.
+            longed be coupled to any button.<br>
+            <b>Custom MQTT</b>: Send a custom MQTT payload to a custom MQTT topic.<br>
+            <b>Follow mode</b>: The relay state will follow the button state. If the button is pressed, the relay is on, if the button is released, the relay is off.<br>
           </div>
         </span>
       </label>
@@ -142,6 +176,8 @@
           <select name="button2_mode" id="button2_mode">
             <option value="0" {% if panel.button2_mode == 0 %}selected{% endif %}>Direct mode</option>
             <option value="1" {% if panel.button2_mode == 1 %}selected{% endif %}>Detached mode</option>
+            <option value="2" {% if panel.button2_mode == 2 %}selected{% endif %}>Custom MQTT</option>
+            <option value="3" {% if panel.button2_mode == 3 %}selected{% endif %}>Follow mode</option>
           </select>
         </div>
       </div>
@@ -164,11 +200,21 @@
           </select>
         </div>
       </div>
+      <div id="button2_custom_mqtt_container">
+        <label class="label">MQTT Topic:</label>
+        <div class="control" id="">
+          <input type="text" class="input" name="button2_custom_mqtt_topic" value="{{ settings.button2_custom_mqtt_topic }}">
+        </div>
+        <label class="label">MQTT Payload:</label>
+        <div class="control" id="">
+          <input type="text" class="input" name="button2_custom_mqtt_payload" value="{{ settings.button2_custom_mqtt_payload }}" maxlength=128>
+        </div>
+      </div>
     </div>
     <div class="field">
       <label class="label">Relay 1 default mode<span class="question">
           <span class="icon question_icon">
-            <i class="mdi mdi-help"></i>
+            <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
             Controls the default power state of relay 1 after power on.<br>
@@ -189,7 +235,7 @@
     <div class="field">
       <label class="label">Relay 2 default mode<span class="question">
           <span class="icon question_icon">
-            <i class="mdi mdi-help"></i>
+            <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
             Controls the default power state of relay 2 after power on.<br>
@@ -217,7 +263,7 @@
         Is US panel
         <span class="question">
           <span class="icon question_icon">
-            <i class="mdi mdi-help"></i>
+            <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
             Wether this panel is a US version or Europe version. Check for US version.
@@ -228,7 +274,7 @@
     <div class="field">
         <label class="label">Screen brightness<span class="question">
           <span class="icon question_icon">
-            <i class="mdi mdi-help"></i>
+            <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
             Brightness when the panel is on. 1-100%. Leave empty to use global setting.
@@ -244,7 +290,7 @@
     <div class="field">
         <label class="label">Screensaver brightness<span class="question">
           <span class="icon question_icon">
-            <i class="mdi mdi-help"></i>
+            <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
             Brightness level during screensaver. 0-100%. Leave empty to use global setting.
@@ -260,7 +306,7 @@
     <div class="field">
         <label class="label">Screensaver activation timeout<span class="question">
           <span class="icon question_icon">
-            <i class="mdi mdi-help"></i>
+            <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
             The amount of time before the screensaver is activated. Time is in milliseconds. Default: 30000 (30 seconds). Leave empty to use global setting.
@@ -276,7 +322,7 @@
     <div class="field">
       <label class="label">Show clock on screensaver<span class="question">
           <span class="icon question_icon">
-            <i class="mdi mdi-help"></i>
+            <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
             True: show clock on screensaver<br>
@@ -298,7 +344,7 @@
     <div class="field">
         <label class="label">Temperature calibration<span class="question">
           <span class="icon question_icon">
-            <i class="mdi mdi-help"></i>
+            <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
             Enter the number of degrees to calibrate. Entering a positive number (ex. 5) will add 5 degrees to the read temperature. Entering a negative number (ex. -5) will subtract 5 degrees from the read temperature.
