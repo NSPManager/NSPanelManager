@@ -116,19 +116,10 @@ def edit_room(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
     data = {
         'room': room,
-        'light1': Light.objects.filter(room=room, room_view_position=1).first(),
-        'light2': Light.objects.filter(room=room, room_view_position=2).first(),
-        'light3': Light.objects.filter(room=room, room_view_position=3).first(),
-        'light4': Light.objects.filter(room=room, room_view_position=4).first(),
-        'light5': Light.objects.filter(room=room, room_view_position=5).first(),
-        'light6': Light.objects.filter(room=room, room_view_position=6).first(),
-        'light7': Light.objects.filter(room=room, room_view_position=7).first(),
-        'light8': Light.objects.filter(room=room, room_view_position=8).first(),
-        'light9': Light.objects.filter(room=room, room_view_position=9).first(),
-        'light10': Light.objects.filter(room=room, room_view_position=10).first(),
-        'light11': Light.objects.filter(room=room, room_view_position=11).first(),
-        'light12': Light.objects.filter(room=room, room_view_position=12).first(),
     }
+    lights = Light.objects.filter(room=room, room_view_position__gte=1, room_view_position__lte=12);
+    for light in lights:
+        data["light" + str(light.room_view_position)] = light
     return render(request, 'edit_room.html', data)
 
 def save_new_room(request):
@@ -312,9 +303,14 @@ def add_light_to_room(request, room_id: int):
         newLight.openhab_item_rgb = ""
 
     if newLight.room_view_position == 0:
+        all_lights = Light.objects.filter(room=room, room_view_position__gte=1, room_view_position__lte=12);
         for i in range(1, 13):
-            # TODO: Review to only make one call to database.
-            if not Light.objects.filter(room=room, room_view_position=i).exists():
+            position_free = True
+            for light in all_lights:
+                if light.room_view_position == i:
+                    position_free = False
+                    break
+            if position_free:
                 newLight.room_view_position = i
                 break
 

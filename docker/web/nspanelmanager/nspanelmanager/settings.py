@@ -93,7 +93,8 @@ WSGI_APPLICATION = 'nspanelmanager.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/data/nspanelmanager_db.sqlite3'
+        'NAME': '/data/nspanelmanager_db.sqlite3',
+        'timeout': 20
     }
 }
 
