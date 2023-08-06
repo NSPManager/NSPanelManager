@@ -39,7 +39,7 @@
 <span class="is-hidden" id="max_live_log_messages">{{ max_live_log_messages }}</span>
 <div class="box">
   <div class="notification is-info is-light">
-    Changes to NSPanel settings on this page requires a reboot of each panel to take effect.
+    Changes to NSPanel settings on this page requires a reboot of the panel to take effect.
   </div>
   <form method="POST" action="{% url 'save_panel_settings' panel_id=panel.id %}">
     {% csrf_token %}
@@ -61,6 +61,18 @@
             <option value="{{ room.id }}">{{ room.friendly_name }}</option>
             {% endif %}
             {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="label">Default page</label>
+      <div class="control">
+        <div class="select">
+          <select name="default_page">
+            <option value="0" {% if settings.default_page == "0" %}selected{% endif %}>Main page</option>
+            <option value="1" {% if settings.default_page == "1" %}selected{% endif %}>Scenes page</option>
+            <option value="2" {% if settings.default_page == "2" %}selected{% endif %}>Room page</option>
           </select>
         </div>
       </div>

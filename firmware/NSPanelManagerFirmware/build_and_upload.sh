@@ -62,9 +62,6 @@ data_file_status="$?"
 curl http://"$NSPanelManager_address":"$NSPanelManager_port"/save_new_merged_flash -F bin=@merged-flash.bin
 data_file_status="$?"
 
-# Wait for Django to process files.
-sleep 5
-
 if [ "$firmware_status" -eq 0 ] && [ "$data_file_status" -eq 0 ]; then
 	echo "Firmware built and uploaded to manager."
 else

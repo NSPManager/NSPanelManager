@@ -4,11 +4,19 @@
 #include <Arduino.h>
 #include <InterfaceConfigEnums.hpp>
 #include <vector>
+
+enum DEFAULT_PAGE {
+  MAIN_PAGE,
+  SCENES_PAGE,
+  ROOM_PAGE
+};
+
 class Scene;
 
 class InterfaceConfig {
 public:
   static inline uint16_t homeScreen = 0;
+  static inline DEFAULT_PAGE default_page;
   static inline bool lock_to_default_room = false;
   static inline uint16_t colorTempMin = 2000;
   static inline uint16_t colorTempMax = 6000;

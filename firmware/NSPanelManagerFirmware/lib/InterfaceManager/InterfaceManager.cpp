@@ -1,3 +1,4 @@
+#include "freertos/portmacro.h"
 #include <ArduinoJson.h>
 #include <ButtonManager.hpp>
 #include <HomePage.hpp>
@@ -101,7 +102,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
 
     // Loading is done, show Home page
     NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
-    PageManager::GetHomePage()->show();
+    InterfaceManager::showDefaultPage();
     PageManager::GetHomePage()->setScreensaverTimeout(InterfaceConfig::screensaver_activation_timeout);
   }
 
@@ -111,6 +112,14 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
 
   LOG_INFO("Config initialized. Closing taskLoadConfigAndInit");
   vTaskDelete(NULL); // Delete task, we are done
+}
+
+void InterfaceManager::showDefaultPage() {
+  if (InterfaceConfig::default_page == DEFAULT_PAGE::SCENES_PAGE) {
+    PageManager::GetScenePage()->show();
+  } else if (InterfaceConfig::default_page == DEFAULT_PAGE::ROOM_PAGE) {
+    PageManager::GetRoomPage()->show();
+  }
 }
 
 void InterfaceManager::_taskProcessMqttMessages(void *param) {
@@ -125,7 +134,7 @@ void InterfaceManager::_taskProcessMqttMessages(void *param) {
         try {
           if (msg.topic.compare(NSPMConfig::instance->mqtt_screen_cmd_topic) == 0) {
             if (msg.payload.compare("1") == 0) {
-              PageManager::GetHomePage()->show();
+              InterfaceManager::showDefaultPage();
               MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1"); // Send out state information that panel woke from sleep
             } else if (msg.payload.compare("0") == 0) {
               PageManager::GetScreensaverPage()->show();
@@ -222,7 +231,7 @@ void InterfaceManager::subscribeToMqttTopics() {
 
 void InterfaceManager::processWakeEvent() {
   LOG_DEBUG("Got wake event from panel, activating home page.");
-  PageManager::GetHomePage()->show();
+  InterfaceManager::showDefaultPage();
 }
 
 void InterfaceManager::processSleepEvent() {

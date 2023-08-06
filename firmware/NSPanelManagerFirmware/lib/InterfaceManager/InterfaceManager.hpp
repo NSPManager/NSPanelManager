@@ -35,6 +35,7 @@ public:
   static inline void handleNSPanelCommand(char *topic, byte *payload, unsigned int length);
   static inline void handleNSPanelScreenBrightnessCommand(char *topic, byte *payload, unsigned int length);
   static inline void handleNSPanelScreensaverBrightnessCommand(char *topic, byte *payload, unsigned int length);
+  static void showDefaultPage();
 
 private:
   /// @brief The task that handles startup if InterfaceManager. It load the config from the server and processes it and
@@ -60,8 +61,6 @@ private:
   /// @param buffer The buffer to put the JSON-data in to
   /// @return True if sucessful, otherwise false
   bool _getRoomConfig(int room_id, DynamicJsonDocument *buffer);
-  /// @brief Set current light mode, handle starting/stopping special light mode
-  /// @param mode The mode to set
 };
 
 #endif

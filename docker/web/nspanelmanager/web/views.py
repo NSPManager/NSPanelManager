@@ -173,6 +173,7 @@ def edit_nspanel(request, panel_id: int):
         "button1_custom_mqtt_payload": get_nspanel_setting_with_default(panel_id, "button1_mqtt_payload", ""),
         "button2_custom_mqtt_topic": get_nspanel_setting_with_default(panel_id, "button2_mqtt_topic", ""),
         "button2_custom_mqtt_payload": get_nspanel_setting_with_default(panel_id, "button2_mqtt_payload", ""),
+        "default_page": get_nspanel_setting_with_default(panel_id, "default_page", "0"),
     }
 
     return render(request, 'edit_nspanel.html', {
@@ -253,6 +254,7 @@ def save_panel_settings(request, panel_id: int):
     set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
     set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
     set_nspanel_setting_value(panel_id, "temperature_calibration", float(request.POST["temperature_calibration"]))
+    set_nspanel_setting_value(panel_id, "default_page", request.POST["default_page"])
     panel.save()
     return redirect('edit_nspanel', panel_id)
 
