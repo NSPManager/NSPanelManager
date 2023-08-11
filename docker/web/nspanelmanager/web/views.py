@@ -113,22 +113,15 @@ def move_room_down(request, room_id: int):
 
 
 def edit_room(request, room_id: int):
+    total_num_rooms = Room.objects.all().count()
     room = Room.objects.filter(id=room_id).first()
     data = {
         'room': room,
-        'light1': Light.objects.filter(room=room, room_view_position=1).first(),
-        'light2': Light.objects.filter(room=room, room_view_position=2).first(),
-        'light3': Light.objects.filter(room=room, room_view_position=3).first(),
-        'light4': Light.objects.filter(room=room, room_view_position=4).first(),
-        'light5': Light.objects.filter(room=room, room_view_position=5).first(),
-        'light6': Light.objects.filter(room=room, room_view_position=6).first(),
-        'light7': Light.objects.filter(room=room, room_view_position=7).first(),
-        'light8': Light.objects.filter(room=room, room_view_position=8).first(),
-        'light9': Light.objects.filter(room=room, room_view_position=9).first(),
-        'light10': Light.objects.filter(room=room, room_view_position=10).first(),
-        'light11': Light.objects.filter(room=room, room_view_position=11).first(),
-        'light12': Light.objects.filter(room=room, room_view_position=12).first(),
+        'total_num_rooms': total_num_rooms
     }
+    lights = Light.objects.filter(room=room, room_view_position__gte=1, room_view_position__lte=12);
+    for light in lights:
+        data["light" + str(light.room_view_position)] = light
     return render(request, 'edit_room.html', data)
 
 def save_new_room(request):
@@ -140,8 +133,17 @@ def save_new_room(request):
 
 
 def delete_room(request, room_id: int):
-    Room.objects.filter(id=room_id).delete()
-    restart_mqtt_manager()
+    num_rooms = Room.objects.all().count()
+    if num_rooms > 1:
+        room = Room.objects.filter(id=room_id).first()
+        if num_rooms >= 2:
+            print("Other room available. Moving panels to other room.")
+            nspanels = NSPanel.objects.filter(room=room)
+            new_room = Room.objects.all().exclude(id=room.id).first()
+            nspanels.update(room=new_room)
+        room.delete()
+
+        restart_mqtt_manager()
     return redirect('rooms')
 
 
@@ -173,6 +175,7 @@ def edit_nspanel(request, panel_id: int):
         "button1_custom_mqtt_payload": get_nspanel_setting_with_default(panel_id, "button1_mqtt_payload", ""),
         "button2_custom_mqtt_topic": get_nspanel_setting_with_default(panel_id, "button2_mqtt_topic", ""),
         "button2_custom_mqtt_payload": get_nspanel_setting_with_default(panel_id, "button2_mqtt_payload", ""),
+        "default_page": get_nspanel_setting_with_default(panel_id, "default_page", "0"),
     }
 
     return render(request, 'edit_nspanel.html', {
@@ -253,6 +256,7 @@ def save_panel_settings(request, panel_id: int):
     set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
     set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
     set_nspanel_setting_value(panel_id, "temperature_calibration", float(request.POST["temperature_calibration"]))
+    set_nspanel_setting_value(panel_id, "default_page", request.POST["default_page"])
     panel.save()
     return redirect('edit_nspanel', panel_id)
 
@@ -310,9 +314,14 @@ def add_light_to_room(request, room_id: int):
         newLight.openhab_item_rgb = ""
 
     if newLight.room_view_position == 0:
+        all_lights = Light.objects.filter(room=room, room_view_position__gte=1, room_view_position__lte=12);
         for i in range(1, 13):
-            # TODO: Review to only make one call to database.
-            if not Light.objects.filter(room=room, room_view_position=i).exists():
+            position_free = True
+            for light in all_lights:
+                if light.room_view_position == i:
+                    position_free = False
+                    break
+            if position_free:
                 newLight.room_view_position = i
                 break
 

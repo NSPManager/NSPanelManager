@@ -56,7 +56,7 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
   switch (component) {
   case ROOM_PAGE_BACK_BUTTON_ID:
     // NSPanel::instance->goToPage(HOME_PAGE_NAME);
-    PageManager::GoBack();
+    PageManager::GetHomePage()->show();
     break;
   case ROOM_PAGE_PREVIOUS_ROOM_BUTTON_ID:
     RoomManager::goToPreviousRoom();

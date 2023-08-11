@@ -10,4 +10,4 @@ if [ ! -e "data/secret.key" ] && [ -e "$(pwd)/web/nspanelmanager/secret.key" ]; 
 	cp "$(pwd)/web/nspanelmanager/secret.key" "data/secret.key"
 fi
 
-docker build -t nspanelmanager . && docker run --rm --name nspanelmanager -it -v /etc/timezone:/etc/timezone:ro -v "$(pwd)/web":/usr/src/app/ -v "$(pwd)/data":/data/ -p 8000:8000 -p 8001:8001 nspanelmanager /bin/bash && docker rmi nspanelmanager
+docker build -t nspanelmanager . && docker run --rm --name nspanelmanager --mac-address 02:42:ac:11:ff:ff -it -v /etc/timezone:/etc/timezone:ro -v "$(pwd)/web":/usr/src/app/ -v "$(pwd)/data":/data/ -p 8000:8000 -p 8001:8001 nspanelmanager /bin/bash && docker rmi nspanelmanager

@@ -20,6 +20,14 @@ jobs:
           replace: "${{ github.ref_name }}"
           regex: true
           include: "docker/config.yaml"
+      - uses: actions/checkout@v3
+      - name: Update displayed version in web interface footer
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "[0-9]+.[0-9]+.[0-9]+"
+          replace: "${{ github.ref_name }}"
+          regex: true
+          include: "docker/web/nspanelmanager/web/templates/footer.html"
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Push updated version back to repo

@@ -47,7 +47,6 @@ def _default_nspanel_status_data():
 class NSPanel(models.Model):
     mac_address = models.CharField(max_length=17)
     friendly_name = models.CharField(max_length=100)
-    last_seen = models.DateTimeField(default=django.utils.timezone.now)
     ip_address = models.CharField(max_length=15, default="")
     version = models.CharField(max_length=15, default="")
     room = models.ForeignKey(Room, on_delete=models.CASCADE)

@@ -118,7 +118,7 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
   // Release events
   switch (component) {
   case SCENES_PAGE_BACK_BUTTON_ID: {
-    PageManager::GoBack();
+    PageManager::GetHomePage()->show();
     break;
   }
   case SCENES_PAGE_SCENE1_LABEL_ID: {

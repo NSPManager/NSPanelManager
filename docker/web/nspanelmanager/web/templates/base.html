@@ -1,7 +1,7 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height: 100%;">
 
 <head>
     <meta charset="UTF-8">
@@ -21,15 +21,17 @@
     <title>NSPanelManager</title>
 </head>
 
-<body>
+<body style="min-height: 100%;">
     {% include 'modals.html' %}
     {% include 'navbar.html' %}
 
-    <div class="container mt-4">
+    <div class="container mt-4 is-fullheight">
         <div id="notification_holder" class="pb-4"></div> <!-- Displays any warnings or errors -->
         {% block content %}
         {% endblock %}
     </div>
+
+    {% include 'footer.html' %}
 </body>
 
 </html>
