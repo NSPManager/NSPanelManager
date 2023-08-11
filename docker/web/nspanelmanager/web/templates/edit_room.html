@@ -232,7 +232,12 @@
       </div>
     </div>
     <button class="button is-primary">Save</button>
-    <a href="{% url 'delete_room' room_id=room.id %}" class="button is-danger">Delete</a>
+    <a href="{% if total_num_rooms != 1 %}{% url 'delete_room' room_id=room.id %}{% else %}#{% endif %}" class="button is-danger" {% if total_num_rooms == 1 %}disabled{% endif %}>Delete</a>
+    {% if total_num_rooms == 1 %}
+    <div class="notification is-danger mt-3">
+      The last room cannot be deleted. Rename this room or create another room before removing this one.
+    </div>
+    {% endif %}
   </form>
 </div>
 <hr>

@@ -113,9 +113,11 @@ def move_room_down(request, room_id: int):
 
 
 def edit_room(request, room_id: int):
+    total_num_rooms = Room.objects.all().count()
     room = Room.objects.filter(id=room_id).first()
     data = {
         'room': room,
+        'total_num_rooms': total_num_rooms
     }
     lights = Light.objects.filter(room=room, room_view_position__gte=1, room_view_position__lte=12);
     for light in lights:
