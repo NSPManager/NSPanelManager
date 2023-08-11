@@ -115,7 +115,9 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
 }
 
 void InterfaceManager::showDefaultPage() {
-  if (InterfaceConfig::default_page == DEFAULT_PAGE::SCENES_PAGE) {
+  if (InterfaceConfig::default_page == DEFAULT_PAGE::MAIN_PAGE) {
+    PageManager::GetHomePage()->show();
+  } else if (InterfaceConfig::default_page == DEFAULT_PAGE::SCENES_PAGE) {
     PageManager::GetScenePage()->show();
   } else if (InterfaceConfig::default_page == DEFAULT_PAGE::ROOM_PAGE) {
     PageManager::GetRoomPage()->show();

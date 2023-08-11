@@ -1,7 +1,7 @@
 #ifndef MqttLog_H
 #define MqttLog_H
 
-#define LOG_TO_SERIAL 1 // Set to 1 to enable
+#define LOG_TO_SERIAL 0 // Set to 1 to enable
 
 #include <Arduino.h>
 #include <MqttManager.hpp>

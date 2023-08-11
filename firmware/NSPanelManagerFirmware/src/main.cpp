@@ -42,7 +42,7 @@ float readNTCTemperature(bool farenheit) {
 }
 
 void registerToNSPanelManager() {
-  while (true) {
+  while (WiFi.isConnected()) {
     WiFiClient wifiClient;
     HTTPClient httpClient;
     std::string url = "http://";
@@ -215,7 +215,6 @@ void taskManageWifiAndMqtt(void *param) {
 
 void setup() {
   Serial.begin(115200);
-
   // Load config if any, and if it fails. Factory reset!
   if (!(config.init() && config.loadFromLittleFS())) {
     config.factoryReset();

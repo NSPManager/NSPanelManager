@@ -131,8 +131,17 @@ def save_new_room(request):
 
 
 def delete_room(request, room_id: int):
-    Room.objects.filter(id=room_id).delete()
-    restart_mqtt_manager()
+    num_rooms = Room.objects.all().count()
+    if num_rooms > 1:
+        room = Room.objects.filter(id=room_id).first()
+        if num_rooms >= 2:
+            print("Other room available. Moving panels to other room.")
+            nspanels = NSPanel.objects.filter(room=room)
+            new_room = Room.objects.all().exclude(id=room.id).first()
+            nspanels.update(room=new_room)
+        room.delete()
+
+        restart_mqtt_manager()
     return redirect('rooms')
 
 
