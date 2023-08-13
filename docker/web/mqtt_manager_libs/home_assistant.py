@@ -1,4 +1,4 @@
-import websocket
+import websocket, ssl
 import logging
 import json
 from threading import Thread
@@ -122,7 +122,7 @@ def _do_connection():
         logging.info(F"Connecting to Home Assistant at {ws_url}")
         ws.close()
         time.sleep(1)
-        ws.run_forever()
+        ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
         time.sleep(10)
 
 
