@@ -93,6 +93,19 @@ def get_mqtt_manager_config(request):
         }
         return_json["nspanels"][panel.id] = panel_config
 
+    return_json["scenes"] = {}
+    for scene in Scene.objects.all():
+        scene_config = {
+            "id": scene.id,
+            "name": scene.friendly_name,
+        }
+        if scene.room:
+            scene_config.update({
+                "room_id": scene.room.id,
+                "room_name": scene.room.friendly_name
+            })
+        return_json["scenes"][scene.id] = scene_config
+
     return JsonResponse(return_json)
 
 
@@ -148,7 +161,7 @@ def get_all_available_light_entities(request):
             else:
                 home_assistant_api_address = get_setting_with_default("home_assistant_address", "") + "/api/states"
             print("Trying to get Home Assistant entities via api address: " + home_assistant_api_address)
-            home_assistant_response = requests.get(home_assistant_api_address, headers=home_assistant_request_headers, timeout=5)
+            home_assistant_response = requests.get(home_assistant_api_address, headers=home_assistant_request_headers, timeout=5, verify=False)
             if home_assistant_response.status_code == 200:
                 for entity in home_assistant_response.json():
                     if (entity["entity_id"].startswith("light.") or entity["entity_id"].startswith("switch.")):
@@ -174,7 +187,7 @@ def get_all_available_light_entities(request):
         }
         try:
             openhab_response = requests.get(get_setting_with_default(
-                "openhab_address", "") + "/rest/things", headers=openhab_request_headers)
+                "openhab_address", "") + "/rest/things", headers=openhab_request_headers, verify=False)
 
             if openhab_response.status_code == 200:
                 for entity in openhab_response.json():

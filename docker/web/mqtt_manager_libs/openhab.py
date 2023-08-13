@@ -1,4 +1,4 @@
-import websocket
+import websocket, ssl
 import requests
 import logging
 import json
@@ -140,7 +140,7 @@ def _do_connection():
         logging.info(F"Connecting to OpenHAB.")
         ws.close()
         sleep(1)
-        ws.run_forever()
+        ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
         sleep(10)
     # Update all existing states
     _update_all_light_states()
