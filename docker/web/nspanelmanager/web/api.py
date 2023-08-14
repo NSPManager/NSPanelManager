@@ -6,6 +6,7 @@ from django.core.files.storage import FileSystemStorage
 import json
 import requests
 import logging
+import traceback
 
 import hashlib
 import psutil
@@ -173,7 +174,7 @@ def get_all_available_light_entities(request):
                 return_json["errors"].append("Failed to get Home Assistant lights, got return code: " + str(home_assistant_response.status_code))
                 print("ERROR! Got status code other than 200. Got code: " + str(home_assistant_response.status_code))
         except Exception as e:
-            return_json["errors"].append("Failed to get Home Assistant lights: " + str(e))
+            return_json["errors"].append("Failed to get Home Assistant lights: " + str(traceback.format_exc()))
             logging.exception("Failed to get Home Assistant lights!")
     else:
         print("No home assistant configuration values. Will not gather Home Assistant entities.")
@@ -213,7 +214,7 @@ def get_all_available_light_entities(request):
                 return_json["errors"].append("Failed to get OpenHAB lights, got return code: " + str(openhab_response.status_code))
                 print("ERROR! Got status code other than 200. Got code: " + str(openhab_response.status_code))
         except Exception as e:
-            return_json["errors"].append("Failed to get OpenHAB lights: " + str(e))
+            return_json["errors"].append("Failed to get OpenHAB lights: " + str(traceback.format_exc()))
             logging.exception("Failed to get OpenHAB lights!")
     else:
         print("No OpenHAB configuration values. Will not gather OpenHAB entities.")

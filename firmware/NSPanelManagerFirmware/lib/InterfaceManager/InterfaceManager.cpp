@@ -69,7 +69,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
           PageManager::GetNSPanelManagerPage()->setText("Connecting to WiFi...");
         }
       } else if (!InterfaceManager::hasRegisteredToManager) {
-        PageManager::GetNSPanelManagerPage()->setText("Registring to manager...");
+        PageManager::GetNSPanelManagerPage()->setText("Registering to manager...");
       } else if (!MqttManager::connected()) {
         PageManager::GetNSPanelManagerPage()->setText("Connecting to MQTT...");
       }
