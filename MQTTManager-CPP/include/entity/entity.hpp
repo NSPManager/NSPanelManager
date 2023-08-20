@@ -1,0 +1,18 @@
+#ifndef MQTT_MANAGER_ENTITY
+#define MQTT_MANAGER_ENTITY
+
+enum MQTT_MANAGER_ENTITY_TYPE {
+  LIGHT
+};
+
+enum MQTT_MANAGER_ENTITY_CONTROLLER {
+  HOME_ASSISTANT,
+  OPENHAB
+};
+
+class MqttManagerEntity {
+  virtual MQTT_MANAGER_ENTITY_TYPE get_type() = 0;
+  virtual MQTT_MANAGER_ENTITY_CONTROLLER get_controller() = 0;
+};
+
+#endif // !MQTT_MANAGER_ENTITY

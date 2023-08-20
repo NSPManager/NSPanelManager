@@ -295,13 +295,14 @@ def get_config():
 
 
 def connect_and_loop():
-    global settings, home_assistant
+    global settings, home_assistant, mqtt_connect_time
     mqtt_manager_libs.websocket_server.register_message_handler(on_websocket_message)
     mqtt_manager_libs.websocket_server.register_on_connect_handler(on_websocket_client_connect)
     mqtt_manager_libs.websocket_server.start_server()  # Start websocket server
     client.on_connect = on_connect
     client.on_message = on_message
     client.username_pw_set(settings["mqtt_username"], settings["mqtt_password"])
+    client.will_set("nspanel/status/availability_" + get_machine_mac(), "offline", 0, True)
     # Wait for connection
     connection_return_code = 0
     mqtt_server = settings["mqtt_server"]
@@ -315,6 +316,7 @@ def connect_and_loop():
             logging.exception(F"Failed to connect to MQTT {mqtt_server}:{mqtt_port}. Will try again in 10 seconds. Code: {connection_return_code}")
             time.sleep(10)
     mqtt_connect_time = millis()
+    client.publish("nspanel/status/availability_" + get_machine_mac(), "online", True)
 
     # Send reload command to panels for them to reload config as MQTT manager JUST restarted (probably because of config change)
     if has_sent_reload_command == False:

@@ -16,6 +16,13 @@ firmware/NSPanelManagerFirmware/.ccls
 firmware/NSPanelManagerFirmware/.ccls-cache
 MQTTManager-RUST/
 
+MQTTManager-CPP/conan_cache/
+MQTTManager-CPP/build/
+MQTTManager-CPP/.cache/
+MQTTManager-CPP/CMakeFiles/
+MQTTManager-CPP/lib/
+MQTTManager-CPP/env.sh
+
 # User/computer specific files that is user depandant
 firmware/NSPanelManagerFirmware/src/CMakeLists.txt
 firmware/NSPanelManagerFirmware/compile_commands.json

@@ -44,6 +44,6 @@ class WebConfig(AppConfig):
                         set_setting_value("home_assistant_token", environment("SUPERVISOR_TOKEN"))
                     #from .models import Settings
                     #objects = Settings.objects.filter(name=name)
-            start_mqtt_manager()
+            #start_mqtt_manager()
         except:
             logging.exception("Failed to populate Home Assistant addon settings.")

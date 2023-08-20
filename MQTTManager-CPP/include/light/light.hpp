@@ -1,0 +1,108 @@
+#ifndef MQTT_MANAGER_LIGHT
+#define MQTT_MANAGER_LIGHT
+
+#include <cstdint>
+#include <entity/entity.hpp>
+#include <nlohmann/json.hpp>
+
+enum MQTT_MANAGER_LIGHT_MODE {
+  DEFAULT, // Normal, no special case.
+  RGB      // Send updated values as HSV and not brightness and/or color_temperature.
+};
+
+class Light : public MqttManagerEntity {
+public:
+  Light(nlohmann::json &init_data);
+
+  /**
+   * Turn on the light
+   */
+  void turn_on();
+
+  /**
+   * Turn off the light
+   */
+  void turn_off();
+
+  /**
+   * Set the dim level of a light. If the light is in RGB mode it will retain that mode
+   * and set_hsb will be called with existing value for hue and saturation instead.
+   * @param brightness: Light brightness 0-100
+   */
+  void set_brightness(uint8_t brightness);
+
+  /**
+   * Set the color temperature of a light. If the light is in RGB mode it will transission to normal mode.
+   * @param color_tmperature: Color temperature in kelvin
+   */
+  void set_color_temperature(uint color_temperature);
+
+  /**
+   * Set the Hue value of the light.
+   * @param hue: Hue level, 0 to 359
+   */
+  void set_hue(uint16_t hue);
+
+  /**
+   * Set the Saturation value of the light.
+   * @param saturation: Saturation level, 0 to 100
+   */
+  void set_saturation(uint8_t saturation);
+
+  /**
+   * Set the Hue, Saturation and Brightness value of the light.
+   * @param hue: Hue level, 0 to 100
+   * @param saturation: Hue level, 0 to 100
+   * @param brightness: Hue level, 0 to 100
+   */
+  void set_hsb(uint16_t hue, uint8_t saturation, uint8_t brightness);
+
+  /**
+   * Get the ID of the light.
+   */
+  uint get_id();
+
+  /**
+   * Go through the requested states and compare them with the current states.
+   * If there is any difference, send the updated values to the controller.
+   */
+  virtual void send_state_update_to_controller() = 0;
+
+  /**
+   * Get the current control mode of the light.
+   */
+  MQTT_MANAGER_LIGHT_MODE get_mode();
+
+  MQTT_MANAGER_ENTITY_TYPE get_type();
+  MQTT_MANAGER_ENTITY_CONTROLLER get_controller();
+
+protected:
+  uint _id;
+  std::string _name;
+  // TODO: Add pointer to initialized room
+  MQTT_MANAGER_ENTITY_CONTROLLER _controller;
+
+  bool _can_dim;
+  bool _can_color_temperature;
+  bool _can_rgb;
+
+  bool _current_state;
+  uint8_t _current_brightness;
+  uint _current_color_temperature;
+  uint16_t _current_hue;
+  uint8_t _current_saturation;
+  MQTT_MANAGER_LIGHT_MODE _current_mode;
+
+  bool _requested_state;
+  uint8_t _requested_brightness;
+  uint _requested_color_temperature;
+  uint16_t _requested_hue;
+  uint8_t _requested_saturation;
+
+  std::string _mqtt_brightness_topic;
+  std::string _mqtt_kelvin_topic;
+  std::string _mqtt_hue_topic;
+  std::string _mqtt_saturation_topic;
+};
+
+#endif // !MQTT_MANAGER_LIGHT

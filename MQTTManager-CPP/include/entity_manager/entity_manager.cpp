@@ -1,0 +1,147 @@
+#include "light/home_assistant_light.hpp"
+#include <entity_manager/entity_manager.hpp>
+#include <mqtt_manager_config/mqtt_manager_config.hpp>
+#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+#include <nspanel/nspanel.hpp>
+#include <spdlog/spdlog.h>
+#include <sys/types.h>
+
+void EntityManager::init() {
+  MQTT_Manager::attach_observer(EntityManager::mqtt_callback);
+}
+
+void EntityManager::init_entities() {
+  spdlog::info("Loading entities.");
+  for (nlohmann::json config : MqttManagerConfig::light_configs) {
+    std::string light_type = config["type"];
+    if (light_type.compare("home_assistant") == 0) {
+      HomeAssistantLight *light = new HomeAssistantLight(config);
+      EntityManager::_lights.push_back(light);
+      EntityManager::add_entity(light);
+    } else if (light_type.compare("openhab") == 0) {
+      // TODO: Implement OpenHAB light.
+      // HomeAssistantLight *light = new Open(config);
+      // EntityManager::_lights.push_back(light);
+      // EntityManager::add_entity(light);
+    } else {
+      spdlog::error("Unknown light type '{}'. Will ignore entity.", light_type);
+    }
+  }
+
+  for (nlohmann::json config : MqttManagerConfig::nspanel_configs) {
+    EntityManager::_nspanels.push_back(new NSPanel(config));
+  }
+}
+
+void EntityManager::add_entity(MqttManagerEntity *entity) {
+  EntityManager::_entities.push_back(entity);
+}
+
+void EntityManager::remove_entity(MqttManagerEntity *entity) {
+  EntityManager::_entities.remove(entity);
+}
+
+bool EntityManager::mqtt_callback(const std::string &topic, const std::string &payload) {
+  spdlog::debug("Processing message on topic: {}, payload: {}", topic, payload);
+  try {
+    return EntityManager::_process_message(topic, payload);
+  } catch (const std::exception ex) {
+    spdlog::error("Caught std::exception while processing message. Exception: ", ex.what());
+  } catch (...) {
+    spdlog::error("Caught unknown exception while processing message.");
+  }
+
+  return false;
+}
+
+bool EntityManager::_process_message(const std::string &topic, const std::string &payload) {
+  if (topic.compare("nspanel/mqttmanager/command") == 0) {
+    nlohmann::json data = nlohmann::json::parse(payload);
+    std::string mac_origin = data["mac_origin"];
+    NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_origin);
+    if (panel != nullptr) {
+      std::string command_method = data["method"];
+      if (command_method.compare("set") == 0) {
+        std::string command_set_attribute = data["attribute"];
+        if (command_set_attribute.compare("brightness") == 0) {
+          std::vector<uint> entity_ids = data["entity_ids"];
+          uint8_t new_brightness = data["brightness"];
+          for (uint entity_id : entity_ids) {
+            Light *light = EntityManager::get_light_by_id(entity_id);
+            if (light != nullptr) {
+              if (new_brightness != 0) {
+                light->set_brightness(new_brightness);
+                light->turn_on();
+              } else {
+                light->turn_off();
+              }
+            }
+          }
+        } else if (command_set_attribute.compare("kelvin") == 0) {
+          std::vector<uint> entity_ids = data["entity_ids"];
+          uint new_kelvin = data["kelvin"];
+          for (uint entity_id : entity_ids) {
+            Light *light = EntityManager::get_light_by_id(entity_id);
+            if (light != nullptr) {
+              light->set_color_temperature(new_kelvin);
+            }
+          }
+        } else if (command_set_attribute.compare("hue") == 0) {
+          std::vector<uint> entity_ids = data["entity_ids"];
+          uint new_hue = data["hue"];
+          for (uint entity_id : entity_ids) {
+            Light *light = EntityManager::get_light_by_id(entity_id);
+            if (light != nullptr) {
+              light->set_hue(new_hue);
+            }
+          }
+        } else if (command_set_attribute.compare("saturation") == 0) {
+          std::vector<uint> entity_ids = data["entity_ids"];
+          uint new_saturation = data["saturation"];
+          for (uint entity_id : entity_ids) {
+            Light *light = EntityManager::get_light_by_id(entity_id);
+            if (light != nullptr) {
+              light->set_saturation(new_saturation);
+            }
+          }
+        } else {
+          spdlog::error("Unknown attribute '{}' in set-command request.", command_set_attribute);
+        }
+      }
+    } else {
+      spdlog::warn("Ignoring command from panel not known. Origin panel MAC: {}", mac_origin);
+    }
+
+    return true;
+  }
+
+  return false; // Message was not processed by us, keep looking.
+}
+
+Light *EntityManager::get_light_by_id(uint id) {
+  for (Light *light : EntityManager::_lights) {
+    if (light->get_id() == id) {
+      return light;
+    }
+  }
+  return nullptr;
+}
+
+NSPanel *EntityManager::get_nspanel_by_id(uint id) {
+  for (NSPanel *nspanel : EntityManager::_nspanels) {
+    if (nspanel->get_id() == id) {
+      return nspanel;
+    }
+  }
+  return nullptr;
+}
+
+NSPanel *EntityManager::get_nspanel_by_mac(std::string mac) {
+  for (NSPanel *nspanel : EntityManager::_nspanels) {
+    if (nspanel->get_mac().compare(mac) == 0) {
+      return nspanel;
+    }
+  }
+  return nullptr;
+}

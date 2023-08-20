@@ -1,7 +1,16 @@
 import json
 import logging
-
 from paho import mqtt
+import subprocess
+import re
+
+
+def get_machine_mac():
+    pid = subprocess.Popen(["ifconfig" ], stdout=subprocess.PIPE)
+    s = pid.communicate()[0].decode()
+    mac = re.search(r"(([a-f\d]{1,2}\:){5}[a-f\d]{1,2})", s).groups()[0]
+    return mac
+
 
 def register_panel(nspanel, mqtt_client, settings):
     base_config = {
@@ -25,6 +34,7 @@ def register_panel(nspanel, mqtt_client, settings):
     register_relays(nspanel, mqtt_client, settings, base_config)
     register_screen_switch(nspanel, mqtt_client, settings, base_config)
     register_screen_brightness_controls(nspanel, mqtt_client, settings, base_config)
+    register_scenes(settings, mqtt_client)
 
 
 def register_temperature_sensor(nspanel, mqtt_client, settings, base_config):
@@ -89,3 +99,20 @@ def register_screen_brightness_controls(nspanel, mqtt_client, settings, base_con
     config["max"] = "100"
     config["unique_id"] = nspanel["mac"].replace(":", "_").lower() + "_screensaver_brightness"
     mqtt_client.publish("homeassistant/number/nspanelmanager/" + nspanel["mac"].replace(":", "_").lower() + "_screensaver_brightness/config", json.dumps(config), retain=True)
+
+def register_scenes(settings, mqtt_client):
+    for id, scene in settings["scenes"].items():
+        config = {
+            "availability":  [
+                {
+                    "topic": "nspanel/status/availability_" + get_machine_mac(),
+                }
+            ]
+        }
+        config["name"] = "NSPM Scene " + scene["name"]
+        config["payload_on"] = "1"
+        if "room_id" in scene and "room_name" in scene:
+            config["command_topic"] = "nspanel/scenes/room/" + scene["room_name"] + "/" + scene["name"] + "/activate"
+        else:
+            config["command_topic"] = "nspanel/scenes/global/" + scene["name"] + "/activate"
+
