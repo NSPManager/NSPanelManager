@@ -37,11 +37,11 @@ void MQTT_Manager::connect() {
                       .finalize();
 
   try {
-    spdlog::info("Connecting to the MQTT Server...");
+    SPDLOG_INFO("Connecting to the MQTT Server...");
     mqtt::connect_response rsp = MQTT_Manager::_mqtt_client->connect(connOpts);
-    spdlog::info("Connected to server.");
+    SPDLOG_INFO("Connected to server.");
 
-    spdlog::debug("Subscribing to topics...");
+    SPDLOG_DEBUG("Subscribing to topics...");
     MQTT_Manager::_mqtt_client->subscribe(MQTT_Manager::_get_subscribe_topics(), MQTT_Manager::_get_subscribe_topics_qos());
 
     // Consume messages
@@ -51,18 +51,18 @@ void MQTT_Manager::connect() {
       if (msg) {
         MQTT_Manager::_process_mqtt_message(msg->get_topic(), msg->get_payload());
       } else if (!MQTT_Manager::_mqtt_client->is_connected()) {
-        spdlog::error("Lost connection");
+        SPDLOG_ERROR("Lost connection");
         while (!MQTT_Manager::_mqtt_client->is_connected()) {
           std::this_thread::sleep_for(std::chrono::milliseconds(250));
         }
-        spdlog::info("Re-established connection");
+        SPDLOG_INFO("Re-established connection");
       }
     }
 
     // Disconnect
-    spdlog::info("Disconnecting from the MQTT server...");
+    SPDLOG_INFO("Disconnecting from the MQTT server...");
     MQTT_Manager::_mqtt_client->disconnect();
-    spdlog::info("OK");
+    SPDLOG_INFO("OK");
   } catch (const mqtt::exception &exc) {
     std::cerr << exc.what() << std::endl;
     // return 1;
@@ -129,12 +129,12 @@ void MQTT_Manager::_process_mqtt_message(const std::string topic, const std::str
       }
     }
     if (!message_handled) {
-      spdlog::warn("Got message on topic '{}' that was unhandled.", topic);
+      SPDLOG_WARN("Got message on topic '{}' that was unhandled.", topic);
     }
   } catch (std::exception ex) {
-    spdlog::error("Caught std::exception while processing message on topic '{}'. message: '{}'. Exception: ", topic, message, ex.what());
+    SPDLOG_ERROR("Caught std::exception while processing message on topic '{}'. message: '{}'. Exception: ", topic, message, ex.what());
   } catch (...) {
-    spdlog::error("Caught exception of type other than std::exception while processing message on topic '{}'. message: {}", topic, message);
+    SPDLOG_ERROR("Caught exception of type other than std::exception while processing message on topic '{}'. message: {}", topic, message);
   }
 }
 
@@ -173,7 +173,7 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
       mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), 0, retain);
       MQTT_Manager::_mqtt_client->publish(msg);
     } else {
-      spdlog::error("Tried sending MQTT message while MQTT is disconnected.");
+      SPDLOG_ERROR("Tried sending MQTT message while MQTT is disconnected.");
     }
   }
 }

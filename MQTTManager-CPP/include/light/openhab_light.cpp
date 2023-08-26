@@ -1,12 +1,15 @@
 #include "openhab_light.hpp"
+#include "openhab_manager/openhab_manager.hpp"
+#include <fmt/format.h>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
+#include <string>
 
-OpenHabLight::OpenHabLight(nlohmann::json &init_data) : Light(init_data) {
+OpenhabLight::OpenhabLight(nlohmann::json &init_data) : Light(init_data) {
   // Process OpenHAB specific details. General light data is loaded in the "Light" constructor.
 
   if (this->_controller != MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB) {
-    spdlog::error("OpenHabLight has not been recognized as controlled by OPENHAB. Will stop processing light.");
+    SPDLOG_ERROR("OpenhabLight has not been recognized as controlled by OPENHAB. Will stop processing light.");
     return;
   }
 
@@ -21,7 +24,7 @@ OpenHabLight::OpenHabLight(nlohmann::json &init_data) : Light(init_data) {
   } else {
     this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH;
     this->_openhab_on_off_item = init_data["openhab_item_switch"];
-    spdlog::error("Got unknown OpenHAB control mode ({}) for light {}::{}. Will assume switch.", openhab_control_mode, this->_id, this->_name);
+    SPDLOG_ERROR("Got unknown OpenHAB control mode ({}) for light {}::{}. Will assume switch.", openhab_control_mode, this->_id, this->_name);
   }
 
   if (this->_can_color_temperature) {
@@ -31,25 +34,34 @@ OpenHabLight::OpenHabLight(nlohmann::json &init_data) : Light(init_data) {
     this->_openhab_item_rgb = init_data["openhab_itemrgb"];
   }
 
-  spdlog::debug("Loaded light {}::{}.", this->_id, this->_name);
+  SPDLOG_DEBUG("Loaded light {}::{}.", this->_id, this->_name);
 }
 
-void OpenHabLight::turn_on() {
-  spdlog::debug("Turning on HA light {}::{}", this->_id, this->_name);
+void OpenhabLight::send_state_update_to_controller() {
+  nlohmann::json service_data;
+  service_data["type"] = "ItemCommandEvent";
+  service_data["topic"] = fmt::format("openhab/items/{}/command", this->_openhab_on_off_item);
+  nlohmann::json payload_data;
+  payload_data["type"] = "Percent";
+  if (this->_requested_state) {
+    SPDLOG_DEBUG("Setting light {}::{} to level: {}", this->_id, this->_name, this->_requested_brightness);
+    payload_data["value"] = this->_requested_brightness;
+  } else {
+    SPDLOG_DEBUG("Setting light {}::{} to level: 0", this->_id, this->_name);
+    payload_data["value"] = 0;
+  }
+  service_data["payload"] = payload_data.dump();
+  OpenhabManager::send_json(service_data);
+
+  if (this->_can_color_temperature && this->_requested_state && this->_requested_color_temperature != this->_current_color_temperature) {
+    service_data["topic"] = fmt::format("openhab/items/{}/command", this->_openhab_item_color_temperature);
+    payload_data["value"] = this->_requested_color_temperature;
+    service_data["payload"] = payload_data.dump();
+    OpenhabManager::send_json(service_data);
+  }
 }
 
-void OpenHabLight::turn_off() {
-  spdlog::debug("Turning off HA light {}::{}", this->_id, this->_name);
-}
-
-void OpenHabLight::set_brightness(uint8_t brightness) {
-  spdlog::debug("Setting dim level for light {}::{} to {}", this->_id, this->_name, brightness);
-}
-
-void OpenHabLight::set_color_temperature(uint color_temperature) {
-  spdlog::debug("Setting color temperatre for light {}::{} to {}", this->_id, this->_name, color_temperature);
-}
-
-void OpenHabLight::set_hsb(uint8_t hue, uint8_t saturation, uint8_t brightness) {
-  spdlog::debug("Setting HSB for light {}::{} to {},{},{}", this->_id, this->_name, hue, saturation, brightness);
+bool OpenhabLight::openhab_event_callback(nlohmann::json &data) {
+  SPDLOG_DEBUG("Got openhab event: {}", data.dump());
+  return false;
 }

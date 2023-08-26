@@ -12,12 +12,12 @@ HomeAssistantLight::HomeAssistantLight(nlohmann::json &init_data) : Light(init_d
   // Process Home Assistant specific details. General light data is loaded in the "Light" constructor.
 
   if (this->_controller != MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT) {
-    spdlog::error("HomeAssistantLight has not been rekognized as controlled by HOME_ASSISTANT. Will stop processing light.");
+    SPDLOG_ERROR("HomeAssistantLight has not been rekognized as controlled by HOME_ASSISTANT. Will stop processing light.");
     return;
   }
 
   this->_home_assistant_name = init_data["home_assistant_name"];
-  spdlog::debug("Loaded light {}::{}.", this->_id, this->_name);
+  SPDLOG_DEBUG("Loaded light {}::{}.", this->_id, this->_name);
 
   if (this->_home_assistant_name.rfind("light.", 0) == 0) {
     this->_home_assistant_light_type = MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TYPE::TYPE_LIGHT;
@@ -25,7 +25,7 @@ HomeAssistantLight::HomeAssistantLight(nlohmann::json &init_data) : Light(init_d
     this->_home_assistant_light_type = MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TYPE::TYPE_SWITCH;
   } else {
     this->_home_assistant_light_type = MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TYPE::TYPE_LIGHT;
-    spdlog::error("Unknown type of home assistant entity '{}'. Will assume light is a light.", this->_home_assistant_name);
+    SPDLOG_ERROR("Unknown type of home assistant entity '{}'. Will assume light is a light.", this->_home_assistant_name);
   }
 
   HomeAssistantManager::attach_event_observer(this);
@@ -66,7 +66,7 @@ void HomeAssistantLight::send_state_update_to_controller() {
 bool HomeAssistantLight::home_assistant_event_callback(nlohmann::json &data) {
   if (std::string(data["event"]["event_type"]).compare("state_changed") == 0) {
     if (std::string(data["event"]["data"]["entity_id"]).compare(this->_home_assistant_name) == 0) {
-      spdlog::debug("Got event update for HA light {}::{}.", this->_id, this->_name);
+      SPDLOG_DEBUG("Got event update for HA light {}::{}.", this->_id, this->_name);
       nlohmann::json new_state_data = data["event"]["data"]["new_state"];
       nlohmann::json new_state_attributes = new_state_data["attributes"];
 
@@ -100,7 +100,7 @@ bool HomeAssistantLight::home_assistant_event_callback(nlohmann::json &data) {
           this->_requested_brightness = 0;
           MQTT_Manager::publish(this->_mqtt_brightness_topic, "0", true);
         } else {
-          spdlog::error("Unknown entity state: {}", new_state);
+          SPDLOG_ERROR("Unknown entity state: {}", new_state);
         }
       }
 

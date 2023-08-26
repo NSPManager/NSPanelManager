@@ -22,6 +22,7 @@ MQTTManager-CPP/.cache/
 MQTTManager-CPP/CMakeFiles/
 MQTTManager-CPP/lib/
 MQTTManager-CPP/env.sh
+MQTTManager-CPP/compile_commands.json
 
 # User/computer specific files that is user depandant
 firmware/NSPanelManagerFirmware/src/CMakeLists.txt

@@ -1,3 +1,4 @@
+#include "openhab_manager/openhab_manager.hpp"
 #include <chrono>
 #include <cstddef>
 #include <spdlog/spdlog.h>
@@ -12,32 +13,35 @@
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 
 int main(void) {
+  spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%s:%#] [%t] %v");
   spdlog::set_level(spdlog::level::debug); // Set global log level to info
+
   EntityManager::init();
   MqttManagerConfig::load();
   EntityManager::init_entities();
 
-  spdlog::info("Config loaded. Starting components.");
+  SPDLOG_INFO("Config loaded. Starting components.");
   std::thread mqtt_manager_thread(MQTT_Manager::connect);
   std::thread home_assistant_manager_thread;
   std::thread openhab_manager_thread;
 
   while (!MQTT_Manager::is_connected()) {
-    spdlog::error("Waiting for MQTT to connect before proceeding.");
+    SPDLOG_ERROR("Waiting for MQTT to connect before proceeding.");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 
   if (!MqttManagerConfig::home_assistant_address.empty() && !MqttManagerConfig::home_assistant_access_token.empty()) {
-    spdlog::info("Home Assistant address and access token configured. Starting Home Assistant component.");
+    SPDLOG_INFO("Home Assistant address and access token configured. Starting Home Assistant component.");
     home_assistant_manager_thread = std::thread(HomeAssistantManager::connect);
   } else {
-    spdlog::warn("Home Assistant address and/or token missing. Won't start Home Assistant component.");
+    SPDLOG_WARN("Home Assistant address and/or token missing. Won't start Home Assistant component.");
   }
 
   if (!MqttManagerConfig::openhab_address.empty() && !MqttManagerConfig::openhab_access_token.empty()) {
-    // TODO: Implement OpenHAB Manager
+    SPDLOG_INFO("Openhab address and access token configured. Starting Openhab component.");
+    openhab_manager_thread = std::thread(OpenhabManager::connect);
   } else {
-    spdlog::warn("OpenHAB address and/or token missing. Won't start OpenHAB component.");
+    SPDLOG_WARN("OpenHAB address and/or token missing. Won't start OpenHAB component.");
   }
 
   // Wait for threads to exit

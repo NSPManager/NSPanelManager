@@ -337,6 +337,7 @@ void LightManager::_taskProcessMqttMessages(void *param) {
           } else {
             LOG_ERROR("Got kelvin update for unknown light ID: ", entity.c_str());
           }
+          // TODO: Implement RGB management
         } else {
           LOG_ERROR("Got state update for unknown attribute: ", attribute.c_str());
         }

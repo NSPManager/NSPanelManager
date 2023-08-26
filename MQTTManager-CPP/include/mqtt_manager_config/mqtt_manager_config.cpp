@@ -30,10 +30,10 @@ void MqttManagerConfig::load() {
     if (ha_token != nullptr) {
       MqttManagerConfig::home_assistant_access_token = ha_token;
     } else {
-      spdlog::error("Configured to use Home Assistant at address '{}' but no token was given.", ha_address);
+      SPDLOG_ERROR("Configured to use Home Assistant at address '{}' but no token was given.", ha_address);
     }
   } else {
-    spdlog::warn("No Home Assistant address set. Will not use Home Assistant.");
+    SPDLOG_WARN("No Home Assistant address set. Will not use Home Assistant.");
   }
 
   // Load OpenHAB values
@@ -42,10 +42,10 @@ void MqttManagerConfig::load() {
     if (ha_token != nullptr) {
       MqttManagerConfig::openhab_access_token = openhab_token;
     } else {
-      spdlog::error("Configured to use OpenHAB at address '{}' but no token was given.", openhab_address);
+      SPDLOG_ERROR("Configured to use OpenHAB at address '{}' but no token was given.", openhab_address);
     }
   } else {
-    spdlog::warn("No Home Assistant address set. Will not use OpenHAB.");
+    SPDLOG_WARN("No Home Assistant address set. Will not use OpenHAB.");
   }
 
   // Load MQTT values
@@ -55,7 +55,7 @@ void MqttManagerConfig::load() {
     if (mqtt_port != nullptr) {
       MqttManagerConfig::mqtt_port = atoi(mqtt_port);
     } else {
-      spdlog::warn("No port configured, will use default MQTT port 1883.");
+      SPDLOG_WARN("No port configured, will use default MQTT port 1883.");
       MqttManagerConfig::mqtt_port = 1883;
     }
 
@@ -67,18 +67,19 @@ void MqttManagerConfig::load() {
       MqttManagerConfig::mqtt_password = mqtt_password;
     }
   } else {
-    spdlog::error("No MQTT server configured!");
+    SPDLOG_ERROR("No MQTT server configured!");
   }
 
   // Load all other non-sensitive config via HTTP GET to manager.
   CURL *curl;
   CURLcode res;
 
+  SPDLOG_INFO("Gathering config from web manager.");
   while (true) {
     curl = curl_easy_init();
     if (curl) {
       std::string response_data;
-      spdlog::debug("Requesting config from: http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_mqtt_manager_config");
+      SPDLOG_DEBUG("Requesting config from: http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_mqtt_manager_config");
       curl_easy_setopt(curl, CURLOPT_URL, "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_mqtt_manager_config");
       /* example.com is redirected, so we tell libcurl to follow redirection */
       curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -89,25 +90,26 @@ void MqttManagerConfig::load() {
       res = curl_easy_perform(curl);
       /* Check for errors */
       if (res == CURLE_OK) {
-        spdlog::debug("Got config data. Processing config.");
+        SPDLOG_DEBUG("Got config data. Processing config.");
         nlohmann::json data = nlohmann::json::parse(response_data);
         MqttManagerConfig::populate_settings_from_config(data);
         break; // Exit loop as we have gather and processed config.
       } else {
-        spdlog::error("curl_easy_perform() failed, got code: {}. Will retry.", curl_easy_strerror(res));
+        SPDLOG_ERROR("curl_easy_perform() failed, got code: {}. Will retry.", curl_easy_strerror(res));
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
       }
 
       /* always cleanup */
       curl_easy_cleanup(curl);
     } else {
-      spdlog::error("Failed to curl_easy_init(). Will try again.");
+      SPDLOG_ERROR("Failed to curl_easy_init(). Will try again.");
       std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     }
   }
 }
 
 void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
+  SPDLOG_INFO("Got config from web manager, will process and load values.");
   MqttManagerConfig::color_temp_min = data["color_temp_min"];
   MqttManagerConfig::color_temp_max = data["color_temp_max"];
   MqttManagerConfig::clock_us_style = std::string(data["clock_us_style"]).compare("True") == 0;
@@ -120,7 +122,7 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     MqttManagerConfig::turn_on_behavior = LIGHT_TURN_ON_BEHAVIOR::COLOR_TEMP;
   } else {
     MqttManagerConfig::turn_on_behavior = LIGHT_TURN_ON_BEHAVIOR::COLOR_TEMP; // Set default when error.
-    spdlog::error("Unknown turn on behavior for lights: {}. Will use COLOR_TEMP.", turn_on_behavior);
+    SPDLOG_ERROR("Unknown turn on behavior for lights: {}. Will use COLOR_TEMP.", turn_on_behavior);
   }
 
   for (nlohmann::json light_config : data["lights"]) {
@@ -130,5 +132,5 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     MqttManagerConfig::nspanel_configs.push_back(nspanel_config);
   }
 
-  spdlog::debug("Config loaded.");
+  SPDLOG_DEBUG("Config loaded.");
 }

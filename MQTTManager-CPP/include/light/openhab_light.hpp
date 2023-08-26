@@ -2,45 +2,28 @@
 #define MQTT_MANAGER_OPENHAB_LIGHT
 
 #include "light.hpp"
+#include "openhab_manager/openhab_manager.hpp"
 
 enum MQTT_MANAGER_OPENHAB_CONTROL_MODE {
   DIMMER,
   SWITCH
 };
 
-class OpenHabLight : public Light {
-  OpenHabLight(nlohmann::json &init_data);
+class OpenhabLight : public Light, public OpenhabEventObserver {
+public:
+  OpenhabLight(nlohmann::json &init_data);
 
   /**
-   * Turn on the light
+   * Go through the requested states and compare them with the current states.
+   * If there is any difference, send the updated values to the controller.
    */
-  void turn_on();
+  void send_state_update_to_controller();
 
   /**
-   * Turn off the light
+   * Process event data. If the event was processed by the given instance, return true, else return false.
+   * In case a false is returned the loop will continue until all registered entities has been checked.
    */
-  void turn_off();
-
-  /**
-   * Set the dim level of a light. If the light is in RGB mode it will retain that mode
-   * and set_hsb will be called with existing value for hue and saturation instead.
-   * @param brightness: Hue level, 0 to 255
-   */
-  void set_brightness(uint8_t brightness);
-
-  /**
-   * Set the color temperature of a light. If the light is in RGB mode it will transission to normal mode.
-   * @param color_tmperature: Color temperature in kelvin
-   */
-  void set_color_temperature(uint color_temperature);
-
-  /**
-   * Set the Hue, Saturation and Brightness value of the light.
-   * @param hue: Hue level, 0 to 255
-   * @param saturation: Hue level, 0 to 255
-   * @param brightness: Hue level, 0 to 255
-   */
-  void set_hsb(uint8_t hue, uint8_t saturation, uint8_t brightness);
+  bool openhab_event_callback(nlohmann::json &event_data);
 
 private:
   std::string _openhab_name;

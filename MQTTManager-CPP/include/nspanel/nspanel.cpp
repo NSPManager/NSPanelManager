@@ -8,7 +8,7 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
   this->_mac = init_data["mac"];
   this->_ip_address = init_data["address"];
   this->_is_us_panel = std::string(init_data["is_us_panel"]).compare("True") == 0;
-  spdlog::debug("Loaded NSPanel {}::{}.", this->_id, this->_name);
+  SPDLOG_DEBUG("Loaded NSPanel {}::{}.", this->_id, this->_name);
 
   this->_mqtt_log_topic = "nspanel/";
   this->_mqtt_log_topic.append(this->_name);

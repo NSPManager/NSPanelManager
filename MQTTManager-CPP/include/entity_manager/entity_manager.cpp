@@ -1,4 +1,5 @@
 #include "light/home_assistant_light.hpp"
+#include "light/openhab_light.hpp"
 #include <entity_manager/entity_manager.hpp>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <nlohmann/json.hpp>
@@ -12,23 +13,23 @@ void EntityManager::init() {
 }
 
 void EntityManager::init_entities() {
-  spdlog::info("Loading entities.");
-  for (nlohmann::json config : MqttManagerConfig::light_configs) {
+  SPDLOG_INFO("Initializing {} lights.", MqttManagerConfig::light_configs.size());
+  for (nlohmann::json &config : MqttManagerConfig::light_configs) {
     std::string light_type = config["type"];
     if (light_type.compare("home_assistant") == 0) {
       HomeAssistantLight *light = new HomeAssistantLight(config);
       EntityManager::_lights.push_back(light);
       EntityManager::add_entity(light);
     } else if (light_type.compare("openhab") == 0) {
-      // TODO: Implement OpenHAB light.
-      // HomeAssistantLight *light = new Open(config);
-      // EntityManager::_lights.push_back(light);
-      // EntityManager::add_entity(light);
+      OpenhabLight *light = new OpenhabLight(config);
+      EntityManager::_lights.push_back(light);
+      EntityManager::add_entity(light);
     } else {
-      spdlog::error("Unknown light type '{}'. Will ignore entity.", light_type);
+      SPDLOG_ERROR("Unknown light type '{}'. Will ignore entity.", light_type);
     }
   }
 
+  SPDLOG_INFO("Initializing {} NSPanels.", MqttManagerConfig::nspanel_configs.size());
   for (nlohmann::json config : MqttManagerConfig::nspanel_configs) {
     EntityManager::_nspanels.push_back(new NSPanel(config));
   }
@@ -43,13 +44,13 @@ void EntityManager::remove_entity(MqttManagerEntity *entity) {
 }
 
 bool EntityManager::mqtt_callback(const std::string &topic, const std::string &payload) {
-  spdlog::debug("Processing message on topic: {}, payload: {}", topic, payload);
+  SPDLOG_DEBUG("Processing message on topic: {}, payload: {}", topic, payload);
   try {
     return EntityManager::_process_message(topic, payload);
   } catch (const std::exception ex) {
-    spdlog::error("Caught std::exception while processing message. Exception: ", ex.what());
+    SPDLOG_ERROR("Caught std::exception while processing message. Exception: ", ex.what());
   } catch (...) {
-    spdlog::error("Caught unknown exception while processing message.");
+    SPDLOG_ERROR("Caught unknown exception while processing message.");
   }
 
   return false;
@@ -106,11 +107,11 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             }
           }
         } else {
-          spdlog::error("Unknown attribute '{}' in set-command request.", command_set_attribute);
+          SPDLOG_ERROR("Unknown attribute '{}' in set-command request.", command_set_attribute);
         }
       }
     } else {
-      spdlog::warn("Ignoring command from panel not known. Origin panel MAC: {}", mac_origin);
+      SPDLOG_WARN("Ignoring command from panel not known. Origin panel MAC: {}", mac_origin);
     }
 
     return true;

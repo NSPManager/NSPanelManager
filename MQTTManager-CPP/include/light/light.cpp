@@ -7,7 +7,7 @@
 Light::Light(nlohmann::json &init_data) {
   this->_id = init_data["id"];
   this->_name = init_data["name"];
-  spdlog::debug("Loading light {}::{}.", this->_id, this->_name);
+  SPDLOG_DEBUG("Loading light {}::{}.", this->_id, this->_name);
 
   // this->_name = init_data["name"]; // TODO: Pointer to room
 
@@ -41,7 +41,7 @@ Light::Light(nlohmann::json &init_data) {
   } else if (std::string(init_data["type"]).compare("openhab") == 0) {
     this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
   } else {
-    spdlog::error("Got unknown type ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(init_data["type"]), this->_id, this->_name);
+    SPDLOG_ERROR("Got unknown type ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(init_data["type"]), this->_id, this->_name);
     this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
   }
 
@@ -57,7 +57,7 @@ Light::Light(nlohmann::json &init_data) {
     this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT; // Normal mode. Don't do anything special with light change request.
   }
 
-  spdlog::debug("Light constructor complete for light {}::{}, can dim: {}, can color temp: {}, can_rgb: {}.", this->_id, this->_name, this->_can_dim ? "yes" : "no", this->_can_color_temperature ? "yes" : "no", this->_can_rgb ? "yes" : "no");
+  SPDLOG_DEBUG("Light constructor complete for light {}::{}, can dim: {}, can color temp: {}, can_rgb: {}.", this->_id, this->_name, this->_can_dim ? "yes" : "no", this->_can_color_temperature ? "yes" : "no", this->_can_rgb ? "yes" : "no");
 }
 
 MQTT_MANAGER_ENTITY_TYPE Light::get_type() {
