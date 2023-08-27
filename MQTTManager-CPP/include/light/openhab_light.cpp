@@ -1,4 +1,5 @@
 #include "openhab_light.hpp"
+#include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "openhab_manager/openhab_manager.hpp"
 #include <fmt/format.h>
 #include <nlohmann/json_fwd.hpp>
@@ -54,8 +55,19 @@ void OpenhabLight::send_state_update_to_controller() {
   OpenhabManager::send_json(service_data);
 
   if (this->_can_color_temperature && this->_requested_state && this->_requested_color_temperature != this->_current_color_temperature) {
+    // Calculate color temp percentage
+    uint16_t kelvin_max_floored = MqttManagerConfig::color_temp_max - MqttManagerConfig::color_temp_min;
+    uint16_t kelvin_floored = this->_requested_color_temperature - MqttManagerConfig::color_temp_min;
+    uint8_t color_temp_percentage = 100 - int(((float)kelvin_floored / (float)kelvin_max_floored) * 100);
+    if (color_temp_percentage > 100) {
+      color_temp_percentage = 100;
+    } else if (color_temp_percentage < 0) {
+      color_temp_percentage = 0;
+    }
+
+    SPDLOG_DEBUG("Setting light {}::{} to color temp: {}%", this->_id, this->_name, color_temp_percentage);
     service_data["topic"] = fmt::format("openhab/items/{}/command", this->_openhab_item_color_temperature);
-    payload_data["value"] = this->_requested_color_temperature;
+    payload_data["value"] = color_temp_percentage;
     service_data["payload"] = payload_data.dump();
     OpenhabManager::send_json(service_data);
   }
