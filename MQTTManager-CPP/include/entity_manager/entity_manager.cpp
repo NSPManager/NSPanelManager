@@ -44,7 +44,7 @@ void EntityManager::remove_entity(MqttManagerEntity *entity) {
 }
 
 bool EntityManager::mqtt_callback(const std::string &topic, const std::string &payload) {
-  SPDLOG_DEBUG("Processing message on topic: {}, payload: {}", topic, payload);
+  SPDLOG_TRACE("Processing message on topic: {}, payload: {}", topic, payload);
   try {
     return EntityManager::_process_message(topic, payload);
   } catch (const std::exception ex) {

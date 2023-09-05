@@ -93,7 +93,10 @@ void Light::set_brightness(uint8_t brightness) {
     brightness = 100;
   }
   this->_requested_brightness = brightness;
-  this->send_state_update_to_controller();
+  if (this->_current_state) {
+    // Only send new brightness value if the light is on.
+    this->send_state_update_to_controller();
+  }
 }
 
 void Light::set_color_temperature(uint color_temperature) {

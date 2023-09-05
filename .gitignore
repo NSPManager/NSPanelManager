@@ -14,7 +14,6 @@ firmware/NSPanelManagerFirmware/nspanels_to_ota.txt
 firmware/NSPanelManagerFirmware/.cache
 firmware/NSPanelManagerFirmware/.ccls
 firmware/NSPanelManagerFirmware/.ccls-cache
-MQTTManager-RUST/
 
 MQTTManager-CPP/conan_cache/
 MQTTManager-CPP/build/

@@ -100,6 +100,7 @@ void OpenhabManager::_fetch_and_update_current_states() {
 void OpenhabManager::send_json(nlohmann::json &data) {
   data["source"] = "NSPanelManager::MqttManager";
   std::string buffer = data.dump();
+  SPDLOG_TRACE("Sending data: {}", buffer);
   OpenhabManager::_send_string(buffer);
 }
 
@@ -120,6 +121,7 @@ void OpenhabManager::detach_event_observer(OpenhabEventObserver *observer) {
 }
 
 void OpenhabManager::_process_openhab_event(nlohmann::json &event_data) {
+  SPDLOG_DEBUG("Processing Openhab event: {}", event_data.dump());
   for (OpenhabEventObserver *observer : OpenhabManager::_openhab_event_observers) {
     if (observer->openhab_event_callback(event_data)) {
       return;

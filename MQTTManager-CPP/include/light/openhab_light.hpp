@@ -31,6 +31,12 @@ private:
   std::string _openhab_on_off_item;            // Controls the item for on/off functioanlity
   std::string _openhab_item_color_temperature; // Item for chaning color temp
   std::string _openhab_item_rgb;               // Item for chaning color
+
+  uint64_t _last_on_off_change;
+  uint64_t _last_brightness_change;
+  uint64_t _last_color_temp_change;
+  uint64_t _last_rgb_change;
+  uint64_t _last_light_mode_change;
 };
 
 #endif // !MQTT_MANAGER_OPENHAB_LIGHT
