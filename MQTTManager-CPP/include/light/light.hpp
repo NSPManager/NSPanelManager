@@ -64,6 +64,11 @@ public:
   uint16_t get_id();
 
   /**
+   * Get the friendly name for the light.
+   */
+  std::string get_name();
+
+  /**
    * Go through the requested states and compare them with the current states.
    * If there is any difference, send the updated values to the controller.
    */

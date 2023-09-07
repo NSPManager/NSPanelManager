@@ -2,12 +2,15 @@
 #define MQTT_MANAGER_NSPM_SCENE_H
 
 #include "entity/entity.hpp"
+#include "light/light.hpp"
+#include "room/room.hpp"
 #include <list>
 #include <nlohmann/json.hpp>
 #include <scenes/scene.hpp>
 #include <string>
 
 struct LightState {
+  Light *_light;
   uint16_t light_id;
   uint8_t brightness;
   uint16_t color_temperature;
@@ -28,9 +31,11 @@ public:
   MQTT_MANAGER_ENTITY_CONTROLLER get_controller();
 
 private:
+  bool _is_global_scene;
   uint16_t _id;
   std::string _name;
-  // TODO: Implement pointer to Room
+  uint16_t _room_id;
+  Room *_room;
   std::list<LightState> _light_states;
 };
 

@@ -73,6 +73,10 @@ uint16_t Light::get_id() {
   return this->_id;
 }
 
+std::string Light::get_name() {
+  return this->_name;
+}
+
 MQTT_MANAGER_LIGHT_MODE Light::get_mode() {
   return this->_current_mode;
 }

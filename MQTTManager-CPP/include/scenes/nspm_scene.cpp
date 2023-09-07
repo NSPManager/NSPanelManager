@@ -1,4 +1,7 @@
 #include "entity/entity.hpp"
+#include "entity_manager/entity_manager.hpp"
+#include "light/light.hpp"
+#include <cstddef>
 #include <nlohmann/json_fwd.hpp>
 #include <scenes/nspm_scene.hpp>
 #include <spdlog/spdlog.h>
@@ -6,8 +9,13 @@
 NSPMScene::NSPMScene(nlohmann::json &data) {
   this->_id = data["scene_id"];
   this->_name = data["scene_name"];
+  if (!data["room_id"].is_null()) {
+    this->_is_global_scene = false;
+    this->_room_id = data["room_id"];
+  } else {
+    this->_is_global_scene = true;
+  }
   SPDLOG_DEBUG("Loading NSPM scene {}::{}.", this->_id, this->_name);
-  // TODO: Find and link pointer to room
   for (nlohmann::json light_data : data["light_states"]) {
     LightState state;
     state.light_id = light_data["light_id"];
@@ -45,5 +53,23 @@ MQTT_MANAGER_ENTITY_CONTROLLER NSPMScene::get_controller() {
 }
 
 void NSPMScene::post_init() {
-  // No post_init tasks
+  if (!this->_is_global_scene) {
+    MqttManagerEntity *room_entity = EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::ROOM, this->_room_id);
+    if (room_entity != nullptr) {
+      this->_room = dynamic_cast<Room *>(room_entity);
+    } else {
+      SPDLOG_ERROR("Did not find any room with room ID: {}. Will not continue loading.", this->_room_id);
+      return;
+    }
+
+    for (LightState state : this->_light_states) {
+      Light *light = EntityManager::get_light_by_id(state.light_id);
+      if (light != nullptr) {
+        SPDLOG_DEBUG("Attached light {}::{} to light state attached to scene {}::{}.", light->get_id(), light->get_name(), this->_id, this->_name);
+        state._light = light;
+      } else {
+        SPDLOG_ERROR("Did not find any light matching a light state for scene {}::{}.", this->_id, this->_name);
+      }
+    }
+  }
 }
