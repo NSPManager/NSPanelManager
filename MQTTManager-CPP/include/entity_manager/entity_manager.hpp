@@ -32,6 +32,18 @@ public:
   static void remove_entity(MqttManagerEntity *entity);
 
   /**
+   * Get an item by the specified type that has the specified ID.
+   * Return pointer to entity if found, otherwise a nullptr
+   */
+  static MqttManagerEntity *get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE type, uint16_t id);
+
+  /**
+   * Get all entities matching the specified type that has the specified ID.
+   * Return std::list of MqttManagerEntity pointers.
+   */
+  static std::list<MqttManagerEntity *> get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE type);
+
+  /**
    * Process MQTT Message. Return true if message was handled.
    */
   static bool mqtt_callback(const std::string &topic, const std::string &payload);

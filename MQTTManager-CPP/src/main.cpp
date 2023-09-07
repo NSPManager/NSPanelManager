@@ -26,7 +26,7 @@ int main(void) {
   std::thread openhab_manager_thread;
 
   while (!MQTT_Manager::is_connected()) {
-    SPDLOG_ERROR("Waiting for MQTT to connect before proceeding.");
+    SPDLOG_INFO("Waiting for MQTT to connect before proceeding.");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 

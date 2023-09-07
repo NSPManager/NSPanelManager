@@ -131,6 +131,12 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   for (nlohmann::json nspanel_config : data["nspanels"]) {
     MqttManagerConfig::nspanel_configs.push_back(nspanel_config);
   }
+  for (nlohmann::json scene_config : data["scenes"]) {
+    MqttManagerConfig::scenes_configs.push_back(scene_config);
+  }
+  for (nlohmann::json room_config : data["rooms"]) {
+    MqttManagerConfig::room_configs.push_back(room_config);
+  }
 
   SPDLOG_DEBUG("Config loaded.");
 }

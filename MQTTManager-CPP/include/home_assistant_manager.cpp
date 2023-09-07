@@ -23,7 +23,6 @@ void HomeAssistantManager::connect() {
   std::string home_assistant_websocket_url = MqttManagerConfig::home_assistant_address;
   home_assistant_websocket_url.append("/api/websocket"); // TODO: Implement /core/websocket if running as HA addon
   if (home_assistant_websocket_url.find("https://") != std::string::npos) {
-    SPDLOG_DEBUG("Replacing https with wss");
     // Replace https with wss
     home_assistant_websocket_url = home_assistant_websocket_url.replace(home_assistant_websocket_url.find("https://"), sizeof("https://") - 1, "wss://");
     SPDLOG_DEBUG("Settings TLS options");
@@ -33,7 +32,6 @@ void HomeAssistantManager::connect() {
     HomeAssistantManager::_websocket->setTLSOptions(tls_options);
   } else if (home_assistant_websocket_url.find("http://") != std::string::npos) {
     // Replace http with ws
-    SPDLOG_DEBUG("Replacing http with ws");
     home_assistant_websocket_url = home_assistant_websocket_url.replace(home_assistant_websocket_url.find("http://"), sizeof("http://") - 1, "ws://");
   } else {
     SPDLOG_ERROR("Unknown connection type of Home Assistant. Will not continue!");

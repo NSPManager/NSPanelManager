@@ -24,7 +24,6 @@ void OpenhabManager::connect() {
   std::string openhab_websocket_url = MqttManagerConfig::openhab_address;
   openhab_websocket_url.append("/ws");
   if (openhab_websocket_url.find("https://") != std::string::npos) {
-    SPDLOG_DEBUG("Replacing https with wss");
     // Replace https with wss
     openhab_websocket_url = openhab_websocket_url.replace(openhab_websocket_url.find("https://"), sizeof("https://") - 1, "wss://");
     SPDLOG_DEBUG("Settings TLS options");
@@ -34,7 +33,6 @@ void OpenhabManager::connect() {
     OpenhabManager::_websocket->setTLSOptions(tls_options);
   } else if (openhab_websocket_url.find("http://") != std::string::npos) {
     // Replace http with ws
-    SPDLOG_DEBUG("Replacing http with ws");
     openhab_websocket_url = openhab_websocket_url.replace(openhab_websocket_url.find("http://"), sizeof("http://") - 1, "ws://");
   } else {
     SPDLOG_ERROR("Unknown connection type for Openhab. Will not continue!");

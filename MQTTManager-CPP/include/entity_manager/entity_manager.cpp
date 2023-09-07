@@ -1,5 +1,10 @@
+#include "entity/entity.hpp"
 #include "light/home_assistant_light.hpp"
 #include "light/openhab_light.hpp"
+#include "room/room.hpp"
+#include "scenes/nspm_scene.hpp"
+#include "scenes/scene.hpp"
+#include <cstdint>
 #include <entity_manager/entity_manager.hpp>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <nlohmann/json.hpp>
@@ -13,6 +18,11 @@ void EntityManager::init() {
 }
 
 void EntityManager::init_entities() {
+  SPDLOG_INFO("Initializing {} Rooms.", MqttManagerConfig::room_configs.size());
+  for (nlohmann::json config : MqttManagerConfig::room_configs) {
+    EntityManager::_entities.push_back(new Room(config));
+  }
+
   SPDLOG_INFO("Initializing {} lights.", MqttManagerConfig::light_configs.size());
   for (nlohmann::json &config : MqttManagerConfig::light_configs) {
     std::string light_type = config["type"];
@@ -29,9 +39,24 @@ void EntityManager::init_entities() {
     }
   }
 
+  SPDLOG_INFO("Initializing {} scenes.", MqttManagerConfig::scenes_configs.size());
+  for (nlohmann::json &config : MqttManagerConfig::scenes_configs) {
+    std::string scene_type = config["type"];
+    if (scene_type.compare("nspm_scene") == 0) {
+      Scene *scene = new NSPMScene(config);
+      EntityManager::add_entity(scene);
+    }
+    // TODO: Implement Home Assistant and Openhab scenes.
+  }
+
   SPDLOG_INFO("Initializing {} NSPanels.", MqttManagerConfig::nspanel_configs.size());
   for (nlohmann::json config : MqttManagerConfig::nspanel_configs) {
     EntityManager::_nspanels.push_back(new NSPanel(config));
+  }
+
+  SPDLOG_INFO("Performing post init on {} entities.", EntityManager::_entities.size());
+  for (MqttManagerEntity *entity : EntityManager::_entities) {
+    entity->post_init();
   }
 }
 
@@ -41,6 +66,25 @@ void EntityManager::add_entity(MqttManagerEntity *entity) {
 
 void EntityManager::remove_entity(MqttManagerEntity *entity) {
   EntityManager::_entities.remove(entity);
+}
+
+MqttManagerEntity *EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE type, uint16_t id) {
+  for (MqttManagerEntity *entity : EntityManager::_entities) {
+    if (entity->get_type() == type && entity->get_id() == id) {
+      return entity;
+    }
+  }
+  return nullptr;
+}
+
+std::list<MqttManagerEntity *> EntityManager::get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE type) {
+  std::list<MqttManagerEntity *> return_entities;
+  for (MqttManagerEntity *entity : EntityManager::_entities) {
+    if (entity->get_type() == type) {
+      return_entities.push_back(entity);
+    }
+  }
+  return return_entities;
 }
 
 bool EntityManager::mqtt_callback(const std::string &topic, const std::string &payload) {

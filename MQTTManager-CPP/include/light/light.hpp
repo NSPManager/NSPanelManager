@@ -1,6 +1,7 @@
 #ifndef MQTT_MANAGER_LIGHT
 #define MQTT_MANAGER_LIGHT
 
+#include "room/room.hpp"
 #include <cstdint>
 #include <entity/entity.hpp>
 #include <nlohmann/json.hpp>
@@ -60,7 +61,7 @@ public:
   /**
    * Get the ID of the light.
    */
-  uint get_id();
+  uint16_t get_id();
 
   /**
    * Go through the requested states and compare them with the current states.
@@ -73,13 +74,19 @@ public:
    */
   MQTT_MANAGER_LIGHT_MODE get_mode();
 
+  /**
+   * Post init, attach to room.
+   */
+  void post_init();
+
   MQTT_MANAGER_ENTITY_TYPE get_type();
   MQTT_MANAGER_ENTITY_CONTROLLER get_controller();
 
 protected:
   uint _id;
   std::string _name;
-  // TODO: Add pointer to initialized room
+  uint16_t _room_id;
+  Room *_room;
   MQTT_MANAGER_ENTITY_CONTROLLER _controller;
 
   bool _can_dim;

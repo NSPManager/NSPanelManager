@@ -37,6 +37,8 @@ public:
 
   static inline std::list<nlohmann::json> light_configs;
   static inline std::list<nlohmann::json> nspanel_configs;
+  static inline std::list<nlohmann::json> scenes_configs;
+  static inline std::list<nlohmann::json> room_configs;
 
 private:
   static void populate_settings_from_config(nlohmann::json &data);

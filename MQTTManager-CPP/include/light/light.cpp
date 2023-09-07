@@ -1,4 +1,5 @@
 #include "light.hpp"
+#include "entity_manager/entity_manager.hpp"
 #include <entity/entity.hpp>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
@@ -9,7 +10,7 @@ Light::Light(nlohmann::json &init_data) {
   this->_name = init_data["name"];
   SPDLOG_DEBUG("Loading light {}::{}.", this->_id, this->_name);
 
-  // this->_name = init_data["name"]; // TODO: Pointer to room
+  this->_room_id = init_data["room_id"];
 
   this->_current_state = false;
   this->_current_brightness = 50;
@@ -57,7 +58,7 @@ Light::Light(nlohmann::json &init_data) {
     this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT; // Normal mode. Don't do anything special with light change request.
   }
 
-  SPDLOG_DEBUG("Light constructor complete for light {}::{}, can dim: {}, can color temp: {}, can_rgb: {}.", this->_id, this->_name, this->_can_dim ? "yes" : "no", this->_can_color_temperature ? "yes" : "no", this->_can_rgb ? "yes" : "no");
+  SPDLOG_DEBUG("Light {}::{} base loaded, can dim: {}, can color temp: {}, can_rgb: {}.", this->_id, this->_name, this->_can_dim ? "yes" : "no", this->_can_color_temperature ? "yes" : "no", this->_can_rgb ? "yes" : "no");
 }
 
 MQTT_MANAGER_ENTITY_TYPE Light::get_type() {
@@ -68,7 +69,7 @@ MQTT_MANAGER_ENTITY_CONTROLLER Light::get_controller() {
   return this->_controller;
 }
 
-uint Light::get_id() {
+uint16_t Light::get_id() {
   return this->_id;
 }
 
@@ -123,4 +124,15 @@ void Light::set_hsb(uint16_t hue, uint8_t saturation, uint8_t brightness) {
   this->_requested_saturation = saturation;
   this->_requested_brightness = brightness;
   this->send_state_update_to_controller();
+}
+
+void Light::post_init() {
+  MqttManagerEntity *room_entity = EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::ROOM, this->_room_id);
+  if (room_entity != nullptr) {
+    this->_room = dynamic_cast<Room *>(room_entity);
+    this->_room->attach_entity(this);
+    SPDLOG_INFO("Attaching light {}::{} to room {}::{}", this->_id, this->_name, this->_room->get_id(), this->_room->get_name());
+  } else {
+    SPDLOG_ERROR("Found no room with ID: {}", this->_room_id);
+  }
 }

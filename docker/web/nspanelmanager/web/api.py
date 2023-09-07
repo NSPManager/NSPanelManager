@@ -70,6 +70,7 @@ def get_mqtt_manager_config(request):
         lightConfig["id"] = light.id
         lightConfig["name"] = light.friendly_name
         lightConfig["room_name"] = light.room.friendly_name
+        lightConfig["room_id"] = light.room.id
         lightConfig["type"] = light.type
         lightConfig["can_dim"] = light.can_dim
         lightConfig["can_color_temperature"] = light.can_color_temperature
@@ -94,18 +95,35 @@ def get_mqtt_manager_config(request):
         }
         return_json["nspanels"][panel.id] = panel_config
 
-    return_json["scenes"] = {}
+
+    return_json["rooms"] = []
+    for room in Room.objects.all():
+        return_json["rooms"].append({
+            "id": room.id,
+            "name": room.friendly_name
+        })
+
+    return_json["scenes"] = []
     for scene in Scene.objects.all():
-        scene_config = {
-            "id": scene.id,
-            "name": scene.friendly_name,
+        scene_info = {
+            "type": "nspm_scene",
+            "scene_id": scene.id,
+            "scene_name": scene.friendly_name,
+            "room_name": scene.room.friendly_name if scene.room != None else None,
+            "room_id": scene.room.id if scene.room != None else None,
+            "light_states": []
         }
-        if scene.room:
-            scene_config.update({
-                "room_id": scene.room.id,
-                "room_name": scene.room.friendly_name
+        for state in scene.lightstate_set.all():
+            scene_info["light_states"].append({
+                "light_id": state.light.id,
+                "light_type": state.light.type,
+                "color_mode": state.color_mode,
+                "light_level": state.light_level,
+                "color_temp": state.color_temperature,
+                "hue": state.hue,
+                "saturation": state.saturation
             })
-        return_json["scenes"][scene.id] = scene_config
+        return_json["scenes"].append(scene_info)
 
     return JsonResponse(return_json)
 
