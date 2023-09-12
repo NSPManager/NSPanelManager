@@ -62,15 +62,16 @@ void OpenhabLight::send_state_update_to_controller() {
   nlohmann::json payload_data;
   payload_data["type"] = "Percent";
 
-  // SPDLOG_DEBUG("--- Sending light {}::{} event state ---", this->_id, this->_name);
+  SPDLOG_DEBUG("--- Sending light {}::{} event state ---", this->_id, this->_name);
+  SPDLOG_DEBUG("Current mode: {}", this->_current_mode == MQTT_MANAGER_LIGHT_MODE::RGB ? "RGB" : "DEFAULT");
   // SPDLOG_DEBUG("Requested state: {}, current: {}", this->_requested_state, this->_current_state);
   // SPDLOG_DEBUG("Requested brightness: {}, current: {}", this->_requested_brightness, this->_current_brightness);
   SPDLOG_DEBUG("Requested color_temperature: {}, current: {}", this->_requested_color_temperature, this->_current_color_temperature);
-  // SPDLOG_DEBUG("Requested hue: {}, current: {}", this->_requested_hue, this->_current_hue);
-  // SPDLOG_DEBUG("Requested saturation: {}, current: {}", this->_requested_saturation, this->_current_saturation);
+  SPDLOG_DEBUG("Requested hue: {}, current: {}", this->_requested_hue, this->_current_hue);
+  SPDLOG_DEBUG("Requested saturation: {}, current: {}", this->_requested_saturation, this->_current_saturation);
 
   // Do not send brightness seperatly for rgb, this is included in the HSB values.
-  if (this->_requested_state && this->_current_mode != MQTT_MANAGER_LIGHT_MODE::RGB) {
+  if (this->_requested_state) {
     SPDLOG_DEBUG("Setting light {}::{} to level: {}", this->_id, this->_name, this->_requested_brightness);
     payload_data["value"] = this->_requested_brightness;
     service_data["payload"] = payload_data.dump();
@@ -99,7 +100,7 @@ void OpenhabLight::send_state_update_to_controller() {
     service_data["payload"] = payload_data.dump();
     this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
     OpenhabManager::send_json(service_data);
-  } else if (this->_can_rgb && this->_requested_state && (this->_requested_hue != this->_current_hue || this->_requested_saturation != this->_current_saturation || this->_requested_brightness != this->_current_brightness)) {
+  } else if (this->_can_rgb && this->_requested_state && (this->_requested_hue != this->_current_hue || this->_requested_saturation != this->_current_saturation)) {
     SPDLOG_DEBUG("Setting light {}::{} to HSB: {},{},{}", this->_id, this->_name, this->_requested_hue, this->_requested_saturation, this->_requested_brightness);
     service_data["topic"] = fmt::format("openhab/items/{}/command", this->_openhab_item_rgb);
     payload_data["type"] = "HSB";
