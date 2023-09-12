@@ -1,4 +1,5 @@
 #include "openhab_manager/openhab_manager.hpp"
+#include "websocket_server/websocket_server.hpp"
 #include <chrono>
 #include <cstddef>
 #include <spdlog/spdlog.h>
@@ -30,6 +31,10 @@ int main(void) {
   std::thread mqtt_manager_thread(MQTT_Manager::connect);
   std::thread home_assistant_manager_thread;
   std::thread openhab_manager_thread;
+  std::thread websocket_server_thread;
+
+  SPDLOG_INFO("Starting Websocket Server on port 8002.");
+  websocket_server_thread = std::thread(WebsocketServer::start);
 
   while (!MQTT_Manager::is_connected()) {
     SPDLOG_INFO("Waiting for MQTT to connect before proceeding.");
