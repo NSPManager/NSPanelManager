@@ -18,6 +18,12 @@ int main(void) {
 
   EntityManager::init();
   MqttManagerConfig::load();
+
+  if (MqttManagerConfig::mqtt_server.empty() || MqttManagerConfig::mqtt_port == 0) {
+    SPDLOG_CRITICAL("No MQTT server or port configured! Will exit with code 1.");
+    return 1;
+  }
+
   EntityManager::init_entities();
 
   SPDLOG_INFO("Config loaded. Starting components.");

@@ -50,6 +50,13 @@ void OpenhabManager::connect() {
 
   OpenhabManager::_keepalive_thread = std::thread(OpenhabManager::_send_keepalive);
   OpenhabManager::_keepalive_thread.join();
+
+  // Set openhab event filter
+  nlohmann::json filter;
+  filter["type"] = "WebSocketEvent";
+  filter["topic"] = "openhab/websocket/filter/type";
+  filter["payload"] = "[\"ItemStateEvent\", \"ItemStateChangedEvent\"]";
+  OpenhabManager::send_json(filter);
 }
 
 void OpenhabManager::_websocket_message_callback(const ix::WebSocketMessagePtr &msg) {

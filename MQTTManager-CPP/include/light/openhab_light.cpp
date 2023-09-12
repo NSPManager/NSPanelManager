@@ -65,7 +65,7 @@ void OpenhabLight::send_state_update_to_controller() {
   // SPDLOG_DEBUG("--- Sending light {}::{} event state ---", this->_id, this->_name);
   // SPDLOG_DEBUG("Requested state: {}, current: {}", this->_requested_state, this->_current_state);
   // SPDLOG_DEBUG("Requested brightness: {}, current: {}", this->_requested_brightness, this->_current_brightness);
-  // SPDLOG_DEBUG("Requested color_temperature: {}, current: {}", this->_requested_color_temperature, this->_current_color_temperature);
+  SPDLOG_DEBUG("Requested color_temperature: {}, current: {}", this->_requested_color_temperature, this->_current_color_temperature);
   // SPDLOG_DEBUG("Requested hue: {}, current: {}", this->_requested_hue, this->_current_hue);
   // SPDLOG_DEBUG("Requested saturation: {}, current: {}", this->_requested_saturation, this->_current_saturation);
 
@@ -169,12 +169,12 @@ bool OpenhabLight::openhab_event_callback(nlohmann::json &data) {
         this->_current_color_temperature = std::round(kelvin);
         this->_requested_color_temperature = this->_current_color_temperature;
         this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
-        this->_last_light_mode_change = CurrentTimeMilliseconds();
         this->_last_color_temp_change = CurrentTimeMilliseconds();
 
         SPDLOG_DEBUG("Light {}::{} got new color temperature from Openhab, new value: {}", this->_id, this->_name, this->_current_color_temperature);
         MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature));
       }
+      this->_last_light_mode_change = CurrentTimeMilliseconds();
       return true;
     } else if (topic_item.compare(this->_openhab_item_rgb) == 0 && (this->_current_mode == MQTT_MANAGER_LIGHT_MODE::RGB || CurrentTimeMilliseconds() >= this->_last_light_mode_change + 1000)) {
       // We only care about the first event from Openhab, ignore the rest but still indicate that event was handled so the manager stops looping over all entities.
@@ -190,23 +190,35 @@ bool OpenhabLight::openhab_event_callback(nlohmann::json &data) {
         }
         payload_parts.push_back(values); // Add last part of values to the vector manually as the string doesn't end with ,
 
-        this->_current_hue = std::round(atof(payload_parts[0].c_str()));
-        this->_requested_hue = this->_current_hue;
-        this->_current_saturation = std::round(atof(payload_parts[1].c_str()));
-        this->_requested_saturation = this->_current_saturation;
-        this->_current_brightness = std::round(atof(payload_parts[2].c_str()));
-        this->_requested_brightness = this->_current_brightness;
+        uint16_t hue = std::round(atof(payload_parts[0].c_str()));
+        uint16_t saturation = std::round(atof(payload_parts[1].c_str()));
+        uint16_t brightness = std::round(atof(payload_parts[2].c_str()));
+
+        if (hue != this->_current_hue || hue != this->_requested_hue) {
+          this->_current_hue = std::round(atof(payload_parts[0].c_str()));
+          this->_requested_hue = this->_current_hue;
+          MQTT_Manager::publish(this->_mqtt_hue_topic, std::to_string(this->_current_hue));
+        }
+
+        if (saturation != this->_current_saturation || saturation != this->_requested_saturation) {
+          this->_current_saturation = std::round(atof(payload_parts[1].c_str()));
+          this->_requested_saturation = this->_current_saturation;
+          MQTT_Manager::publish(this->_mqtt_saturation_topic, std::to_string(this->_current_saturation));
+        }
+
+        if (brightness != this->_current_brightness || brightness != this->_requested_brightness) {
+          this->_current_brightness = std::round(atof(payload_parts[2].c_str()));
+          this->_requested_brightness = this->_current_brightness;
+          MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness));
+        }
+
         this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
-        this->_last_light_mode_change = CurrentTimeMilliseconds();
         this->_last_rgb_change = CurrentTimeMilliseconds();
         this->_last_brightness_change = CurrentTimeMilliseconds();
 
         SPDLOG_DEBUG("Light {}::{} got new HSB from Openhab, new values: {},{},{}", this->_id, this->_name, this->_current_hue, this->_current_saturation, this->_current_brightness);
-        // TODO: Optimize so that only changed values are sent to panels over MQTT.
-        MQTT_Manager::publish(this->_mqtt_hue_topic, std::to_string(this->_current_hue));
-        MQTT_Manager::publish(this->_mqtt_saturation_topic, std::to_string(this->_current_saturation));
-        MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness));
       }
+      this->_last_light_mode_change = CurrentTimeMilliseconds();
       return true;
     }
     return false;
