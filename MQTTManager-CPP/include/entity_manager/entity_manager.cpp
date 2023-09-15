@@ -4,8 +4,10 @@
 #include "room/room.hpp"
 #include "scenes/nspm_scene.hpp"
 #include "scenes/scene.hpp"
+#include "websocket_server/websocket_server.hpp"
 #include <cstdint>
 #include <entity_manager/entity_manager.hpp>
+#include <ixwebsocket/IXWebSocket.h>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
@@ -15,6 +17,7 @@
 
 void EntityManager::init() {
   MQTT_Manager::attach_observer(EntityManager::mqtt_callback);
+  WebsocketServer::attach_message_callback(EntityManager::websocket_callback);
 }
 
 void EntityManager::init_entities() {
@@ -189,4 +192,25 @@ NSPanel *EntityManager::get_nspanel_by_mac(std::string mac) {
     }
   }
   return nullptr;
+}
+
+bool EntityManager::websocket_callback(std::string &message, std::string *response_buffer) {
+  nlohmann::json data = nlohmann::json::parse(message);
+  uint64_t command_id = data["cmd_id"];
+  std::string command = data["command"];
+
+  if (command.compare("get_nspanel_status") == 0) {
+    SPDLOG_DEBUG("Processing request for all NSPanels status.");
+    std::vector<nlohmann::json> panel_responses;
+    for (NSPanel *panel : EntityManager::_nspanels) {
+      panel_responses.push_back(panel->get_websocket_json_representation());
+    }
+    nlohmann::json response;
+    response["nspanels"] = panel_responses;
+    response["cmd_id"] = command_id;
+    (*response_buffer) = response.dump();
+    return true;
+  }
+
+  return false;
 }

@@ -51,7 +51,7 @@ class MQTTManager_WS {
   }
 
   connect() {
-    this.websocket = new WebSocket("ws://" + location.hostname + ":8001");
+    this.websocket = new WebSocket("ws://" + location.hostname + ":8002");
 
     this.websocket.onopen = (event) => {
       if (this.on_connect_function != null) {

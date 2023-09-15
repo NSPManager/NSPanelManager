@@ -101,18 +101,19 @@ def register_screen_brightness_controls(nspanel, mqtt_client, settings, base_con
     mqtt_client.publish("homeassistant/number/nspanelmanager/" + nspanel["mac"].replace(":", "_").lower() + "_screensaver_brightness/config", json.dumps(config), retain=True)
 
 def register_scenes(settings, mqtt_client):
-    for id, scene in settings["scenes"].items():
-        config = {
-            "availability":  [
-                {
-                    "topic": "nspanel/status/availability_" + get_machine_mac(),
-                }
-            ]
-        }
-        config["name"] = "NSPM Scene " + scene["name"]
-        config["payload_on"] = "1"
-        if "room_id" in scene and "room_name" in scene:
-            config["command_topic"] = "nspanel/scenes/room/" + scene["room_name"] + "/" + scene["name"] + "/activate"
-        else:
-            config["command_topic"] = "nspanel/scenes/global/" + scene["name"] + "/activate"
+    pass
+    # for id, scene in settings["scenes"].items():
+    #     config = {
+    #         "availability":  [
+    #             {
+    #                 "topic": "nspanel/status/availability_" + get_machine_mac(),
+    #             }
+    #         ]
+    #     }
+    #     config["name"] = "NSPM Scene " + scene["name"]
+    #     config["payload_on"] = "1"
+    #     if "room_id" in scene and "room_name" in scene:
+    #         config["command_topic"] = "nspanel/scenes/room/" + scene["room_name"] + "/" + scene["name"] + "/activate"
+    #     else:
+    #         config["command_topic"] = "nspanel/scenes/global/" + scene["name"] + "/activate"
 

@@ -48,6 +48,11 @@ public:
    */
   static bool mqtt_callback(const std::string &topic, const std::string &payload);
 
+  /**
+   * Process any incomming message from the websocket. Return true if message was handled.
+   */
+  static bool websocket_callback(std::string &message, std::string *response_buffer);
+
   static Light *get_light_by_id(uint id);
   static NSPanel *get_nspanel_by_id(uint id);
   static NSPanel *get_nspanel_by_mac(std::string mac);
