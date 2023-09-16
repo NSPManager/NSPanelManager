@@ -15,6 +15,10 @@ if [ -e "env.sh" ]; then
 	source ./env.sh # Load environment variables if manually set
 fi
 
+if [ ! -z "$TZ" ]; then
+	echo "$TZ" >/etc/localtime
+fi
+
 export CONAN_USER_HOME="/test/"
 
 conan install . --output-folder=build --build=missing
