@@ -120,6 +120,8 @@ function update_nspanel_status(data) {
     mac_selector = mac_selector.replaceAll(":", "\\:");
     if ("state" in data) {
       var new_html = "";
+      console.log("MAC:", data.mac);
+      console.log("Received new state for terminal:", data.state);
       if (data.state == "online") {
         if ($("#panel_header_" + mac_selector).length == 0) {
           // We got an online message from a newly registed panel. Updated page in about 1 second.
@@ -240,7 +242,7 @@ function update_nspanel_status(data) {
 $(document).ready(function () {
   ws.register_message_handler((message) => {
     if ("type" in message) {
-      if (message.type == "status" || message.type == "status_report") {
+      if (message.type == "status") {
         update_nspanel_status(message.payload);
       } else if (message.type == "mqttmanager_status") {
         if (message.mqtt.connected == false) {

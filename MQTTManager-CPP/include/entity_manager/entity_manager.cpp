@@ -6,13 +6,16 @@
 #include "scenes/scene.hpp"
 #include "websocket_server/websocket_server.hpp"
 #include <cstdint>
+#include <cstdlib>
 #include <entity_manager/entity_manager.hpp>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <nspanel/nspanel.hpp>
+#include <spdlog/common.h>
 #include <spdlog/spdlog.h>
+#include <string>
 #include <sys/types.h>
 
 void EntityManager::init() {
@@ -209,6 +212,22 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
     response["nspanels"] = panel_responses;
     response["cmd_id"] = command_id;
     (*response_buffer) = response.dump();
+    return true;
+  } else if (command.compare("reboot_nspanels") == 0) {
+    nlohmann::json args = data["args"];
+    nlohmann::json nspanels = args["nspanels"];
+    for (std::string nspanel_id_str : nspanels) {
+      uint16_t nspanel_id = atoi(nspanel_id_str.c_str());
+      NSPanel *nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
+      if (nspanel != nullptr) {
+        SPDLOG_INFO("Sending reboot command to nspanel {}::{}.", nspanel->get_id(), nspanel->get_name());
+        nlohmann::json cmd;
+        cmd["command"] = "reboot";
+        nspanel->send_command(cmd);
+      } else {
+        SPDLOG_ERROR("Received command to reboot NSPanel with ID {} but no panel with that ID is loaded.");
+      }
+    }
     return true;
   }
 

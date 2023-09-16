@@ -35,6 +35,10 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
   this->_mqtt_status_report_topic.append(this->_name);
   this->_mqtt_status_report_topic.append("/status_report");
 
+  this->_mqtt_command_topic = "nspanel/";
+  this->_mqtt_command_topic.append(this->_name);
+  this->_mqtt_command_topic.append("/command");
+
   MQTT_Manager::attach_observer(this);
 }
 
@@ -98,7 +102,9 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
       }
 
       // Send status over to web interface:
-      nlohmann::json status_reps = this->get_websocket_json_representation();
+      nlohmann::json status_reps;
+      status_reps["type"] = "status";
+      status_reps["payload"] = this->get_websocket_json_representation();
       WebsocketServer::broadcast_json(status_reps);
       return true;
     }
@@ -113,7 +119,9 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
       this->_nspanel_warnings = data["warnings"];
 
       // Send status over to web interface:
-      nlohmann::json status_reps = this->get_websocket_json_representation();
+      nlohmann::json status_reps;
+      status_reps["type"] = "status";
+      status_reps["payload"] = this->get_websocket_json_representation();
       WebsocketServer::broadcast_json(status_reps);
       return true;
     }
@@ -149,4 +157,13 @@ nlohmann::json NSPanel::get_websocket_json_representation() {
   data["warnings"] = this->_nspanel_warnings;
 
   return data;
+}
+
+void NSPanel::send_command(nlohmann::json &command) {
+  std::string buffer = command.dump();
+  MQTT_Manager::publish(this->_mqtt_command_topic, buffer);
+}
+
+std::string NSPanel::get_name() {
+  return this->_name;
 }

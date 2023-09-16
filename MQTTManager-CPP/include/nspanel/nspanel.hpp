@@ -22,7 +22,13 @@ public:
    */
   uint get_id();
   std::string get_mac();
+  std::string get_name();
   bool mqtt_callback(const std::string &topic, const std::string &payload);
+
+  /**
+   * Dump JSON as string and send to NSPanel command topic.
+   */
+  void send_command(nlohmann::json &command);
 
   /**
    * Get the JSON message that will be sent over the websocket when a client requests the state of the NSPAnel.
@@ -44,6 +50,7 @@ private:
   std::string _mqtt_log_topic;
   std::string _mqtt_status_topic;
   std::string _mqtt_status_report_topic;
+  std::string _mqtt_command_topic;
 };
 
 #endif // !MQTT_MANAGER_NSPANEL
