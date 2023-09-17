@@ -10,6 +10,7 @@ enum MQTT_MANAGER_NSPANEL_STATE {
   ONLINE,
   OFFLINE,
   UPDATING_FIRMWARE,
+  UPDATING_DATA,
   UPDATING_TFT
 };
 
@@ -44,6 +45,7 @@ private:
   int16_t _rssi;
   int16_t _temperature;
   uint8_t _heap_used_pct;
+  uint8_t _update_progress;
   MQTT_MANAGER_NSPANEL_STATE _state;
   std::string _nspanel_warnings;
 

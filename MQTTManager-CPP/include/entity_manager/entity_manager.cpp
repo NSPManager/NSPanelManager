@@ -228,6 +228,37 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
         SPDLOG_ERROR("Received command to reboot NSPanel with ID {} but no panel with that ID is loaded.");
       }
     }
+  } else if (command.compare("firmware_update_nspanels") == 0) {
+    nlohmann::json args = data["args"];
+    nlohmann::json nspanels = args["nspanels"];
+    for (std::string nspanel_id_str : nspanels) {
+      uint16_t nspanel_id = atoi(nspanel_id_str.c_str());
+      NSPanel *nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
+      if (nspanel != nullptr) {
+        SPDLOG_INFO("Sending firmware update command to nspanel {}::{}.", nspanel->get_id(), nspanel->get_name());
+        nlohmann::json cmd;
+        cmd["command"] = "firmware_update";
+        nspanel->send_command(cmd);
+      } else {
+        SPDLOG_ERROR("Received command to firmware update NSPanel with ID {} but no panel with that ID is loaded.");
+      }
+    }
+    return true;
+  } else if (command.compare("tft_update_nspanels") == 0) {
+    nlohmann::json args = data["args"];
+    nlohmann::json nspanels = args["nspanels"];
+    for (std::string nspanel_id_str : nspanels) {
+      uint16_t nspanel_id = atoi(nspanel_id_str.c_str());
+      NSPanel *nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
+      if (nspanel != nullptr) {
+        SPDLOG_INFO("Sending TFT update command to nspanel {}::{}.", nspanel->get_id(), nspanel->get_name());
+        nlohmann::json cmd;
+        cmd["command"] = "tft_update";
+        nspanel->send_command(cmd);
+      } else {
+        SPDLOG_ERROR("Received command to TFT update NSPanel with ID {} but no panel with that ID is loaded.");
+      }
+    }
     return true;
   }
 

@@ -118,6 +118,25 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
       this->_ip_address = data["ip"];
       this->_nspanel_warnings = data["warnings"];
 
+      if (data.contains("state")) {
+        std::string state = data["state"];
+        if (state.compare("updating_tft") == 0) {
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT;
+        } else if (state.compare("updating_fw") == 0) {
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_FIRMWARE;
+        } else if (state.compare("updating_fs") == 0) {
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA;
+        } else {
+          SPDLOG_ERROR("Received unknown state from nspanel {}::{}. State: {}", this->_id, this->_name, state);
+        }
+      }
+
+      if (data.contains("progress")) {
+        this->_update_progress = data["progress"];
+      } else {
+        this->_update_progress = 0;
+      }
+
       // Send status over to web interface:
       nlohmann::json status_reps;
       status_reps["type"] = "status";
@@ -140,10 +159,16 @@ nlohmann::json NSPanel::get_websocket_json_representation() {
     data["state"] = "offline";
     break;
   case MQTT_MANAGER_NSPANEL_STATE::UPDATING_FIRMWARE:
-    data["state"] = "update_fw";
+    data["state"] = "updating_fw";
+    data["progress"] = this->_update_progress;
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA:
+    data["state"] = "updating_fs";
+    data["progress"] = this->_update_progress;
     break;
   case MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT:
-    data["state"] = "update_tft";
+    data["state"] = "updating_tft";
+    data["progress"] = this->_update_progress;
     break;
   default:
     data["state"] = "unknown";
