@@ -320,7 +320,7 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
 
       if (!light_id_found) {
         Scene *scene_to_remove = (*it);
-        LOG_DEBUG("Removing light: ", scene_to_remove->getName().c_str(), ". ID: ", scene_to_remove->getId());
+        LOG_DEBUG("Removing scene: ", scene_to_remove->getName().c_str(), ". ID: ", scene_to_remove->getId());
         it = newRoom->scenes.erase(it);
         scene_to_remove->callDeconstructCallbacks();
         delete scene_to_remove;
