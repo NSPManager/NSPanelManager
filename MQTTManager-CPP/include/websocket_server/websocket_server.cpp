@@ -40,6 +40,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
       SPDLOG_ERROR("Received websocket fragment from client at IP: {}. Websocket fragments are not suported.", connectionState->getRemoteIp());
     } else if (msg->type == ix::WebSocketMessageType::Message) {
       std::string message = msg->str;
+      SPDLOG_DEBUG("Got message from websocket. Message: {}", message);
       std::string response_buffer;
       bool found_callback = false;
       for (auto callback : WebsocketServer::_callbacks) {

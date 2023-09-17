@@ -14,6 +14,41 @@ function rebootNSPanel() {
   ws.send_command("reboot_nspanels", { nspanels: [nspanel_id] }, null);
 }
 
+function requests_log_backtrace() {
+  ws.send_command("get_nspanels_logs", { nspanels: [nspanel_id] }, null);
+}
+
+function push_log_message_to_view(data) {
+  var add_html = "<tr><td>";
+  add_html += data.time;
+  add_html += "</td><td>";
+  if (data.level == "ERROR") {
+    add_html += '<span class="tag is-danger">ERROR</span>';
+  } else if (data.level == "WARNING") {
+    add_html += '<span class="tag is-warning">WARNING</span>';
+  } else if (data.level == "INFO") {
+    add_html += '<span class="tag is-info">INFO</span>';
+  } else if (data.level == "DEBUG") {
+    add_html += '<span class="tag is-dark">DEBUG</span>';
+  } else if (data.level == "TRACE") {
+    add_html += '<span class="tag is-black">TRACE</span>';
+  } else if (data.level == "WARNING") {
+    add_html += '<span class="tag is-light">???UNKNOWN???</span>';
+  }
+  add_html += "</td>";
+  add_html += "<td>";
+  add_html += data.message;
+  add_html += "</td>";
+  add_html += "</tr>";
+
+  var row_count = $("#log_body tr").length;
+  if (row_count >= $("#max_live_log_messages").text()) {
+    $("#log_body tr:last-child").remove();
+  }
+
+  $("#log_body").prepend(add_html);
+}
+
 function update_nspanel_status(data) {
   if ("mac" in data) {
     let mac_selector = data.mac;
@@ -139,34 +174,7 @@ $(document).ready(() => {
     if (data.type == "status" || data.type == "status_report") {
       update_nspanel_status(data.payload);
     } else if (data.type == "log" && data.mac == mac_address) {
-      var add_html = "<tr><td>";
-      add_html += data.time;
-      add_html += "</td><td>";
-      if (data.level == "ERROR") {
-        add_html += '<span class="tag is-danger">ERROR</span>';
-      } else if (data.level == "WARNING") {
-        add_html += '<span class="tag is-warning">WARNING</span>';
-      } else if (data.level == "INFO") {
-        add_html += '<span class="tag is-info">INFO</span>';
-      } else if (data.level == "DEBUG") {
-        add_html += '<span class="tag is-dark">DEBUG</span>';
-      } else if (data.level == "TRACE") {
-        add_html += '<span class="tag is-black">TRACE</span>';
-      } else if (data.level == "WARNING") {
-        add_html += '<span class="tag is-light">???UNKNOWN???</span>';
-      }
-      add_html += "</td>";
-      add_html += "<td>";
-      add_html += data.message;
-      add_html += "</td>";
-      add_html += "</tr>";
-
-      var row_count = $("#log_body tr").length;
-      if (row_count >= $("#max_live_log_messages").text()) {
-        $("#log_body tr:last-child").remove();
-      }
-
-      $("#log_body").prepend(add_html);
+      push_log_message_to_view(data);
     }
   });
 
@@ -180,6 +188,16 @@ $(document).ready(() => {
         update_nspanel_status(nspanel);
       }
     });
+
+    ws.send_command(
+      "get_nspanel_logs",
+      { nspanel_id: nspanel_id },
+      (response) => {
+        for (const [id, log] of Object.entries(response.logs)) {
+          push_log_message_to_view(log);
+        }
+      }
+    );
   });
 
   ws.register_on_close_handler(() => {

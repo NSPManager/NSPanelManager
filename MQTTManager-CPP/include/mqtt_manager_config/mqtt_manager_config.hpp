@@ -34,6 +34,7 @@ public:
   static inline bool clock_us_style;
   static inline bool use_farenheit;
   static inline bool turn_on_behavior;
+  static inline uint16_t max_log_buffer_size;
 
   static inline std::list<nlohmann::json> light_configs;
   static inline std::list<nlohmann::json> nspanel_configs;

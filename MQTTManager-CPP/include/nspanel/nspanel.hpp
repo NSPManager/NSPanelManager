@@ -14,6 +14,13 @@ enum MQTT_MANAGER_NSPANEL_STATE {
   UPDATING_TFT
 };
 
+class NSPanelLogMessage {
+public:
+  std::string time;
+  std::string level;
+  std::string message;
+};
+
 class NSPanel : public MQTT_Observer {
 public:
   NSPanel(nlohmann::json &init_data);
@@ -32,9 +39,14 @@ public:
   void send_command(nlohmann::json &command);
 
   /**
-   * Get the JSON message that will be sent over the websocket when a client requests the state of the NSPAnel.
+   * Get the JSON message that will be sent over the websocket when a client requests the state of the NSPanel.
    */
   nlohmann::json get_websocket_json_representation();
+
+  /**
+   * Get the JSON message that will be sent over the websocket when a client requests the logs from the given NSPanel.
+   */
+  nlohmann::json get_websocket_json_logs();
 
 private:
   uint _id;
@@ -53,6 +65,8 @@ private:
   std::string _mqtt_status_topic;
   std::string _mqtt_status_report_topic;
   std::string _mqtt_command_topic;
+
+  std::list<NSPanelLogMessage> _log_messages;
 };
 
 #endif // !MQTT_MANAGER_NSPANEL

@@ -63,6 +63,7 @@ def get_mqtt_manager_config(request):
     return_json["clock_us_style"] = get_setting_with_default("clock_us_style", False)
     return_json["use_farenheit"] = get_setting_with_default("use_farenheit", False)
     return_json["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
+    return_json["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size", "10")
 
     return_json["lights"] = {}
     for light in Light.objects.all():

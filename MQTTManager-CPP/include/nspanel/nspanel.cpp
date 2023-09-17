@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <ctime>
 #include <iomanip>
+#include <list>
+#include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
@@ -84,6 +86,17 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
       log_data["level"] = message_parts[1];
       log_data["message"] = message_parts[2];
       WebsocketServer::broadcast_json(log_data);
+
+      // Save log message in backtrace for when (if) the log interface requests it.
+      NSPanelLogMessage message;
+      message.time = buffer.str();
+      message.level = message_parts[1];
+      message.message = message_parts[2];
+      this->_log_messages.push_front(message);
+      // Remove older messages from backtrace.
+      while (this->_log_messages.size() > MqttManagerConfig::max_log_buffer_size) {
+        this->_log_messages.pop_back();
+      }
       return true;
     } else {
       SPDLOG_ERROR("Received message on log topic {} with wrong format. Message: {}", topic, payload);
@@ -191,4 +204,19 @@ void NSPanel::send_command(nlohmann::json &command) {
 
 std::string NSPanel::get_name() {
   return this->_name;
+}
+
+nlohmann::json NSPanel::get_websocket_json_logs() {
+  std::list<nlohmann::json> logs;
+  for (NSPanelLogMessage log : this->_log_messages) {
+    nlohmann::json log_message;
+    log_message["time"] = log.time;
+    log_message["level"] = log.level;
+    log_message["message"] = log.message;
+    logs.push_front(log_message);
+  }
+
+  nlohmann::json response;
+  response["logs"] = logs;
+  return response;
 }
