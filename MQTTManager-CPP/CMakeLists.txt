@@ -22,6 +22,7 @@ find_package(CURL REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(ixwebsocket REQUIRED)
 find_package(tz REQUIRED)
+find_package(inja REQUIRED)
 
 
 add_library(MQTT_Manager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.hpp)
@@ -32,7 +33,7 @@ target_link_libraries(MQTT_Manager PahoMqttCpp::paho-mqttpp3-static MQTTManager_
 add_library(MQTTManager_WebsocketServer SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.hpp)
 set_target_properties(MQTTManager_WebsocketServer PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.hpp)
 target_include_directories(MQTTManager_WebsocketServer PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_WebsocketServer ixwebsocket::ixwebsocket spdlog::spdlog nlohmann_json::nlohmann_json)
+target_link_libraries(MQTTManager_WebsocketServer ixwebsocket::ixwebsocket spdlog::spdlog nlohmann_json::nlohmann_json pantor::inja)
 
 add_library(MQTTManager_HomeAssistantManager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.hpp)
 set_target_properties(MQTTManager_HomeAssistantManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.hpp)
@@ -65,8 +66,8 @@ target_link_libraries(MQTTManager_Room spdlog::spdlog nlohmann_json::nlohmann_js
 
 add_library(MQTTManager_EntityManager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)
 set_target_properties(MQTTManager_EntityManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)
-target_include_directories(MQTTManager_EntityManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_EntityManager spdlog::spdlog MQTT_Manager MQTTManager_NSPanel MQTTManager_Light MQTTManager_WebsocketServer)
+target_include_directories(MQTTManager_EntityManager PUBLIC ${CURL_INCLUDE_DIR} ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_link_libraries(MQTTManager_EntityManager ${CURL_LIBRARIES} spdlog::spdlog MQTT_Manager MQTTManager_NSPanel MQTTManager_Light MQTTManager_WebsocketServer)
 
 add_library(MQTTManager_Config SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.hpp)
 set_target_properties(MQTTManager_Config PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.hpp)

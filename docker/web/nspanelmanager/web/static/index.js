@@ -120,8 +120,6 @@ function update_nspanel_status(data) {
     mac_selector = mac_selector.replaceAll(":", "\\:");
     if ("state" in data) {
       var new_html = "";
-      console.log("MAC:", data.mac);
-      console.log("Received new state for terminal:", data.state);
       if (data.state == "online") {
         if ($("#panel_header_" + mac_selector).length == 0) {
           // We got an online message from a newly registed panel. Updated page in about 1 second.
@@ -239,7 +237,22 @@ function update_nspanel_status(data) {
   }
 }
 
+function add_nspanel(data) {}
+
 $(document).ready(function () {
+  document.body.addEventListener("htmx:wsOpen", function (evt) {
+    console.log("Connected to websocket!");
+    evt.detail.socketWrapper.send(
+      JSON.stringify({
+        cmd_id: 0,
+        command: "get_index_nspanels_full",
+      }),
+      evt.detail.elt
+    );
+  });
+
+  return;
+
   ws.register_message_handler((message) => {
     if ("type" in message) {
       if (message.type == "status") {

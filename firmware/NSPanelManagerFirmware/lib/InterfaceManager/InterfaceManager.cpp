@@ -1,3 +1,4 @@
+#include "NSPMConfig.h"
 #include "freertos/portmacro.h"
 #include <ArduinoJson.h>
 #include <ButtonManager.hpp>
@@ -58,6 +59,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   PageManager::GetHomePage()->init();
   PageManager::GetNSPanelManagerPage()->show();
   NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
+  InterfaceManager::subscribeToMqttTopics();
   while (!WiFi.isConnected() || !MqttManager::connected() || !InterfaceManager::hasRegisteredToManager || !NSPMConfig::instance->littlefs_mount_successfull) {
     if (NSPanel::instance->ready()) {
       if (!NSPMConfig::instance->littlefs_mount_successfull) {
@@ -82,7 +84,6 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
     vTaskDelay((millis() - start) / portTICK_PERIOD_MS);
   }
 
-  InterfaceManager::subscribeToMqttTopics();
   // Start task for MQTT processing
   xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskProcessMqttMessages", 5000, NULL, 1, &InterfaceManager::_taskHandleProcessMqttMessages, CONFIG_ARDUINO_RUNNING_CORE);
 
@@ -183,6 +184,10 @@ void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned
   } else if (command.compare("tft_update") == 0) {
     InterfaceManager::stop();
     NSPanel::instance->startOTAUpdate();
+  } else if (command.compare("register_accept") == 0) {
+    NSPMConfig::instance->manager_address = json["address"].as<String>().c_str();
+    NSPMConfig::instance->manager_port = json["port"].as<uint16_t>();
+    InterfaceManager::hasRegisteredToManager = true;
   } else {
     LOG_WARNING("Received unknown command on MQTT: ", command.c_str());
   }
@@ -223,7 +228,7 @@ void InterfaceManager::subscribeToMqttTopics() {
   if (InterfaceConfig::show_screensaver_clock) {
     PageManager::GetScreensaverPage()->attachMqttTimeCallback();
   } else {
-    LOG_DEBUG("Not attaching MQTT clock callback is panel is confiugred to now show clock on screensaver.");
+    LOG_DEBUG("Not attaching MQTT clock callback as panel is not configured to clock on screensaver.");
   }
 
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_cmd_topic.c_str(), &InterfaceManager::handleNSPanelCommand);

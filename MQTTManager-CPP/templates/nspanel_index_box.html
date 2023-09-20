@@ -1,0 +1,132 @@
+<div
+  class="box nspanel-box m-2"
+  id="panel_status_box_{{ nspanel.mac_address }}"
+>
+  <span
+    id="nspanel_id_{{ nspanel.mac_address }}"
+    class="is-hidden nspanel_id_container"
+  >
+    {{ nspanel.id }}</span
+  >
+  <span class="is-hidden nspanel_mac_container">{{ nspanel.mac_address }}</span>
+  <div class="nspanel-status-header">
+    <div 
+      class='{% if nspanel.state == "online" %}nspanel-status-header has-background-success{% else if nspanel.state == "offline" %}nspanel-status-header has-background-danger{% else %}has-background-grey
+      nspanel-status-header-await{% endif %}' id="panel_header_{{
+      nspanel.mac_address }}">
+    </div>
+  </div>
+  <div class="nspanel-status-content-box">
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <div class="is-pulled-left">
+            <span class="has-text-weight-bold"
+              ><a href="#" class="has-text-dark">{{ nspanel.name }}</a></span
+            >
+          </div>
+        </div>
+      </div>
+      <div class="level-right">
+        <span
+          class="has-text-weight-light is-italic is-size-7"
+          id="panel_header_text_{{ nspanel.mac_address }}"
+          >{% if nspanel.state == "offline" %}Offline{% else if nspanel.state ==
+          "unknown"%}Unknown status{% endif %}</span
+        >
+      </div>
+    </div>
+
+    <div class="info-item">
+      <span class="icon-text">
+        <span class="icon">
+          <i
+            class="mdi mdi-help"
+            id="wifi_signal_strength_{{ nspanel.mac_address }}"
+          ></i>
+        </span>
+        <span
+          id="wifi_signal_strength_text_{{ nspanel.mac_address }}"
+          class="is-size-7"
+          >{% if nspanel.state != "offline" and nspanel.state != "unknown" %}{{
+          nspanel.rssi }} dBm{% else %}-{% endif %}</span
+        >
+      </span>
+    </div>
+    <div class="info-item">
+      <span class="icon-text">
+        <span class="icon">
+          <i class="mdi mdi-thermometer"></i>
+        </span>
+        <span
+          id="temperature_{{ nspanel.mac_address }}"
+          class="nspanel-status-temperature is-size-7"
+          >{% if nspanel.state != "offline" and nspanel.state != "unknown" %}{{
+          nspanel.temperature }} {% else %}-{% endif %}</span
+        >
+      </span>
+    </div>
+    <div class="info-item">
+      <span class="icon-text">
+        <span class="icon">
+          <i class="mdi mdi-memory"></i>
+        </span>
+        <span class="is-size-7" id="heap_used_{{ nspanel.mac_address }}"
+          >{% if nspanel.state != "offline" and nspanel.state != "unknown" %}{{
+          nspanel.heap_used_pct }}% {% else %}-{% endif %}</span
+        >
+      </span>
+    </div>
+  </div>
+  <div class="nspanel-status-footer">
+    <span
+      data-tooltip=""
+      class="icon is-small has-tooltipl-multiline has-tooltip-warning pl-3 is-hidden"
+      id="nspanel_{{ nspanel.mac_address}}_warnings"
+    >
+      <span class="mdi mdi-alert-circle has-text-warning mdi-24px"></span>
+    </span>
+    <div class="dropdown nspanel-actions-button">
+      <div class="dropdown-trigger">
+        <span class="mdi mdi-cog pr-2"></span>
+      </div>
+      <div class="dropdown-menu" id="dropdown-menu" role="menu">
+        <div class="dropdown-content">
+          <a
+            class="dropdown-item"
+            onclick="rebootNSPanel(' {{ nspanel.mac_address }}');"
+          >
+            <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot
+          </a>
+          <a
+            class="dropdown-item"
+            href="http://{{ nspanel.ip_address }}"
+            target="_blank"
+          >
+            <span class="mdi mdi-web pr-2 has-text-primary"></span>Visit panel
+            page
+          </a>
+          <hr class="dropdown-divider" />
+          <a
+            class="dropdown-item"
+            onclick="startNSPanelOtaUpdate('{{ nspanel.mac_address }}');"
+          >
+            <span class="mdi mdi-upload pr-2 has-text-info"></span>Update
+            firmware
+          </a>
+          <a
+            class="dropdown-item"
+            onclick="startNSPanelTftUpdate('{{ nspanel.mac_address }}');"
+          >
+            <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span
+            >Update screen
+          </a>
+          <hr class="dropdown-divider" />
+          <a href="#" class="dropdown-item has-text-danger">
+            <span class="mdi mdi-minus-circle pr-2"></span>Delete
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

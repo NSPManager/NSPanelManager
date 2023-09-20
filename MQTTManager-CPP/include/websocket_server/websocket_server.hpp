@@ -5,6 +5,7 @@
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <nlohmann/json.hpp>
+#include <string>
 
 class WebsocketServer {
 public:
@@ -29,10 +30,17 @@ public:
    */
   static void attach_message_callback(std::function<bool(std::string &message, std::string *response_buf)> callback);
 
+  /**
+   * Will read a template with a specified name and render it given the data and then send it out over the websocket.
+   * This function is mostly helpful together with HTMX on the frontend.
+   */
+  static void render_template_with_args(std::string template_name, nlohmann::json data);
+
 private:
   static inline std::list<ix::WebSocket> _connected_websockets;
   static inline ix::WebSocketServer *_server;
   static inline std::list<std::function<bool(std::string &message, std::string *response_buf)>> _callbacks;
+  static inline std::list<std::function<bool()>> _client_connect_callbacks;
 
   static void _websocket_message_callback(std::shared_ptr<ix::ConnectionState> connectionState, ix::WebSocket &webSocket, const ix::WebSocketMessagePtr &msg);
 };

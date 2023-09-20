@@ -1,3 +1,4 @@
+#include "freertos/portmacro.h"
 #include <Arduino.h>
 #include <ButtonManager.hpp>
 #include <HTTPClient.h>
@@ -42,17 +43,11 @@ float readNTCTemperature(bool farenheit) {
 }
 
 void registerToNSPanelManager() {
-  while (WiFi.isConnected()) {
-    WiFiClient wifiClient;
-    HTTPClient httpClient;
-    std::string url = "http://";
-    url.append(NSPMConfig::instance->manager_address);
-    url.append(":");
-    url.append(std::to_string(NSPMConfig::instance->manager_port));
-    url.append("/api/register_nspanel");
-
+  while (WiFi.isConnected() && MqttManager::connected() && !InterfaceManager::hasRegisteredToManager) {
+    LOG_DEBUG("Sending MQTTManager register request.");
     StaticJsonDocument<512> doc;
-    doc["mac_address"] = WiFi.macAddress().c_str();
+    doc["command"] = "register_request";
+    doc["mac_origin"] = WiFi.macAddress().c_str();
     doc["friendly_name"] = NSPMConfig::instance->wifi_hostname.c_str();
     doc["version"] = NSPanelManagerFirmwareVersion;
     doc["md5_firmware"] = NSPMConfig::instance->md5_firmware;
@@ -61,20 +56,9 @@ void registerToNSPanelManager() {
 
     char buffer[512];
     serializeJson(doc, buffer);
+    MqttManager::publish("nspanel/mqttmanager/command", buffer);
 
-    httpClient.begin(wifiClient, url.c_str());
-    httpClient.addHeader("Content-Type", "application/json");
-    int responseCode = httpClient.POST(buffer);
-
-    if (responseCode == 200) {
-      InterfaceManager::hasRegisteredToManager = true;
-      LOG_INFO("Registered to manager at: ", url.c_str());
-      break;
-    } else {
-      InterfaceManager::hasRegisteredToManager = false;
-      LOG_ERROR("Failed to register panel at: ", url.c_str(), ". Will try again in 5 seconds.");
-      vTaskDelay(5000 / portTICK_PERIOD_MS);
-    }
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
   }
 }
 

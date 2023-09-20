@@ -45,88 +45,11 @@
     </div>
   </div>
 </div>
-<div class="is-flex flex-wrap" style="flex-wrap: wrap;">
-    {% for panel_info in nspanels %}
-    <div class="box nspanel-box m-2" id="panel_status_box_{{ panel_info.nspanel.mac_address }}">
-      <span id="nspanel_id_{{ panel_info.nspanel.mac_address }}" class="is-hidden nspanel_id_container">{{ panel_info.nspanel.id }}</span>
-      <span class="is-hidden nspanel_mac_container">{{ panel_info.nspanel.mac_address }}</span>
-      <div class="nspanel-status-header">
-        <div class="has-background-grey nspanel-status-header-await" id="panel_header_{{ panel_info.nspanel.mac_address }}"></div>
-      </div>
-      <div class="nspanel-status-content-box">
-        <div class="level">
-          <div class="level-left">
-            <div class="level-item">
-              <div class="is-pulled-left">
-                <span class="has-text-weight-bold"><a href="{% url 'edit_nspanel' panel_id=panel_info.nspanel.id %}" class="has-text-dark">{{ panel_info.nspanel.friendly_name }}</a></span>
-              </div>
-            </div>
-          </div>
-          <div class="level-right">
-            <span class="has-text-weight-light is-italic is-size-7" id="panel_header_text_{{ panel_info.nspanel.mac_address }}">Unknown status</span>
-          </div>
-        </div>
-
-
-        <div class="info-item">
-          <span class="icon-text">
-            <span class="icon">
-              <i class="mdi mdi-help" id="wifi_signal_strength_{{ panel_info.nspanel.mac_address }}"></i>
-            </span>
-            <span id="wifi_signal_strength_text_{{ panel_info.nspanel.mac_address }}" class="is-size-7">-</span>
-          </span>
-        </div>
-        <div class="info-item">
-          <span class="icon-text">
-            <span class="icon">
-              <i class="mdi mdi-thermometer"></i>
-            </span>
-            <span id="temperature_{{ panel_info.nspanel.mac_address }}" class="nspanel-status-temperature is-size-7">-</span>
-          </span>
-        </div>
-        <div class="info-item">
-          <span class="icon-text">
-            <span class="icon">
-              <i class="mdi mdi-memory"></i>
-            </span>
-            <span class="is-size-7" id="heap_used_{{ panel_info.nspanel.mac_address }}">-</span>
-          </span>
-        </div>
-
-      </div>
-      <div class="nspanel-status-footer">
-          <span data-tooltip="" class="icon is-small has-tooltipl-multiline has-tooltip-warning pl-3 is-hidden" id="nspanel_{{ panel_info.nspanel.mac_address}}_warnings">
-            <span class="mdi mdi-alert-circle has-text-warning mdi-24px"></span>
-          </span>
-          <div class="dropdown nspanel-actions-button">
-            <div class="dropdown-trigger">
-              <span class="mdi mdi-cog pr-2"></span>
-            </div>
-            <div class="dropdown-menu" id="dropdown-menu" role="menu">
-              <div class="dropdown-content">
-                <a class="dropdown-item"
-                  onclick="rebootNSPanel('{{ panel_info.nspanel.mac_address }}');">
-                  <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot
-                </a>
-                <a class="dropdown-item" href="http://{{ panel_info.nspanel.ip_address }}" target="_blank">
-                  <span class="mdi mdi-web pr-2 has-text-primary"></span>Visit panel page
-                </a>
-                <hr class="dropdown-divider">
-                <a class="dropdown-item" onclick="startNSPanelOtaUpdate('{{ panel_info.nspanel.mac_address }}');">
-                  <span class="mdi mdi-upload pr-2 has-text-info"></span>Update firmware
-                </a>
-                <a class="dropdown-item" onclick="startNSPanelTftUpdate('{{ panel_info.nspanel.mac_address }}');">
-                  <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update screen
-                </a>
-                <hr class="dropdown-divider">
-                <a href="{% url 'delete_nspanel' panel_id=panel_info.nspanel.id %}" class="dropdown-item has-text-danger">
-                  <span class="mdi mdi-minus-circle pr-2"></span>Delete
-                </a>
-              </div>
-            </div>
-          </div>
-      </div>
-    </div>
-    {% endfor %}
+<div hx-ext="ws" ws-connect="ws://127.0.0.1:8002/">
+  <div class="is-flex flex-wrap"  style="flex-wrap: wrap;" id="nspanels_container">
+    <!-- {% for panel_info in nspanels %}
+    {% include 'partial/nspanel_index_view.html' %}
+    {% endfor %} -->
+  </div>
 </div>
 {% endblock %}

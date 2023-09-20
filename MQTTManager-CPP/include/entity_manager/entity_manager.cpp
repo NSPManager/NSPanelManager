@@ -1,12 +1,15 @@
 #include "entity/entity.hpp"
 #include "light/home_assistant_light.hpp"
 #include "light/openhab_light.hpp"
+#include "mqtt_manager/mqtt_manager.hpp"
 #include "room/room.hpp"
 #include "scenes/nspm_scene.hpp"
 #include "scenes/scene.hpp"
 #include "websocket_server/websocket_server.hpp"
 #include <cstdint>
 #include <cstdlib>
+#include <curl/curl.h>
+#include <curl/easy.h>
 #include <entity_manager/entity_manager.hpp>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
@@ -17,6 +20,11 @@
 #include <spdlog/spdlog.h>
 #include <string>
 #include <sys/types.h>
+
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+  ((std::string *)userp)->append((char *)contents, size * nmemb);
+  return size * nmemb;
+}
 
 void EntityManager::init() {
   MQTT_Manager::attach_observer(EntityManager::mqtt_callback);
@@ -108,10 +116,11 @@ bool EntityManager::mqtt_callback(const std::string &topic, const std::string &p
 
 bool EntityManager::_process_message(const std::string &topic, const std::string &payload) {
   if (topic.compare("nspanel/mqttmanager/command") == 0) {
+    SPDLOG_DEBUG("Received command payload: {}", payload);
     nlohmann::json data = nlohmann::json::parse(payload);
     std::string mac_origin = data["mac_origin"];
-    NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_origin);
-    if (panel != nullptr) {
+    if (data.contains("method")) {
+      NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_origin);
       std::string command_method = data["method"];
       if (command_method.compare("set") == 0) {
         std::string command_set_attribute = data["attribute"];
@@ -159,9 +168,68 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
         } else {
           SPDLOG_ERROR("Unknown attribute '{}' in set-command request.", command_set_attribute);
         }
+      } else {
+        SPDLOG_ERROR("Unknown method. Payload: {}", payload);
+      }
+    } else if (data.contains("command")) {
+      std::string command = data["command"];
+      if (command.compare("register_request") == 0) {
+        std::string mac_address = data["mac_origin"];
+        std::string name = data["friendly_name"];
+        SPDLOG_INFO("Got register request from NSPanel with name {} and MAC: {}", name, mac_address);
+        NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_address);
+        if (panel != nullptr) {
+          std::string nspanel_command_topic = "nspanel/";
+          nspanel_command_topic.append(name);
+          nspanel_command_topic.append("/command");
+
+          // TODO: Send HTTP POST request to manager with new details from panel
+
+          CURL *curl;
+          CURLcode res;
+          curl = curl_easy_init();
+          if (curl) {
+            std::string response_data;
+            SPDLOG_INFO("Sending registration data to Django for database management.");
+            // TODO: Update address
+            curl_easy_setopt(curl, CURLOPT_URL, "http://10.0.0.10:8000/api/register_nspanel");
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
+
+            /* Perform the request, res will get the return code */
+            res = curl_easy_perform(curl);
+            long http_code;
+            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+            /* Check for errors */
+            if (res == CURLE_OK && http_code == 200) {
+              SPDLOG_INFO("Panel registration OK. Sending registration_accept.");
+              // Registration to manager was OK, send registration_accept to panel:
+              nlohmann::json response;
+              response["command"] = "register_accept";
+              response["address"] = "10.0.0.10";
+              response["port"] = 8000;
+              MQTT_Manager::publish(nspanel_command_topic, response.dump());
+            } else {
+              SPDLOG_ERROR("curl_easy_perform() when registring panel failed, got code: {}.", curl_easy_strerror(res));
+              std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+            }
+
+            /* always cleanup */
+            curl_easy_cleanup(curl);
+          } else {
+            SPDLOG_ERROR("Failed to curl_easy_init(). Will try again.");
+            std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+          }
+
+        } else {
+          // TODO: Create pending NSPanels
+          SPDLOG_INFO("Panel is not registered tp manager, adding panel but as 'pending accept' status.");
+        }
+      } else {
+        SPDLOG_ERROR("Got command but no handler for it exists. Command: {}", command);
       }
     } else {
-      SPDLOG_WARN("Ignoring command from panel not known. Origin panel MAC: {}", mac_origin);
+      SPDLOG_ERROR("Received unknown message on command topic. Message: {}", payload);
     }
 
     return true;
@@ -212,6 +280,15 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
     response["nspanels"] = panel_responses;
     response["cmd_id"] = command_id;
     (*response_buffer) = response.dump();
+    return true;
+  } else if (command.compare("get_index_nspanels_full") == 0) {
+    std::list<nlohmann::json> nspanels;
+    for (NSPanel *panel : EntityManager::_nspanels) {
+      nspanels.push_back(panel->get_websocket_json_representation());
+    }
+    nlohmann::json data;
+    data["nspanels"] = nspanels;
+    WebsocketServer::render_template_with_args("nspanel_index_view.html", data);
     return true;
   } else if (command.compare("reboot_nspanels") == 0) {
     nlohmann::json args = data["args"];

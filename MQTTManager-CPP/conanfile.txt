@@ -5,6 +5,7 @@ libcurl/8.2.1
 nlohmann_json/3.11.2
 ixwebsocket/11.4.3
 tz/2023c
+inja/3.4.0
 
 [generators]
 CMakeDeps

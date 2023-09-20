@@ -78,6 +78,9 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
         buffer << std::put_time(&tm, "%I:%M:%S %p");
       }
 
+      std::string send_mac = message_parts[0];
+      send_mac.erase(std::remove(send_mac.begin(), send_mac.end(), ':'), send_mac.end());
+
       nlohmann::json log_data;
       log_data["type"] = "log";
       log_data["time"] = buffer.str();
@@ -85,7 +88,8 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
       log_data["mac"] = message_parts[0];
       log_data["level"] = message_parts[1];
       log_data["message"] = message_parts[2];
-      WebsocketServer::broadcast_json(log_data);
+      // WebsocketServer::broadcast_json(log_data);
+      WebsocketServer::render_template_with_args("nspanel_status_header.html", log_data);
 
       // Save log message in backtrace for when (if) the log interface requests it.
       NSPanelLogMessage message;
@@ -108,17 +112,18 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
       std::string state = data["state"];
       if (state.compare("online") == 0) {
         this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+        SPDLOG_DEBUG("NSPanel {}::{} become ONLINE.", this->_id, this->_name);
       } else if (state.compare("offline") == 0) {
         this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE;
+        SPDLOG_DEBUG("NSPanel {}::{} become OFFLINE.", this->_id, this->_name);
       } else {
         SPDLOG_ERROR("Received unknown state for nspanel {}::{}. State: {}", this->_id, this->_name, state);
       }
 
       // Send status over to web interface:
       nlohmann::json status_reps;
-      status_reps["type"] = "status";
-      status_reps["payload"] = this->get_websocket_json_representation();
-      WebsocketServer::broadcast_json(status_reps);
+      status_reps["nspanel"] = this->get_websocket_json_representation();
+      WebsocketServer::render_template_with_args("nspanel_index_box.html", status_reps);
       return true;
     }
   } else if (topic.compare(this->_mqtt_status_report_topic) == 0) {
@@ -187,11 +192,17 @@ nlohmann::json NSPanel::get_websocket_json_representation() {
     data["state"] = "unknown";
     break;
   }
+
+  std::string send_mac = this->_mac;
+  send_mac.erase(std::remove(send_mac.begin(), send_mac.end(), ':'), send_mac.end());
+
+  data["id"] = this->_id;
+  data["name"] = this->_name;
   data["rssi"] = this->_rssi;
   data["heap_used_pct"] = this->_heap_used_pct;
-  data["mac"] = this->_mac;
+  data["mac_address"] = send_mac;
+  data["ip_address"] = this->_ip_address;
   data["temperature"] = this->_temperature;
-  data["ip"] = this->_ip_address;
   data["warnings"] = this->_nspanel_warnings;
 
   return data;
