@@ -23,6 +23,7 @@ public:
 
 private:
   static inline std::list<RoomManagerObserver *> _roomChangeObservers;
+  static inline unsigned long _lastReloadCommand;
   static void _callRoomChangeCallbacks();
 };
 
