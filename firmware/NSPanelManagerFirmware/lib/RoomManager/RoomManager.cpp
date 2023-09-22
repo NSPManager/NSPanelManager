@@ -1,3 +1,4 @@
+#include "esp32-hal.h"
 #include <ArduinoJson.h>
 #include <ButtonManager.hpp>
 #include <HttpLib.hpp>
@@ -17,13 +18,20 @@
 void RoomManager::init() {
   MqttManager::subscribeToTopic("nspanel/config/reload", &RoomManager::reloadCallback);
   RoomManager::currentRoom = RoomManager::rooms.end();
+  RoomManager::_lastReloadCommand = millis();
 }
 
 void RoomManager::reloadCallback(char *topic, byte *payload, unsigned int length) {
+  if (RoomManager::_lastReloadCommand + 5000 >= millis()) {
+    LOG_ERROR("Received reload command within 5 seconds of a reload. Ignoring command.");
+    return;
+  }
+
   std::string payload_str = std::string((char *)payload, 1);
   if (payload_str.compare("1") == 0) {
     LOG_DEBUG("Got reload command, reloading rooms.");
     RoomManager::loadAllRooms(true);
+    RoomManager::_lastReloadCommand = millis();
   }
 }
 

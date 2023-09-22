@@ -111,6 +111,13 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   NSPanel::attachSleepCallback(InterfaceManager::processSleepEvent);
   NSPanel::attachWakeCallback(InterfaceManager::processWakeEvent);
 
+  // Attach screen clock MQTT callback if configured from manager.
+  if (InterfaceConfig::show_screensaver_clock) {
+    PageManager::GetScreensaverPage()->attachMqttTimeCallback();
+  } else {
+    LOG_DEBUG("Not attaching MQTT clock callback is panel is confiugred to now show clock on screensaver.");
+  }
+
   LOG_INFO("Config initialized. Closing taskLoadConfigAndInit");
   vTaskDelete(NULL); // Delete task, we are done
 }
@@ -182,8 +189,8 @@ void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned
   } else if (command.compare("firmware_update") == 0) {
     WebManager::startOTAUpdate();
   } else if (command.compare("tft_update") == 0) {
-    InterfaceManager::stop();
     NSPanel::instance->startOTAUpdate();
+    InterfaceManager::stop();
   } else if (command.compare("register_accept") == 0) {
     NSPMConfig::instance->manager_address = json["address"].as<String>().c_str();
     NSPMConfig::instance->manager_port = json["port"].as<uint16_t>();
