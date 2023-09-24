@@ -8,14 +8,14 @@ webui: http://[HOST]:[PORT:8000]/
 panel_icon: mdi:fit-to-screen
 ports:
   8000/tcp: 8000
-  8001/tcp: 8011
+  8001/tcp: 8001
 environment:
   IS_HOME_ASSISTANT_ADDON: "true"
 init: false
 homeassistant_api: true
 arch:
-  - aarch0.1.22
-  - amd0.1.22
+  - aarch64
+  - amd64
   - armhf
-  - armv0.1.22
-  - i0.1.22
+  - armv7
+  - i386
