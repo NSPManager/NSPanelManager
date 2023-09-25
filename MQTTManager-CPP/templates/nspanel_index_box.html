@@ -88,16 +88,20 @@
     </span>
     <div class="dropdown nspanel-actions-button">
       <div class="dropdown-trigger">
-        <span class="mdi mdi-cog pr-2"></span>
+        <span class="mdi mdi-cog pr-2" onclick="show_dropdown_menu(this);"></span>
       </div>
       <div class="dropdown-menu" id="dropdown-menu" role="menu">
         <div class="dropdown-content">
-          <a
-            class="dropdown-item"
-            onclick="rebootNSPanel(' {{ nspanel.mac_address }}');"
-          >
-            <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot
-          </a>
+            <form id="reboot_nspanel" ws-send>
+              <a
+                class="dropdown-item"
+                onclick="htmx.trigger(htmx.closest(this, 'form'), 'submit');"
+              >
+                  <input type="hidden" name="mac" value="{{ nspanel.mac_address }}">
+                  <input type="hidden" name="id" value="{{ nspanel.id }}">
+                  <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot
+              </a>
+            </form>
           <a
             class="dropdown-item"
             href="http://{{ nspanel.ip_address }}"

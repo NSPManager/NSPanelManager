@@ -267,6 +267,28 @@ NSPanel *EntityManager::get_nspanel_by_mac(std::string mac) {
 
 bool EntityManager::websocket_callback(std::string &message, std::string *response_buffer) {
   nlohmann::json data = nlohmann::json::parse(message);
+
+  if (data.contains("HEADERS")) {
+    nlohmann::json headers = data["HEADERS"];
+    std::string target = headers["HX-Target"];
+    if (target.compare("reboot_nspanel") == 0) {
+      uint16_t nspanel_id = atoi(std::string(data["id"]).c_str());
+      NSPanel *nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
+      if (nspanel != nullptr) {
+        SPDLOG_INFO("Sending reboot command to nspanel {}::{}.", nspanel->get_id(), nspanel->get_name());
+        nlohmann::json cmd;
+        cmd["command"] = "reboot";
+        nspanel->send_command(cmd);
+      } else {
+        SPDLOG_ERROR("Received command to reboot NSPanel with ID {} but no panel with that ID is loaded.");
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
   uint64_t command_id = data["cmd_id"];
   std::string command = data["command"];
 

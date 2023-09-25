@@ -254,6 +254,8 @@ def get_client_ip(request):
 def register_nspanel(request):
     """Update the already existing NSPanel OR create a new one"""
     data = json.loads(request.body)
+    if "mac_address" in data:
+        data["mac_origin"] = data["mac_address"]
     new_panel = NSPanel.objects.filter(mac_address=data['mac_origin']).first()
     panel_already_exists = True
 

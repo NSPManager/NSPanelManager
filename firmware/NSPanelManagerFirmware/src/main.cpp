@@ -43,20 +43,24 @@ float readNTCTemperature(bool farenheit) {
 }
 
 void registerToNSPanelManager() {
-  while (WiFi.isConnected() && MqttManager::connected() && !InterfaceManager::hasRegisteredToManager) {
-    LOG_DEBUG("Sending MQTTManager register request.");
-    StaticJsonDocument<512> doc;
-    doc["command"] = "register_request";
-    doc["mac_origin"] = WiFi.macAddress().c_str();
-    doc["friendly_name"] = NSPMConfig::instance->wifi_hostname.c_str();
-    doc["version"] = NSPanelManagerFirmwareVersion;
-    doc["md5_firmware"] = NSPMConfig::instance->md5_firmware;
-    doc["md5_data_file"] = NSPMConfig::instance->md5_data_file;
-    doc["md5_tft_file"] = NSPMConfig::instance->md5_tft_file;
+  while (WiFi.isConnected() && !InterfaceManager::hasRegisteredToManager) {
+    if (MqttManager::connected()) {
+      LOG_DEBUG("Sending MQTTManager register request.");
+      StaticJsonDocument<512> doc;
+      doc["command"] = "register_request";
+      doc["mac_origin"] = WiFi.macAddress().c_str();
+      doc["friendly_name"] = NSPMConfig::instance->wifi_hostname.c_str();
+      doc["version"] = NSPanelManagerFirmwareVersion;
+      doc["md5_firmware"] = NSPMConfig::instance->md5_firmware;
+      doc["md5_data_file"] = NSPMConfig::instance->md5_data_file;
+      doc["md5_tft_file"] = NSPMConfig::instance->md5_tft_file;
 
-    char buffer[512];
-    serializeJson(doc, buffer);
-    MqttManager::publish("nspanel/mqttmanager/command", buffer);
+      char buffer[512];
+      serializeJson(doc, buffer);
+      MqttManager::publish("nspanel/mqttmanager/command", buffer);
+    } else {
+      LOG_ERROR("MQTT Not connected. Will retry to register in 5 seconds.");
+    }
 
     vTaskDelay(5000 / portTICK_PERIOD_MS);
   }

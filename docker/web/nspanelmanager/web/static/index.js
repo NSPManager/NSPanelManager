@@ -109,8 +109,8 @@ function updateDisplayedWarnings() {
   }
 }
 
-function show_dropdown_menu(event) {
-  $(this).closest(".dropdown").toggleClass("is-active");
+function show_dropdown_menu(dom) {
+  $(dom).closest(".dropdown").toggleClass("is-active");
   event.stopPropagation();
 }
 
@@ -251,6 +251,11 @@ $(document).ready(function () {
     );
   });
 
+
+  $(window).click(function () {
+    $(".dropdown").removeClass("is-active");
+  });
+
   return;
 
   ws.register_message_handler((message) => {
@@ -348,9 +353,6 @@ $(document).ready(function () {
   });
 
   $(".dropdown").click(show_dropdown_menu);
-  $(window).click(function () {
-    $(".dropdown").removeClass("is-active");
-  });
 
   updateNSPanelsWarnings();
 });

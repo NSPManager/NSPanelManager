@@ -1,0 +1,100 @@
+[22/Sep/2023 20:38:05] "GET /static/question.js?refresh=1695415085 HTTP/1.1" 200 297
+[22/Sep/2023 20:38:05] "GET /static/base.css?refresh=1695415085 HTTP/1.1" 200 324
+[22/Sep/2023 20:38:05] "GET /static/settings.js?refresh=1695415085 HTTP/1.1" 200 284
+[22/Sep/2023 20:38:06] "GET /api/get_mqtt_manager_config HTTP/1.1" 200 478
+INFO:root:Got config, will start MQTT Manager.
+DEBUG:environ.environ:get 'MQTT_SERVER' casted as 'None' with default '<NoValue>'
+DEBUG:environ.environ:get 'MQTT_PORT' casted as 'None' with default '<NoValue>'
+DEBUG:environ.environ:get 'MQTT_USERNAME' casted as 'None' with default '<NoValue>'
+DEBUG:environ.environ:get 'MQTT_PASSWORD' casted as 'None' with default '<NoValue>'
+DEBUG:environ.environ:get 'HOME_ASSISTANT_ADDRESS' casted as 'None' with default '<NoValue>'
+DEBUG:environ.environ:get 'HOME_ASSISTANT_TOKEN' casted as 'None' with default '<NoValue>'
+DEBUG:environ.environ:get 'OPENHAB_ADDRESS' casted as 'None' with default '<NoValue>'
+DEBUG:environ.environ:get 'OPENHAB_TOKEN' casted as 'None' with default '<NoValue>'
+DEBUG:asyncio:Using selector: EpollSelector
+INFO:root:Connecting to 192.168.87.42:1883 as 'NSPanelManager_02:42:ac:1e:21:03'
+DEBUG:environ.environ:get 'IS_HOME_ASSISTANT_ADDON' casted as 'None' with default '<NoValue>'
+INFO:root:OpenHAB values not configured, will not connect.
+INFO:root:Connecting to Home Assistant at ws://supervisor/core/websocket
+INFO:root:Connected to MQTT Server
+DEBUG:root:Got status from existing panel.
+[22/Sep/2023 20:38:06] "GET /api/get_nspanel_config?mac=B8:D6:1A:68:70:EC HTTP/1.1" 200 909
+[22/Sep/2023 20:38:06] "GET /api/get_nspanel_config/room/1 HTTP/1.1" 200 50
+DEBUG:root:Sending mqttmanager_status.
+INFO:root:WebSocket connection to Home Assistant opened.
+DEBUG:asyncio:Using selector: EpollSelector
+DEBUG:root:Sending mqttmanager_status.
+INFO:root:Sending auth to Home Assistant
+INFO:root:Home Assistant auth OK. Requesting existing states.
+DEBUG:asyncio:Using selector: EpollSelector
+DEBUG:root:Sending mqttmanager_status.
+[22/Sep/2023 20:38:13] "GET / HTTP/1.1" 200 16838
+[22/Sep/2023 20:38:13] "GET /static/base.js?refresh=1695415093 HTTP/1.1" 200 517
+[22/Sep/2023 20:38:13] "GET /static/base.css?refresh=1695415093 HTTP/1.1" 200 324
+[22/Sep/2023 20:38:13] "GET /static/index.css?refresh=1695415093 HTTP/1.1" 200 1131
+[22/Sep/2023 20:38:13] "GET /static/mqttmanager_ws.js?refresh=1695415093 HTTP/1.1" 200 1890
+[22/Sep/2023 20:38:13] "GET /static/index.js?refresh=1695415093 HTTP/1.1" 200 11630
+[22/Sep/2023 20:38:13] "GET /static/loader.css?refresh=1695415093 HTTP/1.1" 200 680
+DEBUG:root:Sending mqttmanager_status.
+[22/Sep/2023 20:38:13] "GET /api/get_nspanels_warnings HTTP/1.1" 200 113
+[22/Sep/2023 20:38:38] "POST /api/register_nspanel HTTP/1.1" 200 2
+DEBUG:root:Got status from existing panel.
+DEBUG:root:Got status from existing panel.
+[22/Sep/2023 20:38:40] "GET /api/get_nspanels_warnings HTTP/1.1" 200 113
+[22/Sep/2023 20:38:40] "GET /api/get_nspanels_warnings HTTP/1.1" 200 113
+[22/Sep/2023 20:38:59] "GET /settings HTTP/1.1" 200 29258
+[22/Sep/2023 20:38:59] "GET /static/base.js?refresh=1695415139 HTTP/1.1" 200 517
+[22/Sep/2023 20:38:59] "GET /static/loader.css?refresh=1695415139 HTTP/1.1" 200 680
+[22/Sep/2023 20:38:59] "GET /static/base.css?refresh=1695415139 HTTP/1.1" 200 324
+[22/Sep/2023 20:38:59] "GET /static/mqttmanager_ws.js?refresh=1695415139 HTTP/1.1" 200 1890
+[22/Sep/2023 20:38:59] "GET /static/question.js?refresh=1695415139 HTTP/1.1" 200 297
+[22/Sep/2023 20:38:59] "GET /static/settings.js?refresh=1695415139 HTTP/1.1" 200 284
+[22/Sep/2023 20:39:15] "GET / HTTP/1.1" 200 16838
+[22/Sep/2023 20:39:15] "GET /static/base.js?refresh=1695415155 HTTP/1.1" 200 517
+[22/Sep/2023 20:39:15] "GET /static/mqttmanager_ws.js?refresh=1695415155 HTTP/1.1" 200 1890
+[22/Sep/2023 20:39:15] "GET /static/loader.css?refresh=1695415155 HTTP/1.1" 200 680
+[22/Sep/2023 20:39:15] "GET /static/index.css?refresh=1695415155 HTTP/1.1" 200 1131
+[22/Sep/2023 20:39:15] "GET /static/index.js?refresh=1695415155 HTTP/1.1" 200 11630
+[22/Sep/2023 20:39:15] "GET /static/base.css?refresh=1695415155 HTTP/1.1" 200 324
+[22/Sep/2023 20:39:15] "GET /api/get_nspanels_warnings HTTP/1.1" 200 113
+DEBUG:root:Sending mqttmanager_status.
+[22/Sep/2023 20:39:24] "GET / HTTP/1.1" 200 16838
+[22/Sep/2023 20:39:24] "GET /static/base.js?refresh=1695415164 HTTP/1.1" 200 517
+[22/Sep/2023 20:39:24] "GET /static/base.css?refresh=1695415164 HTTP/1.1" 200 324
+[22/Sep/2023 20:39:24] "GET /static/mqttmanager_ws.js?refresh=1695415164 HTTP/1.1" 200 1890
+[22/Sep/2023 20:39:24] "GET /static/index.css?refresh=1695415164 HTTP/1.1" 200 1131
+[22/Sep/2023 20:39:24] "GET /static/loader.css?refresh=1695415164 HTTP/1.1" 200 680
+[22/Sep/2023 20:39:24] "GET /static/index.js?refresh=1695415164 HTTP/1.1" 200 11630
+DEBUG:root:Sending mqttmanager_status.
+[22/Sep/2023 20:39:24] "GET /api/get_nspanels_warnings HTTP/1.1" 200 113
+[22/Sep/2023 20:39:43] "GET /settings HTTP/1.1" 200 29258
+[22/Sep/2023 20:39:43] "GET /static/mqttmanager_ws.js?refresh=1695415183 HTTP/1.1" 200 1890
+[22/Sep/2023 20:39:43] "GET /static/settings.js?refresh=1695415183 HTTP/1.1" 200 284
+[22/Sep/2023 20:39:43] "GET /static/question.js?refresh=1695415183 HTTP/1.1" 200 297
+[22/Sep/2023 20:39:43] "GET /static/base.css?refresh=1695415183 HTTP/1.1" 200 324
+[22/Sep/2023 20:39:43] "GET /static/loader.css?refresh=1695415183 HTTP/1.1" 200 680
+[22/Sep/2023 20:39:43] "GET /static/base.js?refresh=1695415183 HTTP/1.1" 200 517
+[22/Sep/2023 20:39:48] "GET / HTTP/1.1" 200 16838
+[22/Sep/2023 20:39:48] "GET /static/base.js?refresh=1695415188 HTTP/1.1" 200 517
+[22/Sep/2023 20:39:48] "GET /static/mqttmanager_ws.js?refresh=1695415188 HTTP/1.1" 200 1890
+[22/Sep/2023 20:39:48] "GET /static/index.css?refresh=1695415188 HTTP/1.1" 200 1131
+[22/Sep/2023 20:39:48] "GET /static/base.css?refresh=1695415188 HTTP/1.1" 200 324
+[22/Sep/2023 20:39:48] "GET /static/loader.css?refresh=1695415188 HTTP/1.1" 200 680
+[22/Sep/2023 20:39:48] "GET /static/index.js?refresh=1695415188 HTTP/1.1" 200 11630
+DEBUG:root:Sending mqttmanager_status.
+[22/Sep/2023 20:39:48] "GET /api/get_nspanels_warnings HTTP/1.1" 200 113
+[22/Sep/2023 20:40:05] "GET / HTTP/1.1" 200 16838
+[22/Sep/2023 20:40:05] "GET /static/base.js?refresh=1695415205 HTTP/1.1" 200 517
+[22/Sep/2023 20:40:05] "GET /static/mqttmanager_ws.js?refresh=1695415205 HTTP/1.1" 200 1890
+[22/Sep/2023 20:40:05] "GET /static/index.js?refresh=1695415205 HTTP/1.1" 200 11630
+[22/Sep/2023 20:40:05] "GET /static/loader.css?refresh=1695415205 HTTP/1.1" 200 680
+[22/Sep/2023 20:40:05] "GET /static/index.css?refresh=1695415205 HTTP/1.1" 200 1131
+[22/Sep/2023 20:40:05] "GET /static/base.css?refresh=1695415205 HTTP/1.1" 200 324
+DEBUG:root:Sending mqttmanager_status.
+[22/Sep/2023 20:40:05] "GET /api/get_nspanels_warnings HTTP/1.1" 200 113
+DEBUG:root:Got status from existing panel.
+DEBUG:root:Got status from existing panel.
+[22/Sep/2023 20:40:17] "GET /api/get_nspanels_warnings HTTP/1.1" 200 113
+[22/Sep/2023 20:40:17] "GET /api/get_nspanels_warnings HTTP/1.1" 200 113
+[22/Sep/2023 20:40:17] "GET /api/get_nspanels_warnings HTTP/1.1" 200 113
+DEBUG:root:Got status from existing panel.
