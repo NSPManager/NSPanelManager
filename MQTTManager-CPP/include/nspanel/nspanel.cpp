@@ -188,6 +188,9 @@ nlohmann::json NSPanel::get_websocket_json_representation() {
     data["state"] = "updating_tft";
     data["progress"] = this->_update_progress;
     break;
+  case MQTT_MANAGER_NSPANEL_STATE::WAITING:
+    data["state"] = "waiting";
+    break;
   default:
     data["state"] = "unknown";
     break;
@@ -206,6 +209,42 @@ nlohmann::json NSPanel::get_websocket_json_representation() {
   data["warnings"] = this->_nspanel_warnings;
 
   return data;
+}
+
+void NSPanel::reboot() {
+  SPDLOG_INFO("Sending reboot command to nspanel {}::{}.", this->_id, this->_name);
+  nlohmann::json cmd;
+  cmd["command"] = "reboot";
+  this->send_command(cmd);
+
+  this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+  nlohmann::json args;
+  args["nspanel"] = this->get_websocket_json_representation();
+  WebsocketServer::render_template_with_args("nspanel_index_box.html", args);
+}
+
+void NSPanel::firmware_update() {
+  SPDLOG_INFO("Sending firmware update command to nspanel {}::{}.", this->_id, this->_name);
+  nlohmann::json cmd;
+  cmd["command"] = "firmware_update";
+  this->send_command(cmd);
+
+  this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+  nlohmann::json args;
+  args["nspanel"] = this->get_websocket_json_representation();
+  WebsocketServer::render_template_with_args("nspanel_index_box.html", args);
+}
+
+void NSPanel::tft_update() {
+  SPDLOG_INFO("Sending TFT update command to nspanel {}::{}.", this->_id, this->_name);
+  nlohmann::json cmd;
+  cmd["command"] = "tft_update";
+  this->send_command(cmd);
+
+  this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+  nlohmann::json args;
+  args["nspanel"] = this->get_websocket_json_representation();
+  WebsocketServer::render_template_with_args("nspanel_index_box.html", args);
 }
 
 void NSPanel::send_command(nlohmann::json &command) {

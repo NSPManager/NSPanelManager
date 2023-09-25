@@ -7,6 +7,7 @@
 
 enum MQTT_MANAGER_NSPANEL_STATE {
   UNKNOWN,
+  WAITING,
   ONLINE,
   OFFLINE,
   UPDATING_FIRMWARE,
@@ -47,6 +48,21 @@ public:
    * Get the JSON message that will be sent over the websocket when a client requests the logs from the given NSPanel.
    */
   nlohmann::json get_websocket_json_logs();
+
+  /**
+   * Sends a reboot command to the panel over MQTT.
+   */
+  void reboot();
+
+  /**
+   * Sends a command to start firmware update.
+   */
+  void firmware_update();
+
+  /**
+   * Sends a command to start TFT screen update.
+   */
+  void tft_update();
 
 private:
   uint _id;

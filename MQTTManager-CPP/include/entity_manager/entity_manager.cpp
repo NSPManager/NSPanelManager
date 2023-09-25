@@ -275,10 +275,27 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       uint16_t nspanel_id = atoi(std::string(data["id"]).c_str());
       NSPanel *nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
       if (nspanel != nullptr) {
-        SPDLOG_INFO("Sending reboot command to nspanel {}::{}.", nspanel->get_id(), nspanel->get_name());
-        nlohmann::json cmd;
-        cmd["command"] = "reboot";
-        nspanel->send_command(cmd);
+        nspanel->reboot();
+      } else {
+        SPDLOG_ERROR("Received command to reboot NSPanel with ID {} but no panel with that ID is loaded.");
+      }
+
+      return true;
+    } else if (target.compare("firmware_update") == 0) {
+      uint16_t nspanel_id = atoi(std::string(data["id"]).c_str());
+      NSPanel *nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
+      if (nspanel != nullptr) {
+        nspanel->firmware_update();
+      } else {
+        SPDLOG_ERROR("Received command to reboot NSPanel with ID {} but no panel with that ID is loaded.");
+      }
+
+      return true;
+    } else if (target.compare("tft_update") == 0) {
+      uint16_t nspanel_id = atoi(std::string(data["id"]).c_str());
+      NSPanel *nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
+      if (nspanel != nullptr) {
+        nspanel->tft_update();
       } else {
         SPDLOG_ERROR("Received command to reboot NSPanel with ID {} but no panel with that ID is loaded.");
       }
@@ -289,6 +306,7 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
     return false;
   }
 
+  // TODO: Phase out old custom Javascript handling and convert to using HTMX.
   uint64_t command_id = data["cmd_id"];
   std::string command = data["command"];
 

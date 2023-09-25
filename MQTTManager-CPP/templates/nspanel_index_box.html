@@ -11,8 +11,8 @@
   <span class="is-hidden nspanel_mac_container">{{ nspanel.mac_address }}</span>
   <div class="nspanel-status-header">
     <div 
-      class='{% if nspanel.state == "online" %}nspanel-status-header has-background-success{% else if nspanel.state == "offline" %}nspanel-status-header has-background-danger{% else %}has-background-grey
-      nspanel-status-header-await{% endif %}' id="panel_header_{{
+      class='{% if nspanel.state == "online" %}nspanel-status-header has-background-success{% else if nspanel.state == "offline" %}nspanel-status-header has-background-danger
+      {% else if nspanel.state == "waiting" %}has-background-info nspanel-status-header-await{% else %}has-background-grey nspanel-status-header-await{% endif %}' id="panel_header_{{
       nspanel.mac_address }}">
     </div>
   </div>
@@ -31,7 +31,7 @@
         <span
           class="has-text-weight-light is-italic is-size-7"
           id="panel_header_text_{{ nspanel.mac_address }}"
-          >{% if nspanel.state == "offline" %}Offline{% else if nspanel.state ==
+        >{% if nspanel.state == "offline" %}Offline{% else if nspanel.state == "waiting" %}Waiting{% else if nspanel.state ==
           "unknown"%}Unknown status{% endif %}</span
         >
       </div>
@@ -80,8 +80,8 @@
   </div>
   <div class="nspanel-status-footer">
     <span
-      data-tooltip=""
-      class="icon is-small has-tooltipl-multiline has-tooltip-warning pl-3 is-hidden"
+      data-tooltip="{{ nspanel.warnings }}"
+      class='icon is-small has-tooltipl-multiline has-tooltip-warning pl-3 {% if nspanel.warnings == "" %}is-hidden{% endif %}'
       id="nspanel_{{ nspanel.mac_address}}_warnings"
     >
       <span class="mdi mdi-alert-circle has-text-warning mdi-24px"></span>
