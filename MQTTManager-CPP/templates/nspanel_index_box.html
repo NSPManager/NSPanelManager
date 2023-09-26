@@ -9,12 +9,11 @@
     {{ nspanel.id }}</span
   >
   <span class="is-hidden nspanel_mac_container">{{ nspanel.mac_address }}</span>
-  <div class="nspanel-status-header">
-    <div 
-      class='{% if nspanel.state == "online" %}nspanel-status-header has-background-success{% else if nspanel.state == "offline" %}nspanel-status-header has-background-danger
-      {% else if nspanel.state == "waiting" %}has-background-info nspanel-status-header-await{% else %}has-background-grey nspanel-status-header-await{% endif %}' id="panel_header_{{
-      nspanel.mac_address }}">
-    </div>
+  <div style='width: {% if nspanel.state == "updating_fw" %}{{ nspanel.progress }}%{% else if nspanel.state == "updating_fs" %}{{ nspanel.progress }}%{% else if nspanel.state == "updating_tft" %}{{ nspanel.progress }}%{% else %}100%{% endif %};'
+    class='nspanel-status-header {% if nspanel.state == "online" %}has-background-success{% else if nspanel.state == "offline" %}has-background-danger
+    {% else if nspanel.state == "waiting" %}has-background-info nspanel-status-header-await{% else if nspanel.state == "updating_tft" %}has-background-info{% else if nspanel.state == "updating_fw" %}has-background-info
+    {% else if nspanel.state == "updating_fs" %}has-background-info{% else %}has-background-grey nspanel-status-header-await{% endif %}' id="panel_header_{{
+    nspanel.mac_address }}">
   </div>
   <div class="nspanel-status-content-box">
     <div class="level">
@@ -22,7 +21,7 @@
         <div class="level-item">
           <div class="is-pulled-left">
             <span class="has-text-weight-bold"
-              ><a href="#" class="has-text-dark">{{ nspanel.name }}</a></span
+            ><a href="/nspanel/{{ nspanel.id }}" class="has-text-dark">{{ nspanel.name }}</a></span
             >
           </div>
         </div>
@@ -32,7 +31,8 @@
           class="has-text-weight-light is-italic is-size-7"
           id="panel_header_text_{{ nspanel.mac_address }}"
         >{% if nspanel.state == "offline" %}Offline{% else if nspanel.state == "waiting" %}Waiting{% else if nspanel.state ==
-          "unknown"%}Unknown status{% endif %}</span
+          "unknown" %}Unknown status{% else if nspanel.state == "updating_tft" %}Updating TFT {{ nspanel.progress }}%{% else if nspanel.state == "updating_fw" %}Updating firmware {{ nspanel.progress }}%
+          {% else if nspanel.state == "updating_fs" %}Updating LittleFS {{ nspanel.progress }}%{% endif %}</span
         >
       </div>
     </div>
@@ -111,20 +111,28 @@
             page
           </a>
           <hr class="dropdown-divider" />
-          <a
-            class="dropdown-item"
-            onclick="startNSPanelOtaUpdate('{{ nspanel.mac_address }}');"
-          >
-            <span class="mdi mdi-upload pr-2 has-text-info"></span>Update
-            firmware
-          </a>
-          <a
-            class="dropdown-item"
-            onclick="startNSPanelTftUpdate('{{ nspanel.mac_address }}');"
-          >
-            <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span
-            >Update screen
-          </a>
+            <form id="firmware_update" ws-send>
+            <a
+              class="dropdown-item"
+              onclick="htmx.trigger(htmx.closest(this, 'form'), 'submit');"
+            >
+              <input type="hidden" name="mac" value="{{ nspanel.mac_address }}">
+              <input type="hidden" name="id" value="{{ nspanel.id }}">
+              <span class="mdi mdi-upload pr-2 has-text-info"></span>Update
+              firmware
+            </a>
+          </form>
+          <form id="tft_update" ws-send>
+            <a
+              class="dropdown-item"
+              onclick="htmx.trigger(htmx.closest(this, 'form'), 'submit');"
+            >
+              <input type="hidden" name="mac" value="{{ nspanel.mac_address }}">
+              <input type="hidden" name="id" value="{{ nspanel.id }}">
+              <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span
+              >Update screen
+            </a>
+          </form>
           <hr class="dropdown-divider" />
           <a href="#" class="dropdown-item has-text-danger">
             <span class="mdi mdi-minus-circle pr-2"></span>Delete

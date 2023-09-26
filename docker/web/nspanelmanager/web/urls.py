@@ -33,9 +33,11 @@ urlpatterns = [
     path('download_firmware', views.download_firmware, name='download_firmware'),
     path('download_data_file', views.download_data_file, name='download_data_file'),
     path('download_tft', views.download_tft, name='download_tft'),
+    path('download_tft_us', views.download_tft_us, name='download_tft_us'),
     path('checksum_firmware', views.checksum_firmware, name='checksum_firmware'),
     path('checksum_data_file', views.checksum_data_file, name='checksum_data_file'),
     path('checksum_tft_file', views.checksum_tft_file, name='checksum_tft_file'),
+    path('checksum_tft_file_us', views.checksum_tft_file_us, name='checksum_tft_file_us'),
     path('manual', views.get_manual, name="manual"),
     # Below are API routes
     path('api/register_nspanel', api.register_nspanel, name='register_nspanel'),

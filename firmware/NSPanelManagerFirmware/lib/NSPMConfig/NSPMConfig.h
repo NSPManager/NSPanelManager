@@ -128,6 +128,9 @@ public:
 
   /// @brief Should we report time in farenheit or celcius? True = farenheit, false = Celcius
   bool use_farenheit;
+
+  /// @brief Indicates what TFT and checksums to check.
+  bool is_us_panel;
 };
 
 #endif

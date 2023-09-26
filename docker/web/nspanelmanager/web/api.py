@@ -336,6 +336,7 @@ def get_nspanel_config(request):
         base["button2_mode"] = nspanel.button2_mode
         base["button2_mqtt_topic"] = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_topic", "")
         base["button2_mqtt_payload"] = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_payload", "")
+        base["is_us_panel"] = get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False")
 
         if nspanel.button1_detached_mode_light:
             base["button1_detached_light"] = nspanel.button1_detached_mode_light.id

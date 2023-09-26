@@ -23,6 +23,7 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
   this->_heap_used_pct = 0;
   this->_nspanel_warnings = "";
   this->_temperature = -255;
+  this->_update_progress = 0;
   SPDLOG_DEBUG("Loaded NSPanel {}::{}.", this->_id, this->_name);
 
   this->_mqtt_log_topic = "nspanel/";
@@ -156,10 +157,9 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
       }
 
       // Send status over to web interface:
-      nlohmann::json status_reps;
-      status_reps["type"] = "status";
-      status_reps["payload"] = this->get_websocket_json_representation();
-      WebsocketServer::broadcast_json(status_reps);
+      nlohmann::json args;
+      args["nspanel"] = this->get_websocket_json_representation();
+      WebsocketServer::render_template_with_args("nspanel_index_box.html", args);
       return true;
     }
     return true;

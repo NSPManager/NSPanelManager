@@ -628,7 +628,11 @@ bool NSPanel::_updateTFTOTA() {
   downloadUrl.append(NSPMConfig::instance->manager_address);
   downloadUrl.append(":");
   downloadUrl.append(std::to_string(NSPMConfig::instance->manager_port));
-  downloadUrl.append("/download_tft");
+  if (!NSPMConfig::instance->is_us_panel) {
+    downloadUrl.append("/download_tft");
+  } else {
+    downloadUrl.append("/download_tft_us");
+  }
 
   LOG_INFO("Will download TFT file from: ", downloadUrl.c_str());
   size_t file_size = HttpLib::GetFileSize(downloadUrl.c_str());
@@ -803,7 +807,11 @@ bool NSPanel::_updateTFTOTA() {
     checksumUrl.append(NSPMConfig::instance->manager_address);
     checksumUrl.append(":");
     checksumUrl.append(std::to_string(NSPMConfig::instance->manager_port));
-    checksumUrl.append("/checksum_tft_file");
+    if (!NSPMConfig::instance->is_us_panel) {
+      checksumUrl.append("/checksum_tft_file");
+    } else {
+      checksumUrl.append("/checksum_tft_file_us");
+    }
     if (HttpLib::GetMD5sum(checksumUrl.c_str(), checksum_holder)) {
       break;
     }
