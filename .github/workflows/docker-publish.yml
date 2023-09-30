@@ -23,7 +23,7 @@ jobs:
       - name: Update displayed version in web interface footer
         uses: jacobtomlinson/gha-find-replace@v3
         with:
-          find: "([0-9]+.?)+"
+          find: "Version: ([0-9]+.?)+"
           replace: "${{ github.ref_name }}"
           regex: true
           include: "docker/web/nspanelmanager/web/templates/footer.html"
