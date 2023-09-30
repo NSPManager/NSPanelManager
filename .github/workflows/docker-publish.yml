@@ -16,7 +16,7 @@ jobs:
       - name: Update Home Assistant config.yaml version
         uses: jacobtomlinson/gha-find-replace@v3
         with:
-          find: "([0-9]+.?)+"
+          find: 'version: "([0-9]+\.?)+"'
           replace: "${{ github.ref_name }}"
           regex: true
           include: "docker/config.yaml"
