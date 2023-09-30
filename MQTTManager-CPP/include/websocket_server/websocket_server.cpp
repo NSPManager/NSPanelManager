@@ -36,9 +36,9 @@ void WebsocketServer::start() {
 void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::ConnectionState> connectionState, ix::WebSocket &webSocket, const ix::WebSocketMessagePtr &msg) {
   try {
     if (msg->type == ix::WebSocketMessageType::Open) {
-      SPDLOG_TRACE("New websocket client at IP: {}", connectionState->getRemoteIp());
+      SPDLOG_DEBUG("New websocket client at IP: {}", connectionState->getRemoteIp());
     } else if (msg->type == ix::WebSocketMessageType::Close) {
-      SPDLOG_TRACE("Websocket closed to client at IP: {}", connectionState->getRemoteIp());
+      SPDLOG_DEBUG("Websocket closed to client at IP: {}", connectionState->getRemoteIp());
     } else if (msg->type == ix::WebSocketMessageType::Error) {
       SPDLOG_ERROR("Websocket error to client at IP: {}", connectionState->getRemoteIp());
     } else if (msg->type == ix::WebSocketMessageType::Fragment) {

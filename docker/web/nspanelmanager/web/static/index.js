@@ -20,9 +20,8 @@ function startNSPanelOtaUpdateAll() {
   });
 }
 
-function startNSPanelOtaUpdate(mac) {
-  let mac_selector = mac;
-  mac_selector = mac_selector.replaceAll(":", "\\:");
+function startNSPanelOtaUpdate(dom) {
+  let mac_selector = $(dom).closest(".nspanel-box").find(".nspanel_mac_container").text();
   $("#panel_header_" + mac_selector).attr(
     "class",
     "nspanel-status-header has-background-info nspanel-status-header-await"
@@ -38,9 +37,8 @@ function startNSPanelTftUpdateAll() {
   });
 }
 
-function startNSPanelTftUpdate(mac) {
-  let mac_selector = mac;
-  mac_selector = mac_selector.replaceAll(":", "\\:");
+function startNSPanelTftUpdate(dom) {
+  let mac_selector = $(dom).closest(".nspanel-box").find(".nspanel_mac_container").text();
   $("#panel_header_" + mac_selector).attr(
     "class",
     "nspanel-status-header has-background-info nspanel-status-header-await"
@@ -56,9 +54,8 @@ function rebootNSPanelAll() {
   });
 }
 
-function rebootNSPanel(mac) {
-  let mac_selector = mac;
-  mac_selector = mac_selector.replaceAll(":", "\\:");
+function rebootNSPanel(dom) {
+  let mac_selector = $(dom).closest(".nspanel-box").find(".nspanel_mac_container").text();
   $("#panel_header_" + mac_selector).attr(
     "class",
     "nspanel-status-header has-background-info nspanel-status-header-await"
@@ -115,16 +112,37 @@ function show_dropdown_menu(dom) {
 }
 
 function create_nspanel_from_template(data) {
-  var nspanel = $("#nspanel_index_box_template").html();
-  
+  // Create a new NSPanel box from template. This will replace all data
+  // neccesary for the update function to fill in the rest.
+  var nspanel = $($("#nspanel_index_box_template").html());
+
+  // Setup links
+  nspanel.find("#nspanel_name").attr("href", "/nspanel/" + data.id);
+  nspanel.find(".nspanel-settings-link").attr("href", "/nspanel/" + data.id);
+  nspanel.find(".nspanel-visit-link").attr("href", "http://" + data.ip_address);
+
+  nspanel.find("#panel_header").attr("id", "panel_header_" + data.mac_address);
+  nspanel.find("#nspanel_id").text(data.id);
+  nspanel.find("#nspanel_id").attr("id", "nspanel_id_" + data.mac_address);
+  nspanel.find("#nspanel_mac_container").text(data.mac_address);
+  nspanel.find("#nspanel_mac_container").attr("id", "nspanel_mac_container_" + data.mac_address);
+  nspanel.find("#panel_header_text").attr("id", "panel_header_text_" + data.mac_address);
+  nspanel.find("#wifi_signal_strength").attr("id", "wifi_signal_strength_" + data.mac_address);
+  nspanel.find("#wifi_signal_strength_text").attr("id", "wifi_signal_strength_text_" + data.mac_address);
+  nspanel.find("#temperature").attr("id", "temperature_" + data.mac_address);
+  nspanel.find("#heap_used").attr("id", "heap_used_" + data.mac_address);
+  nspanel.find("#nspanel_warnings").attr("id", "nspanel_warnings_" + data.mac_address);
+  nspanel.find("#nspanel_name").html(data.name);
+  nspanel.find("#nspanel_name").attr("id", "nspanel_name_" + data.mac_address);
+
+  $("#nspanels_container").append(nspanel);
+  update_nspanel_status(data);
 }
 
 function update_nspanel_status(data) {
   if ("mac_address" in data) {
-    let mac_selector = data.mac_address;
-    mac_selector = mac_selector.replaceAll(":", "\\:");
     
-    if($("panel_header_#" + mac_selector).length == 0) {
+    if($("#panel_header_" + data.mac_address).length == 0) {
       create_nspanel_from_template(data);
       return;
     }
@@ -132,17 +150,17 @@ function update_nspanel_status(data) {
     if ("state" in data) {
       var new_html = "";
       if (data.state == "online") {
-        if ($("#panel_header_" + mac_selector).length == 0) {
+        if ($("#panel_header_" + data.mac_address).length == 0) {
           // We got an online message from a newly registed panel. Updated page in about 1 second.
           setTimeout(() => {
             location.reload();
           }, 1000);
         }
         if (
-          $("#panel_header_" + mac_selector).hasClass(
+          $("#panel_header_" + data.mac_address).hasClass(
             "has-background-danger"
           ) ||
-          $("#panel_header_" + mac_selector).hasClass(
+          $("#panel_header_" + data.mac_address).hasClass(
             "has-background-success-dark"
           )
         ) {
@@ -150,19 +168,19 @@ function update_nspanel_status(data) {
           updateNSPanelsWarnings();
         }
 
-        $("#panel_header_" + mac_selector).attr(
+        $("#panel_header_" + data.mac_address).attr(
           "class",
           "nspanel-status-header has-background-success"
         );
-        $("#panel_header_text_" + mac_selector).text("");
-        $("#panel_header_" + mac_selector).css("width", "100%");
+        $("#panel_header_text_" + data.mac_address).text("");
+        $("#panel_header_" + data.mac_address).css("width", "100%");
       } else if (data.state == "offline") {
-        $("#panel_header_" + mac_selector).attr(
+        $("#panel_header_" + data.mac_address).attr(
           "class",
           "nspanel-status-header has-background-danger"
         );
-        $("#panel_header_text_" + mac_selector).text("Offline");
-        $("#panel_header_" + mac_selector).css("width", "100%");
+        $("#panel_header_text_" + data.mac_address).text("Offline");
+        $("#panel_header_" + data.mac_address).css("width", "100%");
       } else {
         // Update panel tag to show update progress if any
         update_text = "";
@@ -180,19 +198,19 @@ function update_nspanel_status(data) {
 
         if (update_progress == 100) {
           update_text = "Rebooting";
-          $("#panel_header_" + mac_selector).attr(
+          $("#panel_header_" + data.mac_address).attr(
             "class",
             "nspanel-status-header has-background-success-dark"
           );
         } else {
-          $("#panel_header_" + mac_selector).attr(
+          $("#panel_header_" + data.mac_address).attr(
             "class",
             "nspanel-status-header has-background-info"
           );
         }
 
-        $("#panel_header_" + mac_selector).css("width", update_progress + "%");
-        $("#panel_header_text_" + mac_selector).text(
+        $("#panel_header_" + data.mac_address).css("width", update_progress + "%");
+        $("#panel_header_text_" + data.mac_address).text(
           update_text + ", " + update_progress + "%"
         );
       }
@@ -210,19 +228,19 @@ function update_nspanel_status(data) {
       } else {
         new_rssi_classes = "mdi mdi-wifi-strength-4";
       }
-      $("#wifi_signal_strength_text_" + mac_selector).html(data.rssi + " dBm");
-      $("#wifi_signal_strength_" + mac_selector).attr(
+      $("#wifi_signal_strength_text_" + data.mac_address).html(data.rssi + " dBm");
+      $("#wifi_signal_strength_" + data.mac_address).attr(
         "class",
         new_rssi_classes
       );
-      $("#wifi_signal_strength_" + mac_selector).attr(
+      $("#wifi_signal_strength_" + data.mac_address).attr(
         "title",
         data.rssi + " dBm"
       );
     }
 
     if ("heap_used_pct" in data) {
-      $("#heap_used_" + mac_selector)
+      $("#heap_used_" + data.mac_address)
         .text(data.heap_used_pct + "%")
         .text()
         .slice(-2);
@@ -230,7 +248,7 @@ function update_nspanel_status(data) {
 
     if ("temperature" in data) {
       var temperature_unit = $("#temperature_unit").text();
-      $("#temperature_" + mac_selector).html(
+      $("#temperature_" + data.mac_address).html(
         Math.round(data.temperature * 100) / 100 + " " + temperature_unit
       );
     }
@@ -251,6 +269,7 @@ function update_nspanel_status(data) {
 function add_nspanel(data) {}
 
 $(document).ready(function () {
+
   ws.register_message_handler((message) => {
     if ("type" in message) {
       if (message.type == "status") {
@@ -328,6 +347,7 @@ $(document).ready(function () {
       );
     }
   });
+  console.log("Starting connect to WebSocket.");
   ws.connect();
 
   $("#firmware_upload_file_input").change(function () {
@@ -345,7 +365,9 @@ $(document).ready(function () {
     $("#tft_upload_file_name").html(fileName);
   });
 
-  $(".dropdown").click(show_dropdown_menu);
+  $(window).click(function () {
+    $(".dropdown").removeClass("is-active");
+  });
 
   updateNSPanelsWarnings();
 });

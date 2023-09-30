@@ -89,8 +89,7 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
       log_data["mac"] = message_parts[0];
       log_data["level"] = message_parts[1];
       log_data["message"] = message_parts[2];
-      // WebsocketServer::broadcast_json(log_data);
-      WebsocketServer::render_template_with_args("nspanel_status_header.html", log_data);
+      WebsocketServer::broadcast_json(log_data);
 
       // Save log message in backtrace for when (if) the log interface requests it.
       NSPanelLogMessage message;
@@ -123,8 +122,9 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
 
       // Send status over to web interface:
       nlohmann::json status_reps;
-      status_reps["nspanel"] = this->get_websocket_json_representation();
-      WebsocketServer::render_template_with_args("nspanel_index_box.html", status_reps);
+      status_reps["type"] = "status";
+      status_reps["payload"] = this->get_websocket_json_representation();
+      WebsocketServer::broadcast_json(status_reps);
       return true;
     }
   } else if (topic.compare(this->_mqtt_status_report_topic) == 0) {
@@ -157,9 +157,10 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
       }
 
       // Send status over to web interface:
-      nlohmann::json args;
-      args["nspanel"] = this->get_websocket_json_representation();
-      WebsocketServer::render_template_with_args("nspanel_index_box.html", args);
+      nlohmann::json status_reps;
+      status_reps["type"] = "status";
+      status_reps["payload"] = this->get_websocket_json_representation();
+      WebsocketServer::broadcast_json(status_reps);
       return true;
     }
     return true;
@@ -218,9 +219,6 @@ void NSPanel::reboot() {
   this->send_command(cmd);
 
   this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
-  nlohmann::json args;
-  args["nspanel"] = this->get_websocket_json_representation();
-  WebsocketServer::render_template_with_args("nspanel_index_box.html", args);
 }
 
 void NSPanel::firmware_update() {
@@ -230,9 +228,6 @@ void NSPanel::firmware_update() {
   this->send_command(cmd);
 
   this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
-  nlohmann::json args;
-  args["nspanel"] = this->get_websocket_json_representation();
-  WebsocketServer::render_template_with_args("nspanel_index_box.html", args);
 }
 
 void NSPanel::tft_update() {
@@ -242,9 +237,6 @@ void NSPanel::tft_update() {
   this->send_command(cmd);
 
   this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
-  nlohmann::json args;
-  args["nspanel"] = this->get_websocket_json_representation();
-  WebsocketServer::render_template_with_args("nspanel_index_box.html", args);
 }
 
 void NSPanel::send_command(nlohmann::json &command) {
