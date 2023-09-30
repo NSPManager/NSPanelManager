@@ -355,9 +355,10 @@ def get_nspanel_config(request):
             base["scenes"][scene.id] = {}
             base["scenes"][scene.id]["name"] = scene.friendly_name
         return JsonResponse(base)
-    except:
-        print("Tried to get NSPanel config for panel that was not registered.")
-        return HttpResponse("", status=500)
+    except Exception as e:
+        print("Error while getting config for NSPanel.")
+        print(e)
+        return HttpResponse(e, status=500)
 
 
 def get_room_config(request, room_id: int):
