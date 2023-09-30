@@ -671,7 +671,7 @@ bool NSPanel::_updateTFTOTA() {
   }
 
   // Wait for panel to finish whatever it is doing.
-  vTaskDelay(5000 / portTICK_PERIOD_MS);
+  vTaskDelay(2000 / portTICK_PERIOD_MS);
 
   if (baud_diff >= 10) {
     std::string uploadBaudRateString = "baud=";
@@ -680,10 +680,14 @@ bool NSPanel::_updateTFTOTA() {
     NSPanel::instance->_sendCommandEndSequence();
 
     std::string read_data = "";
-    NSPanel::instance->_readDataToString(&read_data, 10000, false);
-    if (read_data.empty()) {
-      LOG_ERROR("Baud rate switch failed. Will continue anyways.");
+    NSPanel::instance->_readDataToString(&read_data, 5000, false);
+    if (!read_data.empty()) {
+      LOG_ERROR("Baud rate switch failed. Will restart NSPanel and continue anyways.");
       vTaskDelay(1000 / portTICK_PERIOD_MS);
+      digitalWrite(4, HIGH); // Turn off power to the display
+      vTaskDelay(1000 / portTICK_PERIOD_MS);
+      digitalWrite(4, LOW); // Turn on power to the display
+      vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 
     LOG_INFO("Baud rate switching Serial2 from ", Serial2.baudRate(), " to ", NSPMConfig::instance->tft_upload_baud);
@@ -702,7 +706,6 @@ bool NSPanel::_updateTFTOTA() {
     commandString = "whmi-wris ";
     commandString.append(std::to_string(file_size));
     commandString.append(",");
-    // commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(",1");
   } else {
@@ -710,7 +713,6 @@ bool NSPanel::_updateTFTOTA() {
     commandString = "whmi-wri ";
     commandString.append(std::to_string(file_size));
     commandString.append(",1");
-    // commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(",1");
   }
