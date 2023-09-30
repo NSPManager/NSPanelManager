@@ -268,50 +268,11 @@ NSPanel *EntityManager::get_nspanel_by_mac(std::string mac) {
 bool EntityManager::websocket_callback(std::string &message, std::string *response_buffer) {
   nlohmann::json data = nlohmann::json::parse(message);
 
-  if (data.contains("HEADERS")) {
-    nlohmann::json headers = data["HEADERS"];
-    std::string target = headers["HX-Target"];
-    if (target.compare("reboot_nspanel") == 0) {
-      uint16_t nspanel_id = atoi(std::string(data["id"]).c_str());
-      NSPanel *nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
-      if (nspanel != nullptr) {
-        nspanel->reboot();
-      } else {
-        SPDLOG_ERROR("Received command to reboot NSPanel with ID {} but no panel with that ID is loaded.");
-      }
-
-      return true;
-    } else if (target.compare("firmware_update") == 0) {
-      uint16_t nspanel_id = atoi(std::string(data["id"]).c_str());
-      NSPanel *nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
-      if (nspanel != nullptr) {
-        nspanel->firmware_update();
-      } else {
-        SPDLOG_ERROR("Received command to reboot NSPanel with ID {} but no panel with that ID is loaded.");
-      }
-
-      return true;
-    } else if (target.compare("tft_update") == 0) {
-      uint16_t nspanel_id = atoi(std::string(data["id"]).c_str());
-      NSPanel *nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
-      if (nspanel != nullptr) {
-        nspanel->tft_update();
-      } else {
-        SPDLOG_ERROR("Received command to reboot NSPanel with ID {} but no panel with that ID is loaded.");
-      }
-
-      return true;
-    }
-
-    return false;
-  }
-
-  // TODO: Phase out old custom Javascript handling and convert to using HTMX.
   uint64_t command_id = data["cmd_id"];
   std::string command = data["command"];
 
-  if (command.compare("get_nspanel_status") == 0) {
-    SPDLOG_DEBUG("Processing request for all NSPanels status.");
+  if (command.compare("get_nspanels_status") == 0) {
+    SPDLOG_DEBUG("Processing request for NSPanels status.");
     std::vector<nlohmann::json> panel_responses;
     for (NSPanel *panel : EntityManager::_nspanels) {
       panel_responses.push_back(panel->get_websocket_json_representation());
@@ -320,15 +281,6 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
     response["nspanels"] = panel_responses;
     response["cmd_id"] = command_id;
     (*response_buffer) = response.dump();
-    return true;
-  } else if (command.compare("get_index_nspanels_full") == 0) {
-    std::list<nlohmann::json> nspanels;
-    for (NSPanel *panel : EntityManager::_nspanels) {
-      nspanels.push_back(panel->get_websocket_json_representation());
-    }
-    nlohmann::json data;
-    data["nspanels"] = nspanels;
-    WebsocketServer::render_template_with_args("nspanel_index_view.html", data);
     return true;
   } else if (command.compare("reboot_nspanels") == 0) {
     nlohmann::json args = data["args"];

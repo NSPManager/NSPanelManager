@@ -15,8 +15,6 @@
     <link rel="stylesheet" href="{% static 'loader.css' %}?refresh={% now 'U' %}">
     <link rel="stylesheet" href="{% static 'base.css' %}?refresh={% now 'U' %}">
 
-    <script src="https://unpkg.com/htmx.org@1.9.5"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
     <script src="{% static 'mqttmanager_ws.js' %}?refresh={% now 'U' %}"></script>
     <!-- <script type="module" src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"></script> -->
     {% block head %}

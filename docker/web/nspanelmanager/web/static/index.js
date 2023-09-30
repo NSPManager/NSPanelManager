@@ -114,10 +114,21 @@ function show_dropdown_menu(dom) {
   event.stopPropagation();
 }
 
+function create_nspanel_from_template(data) {
+  var nspanel = $("#nspanel_index_box_template").html();
+  
+}
+
 function update_nspanel_status(data) {
-  if ("mac" in data) {
-    let mac_selector = data.mac;
+  if ("mac_address" in data) {
+    let mac_selector = data.mac_address;
     mac_selector = mac_selector.replaceAll(":", "\\:");
+    
+    if($("panel_header_#" + mac_selector).length == 0) {
+      create_nspanel_from_template(data);
+      return;
+    }
+
     if ("state" in data) {
       var new_html = "";
       if (data.state == "online") {
@@ -240,24 +251,6 @@ function update_nspanel_status(data) {
 function add_nspanel(data) {}
 
 $(document).ready(function () {
-  document.body.addEventListener("htmx:wsOpen", function (evt) {
-    console.log("Connected to websocket!");
-    evt.detail.socketWrapper.send(
-      JSON.stringify({
-        cmd_id: 0,
-        command: "get_index_nspanels_full",
-      }),
-      evt.detail.elt
-    );
-  });
-
-
-  $(window).click(function () {
-    $(".dropdown").removeClass("is-active");
-  });
-
-  return;
-
   ws.register_message_handler((message) => {
     if ("type" in message) {
       if (message.type == "status") {
@@ -321,7 +314,7 @@ $(document).ready(function () {
     // Remove any connection error notification
     $("#failed_to_connect_error").remove();
 
-    ws.send_command("get_nspanel_status", {}, (response) => {
+    ws.send_command("get_nspanels_status", {}, (response) => {
       for (const [id, nspanel] of Object.entries(response.nspanels)) {
         update_nspanel_status(nspanel);
       }
