@@ -173,7 +173,7 @@ $(document).ready(() => {
   ws.register_message_handler((data) => {
     if (data.type == "status" || data.type == "status_report") {
       update_nspanel_status(data.payload);
-    } else if (data.type == "log" && data.mac == mac_address) {
+    } else if (data.type == "log" && data.mac.replaceAll(":", "") == mac_address) {
       push_log_message_to_view(data);
     }
   });

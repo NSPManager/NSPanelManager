@@ -5,8 +5,8 @@ RUN apt-get update \
 
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
-		postgresql-client curl inotify-tools net-tools \
-	&& rm -rf /var/lib/apt/lists/*
+		postgresql-client curl inotify-tools net-tools nginx
+	# && rm -rf /var/lib/apt/lists/*
 
 RUN echo "alias ll='ls -lh --color=auto'" >> /etc/bash.bashrc
 
