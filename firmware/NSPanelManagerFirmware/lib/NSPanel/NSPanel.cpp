@@ -639,31 +639,6 @@ bool NSPanel::_updateTFTOTA() {
   digitalWrite(4, LOW); // Turn on power to the display
   vTaskDelay(5000 / portTICK_PERIOD_MS);
 
-  // Send "connect" string to get data
-  Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN");
-  NSPanel::instance->_sendCommandEndSequence();
-  vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
-  // Clear Serial2 read buffer
-  while (Serial2.available() > 0) {
-    Serial2.read();
-    if (Serial2.available() == 0) {
-      vTaskDelay(250 / portTICK_PERIOD_MS);
-    }
-  }
-
-  LOG_DEBUG("Sending connect to panel");
-  Serial2.print("connect");
-  NSPanel::instance->_sendCommandEndSequence();
-  vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
-
-  std::string comok_string = "";
-  NSPanel::instance->_readDataToString(&comok_string, 5000, false);
-  NSPanel::instance->_clearSerialBuffer();
-  if (comok_string.length() > 3) {
-    comok_string.erase(comok_string.length() - 3);
-  }
-  LOG_DEBUG("Got comok: ", comok_string.c_str());
-
   // Switch to desiered upload buad rate.
   int32_t baud_diff = NSPMConfig::instance->tft_upload_baud - Serial2.baudRate();
   if (baud_diff < 0) {
@@ -697,6 +672,31 @@ bool NSPanel::_updateTFTOTA() {
     Serial2.begin(NSPMConfig::instance->tft_upload_baud, SERIAL_8N1, 17, 16);
   }
 
+  // Send "connect" string to get data
+  Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN");
+  NSPanel::instance->_sendCommandEndSequence();
+  vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
+  // Clear Serial2 read buffer
+  while (Serial2.available() > 0) {
+    Serial2.read();
+    if (Serial2.available() == 0) {
+      vTaskDelay(250 / portTICK_PERIOD_MS);
+    }
+  }
+
+  LOG_DEBUG("Sending connect to panel");
+  Serial2.print("connect");
+  NSPanel::instance->_sendCommandEndSequence();
+  vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
+
+  std::string comok_string = "";
+  NSPanel::instance->_readDataToString(&comok_string, 5000, false);
+  NSPanel::instance->_clearSerialBuffer();
+  if (comok_string.length() > 3) {
+    comok_string.erase(comok_string.length() - 3);
+  }
+  LOG_DEBUG("Got comok: ", comok_string.c_str());
+
   LOG_DEBUG("Will start TFT upload, TFT file size: ", file_size);
   // TODO: Detect if new protocol is not supported, in that case set flag in flash and restart and then continue flash with legacy mode.
   // Send whmi-wri command to initiate upload
@@ -716,6 +716,7 @@ bool NSPanel::_updateTFTOTA() {
     commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(",1");
   }
+  LOG_DEBUG("Sending TFT upload command: ", commandString.c_str());
   Serial2.print(commandString.c_str());
   NSPanel::instance->_sendCommandEndSequence();
 
