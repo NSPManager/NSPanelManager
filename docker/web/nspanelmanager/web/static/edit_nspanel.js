@@ -50,79 +50,79 @@ function push_log_message_to_view(data) {
 }
 
 function update_nspanel_status(data) {
-  if ("mac" in data) {
-    let mac_selector = data.mac;
-    mac_selector = mac_selector.replaceAll(":", "\\:");
-    if ("state" in data) {
-      var new_html = "";
-      if (data.state == "online") {
-        $("#online_offline_tag_" + mac_selector).html("Online");
-        $("#online_offline_tag_" + mac_selector).attr(
-          "class",
-          "tag is-success"
-        );
-      } else if (data.state == "offline") {
-        $("#online_offline_tag_" + mac_selector).html("Offline");
-        $("#online_offline_tag_" + mac_selector).attr("class", "tag is-danger");
-      } else {
-        // Update panel tag to show update progress if any
-        update_text = "";
-        update_progress = 0;
-        if (data.state == "updating_fw") {
-          update_text = "Updating firmware";
-          update_progress = data.progress;
-        } else if (data.state == "updating_fs") {
-          update_text = "Updating LittleFS";
-          update_progress = data.progress;
-        } else if (data.state == "updating_tft") {
-          update_text = "Updating GUI";
-          update_progress = data.progress;
+  if ("mac_address" in data) {
+    if(data.mac_address == mac_address) { // Check that the status data corresponds to the panel currently in view.
+      if ("state" in data) {
+        var new_html = "";
+        if (data.state == "online") {
+          $("#online_offline_tag").html("Online");
+          $("#online_offline_tag").attr(
+            "class",
+            "tag is-success"
+          );
+        } else if (data.state == "offline") {
+          $("#online_offline_tag").html("Offline");
+          $("#online_offline_tag").attr("class", "tag is-danger");
+        } else {
+          // Update panel tag to show update progress if any
+          update_text = "";
+          update_progress = 0;
+          if (data.state == "updating_fw") {
+            update_text = "Updating firmware";
+            update_progress = data.progress;
+          } else if (data.state == "updating_fs") {
+            update_text = "Updating LittleFS";
+            update_progress = data.progress;
+          } else if (data.state == "updating_tft") {
+            update_text = "Updating GUI";
+            update_progress = data.progress;
+          }
+
+          $("#online_offline_tag").html(
+            update_text + ": " + update_progress + "%"
+          );
+          $("#online_offline_tag").attr("class", "tag is-info");
         }
-
-        $("#online_offline_tag_" + mac_selector).html(
-          update_text + ": " + update_progress + "%"
+      }
+      if ("rssi" in data) {
+        var new_rssi_classes = "";
+        if (data.rssi <= -90) {
+          new_rssi_classes = "mdi mdi-wifi-strength-1-alert";
+        } else if (data.rssi <= -80) {
+          new_rssi_classes = "mdi mdi-wifi-strength-1";
+        } else if (data.rssi <= -67) {
+          new_rssi_classes = "mdi mdi-wifi-strength-2";
+        } else if (data.rssi <= -55) {
+          new_rssi_classes = "mdi mdi-wifi-strength-3";
+        } else {
+          new_rssi_classes = "mdi mdi-wifi-strength-4";
+        }
+        $("#wifi_signal_strength").html(
+          '<span class="' +
+            new_rssi_classes +
+            '" id="wifi_signal_strength_' +
+            data.mac +
+            '" title="' +
+            data.rssi +
+            ' dBm"></span>'
         );
-        $("#online_offline_tag_" + mac_selector).attr("class", "tag is-info");
       }
-    }
-    if ("rssi" in data) {
-      var new_rssi_classes = "";
-      if (data.rssi <= -90) {
-        new_rssi_classes = "mdi mdi-wifi-strength-1-alert";
-      } else if (data.rssi <= -80) {
-        new_rssi_classes = "mdi mdi-wifi-strength-1";
-      } else if (data.rssi <= -67) {
-        new_rssi_classes = "mdi mdi-wifi-strength-2";
-      } else if (data.rssi <= -55) {
-        new_rssi_classes = "mdi mdi-wifi-strength-3";
-      } else {
-        new_rssi_classes = "mdi mdi-wifi-strength-4";
+
+      if ("heap_used_pct" in data) {
+        $("#heap_used")
+          .text(data.heap_used_pct + "%")
+          .text()
+          .slice(-2);
       }
-      $("#wifi_signal_strength_" + mac_selector).html(
-        '<span class="' +
-          new_rssi_classes +
-          '" id="wifi_signal_strength_' +
-          data.mac +
-          '" title="' +
-          data.rssi +
-          ' dBm"></span>'
-      );
-    }
 
-    if ("heap_used_pct" in data) {
-      $("#heap_used_" + mac_selector)
-        .text(data.heap_used_pct + "%")
-        .text()
-        .slice(-2);
-    }
-
-    if ("temperature" in data) {
-      var temperature_unit = $("#temperature_" + mac_selector)
-        .text()
-        .slice(-2);
-      $("#temperature_" + mac_selector).html(
-        Math.round(data.temperature * 100) / 100 + " " + temperature_unit
-      );
+      if ("temperature" in data) {
+        var temperature_unit = $("#temperature")
+          .text()
+          .slice(-2);
+        $("#temperature").html(
+          Math.round(data.temperature * 100) / 100 + " " + temperature_unit
+        );
+      }
     }
   }
 }
@@ -168,7 +168,7 @@ function update_shown_elements() {
 }
 
 $(document).ready(() => {
-  mac_address = $("#nspanel_mac").text();
+  mac_address = $("#nspanel_mac").text().replaceAll(":", ""); // Convert from Django mac format to MQTTManager mac format.
   nspanel_id = $("#nspanel_id").text();
   ws.register_message_handler((data) => {
     if (data.type == "status" || data.type == "status_report") {
@@ -183,10 +183,8 @@ $(document).ready(() => {
     // Remove any connection error notification
     $("#failed_to_connect_error").remove();
 
-    ws.send_command("get_nspanel_status", {}, (response) => {
-      for (const [id, nspanel] of Object.entries(response.nspanels)) {
-        update_nspanel_status(nspanel);
-      }
+    ws.send_command("get_nspanels_status", { nspanel_id: nspanel_id }, (response) => {
+      update_nspanel_status(response.nspanels[0]);
     });
 
     ws.send_command(

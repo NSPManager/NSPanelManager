@@ -267,6 +267,7 @@ NSPanel *EntityManager::get_nspanel_by_mac(std::string mac) {
 
 bool EntityManager::websocket_callback(std::string &message, std::string *response_buffer) {
   nlohmann::json data = nlohmann::json::parse(message);
+  nlohmann::json args = data["args"];
 
   uint64_t command_id = data["cmd_id"];
   std::string command = data["command"];
@@ -275,7 +276,15 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
     SPDLOG_DEBUG("Processing request for NSPanels status.");
     std::vector<nlohmann::json> panel_responses;
     for (NSPanel *panel : EntityManager::_nspanels) {
-      panel_responses.push_back(panel->get_websocket_json_representation());
+      if (args.contains("nspanel_id")) {
+        if (panel->get_id() == atoi(std::string(args["nspanel_id"]).c_str())) {
+          panel_responses.push_back(panel->get_websocket_json_representation());
+          break;
+        }
+      } else {
+        // In case no ID was specified, send status for all panels.
+        panel_responses.push_back(panel->get_websocket_json_representation());
+      }
     }
     nlohmann::json response;
     response["nspanels"] = panel_responses;

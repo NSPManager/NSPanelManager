@@ -20,6 +20,8 @@ environment = environ.Env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Configure charset to match TFT on NSPanel:
+#DEFAULT_CHARSET = "iso-8859-1"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
