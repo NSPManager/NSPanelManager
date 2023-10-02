@@ -51,8 +51,16 @@ class MQTTManager_WS {
   }
 
   connect() {
-    console.log("Connecting....");
-    this.websocket = new WebSocket("ws://" + location.hostname + ":8002");
+    var websocket_address = "";
+    if(location.protocol === "https:") {
+      websocket_address = "wss://";
+    } else {
+      websocket_address = "ws://";
+    }
+    
+    websocket_address += location.hostname + ":" + location.port + "/websocket";
+    console.log("Connecting to " + websocket_address);
+    this.websocket = new WebSocket(websocket_address);
 
     this.websocket.onopen = (event) => {
       if (this.on_connect_function != null) {

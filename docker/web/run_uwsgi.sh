@@ -4,7 +4,7 @@ echo "Running migrations..."
 /usr/local/bin/python nspanelmanager/manage.py migrate
 
 echo "Starting Nginx"
-/etc/init.d/nginx start
+/etc/init.d/nginx restart
 
 echo "Starting NSPanelManager web interface server"
 uwsgi --chdir=/usr/src/app/nspanelmanager/ \

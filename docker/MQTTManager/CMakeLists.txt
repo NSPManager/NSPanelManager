@@ -13,7 +13,7 @@ endif()
 # set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY /usr/src/app/lib)
 # set(CMAKE_LIBRARY_OUTPUT_DIRECTORY /usr/src/app/lib)
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY /usr/src/app/bin)
-set(CMAKE_INCLUDE_SRC_DIRECTORY /usr/src/app/include)
+set(CMAKE_INCLUDE_SRC_DIRECTORY /MQTTManager/include)
 add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 
 find_package(PahoMqttCpp REQUIRED)

@@ -15,13 +15,13 @@ firmware/NSPanelManagerFirmware/.cache
 firmware/NSPanelManagerFirmware/.ccls
 firmware/NSPanelManagerFirmware/.ccls-cache
 
-MQTTManager-CPP/conan_cache/
-MQTTManager-CPP/build/
-MQTTManager-CPP/.cache/
-MQTTManager-CPP/CMakeFiles/
-MQTTManager-CPP/lib/
-MQTTManager-CPP/env.sh
-MQTTManager-CPP/compile_commands.json
+docker/MQTTManager/conan_cache/
+docker/MQTTManager/build/
+docker/MQTTManager/.cache/
+docker/MQTTManager/CMakeFiles/
+docker/MQTTManager/lib/
+docker/MQTTManager/env.sh
+docker/MQTTManager/compile_commands.json
 
 # User/computer specific files that is user depandant
 firmware/NSPanelManagerFirmware/src/CMakeLists.txt

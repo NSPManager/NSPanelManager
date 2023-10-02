@@ -4,6 +4,6 @@
         "conan": {}
     },
     "include": [
-        "/usr/src/app/build/CMakePresets.json"
+        "/MQTTManager/build/CMakePresets.json"
     ]
 }
