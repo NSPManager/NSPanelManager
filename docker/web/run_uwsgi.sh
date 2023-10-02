@@ -1,5 +1,12 @@
 #!/bin/bash
 
+echo "Running migrations..."
+/usr/local/bin/python nspanelmanager/manage.py migrate
+
+echo "Starting Nginx"
+/etc/init.d/nginx start
+
+echo "Starting NSPanelManager web interface server"
 uwsgi --chdir=/usr/src/app/nspanelmanager/ \
 	--module=nspanelmanager.wsgi:application \
 	--env DJANGO_SETTINGS_MODULE=nspanelmanager.settings \
