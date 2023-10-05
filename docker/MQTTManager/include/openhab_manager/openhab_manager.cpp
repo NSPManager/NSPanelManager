@@ -126,7 +126,7 @@ void OpenhabManager::detach_event_observer(OpenhabEventObserver *observer) {
 }
 
 void OpenhabManager::_process_openhab_event(nlohmann::json &event_data) {
-  SPDLOG_DEBUG("Processing Openhab event: {}", event_data.dump());
+  SPDLOG_TRACE("Processing Openhab event: {}", event_data.dump());
   for (OpenhabEventObserver *observer : OpenhabManager::_openhab_event_observers) {
     if (observer->openhab_event_callback(event_data)) {
       return;

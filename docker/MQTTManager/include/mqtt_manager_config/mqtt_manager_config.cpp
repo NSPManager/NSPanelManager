@@ -89,7 +89,7 @@ void MqttManagerConfig::load() {
       /* Perform the request, res will get the return code */
       res = curl_easy_perform(curl);
       /* Check for errors */
-      if (res == CURLE_OK) {
+      if (res == CURLE_OK && !response_data.empty()) {
         SPDLOG_DEBUG("Got config data. Processing config.");
         nlohmann::json data = nlohmann::json::parse(response_data);
         MqttManagerConfig::populate_settings_from_config(data);
@@ -126,15 +126,19 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     SPDLOG_ERROR("Unknown turn on behavior for lights: {}. Will use COLOR_TEMP.", turn_on_behavior);
   }
 
+  SPDLOG_DEBUG("Loading lights...");
   for (nlohmann::json light_config : data["lights"]) {
     MqttManagerConfig::light_configs.push_back(light_config);
   }
+  SPDLOG_DEBUG("Loading NSPanels...");
   for (nlohmann::json nspanel_config : data["nspanels"]) {
     MqttManagerConfig::nspanel_configs.push_back(nspanel_config);
   }
+  SPDLOG_DEBUG("Loading Scenes...");
   for (nlohmann::json scene_config : data["scenes"]) {
     MqttManagerConfig::scenes_configs.push_back(scene_config);
   }
+  SPDLOG_DEBUG("Loading Rooms...");
   for (nlohmann::json room_config : data["rooms"]) {
     MqttManagerConfig::room_configs.push_back(room_config);
   }

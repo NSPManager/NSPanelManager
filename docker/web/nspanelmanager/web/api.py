@@ -18,25 +18,6 @@ from .models import NSPanel, Room, Light, LightState, Scene
 from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default
 
 
-def restart_mqtt_manager():
-    for proc in psutil.process_iter():
-        if "./mqtt_manager.py" in proc.cmdline():
-            logging.info("Killing existing mqtt_manager")
-            proc.kill()
-    # Restart the process
-    logging.info("Restarting MQTT Manager")
-    mqttmanager_env = os.environ.copy()
-    mqttmanager_env["MQTT_SERVER"] = get_setting_with_default("mqtt_server", "")
-    mqttmanager_env["MQTT_PORT"] = get_setting_with_default("mqtt_port", "1883")
-    mqttmanager_env["MQTT_USERNAME"] = get_setting_with_default("mqtt_username", "")
-    mqttmanager_env["MQTT_PASSWORD"] = get_setting_with_default("mqtt_password", "")
-    mqttmanager_env["HOME_ASSISTANT_ADDRESS"] = get_setting_with_default("home_assistant_address", "")
-    mqttmanager_env["HOME_ASSISTANT_TOKEN"] = get_setting_with_default("home_assistant_token", "")
-    mqttmanager_env["OPENHAB_ADDRESS"] = get_setting_with_default("openhab_address", "")
-    mqttmanager_env["OPENHAB_TOKEN"] = get_setting_with_default("openhab_token", "")
-    subprocess.Popen(["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/", env=mqttmanager_env)
-
-
 def get_file_md5sum(filename):
     fs = FileSystemStorage()
     if fs.exists(filename):
@@ -96,14 +77,6 @@ def get_mqtt_manager_config(request):
         }
         return_json["nspanels"][panel.id] = panel_config
 
-
-    return_json["rooms"] = []
-    for room in Room.objects.all():
-        return_json["rooms"].append({
-            "id": room.id,
-            "name": room.friendly_name
-        })
-
     return_json["scenes"] = []
     for scene in Scene.objects.all():
         scene_info = {
@@ -125,7 +98,6 @@ def get_mqtt_manager_config(request):
                 "saturation": state.saturation
             })
         return_json["scenes"].append(scene_info)
-
     return JsonResponse(return_json)
 
 
@@ -254,9 +226,7 @@ def get_client_ip(request):
 def register_nspanel(request):
     """Update the already existing NSPanel OR create a new one"""
     data = json.loads(request.body)
-    if "mac_address" in data:
-        data["mac_origin"] = data["mac_address"]
-    new_panel = NSPanel.objects.filter(mac_address=data['mac_origin']).first()
+    new_panel = NSPanel.objects.filter(mac_address=data['mac_address']).first()
     panel_already_exists = True
 
     if not new_panel:
@@ -264,7 +234,7 @@ def register_nspanel(request):
         new_panel.friendly_name = data['friendly_name']
         panel_already_exists = False
 
-    new_panel.mac_address = data['mac_origin']
+    new_panel.mac_address = data['mac_address']
     new_panel.version = data["version"]
     new_panel.ip_address = get_client_ip(request)
     fs = FileSystemStorage()
@@ -291,14 +261,14 @@ def register_nspanel(request):
 
     # Save the update/Create new panel
     new_panel.save()
-    if not panel_already_exists:
-        restart_mqtt_manager()
+    # if not panel_already_exists:
+    # restart_mqtt_manager()
     return HttpResponse('OK', status=200)
 
 
 def delete_panel(request, panel_id: int):
     NSPanel.objects.get(id=panel_id).delete()
-    restart_mqtt_manager()
+    # restart_mqtt_manager()
     return redirect('/')
 
 
@@ -336,7 +306,6 @@ def get_nspanel_config(request):
         base["button2_mode"] = nspanel.button2_mode
         base["button2_mqtt_topic"] = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_topic", "")
         base["button2_mqtt_payload"] = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_payload", "")
-        base["is_us_panel"] = get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False")
 
         if nspanel.button1_detached_mode_light:
             base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
@@ -355,10 +324,9 @@ def get_nspanel_config(request):
             base["scenes"][scene.id] = {}
             base["scenes"][scene.id]["name"] = scene.friendly_name
         return JsonResponse(base)
-    except Exception as e:
-        print("Error while getting config for NSPanel.")
-        print(e)
-        return HttpResponse(e, status=500)
+    except:
+        print("Tried to get NSPanel config for panel that was not registered.")
+        return HttpResponse("", status=500)
 
 
 def get_room_config(request, room_id: int):
