@@ -191,8 +191,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
           if (curl) {
             std::string response_data;
             SPDLOG_INFO("Sending registration data to Django for database management.");
-            // TODO: Update address
-            curl_easy_setopt(curl, CURLOPT_URL, "http://10.0.0.10:8000/api/register_nspanel");
+            curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:8000/api/register_nspanel");
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
 

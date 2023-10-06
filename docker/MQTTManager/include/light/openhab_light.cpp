@@ -4,7 +4,10 @@
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "openhab_manager/openhab_manager.hpp"
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
+#include <curl/curl.h>
+#include <curl/easy.h>
 #include <fmt/core.h>
 #include <fmt/format.h>
 #include <nlohmann/json_fwd.hpp>
@@ -49,6 +52,8 @@ OpenhabLight::OpenhabLight(nlohmann::json &init_data) : Light(init_data) {
   if (this->_can_rgb) {
     this->_openhab_item_rgb = init_data["openhab_item_rgb"];
   }
+
+  this->_update_item_values_from_openhab_rest();
 
   OpenhabManager::attach_event_observer(this);
 
@@ -226,4 +231,121 @@ bool OpenhabLight::openhab_event_callback(nlohmann::json &data) {
   } else {
     return false;
   }
+}
+
+void OpenhabLight::_update_item_values_from_openhab_rest() {
+  std::string brightness;
+  std::string color_temperature;
+  std::string rgb;
+
+  brightness = this->_openhab_rest_get(this->_openhab_on_off_item);
+  if (this->_can_color_temperature) {
+    color_temperature = this->_openhab_rest_get(this->_openhab_item_color_temperature);
+  }
+  if (this->_can_rgb) {
+    rgb = this->_openhab_rest_get(this->_openhab_item_rgb);
+  }
+
+  if (!brightness.empty()) {
+    nlohmann::json data = nlohmann::json::parse(brightness);
+    this->_current_brightness = atoi(std::string(data["state"]).c_str());
+    this->_current_state = this->_current_brightness > 0;
+
+    SPDLOG_DEBUG("Got state {} and brightness {} from OpenHAB.", this->_current_state ? "ON" : "OFF", this->_current_brightness);
+  } else {
+    SPDLOG_ERROR("Failed to get current brightness of item {}. Will assume 0.", this->_openhab_on_off_item);
+    this->_current_state = false;
+    this->_current_brightness = 0;
+  }
+
+  if (this->_can_color_temperature && !color_temperature.empty()) {
+    nlohmann::json data = nlohmann::json::parse(color_temperature);
+    this->_current_color_temperature = atoi(std::string(data["state"]).c_str());
+    SPDLOG_DEBUG("Got color temperature {} from OpenHAB.", this->_current_color_temperature);
+  } else if (this->_can_color_temperature && color_temperature.empty()) {
+    SPDLOG_ERROR("Failed to get current color temperature of item {}. Will assume 0.", this->_openhab_item_color_temperature);
+    this->_current_color_temperature = 0;
+  }
+
+  if (this->_can_rgb && !rgb.empty()) {
+    nlohmann::json data = nlohmann::json::parse(color_temperature);
+    std::string rgb_data = data["state"];
+
+    // Split log message by colon to extract Hue, Saturation and Brightness
+    std::vector<std::string> rgb_data_parts;
+    size_t pos = 0;
+    uint8_t count = 0;
+    std::string token;
+    while ((pos = rgb_data.find(",")) != std::string::npos && count < 2) {
+      token = rgb_data.substr(0, pos);
+      rgb_data_parts.push_back(token);
+      rgb_data.erase(0, pos + 1); // Remove current part from beginning of topic string (including delimiter)
+      count++;
+    }
+    rgb_data_parts.push_back(rgb_data);
+
+    this->_current_hue = atoi(rgb_data_parts[0].c_str());
+    this->_current_saturation = atoi(rgb_data_parts[1].c_str());
+    SPDLOG_DEBUG("Got hue {} from OpenHAB.", this->_current_hue);
+    SPDLOG_DEBUG("Got saturation {} from OpenHAB.", this->_current_color_temperature);
+  } else if (this->_can_rgb && rgb.empty()) {
+    SPDLOG_ERROR("Failed to get current HSB of item {}. Will assume 0.", this->_openhab_item_rgb);
+    this->_current_hue = 0;
+    this->_current_saturation = 0;
+  }
+
+  this->_requested_state = this->_current_state;
+  this->_requested_brightness = this->_current_brightness;
+  this->_requested_saturation = this->_current_saturation;
+  this->_requested_color_temperature = this->_current_color_temperature;
+  this->_requested_hue = this->_current_hue;
+}
+
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+  ((std::string *)userp)->append((char *)contents, size * nmemb);
+  return size * nmemb;
+}
+
+std::string OpenhabLight::_openhab_rest_get(std::string &item) {
+  CURL *curl = curl_easy_init();
+  CURLcode res;
+
+  std::string response_data;
+  std::string request_url = MqttManagerConfig::openhab_address;
+  request_url.append("/rest/items/");
+  request_url.append(item);
+  SPDLOG_TRACE("Requesting openhab item state from: {}", request_url);
+
+  std::string bearer_token = "Bearer ";
+  bearer_token.append(MqttManagerConfig::openhab_access_token);
+
+  struct curl_slist *headers = NULL;
+  headers = curl_slist_append(headers, bearer_token.c_str());
+  if (headers == NULL) {
+    SPDLOG_ERROR("Failed to set bearer token header for OpenHAB light rest request.");
+    return response_data;
+  }
+  headers = curl_slist_append(headers, "Content-type: application/json");
+  if (headers == NULL) {
+    SPDLOG_ERROR("Failed to set content-type header for OpenHAB light rest request.");
+    return response_data;
+  }
+
+  curl_easy_setopt(curl, CURLOPT_URL, request_url.c_str());
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+  /* Perform the request, res will get the return code */
+  res = curl_easy_perform(curl);
+  /* Check for errors */
+  if (res != CURLE_OK) {
+    SPDLOG_ERROR("Failed to get data from OpenHAB api at '{}'. Got response: {}", request_url, response_data);
+  }
+
+  /* always cleanup */
+  curl_easy_cleanup(curl);
+  curl_slist_free_all(headers);
+  return response_data;
 }

@@ -7,8 +7,8 @@
 #include <spdlog/spdlog.h>
 
 NSPMScene::NSPMScene(nlohmann::json &data) {
-  this->_id = data["id"];
-  this->_name = data["name"];
+  this->_id = data["scene_id"];
+  this->_name = data["scene_name"];
   if (!data["room_id"].is_null()) {
     this->_is_global_scene = false;
     this->_room_id = data["room_id"];
