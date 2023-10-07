@@ -4,10 +4,12 @@ import logging
 import psutil
 import subprocess
 import os
+import time
 
 
 def start_mqtt_manager():
     from .settings_helper import get_setting_with_default
+    time.sleep(2) # Wait 2 seconds for MQTT Manager to start if it's just about to start from other thread.
     for proc in psutil.process_iter():
         if "nspm_mqttmanager" in proc.cmdline():
             return None # MQTT Manager already running
