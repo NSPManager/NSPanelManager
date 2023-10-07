@@ -42,27 +42,21 @@ float readNTCTemperature(bool farenheit) {
   return -254;
 }
 
-void registerToNSPanelManager() {
-  while (WiFi.isConnected() && !InterfaceManager::hasRegisteredToManager) {
-    if (MqttManager::connected()) {
-      LOG_DEBUG("Sending MQTTManager register request.");
-      StaticJsonDocument<512> doc;
-      doc["command"] = "register_request";
-      doc["mac_origin"] = WiFi.macAddress().c_str();
-      doc["friendly_name"] = NSPMConfig::instance->wifi_hostname.c_str();
-      doc["version"] = NSPanelManagerFirmwareVersion;
-      doc["md5_firmware"] = NSPMConfig::instance->md5_firmware;
-      doc["md5_data_file"] = NSPMConfig::instance->md5_data_file;
-      doc["md5_tft_file"] = NSPMConfig::instance->md5_tft_file;
+void sendMqttManagerRegistrationRequest() {
+  if (MqttManager::connected()) {
+    LOG_DEBUG("Sending MQTTManager register request.");
+    StaticJsonDocument<512> doc;
+    doc["command"] = "register_request";
+    doc["mac_origin"] = WiFi.macAddress().c_str();
+    doc["friendly_name"] = NSPMConfig::instance->wifi_hostname.c_str();
+    doc["version"] = NSPanelManagerFirmwareVersion;
+    doc["md5_firmware"] = NSPMConfig::instance->md5_firmware;
+    doc["md5_data_file"] = NSPMConfig::instance->md5_data_file;
+    doc["md5_tft_file"] = NSPMConfig::instance->md5_tft_file;
 
-      char buffer[512];
-      serializeJson(doc, buffer);
-      MqttManager::publish("nspanel/mqttmanager/command", buffer);
-    } else {
-      LOG_ERROR("MQTT Not connected. Will retry to register in 5 seconds.");
-    }
-
-    vTaskDelay(5000 / portTICK_PERIOD_MS);
+    char buffer[512];
+    serializeJson(doc, buffer);
+    MqttManager::publish("nspanel/mqttmanager/command", buffer);
   }
 }
 
@@ -140,7 +134,6 @@ void taskManageWifiAndMqtt(void *param) {
             LOG_INFO("Gateway:    ", WiFi.gatewayIP().toString());
             // Start web server
             webMan.init(NSPanelManagerFirmwareVersion);
-            registerToNSPanelManager();
           } else {
             LOG_ERROR("Failed to connect to WiFi. Will try again in 5 seconds");
             Serial.println("Failed to connect to WiFi. Will try again in 5 seconds");
@@ -152,6 +145,9 @@ void taskManageWifiAndMqtt(void *param) {
         startAndManageWiFiAccessPoint();
       }
       if (WiFi.isConnected() && MqttManager::connected()) {
+        if (!InterfaceManager::hasRegisteredToManager) {
+          sendMqttManagerRegistrationRequest();
+        }
         bool force_send_mqtt_update = false;
         DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
         if (NSPanel::instance->getUpdateState()) {

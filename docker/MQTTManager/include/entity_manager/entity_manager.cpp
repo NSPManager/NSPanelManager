@@ -206,7 +206,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
               nlohmann::json response;
               response["command"] = "register_accept";
               response["address"] = MqttManagerConfig::manager_address.c_str();
-              response["port"] = 8000;
+              response["port"] = MqttManagerConfig::manager_port;
               MQTT_Manager::publish(nspanel_command_topic, response.dump());
             } else {
               SPDLOG_ERROR("curl_easy_perform() when registring panel failed, got code: {}.", curl_easy_strerror(res));

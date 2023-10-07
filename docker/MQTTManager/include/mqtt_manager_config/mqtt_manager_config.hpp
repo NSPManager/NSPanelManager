@@ -18,6 +18,7 @@ public:
   static void load();
 
   static inline std::string manager_address;
+  static inline uint16_t manager_port;
 
   static inline std::string mqtt_server;
   static inline uint mqtt_port = 1883;

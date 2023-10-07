@@ -117,6 +117,13 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   MqttManagerConfig::use_farenheit = std::string(data["use_farenheit"]).compare("True") == 0;
   MqttManagerConfig::max_log_buffer_size = atoi(std::string(data["max_log_buffer_size"]).c_str());
 
+  if (!std::string(data["manager_port"]).empty()) {
+    MqttManagerConfig::manager_port = atoi(std::string(data["manager_port"]).c_str());
+  } else {
+    SPDLOG_ERROR("Manager port not configured! Setting 0.");
+    MqttManagerConfig::manager_port = 0;
+  }
+
   std::string turn_on_behavior = data["turn_on_behavior"];
   if (turn_on_behavior.compare("restore") == 0) {
     MqttManagerConfig::turn_on_behavior = LIGHT_TURN_ON_BEHAVIOR::RESTORE;

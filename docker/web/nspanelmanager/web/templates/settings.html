@@ -69,14 +69,31 @@
                 <i class="mdi mdi-information has-text-info"></i>
               </span>
               <div class="question_help_text notification is-info is-light">
-                The addres the NSPanel will use to access the manager without protocol pr port. Ex: 10.0.0.10
+                The addres the NSPanel will use to access the manager without protocol or port. Ex: 10.0.0.10
               </div>
             </span>
           </label>
         </div>
         <div class="field is-grouped">
             <div class="control">
-                <input class="input" name="manager_address" id="manager_address" placeholder="http://10.0.0.10:8000" value="{{ manager_address }}" required>
+                <input class="input" name="manager_address" id="manager_address" placeholder="10.0.0.10" value="{{ manager_address }}" required>
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label">Manager port<span class="question">
+              <span class="icon question_icon">
+                <i class="mdi mdi-information has-text-info"></i>
+              </span>
+              <div class="question_help_text notification is-info is-light">
+                The port of the manager web interface. This can not be discovered inside the container and therefore has to be entered manually.
+              </div>
+            </span>
+          </label>
+        </div>
+        <div class="field is-grouped">
+            <div class="control">
+                <input class="input" type="number" name="manager_port" id="manager_port" placeholder="8000" value="{{ manager_port }}" required>
             </div>
         </div>
 

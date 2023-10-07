@@ -26,6 +26,9 @@ int main(void) {
   } else if (MqttManagerConfig::manager_address.empty()) {
     SPDLOG_CRITICAL("No manager address configured. Will exit with code 2.");
     return 2;
+  } else if (MqttManagerConfig::manager_port == 0) {
+    SPDLOG_CRITICAL("No manager port configured. Will exit with code 3.");
+    return 3;
   }
 
   EntityManager::init_entities();

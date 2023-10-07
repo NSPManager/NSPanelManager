@@ -20,7 +20,6 @@ void WebManager::init(const char *nspmFirmwareVersion) {
     LOG_ERROR("Trying to start WebManager while it has already been started.");
     return;
   }
-
   this->instance = this;
   this->_nspmFirmwareVersion = nspmFirmwareVersion;
   this->_state = WebManagerState::ONLINE;
