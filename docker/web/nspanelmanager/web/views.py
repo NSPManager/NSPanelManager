@@ -419,11 +419,11 @@ def settings_page(request):
     data["max_live_log_messages"] = get_setting_with_default("max_live_log_messages", 10)
     data["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size", 10)
     data["is_home_assistant_addon"] = ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
+    data["manager_address"] = get_setting_with_default("manager_address", "")
     return render(request, 'settings.html', data)
 
 
 def save_settings(request):
-
     set_setting_value(name="mqtt_server", value=request.POST["mqtt_server"])
     set_setting_value(name="mqtt_port", value=request.POST["mqtt_port"])
     set_setting_value(name="mqtt_username", value=request.POST["mqtt_username"])
@@ -459,6 +459,7 @@ def save_settings(request):
     set_setting_value(name="turn_on_behavior", value=request.POST["turn_on_behavior"])
     set_setting_value(name="max_live_log_messages", value=request.POST["max_live_log_messages"])
     set_setting_value(name="max_log_buffer_size", value=request.POST["max_log_buffer_size"])
+    set_setting_value(name="manager_address", value=request.POST["manager_address"])
     # Settings saved, restart mqtt_manager
     # restart_mqtt_manager()
     return redirect('settings')

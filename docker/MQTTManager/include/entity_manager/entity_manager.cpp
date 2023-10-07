@@ -205,7 +205,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
               // Registration to manager was OK, send registration_accept to panel:
               nlohmann::json response;
               response["command"] = "register_accept";
-              response["address"] = "10.0.0.10";
+              response["address"] = MqttManagerConfig::manager_address.c_str();
               response["port"] = 8000;
               MQTT_Manager::publish(nspanel_command_topic, response.dump());
             } else {

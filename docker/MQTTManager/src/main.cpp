@@ -23,6 +23,9 @@ int main(void) {
   if (MqttManagerConfig::mqtt_server.empty() || MqttManagerConfig::mqtt_port == 0) {
     SPDLOG_CRITICAL("No MQTT server or port configured! Will exit with code 1.");
     return 1;
+  } else if (MqttManagerConfig::manager_address.empty()) {
+    SPDLOG_CRITICAL("No manager address configured. Will exit with code 2.");
+    return 2;
   }
 
   EntityManager::init_entities();

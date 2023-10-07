@@ -17,6 +17,8 @@ class MqttManagerConfig {
 public:
   static void load();
 
+  static inline std::string manager_address;
+
   static inline std::string mqtt_server;
   static inline uint mqtt_port = 1883;
   static inline std::string mqtt_username;

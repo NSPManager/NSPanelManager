@@ -62,6 +62,26 @@
         <div class="field">
             <h5 class="title is-5">NSPanel Manager settings</h5>
         </div>
+
+        <div class="field">
+            <label class="label">Manager address<span class="question">
+              <span class="icon question_icon">
+                <i class="mdi mdi-information has-text-info"></i>
+              </span>
+              <div class="question_help_text notification is-info is-light">
+                The addres the NSPanel will use to access the manager without protocol pr port. Ex: 10.0.0.10
+              </div>
+            </span>
+          </label>
+        </div>
+        <div class="field is-grouped">
+            <div class="control">
+                <input class="input" name="manager_address" id="manager_address" placeholder="http://10.0.0.10:8000" value="{{ manager_address }}" required>
+            </div>
+        </div>
+
+        <!-- TODO: Make port configurable -->
+
         <div class="field">
             <label class="label">Number of messages to display on live log<span class="question">
               <span class="icon question_icon">

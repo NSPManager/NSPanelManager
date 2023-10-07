@@ -112,10 +112,10 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
       std::string state = data["state"];
       if (state.compare("online") == 0) {
         this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
-        SPDLOG_DEBUG("NSPanel {}::{} become ONLINE.", this->_id, this->_name);
+        SPDLOG_DEBUG("NSPanel {}::{} became ONLINE.", this->_id, this->_name);
       } else if (state.compare("offline") == 0) {
         this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE;
-        SPDLOG_DEBUG("NSPanel {}::{} become OFFLINE.", this->_id, this->_name);
+        SPDLOG_DEBUG("NSPanel {}::{} became OFFLINE.", this->_id, this->_name);
       } else {
         SPDLOG_ERROR("Received unknown state for nspanel {}::{}. State: {}", this->_id, this->_name, state);
       }

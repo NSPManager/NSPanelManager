@@ -110,6 +110,7 @@ void MqttManagerConfig::load() {
 
 void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   SPDLOG_INFO("Got config from web manager, will process and load values.");
+  MqttManagerConfig::manager_address = data["manager_address"];
   MqttManagerConfig::color_temp_min = data["color_temp_min"];
   MqttManagerConfig::color_temp_max = data["color_temp_max"];
   MqttManagerConfig::clock_us_style = std::string(data["clock_us_style"]).compare("True") == 0;

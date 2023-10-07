@@ -45,6 +45,7 @@ def get_mqtt_manager_config(request):
     return_json["use_farenheit"] = get_setting_with_default("use_farenheit", False)
     return_json["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
     return_json["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size", "10")
+    return_json["manager_address"] = get_setting_with_default("manager_address", "")
 
     return_json["lights"] = {}
     for light in Light.objects.all():
@@ -226,6 +227,10 @@ def get_client_ip(request):
 def register_nspanel(request):
     """Update the already existing NSPanel OR create a new one"""
     data = json.loads(request.body)
+    if "mac" in data:
+        data["mac_address"] = data["mac"]
+    if "mac_origin" in data:
+        data["mac_address"] = data["mac_origin"]
     new_panel = NSPanel.objects.filter(mac_address=data['mac_address']).first()
     panel_already_exists = True
 
