@@ -13,9 +13,8 @@ RUN apt-get install -y --no-install-recommends \
 	# && rm -rf /var/lib/apt/lists/*
 
 # Install cmake
-RUN cd /tmp \
-	&& wget https://github.com/Kitware/CMake/releases/download/v3.27.2/cmake-3.27.2-linux-x86_64.tar.gz && \
-  tar -zxvf cmake-*.tar.gz && rm -f cmake-*.tar.gz && mv cmake-* /cmake/ && for f in /cmake/bin/*; do ln -s $f /bin/${f##*/}; done
+COPY cmake-3.27.2-linux-x86_64.tar.gz /tmp/
+RUN cd /tmp && tar -zxvf cmake-*.tar.gz && rm -f cmake-*.tar.gz && mv cmake-* /cmake/ && for f in /cmake/bin/*; do ln -s $f /bin/${f##*/}; done
 
 RUN echo "alias ll='ls -lh --color=auto'" >> /etc/bash.bashrc
 

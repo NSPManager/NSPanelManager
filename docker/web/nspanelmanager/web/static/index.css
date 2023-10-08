@@ -4,6 +4,10 @@
   min-width: 20rem;
 }
 
+.hidden {
+  display: hidden;
+}
+
 .nspanel-status-header-await {
   border-radius: 6px 6px 0px 0px;
   min-height: 0.25rem;

@@ -1,59 +1,55 @@
-function setupWifiSelectModal() {
-  $("#select_wifi_modal_close_background").click(function () {
-    $("#select_wifi_modal").removeClass("is-active");
+function close_wifi_select_modal() {
+  var select_wifi_modal = document.getElementById("select_wifi_modal");
+  select_wifi_modal.classList.remove("is-active");
     doConnectionCheck = true;
-  });
-
-  $("#select_wifi_modal_close_button").click(function () {
-    $("#select_wifi_modal").removeClass("is-active");
-    doConnectionCheck = true;
-  });
-
-  $("#select_wifi_modal_cancel_button").click(function () {
-    $("#select_wifi_modal").removeClass("is-active");
-    doConnectionCheck = true;
-  });
 }
 
 function showWifiSelectModal() {
-  $("#available_wifi_networks").hide();
-  $("#wifi_failed_to_get_networks").hide();
-  $("#wifi_no_networks_found").hide();
-  $("#wifi_wait_div").show();
-  $("#select_wifi_modal").addClass("is-active");
-  // setTimeout(function() {
-  //     $("#wifi_wait_div").hide();
-  //     $("#available_wifi_networks").show();
-  // }, 1000);
-  // The first scan will always return 0 results. If we get 0 results, wait 5 seconds and try again.
+  var available_wifi_networks = document.getElementById("available_wifi_networks");
+  var wifi_failed_to_get_networks = document.getElementById("wifi_failed_to_get_networks");
+  var wifi_no_networks_found = document.getElementById("wifi_no_networks_found");
+  var wifi_wait_div = document.getElementById("wifi_wait_div");
+  var select_wifi_modal = document.getElementById("select_wifi_modal");
+
+  available_wifi_networks.classList.add("hidden");
+  wifi_failed_to_get_networks.classList.add("hidden");
+  wifi_no_networks_found.classList.add("hidden");
+  wifi_wait_div.classList.remove("hidden");
+  select_wifi_modal.classList.add("is-active");
+  getAvailableNetworks(0);
+}
+
+function getAvailableNetworks(attempt) {
   doConnectionCheck = false;
-  $.get("/available_wifi_networks", function (data) {
-    if (data.length <= 0) {
-      setTimeout(function () {
-        $.get("/available_wifi_networks", function (data) {
-          if (data.length <= 0) {
-            $("#wifi_wait_div").hide();
-            $("#wifi_no_networks_found").show();
-          } else {
-            populateModalWithWiFiNetworks(data);
-          }
-        }).fail(function () {
-          $("#wifi_wait_div").hide();
-          $("#wifi_failed_to_get_networks").show();
-        });
-      }, 5000)
-    } else {
-      populateModalWithWiFiNetworks(data);
+  // Make http request and get the available networks:
+  const request = new XMLHttpRequest();
+  request.onreadystatechange = () => {
+    console.log(request.readyState);
+    if(request.readyState === XMLHttpRequest.DONE && request.status === 200) {
+      let data = JSON.parse(request.responseText);
+      if (data.length > 0) {
+        populateModalWithWiFiNetworks(data);
+      } else if(attempt == 0) {
+        // Got no networks back, try once more the first request usally returnes an empty list.
+        console.log("Got empty list back from ESP32. Will try once more.");
+        attempt++;
+        getAvailableNetworks(attempt);
+      }
+    } else if(request.readyState === XMLHttpRequest.DONE && request.status != 200) {
+      var wifi_wait_div = document.getElementById("wifi_wait_div");
+      var wifi_failed_to_get_networks = document.getElementById("wifi_failed_to_get_networks");
+      wifi_wait_div.classList.add("hidden");
+      wifi_failed_to_get_networks.classList.remove("hidden");
     }
-  }).fail(function () {
-    $("#wifi_wait_div").hide();
-    $("#wifi_failed_to_get_networks").show();
-  });
+  };
+  request.open("GET", "/available_wifi_networks");
+  request.send();
 }
 
 function populateModalWithWiFiNetworks(networks) {
   var table_body_html = "";
-  $.each(networks, function (index, network) {
+  for(let i = 0; i < networks.length; i++) {
+    let network = networks[i];
     table_body_html += "<tr>";
 
     table_body_html += "<th>";
@@ -73,19 +69,25 @@ function populateModalWithWiFiNetworks(networks) {
     table_body_html += "</td>";
 
     table_body_html += "</tr>";
-  });
-  $("#available_wifi_networks_tbody").html(table_body_html);
-  $("#wifi_wait_div").hide();
-  $("#available_wifi_networks").show();
+  }
+
+  var wifi_wait_div = document.getElementById("wifi_wait_div");
+  var available_wifi_networks = document.getElementById("available_wifi_networks");
+  var available_wifi_networks_tbody = document.getElementById("available_wifi_networks_tbody");
+  
+  available_wifi_networks_tbody.innerHTML = table_body_html;
+  wifi_wait_div.classList.add("hidden");
+  available_wifi_networks.classList.remove("hidden");
 }
 
 function selectNetwork(network) {
-    $("#wifi_ssid").val(network);
-    $("#select_wifi_modal").removeClass("is-active");
-    $("#wifi_psk").select(); // Select the PSK field to accept the PSK for the select WiFi
-    doConnectionCheck = true;
-}
+  var wifi_ssid = document.getElementById("wifi_ssid");
+  var select_wifi_modal = document.getElementById("select_wifi_modal");
+  var wifi_psk = document.getElementById("wifi_psk");
 
-$(document).ready(function () {
-  setupWifiSelectModal();
-});
+  select_wifi_modal.classList.remove("is-active");
+  wifi_ssid.value = network;
+  wifi_psk.select();
+  wifi_psk.focus();
+  doConnectionCheck = true;
+}

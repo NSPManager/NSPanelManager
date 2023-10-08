@@ -4,10 +4,9 @@
     <title>NSPanel: %wifi_hostname%</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="utf-8" />
-    <script src="/static/jquery.min.js"></script>
-    <script src="/static/index.js"></script>
-    <link rel="stylesheet" href="/static/bulma.min.css" />
-    <link rel="stylesheet" href="/static/index.css" />
+    <script src="static/index.js"></script>
+    <link rel="stylesheet" href="static/bulma.min.css" />
+    <link rel="stylesheet" href="static/index.css" />
 
     <script>
       $("document").ready(function () {
@@ -41,6 +40,7 @@
       <div
         class="modal-background"
         id="select_wifi_modal_close_background"
+        onclick="close_wifi_select_modal();"
       ></div>
       <div class="modal-card">
         <header class="modal-card-head">
@@ -49,6 +49,7 @@
             class="delete"
             aria-label="close"
             id="select_wifi_modal_close_button"
+            onclick="close_wifi_select_modal();"
           ></button>
         </header>
         <section class="modal-card-body">
@@ -88,7 +89,7 @@
           </div>
         </section>
         <footer class="modal-card-foot">
-          <button class="button" id="select_wifi_modal_cancel_button">
+          <button class="button" id="select_wifi_modal_cancel_button" onclick="close_wifi_select_modal();">
             Cancel
           </button>
         </footer>
