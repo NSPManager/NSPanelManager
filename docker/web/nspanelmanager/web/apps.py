@@ -10,7 +10,7 @@ import time
 def start_mqtt_manager():
     from .settings_helper import get_setting_with_default
     for proc in psutil.process_iter():
-        if "nspm_mqttmanager" in proc.cmdline():
+        if "/usr/src/app/nspm_mqttmanager" in proc.cmdline():
             return None # MQTT Manager already running
     print("Did not fin a running MQTTManager, starting MQTTManager...")
     # Restart the process
