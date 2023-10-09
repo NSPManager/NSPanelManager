@@ -93,12 +93,12 @@ function updateDisplayedWarnings() {
       }
       total_warning_string += data["websocket"];
     }
-    let mac_selector = mac.replaceAll(":", "\\:");
+    let mac_selector = mac.replaceAll(":", ""); // Convert real MAC to DOM-MAC
     if (total_warning_string == "") {
-      $("#nspanel_" + mac_selector + "_warnings").addClass("is-hidden");
+      $("#nspanel_warninigs_" + mac_selector).addClass("is-hidden");
     } else if (total_warning_string != "") {
-      $("#nspanel_" + mac_selector + "_warnings").removeClass("is-hidden");
-      $("#nspanel_" + mac_selector + "_warnings").attr(
+      $("#nspanel_warnings_" + mac_selector).removeClass("is-hidden");
+      $("#nspanel_warnings_" + mac_selector).attr(
         "data-tooltip",
         total_warning_string
       );
