@@ -91,3 +91,4 @@ function selectNetwork(network) {
   wifi_psk.focus();
   doConnectionCheck = true;
 }
+

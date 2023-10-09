@@ -4,14 +4,17 @@
     <title>NSPanel: %wifi_hostname%</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="utf-8" />
-    <script src="static/index.js"></script>
-    <link rel="stylesheet" href="static/bulma.min.css" />
-    <link rel="stylesheet" href="static/index.css" />
-
+    <script src="/static/index.js"></script>
+    <link rel="stylesheet" href="/static/bulma.min.css" />
+    <link rel="stylesheet" href="/static/index.css" />
     <script>
-      $("document").ready(function () {
-        $("#log_level").val("%log_level%").change();
-        $("#upload_buad_rate").val("%tft_upload_baud%").change();
+      // About the same as $(document).ready(....)
+      document.addEventListener("DOMContentLoaded", () => {
+        var log_level_select = document.getElementById("log_level");
+        var upload_buad_rate_select = document.getElementById("upload_buad_rate");
+
+        log_level_select.value = "%log_level%";
+        upload_buad_rate_select.value = "%tft_upload_baud%";
       });
     </script>
   </head>
