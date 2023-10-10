@@ -298,37 +298,19 @@ bool WebManager::_update(uint8_t type, const char *url) {
   LOG_INFO("Size of remote file '", downloadUrl.c_str(), "' is ", totalSize, " bytes.");
 
   LOG_INFO("Starting update.");
+  Update.onProgress(WebManager::_onProgress);
   bool canBegin = Update.begin(totalSize, type);
   if (!canBegin) {
     LOG_ERROR("Could not start update!");
     return false;
   }
 
-  size_t writtenSize = 0;
-  uint8_t buffer[8192];
-  uint8_t last_update_percent = 0;
-  while (writtenSize < totalSize) {
-    size_t downloadSize = totalSize - writtenSize;
-    if (downloadSize > sizeof(buffer)) {
-      downloadSize = sizeof(buffer);
-    }
-    size_t downloadedBytes = HttpLib::DownloadChunk(buffer, downloadUrl.c_str(), writtenSize, downloadSize);
-    writtenSize += Update.write(buffer, downloadedBytes);
-
-    // Update percent update completed
-    WebManager::_update_progress = (uint8_t)(((float)writtenSize / (float)totalSize) * 100);
-    if (type == U_FLASH && last_update_percent != WebManager::_update_progress) {
-      std::string update_string = "Updating FW ";
-      update_string.append(std::to_string(WebManager::_update_progress));
-      update_string.append("%");
-      PageManager::GetNSPanelManagerPage()->setText(update_string);
-    } else if (type == U_SPIFFS && last_update_percent != WebManager::_update_progress) {
-      std::string update_string = "Updating FS ";
-      update_string.append(std::to_string(WebManager::_update_progress));
-      update_string.append("%");
-      PageManager::GetNSPanelManagerPage()->setText(update_string);
-    }
-    vTaskDelay(50 / portTICK_PERIOD_MS);
+  HTTPClient http;
+  http.begin(downloadUrl.c_str());
+  int http_code = http.GET();
+  if (http_code == 200) {
+    LOG_INFO("Established download stream for firmware update.");
+    Update.writeStream(http.getStream());
   }
 
   if (!Update.end()) {
@@ -345,4 +327,20 @@ bool WebManager::_update(uint8_t type, const char *url) {
     LOG_ERROR("OTA Not finished. Something went wrong!");
     return false;
   }
+}
+
+void WebManager::_onProgress(size_t progress, size_t total) {
+  WebManager::_update_progress = (progress / (total / 100));
+  if (WebManager::_state == WebManagerState::UPDATING_FIRMWARE && WebManager::_last_displayed_update_progress != WebManager::_update_progress) {
+    std::string update_string = "Updating FW ";
+    update_string.append(std::to_string(WebManager::_update_progress));
+    update_string.append("%");
+    PageManager::GetNSPanelManagerPage()->setText(update_string);
+  } else if (WebManager::_state == WebManagerState::UPDATING_LITTLEFS && WebManager::_last_displayed_update_progress != WebManager::_update_progress) {
+    std::string update_string = "Updating FS ";
+    update_string.append(std::to_string(WebManager::_update_progress));
+    update_string.append("%");
+    PageManager::GetNSPanelManagerPage()->setText(update_string);
+  }
+  WebManager::_last_displayed_update_progress = progress;
 }

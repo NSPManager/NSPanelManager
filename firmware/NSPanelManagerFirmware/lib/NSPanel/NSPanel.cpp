@@ -756,6 +756,7 @@ bool NSPanel::_updateTFTOTA() {
     } else {
       next_write_size = file_size - lastReadByte;
     }
+    // TODO: Instead of downloadchunk try to download from streampointer for as long as possible.
     size_t bytesReceived = HttpLib::DownloadChunk(dataBuffer, downloadUrl.c_str(), nextStartWriteOffset, next_write_size);
     LOG_DEBUG("Bytes received: ", bytesReceived, " requested ", next_write_size);
 
