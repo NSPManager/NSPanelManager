@@ -716,6 +716,9 @@ bool NSPanel::_updateTFTOTA() {
     commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(",1");
   }
+  LOG_DEBUG("Doing one last serial2 clear.");
+  NSPanel::_clearSerialBuffer();
+
   LOG_DEBUG("Sending TFT upload command: ", commandString.c_str());
   Serial2.print(commandString.c_str());
   NSPanel::instance->_sendCommandEndSequence();
@@ -735,9 +738,8 @@ bool NSPanel::_updateTFTOTA() {
       LOG_INFO(String(Serial2.read(), HEX).c_str());
       vTaskDelay(5 / portTICK_PERIOD_MS);
     }
-    LOG_ERROR("Will now restart.");
-    vTaskDelay(5000 / portTICK_PERIOD_MS);
-    ESP.restart();
+    LOG_ERROR("Will try to upload anyway. If nothing happens, please reboot and try again.");
+    vTaskDelay(500 / portTICK_PERIOD_MS);
     return false;
   }
 
