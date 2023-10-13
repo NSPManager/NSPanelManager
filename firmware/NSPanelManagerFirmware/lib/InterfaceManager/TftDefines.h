@@ -23,10 +23,10 @@
 #define HOME_BUTTON_CEILING_NAME "home.b_ceiling"
 #define HOME_BUTTON_TABLE_NAME "home.b_table"
 #define HOME_BUTTON_SCENES_NAME "home.b_scenes"
-#define HOME_BUTTON_SCENES_ROOM_MODE_PIC 24  // Pictures to use on button when panel is in Room Lights mode
-#define HOME_BUTTON_SCENES_ROOM_MODE_PIC2 25 // Pictures to use on button when panel is in Room Lights mode
-#define HOME_BUTTON_SCENES_ALL_MODE_PIC 26   // Pictures to use on button when panel is in All Lights mode
-#define HOME_BUTTON_SCENES_ALL_MODE_PIC2 27  // Pictures to use on button when panel is in All Lights mode
+#define HOME_BUTTON_SCENES_ROOM_MODE_PIC 59  // Pictures to use on button when panel is in Room Lights mode
+#define HOME_BUTTON_SCENES_ROOM_MODE_PIC2 60 // Pictures to use on button when panel is in Room Lights mode
+#define HOME_BUTTON_SCENES_ALL_MODE_PIC 61   // Pictures to use on button when panel is in All Lights mode
+#define HOME_BUTTON_SCENES_ALL_MODE_PIC2 62  // Pictures to use on button when panel is in All Lights mode
 #define HOME_PAGE_SCREENSAVER_TIMER_NAME "home.sleep_display"
 #define HOME_PAGE_ROOM_LABEL_NAME HOME_PAGE_NAME ".room"
 #define HOME_PAGE_ROOM_LABEL_ID 5
@@ -146,12 +146,12 @@
 #define LIGHT_PAGE_KELVIN_SLIDER_NAME "kelvin_sat"
 #define LIGHT_PAGE_HUE_SLIDER_ID 6
 #define LIGHT_PAGE_HUE_SLIDER_NAME "hue"
-#define LIGHT_PAGE_KELVIN_SLIDER_PIC 10   // Pic for "currentmode"
-#define LIGHT_PAGE_KELVIN_SLIDER_PIC1 11  // Pic for "currentmode"
-#define LIGHT_PAGE_SAT_SLIDER_PIC 14      // Pic for "currentmode"
-#define LIGHT_PAGE_SAT_SLIDER_PIC1 15     // Pic for "currentmode"
-#define LIGHT_PAGE_COLOR_TEMP_MODE_PIC 18 // Pic for kelvin/sat slider
-#define LIGHT_PAGE_COLOR_RGB_MODE_PIC 19  // Pic for kelvin/sat slider
+#define LIGHT_PAGE_KELVIN_SLIDER_PIC 69   // Pic for "currentmode"
+#define LIGHT_PAGE_KELVIN_SLIDER_PIC1 70  // Pic for "currentmode"
+#define LIGHT_PAGE_SAT_SLIDER_PIC 73      // Pic for "currentmode"
+#define LIGHT_PAGE_SAT_SLIDER_PIC1 74     // Pic for "currentmode"
+#define LIGHT_PAGE_COLOR_TEMP_MODE_PIC 77 // Pic top right corner
+#define LIGHT_PAGE_COLOR_RGB_MODE_PIC 78  // Pic top right corner
 
 #define SETTINGS_PAGE_NAME "settings"
 #define SETTINGS_PAGE_ID 3 // ID for "Settings"-page

@@ -651,13 +651,14 @@ bool NSPanel::_updateTFTOTA() {
   if (baud_diff >= 10) {
     std::string uploadBaudRateString = "baud=";
     uploadBaudRateString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
+    NSPanel::_clearSerialBuffer();
     Serial2.print(uploadBaudRateString.c_str());
     NSPanel::instance->_sendCommandEndSequence();
 
     std::string read_data = "";
-    NSPanel::instance->_readDataToString(&read_data, 5000, false);
+    NSPanel::instance->_readDataToString(&read_data, 1000, false);
     if (!read_data.empty()) {
-      LOG_ERROR("Baud rate switch failed. Will restart NSPanel and continue anyways.");
+      LOG_ERROR("Baud rate switch failed. Will restart NSPanel and continue anyways. If this doesn't work, try to flash at default baud 115200 or 9600!");
       vTaskDelay(1000 / portTICK_PERIOD_MS);
       digitalWrite(4, HIGH); // Turn off power to the display
       vTaskDelay(1000 / portTICK_PERIOD_MS);
