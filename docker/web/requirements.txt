@@ -4,7 +4,6 @@ charset-normalizer==3.3.0
 Django==4.2.6
 django-environ==0.11.2
 django-mathfilters==1.0.0
-django-ranged-response==0.2.0
 gevent==23.9.1
 greenlet==3.0.0
 idna==3.4
