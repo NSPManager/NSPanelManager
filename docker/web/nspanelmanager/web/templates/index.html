@@ -108,6 +108,10 @@
                   onclick="rebootNSPanel('{{ panel_info.nspanel.mac_address }}');">
                   <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot
                 </a>
+                <a class="dropdown-item"
+                  href="{% url 'edit_nspanel' panel_info.nspanel.id %}">
+                  <span class="mdi mdi-cog pr-2 has-text-primary"></span>Panel settings
+                </a>
                 <a class="dropdown-item" href="http://{{ panel_info.nspanel.ip_address }}" target="_blank">
                   <span class="mdi mdi-web pr-2 has-text-primary"></span>Visit panel page
                 </a>

@@ -1,3 +1,4 @@
+#include "freertos/portmacro.h"
 #include <Arduino.h>
 #include <ButtonManager.hpp>
 #include <HTTPClient.h>
@@ -152,7 +153,6 @@ void taskManageWifiAndMqtt(void *param) {
             LOG_INFO("Gateway:    ", WiFi.gatewayIP().toString());
             // Start web server
             webMan.init(NSPanelManagerFirmwareVersion);
-            registerToNSPanelManager();
           } else {
             LOG_ERROR("Failed to connect to WiFi. Will try again in 5 seconds");
             Serial.println("Failed to connect to WiFi. Will try again in 5 seconds");
@@ -164,6 +164,9 @@ void taskManageWifiAndMqtt(void *param) {
         startAndManageWiFiAccessPoint();
       }
       if (WiFi.isConnected() && MqttManager::connected()) {
+        if (!InterfaceManager::hasRegisteredToManager) {
+          registerToNSPanelManager();
+        }
         bool force_send_mqtt_update = false;
         DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
         if (NSPanel::instance->getUpdateState()) {

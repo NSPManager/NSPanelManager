@@ -110,6 +110,13 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   NSPanel::attachSleepCallback(InterfaceManager::processSleepEvent);
   NSPanel::attachWakeCallback(InterfaceManager::processWakeEvent);
 
+  // Attach screen clock MQTT callback if configured from manager.
+  if (InterfaceConfig::show_screensaver_clock) {
+    PageManager::GetScreensaverPage()->attachMqttTimeCallback();
+  } else {
+    LOG_DEBUG("Not attaching MQTT clock callback is panel is confiugred to now show clock on screensaver.");
+  }
+
   LOG_INFO("Config initialized. Closing taskLoadConfigAndInit");
   vTaskDelete(NULL); // Delete task, we are done
 }
@@ -181,8 +188,8 @@ void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned
   } else if (command.compare("firmware_update") == 0) {
     WebManager::startOTAUpdate();
   } else if (command.compare("tft_update") == 0) {
-    InterfaceManager::stop();
     NSPanel::instance->startOTAUpdate();
+    InterfaceManager::stop();
   } else {
     LOG_WARNING("Received unknown command on MQTT: ", command.c_str());
   }
@@ -220,11 +227,6 @@ void InterfaceManager::subscribeToMqttTopics() {
   // Subscribe to command to wake/put to sleep the display
   vTaskDelay(100 / portTICK_PERIOD_MS);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_screen_cmd_topic.c_str(), &InterfaceManager::mqttCallback);
-  if (InterfaceConfig::show_screensaver_clock) {
-    PageManager::GetScreensaverPage()->attachMqttTimeCallback();
-  } else {
-    LOG_DEBUG("Not attaching MQTT clock callback is panel is confiugred to now show clock on screensaver.");
-  }
 
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_cmd_topic.c_str(), &InterfaceManager::handleNSPanelCommand);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_screen_brightness_topic.c_str(), &InterfaceManager::handleNSPanelScreenBrightnessCommand);

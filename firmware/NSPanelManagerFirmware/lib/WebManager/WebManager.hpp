@@ -39,6 +39,8 @@ private:
   static inline WebManagerState _state;
   /// @brief If updating, contains the % done of the update
   static inline uint8_t _update_progress;
+
+  static inline bool _has_already_been_started = false;
 };
 
 #endif

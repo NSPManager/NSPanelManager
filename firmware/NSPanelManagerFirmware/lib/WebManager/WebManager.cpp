@@ -16,6 +16,11 @@
 WebManager *WebManager::instance;
 
 void WebManager::init(const char *nspmFirmwareVersion) {
+  if (this->_has_already_been_started) {
+    LOG_ERROR("Trying to start WebManager while it has already been started.");
+    return;
+  }
+
   this->instance = this;
   this->_nspmFirmwareVersion = nspmFirmwareVersion;
   this->_state = WebManagerState::ONLINE;
@@ -35,6 +40,7 @@ void WebManager::init(const char *nspmFirmwareVersion) {
 
   this->_server.serveStatic("/static", LittleFS, "/static");
   this->_server.begin();
+  this->_has_already_been_started = true;
 }
 
 String WebManager::processIndexTemplate(const String &templateVar) {
@@ -270,6 +276,7 @@ uint8_t WebManager::getUpdateProgress() {
 }
 
 bool WebManager::_update(uint8_t type, const char *url) {
+  InterfaceManager::stop();
   LOG_INFO("Starting ", type == U_FLASH ? "Firmware" : "LittleFS", " OTA update...");
   WebManager::_update_progress = 0;
   std::string downloadUrl = "http://";
@@ -300,6 +307,7 @@ bool WebManager::_update(uint8_t type, const char *url) {
 
   size_t writtenSize = 0;
   uint8_t buffer[8192];
+  uint8_t last_update_percent = 0;
   while (writtenSize < totalSize) {
     size_t downloadSize = totalSize - writtenSize;
     if (downloadSize > sizeof(buffer)) {
@@ -310,12 +318,12 @@ bool WebManager::_update(uint8_t type, const char *url) {
 
     // Update percent update completed
     WebManager::_update_progress = (uint8_t)(((float)writtenSize / (float)totalSize) * 100);
-    if (type == U_FLASH) {
+    if (type == U_FLASH && last_update_percent != WebManager::_update_progress) {
       std::string update_string = "Updating FW ";
       update_string.append(std::to_string(WebManager::_update_progress));
       update_string.append("%");
       PageManager::GetNSPanelManagerPage()->setText(update_string);
-    } else {
+    } else if (type == U_SPIFFS && last_update_percent != WebManager::_update_progress) {
       std::string update_string = "Updating FS ";
       update_string.append(std::to_string(WebManager::_update_progress));
       update_string.append("%");

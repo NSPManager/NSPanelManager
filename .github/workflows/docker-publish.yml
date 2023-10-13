@@ -16,15 +16,15 @@ jobs:
       - name: Update Home Assistant config.yaml version
         uses: jacobtomlinson/gha-find-replace@v3
         with:
-          find: "[0-9]+.[0-9]+.[0-9]+"
-          replace: "${{ github.ref_name }}"
+          find: 'version: "([0-9]+\.?)+"'
+          replace: "version: ${{ github.ref_name }}"
           regex: true
           include: "docker/config.yaml"
       - name: Update displayed version in web interface footer
         uses: jacobtomlinson/gha-find-replace@v3
         with:
-          find: "[0-9]+.[0-9]+.[0-9]+"
-          replace: "${{ github.ref_name }}"
+          find: "Version: ([0-9]+.?)+"
+          replace: "Version: ${{ github.ref_name }}"
           regex: true
           include: "docker/web/nspanelmanager/web/templates/footer.html"
       - uses: stefanzweifel/git-auto-commit-action@v4
