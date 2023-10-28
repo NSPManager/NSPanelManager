@@ -11,7 +11,7 @@
       function close_wifi_select_modal() {
         var select_wifi_modal = document.getElementById("select_wifi_modal");
         select_wifi_modal.classList.remove("is-active");
-          doConnectionCheck = true;
+        doConnectionCheck = true;
       }
 
       function showWifiSelectModal() {
@@ -26,24 +26,22 @@
         wifi_no_networks_found.classList.add("hidden");
         wifi_wait_div.classList.remove("hidden");
         select_wifi_modal.classList.add("is-active");
-        getAvailableNetworks(0);
+        getAvailableNetworks();
       }
 
-      function getAvailableNetworks(attempt) {
+      function getAvailableNetworks() {
         doConnectionCheck = false;
         // Make http request and get the available networks:
         const request = new XMLHttpRequest();
         request.onreadystatechange = () => {
-          console.log(request.readyState);
           if(request.readyState === XMLHttpRequest.DONE && request.status === 200) {
             let data = JSON.parse(request.responseText);
             if (data.length > 0) {
               populateModalWithWiFiNetworks(data);
-            } else if(attempt == 0) {
+            } else {
               // Got no networks back, try once more the first request usally returnes an empty list.
               console.log("Got empty list back from ESP32. Will try once more.");
-              attempt++;
-              getAvailableNetworks(attempt);
+              getAvailableNetworks();
             }
           } else if(request.readyState === XMLHttpRequest.DONE && request.status != 200) {
             var wifi_wait_div = document.getElementById("wifi_wait_div");
@@ -116,7 +114,7 @@
   <body>
     <!-- Modal to show that connected to the device has been lost -->
     <div class="modal" id="not_connected_modal">
-      <div class="modal-background"></div>
+      <div class="modal-background" onclick="close_wifi_select_modal();"></div>
       <div class="modal-card">
         <header class="modal-card-head">
           <p class="modal-card-title">Connection lost</p>
@@ -137,6 +135,7 @@
       <div
         class="modal-background"
         id="select_wifi_modal_close_background"
+        onclick="close_wifi_select_modal();"
       ></div>
       <div class="modal-card">
         <header class="modal-card-head">
@@ -145,6 +144,7 @@
             class="delete"
             aria-label="close"
             id="select_wifi_modal_close_button"
+            onclick="close_wifi_select_modal();"
           ></button>
         </header>
         <section class="modal-card-body">
@@ -184,7 +184,7 @@
           </div>
         </section>
         <footer class="modal-card-foot">
-          <button class="button" id="select_wifi_modal_cancel_button">
+          <button class="button" id="select_wifi_modal_cancel_button" onclick="close_wifi_select_modal();">
             Cancel
           </button>
         </footer>

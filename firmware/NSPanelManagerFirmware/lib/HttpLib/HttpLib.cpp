@@ -48,18 +48,7 @@ size_t HttpLib::DownloadChunk(uint8_t *buffer, const char *address, size_t offse
 
   size_t sizeReceived = 0;
   uint8_t num_retries = 0;
-  while (sizeReceived < size) {
-    if (!httpClient.getStreamPtr()->available()) { // No data avilable from WiFi, wait 100ms and try again
-      vTaskDelay(50 / portTICK_PERIOD_MS);
-      num_retries++;
-      if (num_retries >= 5) {
-        break;
-      } else {
-        continue;
-      }
-    }
-    sizeReceived += httpClient.getStreamPtr()->readBytes(&buffer[sizeReceived], httpClient.getStreamPtr()->available() >= size - sizeReceived ? size - sizeReceived : httpClient.getStreamPtr()->available());
-  }
+  sizeReceived += httpClient.getStream().readBytes(&buffer[sizeReceived], httpClient.getStreamPtr()->available() >= size - sizeReceived ? size - sizeReceived : httpClient.getStreamPtr()->available());
   httpClient.end();
 
   return sizeReceived;
