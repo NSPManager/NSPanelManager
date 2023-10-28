@@ -14,7 +14,13 @@ firmware/NSPanelManagerFirmware/nspanels_to_ota.txt
 firmware/NSPanelManagerFirmware/.cache
 firmware/NSPanelManagerFirmware/.ccls
 firmware/NSPanelManagerFirmware/.ccls-cache
-MQTTManager-RUST/
+docker/MQTTManager/conan_cache/
+docker/MQTTManager/build/
+docker/MQTTManager/.cache/
+docker/MQTTManager/CMakeFiles/
+docker/MQTTManager/lib/
+docker/MQTTManager/env.sh
+docker/MQTTManager/compile_commands.json
 
 # User/computer specific files that is user depandant
 firmware/NSPanelManagerFirmware/src/CMakeLists.txt

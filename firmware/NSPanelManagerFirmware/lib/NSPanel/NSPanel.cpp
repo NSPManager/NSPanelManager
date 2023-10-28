@@ -13,6 +13,7 @@
 #include <esp_task_wdt.h>
 #include <math.h>
 #include <string>
+#include <vector>
 
 bool recvRetCommandFinished() {
   bool ret = false;
@@ -142,7 +143,6 @@ int NSPanel::getComponentIntVal(const char *componentId) {
   }
 
   xSemaphoreGive(this->_mutexReadSerialData);
-
   return value;
 }
 
@@ -361,7 +361,9 @@ void NSPanel::_taskReadNSPanelData(void *param) {
             num_ff_read_in_row++;
             if (num_ff_read_in_row >= 3) { // End of command, clear bugger and read next if any
               NSPanel::instance->_processQueue.push(data);
-              xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
+              if (NSPanel::instance->_taskHandleProcessPanelOutput != NULL) {
+                xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
+              }
               data.clear();
             }
           } else {
@@ -374,7 +376,9 @@ void NSPanel::_taskReadNSPanelData(void *param) {
 
         if (data.size() > 0) { // This will only trigger if data did not end in 0xFF 0xFF 0xFF which should never happen
           NSPanel::instance->_processQueue.push(data);
-          xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
+          if (NSPanel::instance->_taskHandleProcessPanelOutput != NULL) {
+            xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
+          }
         }
       }
       xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
@@ -487,8 +491,12 @@ void NSPanel::_sendRawCommand(const char *command, int length) {
   xSemaphoreGive(this->_mutexWriteSerialData);
 }
 
-void NSPanel::startOTAUpdate() {
-  xTaskCreatePinnedToCore(_taskUpdateTFTConfigOTA, "taskUpdateTFTConfigOTA", 30000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+bool NSPanel::startOTAUpdate() {
+  if (xTaskCreatePinnedToCore(_taskUpdateTFTConfigOTA, "taskUpdateTFTConfigOTA", 10000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE) != pdPASS) {
+    LOG_ERROR("Failed to create task to update TFT.");
+    return false;
+  }
+  return true;
 }
 
 void NSPanel::_clearSerialBuffer(NSPanelCommand *cmd) {
@@ -606,8 +614,9 @@ bool NSPanel::ready() {
   return this->_has_received_nspm;
 }
 
-bool NSPanel::_updateTFTOTA() {
-  LOG_INFO("_updateTFTOTA Started.");
+bool NSPanel::_initTFTUpdate(int communication_baud_rate) {
+  LOG_INFO("Trying to initialize TFT update at baud ", communication_baud_rate);
+  Serial2.updateBaudRate(communication_baud_rate);
 
   NSPanel::instance->_writeCommandsToSerial = false;
   NSPanel::instance->_update_progress = 0;
@@ -623,6 +632,36 @@ bool NSPanel::_updateTFTOTA() {
   // Clear current read buffer
   Serial2.flush();
 
+  LOG_INFO("Force restarting screen via power switch.");
+  digitalWrite(4, HIGH); // Turn off power to the display
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  digitalWrite(4, LOW); // Turn on power to the display
+  vTaskDelay(3000 / portTICK_PERIOD_MS);
+
+  // Send "connect" string to get data
+  Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN");
+  NSPanel::instance->_sendCommandEndSequence();
+  vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
+  // Clear Serial2 read buffer
+  NSPanel::_clearSerialBuffer();
+  vTaskDelay(50 / portTICK_PERIOD_MS);
+
+  LOG_DEBUG("Sending connect to panel");
+  Serial2.print("connect");
+  NSPanel::instance->_sendCommandEndSequence();
+
+  std::string comok_string = "";
+  NSPanel::instance->_readDataToString(&comok_string, 10000, false);
+  NSPanel::instance->_clearSerialBuffer();
+  if (comok_string.length() > 3) {
+    comok_string.erase(comok_string.length() - 3);
+    LOG_DEBUG("Got comok: ", comok_string.c_str());
+  } else {
+    // We didn't receive a comok string back. Try again at baud 9600 (default 115200)
+    LOG_ERROR("Didn't receive expected comok, got: '", comok_string.c_str(), "'. Will retry.");
+    return NSPanel::_initTFTUpdate(communication_baud_rate == 115200 ? NSPMConfig::instance->tft_upload_baud : 115200);
+  }
+
   // URL to download TFT file from
   std::string downloadUrl = "http://";
   downloadUrl.append(NSPMConfig::instance->manager_address);
@@ -631,72 +670,14 @@ bool NSPanel::_updateTFTOTA() {
   downloadUrl.append("/download_tft");
 
   LOG_INFO("Will download TFT file from: ", downloadUrl.c_str());
-  size_t file_size = HttpLib::GetFileSize(downloadUrl.c_str());
-
-  LOG_INFO("Force restarting screen via power switch.");
-  digitalWrite(4, HIGH); // Turn off power to the display
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
-  digitalWrite(4, LOW); // Turn on power to the display
-  vTaskDelay(5000 / portTICK_PERIOD_MS);
-
-  // Switch to desiered upload buad rate.
-  int32_t baud_diff = NSPMConfig::instance->tft_upload_baud - Serial2.baudRate();
-  if (baud_diff < 0) {
-    baud_diff = baud_diff / -1;
-  }
-
-  // Wait for panel to finish whatever it is doing.
-  vTaskDelay(2000 / portTICK_PERIOD_MS);
-
-  if (baud_diff >= 10) {
-    std::string uploadBaudRateString = "baud=";
-    uploadBaudRateString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
-    NSPanel::_clearSerialBuffer();
-    Serial2.print(uploadBaudRateString.c_str());
-    NSPanel::instance->_sendCommandEndSequence();
-
-    std::string read_data = "";
-    NSPanel::instance->_readDataToString(&read_data, 1000, false);
-    if (!read_data.empty()) {
-      LOG_ERROR("Baud rate switch failed. Will restart NSPanel and continue anyways. If this doesn't work, try to flash at default baud 115200 or 9600!");
-      vTaskDelay(1000 / portTICK_PERIOD_MS);
-      digitalWrite(4, HIGH); // Turn off power to the display
-      vTaskDelay(1000 / portTICK_PERIOD_MS);
-      digitalWrite(4, LOW); // Turn on power to the display
-      vTaskDelay(5000 / portTICK_PERIOD_MS);
-    }
-
-    LOG_INFO("Baud rate switching Serial2 from ", Serial2.baudRate(), " to ", NSPMConfig::instance->tft_upload_baud);
-    NSPanel::_clearSerialBuffer();
-    Serial2.end();
-    Serial2.setTxBufferSize(0);
-    Serial2.begin(NSPMConfig::instance->tft_upload_baud, SERIAL_8N1, 17, 16);
-  }
-
-  // Send "connect" string to get data
-  Serial2.print("DRAKJHSUYDGBNCJHGJKSHBDN");
-  NSPanel::instance->_sendCommandEndSequence();
-  vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
-  // Clear Serial2 read buffer
-  while (Serial2.available() > 0) {
-    Serial2.read();
-    if (Serial2.available() == 0) {
-      vTaskDelay(250 / portTICK_PERIOD_MS);
+  unsigned long file_size = 0;
+  while (file_size == 0) {
+    file_size = HttpLib::GetFileSize(downloadUrl.c_str());
+    if (file_size == 0) {
+      LOG_ERROR("Failed to get file size for TFT flashing. Will try again.");
+      vTaskDelay(500 / portTICK_PERIOD_MS);
     }
   }
-
-  LOG_DEBUG("Sending connect to panel");
-  Serial2.print("connect");
-  NSPanel::instance->_sendCommandEndSequence();
-  vTaskDelay((1000000 / Serial2.baudRate()) + 30 / portTICK_PERIOD_MS);
-
-  std::string comok_string = "";
-  NSPanel::instance->_readDataToString(&comok_string, 5000, false);
-  NSPanel::instance->_clearSerialBuffer();
-  if (comok_string.length() > 3) {
-    comok_string.erase(comok_string.length() - 3);
-  }
-  LOG_DEBUG("Got comok: ", comok_string.c_str());
 
   LOG_DEBUG("Will start TFT upload, TFT file size: ", file_size);
   // TODO: Detect if new protocol is not supported, in that case set flag in flash and restart and then continue flash with legacy mode.
@@ -713,21 +694,34 @@ bool NSPanel::_updateTFTOTA() {
     LOG_INFO("Starting upload using v1.1 protocol.");
     commandString = "whmi-wri ";
     commandString.append(std::to_string(file_size));
-    commandString.append(",1");
+    commandString.append(",");
     commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(",1");
   }
   LOG_DEBUG("Doing one last serial2 clear.");
   NSPanel::_clearSerialBuffer();
+  vTaskDelay(500 / portTICK_PERIOD_MS);
 
-  LOG_DEBUG("Sending TFT upload command: ", commandString.c_str());
   Serial2.print(commandString.c_str());
   NSPanel::instance->_sendCommandEndSequence();
+  LOG_DEBUG("Sent TFT upload command: ", commandString.c_str());
+
+  // Switch to desiered upload buad rate.
+  vTaskDelay(50 / portTICK_PERIOD_MS);
+  int32_t baud_diff = NSPMConfig::instance->tft_upload_baud - Serial2.baudRate();
+  if (baud_diff < 0) {
+    baud_diff = baud_diff / -1;
+  }
+  if (baud_diff >= 10) {
+    LOG_INFO("Switching flash baud rate on Serial2 from ", Serial2.baudRate(), " to ", NSPMConfig::instance->tft_upload_baud);
+    Serial2.updateBaudRate(NSPMConfig::instance->tft_upload_baud);
+  }
 
   // Wait until Nextion returns okay to transmit tft
-  LOG_DEBUG("Waiting for panel reponse");
-  while (Serial2.available() == 0) {
-    vTaskDelay(25 / portTICK_PERIOD_MS);
+  LOG_DEBUG("Waiting for panel reponse (max 10 seconds).");
+  unsigned long start_panel_response_wait = millis();
+  while (Serial2.available() == 0 && start_panel_response_wait + 10000 > millis()) {
+    vTaskDelay(250 / portTICK_PERIOD_MS);
   }
 
   uint8_t returnData = Serial2.read();
@@ -739,14 +733,43 @@ bool NSPanel::_updateTFTOTA() {
       LOG_INFO(String(Serial2.read(), HEX).c_str());
       vTaskDelay(5 / portTICK_PERIOD_MS);
     }
-    LOG_ERROR("Will try to upload anyway. If nothing happens, please reboot and try again.");
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    return false;
+    LOG_ERROR("Will retry TFT upload init.");
+    return NSPanel::_initTFTUpdate(communication_baud_rate);
   }
 
+  return true;
+}
+
+bool NSPanel::_updateTFTOTA() {
+  LOG_INFO("_updateTFTOTA Started.");
+  NSPanel::_initTFTUpdate(115200);
+
+  // URL to download TFT file from
+  std::string downloadUrl = "http://";
+  downloadUrl.append(NSPMConfig::instance->manager_address);
+  downloadUrl.append(":");
+  downloadUrl.append(std::to_string(NSPMConfig::instance->manager_port));
+  downloadUrl.append("/download_tft");
+  LOG_DEBUG("Will try to download TFT from ", downloadUrl.c_str());
+
+  unsigned long file_size = 0;
+  while (file_size == 0) {
+    file_size = HttpLib::GetFileSize(downloadUrl.c_str());
+    if (file_size == 0) {
+      LOG_ERROR("Failed to get file size for TFT flashing. Will try again.");
+      vTaskDelay(500 / portTICK_PERIOD_MS);
+    }
+  }
   unsigned long startWaitingForOKForNextChunk = 0;
-  uint32_t nextStartWriteOffset = 0;
-  size_t lastReadByte = 0;
+  unsigned long nextStartWriteOffset = 0;
+  unsigned long lastReadByte = 0;
+
+  if (esp_get_free_heap_size() < 4096) {
+    LOG_ERROR("Not enough free memory to flash device! Will reboot.");
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
+    ESP.restart();
+  }
+
   uint8_t dataBuffer[4096];
 
   // Loop until break when all firmware has finished uploading (data available in stream == 0)
@@ -758,8 +781,14 @@ bool NSPanel::_updateTFTOTA() {
     } else {
       next_write_size = file_size - lastReadByte;
     }
-    size_t bytesReceived = HttpLib::DownloadChunk(dataBuffer, downloadUrl.c_str(), nextStartWriteOffset, next_write_size);
-    LOG_DEBUG("Bytes received: ", bytesReceived, " requested ", next_write_size);
+    size_t bytesReceived = 0;
+    while (bytesReceived != next_write_size) {
+      bytesReceived = HttpLib::DownloadChunk(dataBuffer, downloadUrl.c_str(), nextStartWriteOffset, next_write_size);
+      if (bytesReceived != next_write_size) {
+        LOG_ERROR("Bytes received: ", bytesReceived, " requested ", next_write_size, ". Will retry.");
+        vTaskDelay(250 / portTICK_PERIOD_MS);
+      }
+    }
 
     vTaskDelay(500 / portTICK_PERIOD_MS);
     Serial2.write(dataBuffer, bytesReceived);

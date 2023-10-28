@@ -1,7 +1,7 @@
 #ifndef MqttLog_H
 #define MqttLog_H
 
-#define LOG_TO_SERIAL 0 // Set to 1 to enable
+#define LOG_TO_SERIAL 1 // Set to 1 to enable
 
 #include <Arduino.h>
 #include <MqttManager.hpp>
@@ -52,6 +52,10 @@ public:
   template <typename... Args>
   void logToMqtt(const MqttLogLevel logLevel, const char *filename, int lineNumber, const char *functionName, Args &&...args) {
     if (logLevel > this->_logLevel || this->_mqttLogTopic->empty()) {
+      return;
+    }
+    if (this->_messageBuilderMutex == NULL) {
+      Serial.println("Tried to send message without a messageBuilderMutex. Message:");
       return;
     }
 

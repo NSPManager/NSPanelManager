@@ -61,6 +61,8 @@ private:
   /// @param buffer The buffer to put the JSON-data in to
   /// @return True if sucessful, otherwise false
   bool _getRoomConfig(int room_id, DynamicJsonDocument *buffer);
+
+  bool _processMqttMessages;
 };
 
 #endif

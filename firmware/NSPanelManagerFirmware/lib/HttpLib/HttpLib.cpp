@@ -12,6 +12,7 @@ size_t HttpLib::GetFileSize(const char *url) {
 
   if (httpReturnCode != 200) {
     LOG_ERROR("Failed to retrive file size for URL '", url, "'. Got return code: ", httpReturnCode);
+    httpClient.end();
     return 0;
   }
 
