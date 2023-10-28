@@ -177,6 +177,7 @@
     The following has to be done in order to get a fully working container:
     \begin{itemize}
       \item Navigate to the web interface. If the port was not changed it is available at port \textbf{8000}.
+      \item Navigate to the "Settings"-page.
       \item Enter MQTT server.
         \note{If you are running the MQTT server as an add-on to Home Assistant, enter the IP-address of your Home Assistant server.}
       \item Enter MQTT port if changed from default \textbf{1883}.
@@ -435,6 +436,26 @@
     \end{lstlisting}
     If you wish to change the timezone, there are two options. Either, do as the command above, pass in the local machine /etc/timezone. This might not always work though as your server might be set to Etc/UTC then you can set the TZ-environment variable, for example: \lstinline[language=bash]{-e TZ=Europe/Stockholm} and remove the volume mapping for /etc/timezone.
     \important{All data for NSPanel Manager is stored in the directory mapped to "/data" in the container. In this case, the "data"-directory where you are currently standing.}
+
+
+    \subsection{Docker-compose container setup}
+    If you wish to run NSPanel manager from docker compose you can use the below example as a template for your setup.
+    \note{This example is for an x86\_64 machine placed in the Europe/Stockholm timezone. Replace image name and timezone as needed.}
+    \begin{lstlisting}
+    services:
+      nspanelmanager:
+        image: nspanelmanager/nspanelmanager-amd64
+        container_name: nspanelmanager
+        environment:
+          - TZ=Europe/Stockholm
+        volumes:
+          - /nspmdata/:/data/
+        ports:
+          - 8000:8000
+          - 8001:8001
+        restart: always
+    \end{lstlisting}
+    \important{All data for NSPanel Manager is stored in the directory mapped to "/data" in the container. In this case, the "/nspmdata/"-directory where you are currently standing.}
 
     \clearpage
     \section{Functional information}

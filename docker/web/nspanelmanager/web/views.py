@@ -3,8 +3,6 @@ from django.shortcuts import render, redirect, HttpResponse
 from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
 
-from ranged_response import RangedFileResponse
-
 import hashlib
 import psutil
 import subprocess

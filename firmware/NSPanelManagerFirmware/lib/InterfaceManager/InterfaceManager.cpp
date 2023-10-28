@@ -22,6 +22,7 @@
 
 void InterfaceManager::init() {
   this->instance = this;
+  this->_processMqttMessages = true;
   RoomManager::init();
   MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1");
   xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
@@ -30,11 +31,10 @@ void InterfaceManager::init() {
 void InterfaceManager::stop() {
   LOG_INFO("Stopping interface manager.");
   try {
-    if (InterfaceManager::_taskHandleProcessMqttMessages != NULL) {
-      vTaskDelete(InterfaceManager::_taskHandleProcessMqttMessages);
-    }
+    InterfaceManager::instance->_processMqttMessages = false; // Stop processing of MQTT messages.
     if (InterfaceManager::_taskHandleSpecialModeTimer != NULL) {
       vTaskDelete(InterfaceManager::_taskHandleSpecialModeTimer);
+      InterfaceManager::_taskHandleSpecialModeTimer = NULL;
     }
 
     for (Room *room : RoomManager::rooms) {
@@ -76,12 +76,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
         PageManager::GetNSPanelManagerPage()->setText("Connecting to MQTT...");
       }
     }
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-  }
-
-  // Wait for panel to become ready
-  if (millis() - start < 4000) {
-    vTaskDelay((millis() - start) / portTICK_PERIOD_MS);
+    vTaskDelay(250 / portTICK_PERIOD_MS);
   }
 
   // Start task for MQTT processing
@@ -142,14 +137,16 @@ void InterfaceManager::_taskProcessMqttMessages(void *param) {
       while (InterfaceManager::_mqttMessages.size() > 0) {
         mqttMessage msg = InterfaceManager::_mqttMessages.front();
         try {
-          if (msg.topic.compare(NSPMConfig::instance->mqtt_screen_cmd_topic) == 0) {
-            if (msg.payload.compare("1") == 0) {
-              InterfaceManager::showDefaultPage();
-              MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1"); // Send out state information that panel woke from sleep
-            } else if (msg.payload.compare("0") == 0) {
-              PageManager::GetScreensaverPage()->show();
-            } else {
-              LOG_ERROR("Invalid payload for screen cmd. Valid payload: 1 or 0");
+          if (InterfaceManager::instance->_processMqttMessages) {
+            if (msg.topic.compare(NSPMConfig::instance->mqtt_screen_cmd_topic) == 0) {
+              if (msg.payload.compare("1") == 0) {
+                InterfaceManager::showDefaultPage();
+                MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1"); // Send out state information that panel woke from sleep
+              } else if (msg.payload.compare("0") == 0) {
+                PageManager::GetScreensaverPage()->show();
+              } else {
+                LOG_ERROR("Invalid payload for screen cmd. Valid payload: 1 or 0");
+              }
             }
           }
         } catch (...) {
@@ -189,8 +186,8 @@ void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned
   } else if (command.compare("firmware_update") == 0) {
     WebManager::startOTAUpdate();
   } else if (command.compare("tft_update") == 0) {
-    NSPanel::instance->startOTAUpdate();
     InterfaceManager::stop();
+    NSPanel::instance->startOTAUpdate();
   } else if (command.compare("register_accept") == 0) {
     NSPMConfig::instance->manager_address = json["address"].as<String>().c_str();
     NSPMConfig::instance->manager_port = json["port"].as<uint16_t>();

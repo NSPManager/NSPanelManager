@@ -1,106 +1,190 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>NSPanel: %wifi_hostname%</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta charset="utf-8" />
-    <script src="/static/index.js"></script>
-    <link rel="stylesheet" href="/static/bulma.min.css" />
-    <link rel="stylesheet" href="/static/index.css" />
-    <script>
-      // About the same as $(document).ready(....)
-      document.addEventListener("DOMContentLoaded", () => {
-        var log_level_select = document.getElementById("log_level");
-        var upload_buad_rate_select = document.getElementById("upload_buad_rate");
 
-        log_level_select.value = "%log_level%";
-        upload_buad_rate_select.value = "%tft_upload_baud%";
-      });
-    </script>
-  </head>
+<head>
+  <title>NSPanel: %wifi_hostname%</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="/static/bulma.min.css" />
+  <link rel="stylesheet" href="/static/index.css" />
+  <script>
+    function close_wifi_select_modal() {
+      var select_wifi_modal = document.getElementById("select_wifi_modal");
+      select_wifi_modal.classList.remove("is-active");
+      doConnectionCheck = true;
+    }
 
-  <body>
-    <!-- Modal to show that connected to the device has been lost -->
-    <div class="modal" id="not_connected_modal">
-      <div class="modal-background"></div>
-      <div class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title">Connection lost</p>
-        </header>
-        <section class="modal-card-body">
+    function showWifiSelectModal() {
+      var available_wifi_networks = document.getElementById("available_wifi_networks");
+      var wifi_failed_to_get_networks = document.getElementById("wifi_failed_to_get_networks");
+      var wifi_no_networks_found = document.getElementById("wifi_no_networks_found");
+      var wifi_wait_div = document.getElementById("wifi_wait_div");
+      var select_wifi_modal = document.getElementById("select_wifi_modal");
+
+      available_wifi_networks.classList.add("hidden");
+      wifi_failed_to_get_networks.classList.add("hidden");
+      wifi_no_networks_found.classList.add("hidden");
+      wifi_wait_div.classList.remove("hidden");
+      select_wifi_modal.classList.add("is-active");
+      getAvailableNetworks();
+    }
+
+    function getAvailableNetworks() {
+      doConnectionCheck = false;
+      // Make http request and get the available networks:
+      const request = new XMLHttpRequest();
+      request.onreadystatechange = () => {
+        if (request.readyState === XMLHttpRequest.DONE && request.status === 200) {
+          let data = JSON.parse(request.responseText);
+          if (data.length > 0) {
+            populateModalWithWiFiNetworks(data);
+          } else {
+            // Got no networks back, try once more the first request usally returnes an empty list.
+            console.log("Got empty list back from ESP32. Will try once more.");
+            getAvailableNetworks();
+          }
+        } else if (request.readyState === XMLHttpRequest.DONE && request.status != 200) {
+          var wifi_wait_div = document.getElementById("wifi_wait_div");
+          var wifi_failed_to_get_networks = document.getElementById("wifi_failed_to_get_networks");
+          wifi_wait_div.classList.add("hidden");
+          wifi_failed_to_get_networks.classList.remove("hidden");
+        }
+      };
+      request.open("GET", "/available_wifi_networks");
+      request.send();
+    }
+
+    function populateModalWithWiFiNetworks(networks) {
+      var table_body_html = "";
+      for (let i = 0; i < networks.length; i++) {
+        let network = networks[i];
+        table_body_html += "<tr>";
+
+        table_body_html += "<th>";
+        table_body_html += `<a onclick="selectNetwork('${network.ssid}');">${network.ssid}</a>`;
+        table_body_html += "</th>";
+
+        table_body_html += "<td>";
+        table_body_html += network.rssi;
+        table_body_html += "</td>";
+
+        table_body_html += "<td>";
+        table_body_html += network.channel;
+        table_body_html += "</td>";
+
+        table_body_html += "<td>";
+        table_body_html += network.security;
+        table_body_html += "</td>";
+
+        table_body_html += "</tr>";
+      }
+
+      var wifi_wait_div = document.getElementById("wifi_wait_div");
+      var available_wifi_networks = document.getElementById("available_wifi_networks");
+      var available_wifi_networks_tbody = document.getElementById("available_wifi_networks_tbody");
+
+      available_wifi_networks_tbody.innerHTML = table_body_html;
+      wifi_wait_div.classList.add("hidden");
+      available_wifi_networks.classList.remove("hidden");
+    }
+
+    function selectNetwork(network) {
+      var wifi_ssid = document.getElementById("wifi_ssid");
+      var select_wifi_modal = document.getElementById("select_wifi_modal");
+      var wifi_psk = document.getElementById("wifi_psk");
+
+      select_wifi_modal.classList.remove("is-active");
+      wifi_ssid.value = network;
+      wifi_psk.select();
+      wifi_psk.focus();
+      doConnectionCheck = true;
+    }
+
+    // About the same as $(document).ready(....)
+    document.addEventListener("DOMContentLoaded", () => {
+      var log_level_select = document.getElementById("log_level");
+      var upload_buad_rate_select = document.getElementById("upload_buad_rate");
+
+      log_level_select.value = "%log_level%";
+      upload_buad_rate_select.value = "%tft_upload_baud%";
+    });
+  </script>
+</head>
+
+<body>
+  <!-- Modal to show that connected to the device has been lost -->
+  <div class="modal" id="not_connected_modal">
+    <div class="modal-background" onclick="close_wifi_select_modal();"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Connection lost</p>
+      </header>
+      <section class="modal-card-body">
+        <center>
+          <div class="lds-dual-ring"></div>
+          <br />
+          Please wait, you will be automatically reconnected (if the address
+          is still the same).
+        </center>
+      </section>
+      <footer class="modal-card-foot"></footer>
+    </div>
+  </div>
+  <!-- Select WiFi SSID modal -->
+  <div class="modal" id="select_wifi_modal">
+    <div class="modal-background" id="select_wifi_modal_close_background" onclick="close_wifi_select_modal();"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Select network</p>
+        <button class="delete" aria-label="close" id="select_wifi_modal_close_button"
+          onclick="close_wifi_select_modal();"></button>
+      </header>
+      <section class="modal-card-body">
+        <div id="wifi_wait_div">
           <center>
             <div class="lds-dual-ring"></div>
             <br />
-            Please wait, you will be automatically reconnected (if the address
-            is still the same).
+            Please wait, while fetching available Wifi networks.
           </center>
-        </section>
-        <footer class="modal-card-foot"></footer>
-      </div>
+        </div>
+        <div id="wifi_failed_to_get_networks">
+          <div class="notification is-danger">
+            Failed to get a list of available networks!
+          </div>
+        </div>
+        <div id="wifi_no_networks_found">
+          <div class="notification is-danger">No networks found.</div>
+        </div>
+        <div id="available_wifi_networks">
+          <table class="table is-fullwidth">
+            <thead>
+              <tr>
+                <th>SSID</th>
+                <th>RSSI</th>
+                <th>Channel</th>
+                <th>Security</th>
+              </tr>
+            </thead>
+            <tbody id="available_wifi_networks_tbody">
+              <tr>
+                <th>1</th>
+                <td>2</td>
+                <td>3</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button class="button" id="select_wifi_modal_cancel_button" onclick="close_wifi_select_modal();">
+          Cancel
+        </button>
+      </footer>
     </div>
-    <!-- Select WiFi SSID modal -->
-    <div class="modal" id="select_wifi_modal">
-      <div
-        class="modal-background"
-        id="select_wifi_modal_close_background"
-        onclick="close_wifi_select_modal();"
-      ></div>
-      <div class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title">Select network</p>
-          <button
-            class="delete"
-            aria-label="close"
-            id="select_wifi_modal_close_button"
-            onclick="close_wifi_select_modal();"
-          ></button>
-        </header>
-        <section class="modal-card-body">
-          <div id="wifi_wait_div">
-            <center>
-              <div class="lds-dual-ring"></div>
-              <br />
-              Please wait, while fetching available Wifi networks.
-            </center>
-          </div>
-          <div id="wifi_failed_to_get_networks">
-            <div class="notification is-danger">
-              Failed to get a list of available networks!
-            </div>
-          </div>
-          <div id="wifi_no_networks_found">
-            <div class="notification is-danger">No networks found.</div>
-          </div>
-          <div id="available_wifi_networks">
-            <table class="table is-fullwidth">
-              <thead>
-                <tr>
-                  <th>SSID</th>
-                  <th>RSSI</th>
-                  <th>Channel</th>
-                  <th>Security</th>
-                </tr>
-              </thead>
-              <tbody id="available_wifi_networks_tbody">
-                <tr>
-                  <th>1</th>
-                  <td>2</td>
-                  <td>3</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-        <footer class="modal-card-foot">
-          <button class="button" id="select_wifi_modal_cancel_button" onclick="close_wifi_select_modal();">
-            Cancel
-          </button>
-        </footer>
-      </div>
-    </div>
+  </div>
 
-    <!-- Modal to confirm factory reset -->
-    <!-- <div class="modal" id="factory_reset_modal">
+  <!-- Modal to confirm factory reset -->
+  <!-- <div class="modal" id="factory_reset_modal">
         <div class="modal-background" id="factory_reset_modal_background"></div>
         <div class="modal-card">
             <header class="modal-card-head">
@@ -116,253 +200,181 @@
         </div>
     </div> -->
 
-    <section class="section">
-      <div class="container">
-        <h1 class="title" id="page-title">NSPanelManager</h1>
-        <h2 class="subtitle" id="page-subtitle">Version %version%</h2>
-      </div>
-    </section>
-
+  <section class="section">
     <div class="container">
-      <form method="POST" action="/save_config" id="config">
-        <div class="box">
-          <div class="field">
-            <h5 class="title is-5">General</h5>
-            <label class="label">Friendly name</label>
-            <div class="control">
-              <input
-                class="input"
-                type="text"
-                name="wifi_hostname"
-                id="wifi_hostname"
-                placeholder="Device name"
-                value="%wifi_hostname%"
-                required
-              />
-            </div>
-            <div class="notification is-warning mt-4">
-              The "Friendly name" on this page is only used when first
-              registring to the NSPanel Manager container. If you wish to change
-              name after it is already registered, do this on the panel page
-              setting on the NSPanel Manager container.
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">Manager address</label>
-            <div class="control">
-              <input
-                class="input"
-                type="text"
-                name="manager_address"
-                id="manager_address"
-                placeholder="192.168.1.5"
-                value="%manager_address%"
-                required
-              />
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">Manager port</label>
-            <div class="control">
-              <input
-                class="input"
-                type="number"
-                name="manager_port"
-                id="manager_port"
-                placeholder="8000"
-                value="%manager_port%"
-                required
-              />
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">Log level</label>
-            <div class="control">
-              <div class="select">
-                <select name="log_level" id="log_level">
-                  <option value="0">None</option>
-                  <option value="1">Error</option>
-                  <option value="2">Warning</option>
-                  <option value="3">Info</option>
-                  <option value="4">Debug</option>
-                  <option value="5">Trace</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="box">
-          <div class="field">
-            <h5 class="title is-5">WiFi</h5>
-          </div>
-          <div class="field">
-            <label class="label">Connect to WiFi</label>
-          </div>
-          <div class="field has-addons">
-            <div class="control is-expanded">
-              <input
-                class="input"
-                type="text"
-                name="wifi_ssid"
-                id="wifi_ssid"
-                placeholder="SSID"
-                value="%wifi_ssid%"
-                required
-              />
-            </div>
-            <div class="control">
-              <a class="button is-info" onclick="showWifiSelectModal();"
-                >List</a
-              >
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">WiFi Password</label>
-            <div class="control">
-              <input
-                class="input"
-                type="password"
-                name="wifi_psk"
-                id="wifi_psk"
-                placeholder="Password"
-                value="%wifi_psk%"
-                required
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="box">
-          <div class="field">
-            <h5 class="title is-5">MQTT</h5>
-          </div>
-          <div class="field">
-            <label class="label">MQTT Server</label>
-            <div class="control">
-              <input
-                class="input"
-                type="text"
-                name="mqtt_server"
-                id="mqtt_server"
-                placeholder="MQTT Server"
-                value="%mqtt_server%"
-                required
-              />
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">MQTT Port</label>
-            <div class="control">
-              <input
-                class="input"
-                type="number"
-                name="mqtt_port"
-                id="mqtt_port"
-                placeholder="MQTT Port"
-                value="%mqtt_port%"
-                required
-              />
-            </div>
-          </div>
-          <div class="field" id="mqtt_username_field">
-            <label class="label">MQTT Username</label>
-            <div class="control">
-              <input
-                class="input"
-                type="text"
-                name="mqtt_username"
-                id="mqtt_username"
-                value="%mqtt_username%"
-                placeholder="MQTT Username"
-              />
-            </div>
-          </div>
-          <div class="field" id="mqtt_psk_field">
-            <label class="label">MQTT Password</label>
-            <div class="control">
-              <input
-                class="input"
-                type="password"
-                name="mqtt_psk"
-                id="mqtt_psk"
-                placeholder="MQTT Password"
-                value="%mqtt_psk%"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="box">
-          <div class="field">
-            <h5 class="title is-5">NSPanel TFT upload</h5>
-          </div>
-          <div class="field">
-            <label class="label">Protocol</label>
-            <div class="control">
-              <label class="radio">
-                <input
-                  type="radio"
-                  name="upload_protocol"
-                  value="latest"
-                  %upload_proto_latest_checked%
-                />
-                Latest ("v1.2")
-              </label>
-              <label class="radio">
-                <input
-                  type="radio"
-                  name="upload_protocol"
-                  value="legacy"
-                  %upload_proto_legacy_checked%
-                />
-                Legacy (v1.0)
-              </label>
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">Upload baud rate</label>
-            <div class="notification is-warning">
-              The upload baud rate that this specific NSPanel is able to perform at can not be
-              calculated. This is something you will have to experiment with if
-              you wish to have different value than default. Chaning this from
-              default may cause the NSPanel to fail to update the screen TFT.
-            </div>
-            <div class="control">
-              <div class="select">
-                <select name="upload_buad_rate" id="upload_buad_rate">
-                  <option value="2400">2400</option>
-                  <option value="4800">4800</option>
-                  <option value="9600">9600</option>
-                  <option value="19200">19200</option>
-                  <option value="31250">31250</option>
-                  <option value="38400">38400</option>
-                  <option value="57600">57600</option>
-                  <option value="115200">115200 (default)</option>
-                  <option value="250000">250000</option>
-                  <option value="260000">260000</option>
-                  <option value="512000">512000</option>
-                  <option value="921600">921600</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Add 1rem of padding to bottom to prevent a white bar appering on the bottom of the page -->
-        <div class="level" style="padding-bottom: 1rem">
-          <div class="level-left">
-            <div class="buttons is-right"></div>
-          </div>
-          <div class="level-right">
-            <div class="buttons">
-              <button class="button is-success" type="submit" id="save_button">
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      </form>
+      <h1 class="title" id="page-title">NSPanelManager</h1>
+      <h2 class="subtitle" id="page-subtitle">Version %version%</h2>
     </div>
-  </body>
+  </section>
+
+  <div class="container">
+    <form method="POST" action="/save_config" id="config">
+      <div class="box">
+        <div class="field">
+          <h5 class="title is-5">General</h5>
+          <label class="label">Friendly name</label>
+          <div class="control">
+            <input class="input" type="text" name="wifi_hostname" id="wifi_hostname" placeholder="Device name"
+              value="%wifi_hostname%" required />
+          </div>
+          <div class="notification is-warning mt-4">
+            The "Friendly name" on this page is only used when first
+            registring to the NSPanel Manager container. If you wish to change
+            name after it is already registered, do this on the panel page
+            setting on the NSPanel Manager container.
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Manager address</label>
+          <div class="control">
+            <input class="input" type="text" name="manager_address" id="manager_address" placeholder="192.168.1.5"
+              value="%manager_address%" required />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Manager port</label>
+          <div class="control">
+            <input class="input" type="number" name="manager_port" id="manager_port" placeholder="8000"
+              value="%manager_port%" required />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Log level</label>
+          <div class="control">
+            <div class="select">
+              <select name="log_level" id="log_level">
+                <option value="0">None</option>
+                <option value="1">Error</option>
+                <option value="2">Warning</option>
+                <option value="3">Info</option>
+                <option value="4">Debug</option>
+                <option value="5">Trace</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <div class="field">
+          <h5 class="title is-5">WiFi</h5>
+        </div>
+        <div class="field">
+          <label class="label">Connect to WiFi</label>
+        </div>
+        <div class="field has-addons">
+          <div class="control is-expanded">
+            <input class="input" type="text" name="wifi_ssid" id="wifi_ssid" placeholder="SSID" value="%wifi_ssid%"
+              required />
+          </div>
+          <div class="control">
+            <a class="button is-info" onclick="showWifiSelectModal();">List</a>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">WiFi Password</label>
+          <div class="control">
+            <input class="input" type="password" name="wifi_psk" id="wifi_psk" placeholder="Password" value="%wifi_psk%"
+              required />
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <div class="field">
+          <h5 class="title is-5">MQTT</h5>
+        </div>
+        <div class="field">
+          <label class="label">MQTT Server</label>
+          <div class="control">
+            <input class="input" type="text" name="mqtt_server" id="mqtt_server" placeholder="MQTT Server"
+              value="%mqtt_server%" required />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">MQTT Port</label>
+          <div class="control">
+            <input class="input" type="number" name="mqtt_port" id="mqtt_port" placeholder="MQTT Port"
+              value="%mqtt_port%" required />
+          </div>
+        </div>
+        <div class="field" id="mqtt_username_field">
+          <label class="label">MQTT Username</label>
+          <div class="control">
+            <input class="input" type="text" name="mqtt_username" id="mqtt_username" value="%mqtt_username%"
+              placeholder="MQTT Username" />
+          </div>
+        </div>
+        <div class="field" id="mqtt_psk_field">
+          <label class="label">MQTT Password</label>
+          <div class="control">
+            <input class="input" type="password" name="mqtt_psk" id="mqtt_psk" placeholder="MQTT Password"
+              value="%mqtt_psk%" />
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <div class="field">
+          <h5 class="title is-5">NSPanel TFT upload</h5>
+        </div>
+        <div class="field">
+          <label class="label">Protocol</label>
+          <div class="control">
+            <label class="radio">
+              <input type="radio" name="upload_protocol" value="latest" %upload_proto_latest_checked% />
+              Latest ("v1.2")
+            </label>
+            <label class="radio">
+              <input type="radio" name="upload_protocol" value="legacy" %upload_proto_legacy_checked% />
+              Legacy (v1.0)
+            </label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Upload baud rate</label>
+          <div class="notification is-warning">
+            The upload baud rate that this specific NSPanel is able to perform at can not be
+            calculated. This is something you will have to experiment with if
+            you wish to have different value than default. Chaning this from
+            default may cause the NSPanel to fail to update the screen TFT.
+          </div>
+          <div class="control">
+            <div class="select">
+              <select name="upload_buad_rate" id="upload_buad_rate">
+                <option value="2400">2400</option>
+                <option value="4800">4800</option>
+                <option value="9600">9600</option>
+                <option value="19200">19200</option>
+                <option value="31250">31250</option>
+                <option value="38400">38400</option>
+                <option value="57600">57600</option>
+                <option value="115200">115200 (default)</option>
+                <option value="250000">250000</option>
+                <option value="260000">260000</option>
+                <option value="512000">512000</option>
+                <option value="921600">921600</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add 1rem of padding to bottom to prevent a white bar appering on the bottom of the page -->
+      <div class="level" style="padding-bottom: 1rem">
+        <div class="level-left">
+          <div class="buttons is-right"></div>
+        </div>
+        <div class="level-right">
+          <div class="buttons">
+            <button class="button is-success" type="submit" id="save_button">
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</body>
+
 </html>

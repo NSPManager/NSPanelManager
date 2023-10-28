@@ -40,7 +40,7 @@ public:
   static std::string getWarnings();
   bool ready();
   bool init();
-  void startOTAUpdate();
+  bool startOTAUpdate();
   void goToPage(const char *page);
   void setDimLevel(uint8_t dimLevel);
   void setSleep(bool sleep);
@@ -69,6 +69,7 @@ private:
   /// @param offset Offset to request data from (bytes)
   /// @param size Maximum download chunk size
   /// @return The number of bytes downloaded
+  static bool _initTFTUpdate(int communication_baud_rate);
   static bool _updateTFTOTA();
   std::queue<std::vector<char>> _processQueue;
   TaskHandle_t _taskHandleProcessPanelOutput;

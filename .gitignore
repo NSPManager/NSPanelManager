@@ -14,7 +14,6 @@ firmware/NSPanelManagerFirmware/nspanels_to_ota.txt
 firmware/NSPanelManagerFirmware/.cache
 firmware/NSPanelManagerFirmware/.ccls
 firmware/NSPanelManagerFirmware/.ccls-cache
-
 docker/MQTTManager/conan_cache/
 docker/MQTTManager/build/
 docker/MQTTManager/.cache/
