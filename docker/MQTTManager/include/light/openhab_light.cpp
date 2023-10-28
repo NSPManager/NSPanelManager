@@ -268,7 +268,7 @@ void OpenhabLight::_update_item_values_from_openhab_rest() {
   }
 
   if (this->_can_rgb && !rgb.empty()) {
-    nlohmann::json data = nlohmann::json::parse(color_temperature);
+    nlohmann::json data = nlohmann::json::parse(rgb);
     std::string rgb_data = data["state"];
 
     // Split log message by colon to extract Hue, Saturation and Brightness
@@ -284,10 +284,18 @@ void OpenhabLight::_update_item_values_from_openhab_rest() {
     }
     rgb_data_parts.push_back(rgb_data);
 
-    this->_current_hue = atoi(rgb_data_parts[0].c_str());
-    this->_current_saturation = atoi(rgb_data_parts[1].c_str());
-    SPDLOG_DEBUG("Got hue {} from OpenHAB.", this->_current_hue);
-    SPDLOG_DEBUG("Got saturation {} from OpenHAB.", this->_current_color_temperature);
+    if (rgb_data_parts.size() >= 3) {
+      SPDLOG_DEBUG("Got part: {}", rgb_data_parts[0]);
+      SPDLOG_DEBUG("Got part: {}", rgb_data_parts[1]);
+      SPDLOG_DEBUG("Got part: {}", rgb_data_parts[2]);
+
+      this->_current_hue = atoi(rgb_data_parts[0].c_str());
+      SPDLOG_DEBUG("Got hue {} from OpenHAB.", this->_current_hue);
+      this->_current_saturation = atoi(rgb_data_parts[1].c_str());
+      SPDLOG_DEBUG("Got saturation {} from OpenHAB.", this->_current_color_temperature);
+    } else {
+      SPDLOG_ERROR("Couldn't decode HSB value for light {}::{}. Got value: {}", this->_id, this->_name, rgb);
+    }
   } else if (this->_can_rgb && rgb.empty()) {
     SPDLOG_ERROR("Failed to get current HSB of item {}. Will assume 0.", this->_openhab_item_rgb);
     this->_current_hue = 0;
