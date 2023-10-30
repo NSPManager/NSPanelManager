@@ -12,7 +12,7 @@ def start_mqtt_manager():
     for proc in psutil.process_iter():
         if "/usr/src/app/nspm_mqttmanager" in proc.cmdline():
             return None # MQTT Manager already running
-    print("Did not fin a running MQTTManager, starting MQTTManager...")
+    print("Did not find a running MQTTManager, starting MQTTManager...")
     # Restart the process
     logging.info("Starting a new mqtt_manager")
     mqttmanager_env = os.environ.copy()

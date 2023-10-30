@@ -100,6 +100,16 @@ def get_mqtt_manager_config(request):
                 "saturation": state.saturation
             })
         return_json["scenes"].append(scene_info)
+
+    return_json["rooms"] = []
+    for room in Room.objects.all():
+        room_info = {
+            "type": "room",
+            "id": room.id,
+            "name": room.friendly_name
+        }
+        return_json["rooms"].append(room_info)
+
     return JsonResponse(return_json)
 
 

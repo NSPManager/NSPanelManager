@@ -34,43 +34,58 @@ void EntityManager::init() {
 void EntityManager::init_entities() {
   SPDLOG_INFO("Initializing {} Rooms.", MqttManagerConfig::room_configs.size());
   for (nlohmann::json config : MqttManagerConfig::room_configs) {
-    EntityManager::_entities.push_back(new Room(config));
+    if (EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::ROOM, config["id"]) == nullptr) {
+      EntityManager::_entities.push_back(new Room(config));
+    }
   }
 
   SPDLOG_INFO("Initializing {} lights.", MqttManagerConfig::light_configs.size());
   for (nlohmann::json &config : MqttManagerConfig::light_configs) {
-    std::string light_type = config["type"];
-    if (light_type.compare("home_assistant") == 0) {
-      HomeAssistantLight *light = new HomeAssistantLight(config);
-      EntityManager::_lights.push_back(light);
-      EntityManager::add_entity(light);
-    } else if (light_type.compare("openhab") == 0) {
-      OpenhabLight *light = new OpenhabLight(config);
-      EntityManager::_lights.push_back(light);
-      EntityManager::add_entity(light);
-    } else {
-      SPDLOG_ERROR("Unknown light type '{}'. Will ignore entity.", light_type);
+    if (EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config["id"]) == nullptr) {
+      std::string light_type = config["type"];
+      if (light_type.compare("home_assistant") == 0) {
+        HomeAssistantLight *light = new HomeAssistantLight(config);
+        EntityManager::_lights.push_back(light);
+        EntityManager::add_entity(light);
+      } else if (light_type.compare("openhab") == 0) {
+        OpenhabLight *light = new OpenhabLight(config);
+        EntityManager::_lights.push_back(light);
+        EntityManager::add_entity(light);
+      } else {
+        SPDLOG_ERROR("Unknown light type '{}'. Will ignore entity.", light_type);
+      }
     }
   }
 
   SPDLOG_INFO("Initializing {} scenes.", MqttManagerConfig::scenes_configs.size());
   for (nlohmann::json &config : MqttManagerConfig::scenes_configs) {
-    std::string scene_type = config["type"];
-    if (scene_type.compare("nspm_scene") == 0) {
-      Scene *scene = new NSPMScene(config);
-      EntityManager::add_entity(scene);
+    if (EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::SCENE, config["scene_id"]) == nullptr) {
+      std::string scene_type = config["type"];
+      if (scene_type.compare("nspm_scene") == 0) {
+        Scene *scene = new NSPMScene(config);
+        EntityManager::add_entity(scene);
+      }
+      // TODO: Implement Home Assistant and Openhab scenes.
     }
-    // TODO: Implement Home Assistant and Openhab scenes.
-  }
 
-  SPDLOG_INFO("Initializing {} NSPanels.", MqttManagerConfig::nspanel_configs.size());
-  for (nlohmann::json config : MqttManagerConfig::nspanel_configs) {
-    EntityManager::_nspanels.push_back(new NSPanel(config));
-  }
+    SPDLOG_INFO("Initializing {} NSPanels.", MqttManagerConfig::nspanel_configs.size());
+    for (nlohmann::json config : MqttManagerConfig::nspanel_configs) {
+      bool already_exists = false;
+      for (NSPanel *panel : EntityManager::_nspanels) {
+        if (panel->get_id() == config["id"]) {
+          already_exists = true;
+          break;
+        }
+      }
+      if (!already_exists) {
+        EntityManager::_nspanels.push_back(new NSPanel(config));
+      }
+    }
 
-  SPDLOG_INFO("Performing post init on {} entities.", EntityManager::_entities.size());
-  for (MqttManagerEntity *entity : EntityManager::_entities) {
-    entity->post_init();
+    SPDLOG_INFO("Performing post init on {} entities.", EntityManager::_entities.size());
+    for (MqttManagerEntity *entity : EntityManager::_entities) {
+      entity->post_init();
+    }
   }
 }
 

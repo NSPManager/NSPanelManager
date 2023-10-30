@@ -2,6 +2,7 @@
 #include "websocket_server/websocket_server.hpp"
 #include <chrono>
 #include <cstddef>
+#include <signal.h>
 #include <spdlog/spdlog.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,9 +14,29 @@
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 
+#define SIGUSR1 10
+
+void sigusr1_handler(int signal) {
+  if (signal == SIGUSR1) {
+    SPDLOG_INFO("Reloading config from manager.");
+  }
+
+  MqttManagerConfig::load();
+  EntityManager::init_entities();
+}
+
 int main(void) {
   spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%s:%#] [%t] %v");
   spdlog::set_level(spdlog::level::debug); // Set global log level to info
+
+  // When a config change is made in the web interface the Django application
+  // will send a SIGUSR1 signal to the MQTTManager so that the manager
+  // know that it needs to reload the config.
+  struct sigaction sigUsr1Handler;
+  sigUsr1Handler.sa_handler = sigusr1_handler;
+  sigemptyset(&sigUsr1Handler.sa_mask);
+  sigUsr1Handler.sa_flags = 0;
+  sigaction(SIGUSR1, &sigUsr1Handler, NULL);
 
   EntityManager::init();
   MqttManagerConfig::load();

@@ -8,6 +8,8 @@
 #include <spdlog/spdlog.h>
 #include <string>
 
+#define ITEM_IN_LIST(list, item) (std::find(list.begin(), list.end(), item) != list.end());
+
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
   ((std::string *)userp)->append((char *)contents, size * nmemb);
   return size * nmemb;
@@ -135,20 +137,87 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   }
 
   SPDLOG_DEBUG("Loading lights...");
+  std::list<nlohmann::json> json_lights;
   for (nlohmann::json light_config : data["lights"]) {
-    MqttManagerConfig::light_configs.push_back(light_config);
+    json_lights.push_back(light_config); // Build light list for next step.
+    bool already_exists = ITEM_IN_LIST(MqttManagerConfig::light_configs, light_config);
+    if (!already_exists) {
+      MqttManagerConfig::light_configs.push_back(light_config);
+    }
   }
+
+  auto it = MqttManagerConfig::light_configs.begin();
+  while (it != MqttManagerConfig::light_configs.end()) {
+    bool exists = ITEM_IN_LIST(json_lights, (*it));
+    if (!exists) {
+      SPDLOG_DEBUG("Removing light config as it doesn't exist in config anymore.");
+      MqttManagerConfig::light_configs.erase(it++);
+    } else {
+      ++it;
+    }
+  }
+
   SPDLOG_DEBUG("Loading NSPanels...");
+  std::list<nlohmann::json> json_nspanels;
   for (nlohmann::json nspanel_config : data["nspanels"]) {
-    MqttManagerConfig::nspanel_configs.push_back(nspanel_config);
+    json_nspanels.push_back(nspanel_config); // Build light list for next step.
+    bool already_exists = ITEM_IN_LIST(MqttManagerConfig::nspanel_configs, nspanel_config);
+    if (!already_exists) {
+      MqttManagerConfig::nspanel_configs.push_back(nspanel_config);
+    }
   }
+
+  auto nit = MqttManagerConfig::nspanel_configs.begin();
+  while (nit != MqttManagerConfig::nspanel_configs.end()) {
+    bool exists = ITEM_IN_LIST(json_nspanels, (*nit));
+    if (!exists) {
+      SPDLOG_DEBUG("Removing NSPanel config as it doesn't exist in config anymore.");
+      MqttManagerConfig::nspanel_configs.erase(nit++);
+    } else {
+      ++nit;
+    }
+  }
+
   SPDLOG_DEBUG("Loading Scenes...");
+  std::list<nlohmann::json> json_scenes;
   for (nlohmann::json scene_config : data["scenes"]) {
-    MqttManagerConfig::scenes_configs.push_back(scene_config);
+    json_scenes.push_back(scene_config); // Build light list for next step.
+    bool already_exists = ITEM_IN_LIST(MqttManagerConfig::scenes_configs, scene_config);
+    if (!already_exists) {
+      MqttManagerConfig::scenes_configs.push_back(scene_config);
+    }
   }
+
+  auto sit = MqttManagerConfig::scenes_configs.begin();
+  while (sit != MqttManagerConfig::scenes_configs.end()) {
+    bool exists = ITEM_IN_LIST(json_scenes, (*sit));
+    if (!exists) {
+      SPDLOG_DEBUG("Removing scene config as it doesn't exist in config anymore.");
+      MqttManagerConfig::scenes_configs.erase(sit++);
+    } else {
+      ++sit;
+    }
+  }
+
   SPDLOG_DEBUG("Loading Rooms...");
+  std::list<nlohmann::json> json_rooms;
   for (nlohmann::json room_config : data["rooms"]) {
-    MqttManagerConfig::room_configs.push_back(room_config);
+    json_rooms.push_back(room_config); // Build light list for next step.
+    bool already_exists = ITEM_IN_LIST(MqttManagerConfig::room_configs, room_config);
+    if (!already_exists) {
+      MqttManagerConfig::room_configs.push_back(room_config);
+    }
+  }
+
+  auto rit = MqttManagerConfig::room_configs.begin();
+  while (rit != MqttManagerConfig::room_configs.end()) {
+    bool exists = ITEM_IN_LIST(json_rooms, (*rit));
+    if (!exists) {
+      SPDLOG_DEBUG("Removing room config as it doesn't exist in config anymore.");
+      MqttManagerConfig::room_configs.erase(rit++);
+    } else {
+      ++rit;
+    }
   }
 
   SPDLOG_DEBUG("Config loaded.");

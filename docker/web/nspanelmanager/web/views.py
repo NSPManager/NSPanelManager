@@ -9,9 +9,25 @@ import subprocess
 import logging
 import environ
 import os
+import signal
 
 from .models import NSPanel, Room, Light, Settings, Scene
+from .apps import start_mqtt_manager
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
+
+def restart_mqtt_manager():
+    for proc in psutil.process_iter():
+        if "/usr/src/app/nspm_mqttmanager" in proc.cmdline():
+            print("Killing running MQTTManager")
+            proc.kill()
+    start_mqtt_manager()
+
+def send_mqttmanager_reload_command():
+    for proc in psutil.process_iter():
+        if "/usr/src/app/nspm_mqttmanager" in proc.cmdline():
+            print("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
+            print(proc.pid)
+            os.kill(proc.pid, signal.SIGUSR1)
 
 def get_file_md5sum(filename):
     fs = FileSystemStorage()
@@ -107,7 +123,7 @@ def save_new_room(request):
     new_room = Room()
     new_room.friendly_name = request.POST['friendly_name']
     new_room.save()
-    # restart_mqtt_manager()
+    send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=new_room.id)
 
 
@@ -116,13 +132,12 @@ def delete_room(request, room_id: int):
     if num_rooms > 1:
         room = Room.objects.filter(id=room_id).first()
         if num_rooms >= 2:
-            print("Other room available. Moving panels to other room.")
             nspanels = NSPanel.objects.filter(room=room)
             new_room = Room.objects.all().exclude(id=room.id).first()
             nspanels.update(room=new_room)
         room.delete()
 
-        # restart_mqtt_manager()
+        send_mqttmanager_reload_command()
     return redirect('rooms')
 
 
@@ -130,7 +145,7 @@ def update_room_form(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
     room.friendly_name = request.POST['friendly_name']
     room.save()
-    # restart_mqtt_manager()
+    send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=room_id)
 
 
@@ -242,7 +257,7 @@ def save_panel_settings(request, panel_id: int):
 
 def remove_light_from_room(request, room_id: int, light_id: int):
     Light.objects.filter(id=light_id).delete()
-    # restart_mqtt_manager()
+    send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=room_id)
 
 
@@ -305,7 +320,7 @@ def add_light_to_room(request, room_id: int):
                 break
 
     newLight.save()
-    # restart_mqtt_manager()
+    send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=room_id)
 
 def add_scene_to_room(request, room_id: int):
@@ -317,21 +332,21 @@ def add_scene_to_room(request, room_id: int):
     new_scene.friendly_name = request.POST["scene_name"]
     new_scene.room = room
     new_scene.save()
-    # restart_mqtt_manager()
+    send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=room_id)
 
 def delete_scene(request, scene_id: int):
     scene = Scene.objects.get(id=scene_id)
     if scene:
         scene.delete()
-        # restart_mqtt_manager()
+        send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=scene.room.id)
 
 def delete_global_scene(request, scene_id: int):
     scene = Scene.objects.get(id=scene_id)
     if scene:
         scene.delete()
-        # restart_mqtt_manager()
+        send_mqttmanager_reload_command()
     return redirect('settings')
 
 def add_scene_to_global(request):
@@ -342,7 +357,7 @@ def add_scene_to_global(request):
     new_scene.friendly_name = request.POST["scene_name"]
     new_scene.room = None
     new_scene.save()
-    # restart_mqtt_manager()
+    send_mqttmanager_reload_command()
     return redirect('settings')
 
 def add_light_to_room_view(request, room_id: int):
@@ -461,7 +476,7 @@ def save_settings(request):
     set_setting_value(name="manager_address", value=request.POST["manager_address"])
     set_setting_value(name="manager_port", value=request.POST["manager_port"])
     # Settings saved, restart mqtt_manager
-    # restart_mqtt_manager()
+    restart_mqtt_manager()
     return redirect('settings')
 
     # TODO: Make exempt only when Debug = true
