@@ -1,6 +1,7 @@
 #ifndef MQTT_MANAGER_ENTITY_MANAGER
 #define MQTT_MANAGER_ENTITY_MANAGER
 
+#include <boost/signals2.hpp>
 #include <entity/entity.hpp>
 #include <light/light.hpp>
 #include <list>
@@ -16,10 +17,23 @@ public:
    */
   static void init();
 
+  static void config_added(nlohmann::json *config);
+  static void config_removed(nlohmann::json *config);
+
   /**
-   * Create and initialize entities from config.
+   * Call post-initialized on all entities.
    */
-  static void init_entities();
+  static void post_init_entities();
+
+  /**
+   * Attach callback for when a new entity is added
+   */
+  static void attach_entity_added_listener(void (*listener)(MqttManagerEntity *));
+
+  /**
+   * Detach an existing callback for when an entity is added
+   */
+  static void detach_entity_added_listener(void (*listener)(MqttManagerEntity *));
 
   /**
    * Add an entity to the list of managed entities.
@@ -30,6 +44,26 @@ public:
    * Remove an entity from the list of managed entities.
    */
   static void remove_entity(MqttManagerEntity *entity);
+
+  /**
+   * Create and add a light to the manager
+   */
+  static void add_light(nlohmann::json &config);
+
+  /**
+   * Create and add a nspanel to the manager
+   */
+  static void add_nspanel(nlohmann::json &config);
+
+  /**
+   * Create and add a room to the manager
+   */
+  static void add_room(nlohmann::json &config);
+
+  /**
+   * Create and add a scene to the manager
+   */
+  static void add_scene(nlohmann::json &config);
 
   /**
    * Get an item by the specified type that has the specified ID.
@@ -63,6 +97,10 @@ private:
   static bool _process_message(const std::string &topic, const std::string &payload);
   static inline std::list<Light *> _lights;
   static inline std::list<NSPanel *> _nspanels;
+  static inline std::list<MqttManagerEntity *> _post_init_entities; // The entities to post init when called next time.
+
+  static inline boost::signals2::signal<void(MqttManagerEntity *)> _entity_added_signal;
+  static inline boost::signals2::signal<void(MqttManagerEntity *)> _entity_removed_signal;
 };
 
 #endif // !MQTT_MANAGER_ENTITY_MANAGER

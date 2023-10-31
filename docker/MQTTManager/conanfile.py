@@ -14,6 +14,7 @@ class CompressorRecipe(ConanFile):
         self.requires("ixwebsocket/11.4.3")
         self.requires("tz/2023c")
         self.requires("inja/3.4.0")
+        self.requires("boost/1.83.0")
 
     def build_requirements(self):
         self.tool_requires("cmake/3.22.6")

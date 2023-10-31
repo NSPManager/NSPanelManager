@@ -35,6 +35,8 @@ public:
    * All entities and config has been loaded, do post-processing tasks.
    */
   virtual void post_init() = 0;
+
+  virtual ~MqttManagerEntity() {}
 };
 
 #endif // !MQTT_MANAGER_ENTITY

@@ -37,9 +37,9 @@ Light::Light(nlohmann::json &init_data) {
   this->_mqtt_saturation_topic = std::string(mqtt_base_topic);
   this->_mqtt_saturation_topic.append("state_sat");
 
-  if (std::string(init_data["type"]).compare("home_assistant") == 0) {
+  if (std::string(init_data["light_type"]).compare("home_assistant") == 0) {
     this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
-  } else if (std::string(init_data["type"]).compare("openhab") == 0) {
+  } else if (std::string(init_data["light_type"]).compare("openhab") == 0) {
     this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
   } else {
     SPDLOG_ERROR("Got unknown type ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(init_data["type"]), this->_id, this->_name);

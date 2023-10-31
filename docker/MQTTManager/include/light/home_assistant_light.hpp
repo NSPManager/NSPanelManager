@@ -15,6 +15,7 @@ public:
   HomeAssistantLight(nlohmann::json &init_data);
   void send_state_update_to_controller();
   bool home_assistant_event_callback(nlohmann::json &event_data);
+  ~HomeAssistantLight();
 
 private:
   std::string _home_assistant_name;

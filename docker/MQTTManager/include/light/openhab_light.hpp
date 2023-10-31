@@ -25,6 +25,8 @@ public:
    */
   bool openhab_event_callback(nlohmann::json &event_data);
 
+  ~OpenhabLight();
+
 private:
   void _update_item_values_from_openhab_rest();
   std::string _openhab_rest_get(std::string &item);
