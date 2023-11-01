@@ -22,7 +22,6 @@ void sigusr1_handler(int signal) {
   }
 
   MqttManagerConfig::load();
-  EntityManager::init_entities();
 }
 
 int main(void) {
@@ -51,8 +50,6 @@ int main(void) {
     SPDLOG_CRITICAL("No manager port configured. Will exit with code 3.");
     return 3;
   }
-
-  EntityManager::init_entities();
 
   SPDLOG_INFO("Config loaded. Starting components.");
   std::thread mqtt_manager_thread(MQTT_Manager::connect);

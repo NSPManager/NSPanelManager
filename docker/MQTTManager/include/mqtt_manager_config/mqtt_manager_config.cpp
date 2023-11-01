@@ -143,14 +143,17 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     bool already_exists = ITEM_IN_LIST(MqttManagerConfig::light_configs, light_config);
     if (!already_exists) {
       MqttManagerConfig::light_configs.push_back(light_config);
+      MqttManagerConfig::_config_added_listener(&MqttManagerConfig::light_configs.back());
     }
   }
 
+  SPDLOG_DEBUG("Checking for removed lights.");
   auto it = MqttManagerConfig::light_configs.begin();
   while (it != MqttManagerConfig::light_configs.end()) {
     bool exists = ITEM_IN_LIST(json_lights, (*it));
     if (!exists) {
       SPDLOG_DEBUG("Removing light config as it doesn't exist in config anymore.");
+      MqttManagerConfig::_config_removed_listener(&(*it));
       MqttManagerConfig::light_configs.erase(it++);
     } else {
       ++it;
@@ -164,15 +167,19 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     bool already_exists = ITEM_IN_LIST(MqttManagerConfig::nspanel_configs, nspanel_config);
     if (!already_exists) {
       MqttManagerConfig::nspanel_configs.push_back(nspanel_config);
+      MqttManagerConfig::_config_added_listener(&MqttManagerConfig::nspanel_configs.back());
     }
   }
 
+  SPDLOG_DEBUG("Checking for removed NSPanels.");
   auto nit = MqttManagerConfig::nspanel_configs.begin();
   while (nit != MqttManagerConfig::nspanel_configs.end()) {
     bool exists = ITEM_IN_LIST(json_nspanels, (*nit));
     if (!exists) {
       SPDLOG_DEBUG("Removing NSPanel config as it doesn't exist in config anymore.");
+      MqttManagerConfig::_config_removed_listener(&(*nit));
       MqttManagerConfig::nspanel_configs.erase(nit++);
+      delete &nit;
     } else {
       ++nit;
     }
@@ -185,14 +192,17 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     bool already_exists = ITEM_IN_LIST(MqttManagerConfig::scenes_configs, scene_config);
     if (!already_exists) {
       MqttManagerConfig::scenes_configs.push_back(scene_config);
+      MqttManagerConfig::_config_added_listener(&MqttManagerConfig::scenes_configs.back());
     }
   }
 
+  SPDLOG_DEBUG("Checking for removed scenes.");
   auto sit = MqttManagerConfig::scenes_configs.begin();
   while (sit != MqttManagerConfig::scenes_configs.end()) {
     bool exists = ITEM_IN_LIST(json_scenes, (*sit));
     if (!exists) {
       SPDLOG_DEBUG("Removing scene config as it doesn't exist in config anymore.");
+      MqttManagerConfig::_config_removed_listener(&(*sit));
       MqttManagerConfig::scenes_configs.erase(sit++);
     } else {
       ++sit;
@@ -206,19 +216,47 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     bool already_exists = ITEM_IN_LIST(MqttManagerConfig::room_configs, room_config);
     if (!already_exists) {
       MqttManagerConfig::room_configs.push_back(room_config);
+      MqttManagerConfig::_config_added_listener(&MqttManagerConfig::room_configs.back());
     }
   }
 
+  SPDLOG_DEBUG("Checking for removed rooms.");
   auto rit = MqttManagerConfig::room_configs.begin();
   while (rit != MqttManagerConfig::room_configs.end()) {
     bool exists = ITEM_IN_LIST(json_rooms, (*rit));
     if (!exists) {
       SPDLOG_DEBUG("Removing room config as it doesn't exist in config anymore.");
+      MqttManagerConfig::_config_removed_listener(&(*rit));
       MqttManagerConfig::room_configs.erase(rit++);
     } else {
       ++rit;
     }
   }
 
-  SPDLOG_DEBUG("Config loaded.");
+  SPDLOG_DEBUG("Config loaded. Calling listeners.");
+  MqttManagerConfig::_config_loaded_listeners();
+}
+
+void MqttManagerConfig::attach_config_added_listener(void (*callback)(nlohmann::json *config)) {
+  MqttManagerConfig::_config_added_listener.connect(callback);
+}
+
+void MqttManagerConfig::dettach_config_added_listener(void (*callback)(nlohmann::json *config)) {
+  MqttManagerConfig::_config_added_listener.disconnect(callback);
+}
+
+void MqttManagerConfig::attach_config_removed_listener(void (*callback)(nlohmann::json *config)) {
+  MqttManagerConfig::_config_removed_listener.connect(callback);
+}
+
+void MqttManagerConfig::dettach_config_removed_listener(void (*callback)(nlohmann::json *config)) {
+  MqttManagerConfig::_config_removed_listener.disconnect(callback);
+}
+
+void MqttManagerConfig::attach_config_loaded_listener(void (*callback)()) {
+  MqttManagerConfig::_config_loaded_listeners.connect(callback);
+}
+
+void MqttManagerConfig::dettach_config_loaded_listener(void (*callback)()) {
+  MqttManagerConfig::_config_loaded_listeners.disconnect(callback);
 }

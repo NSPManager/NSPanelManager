@@ -131,3 +131,5 @@ bool HomeAssistantLight::home_assistant_event_callback(nlohmann::json &data) {
   }
   return false;
 }
+
+HomeAssistantLight::~HomeAssistantLight() {}

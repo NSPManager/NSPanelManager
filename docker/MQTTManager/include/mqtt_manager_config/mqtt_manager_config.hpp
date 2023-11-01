@@ -1,5 +1,6 @@
 #ifndef MQTTMANAGER_CONFIG_HPP
 #define MQTTMANAGER_CONFIG_HPP
+#include <boost/signals2.hpp>
 #include <list>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
@@ -44,8 +45,42 @@ public:
   static inline std::list<nlohmann::json> scenes_configs;
   static inline std::list<nlohmann::json> room_configs;
 
+  /**
+   * Attach a callback to be called when a new configuration has been added
+   */
+  static void attach_config_added_listener(void (*callback)(nlohmann::json *));
+
+  /**
+   * Detach a callback to be called when a new configuration has been added
+   */
+  static void dettach_config_added_listener(void (*callback)(nlohmann::json *));
+
+  /**
+   * Attach a callback to be called when existing configuration is being removed
+   */
+  static void attach_config_removed_listener(void (*callback)(nlohmann::json *));
+
+  /**
+   * Detach a callback to be called when existing configuration is being removed
+   */
+  static void dettach_config_removed_listener(void (*callback)(nlohmann::json *));
+
+  /**
+   * Attach a callback to be called when config has been fully loaded.
+   */
+  static void attach_config_loaded_listener(void (*callback)());
+
+  /**
+   * Detach a callback to be called when config has been fully loaded.
+   */
+  static void dettach_config_loaded_listener(void (*callback)());
+
 private:
   static void populate_settings_from_config(nlohmann::json &data);
+
+  static inline boost::signals2::signal<void(nlohmann::json *)> _config_added_listener;
+  static inline boost::signals2::signal<void(nlohmann::json *)> _config_removed_listener;
+  static inline boost::signals2::signal<void()> _config_loaded_listeners;
 };
 
 #endif // !MQTTMANAGER_CONFIG_HPP

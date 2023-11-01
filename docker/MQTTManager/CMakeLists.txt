@@ -23,7 +23,8 @@ find_package(nlohmann_json REQUIRED)
 find_package(ixwebsocket REQUIRED)
 find_package(tz REQUIRED)
 find_package(inja REQUIRED)
-
+FIND_PACKAGE(Boost COMPONENTS program_options REQUIRED )
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 
 add_library(MQTT_Manager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.hpp)
 set_target_properties(MQTT_Manager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.hpp)
@@ -67,12 +68,12 @@ target_link_libraries(MQTTManager_Room spdlog::spdlog nlohmann_json::nlohmann_js
 add_library(MQTTManager_EntityManager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)
 set_target_properties(MQTTManager_EntityManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)
 target_include_directories(MQTTManager_EntityManager PUBLIC ${CURL_INCLUDE_DIR} ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_EntityManager ${CURL_LIBRARIES} spdlog::spdlog MQTT_Manager MQTTManager_NSPanel MQTTManager_Light MQTTManager_WebsocketServer)
+target_link_libraries(MQTTManager_EntityManager ${CURL_LIBRARIES} spdlog::spdlog MQTT_Manager MQTTManager_NSPanel MQTTManager_Light MQTTManager_WebsocketServer ${Boost_LIBRARIES})
 
 add_library(MQTTManager_Config SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.hpp)
 set_target_properties(MQTTManager_Config PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.hpp)
 target_include_directories(MQTTManager_Config PUBLIC ${CURL_INCLUDE_DIR} ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Config spdlog::spdlog ${CURL_LIBRARIES} nlohmann_json::nlohmann_json)
+target_link_libraries(MQTTManager_Config spdlog::spdlog ${CURL_LIBRARIES} nlohmann_json::nlohmann_json ${Boost_LIBRARIES})
 
 
 add_executable(${PROJECT_NAME} src/main.cpp)

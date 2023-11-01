@@ -51,11 +51,12 @@ def get_mqtt_manager_config(request):
     return_json["lights"] = {}
     for light in Light.objects.all():
         lightConfig = {}
+        lightConfig["type"] = "light"
         lightConfig["id"] = light.id
         lightConfig["name"] = light.friendly_name
         lightConfig["room_name"] = light.room.friendly_name
         lightConfig["room_id"] = light.room.id
-        lightConfig["type"] = light.type
+        lightConfig["light_type"] = light.type
         lightConfig["can_dim"] = light.can_dim
         lightConfig["can_color_temperature"] = light.can_color_temperature
         lightConfig["can_rgb"] = light.can_rgb
@@ -71,6 +72,7 @@ def get_mqtt_manager_config(request):
     return_json["nspanels"] = {}
     for panel in NSPanel.objects.all():
         panel_config = {
+            "type": "nspanel",
             "id": panel.id,
             "mac": panel.mac_address,
             "name": panel.friendly_name,
@@ -82,7 +84,8 @@ def get_mqtt_manager_config(request):
     return_json["scenes"] = []
     for scene in Scene.objects.all():
         scene_info = {
-            "type": "nspm_scene",
+            "type": "scene",
+            "scene_type": "nspm_scene",
             "scene_id": scene.id,
             "scene_name": scene.friendly_name,
             "room_name": scene.room.friendly_name if scene.room != None else None,
@@ -91,6 +94,7 @@ def get_mqtt_manager_config(request):
         }
         for state in scene.lightstate_set.all():
             scene_info["light_states"].append({
+                "type": "light_state",
                 "light_id": state.light.id,
                 "light_type": state.light.type,
                 "color_mode": state.color_mode,

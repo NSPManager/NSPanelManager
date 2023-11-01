@@ -87,6 +87,8 @@ public:
   MQTT_MANAGER_ENTITY_TYPE get_type();
   MQTT_MANAGER_ENTITY_CONTROLLER get_controller();
 
+  virtual ~Light() {}
+
 protected:
   uint _id;
   std::string _name;

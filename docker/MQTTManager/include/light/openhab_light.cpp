@@ -357,3 +357,5 @@ std::string OpenhabLight::_openhab_rest_get(std::string &item) {
   curl_slist_free_all(headers);
   return response_data;
 }
+
+OpenhabLight::~OpenhabLight() {}
