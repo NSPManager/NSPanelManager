@@ -7,7 +7,7 @@
 #include <spdlog/spdlog.h>
 
 NSPMScene::NSPMScene(nlohmann::json &data) {
-  this->_id = data["scene_id"];
+  this->_id = data["id"];
   this->_name = data["scene_name"];
   if (!data["room_id"].is_null()) {
     this->_is_global_scene = false;
@@ -67,9 +67,32 @@ void NSPMScene::post_init() {
       if (light != nullptr) {
         SPDLOG_DEBUG("Attached light {}::{} to light state attached to scene {}::{}.", light->get_id(), light->get_name(), this->_id, this->_name);
         state._light = light;
+        light->attach_delete_callback(this->light_destroyed_callback);
       } else {
         SPDLOG_ERROR("Did not find any light matching a light state for scene {}::{}.", this->_id, this->_name);
       }
+    }
+  }
+}
+
+void NSPMScene::remove_light(Light *light) {
+  auto it = this->_light_states.begin();
+  while (it != this->_light_states.end()) {
+    if (it->light_id == light->get_id()) {
+      SPDLOG_INFO("Removing light state for light {}::{}", light->get_id(), light->get_name());
+      this->_light_states.erase(it++);
+    } else {
+      it++;
+    }
+  }
+}
+
+void NSPMScene::light_destroyed_callback(Light *light) {
+  std::list<MqttManagerEntity *> all_nspm_scenes = EntityManager::get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE::SCENE);
+  for (MqttManagerEntity *entity : all_nspm_scenes) {
+    NSPMScene *scene = dynamic_cast<NSPMScene *>(entity);
+    if (scene != nullptr) {
+      scene->remove_light(light);
     }
   }
 }

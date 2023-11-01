@@ -29,6 +29,9 @@ public:
   void post_init();
   MQTT_MANAGER_ENTITY_TYPE get_type();
   MQTT_MANAGER_ENTITY_CONTROLLER get_controller();
+  void remove_light(Light *light);
+
+  static void light_destroyed_callback(Light *light);
 
 private:
   bool _is_global_scene;

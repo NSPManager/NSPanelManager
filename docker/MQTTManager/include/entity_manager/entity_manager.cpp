@@ -125,7 +125,7 @@ void EntityManager::add_light(nlohmann::json &config) {
 }
 
 void EntityManager::add_scene(nlohmann::json &config) {
-  if (EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::SCENE, config["scene_id"]) == nullptr) {
+  if (EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::SCENE, config["id"]) == nullptr) {
     std::string scene_type = config["scene_type"];
     if (scene_type.compare("nspm_scene") == 0) {
       Scene *scene = new NSPMScene(config);

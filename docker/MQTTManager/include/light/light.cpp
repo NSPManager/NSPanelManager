@@ -140,3 +140,15 @@ void Light::post_init() {
     SPDLOG_ERROR("Found no room with ID: {}", this->_room_id);
   }
 }
+
+void Light::attach_delete_callback(void (*callback)(Light *)) {
+  this->_light_destroyed_callbacks.connect(callback);
+}
+
+void Light::detach_delete_callback(void (*callback)(Light *)) {
+  this->_light_destroyed_callbacks.disconnect(callback);
+}
+
+Light::~Light() {
+  this->_light_destroyed_callbacks(this);
+}

@@ -84,9 +84,9 @@ def get_mqtt_manager_config(request):
     return_json["scenes"] = []
     for scene in Scene.objects.all():
         scene_info = {
+            "id": scene.id,
             "type": "scene",
             "scene_type": "nspm_scene",
-            "scene_id": scene.id,
             "scene_name": scene.friendly_name,
             "room_name": scene.room.friendly_name if scene.room != None else None,
             "room_id": scene.room.id if scene.room != None else None,

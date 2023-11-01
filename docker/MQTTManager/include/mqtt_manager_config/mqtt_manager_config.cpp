@@ -1,8 +1,13 @@
 #include "mqtt_manager_config.hpp"
+#include <boost/stacktrace.hpp>
+#include <boost/stacktrace/frame.hpp>
+#include <boost/stacktrace/stacktrace_fwd.hpp>
 #include <cstddef>
 #include <cstdlib>
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <exception>
+#include <iostream>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
@@ -147,17 +152,21 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     }
   }
 
-  SPDLOG_DEBUG("Checking for removed lights.");
-  auto it = MqttManagerConfig::light_configs.begin();
-  while (it != MqttManagerConfig::light_configs.end()) {
-    bool exists = ITEM_IN_LIST(json_lights, (*it));
-    if (!exists) {
-      SPDLOG_DEBUG("Removing light config as it doesn't exist in config anymore.");
-      MqttManagerConfig::_config_removed_listener(&(*it));
-      MqttManagerConfig::light_configs.erase(it++);
-    } else {
-      ++it;
+  try {
+    SPDLOG_DEBUG("Checking for removed lights.");
+    auto it = MqttManagerConfig::light_configs.begin();
+    while (it != MqttManagerConfig::light_configs.end()) {
+      bool exists = ITEM_IN_LIST(json_lights, (*it));
+      if (!exists) {
+        SPDLOG_DEBUG("Removing light config as it doesn't exist in config anymore.");
+        MqttManagerConfig::_config_removed_listener(&(*it));
+        MqttManagerConfig::light_configs.erase(it++);
+      } else {
+        ++it;
+      }
     }
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Chaught exception when checking for any removed lights. Exception: {}", e.what());
   }
 
   SPDLOG_DEBUG("Loading NSPanels...");
@@ -171,18 +180,22 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     }
   }
 
-  SPDLOG_DEBUG("Checking for removed NSPanels.");
-  auto nit = MqttManagerConfig::nspanel_configs.begin();
-  while (nit != MqttManagerConfig::nspanel_configs.end()) {
-    bool exists = ITEM_IN_LIST(json_nspanels, (*nit));
-    if (!exists) {
-      SPDLOG_DEBUG("Removing NSPanel config as it doesn't exist in config anymore.");
-      MqttManagerConfig::_config_removed_listener(&(*nit));
-      MqttManagerConfig::nspanel_configs.erase(nit++);
-      delete &nit;
-    } else {
-      ++nit;
+  try {
+    SPDLOG_DEBUG("Checking for removed NSPanels.");
+    auto nit = MqttManagerConfig::nspanel_configs.begin();
+    while (nit != MqttManagerConfig::nspanel_configs.end()) {
+      bool exists = ITEM_IN_LIST(json_nspanels, (*nit));
+      if (!exists) {
+        SPDLOG_DEBUG("Removing NSPanel config as it doesn't exist in config anymore.");
+        MqttManagerConfig::_config_removed_listener(&(*nit));
+        MqttManagerConfig::nspanel_configs.erase(nit++);
+        delete &nit;
+      } else {
+        ++nit;
+      }
     }
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Chaught exception when checking for any removed NSPanels. Exception: {}", e.what());
   }
 
   SPDLOG_DEBUG("Loading Scenes...");
@@ -196,17 +209,21 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     }
   }
 
-  SPDLOG_DEBUG("Checking for removed scenes.");
-  auto sit = MqttManagerConfig::scenes_configs.begin();
-  while (sit != MqttManagerConfig::scenes_configs.end()) {
-    bool exists = ITEM_IN_LIST(json_scenes, (*sit));
-    if (!exists) {
-      SPDLOG_DEBUG("Removing scene config as it doesn't exist in config anymore.");
-      MqttManagerConfig::_config_removed_listener(&(*sit));
-      MqttManagerConfig::scenes_configs.erase(sit++);
-    } else {
-      ++sit;
+  try {
+    SPDLOG_DEBUG("Checking for removed scenes.");
+    auto sit = MqttManagerConfig::scenes_configs.begin();
+    while (sit != MqttManagerConfig::scenes_configs.end()) {
+      bool exists = ITEM_IN_LIST(json_scenes, (*sit));
+      if (!exists) {
+        SPDLOG_DEBUG("Removing scene config as it doesn't exist in config anymore.");
+        MqttManagerConfig::_config_removed_listener(&(*sit));
+        MqttManagerConfig::scenes_configs.erase(sit++);
+      } else {
+        ++sit;
+      }
     }
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Chaught exception when checking for any removed scenes. Exception: {}", e.what());
   }
 
   SPDLOG_DEBUG("Loading Rooms...");
@@ -220,17 +237,21 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     }
   }
 
-  SPDLOG_DEBUG("Checking for removed rooms.");
-  auto rit = MqttManagerConfig::room_configs.begin();
-  while (rit != MqttManagerConfig::room_configs.end()) {
-    bool exists = ITEM_IN_LIST(json_rooms, (*rit));
-    if (!exists) {
-      SPDLOG_DEBUG("Removing room config as it doesn't exist in config anymore.");
-      MqttManagerConfig::_config_removed_listener(&(*rit));
-      MqttManagerConfig::room_configs.erase(rit++);
-    } else {
-      ++rit;
+  try {
+    SPDLOG_DEBUG("Checking for removed rooms.");
+    auto rit = MqttManagerConfig::room_configs.begin();
+    while (rit != MqttManagerConfig::room_configs.end()) {
+      bool exists = ITEM_IN_LIST(json_rooms, (*rit));
+      if (!exists) {
+        SPDLOG_DEBUG("Removing room config as it doesn't exist in config anymore.");
+        MqttManagerConfig::_config_removed_listener(&(*rit));
+        MqttManagerConfig::room_configs.erase(rit++);
+      } else {
+        ++rit;
+      }
     }
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Chaught exception when checking for any removed rooms. Exception: {}", e.what());
   }
 
   SPDLOG_DEBUG("Config loaded. Calling listeners.");

@@ -22,6 +22,7 @@ void sigusr1_handler(int signal) {
   }
 
   MqttManagerConfig::load();
+  MQTT_Manager::publish("nspanel/config/reload", "1");
 }
 
 int main(void) {

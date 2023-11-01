@@ -2,6 +2,7 @@
 #define MQTT_MANAGER_LIGHT
 
 #include "room/room.hpp"
+#include <boost/signals2.hpp>
 #include <cstdint>
 #include <entity/entity.hpp>
 #include <nlohmann/json.hpp>
@@ -84,10 +85,20 @@ public:
    */
   void post_init();
 
+  /**
+   * Attach a callback for when the light is destroyed
+   */
+  void attach_delete_callback(void (*callback)(Light *light));
+
+  /**
+   * Detach a callback for when the light is destroyed
+   */
+  void detach_delete_callback(void (*callback)(Light *light));
+
   MQTT_MANAGER_ENTITY_TYPE get_type();
   MQTT_MANAGER_ENTITY_CONTROLLER get_controller();
 
-  virtual ~Light() {}
+  ~Light();
 
 protected:
   uint _id;
@@ -117,6 +128,8 @@ protected:
   std::string _mqtt_kelvin_topic;
   std::string _mqtt_hue_topic;
   std::string _mqtt_saturation_topic;
+
+  boost::signals2::signal<void(Light *)> _light_destroyed_callbacks;
 };
 
 #endif // !MQTT_MANAGER_LIGHT
