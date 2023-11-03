@@ -95,15 +95,17 @@ void MqttManagerConfig::load() {
 
       /* Perform the request, res will get the return code */
       res = curl_easy_perform(curl);
+      long http_code;
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
       /* Check for errors */
-      if (res == CURLE_OK && !response_data.empty()) {
+      if (res == CURLE_OK && !response_data.empty() && http_code == 200) {
         SPDLOG_DEBUG("Got config data. Processing config.");
         nlohmann::json data = nlohmann::json::parse(response_data);
         MqttManagerConfig::populate_settings_from_config(data);
         break; // Exit loop as we have gather and processed config.
       } else {
-        SPDLOG_ERROR("curl_easy_perform() failed, got code: {}. Will retry.", curl_easy_strerror(res));
-        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+        SPDLOG_ERROR("curl_easy_perform() failed, got code: '{}' with status code: {}. Will retry.", curl_easy_strerror(res), http_code);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2500));
       }
 
       /* always cleanup */
