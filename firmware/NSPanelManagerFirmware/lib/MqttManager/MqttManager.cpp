@@ -114,6 +114,7 @@ void MqttManager::_subscribeToTopic(SubscribeTopic &topic) {
   if (MqttManager::_mqttClient->connected()) {
     LOG_TRACE("Subscribing to topic ", topic.topic.c_str());
     MqttManager::_mqttClient->subscribe(topic.topic.c_str());
+    MqttManager::_mqttClient->loop();
   }
 }
 

@@ -131,9 +131,9 @@ void Light::set_hsb(uint16_t hue, uint8_t saturation, uint8_t brightness) {
 }
 
 void Light::post_init() {
-  MqttManagerEntity *room_entity = EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::ROOM, this->_room_id);
+  Room *room_entity = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, this->_room_id);
   if (room_entity != nullptr) {
-    this->_room = dynamic_cast<Room *>(room_entity);
+    this->_room = room_entity;
     this->_room->attach_entity(this);
     SPDLOG_INFO("Attaching light {}::{} to room {}::{}", this->_id, this->_name, this->_room->get_id(), this->_room->get_name());
   } else {

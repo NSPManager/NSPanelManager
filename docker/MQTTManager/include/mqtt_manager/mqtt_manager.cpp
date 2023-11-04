@@ -1,4 +1,5 @@
 #include "mqtt_manager.hpp"
+#include <boost/signals2.hpp>
 #include <cctype>
 #include <chrono>
 #include <cstdint>
@@ -16,6 +17,7 @@
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 void MQTT_Manager::connect() {
@@ -43,6 +45,7 @@ void MQTT_Manager::connect() {
 
     SPDLOG_DEBUG("Subscribing to topics...");
     MQTT_Manager::_mqtt_client->subscribe(MQTT_Manager::_get_subscribe_topics(), MQTT_Manager::_get_subscribe_topics_qos());
+    MQTT_Manager::_resubscribe();
 
     // Consume messages
     while (true) {
@@ -65,10 +68,7 @@ void MQTT_Manager::connect() {
     SPDLOG_INFO("OK");
   } catch (const mqtt::exception &exc) {
     std::cerr << exc.what() << std::endl;
-    // return 1;
   }
-
-  // return 0;
 }
 
 bool MQTT_Manager::is_connected() {
@@ -79,15 +79,38 @@ bool MQTT_Manager::is_connected() {
   }
 }
 
-void MQTT_Manager::subscribe() {
+void MQTT_Manager::subscribe(std::string topic, int qos, void (*callback)(const std::string &, const std::string &)) {
+  MQTT_Manager::_mqtt_callbacks[topic].connect(callback);
+  SPDLOG_DEBUG("Adding '{}' to the list of topics to subscribe to.", topic);
+  MQTT_Manager::_subscribed_topics[topic] = qos;
+  if (MQTT_Manager::is_connected()) {
+    SPDLOG_DEBUG("MQTT is connected, subscribing to MQTT topic '{}'.", topic);
+    MQTT_Manager::_mqtt_client->subscribe(topic, qos);
+  }
+}
+
+void MQTT_Manager::subscribe(std::string topic, void (*callback)(const std::string &, const std::string &)) {
+  MQTT_Manager::subscribe(topic, 1, callback);
+}
+
+void MQTT_Manager::subscribe(const char *topic, void (*callback)(const std::string &, const std::string &)) {
+  MQTT_Manager::subscribe(std::string(topic), 1, callback);
+}
+
+void MQTT_Manager::subscribe(const char *topic, int qos, void (*callback)(const std::string &, const std::string &)) {
+  MQTT_Manager::subscribe(std::string(topic), qos, callback);
+}
+
+void MQTT_Manager::_resubscribe() {
+  SPDLOG_DEBUG("Subscribing to registered MQTT topics.");
+  for (auto mqtt_topic_pair : MQTT_Manager::_subscribed_topics) {
+    MQTT_Manager::_mqtt_client->subscribe(mqtt_topic_pair.first, mqtt_topic_pair.second);
+  }
 }
 
 const std::vector<std::string> MQTT_Manager::_get_subscribe_topics() {
   std::vector<std::string> subscribe_topics;
-  subscribe_topics.push_back("nspanel/mqttmanager/command");
   subscribe_topics.push_back("nspanel/+/log");
-  subscribe_topics.push_back("nspanel/+/status");
-  subscribe_topics.push_back("nspanel/+/status_report");
   subscribe_topics.push_back("nspanel/scenes/room/+/+/save");
   subscribe_topics.push_back("nspanel/scenes/room/+/+/activate");
   subscribe_topics.push_back("nspanel/scenes/global/+/save");
@@ -103,14 +126,17 @@ const std::vector<int> MQTT_Manager::_get_subscribe_topics_qos() {
   subscribe_topics.push_back(1);
   subscribe_topics.push_back(1);
   subscribe_topics.push_back(1);
-  subscribe_topics.push_back(1);
-  subscribe_topics.push_back(1);
-  subscribe_topics.push_back(1);
   // subscribe_topics.push_back(1);
   return subscribe_topics;
 }
 
 void MQTT_Manager::_process_mqtt_message(const std::string topic, const std::string message) {
+  for (auto mqtt_topic_signal_pair : MQTT_Manager::_mqtt_callbacks) {
+    if (mqtt_topic_signal_pair.first.compare(topic) == 0) {
+      MQTT_Manager::_mqtt_callbacks[mqtt_topic_signal_pair.first](topic, message);
+    }
+  }
+
   try {
     bool message_handled = false;
     for (MQTT_Observer *observer : MQTT_Manager::_mqtt_observers) {

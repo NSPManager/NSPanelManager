@@ -69,7 +69,15 @@ public:
    * Get an item by the specified type that has the specified ID.
    * Return pointer to entity if found, otherwise a nullptr
    */
-  static MqttManagerEntity *get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE type, uint16_t id);
+  template <class EntityClass>
+  static EntityClass *get_entity_by_id(MQTT_MANAGER_ENTITY_TYPE type, int id) {
+    for (MqttManagerEntity *entity : EntityManager::_entities) {
+      if (entity->get_type() == type && entity->get_id() == id) {
+        return static_cast<EntityClass *>(entity);
+      }
+    }
+    return nullptr;
+  }
 
   /**
    * Get all entities matching the specified type that has the specified ID.
@@ -81,6 +89,11 @@ public:
    * Process MQTT Message. Return true if message was handled.
    */
   static bool mqtt_callback(const std::string &topic, const std::string &payload);
+
+  /**
+   * Callback from MQTT Manager for when a message was received on a subscribed topic.
+   */
+  static void mqtt_topic_callback(const std::string &topic, const std::string &payload);
 
   /**
    * Process any incomming message from the websocket. Return true if message was handled.

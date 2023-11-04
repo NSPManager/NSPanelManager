@@ -54,9 +54,9 @@ MQTT_MANAGER_ENTITY_CONTROLLER NSPMScene::get_controller() {
 
 void NSPMScene::post_init() {
   if (!this->_is_global_scene) {
-    MqttManagerEntity *room_entity = EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::ROOM, this->_room_id);
+    Room *room_entity = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, this->_room_id);
     if (room_entity != nullptr) {
-      this->_room = dynamic_cast<Room *>(room_entity);
+      this->_room = room_entity;
     } else {
       SPDLOG_ERROR("Did not find any room with room ID: {}. Will not continue loading.", this->_room_id);
       return;

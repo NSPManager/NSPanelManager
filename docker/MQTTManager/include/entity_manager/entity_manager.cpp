@@ -27,11 +27,14 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 }
 
 void EntityManager::init() {
-  MQTT_Manager::attach_observer(EntityManager::mqtt_callback);
+  // MQTT_Manager::attach_observer(EntityManager::mqtt_callback);
   WebsocketServer::attach_message_callback(EntityManager::websocket_callback);
   MqttManagerConfig::attach_config_added_listener(EntityManager::config_added);
   MqttManagerConfig::attach_config_removed_listener(EntityManager::config_removed);
   MqttManagerConfig::attach_config_loaded_listener(EntityManager::post_init_entities);
+  MQTT_Manager::subscribe("nspanel/mqttmanager/command", &EntityManager::mqtt_topic_callback);
+  MQTT_Manager::subscribe("nspanel/+/status", &EntityManager::mqtt_topic_callback);
+  MQTT_Manager::subscribe("nspanel/+/status_report", &EntityManager::mqtt_topic_callback);
 }
 
 void EntityManager::config_added(nlohmann::json *config) {
@@ -69,12 +72,12 @@ void EntityManager::config_removed(nlohmann::json *config) {
         EntityManager::_nspanels.remove(nspanel);
       }
     } else if (type.compare("scene") == 0) {
-      MqttManagerEntity *ptr = EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::SCENE, (*config)["id"]);
+      MqttManagerEntity *ptr = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, (*config)["id"]);
       if (ptr != nullptr) {
         EntityManager::remove_entity(ptr);
       }
     } else if (type.compare("room") == 0) {
-      MqttManagerEntity *ptr = EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::ROOM, (*config)["id"]);
+      MqttManagerEntity *ptr = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, (*config)["id"]);
       if (ptr != nullptr) {
         EntityManager::remove_entity(ptr);
       }
@@ -96,7 +99,7 @@ void EntityManager::detach_entity_added_listener(void (*listener)(MqttManagerEnt
 }
 
 void EntityManager::add_room(nlohmann::json &config) {
-  if (EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::ROOM, config["id"]) == nullptr) {
+  if (EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, config["id"]) == nullptr) {
     EntityManager::_entities.push_back(new Room(config));
   } else {
     int room_id = config["id"];
@@ -105,7 +108,7 @@ void EntityManager::add_room(nlohmann::json &config) {
 }
 
 void EntityManager::add_light(nlohmann::json &config) {
-  if (EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config["id"]) == nullptr) {
+  if (EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config["id"]) == nullptr) {
     std::string light_type = config["light_type"];
     if (light_type.compare("home_assistant") == 0) {
       HomeAssistantLight *light = new HomeAssistantLight(config);
@@ -125,7 +128,7 @@ void EntityManager::add_light(nlohmann::json &config) {
 }
 
 void EntityManager::add_scene(nlohmann::json &config) {
-  if (EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE::SCENE, config["id"]) == nullptr) {
+  if (EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, config["id"]) == nullptr) {
     std::string scene_type = config["scene_type"];
     if (scene_type.compare("nspm_scene") == 0) {
       Scene *scene = new NSPMScene(config);
@@ -181,15 +184,6 @@ void EntityManager::remove_entity(MqttManagerEntity *entity) {
   delete entity;
 }
 
-MqttManagerEntity *EntityManager::get_entity_by_type_and_id(MQTT_MANAGER_ENTITY_TYPE type, uint16_t id) {
-  for (MqttManagerEntity *entity : EntityManager::_entities) {
-    if (entity->get_type() == type && entity->get_id() == id) {
-      return entity;
-    }
-  }
-  return nullptr;
-}
-
 std::list<MqttManagerEntity *> EntityManager::get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE type) {
   std::list<MqttManagerEntity *> return_entities;
   for (MqttManagerEntity *entity : EntityManager::_entities) {
@@ -198,6 +192,11 @@ std::list<MqttManagerEntity *> EntityManager::get_all_entities_by_type(MQTT_MANA
     }
   }
   return return_entities;
+}
+
+void EntityManager::mqtt_topic_callback(const std::string &topic, const std::string &payload) {
+  SPDLOG_DEBUG("Got message on '{}'. Message: {}", topic, payload);
+  EntityManager::_process_message(topic, payload);
 }
 
 bool EntityManager::mqtt_callback(const std::string &topic, const std::string &payload) {
