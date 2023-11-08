@@ -712,7 +712,7 @@ bool NSPanel::_updateTFTOTA() {
     LOG_INFO("Starting upload using v1.1 protocol.");
     commandString = "whmi-wri ";
     commandString.append(std::to_string(file_size));
-    commandString.append(",1");
+    commandString.append(",");
     commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(",1");
   }
