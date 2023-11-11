@@ -30,10 +30,42 @@ NSPMScene::NSPMScene(nlohmann::json &data) {
 
 void NSPMScene::activate() {
   SPDLOG_ERROR("Activate scene not implemented.");
+  for (LightState state : this->_light_states) {
+    if (state._light != nullptr) {
+      if (state.color_mode.compare("dimmer") == 0) {
+        state._light->set_color_temperature(state.color_temperature);
+        if (state.brightness > 0) {
+          state._light->set_brightness(state.brightness);
+        } else {
+          state._light->turn_off();
+        }
+      } else if (state.color_mode.compare("color") == 0) {
+        state._light->set_hue(state.hue);
+        state._light->set_hue(state.saturation);
+        if (state.brightness > 0) {
+          state._light->set_brightness(state.brightness);
+        } else {
+          state._light->turn_off();
+        }
+
+      } else {
+        SPDLOG_ERROR("Trying to apply light state from scene with ID {} for light with ID {} but could not interpret color mode '{}'.", this->get_id(), state.light_id, state.color_mode);
+      }
+    } else {
+      SPDLOG_ERROR("Trying to apply light state from scene with ID {} for light with ID {} but could not find such a light.", this->get_id(), state.light_id);
+    }
+  }
 }
 
 void NSPMScene::save() {
   SPDLOG_ERROR("Save scene not implemented.");
+
+  // Update all light_states for lights.
+
+  nlohmann::json save_scene_data;
+  save_scene_data["scene_id"] = this->get_id();
+
+  // TODO: Array 'light_states' of {'light_id': 123, color_mode: abc, } and so on.
 }
 
 void NSPMScene::remove() {

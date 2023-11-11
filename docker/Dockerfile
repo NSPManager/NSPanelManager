@@ -20,7 +20,9 @@ RUN echo "alias ll='ls -lh --color=auto'" >> /etc/bash.bashrc
 
 WORKDIR /usr/src/app
 RUN pip install -r requirements.txt
-RUN conan profile detect --force && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf && sed -i "s|cppstd=gnu14|cppstd=gnu17|g" /root/.conan2/profiles/default
+RUN conan profile detect --force && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf
+RUN sed -i "s|cppstd=gnu14|cppstd=gnu17|g" /root/.conan2/profiles/default
+RUN sed -i "s|build_type=Release|build_type=Debug|g" /root/.conan2/profiles/default
 
 EXPOSE 8000
 CMD ["/bin/bash", "./run_uwsgi.sh"]

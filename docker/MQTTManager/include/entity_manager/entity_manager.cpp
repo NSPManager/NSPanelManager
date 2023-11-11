@@ -6,11 +6,16 @@
 #include "scenes/nspm_scene.hpp"
 #include "scenes/scene.hpp"
 #include "websocket_server/websocket_server.hpp"
+#include <boost/stacktrace.hpp>
+#include <boost/stacktrace/frame.hpp>
+#include <boost/stacktrace/stacktrace_fwd.hpp>
 #include <cstdint>
 #include <cstdlib>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <entity_manager/entity_manager.hpp>
+#include <exception>
+#include <iostream>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <nlohmann/json.hpp>
@@ -108,54 +113,70 @@ void EntityManager::add_room(nlohmann::json &config) {
 }
 
 void EntityManager::add_light(nlohmann::json &config) {
-  if (EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config["id"]) == nullptr) {
-    std::string light_type = config["light_type"];
-    if (light_type.compare("home_assistant") == 0) {
-      HomeAssistantLight *light = new HomeAssistantLight(config);
-      EntityManager::_lights.push_back(light);
-      EntityManager::add_entity(light);
-    } else if (light_type.compare("openhab") == 0) {
-      OpenhabLight *light = new OpenhabLight(config);
-      EntityManager::_lights.push_back(light);
-      EntityManager::add_entity(light);
+  try {
+    if (EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config["id"]) == nullptr) {
+      std::string light_type = config["light_type"];
+      if (light_type.compare("home_assistant") == 0) {
+        HomeAssistantLight *light = new HomeAssistantLight(config);
+        EntityManager::_lights.push_back(light);
+        EntityManager::add_entity(light);
+      } else if (light_type.compare("openhab") == 0) {
+        OpenhabLight *light = new OpenhabLight(config);
+        EntityManager::_lights.push_back(light);
+        EntityManager::add_entity(light);
+      } else {
+        SPDLOG_ERROR("Unknown light type '{}'. Will ignore entity.", light_type);
+      }
     } else {
-      SPDLOG_ERROR("Unknown light type '{}'. Will ignore entity.", light_type);
+      int light_id = config["id"];
+      SPDLOG_ERROR("A light with ID {} already exists.", light_id);
     }
-  } else {
-    int light_id = config["id"];
-    SPDLOG_ERROR("A light with ID {} already exists.", light_id);
+    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
   }
 }
 
 void EntityManager::add_scene(nlohmann::json &config) {
-  if (EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, config["id"]) == nullptr) {
-    std::string scene_type = config["scene_type"];
-    if (scene_type.compare("nspm_scene") == 0) {
-      Scene *scene = new NSPMScene(config);
-      EntityManager::add_entity(scene);
+  try {
+    if (EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, config["id"]) == nullptr) {
+      std::string scene_type = config["scene_type"];
+      if (scene_type.compare("nspm_scene") == 0) {
+        Scene *scene = new NSPMScene(config);
+        EntityManager::add_entity(scene);
+      }
+      // TODO: Implement Home Assistant and Openhab scenes.
+    } else {
+      int scene_id = config["id"];
+      SPDLOG_ERROR("A scene with ID {} already exists.", scene_id);
     }
-    // TODO: Implement Home Assistant and Openhab scenes.
-  } else {
-    int scene_id = config["id"];
-    SPDLOG_ERROR("A scene with ID {} already exists.", scene_id);
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
   }
 }
 
 void EntityManager::add_nspanel(nlohmann::json &config) {
-  int panel_id = config["id"];
-  for (nlohmann::json config : MqttManagerConfig::nspanel_configs) {
-    bool already_exists = false;
-    for (NSPanel *panel : EntityManager::_nspanels) {
-      if (panel->get_id() == panel_id) {
-        already_exists = true;
-        break;
+  try {
+    int panel_id = config["id"];
+    for (nlohmann::json config : MqttManagerConfig::nspanel_configs) {
+      bool already_exists = false;
+      for (NSPanel *panel : EntityManager::_nspanels) {
+        if (panel->get_id() == panel_id) {
+          already_exists = true;
+          break;
+        }
+      }
+      if (!already_exists) {
+        EntityManager::_nspanels.push_back(new NSPanel(config));
+      } else {
+        SPDLOG_ERROR("A NSPanel with ID {} already exists.", panel_id);
       }
     }
-    if (!already_exists) {
-      EntityManager::_nspanels.push_back(new NSPanel(config));
-    } else {
-      SPDLOG_ERROR("A NSPanel with ID {} already exists.", panel_id);
-    }
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
   }
 }
 
@@ -322,6 +343,23 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
           // TODO: Create pending NSPanels
           SPDLOG_INFO("Panel is not registered tp manager, adding panel but as 'pending accept' status.");
         }
+      } else if (command.compare("activate_scene") == 0) {
+        int scene_id = data["scene_id"];
+        Scene *scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
+        if (scene != nullptr) {
+          scene->activate();
+        } else {
+          SPDLOG_ERROR("No scene with ID {} exists.", scene_id);
+        }
+      } else if (command.compare("save_scene") == 0) {
+        int scene_id = data["scene_id"];
+        Scene *scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
+        if (scene != nullptr) {
+          scene->save();
+        } else {
+          SPDLOG_ERROR("No scene with ID {} exists.", scene_id);
+        }
+
       } else {
         SPDLOG_ERROR("Got command but no handler for it exists. Command: {}", command);
       }

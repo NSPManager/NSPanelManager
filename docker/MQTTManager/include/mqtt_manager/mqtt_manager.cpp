@@ -115,7 +115,6 @@ const std::vector<std::string> MQTT_Manager::_get_subscribe_topics() {
   subscribe_topics.push_back("nspanel/scenes/room/+/+/activate");
   subscribe_topics.push_back("nspanel/scenes/global/+/save");
   subscribe_topics.push_back("nspanel/scenes/global/+/activate");
-  // subscribe_topics.push_back("nspanel/entities/#");
   return subscribe_topics;
 }
 
@@ -126,7 +125,6 @@ const std::vector<int> MQTT_Manager::_get_subscribe_topics_qos() {
   subscribe_topics.push_back(1);
   subscribe_topics.push_back(1);
   subscribe_topics.push_back(1);
-  // subscribe_topics.push_back(1);
   return subscribe_topics;
 }
 

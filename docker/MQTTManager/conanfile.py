@@ -19,3 +19,6 @@ class CompressorRecipe(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/3.22.6")
 
+    def configure(self):
+        self.options["boost"].without_stacktrace = False
+        self.options["boost"].with_stacktrace_backtrace = True

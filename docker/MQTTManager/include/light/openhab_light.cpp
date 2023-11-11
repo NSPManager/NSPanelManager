@@ -41,9 +41,9 @@ OpenhabLight::OpenhabLight(nlohmann::json &init_data) : Light(init_data) {
     this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH;
     this->_openhab_on_off_item = init_data["openhab_item_switch"];
   } else {
+    SPDLOG_ERROR("Got unknown OpenHAB control mode ({}) for light {}::{}. Will assume switch.", openhab_control_mode, this->_id, this->_name);
     this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH;
     this->_openhab_on_off_item = init_data["openhab_item_switch"];
-    SPDLOG_ERROR("Got unknown OpenHAB control mode ({}) for light {}::{}. Will assume switch.", openhab_control_mode, this->_id, this->_name);
   }
 
   if (this->_can_color_temperature) {

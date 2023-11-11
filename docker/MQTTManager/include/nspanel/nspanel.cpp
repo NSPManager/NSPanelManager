@@ -19,7 +19,7 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
   this->_ip_address = init_data["address"];
   this->_is_us_panel = std::string(init_data["is_us_panel"]).compare("True") == 0;
   this->_state = MQTT_MANAGER_NSPANEL_STATE::UNKNOWN;
-  this->_rssi = -100;
+  this->_rssi = -255;
   this->_heap_used_pct = 0;
   this->_nspanel_warnings = "";
   this->_temperature = -255;

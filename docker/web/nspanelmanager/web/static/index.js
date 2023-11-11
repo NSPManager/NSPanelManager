@@ -181,6 +181,13 @@ function update_nspanel_status(data) {
         );
         $("#panel_header_text_" + data.mac_address).text("Offline");
         $("#panel_header_" + data.mac_address).css("width", "100%");
+      } else if (data.state == "unknown") {
+        $("#panel_header_" + data.mac_address).attr(
+          "class",
+          "nspanel-status-header has-background-grey"
+        );
+        $("#panel_header_text_" + data.mac_address).text("Unknown");
+        $("#panel_header_" + data.mac_address).css("width", "100%");
       } else {
         // Update panel tag to show update progress if any
         update_text = "";
