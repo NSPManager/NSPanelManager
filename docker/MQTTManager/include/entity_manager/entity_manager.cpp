@@ -131,7 +131,6 @@ void EntityManager::add_light(nlohmann::json &config) {
       int light_id = config["id"];
       SPDLOG_ERROR("A light with ID {} already exists.", light_id);
     }
-    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
     SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
@@ -234,140 +233,150 @@ bool EntityManager::mqtt_callback(const std::string &topic, const std::string &p
 }
 
 bool EntityManager::_process_message(const std::string &topic, const std::string &payload) {
-  if (topic.compare("nspanel/mqttmanager/command") == 0) {
-    SPDLOG_DEBUG("Received command payload: {}", payload);
-    nlohmann::json data = nlohmann::json::parse(payload);
-    std::string mac_origin = data["mac_origin"];
-    if (data.contains("method")) {
-      NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_origin);
-      std::string command_method = data["method"];
-      if (command_method.compare("set") == 0) {
-        std::string command_set_attribute = data["attribute"];
-        if (command_set_attribute.compare("brightness") == 0) {
-          std::vector<uint> entity_ids = data["entity_ids"];
-          uint8_t new_brightness = data["brightness"];
-          for (uint entity_id : entity_ids) {
-            Light *light = EntityManager::get_light_by_id(entity_id);
-            if (light != nullptr) {
-              if (new_brightness != 0) {
-                light->set_brightness(new_brightness);
-                light->turn_on();
-              } else {
-                light->turn_off();
+  try {
+    if (topic.compare("nspanel/mqttmanager/command") == 0) {
+      SPDLOG_DEBUG("Received command payload: {}", payload);
+      nlohmann::json data = nlohmann::json::parse(payload);
+      if (!data.contains("mac_origin")) {
+        SPDLOG_ERROR("Command payload did not contain a 'mac_origin' attribute. Will cancel processing.");
+        return true;
+      }
+      std::string mac_origin = data["mac_origin"];
+      if (data.contains("method")) {
+        NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_origin);
+        std::string command_method = data["method"];
+        if (command_method.compare("set") == 0) {
+          std::string command_set_attribute = data["attribute"];
+          if (command_set_attribute.compare("brightness") == 0) {
+            std::vector<uint> entity_ids = data["entity_ids"];
+            uint8_t new_brightness = data["brightness"];
+            for (uint entity_id : entity_ids) {
+              Light *light = EntityManager::get_light_by_id(entity_id);
+              if (light != nullptr) {
+                if (new_brightness != 0) {
+                  light->set_brightness(new_brightness);
+                  light->turn_on();
+                } else {
+                  light->turn_off();
+                }
               }
             }
-          }
-        } else if (command_set_attribute.compare("kelvin") == 0) {
-          std::vector<uint> entity_ids = data["entity_ids"];
-          uint new_kelvin = data["kelvin"];
-          for (uint entity_id : entity_ids) {
-            Light *light = EntityManager::get_light_by_id(entity_id);
-            if (light != nullptr) {
-              light->set_color_temperature(new_kelvin);
+          } else if (command_set_attribute.compare("kelvin") == 0) {
+            std::vector<uint> entity_ids = data["entity_ids"];
+            uint new_kelvin = data["kelvin"];
+            for (uint entity_id : entity_ids) {
+              Light *light = EntityManager::get_light_by_id(entity_id);
+              if (light != nullptr) {
+                light->set_color_temperature(new_kelvin);
+              }
             }
-          }
-        } else if (command_set_attribute.compare("hue") == 0) {
-          std::vector<uint> entity_ids = data["entity_ids"];
-          uint new_hue = data["hue"];
-          for (uint entity_id : entity_ids) {
-            Light *light = EntityManager::get_light_by_id(entity_id);
-            if (light != nullptr) {
-              light->set_hue(new_hue);
+          } else if (command_set_attribute.compare("hue") == 0) {
+            std::vector<uint> entity_ids = data["entity_ids"];
+            uint new_hue = data["hue"];
+            for (uint entity_id : entity_ids) {
+              Light *light = EntityManager::get_light_by_id(entity_id);
+              if (light != nullptr) {
+                light->set_hue(new_hue);
+              }
             }
-          }
-        } else if (command_set_attribute.compare("saturation") == 0) {
-          std::vector<uint> entity_ids = data["entity_ids"];
-          uint new_saturation = data["saturation"];
-          for (uint entity_id : entity_ids) {
-            Light *light = EntityManager::get_light_by_id(entity_id);
-            if (light != nullptr) {
-              light->set_saturation(new_saturation);
+          } else if (command_set_attribute.compare("saturation") == 0) {
+            std::vector<uint> entity_ids = data["entity_ids"];
+            uint new_saturation = data["saturation"];
+            for (uint entity_id : entity_ids) {
+              Light *light = EntityManager::get_light_by_id(entity_id);
+              if (light != nullptr) {
+                light->set_saturation(new_saturation);
+              }
             }
+          } else {
+            SPDLOG_ERROR("Unknown attribute '{}' in set-command request.", command_set_attribute);
           }
         } else {
-          SPDLOG_ERROR("Unknown attribute '{}' in set-command request.", command_set_attribute);
+          SPDLOG_ERROR("Unknown method. Payload: {}", payload);
         }
-      } else {
-        SPDLOG_ERROR("Unknown method. Payload: {}", payload);
-      }
-    } else if (data.contains("command")) {
-      std::string command = data["command"];
-      if (command.compare("register_request") == 0) {
-        std::string mac_address = data["mac_origin"];
-        std::string name = data["friendly_name"];
-        SPDLOG_INFO("Got register request from NSPanel with name {} and MAC: {}", name, mac_address);
-        NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_address);
-        if (panel != nullptr) {
-          std::string nspanel_command_topic = "nspanel/";
-          nspanel_command_topic.append(name);
-          nspanel_command_topic.append("/command");
+      } else if (data.contains("command")) {
+        std::string command = data["command"];
+        if (command.compare("register_request") == 0) {
+          std::string mac_address = data["mac_origin"];
+          std::string name = data["friendly_name"];
+          SPDLOG_INFO("Got register request from NSPanel with name {} and MAC: {}", name, mac_address);
+          NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_address);
+          if (panel != nullptr) {
+            std::string nspanel_command_topic = "nspanel/";
+            nspanel_command_topic.append(name);
+            nspanel_command_topic.append("/command");
 
-          // TODO: Send HTTP POST request to manager with new details from panel
+            // TODO: Send HTTP POST request to manager with new details from panel
 
-          CURL *curl;
-          CURLcode res;
-          curl = curl_easy_init();
-          if (curl) {
-            std::string response_data;
-            SPDLOG_INFO("Sending registration data to Django for database management.");
-            curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:8000/api/register_nspanel");
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
+            CURL *curl;
+            CURLcode res;
+            curl = curl_easy_init();
+            if (curl) {
+              std::string response_data;
+              SPDLOG_INFO("Sending registration data to Django for database management.");
+              curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:8000/api/register_nspanel");
+              curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+              curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
 
-            /* Perform the request, res will get the return code */
-            res = curl_easy_perform(curl);
-            long http_code;
-            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-            /* Check for errors */
-            if (res == CURLE_OK && http_code == 200) {
-              SPDLOG_INFO("Panel registration OK. Sending registration_accept.");
-              // Registration to manager was OK, send registration_accept to panel:
-              nlohmann::json response;
-              response["command"] = "register_accept";
-              response["address"] = MqttManagerConfig::manager_address.c_str();
-              response["port"] = MqttManagerConfig::manager_port;
-              MQTT_Manager::publish(nspanel_command_topic, response.dump());
+              /* Perform the request, res will get the return code */
+              res = curl_easy_perform(curl);
+              long http_code;
+              curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+              /* Check for errors */
+              if (res == CURLE_OK && http_code == 200) {
+                SPDLOG_INFO("Panel registration OK. Sending registration_accept.");
+                // Registration to manager was OK, send registration_accept to panel:
+                nlohmann::json response;
+                response["command"] = "register_accept";
+                response["address"] = MqttManagerConfig::manager_address.c_str();
+                response["port"] = MqttManagerConfig::manager_port;
+                MQTT_Manager::publish(nspanel_command_topic, response.dump());
+              } else {
+                SPDLOG_ERROR("curl_easy_perform() when registring panel failed, got code: {}.", curl_easy_strerror(res));
+                std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+              }
+
+              /* always cleanup */
+              curl_easy_cleanup(curl);
             } else {
-              SPDLOG_ERROR("curl_easy_perform() when registring panel failed, got code: {}.", curl_easy_strerror(res));
+              SPDLOG_ERROR("Failed to curl_easy_init(). Will try again.");
               std::this_thread::sleep_for(std::chrono::milliseconds(5000));
             }
 
-            /* always cleanup */
-            curl_easy_cleanup(curl);
           } else {
-            SPDLOG_ERROR("Failed to curl_easy_init(). Will try again.");
-            std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+            // TODO: Create pending NSPanels
+            SPDLOG_INFO("Panel is not registered tp manager, adding panel but as 'pending accept' status.");
+          }
+        } else if (command.compare("activate_scene") == 0) {
+          int scene_id = data["scene_id"];
+          Scene *scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
+          if (scene != nullptr) {
+            scene->activate();
+          } else {
+            SPDLOG_ERROR("No scene with ID {} exists.", scene_id);
+          }
+        } else if (command.compare("save_scene") == 0) {
+          int scene_id = data["scene_id"];
+          Scene *scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
+          if (scene != nullptr) {
+            scene->save();
+          } else {
+            SPDLOG_ERROR("No scene with ID {} exists.", scene_id);
           }
 
         } else {
-          // TODO: Create pending NSPanels
-          SPDLOG_INFO("Panel is not registered tp manager, adding panel but as 'pending accept' status.");
+          SPDLOG_ERROR("Got command but no handler for it exists. Command: {}", command);
         }
-      } else if (command.compare("activate_scene") == 0) {
-        int scene_id = data["scene_id"];
-        Scene *scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
-        if (scene != nullptr) {
-          scene->activate();
-        } else {
-          SPDLOG_ERROR("No scene with ID {} exists.", scene_id);
-        }
-      } else if (command.compare("save_scene") == 0) {
-        int scene_id = data["scene_id"];
-        Scene *scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
-        if (scene != nullptr) {
-          scene->save();
-        } else {
-          SPDLOG_ERROR("No scene with ID {} exists.", scene_id);
-        }
-
       } else {
-        SPDLOG_ERROR("Got command but no handler for it exists. Command: {}", command);
+        SPDLOG_ERROR("Received unknown message on command topic. Message: {}", payload);
       }
-    } else {
-      SPDLOG_ERROR("Received unknown message on command topic. Message: {}", payload);
+
+      return true;
     }
 
-    return true;
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
   }
 
   return false; // Message was not processed by us, keep looking.
