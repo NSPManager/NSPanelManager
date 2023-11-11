@@ -1,7 +1,4 @@
 #include "mqtt_manager_config.hpp"
-#include <boost/stacktrace.hpp>
-#include <boost/stacktrace/frame.hpp>
-#include <boost/stacktrace/stacktrace_fwd.hpp>
 #include <cstddef>
 #include <cstdlib>
 #include <curl/curl.h>
