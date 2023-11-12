@@ -47,6 +47,21 @@ public:
    */
   void detach_entity(MqttManagerEntity *entity);
 
+  /**
+   * Get all entities matching the specified type that has the specified ID.
+   * Return std::list of pointers to entities.
+   */
+  template <class EntityClass>
+  std::list<EntityClass *> get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE type) {
+    std::list<EntityClass *> entities;
+    for (MqttManagerEntity *entity : this->_entities) {
+      if (entity->get_type() == type) {
+        entities.push_back(static_cast<EntityClass *>(entity));
+      }
+    }
+    return entities;
+  }
+
 private:
   uint16_t _id;
   std::string _name;

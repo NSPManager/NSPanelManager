@@ -1,5 +1,6 @@
 #include "light.hpp"
 #include "entity_manager/entity_manager.hpp"
+#include <cstdint>
 #include <entity/entity.hpp>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
@@ -87,8 +88,14 @@ void Light::turn_on() {
 }
 
 void Light::turn_off() {
+  SPDLOG_DEBUG("Requested light {}::{} be turned off.", this->_id, this->_name);
   this->_requested_state = false;
+  SPDLOG_DEBUG("Send update to controller");
   this->send_state_update_to_controller();
+}
+
+bool Light::get_state() {
+  return this->_current_state;
 }
 
 void Light::set_brightness(uint8_t brightness) {
@@ -104,10 +111,18 @@ void Light::set_brightness(uint8_t brightness) {
   }
 }
 
+uint8_t Light::get_brightness() {
+  return this->_current_brightness;
+}
+
 void Light::set_color_temperature(uint color_temperature) {
   this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
   this->_requested_color_temperature = color_temperature;
   this->send_state_update_to_controller();
+}
+
+uint Light::get_color_temperature() {
+  return this->_current_color_temperature;
 }
 
 void Light::set_hue(uint16_t hue) {
@@ -116,10 +131,18 @@ void Light::set_hue(uint16_t hue) {
   this->send_state_update_to_controller();
 }
 
+uint16_t Light::get_hue() {
+  return this->_current_hue;
+}
+
 void Light::set_saturation(uint8_t saturation) {
   this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
   this->_requested_saturation = saturation;
   this->send_state_update_to_controller();
+}
+
+uint8_t Light::get_saturation() {
+  return this->_current_saturation;
 }
 
 void Light::set_hsb(uint16_t hue, uint8_t saturation, uint8_t brightness) {

@@ -81,9 +81,18 @@ public:
 
   /**
    * Get all entities matching the specified type that has the specified ID.
-   * Return std::list of MqttManagerEntity pointers.
+   * Return std::list of pointers to entities.
    */
-  static std::list<MqttManagerEntity *> get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE type);
+  template <class EntityClass>
+  static std::list<EntityClass *> get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE type) {
+    std::list<EntityClass *> entities;
+    for (MqttManagerEntity *entity : EntityManager::_entities) {
+      if (entity->get_type() == type) {
+        entities.push_back(static_cast<EntityClass *>(entity));
+      }
+    }
+    return entities;
+  }
 
   /**
    * Process MQTT Message. Return true if message was handled.

@@ -27,11 +27,21 @@ public:
   void turn_off();
 
   /**
+   * Get the on/off state of the light.
+   */
+  bool get_state();
+
+  /**
    * Set the dim level of a light. If the light is in RGB mode it will retain that mode
    * and set_hsb will be called with existing value for hue and saturation instead.
    * @param brightness: Light brightness 0-100
    */
   void set_brightness(uint8_t brightness);
+
+  /**
+   * Get the current brightness value of the light.
+   */
+  uint8_t get_brightness();
 
   /**
    * Set the color temperature of a light. If the light is in RGB mode it will transission to normal mode.
@@ -40,16 +50,31 @@ public:
   void set_color_temperature(uint color_temperature);
 
   /**
+   * Get the color temperature of the light.
+   */
+  uint get_color_temperature();
+
+  /**
    * Set the Hue value of the light.
    * @param hue: Hue level, 0 to 359
    */
   void set_hue(uint16_t hue);
 
   /**
+   * Get the Hue value of the light.
+   */
+  uint16_t get_hue();
+
+  /**
    * Set the Saturation value of the light.
    * @param saturation: Saturation level, 0 to 100
    */
   void set_saturation(uint8_t saturation);
+
+  /**
+   * Get the Saturation value of the light.
+   */
+  uint8_t get_saturation();
 
   /**
    * Set the Hue, Saturation and Brightness value of the light.

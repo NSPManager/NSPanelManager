@@ -26,7 +26,6 @@ def send_mqttmanager_reload_command():
     for proc in psutil.process_iter():
         if "/usr/src/app/nspm_mqttmanager" in proc.cmdline():
             print("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
-            print(proc.pid)
             os.kill(proc.pid, signal.SIGUSR1)
 
 def get_file_md5sum(filename):

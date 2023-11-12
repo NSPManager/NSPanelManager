@@ -6,6 +6,7 @@
 #include "scenes/nspm_scene.hpp"
 #include "scenes/scene.hpp"
 #include "websocket_server/websocket_server.hpp"
+#include <boost/exception/diagnostic_information.hpp>
 #include <boost/stacktrace.hpp>
 #include <boost/stacktrace/frame.hpp>
 #include <boost/stacktrace/stacktrace_fwd.hpp>
@@ -204,16 +205,6 @@ void EntityManager::remove_entity(MqttManagerEntity *entity) {
   delete entity;
 }
 
-std::list<MqttManagerEntity *> EntityManager::get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE type) {
-  std::list<MqttManagerEntity *> return_entities;
-  for (MqttManagerEntity *entity : EntityManager::_entities) {
-    if (entity->get_type() == type) {
-      return_entities.push_back(entity);
-    }
-  }
-  return return_entities;
-}
-
 void EntityManager::mqtt_topic_callback(const std::string &topic, const std::string &payload) {
   SPDLOG_DEBUG("Got message on '{}'. Message: {}", topic, payload);
   EntityManager::_process_message(topic, payload);
@@ -376,7 +367,8 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
 
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
-    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+    // SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+    SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
   }
 
   return false; // Message was not processed by us, keep looking.
