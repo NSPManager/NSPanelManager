@@ -62,21 +62,33 @@ void NSPMScene::activate() {
 void NSPMScene::save() {
   // Update all light_states to current values.
   SPDLOG_DEBUG("Saving scene {}::{}.", this->_id, this->_name);
+  this->_light_states.clear(); // Clear current light states
   std::list<nlohmann::json> json_light_states;
   for (Light *light : this->_room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT)) {
     nlohmann::json light_state_json;
+    LightState new_light_state;
     switch (light->get_mode()) {
     case MQTT_MANAGER_LIGHT_MODE::DEFAULT:
       light_state_json["mode"] = "dimmer";
       light_state_json["saturation"] = 0;
       light_state_json["hue"] = 0;
       light_state_json["color_temp"] = light->get_color_temperature();
+
+      new_light_state.color_mode = "dimmer";
+      new_light_state.saturation = 0;
+      new_light_state.hue = 0;
+      new_light_state.color_temperature = light->get_color_temperature();
       break;
     case MQTT_MANAGER_LIGHT_MODE::RGB:
       light_state_json["mode"] = "color";
       light_state_json["saturation"] = light->get_saturation();
       light_state_json["hue"] = light->get_hue();
       light_state_json["color_temp"] = 0;
+
+      new_light_state.color_mode = "color";
+      new_light_state.saturation = light->get_saturation();
+      new_light_state.hue = light->get_hue();
+      new_light_state.color_temperature = 0;
       break;
     default:
       SPDLOG_ERROR("Unknown light mode!");
@@ -85,6 +97,11 @@ void NSPMScene::save() {
     light_state_json["light_id"] = light->get_id();
     light_state_json["level"] = light->get_state() ? light->get_brightness() : 0;
     json_light_states.push_back(light_state_json);
+
+    new_light_state.light_id = light->get_id();
+    new_light_state._light = light;
+    new_light_state.brightness = light->get_state() ? light->get_brightness() : 0;
+    this->_light_states.push_back(new_light_state);
   }
 
   // Update all light_states for lights.
