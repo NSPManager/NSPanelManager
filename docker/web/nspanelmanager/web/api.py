@@ -15,8 +15,16 @@ import environ
 import os
 
 from .models import NSPanel, Room, Light, LightState, Scene
+from .apps import start_mqtt_manager
 from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default
 
+
+def restart_mqtt_manager_process():
+    for proc in psutil.process_iter():
+        if "/usr/src/app/nspm_mqttmanager" in proc.cmdline():
+            print("Killing running MQTTManager")
+            proc.kill()
+    start_mqtt_manager()
 
 def get_file_md5sum(filename):
     fs = FileSystemStorage()
@@ -469,3 +477,8 @@ def save_scene(request):
         return HttpResponse("OK", status=200)
     else:
         return HttpResponse("Scene does not exist!", status=500)
+
+@csrf_exempt
+def restart_mqtt_manager(request):
+    restart_mqtt_manager_process()
+    return JsonResponse({"result": "OK"})

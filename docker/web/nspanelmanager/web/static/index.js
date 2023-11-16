@@ -81,6 +81,12 @@ function updateNSPanelsWarnings() {
   });
 }
 
+function restart_mqtt_manager() {
+  $.post("/api/restart_mqtt_manager", (data) => {
+
+  });
+}
+
 function updateDisplayedWarnings() {
   for (const [mac, data] of Object.entries(panel_warnings)) {
     var total_warning_string = "";
