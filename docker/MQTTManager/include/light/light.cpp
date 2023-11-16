@@ -82,31 +82,34 @@ MQTT_MANAGER_LIGHT_MODE Light::get_mode() {
   return this->_current_mode;
 }
 
-void Light::turn_on() {
+void Light::turn_on(bool send_update) {
   this->_requested_state = true;
-  this->send_state_update_to_controller();
+  if (send_update) {
+    this->send_state_update_to_controller();
+  }
 }
 
-void Light::turn_off() {
+void Light::turn_off(bool send_update) {
   SPDLOG_DEBUG("Requested light {}::{} be turned off.", this->_id, this->_name);
   this->_requested_state = false;
   SPDLOG_DEBUG("Send update to controller");
-  this->send_state_update_to_controller();
+  if (send_update) {
+    this->send_state_update_to_controller();
+  }
 }
 
 bool Light::get_state() {
   return this->_current_state;
 }
 
-void Light::set_brightness(uint8_t brightness) {
+void Light::set_brightness(uint8_t brightness, bool send_update) {
   if (brightness < 0) {
     brightness = 0;
   } else if (brightness > 100) {
     brightness = 100;
   }
   this->_requested_brightness = brightness;
-  if (this->_current_state) {
-    // Only send new brightness value if the light is on.
+  if (send_update) {
     this->send_state_update_to_controller();
   }
 }
@@ -115,42 +118,50 @@ uint8_t Light::get_brightness() {
   return this->_current_brightness;
 }
 
-void Light::set_color_temperature(uint color_temperature) {
+void Light::set_color_temperature(uint color_temperature, bool send_update) {
   this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
   this->_requested_color_temperature = color_temperature;
-  this->send_state_update_to_controller();
+  if (send_update) {
+    this->send_state_update_to_controller();
+  }
 }
 
 uint Light::get_color_temperature() {
   return this->_current_color_temperature;
 }
 
-void Light::set_hue(uint16_t hue) {
+void Light::set_hue(uint16_t hue, bool send_update) {
   this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
   this->_requested_hue = hue;
-  this->send_state_update_to_controller();
+  if (send_update) {
+    this->send_state_update_to_controller();
+  }
 }
 
 uint16_t Light::get_hue() {
   return this->_current_hue;
 }
 
-void Light::set_saturation(uint8_t saturation) {
+void Light::set_saturation(uint8_t saturation, bool send_update) {
   this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
   this->_requested_saturation = saturation;
-  this->send_state_update_to_controller();
+  if (send_update) {
+    this->send_state_update_to_controller();
+  }
 }
 
 uint8_t Light::get_saturation() {
   return this->_current_saturation;
 }
 
-void Light::set_hsb(uint16_t hue, uint8_t saturation, uint8_t brightness) {
+void Light::set_hsb(uint16_t hue, uint8_t saturation, uint8_t brightness, bool send_update) {
   this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
   this->_requested_hue = hue;
   this->_requested_saturation = saturation;
   this->_requested_brightness = brightness;
-  this->send_state_update_to_controller();
+  if (send_update) {
+    this->send_state_update_to_controller();
+  }
 }
 
 void Light::post_init() {
@@ -174,4 +185,12 @@ void Light::detach_delete_callback(void (*callback)(Light *)) {
 
 Light::~Light() {
   this->_light_destroyed_callbacks(this);
+}
+
+void Light::reset_requests() {
+  this->_requested_hue = this->_current_hue;
+  this->_requested_state = this->_current_state;
+  this->_requested_brightness = this->_current_brightness;
+  this->_requested_saturation = this->_current_saturation;
+  this->_requested_color_temperature = this->_current_color_temperature;
 }

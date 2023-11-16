@@ -1,7 +1,7 @@
 #ifndef MQTT_MANAGER_ENTITY
 #define MQTT_MANAGER_ENTITY
 
-#include <cstdint>
+#include <boost/signals2/signal.hpp>
 enum MQTT_MANAGER_ENTITY_TYPE {
   LIGHT,
   SCENE,
@@ -36,7 +36,45 @@ public:
    */
   virtual void post_init() = 0;
 
+  /**
+   * Register a entity_changed callback listener.
+   */
+  void attach_entity_changed_callback(void (*callback)(MqttManagerEntity *)) {
+    this->_entity_changed_callbacks.connect(callback);
+  }
+
+  /**
+   * Register a entity_changed callback listener.
+   */
+  template <typename CALLBACK_BIND>
+  void attach_entity_changed_callback(CALLBACK_BIND callback) {
+    this->_entity_changed_callbacks.connect(callback);
+  }
+
+  /**
+   * Detach a entity_changed callback listener.
+   */
+  void register_entity_changed_callback(void (*callback)(MqttManagerEntity *)) {
+    this->_entity_changed_callbacks.disconnect(callback);
+  }
+
+  /**
+   * Register a entity_changed callback listener.
+   */
+  template <typename CALLBACK_BIND>
+  void detach_entity_changed_callback(CALLBACK_BIND callback) {
+    this->_entity_changed_callbacks.disconnect(callback);
+  }
+
   virtual ~MqttManagerEntity() {}
+
+protected:
+  boost::signals2::signal<void(MqttManagerEntity *)> _entity_changed_callbacks;
+
+  /**
+   * Signal to all callbacks that this entity has changed.
+   */
+  void signal_entity_changed();
 };
 
 #endif // !MQTT_MANAGER_ENTITY

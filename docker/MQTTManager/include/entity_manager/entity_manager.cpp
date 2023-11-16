@@ -245,10 +245,10 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
               Light *light = EntityManager::get_light_by_id(entity_id);
               if (light != nullptr) {
                 if (new_brightness != 0) {
-                  light->set_brightness(new_brightness);
-                  light->turn_on();
+                  light->set_brightness(new_brightness, false);
+                  light->turn_on(true);
                 } else {
-                  light->turn_off();
+                  light->turn_off(true);
                 }
               }
             }
@@ -258,7 +258,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             for (uint entity_id : entity_ids) {
               Light *light = EntityManager::get_light_by_id(entity_id);
               if (light != nullptr) {
-                light->set_color_temperature(new_kelvin);
+                light->set_color_temperature(new_kelvin, true);
               }
             }
           } else if (command_set_attribute.compare("hue") == 0) {
@@ -267,7 +267,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             for (uint entity_id : entity_ids) {
               Light *light = EntityManager::get_light_by_id(entity_id);
               if (light != nullptr) {
-                light->set_hue(new_hue);
+                light->set_hue(new_hue, true);
               }
             }
           } else if (command_set_attribute.compare("saturation") == 0) {
@@ -276,7 +276,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             for (uint entity_id : entity_ids) {
               Light *light = EntityManager::get_light_by_id(entity_id);
               if (light != nullptr) {
-                light->set_saturation(new_saturation);
+                light->set_saturation(new_saturation, true);
               }
             }
           } else {

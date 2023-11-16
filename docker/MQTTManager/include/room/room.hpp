@@ -62,6 +62,8 @@ public:
     return entities;
   }
 
+  void entity_changed_callback(MqttManagerEntity *entity);
+
 private:
   uint16_t _id;
   std::string _name;

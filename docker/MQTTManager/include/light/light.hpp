@@ -19,12 +19,12 @@ public:
   /**
    * Turn on the light
    */
-  void turn_on();
+  void turn_on(bool send_update);
 
   /**
    * Turn off the light
    */
-  void turn_off();
+  void turn_off(bool send_update);
 
   /**
    * Get the on/off state of the light.
@@ -35,8 +35,9 @@ public:
    * Set the dim level of a light. If the light is in RGB mode it will retain that mode
    * and set_hsb will be called with existing value for hue and saturation instead.
    * @param brightness: Light brightness 0-100
+   * @param send_update: Wether to send the update to the controller straight away or not.
    */
-  void set_brightness(uint8_t brightness);
+  void set_brightness(uint8_t brightness, bool send_update);
 
   /**
    * Get the current brightness value of the light.
@@ -46,8 +47,9 @@ public:
   /**
    * Set the color temperature of a light. If the light is in RGB mode it will transission to normal mode.
    * @param color_tmperature: Color temperature in kelvin
+   * @param send_update: Wether to send the update to the controller straight away or not.
    */
-  void set_color_temperature(uint color_temperature);
+  void set_color_temperature(uint color_temperature, bool send_update);
 
   /**
    * Get the color temperature of the light.
@@ -57,8 +59,9 @@ public:
   /**
    * Set the Hue value of the light.
    * @param hue: Hue level, 0 to 359
+   * @param send_update: Wether to send the update to the controller straight away or not.
    */
-  void set_hue(uint16_t hue);
+  void set_hue(uint16_t hue, bool send_update);
 
   /**
    * Get the Hue value of the light.
@@ -68,8 +71,9 @@ public:
   /**
    * Set the Saturation value of the light.
    * @param saturation: Saturation level, 0 to 100
+   * @param send_update: Wether to send the update to the controller straight away or not.
    */
-  void set_saturation(uint8_t saturation);
+  void set_saturation(uint8_t saturation, bool send_update);
 
   /**
    * Get the Saturation value of the light.
@@ -81,8 +85,9 @@ public:
    * @param hue: Hue level, 0 to 100
    * @param saturation: Hue level, 0 to 100
    * @param brightness: Hue level, 0 to 100
+   * @param send_update: Wether to send the update to the controller straight away or not.
    */
-  void set_hsb(uint16_t hue, uint8_t saturation, uint8_t brightness);
+  void set_hsb(uint16_t hue, uint8_t saturation, uint8_t brightness, bool send_update);
 
   /**
    * Get the ID of the light.
@@ -119,6 +124,11 @@ public:
    * Detach a callback for when the light is destroyed
    */
   void detach_delete_callback(void (*callback)(Light *light));
+
+  /**
+   * Set all requested values equal to current values.
+   */
+  void reset_requests();
 
   MQTT_MANAGER_ENTITY_TYPE get_type();
   MQTT_MANAGER_ENTITY_CONTROLLER get_controller();

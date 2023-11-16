@@ -1,4 +1,5 @@
 #include "entity/entity.hpp"
+#include <boost/bind.hpp>
 #include <nlohmann/json.hpp>
 #include <room/room.hpp>
 #include <spdlog/spdlog.h>
@@ -33,8 +34,14 @@ void Room::post_init() {
 
 void Room::attach_entity(MqttManagerEntity *entity) {
   this->_entities.push_back(entity);
+  entity->attach_entity_changed_callback(boost::bind(&Room::entity_changed_callback, this, _1));
 }
 
 void Room::detach_entity(MqttManagerEntity *entity) {
   this->_entities.remove(entity);
+  entity->detach_entity_changed_callback(boost::bind(&Room::entity_changed_callback, this, _1));
+}
+
+void Room::entity_changed_callback(MqttManagerEntity *entity) {
+  SPDLOG_DEBUG("ENTITY CHANGED IN ROOM {}", this->_name);
 }

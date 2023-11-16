@@ -36,21 +36,20 @@ void NSPMScene::activate() {
   for (LightState state : this->_light_states) {
     if (state._light != nullptr) {
       SPDLOG_DEBUG("Activating light state for light {}::{}.", state._light->get_id(), state._light->get_name());
+      if (state.brightness == 0) {
+        state._light->turn_off(true);
+        continue;
+      }
+
       if (state.color_mode.compare("dimmer") == 0) {
-        if (state.brightness > 0) {
-          state._light->set_brightness(state.brightness);
-          state._light->set_color_temperature(state.color_temperature);
-        } else {
-          state._light->turn_off();
-        }
+        state._light->turn_on(false);
+        state._light->set_color_temperature(state.color_temperature, false);
+        state._light->set_brightness(state.brightness, true);
       } else if (state.color_mode.compare("color") == 0) {
-        state._light->set_hue(state.hue);
-        state._light->set_hue(state.saturation);
-        if (state.brightness > 0) {
-          state._light->set_brightness(state.brightness);
-        } else {
-          state._light->turn_off();
-        }
+        state._light->turn_on(false);
+        state._light->set_hue(state.hue, false);
+        state._light->set_saturation(state.saturation, false);
+        state._light->set_brightness(state.brightness, true);
       } else {
         SPDLOG_ERROR("Trying to apply light state from scene with {}::{} for light with ID {} but could not interpret color mode '{}'.", this->get_id(), this->_name, state.light_id, state.color_mode);
       }
