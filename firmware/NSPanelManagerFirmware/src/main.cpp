@@ -53,6 +53,7 @@ void sendMqttManagerRegistrationRequest() {
     doc["md5_firmware"] = NSPMConfig::instance->md5_firmware;
     doc["md5_data_file"] = NSPMConfig::instance->md5_data_file;
     doc["md5_tft_file"] = NSPMConfig::instance->md5_tft_file;
+    doc["address"] = WiFi.localIP();
 
     char buffer[512];
     serializeJson(doc, buffer);

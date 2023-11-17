@@ -31,6 +31,35 @@ function startNSPanelOtaUpdate(dom) {
   ws.send_command("firmware_update_nspanels", { nspanels: [panel_id] }, null);
 }
 
+function send_nspanel_accept_request(dom) {
+  let command_data = {};
+  let nspanel_mac = $(dom).attr("data-nspanel-mac");
+  // Convert selector-mac to real mac.
+  let real_mac = nspanel_mac.substring(0, 2) + ":" + nspanel_mac.substring(2, 4) + ":" + nspanel_mac.substring(4, 6) + ":" + nspanel_mac.substring(6, 8) + ":" + nspanel_mac.substring(8, 10) + ":" + nspanel_mac.substring(10, 12);
+  command_data.mac_address = real_mac;
+
+  ws.send_command("nspanel_accept", command_data, (response) => {
+    console.log(response);
+  });
+}
+
+function send_nspanel_delete_request(dom) {
+  let command_data = {};
+  let nspanel_mac = $(dom).closest(".nspanel-box").find(".nspanel_mac_container").text();
+  // Convert selector-mac to real mac.
+  let real_mac = nspanel_mac.substring(0, 2) + ":" + nspanel_mac.substring(2, 4) + ":" + nspanel_mac.substring(4, 6) + ":" + nspanel_mac.substring(6, 8) + ":" + nspanel_mac.substring(8, 10) + ":" + nspanel_mac.substring(10, 12);
+  command_data.mac_address = real_mac;
+
+  ws.send_command("nspanel_delete", command_data, (response) => {
+    if(response.success) {
+      $(dom).closest(".nspanel-box").fadeOut(100);
+      setTimeout(() => {
+        $(dom).closest(".nspanel-box").remove();
+      }, 100);
+    }
+  });
+}
+
 function startNSPanelTftUpdateAll() {
   get_all_online_panel_macs().forEach((mac) => {
     startNSPanelTftUpdate(mac);
@@ -80,6 +109,7 @@ function create_nspanel_from_template(data) {
   var nspanel = $($("#nspanel_index_box_template").html());
 
   // Setup links
+  nspanel.find(".nspanel-box").attr("id", "panel_status_box_" + data.mac);
   nspanel.find("#nspanel_name").attr("href", "/nspanel/" + data.id);
   nspanel.find(".nspanel-settings-link").attr("href", "/nspanel/" + data.id);
   nspanel.find(".nspanel-visit-link").attr("href", "http://" + data.ip_address);
@@ -98,6 +128,13 @@ function create_nspanel_from_template(data) {
   nspanel.find("#nspanel_name").html(data.name);
   nspanel.find("#nspanel_name").attr("id", "nspanel_name_" + data.mac_address);
 
+  if(data.state == "awaiting_accept") {
+    nspanel.find(".accept-request-overlay").removeClass("is-hidden");
+    nspanel.find(".accept-request-overlay").attr("id", "accept_request_overlay_" + data.mac_address);
+    nspanel.find(".accept-request-overlay span").text(data.name);
+    nspanel.find(".accept-request-overlay button.is-success").attr("data-nspanel-mac", data.mac_address);
+  }
+
   $("#nspanels_container").append(nspanel);
   update_nspanel_status(data);
 }
@@ -112,14 +149,12 @@ function update_nspanel_status(data) {
 
     if ("state" in data) {
       var new_html = "";
-      if (data.state == "online") {
-        if ($("#panel_header_" + data.mac_address).length == 0) {
-          // We got an online message from a newly registed panel. Updated page in about 1 second.
-          setTimeout(() => {
-            location.reload();
-          }, 1000);
-        }
 
+      if(data.state != "awaiting_accept") {
+        $("#accept_request_overlay_" + data.mac_address).addClass("is-hidden");
+      }
+
+      if (data.state == "online") {
         $("#panel_header_" + data.mac_address).attr(
           "class",
           "nspanel-status-header has-background-success"
@@ -140,6 +175,20 @@ function update_nspanel_status(data) {
         );
         $("#panel_header_text_" + data.mac_address).text("Unknown");
         $("#panel_header_" + data.mac_address).css("width", "100%");
+      } else if (data.state == "awaiting_accept") {
+        $("#panel_header_" + data.mac_address).attr(
+          "class",
+          "nspanel-status-header has-background-primary"
+        );
+        $("#panel_header_text_" + data.mac_address).text("Awaiting accept");
+        $("#panel_header_" + data.mac_address).css("width", "100%");
+      } else if (data.state == "waiting") {
+        $("#panel_header_text_" + data.mac_address).text("Waiting");
+        $("#panel_header_" + data.mac_address).css("width", "100%");
+        $("#panel_header_" + data.mac_address).attr(
+          "class",
+          "nspanel-status-header has-background-info nspanel-status-header-await"
+        );
       } else {
         // Update panel tag to show update progress if any
         update_text = "";
@@ -176,7 +225,7 @@ function update_nspanel_status(data) {
     }
     if ("rssi" in data) {
       var new_rssi_classes = "";
-      if(data.state == "unknown") {
+      if(data.state == "unknown" || data.state == "waiting") {
         new_rssi_classes = "mdi mdi-wifi-strength-1-alert";
         data.rssi = "?";
       } else if (data.rssi <= -90) {
@@ -201,7 +250,7 @@ function update_nspanel_status(data) {
       );
     }
 
-    if(data.state == "unknown") {
+    if(data.state == "unknown" || data.state == "waiting") {
       $("#heap_used_" + data.mac_address).text("?%");
     } else {
       if ("heap_used_pct" in data) {
@@ -212,7 +261,7 @@ function update_nspanel_status(data) {
       }
     }
 
-    if(data.state == "unknown") {
+    if(data.state == "unknown" || data.state == "waiting") {
       var temperature_unit = $("#temperature_unit").text();
       $("#temperature_" + data.mac_address).html("? " + temperature_unit);
     } else if ("temperature" in data) {

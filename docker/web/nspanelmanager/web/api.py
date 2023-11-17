@@ -10,6 +10,7 @@ import traceback
 
 import hashlib
 import psutil
+import signal
 import subprocess
 import environ
 import os
@@ -25,6 +26,12 @@ def restart_mqtt_manager_process():
             print("Killing running MQTTManager")
             proc.kill()
     start_mqtt_manager()
+
+def send_mqttmanager_reload_command():
+    for proc in psutil.process_iter():
+        if "/usr/src/app/nspm_mqttmanager" in proc.cmdline():
+            print("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
+            os.kill(proc.pid, signal.SIGUSR1)
 
 def get_file_md5sum(filename):
     fs = FileSystemStorage()
@@ -291,13 +298,15 @@ def register_nspanel(request):
     new_panel.save()
     # if not panel_already_exists:
     # restart_mqtt_manager()
-    return HttpResponse('OK', status=200)
+    send_mqttmanager_reload_command()
+    return JsonResponse({"id": new_panel.id}, status=200)
 
 
 def delete_panel(request, panel_id: int):
     NSPanel.objects.get(id=panel_id).delete()
     # restart_mqtt_manager()
-    return redirect('/')
+    send_mqttmanager_reload_command()
+    return HttpResponse("OK", status=200)
 
 
 def get_nspanel_config(request):

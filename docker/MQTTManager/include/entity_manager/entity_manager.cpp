@@ -75,7 +75,11 @@ void EntityManager::config_removed(nlohmann::json *config) {
     } else if (type.compare("nspanel") == 0) {
       NSPanel *nspanel = EntityManager::get_nspanel_by_id((*config)["id"]);
       if (nspanel != nullptr) {
+        SPDLOG_INFO("Removing NSPanel {}::{}.", nspanel->get_id(), nspanel->get_name());
         EntityManager::_nspanels.remove(nspanel);
+        delete nspanel;
+      } else {
+        SPDLOG_ERROR("Removing config for NSPanel with ID {} from ConfigManager but couldn't find an NSPanel with that ID to remove from EntityManager!", int((*config)["id"]));
       }
     } else if (type.compare("scene") == 0) {
       MqttManagerEntity *ptr = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, (*config)["id"]);
@@ -332,50 +336,28 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
   std::string name = data["friendly_name"];
   SPDLOG_INFO("Got register request from NSPanel with name {} and MAC: {}", name, mac_address);
   NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_address);
-  if (panel != nullptr) {
+  if (panel != nullptr && (panel->get_state() != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT || (!panel->has_registered_to_manager() && panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::WAITING))) {
     std::string nspanel_command_topic = "nspanel/";
     nspanel_command_topic.append(name);
     nspanel_command_topic.append("/command");
-
-    CURL *curl;
-    CURLcode res;
-    curl = curl_easy_init();
-    if (curl) {
-      std::string response_data;
-      std::string payload_data = data.dump();
-      SPDLOG_INFO("Sending registration data to Django for database management.");
-      curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:8000/api/register_nspanel");
-      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload_data.c_str());
-
-      /* Perform the request, res will get the return code */
-      res = curl_easy_perform(curl);
-      long http_code;
-      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-      /* Check for errors */
-      if (res == CURLE_OK && http_code == 200) {
-        SPDLOG_INFO("Panel registration OK. Sending registration_accept.");
-        // Registration to manager was OK, send registration_accept to panel:
-        nlohmann::json response;
-        response["command"] = "register_accept";
-        response["address"] = MqttManagerConfig::manager_address.c_str();
-        response["port"] = MqttManagerConfig::manager_port;
-        MQTT_Manager::publish(nspanel_command_topic, response.dump());
-      } else {
-        SPDLOG_ERROR("curl_easy_perform() when registring panel failed, got code: {}.", curl_easy_strerror(res));
-      }
-
-      /* always cleanup */
-      curl_easy_cleanup(curl);
-    } else {
-      SPDLOG_ERROR("Failed to curl_easy_init().");
+    if (panel->register_to_manager(data)) {
+      nlohmann::json response;
+      response["command"] = "register_accept";
+      response["address"] = MqttManagerConfig::manager_address.c_str();
+      response["port"] = MqttManagerConfig::manager_port;
+      MQTT_Manager::publish(nspanel_command_topic, response.dump());
     }
-    panel->update_warnings_from_manager();
     panel->send_websocket_update();
-
   } else {
     // TODO: Create pending NSPanels
     SPDLOG_INFO("Panel is not registered to manager, adding panel but as 'pending accept' status.");
+    nlohmann::json init_data = data;
+    NSPanel *new_nspanel = EntityManager::get_nspanel_by_mac(data["mac_origin"]);
+    if (new_nspanel == nullptr) {
+      new_nspanel = new NSPanel(init_data);
+      EntityManager::_nspanels.push_back(new_nspanel);
+      new_nspanel->send_websocket_update();
+    }
   }
 }
 
@@ -419,11 +401,13 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
     for (NSPanel *panel : EntityManager::_nspanels) {
       if (args.contains("nspanel_id")) {
         if (panel->get_id() == atoi(std::string(args["nspanel_id"]).c_str())) {
+          panel->update_warnings_from_manager();
           panel_responses.push_back(panel->get_websocket_json_representation());
           break;
         }
       } else {
         // In case no ID was specified, send status for all panels.
+        panel->update_warnings_from_manager();
         panel_responses.push_back(panel->get_websocket_json_representation());
       }
     }
@@ -493,6 +477,67 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       SPDLOG_ERROR("Received request for logs from NSPanel with ID {} but no panel with that ID is loaded.");
     }
     return true;
+  } else if (command.compare("nspanel_accept") == 0) {
+    nlohmann::json args = data["args"];
+    std::string mac = args["mac_address"];
+    NSPanel *panel = EntityManager::get_nspanel_by_mac(mac);
+    if (panel != nullptr) {
+      SPDLOG_INFO("Accepting reqister request for NSPanel with MAC {} as per user request from websocket.", mac);
+      panel->accept_register_request();
+      nlohmann::json response;
+      response["cmd_id"] = command_id;
+      response["success"] = true;
+      response["id"] = panel->get_id();
+      (*response_buffer) = response.dump();
+      panel->send_websocket_update();
+      return true;
+    } else {
+      SPDLOG_DEBUG("Received NSPanel accept request for a panel we could not find. Ignoring request.");
+    }
+  } else if (command.compare("nspanel_delete") == 0) {
+    nlohmann::json args = data["args"];
+    std::string mac = args["mac_address"];
+    NSPanel *panel = EntityManager::get_nspanel_by_mac(mac);
+    if (panel != nullptr) {
+      CURL *curl;
+      CURLcode res;
+      curl = curl_easy_init();
+      if (curl) {
+        std::string response_data;
+        SPDLOG_DEBUG("Requesting config from: http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/delete_nspanel/{}", panel->get_id());
+        curl_easy_setopt(curl, CURLOPT_URL, fmt::format("http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/delete_nspanel/{}", panel->get_id()).c_str());
+        /* example.com is redirected, so we tell libcurl to follow redirection */
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+
+        /* Perform the request, res will get the return code */
+        res = curl_easy_perform(curl);
+        long http_code;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+        /* Check for errors */
+        if (res == CURLE_OK && !response_data.empty() && http_code == 200) {
+          SPDLOG_DEBUG("Deleted panel with MAC {}.", mac);
+          nlohmann::json response;
+          response["cmd_id"] = command_id;
+          response["success"] = true;
+          response["id"] = panel->get_id();
+          (*response_buffer) = response.dump();
+          return true;
+        } else {
+          SPDLOG_ERROR("curl_easy_perform() failed, got code: '{}' with status code: {}. Will retry.", curl_easy_strerror(res), http_code);
+          std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+        }
+
+        /* always cleanup */
+        curl_easy_cleanup(curl);
+      } else {
+        SPDLOG_ERROR("Failed to curl_easy_init(). Will try again.");
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+      }
+    } else {
+      SPDLOG_ERROR("Received request to delete NSPanel but no NSPanel with MAC {} is register to this manager.", mac);
+    }
   }
 
   return false;

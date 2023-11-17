@@ -5,6 +5,13 @@
     <div class="nspanel-status-header">
       <div class="has-background-grey nspanel-status-header-await" id="panel_header"></div>
     </div>
+    <div class="accept-request-overlay pt-3 is-hidden">
+      <span>NSPanel '{NAME}' is requesting access. THIS TEXT IS REPLACED BY JAVASCRIPT AS NEEDED!!!</span>
+      <div class="pt-3">
+        <button class="button is-danger">Deny</button>
+        <button class="button is-success" onclick="send_nspanel_accept_request(this);">Accept</button>
+      </div>
+    </div>
     <div class="nspanel-status-content-box">
       <div class="level">
         <div class="level-left">
@@ -77,7 +84,7 @@
               <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update screen
             </a>
             <hr class="dropdown-divider" />
-            <a href="" class="dropdown-item has-text-danger">
+            <a class="dropdown-item has-text-danger" onclick="send_nspanel_delete_request(this);">
               <span class="mdi mdi-minus-circle pr-2"></span>Delete
             </a>
           </div>

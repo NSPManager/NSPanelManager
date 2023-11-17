@@ -1,11 +1,30 @@
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
 .nspanel-box {
   padding: 0px;
   height: 7rem;
   min-width: 20rem;
+  position: relative;
+  animation: fadeIn 0.1s;
 }
 
 .hidden {
   display: hidden;
+}
+
+.accept-request-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.97);
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  border-radius: 0px 0px 6px 6px;
 }
 
 .nspanel-status-header-await {

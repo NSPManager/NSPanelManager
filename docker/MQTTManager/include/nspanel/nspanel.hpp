@@ -7,12 +7,13 @@
 
 enum MQTT_MANAGER_NSPANEL_STATE {
   UNKNOWN,
-  WAITING, // Waiting to be accepted by register request.
+  WAITING,
   ONLINE,
   OFFLINE,
   UPDATING_FIRMWARE,
   UPDATING_DATA,
-  UPDATING_TFT
+  UPDATING_TFT,
+  AWAITING_ACCEPT
 };
 
 class NSPanelLogMessage {
@@ -32,6 +33,7 @@ public:
   uint get_id();
   std::string get_mac();
   std::string get_name();
+  MQTT_MANAGER_NSPANEL_STATE get_state();
   bool mqtt_callback(const std::string &topic, const std::string &payload);
 
   /**
@@ -70,15 +72,37 @@ public:
   void update_warnings_from_manager();
 
   /**
+   * Accept register request from this panel.
+   */
+  void accept_register_request();
+
+  /**
+   * Deny register request from this panel and add to "ignore"-list.
+   */
+  void deny_register_request();
+
+  /**
+   * Returns true if the NSPanel is register in manager, otherwise false.
+   */
+  bool has_registered_to_manager();
+
+  /**
    * Send current state to the websocket.
    */
   void send_websocket_update();
+
+  /**
+   * Register NSPanel to manager.
+   */
+  bool register_to_manager(const nlohmann::json &register_request_payload);
 
 private:
   uint _id;
   std::string _mac;
   std::string _name;
   bool _is_us_panel;
+  bool _is_register_accepted;
+  bool _has_registered_to_manager;
   std::string _ip_address;
   int16_t _rssi;
   int16_t _temperature;

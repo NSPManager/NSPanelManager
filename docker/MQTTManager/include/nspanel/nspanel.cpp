@@ -16,12 +16,33 @@
 #include <websocket_server/websocket_server.hpp>
 
 NSPanel::NSPanel(nlohmann::json &init_data) {
-  this->_id = init_data["id"];
-  this->_name = init_data["name"];
-  this->_mac = init_data["mac"];
+  // If this panel is just a panel in waiting (ie. not accepted the request yet) it won't have an id.
+  if (init_data.contains("id")) {
+    this->_id = init_data["id"];
+  }
+
+  if (init_data.contains("name")) {
+    this->_name = init_data["name"];
+  } else if (init_data.contains("friendly_name")) {
+    this->_name = init_data["friendly_name"];
+  }
+
+  if (init_data.contains("mac")) {
+    this->_mac = init_data["mac"];
+  } else if (init_data.contains("mac_origin")) {
+    this->_mac = init_data["mac_origin"];
+  } else {
+    SPDLOG_ERROR("Creating new NSPanel with no known MAC!");
+  }
   this->_ip_address = init_data["address"];
-  this->_is_us_panel = std::string(init_data["is_us_panel"]).compare("True") == 0;
-  this->_state = MQTT_MANAGER_NSPANEL_STATE::UNKNOWN;
+  if (init_data.contains(("is_us_panel"))) {
+    this->_is_us_panel = std::string(init_data["is_us_panel"]).compare("True") == 0;
+  } else {
+    this->_is_us_panel = false;
+  }
+  this->_state = init_data.contains("id") ? MQTT_MANAGER_NSPANEL_STATE::UNKNOWN : MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
+  this->_has_registered_to_manager = init_data.contains("id");
+  this->_is_register_accepted = init_data.contains("id");
   this->_rssi = -255;
   this->_heap_used_pct = 0;
   this->_nspanel_warnings = "";
@@ -54,6 +75,10 @@ uint NSPanel::get_id() {
 
 std::string NSPanel::get_mac() {
   return this->_mac;
+}
+
+MQTT_MANAGER_NSPANEL_STATE NSPanel::get_state() {
+  return this->_state;
 }
 
 bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload) {
@@ -113,7 +138,9 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
     if (std::string(data["mac"]).compare(this->_mac) == 0) {
       // Update internal state.
       std::string state = data["state"];
-      if (state.compare("online") == 0) {
+      if (this->_state == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
+        return true;
+      } else if (state.compare("online") == 0) {
         this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
         SPDLOG_DEBUG("NSPanel {}::{} became ONLINE.", this->_id, this->_name);
       } else if (state.compare("offline") == 0) {
@@ -138,7 +165,9 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
 
       if (data.contains("state")) {
         std::string state = data["state"];
-        if (state.compare("updating_tft") == 0) {
+        if (this->_state == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
+          // Do nothing, simply block state change to something else.
+        } else if (state.compare("updating_tft") == 0) {
           this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT;
         } else if (state.compare("updating_fw") == 0) {
           this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_FIRMWARE;
@@ -155,11 +184,7 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
         this->_update_progress = 0;
       }
 
-      // Send status over to web interface:
-      nlohmann::json status_reps;
-      status_reps["type"] = "status";
-      status_reps["payload"] = this->get_websocket_json_representation();
-      WebsocketServer::broadcast_json(status_reps);
+      this->send_websocket_update();
       return true;
     }
     return true;
@@ -199,6 +224,9 @@ nlohmann::json NSPanel::get_websocket_json_representation() {
   case MQTT_MANAGER_NSPANEL_STATE::WAITING:
     data["state"] = "waiting";
     break;
+  case MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT:
+    data["state"] = "awaiting_accept";
+    break;
   default:
     data["state"] = "unknown";
     break;
@@ -230,7 +258,9 @@ void NSPanel::reboot() {
   cmd["command"] = "reboot";
   this->send_command(cmd);
 
-  this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+  if (this->_state != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
+    this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+  }
 }
 
 void NSPanel::firmware_update() {
@@ -239,7 +269,9 @@ void NSPanel::firmware_update() {
   cmd["command"] = "firmware_update";
   this->send_command(cmd);
 
-  this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+  if (this->_state != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
+    this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+  }
 }
 
 void NSPanel::tft_update() {
@@ -248,7 +280,9 @@ void NSPanel::tft_update() {
   cmd["command"] = "tft_update";
   this->send_command(cmd);
 
-  this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+  if (this->_state != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
+    this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+  }
 }
 
 void NSPanel::send_command(nlohmann::json &command) {
@@ -324,4 +358,50 @@ void NSPanel::update_warnings_from_manager() {
     SPDLOG_ERROR("Caught exception: {}", e.what());
     SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
   }
+}
+
+void NSPanel::accept_register_request() {
+  this->_is_register_accepted = true;
+  this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+}
+
+bool NSPanel::has_registered_to_manager() {
+  return this->_has_registered_to_manager;
+}
+
+bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload) {
+  CURL *curl;
+  CURLcode res;
+  curl = curl_easy_init();
+  if (curl) {
+    std::string response_data;
+    std::string payload_data = register_request_payload.dump();
+    SPDLOG_INFO("Sending registration data to Django for database management.");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:8000/api/register_nspanel");
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload_data.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+
+    /* Perform the request, res will get the return code */
+    res = curl_easy_perform(curl);
+    long http_code;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+    /* Check for errors */
+    if (res == CURLE_OK && http_code == 200) {
+      SPDLOG_INFO("Panel registration OK. Checking for new warnings.");
+      this->update_warnings_from_manager();
+      SPDLOG_INFO("Panel registration OK. Updating internal data.");
+      nlohmann::json data = nlohmann::json::parse(response_data);
+      this->_id = data["id"];
+      // Registration to manager was OK, return true;
+      return true;
+    } else {
+      SPDLOG_ERROR("curl_easy_perform() when registring panel failed, got code: {}.", curl_easy_strerror(res));
+    }
+
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+  }
+  return false;
 }

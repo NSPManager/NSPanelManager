@@ -185,10 +185,9 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     while (nit != MqttManagerConfig::nspanel_configs.end()) {
       bool exists = ITEM_IN_LIST(json_nspanels, (*nit));
       if (!exists) {
-        SPDLOG_DEBUG("Removing NSPanel config as it doesn't exist in config anymore.");
+        SPDLOG_DEBUG("Removing NSPanel config from MQTTManager as it doesn't exist in config anymore.");
         MqttManagerConfig::_config_removed_listener(&(*nit));
         MqttManagerConfig::nspanel_configs.erase(nit++);
-        delete &nit;
       } else {
         ++nit;
       }
