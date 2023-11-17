@@ -176,7 +176,10 @@ function update_nspanel_status(data) {
     }
     if ("rssi" in data) {
       var new_rssi_classes = "";
-      if (data.rssi <= -90) {
+      if(data.state == "unknown") {
+        new_rssi_classes = "mdi mdi-wifi-strength-1-alert";
+        data.rssi = "?";
+      } else if (data.rssi <= -90) {
         new_rssi_classes = "mdi mdi-wifi-strength-1-alert";
       } else if (data.rssi <= -80) {
         new_rssi_classes = "mdi mdi-wifi-strength-1";
@@ -198,14 +201,21 @@ function update_nspanel_status(data) {
       );
     }
 
-    if ("heap_used_pct" in data) {
-      $("#heap_used_" + data.mac_address)
-        .text(data.heap_used_pct + "%")
-        .text()
-        .slice(-2);
+    if(data.state == "unknown") {
+      $("#heap_used_" + data.mac_address).text("?%");
+    } else {
+      if ("heap_used_pct" in data) {
+        $("#heap_used_" + data.mac_address)
+          .text(data.heap_used_pct + "%")
+          .text()
+          .slice(-2);
+      }
     }
 
-    if ("temperature" in data) {
+    if(data.state == "unknown") {
+      var temperature_unit = $("#temperature_unit").text();
+      $("#temperature_" + data.mac_address).html("? " + temperature_unit);
+    } else if ("temperature" in data) {
       var temperature_unit = $("#temperature_unit").text();
       $("#temperature_" + data.mac_address).html(
         Math.round(data.temperature * 100) / 100 + " " + temperature_unit
