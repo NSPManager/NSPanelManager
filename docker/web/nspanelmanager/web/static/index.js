@@ -65,51 +65,8 @@ function rebootNSPanel(dom) {
   ws.send_command("reboot_nspanels", { nspanels: [panel_id] }, null);
 }
 
-function updateNSPanelsWarnings() {
-  $.get("/api/get_nspanels_warnings", (data) => {
-    data.panels.forEach((panel) => {
-      if (!(panel.nspanel.mac in panel_warnings)) {
-        panel_warnings[panel.nspanel.mac] = {
-          api: "",
-          websocket: "",
-        };
-      }
-      panel_warnings[panel.nspanel.mac]["api"] = panel.warnings;
-    });
-
-    updateDisplayedWarnings();
-  });
-}
-
 function restart_mqtt_manager() {
-  $.post("/api/restart_mqtt_manager", (data) => {
-
-  });
-}
-
-function updateDisplayedWarnings() {
-  for (const [mac, data] of Object.entries(panel_warnings)) {
-    var total_warning_string = "";
-    if (data["api"] != "") {
-      total_warning_string = data["api"];
-    }
-    if (data["websocket"] != "") {
-      if (total_warning_string != "") {
-        total_warning_string += "\n";
-      }
-      total_warning_string += data["websocket"];
-    }
-    let mac_selector = mac.replaceAll(":", ""); // Convert real MAC to DOM-MAC
-    if (total_warning_string == "") {
-      $("#nspanel_warninigs_" + mac_selector).addClass("is-hidden");
-    } else if (total_warning_string != "") {
-      $("#nspanel_warnings_" + mac_selector).removeClass("is-hidden");
-      $("#nspanel_warnings_" + mac_selector).attr(
-        "data-tooltip",
-        total_warning_string
-      );
-    }
-  }
+  $.post("/api/restart_mqtt_manager", (data) => {});
 }
 
 function show_dropdown_menu(dom) {
@@ -161,17 +118,6 @@ function update_nspanel_status(data) {
           setTimeout(() => {
             location.reload();
           }, 1000);
-        }
-        if (
-          $("#panel_header_" + data.mac_address).hasClass(
-            "has-background-danger"
-          ) ||
-          $("#panel_header_" + data.mac_address).hasClass(
-            "has-background-success-dark"
-          )
-        ) {
-          // Current state is offline, just about to update to online. Check if the panel has any warnings.
-          updateNSPanelsWarnings();
         }
 
         $("#panel_header_" + data.mac_address).attr(
@@ -267,22 +213,18 @@ function update_nspanel_status(data) {
     }
 
     if ("warnings" in data) {
-      if (!(data["mac"] in panel_warnings)) {
-        panel_warnings[data["mac"]] = {
-          api: "",
-          websocket: "",
-        };
+      $("#nspanel_warnings_" + data.mac_address).attr("data-tooltip", data["warnings"]);
+      if(data["warnings"] != "") {
+        $("#nspanel_warnings_" + data.mac_address).removeClass("is-hidden");
+      } else {
+        $("#nspanel_warnings_" + data.mac_address).addClass("is-hidden");
       }
-      panel_warnings[data["mac"]]["websocket"] = data.warnings;
-      updateDisplayedWarnings();
     }
   }
 }
 
 function add_nspanel(data) {}
-
 $(document).ready(function () {
-
   ws.register_message_handler((message) => {
     if ("type" in message) {
       if (message.type == "status") {
@@ -381,6 +323,4 @@ $(document).ready(function () {
   $(window).click(function () {
     $(".dropdown").removeClass("is-active");
   });
-
-  updateNSPanelsWarnings();
 });

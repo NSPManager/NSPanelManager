@@ -169,7 +169,10 @@ void EntityManager::add_nspanel(nlohmann::json &config) {
         }
       }
       if (!already_exists) {
-        EntityManager::_nspanels.push_back(new NSPanel(config));
+        NSPanel *panel = new NSPanel(config);
+        panel->update_warnings_from_manager();
+        panel->send_websocket_update();
+        EntityManager::_nspanels.push_back(panel);
       } else {
         SPDLOG_ERROR("A NSPanel with ID {} already exists.", panel_id);
       }
@@ -288,56 +291,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
       } else if (data.contains("command")) {
         std::string command = data["command"];
         if (command.compare("register_request") == 0) {
-          std::string mac_address = data["mac_origin"];
-          std::string name = data["friendly_name"];
-          SPDLOG_INFO("Got register request from NSPanel with name {} and MAC: {}", name, mac_address);
-          NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_address);
-          if (panel != nullptr) {
-            std::string nspanel_command_topic = "nspanel/";
-            nspanel_command_topic.append(name);
-            nspanel_command_topic.append("/command");
-
-            // TODO: Send HTTP POST request to manager with new details from panel
-
-            CURL *curl;
-            CURLcode res;
-            curl = curl_easy_init();
-            if (curl) {
-              std::string response_data;
-              SPDLOG_INFO("Sending registration data to Django for database management.");
-              curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:8000/api/register_nspanel");
-              curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-              curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
-
-              /* Perform the request, res will get the return code */
-              res = curl_easy_perform(curl);
-              long http_code;
-              curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-              /* Check for errors */
-              if (res == CURLE_OK && http_code == 200) {
-                SPDLOG_INFO("Panel registration OK. Sending registration_accept.");
-                // Registration to manager was OK, send registration_accept to panel:
-                nlohmann::json response;
-                response["command"] = "register_accept";
-                response["address"] = MqttManagerConfig::manager_address.c_str();
-                response["port"] = MqttManagerConfig::manager_port;
-                MQTT_Manager::publish(nspanel_command_topic, response.dump());
-              } else {
-                SPDLOG_ERROR("curl_easy_perform() when registring panel failed, got code: {}.", curl_easy_strerror(res));
-                std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-              }
-
-              /* always cleanup */
-              curl_easy_cleanup(curl);
-            } else {
-              SPDLOG_ERROR("Failed to curl_easy_init(). Will try again.");
-              std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-            }
-
-          } else {
-            // TODO: Create pending NSPanels
-            SPDLOG_INFO("Panel is not registered tp manager, adding panel but as 'pending accept' status.");
-          }
+          EntityManager::_handle_register_request(data);
         } else if (command.compare("activate_scene") == 0) {
           int scene_id = data["scene_id"];
           Scene *scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
@@ -367,11 +321,62 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
 
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
-    // SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
     SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
   }
 
   return false; // Message was not processed by us, keep looking.
+}
+
+void EntityManager::_handle_register_request(const nlohmann::json &data) {
+  std::string mac_address = data["mac_origin"];
+  std::string name = data["friendly_name"];
+  SPDLOG_INFO("Got register request from NSPanel with name {} and MAC: {}", name, mac_address);
+  NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_address);
+  if (panel != nullptr) {
+    std::string nspanel_command_topic = "nspanel/";
+    nspanel_command_topic.append(name);
+    nspanel_command_topic.append("/command");
+
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+    if (curl) {
+      std::string response_data;
+      std::string payload_data = data.dump();
+      SPDLOG_INFO("Sending registration data to Django for database management.");
+      curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:8000/api/register_nspanel");
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload_data.c_str());
+
+      /* Perform the request, res will get the return code */
+      res = curl_easy_perform(curl);
+      long http_code;
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+      /* Check for errors */
+      if (res == CURLE_OK && http_code == 200) {
+        SPDLOG_INFO("Panel registration OK. Sending registration_accept.");
+        // Registration to manager was OK, send registration_accept to panel:
+        nlohmann::json response;
+        response["command"] = "register_accept";
+        response["address"] = MqttManagerConfig::manager_address.c_str();
+        response["port"] = MqttManagerConfig::manager_port;
+        MQTT_Manager::publish(nspanel_command_topic, response.dump());
+      } else {
+        SPDLOG_ERROR("curl_easy_perform() when registring panel failed, got code: {}.", curl_easy_strerror(res));
+      }
+
+      /* always cleanup */
+      curl_easy_cleanup(curl);
+    } else {
+      SPDLOG_ERROR("Failed to curl_easy_init().");
+    }
+    panel->update_warnings_from_manager();
+    panel->send_websocket_update();
+
+  } else {
+    // TODO: Create pending NSPanels
+    SPDLOG_INFO("Panel is not registered to manager, adding panel but as 'pending accept' status.");
+  }
 }
 
 Light *EntityManager::get_light_by_id(uint id) {

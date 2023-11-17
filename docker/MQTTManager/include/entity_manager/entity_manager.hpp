@@ -117,6 +117,7 @@ private:
   static inline std::list<MqttManagerEntity *> _entities;
 
   static bool _process_message(const std::string &topic, const std::string &payload);
+  static void _handle_register_request(const nlohmann::json &data);
   static inline std::list<Light *> _lights;
   static inline std::list<NSPanel *> _nspanels;
   static inline std::list<MqttManagerEntity *> _post_init_entities; // The entities to post init when called next time.

@@ -7,7 +7,7 @@
 
 enum MQTT_MANAGER_NSPANEL_STATE {
   UNKNOWN,
-  WAITING,
+  WAITING, // Waiting to be accepted by register request.
   ONLINE,
   OFFLINE,
   UPDATING_FIRMWARE,
@@ -64,6 +64,16 @@ public:
    */
   void tft_update();
 
+  /**
+   * Request warnings from maanager (Django) and update internal state.
+   */
+  void update_warnings_from_manager();
+
+  /**
+   * Send current state to the websocket.
+   */
+  void send_websocket_update();
+
 private:
   uint _id;
   std::string _mac;
@@ -76,6 +86,7 @@ private:
   uint8_t _update_progress;
   MQTT_MANAGER_NSPANEL_STATE _state;
   std::string _nspanel_warnings;
+  std::string _nspanel_warnings_from_manager;
 
   std::string _mqtt_log_topic;
   std::string _mqtt_status_topic;

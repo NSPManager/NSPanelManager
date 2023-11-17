@@ -38,6 +38,14 @@ int main(void) {
   sigUsr1Handler.sa_flags = 0;
   sigaction(SIGUSR1, &sigUsr1Handler, NULL);
 
+  std::thread mqtt_manager_thread;
+  std::thread home_assistant_manager_thread;
+  std::thread openhab_manager_thread;
+  std::thread websocket_server_thread;
+
+  SPDLOG_INFO("Starting Websocket Server on port 8002.");
+  websocket_server_thread = std::thread(WebsocketServer::start);
+
   EntityManager::init();
   MqttManagerConfig::load();
 
@@ -53,13 +61,7 @@ int main(void) {
   }
 
   SPDLOG_INFO("Config loaded. Starting components.");
-  std::thread mqtt_manager_thread(MQTT_Manager::connect);
-  std::thread home_assistant_manager_thread;
-  std::thread openhab_manager_thread;
-  std::thread websocket_server_thread;
-
-  SPDLOG_INFO("Starting Websocket Server on port 8002.");
-  websocket_server_thread = std::thread(WebsocketServer::start);
+  mqtt_manager_thread = std::thread(MQTT_Manager::connect);
 
   while (!MQTT_Manager::is_connected()) {
     SPDLOG_INFO("Waiting for MQTT to connect before proceeding.");

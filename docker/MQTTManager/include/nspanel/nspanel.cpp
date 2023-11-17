@@ -1,9 +1,12 @@
 #include "nspanel.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include <boost/exception/diagnostic_information.hpp>
 #include <chrono>
 #include <cstdint>
 #include <ctime>
+#include <curl/curl.h>
+#include <exception>
 #include <iomanip>
 #include <list>
 #include <nlohmann/json_fwd.hpp>
@@ -120,11 +123,7 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
         SPDLOG_ERROR("Received unknown state for nspanel {}::{}. State: {}", this->_id, this->_name, state);
       }
 
-      // Send status over to web interface:
-      nlohmann::json status_reps;
-      status_reps["type"] = "status";
-      status_reps["payload"] = this->get_websocket_json_representation();
-      WebsocketServer::broadcast_json(status_reps);
+      this->send_websocket_update();
       return true;
     }
   } else if (topic.compare(this->_mqtt_status_report_topic) == 0) {
@@ -168,6 +167,14 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
   return false;
 }
 
+void NSPanel::send_websocket_update() {
+  // Send status over to web interface:
+  nlohmann::json status_reps;
+  status_reps["type"] = "status";
+  status_reps["payload"] = this->get_websocket_json_representation();
+  WebsocketServer::broadcast_json(status_reps);
+}
+
 nlohmann::json NSPanel::get_websocket_json_representation() {
   nlohmann::json data;
   switch (this->_state) {
@@ -207,7 +214,12 @@ nlohmann::json NSPanel::get_websocket_json_representation() {
   data["mac_address"] = send_mac;
   data["ip_address"] = this->_ip_address;
   data["temperature"] = this->_temperature;
-  data["warnings"] = this->_nspanel_warnings;
+  std::string warnings_string = this->_nspanel_warnings;
+  if (warnings_string.length() > 0) {
+    warnings_string.append("\\n");
+  }
+  warnings_string.append(this->_nspanel_warnings_from_manager);
+  data["warnings"] = warnings_string;
 
   return data;
 }
@@ -261,4 +273,55 @@ nlohmann::json NSPanel::get_websocket_json_logs() {
   nlohmann::json response;
   response["logs"] = logs;
   return response;
+}
+
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+  ((std::string *)userp)->append((char *)contents, size * nmemb);
+  return size * nmemb;
+}
+
+void NSPanel::update_warnings_from_manager() {
+  try {
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+    if (curl) {
+      std::string response_data;
+      SPDLOG_DEBUG("Requesting NSPanel warnings from: http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_nspanels_warnings");
+      curl_easy_setopt(curl, CURLOPT_URL, "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_nspanels_warnings");
+      /* example.com is redirected, so we tell libcurl to follow redirection */
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+
+      /* Perform the request, res will get the return code */
+      res = curl_easy_perform(curl);
+      long http_code;
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+      /* Check for errors */
+      if (res == CURLE_OK && !response_data.empty() && http_code == 200) {
+        SPDLOG_DEBUG("Got nspanels warnings. Processing data.");
+        nlohmann::json data = nlohmann::json::parse(response_data);
+        for (nlohmann::json panel : data["panels"]) {
+          if (std::string(panel["nspanel"]["mac"]).compare(this->_mac) == 0) {
+            SPDLOG_DEBUG("Found warnings from manager matching MAC {}", this->_mac);
+            this->_nspanel_warnings_from_manager = panel["warnings"];
+            break;
+          }
+        }
+      } else {
+        SPDLOG_ERROR("curl_easy_perform() failed, got code: '{}' with status code: {}. Will retry.", curl_easy_strerror(res), http_code);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+      }
+
+      /* always cleanup */
+      curl_easy_cleanup(curl);
+    } else {
+      SPDLOG_ERROR("Failed to curl_easy_init(). Will try again.");
+      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    }
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
+  }
 }

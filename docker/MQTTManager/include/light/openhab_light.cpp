@@ -75,6 +75,14 @@ void OpenhabLight::send_state_update_to_controller() {
   nlohmann::json payload_data;
   payload_data["type"] = "Percent";
 
+  if (this->_openhab_control_mode == MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH) {
+    payload_data["type"] = "OnOff";
+    payload_data["value"] = this->_requested_state ? "ON" : "OFF";
+    service_data["payload"] = payload_data.dump();
+    OpenhabManager::send_json(service_data);
+    return; // The light is a switch, it can't do anything more than ON/OFF. Exit function early.
+  }
+
   // Do not send brightness seperatly for rgb, this is included in the HSB values.
   if (!this->_requested_state) {
     SPDLOG_DEBUG("Setting light {}::{} to level: 0", this->_id, this->_name);

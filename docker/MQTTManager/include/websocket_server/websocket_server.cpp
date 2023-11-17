@@ -75,8 +75,12 @@ void WebsocketServer::broadcast_json(nlohmann::json &json) {
 }
 
 void WebsocketServer::broadcast_string(std::string &data) {
-  for (auto websocket : WebsocketServer::_server->getClients()) {
-    websocket->send(data);
+  if (WebsocketServer::_server != nullptr) {
+    for (auto websocket : WebsocketServer::_server->getClients()) {
+      websocket->send(data);
+    }
+  } else {
+    SPDLOG_ERROR("Trying to send data over WebSocket before websocket exists.");
   }
 }
 
