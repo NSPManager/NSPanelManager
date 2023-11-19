@@ -6,6 +6,7 @@
 #include <light/light.hpp>
 #include <list>
 #include <mqtt_manager/mqtt_manager.hpp>
+#include <mutex>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <nspanel/nspanel.hpp>
@@ -71,6 +72,7 @@ public:
    */
   template <class EntityClass>
   static EntityClass *get_entity_by_id(MQTT_MANAGER_ENTITY_TYPE type, int id) {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     for (MqttManagerEntity *entity : EntityManager::_entities) {
       if (entity->get_type() == type && entity->get_id() == id) {
         return static_cast<EntityClass *>(entity);
@@ -85,6 +87,7 @@ public:
    */
   template <class EntityClass>
   static std::list<EntityClass *> get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE type) {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     std::list<EntityClass *> entities;
     for (MqttManagerEntity *entity : EntityManager::_entities) {
       if (entity->get_type() == type) {
@@ -115,11 +118,14 @@ public:
 
 private:
   static inline std::list<MqttManagerEntity *> _entities;
+  static inline std::mutex _entities_mutex;
 
   static bool _process_message(const std::string &topic, const std::string &payload);
   static void _handle_register_request(const nlohmann::json &data);
   static inline std::list<Light *> _lights;
+  static inline std::mutex _lights_mutex;
   static inline std::list<NSPanel *> _nspanels;
+  static inline std::mutex _nspanels_mutex;
   static inline std::list<MqttManagerEntity *> _post_init_entities; // The entities to post init when called next time.
 
   static inline boost::signals2::signal<void(MqttManagerEntity *)> _entity_added_signal;

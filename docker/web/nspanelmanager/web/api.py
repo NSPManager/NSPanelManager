@@ -150,7 +150,7 @@ def get_nspanels_warnings(request):
             if panel == nspanel:
                 continue
             elif panel.friendly_name == nspanel.friendly_name:
-                panel_info["warnings"] += "Two or more panels exists with the same name. This may have cunintended consequences\n"
+                panel_info["warnings"] += "Two or more panels exists with the same name. This may have unintended consequences\n"
                 break
         if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
             panel_info["warnings"] += "Firmware update available.\n"

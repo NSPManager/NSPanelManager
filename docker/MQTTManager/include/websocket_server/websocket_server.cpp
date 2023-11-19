@@ -4,6 +4,7 @@
 #include <iterator>
 #include <ixwebsocket/IXWebSocketMessageType.h>
 #include <ixwebsocket/IXWebSocketServer.h>
+#include <mutex>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <websocket_server/websocket_server.hpp>
@@ -55,6 +56,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
         }
       }
       if (found_callback) {
+        SPDLOG_DEBUG("WebSocket callback found!");
         if (!response_buffer.empty()) {
           webSocket.send(response_buffer);
         }
@@ -76,6 +78,7 @@ void WebsocketServer::broadcast_json(nlohmann::json &json) {
 
 void WebsocketServer::broadcast_string(std::string &data) {
   if (WebsocketServer::_server != nullptr) {
+    std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
     for (auto websocket : WebsocketServer::_server->getClients()) {
       websocket->send(data);
     }

@@ -48,7 +48,11 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
   this->_nspanel_warnings = "";
   this->_temperature = -255;
   this->_update_progress = 0;
-  SPDLOG_DEBUG("Loaded NSPanel {}::{}.", this->_id, this->_name);
+  if (init_data.contains("id")) {
+    SPDLOG_DEBUG("Loaded NSPanel {}::{}.", this->_id, this->_name);
+  } else {
+    SPDLOG_DEBUG("Loaded NSPanel {} with no ID.", this->_name);
+  }
 
   this->_mqtt_log_topic = "nspanel/";
   this->_mqtt_log_topic.append(this->_name);
@@ -67,6 +71,10 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
   this->_mqtt_command_topic.append("/command");
 
   MQTT_Manager::attach_observer(this);
+}
+
+NSPanel::~NSPanel() {
+  MQTT_Manager::detach_observer(this);
 }
 
 uint NSPanel::get_id() {
@@ -395,6 +403,7 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
       nlohmann::json data = nlohmann::json::parse(response_data);
       this->_id = data["id"];
       // Registration to manager was OK, return true;
+      SPDLOG_INFO("Panel registration completed.");
       return true;
     } else {
       SPDLOG_ERROR("curl_easy_perform() when registring panel failed, got code: {}.", curl_easy_strerror(res));
@@ -403,5 +412,6 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
+  this->send_websocket_update();
   return false;
 }

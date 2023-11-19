@@ -26,6 +26,7 @@ public:
 class NSPanel : public MQTT_Observer {
 public:
   NSPanel(nlohmann::json &init_data);
+  ~NSPanel();
 
   /**
    * Get the ID of this NSPanel.

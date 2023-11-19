@@ -19,10 +19,10 @@
 void sigusr1_handler(int signal) {
   if (signal == SIGUSR1) {
     SPDLOG_INFO("Reloading config from manager.");
+    MqttManagerConfig::load();
+    MQTT_Manager::publish("nspanel/config/reload", "1");
+    SPDLOG_INFO("Reload signal processing completed.");
   }
-
-  MqttManagerConfig::load();
-  MQTT_Manager::publish("nspanel/config/reload", "1");
 }
 
 int main(void) {

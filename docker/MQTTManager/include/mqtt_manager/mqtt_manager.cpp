@@ -11,6 +11,7 @@
 #include <mqtt/message.h>
 #include <mqtt/subscribe_options.h>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
+#include <mutex>
 #include <pthread.h>
 #include <spdlog/spdlog.h>
 #include <sstream>
@@ -193,6 +194,7 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload)
 
 void MQTT_Manager::publish(const std::string &topic, const std::string &payload, bool retain) {
   if (MQTT_Manager::_mqtt_client != nullptr) {
+    std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
     if (MQTT_Manager::_mqtt_client->is_connected()) {
       mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), 0, retain);
       MQTT_Manager::_mqtt_client->publish(msg);

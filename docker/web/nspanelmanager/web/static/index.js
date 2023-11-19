@@ -40,6 +40,12 @@ function send_nspanel_accept_request(dom) {
 
   ws.send_command("nspanel_accept", command_data, (response) => {
     console.log(response);
+    if(response.success) {
+      $("#nspanel_id_" + nspanel_mac).html(response.id);
+    } else {
+      console.log("Error! Failed to accept register request! Response: ");
+      console.log(response);
+    }
   });
 }
 

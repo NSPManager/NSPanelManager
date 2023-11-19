@@ -19,6 +19,7 @@
 #include <iostream>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
+#include <mutex>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <nspanel/nspanel.hpp>
@@ -67,17 +68,27 @@ void EntityManager::config_removed(nlohmann::json *config) {
   if ((*config).contains("type")) {
     std::string type = (*config)["type"];
     if (type.compare("light") == 0) {
+      std::lock_guard<std::mutex> mutex_guard(EntityManager::_lights_mutex);
       Light *entity = EntityManager::get_light_by_id((*config)["id"]);
       if (entity != nullptr) {
         EntityManager::_lights.remove(entity);
         delete entity;
       }
     } else if (type.compare("nspanel") == 0) {
+      // Try to find NSPanel by ID or MAC
       NSPanel *nspanel = EntityManager::get_nspanel_by_id((*config)["id"]);
+      if (nspanel == nullptr) {
+        nspanel = EntityManager::get_nspanel_by_mac((*config)["mac"]);
+      }
+
       if (nspanel != nullptr) {
+        std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
         SPDLOG_INFO("Removing NSPanel {}::{}.", nspanel->get_id(), nspanel->get_name());
+        SPDLOG_DEBUG("NSPanels before remove: {}", EntityManager::_nspanels.size());
         EntityManager::_nspanels.remove(nspanel);
+        SPDLOG_DEBUG("NSPanels after remove: {}", EntityManager::_nspanels.size());
         delete nspanel;
+        SPDLOG_DEBUG("NSPanel deleted.");
       } else {
         SPDLOG_ERROR("Removing config for NSPanel with ID {} from ConfigManager but couldn't find an NSPanel with that ID to remove from EntityManager!", int((*config)["id"]));
       }
@@ -110,6 +121,7 @@ void EntityManager::detach_entity_added_listener(void (*listener)(MqttManagerEnt
 
 void EntityManager::add_room(nlohmann::json &config) {
   if (EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, config["id"]) == nullptr) {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     EntityManager::_entities.push_back(new Room(config));
   } else {
     int room_id = config["id"];
@@ -164,10 +176,11 @@ void EntityManager::add_scene(nlohmann::json &config) {
 void EntityManager::add_nspanel(nlohmann::json &config) {
   try {
     int panel_id = config["id"];
+    std::string panel_mac = config["mac"];
     for (nlohmann::json config : MqttManagerConfig::nspanel_configs) {
       bool already_exists = false;
       for (NSPanel *panel : EntityManager::_nspanels) {
-        if (panel->get_id() == panel_id) {
+        if ((panel->has_registered_to_manager() && panel->get_id()) == panel_id || panel->get_mac().compare(panel_mac) == 0) {
           already_exists = true;
           break;
         }
@@ -176,6 +189,7 @@ void EntityManager::add_nspanel(nlohmann::json &config) {
         NSPanel *panel = new NSPanel(config);
         panel->update_warnings_from_manager();
         panel->send_websocket_update();
+        std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
         EntityManager::_nspanels.push_back(panel);
       } else {
         SPDLOG_ERROR("A NSPanel with ID {} already exists.", panel_id);
@@ -200,15 +214,23 @@ void EntityManager::post_init_entities() {
 }
 
 void EntityManager::add_entity(MqttManagerEntity *entity) {
-  EntityManager::_entities.push_back(entity);
-  EntityManager::_post_init_entities.push_back(entity);
+  {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+    EntityManager::_entities.push_back(entity);
+    EntityManager::_post_init_entities.push_back(entity);
+  }
   EntityManager::_entity_added_signal(entity);
 }
 
 void EntityManager::remove_entity(MqttManagerEntity *entity) {
   SPDLOG_DEBUG("Removing entity with ID {}.", entity->get_id());
-  EntityManager::_entities.remove(entity);
+  {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+    EntityManager::_entities.remove(entity);
+  }
   EntityManager::_entity_removed_signal(entity);
+
+  std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
   delete entity;
 }
 
@@ -371,6 +393,7 @@ Light *EntityManager::get_light_by_id(uint id) {
 }
 
 NSPanel *EntityManager::get_nspanel_by_id(uint id) {
+  std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
   for (NSPanel *nspanel : EntityManager::_nspanels) {
     if (nspanel->get_id() == id) {
       return nspanel;
@@ -380,6 +403,7 @@ NSPanel *EntityManager::get_nspanel_by_id(uint id) {
 }
 
 NSPanel *EntityManager::get_nspanel_by_mac(std::string mac) {
+  std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
   for (NSPanel *nspanel : EntityManager::_nspanels) {
     if (nspanel->get_mac().compare(mac) == 0) {
       return nspanel;
@@ -487,7 +511,7 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       nlohmann::json response;
       response["cmd_id"] = command_id;
       response["success"] = true;
-      response["id"] = panel->get_id();
+      response["mac"] = mac;
       (*response_buffer) = response.dump();
       panel->send_websocket_update();
       return true;
@@ -506,7 +530,6 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
         std::string response_data;
         SPDLOG_DEBUG("Requesting config from: http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/delete_nspanel/{}", panel->get_id());
         curl_easy_setopt(curl, CURLOPT_URL, fmt::format("http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/delete_nspanel/{}", panel->get_id()).c_str());
-        /* example.com is redirected, so we tell libcurl to follow redirection */
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
@@ -517,23 +540,20 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
         /* Check for errors */
         if (res == CURLE_OK && !response_data.empty() && http_code == 200) {
-          SPDLOG_DEBUG("Deleted panel with MAC {}.", mac);
           nlohmann::json response;
           response["cmd_id"] = command_id;
           response["success"] = true;
-          response["id"] = panel->get_id();
+          response["mac"] = mac;
           (*response_buffer) = response.dump();
+          curl_easy_cleanup(curl);
+          SPDLOG_DEBUG("Panel with MAC {} delete call completed.", mac);
           return true;
         } else {
           SPDLOG_ERROR("curl_easy_perform() failed, got code: '{}' with status code: {}. Will retry.", curl_easy_strerror(res), http_code);
-          std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+          curl_easy_cleanup(curl);
         }
-
-        /* always cleanup */
-        curl_easy_cleanup(curl);
       } else {
-        SPDLOG_ERROR("Failed to curl_easy_init(). Will try again.");
-        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+        SPDLOG_ERROR("Failed to curl_easy_init().");
       }
     } else {
       SPDLOG_ERROR("Received request to delete NSPanel but no NSPanel with MAC {} is register to this manager.", mac);

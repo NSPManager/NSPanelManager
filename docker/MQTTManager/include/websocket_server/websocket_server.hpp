@@ -4,6 +4,7 @@
 #include <ixwebsocket/IXConnectionState.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXWebSocketServer.h>
+#include <mutex>
 #include <nlohmann/json.hpp>
 #include <string>
 
@@ -39,6 +40,7 @@ public:
 private:
   static inline std::list<ix::WebSocket> _connected_websockets;
   static inline ix::WebSocketServer *_server;
+  static inline std::mutex _server_mutex;
   static inline std::list<std::function<bool(std::string &message, std::string *response_buf)>> _callbacks;
   static inline std::list<std::function<bool()>> _client_connect_callbacks;
 
