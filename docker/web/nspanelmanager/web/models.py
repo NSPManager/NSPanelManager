@@ -56,14 +56,25 @@ class NSPanel(models.Model):
     online_state = models.BooleanField(default=False)
     button1_mode = models.IntegerField(default=0)
     button1_detached_mode_light = models.ForeignKey("Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
+    register_relay1_as_light = models.BooleanField(default=False)
     button2_mode = models.IntegerField(default=0)
     button2_detached_mode_light = models.ForeignKey("Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
+    register_relay2_as_light = models.BooleanField(default=False)
     md5_firmware = models.CharField(max_length=64, default="")
     md5_data_file = models.CharField(max_length=64, default="")
     md5_tft_file = models.CharField(max_length=64, default="")
     def __str__(self) -> str:
         return self.friendly_name
 
+
+class RelayGroup(models.Model):
+    friendly_name = models.CharField(max_length=255, default="")
+    register_as_light = models.BooleanField(default=False)
+
+class RelayGroupBinding(models.Model):
+    relay_group = models.ForeignKey(RelayGroup, on_delete=models.CASCADE, null=True, default=None)
+    nspanel = models.ForeignKey(NSPanel, on_delete=models.CASCADE)
+    relay_num = models.IntegerField(default=1)
 
 class Light(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)

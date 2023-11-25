@@ -8,6 +8,7 @@
 #include <mqtt/message.h>
 #include <mqtt/subscribe_options.h>
 #include <nlohmann/json_fwd.hpp>
+#include <spdlog/spdlog.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -25,10 +26,27 @@ class MQTT_Manager {
 public:
   static void connect();
   static bool is_connected();
-  static void subscribe(std::string topic, int qos, void (*callback)(const std::string &topic, const std::string &payload));
-  static void subscribe(std::string topic, void (*callback)(const std::string &topic, const std::string &payload));
-  static void subscribe(const char *topic, int qos, void (*callback)(const std::string &topic, const std::string &payload));
-  static void subscribe(const char *topic, void (*callback)(const std::string &topic, const std::string &payload));
+
+  template <typename CALLBACK_BIND>
+  static void subscribe(std::string topic, int qos, CALLBACK_BIND callback) {
+    MQTT_Manager::_mqtt_callbacks[topic].connect(callback);
+    SPDLOG_DEBUG("Adding '{}' to the list of topics to subscribe to.", topic);
+    MQTT_Manager::_subscribed_topics[topic] = qos;
+    if (MQTT_Manager::is_connected()) {
+      SPDLOG_DEBUG("MQTT is connected, subscribing to MQTT topic '{}'.", topic);
+      MQTT_Manager::_mqtt_client->subscribe(topic, qos);
+    }
+  }
+
+  template <typename CALLBACK_BIND>
+  static void subscribe(std::string topic, CALLBACK_BIND callback) {
+    MQTT_Manager::subscribe(topic, 0, callback);
+  }
+
+  template <typename CALLBACK_BIND>
+  static void detach_callback(std::string topic, CALLBACK_BIND callback) {
+    MQTT_Manager::_mqtt_callbacks[topic].disconnect(callback);
+  }
 
   /**
    * Attach an MQTT_Observer to the list of observers for new MQTT messages.

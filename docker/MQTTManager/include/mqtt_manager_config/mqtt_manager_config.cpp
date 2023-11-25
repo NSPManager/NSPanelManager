@@ -252,6 +252,34 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     SPDLOG_ERROR("Chaught exception when checking for any removed rooms. Exception: {}", e.what());
   }
 
+  SPDLOG_DEBUG("Loading relay groups...");
+  std::list<nlohmann::json> json_rgs;
+  for (nlohmann::json rg_config : data["nspanel_relay_groups"]) {
+    json_rgs.push_back(rg_config); // Build light list for next step.
+    bool already_exists = ITEM_IN_LIST(MqttManagerConfig::nspanel_relay_group_configs, rg_config);
+    if (!already_exists) {
+      MqttManagerConfig::nspanel_relay_group_configs.push_back(rg_config);
+      MqttManagerConfig::_config_added_listener(&MqttManagerConfig::nspanel_relay_group_configs.back());
+    }
+  }
+
+  try {
+    SPDLOG_DEBUG("Checking for removed relay groups.");
+    auto rit = MqttManagerConfig::nspanel_relay_group_configs.begin();
+    while (rit != MqttManagerConfig::nspanel_relay_group_configs.end()) {
+      bool exists = ITEM_IN_LIST(json_rgs, (*rit));
+      if (!exists) {
+        SPDLOG_DEBUG("Removing scene config as it doesn't exist in config anymore.");
+        MqttManagerConfig::_config_removed_listener(&(*rit));
+        MqttManagerConfig::nspanel_relay_group_configs.erase(rit++);
+      } else {
+        ++rit;
+      }
+    }
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Chaught exception when checking for any removed NSPanel relay groups. Exception: {}", e.what());
+  }
+
   SPDLOG_DEBUG("Config loaded. Calling listeners.");
   MqttManagerConfig::_config_loaded_listeners();
 }

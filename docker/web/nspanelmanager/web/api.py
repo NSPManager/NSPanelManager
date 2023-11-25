@@ -15,7 +15,7 @@ import subprocess
 import environ
 import os
 
-from .models import NSPanel, Room, Light, LightState, Scene
+from .models import NSPanel, Room, Light, LightState, Scene, RelayGroup
 from .apps import start_mqtt_manager
 from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default
 
@@ -92,7 +92,9 @@ def get_mqtt_manager_config(request):
             "mac": panel.mac_address,
             "name": panel.friendly_name,
             "is_us_panel": get_nspanel_setting_with_default(panel.id, "is_us_panel", "False"),
-            "address": panel.ip_address
+            "address": panel.ip_address,
+            "relay1_is_light": panel.register_relay1_as_light,
+            "relay2_is_light": panel.register_relay2_as_light
         }
         return_json["nspanels"][panel.id] = panel_config
 
@@ -128,6 +130,18 @@ def get_mqtt_manager_config(request):
             "name": room.friendly_name
         }
         return_json["rooms"].append(room_info)
+    
+    return_json["nspanel_relay_groups"] = []
+    for relay_group in RelayGroup.objects.all():
+        rg_info = {
+            "type": "nspanel_relay_group",
+            "id": relay_group.id,
+            "name": relay_group.friendly_name,
+            "relays": []
+        }
+        for relay_binding in relay_group.relaygroupbinding_set.all():
+            rg_info["relays"].append({"nspanel_id": relay_binding.nspanel.id, "relay_num": relay_binding.relay_num})
+        return_json["nspanel_relay_groups"].append(rg_info)
 
     return JsonResponse(return_json)
 

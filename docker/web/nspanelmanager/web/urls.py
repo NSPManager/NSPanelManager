@@ -39,6 +39,13 @@ urlpatterns = [
     path('checksum_tft_file', views.checksum_tft_file, name='checksum_tft_file'),
     path('checksum_tft_file_us', views.checksum_tft_file_us, name='checksum_tft_file_us'),
     path('manual', views.get_manual, name="manual"),
+    # Entities:
+    path('entities/relay_groups', views.relay_groups, name="relay_groups"),
+    path('entities/relay_groups/create', views.create_or_update_relay_group, name="create_or_update_relay_group"),
+    path('entities/relay_groups/add_relay', views.add_nspanel_relay_to_group, name="add_nspanel_relay_to_group"),
+    path('entities/relay_groups/delete_relay/<int:relay_binding_id>', views.delete_relay_group_binding, name="delete_relay_group_binding"),
+    path('entities/relay_groups/delete/<int:relay_group_id>', views.delete_relay_group, name="delete_relay_group"),
+    path('entities/global_scenes', views.global_scenes, name="global_scenes"),
     # Below are API routes
     path('api/register_nspanel', api.register_nspanel, name='register_nspanel'),
     path('api/delete_nspanel/<int:panel_id>', api.delete_panel, name='delete_nspanel'),

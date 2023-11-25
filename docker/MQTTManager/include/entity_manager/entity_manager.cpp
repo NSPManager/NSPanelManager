@@ -55,6 +55,8 @@ void EntityManager::config_added(nlohmann::json *config) {
       EntityManager::add_scene((*config));
     } else if (type.compare("room") == 0) {
       EntityManager::add_room((*config));
+    } else if (type.compare("nspanel_relay_group") == 0) {
+      EntityManager::add_nspanel_relay_group((*config));
     } else {
       SPDLOG_ERROR("Unknown type for new config: {}", type);
     }
@@ -99,6 +101,11 @@ void EntityManager::config_removed(nlohmann::json *config) {
       }
     } else if (type.compare("room") == 0) {
       MqttManagerEntity *ptr = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, (*config)["id"]);
+      if (ptr != nullptr) {
+        EntityManager::remove_entity(ptr);
+      }
+    } else if (type.compare("nspanel_relay_group") == 0) {
+      NSPanelRelayGroup *ptr = EntityManager::get_entity_by_id<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP, (*config)["id"]);
       if (ptr != nullptr) {
         EntityManager::remove_entity(ptr);
       }
@@ -163,6 +170,21 @@ void EntityManager::add_scene(nlohmann::json &config) {
         EntityManager::add_entity(scene);
       }
       // TODO: Implement Home Assistant and Openhab scenes.
+    } else {
+      int scene_id = config["id"];
+      SPDLOG_ERROR("A scene with ID {} already exists.", scene_id);
+    }
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+  }
+}
+
+void EntityManager::add_nspanel_relay_group(nlohmann::json &config) {
+  try {
+    if (EntityManager::get_entity_by_id<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP, config["id"]) == nullptr) {
+      NSPanelRelayGroup *rg = new NSPanelRelayGroup(config);
+      EntityManager::add_entity(rg);
     } else {
       int scene_id = config["id"];
       SPDLOG_ERROR("A scene with ID {} already exists.", scene_id);

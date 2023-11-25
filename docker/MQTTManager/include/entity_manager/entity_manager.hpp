@@ -67,6 +67,11 @@ public:
   static void add_scene(nlohmann::json &config);
 
   /**
+   * Create and add a NSPanel relay group to the manager
+   */
+  static void add_nspanel_relay_group(nlohmann::json &config);
+
+  /**
    * Get an item by the specified type that has the specified ID.
    * Return pointer to entity if found, otherwise a nullptr
    */

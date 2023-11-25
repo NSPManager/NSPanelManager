@@ -1,7 +1,10 @@
 #include "nspanel.hpp"
+#include "entity/entity.hpp"
+#include "entity_manager/entity_manager.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include <algorithm>
+#include <boost/bind.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <chrono>
 #include <cstdint>
@@ -15,7 +18,66 @@
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <websocket_server/websocket_server.hpp>
+
+NSPanelRelayGroup::NSPanelRelayGroup(nlohmann::json &config) {
+  this->_id = config["id"];
+  this->_name = config["name"];
+
+  for (nlohmann::json nspanel_relay : config["relays"]) {
+    this->_nspanel_relays.insert(std::make_pair<int, int>(int(nspanel_relay["nspanel_id"]), int(nspanel_relay["relay_num"])));
+  }
+
+  SPDLOG_DEBUG("Loaded NSPanelRelayGroup {}::{}", this->_id, this->_name);
+}
+
+NSPanelRelayGroup::~NSPanelRelayGroup() {
+}
+
+uint16_t NSPanelRelayGroup::get_id() {
+  return this->_id;
+}
+
+MQTT_MANAGER_ENTITY_TYPE NSPanelRelayGroup::get_type() {
+  return MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP;
+}
+
+MQTT_MANAGER_ENTITY_CONTROLLER NSPanelRelayGroup::get_controller() {
+  return MQTT_MANAGER_ENTITY_CONTROLLER::NSPM;
+}
+
+void NSPanelRelayGroup::post_init() {
+}
+
+bool NSPanelRelayGroup::contains(int nspanel_id, int relay_num) {
+  for (auto pair : this->_nspanel_relays) {
+    if (pair.first == nspanel_id && pair.second == relay_num) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void NSPanelRelayGroup::turn_on() {
+  SPDLOG_DEBUG("Turning on NSPanelRelayGroup {}::{}", this->_id, this->_name);
+  for (auto pair : this->_nspanel_relays) {
+    NSPanel *panel = EntityManager::get_nspanel_by_id(pair.first);
+    if (panel != nullptr) {
+      panel->set_relay_state(pair.second, true);
+    }
+  }
+}
+
+void NSPanelRelayGroup::turn_off() {
+  SPDLOG_DEBUG("Turning off NSPanelRelayGroup {}::{}", this->_id, this->_name);
+  for (auto pair : this->_nspanel_relays) {
+    NSPanel *panel = EntityManager::get_nspanel_by_id(pair.first);
+    if (panel != nullptr) {
+      panel->set_relay_state(pair.second, false);
+    }
+  }
+}
 
 NSPanel::NSPanel(nlohmann::json &init_data) {
   // If this panel is just a panel in waiting (ie. not accepted the request yet) it won't have an id.
@@ -90,9 +152,16 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
   this->_mqtt_switch_screen_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_screen/config", mqtt_register_mac);
   this->_mqtt_number_screen_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screen_brightness/config", mqtt_register_mac);
   this->_mqtt_number_screensaver_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screensaver_brightness/config", mqtt_register_mac);
+  this->_mqtt_relay1_command_topic = fmt::format("nspanel/{}/r1_cmd", this->_name);
+  this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/r1_state", this->_name);
+  this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/r2_cmd", this->_name);
+  this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/r2_state", this->_name);
 
-  // TODO: Remove MQTT Observer from panel and use Boost signals to listen to specific MQTT topics.
-  MQTT_Manager::attach_observer(this);
+  MQTT_Manager::subscribe(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+  MQTT_Manager::subscribe(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+  MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+  MQTT_Manager::subscribe(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+  MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
 
   if (init_data.contains("id")) {
     this->register_to_home_assistant();
@@ -100,7 +169,9 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
 }
 
 NSPanel::~NSPanel() {
-  MQTT_Manager::detach_observer(this);
+  MQTT_Manager::detach_callback(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+  MQTT_Manager::detach_callback(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+
   // This nspanel was removed. Clear any retain on any MQTT topic.
   MQTT_Manager::clear_retain(this->_mqtt_status_topic);
   MQTT_Manager::clear_retain(this->_mqtt_command_topic);
@@ -126,7 +197,7 @@ MQTT_MANAGER_NSPANEL_STATE NSPanel::get_state() {
   return this->_state;
 }
 
-bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload) {
+void NSPanel::mqtt_callback(std::string topic, std::string payload) {
   if (topic.compare(this->_mqtt_log_topic) == 0) {
     // Split log message by semicolon to extract MAC, log level and message.
     std::string message = payload;
@@ -174,7 +245,6 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
       while (this->_log_messages.size() > MqttManagerConfig::max_log_buffer_size) {
         this->_log_messages.pop_back();
       }
-      return true;
     } else {
       SPDLOG_ERROR("Received message on log topic {} with wrong format. Message: {}", topic, payload);
     }
@@ -183,9 +253,7 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
     if (std::string(data["mac"]).compare(this->_mac) == 0) {
       // Update internal state.
       std::string state = data["state"];
-      if (this->_state == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
-        return true;
-      } else if (state.compare("online") == 0) {
+      if (state.compare("online") == 0) {
         this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
         SPDLOG_DEBUG("NSPanel {}::{} became ONLINE.", this->_id, this->_name);
       } else if (state.compare("offline") == 0) {
@@ -196,7 +264,6 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
       }
 
       this->send_websocket_update();
-      return true;
     }
   } else if (topic.compare(this->_mqtt_status_report_topic) == 0) {
     nlohmann::json data = nlohmann::json::parse(payload);
@@ -230,11 +297,34 @@ bool NSPanel::mqtt_callback(const std::string &topic, const std::string &payload
       }
 
       this->send_websocket_update();
-      return true;
     }
-    return true;
+  } else if (topic.compare(this->_mqtt_relay1_state_topic) == 0) {
+    this->_relay1_state = (payload.compare("1") == 0);
+    SPDLOG_DEBUG("NSPanel {}::{} relay1 state: {}", this->_id, this->_name, this->_relay1_state ? "ON" : "OFF");
+    std::list<NSPanelRelayGroup *> relay_groups = EntityManager::get_all_entities_by_type<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP);
+    for (NSPanelRelayGroup *relay_group : relay_groups) {
+      if (relay_group->contains(this->_id, 1)) {
+        if (payload.compare("1") == 0) {
+          relay_group->turn_on();
+        } else {
+          relay_group->turn_off();
+        }
+      }
+    }
+  } else if (topic.compare(this->_mqtt_relay2_state_topic) == 0) {
+    this->_relay2_state = (payload.compare("1") == 0);
+    SPDLOG_DEBUG("NSPanel {}::{} relay2 state: {}", this->_id, this->_name, this->_relay2_state ? "ON" : "OFF");
+    std::list<NSPanelRelayGroup *> relay_groups = EntityManager::get_all_entities_by_type<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP);
+    for (NSPanelRelayGroup *relay_group : relay_groups) {
+      if (relay_group->contains(this->_id, 2)) {
+        if (payload.compare("1") == 0) {
+          relay_group->turn_on();
+        } else {
+          relay_group->turn_off();
+        }
+      }
+    }
   }
-  return false;
 }
 
 void NSPanel::send_websocket_update() {
@@ -489,8 +579,8 @@ void NSPanel::register_to_home_assistant() {
     nlohmann::json relay1_data = nlohmann::json(base_json);
     relay1_data["device_class"] = "switch";
     relay1_data["name"] = "Relay 1";
-    relay1_data["state_topic"] = fmt::format("nspanel/{}/r1_state", this->_name);
-    relay1_data["command_topic"] = fmt::format("nspanel/{}/r1_cmd", this->_name);
+    relay1_data["state_topic"] = this->_mqtt_relay1_state_topic;
+    relay1_data["command_topic"] = this->_mqtt_relay1_command_topic;
     relay1_data["state_on"] = "1";
     relay1_data["state_off"] = "0";
     relay1_data["payload_on"] = "1";
@@ -508,8 +598,8 @@ void NSPanel::register_to_home_assistant() {
     nlohmann::json relay2_data = nlohmann::json(base_json);
     relay2_data["device_class"] = "switch";
     relay2_data["name"] = "Relay 2";
-    relay2_data["state_topic"] = fmt::format("nspanel/{}/r2_state", this->_name);
-    relay2_data["command_topic"] = fmt::format("nspanel/{}/r2_cmd", this->_name);
+    relay2_data["state_topic"] = this->_mqtt_relay2_state_topic;
+    relay2_data["command_topic"] = this->_mqtt_relay2_command_topic;
     relay2_data["state_on"] = "1";
     relay2_data["state_off"] = "0";
     relay2_data["payload_on"] = "1";
@@ -555,4 +645,12 @@ void NSPanel::register_to_home_assistant() {
   screensaver_brightness_data["unique_id"] = fmt::format("{}_screensaver_brightness", this->_mqtt_register_mac);
   std::string screensaver_brightness_data_str = screensaver_brightness_data.dump();
   MQTT_Manager::publish(this->_mqtt_number_screensaver_brightness_topic, screensaver_brightness_data_str, true);
+}
+
+void NSPanel::set_relay_state(uint8_t relay, bool state) {
+  if (relay == 1 && this->_relay1_state != state) {
+    MQTT_Manager::publish(this->_mqtt_relay1_command_topic, state ? "1" : "0");
+  } else if (relay == 2 && this->_relay2_state != state) {
+    MQTT_Manager::publish(this->_mqtt_relay2_command_topic, state ? "1" : "0");
+  }
 }

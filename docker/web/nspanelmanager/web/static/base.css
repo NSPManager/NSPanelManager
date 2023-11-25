@@ -7,3 +7,13 @@
 [data-tooltip]:not([disabled]).has-tooltip-warning::before {
   width: 10rem !important;
 }
+
+/* Modal fade animation on modal shown */
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.modal {
+  animation: fadeIn 0.1s;
+}

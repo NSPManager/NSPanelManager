@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'index.css' %}?refresh={% now 'U' %}">
+
+<script>
+function add_new_scene() {
+    $("#edit_scene_id").val("");
+    $("#add_new_scene_to_room_modal").addClass("is-active");
+}
+
+function edit_scene(id, name) {
+    $("#edit_scene_id").val(id);
+    $("#scene_name").val(name);
+    $("#add_new_scene_to_room_modal").addClass("is-active");
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<form method="POST" action="{% url 'add_new_scene_to_global' %}">
+  {% csrf_token %}
+  <input type="hidden" id="edit_scene_id" name="edit_scene_id">
+  <div class="modal" id="add_new_scene_to_room_modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Create new global scene</p>
+        <button type="button" class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <div class="control">
+            <input class="input" type="text" placeholder="Scene name" name="scene_name" id="scene_name">
+          </div>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button type="submit" class="button is-success">Save changes</button>
+        <button type="button" class="button modal-cancel-button">Cancel</button>
+      </footer>
+    </div>
+  </div>
+</form>
+
+<span class="is-hidden" id="temperature_unit">{{ temperature_unit }}</span>
+{% load mathfilters %}
+<div class="level">
+  <div class="level-left">
+    <div class="level-item">
+      <h2 class="title is-4">Global Scenes</h2>
+    </div>
+  </div>
+</div>
+<div>
+  <div>
+    <button type="button" class="button is-primary" onclick="add_new_scene();">Add new scene</button>
+  </div>
+  <div>
+    <table class="table is-fullwidth is-hoverable">
+      <thead>
+        <tr>
+          <th>Scene name</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for scene in global_scenes %}
+        <tr>
+          <th>{{ scene.friendly_name }}</th>
+          <td>
+            <button onclick="edit_scene({{ scene.id }}, '{{ scene.friendly_name }}');" class="button is-small is-primary">Edit</button>
+            <a href='{% url "delete_global_scene" scene.id %}' class="button is-small is-danger">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

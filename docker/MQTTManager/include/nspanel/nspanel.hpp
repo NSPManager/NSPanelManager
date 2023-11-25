@@ -1,9 +1,11 @@
 #ifndef MQTT_MANAGER_NSPANEL
 #define MQTT_MANAGER_NSPANEL
+#include "entity/entity.hpp"
 #include <cstdint>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <nlohmann/json.hpp>
 #include <string>
+#include <unordered_map>
 
 enum MQTT_MANAGER_NSPANEL_STATE {
   UNKNOWN,
@@ -23,7 +25,28 @@ public:
   std::string message;
 };
 
-class NSPanel : public MQTT_Observer {
+class NSPanelRelayGroup : public MqttManagerEntity {
+public:
+  NSPanelRelayGroup(nlohmann::json &config);
+  ~NSPanelRelayGroup();
+
+  bool contains(int nspanel_id, int relay_num);
+  void turn_on();
+  void turn_off();
+
+  uint16_t get_id();
+  MQTT_MANAGER_ENTITY_TYPE get_type();
+  MQTT_MANAGER_ENTITY_CONTROLLER get_controller();
+  void post_init();
+
+private:
+  int _id;
+  std::string _name;
+  // Map of NSPanelID:relayID of relays in this group.
+  std::unordered_map<int, int> _nspanel_relays;
+};
+
+class NSPanel {
 public:
   NSPanel(nlohmann::json &init_data);
   ~NSPanel();
@@ -35,7 +58,7 @@ public:
   std::string get_mac();
   std::string get_name();
   MQTT_MANAGER_NSPANEL_STATE get_state();
-  bool mqtt_callback(const std::string &topic, const std::string &payload);
+  void mqtt_callback(std::string topic, std::string payload);
 
   /**
    * Dump JSON as string and send to NSPanel command topic.
@@ -102,6 +125,11 @@ public:
    */
   void register_to_home_assistant();
 
+  /**
+   * Turn a relay on or off
+   */
+  void set_relay_state(uint8_t relay, bool state);
+
 private:
   uint _id;
   std::string _mac;
@@ -122,8 +150,20 @@ private:
   // MQTT Stuff:
   // Wether or not relay1 should be registered to Home Assistant as a switch or light (true = register as light).
   bool _relay1_is_mqtt_light;
+  // The topic to send commands to the relay1
+  std::string _mqtt_relay1_command_topic;
+  // The topic where relay1 state is published
+  std::string _mqtt_relay1_state_topic;
+  // Wether or not relay1 is on
+  bool _relay1_state;
   // Wether or not relay2 should be registered to Home Assistant as a switch or light (true = register as light).
   bool _relay2_is_mqtt_light;
+  // The topic to send commands to the relay2
+  std::string _mqtt_relay2_command_topic;
+  // The topic where relay2 state is published
+  std::string _mqtt_relay2_state_topic;
+  // Wether or not relay2 is on
+  bool _relay2_state;
   // The topic to capture logs from MQTT
   std::string _mqtt_log_topic;
   // The topic to capture status (online/offline) from MQTT

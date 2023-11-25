@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'index.css' %}?refresh={% now 'U' %}">
+
+<script>
+function create_new_relay_group() {
+    $("#relay_group_id").val("");
+    $("#create_new_relay_group_modal").addClass("is-active");
+}
+
+function edit_relay_group(id, name) {
+    $("#relay_group_id").val(id);
+    $("#relay_group_name").val(name);
+    $("#create_new_relay_group_modal").addClass("is-active");
+}
+
+function add_relay_to_relay_group(relay_group_id) {
+    $("#add_nspanel_relay_group_id").val(relay_group_id);
+    $("#add_relay_to_relay_group_modal").addClass("is-active");
+}
+
+</script>
+{% endblock %}
+
+{% block content %}
+<form method="POST" action="{% url 'create_or_update_relay_group' %}">
+  {% csrf_token %}
+  <input type="hidden" id="relay_group_id" name="relay_group_id">
+  <div class="modal" id="create_new_relay_group_modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Create new Relay Group</p>
+        <button type="button" class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <div class="control">
+            <input class="input" type="text" placeholder="Relay group name" name="relay_group_name" id="relay_group_name">
+          </div>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button type="submit" class="button is-success">Save</button>
+        <button type="button" class="button modal-cancel-button">Cancel</button>
+      </footer>
+    </div>
+  </div>
+</form>
+
+<form method="POST" action="{% url 'add_nspanel_relay_to_group' %}">
+  {% csrf_token %}
+  <input type="hidden" id="add_nspanel_relay_group_id" name="relay_group_id">
+  <div class="modal" id="add_relay_to_relay_group_modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Add relay to group</p>
+        <button type="button" class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <label class="label">NSPanel</label>
+          <div class="control">
+            <div class="select">
+              <select name="nspanel_id">
+                {% for nspanel in nspanels %}
+                <option value="{{ nspanel.id }}">{{ nspanel.friendly_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Relay</label>
+          <div class="control">
+            <div class="select">
+              <select name="relay_num">
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button type="submit" class="button is-success">Save</button>
+        <button type="button" class="button modal-cancel-button">Cancel</button>
+      </footer>
+    </div>
+  </div>
+</form>
+
+
+<span class="is-hidden" id="temperature_unit">{{ temperature_unit }}</span>
+{% load mathfilters %}
+<div class="level">
+  <div class="level-left">
+    <div class="level-item">
+      <h2 class="title is-4">Relay Groups</h2>
+    </div>
+  </div>
+</div>
+<div>
+  <div>
+    <button type="button" class="button is-primary" onclick="create_new_relay_group();">Add new relay group</button>
+  </div>
+  <div>
+    <table class="table is-fullwidth is-hoverable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Relay members</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for relay_group in relay_groups %}
+        <tr>
+          <th>{{ relay_group.friendly_name }}</th>
+          <th>
+            <div class="field is-grouped is-grouped-multiline">
+            {% for member in relay_group.relaygroupbinding_set.all %}
+            <div class="control">
+              <div class="tags has-addons">
+                <a href="{% url 'edit_nspanel' member.nspanel.id %}" class="tag is-link">{{ member.nspanel.friendly_name }} relay {{ member.relay_num }}</a>
+                <a href="{% url 'delete_relay_group_binding' member.id %}" class="tag is-delete"><a>
+              </div>
+            </div>
+            {% endfor %}
+            </div>
+          </th>
+          <td>
+            <button onclick="add_relay_to_relay_group({{ relay_group.id }});" class="button is-small is-primary">Add relay</button>
+            <button onclick="edit_relay_group({{ relay_group.id }}, '{{ relay_group.friendly_name }}');" class="button is-small is-primary">Edit</button>
+            <a href='{% url "delete_relay_group" relay_group.id %}' class="button is-small is-danger">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

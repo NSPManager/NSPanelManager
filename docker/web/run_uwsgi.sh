@@ -1,7 +1,9 @@
 #!/bin/bash
 
 echo "Running migrations..."
-/usr/local/bin/python nspanelmanager/manage.py migrate
+cd nspanelmanager
+/usr/local/bin/python manage.py migrate
+cd ..
 
 echo "Starting Nginx"
 /etc/init.d/nginx restart

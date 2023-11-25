@@ -11,7 +11,7 @@ import environ
 import os
 import signal
 
-from .models import NSPanel, Room, Light, Settings, Scene
+from .models import NSPanel, Room, Light, Settings, Scene, RelayGroup, RelayGroupBinding
 from .apps import start_mqtt_manager
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
 
@@ -346,7 +346,7 @@ def delete_global_scene(request, scene_id: int):
     if scene:
         scene.delete()
         send_mqttmanager_reload_command()
-    return redirect('settings')
+    return redirect('global_scenes')
 
 def add_scene_to_global(request):
     if request.POST["edit_scene_id"].strip() != "" and int(request.POST["edit_scene_id"]) >= 0:
@@ -357,7 +357,7 @@ def add_scene_to_global(request):
     new_scene.room = None
     new_scene.save()
     send_mqttmanager_reload_command()
-    return redirect('settings')
+    return redirect('global_scenes')
 
 def add_light_to_room_view(request, room_id: int):
     if "light_id" not in request.POST:
@@ -426,7 +426,6 @@ def settings_page(request):
     data["show_screensaver_clock"] = get_setting_with_default("show_screensaver_clock", False)
     data["clock_us_style"] = get_setting_with_default("clock_us_style", False)
     data["use_farenheit"] = get_setting_with_default("use_farenheit", False)
-    data["global_scenes"] = Scene.objects.filter(room__isnull=True)
     data["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
     data["max_live_log_messages"] = get_setting_with_default("max_live_log_messages", 10)
     data["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size", 10)
@@ -555,8 +554,6 @@ def download_data_file(request):
         parts = request.headers["Range"][6:].split('-')
         range_start = int(parts[0])
         range_end = int(parts[1])
-        if range_end == 255:  # Workaround for copy-paste error in firmware. TODO: Remove once all panels has been updated.
-            return HttpResponse(fs.open("data_file.bin").read(), content_type="application/octet-stream")
         data = fs.open("data_file.bin").read()
         return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
     else:
@@ -610,3 +607,54 @@ def get_manual(request):
     response = HttpResponse(fs.open("manual.pdf").read(), content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="manual.pdf"'
     return response
+
+def global_scenes(request):
+    data = {}
+    data["global_scenes"] = Scene.objects.filter(room__isnull=True)
+    return render(request, 'global_scenes.html', data)
+
+def relay_groups(request):
+    data = {}
+    data["nspanels"] = NSPanel.objects.all()
+    data["relay_groups"] = RelayGroup.objects.all()
+    return render(request, 'relay_groups.html', data)
+
+
+def create_or_update_relay_group(request):
+    if request.POST["relay_group_id"]:
+        new_rg = RelayGroup.objects.get(id=request.POST["relay_group_id"])
+    else:
+        new_rg = RelayGroup()
+    new_rg.friendly_name = request.POST['relay_group_name']
+    new_rg.save()
+    send_mqttmanager_reload_command()
+    return redirect("relay_groups")
+
+
+def delete_relay_group(request, relay_group_id):
+    rg = RelayGroup.objects.get(id=relay_group_id)
+    if rg:
+        rg.delete()
+    send_mqttmanager_reload_command()
+    return redirect("relay_groups")
+
+
+def add_nspanel_relay_to_group(request):
+    rg = RelayGroup.objects.get(id=request.POST["relay_group_id"])
+    nspanel = NSPanel.objects.get(id=request.POST["nspanel_id"])
+    relay_num = request.POST["relay_num"]
+
+    exists = RelayGroupBinding.objects.filter(nspanel=nspanel, relay_num=relay_num, relay_group=rg).count() > 0
+    if not exists:
+        binding = RelayGroupBinding()
+        binding.relay_group = rg
+        binding.nspanel = nspanel
+        binding.relay_num = relay_num
+        binding.save()
+    return redirect("relay_groups")
+
+def delete_relay_group_binding(request, relay_binding_id):
+    binding = RelayGroupBinding.objects.get(id=relay_binding_id)
+    if binding:
+        binding.delete()
+    return redirect("relay_groups")

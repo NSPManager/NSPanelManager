@@ -94,31 +94,10 @@ bool MQTT_Manager::is_connected() {
   }
 }
 
-void MQTT_Manager::subscribe(std::string topic, int qos, void (*callback)(const std::string &, const std::string &)) {
-  MQTT_Manager::_mqtt_callbacks[topic].connect(callback);
-  SPDLOG_DEBUG("Adding '{}' to the list of topics to subscribe to.", topic);
-  MQTT_Manager::_subscribed_topics[topic] = qos;
-  if (MQTT_Manager::is_connected()) {
-    SPDLOG_DEBUG("MQTT is connected, subscribing to MQTT topic '{}'.", topic);
-    MQTT_Manager::_mqtt_client->subscribe(topic, qos);
-  }
-}
-
-void MQTT_Manager::subscribe(std::string topic, void (*callback)(const std::string &, const std::string &)) {
-  MQTT_Manager::subscribe(topic, 1, callback);
-}
-
-void MQTT_Manager::subscribe(const char *topic, void (*callback)(const std::string &, const std::string &)) {
-  MQTT_Manager::subscribe(std::string(topic), 1, callback);
-}
-
-void MQTT_Manager::subscribe(const char *topic, int qos, void (*callback)(const std::string &, const std::string &)) {
-  MQTT_Manager::subscribe(std::string(topic), qos, callback);
-}
-
 void MQTT_Manager::_resubscribe() {
   SPDLOG_DEBUG("Subscribing to registered MQTT topics.");
   for (auto mqtt_topic_pair : MQTT_Manager::_subscribed_topics) {
+    SPDLOG_DEBUG("Subscribing to topic {}", mqtt_topic_pair.first);
     MQTT_Manager::_mqtt_client->subscribe(mqtt_topic_pair.first, mqtt_topic_pair.second);
   }
 }
@@ -151,6 +130,7 @@ void MQTT_Manager::_process_mqtt_message(const std::string topic, const std::str
   }
 
   try {
+    SPDLOG_TRACE("Got message: {} --> {}", topic, message);
     bool message_handled = false;
     for (MQTT_Observer *observer : MQTT_Manager::_mqtt_observers) {
       if (observer->mqtt_callback(topic, message)) {

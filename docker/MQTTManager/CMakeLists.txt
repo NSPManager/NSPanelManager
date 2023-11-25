@@ -5,6 +5,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
   set(CMAKE_CXX17_STANDARD_COMPILE_OPTION "-std=c++17")
   set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std=gnu++17")
+
 elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
   set(CMAKE_CXX17_STANDARD_COMPILE_OPTION "-std=c++1z")
   set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std=gnu++1z")
@@ -60,7 +61,7 @@ target_link_libraries(MQTTManager_Light MQTTManager_HomeAssistantManager spdlog:
 add_library(MQTTManager_NSPanel SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.hpp)
 set_target_properties(MQTTManager_NSPanel PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/light.hpp)
 target_include_directories(MQTTManager_NSPanel PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_WebsocketServer tz::tz)
+target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_WebsocketServer tz::tz Boost::boost)
 
 add_library(MQTTManager_Scene SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.cpp)
 # set_target_properties(MQTTManager_Scene PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/nspm_scene.hpp)
