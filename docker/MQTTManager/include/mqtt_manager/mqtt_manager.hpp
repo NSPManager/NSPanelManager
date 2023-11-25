@@ -5,6 +5,7 @@
 #include <boost/signals2.hpp>
 #include <functional>
 #include <mqtt/client.h>
+#include <mqtt/message.h>
 #include <mqtt/subscribe_options.h>
 #include <nlohmann/json_fwd.hpp>
 #include <string>
@@ -68,9 +69,16 @@ public:
    */
   static void publish(const std::string &topic, const std::string &payload, bool retain);
 
+  /**
+   * Will clear retain on a topic (not recursive)
+   * @param topic: The MQTT topic to send payload to.
+   */
+  static void clear_retain(const std::string &topic);
+
 private:
   static inline mqtt::client *_mqtt_client = nullptr;
   static inline std::mutex _mqtt_client_mutex;
+  static inline std::list<mqtt::message_ptr> _mqtt_messages_buffer;
   static inline std::list<MQTT_Observer *> _mqtt_observers;
   static inline std::list<std::function<bool(const std::string &topic, const std::string &payload)>> _mqtt_observer_callbacks; // Raw function callbacks
   static const std::vector<std::string> _get_subscribe_topics();

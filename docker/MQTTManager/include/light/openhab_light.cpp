@@ -169,7 +169,7 @@ bool OpenhabLight::openhab_event_callback(nlohmann::json &data) {
         MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness));
         this->_last_brightness_change = CurrentTimeMilliseconds();
       }
-      this->signal_entity_changed();
+      this->_signal_entity_changed();
       return true;
     } else if (topic_item.compare(this->_openhab_item_color_temperature) == 0 && (this->_current_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT || CurrentTimeMilliseconds() >= this->_last_light_mode_change + 1000)) {
       // We only care about the first event from Openhab, ignore the rest but still indicate that event was handled so the manager stops looping over all entities.
@@ -193,7 +193,7 @@ bool OpenhabLight::openhab_event_callback(nlohmann::json &data) {
         MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature));
       }
       this->_last_light_mode_change = CurrentTimeMilliseconds();
-      this->signal_entity_changed();
+      this->_signal_entity_changed();
       return true;
     } else if (topic_item.compare(this->_openhab_item_rgb) == 0 && (this->_current_mode == MQTT_MANAGER_LIGHT_MODE::RGB || CurrentTimeMilliseconds() >= this->_last_light_mode_change + 1000)) {
       // We only care about the first event from Openhab, ignore the rest but still indicate that event was handled so the manager stops looping over all entities.
@@ -238,7 +238,7 @@ bool OpenhabLight::openhab_event_callback(nlohmann::json &data) {
         SPDLOG_DEBUG("Light {}::{} got new HSB from Openhab, new values: {},{},{}", this->_id, this->_name, this->_current_hue, this->_current_saturation, this->_current_brightness);
       }
       this->_last_light_mode_change = CurrentTimeMilliseconds();
-      this->signal_entity_changed();
+      this->_signal_entity_changed();
       return true;
     }
     return false;

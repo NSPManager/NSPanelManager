@@ -1,12 +1,14 @@
 #include "nspanel.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include <algorithm>
 #include <boost/exception/diagnostic_information.hpp>
 #include <chrono>
 #include <cstdint>
 #include <ctime>
 #include <curl/curl.h>
 #include <exception>
+#include <fmt/core.h>
 #include <iomanip>
 #include <list>
 #include <nlohmann/json_fwd.hpp>
@@ -48,6 +50,8 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
   this->_nspanel_warnings = "";
   this->_temperature = -255;
   this->_update_progress = 0;
+  this->_relay1_is_mqtt_light = false; // TODO: Read from config
+  this->_relay2_is_mqtt_light = false; // TODO: Read from config
   if (init_data.contains("id")) {
     SPDLOG_DEBUG("Loaded NSPanel {}::{}.", this->_id, this->_name);
   } else {
@@ -70,11 +74,44 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
   this->_mqtt_command_topic.append(this->_name);
   this->_mqtt_command_topic.append("/command");
 
+  // Convert stored MAC to MAC used in MQTT, ex. AA:AA:AA:BB:BB:BB to aa_aa_aa_bb_bb_bb
+  std::string mqtt_register_mac = this->_mac;
+  std::replace(mqtt_register_mac.begin(), mqtt_register_mac.end(), ':', '_');
+  std::transform(mqtt_register_mac.begin(), mqtt_register_mac.end(), mqtt_register_mac.begin(), [](unsigned char c) {
+    return std::tolower(c);
+  });
+  this->_mqtt_register_mac = mqtt_register_mac;
+
+  this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
+  this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
+  this->_mqtt_light_relay1_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay1/config", mqtt_register_mac);
+  this->_mqtt_switch_relay2_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay2/config", mqtt_register_mac);
+  this->_mqtt_light_relay2_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay2/config", mqtt_register_mac);
+  this->_mqtt_switch_screen_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_screen/config", mqtt_register_mac);
+  this->_mqtt_number_screen_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screen_brightness/config", mqtt_register_mac);
+  this->_mqtt_number_screensaver_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screensaver_brightness/config", mqtt_register_mac);
+
+  // TODO: Remove MQTT Observer from panel and use Boost signals to listen to specific MQTT topics.
   MQTT_Manager::attach_observer(this);
+
+  if (init_data.contains("id")) {
+    this->register_to_home_assistant();
+  }
 }
 
 NSPanel::~NSPanel() {
   MQTT_Manager::detach_observer(this);
+  // This nspanel was removed. Clear any retain on any MQTT topic.
+  MQTT_Manager::clear_retain(this->_mqtt_status_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_command_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_light_relay1_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_light_relay2_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_switch_relay1_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_switch_relay2_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_switch_screen_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_sensor_temperature_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_number_screen_brightness_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_number_screensaver_brightness_topic);
 }
 
 uint NSPanel::get_id() {
@@ -402,6 +439,7 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
       SPDLOG_INFO("Panel registration OK. Updating internal data.");
       nlohmann::json data = nlohmann::json::parse(response_data);
       this->_id = data["id"];
+      this->register_to_home_assistant();
       // Registration to manager was OK, return true;
       SPDLOG_INFO("Panel registration completed.");
       return true;
@@ -414,4 +452,107 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
   }
   this->send_websocket_update();
   return false;
+}
+
+void NSPanel::register_to_home_assistant() {
+  SPDLOG_DEBUG("Registring NSPanel {}::{} entities to Home Assistant via MQTT AutoReg.", this->_id, this->_name);
+
+  std::list<std::string> identifiers;
+  identifiers.push_back(fmt::format("mac_{}", this->_mqtt_register_mac));
+
+  nlohmann::json base_json;
+  base_json["device"] = nlohmann::json();
+  base_json["device"]["identifiers"] = identifiers;
+  base_json["device"]["manufacturer"] = "Sonoff";
+  base_json["device"]["model"] = "NSPanel";
+  base_json["device"]["name"] = this->_name;
+  base_json["availability"] = nlohmann::json();
+  base_json["availability"]["topic"] = this->_mqtt_status_topic;
+  base_json["availability"]["value_template"] = "{{ value_json.state }}";
+
+  // Register temperature sensor
+  nlohmann::json temperature_sensor_data = nlohmann::json(base_json);
+  temperature_sensor_data["device_class"] = "temperature";
+  if (MqttManagerConfig::use_farenheit) {
+    temperature_sensor_data["unit_of_measurement"] = "°F";
+  } else {
+    temperature_sensor_data["unit_of_measurement"] = "°C";
+  }
+  temperature_sensor_data["name"] = "Temperature";
+  temperature_sensor_data["state_topic"] = fmt::format("nspanel/{}/temperature_state", this->_name);
+  temperature_sensor_data["unique_id"] = fmt::format("{}_temperature", this->_name);
+  std::string temperature_sensor_data_str = temperature_sensor_data.dump();
+  MQTT_Manager::publish(this->_mqtt_sensor_temperature_topic, temperature_sensor_data_str, true);
+
+  // Register relay1
+  if (!this->_relay1_is_mqtt_light) {
+    nlohmann::json relay1_data = nlohmann::json(base_json);
+    relay1_data["device_class"] = "switch";
+    relay1_data["name"] = "Relay 1";
+    relay1_data["state_topic"] = fmt::format("nspanel/{}/r1_state", this->_name);
+    relay1_data["command_topic"] = fmt::format("nspanel/{}/r1_cmd", this->_name);
+    relay1_data["state_on"] = "1";
+    relay1_data["state_off"] = "0";
+    relay1_data["payload_on"] = "1";
+    relay1_data["payload_off"] = "0";
+    relay1_data["unique_id"] = fmt::format("{}_relay1", this->_mqtt_register_mac);
+    std::string relay1_data_str = relay1_data.dump();
+    MQTT_Manager::clear_retain(this->_mqtt_light_relay1_topic);
+    MQTT_Manager::publish(this->_mqtt_switch_relay1_topic, relay1_data_str, true);
+  } else {
+    SPDLOG_ERROR("Relay1 as light is not implemented yet!");
+  }
+
+  // Register relay2
+  if (!this->_relay1_is_mqtt_light) {
+    nlohmann::json relay2_data = nlohmann::json(base_json);
+    relay2_data["device_class"] = "switch";
+    relay2_data["name"] = "Relay 2";
+    relay2_data["state_topic"] = fmt::format("nspanel/{}/r2_state", this->_name);
+    relay2_data["command_topic"] = fmt::format("nspanel/{}/r2_cmd", this->_name);
+    relay2_data["state_on"] = "1";
+    relay2_data["state_off"] = "0";
+    relay2_data["payload_on"] = "1";
+    relay2_data["payload_off"] = "0";
+    relay2_data["unique_id"] = fmt::format("{}_relay2", this->_mqtt_register_mac);
+    std::string relay2_data_str = relay2_data.dump();
+    MQTT_Manager::clear_retain(this->_mqtt_light_relay2_topic);
+    MQTT_Manager::publish(this->_mqtt_switch_relay2_topic, relay2_data_str, true);
+  } else {
+    SPDLOG_ERROR("Relay2 as light is not implemented yet!");
+  }
+
+  // Register screen switch
+  nlohmann::json screen_data = nlohmann::json(base_json);
+  screen_data["device_class"] = "switch";
+  screen_data["name"] = "Screen power";
+  screen_data["state_topic"] = fmt::format("nspanel/{}/screen_state", this->_name);
+  screen_data["command_topic"] = fmt::format("nspanel/{}/screen_cmd", this->_name);
+  screen_data["state_on"] = "1";
+  screen_data["state_off"] = "0";
+  screen_data["payload_on"] = "1";
+  screen_data["payload_off"] = "0";
+  screen_data["unique_id"] = fmt::format("{}_screen_state", this->_mqtt_register_mac);
+  std::string screen_data_str = screen_data.dump();
+  MQTT_Manager::publish(this->_mqtt_switch_screen_topic, screen_data_str, true);
+
+  // Register screen brightness
+  nlohmann::json screen_brightness_data = nlohmann::json(base_json);
+  screen_brightness_data["name"] = "Screen brightness";
+  screen_brightness_data["command_topic"] = fmt::format("nspanel/{}/brightness", this->_name);
+  screen_brightness_data["min"] = "1";
+  screen_brightness_data["max"] = "100";
+  screen_brightness_data["unique_id"] = fmt::format("{}_screen_brightness", this->_mqtt_register_mac);
+  std::string screen_brightness_data_str = screen_brightness_data.dump();
+  MQTT_Manager::publish(this->_mqtt_number_screen_brightness_topic, screen_brightness_data_str, true);
+
+  // Register screensaver brightness
+  nlohmann::json screensaver_brightness_data = nlohmann::json(base_json);
+  screensaver_brightness_data["name"] = "Screen brightness";
+  screensaver_brightness_data["command_topic"] = fmt::format("nspanel/{}/brightness_screensaver", this->_name);
+  screensaver_brightness_data["min"] = "0";
+  screensaver_brightness_data["max"] = "100";
+  screensaver_brightness_data["unique_id"] = fmt::format("{}_screensaver_brightness", this->_mqtt_register_mac);
+  std::string screensaver_brightness_data_str = screensaver_brightness_data.dump();
+  MQTT_Manager::publish(this->_mqtt_number_screensaver_brightness_topic, screensaver_brightness_data_str, true);
 }

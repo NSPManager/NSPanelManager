@@ -1,4 +1,5 @@
 #include "mqtt_manager.hpp"
+#include "light/light.hpp"
 #include <boost/signals2.hpp>
 #include <cctype>
 #include <chrono>
@@ -47,6 +48,12 @@ void MQTT_Manager::connect() {
     SPDLOG_DEBUG("Subscribing to topics...");
     MQTT_Manager::_mqtt_client->subscribe(MQTT_Manager::_get_subscribe_topics(), MQTT_Manager::_get_subscribe_topics_qos());
     MQTT_Manager::_resubscribe();
+    // Send buffered messages if any
+    auto it = MQTT_Manager::_mqtt_messages_buffer.begin();
+    while (it != MQTT_Manager::_mqtt_messages_buffer.end()) {
+      MQTT_Manager::_mqtt_client->publish((*it));
+      MQTT_Manager::_mqtt_messages_buffer.erase(it++);
+    }
 
     // Consume messages
     while (true) {
@@ -60,6 +67,13 @@ void MQTT_Manager::connect() {
           std::this_thread::sleep_for(std::chrono::milliseconds(250));
         }
         SPDLOG_INFO("Re-established connection");
+        MQTT_Manager::_resubscribe();
+        // Send buffered messages if any
+        auto it = MQTT_Manager::_mqtt_messages_buffer.begin();
+        while (it != MQTT_Manager::_mqtt_messages_buffer.end()) {
+          MQTT_Manager::_mqtt_client->publish((*it));
+          MQTT_Manager::_mqtt_messages_buffer.erase(it++);
+        }
       }
     }
 
@@ -193,13 +207,21 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload)
 }
 
 void MQTT_Manager::publish(const std::string &topic, const std::string &payload, bool retain) {
+  mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), 0, retain);
   if (MQTT_Manager::_mqtt_client != nullptr) {
     std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
-    if (MQTT_Manager::_mqtt_client->is_connected()) {
-      mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), 0, retain);
-      MQTT_Manager::_mqtt_client->publish(msg);
-    } else {
-      SPDLOG_ERROR("Tried sending MQTT message while MQTT is disconnected.");
-    }
+    MQTT_Manager::_mqtt_client->publish(msg);
+  } else {
+    MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
+  }
+}
+
+void MQTT_Manager::clear_retain(const std::string &topic) {
+  mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), "", 0, 0, true);
+  if (MQTT_Manager::_mqtt_client != nullptr) {
+    std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
+    MQTT_Manager::_mqtt_client->publish(msg);
+  } else {
+    MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
   }
 }

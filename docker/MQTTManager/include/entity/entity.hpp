@@ -66,15 +66,33 @@ public:
     this->_entity_changed_callbacks.disconnect(callback);
   }
 
+  /**
+   * Register a callback listener to be called when entity is about to be destroyed.
+   */
+  template <typename CALLBACK_BIND>
+  void attach_entity_destroy_callback(CALLBACK_BIND callback) {
+    this->_entity_destroy_callback.connect(callback);
+  }
+
+  /**
+   * Detach a callback listener to be called when entity is about to be destroyed.
+   */
+  template <typename CALLBACK_BIND>
+  void detach_entity_destroy_callback(CALLBACK_BIND callback) {
+    this->_entity_destroy_callback.disconnect(callback);
+  }
+
   virtual ~MqttManagerEntity() {}
 
 protected:
   boost::signals2::signal<void(MqttManagerEntity *)> _entity_changed_callbacks;
+  boost::signals2::signal<void(MqttManagerEntity *)> _entity_destroy_callback;
 
   /**
    * Signal to all callbacks that this entity has changed.
    */
-  void signal_entity_changed();
+  void _signal_entity_changed();
+  void _signal_entity_destroyed();
 };
 
 #endif // !MQTT_MANAGER_ENTITY

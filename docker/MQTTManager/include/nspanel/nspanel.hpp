@@ -97,6 +97,11 @@ public:
    */
   bool register_to_manager(const nlohmann::json &register_request_payload);
 
+  /**
+   * Register NSPanel to manager.
+   */
+  void register_to_home_assistant();
+
 private:
   uint _id;
   std::string _mac;
@@ -112,13 +117,31 @@ private:
   MQTT_MANAGER_NSPANEL_STATE _state;
   std::string _nspanel_warnings;
   std::string _nspanel_warnings_from_manager;
+  std::string _mqtt_register_mac;
 
+  // MQTT Stuff:
+  // Wether or not relay1 should be registered to Home Assistant as a switch or light (true = register as light).
+  bool _relay1_is_mqtt_light;
+  // Wether or not relay2 should be registered to Home Assistant as a switch or light (true = register as light).
+  bool _relay2_is_mqtt_light;
+  // The topic to capture logs from MQTT
   std::string _mqtt_log_topic;
+  // The topic to capture status (online/offline) from MQTT
   std::string _mqtt_status_topic;
+  // The topic to capture status reports from MQTT
   std::string _mqtt_status_report_topic;
+  // The topic to send commands to panel to via MQTT
   std::string _mqtt_command_topic;
+  // Home Assistant MQTT registration topics:
+  std::string _mqtt_sensor_temperature_topic;
+  std::string _mqtt_switch_relay1_topic;
+  std::string _mqtt_light_relay1_topic;
+  std::string _mqtt_switch_relay2_topic;
+  std::string _mqtt_light_relay2_topic;
+  std::string _mqtt_switch_screen_topic;
+  std::string _mqtt_number_screen_brightness_topic;
+  std::string _mqtt_number_screensaver_brightness_topic;
 
   std::list<NSPanelLogMessage> _log_messages;
 };
-
 #endif // !MQTT_MANAGER_NSPANEL

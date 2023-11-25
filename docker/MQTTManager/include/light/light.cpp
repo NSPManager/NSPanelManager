@@ -185,6 +185,7 @@ void Light::detach_delete_callback(void (*callback)(Light *)) {
 
 Light::~Light() {
   this->_light_destroyed_callbacks(this);
+  this->_signal_entity_destroyed();
 }
 
 void Light::reset_requests() {

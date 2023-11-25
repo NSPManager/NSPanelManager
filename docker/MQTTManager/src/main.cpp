@@ -43,11 +43,12 @@ int main(void) {
   std::thread openhab_manager_thread;
   std::thread websocket_server_thread;
 
-  SPDLOG_INFO("Starting Websocket Server on port 8002.");
-  websocket_server_thread = std::thread(WebsocketServer::start);
-
+  // Load config from environment/manager
   EntityManager::init();
   MqttManagerConfig::load();
+
+  SPDLOG_INFO("Starting Websocket Server on port 8002.");
+  websocket_server_thread = std::thread(WebsocketServer::start);
 
   if (MqttManagerConfig::mqtt_server.empty() || MqttManagerConfig::mqtt_port == 0) {
     SPDLOG_CRITICAL("No MQTT server or port configured! Will exit with code 1.");
