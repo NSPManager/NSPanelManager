@@ -651,10 +651,12 @@ def add_nspanel_relay_to_group(request):
         binding.nspanel = nspanel
         binding.relay_num = relay_num
         binding.save()
+        send_mqttmanager_reload_command()
     return redirect("relay_groups")
 
 def delete_relay_group_binding(request, relay_binding_id):
     binding = RelayGroupBinding.objects.get(id=relay_binding_id)
     if binding:
         binding.delete()
+    send_mqttmanager_reload_command()
     return redirect("relay_groups")

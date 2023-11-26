@@ -182,12 +182,12 @@ void EntityManager::add_scene(nlohmann::json &config) {
 
 void EntityManager::add_nspanel_relay_group(nlohmann::json &config) {
   try {
-    if (EntityManager::get_entity_by_id<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP, config["id"]) == nullptr) {
-      NSPanelRelayGroup *rg = new NSPanelRelayGroup(config);
+    NSPanelRelayGroup *rg = EntityManager::get_entity_by_id<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP, config["id"]);
+    if (rg == nullptr) {
+      rg = new NSPanelRelayGroup(config);
       EntityManager::add_entity(rg);
     } else {
-      int scene_id = config["id"];
-      SPDLOG_ERROR("A scene with ID {} already exists.", scene_id);
+      rg->update_config(config);
     }
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());

@@ -30,6 +30,7 @@ public:
   NSPanelRelayGroup(nlohmann::json &config);
   ~NSPanelRelayGroup();
 
+  void update_config(nlohmann::json &config);
   bool contains(int nspanel_id, int relay_num);
   void turn_on();
   void turn_off();

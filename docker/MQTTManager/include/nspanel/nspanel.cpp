@@ -22,13 +22,17 @@
 #include <websocket_server/websocket_server.hpp>
 
 NSPanelRelayGroup::NSPanelRelayGroup(nlohmann::json &config) {
+  this->update_config(config);
+}
+
+void NSPanelRelayGroup::update_config(nlohmann::json &config) {
   this->_id = config["id"];
   this->_name = config["name"];
 
+  this->_nspanel_relays.clear();
   for (nlohmann::json nspanel_relay : config["relays"]) {
     this->_nspanel_relays.insert(std::make_pair<int, int>(int(nspanel_relay["nspanel_id"]), int(nspanel_relay["relay_num"])));
   }
-
   SPDLOG_DEBUG("Loaded NSPanelRelayGroup {}::{}", this->_id, this->_name);
 }
 
@@ -65,6 +69,8 @@ void NSPanelRelayGroup::turn_on() {
     NSPanel *panel = EntityManager::get_nspanel_by_id(pair.first);
     if (panel != nullptr) {
       panel->set_relay_state(pair.second, true);
+    } else {
+      SPDLOG_ERROR("Did not find NSPanel with ID {}.", pair.first);
     }
   }
 }
@@ -75,6 +81,8 @@ void NSPanelRelayGroup::turn_off() {
     NSPanel *panel = EntityManager::get_nspanel_by_id(pair.first);
     if (panel != nullptr) {
       panel->set_relay_state(pair.second, false);
+    } else {
+      SPDLOG_ERROR("Did not find NSPanel with ID {}.", pair.first);
     }
   }
 }
@@ -287,6 +295,11 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
           this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA;
         } else {
           SPDLOG_ERROR("Received unknown state from nspanel {}::{}. State: {}", this->_id, this->_name, state);
+        }
+      } else {
+        if (this->_state == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
+          // We were waiting for a new status report. Set panel to online.
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
         }
       }
 
