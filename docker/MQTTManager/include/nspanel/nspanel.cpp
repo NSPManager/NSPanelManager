@@ -259,6 +259,10 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
   } else if (topic.compare(this->_mqtt_status_topic) == 0) {
     nlohmann::json data = nlohmann::json::parse(payload);
     if (std::string(data["mac"]).compare(this->_mac) == 0) {
+      // If the panel has currently not been registered, ignore the new state.
+      if (!this->_has_registered_to_manager) {
+        return;
+      }
       // Update internal state.
       std::string state = data["state"];
       if (state.compare("online") == 0) {
@@ -274,6 +278,10 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       this->send_websocket_update();
     }
   } else if (topic.compare(this->_mqtt_status_report_topic) == 0) {
+    // If the panel has currently not been registered, ignore the new state.
+    if (!this->_has_registered_to_manager) {
+      return;
+    }
     nlohmann::json data = nlohmann::json::parse(payload);
     if (std::string(data["mac"]).compare(this->_mac) == 0) {
       // Update internal status
