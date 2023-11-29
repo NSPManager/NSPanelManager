@@ -381,6 +381,14 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
   SPDLOG_INFO("Got register request from NSPanel with name {} and MAC: {}", name, mac_address);
   NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_address);
   if (panel != nullptr && (panel->get_state() != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT || (!panel->has_registered_to_manager() && panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::WAITING))) {
+    SPDLOG_DEBUG("Has registered to manager? {}", panel->has_registered_to_manager() ? "TRUE" : "FALSE");
+    if (panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
+      SPDLOG_DEBUG("State: WAITING");
+    } else if (panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
+      SPDLOG_DEBUG("State: AWAITING_ACCEPT");
+    } else {
+      SPDLOG_DEBUG("State: something else.");
+    }
     std::string nspanel_command_topic = "nspanel/";
     nspanel_command_topic.append(name);
     nspanel_command_topic.append("/command");
