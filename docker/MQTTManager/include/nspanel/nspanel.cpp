@@ -131,40 +131,35 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
   this->_mqtt_log_topic.append(this->_name);
   this->_mqtt_log_topic.append("/log");
 
-  this->_mqtt_status_topic = "nspanel/";
-  this->_mqtt_status_topic.append(this->_name);
-  this->_mqtt_status_topic.append("/status");
-
-  this->_mqtt_status_report_topic = "nspanel/";
-  this->_mqtt_status_report_topic.append(this->_name);
-  this->_mqtt_status_report_topic.append("/status_report");
-
   this->_mqtt_command_topic = "nspanel/";
   this->_mqtt_command_topic.append(this->_name);
   this->_mqtt_command_topic.append("/command");
 
   // Convert stored MAC to MAC used in MQTT, ex. AA:AA:AA:BB:BB:BB to aa_aa_aa_bb_bb_bb
+  std::string mqtt_register_mac = this->_mac;
+  std::replace(mqtt_register_mac.begin(), mqtt_register_mac.end(), ':', '_');
+  std::transform(mqtt_register_mac.begin(), mqtt_register_mac.end(), mqtt_register_mac.begin(), [](unsigned char c) {
+    return std::tolower(c);
+  });
+  this->_mqtt_register_mac = mqtt_register_mac;
+
+  this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
+  this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
+  this->_mqtt_light_relay1_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay1/config", mqtt_register_mac);
+  this->_mqtt_switch_relay2_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay2/config", mqtt_register_mac);
+  this->_mqtt_light_relay2_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay2/config", mqtt_register_mac);
+  this->_mqtt_switch_screen_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_screen/config", mqtt_register_mac);
+  this->_mqtt_number_screen_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screen_brightness/config", mqtt_register_mac);
+  this->_mqtt_number_screensaver_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screensaver_brightness/config", mqtt_register_mac);
+  this->_mqtt_relay1_command_topic = fmt::format("nspanel/{}/r1_cmd", this->_name);
+  this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/r1_state", this->_name);
+  this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/r2_cmd", this->_name);
+  this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/r2_state", this->_name);
+  this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_name);
+  this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_name);
+
   if (this->_has_registered_to_manager) {
-    std::string mqtt_register_mac = this->_mac;
-    std::replace(mqtt_register_mac.begin(), mqtt_register_mac.end(), ':', '_');
-    std::transform(mqtt_register_mac.begin(), mqtt_register_mac.end(), mqtt_register_mac.begin(), [](unsigned char c) {
-      return std::tolower(c);
-    });
-    this->_mqtt_register_mac = mqtt_register_mac;
-
-    this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
-    this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
-    this->_mqtt_light_relay1_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay1/config", mqtt_register_mac);
-    this->_mqtt_switch_relay2_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay2/config", mqtt_register_mac);
-    this->_mqtt_light_relay2_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay2/config", mqtt_register_mac);
-    this->_mqtt_switch_screen_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_screen/config", mqtt_register_mac);
-    this->_mqtt_number_screen_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screen_brightness/config", mqtt_register_mac);
-    this->_mqtt_number_screensaver_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screensaver_brightness/config", mqtt_register_mac);
-    this->_mqtt_relay1_command_topic = fmt::format("nspanel/{}/r1_cmd", this->_name);
-    this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/r1_state", this->_name);
-    this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/r2_cmd", this->_name);
-    this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/r2_state", this->_name);
-
+    // If this NSPanel is registered to manager, listen to state topics.
     MQTT_Manager::subscribe(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
@@ -180,6 +175,9 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
 NSPanel::~NSPanel() {
   MQTT_Manager::detach_callback(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
   MQTT_Manager::detach_callback(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+  MQTT_Manager::detach_callback(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+  MQTT_Manager::detach_callback(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+  MQTT_Manager::detach_callback(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
 
   // This nspanel was removed. Clear any retain on any MQTT topic.
   MQTT_Manager::clear_retain(this->_mqtt_status_topic);
