@@ -48,20 +48,10 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
       std::string message = msg->str;
       SPDLOG_DEBUG("Got message from websocket. Message: {}", message);
       std::string response_buffer;
-      bool found_callback = false;
       for (auto callback : WebsocketServer::_callbacks) {
         if (callback(message, &response_buffer)) {
-          found_callback = true;
           break;
         }
-      }
-      if (found_callback) {
-        SPDLOG_DEBUG("WebSocket callback found!");
-        if (!response_buffer.empty()) {
-          webSocket.send(response_buffer);
-        }
-      } else {
-        SPDLOG_ERROR("Received message on websocket that was unhandled. Message: {}", message);
       }
     }
   } catch (std::exception ex) {
