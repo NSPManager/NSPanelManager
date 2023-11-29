@@ -131,24 +131,17 @@ void MQTT_Manager::_process_mqtt_message(const std::string topic, const std::str
 
   try {
     SPDLOG_TRACE("Got message: {} --> {}", topic, message);
-    bool message_handled = false;
     for (MQTT_Observer *observer : MQTT_Manager::_mqtt_observers) {
       if (observer->mqtt_callback(topic, message)) {
-        message_handled = true;
         break;
       }
     }
-    if (!message_handled) {
-      // If message is still unhandled, check all static callbacks.
-      for (auto mqtt_callback : MQTT_Manager::_mqtt_observer_callbacks) {
-        if (mqtt_callback(topic, message)) {
-          message_handled = true;
-          break;
-        }
+    // TODO: Phase out MQTTObserver and use Boost::bind instead
+    // If message is still unhandled, check all static callbacks.
+    for (auto mqtt_callback : MQTT_Manager::_mqtt_observer_callbacks) {
+      if (mqtt_callback(topic, message)) {
+        break;
       }
-    }
-    if (!message_handled) {
-      SPDLOG_WARN("Got message on topic '{}' that was unhandled.", topic);
     }
   } catch (std::exception ex) {
     SPDLOG_ERROR("Caught std::exception while processing message on topic '{}'. message: '{}'. Exception: ", topic, message, ex.what());

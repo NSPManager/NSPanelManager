@@ -453,6 +453,7 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
     SPDLOG_DEBUG("Processing request for NSPanels status.");
     std::vector<nlohmann::json> panel_responses;
     for (NSPanel *panel : EntityManager::_nspanels) {
+      SPDLOG_DEBUG("Requesting state from NSPanel {}::{}", panel->get_id(), panel->get_name());
       if (args.contains("nspanel_id")) {
         if (panel->get_id() == atoi(std::string(args["nspanel_id"]).c_str())) {
           panel->update_warnings_from_manager();
@@ -465,10 +466,12 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
         panel_responses.push_back(panel->get_websocket_json_representation());
       }
     }
+    SPDLOG_DEBUG("Returning get_nspanels_status response.");
     nlohmann::json response;
     response["nspanels"] = panel_responses;
     response["cmd_id"] = command_id;
     (*response_buffer) = response.dump();
+    SPDLOG_DEBUG("Response: {}", (*response_buffer));
     return true;
   } else if (command.compare("reboot_nspanels") == 0) {
     nlohmann::json args = data["args"];

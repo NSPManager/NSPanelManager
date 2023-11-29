@@ -382,7 +382,9 @@ nlohmann::json NSPanel::get_websocket_json_representation() {
   std::string send_mac = this->_mac;
   send_mac.erase(std::remove(send_mac.begin(), send_mac.end(), ':'), send_mac.end());
 
-  data["id"] = this->_id;
+  if (this->_has_registered_to_manager) {
+    data["id"] = this->_id;
+  }
   data["name"] = this->_name;
   data["rssi"] = this->_rssi;
   data["heap_used_pct"] = this->_heap_used_pct;
@@ -462,6 +464,10 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 }
 
 void NSPanel::update_warnings_from_manager() {
+  // If this NSPanel hasn't been registered to the manager, then there is no need to fetch warnings from the manager.
+  if (!this->_has_registered_to_manager) {
+    return;
+  }
   try {
     CURL *curl;
     CURLcode res;

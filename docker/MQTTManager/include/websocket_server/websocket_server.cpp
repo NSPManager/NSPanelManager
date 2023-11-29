@@ -50,6 +50,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
       std::string response_buffer;
       for (auto callback : WebsocketServer::_callbacks) {
         if (callback(message, &response_buffer)) {
+          webSocket.sendText(response_buffer);
           break;
         }
       }
