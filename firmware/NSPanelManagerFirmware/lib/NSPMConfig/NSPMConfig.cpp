@@ -45,8 +45,8 @@ bool NSPMConfig::loadFromLittleFS() {
   this->wifi_hostname = doc["wifi_hostname"] | "NSPMPanel";
   this->wifi_ssid = doc["wifi_ssid"] | "";
   this->wifi_psk = doc["wifi_psk"] | "";
-  this->manager_address = doc["manager_address"] | "";
-  this->manager_port = doc.containsKey("manager_port") ? doc["manager_port"].as<uint16_t>() : 8000;
+  this->manager_address = "";                                                              // Manager address is set from a register accept from manager. This value is not used.
+  this->manager_port = 8000;                                                               // Manager address is set from a register accept from manager. This value is not used.
   this->logging_level = doc.containsKey("log_level") ? doc["log_level"].as<uint8_t>() : 3; // Set logging to info if no level was read from file.
 
   this->mqtt_server = doc["mqtt_server"] | "";
@@ -129,8 +129,6 @@ bool NSPMConfig::saveToLittleFS() {
   config_json["wifi_hostname"] = this->wifi_hostname.c_str();
   config_json["wifi_ssid"] = this->wifi_ssid.c_str();
   config_json["wifi_psk"] = this->wifi_psk.c_str();
-  config_json["manager_address"] = this->manager_address.c_str();
-  config_json["manager_port"] = this->manager_port;
   config_json["mqtt_server"] = this->mqtt_server.c_str();
   config_json["mqtt_port"] = this->mqtt_port;
   config_json["mqtt_username"] = this->mqtt_username;
@@ -160,9 +158,6 @@ bool NSPMConfig::factoryReset() {
   this->wifi_ssid = "";
   this->wifi_psk = "";
   this->logging_level = 0;
-
-  this->manager_address = "";
-  this->manager_port = 8000;
 
   this->mqtt_server = "";
   this->mqtt_port = 1883;

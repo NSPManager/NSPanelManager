@@ -51,10 +51,6 @@ String WebManager::processIndexTemplate(const String &templateVar) {
     return NSPMConfig::instance->wifi_ssid.c_str();
   } else if (templateVar == "wifi_psk") {
     return NSPMConfig::instance->wifi_psk.c_str();
-  } else if (templateVar == "manager_address") {
-    return NSPMConfig::instance->manager_address.c_str();
-  } else if (templateVar == "manager_port") {
-    return String(NSPMConfig::instance->manager_port);
   } else if (templateVar == "mqtt_server") {
     return NSPMConfig::instance->mqtt_server.c_str();
   } else if (templateVar == "mqtt_port") {
@@ -82,9 +78,6 @@ void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request) {
   NSPMConfig::instance->wifi_hostname = request->arg("wifi_hostname").c_str();
   NSPMConfig::instance->wifi_ssid = request->arg("wifi_ssid").c_str();
   NSPMConfig::instance->wifi_psk = request->arg("wifi_psk").c_str();
-
-  NSPMConfig::instance->manager_address = request->arg("manager_address").c_str();
-  NSPMConfig::instance->manager_port = request->arg("manager_port").toInt();
 
   NSPMConfig::instance->logging_level = request->arg("log_level").toInt();
 

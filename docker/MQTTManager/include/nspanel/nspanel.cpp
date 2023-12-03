@@ -88,13 +88,24 @@ void NSPanelRelayGroup::turn_off() {
 
 NSPanel::NSPanel(nlohmann::json &init_data) {
   // If this panel is just a panel in waiting (ie. not accepted the request yet) it won't have an id.
+  this->update_config(init_data);
+}
+
+void NSPanel::update_config(nlohmann::json &init_data) {
   if (init_data.contains("id")) {
     this->_id = init_data["id"];
   }
 
+  bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
   if (init_data.contains("name")) {
+    if (this->_name.compare(init_data["name"]) != 0) {
+      rebuilt_mqtt = true;
+    }
     this->_name = init_data["name"];
   } else if (init_data.contains("friendly_name")) {
+    if (this->_name.compare(init_data["friendly_name"]) != 0) {
+      rebuilt_mqtt = true;
+    }
     this->_name = init_data["friendly_name"];
   }
 
@@ -127,36 +138,33 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
     SPDLOG_DEBUG("Loaded NSPanel {} with no ID.", this->_name);
   }
 
-  this->_mqtt_log_topic = "nspanel/";
-  this->_mqtt_log_topic.append(this->_name);
-  this->_mqtt_log_topic.append("/log");
+  if (rebuilt_mqtt) {
+    this->reset_mqtt_topics();
+    // Convert stored MAC to MAC used in MQTT, ex. AA:AA:AA:BB:BB:BB to aa_aa_aa_bb_bb_bb
+    std::string mqtt_register_mac = this->_mac;
+    std::replace(mqtt_register_mac.begin(), mqtt_register_mac.end(), ':', '_');
+    std::transform(mqtt_register_mac.begin(), mqtt_register_mac.end(), mqtt_register_mac.begin(), [](unsigned char c) {
+      return std::tolower(c);
+    });
+    this->_mqtt_register_mac = mqtt_register_mac;
 
-  this->_mqtt_command_topic = "nspanel/";
-  this->_mqtt_command_topic.append(this->_name);
-  this->_mqtt_command_topic.append("/command");
-
-  // Convert stored MAC to MAC used in MQTT, ex. AA:AA:AA:BB:BB:BB to aa_aa_aa_bb_bb_bb
-  std::string mqtt_register_mac = this->_mac;
-  std::replace(mqtt_register_mac.begin(), mqtt_register_mac.end(), ':', '_');
-  std::transform(mqtt_register_mac.begin(), mqtt_register_mac.end(), mqtt_register_mac.begin(), [](unsigned char c) {
-    return std::tolower(c);
-  });
-  this->_mqtt_register_mac = mqtt_register_mac;
-
-  this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
-  this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
-  this->_mqtt_light_relay1_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay1/config", mqtt_register_mac);
-  this->_mqtt_switch_relay2_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay2/config", mqtt_register_mac);
-  this->_mqtt_light_relay2_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay2/config", mqtt_register_mac);
-  this->_mqtt_switch_screen_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_screen/config", mqtt_register_mac);
-  this->_mqtt_number_screen_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screen_brightness/config", mqtt_register_mac);
-  this->_mqtt_number_screensaver_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screensaver_brightness/config", mqtt_register_mac);
-  this->_mqtt_relay1_command_topic = fmt::format("nspanel/{}/r1_cmd", this->_name);
-  this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/r1_state", this->_name);
-  this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/r2_cmd", this->_name);
-  this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/r2_state", this->_name);
-  this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_name);
-  this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_name);
+    this->_mqtt_log_topic = fmt::format("nspanel/{}/log", this->_name);
+    this->_mqtt_command_topic = fmt::format("nspanel/{}/command", this->_name);
+    this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
+    this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
+    this->_mqtt_light_relay1_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay1/config", mqtt_register_mac);
+    this->_mqtt_switch_relay2_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay2/config", mqtt_register_mac);
+    this->_mqtt_light_relay2_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay2/config", mqtt_register_mac);
+    this->_mqtt_switch_screen_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_screen/config", mqtt_register_mac);
+    this->_mqtt_number_screen_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screen_brightness/config", mqtt_register_mac);
+    this->_mqtt_number_screensaver_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screensaver_brightness/config", mqtt_register_mac);
+    this->_mqtt_relay1_command_topic = fmt::format("nspanel/{}/r1_cmd", this->_name);
+    this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/r1_state", this->_name);
+    this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/r2_cmd", this->_name);
+    this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/r2_state", this->_name);
+    this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_name);
+    this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_name);
+  }
 
   if (this->_has_registered_to_manager) {
     // If this NSPanel is registered to manager, listen to state topics.
@@ -165,14 +173,15 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
     MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
-  }
-
-  if (init_data.contains("id")) {
     this->register_to_home_assistant();
   }
 }
 
 NSPanel::~NSPanel() {
+  this->reset_mqtt_topics();
+}
+
+void NSPanel::reset_mqtt_topics() {
   MQTT_Manager::detach_callback(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
   MQTT_Manager::detach_callback(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
   MQTT_Manager::detach_callback(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));

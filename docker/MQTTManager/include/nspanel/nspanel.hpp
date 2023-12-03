@@ -50,7 +50,9 @@ private:
 class NSPanel {
 public:
   NSPanel(nlohmann::json &init_data);
+  void update_config(nlohmann::json &init_data);
   ~NSPanel();
+  void reset_mqtt_topics();
 
   /**
    * Get the ID of this NSPanel.

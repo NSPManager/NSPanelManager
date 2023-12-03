@@ -199,23 +199,19 @@ void EntityManager::add_nspanel(nlohmann::json &config) {
   try {
     int panel_id = config["id"];
     std::string panel_mac = config["mac"];
-    for (nlohmann::json config : MqttManagerConfig::nspanel_configs) {
-      bool already_exists = false;
-      for (NSPanel *panel : EntityManager::_nspanels) {
-        if ((panel->has_registered_to_manager() && panel->get_id()) == panel_id || panel->get_mac().compare(panel_mac) == 0) {
-          already_exists = true;
-          break;
-        }
-      }
-      if (!already_exists) {
-        NSPanel *panel = new NSPanel(config);
-        panel->update_warnings_from_manager();
-        panel->send_websocket_update();
-        std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
-        EntityManager::_nspanels.push_back(panel);
-      } else {
-        SPDLOG_ERROR("A NSPanel with ID {} already exists.", panel_id);
-      }
+    NSPanel *panel = EntityManager::get_nspanel_by_id(panel_id);
+    if (panel == nullptr) {
+      panel = EntityManager::get_nspanel_by_mac(panel_mac);
+    }
+    if (panel != nullptr) {
+      SPDLOG_DEBUG("Found existing NSPanel {}::{}. Updating config for existing panel.", panel->get_id(), panel->get_name());
+      panel->update_config(config);
+    } else {
+      NSPanel *panel = new NSPanel(config);
+      panel->update_warnings_from_manager();
+      panel->send_websocket_update();
+      std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
+      EntityManager::_nspanels.push_back(panel);
     }
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
