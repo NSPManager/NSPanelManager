@@ -30,11 +30,14 @@ public:
   template <typename CALLBACK_BIND>
   static void subscribe(std::string topic, int qos, CALLBACK_BIND callback) {
     MQTT_Manager::_mqtt_callbacks[topic].connect(callback);
-    SPDLOG_DEBUG("Adding '{}' to the list of topics to subscribe to.", topic);
-    MQTT_Manager::_subscribed_topics[topic] = qos;
-    if (MQTT_Manager::is_connected()) {
-      SPDLOG_DEBUG("MQTT is connected, subscribing to MQTT topic '{}'.", topic);
-      MQTT_Manager::_mqtt_client->subscribe(topic, qos);
+    bool already_subscribed = MQTT_Manager::_mqtt_callbacks[topic].num_slots() > 0;
+    if (!already_subscribed) {
+      SPDLOG_DEBUG("Adding '{}' to the list of topics to subscribe to.", topic);
+      MQTT_Manager::_subscribed_topics[topic] = qos;
+      if (MQTT_Manager::is_connected()) {
+        SPDLOG_DEBUG("MQTT is connected, subscribing to MQTT topic '{}'.", topic);
+        MQTT_Manager::_mqtt_client->subscribe(topic, qos);
+      }
     }
   }
 

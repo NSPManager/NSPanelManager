@@ -46,6 +46,7 @@ urlpatterns = [
     path('entities/relay_groups/delete_relay/<int:relay_binding_id>', views.delete_relay_group_binding, name="delete_relay_group_binding"),
     path('entities/relay_groups/delete/<int:relay_group_id>', views.delete_relay_group, name="delete_relay_group"),
     path('entities/global_scenes', views.global_scenes, name="global_scenes"),
+    path('entities/weather_and_time', views.weather_and_time, name="weather_and_time"),
     # Below are API routes
     path('api/register_nspanel', api.register_nspanel, name='register_nspanel'),
     path('api/delete_nspanel/<int:panel_id>', api.delete_panel, name='delete_nspanel'),

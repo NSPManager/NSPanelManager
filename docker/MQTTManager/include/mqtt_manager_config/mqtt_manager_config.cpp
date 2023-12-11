@@ -141,59 +141,15 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   }
 
   SPDLOG_DEBUG("Loading lights...");
-  std::list<nlohmann::json> json_lights;
+  MqttManagerConfig::light_configs.clear();
   for (nlohmann::json light_config : data["lights"]) {
-    json_lights.push_back(light_config); // Build light list for next step.
-    bool already_exists = ITEM_IN_LIST(MqttManagerConfig::light_configs, light_config);
-    if (!already_exists) {
-      MqttManagerConfig::light_configs.push_back(light_config);
-      MqttManagerConfig::_config_added_listener(&MqttManagerConfig::light_configs.back());
-    }
-  }
-
-  try {
-    SPDLOG_DEBUG("Checking for removed lights.");
-    auto it = MqttManagerConfig::light_configs.begin();
-    while (it != MqttManagerConfig::light_configs.end()) {
-      bool exists = ITEM_IN_LIST(json_lights, (*it));
-      if (!exists) {
-        SPDLOG_DEBUG("Removing light config as it doesn't exist in config anymore.");
-        MqttManagerConfig::_config_removed_listener(&(*it));
-        MqttManagerConfig::light_configs.erase(it++);
-      } else {
-        ++it;
-      }
-    }
-  } catch (std::exception &e) {
-    SPDLOG_ERROR("Chaught exception when checking for any removed lights. Exception: {}", e.what());
+    MqttManagerConfig::light_configs.push_back(light_config);
   }
 
   SPDLOG_DEBUG("Loading NSPanels...");
-  std::list<nlohmann::json> json_nspanels;
+  MqttManagerConfig::nspanel_configs.clear();
   for (nlohmann::json nspanel_config : data["nspanels"]) {
-    json_nspanels.push_back(nspanel_config); // Build light list for next step.
-    bool already_exists = ITEM_IN_LIST(MqttManagerConfig::nspanel_configs, nspanel_config);
-    if (!already_exists) {
-      MqttManagerConfig::nspanel_configs.push_back(nspanel_config);
-      MqttManagerConfig::_config_added_listener(&MqttManagerConfig::nspanel_configs.back());
-    }
-  }
-
-  try {
-    SPDLOG_DEBUG("Checking for removed NSPanels.");
-    auto nit = MqttManagerConfig::nspanel_configs.begin();
-    while (nit != MqttManagerConfig::nspanel_configs.end()) {
-      bool exists = ITEM_IN_LIST(json_nspanels, (*nit));
-      if (!exists) {
-        SPDLOG_DEBUG("Removing NSPanel config from MQTTManager as it doesn't exist in config anymore.");
-        MqttManagerConfig::_config_removed_listener(&(*nit));
-        MqttManagerConfig::nspanel_configs.erase(nit++);
-      } else {
-        ++nit;
-      }
-    }
-  } catch (std::exception &e) {
-    SPDLOG_ERROR("Chaught exception when checking for any removed NSPanels. Exception: {}", e.what());
+    MqttManagerConfig::nspanel_configs.push_back(nspanel_config);
   }
 
   SPDLOG_DEBUG("Loading Scenes...");

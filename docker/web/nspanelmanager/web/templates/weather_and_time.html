@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% load static %}
+  <script src="{% static 'question.js' %}?refresh={% now 'U' %}"></script>
+{% endblock %}
+
+{% block content %}
+
+{% load mathfilters %}
+<div class="level">
+  <div class="level-left">
+    <div class="level-item">
+      <h2 class="title is-4">Weather & Time</h2>
+    </div>
+  </div>
+</div>
+<div>
+  <form method="POST" action="{% url 'weather_and_time' %}"
+    <div class="box">
+      <div class="field">
+        <label class="label">Date format<span class="question">
+          <span class="icon question_icon">
+            <i class="mdi mdi-information has-text-info"></i>
+          </span>
+          <div class="question_help_text notification is-info is-light">
+            If a light is off, turning it back on should:<br>
+            Color temperature: The light will be set to the current value of the color temperature slider.<br>
+            Restore: The light will we set to the current value of the color temperature slider IF the light was in color temperature mode when it was turned off. Otherwise, it will turn on the last powered on state.
+          </div>
+        </label>
+        <div class="control">
+          <input class="input" type="text" name="date_format" id="date_format"
+              placeholder="strftime format" value="{{ date_format }}">
+        </div>
+        <div class="control mt-2">
+          <button class="button is-info">Load default EU</button>
+          <button class="button is-info">Load default US</button>
+          <button class="button is-link">See available options</button>
+        </div>
+      </div>
+
+      <div class="field">
+      <label class="checkbox">
+          {% if clock_us_style == "True" %}
+              <input type="checkbox" name="clock_us_style" checked>
+          {% else %}
+              <input type="checkbox" name="clock_us_style">
+          {% endif %}
+          Show the time with AM/PM
+          <span class="question">
+            <span class="icon question_icon">
+              <i class="mdi mdi-information has-text-info"></i>
+            </span>
+            <div class="question_help_text notification is-info is-light">
+              Wether or not to use 24 or 12 hour clock. Enabling this will show the clock with AM and PM.
+            </div>
+          </span>
+      </label>
+      </div>
+      <div class="field">
+        <label class="checkbox">
+            {% if use_farenheit == "True" %}
+                <input type="checkbox" name="use_farenheit" checked>
+            {% else %}
+                <input type="checkbox" name="use_farenheit">
+            {% endif %}
+            Use farenheit
+            <span class="question">
+              <span class="icon question_icon">
+                <i class="mdi mdi-information has-text-info"></i>
+              </span>
+              <div class="question_help_text notification is-info is-light">
+                Wether to report temperature in farenheit. Default: Unchecked = report in celcius.
+              </div>
+            </span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Add 1rem of padding to bottom to prevent a white bar appering on the bottom of the page -->
+    <div class="level mt-4" style="padding-bottom: 1rem;">
+      <div class="level-left">
+        <div class="buttons is-right">
+        </div>
+      </div>
+      <div class="level-right">
+        <div class="buttons">
+          <button class="button is-success" type="submit" id="save_button">Save</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

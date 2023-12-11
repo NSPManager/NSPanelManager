@@ -17,6 +17,11 @@ public:
   Light(nlohmann::json &init_data);
 
   /**
+   * Update the config of the light to reflect the new settings
+   */
+  void update_config(nlohmann::json &config);
+
+  /**
    * Turn on the light
    */
   void turn_on(bool send_update);

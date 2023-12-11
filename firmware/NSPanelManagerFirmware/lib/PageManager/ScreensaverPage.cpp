@@ -37,5 +37,5 @@ void ScreensaverPage::unshow() {
 
 void ScreensaverPage::clockMqttCallback(char *topic, byte *payload, unsigned int length) {
   std::string clock_string = std::string((char *)payload, length);
-  NSPanel::instance->setComponentText(SCREENSAVE_PAGE_TEXT_NAME, clock_string.c_str());
+  NSPanel::instance->setComponentText(SCREENSAVE_PAGE_NAME "." SCREENSAVER_CURRENT_TIME_TEXT_NAME, clock_string.c_str());
 }

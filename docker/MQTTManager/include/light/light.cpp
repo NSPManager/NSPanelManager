@@ -8,22 +8,7 @@
 
 Light::Light(nlohmann::json &init_data) {
   this->_id = init_data["id"];
-  this->_name = init_data["name"];
-  SPDLOG_DEBUG("Loading light {}::{}.", this->_id, this->_name);
-
   this->_room_id = init_data["room_id"];
-
-  this->_current_state = false;
-  this->_current_brightness = 50;
-  this->_current_color_temperature = 2500;
-  this->_current_saturation = 50;
-  this->_current_hue = 50;
-
-  this->_requested_state = false;
-  this->_requested_brightness = 50;
-  this->_requested_color_temperature = 2500;
-  this->_requested_saturation = 50;
-  this->_requested_hue = 50;
 
   // Build MQTT Topics
   std::string mqtt_base_topic = "nspanel/entities/light/";
@@ -38,28 +23,48 @@ Light::Light(nlohmann::json &init_data) {
   this->_mqtt_saturation_topic = std::string(mqtt_base_topic);
   this->_mqtt_saturation_topic.append("state_sat");
 
-  if (std::string(init_data["light_type"]).compare("home_assistant") == 0) {
-    this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
-  } else if (std::string(init_data["light_type"]).compare("openhab") == 0) {
-    this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
-  } else {
-    SPDLOG_ERROR("Got unknown type ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(init_data["type"]), this->_id, this->_name);
-    this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
-  }
+  this->_current_state = false;
+  this->_current_brightness = 50;
+  this->_current_color_temperature = 2500;
+  this->_current_saturation = 50;
+  this->_current_hue = 50;
 
-  this->_can_dim = init_data["can_dim"];
-  this->_can_color_temperature = init_data["can_color_temperature"];
-  this->_can_rgb = init_data["can_rgb"];
+  this->_requested_state = false;
+  this->_requested_brightness = 50;
+  this->_requested_color_temperature = 2500;
+  this->_requested_saturation = 50;
+  this->_requested_hue = 50;
 
-  if (this->_can_dim) {
-    this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
-  } else if (this->_can_rgb) {
-    this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
-  } else {
-    this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT; // Normal mode. Don't do anything special with light change request.
-  }
-
+  this->update_config(init_data);
   SPDLOG_DEBUG("Light {}::{} base loaded, can dim: {}, can color temp: {}, can_rgb: {}.", this->_id, this->_name, this->_can_dim ? "yes" : "no", this->_can_color_temperature ? "yes" : "no", this->_can_rgb ? "yes" : "no");
+}
+
+void Light::update_config(nlohmann::json &init_data) {
+  if (this->_name.compare(init_data["name"]) != 0) {
+    this->_name = init_data["name"];
+    SPDLOG_DEBUG("Loading light {}::{}.", this->_id, this->_name);
+
+    if (std::string(init_data["light_type"]).compare("home_assistant") == 0) {
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
+    } else if (std::string(init_data["light_type"]).compare("openhab") == 0) {
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
+    } else {
+      SPDLOG_ERROR("Got unknown type ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(init_data["type"]), this->_id, this->_name);
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
+    }
+
+    this->_can_dim = init_data["can_dim"];
+    this->_can_color_temperature = init_data["can_color_temperature"];
+    this->_can_rgb = init_data["can_rgb"];
+
+    if (this->_can_dim) {
+      this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
+    } else if (this->_can_rgb) {
+      this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
+    } else {
+      this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT; // Normal mode. Don't do anything special with light change request.
+    }
+  }
 }
 
 MQTT_MANAGER_ENTITY_TYPE Light::get_type() {
@@ -184,6 +189,7 @@ void Light::detach_delete_callback(void (*callback)(Light *)) {
 }
 
 Light::~Light() {
+  SPDLOG_DEBUG("Destructor for light {}::{} called.", this->_id, this->_name);
   this->_light_destroyed_callbacks(this);
   this->_signal_entity_destroyed();
 }

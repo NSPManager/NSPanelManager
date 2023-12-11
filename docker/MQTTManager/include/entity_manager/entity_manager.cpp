@@ -28,6 +28,8 @@
 #include <string>
 #include <sys/types.h>
 
+#define ITEM_IN_LIST(list, item) (std::find(list.begin(), list.end(), item) != list.end());
+
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
   ((std::string *)userp)->append((char *)contents, size * nmemb);
   return size * nmemb;
@@ -37,7 +39,6 @@ void EntityManager::init() {
   // MQTT_Manager::attach_observer(EntityManager::mqtt_callback);
   WebsocketServer::attach_message_callback(EntityManager::websocket_callback);
   MqttManagerConfig::attach_config_added_listener(EntityManager::config_added);
-  MqttManagerConfig::attach_config_removed_listener(EntityManager::config_removed);
   MqttManagerConfig::attach_config_loaded_listener(EntityManager::post_init_entities);
   MQTT_Manager::subscribe("nspanel/mqttmanager/command", &EntityManager::mqtt_topic_callback);
   MQTT_Manager::subscribe("nspanel/+/status", &EntityManager::mqtt_topic_callback);
@@ -47,11 +48,7 @@ void EntityManager::init() {
 void EntityManager::config_added(nlohmann::json *config) {
   if ((*config).contains("type")) {
     std::string type = (*config)["type"];
-    if (type.compare("light") == 0) {
-      EntityManager::add_light((*config));
-    } else if (type.compare("nspanel") == 0) {
-      EntityManager::add_nspanel((*config));
-    } else if (type.compare("scene") == 0) {
+    if (type.compare("scene") == 0) {
       EntityManager::add_scene((*config));
     } else if (type.compare("room") == 0) {
       EntityManager::add_room((*config));
@@ -69,32 +66,7 @@ void EntityManager::config_added(nlohmann::json *config) {
 void EntityManager::config_removed(nlohmann::json *config) {
   if ((*config).contains("type")) {
     std::string type = (*config)["type"];
-    if (type.compare("light") == 0) {
-      std::lock_guard<std::mutex> mutex_guard(EntityManager::_lights_mutex);
-      Light *entity = EntityManager::get_light_by_id((*config)["id"]);
-      if (entity != nullptr) {
-        EntityManager::_lights.remove(entity);
-        delete entity;
-      }
-    } else if (type.compare("nspanel") == 0) {
-      // Try to find NSPanel by ID or MAC
-      NSPanel *nspanel = EntityManager::get_nspanel_by_id((*config)["id"]);
-      if (nspanel == nullptr) {
-        nspanel = EntityManager::get_nspanel_by_mac((*config)["mac"]);
-      }
-
-      if (nspanel != nullptr) {
-        std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
-        SPDLOG_INFO("Removing NSPanel {}::{}.", nspanel->get_id(), nspanel->get_name());
-        SPDLOG_DEBUG("NSPanels before remove: {}", EntityManager::_nspanels.size());
-        EntityManager::_nspanels.remove(nspanel);
-        SPDLOG_DEBUG("NSPanels after remove: {}", EntityManager::_nspanels.size());
-        delete nspanel;
-        SPDLOG_DEBUG("NSPanel deleted.");
-      } else {
-        SPDLOG_ERROR("Removing config for NSPanel with ID {} from ConfigManager but couldn't find an NSPanel with that ID to remove from EntityManager!", int((*config)["id"]));
-      }
-    } else if (type.compare("scene") == 0) {
+    if (type.compare("scene") == 0) {
       MqttManagerEntity *ptr = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, (*config)["id"]);
       if (ptr != nullptr) {
         EntityManager::remove_entity(ptr);
@@ -138,7 +110,7 @@ void EntityManager::add_room(nlohmann::json &config) {
 
 void EntityManager::add_light(nlohmann::json &config) {
   try {
-    if (EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config["id"]) == nullptr) {
+    if (EntityManager::get_light_by_id(config["id"]) == nullptr) {
       std::string light_type = config["light_type"];
       if (light_type.compare("home_assistant") == 0) {
         HomeAssistantLight *light = new HomeAssistantLight(config);
@@ -225,6 +197,75 @@ void EntityManager::post_init_entities() {
     entity->post_init();
   }
   EntityManager::_post_init_entities.clear();
+
+  {
+    // Process any loaded NSPanels
+    SPDLOG_DEBUG("Updating NSPanels.");
+    std::list<int> nspanel_ids;
+    for (nlohmann::json &config : MqttManagerConfig::nspanel_configs) {
+      EntityManager::add_nspanel(config); // add_nspanel takes care to check if it exists before adding it. IF it exists, update it instead.
+      nspanel_ids.push_back(config["id"]);
+    }
+
+    // Check for any removed nspanels
+    SPDLOG_DEBUG("Checking for removed NSPanels.");
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
+    auto rit = EntityManager::_nspanels.cbegin();
+    while (rit != EntityManager::_nspanels.cend()) {
+      if ((*rit)->has_registered_to_manager()) {
+        bool exists = ITEM_IN_LIST(nspanel_ids, (*rit)->get_id());
+
+        if (!exists) {
+          NSPanel *panel = (*rit);
+          SPDLOG_DEBUG("Removing NSPanel {}::{} as it doesn't exist in config anymore.", panel->get_id(), panel->get_name());
+          EntityManager::_nspanels.erase(rit++);
+          delete panel;
+        } else {
+          rit++;
+        }
+      }
+    }
+  }
+
+  {
+    // Process any loaded lights
+    SPDLOG_DEBUG("Updating lights.");
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_lights_mutex);
+    std::list<int> light_ids;
+    for (nlohmann::json &config : MqttManagerConfig::light_configs) {
+      light_ids.push_back(config["id"]);
+      Light *light = EntityManager::get_light_by_id(config["id"]);
+      if (light != nullptr) {
+        light->update_config(config);
+      } else {
+        EntityManager::add_light(config);
+      }
+    }
+    SPDLOG_DEBUG("Existing lights updated.");
+
+    // Check for any removed lights
+    SPDLOG_DEBUG("Checking for removed lights.");
+    auto rit = EntityManager::_lights.begin();
+    while (rit != EntityManager::_lights.end()) {
+      bool exists = false;
+      for (int light_id : light_ids) {
+        if (light_id == (*rit)->get_id()) {
+          exists = true;
+          break;
+        }
+      }
+
+      if (!exists) {
+        SPDLOG_DEBUG("Removing Light {}::{} as it doesn't exist in config anymore.", (*rit)->get_id(), (*rit)->get_name());
+        Light *light = (*rit);
+        EntityManager::_lights.erase(rit++);
+        delete light;
+        SPDLOG_DEBUG("Light removed successfully.");
+      } else {
+        ++rit;
+      }
+    }
+  }
 
   SPDLOG_INFO("Total loaded lights: {}", EntityManager::_lights.size());
   SPDLOG_INFO("Total loaded NSPanels: {}", EntityManager::_nspanels.size());
@@ -410,9 +451,12 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
 }
 
 Light *EntityManager::get_light_by_id(uint id) {
-  for (Light *light : EntityManager::_lights) {
-    if (light->get_id() == id) {
-      return light;
+  auto rit = EntityManager::_lights.cbegin();
+  while (rit != EntityManager::_lights.cend()) {
+    if ((*rit)->get_id() == id) {
+      return (*rit);
+    } else {
+      rit++;
     }
   }
   return nullptr;

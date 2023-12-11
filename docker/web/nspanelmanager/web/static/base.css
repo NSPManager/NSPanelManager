@@ -17,3 +17,7 @@
 .modal {
   animation: fadeIn 0.1s;
 }
+
+.question_help_text {
+  display: none; /* Default is hidden */
+}
