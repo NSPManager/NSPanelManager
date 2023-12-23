@@ -10,6 +10,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <nspanel/nspanel.hpp>
+#include <spdlog/spdlog.h>
 
 class EntityManager {
 public:
@@ -17,9 +18,6 @@ public:
    * Setup function callbacks and other prerequisites for the EntityManager
    */
   static void init();
-
-  static void config_added(nlohmann::json *config);
-  static void config_removed(nlohmann::json *config);
 
   /**
    * Call post-initialized on all entities.
@@ -37,11 +35,6 @@ public:
   static void detach_entity_added_listener(void (*listener)(MqttManagerEntity *));
 
   /**
-   * Add an entity to the list of managed entities.
-   */
-  static void add_entity(MqttManagerEntity *entity);
-
-  /**
    * Remove an entity from the list of managed entities.
    */
   static void remove_entity(MqttManagerEntity *entity);
@@ -55,11 +48,6 @@ public:
    * Create and add a nspanel to the manager
    */
   static void add_nspanel(nlohmann::json &config);
-
-  /**
-   * Create and add a room to the manager
-   */
-  static void add_room(nlohmann::json &config);
 
   /**
    * Create and add a scene to the manager
@@ -78,9 +66,12 @@ public:
   template <class EntityClass>
   static EntityClass *get_entity_by_id(MQTT_MANAGER_ENTITY_TYPE type, int id) {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-    for (MqttManagerEntity *entity : EntityManager::_entities) {
-      if (entity->get_type() == type && entity->get_id() == id) {
-        return static_cast<EntityClass *>(entity);
+    auto rit = EntityManager::_entities.cbegin();
+    while (rit != EntityManager::_entities.cend()) {
+      if ((*rit)->get_type() == type && (*rit)->get_id() == id) {
+        return static_cast<EntityClass *>(*rit);
+      } else {
+        ++rit;
       }
     }
     return nullptr;
@@ -131,7 +122,6 @@ private:
   static inline std::mutex _lights_mutex;
   static inline std::list<NSPanel *> _nspanels;
   static inline std::mutex _nspanels_mutex;
-  static inline std::list<MqttManagerEntity *> _post_init_entities; // The entities to post init when called next time.
 
   static inline boost::signals2::signal<void(MqttManagerEntity *)> _entity_added_signal;
   static inline boost::signals2::signal<void(MqttManagerEntity *)> _entity_removed_signal;

@@ -13,6 +13,11 @@ public:
   Room(nlohmann::json &config);
 
   /**
+   * Update room with given config
+   */
+  void update_config(nlohmann::json &config);
+
+  /**
    * Get the ID of the room.
    */
   uint16_t get_id();

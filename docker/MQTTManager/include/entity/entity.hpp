@@ -2,6 +2,7 @@
 #define MQTT_MANAGER_ENTITY
 
 #include <boost/signals2/signal.hpp>
+#include <nlohmann/json_fwd.hpp>
 enum MQTT_MANAGER_ENTITY_TYPE {
   LIGHT,
   SCENE,
@@ -36,6 +37,11 @@ public:
    * All entities and config has been loaded, do post-processing tasks.
    */
   virtual void post_init() = 0;
+
+  /**
+   * Update the config for the given object
+   */
+  virtual void update_config(nlohmann::json &config) = 0;
 
   /**
    * Register a entity_changed callback listener.

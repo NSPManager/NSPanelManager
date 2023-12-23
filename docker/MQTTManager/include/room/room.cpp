@@ -6,6 +6,10 @@
 #include <string>
 
 Room::Room(nlohmann::json &config) {
+  this->update_config(config);
+}
+
+void Room::update_config(nlohmann::json &config) {
   this->_id = config["id"];
   this->_name = config["name"];
 

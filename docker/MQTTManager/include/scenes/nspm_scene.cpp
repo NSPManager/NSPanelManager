@@ -10,6 +10,10 @@
 
 NSPMScene::NSPMScene(nlohmann::json &data) {
   this->_id = data["id"];
+  this->update_config(data);
+}
+
+void NSPMScene::update_config(nlohmann::json &data) {
   this->_name = data["scene_name"];
   if (!data["room_id"].is_null()) {
     this->_is_global_scene = false;
@@ -18,6 +22,7 @@ NSPMScene::NSPMScene(nlohmann::json &data) {
     this->_is_global_scene = true;
   }
   SPDLOG_DEBUG("Loading NSPM scene {}::{}.", this->_id, this->_name);
+  this->_light_states.clear();
   for (nlohmann::json light_data : data["light_states"]) {
     LightState state;
     state._light = nullptr;
@@ -29,6 +34,7 @@ NSPMScene::NSPMScene(nlohmann::json &data) {
     state.saturation = light_data["saturation"];
     this->_light_states.push_back(state);
   }
+  SPDLOG_DEBUG("Loaded scene {}::{}.", this->_id, this->_name);
 }
 
 void NSPMScene::activate() {

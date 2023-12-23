@@ -38,56 +38,10 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 void EntityManager::init() {
   // MQTT_Manager::attach_observer(EntityManager::mqtt_callback);
   WebsocketServer::attach_message_callback(EntityManager::websocket_callback);
-  MqttManagerConfig::attach_config_added_listener(EntityManager::config_added);
   MqttManagerConfig::attach_config_loaded_listener(EntityManager::post_init_entities);
   MQTT_Manager::subscribe("nspanel/mqttmanager/command", &EntityManager::mqtt_topic_callback);
   MQTT_Manager::subscribe("nspanel/+/status", &EntityManager::mqtt_topic_callback);
   MQTT_Manager::subscribe("nspanel/+/status_report", &EntityManager::mqtt_topic_callback);
-}
-
-void EntityManager::config_added(nlohmann::json *config) {
-  if ((*config).contains("type")) {
-    std::string type = (*config)["type"];
-    if (type.compare("scene") == 0) {
-      EntityManager::add_scene((*config));
-    } else if (type.compare("room") == 0) {
-      EntityManager::add_room((*config));
-    } else if (type.compare("nspanel_relay_group") == 0) {
-      EntityManager::add_nspanel_relay_group((*config));
-    } else {
-      SPDLOG_ERROR("Unknown type for new config: {}", type);
-    }
-  } else {
-    std::string config_str = config->dump();
-    SPDLOG_ERROR("Config added without a type-specifier. Will ignore it! Config: {}", config_str);
-  }
-}
-
-void EntityManager::config_removed(nlohmann::json *config) {
-  if ((*config).contains("type")) {
-    std::string type = (*config)["type"];
-    if (type.compare("scene") == 0) {
-      MqttManagerEntity *ptr = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, (*config)["id"]);
-      if (ptr != nullptr) {
-        EntityManager::remove_entity(ptr);
-      }
-    } else if (type.compare("room") == 0) {
-      MqttManagerEntity *ptr = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, (*config)["id"]);
-      if (ptr != nullptr) {
-        EntityManager::remove_entity(ptr);
-      }
-    } else if (type.compare("nspanel_relay_group") == 0) {
-      NSPanelRelayGroup *ptr = EntityManager::get_entity_by_id<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP, (*config)["id"]);
-      if (ptr != nullptr) {
-        EntityManager::remove_entity(ptr);
-      }
-    } else {
-      SPDLOG_ERROR("Unknown type for config: {}", type);
-    }
-  } else {
-    std::string config_str = config->dump();
-    SPDLOG_ERROR("Removing config without a type-specifier. Will ignore it! Config: {}", config_str);
-  }
 }
 
 void EntityManager::attach_entity_added_listener(void (*listener)(MqttManagerEntity *)) {
@@ -98,16 +52,6 @@ void EntityManager::detach_entity_added_listener(void (*listener)(MqttManagerEnt
   EntityManager::_entity_added_signal.disconnect(listener);
 }
 
-void EntityManager::add_room(nlohmann::json &config) {
-  if (EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, config["id"]) == nullptr) {
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-    EntityManager::_entities.push_back(new Room(config));
-  } else {
-    int room_id = config["id"];
-    SPDLOG_ERROR("A room with ID {} already exists!", room_id);
-  }
-}
-
 void EntityManager::add_light(nlohmann::json &config) {
   try {
     if (EntityManager::get_light_by_id(config["id"]) == nullptr) {
@@ -115,11 +59,9 @@ void EntityManager::add_light(nlohmann::json &config) {
       if (light_type.compare("home_assistant") == 0) {
         HomeAssistantLight *light = new HomeAssistantLight(config);
         EntityManager::_lights.push_back(light);
-        EntityManager::add_entity(light);
       } else if (light_type.compare("openhab") == 0) {
         OpenhabLight *light = new OpenhabLight(config);
         EntityManager::_lights.push_back(light);
-        EntityManager::add_entity(light);
       } else {
         SPDLOG_ERROR("Unknown light type '{}'. Will ignore entity.", light_type);
       }
@@ -135,16 +77,16 @@ void EntityManager::add_light(nlohmann::json &config) {
 
 void EntityManager::add_scene(nlohmann::json &config) {
   try {
-    if (EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, config["id"]) == nullptr) {
+    Scene *scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, config["id"]);
+    if (scene == nullptr) {
       std::string scene_type = config["scene_type"];
       if (scene_type.compare("nspm_scene") == 0) {
         Scene *scene = new NSPMScene(config);
-        EntityManager::add_entity(scene);
+        EntityManager::_entities.push_back(scene);
       }
       // TODO: Implement Home Assistant and Openhab scenes.
     } else {
-      int scene_id = config["id"];
-      SPDLOG_ERROR("A scene with ID {} already exists.", scene_id);
+      scene->update_config(config);
     }
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
@@ -157,7 +99,7 @@ void EntityManager::add_nspanel_relay_group(nlohmann::json &config) {
     NSPanelRelayGroup *rg = EntityManager::get_entity_by_id<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP, config["id"]);
     if (rg == nullptr) {
       rg = new NSPanelRelayGroup(config);
-      EntityManager::add_entity(rg);
+      EntityManager::_entities.push_back(rg);
     } else {
       rg->update_config(config);
     }
@@ -192,11 +134,7 @@ void EntityManager::add_nspanel(nlohmann::json &config) {
 }
 
 void EntityManager::post_init_entities() {
-  SPDLOG_INFO("Performing post init on {} entities.", EntityManager::_post_init_entities.size());
-  for (MqttManagerEntity *entity : EntityManager::_post_init_entities) {
-    entity->post_init();
-  }
-  EntityManager::_post_init_entities.clear();
+  SPDLOG_INFO("New config loaded, processing changes.");
 
   {
     // Process any loaded NSPanels
@@ -267,18 +205,143 @@ void EntityManager::post_init_entities() {
     }
   }
 
+  {
+    // Process any loaded rooms
+    SPDLOG_DEBUG("Updating rooms.");
+    std::list<int> room_ids;
+    for (nlohmann::json &config : MqttManagerConfig::room_configs) {
+      room_ids.push_back(config["id"]);
+      SPDLOG_DEBUG("Trying to get room by id.");
+      Room *room = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, config["id"]);
+      SPDLOG_DEBUG("Got result. Trying to get mutex.");
+      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+      SPDLOG_DEBUG("Got mutex.");
+      if (room != nullptr) {
+        SPDLOG_DEBUG("Found existing room {}::{}, will update.", room->get_id(), room->get_name());
+        room->update_config(config);
+      } else {
+        room = new Room(config);
+        EntityManager::_entities.push_back(room);
+      }
+    }
+    SPDLOG_DEBUG("Existing rooms updated.");
+
+    // Check for any removed lights
+    SPDLOG_DEBUG("Checking for removed rooms.");
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+    auto rit = EntityManager::_entities.begin();
+    while (rit != EntityManager::_entities.end()) {
+      if ((*rit)->get_type() == MQTT_MANAGER_ENTITY_TYPE::ROOM) {
+        bool exists = false;
+        for (int room_id : room_ids) {
+          if (room_id == (*rit)->get_id()) {
+            exists = true;
+            break;
+          }
+        }
+
+        if (!exists) {
+          SPDLOG_DEBUG("Removing room with id {} as it doesn't exist in config anymore.", (*rit)->get_id());
+          MqttManagerEntity *room = (*rit);
+          EntityManager::_entities.erase(rit++);
+          delete room;
+          SPDLOG_DEBUG("Room removed successfully.");
+        } else {
+          ++rit;
+        }
+      } else {
+        ++rit;
+      }
+    }
+  }
+
+  {
+    // Process any loaded NSPanel Relay Groups
+    SPDLOG_DEBUG("Updating NSPanel relay groups.");
+    std::list<int> relay_group_ids;
+    for (nlohmann::json &config : MqttManagerConfig::nspanel_relay_group_configs) {
+      EntityManager::add_nspanel_relay_group(config);
+      relay_group_ids.push_back(config["id"]);
+    }
+    SPDLOG_DEBUG("Existing relay groups updated.");
+
+    // Check for any removed lights
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+    SPDLOG_DEBUG("Checking for removed relay groups.");
+    auto rit = EntityManager::_entities.begin();
+    while (rit != EntityManager::_entities.end()) {
+      if ((*rit)->get_type() == MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP) {
+        bool exists = false;
+        for (int rg_id : relay_group_ids) {
+          if (rg_id == (*rit)->get_id()) {
+            exists = true;
+            break;
+          }
+        }
+
+        if (!exists) {
+          SPDLOG_DEBUG("Removing relay group with id {} as it doesn't exist in config anymore.", (*rit)->get_id());
+          MqttManagerEntity *rg = (*rit);
+          EntityManager::_entities.erase(rit++);
+          delete rg;
+          SPDLOG_DEBUG("Relay group removed successfully.");
+        } else {
+          ++rit;
+        }
+      } else {
+        ++rit;
+      }
+    }
+  }
+
+  {
+    // Process any loaded Scenes
+    SPDLOG_DEBUG("Updating scenes.");
+    std::list<int> scene_ids;
+    for (nlohmann::json &config : MqttManagerConfig::scenes_configs) {
+      EntityManager::add_scene(config);
+      scene_ids.push_back(config["id"]);
+    }
+    SPDLOG_DEBUG("Existing scenes updated.");
+
+    // Check for any removed lights
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+    SPDLOG_DEBUG("Checking for removed scenes.");
+    auto rit = EntityManager::_entities.begin();
+    while (rit != EntityManager::_entities.end()) {
+      if ((*rit)->get_type() == MQTT_MANAGER_ENTITY_TYPE::SCENE) {
+        bool exists = false;
+        for (int scene_id : scene_ids) {
+          if (scene_id == (*rit)->get_id()) {
+            exists = true;
+            break;
+          }
+        }
+
+        if (!exists) {
+          SPDLOG_DEBUG("Removing scene with id {} as it doesn't exist in config anymore.", (*rit)->get_id());
+          MqttManagerEntity *scene = (*rit);
+          EntityManager::_entities.erase(rit++);
+          delete scene;
+          SPDLOG_DEBUG("Relay group removed successfully.");
+        } else {
+          ++rit;
+        }
+      } else {
+        ++rit;
+      }
+    }
+  }
+
+  SPDLOG_INFO("Performing post init on {} entities.", EntityManager::_entities.size());
+  for (MqttManagerEntity *entity : EntityManager::_entities) {
+    SPDLOG_DEBUG("Performing PostInit on entity type {} with id {}", static_cast<int>(entity->get_type()), entity->get_id());
+    entity->post_init();
+  }
+
   SPDLOG_INFO("Total loaded lights: {}", EntityManager::_lights.size());
   SPDLOG_INFO("Total loaded NSPanels: {}", EntityManager::_nspanels.size());
   SPDLOG_INFO("Total loaded Entities: {}", EntityManager::_entities.size());
-}
-
-void EntityManager::add_entity(MqttManagerEntity *entity) {
-  {
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-    EntityManager::_entities.push_back(entity);
-    EntityManager::_post_init_entities.push_back(entity);
-  }
-  EntityManager::_entity_added_signal(entity);
 }
 
 void EntityManager::remove_entity(MqttManagerEntity *entity) {
