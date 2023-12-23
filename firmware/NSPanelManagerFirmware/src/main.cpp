@@ -10,8 +10,11 @@
 #include <NSPanel.hpp>
 #include <PageManager.hpp>
 #include <PubSubClient.h>
+#include <TftDefines.h>
 #include <WebManager.hpp>
 #include <WiFi.h>
+#include <cmath>
+#include <math.h>
 #include <nspm-bin-version.h>
 #include <string>
 
@@ -182,6 +185,11 @@ void taskManageWifiAndMqtt(void *param) {
           char buffer[512];
           uint json_length = serializeJson(*status_report_doc, buffer);
           MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer, true);
+
+          std::string display_temp = std::to_string((int)round(temperature));
+          display_temp.append("°");
+          NSPanel::instance->setComponentText(SCREENSAVE_PAGE_NAME "." SCREENSAVER_CURRENT_ROOMTEMP_TEXT_NAME, display_temp.c_str());
+
           lastStatusReport = millis();
         }
         delete status_report_doc;

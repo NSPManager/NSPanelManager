@@ -35,6 +35,7 @@ public:
   static inline uint color_temp_min;
   static inline uint color_temp_max;
 
+  static inline std::string date_format;
   static inline bool clock_us_style;
   static inline bool use_farenheit;
   static inline bool turn_on_behavior;

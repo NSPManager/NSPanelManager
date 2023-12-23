@@ -1,7 +1,12 @@
 #include "openhab_manager/openhab_manager.hpp"
 #include "websocket_server/websocket_server.hpp"
+#include <cctype>
 #include <chrono>
 #include <cstddef>
+#include <cstdlib>
+#include <ctime>
+#include <filesystem>
+#include <fstream>
 #include <signal.h>
 #include <spdlog/spdlog.h>
 #include <stdio.h>
@@ -15,6 +20,8 @@
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 
 #define SIGUSR1 10
+std::string last_time_published;
+std::string last_date_published;
 
 void sigusr1_handler(int signal) {
   if (signal == SIGUSR1) {
@@ -22,6 +29,56 @@ void sigusr1_handler(int signal) {
     MqttManagerConfig::load();
     MQTT_Manager::publish("nspanel/config/reload", "1");
     SPDLOG_INFO("Reload signal processing completed.");
+  }
+}
+
+void publish_time_and_date() {
+  // Read and set timezone from /etc/timezone
+  std::ifstream f("/etc/timezone", std::ios::in | std::ios::binary);
+  const size_t file_size = std::filesystem::file_size("/etc/timezone");
+  std::string timezone_str(file_size, '\0');
+  f.read(timezone_str.data(), file_size);
+  f.close();
+
+  timezone_str.erase(std::find_if(timezone_str.rbegin(), timezone_str.rend(), [](unsigned char ch) {
+                       return !std::isspace(ch) && ch != '\n' && ch != '\r';
+                     }).base(),
+                     timezone_str.end());
+
+  SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
+  setenv("TZ", timezone_str.c_str(), 1);
+
+  // Timezone loaded, proceed to update MQTT
+  for (;;) {
+    char time_buffer[20];
+    std::string time_str;
+    char date_buffer[100];
+    std::string date_str;
+
+    std::time_t time = std::time({});
+    std::strftime(date_buffer, 100, MqttManagerConfig::date_format.c_str(), std::localtime(&time));
+    date_str = date_buffer;
+    if (MqttManagerConfig::clock_us_style) {
+      std::strftime(time_buffer, 20, "%I:%M %p", std::localtime(&time));
+      time_str = time_buffer;
+    } else {
+      std::strftime(time_buffer, 20, "%H:%M", std::localtime(&time));
+      time_str = time_buffer;
+    }
+
+    if (time_str.compare(last_time_published) != 0) {
+      SPDLOG_DEBUG("Publising time {}.", time_str);
+      MQTT_Manager::publish("nspanel/status/time", time_buffer, true);
+      last_time_published = time_buffer;
+    }
+
+    if (date_str.compare(last_date_published) != 0) {
+      SPDLOG_DEBUG("Publising date {}.", date_str);
+      MQTT_Manager::publish("nspanel/status/date", date_buffer, true);
+      last_date_published = date_buffer;
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 }
 
@@ -42,6 +99,7 @@ int main(void) {
   std::thread home_assistant_manager_thread;
   std::thread openhab_manager_thread;
   std::thread websocket_server_thread;
+  std::thread time_and_date_thread;
 
   // Load config from environment/manager
   EntityManager::init();
@@ -69,6 +127,7 @@ int main(void) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 
+  time_and_date_thread = std::thread(publish_time_and_date);
   if (!MqttManagerConfig::home_assistant_address.empty() && !MqttManagerConfig::home_assistant_access_token.empty()) {
     SPDLOG_INFO("Home Assistant address and access token configured. Starting Home Assistant component.");
     home_assistant_manager_thread = std::thread(HomeAssistantManager::connect);

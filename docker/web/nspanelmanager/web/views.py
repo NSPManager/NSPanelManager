@@ -664,6 +664,7 @@ def weather_and_time(request):
         return redirect("weather_and_time")
     else:
         data = {}
+        data["date_format"] = get_setting_with_default("date_format", "%a %d/%m %Y");
         data["clock_us_style"] = get_setting_with_default("clock_us_style", False)
         data["use_farenheit"] = get_setting_with_default("use_farenheit", False)
         return render(request, "weather_and_time.html", data)

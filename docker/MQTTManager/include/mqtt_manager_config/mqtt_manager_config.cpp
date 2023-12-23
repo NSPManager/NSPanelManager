@@ -119,6 +119,7 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   MqttManagerConfig::manager_address = data["manager_address"];
   MqttManagerConfig::color_temp_min = data["color_temp_min"];
   MqttManagerConfig::color_temp_max = data["color_temp_max"];
+  MqttManagerConfig::date_format = std::string(data["date_format"]);
   MqttManagerConfig::clock_us_style = std::string(data["clock_us_style"]).compare("True") == 0;
   MqttManagerConfig::use_farenheit = std::string(data["use_farenheit"]).compare("True") == 0;
   MqttManagerConfig::max_log_buffer_size = atoi(std::string(data["max_log_buffer_size"]).c_str());

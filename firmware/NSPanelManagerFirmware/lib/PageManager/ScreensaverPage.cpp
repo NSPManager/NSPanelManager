@@ -10,6 +10,7 @@
 
 void ScreensaverPage::attachMqttTimeCallback() {
   MqttManager::subscribeToTopic("nspanel/status/time", &ScreensaverPage::clockMqttCallback);
+  MqttManager::subscribeToTopic("nspanel/status/date", &ScreensaverPage::dateMqttCallback);
 }
 
 void ScreensaverPage::show() {
@@ -38,4 +39,9 @@ void ScreensaverPage::unshow() {
 void ScreensaverPage::clockMqttCallback(char *topic, byte *payload, unsigned int length) {
   std::string clock_string = std::string((char *)payload, length);
   NSPanel::instance->setComponentText(SCREENSAVE_PAGE_NAME "." SCREENSAVER_CURRENT_TIME_TEXT_NAME, clock_string.c_str());
+}
+
+void ScreensaverPage::dateMqttCallback(char *topic, byte *payload, unsigned int length) {
+  std::string date_string = std::string((char *)payload, length);
+  NSPanel::instance->setComponentText(SCREENSAVE_PAGE_NAME "." SCREENSAVER_CURRENT_DAY_TEXT_NAME, date_string.c_str());
 }

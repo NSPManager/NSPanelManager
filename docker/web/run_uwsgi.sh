@@ -1,5 +1,12 @@
 #!/bin/bash
 
+if [ "$TZ" != "" ]; then
+	echo "Setting /etc/timezone to $TZ"
+	echo "$TZ" >/etc/timezone
+fi
+export TZ="$(cat /etc/timezone)"
+echo "Will use timezone: $TZ"
+
 echo "Running migrations..."
 cd nspanelmanager
 /usr/local/bin/python manage.py migrate

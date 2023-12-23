@@ -12,6 +12,7 @@ def start_mqtt_manager():
     for proc in psutil.process_iter():
         if "/usr/src/app/nspm_mqttmanager" in proc.cmdline():
             return None # MQTT Manager already running
+
     print("Did not find a running MQTTManager, starting MQTTManager...")
     # Restart the process
     logging.info("Starting a new mqtt_manager")
@@ -24,7 +25,7 @@ def start_mqtt_manager():
     mqttmanager_env["HOME_ASSISTANT_TOKEN"] = get_setting_with_default("home_assistant_token", "")
     mqttmanager_env["OPENHAB_ADDRESS"] = get_setting_with_default("openhab_address", "")
     mqttmanager_env["OPENHAB_TOKEN"] = get_setting_with_default("openhab_token", "")
-    #subprocess.Popen(["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/", env=mqttmanager_env)
+    mqttmanager_env["OPENHAB_TOKEN"] = get_setting_with_default("openhab_token", "")
     subprocess.Popen(["/usr/src/app/nspm_mqttmanager"], cwd="/usr/src/app/", env=mqttmanager_env)
 
 

@@ -24,9 +24,7 @@
             <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
-            If a light is off, turning it back on should:<br>
-            Color temperature: The light will be set to the current value of the color temperature slider.<br>
-            Restore: The light will we set to the current value of the color temperature slider IF the light was in color temperature mode when it was turned off. Otherwise, it will turn on the last powered on state.
+            The format of the date on the NSPanel. This is set using the strftime function. See available formatting for all options.
           </div>
         </label>
         <div class="control">
@@ -34,9 +32,7 @@
               placeholder="strftime format" value="{{ date_format }}">
         </div>
         <div class="control mt-2">
-          <button class="button is-info">Load default EU</button>
-          <button class="button is-info">Load default US</button>
-          <button class="button is-link">See available options</button>
+          <a href="https://cplusplus.com/reference/ctime/strftime/" target="_blank" class="button is-link">See available formatting</a>
         </div>
       </div>
 

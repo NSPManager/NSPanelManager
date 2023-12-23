@@ -62,6 +62,7 @@ def get_mqtt_manager_config(request):
     return_json["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size", "10")
     return_json["manager_address"] = get_setting_with_default("manager_address", "")
     return_json["manager_port"] = get_setting_with_default("manager_port", "")
+    return_json["date_format"] = get_setting_with_default("date_format", "%a %d/%m %Y");
 
     return_json["lights"] = {}
     for light in Light.objects.all():
