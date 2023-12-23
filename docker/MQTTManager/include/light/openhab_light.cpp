@@ -85,10 +85,14 @@ void OpenhabLight::send_state_update_to_controller() {
 
   // Do not send brightness seperatly for rgb, this is included in the HSB values.
   if (!this->_requested_state) {
-    SPDLOG_DEBUG("Setting light {}::{} to level: 0", this->_id, this->_name);
-    payload_data["value"] = 0;
-    service_data["payload"] = payload_data.dump();
-    OpenhabManager::send_json(service_data);
+    if (this->_current_state) {
+      SPDLOG_DEBUG("Setting light {}::{} to level: 0", this->_id, this->_name);
+      payload_data["value"] = 0;
+      service_data["payload"] = payload_data.dump();
+      OpenhabManager::send_json(service_data);
+    } else {
+      SPDLOG_DEBUG("Light {}::{} is already off. Will not send update to openhab.");
+    }
   } else if (this->_requested_state && this->_current_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT) {
     // Send light level:
     SPDLOG_DEBUG("Setting light {}::{} to level: {}", this->_id, this->_name, this->_requested_brightness);
@@ -148,11 +152,22 @@ bool OpenhabLight::openhab_event_callback(nlohmann::json &data) {
     if (topic_item.compare(this->_openhab_on_off_item) == 0) {
       // We only care about the first event from Openhab, ignore the rest but still indicate that event was handled so the manager stops looping over all entities.
       if (CurrentTimeMilliseconds() >= this->_last_brightness_change + 1000) {
-        double brightness = atof(std::string(payload["value"]).c_str());
-        if (brightness < 0) {
-          brightness = 0;
-        } else if (brightness > 100) {
-          brightness = 100;
+        double brightness = 0;
+        if (this->_openhab_control_mode == MQTT_MANAGER_OPENHAB_CONTROL_MODE::DIMMER) {
+          brightness = atof(std::string(payload["value"]).c_str());
+          if (brightness < 0) {
+            brightness = 0;
+          } else if (brightness > 100) {
+            brightness = 100;
+          }
+        } else if (this->_openhab_control_mode == MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH) {
+          if (std::string(payload["value"]).compare("ON") == 0) {
+            brightness = 100;
+          } else {
+            brightness = 0;
+          }
+        } else {
+          SPDLOG_ERROR("Unknown openhab control mode for light {}::{}.", this->_id, this->_name);
         }
         this->_current_brightness = std::round(brightness);
         this->_requested_brightness = this->_current_brightness;
@@ -248,6 +263,7 @@ bool OpenhabLight::openhab_event_callback(nlohmann::json &data) {
 }
 
 void OpenhabLight::_update_item_values_from_openhab_rest() {
+  SPDLOG_DEBUG("Gathering current state for openhab light {}::{}.", this->_id, this->_name);
   std::string brightness;
   std::string color_temperature;
   std::string rgb;
@@ -263,8 +279,20 @@ void OpenhabLight::_update_item_values_from_openhab_rest() {
   if (!brightness.empty()) {
     nlohmann::json data = nlohmann::json::parse(brightness);
     if (data.contains("state")) {
-      this->_current_brightness = atoi(std::string(data["state"]).c_str());
-      this->_current_state = this->_current_brightness > 0;
+      if (this->_openhab_control_mode == MQTT_MANAGER_OPENHAB_CONTROL_MODE::DIMMER) {
+        this->_current_brightness = atoi(std::string(data["state"]).c_str());
+        this->_current_state = this->_current_brightness > 0;
+      } else if (this->_openhab_control_mode == MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH) {
+        if (std::string(data["state"]).compare("ON") == 0) {
+          this->_current_brightness = 100;
+          this->_current_state = true;
+        } else {
+          this->_current_brightness = 0;
+          this->_current_state = false;
+        }
+      } else {
+        SPDLOG_ERROR("Unknown Openhab control mode for light {}::{}.", this->_id, this->_name);
+      }
 
       SPDLOG_DEBUG("Got state {} and brightness {} from OpenHAB.", this->_current_state ? "ON" : "OFF", this->_current_brightness);
     } else {
@@ -329,6 +357,21 @@ void OpenhabLight::_update_item_values_from_openhab_rest() {
   this->_requested_saturation = this->_current_saturation;
   this->_requested_color_temperature = this->_current_color_temperature;
   this->_requested_hue = this->_current_hue;
+
+  if (this->_requested_state) {
+    MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness));
+  } else {
+    MQTT_Manager::publish(this->_mqtt_brightness_topic, "0");
+  }
+
+  if (this->_can_color_temperature) {
+    MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature));
+  }
+
+  if (this->_can_rgb) {
+    MQTT_Manager::publish(this->_mqtt_hue_topic, std::to_string(this->_current_hue));
+    MQTT_Manager::publish(this->_mqtt_saturation_topic, std::to_string(this->_current_saturation));
+  }
 }
 
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
