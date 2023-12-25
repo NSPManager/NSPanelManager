@@ -1,9 +1,9 @@
 function add_new_light_to_available_lights_list(light, type) {
   var icon = "";
   if (type == "home_assistant") {
-    if (light.label.startsWith("light.")) {
+    if (light.entity_id.startsWith("light.")) {
       icon = "mdi-lightbulb";
-    } else if (light.label.startsWith("switch.")) {
+    } else if (light.entity_id.startsWith("switch.")) {
       // icon = "mdi-toggle-switch-off";
       icon = "mdi-lightning-bolt";
     } else {
@@ -17,7 +17,7 @@ function add_new_light_to_available_lights_list(light, type) {
     '<a class="panel-block" data-type="' +
       type +
       "\" data-items='" +
-      JSON.stringify(light.items) +
+      JSON.stringify(light.items) + "' data-entity_id='" + light.entity_id +
       "'><span class=\"mdi " +
       icon +
       ' add_item_icon"></span>' +
@@ -53,8 +53,12 @@ function populate_add_new_light_dialog() {
   $("#add_new_light_options").hide();
   $("#add_new_light_loader").show();
 
-  $.get("/api/get_all_available_lights", function (data) {
-    console.log(data);
+  var types = {
+    "home_assistant_type_filter": JSON.stringify([
+      "light", "switch"
+    ])
+  };
+  $.get("/api/get_all_available_entities", types, function (data) {
     $("#add_new_light_errors").html("");
     $("#add_new_light_options").html("");
     data.errors.forEach((error) => {
@@ -129,7 +133,7 @@ function add_new_light_show_light_page(light_element) {
   $("#modal-add-light-options-inputs").show();
   $("#edit_light_id").val("-1"); // Set text field
   $("#add_new_light_name").val($(this).text()); // Set text field
-  $("#home_assistant_name").val($(this).text()); // Set text field
+  $("#home_assistant_name").val($(this).data("entity_id")); // Set text field
   $("#openhab_name").val($(this).text()); // Set text field
   $("#add_new_light_type").val($(this).data("type")); // Set the correct type
 

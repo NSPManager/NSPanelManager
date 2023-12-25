@@ -177,8 +177,12 @@ def get_nspanels_warnings(request):
     return JsonResponse({"panels": nspanels})
 
 
-def get_all_available_light_entities(request):
+def get_all_available_entities(request):
     # TODO: Implement manually entered entities
+    home_assistant_type_filter = []
+    if "home_assistant_type_filter" in request.GET:
+        home_assistant_type_filter = json.loads(request.GET["home_assistant_type_filter"]);
+
     # Get Home Assistant lights
     return_json = {}
     return_json["home_assistant_lights"] = []
@@ -202,11 +206,17 @@ def get_all_available_light_entities(request):
             home_assistant_response = requests.get(home_assistant_api_address, headers=home_assistant_request_headers, timeout=5, verify=False)
             if home_assistant_response.status_code == 200:
                 for entity in home_assistant_response.json():
-                    if (entity["entity_id"].startswith("light.") or entity["entity_id"].startswith("switch.")):
-                        return_json["home_assistant_lights"].append({
+                    entity_type = entity["entity_id"].split(".")[0]
+                    if (len(home_assistant_type_filter) > 0 and entity_type in home_assistant_type_filter) or len(home_assistant_type_filter) == 0:
+                        data = {
                             "label": entity["entity_id"],
+                            "entity_id": entity["entity_id"],
                             "items": []
-                        })
+                        }
+                        if "friendly_name" in entity["attributes"]:
+                            data["label"] = entity["attributes"]["friendly_name"]
+
+                        return_json["home_assistant_lights"].append(data)
             else:
                 return_json["errors"].append("Failed to get Home Assistant lights, got return code: " + str(home_assistant_response.status_code))
                 print("ERROR! Got status code other than 200. Got code: " + str(home_assistant_response.status_code))
