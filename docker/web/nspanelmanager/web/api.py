@@ -185,9 +185,9 @@ def get_all_available_entities(request):
 
     # Get Home Assistant lights
     return_json = {}
-    return_json["home_assistant_lights"] = []
-    return_json["openhab_lights"] = []
-    return_json["manual_lights"] = []
+    return_json["home_assistant_entities"] = []
+    return_json["openhab_entities"] = []
+    return_json["manual_entities"] = []
     return_json["errors"] = []
 
     # Home Assistant
@@ -216,7 +216,7 @@ def get_all_available_entities(request):
                         if "friendly_name" in entity["attributes"]:
                             data["label"] = entity["attributes"]["friendly_name"]
 
-                        return_json["home_assistant_lights"].append(data)
+                        return_json["home_assistant_entities"].append(data)
             else:
                 return_json["errors"].append("Failed to get Home Assistant lights, got return code: " + str(home_assistant_response.status_code))
                 print("ERROR! Got status code other than 200. Got code: " + str(home_assistant_response.status_code))
@@ -253,8 +253,9 @@ def get_all_available_entities(request):
                                         items.append(linkedItem)
                         if add_entity:
                             # return_json["openhab_lights"].append(entity["label"])
-                            return_json["openhab_lights"].append({
+                            return_json["openhab_entities"].append({
                                 "label": entity["label"],
+                                "entity_id": entity["label"],
                                 "items": items
                             })
             else:

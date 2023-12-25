@@ -68,13 +68,13 @@ function populate_add_new_light_dialog() {
         $("#add_new_light_errors").html() + error_element
       );
     });
-    data.home_assistant_lights.forEach((light) => {
+    data.home_assistant_entities.forEach((light) => {
       add_new_light_to_available_lights_list(light, "home_assistant");
     });
-    data.openhab_lights.forEach((light) => {
+    data.openhab_entities.forEach((light) => {
       add_new_light_to_available_lights_list(light, "openhab");
     });
-    data.manual_lights.forEach((light) => {
+    data.manual_entities.forEach((light) => {
       add_new_light_to_available_lights_list(light, "manual");
     });
 

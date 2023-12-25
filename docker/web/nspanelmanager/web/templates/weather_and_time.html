@@ -3,6 +3,38 @@
 {% block head %}
 {% load static %}
   <script src="{% static 'question.js' %}?refresh={% now 'U' %}"></script>
+  <script>
+    $(document).ready(() => {
+      var types = {
+        "home_assistant_type_filter": JSON.stringify([
+          "weather"
+        ])
+      };
+      $.get("/api/get_all_available_entities", types, function (data) {
+        data.home_assistant_entities.forEach((entity) => {
+          $("#weather_entity").append($('<option>', {
+            value: "homeassistant," + entity.entity_id,
+            text: entity.label
+          }));
+        });
+
+        data.openhab_entities.forEach((entity) => {
+          $("#weather_entity").append($('<option>', {
+            value: "openhab," + entity.entity_id,
+            text: entity.label
+          }));
+        });
+        data.manual_entities.forEach((entity) => {
+          $("#weather_entity").append($('<option>', {
+            value: "manual," + entity.entity_id,
+            text: entity.label
+          }));
+        });
+
+        $("#weather_entity").val("{{ weather_entity }}").change();
+      });
+    });
+  </script>
 {% endblock %}
 
 {% block content %}
@@ -16,7 +48,8 @@
   </div>
 </div>
 <div>
-  <form method="POST" action="{% url 'weather_and_time' %}"
+  <form method="POST" action="{% url 'weather_and_time' %}">
+    {% csrf_token %}
     <div class="box">
       <div class="field">
         <label class="label">Date format<span class="question">
@@ -33,6 +66,24 @@
         </div>
         <div class="control mt-2">
           <a href="https://cplusplus.com/reference/ctime/strftime/" target="_blank" class="button is-link">See available formatting</a>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Weather entity<span class="question">
+          <span class="icon question_icon">
+            <i class="mdi mdi-information has-text-info"></i>
+          </span>
+          <div class="question_help_text notification is-info is-light">
+            The entity you wish to use for the weather information on the screensaver.
+          </div>
+        </label>
+        <div class="control">
+            <div class="select">
+              <select name="weather_entity" id="weather_entity">
+                <option value="">- Do not use weather -</option>
+              </select>
+            </div>
         </div>
       </div>
 

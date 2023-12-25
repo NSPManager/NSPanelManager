@@ -661,10 +661,28 @@ def delete_relay_group_binding(request, relay_binding_id):
 
 def weather_and_time(request):
     if request.method == "POST":
+        if "," in request.POST["weather_entity"]:
+            weather_controller, weather_entity = request.POST["weather_entity"].split(",")
+            set_setting_value("weather_controller", weather_controller)
+            set_setting_value("weather_entity", weather_entity)
+        else:
+            set_setting_value("weather_controller", "")
+            set_setting_value("weather_entity", "")
+
+        set_setting_value("date_format", request.POST["date_format"])
+        set_setting_value("clock_us_style", "clock_us_style" in request.POST)
+        set_setting_value("use_farenheit", "clock_us_style" in request.POST)
         return redirect("weather_and_time")
     else:
         data = {}
         data["date_format"] = get_setting_with_default("date_format", "%a %d/%m %Y");
         data["clock_us_style"] = get_setting_with_default("clock_us_style", False)
         data["use_farenheit"] = get_setting_with_default("use_farenheit", False)
+
+        weather_controller = get_setting_with_default("weather_controller", "")
+        if weather_controller:
+            data["weather_entity"] = weather_controller + "," + get_setting_with_default("weather_entity", "")
+        else:
+            data["weather_entity"] = ""
+            
         return render(request, "weather_and_time.html", data)
