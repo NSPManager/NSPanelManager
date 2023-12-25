@@ -1,5 +1,6 @@
 #include "home_assistant_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include <boost/exception/diagnostic_information.hpp>
 #include <exception>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXSocketTLSOptions.h>
@@ -106,7 +107,7 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
       SPDLOG_WARN("Got unhandled message: {}", message);
     }
   } catch (std::exception ex) {
-    SPDLOG_ERROR("Caught std::exception while processing WebSocketMessage. Exception: {}, message: {}", ex.what(), message);
+    SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(ex, true));
   } catch (...) {
     SPDLOG_ERROR("Caught exception while processing WebSocket message: {}", message);
   }

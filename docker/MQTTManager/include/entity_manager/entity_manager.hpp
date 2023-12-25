@@ -11,6 +11,7 @@
 #include <nlohmann/json_fwd.hpp>
 #include <nspanel/nspanel.hpp>
 #include <spdlog/spdlog.h>
+#include <weather/weather.hpp>
 
 class EntityManager {
 public:
@@ -122,6 +123,7 @@ private:
   static inline std::mutex _lights_mutex;
   static inline std::list<NSPanel *> _nspanels;
   static inline std::mutex _nspanels_mutex;
+  static inline MQTTManagerWeather _weather_manager;
 
   static inline boost::signals2::signal<void(MqttManagerEntity *)> _entity_added_signal;
   static inline boost::signals2::signal<void(MqttManagerEntity *)> _entity_removed_signal;

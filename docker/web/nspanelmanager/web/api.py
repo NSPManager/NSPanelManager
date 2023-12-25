@@ -63,6 +63,10 @@ def get_mqtt_manager_config(request):
     return_json["manager_address"] = get_setting_with_default("manager_address", "")
     return_json["manager_port"] = get_setting_with_default("manager_port", "")
     return_json["date_format"] = get_setting_with_default("date_format", "%a %d/%m %Y");
+    return_json["weather_controller"] = get_setting_with_default("weather_controller", "");
+    return_json["weather_entity"] = get_setting_with_default("weather_entity", "");
+    fs = FileSystemStorage()
+    return_json["icon_mapping"] = json.loads(fs.open("icon_mapping.json").read())
 
     return_json["lights"] = {}
     for light in Light.objects.all():

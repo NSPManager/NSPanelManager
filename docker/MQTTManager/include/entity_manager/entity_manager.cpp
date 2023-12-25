@@ -136,6 +136,8 @@ void EntityManager::add_nspanel(nlohmann::json &config) {
 void EntityManager::post_init_entities() {
   SPDLOG_INFO("New config loaded, processing changes.");
 
+  EntityManager::_weather_manager.update_config();
+
   {
     // Process any loaded NSPanels
     SPDLOG_DEBUG("Updating NSPanels.");

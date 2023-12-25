@@ -14,6 +14,7 @@ public:
   void attachMqttTimeCallback();
   static void clockMqttCallback(char *topic, byte *payload, unsigned int length);
   static void dateMqttCallback(char *topic, byte *payload, unsigned int length);
+  static void weatherMqttCallback(char *topic, byte *payload, unsigned int length);
 };
 
 #endif
