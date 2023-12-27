@@ -3,6 +3,8 @@
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "openhab_manager/openhab_manager.hpp"
+#include <cstdlib>
+#include <ctime>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
@@ -38,6 +40,50 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
       info.precipitation_probability = forcast["precipitation_probability"];
       info.temperature_low = forcast["templow"];
       info.temperature_high = forcast["temperature"];
+
+      // Get day of week
+      std::string datetime = forcast["datetime"];
+      std::vector<std::string> datetime_parts;
+      size_t pos = datetime.find("T");
+      std::string date = datetime.substr(0, pos);
+      std::string year = date.substr(0, date.find("-"));
+      date.erase(0, date.find("-") + 1);
+      std::string month = date.substr(0, date.find("-"));
+      date.erase(0, date.find("-") + 1);
+      std::string day_of_month = date;
+
+      std::tm tm = {01, 00, 00, atoi(day_of_month.c_str()), atoi(month.c_str()) - 1, atoi(year.c_str()) - 1900};
+      std::time_t utc_time = std::mktime(&tm);
+      const std::tm *localtime = std::localtime(&utc_time);
+
+      switch (localtime->tm_wday) {
+      case 0:
+        info.day = "Sun";
+        break;
+      case 1:
+        info.day = "Mon";
+        break;
+      case 2:
+        info.day = "Tue";
+        break;
+      case 3:
+        info.day = "Wed";
+        break;
+      case 4:
+        info.day = "Thu";
+        break;
+      case 5:
+        info.day = "Fri";
+        break;
+      case 6:
+        info.day = "Sat";
+        break;
+      default:
+        info.day = std::to_string(localtime->tm_wday);
+        break;
+      }
+      SPDLOG_DEBUG("Day: {}", info.day);
+
       this->_forcast_weather_info.push_back(info);
     }
 
@@ -109,7 +155,7 @@ void MQTTManagerWeather::send_state_update() {
     std::string wind = std::to_string((int)(info.wind_speed + 0.5));
     wind.append(this->_windspeed_unit);
     forcast_data["wind"] = wind;
-    forcast_data["day"] = "-";
+    forcast_data["day"] = info.day;
     forcast.push_back(forcast_data);
   }
   weather_info["forcast"] = forcast;
