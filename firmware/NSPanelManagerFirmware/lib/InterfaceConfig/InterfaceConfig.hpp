@@ -42,6 +42,8 @@ public:
   static inline unsigned long screensaver_activation_timeout = 30000;
   /// @brief Wether or not to show clock on screensaver.
   static inline bool show_screensaver_clock = false;
+  /// @brief Wether or not to a background on screensaver.
+  static inline bool show_screensaver_background = false;
   /// @brief Show clock in US style. AM/PM?
   static inline bool clock_us_style = false;
   /// @brief All the global scenes.

@@ -160,6 +160,7 @@ def edit_nspanel(request, panel_id: int):
         "is_us_panel": get_nspanel_setting_with_default(panel_id, "is_us_panel", "False"),
         "screensaver_activation_timeout": get_nspanel_setting_with_default(panel_id, "screensaver_activation_timeout", ""),
         "show_screensaver_clock": get_nspanel_setting_with_default(panel_id, "show_screensaver_clock", "Global"),
+        "show_screensaver_background": get_nspanel_setting_with_default(panel_id, "show_screensaver_background", "Global"),
         "reverse_relays": get_nspanel_setting_with_default(panel_id, "reverse_relays", "False"),
         "relay1_default_mode": get_nspanel_setting_with_default(panel_id, "relay1_default_mode", "False"),
         "relay2_default_mode": get_nspanel_setting_with_default(panel_id, "relay2_default_mode", "False"),
@@ -245,6 +246,11 @@ def save_panel_settings(request, panel_id: int):
         delete_nspanel_setting(panel_id, "show_screensaver_clock")
     else:
         set_nspanel_setting_value(panel_id, "show_screensaver_clock", request.POST["show_screensaver_clock"])
+
+    if request.POST["show_screensaver_background"] == "Global":
+        delete_nspanel_setting(panel_id, "show_screensaver_background")
+    else:
+        set_nspanel_setting_value(panel_id, "show_screensaver_background", request.POST["show_screensaver_background"])
 
     set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
     set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
@@ -424,6 +430,7 @@ def settings_page(request):
     data["screen_dim_level"] = get_setting_with_default("screen_dim_level", 100)
     data["screensaver_dim_level"] = get_setting_with_default("screensaver_dim_level", 0)
     data["show_screensaver_clock"] = get_setting_with_default("show_screensaver_clock", False)
+    data["show_Screensaver_background"] = get_setting_with_default("show_Screensaver_background", True)
     data["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
     data["max_live_log_messages"] = get_setting_with_default("max_live_log_messages", 10)
     data["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size", 10)

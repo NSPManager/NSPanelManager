@@ -18,6 +18,7 @@ void ScreensaverPage::attachMqttTimeCallback() {
 }
 
 void ScreensaverPage::show() {
+  NSPanel::instance->setComponentVal(SCREENSAVER_BACKGROUND_CHOICE_VARIABLE_NAME, InterfaceConfig::show_screensaver_background ? 1 : 0);
   PageManager::SetCurrentPage(this);
   NSPanel::instance->setDimLevel(InterfaceConfig::screensaver_dim_level);
   NSPanel::instance->goToPage(SCREENSAVE_PAGE_NAME);

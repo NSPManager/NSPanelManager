@@ -353,6 +353,30 @@
         </div>
       </div>
     </div>
+
+    <div class="field">
+      <label class="label">Show background on screensaver<span class="question">
+          <span class="icon question_icon">
+            <i class="mdi mdi-information has-text-info"></i>
+          </span>
+          <div class="question_help_text notification is-info is-light">
+            True: show background on screensaver<br>
+            False: do not show background on screensaver<br>
+            Global: use global setting.
+          </div>
+        </span>
+      </label>
+      <div class="control">
+        <div class="select">
+          <select name="show_screensaver_background" id="show_screensaver_background">
+            <option value="True" {% if settings.show_screensaver_background == "True" %}selected{% endif %}>True</option>
+            <option value="False" {% if settings.show_screensaver_background == "False" %}selected{% endif %}>False</option>
+            <option value="Global" {% if settings.show_screensaver_background == "Global" %}selected{% endif %}>Global</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
     <div class="field">
         <label class="label">Temperature calibration<span class="question">
           <span class="icon question_icon">

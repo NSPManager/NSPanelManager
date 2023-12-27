@@ -240,17 +240,18 @@
               <span class="icon question_icon">
                 <i class="mdi mdi-information has-text-info"></i>
               </span>
-              <div class="question_help_text notification is-info is-light">
-                Brightness level during screensaver. 0-100%.
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
+                <div class="question_help_text notification is-info is-light">
+                  Brightness level during screensaver. 0-100%.
+                </div>
+              </span>
+            </label>
+          </div>
+          <div class="field is-grouped">
             <div class="control">
-                <input class="input" type="number" name="screensaver_dim_level" id="screensaver_dim_level" placeholder="Screensaver brightness" min=0 max=100 value="{{ screensaver_dim_level }}" required>
+              <input class="input" type="number" name="screensaver_dim_level" id="screensaver_dim_level" placeholder="Screensaver brightness" min=0 max=100 value="{{ screensaver_dim_level }}" required>
             </div>
         </div>
+
         <div class="field">
             <label class="label">Screensaver activation timeout(ms)<span class="question">
               <span class="icon question_icon">
@@ -267,6 +268,26 @@
                 <input class="input" type="number" name="screensaver_activation_timeout" id="screensaver_activation_timeout" placeholder="Screensaver activaion timeout" value="{{ screensaver_activation_timeout }}" required>
             </div>
         </div>
+
+        <div class="field">
+            <label class="checkbox">
+                {% if show_screensaver_background == "True" %}
+                    <input type="checkbox" name="show_screensaver_background" checked>
+                {% else %}
+                    <input type="checkbox" name="show_screensaver_background">
+                {% endif %}
+                Show background on screensaver
+                <span class="question">
+                  <span class="icon question_icon">
+                    <i class="mdi mdi-information has-text-info"></i>
+                  </span>
+                  <div class="question_help_text notification is-info is-light">
+                    Wether or not to show a background on the screensaver. For this to show up the screensaver brightness has to be larger than 1.
+                  </div>
+                </span>
+            </label>
+        </div>
+
         <div class="field">
             <label class="checkbox">
                 {% if show_screensaver_clock == "True" %}
