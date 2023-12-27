@@ -131,13 +131,7 @@ void MQTT_Manager::_process_mqtt_message(const std::string topic, const std::str
 
   try {
     SPDLOG_TRACE("Got message: {} --> {}", topic, message);
-    for (MQTT_Observer *observer : MQTT_Manager::_mqtt_observers) {
-      if (observer->mqtt_callback(topic, message)) {
-        break;
-      }
-    }
-    // TODO: Phase out MQTTObserver and use Boost::bind instead
-    // If message is still unhandled, check all static callbacks.
+    // Call each observer/listener until a callback return true, ie. the callback was handled.
     for (auto mqtt_callback : MQTT_Manager::_mqtt_observer_callbacks) {
       if (mqtt_callback(topic, message)) {
         break;
@@ -153,16 +147,8 @@ void MQTT_Manager::_process_mqtt_message(const std::string topic, const std::str
 void MQTT_Manager::_process_mqtt_command(nlohmann::json &data) {
 }
 
-void MQTT_Manager::attach_observer(MQTT_Observer *observer) {
-  MQTT_Manager::_mqtt_observers.push_back(observer);
-}
-
 void MQTT_Manager::attach_observer(std::function<bool(const std::string &topic, const std::string &payload)> callback) {
   MQTT_Manager::_mqtt_observer_callbacks.push_back(callback);
-}
-
-void MQTT_Manager::detach_observer(MQTT_Observer *observer) {
-  MQTT_Manager::_mqtt_observers.remove(observer);
 }
 
 void MQTT_Manager::detach_observer(std::function<bool(const std::string &topic, const std::string &payload)> callback) {

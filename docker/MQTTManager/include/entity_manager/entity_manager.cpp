@@ -503,7 +503,6 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
     }
     panel->send_websocket_update();
   } else {
-    // TODO: Create pending NSPanels
     SPDLOG_INFO("Panel is not registered to manager, adding panel but as 'pending accept' status.");
     nlohmann::json init_data = data;
     NSPanel *new_nspanel = EntityManager::get_nspanel_by_mac(data["mac_origin"]);

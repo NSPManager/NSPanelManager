@@ -13,15 +13,6 @@
 #include <unordered_map>
 #include <vector>
 
-class MQTT_Observer {
-public:
-  /**
-   * Process an MQTT message. Returns true if message was processed or false to continue
-   * through all registered listeners.
-   */
-  virtual bool mqtt_callback(const std::string &topic, const std::string &payload) = 0;
-};
-
 class MQTT_Manager {
 public:
   static void connect();
@@ -51,18 +42,6 @@ public:
   static void detach_callback(std::string topic, CALLBACK_BIND callback) {
     MQTT_Manager::_mqtt_callbacks[topic].disconnect(callback);
   }
-
-  /**
-   * Attach an MQTT_Observer to the list of observers for new MQTT messages.
-   * @param observer: Pointer to the observer.
-   */
-  static void attach_observer(MQTT_Observer *observer);
-
-  /**
-   * Detach an MQTT_Observer from the list of observers for new MQTT messages.
-   * @param observer: Pointer to the observer.
-   */
-  static void detach_observer(MQTT_Observer *observer);
 
   /**
    * Attach a function callback to the list of observers for new MQTT messages.
@@ -101,7 +80,6 @@ private:
   static inline mqtt::client *_mqtt_client = nullptr;
   static inline std::mutex _mqtt_client_mutex;
   static inline std::list<mqtt::message_ptr> _mqtt_messages_buffer;
-  static inline std::list<MQTT_Observer *> _mqtt_observers;
   static inline std::list<std::function<bool(const std::string &topic, const std::string &payload)>> _mqtt_observer_callbacks; // Raw function callbacks
   static const std::vector<std::string> _get_subscribe_topics();
   static const std::vector<int> _get_subscribe_topics_qos();

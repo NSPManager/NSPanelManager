@@ -22,7 +22,11 @@ void HomeAssistantManager::connect() {
   }
 
   std::string home_assistant_websocket_url = MqttManagerConfig::home_assistant_address;
-  home_assistant_websocket_url.append("/api/websocket"); // TODO: Implement /core/websocket if running as HA addon
+  if (MqttManagerConfig::is_home_assistant_addon) {
+    home_assistant_websocket_url.append("/core/websocket");
+  } else {
+    home_assistant_websocket_url.append("/api/websocket");
+  }
   if (home_assistant_websocket_url.find("https://") != std::string::npos) {
     SPDLOG_DEBUG("Replacing https with wss");
     // Replace https with wss

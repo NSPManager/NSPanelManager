@@ -35,6 +35,7 @@ public:
   static inline uint color_temp_min;
   static inline uint color_temp_max;
 
+  static inline bool is_home_assistant_addon;
   static inline std::string date_format;
   static inline std::string weather_controller;
   static inline std::string weather_entity;

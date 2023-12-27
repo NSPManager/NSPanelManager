@@ -42,6 +42,8 @@ def get_file_md5sum(filename):
 
 
 def get_mqtt_manager_config(request):
+    environment = environ.Env()
+
     return_json = {}
     return_json["color_temp_min"] = int(
         get_setting_with_default("color_temp_min", 2000))
@@ -56,8 +58,8 @@ def get_mqtt_manager_config(request):
     return_json["openhab_color_temp_channel_name"] = get_setting_with_default(
         "openhab_color_temp_channel_name", "")
     return_json["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name", "")
-    return_json["clock_us_style"] = get_setting_with_default("clock_us_style", False)
-    return_json["use_farenheit"] = get_setting_with_default("use_farenheit", False)
+    return_json["clock_us_style"] = get_setting_with_default("clock_us_style", False) == "True"
+    return_json["use_farenheit"] = get_setting_with_default("use_farenheit", False) == "True"
     return_json["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
     return_json["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size", "10")
     return_json["manager_address"] = get_setting_with_default("manager_address", "")
@@ -65,6 +67,10 @@ def get_mqtt_manager_config(request):
     return_json["date_format"] = get_setting_with_default("date_format", "%a %d/%m %Y");
     return_json["weather_controller"] = get_setting_with_default("weather_controller", "");
     return_json["weather_entity"] = get_setting_with_default("weather_entity", "");
+    if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
+        return_json["is_home_assistant_addon"] = True
+    else:
+        return_json["is_home_assistant_addon"] = False
     fs = FileSystemStorage()
     return_json["icon_mapping"] = json.loads(fs.open("icon_mapping.json").read())
 
@@ -96,7 +102,7 @@ def get_mqtt_manager_config(request):
             "id": panel.id,
             "mac": panel.mac_address,
             "name": panel.friendly_name,
-            "is_us_panel": get_nspanel_setting_with_default(panel.id, "is_us_panel", "False"),
+            "is_us_panel": get_nspanel_setting_with_default(panel.id, "is_us_panel", "False") == "True",
             "address": panel.ip_address,
             "relay1_is_light": panel.register_relay1_as_light,
             "relay2_is_light": panel.register_relay2_as_light
@@ -360,8 +366,8 @@ def get_nspanel_config(request):
         base["screensaver_dim_level"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level", 0))
         base["screensaver_activation_timeout"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout", 30000))
         base["show_screensaver_clock"] = get_nspanel_setting_with_default(nspanel.id, "show_screensaver_clock", get_setting_with_default("show_screensaver_clock", False))
-        base["clock_us_style"] = get_setting_with_default("clock_us_style", False)
-        base["use_farenheit"] = get_setting_with_default("use_farenheit", False)
+        base["clock_us_style"] = get_setting_with_default("clock_us_style", False) == "True"
+        base["use_farenheit"] = get_setting_with_default("use_farenheit", False) == "True"
         base["lock_to_default_room"] = get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False")
         base["reverse_relays"] = get_nspanel_setting_with_default(nspanel.id, "reverse_relays", False)
         base["relay1_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", False)

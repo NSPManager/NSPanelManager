@@ -464,8 +464,6 @@ def save_settings(request):
     set_setting_value(name="screen_dim_level", value=request.POST["screen_dim_level"])
     set_setting_value(name="screensaver_dim_level", value=request.POST["screensaver_dim_level"])
     set_setting_value(name="show_screensaver_clock", value=("show_screensaver_clock" in request.POST))
-    set_setting_value(name="clock_us_style", value=("clock_us_style" in request.POST))
-    set_setting_value(name="use_farenheit", value=("use_farenheit" in request.POST))
     set_setting_value(name="turn_on_behavior", value=request.POST["turn_on_behavior"])
     set_setting_value(name="max_live_log_messages", value=request.POST["max_live_log_messages"])
     set_setting_value(name="max_log_buffer_size", value=request.POST["max_log_buffer_size"])

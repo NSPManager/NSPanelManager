@@ -123,8 +123,9 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   MqttManagerConfig::weather_controller = std::string(data["weather_controller"]);
   MqttManagerConfig::weather_entity = std::string(data["weather_entity"]);
   MqttManagerConfig::icon_mapping = data["icon_mapping"];
-  MqttManagerConfig::clock_us_style = std::string(data["clock_us_style"]).compare("True") == 0;
-  MqttManagerConfig::use_farenheit = std::string(data["use_farenheit"]).compare("True") == 0;
+  MqttManagerConfig::clock_us_style = data["clock_us_style"];
+  MqttManagerConfig::use_farenheit = data["use_farenheit"];
+  MqttManagerConfig::is_home_assistant_addon = data["is_home_assistant_addon"];
   MqttManagerConfig::max_log_buffer_size = atoi(std::string(data["max_log_buffer_size"]).c_str());
 
   if (!std::string(data["manager_port"]).empty()) {

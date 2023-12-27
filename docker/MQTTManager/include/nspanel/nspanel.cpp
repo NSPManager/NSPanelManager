@@ -118,11 +118,13 @@ void NSPanel::update_config(nlohmann::json &init_data) {
   }
   this->_ip_address = init_data["address"];
   if (init_data.contains(("is_us_panel"))) {
-    this->_is_us_panel = std::string(init_data["is_us_panel"]).compare("True") == 0;
+    this->_is_us_panel = init_data["is_us_panel"];
   } else {
     this->_is_us_panel = false;
   }
-  this->_state = init_data.contains("id") ? MQTT_MANAGER_NSPANEL_STATE::UNKNOWN : MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
+  if (!init_data.contains("id")) {
+    this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
+  }
   this->_has_registered_to_manager = init_data.contains("id");
   this->_is_register_accepted = init_data.contains("id");
   this->_rssi = -255;
@@ -130,8 +132,8 @@ void NSPanel::update_config(nlohmann::json &init_data) {
   this->_nspanel_warnings = "";
   this->_temperature = -255;
   this->_update_progress = 0;
-  this->_relay1_is_mqtt_light = false; // TODO: Read from config
-  this->_relay2_is_mqtt_light = false; // TODO: Read from config
+  this->_relay1_is_mqtt_light = init_data["relay1_is_light"];
+  this->_relay2_is_mqtt_light = init_data["relay2_is_light"];
   if (init_data.contains("id")) {
     SPDLOG_DEBUG("Loaded NSPanel {}::{}.", this->_id, this->_name);
   } else {
