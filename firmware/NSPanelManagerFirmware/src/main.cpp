@@ -188,7 +188,7 @@ void taskManageWifiAndMqtt(void *param) {
 
           std::string display_temp = std::to_string((int)round(temperature));
           display_temp.append("°");
-          NSPanel::instance->setComponentText(SCREENSAVE_PAGE_NAME "." SCREENSAVER_CURRENT_ROOMTEMP_TEXT_NAME, display_temp.c_str());
+          PageManager::GetScreensaverPage()->updateRoomTemp(display_temp);
 
           lastStatusReport = millis();
         }

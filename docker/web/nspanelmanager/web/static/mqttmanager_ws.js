@@ -75,8 +75,15 @@ class MQTTManager_WS {
     };
 
     this.websocket.onmessage = (event) => {
-      var json_message = JSON.parse(event.data);
-      this.process_message(json_message);
+      try {
+        if(event.data.length > 0) {
+          var json_message = JSON.parse(event.data);
+          this.process_message(json_message);
+        }
+      }catch (error) {
+        console.log("Received error while processing message " + event.data);
+        console.log(error);
+      }
     };
 
     this.websocket.onclose = (event) => {

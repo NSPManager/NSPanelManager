@@ -621,7 +621,7 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
         cmd["command"] = "tft_update";
         nspanel->send_command(cmd);
       } else {
-        SPDLOG_ERROR("Received command to TFT update NSPanel with ID {} but no panel with that ID is loaded.");
+        SPDLOG_ERROR("Received command to TFT update NSPanel with ID {} but no panel with that ID is loaded.", nspanel_id);
       }
     }
     return true;

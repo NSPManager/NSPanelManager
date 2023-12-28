@@ -16,7 +16,7 @@ function get_all_online_panel_macs() {
 
 function startNSPanelOtaUpdateAll() {
   get_all_online_panel_macs().forEach((mac) => {
-    startNSPanelOtaUpdate(mac);
+    startNSPanelOtaUpdate($("#nspanel_mac_container_" + mac));
   });
 }
 
@@ -68,7 +68,7 @@ function send_nspanel_delete_request(dom) {
 
 function startNSPanelTftUpdateAll() {
   get_all_online_panel_macs().forEach((mac) => {
-    startNSPanelTftUpdate(mac);
+    startNSPanelTftUpdate($("#nspanel_mac_container_" + mac));
   });
 }
 
@@ -85,7 +85,7 @@ function startNSPanelTftUpdate(dom) {
 
 function rebootNSPanelAll() {
   get_all_online_panel_macs().forEach((mac) => {
-    rebootNSPanel(mac);
+    rebootNSPanel($("#nspanel_mac_container_" + mac));
   });
 }
 
