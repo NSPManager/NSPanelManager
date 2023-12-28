@@ -11,11 +11,6 @@
 
 // SCREENSAVER PAGE
 #define SCREENSAVE_PAGE_NAME "screensaver"
-<<<<<<< HEAD
-#define SCREENSAVE_PAGE_TEXT_NAME ".curTime"  //this row should be removed and curTime below should be used instead
-=======
-#define SCREENSAVE_MINIMAL_PAGE_NAME "screensaver2"
->>>>>>> d1be7c2c6e2fecebd428628f455c0de689a87bcc
 
 #define SCREENSAVER_FIRSTVIEW_VARIABLE_NAME "screensaver.firstview" // Variable used to check if Screensaver page is loaded for the first time. Set to 1 when Nextion Screen starts. Variable is used to run code in Nextion screen to hide/show background on screensaver depending on user choice in NSPanel Manager (screensaver.ssBackground). After sceenpage is loaded for the first time this variable is set to 0 so the code just have to be run once.
 #define SCREENSAVER_BACKGROUND_CHOICE_VARIABLE_NAME "ssBackground"  // Variable represents the user choice Background/No Background for screensaver page that is done in NSPanelManager. 1=Backgroud, 0=No background. Background picture change for all components is done when screensaver page loads for the first time.
@@ -112,7 +107,7 @@
 
 
 //SCREENSAVER2 PAGE //Used for users that only wants time on screensaver or a completely black page
-#define SCREENSAVE2_PAGE_NAME "screensaver2"
+#define SCREENSAVE_MINIMAL_PAGE_NAME "screensaver2"
 
 #define SCREENSAVER2_FIRSTVIEW_VARIABLE_NAME "screensaver2.firstview" //Variable used to check if Screensaver page is loaded for the first time. Set to 1 when Nextion Screen starts. Variable is used to run code in Nextion screen to hide/show background on screensaver depending on user choice in NSPanel Manager (screensaver.ssBackground). After sceenpage is loaded for the first time this variable is set to 0 so the code just have to be run once. 
 #define SCREENSAVER2_BACKGROUND_CHOICE_VARIABLE_NAME "screensaver2.ssBackground" //Variable represents the user choice Background/No Background for screensaver page that is done in NSPanelManager. 1=Backgroud, 0=No background. Background picture change for all components is done when screensaver page loads for the first time.
