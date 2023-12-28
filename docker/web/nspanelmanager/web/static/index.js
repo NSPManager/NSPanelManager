@@ -352,6 +352,8 @@ $(document).ready(function () {
     console.log("Connected to MQTTManager via websocket.");
     // Remove any connection error notification
     $("#failed_to_connect_error").remove();
+    $("#waiting_for_mqtt_manager_connection_error").remove();
+    $("#loading-panels-spinner").css("opacity", "0%");
 
     ws.send_command("get_nspanels_status", {}, (response) => {
       for (const [id, nspanel] of Object.entries(response.nspanels)) {
@@ -369,6 +371,15 @@ $(document).ready(function () {
   });
   console.log("Starting connect to WebSocket.");
   ws.connect();
+
+  setTimeout(() => {
+    if(!ws.is_connected()) {
+      $("#loading-panels-spinner").css("opacity", "100%");
+      $("#notification_holder").append(
+        '<div class="notification is-warning" id="waiting_for_mqtt_manager_connection_error">Trying to connect to MQTTManager...</div>'
+      );
+    }
+  }, 500);
 
   $("#firmware_upload_file_input").change(function () {
     var fileName = $(this).val().replace("C:\\fakepath\\", "");

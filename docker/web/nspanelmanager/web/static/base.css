@@ -21,3 +21,21 @@
 .question_help_text {
   display: none; /* Default is hidden */
 }
+
+.hidden {
+  display: none;
+}
+
+.ani-spin {
+  animation: ani-spin 1.2s linear infinite; 
+}
+
+@keyframes ani-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}

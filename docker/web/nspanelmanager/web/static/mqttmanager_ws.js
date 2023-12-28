@@ -5,6 +5,7 @@ class MQTTManager_WS {
   on_connect_function = null;
   on_close_function = null;
   websocket = null;
+  connected = false;
 
   process_message(message) {
     if ("cmd_id" in message && message["cmd_id"] in this.commands_sent_queue) {
@@ -17,6 +18,10 @@ class MQTTManager_WS {
         "ERROR! Got message but has not callback to handle said message."
       );
     }
+  }
+
+  is_connected() {
+    return this.connected;
   }
 
   send_command(command, args, handler) {
@@ -63,6 +68,7 @@ class MQTTManager_WS {
     this.websocket = new WebSocket(websocket_address);
 
     this.websocket.onopen = (event) => {
+      this.connected = true;
       if (this.on_connect_function != null) {
         this.on_connect_function();
       }
@@ -74,6 +80,7 @@ class MQTTManager_WS {
     };
 
     this.websocket.onclose = (event) => {
+      this.connected = false;
       if (event.code != 1001) {
         // Ignore when browser is leaving page.
         if (this.on_close_function != null) {

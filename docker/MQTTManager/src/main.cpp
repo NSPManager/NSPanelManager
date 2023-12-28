@@ -67,13 +67,11 @@ void publish_time_and_date() {
     }
 
     if (time_str.compare(last_time_published) != 0) {
-      SPDLOG_DEBUG("Publising time {}.", time_str);
       MQTT_Manager::publish("nspanel/status/time", time_buffer, true);
       last_time_published = time_buffer;
     }
 
     if (date_str.compare(last_date_published) != 0) {
-      SPDLOG_DEBUG("Publising date {}.", date_str);
       MQTT_Manager::publish("nspanel/status/date", date_buffer, true);
       last_date_published = date_buffer;
     }
