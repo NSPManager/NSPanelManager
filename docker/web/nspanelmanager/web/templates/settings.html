@@ -287,7 +287,8 @@
               <select name="screensaver_mode">
                 <option value="with_background" {% if screensaver_mode == "with_background" %}selected{% endif %}>Show with background (clock, date and weather)</option>
                 <option value="without_background" {% if screensaver_mode == "without_background" %}selected{% endif %}>Show without background (clock, date and weather)</option>
-                <option value="only_clock_and_date" {% if screensaver_mode == "only_clock_and_date" %}selected{% endif %}>Show without background (only clock and date)</option>
+                <option value="datetime_with_background" {% if screensaver_mode == "datetime_with_background" %}selected{% endif %}>Show with background (no weather)</option>
+                <option value="datetime_without_background" {% if screensaver_mode == "datetime_without_background" %}selected{% endif %}>Show without background (no weather)</option>
                 <option value="no_screensaver" {% if screensaver_mode == "no_screensaver" %}selected{% endif %}>No screensaver (turn off screen)</option>
               </select>
             </div>

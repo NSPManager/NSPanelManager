@@ -15,6 +15,14 @@ public:
   static void clockMqttCallback(char *topic, byte *payload, unsigned int length);
   static void dateMqttCallback(char *topic, byte *payload, unsigned int length);
   static void weatherMqttCallback(char *topic, byte *payload, unsigned int length);
+  static void updateRoomTemp(std::string temp_string);
+
+private:
+  std::string _screensaver_page_name;
+  std::string _screensaver_time_name;
+  std::string _screensaver_date_name;
+  std::string _screensaver_temperature_name;
+  bool _show_weather;
 };
 
 #endif

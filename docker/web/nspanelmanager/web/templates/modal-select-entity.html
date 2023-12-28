@@ -1,0 +1,50 @@
+<div class="modal" id="modal-select-entity">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <nav class="panel" style="background-color: white;" id="add_new_entity_modal_panel">
+      <p class="panel-heading">
+        Choose an entity
+      </p>
+      <div class="panel-block">
+        <p class="control has-icons-left">
+          <input class="input" type="text" placeholder="Search" id="add_new_entity_search">
+          <span class="icon is-left">
+            <i class="fas fa-search" aria-hidden="true"></i>
+          </span>
+        </p>
+      </div>
+      <div id="add_new_entity_errors">
+      </div>
+      <p class="panel-tabs" id="add_new_entity_tabs">
+        <a class="is-active" id="filter_for_all" onclick="add_new_entities_filter_for_type('all');">All</a>
+        <a id="filter_for_home_assistant" onclick="add_new_entities_filter_for_type('home_assistant');">Home
+          Assistant</a>
+        <a id="filter_for_openhab" onclick="add_new_entities_filter_for_type('openhab');">OpenHAB</a>
+        <a id="filter_for_manual" onclick="add_new_entities_filter_for_type('manual');">Manual</a>
+      </p>
+      <div id="add_new_entity_options">
+      </div>
+      <div id="add_new_entity_loader">
+        <center>{% include 'loader.html' %}</center>
+      </div>
+    </nav>
+  </div>
+</div>
+
+
+<div class="modal" id="modal-select-item">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title" id="modal-select-item-heading">Modal title</p>
+      <button class="delete" aria-label="close"></button>
+    </header>
+    <section class="modal-card-body" id="select_item_options">
+      <!-- Content ... -->
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-success" id="select_item_ok_button">OK</button>
+      <button class="button" onclick="$('.modal').removeClass('is-active');">Cancel</button>
+    </footer>
+  </div>
+</div>

@@ -350,7 +350,8 @@
           <select name="screensaver_mode">
             <option value="with_background" {% if settings.screensaver_mode == "with_background" %}selected{% endif %}>Show with background (clock, date and weather)</option>
             <option value="without_background" {% if settings.screensaver_mode == "without_background" %}selected{% endif %}>Show without background (clock, date and weather)</option>
-            <option value="only_clock_and_date" {% if settings.screensaver_mode == "only_clock_and_date" %}selected{% endif %}>Show without background (only clock and date)</option>
+            <option value="datetime_with_background" {% if settings.screensaver_mode == "datetime_with_background" %}selected{% endif %}>Show with background (no weather)</option>
+            <option value="datetime_without_background" {% if settings.screensaver_mode == "datetime_without_background" %}selected{% endif %}>Show without background (no weather)</option>
             <option value="no_screensaver" {% if settings.screensaver_mode == "no_screensaver" %}selected{% endif %}>No screensaver (turn off screen)</option>
             <option value="global" {% if settings.screensaver_mode == "global" %}selected{% endif %}>Global (use global setting)</option>
           </select>

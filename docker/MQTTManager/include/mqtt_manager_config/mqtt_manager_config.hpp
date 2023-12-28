@@ -38,7 +38,9 @@ public:
   static inline bool is_home_assistant_addon;
   static inline std::string date_format;
   static inline std::string weather_controller;
-  static inline std::string weather_entity;
+  static inline std::string home_assistant_weather_entity;
+  static inline std::string openhab_current_weather_item;
+  static inline std::string openhab_forcast_weather_item;
   static inline nlohmann::json icon_mapping;
   static inline bool clock_us_style;
   static inline bool use_farenheit;

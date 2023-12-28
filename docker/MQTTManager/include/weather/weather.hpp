@@ -26,8 +26,6 @@ private:
   };
 
   std::vector<weather_info> _forcast_weather_info;
-  std::string _controller;
-  std::string _entity;
   std::string _windspeed_unit;
   std::string _precipitation_unit;
   std::string _current_condition;

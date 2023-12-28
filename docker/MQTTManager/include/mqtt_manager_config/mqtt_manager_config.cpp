@@ -121,7 +121,9 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   MqttManagerConfig::color_temp_max = data["color_temp_max"];
   MqttManagerConfig::date_format = std::string(data["date_format"]);
   MqttManagerConfig::weather_controller = std::string(data["weather_controller"]);
-  MqttManagerConfig::weather_entity = std::string(data["weather_entity"]);
+  MqttManagerConfig::home_assistant_weather_entity = std::string(data["home_assistant_weather_entity"]);
+  MqttManagerConfig::openhab_current_weather_item = std::string(data["openhab_current_weather_item"]);
+  MqttManagerConfig::openhab_forcast_weather_item = std::string(data["openhab_forcast_weather_item"]);
   MqttManagerConfig::icon_mapping = data["icon_mapping"];
   MqttManagerConfig::clock_us_style = data["clock_us_style"];
   MqttManagerConfig::use_farenheit = data["use_farenheit"];
