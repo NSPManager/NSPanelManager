@@ -39,3 +39,7 @@
     transform: rotate(360deg);
   }
 }
+
+.modal-card > .panel {
+  overflow: scroll;
+}

@@ -11,22 +11,19 @@
 #include <string>
 
 void MQTTManagerWeather::update_config() {
-  this->_controller = MqttManagerConfig::weather_controller;
-  this->_entity = MqttManagerConfig::weather_entity;
-
-  if (this->_controller.compare("homeassistant") == 0) {
+  if (MqttManagerConfig::weather_controller.compare("homeassistant") == 0) {
     HomeAssistantManager::attach_event_observer(this);
     OpenhabManager::detach_event_observer(this);
-  } else if (this->_controller.compare("openhab") == 0) {
+  } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
     OpenhabManager::attach_event_observer(this);
     HomeAssistantManager::detach_event_observer(this);
   } else {
-    SPDLOG_ERROR("Unsupported weather controller '{}'.", this->_controller);
+    SPDLOG_ERROR("Unsupported weather controller '{}'.", MqttManagerConfig::weather_controller);
   }
 }
 
 bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_data) {
-  if (std::string(event_data["event"]["data"]["entity_id"]).compare(this->_entity) == 0) {
+  if (std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::home_assistant_weather_entity) == 0) {
     nlohmann::json new_state = event_data["event"]["data"]["new_state"];
 
     this->_forcast_weather_info.clear();
@@ -108,23 +105,23 @@ bool MQTTManagerWeather::openhab_event_callback(nlohmann::json &event_data) {
 }
 
 std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition) {
-  if (this->_controller.compare("homeassistant") == 0) {
+  if (MqttManagerConfig::weather_controller.compare("homeassistant") == 0) {
     for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["home_assistant_weather_mappings"]) {
       if (std::string(mapping["condition"]).compare(condition) == 0) {
         return std::string(mapping["character-mapping"]);
       }
     }
-  } else if (this->_controller.compare("openhab") == 0) {
+  } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
     for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["openweathermap_weather_mappings"]) {
       if (std::string(mapping["id"]).compare(condition) == 0) {
         return std::string(mapping["character-mapping"]);
       }
     }
   } else {
-    SPDLOG_ERROR("Unknown controller {}.", this->_controller);
+    SPDLOG_ERROR("Unknown controller {}.", MqttManagerConfig::weather_controller);
   }
 
-  SPDLOG_ERROR("Couldn't find a mapping for condition {} using controller {}.", condition, this->_controller);
+  SPDLOG_ERROR("Couldn't find a mapping for condition {} using controller {}.", condition, MqttManagerConfig::weather_controller);
   return "";
 }
 

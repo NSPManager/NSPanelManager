@@ -659,27 +659,40 @@ def delete_relay_group_binding(request, relay_binding_id):
 
 def weather_and_time(request):
     if request.method == "POST":
-        if "," in request.POST["weather_entity"]:
-            weather_controller, weather_entity = request.POST["weather_entity"].split(",")
-            set_setting_value("weather_controller", weather_controller)
-            set_setting_value("weather_entity", weather_entity)
+        weather_type = request.POST["weather_type"]
+        set_setting_value("weather_controller", weather_type);
+        if weather_type == "home_assistant":
+            set_setting_value("weather_home_assistant_weather_entity", request.POST["weather_home_assistant_entity"]);
+            set_setting_value("weather_openhab_current_weather_item", "");
+            set_setting_value("weather_openhab_forcast_weather_item", "");
+        elif weather_type == "openhab":
+            set_setting_value("weather_home_assistant_weather_entity", "");
+            set_setting_value("weather_openhab_current_weather_item", request.POST["weather_openhab_current_weather_item"])
+            set_setting_value("weather_openhab_forcast_weather_item", request.POST["weather_openhab_forcast_weather_item"])
         else:
-            set_setting_value("weather_controller", "")
-            set_setting_value("weather_entity", "")
+            print(F"ERROR! Unknown weather controller: {weather_type}")
+
 
         set_setting_value("date_format", request.POST["date_format"])
         set_setting_value("clock_us_style", "clock_us_style" in request.POST)
         set_setting_value("use_farenheit", "clock_us_style" in request.POST)
+        send_mqttmanager_reload_command()
         return redirect("weather_and_time")
     else:
         data = {}
         data["date_format"] = get_setting_with_default("date_format", "%a %d/%m %Y");
         data["clock_us_style"] = get_setting_with_default("clock_us_style", False)
         data["use_farenheit"] = get_setting_with_default("use_farenheit", False)
+        data["weather_type"] = get_setting_with_default("weather_controller", "")
+        data["weather_home_assistant_weather_entity"] = get_setting_with_default("weather_home_assistant_weather_entity", "")
+        data["weather_openhab_current_weather_item"] = get_setting_with_default("weather_openhab_current_weather_item", "")
+        data["weather_openhab_forcast_weather_item"] = get_setting_with_default("weather_openhab_forcast_weather_item", "")
 
         weather_controller = get_setting_with_default("weather_controller", "")
-        if weather_controller:
-            data["weather_entity"] = weather_controller + "," + get_setting_with_default("weather_entity", "")
+        if weather_controller == "home_assistant":
+            data["weather_entity"] = get_setting_with_default("weather_home_assistant_weather_entity", "")
+        elif weather_controller == "openhab":
+            data["weather_entity"] = get_setting_with_default("weather_openhab_current_weather_item", "") + ", " + get_setting_with_default("weather_openhab_forcast_weather_item", "")
         else:
             data["weather_entity"] = ""
             
