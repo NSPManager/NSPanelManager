@@ -11,7 +11,7 @@
 
 //SCREENSAVER PAGE
 #define SCREENSAVE_PAGE_NAME "screensaver"
-#define SCREENSAVE_PAGE_TEXT_NAME SCREENSAVE_PAGE_NAME ".curTime"  //this row should be removed and curTime below should be used instead
+#define SCREENSAVE_PAGE_TEXT_NAME ".curTime"  //this row should be removed and curTime below should be used instead
 
 #define SCREENSAVER_FIRSTVIEW_VARIABLE_NAME "screensaver.firstview" //Variable used to check if Screensaver page is loaded for the first time. Set to 1 when Nextion Screen starts. Variable is used to run code in Nextion screen to hide/show background on screensaver depending on user choice in NSPanel Manager (screensaver.ssBackground). After sceenpage is loaded for the first time this variable is set to 0 so the code just have to be run once. 
 #define SCREENSAVER_BACKGROUND_CHOICE_VARIABLE_NAME "screensaver.ssBackground" //Variable represents the user choice Background/No Background for screensaver page that is done in NSPanelManager. 1=Backgroud, 0=No background. Background picture change for all components is done when screensaver page loads for the first time.
@@ -24,8 +24,10 @@
 #define SCREENSAVER_CURRENT_WIND_TEXT_NAME "curWind"
 
 #define SCREENSAVER_CURRENT_ROOMTEMP_TEXT_NAME "curRoomtemp"
+#define SCREENSAVER_CURRENT_ROOMTEMP_ICON_TEXT_NAME "t7"
 #define SCREENSAVER_CURRENT_DAY_TEXT_NAME "curDay"
 #define SCREENSAVER_CURRENT_TIME_TEXT_NAME "curTime"
+#define SCREENSAVER_CURRENT_AMPM_TEXT_NAME "curAMPM"
 #define SCREENSAVER_CURRENT_SUNRISE_TEXT_NAME "curSunrise"
 #define SCREENSAVER_CURRENT_SUNSET_TEXT_NAME "curSunset"
 
@@ -67,8 +69,10 @@
 #define SCREENSAVER_CURRENT_WIND_TEXT_ID 34
 
 #define SCREENSAVER_CURRENT_ROOMTEMP_TEXT_ID 46
+#define SCREENSAVER_CURRENT_ROOMTEMP_ICON_TEXT_ID 6
 #define SCREENSAVER_CURRENT_DAY_TEXT_ID 44
 #define SCREENSAVER_CURRENT_TIME_TEXT_ID 35
+#define SCREENSAVER_CURRENT_AMPM_TEXT_ID 36
 #define SCREENSAVER_CURRENT_SUNRISE_TEXT_ID 38
 #define SCREENSAVER_CURRENT_SUNSET_TEXT_ID 40
 
@@ -101,6 +105,30 @@
 #define SCREENSAVER_FORECAST_WIND3_TEXT_ID 23
 #define SCREENSAVER_FORECAST_WIND4_TEXT_ID 24
 #define SCREENSAVER_FORECAST_WIND5_TEXT_ID 25
+
+
+//SCREENSAVER2 PAGE //Used for users that only wants time on screensaver or a completely black page
+#define SCREENSAVE2_PAGE_NAME "screensaver2"
+
+#define SCREENSAVER2_FIRSTVIEW_VARIABLE_NAME "screensaver2.firstview" //Variable used to check if Screensaver page is loaded for the first time. Set to 1 when Nextion Screen starts. Variable is used to run code in Nextion screen to hide/show background on screensaver depending on user choice in NSPanel Manager (screensaver.ssBackground). After sceenpage is loaded for the first time this variable is set to 0 so the code just have to be run once. 
+#define SCREENSAVER2_BACKGROUND_CHOICE_VARIABLE_NAME "screensaver2.ssBackground" //Variable represents the user choice Background/No Background for screensaver page that is done in NSPanelManager. 1=Backgroud, 0=No background. Background picture change for all components is done when screensaver page loads for the first time.
+
+//SCREENSAVER2 TEXT COMPONENT NAMES
+
+#define SCREENSAVER2_CURRENT_ROOMTEMP_TEXT_NAME "curRoomtemp"
+#define SCREENSAVER2_CURRENT_ROOMTEMP_ICON_TEXT_NAME "t7"
+#define SCREENSAVER2_CURRENT_DAY_TEXT_NAME "curDay"
+#define SCREENSAVER2_CURRENT_TIME_TEXT_NAME "curTime"
+#define SCREENSAVER2_CURRENT_AMPM_TEXT_NAME "curAMPM"
+
+//SCREENSAVER TEXT COMPONENT ID's
+
+#define SCREENSAVER2_CURRENT_ROOMTEMP_TEXT_ID 7
+#define SCREENSAVER2_CURRENT_ROOMTEMP_ICON_TEXT_ID 6
+#define SCREENSAVER2_CURRENT_DAY_TEXT_ID 5
+#define SCREENSAVER2_CURRENT_TIME_TEXT_ID 1
+#define SCREENSAVER2_CURRENT_AMPM_TEXT_ID 9
+
 
 #define HOME_PIC_HIGHLIGHT_CEILING_NAME "p_lockceiling" // Should not have "home." in front as visibility command for Nextion is not as other commands
 #define HOME_PIC_HIGHLIGHT_TABLE_NAME "p_locktable"     // Should not have "home." in front as visibility command for Nextion is not as other commands
