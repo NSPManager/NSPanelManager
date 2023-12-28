@@ -241,7 +241,7 @@
                 <i class="mdi mdi-information has-text-info"></i>
               </span>
                 <div class="question_help_text notification is-info is-light">
-                  Brightness level during screensaver. 0-100%.
+                  Brightness level during screensaver. 0-100%. This will always be 0% if screensaver mode is set to show no screensaver.
                 </div>
               </span>
             </label>
@@ -270,41 +270,28 @@
         </div>
 
         <div class="field">
-            <label class="checkbox">
-                {% if show_screensaver_background == "True" %}
-                    <input type="checkbox" name="show_screensaver_background" checked>
-                {% else %}
-                    <input type="checkbox" name="show_screensaver_background">
-                {% endif %}
-                Show background on screensaver
-                <span class="question">
-                  <span class="icon question_icon">
-                    <i class="mdi mdi-information has-text-info"></i>
-                  </span>
-                  <div class="question_help_text notification is-info is-light">
-                    Wether or not to show a background on the screensaver. For this to show up the screensaver brightness has to be larger than 1.
-                  </div>
-                </span>
-            </label>
+            <label class="label">Screensaver mode<span class="question">
+              <span class="icon question_icon">
+                <i class="mdi mdi-information has-text-info"></i>
+              </span>
+              <div class="question_help_text notification is-info is-light">
+                Select the way the screensaver is shown.
+              </div>
+            </span>
+          </label>
         </div>
 
         <div class="field">
-            <label class="checkbox">
-                {% if show_screensaver_clock == "True" %}
-                    <input type="checkbox" name="show_screensaver_clock" checked>
-                {% else %}
-                    <input type="checkbox" name="show_screensaver_clock">
-                {% endif %}
-                Show clock on screensaver
-                <span class="question">
-                  <span class="icon question_icon">
-                    <i class="mdi mdi-information has-text-info"></i>
-                  </span>
-                  <div class="question_help_text notification is-info is-light">
-                    Wether or not to show a clock on the screensaver. For this to show up the screensaver brightness has to be larger than 0.
-                  </div>
-                </span>
-            </label>
+          <div class="control">
+            <div class="select">
+              <select name="screensaver_mode">
+                <option value="with_background" {% if screensaver_mode == "with_background" %}selected{% endif %}>Show with background (clock, date and weather)</option>
+                <option value="without_background" {% if screensaver_mode == "without_background" %}selected{% endif %}>Show without background (clock, date and weather)</option>
+                <option value="only_clock_and_date" {% if screensaver_mode == "only_clock_and_date" %}selected{% endif %}>Show without background (only clock and date)</option>
+                <option value="no_screensaver" {% if screensaver_mode == "no_screensaver" %}selected{% endif %}>No screensaver (turn off screen)</option>
+              </select>
+            </div>
+          </div>
         </div>
     </div>
     <div class="box">

@@ -11,7 +11,7 @@ public:
   void unshow();
   void processTouchEvent(uint8_t page, uint8_t component, bool pressed);
 
-  void attachMqttTimeCallback();
+  void attachMqttCallback();
   static void clockMqttCallback(char *topic, byte *payload, unsigned int length);
   static void dateMqttCallback(char *topic, byte *payload, unsigned int length);
   static void weatherMqttCallback(char *topic, byte *payload, unsigned int length);

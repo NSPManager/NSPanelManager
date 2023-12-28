@@ -11,16 +11,24 @@
 #include <ScreensaverPage.hpp>
 #include <TftDefines.h>
 
-void ScreensaverPage::attachMqttTimeCallback() {
+void ScreensaverPage::attachMqttCallback() {
   MqttManager::subscribeToTopic("nspanel/status/time", &ScreensaverPage::clockMqttCallback);
   MqttManager::subscribeToTopic("nspanel/status/date", &ScreensaverPage::dateMqttCallback);
   MqttManager::subscribeToTopic("nspanel/status/weather", &ScreensaverPage::weatherMqttCallback);
 }
 
 void ScreensaverPage::show() {
-  NSPanel::instance->setComponentVal(SCREENSAVER_BACKGROUND_CHOICE_VARIABLE_NAME, InterfaceConfig::show_screensaver_background ? 1 : 0);
+  if (InterfaceConfig::screensaver_mode.compare("with_background") == 0) {
+    NSPanel::instance->setComponentVal(SCREENSAVER_BACKGROUND_CHOICE_VARIABLE_NAME, 1);
+  } else {
+    NSPanel::instance->setComponentVal(SCREENSAVER_BACKGROUND_CHOICE_VARIABLE_NAME, 0);
+  }
   PageManager::SetCurrentPage(this);
-  NSPanel::instance->setDimLevel(InterfaceConfig::screensaver_dim_level);
+  if (InterfaceConfig::screensaver_mode.compare("no_screensaver") == 0) {
+    NSPanel::instance->setDimLevel(0);
+  } else {
+    NSPanel::instance->setDimLevel(InterfaceConfig::screensaver_dim_level);
+  }
   NSPanel::instance->goToPage(SCREENSAVE_PAGE_NAME);
   MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "0");
   PageManager::GetHomePage()->setCurrentMode(roomMode::room);

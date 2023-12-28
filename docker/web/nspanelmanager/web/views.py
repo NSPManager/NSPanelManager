@@ -159,8 +159,7 @@ def edit_nspanel(request, panel_id: int):
         "screensaver_dim_level": get_nspanel_setting_with_default(panel_id, "screensaver_dim_level", ""),
         "is_us_panel": get_nspanel_setting_with_default(panel_id, "is_us_panel", "False"),
         "screensaver_activation_timeout": get_nspanel_setting_with_default(panel_id, "screensaver_activation_timeout", ""),
-        "show_screensaver_clock": get_nspanel_setting_with_default(panel_id, "show_screensaver_clock", "Global"),
-        "show_screensaver_background": get_nspanel_setting_with_default(panel_id, "show_screensaver_background", "Global"),
+        "screensaver_mode": get_nspanel_setting_with_default(panel_id, "screensaver_mode", "global"),
         "reverse_relays": get_nspanel_setting_with_default(panel_id, "reverse_relays", "False"),
         "relay1_default_mode": get_nspanel_setting_with_default(panel_id, "relay1_default_mode", "False"),
         "relay2_default_mode": get_nspanel_setting_with_default(panel_id, "relay2_default_mode", "False"),
@@ -242,15 +241,10 @@ def save_panel_settings(request, panel_id: int):
     else:
         delete_nspanel_setting(panel_id, "screensaver_activation_timeout")
 
-    if request.POST["show_screensaver_clock"] == "Global":
-        delete_nspanel_setting(panel_id, "show_screensaver_clock")
+    if request.POST["screensaver_mode"] == "global":
+        delete_nspanel_setting(panel_id, "screensaver_mode")
     else:
-        set_nspanel_setting_value(panel_id, "show_screensaver_clock", request.POST["show_screensaver_clock"])
-
-    if request.POST["show_screensaver_background"] == "Global":
-        delete_nspanel_setting(panel_id, "show_screensaver_background")
-    else:
-        set_nspanel_setting_value(panel_id, "show_screensaver_background", request.POST["show_screensaver_background"])
+        set_nspanel_setting_value(panel_id, "screensaver_mode", request.POST["screensaver_mode"])
 
     set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
     set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
@@ -429,8 +423,7 @@ def settings_page(request):
     data["screensaver_activation_timeout"] = get_setting_with_default("screensaver_activation_timeout", 30000)
     data["screen_dim_level"] = get_setting_with_default("screen_dim_level", 100)
     data["screensaver_dim_level"] = get_setting_with_default("screensaver_dim_level", 0)
-    data["show_screensaver_clock"] = get_setting_with_default("show_screensaver_clock", False)
-    data["show_Screensaver_background"] = get_setting_with_default("show_Screensaver_background", True)
+    data["screensaver_mode"] = get_setting_with_default("screensaver_mode", "with_background")
     data["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
     data["max_live_log_messages"] = get_setting_with_default("max_live_log_messages", 10)
     data["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size", 10)
@@ -470,7 +463,7 @@ def save_settings(request):
     set_setting_value(name="screensaver_activation_timeout", value=request.POST["screensaver_activation_timeout"])
     set_setting_value(name="screen_dim_level", value=request.POST["screen_dim_level"])
     set_setting_value(name="screensaver_dim_level", value=request.POST["screensaver_dim_level"])
-    set_setting_value(name="show_screensaver_clock", value=("show_screensaver_clock" in request.POST))
+    set_setting_value(name="screensaver_mode", value=request.POST["screensaver_mode"])
     set_setting_value(name="turn_on_behavior", value=request.POST["turn_on_behavior"])
     set_setting_value(name="max_live_log_messages", value=request.POST["max_live_log_messages"])
     set_setting_value(name="max_log_buffer_size", value=request.POST["max_log_buffer_size"])

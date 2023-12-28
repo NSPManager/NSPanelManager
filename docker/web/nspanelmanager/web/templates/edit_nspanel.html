@@ -305,7 +305,7 @@
             <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
-            Brightness level during screensaver. 0-100%. Leave empty to use global setting.
+            Brightness level during screensaver. 0-100%. Leave empty to use global setting. This will always be 0% if screensaver mode is set to show no screensaver.
           </div>
         </span>
       </label>
@@ -331,47 +331,28 @@
             <input class="input" type="number" name="screensaver_activation_timeout" id="screensaver_activation_timeout" placeholder="Global" value="{{ settings.screensaver_activation_timeout }}">
         </div>
     </div>
+
     <div class="field">
-      <label class="label">Show clock on screensaver<span class="question">
+      <label class="label">Screensaver mode<span class="question">
           <span class="icon question_icon">
             <i class="mdi mdi-information has-text-info"></i>
           </span>
           <div class="question_help_text notification is-info is-light">
-            True: show clock on screensaver<br>
-            False: do not show clock on screensaver<br>
-            Global: use global setting.
+            Select the way the screensaver is shown.
           </div>
         </span>
       </label>
-      <div class="control">
-        <div class="select">
-          <select name="show_screensaver_clock" id="show_screensaver_clock">
-            <option value="True" {% if settings.show_screensaver_clock == "True" %}selected{% endif %}>True</option>
-            <option value="False" {% if settings.show_screensaver_clock == "False" %}selected{% endif %}>False</option>
-            <option value="Global" {% if settings.show_screensaver_clock == "Global" %}selected{% endif %}>Global</option>
-          </select>
-        </div>
-      </div>
     </div>
 
     <div class="field">
-      <label class="label">Show background on screensaver<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            True: show background on screensaver<br>
-            False: do not show background on screensaver<br>
-            Global: use global setting.
-          </div>
-        </span>
-      </label>
       <div class="control">
         <div class="select">
-          <select name="show_screensaver_background" id="show_screensaver_background">
-            <option value="True" {% if settings.show_screensaver_background == "True" %}selected{% endif %}>True</option>
-            <option value="False" {% if settings.show_screensaver_background == "False" %}selected{% endif %}>False</option>
-            <option value="Global" {% if settings.show_screensaver_background == "Global" %}selected{% endif %}>Global</option>
+          <select name="screensaver_mode">
+            <option value="with_background" {% if settings.screensaver_mode == "with_background" %}selected{% endif %}>Show with background (clock, date and weather)</option>
+            <option value="without_background" {% if settings.screensaver_mode == "without_background" %}selected{% endif %}>Show without background (clock, date and weather)</option>
+            <option value="only_clock_and_date" {% if settings.screensaver_mode == "only_clock_and_date" %}selected{% endif %}>Show without background (only clock and date)</option>
+            <option value="no_screensaver" {% if settings.screensaver_mode == "no_screensaver" %}selected{% endif %}>No screensaver (turn off screen)</option>
+            <option value="global" {% if settings.screensaver_mode == "global" %}selected{% endif %}>Global (use global setting)</option>
           </select>
         </div>
       </div>

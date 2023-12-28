@@ -33,7 +33,6 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
     for (nlohmann::json forcast : new_state["attributes"]["forecast"]) {
       weather_info info;
       SPDLOG_DEBUG("Loading weather forcast for {}", std::string(forcast["datetime"]));
-      // TODO: Get day of week from ["datetime"], ex. 2023-12-25T11:00:00+00:00
       info.condition = forcast["condition"];
       info.wind_speed = forcast["wind_speed"];
       info.precipitation = forcast["precipitation"];
@@ -82,7 +81,6 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
         info.day = std::to_string(localtime->tm_wday);
         break;
       }
-      SPDLOG_DEBUG("Day: {}", info.day);
 
       this->_forcast_weather_info.push_back(info);
     }

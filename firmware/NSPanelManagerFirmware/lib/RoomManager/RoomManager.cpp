@@ -81,8 +81,7 @@ void RoomManager::loadAllRooms(bool is_update) {
   InterfaceConfig::screen_dim_level = (*roomData)["screen_dim_level"].as<uint8_t>();
   InterfaceConfig::screensaver_dim_level = (*roomData)["screensaver_dim_level"].as<uint8_t>();
   InterfaceConfig::screensaver_activation_timeout = (*roomData)["screensaver_activation_timeout"].as<uint16_t>();
-  InterfaceConfig::show_screensaver_clock = (*roomData)["show_screensaver_clock"].as<String>().equals("True");
-  InterfaceConfig::show_screensaver_background = (*roomData)["show_screensaver_background"].as<String>().equals("True");
+  InterfaceConfig::screensaver_mode = (*roomData)["screensaver_mode"].as<String>().c_str();
   InterfaceConfig::clock_us_style = (*roomData)["clock_us_style"].as<String>().equals("True");
   InterfaceConfig::lock_to_default_room = (*roomData)["lock_to_default_room"].as<String>().equals("True");
   NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>((*roomData)["button1_mode"].as<uint8_t>());
