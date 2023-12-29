@@ -1,5 +1,7 @@
 #include "openhab_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include <boost/algorithm/string.hpp>
+#include <curl/curl.h>
 #include <exception>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXSocketTLSOptions.h>
@@ -65,7 +67,20 @@ void OpenhabManager::_websocket_message_callback(const ix::WebSocketMessagePtr &
   } else if (msg->type == ix::WebSocketMessageType::Open) {
     SPDLOG_INFO("Connected to Openhab websocket.");
     OpenhabManager::_authenticated = true;
-    OpenhabManager::_fetch_and_update_current_states();
+    for (auto item_observer_pairs : OpenhabManager::_openhab_item_observers) {
+      try {
+        std::string data = OpenhabManager::_fetch_item_state_via_rest(item_observer_pairs.first);
+        if (data.length() > 0) {
+          nlohmann::json update_data;
+          update_data["type"] = "ItemStateFetched";
+          update_data["payload"] = nlohmann::json::parse(data);
+          OpenhabManager::_openhab_item_observers[item_observer_pairs.first](update_data);
+        }
+      } catch (std::exception &e) {
+        SPDLOG_ERROR("Caught exception: {}", e.what());
+        SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
+      }
+    }
   } else if (msg->type == ix::WebSocketMessageType::Close) {
     SPDLOG_WARN("Disconnected from Openhab websocket.");
     OpenhabManager::_authenticated = false;
@@ -98,8 +113,56 @@ void OpenhabManager::_process_websocket_message(const std::string &message) {
   }
 }
 
-void OpenhabManager::_fetch_and_update_current_states() {
-  SPDLOG_INFO("Fetching current states for Openhab entities.");
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+  ((std::string *)userp)->append((char *)contents, size * nmemb);
+  return size * nmemb;
+}
+
+std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
+  CURL *curl = curl_easy_init();
+  CURLcode res;
+
+  std::string response_data;
+  std::string request_url = MqttManagerConfig::openhab_address;
+  request_url.append("/rest/items/");
+  request_url.append(item);
+  SPDLOG_TRACE("Requesting openhab item state from: {}", request_url);
+
+  std::string bearer_token = "Bearer ";
+  bearer_token.append(MqttManagerConfig::openhab_access_token);
+
+  struct curl_slist *headers = NULL;
+  headers = curl_slist_append(headers, bearer_token.c_str());
+  if (headers == NULL) {
+    SPDLOG_ERROR("Failed to set bearer token header for OpenHAB light rest request.");
+    return response_data;
+  }
+  headers = curl_slist_append(headers, "Content-type: application/json");
+  if (headers == NULL) {
+    SPDLOG_ERROR("Failed to set content-type header for OpenHAB light rest request.");
+    return response_data;
+  }
+
+  curl_easy_setopt(curl, CURLOPT_URL, request_url.c_str());
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+  /* Perform the request, res will get the return code */
+  res = curl_easy_perform(curl);
+  long http_code;
+  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+  /* Check for errors */
+  if (res != CURLE_OK || http_code != 200) {
+    SPDLOG_ERROR("Failed to get data from OpenHAB api at '{}'. Got response: {}", request_url, response_data);
+    return response_data;
+  }
+
+  /* always cleanup */
+  curl_easy_cleanup(curl);
+  curl_slist_free_all(headers);
+  return response_data;
 }
 
 void OpenhabManager::send_json(nlohmann::json &data) {
@@ -117,19 +180,17 @@ void OpenhabManager::_send_string(std::string &data) {
   }
 }
 
-void OpenhabManager::attach_event_observer(OpenhabEventObserver *observer) {
-  OpenhabManager::_openhab_event_observers.push_back(observer);
-}
-
-void OpenhabManager::detach_event_observer(OpenhabEventObserver *observer) {
-  OpenhabManager::_openhab_event_observers.remove(observer);
-}
-
 void OpenhabManager::_process_openhab_event(nlohmann::json &event_data) {
   SPDLOG_TRACE("Processing Openhab event: {}", event_data.dump());
-  for (OpenhabEventObserver *observer : OpenhabManager::_openhab_event_observers) {
-    if (observer->openhab_event_callback(event_data)) {
-      return;
+  if (std::string(event_data["type"]).compare("ItemStateChangedEvent") == 0) {
+    SPDLOG_DEBUG("Got new state data: {}", event_data.dump());
+    // Extract topic into multiple parts
+    std::string topic = event_data["topic"];
+    std::vector<std::string> topic_parts;
+    boost::split(topic_parts, topic, boost::is_any_of("/"));
+    if (topic_parts.size() >= 3) {
+      std::string topic_item = topic_parts[2];
+      OpenhabManager::_openhab_item_observers[topic_item](event_data);
     }
   }
 }

@@ -9,7 +9,7 @@ enum MQTT_MANAGER_OPENHAB_CONTROL_MODE {
   SWITCH
 };
 
-class OpenhabLight : public Light, public OpenhabEventObserver {
+class OpenhabLight : public Light {
 public:
   OpenhabLight(nlohmann::json &init_data);
 
@@ -20,10 +20,9 @@ public:
   void send_state_update_to_controller();
 
   /**
-   * Process event data. If the event was processed by the given instance, return true, else return false.
-   * In case a false is returned the loop will continue until all registered entities has been checked.
+   * Process event data.
    */
-  bool openhab_event_callback(nlohmann::json &event_data);
+  void openhab_event_callback(nlohmann::json event_data);
 
   ~OpenhabLight();
 

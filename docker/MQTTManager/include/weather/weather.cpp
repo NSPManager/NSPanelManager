@@ -3,6 +3,9 @@
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "openhab_manager/openhab_manager.hpp"
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/bind.hpp>
 #include <cstdlib>
 #include <ctime>
 #include <fmt/core.h>
@@ -13,11 +16,15 @@
 
 void MQTTManagerWeather::update_config() {
   if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
+    SPDLOG_INFO("Initializing weather controller for Home Assistant.");
     HomeAssistantManager::attach_event_observer(this);
-    OpenhabManager::detach_event_observer(this);
+    OpenhabManager::detach_event_observer(MqttManagerConfig::openhab_current_weather_item, boost::bind(&MQTTManagerWeather::openhab_event_callback, this, _1));
+    OpenhabManager::detach_event_observer(MqttManagerConfig::openhab_forcast_weather_item, boost::bind(&MQTTManagerWeather::openhab_event_callback, this, _1));
   } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
-    OpenhabManager::attach_event_observer(this);
+    SPDLOG_INFO("Initializing weather controller for OpenHAB.");
     HomeAssistantManager::detach_event_observer(this);
+    OpenhabManager::attach_event_observer(MqttManagerConfig::openhab_current_weather_item, boost::bind(&MQTTManagerWeather::openhab_event_callback, this, _1));
+    OpenhabManager::attach_event_observer(MqttManagerConfig::openhab_forcast_weather_item, boost::bind(&MQTTManagerWeather::openhab_event_callback, this, _1));
   } else {
     SPDLOG_ERROR("Unsupported weather controller '{}'.", MqttManagerConfig::weather_controller);
   }
@@ -129,8 +136,22 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
   return false;
 }
 
-bool MQTTManagerWeather::openhab_event_callback(nlohmann::json &event_data) {
-  return false;
+void MQTTManagerWeather::openhab_event_callback(nlohmann::json event_data) {
+  if (std::string(event_data["type"]).compare("ItemStateChangedEvent") == 0) {
+    // Extract topic into multiple parts
+    std::string topic = event_data["topic"];
+    std::vector<std::string> topic_parts;
+    boost::split(topic_parts, topic, boost::is_any_of("/"));
+
+    SPDLOG_DEBUG("Topic: {}", std::string(event_data["topic"]));
+    SPDLOG_DEBUG("Got {} parts", topic_parts.size());
+    if (topic_parts.size() >= 3) {
+      SPDLOG_DEBUG("Part: {}", topic_parts[0]);
+      SPDLOG_DEBUG("Part: {}", topic_parts[1]);
+      SPDLOG_DEBUG("Part: {}", topic_parts[2]);
+      std::string topic_item = topic_parts[2];
+    }
+  }
 }
 
 std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition) {

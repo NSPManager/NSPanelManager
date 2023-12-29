@@ -1,20 +1,15 @@
 #ifndef MQTT_MANAGER_OPENHAB_MANAGER_HPP
 #define MQTT_MANAGER_OPENHAB_MANAGER_HPP
 
+#include <boost/exception/diagnostic_information.hpp>
+#include <boost/ptr_container/ptr_map.hpp>
+#include <boost/signals2.hpp>
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXWebSocketMessage.h>
 #include <mutex>
-#include <nlohmann/json_fwd.hpp>
+#include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
 #include <string>
-
-class OpenhabEventObserver {
-public:
-  /**
-   * Process event data. If the event was processed by the given instance, return true, else return false.
-   * In case a false is returned the loop will continue until all registered entities has been checked.
-   */
-  virtual bool openhab_event_callback(nlohmann::json &event_data) = 0;
-};
 
 class OpenhabManager {
 public:
@@ -24,21 +19,42 @@ public:
   /**
    * Attach an event listener to handle Openhab events.
    */
-  static void attach_event_observer(OpenhabEventObserver *observer);
+  template <typename CALLBACK_BIND>
+  static void attach_event_observer(std::string item, CALLBACK_BIND callback) {
+    OpenhabManager::_openhab_item_observers[item].disconnect(callback); // Disconnect first in case it was already connected, otherwise multiple signals will be sent.
+    OpenhabManager::_openhab_item_observers[item].connect(callback);
+
+    try {
+      std::string data = OpenhabManager::_fetch_item_state_via_rest(item);
+      if (data.length() > 0) {
+        nlohmann::json update_data;
+        update_data["type"] = "ItemStateFetched";
+        update_data["payload"] = nlohmann::json::parse(data);
+        OpenhabManager::_openhab_item_observers[item](update_data);
+      }
+    } catch (std::exception &e) {
+      SPDLOG_ERROR("Caught exception: {}", e.what());
+      SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
+    }
+  }
 
   /**
    * Detach an event listener for Openhab events.
    */
-  static void detach_event_observer(OpenhabEventObserver *observer);
+  template <typename CALLBACK_BIND>
+  static void detach_event_observer(std::string item, CALLBACK_BIND callback) {
+    OpenhabManager::_openhab_item_observers[item].disconnect(callback);
+  }
 
 private:
-  static inline std::list<OpenhabEventObserver *> _openhab_event_observers;
   static void _process_openhab_event(nlohmann::json &event_data);
+  // Callback registration for items
+  static inline boost::ptr_map<std::string, boost::signals2::signal<void(nlohmann::json data)>> _openhab_item_observers;
 
   /**
-   * Fetch all current states for registered entities from the OpenHAB REST api.
+   * Fetch an item state from OpenHAB via REST-api
    */
-  static void _fetch_and_update_current_states();
+  static std::string _fetch_item_state_via_rest(std::string item);
 
   /**
    * Send keepalive to OpenHAB to keep websocket connection open.

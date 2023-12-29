@@ -42,7 +42,9 @@
 \lstset{
   basicstyle=\ttfamily,
   backgroundcolor=\color{code_background_color},
-  columns=fullflexible
+  columns=fullflexible,
+  breaklines=true,
+  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
 }
 
 \makeatletter
@@ -346,6 +348,44 @@
     \includegraphics[scale=0.25]{settings_page.png}
     \caption{Global settings}%
     \end{figure}
+
+
+    \subsection{Time and date}
+    Time and date is automatically sent from the NSPanel Manager container out to each and every panel. This is used to display time and date on the screensaver (if enabled). The timezone is gathered from the TZ environment variable and automatically set.  
+
+    \subsection{Weather}
+    If you wish to use weather on the screensaver, this has to be set in the manager. In the menu bar, navigate to Entities $\rightarrow$ Weather \& Time.
+    \subsubsection{Home Assistant}
+    If using Home Assistant, press the "Select weather entitiy"-button and select an entity of type weather from Home Assistant.  
+    Home Assistant doesn't provide sun state in the weather entity so this has to be setup manual, press the "Select sun entity"-button and select an entity of type "sun".  
+    Press the save button to apply the settings.
+
+    \subsubsection{OpenHAB}
+    If using OpenHAB, there are a few things that has to be setup in OpenHAB before configuration in NSPanel Manager can happen. First of all, a weather entity for current weather has to be setup. 
+    NSPanel Manager only has support for OpenWeatherMap and so, this guide will show how to setup OpenWeatherMap in OpenHAB. First of all, create an account at \href{https://home.openweathermap.org/users/sign_up}{OpenWeatherMap}.
+    Once that is complete, you need to create an API-key, this can be done on \href{https://home.openweathermap.org/api_keys}{this page}. Give it a good name, something like OpenHAB so you in the future know what it's for.
+    Next we will need to figure out what latitude and longitude you are located at. The easiest way of doing this is to open \href{https://maps.google.com}{Google Maps} and navigate to your location.
+
+    Once done, the URL will look something like this:
+    \begin{lstlisting}
+       https://www.google.com/maps/@59.3314504,18.0823082,14.37z?entry=ttu
+    \end{lstlisting}
+    You latitude and longitude is placed after the @-sign, in this case the latitude is 59.3314504 and the longitude is 18.0823082.
+
+    Next, in OpenHAB you need to install the HTTP binding from the Add-on Store. After that is done, create a new .thing-file in the "things"-directory for your OpenHAB configuration and paste the following:
+    \begin{lstlisting}
+    Thing http:url:weather "Weather" [
+        baseURL="https://api.openweathermap.org/data/2.5/",
+        refresh=600] {
+            Channels:
+             Type string : weather "weather" [ stateExtension="weather?units=metric&lat=<lat>&lon=<long>&appid=<apikey>" ]
+             Type string : forecast "forecast" [ stateExtension="forecast?units=metric&lat=<lat>&lon=<long>&appid=<apikey>" ]
+    }
+    \end{lstlisting}
+    \info{In case the HTTP binding does not initialize, you may need to increase the org.openhab.webclient:maxThreadsShared-value and the org.openhab.webclient:maxThreadsCustom-value in the conf/servicese/runtime.cfg-file for OpenHAB.}
+    When you have pasted the above into a .things-file, you need to replace <lat> with your latitude, replace <long> with your longitude and replace <apikey> with your API-key for openweathermap.
+    \info{If you do not want metric units, replace units=metric with units=imperial in the stateExtension.}
+    
 
     \clearpage
     \section{Panel functions}
