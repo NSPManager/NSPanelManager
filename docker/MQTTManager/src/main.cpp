@@ -51,6 +51,7 @@ void publish_time_and_date() {
   // Timezone loaded, proceed to update MQTT
   for (;;) {
     char time_buffer[20];
+    char ampm_buffer[20];
     std::string time_str;
     char date_buffer[100];
     std::string date_str;
@@ -58,8 +59,10 @@ void publish_time_and_date() {
     std::time_t time = std::time({});
     std::strftime(date_buffer, 100, MqttManagerConfig::date_format.c_str(), std::localtime(&time));
     date_str = date_buffer;
+
     if (MqttManagerConfig::clock_us_style) {
-      std::strftime(time_buffer, 20, "%I:%M %p", std::localtime(&time));
+      std::strftime(time_buffer, 20, "%I:%M", std::localtime(&time));
+      std::strftime(ampm_buffer, 20, "%p", std::localtime(&time));
       time_str = time_buffer;
     } else {
       std::strftime(time_buffer, 20, "%H:%M", std::localtime(&time));
@@ -68,6 +71,7 @@ void publish_time_and_date() {
 
     if (time_str.compare(last_time_published) != 0) {
       MQTT_Manager::publish("nspanel/status/time", time_buffer, true);
+      MQTT_Manager::publish("nspanel/status/ampm", ampm_buffer, true);
       last_time_published = time_buffer;
     }
 

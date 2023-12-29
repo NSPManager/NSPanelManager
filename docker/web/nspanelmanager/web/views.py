@@ -675,8 +675,8 @@ def weather_and_time(request):
 
         set_setting_value("date_format", request.POST["date_format"])
         set_setting_value("clock_us_style", "clock_us_style" in request.POST)
-        set_setting_value("use_farenheit", "clock_us_style" in request.POST)
-        send_mqttmanager_reload_command()
+        set_setting_value("use_farenheit", "use_farenheit" in request.POST)
+        restart_mqtt_manager()
         return redirect("weather_and_time")
     else:
         data = {}
