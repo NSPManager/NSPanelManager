@@ -260,7 +260,6 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
     }
     return;
   } else if (std::string(data["type"]).compare("ItemStateFetched") == 0) {
-    SPDLOG_DEBUG("Light {}::{} Received new REST API state: {}", this->_id, this->_name, data.dump());
     if (this->_openhab_on_off_item.compare(data["payload"]["name"]) == 0) {
       if (this->_openhab_control_mode == MQTT_MANAGER_OPENHAB_CONTROL_MODE::DIMMER) {
         this->_current_brightness = atoi(std::string(data["payload"]["state"]).c_str());

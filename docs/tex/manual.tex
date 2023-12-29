@@ -382,10 +382,11 @@
              Type string : forecast "forecast" [ stateExtension="forecast?units=metric&lat=<lat>&lon=<long>&appid=<apikey>" ]
     }
     \end{lstlisting}
-    \info{In case the HTTP binding does not initialize, you may need to increase the org.openhab.webclient:maxThreadsShared-value and the org.openhab.webclient:maxThreadsCustom-value in the conf/servicese/runtime.cfg-file for OpenHAB.}
+    \info{In case the HTTP binding does not initialize, you may need to increase the org.openhab.webclient:maxThreadsShared-value and the org.openhab.webclient:maxThreadsCustom-value in the conf/services/runtime.cfg-file for OpenHAB.}
     When you have pasted the above into a .things-file, you need to replace <lat> with your latitude, replace <long> with your longitude and replace <apikey> with your API-key for openweathermap.
     \info{If you do not want metric units, replace units=metric with units=imperial in the stateExtension.}
     
+    Once this is done and the weather HTTP-binding is showing up in OpenHAB you can press the "Select weather entity" in the NSPanel Manager web interface, select your weather entity and then select the channels for current weather and forecast.
 
     \clearpage
     \section{Panel functions}

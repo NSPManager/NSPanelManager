@@ -75,6 +75,8 @@ void OpenhabManager::_websocket_message_callback(const ix::WebSocketMessagePtr &
           update_data["type"] = "ItemStateFetched";
           update_data["payload"] = nlohmann::json::parse(data);
           OpenhabManager::_openhab_item_observers[item_observer_pairs.first](update_data);
+        } else {
+          SPDLOG_ERROR("Failed to get current state for item '{}' via OpenHAB REST API.", item_observer_pairs.first);
         }
       } catch (std::exception &e) {
         SPDLOG_ERROR("Caught exception: {}", e.what());

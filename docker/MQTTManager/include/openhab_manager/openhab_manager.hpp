@@ -31,6 +31,8 @@ public:
         update_data["type"] = "ItemStateFetched";
         update_data["payload"] = nlohmann::json::parse(data);
         OpenhabManager::_openhab_item_observers[item](update_data);
+      } else {
+        SPDLOG_ERROR("Failed to get current state for item '{}' via OpenHAB REST API.", item);
       }
     } catch (std::exception &e) {
       SPDLOG_ERROR("Caught exception: {}", e.what());

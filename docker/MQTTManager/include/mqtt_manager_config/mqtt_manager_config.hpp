@@ -41,7 +41,7 @@ public:
   static inline std::string home_assistant_weather_entity;
   static inline std::string home_assistant_sun_entity;
   static inline std::string openhab_current_weather_item;
-  static inline std::string openhab_forcast_weather_item;
+  static inline std::string openhab_forecast_weather_item;
   static inline nlohmann::json icon_mapping;
   static inline bool clock_us_style;
   static inline bool use_farenheit;

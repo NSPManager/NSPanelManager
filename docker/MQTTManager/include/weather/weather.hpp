@@ -9,15 +9,18 @@ class MQTTManagerWeather : public HomeAssistantEventObserver {
 public:
   void update_config();
   bool home_assistant_event_callback(nlohmann::json &event_data);
-  void openhab_event_callback(nlohmann::json event_data);
+  void openhab_current_weather_callback(nlohmann::json event_data);
+  void openhab_forecast_weather_callback(nlohmann::json event_data);
   void send_state_update();
 
 private:
-  std::string _get_icon_from_mapping(std::string &condition);
+  std::string _get_icon_from_mapping(std::string &condition, uint8_t hour);
 
   struct weather_info {
     std::string condition;
+    int condition_id; // Only used for OpenHAB/OpenWeatherMap
     std::string day;
+    std::tm time;
     float precipitation;
     float precipitation_probability;
     float temperature_low;
@@ -25,10 +28,14 @@ private:
     float wind_speed;
   };
 
-  std::vector<weather_info> _forcast_weather_info;
+  std::vector<weather_info> _forecast_weather_info;
   std::string _windspeed_unit;
   std::string _precipitation_unit;
   std::string _current_condition;
+  std::tm _current_weather_time;
+  int _current_condition_id; // Only used for OpenHAB/OpenWeatherMap
+  int _next_sunrise_hour;
+  int _next_sunset_hour;
   std::string _next_sunrise;
   std::string _next_sunset;
   float _current_temperature;

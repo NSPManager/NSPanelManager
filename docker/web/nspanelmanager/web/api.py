@@ -69,7 +69,7 @@ def get_mqtt_manager_config(request):
     return_json["home_assistant_sun_entity"] = get_setting_with_default("sun_entity", "");
     return_json["home_assistant_weather_entity"] = get_setting_with_default("weather_home_assistant_weather_entity", "");
     return_json["openhab_current_weather_item"] = get_setting_with_default("weather_openhab_current_weather_item", "");
-    return_json["openhab_forcast_weather_item"] = get_setting_with_default("weather_openhab_forcast_weather_item", "");
+    return_json["openhab_forecast_weather_item"] = get_setting_with_default("weather_openhab_forecast_weather_item", "");
     if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
         return_json["is_home_assistant_addon"] = True
     else:
