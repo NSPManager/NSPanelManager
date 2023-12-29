@@ -27,9 +27,6 @@ public:
   ~OpenhabLight();
 
 private:
-  void _update_item_values_from_openhab_rest();
-  std::string _openhab_rest_get(std::string &item);
-
   std::string _openhab_name;
   MQTT_MANAGER_OPENHAB_CONTROL_MODE _openhab_control_mode;
   std::string _openhab_on_off_item;            // Controls the item for on/off functioanlity
