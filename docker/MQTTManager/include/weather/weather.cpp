@@ -137,6 +137,7 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
     std::string setting_minute = setting_time.substr(0, setting_time.find(":"));
     setting_time.erase(0, setting_time.find(":") + 1);
 
+    // TODO: Why are these times off by an hour?
     this->_next_sunrise_hour = atoi(rising_hour.c_str());
     this->_next_sunrise = fmt::format("{}:{}", rising_hour, rising_minute);
     this->_next_sunset_hour = atoi(setting_hour.c_str());
@@ -252,7 +253,7 @@ void MQTTManagerWeather::openhab_forecast_weather_callback(nlohmann::json event_
 
 std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, uint8_t hour) {
   SPDLOG_DEBUG("Checking for icon matching condition: {}", condition);
-  if (MqttManagerConfig::weather_controller.compare("homeassistant") == 0) {
+  if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
     for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["home_assistant_weather_mappings"]) {
       if (std::string(mapping["condition"]).compare(condition) == 0) {
         return std::string(mapping["character-mapping"]);
@@ -286,11 +287,14 @@ void MQTTManagerWeather::send_state_update() {
   std::list<nlohmann::json> forecast;
   for (struct weather_info info : this->_forecast_weather_info) {
     nlohmann::json forecast_data;
-    if (MqttManagerConfig::weather_controller.compare("homeassistant") == 0) {
+    if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
       forecast_data["icon"] = this->_get_icon_from_mapping(info.condition, info.time.tm_hour);
     } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
       std::string condition_id = std::to_string(info.condition_id);
       forecast_data["icon"] = this->_get_icon_from_mapping(condition_id, info.time.tm_hour);
+    } else {
+      SPDLOG_ERROR("Unknown weather controller {}. Will not set an icon!", MqttManagerConfig::weather_controller);
+      weather_info["icon"] = "";
     }
     std::string pre = std::to_string((int)(info.precipitation + 0.5));
     pre.append(this->_precipitation_unit);
@@ -315,11 +319,14 @@ void MQTTManagerWeather::send_state_update() {
     forecast.push_back(forecast_data);
   }
   weather_info["forecast"] = forecast;
-  if (MqttManagerConfig::weather_controller.compare("homeassistant") == 0) {
+  if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
     weather_info["icon"] = this->_get_icon_from_mapping(this->_current_condition, this->_current_weather_time.tm_hour);
   } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
     std::string condition_id = std::to_string(this->_current_condition_id);
     weather_info["icon"] = this->_get_icon_from_mapping(condition_id, this->_current_weather_time.tm_hour);
+  } else {
+    SPDLOG_ERROR("Unknown weather controller {}. Will not set an icon!", MqttManagerConfig::weather_controller);
+    weather_info["icon"] = "";
   }
   std::string temp = std::to_string((int)(this->_current_temperature + 0.5));
   temp.append("°");
