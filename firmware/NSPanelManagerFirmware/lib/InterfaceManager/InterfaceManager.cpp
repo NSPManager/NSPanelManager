@@ -107,6 +107,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   NSPanel::attachWakeCallback(InterfaceManager::processWakeEvent);
 
   // Attach screen clock MQTT callback if configured from manager.
+  PageManager::GetScreensaverPage()->init();
   if (InterfaceConfig::screensaver_mode.compare("no_screensaver") != 0) {
     PageManager::GetScreensaverPage()->attachMqttCallback();
   } else {
@@ -229,12 +230,6 @@ void InterfaceManager::subscribeToMqttTopics() {
   // Subscribe to command to wake/put to sleep the display
   vTaskDelay(100 / portTICK_PERIOD_MS);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_screen_cmd_topic.c_str(), &InterfaceManager::mqttCallback);
-  if (InterfaceConfig::screensaver_mode.compare("no_screensaver") != 0) {
-    PageManager::GetScreensaverPage()->attachMqttCallback();
-  } else {
-    LOG_DEBUG("Not attaching MQTT clock callback as panel is configured to not show screensaver.");
-  }
-
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_cmd_topic.c_str(), &InterfaceManager::handleNSPanelCommand);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_screen_brightness_topic.c_str(), &InterfaceManager::handleNSPanelScreenBrightnessCommand);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_screensaver_brightness.c_str(), &InterfaceManager::handleNSPanelScreensaverBrightnessCommand);

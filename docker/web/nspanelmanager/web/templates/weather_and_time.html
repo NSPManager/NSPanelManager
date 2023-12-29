@@ -15,7 +15,6 @@
     }
 
     function select_weather_entity(element) {
-      console.log(element);
       $(".modal").removeClass("is-active");
       if($(this).data("type") == "home_assistant") {
         $("#weather_home_assistant_entity").val($(this).data("entity_id"));
@@ -33,6 +32,18 @@
           {text: "Forcast weather item", id: "forcast_weather_item"}
         ], openhab_weather_items_selected);
       }
+    }
+
+    function select_new_sun_entity() {
+      var types = {
+        "home_assistant_type_filter": JSON.stringify([
+          "sun"
+        ])
+      };
+      select_new_entity(types, (element) => {
+        $(".modal").removeClass("is-active");
+        $("#sun_entity").val($(element.currentTarget).data("entity_id"));
+      });
     }
 
     function openhab_weather_items_selected(data) {
@@ -124,6 +135,24 @@
           <input class="input" type="text" name="weather_entity" id="weather_entity" readonly value="{{ weather_entity }}">
           <div class="control mt-2">
             <a class="button is-primary" onclick="select_new_weather_entity();">Select weather entity</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Home Assistant sun<span class="question">
+          <span class="icon question_icon">
+            <i class="mdi mdi-information has-text-info"></i>
+          </span>
+          <div class="question_help_text notification is-info is-light">
+            The sun entity in Home Assistant is used to get sunrise/sunset information. This is only needed if you are using Home Assistant and can be safely ignored if using OpenHAB.
+          </div>
+        </label>
+        <div class="control">
+          <input class="input" type="text" name="sun_entity" id="sun_entity" readonly value="{{ sun_entity }}">
+          <div class="control mt-2">
+            <a class="button is-primary" onclick="select_new_sun_entity();">Select sun entity</a>
+            <a class="button is-link" href="https://www.home-assistant.io/integrations/sun/">More information</a>
           </div>
         </div>
       </div>

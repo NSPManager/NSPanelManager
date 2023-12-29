@@ -29,6 +29,8 @@ private:
   std::string _windspeed_unit;
   std::string _precipitation_unit;
   std::string _current_condition;
+  std::string _next_sunrise;
+  std::string _next_sunset;
   float _current_temperature;
   float _current_wind_speed;
   float _current_precipitation_probability;

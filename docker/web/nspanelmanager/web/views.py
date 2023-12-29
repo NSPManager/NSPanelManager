@@ -663,10 +663,12 @@ def weather_and_time(request):
         set_setting_value("weather_controller", weather_type);
         if weather_type == "home_assistant":
             set_setting_value("weather_home_assistant_weather_entity", request.POST["weather_home_assistant_entity"]);
+            set_setting_value("sun_entity", request.POST["sun_entity"]);
             set_setting_value("weather_openhab_current_weather_item", "");
             set_setting_value("weather_openhab_forcast_weather_item", "");
         elif weather_type == "openhab":
             set_setting_value("weather_home_assistant_weather_entity", "");
+            set_setting_value("sun_entity", "");
             set_setting_value("weather_openhab_current_weather_item", request.POST["weather_openhab_current_weather_item"])
             set_setting_value("weather_openhab_forcast_weather_item", request.POST["weather_openhab_forcast_weather_item"])
         else:
@@ -687,6 +689,7 @@ def weather_and_time(request):
         data["weather_home_assistant_weather_entity"] = get_setting_with_default("weather_home_assistant_weather_entity", "")
         data["weather_openhab_current_weather_item"] = get_setting_with_default("weather_openhab_current_weather_item", "")
         data["weather_openhab_forcast_weather_item"] = get_setting_with_default("weather_openhab_forcast_weather_item", "")
+        data["sun_entity"] = get_setting_with_default("sun_entity", "")
 
         weather_controller = get_setting_with_default("weather_controller", "")
         if weather_controller == "home_assistant":

@@ -5,13 +5,14 @@
 #include "openhab_manager/openhab_manager.hpp"
 #include <cstdlib>
 #include <ctime>
+#include <fmt/core.h>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
 
 void MQTTManagerWeather::update_config() {
-  if (MqttManagerConfig::weather_controller.compare("homeassistant") == 0) {
+  if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
     HomeAssistantManager::attach_event_observer(this);
     OpenhabManager::detach_event_observer(this);
   } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
@@ -96,6 +97,34 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
 
     this->send_state_update();
     return true;
+  } else if (std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::home_assistant_sun_entity) == 0) {
+    std::string next_rising = event_data["event"]["data"]["new_state"]["attributes"]["next_rising"];
+    std::string next_setting = event_data["event"]["data"]["new_state"]["attributes"]["next_setting"];
+
+    // Get time parts from sunrise
+    std::string rising_date = next_rising.substr(0, next_rising.find("T"));
+    next_rising.erase(0, next_rising.find("T") + 1);
+    std::string rising_time = next_rising.substr(0, next_rising.find("+"));
+    next_rising.erase(0, next_rising.find("+") + 1);
+
+    std::string rising_hour = rising_time.substr(0, rising_time.find(":"));
+    rising_time.erase(0, rising_time.find(":") + 1);
+    std::string rising_minute = rising_time.substr(0, rising_time.find(":"));
+    rising_time.erase(0, rising_time.find(":") + 1);
+
+    // Get time parts from sunrise
+    std::string setting_date = next_setting.substr(0, next_setting.find("T"));
+    next_setting.erase(0, next_setting.find("T") + 1);
+    std::string setting_time = next_setting.substr(0, next_setting.find("+"));
+    next_setting.erase(0, next_setting.find("+") + 1);
+
+    std::string setting_hour = setting_time.substr(0, setting_time.find(":"));
+    setting_time.erase(0, setting_time.find(":") + 1);
+    std::string setting_minute = setting_time.substr(0, setting_time.find(":"));
+    setting_time.erase(0, setting_time.find(":") + 1);
+
+    this->_next_sunrise = fmt::format("{}:{}", rising_hour, rising_minute);
+    this->_next_sunset = fmt::format("{}:{}", setting_hour, setting_minute);
   }
   return false;
 }
@@ -105,7 +134,7 @@ bool MQTTManagerWeather::openhab_event_callback(nlohmann::json &event_data) {
 }
 
 std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition) {
-  if (MqttManagerConfig::weather_controller.compare("homeassistant") == 0) {
+  if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
     for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["home_assistant_weather_mappings"]) {
       if (std::string(mapping["condition"]).compare(condition) == 0) {
         return std::string(mapping["character-mapping"]);
@@ -161,6 +190,9 @@ void MQTTManagerWeather::send_state_update() {
   std::string wind = std::to_string((int)(this->_current_wind_speed + 0.5));
   wind.append(this->_windspeed_unit);
   weather_info["wind"] = wind;
+
+  weather_info["sunrise"] = this->_next_sunrise;
+  weather_info["sunset"] = this->_next_sunset;
 
   MQTT_Manager::publish("nspanel/status/weather", weather_info.dump(), true);
 }

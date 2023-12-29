@@ -39,6 +39,7 @@ public:
   static inline std::string date_format;
   static inline std::string weather_controller;
   static inline std::string home_assistant_weather_entity;
+  static inline std::string home_assistant_sun_entity;
   static inline std::string openhab_current_weather_item;
   static inline std::string openhab_forcast_weather_item;
   static inline nlohmann::json icon_mapping;

@@ -6,6 +6,7 @@
 
 class ScreensaverPage : public PageBase {
 public:
+  void init();
   void update();
   void show();
   void unshow();
