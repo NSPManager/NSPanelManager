@@ -121,14 +121,19 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 }
 
 std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
+  SPDLOG_DEBUG("Trying to fetch item state from OpenHAB for item '{}'.", item);
   CURL *curl = curl_easy_init();
   CURLcode res;
+
+  if (!curl) {
+    SPDLOG_ERROR("Failed to create curl object!");
+    return "";
+  }
 
   std::string response_data;
   std::string request_url = MqttManagerConfig::openhab_address;
   request_url.append("/rest/items/");
   request_url.append(item);
-  SPDLOG_TRACE("Requesting openhab item state from: {}", request_url);
 
   std::string bearer_token = "Bearer ";
   bearer_token.append(MqttManagerConfig::openhab_access_token);
@@ -137,11 +142,15 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
   headers = curl_slist_append(headers, bearer_token.c_str());
   if (headers == NULL) {
     SPDLOG_ERROR("Failed to set bearer token header for OpenHAB light rest request.");
+    curl_easy_cleanup(curl);
+    curl_slist_free_all(headers);
     return response_data;
   }
   headers = curl_slist_append(headers, "Content-type: application/json");
   if (headers == NULL) {
     SPDLOG_ERROR("Failed to set content-type header for OpenHAB light rest request.");
+    curl_easy_cleanup(curl);
+    curl_slist_free_all(headers);
     return response_data;
   }
 
@@ -150,6 +159,7 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5); // Wait max 5 seconds for an answer
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);
@@ -158,6 +168,8 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
   /* Check for errors */
   if (res != CURLE_OK || http_code != 200) {
     SPDLOG_ERROR("Failed to get data from OpenHAB api at '{}'. Got response: {}", request_url, response_data);
+    curl_easy_cleanup(curl);
+    curl_slist_free_all(headers);
     return response_data;
   }
 
@@ -199,7 +211,7 @@ void OpenhabManager::_process_openhab_event(nlohmann::json &event_data) {
 
 void OpenhabManager::_send_keepalive() {
   SPDLOG_INFO("Started Openhab keepalive thread.");
-  for (;;) {
+  while (true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     SPDLOG_TRACE("Sending openhab keepalive.");
     if (OpenhabManager::_authenticated) {

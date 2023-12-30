@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <fmt/core.h>
+#include <math.h>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
@@ -102,14 +103,16 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
       this->_current_precipitation_probability = this->_forecast_weather_info[0].precipitation_probability;
       this->_current_wind_speed = new_state["attributes"]["wind_speed"];
       this->_current_temperature = new_state["attributes"]["temperature"];
+      this->_current_min_temperature = this->_forecast_weather_info[0].temperature_low;
+      this->_current_max_temperature = this->_forecast_weather_info[0].temperature_high;
       std::time_t time = std::time({});
       this->_current_weather_time = *std::localtime(&time);
+      this->send_state_update();
     } else {
       SPDLOG_ERROR("Failed to process forecast information from Home Assistant.");
       return true;
     }
 
-    this->send_state_update();
     return true;
   } else if (std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::home_assistant_sun_entity) == 0) {
     std::string next_rising = event_data["event"]["data"]["new_state"]["attributes"]["next_rising"];
@@ -137,7 +140,6 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
     std::string setting_minute = setting_time.substr(0, setting_time.find(":"));
     setting_time.erase(0, setting_time.find(":") + 1);
 
-    // TODO: Why are these times off by an hour?
     this->_next_sunrise_hour = atoi(rising_hour.c_str());
     this->_next_sunrise = fmt::format("{}:{}", rising_hour, rising_minute);
     this->_next_sunset_hour = atoi(setting_hour.c_str());
@@ -156,12 +158,15 @@ void MQTTManagerWeather::openhab_current_weather_callback(nlohmann::json event_d
   }
 
   if (weather_state.size() > 0) {
+    SPDLOG_DEBUG("Got new current weather state update from OpenHAB.");
     nlohmann::json weather_json = nlohmann::json::parse(weather_state);
 
     this->_current_condition = weather_json["weather"][0]["description"];
     this->_current_condition_id = weather_json["weather"][0]["id"];
 
     this->_current_temperature = weather_json["main"]["temp"];
+    this->_current_min_temperature = weather_json["main"]["temp_min"];
+    this->_current_max_temperature = weather_json["main"]["temp_max"];
     this->_current_wind_speed = weather_json["wind"]["speed"];
 
     time_t weather_time = uint64_t(weather_json["dt"]);
@@ -169,15 +174,14 @@ void MQTTManagerWeather::openhab_current_weather_callback(nlohmann::json event_d
 
     time_t sunrise = weather_json["sys"]["sunrise"];
     time_t sunset = weather_json["sys"]["sunset"];
-    std::tm sunrise_time = *std::localtime(&sunrise);
-    std::tm sunset_time = *std::localtime(&sunset);
+    std::tm sunrise_time = *std::gmtime(&sunrise); // Timestamp is returned in localtime, do not adjust according to timezone.
+    std::tm sunset_time = *std::gmtime(&sunset);   // Timestamp is returned in localtime, do not adjust according to timezone.
     this->_next_sunrise_hour = sunrise_time.tm_hour;
     this->_next_sunrise = fmt::format("{:0>2}:{:0>2}", sunrise_time.tm_hour, sunrise_time.tm_min);
     this->_next_sunset_hour = sunset_time.tm_hour;
     this->_next_sunset = fmt::format("{:0>2}:{:0>2}", sunset_time.tm_hour, sunset_time.tm_min);
+    this->send_state_update();
   }
-
-  this->send_state_update();
 }
 
 void MQTTManagerWeather::openhab_forecast_weather_callback(nlohmann::json event_data) {
@@ -190,23 +194,30 @@ void MQTTManagerWeather::openhab_forecast_weather_callback(nlohmann::json event_
   }
 
   if (forecast_state.size() > 0) {
+    SPDLOG_DEBUG("Got new weather forecast state update from OpenHAB.");
     nlohmann::json forecast_json = nlohmann::json::parse(forecast_state);
 
     struct weather_info day_summary;
+    // std::tm day_info_time = *std::localtime(0);
     std::tm day_info_time;
+    day_info_time.tm_year = 0; // Set initial year to 0.
 
     this->_forecast_weather_info.clear();
-    for (nlohmann::json day_info : forecast_json["list"]) {
+    for (nlohmann::json &day_info : forecast_json["list"]) {
       time_t dt = uint64_t(day_info["dt"]);
       std::tm current_time = *std::localtime(&dt);
-      SPDLOG_DEBUG("Processing OpenHAB weather(OpenWeatherMap) for {}-{}-{} {}:{}", current_time.tm_year + 1900, current_time.tm_mon, current_time.tm_mday, current_time.tm_hour, current_time.tm_min);
 
-      if (day_info_time.tm_year == 0 || current_time.tm_hour <= 12) {
+      if (day_info_time.tm_year != 0 && day_info_time.tm_mday != current_time.tm_mday) {
+        this->_forecast_weather_info.push_back(day_summary);
+        SPDLOG_DEBUG("Adding OpenHAB weather(OpenWeatherMap) for {}-{:0>2}-{:0>2} {:0>2}:{:0>2} to forecast list.", day_summary.time.tm_year + 1900, day_summary.time.tm_mon, day_summary.time.tm_mday, day_summary.time.tm_hour, day_summary.time.tm_min);
+      }
+
+      if (day_info_time.tm_year == 0 || current_time.tm_hour <= 14) {
         day_summary.condition = day_info["weather"][0]["description"];
         day_summary.condition_id = day_info["weather"][0]["id"];
         day_summary.wind_speed = day_info["wind"]["speed"];
         day_summary.temperature_low = day_info["main"]["temp_min"];
-        day_summary.temperature_low = day_info["main"]["temp_max"];
+        day_summary.temperature_high = day_info["main"]["temp_max"];
         day_summary.precipitation = 0; // Unsed
         day_summary.precipitation_probability = float(day_info["pop"]) * 100;
         day_summary.time = current_time;
@@ -239,20 +250,26 @@ void MQTTManagerWeather::openhab_forecast_weather_callback(nlohmann::json event_
         }
       }
 
-      if (day_info_time.tm_year != 0 && day_info_time.tm_mday != current_time.tm_mday) {
-        this->_forecast_weather_info.push_back(day_summary);
-        SPDLOG_DEBUG("Adding OpenHAB weather(OpenWeatherMap) for {}-{}-{} {}:{} to forecast list.", current_time.tm_year + 1900, current_time.tm_mon, current_time.tm_mday, current_time.tm_hour, current_time.tm_min);
-      }
-
       day_info_time = current_time;
     }
-    this->_forecast_weather_info.push_back(day_summary); // Add the last forecast item
-    this->send_state_update();
+
+    // In case the last timestamp/day never reach 12:00 (midday) we need to add it manually.
+    if (this->_forecast_weather_info.size() <= 4) {
+      SPDLOG_DEBUG("Adding OpenHAB weather(OpenWeatherMap) for {}-{:0>2}-{:0>2} {:0>2}:{:0>2} to forecast list.", day_summary.time.tm_year + 1900, day_summary.time.tm_mon, day_summary.time.tm_mday, day_summary.time.tm_hour, day_summary.time.tm_min);
+      this->_forecast_weather_info.push_back(day_summary); // Add the last forecast item
+    }
+
+    if (this->_forecast_weather_info.size() > 0) {
+      // Unfortunetly OpenWeatherMap doesn't provide a precipitation_probability for the current time and so the next best thing is the first item in the forecast.
+      this->_current_precipitation_probability = this->_forecast_weather_info[0].precipitation_probability;
+      this->send_state_update();
+    } else {
+      SPDLOG_ERROR("Failed to load any forecast from OpenHAB weather.");
+    }
   }
 }
 
 std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, uint8_t hour) {
-  SPDLOG_DEBUG("Checking for icon matching condition: {}", condition);
   if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
     for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["home_assistant_weather_mappings"]) {
       if (std::string(mapping["condition"]).compare(condition) == 0) {
@@ -296,23 +313,23 @@ void MQTTManagerWeather::send_state_update() {
       SPDLOG_ERROR("Unknown weather controller {}. Will not set an icon!", MqttManagerConfig::weather_controller);
       weather_info["icon"] = "";
     }
-    std::string pre = std::to_string((int)(info.precipitation + 0.5));
+    std::string pre = std::to_string((int)round(info.precipitation));
     pre.append(this->_precipitation_unit);
     forecast_data["pre"] = pre;
-    std::string prepro = std::to_string((int)(info.precipitation_probability + 0.5));
+    std::string prepro = std::to_string((int)round(info.precipitation_probability));
     prepro.append("%");
     forecast_data["prepro"] = prepro;
 
-    std::string templow = std::to_string((int)(info.temperature_low + 0.5));
+    std::string templow = std::to_string((int)round(info.temperature_low));
     templow.append("°");
-    std::string temphigh = std::to_string((int)(info.temperature_high + 0.5));
+    std::string temphigh = std::to_string((int)round(info.temperature_high));
     temphigh.append("°");
     std::string temp_display = temphigh;
     temp_display.append("/");
     temp_display.append(templow);
     forecast_data["maxmin"] = temp_display;
 
-    std::string wind = std::to_string((int)(info.wind_speed + 0.5));
+    std::string wind = std::to_string((int)round(info.wind_speed));
     wind.append(this->_windspeed_unit);
     forecast_data["wind"] = wind;
     forecast_data["day"] = info.day;
@@ -328,15 +345,26 @@ void MQTTManagerWeather::send_state_update() {
     SPDLOG_ERROR("Unknown weather controller {}. Will not set an icon!", MqttManagerConfig::weather_controller);
     weather_info["icon"] = "";
   }
-  std::string temp = std::to_string((int)(this->_current_temperature + 0.5));
+  std::string temp = std::to_string((int)round(this->_current_temperature));
   temp.append("°");
   weather_info["temp"] = temp;
-  std::string wind = std::to_string((int)(this->_current_wind_speed + 0.5));
+
+  std::string templow = std::to_string((int)round(this->_current_min_temperature));
+  templow.append("°");
+  std::string temphigh = std::to_string((int)round(this->_current_max_temperature));
+  temphigh.append("°");
+  std::string temp_display = temphigh;
+  temp_display.append("/");
+  temp_display.append(templow);
+  weather_info["maxmin"] = temp_display;
+
+  std::string wind = std::to_string((int)round(this->_current_wind_speed));
   wind.append(this->_windspeed_unit);
   weather_info["wind"] = wind;
 
   weather_info["sunrise"] = this->_next_sunrise;
   weather_info["sunset"] = this->_next_sunset;
+  weather_info["prepro"] = fmt::format("{}%", this->_current_precipitation_probability);
 
   MQTT_Manager::publish("nspanel/status/weather", weather_info.dump(), true);
 }

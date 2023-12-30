@@ -139,49 +139,46 @@ void ScreensaverPage::weatherMqttCallback(char *topic, byte *payload, unsigned i
   NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_WIND_TEXT_NAME, json["wind"]);
   NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_SUNRISE_TEXT_NAME, json["sunrise"]);
   NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_SUNSET_TEXT_NAME, json["sunset"]);
+  NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_MAXMIN_TEXT_NAME, json["maxmin"]);
+  NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_RAIN_TEXT_NAME, json["prepro"]);
 
   if (forecast.size() >= 1) {
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_MAXMIN_TEXT_NAME, forecast[0]["maxmin"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_RAIN_TEXT_NAME, forecast[0]["prepro"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY1_TEXT_NAME, forecast[0]["day"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON1_TEXT_NAME, forecast[0]["icon"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN1_TEXT_NAME, forecast[0]["maxmin"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN1_TEXT_NAME, forecast[0]["prepro"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND1_TEXT_NAME, forecast[0]["wind"]);
   }
 
   if (forecast.size() >= 2) {
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY1_TEXT_NAME, forecast[1]["day"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON1_TEXT_NAME, forecast[1]["icon"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN1_TEXT_NAME, forecast[1]["maxmin"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN1_TEXT_NAME, forecast[1]["prepro"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND1_TEXT_NAME, forecast[1]["wind"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY2_TEXT_NAME, forecast[1]["day"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON2_TEXT_NAME, forecast[1]["icon"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN2_TEXT_NAME, forecast[1]["maxmin"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN2_TEXT_NAME, forecast[1]["prepro"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND2_TEXT_NAME, forecast[1]["wind"]);
   }
 
   if (forecast.size() >= 3) {
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY2_TEXT_NAME, forecast[2]["day"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON2_TEXT_NAME, forecast[2]["icon"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN2_TEXT_NAME, forecast[2]["maxmin"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN2_TEXT_NAME, forecast[2]["prepro"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND2_TEXT_NAME, forecast[2]["wind"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY3_TEXT_NAME, forecast[2]["day"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON3_TEXT_NAME, forecast[2]["icon"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN3_TEXT_NAME, forecast[2]["maxmin"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN3_TEXT_NAME, forecast[2]["prepro"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND3_TEXT_NAME, forecast[2]["wind"]);
   }
 
   if (forecast.size() >= 4) {
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY3_TEXT_NAME, forecast[3]["day"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON3_TEXT_NAME, forecast[3]["icon"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN3_TEXT_NAME, forecast[3]["maxmin"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN3_TEXT_NAME, forecast[3]["prepro"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND3_TEXT_NAME, forecast[3]["wind"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY4_TEXT_NAME, forecast[3]["day"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON4_TEXT_NAME, forecast[3]["icon"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN4_TEXT_NAME, forecast[3]["maxmin"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN4_TEXT_NAME, forecast[3]["prepro"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND4_TEXT_NAME, forecast[3]["wind"]);
   }
 
   if (forecast.size() >= 5) {
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY4_TEXT_NAME, forecast[4]["day"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON4_TEXT_NAME, forecast[4]["icon"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN4_TEXT_NAME, forecast[4]["maxmin"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN4_TEXT_NAME, forecast[4]["prepro"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND4_TEXT_NAME, forecast[4]["wind"]);
-  }
-
-  if (forecast.size() >= 6) {
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY5_TEXT_NAME, forecast[5]["day"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON5_TEXT_NAME, forecast[5]["icon"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN5_TEXT_NAME, forecast[5]["maxmin"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN5_TEXT_NAME, forecast[5]["prepro"]);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND5_TEXT_NAME, forecast[5]["wind"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY5_TEXT_NAME, forecast[4]["day"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON5_TEXT_NAME, forecast[4]["icon"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN5_TEXT_NAME, forecast[4]["maxmin"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN5_TEXT_NAME, forecast[4]["prepro"]);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND5_TEXT_NAME, forecast[4]["wind"]);
   }
 }

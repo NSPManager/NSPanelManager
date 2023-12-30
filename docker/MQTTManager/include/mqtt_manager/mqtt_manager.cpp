@@ -36,7 +36,7 @@ void MQTT_Manager::connect() {
                       .user_name(MqttManagerConfig::mqtt_username)
                       .password(MqttManagerConfig::mqtt_password)
                       .keep_alive_interval(std::chrono::seconds(30))
-                      .automatic_reconnect(std::chrono::seconds(2), std::chrono::seconds(30))
+                      .automatic_reconnect(std::chrono::seconds(2), std::chrono::seconds(10))
                       .clean_session(false)
                       .finalize();
 
@@ -97,6 +97,7 @@ bool MQTT_Manager::is_connected() {
 void MQTT_Manager::_resubscribe() {
   SPDLOG_DEBUG("Subscribing to registered MQTT topics.");
   for (auto mqtt_topic_pair : MQTT_Manager::_subscribed_topics) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait 100ms between each subscribe in order for MQTT to catch up.
     SPDLOG_DEBUG("Subscribing to topic {}", mqtt_topic_pair.first);
     MQTT_Manager::_mqtt_client->subscribe(mqtt_topic_pair.first, mqtt_topic_pair.second);
   }

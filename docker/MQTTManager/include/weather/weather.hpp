@@ -39,6 +39,8 @@ private:
   std::string _next_sunrise;
   std::string _next_sunset;
   float _current_temperature;
+  float _current_max_temperature;
+  float _current_min_temperature;
   float _current_wind_speed;
   float _current_precipitation_probability;
 };
