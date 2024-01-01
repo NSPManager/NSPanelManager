@@ -56,9 +56,9 @@ void MQTT_Manager::connect() {
     }
 
     // Consume messages
+    MQTT_Manager::_mqtt_client->start_consuming();
     while (true) {
       auto msg = MQTT_Manager::_mqtt_client->consume_message();
-
       if (msg) {
         MQTT_Manager::_process_mqtt_message(msg->get_topic(), msg->get_payload());
       } else if (!MQTT_Manager::_mqtt_client->is_connected()) {
@@ -69,7 +69,6 @@ void MQTT_Manager::connect() {
         SPDLOG_INFO("Re-established connection");
         MQTT_Manager::_resubscribe();
         // Send buffered messages if any
-        std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
         auto it = MQTT_Manager::_mqtt_messages_buffer.begin();
         while (it != MQTT_Manager::_mqtt_messages_buffer.end()) {
           MQTT_Manager::_mqtt_client->publish((*it));
@@ -98,10 +97,18 @@ bool MQTT_Manager::is_connected() {
 void MQTT_Manager::_resubscribe() {
   std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
   SPDLOG_DEBUG("Subscribing to registered MQTT topics.");
+  mqtt::const_message_ptr msg;
   for (auto mqtt_topic_pair : MQTT_Manager::_subscribed_topics) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait 100ms between each subscribe in order for MQTT to catch up.
     SPDLOG_DEBUG("Subscribing to topic {}", mqtt_topic_pair.first);
     MQTT_Manager::_mqtt_client->subscribe(mqtt_topic_pair.first, mqtt_topic_pair.second);
+    bool received_message;
+    do {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait 100ms between each subscribe in order for MQTT to catch up.
+      received_message = MQTT_Manager::_mqtt_client->try_consume_message(&msg);
+      if (received_message) {
+        MQTT_Manager::_process_mqtt_message(msg->get_topic(), msg->get_payload());
+      }
+    } while (received_message);
   }
 }
 

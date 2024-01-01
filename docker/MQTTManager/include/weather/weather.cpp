@@ -162,7 +162,6 @@ void MQTTManagerWeather::openhab_current_weather_callback(nlohmann::json event_d
   }
 
   if (weather_state.size() > 0) {
-    SPDLOG_DEBUG("Got new current weather state update from OpenHAB.");
     nlohmann::json weather_json = nlohmann::json::parse(weather_state);
 
     this->_current_condition = weather_json["weather"][0]["description"];
@@ -202,7 +201,6 @@ void MQTTManagerWeather::openhab_forecast_weather_callback(nlohmann::json event_
   }
 
   if (forecast_state.size() > 0) {
-    SPDLOG_DEBUG("Got new weather forecast state update from OpenHAB.");
     nlohmann::json forecast_json = nlohmann::json::parse(forecast_state);
 
     struct weather_info day_summary;
@@ -211,51 +209,78 @@ void MQTTManagerWeather::openhab_forecast_weather_callback(nlohmann::json event_
     day_info_time.tm_year = 0; // Set initial year to 0.
 
     this->_forecast_weather_info.clear();
+    bool has_loaded_first_day = false;
     for (nlohmann::json &day_info : forecast_json["list"]) {
       time_t dt = uint64_t(day_info["dt"]);
       std::tm current_time = *std::localtime(&dt);
 
-      if (day_info_time.tm_year != 0 && day_info_time.tm_mday != current_time.tm_mday) {
-        this->_forecast_weather_info.push_back(day_summary);
-        SPDLOG_DEBUG("Adding OpenHAB weather(OpenWeatherMap) for {}-{:0>2}-{:0>2} {:0>2}:{:0>2} to forecast list.", day_summary.time.tm_year + 1900, day_summary.time.tm_mon + 1, day_summary.time.tm_mday, day_summary.time.tm_hour, day_summary.time.tm_min);
-      }
+      if (has_loaded_first_day) {
+        day_info_time.tm_mday = current_time.tm_mday;
+        has_loaded_first_day = true;
 
-      if (day_info_time.tm_year == 0 || current_time.tm_hour <= 14) {
-        day_summary.condition = day_info["weather"][0]["description"];
-        day_summary.condition_id = day_info["weather"][0]["id"];
+        // Update day summary with new values.
         day_summary.wind_speed = day_info["wind"]["speed"];
         day_summary.temperature_low = day_info["main"]["temp_min"];
         day_summary.temperature_high = day_info["main"]["temp_max"];
-        day_summary.precipitation = 0; // Unsed
         day_summary.precipitation_probability = float(day_info["pop"]) * 100;
-        day_summary.time = current_time;
+      }
 
-        switch (current_time.tm_wday) {
-        case 0:
-          day_summary.day = "Sun";
-          break;
-        case 1:
-          day_summary.day = "Mon";
-          break;
-        case 2:
-          day_summary.day = "Tue";
-          break;
-        case 3:
-          day_summary.day = "Wed";
-          break;
-        case 4:
-          day_summary.day = "Thu";
-          break;
-        case 5:
-          day_summary.day = "Fri";
-          break;
-        case 6:
-          day_summary.day = "Sat";
-          break;
-        default:
-          day_summary.day = std::to_string(current_time.tm_wday);
-          break;
-        }
+      if (day_info_time.tm_year != 0 && day_info_time.tm_mday != current_time.tm_mday) {
+        this->_forecast_weather_info.push_back(day_summary);
+        SPDLOG_DEBUG("Adding OpenHAB weather(OpenWeatherMap) for {}-{:0>2}-{:0>2} {:0>2}:{:0>2} to forecast list.", day_summary.time.tm_year + 1900, day_summary.time.tm_mon + 1, day_summary.time.tm_mday, day_summary.time.tm_hour, day_summary.time.tm_min);
+
+        // Update day summary with new values.
+        day_summary.wind_speed = day_info["wind"]["speed"];
+        day_summary.temperature_low = day_info["main"]["temp_min"];
+        day_summary.temperature_high = day_info["main"]["temp_max"];
+        day_summary.precipitation_probability = float(day_info["pop"]) * 100;
+      }
+
+      if (current_time.tm_hour <= 14) {
+        // We can only show one weather and not every 3-hour time span. Show midday. TODO: Try to create a summary or average the weater?
+        day_summary.condition = day_info["weather"][0]["description"];
+        day_summary.condition_id = day_info["weather"][0]["id"];
+      }
+      if (float(day_info["wind"]["speed"]) > day_summary.wind_speed) {
+        day_summary.wind_speed = day_info["wind"]["speed"];
+      }
+      if (float(day_info["main"]["temp_min"]) < day_summary.temperature_low) {
+        day_summary.temperature_low = day_info["main"]["temp_min"];
+      }
+      if (float(day_info["main"]["temp_max"]) > day_summary.temperature_high) {
+        day_summary.temperature_high = day_info["main"]["temp_max"];
+      }
+      if (float(day_info["pop"]) * 100 > day_summary.precipitation_probability) {
+        day_summary.precipitation_probability = float(day_info["pop"]) * 100;
+      }
+      day_summary.precipitation = 0; // Unsed
+      day_summary.time = current_time;
+
+      switch (current_time.tm_wday) {
+      case 0:
+        day_summary.day = "Sun";
+        break;
+      case 1:
+        day_summary.day = "Mon";
+        break;
+      case 2:
+        day_summary.day = "Tue";
+        break;
+      case 3:
+        day_summary.day = "Wed";
+        break;
+      case 4:
+        day_summary.day = "Thu";
+        break;
+      case 5:
+        day_summary.day = "Fri";
+        break;
+      case 6:
+        day_summary.day = "Sat";
+        break;
+      default:
+        day_summary.day = std::to_string(current_time.tm_wday);
+        break;
       }
 
       day_info_time = current_time;
