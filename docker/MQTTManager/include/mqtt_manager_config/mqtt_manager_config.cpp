@@ -4,6 +4,7 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <exception>
+#include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
@@ -18,6 +19,21 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 }
 
 void MqttManagerConfig::load() {
+  // Begin by loading timezone
+  std::ifstream f("/etc/timezone", std::ios::in | std::ios::binary);
+  const size_t file_size = std::filesystem::file_size("/etc/timezone");
+  std::string timezone_str(file_size, '\0');
+  f.read(timezone_str.data(), file_size);
+  f.close();
+
+  timezone_str.erase(std::find_if(timezone_str.rbegin(), timezone_str.rend(), [](unsigned char ch) {
+                       return !std::isspace(ch) && ch != '\n' && ch != '\r';
+                     }).base(),
+                     timezone_str.end());
+  MqttManagerConfig::timezone = timezone_str;
+
+  SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
+
   // Load sensitive variables from environment and not via http get request to manager.
   char *ha_address = std::getenv("HOME_ASSISTANT_ADDRESS");
   char *ha_token = std::getenv("HOME_ASSISTANT_TOKEN");

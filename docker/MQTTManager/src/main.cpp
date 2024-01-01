@@ -6,7 +6,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <filesystem>
-#include <fstream>
 #include <signal.h>
 #include <spdlog/spdlog.h>
 #include <stdio.h>
@@ -33,20 +32,9 @@ void sigusr1_handler(int signal) {
 }
 
 void publish_time_and_date() {
-  // Read and set timezone from /etc/timezone
-  std::ifstream f("/etc/timezone", std::ios::in | std::ios::binary);
-  const size_t file_size = std::filesystem::file_size("/etc/timezone");
-  std::string timezone_str(file_size, '\0');
-  f.read(timezone_str.data(), file_size);
-  f.close();
-
-  timezone_str.erase(std::find_if(timezone_str.rbegin(), timezone_str.rend(), [](unsigned char ch) {
-                       return !std::isspace(ch) && ch != '\n' && ch != '\r';
-                     }).base(),
-                     timezone_str.end());
-
-  SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
-  setenv("TZ", timezone_str.c_str(), 1);
+  // Set timezone
+  setenv("TZ", MqttManagerConfig::timezone.c_str(), 1);
+  tzset();
 
   // Timezone loaded, proceed to update MQTT
   for (;;) {

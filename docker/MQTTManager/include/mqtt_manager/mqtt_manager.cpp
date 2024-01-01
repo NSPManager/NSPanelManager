@@ -69,6 +69,7 @@ void MQTT_Manager::connect() {
         SPDLOG_INFO("Re-established connection");
         MQTT_Manager::_resubscribe();
         // Send buffered messages if any
+        std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
         auto it = MQTT_Manager::_mqtt_messages_buffer.begin();
         while (it != MQTT_Manager::_mqtt_messages_buffer.end()) {
           MQTT_Manager::_mqtt_client->publish((*it));
@@ -95,6 +96,7 @@ bool MQTT_Manager::is_connected() {
 }
 
 void MQTT_Manager::_resubscribe() {
+  std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
   SPDLOG_DEBUG("Subscribing to registered MQTT topics.");
   for (auto mqtt_topic_pair : MQTT_Manager::_subscribed_topics) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait 100ms between each subscribe in order for MQTT to catch up.
@@ -170,7 +172,11 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
   mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), 0, retain);
   if (MQTT_Manager::_mqtt_client != nullptr) {
     std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
-    MQTT_Manager::_mqtt_client->publish(msg);
+    if (MQTT_Manager::is_connected()) {
+      MQTT_Manager::_mqtt_client->publish(msg);
+    } else {
+      MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
+    }
   } else {
     MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
   }

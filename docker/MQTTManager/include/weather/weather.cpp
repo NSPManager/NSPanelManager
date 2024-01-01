@@ -149,6 +149,10 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
 }
 
 void MQTTManagerWeather::openhab_current_weather_callback(nlohmann::json event_data) {
+  // Set timezone
+  setenv("TZ", MqttManagerConfig::timezone.c_str(), 1);
+  tzset();
+
   std::string weather_state;
   if (std::string(event_data["type"]).compare("ItemStateChangedEvent") == 0) {
     nlohmann::json payload = nlohmann::json::parse(std::string(event_data["payload"]));
@@ -174,8 +178,8 @@ void MQTTManagerWeather::openhab_current_weather_callback(nlohmann::json event_d
 
     time_t sunrise = weather_json["sys"]["sunrise"];
     time_t sunset = weather_json["sys"]["sunset"];
-    std::tm sunrise_time = *std::gmtime(&sunrise); // Timestamp is returned in localtime, do not adjust according to timezone.
-    std::tm sunset_time = *std::gmtime(&sunset);   // Timestamp is returned in localtime, do not adjust according to timezone.
+    std::tm sunrise_time = *std::localtime(&sunrise);
+    std::tm sunset_time = *std::localtime(&sunset);
     this->_next_sunrise_hour = sunrise_time.tm_hour;
     this->_next_sunrise = fmt::format("{:0>2}:{:0>2}", sunrise_time.tm_hour, sunrise_time.tm_min);
     this->_next_sunset_hour = sunset_time.tm_hour;
@@ -185,6 +189,10 @@ void MQTTManagerWeather::openhab_current_weather_callback(nlohmann::json event_d
 }
 
 void MQTTManagerWeather::openhab_forecast_weather_callback(nlohmann::json event_data) {
+  // Set timezone
+  setenv("TZ", MqttManagerConfig::timezone.c_str(), 1);
+  tzset();
+
   std::string forecast_state;
   if (std::string(event_data["type"]).compare("ItemStateChangedEvent") == 0) {
     nlohmann::json payload = nlohmann::json::parse(std::string(event_data["payload"]));
@@ -209,7 +217,7 @@ void MQTTManagerWeather::openhab_forecast_weather_callback(nlohmann::json event_
 
       if (day_info_time.tm_year != 0 && day_info_time.tm_mday != current_time.tm_mday) {
         this->_forecast_weather_info.push_back(day_summary);
-        SPDLOG_DEBUG("Adding OpenHAB weather(OpenWeatherMap) for {}-{:0>2}-{:0>2} {:0>2}:{:0>2} to forecast list.", day_summary.time.tm_year + 1900, day_summary.time.tm_mon, day_summary.time.tm_mday, day_summary.time.tm_hour, day_summary.time.tm_min);
+        SPDLOG_DEBUG("Adding OpenHAB weather(OpenWeatherMap) for {}-{:0>2}-{:0>2} {:0>2}:{:0>2} to forecast list.", day_summary.time.tm_year + 1900, day_summary.time.tm_mon + 1, day_summary.time.tm_mday, day_summary.time.tm_hour, day_summary.time.tm_min);
       }
 
       if (day_info_time.tm_year == 0 || current_time.tm_hour <= 14) {
@@ -255,7 +263,7 @@ void MQTTManagerWeather::openhab_forecast_weather_callback(nlohmann::json event_
 
     // In case the last timestamp/day never reach 12:00 (midday) we need to add it manually.
     if (this->_forecast_weather_info.size() <= 4) {
-      SPDLOG_DEBUG("Adding OpenHAB weather(OpenWeatherMap) for {}-{:0>2}-{:0>2} {:0>2}:{:0>2} to forecast list.", day_summary.time.tm_year + 1900, day_summary.time.tm_mon, day_summary.time.tm_mday, day_summary.time.tm_hour, day_summary.time.tm_min);
+      SPDLOG_DEBUG("Adding OpenHAB weather(OpenWeatherMap) for {}-{:0>2}-{:0>2} {:0>2}:{:0>2} to forecast list.", day_summary.time.tm_year + 1900, day_summary.time.tm_mon + 1, day_summary.time.tm_mday, day_summary.time.tm_hour, day_summary.time.tm_min);
       this->_forecast_weather_info.push_back(day_summary); // Add the last forecast item
     }
 
