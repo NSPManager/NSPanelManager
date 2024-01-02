@@ -197,7 +197,6 @@ void OpenhabManager::_send_string(std::string &data) {
 void OpenhabManager::_process_openhab_event(nlohmann::json &event_data) {
   SPDLOG_TRACE("Processing Openhab event: {}", event_data.dump());
   if (std::string(event_data["type"]).compare("ItemStateChangedEvent") == 0) {
-    SPDLOG_DEBUG("Got new state data: {}", event_data.dump());
     // Extract topic into multiple parts
     std::string topic = event_data["topic"];
     std::vector<std::string> topic_parts;

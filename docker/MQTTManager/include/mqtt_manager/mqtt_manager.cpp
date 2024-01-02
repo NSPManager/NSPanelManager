@@ -14,6 +14,7 @@
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <mutex>
 #include <pthread.h>
+#include <ratio>
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <stdexcept>

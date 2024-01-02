@@ -236,10 +236,11 @@ void MQTTManagerWeather::openhab_forecast_weather_callback(nlohmann::json event_
         day_summary.precipitation_probability = float(day_info["pop"]) * 100;
       }
 
-      if (current_time.tm_hour <= 14) {
+      if (day_info_time.tm_year == 0 || current_time.tm_hour <= 14) {
         // We can only show one weather and not every 3-hour time span. Show midday. TODO: Try to create a summary or average the weater?
         day_summary.condition = day_info["weather"][0]["description"];
         day_summary.condition_id = day_info["weather"][0]["id"];
+        SPDLOG_DEBUG("Read weather ID {}", day_summary.condition_id);
       }
       if (float(day_info["wind"]["speed"]) > day_summary.wind_speed) {
         day_summary.wind_speed = day_info["wind"]["speed"];
