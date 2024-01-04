@@ -103,6 +103,8 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
       this->_current_condition = this->_forecast_weather_info[0].condition;
       this->_current_precipitation_probability = this->_forecast_weather_info[0].precipitation_probability;
       this->_current_wind_speed = new_state["attributes"]["wind_speed"];
+      this->_windspeed_unit = new_state["attributes"]["wind_speed_unit"];
+      this->_precipitation_unit = new_state["attributes"]["precipitation_unit"];
       this->_current_temperature = new_state["attributes"]["temperature"];
       this->_current_min_temperature = this->_forecast_weather_info[0].temperature_low;
       this->_current_max_temperature = this->_forecast_weather_info[0].temperature_high;
@@ -173,10 +175,12 @@ void MQTTManagerWeather::openhab_current_weather_callback(nlohmann::json event_d
       this->_current_temperature = weather_json["Temperature"]["Imperial"]["Value"];
       this->_current_wind_speed = weather_json["Wind"]["Speed"]["Imperial"]["Value"];
       this->_windspeed_unit = weather_json["Wind"]["Speed"]["Imperial"]["Unit"];
+      this->_precipitation_unit = weather_json["PrecipitationSummary"]["Precipitation"]["Imperial"]["Unit"];
     } else {
       this->_current_temperature = weather_json["Temperature"]["Metric"]["Value"];
       this->_current_wind_speed = weather_json["Wind"]["Speed"]["Metric"]["Value"];
       this->_windspeed_unit = weather_json["Wind"]["Speed"]["Metric"]["Unit"];
+      this->_precipitation_unit = weather_json["PrecipitationSummary"]["Precipitation"]["Metric"]["Unit"];
     }
 
     time_t weather_time = uint64_t(weather_json["EpochTime"]);
