@@ -77,5 +77,51 @@
 {"id":"802", "character-mapping-day":"C", "character-mapping-night":"D"},
 {"id":"803", "character-mapping-day":"C", "character-mapping-night":"D"},
 {"id":"804", "character-mapping-day":"C", "character-mapping-night":"D"}
+],
+
+"accu_weather_mappings": [
+{"id":"1", "character-mapping":"A", "text":"Sunny"},
+{"id":"2", "character-mapping":"C", "text":"Mostly Sunny"},
+{"id":"3", "character-mapping":"C", "text":"Partly Sunny"},
+{"id":"4", "character-mapping":"C", "text":"Intermittent Clouds"},
+{"id":"5", "character-mapping":"E", "text":"Hazy Sunshine"},
+{"id":"6", "character-mapping":"C", "text":"Mostly Cloudy"},
+{"id":"7", "character-mapping":"F", "text":"Cloudy"},
+{"id":"8", "character-mapping":"F", "text":"Dreary (Overcast"},
+{"id":"11", "character-mapping":"G", "text":"Fog"},
+{"id":"12", "character-mapping":"J", "text":"Showers"},
+{"id":"13", "character-mapping":"K", "text":"Mostly Cloudy w/ Showers"},
+{"id":"14", "character-mapping":"K", "text":"Partly Sunny w/ Showers"},
+{"id":"15", "character-mapping":"R", "text":"T-Storms"},
+{"id":"16", "character-mapping":"S", "text":"Mostly Cloudy w/ T-Storms"},
+{"id":"17", "character-mapping":"S", "text":"Partly Sunny w/ T-Storms"},
+{"id":"18", "character-mapping":"I", "text":"Rain"},
+{"id":"19", "character-mapping":"L", "text":"Flurries"},
+{"id":"20", "character-mapping":"O", "text":"Mostly Cloudy w/ Flurries"},
+{"id":"21", "character-mapping":"O", "text":"Partly Sunny w/ Flurries"},
+{"id":"22", "character-mapping":"M", "text":"Snow"},
+{"id":"23", "character-mapping":"O", "text":"Mostly Cloudy w/ Snow"},
+{"id":"24", "character-mapping":"Z", "text":"Ice"},
+{"id":"25", "character-mapping":"H", "text":"Sleet"},
+{"id":"26", "character-mapping":"N", "text":"Freezing Rain"},
+{"id":"29", "character-mapping":"N", "text":"Rain and Snow"},
+{"id":"30", "character-mapping":"V", "text":"Hot"},
+{"id":"31", "character-mapping":"[", "text":"Cold"},
+{"id":"32", "character-mapping":"T", "text":"Windy"},
+{"id":"33", "character-mapping":"B", "text":"Clear"},
+{"id":"34", "character-mapping":"D", "text":"Mostly Clear"},
+{"id":"35", "character-mapping":"D", "text":"Partly Cloudy"},
+{"id":"36", "character-mapping":"D", "text":"Intermittent Clouds"},
+{"id":"37", "character-mapping":"D", "text":"Hazy Moonlight"},
+{"id":"38", "character-mapping":"D", "text":"Mostly Cloudy"},
+{"id":"39", "character-mapping":"J", "text":"Partly Cloudy w/ Showers"},
+{"id":"40", "character-mapping":"J", "text":"Mostly Cloudy w/ Showers"},
+{"id":"41", "character-mapping":"R", "text":"Partly Cloudy w/ T-Storms"},
+{"id":"42", "character-mapping":"R", "text":"Mostly Cloudy w/ T-Storms"},
+{"id":"43", "character-mapping":"L", "text":"Mostly Cloudy w/ Flurries"},
+{"id":"44", "character-mapping":"M", "text":"Mostly Cloudy w/ Snow"}
 ]
 }
+
+
+
