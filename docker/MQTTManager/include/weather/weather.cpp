@@ -36,13 +36,15 @@ void MQTTManagerWeather::update_config() {
   }
 
   if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0) {
-    SPDLOG_INFO("Will load outside temperature from sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
+    SPDLOG_INFO("Will load outside temperature from Home Assistant sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
     HomeAssistantManager::attach_event_observer(this);
     OpenhabManager::detach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::openhab_temp_sensor_callback, this, _1));
   } else if (MqttManagerConfig::outside_temp_sensor_provider.compare("openhab") == 0) {
-    SPDLOG_INFO("Will load outside temperature from sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
-    HomeAssistantManager::detach_event_observer(this);
+    SPDLOG_INFO("Will load outside temperature from OpenHAB sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
     OpenhabManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::openhab_temp_sensor_callback, this, _1));
+    if (MqttManagerConfig::weather_controller.compare("home_assistant") != 0) {
+      HomeAssistantManager::detach_event_observer(this);
+    }
   }
 }
 
@@ -321,8 +323,19 @@ std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, u
   return "";
 }
 
-void MQTTManagerWeather::openhab_temp_sensor_callback(nlohmann::json data) {
-  SPDLOG_DEBUG("Got new temp sensor data from OpenHAB: {}", data.dump());
+void MQTTManagerWeather::openhab_temp_sensor_callback(nlohmann::json event_data) {
+  std::string temp_data;
+  if (std::string(event_data["type"]).compare("ItemStateChangedEvent") == 0) {
+    nlohmann::json payload = nlohmann::json::parse(std::string(event_data["payload"]));
+    temp_data = payload["value"];
+  } else if (std::string(event_data["type"]).compare("ItemStateFetched") == 0) {
+    temp_data = event_data["payload"]["state"];
+  }
+
+  if (temp_data.size() > 0) {
+    this->_current_temperature = atof(temp_data.c_str());
+    this->send_state_update();
+  }
 }
 
 void MQTTManagerWeather::send_state_update() {
@@ -392,5 +405,9 @@ void MQTTManagerWeather::send_state_update() {
   weather_info["sunset"] = this->_next_sunset;
   weather_info["prepro"] = fmt::format("{}%", this->_current_precipitation_probability);
 
-  MQTT_Manager::publish("nspanel/status/weather", weather_info.dump(), true);
+  std::string new_weather_data = weather_info.dump();
+  if (new_weather_data.compare(MQTTManagerWeather::_last_json_sent) != 0) {
+    MQTT_Manager::publish("nspanel/status/weather", new_weather_data, true);
+    MQTTManagerWeather::_last_json_sent = new_weather_data;
+  }
 }
