@@ -688,7 +688,7 @@ def weather_and_time(request):
         data["clock_us_style"] = get_setting_with_default("clock_us_style", False)
         data["use_farenheit"] = get_setting_with_default("use_farenheit", False)
         data["weather_type"] = get_setting_with_default("weather_controller", "")
-        data["outside_temp_sensor_provider"] = get_setting_with_default("outside_temp_sensor_provider", "")
+        data["outside_temp_provider"] = get_setting_with_default("outside_temp_sensor_provider", "")
         data["outside_temp_sensor"] = get_setting_with_default("outside_temp_sensor_entity_id", "")
         data["weather_home_assistant_weather_entity"] = get_setting_with_default("weather_home_assistant_weather_entity", "")
         data["weather_openhab_current_weather_item"] = get_setting_with_default("weather_openhab_current_weather_item", "")

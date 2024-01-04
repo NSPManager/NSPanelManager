@@ -124,10 +124,10 @@ void ScreensaverPage::weatherMqttCallback(char *topic, byte *payload, unsigned i
 
   LOG_DEBUG("Received new weather data.");
   std::string payload_str = std::string((char *)payload, length);
-  StaticJsonDocument<1024> json;
+  StaticJsonDocument<2048> json;
   DeserializationError error = deserializeJson(json, payload_str);
   if (error) {
-    LOG_ERROR("Failed to serialize weather data.");
+    LOG_ERROR("Failed to serialize weather data. Got code: ", error.code());
     return;
   }
   vTaskDelay(500 / portTICK_PERIOD_MS);

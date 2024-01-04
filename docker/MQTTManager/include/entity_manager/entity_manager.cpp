@@ -570,12 +570,10 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
         panel_responses.push_back(panel->get_websocket_json_representation());
       }
     }
-    SPDLOG_DEBUG("Returning get_nspanels_status response.");
     nlohmann::json response;
     response["nspanels"] = panel_responses;
     response["cmd_id"] = command_id;
     (*response_buffer) = response.dump();
-    SPDLOG_DEBUG("Response: {}", (*response_buffer));
     return true;
   } else if (command.compare("reboot_nspanels") == 0) {
     nlohmann::json args = data["args"];

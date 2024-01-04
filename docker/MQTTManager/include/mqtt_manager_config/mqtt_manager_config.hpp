@@ -40,6 +40,8 @@ public:
   static inline std::string weather_controller;
   static inline std::string home_assistant_weather_entity;
   static inline std::string home_assistant_sun_entity;
+  static inline std::string outside_temp_sensor_provider;
+  static inline std::string outside_temp_sensor_entity_id;
   static inline std::string openhab_current_weather_item;
   static inline std::string openhab_forecast_weather_item;
   static inline std::string timezone;

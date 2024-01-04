@@ -141,6 +141,11 @@ void HomeAssistantManager::_send_string(std::string &data) {
 }
 
 void HomeAssistantManager::attach_event_observer(HomeAssistantEventObserver *observer) {
+  for (HomeAssistantEventObserver *stored_observer : HomeAssistantManager::_home_assistant_event_observers) {
+    if (stored_observer == observer) {
+      return;
+    }
+  }
   HomeAssistantManager::_home_assistant_event_observers.push_back(observer);
 }
 

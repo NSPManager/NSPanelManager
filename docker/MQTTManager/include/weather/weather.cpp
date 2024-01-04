@@ -34,6 +34,16 @@ void MQTTManagerWeather::update_config() {
   } else {
     SPDLOG_ERROR("Unsupported weather controller '{}'.", MqttManagerConfig::weather_controller);
   }
+
+  if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0) {
+    SPDLOG_INFO("Will load outside temperature from sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
+    HomeAssistantManager::attach_event_observer(this);
+    OpenhabManager::detach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::openhab_temp_sensor_callback, this, _1));
+  } else if (MqttManagerConfig::outside_temp_sensor_provider.compare("openhab") == 0) {
+    SPDLOG_INFO("Will load outside temperature from sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
+    HomeAssistantManager::detach_event_observer(this);
+    OpenhabManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::openhab_temp_sensor_callback, this, _1));
+  }
 }
 
 bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_data) {
@@ -100,12 +110,14 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
     SPDLOG_DEBUG("Loaded forecast for {} days.", this->_forecast_weather_info.size());
 
     if (this->_forecast_weather_info.size() > 0) {
+      if (MqttManagerConfig::outside_temp_sensor_provider.length() == 0 && MqttManagerConfig::outside_temp_sensor_entity_id.length() == 0) {
+        this->_current_temperature = new_state["attributes"]["temperature"];
+      }
       this->_current_condition = this->_forecast_weather_info[0].condition;
       this->_current_precipitation_probability = this->_forecast_weather_info[0].precipitation_probability;
       this->_current_wind_speed = new_state["attributes"]["wind_speed"];
       this->_windspeed_unit = new_state["attributes"]["wind_speed_unit"];
       this->_precipitation_unit = new_state["attributes"]["precipitation_unit"];
-      this->_current_temperature = new_state["attributes"]["temperature"];
       this->_current_min_temperature = this->_forecast_weather_info[0].temperature_low;
       this->_current_max_temperature = this->_forecast_weather_info[0].temperature_high;
       std::time_t time = std::time({});
@@ -147,6 +159,10 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
     this->_next_sunrise = fmt::format("{}:{}", rising_hour, rising_minute);
     this->_next_sunset_hour = atoi(setting_hour.c_str());
     this->_next_sunset = fmt::format("{}:{}", setting_hour, setting_minute);
+  } else if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0 && std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::outside_temp_sensor_entity_id) == 0) {
+    nlohmann::json new_state = event_data["event"]["data"]["new_state"];
+    this->_current_temperature = atof(std::string(new_state["state"]).c_str());
+    this->send_state_update();
   }
   return false;
 }
@@ -172,12 +188,16 @@ void MQTTManagerWeather::openhab_current_weather_callback(nlohmann::json event_d
     this->_current_condition_id = weather_json["WeatherIcon"];
 
     if (MqttManagerConfig::use_farenheit) {
-      this->_current_temperature = weather_json["Temperature"]["Imperial"]["Value"];
+      if (MqttManagerConfig::outside_temp_sensor_provider.length() == 0 && MqttManagerConfig::outside_temp_sensor_entity_id.length() == 0) {
+        this->_current_temperature = weather_json["Temperature"]["Imperial"]["Value"];
+      }
       this->_current_wind_speed = weather_json["Wind"]["Speed"]["Imperial"]["Value"];
       this->_windspeed_unit = weather_json["Wind"]["Speed"]["Imperial"]["Unit"];
       this->_precipitation_unit = weather_json["PrecipitationSummary"]["Precipitation"]["Imperial"]["Unit"];
     } else {
-      this->_current_temperature = weather_json["Temperature"]["Metric"]["Value"];
+      if (MqttManagerConfig::outside_temp_sensor_provider.length() == 0 && MqttManagerConfig::outside_temp_sensor_entity_id.length() == 0) {
+        this->_current_temperature = weather_json["Temperature"]["Metric"]["Value"];
+      }
       this->_current_wind_speed = weather_json["Wind"]["Speed"]["Metric"]["Value"];
       this->_windspeed_unit = weather_json["Wind"]["Speed"]["Metric"]["Unit"];
       this->_precipitation_unit = weather_json["PrecipitationSummary"]["Precipitation"]["Metric"]["Unit"];
@@ -299,6 +319,10 @@ std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, u
 
   SPDLOG_ERROR("Couldn't find a mapping for condition {} using controller {}.", condition, MqttManagerConfig::weather_controller);
   return "";
+}
+
+void MQTTManagerWeather::openhab_temp_sensor_callback(nlohmann::json data) {
+  SPDLOG_DEBUG("Got new temp sensor data from OpenHAB: {}", data.dump());
 }
 
 void MQTTManagerWeather::send_state_update() {

@@ -11,6 +11,7 @@ public:
   bool home_assistant_event_callback(nlohmann::json &event_data);
   void openhab_current_weather_callback(nlohmann::json event_data);
   void openhab_forecast_weather_callback(nlohmann::json event_data);
+  void openhab_temp_sensor_callback(nlohmann::json event_data);
   void send_state_update();
 
 private:
