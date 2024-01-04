@@ -48,7 +48,6 @@ void MQTT_Manager::connect() {
 
     SPDLOG_DEBUG("Subscribing to topics...");
     MQTT_Manager::_mqtt_client->subscribe(MQTT_Manager::_get_subscribe_topics(), MQTT_Manager::_get_subscribe_topics_qos());
-    MQTT_Manager::_resubscribe();
     // Send buffered messages if any
     auto it = MQTT_Manager::_mqtt_messages_buffer.begin();
     while (it != MQTT_Manager::_mqtt_messages_buffer.end()) {
@@ -114,8 +113,8 @@ void MQTT_Manager::_resubscribe() {
 }
 
 const std::vector<std::string> MQTT_Manager::_get_subscribe_topics() {
+  // TODO: Remove this type of subscription, perform subscribe in each room and so on.
   std::vector<std::string> subscribe_topics;
-  subscribe_topics.push_back("nspanel/+/log");
   subscribe_topics.push_back("nspanel/scenes/room/+/+/save");
   subscribe_topics.push_back("nspanel/scenes/room/+/+/activate");
   subscribe_topics.push_back("nspanel/scenes/global/+/save");
@@ -125,7 +124,6 @@ const std::vector<std::string> MQTT_Manager::_get_subscribe_topics() {
 
 const std::vector<int> MQTT_Manager::_get_subscribe_topics_qos() {
   std::vector<int> subscribe_topics;
-  subscribe_topics.push_back(1);
   subscribe_topics.push_back(1);
   subscribe_topics.push_back(1);
   subscribe_topics.push_back(1);

@@ -9,6 +9,8 @@ function add_new_entity_to_list(entity, type) {
       icon = "mdi-weather-cloudy";
     } else if (entity.entity_id.startsWith("sun.")) {
       icon = "mdi-weather-sunny";
+    } else if (entity.entity_id.startsWith("sensor.")) {
+      icon = "mdi-import";
     } else {
       icon = "mdi-help";
     }

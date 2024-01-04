@@ -675,6 +675,8 @@ def weather_and_time(request):
             print(F"ERROR! Unknown weather controller: {weather_type}")
 
 
+        set_setting_value("outside_temp_sensor_provider", request.POST["outside_temp_provider"]);
+        set_setting_value("outside_temp_sensor_entity_id", request.POST["outside_temp_sensor"]);
         set_setting_value("date_format", request.POST["date_format"])
         set_setting_value("clock_us_style", "clock_us_style" in request.POST)
         set_setting_value("use_farenheit", "use_farenheit" in request.POST)
@@ -686,17 +688,11 @@ def weather_and_time(request):
         data["clock_us_style"] = get_setting_with_default("clock_us_style", False)
         data["use_farenheit"] = get_setting_with_default("use_farenheit", False)
         data["weather_type"] = get_setting_with_default("weather_controller", "")
+        data["outside_temp_sensor_provider"] = get_setting_with_default("outside_temp_sensor_provider", "")
+        data["outside_temp_sensor"] = get_setting_with_default("outside_temp_sensor_entity_id", "")
         data["weather_home_assistant_weather_entity"] = get_setting_with_default("weather_home_assistant_weather_entity", "")
         data["weather_openhab_current_weather_item"] = get_setting_with_default("weather_openhab_current_weather_item", "")
         data["weather_openhab_forecast_weather_item"] = get_setting_with_default("weather_openhab_forecast_weather_item", "")
         data["sun_entity"] = get_setting_with_default("sun_entity", "")
-
-        weather_controller = get_setting_with_default("weather_controller", "")
-        if weather_controller == "home_assistant":
-            data["weather_entity"] = get_setting_with_default("weather_home_assistant_weather_entity", "")
-        elif weather_controller == "openhab":
-            data["weather_entity"] = get_setting_with_default("weather_openhab_current_weather_item", "") + ", " + get_setting_with_default("weather_openhab_forecast_weather_item", "")
-        else:
-            data["weather_entity"] = ""
             
         return render(request, "weather_and_time.html", data)

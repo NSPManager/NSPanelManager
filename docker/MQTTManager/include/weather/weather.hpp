@@ -21,6 +21,8 @@ private:
     int condition_id; // Only used for OpenHAB/OpenWeatherMap
     std::string day;
     std::tm time;
+    std::tm sunrise;
+    std::tm sunset;
     float precipitation;
     float precipitation_probability;
     float temperature_low;

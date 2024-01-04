@@ -16,6 +16,7 @@
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <vector>
 
 void MQTTManagerWeather::update_config() {
   if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
@@ -162,27 +163,25 @@ void MQTTManagerWeather::openhab_current_weather_callback(nlohmann::json event_d
   }
 
   if (weather_state.size() > 0) {
-    nlohmann::json weather_json = nlohmann::json::parse(weather_state);
+    nlohmann::json json_decode = nlohmann::json::parse(weather_state);
+    nlohmann::json weather_json = json_decode[0];
 
-    this->_current_condition = weather_json["weather"][0]["description"];
-    this->_current_condition_id = weather_json["weather"][0]["id"];
+    this->_current_condition = weather_json["WeatherText"];
+    this->_current_condition_id = weather_json["WeatherIcon"];
 
-    this->_current_temperature = weather_json["main"]["temp"];
-    this->_current_min_temperature = weather_json["main"]["temp_min"];
-    this->_current_max_temperature = weather_json["main"]["temp_max"];
-    this->_current_wind_speed = weather_json["wind"]["speed"];
+    if (MqttManagerConfig::use_farenheit) {
+      this->_current_temperature = weather_json["Temperature"]["Imperial"]["Value"];
+      this->_current_wind_speed = weather_json["Wind"]["Speed"]["Imperial"]["Value"];
+      this->_windspeed_unit = weather_json["Wind"]["Speed"]["Imperial"]["Unit"];
+    } else {
+      this->_current_temperature = weather_json["Temperature"]["Metric"]["Value"];
+      this->_current_wind_speed = weather_json["Wind"]["Speed"]["Metric"]["Value"];
+      this->_windspeed_unit = weather_json["Wind"]["Speed"]["Metric"]["Unit"];
+    }
 
-    time_t weather_time = uint64_t(weather_json["dt"]);
+    time_t weather_time = uint64_t(weather_json["EpochTime"]);
     this->_current_weather_time = *std::localtime(&weather_time);
 
-    time_t sunrise = weather_json["sys"]["sunrise"];
-    time_t sunset = weather_json["sys"]["sunset"];
-    std::tm sunrise_time = *std::localtime(&sunrise);
-    std::tm sunset_time = *std::localtime(&sunset);
-    this->_next_sunrise_hour = sunrise_time.tm_hour;
-    this->_next_sunrise = fmt::format("{:0>2}:{:0>2}", sunrise_time.tm_hour, sunrise_time.tm_min);
-    this->_next_sunset_hour = sunset_time.tm_hour;
-    this->_next_sunset = fmt::format("{:0>2}:{:0>2}", sunset_time.tm_hour, sunset_time.tm_min);
     this->send_state_update();
   }
 }
@@ -203,61 +202,27 @@ void MQTTManagerWeather::openhab_forecast_weather_callback(nlohmann::json event_
   if (forecast_state.size() > 0) {
     nlohmann::json forecast_json = nlohmann::json::parse(forecast_state);
 
-    struct weather_info day_summary;
-    // std::tm day_info_time = *std::localtime(0);
-    std::tm day_info_time;
-    day_info_time.tm_year = 0; // Set initial year to 0.
-
     this->_forecast_weather_info.clear();
-    bool has_loaded_first_day = false;
-    for (nlohmann::json &day_info : forecast_json["list"]) {
-      time_t dt = uint64_t(day_info["dt"]);
-      std::tm current_time = *std::localtime(&dt);
+    for (nlohmann::json &day_info : forecast_json["DailyForecasts"]) {
+      struct weather_info day_summary;
+      time_t dt = uint64_t(day_info["EpochDate"]);
+      day_summary.time = *std::localtime(&dt);
 
-      if (has_loaded_first_day) {
-        day_info_time.tm_mday = current_time.tm_mday;
-        has_loaded_first_day = true;
+      day_summary.condition = day_info["Day"]["ShortPhrase"];
+      day_summary.condition_id = day_info["Day"]["Icon"];
+      day_summary.temperature_low = day_info["Temperature"]["Minimum"]["Value"];
+      day_summary.temperature_high = day_info["Temperature"]["Maximum"]["Value"];
+      day_summary.wind_speed = day_info["Day"]["Wind"]["Speed"]["Value"];
+      day_summary.precipitation_probability = day_info["Day"]["PrecipitationProbability"];
 
-        // Update day summary with new values.
-        day_summary.wind_speed = day_info["wind"]["speed"];
-        day_summary.temperature_low = day_info["main"]["temp_min"];
-        day_summary.temperature_high = day_info["main"]["temp_max"];
-        day_summary.precipitation_probability = float(day_info["pop"]) * 100;
-      }
+      // sunrise
+      time_t dt_sunrise = uint64_t(day_info["Sun"]["EpochRise"]);
+      day_summary.sunrise = *std::localtime(&dt_sunrise);
+      // sunset
+      time_t dt_sunset = uint64_t(day_info["Sun"]["EpochSet"]);
+      day_summary.sunset = *std::localtime(&dt_sunset);
 
-      if (day_info_time.tm_year != 0 && day_info_time.tm_mday != current_time.tm_mday) {
-        this->_forecast_weather_info.push_back(day_summary);
-        SPDLOG_DEBUG("Adding OpenHAB weather(OpenWeatherMap) for {}-{:0>2}-{:0>2} {:0>2}:{:0>2} to forecast list.", day_summary.time.tm_year + 1900, day_summary.time.tm_mon + 1, day_summary.time.tm_mday, day_summary.time.tm_hour, day_summary.time.tm_min);
-
-        // Update day summary with new values.
-        day_summary.wind_speed = day_info["wind"]["speed"];
-        day_summary.temperature_low = day_info["main"]["temp_min"];
-        day_summary.temperature_high = day_info["main"]["temp_max"];
-        day_summary.precipitation_probability = float(day_info["pop"]) * 100;
-      }
-
-      if (day_info_time.tm_year == 0 || current_time.tm_hour <= 14) {
-        // We can only show one weather and not every 3-hour time span. Show midday. TODO: Try to create a summary or average the weater?
-        day_summary.condition = day_info["weather"][0]["description"];
-        day_summary.condition_id = day_info["weather"][0]["id"];
-        SPDLOG_DEBUG("Read weather ID {}", day_summary.condition_id);
-      }
-      if (float(day_info["wind"]["speed"]) > day_summary.wind_speed) {
-        day_summary.wind_speed = day_info["wind"]["speed"];
-      }
-      if (float(day_info["main"]["temp_min"]) < day_summary.temperature_low) {
-        day_summary.temperature_low = day_info["main"]["temp_min"];
-      }
-      if (float(day_info["main"]["temp_max"]) > day_summary.temperature_high) {
-        day_summary.temperature_high = day_info["main"]["temp_max"];
-      }
-      if (float(day_info["pop"]) * 100 > day_summary.precipitation_probability) {
-        day_summary.precipitation_probability = float(day_info["pop"]) * 100;
-      }
-      day_summary.precipitation = 0; // Unsed
-      day_summary.time = current_time;
-
-      switch (current_time.tm_wday) {
+      switch (day_summary.time.tm_wday) {
       case 0:
         day_summary.day = "Sun";
         break;
@@ -280,22 +245,21 @@ void MQTTManagerWeather::openhab_forecast_weather_callback(nlohmann::json event_
         day_summary.day = "Sat";
         break;
       default:
-        day_summary.day = std::to_string(current_time.tm_wday);
+        day_summary.day = std::to_string(day_summary.time.tm_wday);
         break;
       }
 
-      day_info_time = current_time;
-    }
-
-    // In case the last timestamp/day never reach 12:00 (midday) we need to add it manually.
-    if (this->_forecast_weather_info.size() <= 4) {
       SPDLOG_DEBUG("Adding OpenHAB weather(OpenWeatherMap) for {}-{:0>2}-{:0>2} {:0>2}:{:0>2} to forecast list.", day_summary.time.tm_year + 1900, day_summary.time.tm_mon + 1, day_summary.time.tm_mday, day_summary.time.tm_hour, day_summary.time.tm_min);
-      this->_forecast_weather_info.push_back(day_summary); // Add the last forecast item
+      this->_forecast_weather_info.push_back(day_summary);
     }
 
     if (this->_forecast_weather_info.size() > 0) {
       // Unfortunetly OpenWeatherMap doesn't provide a precipitation_probability for the current time and so the next best thing is the first item in the forecast.
       this->_current_precipitation_probability = this->_forecast_weather_info[0].precipitation_probability;
+      this->_next_sunrise_hour = this->_forecast_weather_info[0].sunrise.tm_hour;
+      this->_next_sunrise = fmt::format("{:0>2}:{:0>2}", this->_forecast_weather_info[0].sunrise.tm_hour, this->_forecast_weather_info[0].sunrise.tm_min);
+      this->_next_sunset_hour = this->_forecast_weather_info[0].sunset.tm_hour;
+      this->_next_sunset = fmt::format("{:0>2}:{:0>2}", this->_forecast_weather_info[0].sunset.tm_hour, this->_forecast_weather_info[0].sunset.tm_min);
       this->send_state_update();
     } else {
       SPDLOG_ERROR("Failed to load any forecast from OpenHAB weather.");

@@ -5,6 +5,131 @@
   <script src="{% static 'question.js' %}?refresh={% now 'U' %}"></script>
   <script src="{% static 'modal-select-entity.js' %}?refresh={% now 'U' %}"></script>
   <script>
+    function select_new_outside_temp_sensor() {
+      var types = {
+        "home_assistant_type_filter": JSON.stringify([
+          "sensor"
+        ])
+      };
+      select_new_entity(types, (element) => {
+        $(".modal").removeClass("is-active");
+        var weather_entity_id = $(element.currentTarget).data("entity_id");
+        var entity_type = $(element.currentTarget).data("type");
+        if(entity_type == "home_assistant") {
+          $("#outside_temp_provider").val(entity_type);
+          $("#outside_temp_sensor").val(weather_entity_id);
+        } else if (entity_type == "openhab") {
+          var temp_thing = $(element.currentTarget).data("entity_id");
+          var items = $(element.currentTarget).data("items");
+          var temp_item = "";
+          if(items.length > 1) {
+            var options = [];
+            items.forEach(item => {
+              options.push({text: item, value: item});
+            });
+
+            select_openhab_items("Select temperature item", options, [
+              {text: "Outside temperature sensor", id: "temp_item"},
+            ], (data) => {
+              temp_item = data["temp_item"];
+            });
+          } else if(items.length == 1) {
+            temp_item = items[0];
+          } else {
+            alert("No items/channels linked to thing! Cannot proceed.");
+          }
+
+          $("#outside_temp_provider").val(entity_type);
+          $("#outside_temp_sensor").val(temp_item);
+        }else {
+          $("#outside_temp_provider").val("");
+          $("#outside_temp_sensor").val("");
+          alert("Unknown entity type. Cannot proceed!");
+        }
+      });
+    }
+
+    function select_home_assistant_weather_entity() {
+      var types = {
+        "home_assistant_type_filter": JSON.stringify([
+          "weather"
+        ])
+      };
+      select_new_entity(types, (element) => {
+        var weather_entity_id = $(element.currentTarget).data("entity_id");
+        $(".modal").removeClass("is-active");
+        $("#weather_home_assistant_entity").val(weather_entity_id);
+      });
+    }
+
+    function select_openhab_weather_entity() {
+      var types = {
+        "home_assistant_type_filter": JSON.stringify([
+          "weather"
+        ])
+      };
+      select_new_entity(types, (element) => {
+        $(".modal").removeClass("is-active");
+
+        var weather_thing = $(element.currentTarget).data("entity_id");
+        var items = $(element.currentTarget).data("items");
+        var openhab_weather_item = "";
+        if(items.length > 1) {
+          var options = [];
+          items.forEach(item => {
+            options.push({text: item, value: item});
+          });
+
+          select_openhab_items("Select weather item", options, [
+            {text: "Current weather item", id: "current_weather_item"},
+          ], (data) => {
+            openhab_weather_item = data["current_weather_item"];
+          });
+        } else if(items.length == 1) {
+          openhab_weather_item = items[0];
+        } else {
+          alert("No items/channels linked to thing! Cannot proceed.");
+        }
+
+        $("#weather_openhab_current_weather_item").val(openhab_weather_item);
+      });
+    }
+
+
+    function select_openhab_forecast_entity() {
+      var types = {
+        "home_assistant_type_filter": JSON.stringify([
+          "weather"
+        ])
+      };
+      select_new_entity(types, (element) => {
+        $(".modal").removeClass("is-active");
+
+        var weather_thing = $(element.currentTarget).data("entity_id");
+        var items = $(element.currentTarget).data("items");
+        var openhab_weather_item = "";
+        if(items.length > 1) {
+          var options = [];
+          items.forEach(item => {
+            options.push({text: item, value: item});
+          });
+
+          select_openhab_items("Select forecast item", options, [
+            {text: "Forecast weather item", id: "forecast_weather_item"},
+          ], (data) => {
+            openhab_weather_item = data["forecast_weather_item"];
+          });
+        } else if(items.length == 1) {
+          openhab_weather_item = items[0];
+        } else {
+          alert("No items/channels linked to thing! Cannot proceed.");
+        }
+
+        $("#weather_openhab_forecast_weather_item").val(openhab_weather_item);
+      });
+
+    }
+
     function select_new_weather_entity() {
       var types = {
         "home_assistant_type_filter": JSON.stringify([
@@ -12,26 +137,6 @@
         ])
       };
       select_new_entity(types, select_weather_entity);
-    }
-
-    function select_weather_entity(element) {
-      $(".modal").removeClass("is-active");
-      if($(this).data("type") == "home_assistant") {
-        $("#weather_home_assistant_entity").val($(this).data("entity_id"));
-        $("#weather_entity").val($(this).text());
-        $("#weather_type").val("home_assistant");
-      } else {
-        var items = $(this).data("items");
-        var options = [];
-        items.forEach(item => {
-          options.push({text: item, value: item});
-        });
-
-        select_openhab_items("Select weather items", options, [
-          {text: "Current weather item", id: "current_weather_item"},
-          {text: "forecast weather item", id: "forecast_weather_item"}
-        ], openhab_weather_items_selected);
-      }
     }
 
     function select_new_sun_entity() {
@@ -46,41 +151,26 @@
       });
     }
 
-    function openhab_weather_items_selected(data) {
-      $(".modal").removeClass("is-active");
-      $("#weather_type").val("openhab");
-      $("#weather_openhab_current_weather_item").val(data["current_weather_item"]);
-      $("#weather_openhab_forecast_weather_item").val(data["forecast_weather_item"]);
-      $("#weather_entity").val(data["current_weather_item"] + ", " + data["forecast_weather_item"]);
+    function update_displayed_weather_select_options(entity) {
+      var weather_type = $("#weather_type").val();
+      if(weather_type == "home_assistant") {
+        $("#home_assistant_weather_input_group").show();
+        $("#home_assistant_sun_input_group").show();
+        $("#openhab_current_weather_input_group").hide();
+        $("#openhab_forecast_input_group").hide();
+      } else if (weather_type == "openhab") {
+        $("#home_assistant_weather_input_group").hide();
+        $("#home_assistant_sun_input_group").hide();
+        $("#openhab_current_weather_input_group").show();
+        $("#openhab_forecast_input_group").show();
+      } else {
+        console.log("ERROR: Weather type '" + weather_type + "' is unkown!");
+      }
     }
 
     $(document).ready(() => {
-      var types = {
-        "home_assistant_type_filter": JSON.stringify([
-          "weather"
-        ])
-      };
-      $.get("/api/get_all_available_entities", types, function (data) {
-        data.home_assistant_entities.forEach((entity) => {
-          $("#weather_entity").append($('<option>', {
-            value: "homeassistant," + entity.entity_id,
-            text: entity.label
-          }));
-        });
-
-        data.openhab_entities.forEach((entity) => {
-          $("#weather_entity").append($('<option>', {
-            value: "openhab," + entity.entity_id,
-            text: entity.label
-          }));
-        });
-        data.manual_entities.forEach((entity) => {
-          $("#weather_entity").append($('<option>', {
-            value: "manual," + entity.entity_id,
-            text: entity.label
-          }));
-        });
-      });
+      update_displayed_weather_select_options(null);
+      $("#weather_type").on('change', update_displayed_weather_select_options);
     });
   </script>
 {% endblock %}
@@ -118,6 +208,47 @@
         </div>
       </div>
 
+
+      <div class="field">
+        <label class="label">Outside temperature sensor<span class="question">
+          <span class="icon question_icon">
+            <i class="mdi mdi-information has-text-info"></i>
+          </span>
+          <div class="question_help_text notification is-info is-light">
+            If you wish to read the outside temperature from a sensor instead of displaying what is gathered from the weather provider.
+          </div>
+        </label>
+        <div class="control">
+          <input type="hidden" name="outside_temp_provider" id="outside_temp_provider" readonly value="{{ outside_temp_provider }}">
+          <input class="input" type="text" name="outside_temp_sensor" id="outside_temp_sensor" readonly value="{{ outside_temp_sensor }}">
+          <div class="control mt-2">
+            <a class="button is-primary" onclick="select_new_outside_temp_sensor();">Select temperature sensor</a>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="field">
+        <label class="label">Weather provider<span class="question">
+          <span class="icon question_icon">
+            <i class="mdi mdi-information has-text-info"></i>
+          </span>
+          <div class="question_help_text notification is-info is-light">
+            Select from which platform to read the current weather.
+          </div>
+        </label>
+        <div class="control">
+          <div class="control mt-2">
+            <div class="select">
+              <select name="weather_type" id="weather_type">
+                <option value="home_assistant" {% if weather_type == "home_assistant" %}selected{% endif %}>Home Assistant</option>
+                <option value="openhab" {% if weather_type == "openhab" %}selected{% endif %}>OpenHAB (AccuWeather)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="field">
         <label class="label">Weather entity<span class="question">
           <span class="icon question_icon">
@@ -128,18 +259,46 @@
           </div>
         </label>
         <div class="control">
-          <input type="hidden" name="weather_type" id="weather_type" value="{{ weather_type }}">
-          <input type="hidden" name="weather_home_assistant_entity" id="weather_home_assistant_entity" value="{{ weather_home_assistant_weather_entity }}">
-          <input type="hidden" name="weather_openhab_current_weather_item" id="weather_openhab_current_weather_item" value="{{ weather_openhab_current_weather_item }}">
-          <input type="hidden" name="weather_openhab_forecast_weather_item" id="weather_openhab_forecast_weather_item" value="{{ weather_openhab_forecast_weather_item }}">
-          <input class="input" type="text" name="weather_entity" id="weather_entity" readonly value="{{ weather_entity }}">
+          <div class="field has-addons has-addons-right" id="home_assistant_weather_input_group">
+            <p class="control">
+              <a class="button is-static">Weather</a>
+            </p>
+            <p class="control is-expanded">
+              <input type="input" class="input" name="weather_home_assistant_entity" id="weather_home_assistant_entity" readonly value="{{ weather_home_assistant_weather_entity }}">
+            </p>
+            <p class="control">
+              <a class="button is-primary" onclick="select_home_assistant_weather_entity();">Select</a>
+            </p>
+          </div>
+          <div class="field has-addons has-addons-right" id="openhab_current_weather_input_group">
+            <p class="control">
+              <a class="button is-static">Current weather</a>
+            </p>
+            <p class="control is-expanded">
+              <input type="input" class="input" name="weather_openhab_current_weather_item" id="weather_openhab_current_weather_item" readonly value="{{ weather_openhab_current_weather_item }}">
+            </p>
+            <p class="control">
+              <a class="button is-primary" onclick="select_openhab_weather_entity();">Select</a>
+            </p>
+          </div>
+          <div class="field has-addons has-addons-right" id="openhab_forecast_input_group">
+            <p class="control">
+              <a class="button is-static">Forecast</a>
+            </p>
+            <p class="control is-expanded">
+              <input type="input" class="input" name="weather_openhab_forecast_weather_item" id="weather_openhab_forecast_weather_item" readonly value="{{ weather_openhab_forecast_weather_item }}">
+            </p>
+            <p class="control">
+              <a class="button is-primary" onclick="select_openhab_forecast_entity();">Select</a>
+            </p>
+          </div>
           <div class="control mt-2">
-            <a class="button is-primary" onclick="select_new_weather_entity();">Select weather entity</a>
+            <a class="button is-primary hidden" id="select_ha_weather_entity" onclick="select_ha_weather_entity();">Select weather entity</a>
           </div>
         </div>
       </div>
 
-      <div class="field">
+      <div class="field" id="home_assistant_sun_input_group">
         <label class="label">Home Assistant sun<span class="question">
           <span class="icon question_icon">
             <i class="mdi mdi-information has-text-info"></i>
