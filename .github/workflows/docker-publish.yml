@@ -15,8 +15,9 @@ jobs:
       - uses: actions/checkout@v3
       - run: |
           sed -i "s/^version: [0-9\.]\+/version: ${{ github.ref_name }}/g" docker/config.yaml
-          sed -i "s/^Version: [0-9\.]\+/Version: ${{ github.ref_name }}/g" docker/web/nspanelmanager/web/templates/footer.html
+          sed -i "s/[0-9]\+\.[0-9]\+\.[0-9]\+/${{ github.ref_name }}/g" docker/web/nspanelmanager/web/templates/footer.html
       - uses: stefanzweifel/git-auto-commit-action@v4
+        if: ${{ !github.event.act }} # skip during local actions testing
         with:
           commit_message: Push updated version back to repo
           branch: main
