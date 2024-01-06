@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'docs/**'
+    paths-ignore:
+      - 'docs/tex/manual.pdf'
 
 jobs:
   update_manual:
