@@ -21,5 +21,4 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v4
         if: ${{ !github.event.act }}
         with:
-          commit_message: Push updated version back to repo
-          branch: main
+          commit_message: Push updated manual back to repo

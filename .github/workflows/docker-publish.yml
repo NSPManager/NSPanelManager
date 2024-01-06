@@ -20,7 +20,6 @@ jobs:
         if: ${{ !github.event.act }} # skip during local actions testing
         with:
           commit_message: Push updated version back to repo
-          branch: main
   publish:
     if: ${{ !github.event.act }} # skip during local actions testing
     name: Publish
