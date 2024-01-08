@@ -1,4 +1,4 @@
-FROM python:latest
+FROM python:3.11
 
 COPY web/ /usr/src/app/
 COPY nginx/sites-enabled/ /etc/nginx/sites-enabled/
