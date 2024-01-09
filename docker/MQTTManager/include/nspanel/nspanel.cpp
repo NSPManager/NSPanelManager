@@ -132,12 +132,20 @@ void NSPanel::update_config(nlohmann::json &init_data) {
   this->_nspanel_warnings = "";
   this->_temperature = -255;
   this->_update_progress = 0;
-  this->_relay1_is_mqtt_light = init_data["relay1_is_light"];
-  this->_relay2_is_mqtt_light = init_data["relay2_is_light"];
   if (init_data.contains("id")) {
     SPDLOG_DEBUG("Loaded NSPanel {}::{}.", this->_id, this->_name);
   } else {
     SPDLOG_DEBUG("Loaded NSPanel {} with no ID.", this->_name);
+  }
+  if (init_data.contains("relay1_is_light")) {
+    this->_relay1_is_mqtt_light = init_data["relay1_is_light"];
+  } else {
+    this->_relay1_is_mqtt_light = false;
+  }
+  if (init_data.contains("relay2_is_light")) {
+    this->_relay2_is_mqtt_light = init_data["relay2_is_light"];
+  } else {
+    this->_relay2_is_mqtt_light = false;
   }
 
   if (rebuilt_mqtt) {
