@@ -340,7 +340,7 @@ def register_nspanel(request):
     new_panel.save()
     # if not panel_already_exists:
     # restart_mqtt_manager()
-    send_mqttmanager_reload_command()
+    # send_mqttmanager_reload_command()
     return JsonResponse({"id": new_panel.id}, status=200)
 
 
@@ -374,6 +374,7 @@ def get_nspanel_config(request):
         base["screensaver_mode"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode", "with_background"))
         base["clock_us_style"] = get_setting_with_default("clock_us_style", "False")
         base["use_farenheit"] = get_setting_with_default("use_farenheit", "False")
+        base["is_us_panel"] = get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False")
         base["lock_to_default_room"] = get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False")
         base["reverse_relays"] = get_nspanel_setting_with_default(nspanel.id, "reverse_relays", False)
         base["relay1_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", False)

@@ -753,7 +753,11 @@ bool NSPanel::_updateTFTOTA() {
   downloadUrl.append(NSPMConfig::instance->manager_address);
   downloadUrl.append(":");
   downloadUrl.append(std::to_string(NSPMConfig::instance->manager_port));
-  downloadUrl.append("/download_tft");
+  if (!NSPMConfig::instance->is_us_panel) {
+    downloadUrl.append("/download_tft");
+  } else {
+    downloadUrl.append("/download_tft_us");
+  }
   LOG_DEBUG("Will try to download TFT from ", downloadUrl.c_str());
 
   unsigned long file_size = 0;

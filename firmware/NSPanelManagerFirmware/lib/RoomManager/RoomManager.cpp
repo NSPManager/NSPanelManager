@@ -84,6 +84,7 @@ void RoomManager::loadAllRooms(bool is_update) {
   InterfaceConfig::screensaver_mode = (*roomData)["screensaver_mode"].as<String>().c_str();
   InterfaceConfig::clock_us_style = (*roomData)["clock_us_style"].as<String>().equals("True");
   InterfaceConfig::lock_to_default_room = (*roomData)["lock_to_default_room"].as<String>().equals("True");
+  NSPMConfig::instance->is_us_panel = (*roomData)["is_us_panel"].as<String>().equals("True");
   NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>((*roomData)["button1_mode"].as<uint8_t>());
   NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>((*roomData)["button2_mode"].as<uint8_t>());
   NSPMConfig::instance->use_farenheit = (*roomData)["use_farenheit"].as<String>().equals("True");

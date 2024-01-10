@@ -60,8 +60,6 @@ bool NSPMConfig::loadFromLittleFS() {
   this->relay1_default_mode = doc["relay1_default_mode"].as<String>() == "True";
   this->relay2_default_mode = doc["relay2_default_mode"].as<String>() == "True";
 
-  this->is_us_panel = doc["is_us_panel"].as<String>() == "True";
-
   // Load calculated values
   this->mqtt_availability_topic = "nspanel/";
   this->mqtt_availability_topic.append(NSPMConfig::instance->wifi_hostname);

@@ -301,7 +301,7 @@ std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, u
       }
     }
   } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
-    for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["openweathermap_weather_mappings"]) {
+    for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["accu_weather_mappings"]) {
       if (std::string(mapping["id"]).compare(condition) == 0) {
         if (mapping.contains("character-mapping")) {
           return std::string(mapping["character-mapping"]);
