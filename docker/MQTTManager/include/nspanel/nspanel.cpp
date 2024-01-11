@@ -506,7 +506,6 @@ void NSPanel::update_warnings_from_manager() {
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
       /* Check for errors */
       if (res == CURLE_OK && !response_data.empty() && http_code == 200) {
-        SPDLOG_DEBUG("Got nspanels warnings. Processing data.");
         nlohmann::json data = nlohmann::json::parse(response_data);
         for (nlohmann::json panel : data["panels"]) {
           if (std::string(panel["nspanel"]["mac"]).compare(this->_mac) == 0) {
@@ -565,7 +564,7 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
       this->update_warnings_from_manager();
       SPDLOG_INFO("Panel registration OK. Updating internal data.");
       nlohmann::json data = nlohmann::json::parse(response_data);
-      this->_id = data["id"];
+      this->update_config(data); // Returned data from registration request is the same as data from the global /api/get_mqtt_manager_config
       this->register_to_home_assistant();
       // Registration to manager was OK, return true;
       SPDLOG_INFO("Panel registration completed.");

@@ -251,6 +251,7 @@ def save_panel_settings(request, panel_id: int):
     set_nspanel_setting_value(panel_id, "temperature_calibration", float(request.POST["temperature_calibration"]))
     set_nspanel_setting_value(panel_id, "default_page", request.POST["default_page"])
     panel.save()
+    send_mqttmanager_reload_command()
     return redirect('edit_nspanel', panel_id)
 
 

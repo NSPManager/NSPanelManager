@@ -1,5 +1,6 @@
 #include "mqtt_manager.hpp"
 #include "light/light.hpp"
+#include <boost/exception/diagnostic_information.hpp>
 #include <boost/signals2.hpp>
 #include <cctype>
 #include <chrono>
@@ -46,15 +47,6 @@ void MQTT_Manager::connect() {
     mqtt::connect_response rsp = MQTT_Manager::_mqtt_client->connect(connOpts);
     SPDLOG_INFO("Connected to server.");
 
-    SPDLOG_DEBUG("Subscribing to topics...");
-    MQTT_Manager::_mqtt_client->subscribe(MQTT_Manager::_get_subscribe_topics(), MQTT_Manager::_get_subscribe_topics_qos());
-    // Send buffered messages if any
-    auto it = MQTT_Manager::_mqtt_messages_buffer.begin();
-    while (it != MQTT_Manager::_mqtt_messages_buffer.end()) {
-      MQTT_Manager::_mqtt_client->publish((*it));
-      MQTT_Manager::_mqtt_messages_buffer.erase(it++);
-    }
-
     // Consume messages
     MQTT_Manager::_mqtt_client->start_consuming();
     while (true) {
@@ -66,13 +58,17 @@ void MQTT_Manager::connect() {
         while (!MQTT_Manager::_mqtt_client->is_connected()) {
           std::this_thread::sleep_for(std::chrono::milliseconds(250));
         }
-        SPDLOG_INFO("Re-established connection");
+        SPDLOG_INFO("Established connection to MQTT server.");
         MQTT_Manager::_resubscribe();
         // Send buffered messages if any
-        auto it = MQTT_Manager::_mqtt_messages_buffer.begin();
-        while (it != MQTT_Manager::_mqtt_messages_buffer.end()) {
-          MQTT_Manager::_mqtt_client->publish((*it));
-          MQTT_Manager::_mqtt_messages_buffer.erase(it++);
+        try {
+          auto it = MQTT_Manager::_mqtt_messages_buffer.cbegin();
+          while (it != MQTT_Manager::_mqtt_messages_buffer.cend()) {
+            MQTT_Manager::_mqtt_client->publish((*it));
+            MQTT_Manager::_mqtt_messages_buffer.erase(it++);
+          }
+        } catch (std::exception &e) {
+          SPDLOG_ERROR("Caught exception when trying to publish message: {}", boost::diagnostic_information(e, true));
         }
       }
     }
@@ -96,19 +92,28 @@ bool MQTT_Manager::is_connected() {
 
 void MQTT_Manager::_resubscribe() {
   std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
-  SPDLOG_DEBUG("Subscribing to registered MQTT topics.");
-  mqtt::const_message_ptr msg;
-  for (auto mqtt_topic_pair : MQTT_Manager::_subscribed_topics) {
-    SPDLOG_DEBUG("Subscribing to topic {}", mqtt_topic_pair.first);
-    MQTT_Manager::_mqtt_client->subscribe(mqtt_topic_pair.first, mqtt_topic_pair.second);
-    bool received_message;
-    do {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait 100ms between each subscribe in order for MQTT to catch up.
-      received_message = MQTT_Manager::_mqtt_client->try_consume_message(&msg);
-      if (received_message) {
-        MQTT_Manager::_process_mqtt_message(msg->get_topic(), msg->get_payload());
-      }
-    } while (received_message);
+  try {
+    SPDLOG_DEBUG("Subscribing to registered MQTT topics.");
+    MQTT_Manager::_mqtt_client->subscribe(MQTT_Manager::_get_subscribe_topics(), MQTT_Manager::_get_subscribe_topics_qos());
+
+    mqtt::const_message_ptr msg;
+    for (auto mqtt_topic_pair : MQTT_Manager::_subscribed_topics) {
+      SPDLOG_DEBUG("Subscribing to topic {}", mqtt_topic_pair.first);
+      auto subscribe_result = MQTT_Manager::_mqtt_client->subscribe(mqtt_topic_pair.first, mqtt_topic_pair.second);
+      int result_code = subscribe_result.get_reason_codes().front();
+      SPDLOG_DEBUG("Subscribed to {}. Got code: {}", mqtt_topic_pair.first, result_code);
+
+      bool received_message;
+      do {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait 100ms between each subscribe in order for MQTT to catch up.
+        received_message = MQTT_Manager::_mqtt_client->try_consume_message(&msg);
+        if (received_message) {
+          MQTT_Manager::_process_mqtt_message(msg->get_topic(), msg->get_payload());
+        }
+      } while (received_message);
+    }
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception trying to subscribe to topics: {}", boost::diagnostic_information(e, true));
   }
 }
 

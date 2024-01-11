@@ -102,17 +102,7 @@ def get_mqtt_manager_config(request):
 
     return_json["nspanels"] = {}
     for panel in NSPanel.objects.all():
-        panel_config = {
-            "type": "nspanel",
-            "id": panel.id,
-            "mac": panel.mac_address,
-            "name": panel.friendly_name,
-            "is_us_panel": get_nspanel_setting_with_default(panel.id, "is_us_panel", "False") == "True",
-            "address": panel.ip_address,
-            "relay1_is_light": panel.register_relay1_as_light,
-            "relay2_is_light": panel.register_relay2_as_light
-        }
-        return_json["nspanels"][panel.id] = panel_config
+        return_json["nspanels"][panel.id] = get_nspanel_json_representation(panel)
 
     return_json["scenes"] = []
     for scene in Scene.objects.all():
@@ -161,6 +151,18 @@ def get_mqtt_manager_config(request):
 
     return JsonResponse(return_json)
 
+def get_nspanel_json_representation(panel):
+    panel_config = {
+        "type": "nspanel",
+        "id": panel.id,
+        "mac": panel.mac_address,
+        "name": panel.friendly_name,
+        "is_us_panel": get_nspanel_setting_with_default(panel.id, "is_us_panel", "False") == "True",
+        "address": panel.ip_address,
+        "relay1_is_light": panel.register_relay1_as_light,
+        "relay2_is_light": panel.register_relay2_as_light
+    }
+    return panel_config
 
 def get_nspanels_warnings(request):
     md5_firmware = get_file_md5sum("firmware.bin")
@@ -338,10 +340,8 @@ def register_nspanel(request):
 
     # Save the update/Create new panel
     new_panel.save()
-    # if not panel_already_exists:
-    # restart_mqtt_manager()
-    # send_mqttmanager_reload_command()
-    return JsonResponse({"id": new_panel.id}, status=200)
+    json_response = get_nspanel_json_representation(new_panel)
+    return JsonResponse(json_response)
 
 
 def delete_panel(request, panel_id: int):
