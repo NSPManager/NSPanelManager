@@ -41,6 +41,10 @@ def index(request):
     else:
         temperature_unit = "°C"
 
+    notifications = []
+    if get_setting_with_default("manager_address", "") == "":
+        notifications.append({"text": "No manager address configured in settings.", "classes": "is-danger"})
+
     nspanels = []
     for nspanel in NSPanel.objects.all():
         panel_info = {}
@@ -49,7 +53,8 @@ def index(request):
 
     return render(request, 'index.html', {
         'nspanels': nspanels,
-        "temperature_unit": temperature_unit,
+        'notifications': notifications,
+        'temperature_unit': temperature_unit,
     })
 
 

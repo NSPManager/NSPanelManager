@@ -127,7 +127,6 @@
     \textbf{Installation}\newline
     Prerequisites:
     \begin{itemize}
-      \item Repository cloned/downloaded.
       \item Working Docker installation.
     \end{itemize}
     The pre-built container image is available on Docker hub as several different architectures, the following architectures are available:
@@ -180,14 +179,15 @@
     \begin{itemize}
       \item Navigate to the web interface. If the port was not changed it is available at port \textbf{8000}.
       \item Navigate to the "Settings"-page.
-      \item Enter MQTT server.
-        \note{If you are running the MQTT server as an add-on to Home Assistant, enter the IP-address of your Home Assistant server.}
-      \item Enter MQTT port if changed from default \textbf{1883}.
-      \item If authentication is used for MQTT, enter username and password.
-      \item If running Home Assistant, enter address with http or https and port, E.g. \textit{http://192.168.1.5:8123}. Also enter Home Assistant access token.
+      \item First of all, enter the connection details to the manager. This data is supplied to NSPanels when the try to find managers over the network. 
+      \item In the "Manager address"-field, enter the IP-address used to connect to the manager.
+      \item In the "Manager port"-field, enter the port used to connect to the manager. If you didn't change the port, this is 8000.
+      \item Enter connection details for your MQTT server, leave username and password empty if you do not use MQTT authentication.
+       \note{If you are running the MQTT server as an add-on to Home Assistant, enter the IP-address of your Home Assistant server.}
+      \item If you wish to use NSPanel Manager with Home Assistant, enter the connection details in the "Home Assistant API"-section. Enter the address with http or https and port, E.g. \textit{http://192.168.1.5:8123}. Also enter Home Assistant access token.
       \important{If you are running the container as an Home Assistant add-on, the address and access token will already be set. Do not change these!}
       \info{To get an access token in Home Assistant, navigate to Home Assistant and press your username in the bottom left. Scroll down and create a "Long-Lived Access Token".}
-      \item If running OpenHAB, enter address with http or https and port, E.g. \textit{http://192.168.1.5:8080}. Also enter OpenHAB access token.
+      \item If you wish to use NSPanel Manager with OpenHAB, enter the connection details in the "OpenHAB API"-section. Enter the address with http or https and port, E.g. \textit{http://192.168.1.5:8123}. Also enter OpenHAB access token.
       \info{To get an access token in OpenHAB, navigate to OpenHAB and press your username in the bottom left. Scroll down and create an "API Token".}
     \item Save the new settings and continue to \hyperref[sec:nspanel_flashing]{NSPanel flashing}.
     \end{itemize}
@@ -475,8 +475,7 @@
     \section{Advanced setup}
     \label{sec:advanced_setup}
     \subsection{Manual Docker container setup}
-    If you wish to manually build and setup the Docker container from source, use the command \\ \lstinline[language=bash]{docker build -t nspanelmanager .} while standing in the downloaded "docker"-directory. This will always be the same. To then start the container, the following command can be used:
-    \note{The extra dot at the end of the "docker build"-command is essential.}
+    If you wish to manually build and setup the Docker container from source first clone/download this git repository. Then use the command \lstinline[language=bash]{docker build -t nspanelmanager .} while standing in the downloaded "docker"-directory. This will always be the same. To then start the container, the following command can be used:
     \begin{lstlisting}[language=bash]
     docker run --name nspanelmanager -v /etc/timezone:/etc/timezone:ro -v \
     "$(pwd)/data/":"/data/" \

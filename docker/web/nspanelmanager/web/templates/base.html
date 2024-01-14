@@ -28,7 +28,12 @@
     {% include 'navbar.html' %}
 
     <div class="container mt-4 is-fullheight">
-        <div id="notification_holder" class="pb-4"></div> <!-- Displays any warnings or errors -->
+        <!-- Displays any warnings or errors -->
+        <div id="notification_holder" class="pb-4">
+          {% for notification in notifications %}
+            <div class="notification {{ notification.classes }}">{{ notification.text }}</div>
+          {% endfor %}
+        </div> 
         {% block content %}
         {% endblock %}
     </div>
