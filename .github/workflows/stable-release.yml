@@ -3,6 +3,8 @@ name: "Publish"
 on:
   release:
     types: [published]
+    branches:
+      - 'master'
 
 jobs:
   copy_config_template:
