@@ -482,26 +482,16 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
   std::string name = data["friendly_name"];
   SPDLOG_INFO("Got register request from NSPanel with name {} and MAC: {}", name, mac_address);
   NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_address);
-  if (panel != nullptr && (panel->get_state() != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT || (!panel->has_registered_to_manager() && panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::WAITING))) {
+  if (panel != nullptr && panel->get_state() != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
     SPDLOG_DEBUG("Has registered to manager? {}", panel->has_registered_to_manager() ? "TRUE" : "FALSE");
     if (panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
       SPDLOG_DEBUG("State: WAITING");
     } else if (panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
       SPDLOG_DEBUG("State: AWAITING_ACCEPT");
     } else {
-      SPDLOG_DEBUG("State: something else.");
+      SPDLOG_DEBUG("State: something else, {}.", int(panel->get_state()));
     }
-    std::string nspanel_command_topic = "nspanel/";
-    nspanel_command_topic.append(name);
-    nspanel_command_topic.append("/command");
-    if (panel->register_to_manager(data)) {
-      nlohmann::json response;
-      response["command"] = "register_accept";
-      response["address"] = MqttManagerConfig::manager_address.c_str();
-      response["port"] = MqttManagerConfig::manager_port;
-      MQTT_Manager::publish(nspanel_command_topic, response.dump());
-    }
-    panel->send_websocket_update();
+    panel->register_to_manager(data);
   } else {
     SPDLOG_INFO("Panel is not registered to manager, adding panel but as 'pending accept' status.");
     nlohmann::json init_data = data;

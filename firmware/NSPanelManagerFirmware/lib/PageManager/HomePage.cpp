@@ -610,7 +610,7 @@ void HomePage::updateRoomInfo() {
   if (InterfaceConfig::currentRoomMode == roomMode::room) {
     NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, (*RoomManager::currentRoom)->name.c_str());
   } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
-    NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, "<--ALL-->");
+    NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, "All");
   }
   this->updateLightStatus(true, true);
 }

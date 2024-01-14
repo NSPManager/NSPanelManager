@@ -1,3 +1,4 @@
+#include "esp32-hal.h"
 #include "freertos/portmacro.h"
 #include <Arduino.h>
 #include <ButtonManager.hpp>
@@ -27,6 +28,7 @@ TaskHandle_t _taskWifiAndMqttManager;
 WiFiClient espClient;
 MqttManager mqttManager;
 
+unsigned long lastRegistrationRequest = 0;
 unsigned long lastStatusReport = 0;
 unsigned long lastWiFiconnected = 0;
 
@@ -46,7 +48,8 @@ float readNTCTemperature(bool farenheit) {
 }
 
 void sendMqttManagerRegistrationRequest() {
-  if (MqttManager::connected()) {
+  // Only send registration requests with a 3 second interval.
+  if (MqttManager::connected() && millis() >= lastRegistrationRequest + 3000) {
     LOG_DEBUG("Sending MQTTManager register request.");
     StaticJsonDocument<512> doc;
     doc["command"] = "register_request";
@@ -61,6 +64,7 @@ void sendMqttManagerRegistrationRequest() {
     char buffer[512];
     serializeJson(doc, buffer);
     MqttManager::publish("nspanel/mqttmanager/command", buffer);
+    lastRegistrationRequest = millis();
   }
 }
 

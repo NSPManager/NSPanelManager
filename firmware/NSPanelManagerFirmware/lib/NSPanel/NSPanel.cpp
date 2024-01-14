@@ -668,7 +668,7 @@ bool NSPanel::_initTFTUpdate(int communication_baud_rate) {
   downloadUrl.append(":");
   downloadUrl.append(std::to_string(NSPMConfig::instance->manager_port));
   if (!NSPMConfig::instance->is_us_panel) {
-    downloadUrl.append("/download_tft");
+    downloadUrl.append("/download_tft_eu");
   } else {
     downloadUrl.append("/download_tft_us");
   }
@@ -754,7 +754,7 @@ bool NSPanel::_updateTFTOTA() {
   downloadUrl.append(":");
   downloadUrl.append(std::to_string(NSPMConfig::instance->manager_port));
   if (!NSPMConfig::instance->is_us_panel) {
-    downloadUrl.append("/download_tft");
+    downloadUrl.append("/download_tft_eu");
   } else {
     downloadUrl.append("/download_tft_us");
   }
@@ -847,7 +847,7 @@ bool NSPanel::_updateTFTOTA() {
     checksumUrl.append(":");
     checksumUrl.append(std::to_string(NSPMConfig::instance->manager_port));
     if (!NSPMConfig::instance->is_us_panel) {
-      checksumUrl.append("/checksum_tft_file");
+      checksumUrl.append("/checksum_tft_file_eu");
     } else {
       checksumUrl.append("/checksum_tft_file_us");
     }

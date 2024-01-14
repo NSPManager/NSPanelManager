@@ -127,11 +127,13 @@ void NSPanel::update_config(nlohmann::json &init_data) {
   }
   this->_has_registered_to_manager = init_data.contains("id");
   this->_is_register_accepted = init_data.contains("id");
-  this->_rssi = -255;
-  this->_heap_used_pct = 0;
-  this->_nspanel_warnings = "";
-  this->_temperature = -255;
-  this->_update_progress = 0;
+  if (this->_state == MQTT_MANAGER_NSPANEL_STATE::OFFLINE || this->_state == MQTT_MANAGER_NSPANEL_STATE::UNKNOWN) {
+    this->_rssi = -255;
+    this->_heap_used_pct = 0;
+    this->_nspanel_warnings = "";
+    this->_temperature = -255;
+    this->_update_progress = 0;
+  }
   if (init_data.contains("id")) {
     SPDLOG_DEBUG("Loaded NSPanel {}::{}.", this->_id, this->_name);
   } else {
@@ -541,42 +543,56 @@ bool NSPanel::has_registered_to_manager() {
 }
 
 bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload) {
-  CURL *curl;
-  CURLcode res;
-  curl = curl_easy_init();
-  if (curl) {
-    std::string response_data;
-    std::string payload_data = register_request_payload.dump();
-    SPDLOG_INFO("Sending registration data to Django for database management.");
-    curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:8000/api/register_nspanel");
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload_data.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+  try {
 
-    /* Perform the request, res will get the return code */
-    res = curl_easy_perform(curl);
-    long http_code;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-    /* Check for errors */
-    if (res == CURLE_OK && http_code == 200) {
-      SPDLOG_INFO("Panel registration OK. Checking for new warnings.");
-      this->update_warnings_from_manager();
-      SPDLOG_INFO("Panel registration OK. Updating internal data.");
-      nlohmann::json data = nlohmann::json::parse(response_data);
-      this->update_config(data); // Returned data from registration request is the same as data from the global /api/get_mqtt_manager_config
-      this->register_to_home_assistant();
-      // Registration to manager was OK, return true;
-      SPDLOG_INFO("Panel registration completed.");
-      return true;
-    } else {
-      SPDLOG_ERROR("curl_easy_perform() when registring panel failed, got code: {}.", curl_easy_strerror(res));
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+    if (curl) {
+      std::string response_data;
+      std::string payload_data = register_request_payload.dump();
+      SPDLOG_INFO("Sending registration data to Django for database management.");
+      curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:8000/api/register_nspanel");
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload_data.c_str());
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+
+      /* Perform the request, res will get the return code */
+      res = curl_easy_perform(curl);
+      long http_code;
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+      /* Check for errors */
+      if (res == CURLE_OK && http_code == 200) {
+        SPDLOG_INFO("Panel registration OK. Checking for new warnings.");
+        this->update_warnings_from_manager();
+        SPDLOG_INFO("Panel registration OK. Updating internal data.");
+        nlohmann::json data = nlohmann::json::parse(response_data);
+        this->update_config(data); // Returned data from registration request is the same as data from the global /api/get_mqtt_manager_config
+        this->register_to_home_assistant();
+        SPDLOG_INFO("Panel registration completed. Sending accept command to panel.");
+
+        // Everything was successfull, send registration accept to panel:
+        nlohmann::json response;
+        response["command"] = "register_accept";
+        response["address"] = MqttManagerConfig::manager_address.c_str();
+        response["port"] = MqttManagerConfig::manager_port;
+        MQTT_Manager::publish(this->_mqtt_command_topic, response.dump());
+
+        this->send_websocket_update();
+        curl_easy_cleanup(curl);
+        return true;
+      } else {
+        SPDLOG_ERROR("curl_easy_perform() when registring panel failed, got code: {}.", curl_easy_strerror(res));
+      }
+
+      /* always cleanup */
+      curl_easy_cleanup(curl);
     }
-
-    /* always cleanup */
-    curl_easy_cleanup(curl);
+  } catch (const std::exception &e) {
+    SPDLOG_ERROR("Caught exception when trying to register NSPanel: {}", boost::diagnostic_information(e, true));
   }
-  this->send_websocket_update();
+
   return false;
 }
 
@@ -608,6 +624,7 @@ void NSPanel::register_to_home_assistant() {
   temperature_sensor_data["state_topic"] = fmt::format("nspanel/{}/temperature_state", this->_name);
   temperature_sensor_data["unique_id"] = fmt::format("{}_temperature", this->_name);
   std::string temperature_sensor_data_str = temperature_sensor_data.dump();
+  SPDLOG_DEBUG("Registring temp sensor for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
   MQTT_Manager::publish(this->_mqtt_sensor_temperature_topic, temperature_sensor_data_str, true);
 
   // Register relay1
@@ -624,8 +641,10 @@ void NSPanel::register_to_home_assistant() {
     relay1_data["unique_id"] = fmt::format("{}_relay1", this->_mqtt_register_mac);
     std::string relay1_data_str = relay1_data.dump();
     MQTT_Manager::clear_retain(this->_mqtt_light_relay1_topic);
+    SPDLOG_DEBUG("Registring relay1 as relay for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
     MQTT_Manager::publish(this->_mqtt_switch_relay1_topic, relay1_data_str, true);
   } else {
+    // TODO
     SPDLOG_ERROR("Relay1 as light is not implemented yet!");
   }
 
@@ -643,6 +662,7 @@ void NSPanel::register_to_home_assistant() {
     relay2_data["unique_id"] = fmt::format("{}_relay2", this->_mqtt_register_mac);
     std::string relay2_data_str = relay2_data.dump();
     MQTT_Manager::clear_retain(this->_mqtt_light_relay2_topic);
+    SPDLOG_DEBUG("Registring relay2 as relay for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
     MQTT_Manager::publish(this->_mqtt_switch_relay2_topic, relay2_data_str, true);
   } else {
     SPDLOG_ERROR("Relay2 as light is not implemented yet!");
@@ -660,6 +680,7 @@ void NSPanel::register_to_home_assistant() {
   screen_data["payload_off"] = "0";
   screen_data["unique_id"] = fmt::format("{}_screen_state", this->_mqtt_register_mac);
   std::string screen_data_str = screen_data.dump();
+  SPDLOG_DEBUG("Registring screenstate switch for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
   MQTT_Manager::publish(this->_mqtt_switch_screen_topic, screen_data_str, true);
 
   // Register screen brightness
@@ -670,6 +691,7 @@ void NSPanel::register_to_home_assistant() {
   screen_brightness_data["max"] = "100";
   screen_brightness_data["unique_id"] = fmt::format("{}_screen_brightness", this->_mqtt_register_mac);
   std::string screen_brightness_data_str = screen_brightness_data.dump();
+  SPDLOG_DEBUG("Registring screen brightness for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
   MQTT_Manager::publish(this->_mqtt_number_screen_brightness_topic, screen_brightness_data_str, true);
 
   // Register screensaver brightness
@@ -680,6 +702,7 @@ void NSPanel::register_to_home_assistant() {
   screensaver_brightness_data["max"] = "100";
   screensaver_brightness_data["unique_id"] = fmt::format("{}_screensaver_brightness", this->_mqtt_register_mac);
   std::string screensaver_brightness_data_str = screensaver_brightness_data.dump();
+  SPDLOG_DEBUG("Registring screensaver brightness for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
   MQTT_Manager::publish(this->_mqtt_number_screensaver_brightness_topic, screensaver_brightness_data_str, true);
 }
 

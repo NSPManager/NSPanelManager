@@ -36,15 +36,7 @@ void WebsocketServer::start() {
 
 void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::ConnectionState> connectionState, ix::WebSocket &webSocket, const ix::WebSocketMessagePtr &msg) {
   try {
-    if (msg->type == ix::WebSocketMessageType::Open) {
-      SPDLOG_DEBUG("New websocket client at IP: {}", connectionState->getRemoteIp());
-    } else if (msg->type == ix::WebSocketMessageType::Close) {
-      SPDLOG_DEBUG("Websocket closed to client at IP: {}", connectionState->getRemoteIp());
-    } else if (msg->type == ix::WebSocketMessageType::Error) {
-      SPDLOG_ERROR("Websocket error to client at IP: {}", connectionState->getRemoteIp());
-    } else if (msg->type == ix::WebSocketMessageType::Fragment) {
-      SPDLOG_ERROR("Received websocket fragment from client at IP: {}. Websocket fragments are not suported.", connectionState->getRemoteIp());
-    } else if (msg->type == ix::WebSocketMessageType::Message) {
+    if (msg->type == ix::WebSocketMessageType::Message) {
       std::string message = msg->str;
       SPDLOG_DEBUG("Got message from websocket. Message: {}", message);
       std::string response_buffer;

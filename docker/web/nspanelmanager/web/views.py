@@ -559,7 +559,13 @@ def download_data_file(request):
 
 def download_tft(request):
     fs = FileSystemStorage()
-    filename = "gui.tft"
+    panel_ip = get_client_ip(request)
+    nspanel = NSPanel.objects.filter(ip_address = panel_ip).first()
+    if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True":
+        filename = "gui_us.tft"
+    else:
+        filename = "gui.tft"
+
     if "Range" in request.headers and request.headers["Range"].startswith("bytes="):
         parts = request.headers["Range"][6:].split('-')
         range_start = int(parts[0])
@@ -569,6 +575,18 @@ def download_tft(request):
     else:
         return HttpResponse(fs.open(filename).read(), content_type="application/octet-stream")
 
+
+def download_tft_eu(request):
+    fs = FileSystemStorage()
+    filename = "gui.tft"
+    if "Range" in request.headers and request.headers["Range"].startswith("bytes="):
+        parts = request.headers["Range"][6:].split('-')
+        range_start = int(parts[0])
+        range_end = int(parts[1])
+        data = fs.open(filename).read()
+        return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
+    else:
+        return HttpResponse(fs.open(filename).read(), content_type="application/octet-stream")
 
 def download_tft_us(request):
     fs = FileSystemStorage()
@@ -590,7 +608,18 @@ def checksum_firmware(request):
 def checksum_data_file(request):
     return HttpResponse(get_file_md5sum("data_file.bin"))
 
+
 def checksum_tft_file(request):
+    panel_ip = get_client_ip(request)
+    nspanel = NSPanel.objects.filter(ip_address = panel_ip).first()
+    if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True":
+        filename = "gui_us.tft"
+    else:
+        filename = "gui.tft"
+    return HttpResponse(get_file_md5sum(filename))
+
+
+def checksum_tft_file_eu(request):
     filename = "gui.tft"
     return HttpResponse(get_file_md5sum(filename))
 
@@ -599,11 +628,13 @@ def checksum_tft_file_us(request):
     filename = "gui_us.tft"
     return HttpResponse(get_file_md5sum(filename))
 
+
 def get_manual(request):
     fs = FileSystemStorage()
     response = HttpResponse(fs.open("manual.pdf").read(), content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="manual.pdf"'
     return response
+
 
 def global_scenes(request):
     data = {}

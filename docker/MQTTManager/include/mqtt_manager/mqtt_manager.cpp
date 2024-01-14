@@ -13,7 +13,6 @@
 #include <mqtt/message.h>
 #include <mqtt/subscribe_options.h>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
-#include <mutex>
 #include <pthread.h>
 #include <ratio>
 #include <spdlog/spdlog.h>
@@ -46,6 +45,18 @@ void MQTT_Manager::connect() {
     SPDLOG_INFO("Connecting to the MQTT Server...");
     mqtt::connect_response rsp = MQTT_Manager::_mqtt_client->connect(connOpts);
     SPDLOG_INFO("Connected to server.");
+
+    MQTT_Manager::_resubscribe();
+    SPDLOG_DEBUG("Sending buffered messages.");
+    try {
+      auto it = MQTT_Manager::_mqtt_messages_buffer.cbegin();
+      while (it != MQTT_Manager::_mqtt_messages_buffer.cend()) {
+        MQTT_Manager::_mqtt_client->publish((*it));
+        MQTT_Manager::_mqtt_messages_buffer.erase(it++);
+      }
+    } catch (std::exception &e) {
+      SPDLOG_ERROR("Caught exception when trying to publish message: {}", boost::diagnostic_information(e, true));
+    }
 
     // Consume messages
     MQTT_Manager::_mqtt_client->start_consuming();
@@ -91,7 +102,6 @@ bool MQTT_Manager::is_connected() {
 }
 
 void MQTT_Manager::_resubscribe() {
-  std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
   try {
     SPDLOG_DEBUG("Subscribing to registered MQTT topics.");
     MQTT_Manager::_mqtt_client->subscribe(MQTT_Manager::_get_subscribe_topics(), MQTT_Manager::_get_subscribe_topics_qos());
@@ -182,7 +192,6 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload)
 void MQTT_Manager::publish(const std::string &topic, const std::string &payload, bool retain) {
   mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), 0, retain);
   if (MQTT_Manager::_mqtt_client != nullptr) {
-    std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
     if (MQTT_Manager::is_connected()) {
       MQTT_Manager::_mqtt_client->publish(msg);
     } else {
@@ -196,7 +205,6 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
 void MQTT_Manager::clear_retain(const std::string &topic) {
   mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), "", 0, 0, true);
   if (MQTT_Manager::_mqtt_client != nullptr) {
-    std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
     MQTT_Manager::_mqtt_client->publish(msg);
   } else {
     MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
