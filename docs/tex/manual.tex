@@ -375,7 +375,7 @@
     \begin{lstlisting}
     Thing http:url:accu_weather "Accu Weather" [
       baseURL="http://dataservice.accuweather.com/",
-      refresh=18000] {
+      refresh=1800] {
       Channels:
       Type string : weather "weather" [ stateExtension="/currentconditions/v1/<locationid>?apikey=<apikey>&details=true" ]
     }
@@ -387,6 +387,7 @@
       Type string : forecast "forecast" [ stateExtension="/forecasts/v1/daily/5day/<locationid>?apikey=<apikey>&details=true&metric=true" ]
     }
     \end{lstlisting}
+    \info{Accu Weather only supports 50 API calls/day.There for the first thing (current weather) is set up to one call every 1800 seconds which gives 1 call every 30 minutes, 48 calls per day in total. The second thing (weather forecast is set up to on call every 43200 seconds which is 2 calls/day. In total this will maximize the API calls allowed to Accu Weather API.}
     \info{In case the HTTP binding does not initialize, you may need to increase the org.openhab.webclient:maxThreadsShared-value and the org.openhab.webclient:maxThreadsCustom-value in the conf/services/runtime.cfg-file for OpenHAB.}
     \info{If you do not want metric units, replace metric=true with metric=false in the stateExtension.}
     When you have pasted the above into a .things-file, you need to replace <locationid> with your location ID that we found above and replace <apikey> with your API-key from AccuWeather.
@@ -443,14 +444,14 @@
     You can lock which light to affect by pressing and holding either the ceiling or table-lights button. This will enter a special mode where changes to the sliders will only affect the selected type of lights. By pressing the same button again you can exit the "special mode". The "special mode" will also time out after a few seconds.
     
     \subsubsection{Scenes button (top left corner)}
-    The little cute functional house in the top left corner is for entering the Scenes page. In NSPanel Manager there are both Room Scenes and Global Scenes. If you're in Room Lights mode (button in lower right corner) you will enter the Room Scenes page. If you're in All Lights mode you will enter the Global Scenes page. You'll also see that the house icon changes when toggling between Room Lights and All Lights mode. One yellow window and you will enter Room Scenes page when pressing it. All windows yellow and you will enter the Global Scenes page.
+    The settings icon in the top left corner is for entering the Scenes page. In NSPanel Manager there are both Room Scenes and Global Scenes. If you're in Room Lights mode (button in lower right corner) you will enter the Room Scenes page. If you're in All Lights mode you will enter the Global Scenes page. You'll also see that the settings icon changes when toggling between Room Lights and All Lights mode. Standard settings icon leads to Room Scenes page when pressing it. Settings icon with a roof on top leads to Global Scenes page.
     \subsubsection{Swipe down}
     You can swipe downwards when on the first page to enter the Smart Home Control page.
     This page is a work in progress. Design and funcionality is not finished or decided yet.
     \subsection{Smart Home Control page}
     Accessed by swiping down on Main page. Work in progress. Design and funcionality is not finished or decided yet.  
     \subsection{Scenes page}
-    To enter Scenes page, press the little house in top left corner on Main page. Depending on if you're in Room Lights mode or All Lights mode you will enter Room Scenes page or Global Scenes page.
+    To enter Scenes page, press the settings icon in top left corner on Main page. Depending on if you're in Room Lights mode or All Lights mode you will enter Room Scenes page or Global Scenes page.
     
     Scene names that show up here are the ones you have configured in the NSPanel Manager web interface. To store a scene simply hold the save button for three seconds and the current values of the lights in the room you are in or all lights if in All Lights mode will be saved. To activate a scene and send out those saved values you just press the scene name.
     \subsection{Room page}

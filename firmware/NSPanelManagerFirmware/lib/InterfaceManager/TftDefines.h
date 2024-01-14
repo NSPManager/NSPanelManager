@@ -6,8 +6,11 @@
 #define ROOM_BUTTON_ID 5                   // ID of button to go into "room"-view
 #define SCENES_BUTTON_ID 17                // ID of button to go into Scenes page
 
+
+//BOOTSCREEN PAGE
 #define NSPANELMANAGER_PAGE_NAME "bootscreen"
 #define NSPANELMANAGER_TEXT_NAME "bootscreen.t_loading"
+#define NSPANELMANAGER_TEXT_IP_NAME "bootscreen.t_ip"
 
 // SCREENSAVER PAGE
 #define SCREENSAVER_PAGE_NAME "screensaver"
