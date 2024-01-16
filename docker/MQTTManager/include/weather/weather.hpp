@@ -31,7 +31,6 @@ private:
     float wind_speed;
   };
 
-  std::string _last_json_sent;
   std::vector<weather_info> _forecast_weather_info;
   std::string _windspeed_unit;
   std::string _precipitation_unit;

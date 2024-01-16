@@ -68,19 +68,21 @@ void OpenhabManager::_websocket_message_callback(const ix::WebSocketMessagePtr &
     SPDLOG_INFO("Connected to Openhab websocket.");
     OpenhabManager::_authenticated = true;
     for (auto item_observer_pairs : OpenhabManager::_openhab_item_observers) {
-      try {
-        std::string data = OpenhabManager::_fetch_item_state_via_rest(item_observer_pairs.first);
-        if (data.length() > 0) {
-          nlohmann::json update_data;
-          update_data["type"] = "ItemStateFetched";
-          update_data["payload"] = nlohmann::json::parse(data);
-          OpenhabManager::_openhab_item_observers[item_observer_pairs.first](update_data);
-        } else {
-          SPDLOG_ERROR("Failed to get current state for item '{}' via OpenHAB REST API.", item_observer_pairs.first);
+      if (item_observer_pairs.second->num_slots() > 0) {
+        try {
+          std::string data = OpenhabManager::_fetch_item_state_via_rest(item_observer_pairs.first);
+          if (data.length() > 0) {
+            nlohmann::json update_data;
+            update_data["type"] = "ItemStateFetched";
+            update_data["payload"] = nlohmann::json::parse(data);
+            OpenhabManager::_openhab_item_observers[item_observer_pairs.first](update_data);
+          } else {
+            SPDLOG_ERROR("Failed to get current state for item '{}' via OpenHAB REST API.", item_observer_pairs.first);
+          }
+        } catch (std::exception &e) {
+          SPDLOG_ERROR("Caught exception: {}", e.what());
+          SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
         }
-      } catch (std::exception &e) {
-        SPDLOG_ERROR("Caught exception: {}", e.what());
-        SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
       }
     }
   } else if (msg->type == ix::WebSocketMessageType::Close) {

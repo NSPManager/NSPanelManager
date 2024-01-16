@@ -193,6 +193,8 @@ void MQTTManagerWeather::openhab_current_weather_callback(nlohmann::json event_d
       if (MqttManagerConfig::outside_temp_sensor_provider.length() == 0 && MqttManagerConfig::outside_temp_sensor_entity_id.length() == 0) {
         this->_current_temperature = weather_json["Temperature"]["Imperial"]["Value"];
       }
+      this->_current_min_temperature = weather_json["TemperatureSummary"]["Past6HourRange"]["Minimum"]["Imperial"]["Value"];
+      this->_current_max_temperature = weather_json["TemperatureSummary"]["Past6HourRange"]["Maximum"]["Imperial"]["Value"];
       this->_current_wind_speed = weather_json["Wind"]["Speed"]["Imperial"]["Value"];
       this->_windspeed_unit = weather_json["Wind"]["Speed"]["Imperial"]["Unit"];
       this->_precipitation_unit = weather_json["PrecipitationSummary"]["Precipitation"]["Imperial"]["Unit"];
@@ -200,6 +202,8 @@ void MQTTManagerWeather::openhab_current_weather_callback(nlohmann::json event_d
       if (MqttManagerConfig::outside_temp_sensor_provider.length() == 0 && MqttManagerConfig::outside_temp_sensor_entity_id.length() == 0) {
         this->_current_temperature = weather_json["Temperature"]["Metric"]["Value"];
       }
+      this->_current_min_temperature = weather_json["TemperatureSummary"]["Past6HourRange"]["Minimum"]["Metric"]["Value"];
+      this->_current_max_temperature = weather_json["TemperatureSummary"]["Past6HourRange"]["Maximum"]["Metric"]["Value"];
       this->_current_wind_speed = weather_json["Wind"]["Speed"]["Metric"]["Value"];
       this->_windspeed_unit = weather_json["Wind"]["Speed"]["Metric"]["Unit"];
       this->_precipitation_unit = weather_json["PrecipitationSummary"]["Precipitation"]["Metric"]["Unit"];
@@ -406,8 +410,5 @@ void MQTTManagerWeather::send_state_update() {
   weather_info["prepro"] = fmt::format("{}%", this->_current_precipitation_probability);
 
   std::string new_weather_data = weather_info.dump();
-  if (new_weather_data.compare(MQTTManagerWeather::_last_json_sent) != 0) {
-    MQTT_Manager::publish("nspanel/status/weather", new_weather_data, true);
-    MQTTManagerWeather::_last_json_sent = new_weather_data;
-  }
+  MQTT_Manager::publish("nspanel/status/weather", new_weather_data, true);
 }
