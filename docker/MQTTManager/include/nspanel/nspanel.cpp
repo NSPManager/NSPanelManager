@@ -88,12 +88,15 @@ void NSPanelRelayGroup::turn_off() {
 
 NSPanel::NSPanel(nlohmann::json &init_data) {
   // If this panel is just a panel in waiting (ie. not accepted the request yet) it won't have an id.
+  this->_has_registered_to_manager = false;
   this->update_config(init_data);
 }
 
 void NSPanel::update_config(nlohmann::json &init_data) {
   if (init_data.contains("id")) {
     this->_id = init_data["id"];
+    this->_has_registered_to_manager = true; // Data contained an ID which it got from the manager config.
+    this->_is_register_accepted = true;
   }
 
   bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
@@ -125,8 +128,6 @@ void NSPanel::update_config(nlohmann::json &init_data) {
   if (!init_data.contains("id")) {
     this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
   }
-  this->_has_registered_to_manager = init_data.contains("id");
-  this->_is_register_accepted = init_data.contains("id");
   if (this->_state == MQTT_MANAGER_NSPANEL_STATE::OFFLINE || this->_state == MQTT_MANAGER_NSPANEL_STATE::UNKNOWN) {
     this->_rssi = -255;
     this->_heap_used_pct = 0;
@@ -176,6 +177,7 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/r2_state", this->_name);
     this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_name);
     this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_name);
+    this->register_to_home_assistant();
   }
 
   if (this->_has_registered_to_manager) {
@@ -185,7 +187,6 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
-    this->register_to_home_assistant();
   }
 }
 
@@ -333,7 +334,6 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
     }
   } else if (topic.compare(this->_mqtt_relay1_state_topic) == 0) {
     this->_relay1_state = (payload.compare("1") == 0);
-    SPDLOG_DEBUG("NSPanel {}::{} relay1 state: {}", this->_id, this->_name, this->_relay1_state ? "ON" : "OFF");
     std::list<NSPanelRelayGroup *> relay_groups = EntityManager::get_all_entities_by_type<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP);
     for (NSPanelRelayGroup *relay_group : relay_groups) {
       if (relay_group->contains(this->_id, 1)) {
@@ -346,7 +346,6 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
     }
   } else if (topic.compare(this->_mqtt_relay2_state_topic) == 0) {
     this->_relay2_state = (payload.compare("1") == 0);
-    SPDLOG_DEBUG("NSPanel {}::{} relay2 state: {}", this->_id, this->_name, this->_relay2_state ? "ON" : "OFF");
     std::list<NSPanelRelayGroup *> relay_groups = EntityManager::get_all_entities_by_type<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP);
     for (NSPanelRelayGroup *relay_group : relay_groups) {
       if (relay_group->contains(this->_id, 2)) {
@@ -570,6 +569,9 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
         nlohmann::json data = nlohmann::json::parse(response_data);
         this->update_config(data); // Returned data from registration request is the same as data from the global /api/get_mqtt_manager_config
         this->register_to_home_assistant();
+        if (this->_state == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+        }
         SPDLOG_INFO("Panel registration completed. Sending accept command to panel.");
 
         // Everything was successfull, send registration accept to panel:

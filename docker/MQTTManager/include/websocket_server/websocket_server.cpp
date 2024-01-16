@@ -38,7 +38,6 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
   try {
     if (msg->type == ix::WebSocketMessageType::Message) {
       std::string message = msg->str;
-      SPDLOG_DEBUG("Got message from websocket. Message: {}", message);
       std::string response_buffer;
       for (auto callback : WebsocketServer::_callbacks) {
         if (callback(message, &response_buffer)) {

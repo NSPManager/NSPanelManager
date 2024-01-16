@@ -359,7 +359,6 @@ void EntityManager::remove_entity(MqttManagerEntity *entity) {
 }
 
 void EntityManager::mqtt_topic_callback(const std::string &topic, const std::string &payload) {
-  SPDLOG_DEBUG("Got message on '{}'. Message: {}", topic, payload);
   EntityManager::_process_message(topic, payload);
 }
 
@@ -653,7 +652,7 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       curl = curl_easy_init();
       if (curl) {
         std::string response_data;
-        SPDLOG_DEBUG("Requesting config from: http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/delete_nspanel/{}", panel->get_id());
+        SPDLOG_DEBUG("Sending delete command for {}::{} to: http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/delete_nspanel/{}", panel->get_id(), panel->get_name(), panel->get_id());
         curl_easy_setopt(curl, CURLOPT_URL, fmt::format("http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/delete_nspanel/{}", panel->get_id()).c_str());
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
@@ -665,6 +664,7 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
         /* Check for errors */
         if (res == CURLE_OK && !response_data.empty() && http_code == 200) {
+          panel->reboot();
           nlohmann::json response;
           response["cmd_id"] = command_id;
           response["success"] = true;

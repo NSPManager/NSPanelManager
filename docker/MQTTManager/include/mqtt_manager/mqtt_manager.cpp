@@ -154,7 +154,6 @@ void MQTT_Manager::_process_mqtt_message(const std::string topic, const std::str
   }
 
   try {
-    SPDLOG_TRACE("Got message: {} --> {}", topic, message);
     // Call each observer/listener until a callback return true, ie. the callback was handled.
     for (auto mqtt_callback : MQTT_Manager::_mqtt_observer_callbacks) {
       if (mqtt_callback(topic, message)) {
@@ -203,10 +202,12 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
 }
 
 void MQTT_Manager::clear_retain(const std::string &topic) {
-  mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), "", 0, 0, true);
-  if (MQTT_Manager::_mqtt_client != nullptr) {
-    MQTT_Manager::_mqtt_client->publish(msg);
-  } else {
-    MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
+  if (topic.size() > 0) {
+    mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), "", 0, 0, true);
+    if (MQTT_Manager::_mqtt_client != nullptr) {
+      MQTT_Manager::_mqtt_client->publish(msg);
+    } else {
+      MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
+    }
   }
 }
