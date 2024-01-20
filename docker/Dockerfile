@@ -24,5 +24,7 @@ RUN conan profile detect --force && echo 'core.cache:storage_path=/MQTTManager/c
 RUN sed -i "s|cppstd=gnu14|cppstd=gnu17|g" /root/.conan2/profiles/default
 RUN sed -i "s|build_type=Release|build_type=Debug|g" /root/.conan2/profiles/default
 
+RUN /usr/src/app/make_mqttmanager.sh
+
 EXPOSE 8000
 CMD ["/bin/bash", "./run_uwsgi.sh"]
