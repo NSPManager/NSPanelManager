@@ -476,11 +476,11 @@
     \subsection{Manual Docker container setup}
     If you wish to manually build and setup the Docker container from source first clone/download this git repository. Then use the command \lstinline[language=bash]{docker build -t nspanelmanager .} while standing in the downloaded "docker"-directory. This will always be the same. To then start the container, the following command can be used:
     \begin{lstlisting}[language=bash]
-    docker run --name nspanelmanager -v /etc/timezone:/etc/timezone:ro -v \
+    docker run --name nspanelmanager -e 'TZ=Europe/Stockholm' -v \
     "$(pwd)/data/":"/data/" \
-    -d -p 8000:8000 -p 8001:8001 nspanelmanager
+    -d -p 8000:8000 nspanelmanager
     \end{lstlisting}
-    If you wish to change the timezone, there are two options. Either, do as the command above, pass in the local machine /etc/timezone. This might not always work though as your server might be set to Etc/UTC then you can set the TZ-environment variable, for example: \lstinline[language=bash]{-e TZ=Europe/Stockholm} and remove the volume mapping for /etc/timezone.
+    To change the timezone, set the TZ-environment variable, for example: \lstinline[language=bash]{-e TZ=Europe/Stockholm}.
     \important{All data for NSPanel Manager is stored in the directory mapped to "/data" in the container. In this case, the "data"-directory where you are currently standing.}
 
 
