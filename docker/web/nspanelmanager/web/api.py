@@ -208,7 +208,7 @@ def get_all_available_entities(request):
     return_json["errors"] = []
 
     # Home Assistant
-    if get_setting_with_default("home_assistant_token", "") != "":
+    if get_setting_with_default("home_assistant_token", "") != "" and get_setting_with_default("home_assistant_address", "") != "":
         home_assistant_request_headers = {
             "Authorization": "Bearer " + get_setting_with_default("home_assistant_token", ""),
             "content-type": "application/json",
@@ -244,7 +244,7 @@ def get_all_available_entities(request):
         print("No home assistant configuration values. Will not gather Home Assistant entities.")
 
     # OpenHAB
-    if get_setting_with_default("openhab_token", "") != "":
+    if get_setting_with_default("openhab_token", "") != "" and get_setting_with_default("openhab_address", "") != "":
         # TODO: Sort out how to map channels from items to the correct POST request when MQTT is received
         openhab_request_headers = {
             "Authorization": "Bearer " + get_setting_with_default("openhab_token", ""),
