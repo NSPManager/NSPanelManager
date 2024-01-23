@@ -60,20 +60,34 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   PageManager::GetNSPanelManagerPage()->show();
   NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
   InterfaceManager::subscribeToMqttTopics();
+  std::string last_shown_secondary_text = "";
   while (!WiFi.isConnected() || !MqttManager::connected() || !InterfaceManager::hasRegisteredToManager || !NSPMConfig::instance->littlefs_mount_successfull) {
     if (NSPanel::instance->ready()) {
+      std::string secondary_text = "";
       if (!NSPMConfig::instance->littlefs_mount_successfull) {
         PageManager::GetNSPanelManagerPage()->setText("LittleFS mount failed!");
       } else if (!WiFi.isConnected()) {
         if (WiFi.getMode() == WIFI_MODE_AP) {
           PageManager::GetNSPanelManagerPage()->setText("Connect to AP NSPMPanel");
+          secondary_text = "Connect to IP 192.168.1.1";
         } else {
           PageManager::GetNSPanelManagerPage()->setText("Connecting to WiFi...");
+          secondary_text = "";
         }
       } else if (!InterfaceManager::hasRegisteredToManager) {
         PageManager::GetNSPanelManagerPage()->setText("Registering to manager...");
       } else if (!MqttManager::connected()) {
         PageManager::GetNSPanelManagerPage()->setText("Connecting to MQTT...");
+      }
+
+      if (WiFi.isConnected()) {
+        secondary_text = "IP: ";
+        secondary_text.append(WiFi.localIP().toString().c_str());
+      } else {
+        secondary_text = "";
+      }
+      if (secondary_text.compare(last_shown_secondary_text) != 0) {
+        PageManager::GetNSPanelManagerPage()->setSecondaryText(secondary_text);
       }
     }
     vTaskDelay(250 / portTICK_PERIOD_MS);

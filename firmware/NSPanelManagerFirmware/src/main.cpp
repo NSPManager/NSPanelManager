@@ -125,8 +125,8 @@ void taskManageWifiAndMqtt(void *param) {
       if (!WiFi.isConnected() && millis() - lastWiFiconnected < 180 * 1000) {
         LOG_ERROR("WiFi not connected!");
         Serial.println("WiFi not connected!");
-        WiFi.mode(WIFI_STA);
         WiFi.setHostname(config.wifi_hostname.c_str());
+        WiFi.mode(WIFI_STA);
         for (uint8_t wifi_connect_tries = 0; wifi_connect_tries < 10 && !WiFi.isConnected(); wifi_connect_tries++) {
           Serial.print("Connecting to WiFi ");
           Serial.println(config.wifi_ssid.c_str());

@@ -341,6 +341,12 @@ void EntityManager::post_init_entities() {
     entity->post_init();
   }
 
+  SPDLOG_INFO("Performing post init on {} lights.", EntityManager::_lights.size());
+  for (Light *light : EntityManager::_lights) {
+    SPDLOG_DEBUG("Performing PostInit on entity Light with id {}", light->get_id());
+    light->post_init();
+  }
+
   SPDLOG_INFO("Total loaded lights: {}", EntityManager::_lights.size());
   SPDLOG_INFO("Total loaded NSPanels: {}", EntityManager::_nspanels.size());
   SPDLOG_INFO("Total loaded Entities: {}", EntityManager::_entities.size());

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-/MQTTManager/compile_mqttmanager.sh
+/MQTTManager/compile_mqttmanager.sh $@

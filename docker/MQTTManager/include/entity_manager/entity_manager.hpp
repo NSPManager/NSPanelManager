@@ -119,7 +119,7 @@ private:
 
   static bool _process_message(const std::string &topic, const std::string &payload);
   static void _handle_register_request(const nlohmann::json &data);
-  static inline std::list<Light *> _lights;
+  static inline std::list<Light *> _lights; // TODO: Remove _lights and store ALL entities in the _entities list
   static inline std::mutex _lights_mutex;
   static inline std::list<NSPanel *> _nspanels;
   static inline std::mutex _nspanels_mutex;
