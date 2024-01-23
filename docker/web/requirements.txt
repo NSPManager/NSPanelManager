@@ -2,7 +2,7 @@ asgiref==3.7.2
 certifi==2023.7.22
 charset-normalizer==3.3.0
 colorama==0.4.6
-conan==2.0.13
+conan==2.0.17
 distro==1.8.0
 Django==4.2.6
 django-environ==0.11.2

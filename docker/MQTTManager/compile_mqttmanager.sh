@@ -13,14 +13,23 @@ echo "Compiling for arch '$arch'"
 cp /root/.conan2/profiles/default /root/.conan2/profiles/host
 sed -i "s/^arch.*/arch=$arch/g" /root/.conan2/profiles/host
 
-if [[ "$arch" == arm* ]]; then
-	apt -y install binutils-arm-linux-gnueabi gcc-arm-linux-gnueabi g++-arm-linux-gnueabihf
+if [[ "$arch" == armv7 ]] || [[ "$arch" == armv6 ]]; then
+	apt -y install binutils-arm-linux-gnueabi gcc-arm-linux-gnueabi g++-arm-linux-gnueabi
 	cat <<EOF >>/root/.conan2/profiles/host
 
 [buildenv]
 CC=arm-linux-gnueabi-gcc-12
 CXX=arm-linux-gnueabi-g++-12
 LD=arm-linux-gnueabi-ld
+EOF
+elif [[ "$arch" == armv7hf ]]; then
+	apt -y install binutils-arm-linux-gnueabihf gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+	cat <<EOF >>/root/.conan2/profiles/host
+
+[buildenv]
+CC=arm-linux-gnueabihf-gcc-12
+CXX=arm-linux-gnueabihf-g++-12
+LD=arm-linux-gnueabihf-ld
 EOF
 fi
 
@@ -30,9 +39,9 @@ pushd "$BASEDIR"
 cd /MQTTManager/
 
 rm -rf build
-if [ -e CMakeCache.txt ]; then
-	rm CMakeCache.txt
-fi
+#if [ -e CMakeCache.txt ]; then
+#	rm CMakeCache.txt
+#fi
 
 # Get build type from conan profile
 BUILD_TYPE=$(grep -E "^build_type=" /root/.conan2/profiles/default | cut -d'=' -f 2)
