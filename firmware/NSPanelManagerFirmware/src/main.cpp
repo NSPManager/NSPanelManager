@@ -31,20 +31,42 @@ MqttManager mqttManager;
 unsigned long lastRegistrationRequest = 0;
 unsigned long lastStatusReport = 0;
 unsigned long lastWiFiconnected = 0;
+// Temperature sensing variables:
+#define READ_TEMP_SENSE_DELAY_MS 1000
+#define NUM_TEMP_SENSE_AVERAGE 30
+float averageTemperature = 0;
+uint8_t numberOfTempSamples = 0;
+uint8_t temperatureSlotNumber = 0;
+float tempSensorReadings[NUM_TEMP_SENSE_AVERAGE];
 
-float readNTCTemperature(bool farenheit) {
-  float temperature = analogRead(38);
-  if (temperature > 0) {
+void readNTCTemperatureTask(void *param) {
+  for (;;) {
+    float temperature = analogRead(38);
     temperature = temperature * 3.3 / 4095.0;
     temperature = 11200 * temperature / (3.3 - temperature);
     temperature = 1 / (1 / 298.15 + log(temperature / 10000) / 3950);
     temperature = temperature - 273.15; // Celsius
-    if (farenheit) {
+
+    if (NSPMConfig::instance->use_farenheit) {
       temperature = (temperature * 9 / 5) + 32;
     }
-    return temperature + NSPMConfig::instance->temperature_calibration;
+    tempSensorReadings[temperatureSlotNumber] = temperature + NSPMConfig::instance->temperature_calibration;
+    temperatureSlotNumber++;
+    if (temperatureSlotNumber >= NUM_TEMP_SENSE_AVERAGE) {
+      temperatureSlotNumber = 0;
+    }
+    if (numberOfTempSamples < temperatureSlotNumber) {
+      numberOfTempSamples = temperatureSlotNumber;
+    }
+
+    float tempTotal = 0;
+    for (int i = 0; i < numberOfTempSamples; i++) {
+      tempTotal += tempSensorReadings[i];
+    }
+    int averageTempInt = (tempTotal / numberOfTempSamples) * 10;
+    averageTemperature = float(std::round(averageTempInt)) / 10;
+    vTaskDelay(READ_TEMP_SENSE_DELAY_MS / portTICK_PERIOD_MS);
   }
-  return -254;
 }
 
 void sendMqttManagerRegistrationRequest() {
@@ -174,7 +196,7 @@ void taskManageWifiAndMqtt(void *param) {
         // Online/Offline state is handled in /status topic managed by MQTTManager.
 
         if (force_send_mqtt_update || millis() >= lastStatusReport + 30000) {
-          float temperature = readNTCTemperature(NSPMConfig::instance->use_farenheit);
+          float temperature = averageTemperature;
           (*status_report_doc)["rssi"] = WiFi.RSSI();
           (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
           (*status_report_doc)["mac"] = WiFi.macAddress();
@@ -223,6 +245,7 @@ void setup() {
 
   mqttManager.init();
   ButtonManager::init();
+  xTaskCreatePinnedToCore(readNTCTemperatureTask, "readTempTask", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 
   LOG_INFO("Initializing NSPanel communication");
   if (nspanel.init()) {

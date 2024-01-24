@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <exception>
+#include <fstream>
 #include <iostream>
 #include <mqtt/client.h>
 #include <mqtt/message.h>
@@ -18,6 +19,7 @@
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <stdexcept>
+#include <stdio.h>
 #include <string>
 #include <thread>
 #include <utility>
@@ -25,12 +27,29 @@
 
 void MQTT_Manager::connect() {
   if (MQTT_Manager::_mqtt_client == nullptr) {
+    std::ifstream f("/sys/class/net/eth0/address", std::ios::in | std::ios::binary);
+    const size_t file_size = std::filesystem::file_size("/sys/class/net/eth0/address");
+    std::string mac_address_str(file_size, '\0');
+    f.read(mac_address_str.data(), file_size);
+    f.close();
+
+    // Cleanup text
+    mac_address_str.erase(std::find_if(mac_address_str.rbegin(), mac_address_str.rend(), [](unsigned char ch) {
+                            return !std::isspace(ch) && ch != '\r' && ch != '\n' && ch != '\0';
+                          }).base(),
+                          mac_address_str.end());
+
+    std::replace(mac_address_str.begin(), mac_address_str.end(), ':', '_');
+    std::string mqtt_client_name = "NSPMMQTT_";
+    mqtt_client_name.append(mac_address_str);
+    SPDLOG_INFO("Will connect to MQTT with Client name {}", mqtt_client_name);
+
     std::string connection_url = "tcp://";
     connection_url.append(MqttManagerConfig::mqtt_server);
     connection_url.append(":");
     connection_url.append(std::to_string(MqttManagerConfig::mqtt_port));
 
-    MQTT_Manager::_mqtt_client = new mqtt::client(connection_url, "NSPM_MqttManager");
+    MQTT_Manager::_mqtt_client = new mqtt::client(connection_url, mqtt_client_name.c_str());
   }
 
   auto connOpts = mqtt::connect_options_builder()
