@@ -71,7 +71,7 @@ bool HomeAssistantLight::home_assistant_event_callback(nlohmann::json &data) {
       nlohmann::json new_state_data = data["event"]["data"]["new_state"];
       nlohmann::json new_state_attributes = new_state_data["attributes"];
 
-      if (new_state_data.contains("state") && !new_state_attributes["state"].is_null()) {
+      if (new_state_data.contains("state") && !new_state_data["state"].is_null()) {
         try {
           std::string new_state = new_state_data["state"];
           if (new_state.compare("on") == 0) {
@@ -79,7 +79,10 @@ bool HomeAssistantLight::home_assistant_event_callback(nlohmann::json &data) {
             this->_requested_state = true;
             if (this->_can_dim) {
               if (new_state_attributes.contains("brightness")) {
-                uint8_t new_brightness = new_state_attributes["brightness"];
+                uint8_t new_brightness = 0;
+                if (!new_state_attributes["brightness"].is_null()) {
+                  new_brightness = new_state_attributes["brightness"];
+                }
                 new_brightness = ((float)new_brightness / 255.0) * 100; // Home assistant sends brightness as 0 to 255. We want percentage (0-100)
                 this->_current_brightness = new_brightness;
                 this->_requested_brightness = new_brightness;

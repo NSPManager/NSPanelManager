@@ -294,6 +294,7 @@ void LightManager::_taskProcessMqttMessages(void *param) {
   mqttMessage *msg;
   for (;;) {
     if (xQueueReceive(LightManager::_mqttMessageQueue, &msg, portMAX_DELAY) == pdTRUE) {
+      // Delete any message that does not contain any payload
       if (msg->payload.size() <= 0) {
         delete msg;
         continue;
