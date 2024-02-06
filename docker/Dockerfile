@@ -1,5 +1,7 @@
 FROM python:3.11
 
+ARG no_mqttmanager_build
+
 COPY web/ /usr/src/app/
 COPY nginx/sites-enabled/ /etc/nginx/sites-enabled/
 COPY MQTTManager/ /MQTTManager/
@@ -9,7 +11,7 @@ RUN apt-get update \
 	&& apt-get -y upgrade
 
 RUN apt-get install -y --no-install-recommends \
-		postgresql-client curl inotify-tools net-tools nginx build-essential libssl-dev
+		postgresql-client curl inotify-tools net-tools nginx build-essential
 	# && rm -rf /var/lib/apt/lists/*
 
 # Install cmake
@@ -24,7 +26,7 @@ RUN conan profile detect --force && echo 'core.cache:storage_path=/MQTTManager/c
 RUN sed -i "s|cppstd=gnu14|cppstd=gnu17|g" /root/.conan2/profiles/default
 RUN sed -i "s|build_type=Release|build_type=Debug|g" /root/.conan2/profiles/default
 
-RUN /usr/src/app/make_mqttmanager.sh
+RUN if [[ -n "$no_mqttmanager_build" ]]; then /usr/src/app/make_mqttmanager.sh; fi
 
 EXPOSE 8000
 CMD ["/bin/bash", "./run_uwsgi.sh"]

@@ -1,4 +1,4 @@
-#include "home_assistant_manager.hpp"
+#include "home_assistant_manager/home_assistant_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include <boost/exception/diagnostic_information.hpp>
 #include <cmath>
@@ -148,13 +148,15 @@ void HomeAssistantManager::detach_event_observer(HomeAssistantEventObserver *obs
 }
 
 void HomeAssistantManager::_process_home_assistant_event(nlohmann::json &event_data) {
-  for (HomeAssistantEventObserver *observer : HomeAssistantManager::_home_assistant_event_observers) {
+  auto observer = HomeAssistantManager::_home_assistant_event_observers.cbegin();
+  while (observer != HomeAssistantManager::_home_assistant_event_observers.cend()) {
     try {
-      if (observer->home_assistant_event_callback(event_data)) {
+      if ((*observer)->home_assistant_event_callback(event_data)) {
         return;
       }
     } catch (std::exception &e) {
       SPDLOG_ERROR("Caught exception when processing home assistant event, diag info: {}", boost::diagnostic_information(e, true));
     }
+    observer++;
   }
 }
