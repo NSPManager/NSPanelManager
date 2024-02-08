@@ -5,10 +5,10 @@
 #include <vector>
 #ifndef MQTT_MANAGER_WEATHER
 
-class MQTTManagerWeather : public HomeAssistantEventObserver {
+class MQTTManagerWeather {
 public:
   void update_config();
-  bool home_assistant_event_callback(nlohmann::json &event_data);
+  void home_assistant_event_callback(nlohmann::json event_data);
   void openhab_current_weather_callback(nlohmann::json event_data);
   void openhab_forecast_weather_callback(nlohmann::json event_data);
   void openhab_temp_sensor_callback(nlohmann::json event_data);

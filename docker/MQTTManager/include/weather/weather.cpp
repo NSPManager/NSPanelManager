@@ -21,14 +21,16 @@
 void MQTTManagerWeather::update_config() {
   if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
     SPDLOG_INFO("Initializing weather controller for Home Assistant.");
-    HomeAssistantManager::attach_event_observer(this);
+    HomeAssistantManager::attach_event_observer(MqttManagerConfig::home_assistant_weather_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
+    HomeAssistantManager::attach_event_observer(MqttManagerConfig::home_assistant_access_token, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
     OpenhabManager::detach_event_observer(MqttManagerConfig::openhab_current_weather_item, boost::bind(&MQTTManagerWeather::openhab_current_weather_callback, this, _1));
     OpenhabManager::detach_event_observer(MqttManagerConfig::openhab_forecast_weather_item, boost::bind(&MQTTManagerWeather::openhab_forecast_weather_callback, this, _1));
   } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
     SPDLOG_INFO("Initializing weather controller for OpenHAB.");
     SPDLOG_DEBUG("Current weather item: {}", MqttManagerConfig::openhab_current_weather_item);
     SPDLOG_DEBUG("Forecast weather item: {}", MqttManagerConfig::openhab_forecast_weather_item);
-    HomeAssistantManager::detach_event_observer(this);
+    HomeAssistantManager::detach_event_observer(MqttManagerConfig::home_assistant_weather_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
+    HomeAssistantManager::detach_event_observer(MqttManagerConfig::home_assistant_address, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
     OpenhabManager::attach_event_observer(MqttManagerConfig::openhab_current_weather_item, boost::bind(&MQTTManagerWeather::openhab_current_weather_callback, this, _1));
     OpenhabManager::attach_event_observer(MqttManagerConfig::openhab_forecast_weather_item, boost::bind(&MQTTManagerWeather::openhab_forecast_weather_callback, this, _1));
   } else {
@@ -37,18 +39,18 @@ void MQTTManagerWeather::update_config() {
 
   if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0) {
     SPDLOG_INFO("Will load outside temperature from Home Assistant sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
-    HomeAssistantManager::attach_event_observer(this);
+    HomeAssistantManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
     OpenhabManager::detach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::openhab_temp_sensor_callback, this, _1));
   } else if (MqttManagerConfig::outside_temp_sensor_provider.compare("openhab") == 0) {
     SPDLOG_INFO("Will load outside temperature from OpenHAB sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
     OpenhabManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::openhab_temp_sensor_callback, this, _1));
     if (MqttManagerConfig::weather_controller.compare("home_assistant") != 0) {
-      HomeAssistantManager::detach_event_observer(this);
+      HomeAssistantManager::detach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
     }
   }
 }
 
-bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_data) {
+void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data) {
   if (std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::home_assistant_weather_entity) == 0) {
     nlohmann::json new_state = event_data["event"]["data"]["new_state"];
 
@@ -109,7 +111,7 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
       this->_forecast_weather_info.push_back(info);
     }
 
-    SPDLOG_DEBUG("Loaded forecast for {} days.", this->_forecast_weather_info.size());
+    SPDLOG_DEBUG("Loaded forcast for {} days.", this->_forecast_weather_info.size());
 
     if (this->_forecast_weather_info.size() > 0) {
       if (MqttManagerConfig::outside_temp_sensor_provider.length() == 0 && MqttManagerConfig::outside_temp_sensor_entity_id.length() == 0) {
@@ -127,10 +129,10 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
       this->send_state_update();
     } else {
       SPDLOG_ERROR("Failed to process forecast information from Home Assistant.");
-      return true;
+      return;
     }
 
-    return true;
+    return;
   } else if (std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::home_assistant_sun_entity) == 0) {
     std::string next_rising = event_data["event"]["data"]["new_state"]["attributes"]["next_rising"];
     std::string next_setting = event_data["event"]["data"]["new_state"]["attributes"]["next_setting"];
@@ -166,7 +168,6 @@ bool MQTTManagerWeather::home_assistant_event_callback(nlohmann::json &event_dat
     this->_current_temperature = atof(std::string(new_state["state"]).c_str());
     this->send_state_update();
   }
-  return false;
 }
 
 void MQTTManagerWeather::openhab_current_weather_callback(nlohmann::json event_data) {

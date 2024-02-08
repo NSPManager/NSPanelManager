@@ -10,11 +10,11 @@ enum MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TYPE {
   TYPE_SWITCH
 };
 
-class HomeAssistantLight : public Light, public HomeAssistantEventObserver {
+class HomeAssistantLight : public Light {
 public:
   HomeAssistantLight(nlohmann::json &init_data);
   void send_state_update_to_controller();
-  bool home_assistant_event_callback(nlohmann::json &event_data);
+  void home_assistant_event_callback(nlohmann::json event_data);
   ~HomeAssistantLight();
 
 private:

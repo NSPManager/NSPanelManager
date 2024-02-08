@@ -2,6 +2,7 @@
 #include "entity/entity.hpp"
 #include "light/light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
+#include <boost/bind.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <cstdint>
 #include <home_assistant_manager/home_assistant_manager.hpp>
@@ -19,6 +20,7 @@ HomeAssistantLight::HomeAssistantLight(nlohmann::json &init_data) : Light(init_d
 
   this->_home_assistant_name = init_data["home_assistant_name"];
   SPDLOG_DEBUG("Loaded light {}::{}.", this->_id, this->_name);
+  HomeAssistantManager::attach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantLight::home_assistant_event_callback, this, _1));
 
   if (this->_home_assistant_name.rfind("light.", 0) == 0) {
     this->_home_assistant_light_type = MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TYPE::TYPE_LIGHT;
@@ -28,8 +30,6 @@ HomeAssistantLight::HomeAssistantLight(nlohmann::json &init_data) : Light(init_d
     this->_home_assistant_light_type = MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TYPE::TYPE_LIGHT;
     SPDLOG_ERROR("Unknown type of home assistant entity '{}'. Will assume light is a light.", this->_home_assistant_name);
   }
-
-  HomeAssistantManager::attach_event_observer(this);
 }
 
 void HomeAssistantLight::send_state_update_to_controller() {
@@ -64,7 +64,7 @@ void HomeAssistantLight::send_state_update_to_controller() {
   HomeAssistantManager::send_json(service_data);
 }
 
-bool HomeAssistantLight::home_assistant_event_callback(nlohmann::json &data) {
+void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
   if (std::string(data["event"]["event_type"]).compare("state_changed") == 0) {
     if (std::string(data["event"]["data"]["entity_id"]).compare(this->_home_assistant_name) == 0) {
       SPDLOG_DEBUG("Got event update for HA light {}::{}.", this->_id, this->_name);
@@ -140,10 +140,8 @@ bool HomeAssistantLight::home_assistant_event_callback(nlohmann::json &data) {
           SPDLOG_ERROR("Caught exception when trying to update color mode for light {}::{} message: {}. Working data: {}", this->_id, this->_name, boost::diagnostic_information(e, true), new_state_attributes.dump());
         }
       }
-      return true;
     }
   }
-  return false;
 }
 
 HomeAssistantLight::~HomeAssistantLight() {}

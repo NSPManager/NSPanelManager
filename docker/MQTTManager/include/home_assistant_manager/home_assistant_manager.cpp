@@ -140,23 +140,13 @@ void HomeAssistantManager::_send_string(std::string &data) {
   }
 }
 
-void HomeAssistantManager::attach_event_observer(HomeAssistantEventObserver *observer) {
-  for (HomeAssistantEventObserver *stored_observer : HomeAssistantManager::_home_assistant_event_observers) {
-    if (stored_observer == observer) {
-      return;
-    }
-  }
-  HomeAssistantManager::_home_assistant_event_observers.push_back(observer);
-}
-
-void HomeAssistantManager::detach_event_observer(HomeAssistantEventObserver *observer) {
-  HomeAssistantManager::_home_assistant_event_observers.remove(observer);
-}
-
 void HomeAssistantManager::_process_home_assistant_event(nlohmann::json &event_data) {
-  for (HomeAssistantEventObserver *observer : HomeAssistantManager::_home_assistant_event_observers) {
-    if (observer->home_assistant_event_callback(event_data)) {
-      return;
+  if (event_data.contains("event") && !event_data["event"].is_null()) {
+    if (event_data["event"].contains("event_type") && !event_data["event"]["event_type"].is_null()) {
+      if (std::string(event_data["event"]["event_type"]).compare("state_changed") == 0) {
+        std::string home_assistant_entity_name = event_data["event"]["data"]["entity_id"];
+        HomeAssistantManager::_home_assistant_observers[home_assistant_entity_name](event_data);
+      }
     }
   }
 }
