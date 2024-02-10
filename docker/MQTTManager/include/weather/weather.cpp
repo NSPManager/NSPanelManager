@@ -22,7 +22,7 @@ void MQTTManagerWeather::update_config() {
   if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
     SPDLOG_INFO("Initializing weather controller for Home Assistant.");
     HomeAssistantManager::attach_event_observer(MqttManagerConfig::home_assistant_weather_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
-    HomeAssistantManager::attach_event_observer(MqttManagerConfig::home_assistant_access_token, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
+    HomeAssistantManager::attach_event_observer(MqttManagerConfig::home_assistant_sun_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
     OpenhabManager::detach_event_observer(MqttManagerConfig::openhab_current_weather_item, boost::bind(&MQTTManagerWeather::openhab_current_weather_callback, this, _1));
     OpenhabManager::detach_event_observer(MqttManagerConfig::openhab_forecast_weather_item, boost::bind(&MQTTManagerWeather::openhab_forecast_weather_callback, this, _1));
   } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
@@ -30,7 +30,7 @@ void MQTTManagerWeather::update_config() {
     SPDLOG_DEBUG("Current weather item: {}", MqttManagerConfig::openhab_current_weather_item);
     SPDLOG_DEBUG("Forecast weather item: {}", MqttManagerConfig::openhab_forecast_weather_item);
     HomeAssistantManager::detach_event_observer(MqttManagerConfig::home_assistant_weather_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
-    HomeAssistantManager::detach_event_observer(MqttManagerConfig::home_assistant_address, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
+    HomeAssistantManager::detach_event_observer(MqttManagerConfig::home_assistant_sun_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
     OpenhabManager::attach_event_observer(MqttManagerConfig::openhab_current_weather_item, boost::bind(&MQTTManagerWeather::openhab_current_weather_callback, this, _1));
     OpenhabManager::attach_event_observer(MqttManagerConfig::openhab_forecast_weather_item, boost::bind(&MQTTManagerWeather::openhab_forecast_weather_callback, this, _1));
   } else {
