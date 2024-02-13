@@ -19,6 +19,7 @@ void HomeAssistantManager::connect() {
 
   if (HomeAssistantManager::_websocket == nullptr) {
     HomeAssistantManager::_websocket = new ix::WebSocket();
+    HomeAssistantManager::_websocket->setPingInterval(30);
   }
 
   std::string home_assistant_websocket_url = MqttManagerConfig::home_assistant_address;
