@@ -25,12 +25,12 @@ jobs:
         id: image_name
         run: |
           if [ "${{ github.event.release.prerelease }}" != "true" ]; then
-            echo "Image name: NSPanelManager"
-            echo "name=NSPanelManager" >> $GITHUB_OUTPUT
+            echo "Image name: NSPanelManager-{arch}"
+            echo "image_name=NSPanelManager-{arch}" >> $GITHUB_OUTPUT
             echo "branch=main" >> $GITHUB_OUTPUT
           elif [ "${{ github.event.release.prerelease }}" == "true" ]; then
-            echo "Image name: NSPanelManager-beta"
-            echo "name=NSPanelManager-beta" >> $GITHUB_OUTPUT
+            echo "Image name: NSPanelManager-beta-{arch}"
+            echo "image_name=NSPanelManager-beta-{arch}" >> $GITHUB_OUTPUT
             echo "branch=beta" >> $GITHUB_OUTPUT
           else
             echo "Cannot determine image name!"
@@ -41,18 +41,18 @@ jobs:
         with:
           commit_message: Push updated version back to repo
           branch: "${{ steps.image_name.outputs.branch }}"
-      # - name: Login to DockerHub
-      #   uses: docker/login-action@v2
-      #   with:
-      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
-      # - name: Publish
-      #   uses: home-assistant/builder@master
-      #   with:
-      #     args: |
-      #       --all \
-      #       --target docker \
-      #       --image NSPanelManager-{arch} \
-      #       --version ${{ github.ref_name }} \
-      #       --release ${{ github.ref_name }} \
-      #       --docker-hub ${{ secrets.DOCKERHUB_USERNAME }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Publish
+        uses: home-assistant/builder@master
+        with:
+          args: |
+            --all \
+            --target docker \
+            --image ${{ steps.image_name.outputs.image_name }} \
+            --version ${{ github.ref_name }} \
+            --release ${{ github.ref_name }} \
+            --docker-hub ${{ secrets.DOCKERHUB_USERNAME }}
