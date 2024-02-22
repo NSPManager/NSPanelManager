@@ -1,0 +1,59 @@
+name: "Publish"
+
+on:
+  release:
+    types: [published]
+    branches:
+      - 'main'
+
+jobs:
+  copy_config_template:
+    name: Update Home Assistant add-on version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      deployments: read
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          sed -i "s/^version: [0-9\.]\+/version: ${{ github.ref_name }}/g" docker/config.yaml
+          sed -i "s/[0-9]\+\.[0-9]\+\.[0-9]\+/${{ github.ref_name }}/g" docker/web/nspanelmanager/web/templates/footer.html
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        if: ${{ !github.event.act }} # skip during local actions testing
+        with:
+          commit_message: Push updated version back to repo
+  publish:
+    if: ${{ !github.event.act }} # skip during local actions testing
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+      - name: Extract branch name
+        shell: bash
+        id: extract_branch
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+      - name: Get image name
+        shell: bash
+        id: image_name
+        run: |
+          if [ "${{ steps.extract_branch.outputs.branch }}" == "main" ]; then
+            echo "name=NSPanelManager"
+          if [ "${{ steps.extract_branch.outputs.branch }}" == "beta" ]; then
+            echo "name=NSPanelManager-beta"
+          fi
+      # - name: Login to DockerHub
+      #   uses: docker/login-action@v2
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # - name: Publish
+      #   uses: home-assistant/builder@master
+      #   with:
+      #     args: |
+      #       --all \
+      #       --target docker \
+      #       --image NSPanelManager-{arch} \
+      #       --version ${{ github.ref_name }} \
+      #       --release ${{ github.ref_name }} \
+      #       --docker-hub ${{ secrets.DOCKERHUB_USERNAME }}
