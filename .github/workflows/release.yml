@@ -5,6 +5,7 @@ on:
     types: [published]
     branches:
       - 'main'
+      - 'beta'
 
 jobs:
   copy_config_template:
@@ -29,20 +30,19 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
-      - name: Extract branch name
-        shell: bash
-        id: extract_branch
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
       - name: Get image name
         shell: bash
         id: image_name
         run: |
-          if [ "${{ steps.extract_branch.outputs.branch }}" == "main" ]; then
+          echo "Is prerelease? ${{ github.event.release.prerelease }}"
+          if [ "${{ github.event.release.prerelease }}" != "true" ]; then
+            echo "Image name: NSPanelManager"
             echo "name=NSPanelManager" >> $GITHUB_OUTPUT
-          elif [ "${{ steps.extract_branch.outputs.branch }}" == "beta" ]; then
+          elif [ "${{ github.event.release.prerelease }}" == "true" ]; then
+            echo "Image name: NSPanelManager-beta"
             echo "name=NSPanelManager-beta" >> $GITHUB_OUTPUT
           else
-            echo "Cannot determine image name from branch name ${{ steps.extract_branch.outputs.branch }}"
+            echo "Cannot determine image name!"
             exit 1
           fi
       # - name: Login to DockerHub
