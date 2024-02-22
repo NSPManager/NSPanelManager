@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.gnu import AutotoolsToolchain
+from conan.tools.cmake import cmake_layout
 
 
 class CompressorRecipe(ConanFile):
@@ -8,6 +8,7 @@ class CompressorRecipe(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.3", override=True)
+        self.requires("openssl/3.2.1", override=True)
         self.requires("paho-mqtt-cpp/1.2.0")
         self.requires("spdlog/1.12.0")
         self.requires("libcurl/8.5.0")
@@ -23,3 +24,9 @@ class CompressorRecipe(ConanFile):
     def configure(self):
         self.options["boost"].without_stacktrace = False
         self.options["boost"].with_stacktrace_backtrace = True
+        # self.options["boost"].without_context = True
+        # self.options["boost"].without_coroutine = True
+        # self.options["boost"].without_fiber = True
+
+    def layout(self):
+        cmake_layout(self)

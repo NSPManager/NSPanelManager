@@ -4,6 +4,6 @@
         "conan": {}
     },
     "include": [
-        "/MQTTManager/build/CMakePresets.json"
+        "/MQTTManager/build/Debug/generators/CMakePresets.json"
     ]
 }

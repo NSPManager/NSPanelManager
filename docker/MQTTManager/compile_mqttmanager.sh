@@ -27,8 +27,9 @@ function add_arch_to_sys {
 }
 
 if [[ "$arch" == x86_64 ]]; then
-	add_arch=""
+	add_arch="x86_64"
 	build_arch="x86_64"
+	add_arch_to_sys "$add_arch"
 elif [[ "$arch" == armv7 ]]; then
 	add_arch="armel"
 	add_arch_to_sys "$add_arch"
@@ -42,14 +43,17 @@ LD=arm-linux-gnueabi-ld
 EOF
 elif [[ "$arch" == aarch64 ]]; then
 	add_arch="arm64"
-	add_arch_to_sys "$add_arch"
 	build_arch="armv8"
-	apt -y install binutils-arm-linux-gnueabi gcc-arm-linux-gnueabi g++-arm-linux-gnueabi
+	add_arch_to_sys "$add_arch"
+	apt -y install binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 	cat <<EOF >>/root/.conan2/profiles/host
 [buildenv]
-CC=arm-linux-gnueabi-gcc-12
-CXX=arm-linux-gnueabi-g++-12
-LD=arm-linux-gnueabi-ld
+CC=aarch64-linux-gnu-gcc-12
+CXX=aarch64-linux-gnu-g++-12
+LD=aarch64-linux-gnu-ld
+
+CFLAGS=-march=armv8-a
+CXXFLAGS=-march=armv8-a
 EOF
 elif [[ "$arch" == armhf ]]; then
 	add_arch="armhf"
@@ -78,10 +82,10 @@ sed -i "s/^arch.*/arch=$build_arch/g" /root/.conan2/profiles/host
 # Get build type from conan profile
 BUILD_TYPE=$(grep -E "^build_type=" /root/.conan2/profiles/default | cut -d'=' -f 2)
 
-conan install . --output-folder=build --build=missing -pr:b default -pr:h host
+conan install . --build=missing -pr:b default -pr:h host
 cd build
-source "conanbuild.sh"
-cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+source $BUILD_TYPE/generators/conanbuild.sh
+cmake .. -DCMAKE_TOOLCHAIN_FILE=$BUILD_TYPE/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 cmake --build . --config $BUILD_TYPE
 sed -i "s|/MQTTManager/|/home/tim/NSPanelManager/docker/MQTTManager/|g" compile_commands.json
 cp compile_commands.json ../
