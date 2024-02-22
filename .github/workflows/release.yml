@@ -20,10 +20,6 @@ jobs:
       - run: |
           sed -i "s/^version: [0-9\.]\+/version: ${{ github.ref_name }}/g" docker/config.yaml
           sed -i "s/[0-9]\+\.[0-9]\+\.[0-9]\+/${{ github.ref_name }}/g" docker/web/nspanelmanager/web/templates/footer.html
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        if: ${{ !github.event.act }} # skip during local actions testing
-        with:
-          commit_message: Push updated version back to repo
       - name: Get image name
         shell: bash
         id: image_name
@@ -31,13 +27,20 @@ jobs:
           if [ "${{ github.event.release.prerelease }}" != "true" ]; then
             echo "Image name: NSPanelManager"
             echo "name=NSPanelManager" >> $GITHUB_OUTPUT
+            echo "branch=main" >> $GITHUB_OUTPUT
           elif [ "${{ github.event.release.prerelease }}" == "true" ]; then
             echo "Image name: NSPanelManager-beta"
             echo "name=NSPanelManager-beta" >> $GITHUB_OUTPUT
+            echo "branch=beta" >> $GITHUB_OUTPUT
           else
             echo "Cannot determine image name!"
             exit 1
           fi
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        if: ${{ !github.event.act }} # skip during local actions testing
+        with:
+          commit_message: Push updated version back to repo
+          branch: "${{ steps.image_name.outputs.branch }}"
       # - name: Login to DockerHub
       #   uses: docker/login-action@v2
       #   with:
