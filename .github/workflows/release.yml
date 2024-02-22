@@ -38,9 +38,12 @@ jobs:
         id: image_name
         run: |
           if [ "${{ steps.extract_branch.outputs.branch }}" == "main" ]; then
-            echo "name=NSPanelManager"
-          if [ "${{ steps.extract_branch.outputs.branch }}" == "beta" ]; then
-            echo "name=NSPanelManager-beta"
+            echo "name=NSPanelManager" >> $GITHUB_OUTPUT
+          elif [ "${{ steps.extract_branch.outputs.branch }}" == "beta" ]; then
+            echo "name=NSPanelManager-beta" >> $GITHUB_OUTPUT
+          else
+            echo "Cannot determine image name from branch name ${{ steps.extract_branch.outputs.branch }}"
+            exit 1
           fi
       # - name: Login to DockerHub
       #   uses: docker/login-action@v2
