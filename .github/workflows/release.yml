@@ -8,21 +8,6 @@ on:
       - 'beta'
 
 jobs:
-  copy_config_template:
-    name: Update Home Assistant add-on version
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      deployments: read
-    steps:
-      - uses: actions/checkout@v3
-      - run: |
-          sed -i "s/^version: [0-9\.]\+/version: ${{ github.ref_name }}/g" docker/config.yaml
-          sed -i "s/[0-9]\+\.[0-9]\+\.[0-9]\+/${{ github.ref_name }}/g" docker/web/nspanelmanager/web/templates/footer.html
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        if: ${{ !github.event.act }} # skip during local actions testing
-        with:
-          commit_message: Push updated version back to repo
   publish:
     if: ${{ !github.event.act }} # skip during local actions testing
     name: Publish
@@ -30,11 +15,17 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
+      - run: |
+          sed -i "s/^version: [0-9\.]\+/version: ${{ github.ref_name }}/g" docker/config.yaml
+          sed -i "s/[0-9]\+\.[0-9]\+\.[0-9]\+/${{ github.ref_name }}/g" docker/web/nspanelmanager/web/templates/footer.html
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        if: ${{ !github.event.act }} # skip during local actions testing
+        with:
+          commit_message: Push updated version back to repo
       - name: Get image name
         shell: bash
         id: image_name
         run: |
-          echo "Is prerelease? ${{ github.event.release.prerelease }}"
           if [ "${{ github.event.release.prerelease }}" != "true" ]; then
             echo "Image name: NSPanelManager"
             echo "name=NSPanelManager" >> $GITHUB_OUTPUT
