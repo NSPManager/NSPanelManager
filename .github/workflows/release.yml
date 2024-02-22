@@ -29,18 +29,31 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Publish
-        uses: home-assistant/builder@master
-        with:
-          args: |
-            --all \
-            --target docker \
-            --image NSPanelManager-{arch} \
-            --version ${{ github.ref_name }} \
-            --release ${{ github.ref_name }} \
-            --docker-hub ${{ secrets.DOCKERHUB_USERNAME }}
+      - name: Extract branch name
+        shell: bash
+        id: extract_branch
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+      - name: Get image name
+        shell: bash
+        id: image_name
+        run: |
+          if [ "${{ steps.extract_branch.outputs.branch }}" == "main" ]; then
+            echo "name=NSPanelManager"
+          if [ "${{ steps.extract_branch.outputs.branch }}" == "beta" ]; then
+            echo "name=NSPanelManager-beta"
+          fi
+      # - name: Login to DockerHub
+      #   uses: docker/login-action@v2
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # - name: Publish
+      #   uses: home-assistant/builder@master
+      #   with:
+      #     args: |
+      #       --all \
+      #       --target docker \
+      #       --image NSPanelManager-{arch} \
+      #       --version ${{ github.ref_name }} \
+      #       --release ${{ github.ref_name }} \
+      #       --docker-hub ${{ secrets.DOCKERHUB_USERNAME }}
