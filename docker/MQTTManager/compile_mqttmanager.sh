@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "Starting to compile MQTTManager."
 set -e
 set -x
 
