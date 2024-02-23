@@ -34,7 +34,7 @@ rm -rf build
 BUILD_TYPE=$(grep -E "^build_type=" /root/.conan2/profiles/default | cut -d'=' -f 2)
 if [[ "armhf" = *"$arch"* ]]; then
 	sed -i "s/arch=.*/arch=armv7hf/g" /root/.conan2/profiles/default
-if [[ "armv7" = *"$arch"* ]]; then
+elif [[ "armv7" = *"$arch"* ]]; then
 	sed -i "s/arch=.*/arch=armv7/g" /root/.conan2/profiles/default
 elif [[ "aarch64" = *"$arch"* ]]; then
 	sed -i "s/arch=.*/arch=armv8/g" /root/.conan2/profiles/default
