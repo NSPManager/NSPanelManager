@@ -19,7 +19,7 @@ class CompressorRecipe(ConanFile):
         self.requires("boost/1.84.0")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.22.6")
+        self.tool_requires("cmake/3.28.1")
 
     def configure(self):
         self.options["boost"].without_stacktrace = False
