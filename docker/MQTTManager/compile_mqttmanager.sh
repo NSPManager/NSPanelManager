@@ -3,10 +3,18 @@ echo "Starting to compile MQTTManager."
 set -e
 set -x
 
-if [ ! -z "$1" ]; then
-	arch="$1"
+source /buildinfo
+
+if [ -z "$arch" ]; then
+	if [ ! -z "$1" ]; then
+		arch="$1"
+		echo "Using arch provided as arg: $arch"
+	else
+		arch=$(uname -m)
+		echo "No arch provided as arg, checking uname -m: $arch"
+	fi
 else
-	arch=$(uname -m)
+	echo "Using arch provided build /buildinfo: $arch"
 fi
 
 echo "Compiling for arch '$arch'"
@@ -24,6 +32,18 @@ rm -rf build
 #sed -i "s/^arch.*/arch=$build_arch/g" /root/.conan2/profiles/host
 # Get build type from conan profile
 BUILD_TYPE=$(grep -E "^build_type=" /root/.conan2/profiles/default | cut -d'=' -f 2)
+if [[ "armhf" = *"$arch"* ]]; then
+	sed -i "s/arch=.*/arch=armv7/g" /root/.conan2/profiles/default
+elif [[ "aarch64" = *"$arch"* ]]; then
+	sed -i "s/arch=.*/arch=armv8/g" /root/.conan2/profiles/default
+elif [[ "i386" = *"$arch"* ]]; then
+	sed -i "s/arch=.*/arch=x86/g" /root/.conan2/profiles/default
+elif [[ "amd64" = *"$arch"* ]]; then
+	sed -i "s/arch=.*/arch=x86_64/g" /root/.conan2/profiles/default
+fi
+
+echo "Conan profile: "
+cat /root/.conan2/profiles/default
 
 conan install . --build=missing
 cd build
