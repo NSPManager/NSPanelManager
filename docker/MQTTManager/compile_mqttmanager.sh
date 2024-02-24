@@ -31,7 +31,7 @@ if [ "$TARGETPLATFORM" == "linux/386" ]; then
 	conan_target_arch="x86"
 	apt -y install gcc-multilib g++-multilib
 elif [ "$TARGETPLATFORM" == "linux/amd64" ]; then
-	deb_add_arch="x86_64"
+	deb_add_arch="amd64"
 	conan_target_arch="x86_64"
 elif [ "$TARGETPLATFORM" == "linux/arm/v6" ]; then
 	deb_add_arch="armhf"
