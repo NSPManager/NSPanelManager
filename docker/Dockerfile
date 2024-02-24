@@ -24,7 +24,7 @@ FROM python:3.11
 COPY web/ /usr/src/app/
 COPY nginx/sites-enabled/ /etc/nginx/sites-enabled/
 COPY --from=build /MQTTManager /MQTTManager
-COPY --from=build /usr/src/app/nspm_mqttmanager /usr/src/app/nspm_mqttmanager
+COPY --from=build /usr/src/app/build/nspm_mqttmanager /usr/src/app/nspm_mqttmanager
 
 WORKDIR /usr/src/app
 
