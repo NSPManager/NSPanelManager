@@ -1,24 +1,85 @@
 #!/bin/bash
 echo "Starting to compile MQTTManager."
+
+TARGETPLATFORM=""
+
+while true; do
+	case "$1" in
+	--target-platform)
+		TARGETPLATFORM="$2"
+		echo "Will compile for platform $TARGETPLATFORM"
+		shift
+		;;
+	*) break ;;
+	esac
+done
+
+if [ -z "$TARGETPLATFORM" ]; then
+	echo "No platform given as argument, will assume linux/amd64"
+	TARGETPLATFORM="linux/amd64"
+fi
+
+echo "Compiling for target '$TARGETPLATFORM'"
+
 set -e
 set -x
 
-source /buildinfo
-
-if [ -z "$arch" ]; then
-	if [ ! -z "$1" ]; then
-		arch="$1"
-		echo "Using arch provided as arg: $arch"
-	else
-		arch=$(uname -m)
-		echo "No arch provided as arg, checking uname -m: $arch"
-	fi
+deb_add_arch=""
+cp /root/.conan2/profiles/default /root/.conan2/profiles/host
+if [ "$TARGETPLATFORM" == "linux/386" ]; then
+	deb_add_arch="i386"
+	conan_target_arch="x86"
+	apt -y install gcc-multilib g++-multilib
+elif [ "$TARGETPLATFORM" == "linux/amd64" ]; then
+	deb_add_arch="x86_64"
+	conan_target_arch="x86_64"
+elif [ "$TARGETPLATFORM" == "linux/arm/v6" ]; then
+	deb_add_arch="armhf"
+	conan_target_arch="armv6"
+	apt -y install binutils-arm-linux-gnueabihf gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+	echo "" >>/root/.conan2/profiles/host
+	echo "[buildenv]" >>/root/.conan2/profiles/host
+	echo "CC=arm-linux-gnueabihf-gcc-12" >>/root/.conan2/profiles/host
+	echo "CXX=arm-linux-gnueabihf-g++-12" >>/root/.conan2/profiles/host
+	echo "LD=arm-linux-gnueabihf-ld" >>/root/.conan2/profiles/host
+elif [ "$TARGETPLATFORM" == "linux/arm/v7" ]; then
+	deb_add_arch="armhf"
+	conan_target_arch="armv7hf"
+	apt -y install binutils-arm-linux-gnueabihf gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+	echo "" >>/root/.conan2/profiles/host
+	echo "[buildenv]" >>/root/.conan2/profiles/host
+	echo "CC=arm-linux-gnueabihf-gcc-12" >>/root/.conan2/profiles/host
+	echo "CXX=arm-linux-gnueabihf-g++-12" >>/root/.conan2/profiles/host
+	echo "LD=arm-linux-gnueabihf-ld" >>/root/.conan2/profiles/host
+elif [ "$TARGETPLATFORM" == "linux/arm64" ]; then
+	deb_add_arch="arm64"
+	conan_target_arch="armv8"
+	apt -y install binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+	echo "" >>/root/.conan2/profiles/host
+	echo "[buildenv]" >>/root/.conan2/profiles/host
+	echo "CC=aarch64-linux-gnu-gcc-12" >>/root/.conan2/profiles/host
+	echo "CXX=aarch64-linux-gnu-g++-12" >>/root/.conan2/profiles/host
+	echo "LD=aarch64-linux-gnu-ld" >>/root/.conan2/profiles/host
+	#echo "CFLAGS=-march=armv8-a" >>/root/.conan2/profiles/host
+	#echo "CXXFLAGS=-march=armv8-a" >>/root/.conan2/profiles/host
 else
-	echo "Using arch provided build /buildinfo: $arch"
+	echo "ERROR !Unknown target platform. Will exit."
+	exit 1
+fi
+eval $(dpkg-architecture) # Load in what the builder machine is
+
+# Setup apt source file to be able to access both architectures
+if [ "$deb_add_arch" != "$DEB_HOST_ARCH" ]; then
+	if [ ! -f "/etc/apt/sources.list.d/debian.sources.bak" ]; then
+		cp /etc/apt/sources.list.d/debian.sources /etc/apt/sources.list.d/debian.sources.bak
+	fi
+	cp /etc/apt/sources.list.d/debian.sources.bak /etc/apt/sources.list.d/debian.sources
+	dpkg --add-architecture $deb_add_arch
+	sed -i "/Components.*/a arch=$DEB_HOST_ARCH,$deb_add_arch" /etc/apt/sources.list.d/debian.sources
+	apt-get update
 fi
 
-echo "Compiling for arch '$arch'"
-apt -y install libssl-dev openssl libcurl4-openssl-dev
+apt -y install libssl-dev:$deb_add_arch openssl:$deb_add_arch libcurl4-openssl-dev:$deb_add_arch
 
 BASEDIR=$(dirname "$0")
 pushd "$BASEDIR"
@@ -32,22 +93,12 @@ rm -rf build
 #sed -i "s/^arch.*/arch=$build_arch/g" /root/.conan2/profiles/host
 # Get build type from conan profile
 BUILD_TYPE=$(grep -E "^build_type=" /root/.conan2/profiles/default | cut -d'=' -f 2)
-if [[ "armhf" = *"$arch"* ]]; then
-	sed -i "s/arch=.*/arch=armv7hf/g" /root/.conan2/profiles/default
-elif [[ "armv7" = *"$arch"* ]]; then
-	sed -i "s/arch=.*/arch=armv7/g" /root/.conan2/profiles/default
-elif [[ "aarch64" = *"$arch"* ]]; then
-	sed -i "s/arch=.*/arch=armv8/g" /root/.conan2/profiles/default
-elif [[ "i386" = *"$arch"* ]]; then
-	sed -i "s/arch=.*/arch=x86/g" /root/.conan2/profiles/default
-elif [[ "amd64" = *"$arch"* ]]; then
-	sed -i "s/arch=.*/arch=x86_64/g" /root/.conan2/profiles/default
-fi
+sed -i "s/arch=.*/arch=${conan_target_arch}/g" /root/.conan2/profiles/host
 
 echo "Conan profile: "
 cat /root/.conan2/profiles/default
 
-conan install . --build=missing
+conan install . --build=missing -pr:b default -pr:h host
 cd build
 source $BUILD_TYPE/generators/conanbuild.sh
 cmake .. -DCMAKE_TOOLCHAIN_FILE=$BUILD_TYPE/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE
@@ -55,4 +106,6 @@ cmake --build . --config $BUILD_TYPE
 sed -i "s|/MQTTManager/|/home/tim/NSPanelManager/docker/MQTTManager/|g" compile_commands.json
 cp compile_commands.json ../
 
-cp nspm_mqttmanager /usr/src/app/
+if [ -d "/usr/src/app" ]; then
+	cp nspm_mqttmanager /usr/src/app/
+fi

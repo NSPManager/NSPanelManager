@@ -1,17 +1,13 @@
 #!/bin/bash
 
-version=3.28
-build=1
-
 apt -y remove cmake # In case it is already installed
-apt -y install build-essential libtool autoconf unzip wget
+apt -y install build-essential libtool autoconf unzip
 
 # Download and extract CMake
 mkdir ~/temp
 cd ~/temp
-wget https://cmake.org/files/v$version/cmake-$version.$build.tar.gz
-tar -xzvf cmake-$version.$build.tar.gz
-cd cmake-$version.$build/
+tar -xzf /MQTTManager/cmake-3.28.1.tar.gz
+cd cmake-3.28.1/
 
 ./bootstrap
 make -j$(nproc)
