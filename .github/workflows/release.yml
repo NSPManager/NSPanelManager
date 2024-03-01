@@ -10,7 +10,7 @@ on:
 jobs:
   prepare:
     if: ${{ !github.event.act }} # skip during local actions testing
-    name: Prepare
+    name: prepare
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -68,7 +68,7 @@ jobs:
 
       - uses: yogeshlonkar/wait-for-jobs@v0
         with:
-          jobs: 'Prepare'
+          jobs: 'prepare'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
@@ -113,7 +113,7 @@ jobs:
 
       - uses: yogeshlonkar/wait-for-jobs@v0
         with:
-          jobs: 'Prepare'
+          jobs: 'prepare'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
@@ -158,7 +158,7 @@ jobs:
 
       - uses: yogeshlonkar/wait-for-jobs@v0
         with:
-          jobs: 'Prepare'
+          jobs: 'prepare'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
@@ -203,7 +203,7 @@ jobs:
 
       - uses: yogeshlonkar/wait-for-jobs@v0
         with:
-          jobs: 'Prepare'
+          jobs: 'prepare'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
@@ -248,7 +248,7 @@ jobs:
 
       - uses: yogeshlonkar/wait-for-jobs@v0
         with:
-          jobs: 'Prepare'
+          jobs: 'prepare'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
