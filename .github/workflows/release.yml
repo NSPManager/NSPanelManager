@@ -28,7 +28,7 @@ jobs:
   publish-x86:
     if: ${{ !github.event.act }} # skip during local actions testing
     name: Publish x86
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:
       actions: read
     steps:
@@ -73,7 +73,7 @@ jobs:
   publish-x86_64:
     if: ${{ !github.event.act }} # skip during local actions testing
     name: Publish x86_64
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:
       actions: read
     steps:
@@ -118,7 +118,7 @@ jobs:
   publish-armhf:
     if: ${{ !github.event.act }} # skip during local actions testing
     name: Publish armhf
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:
       actions: read
     steps:
@@ -163,7 +163,7 @@ jobs:
   publish-armv7:
     if: ${{ !github.event.act }} # skip during local actions testing
     name: Publish ARMv7
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:
       actions: read
     steps:
@@ -208,7 +208,7 @@ jobs:
   publish-aarch64:
     if: ${{ !github.event.act }} # skip during local actions testing
     name: Publish aarch64
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:
       actions: read
     steps:
