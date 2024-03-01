@@ -13,6 +13,7 @@ jobs:
     name: prepare
     permissions:
       contents: write
+      actions: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
@@ -37,6 +38,7 @@ jobs:
         with:
           commit_message: Push updated version back to repo
           branch: "${{ steps.image_name.outputs.branch }}"
+
   publish-x86:
     if: ${{ !github.event.act }} # skip during local actions testing
     name: Publish x86
@@ -69,6 +71,7 @@ jobs:
       - uses: yogeshlonkar/wait-for-jobs@v0
         with:
           jobs: 'prepare'
+          ttl: '15'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
@@ -114,6 +117,7 @@ jobs:
       - uses: yogeshlonkar/wait-for-jobs@v0
         with:
           jobs: 'prepare'
+          ttl: '15'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
@@ -159,6 +163,7 @@ jobs:
       - uses: yogeshlonkar/wait-for-jobs@v0
         with:
           jobs: 'prepare'
+          ttl: '15'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
@@ -204,6 +209,7 @@ jobs:
       - uses: yogeshlonkar/wait-for-jobs@v0
         with:
           jobs: 'prepare'
+          ttl: '15'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
@@ -249,6 +255,7 @@ jobs:
       - uses: yogeshlonkar/wait-for-jobs@v0
         with:
           jobs: 'prepare'
+          ttl: '15'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
