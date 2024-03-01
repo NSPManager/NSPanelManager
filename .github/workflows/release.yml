@@ -41,6 +41,7 @@ jobs:
 
   publish-x86:
     if: ${{ !github.event.act }} # skip during local actions testing
+    needs: prepare
     name: Publish x86
     runs-on: ubuntu-latest
     permissions:
@@ -68,10 +69,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - uses: yogeshlonkar/wait-for-jobs@v0
-        with:
-          jobs: 'prepare'
-          ttl: '15'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
@@ -87,6 +84,7 @@ jobs:
 
   publish-x86_64:
     if: ${{ !github.event.act }} # skip during local actions testing
+    needs: prepare
     name: Publish x86_64
     runs-on: ubuntu-latest
     permissions:
@@ -113,11 +111,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - uses: yogeshlonkar/wait-for-jobs@v0
-        with:
-          jobs: 'prepare'
-          ttl: '15'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
@@ -133,6 +126,7 @@ jobs:
 
   publish-armhf:
     if: ${{ !github.event.act }} # skip during local actions testing
+    needs: prepare
     name: Publish armhf
     runs-on: ubuntu-latest
     permissions:
@@ -159,11 +153,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - uses: yogeshlonkar/wait-for-jobs@v0
-        with:
-          jobs: 'prepare'
-          ttl: '15'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
@@ -179,6 +168,7 @@ jobs:
 
   publish-armv7:
     if: ${{ !github.event.act }} # skip during local actions testing
+    needs: prepare
     name: Publish ARMv7
     runs-on: ubuntu-latest
     permissions:
@@ -205,11 +195,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - uses: yogeshlonkar/wait-for-jobs@v0
-        with:
-          jobs: 'prepare'
-          ttl: '15'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
@@ -225,6 +210,7 @@ jobs:
 
   publish-aarch64:
     if: ${{ !github.event.act }} # skip during local actions testing
+    needs: prepare
     name: Publish aarch64
     runs-on: ubuntu-latest
     permissions:
@@ -251,11 +237,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - uses: yogeshlonkar/wait-for-jobs@v0
-        with:
-          jobs: 'prepare'
-          ttl: '15'
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Publish
