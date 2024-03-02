@@ -1,95 +1,125 @@
 <template id="nspanel_index_box_template">
-  <div class="box nspanel-box m-2" id="panel_status_box">
-    <span id="nspanel_id" class="is-hidden nspanel_id_container"></span>
-    <span id="nspanel_mac_container" class="is-hidden nspanel_mac_container"></span>
-    <div class="nspanel-status-header">
-      <div class="has-background-grey nspanel-status-header-await" id="panel_header"></div>
+  <div
+    class="bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md"
+    id="panel_status_box">
+    <div class="">
+      <div class="bg-gray-500 min-h-1 overflow-hidden rounded-t-md w-full animate-pulse" id="panel_header"></div>
     </div>
-    <div class="accept-request-overlay pt-3 is-hidden">
-      <span>NSPanel '{NAME}' is requesting access. THIS TEXT IS REPLACED BY JAVASCRIPT AS NEEDED!!!</span>
-      <div class="pt-3">
-        <button class="button is-danger">Deny</button>
-        <button class="button is-success" onclick="send_nspanel_accept_request(this);">Accept</button>
-      </div>
-    </div>
-    <div class="nspanel-status-content-box">
-      <div class="level">
-        <div class="level-left">
-          <div class="level-item">
-            <div class="is-pulled-left">
-              <span class="has-text-weight-bold"><a href="" class="has-text-dark" id="nspanel_name"></a></span>
-            </div>
-          </div>
+    <div class="p-2">
+      <!-- Hidden data values for the specific panel -->
+      <span id="nspanel_id" class="hidden nspanel_id_container"></span>
+      <span id="nspanel_mac_container" class="hidden nspanel_mac_container" data-nspanel-mac=""></span>
+
+      <!-- Overlay for "accept/deny request" -->
+      <div class="accept-request-overlay hidden">
+        <div class="flex w-full items-center justify-center pt-2">
+          <span class="nspanel-name">NSPanel '{NAME}' is requesting access. THIS TEXT IS REPLACED BY JAVASCRIPT AS NEEDED!!!</span>
         </div>
-        <div class="level-right">
-          <span class="has-text-weight-light is-italic is-size-7"
-            id="panel_header_text">Unknown status</span>
+        <div class="flex w-full items-center justify-center pt-2 pb-4">
+          <div>
+            <button class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Deny</button>
+            <button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onclick="send_nspanel_accept_request(this);">Accept</button>
+          </div>
         </div>
       </div>
 
-      <div class="info-item">
-        <span class="icon-text">
-          <span class="icon">
-            <i class="mdi mdi-help" id="wifi_signal_strength"></i>
-          </span>
-          <span id="wifi_signal_strength_text" class="is-size-7">-</span>
-        </span>
-      </div>
-      <div class="info-item">
-        <span class="icon-text">
-          <span class="icon">
-            <i class="mdi mdi-thermometer"></i>
-          </span>
-          <span id="temperature"
-            class="nspanel-status-temperature is-size-7">-</span>
-        </span>
-      </div>
-      <div class="info-item">
-        <span class="icon-text">
-          <span class="icon">
-            <i class="mdi mdi-memory"></i>
-          </span>
-          <span class="is-size-7" id="heap_used">-</span>
-        </span>
-      </div>
-    </div>
-    <div class="nspanel-status-footer">
-      <span data-tooltip="" class="icon is-small has-tooltipl-multiline has-tooltip-warning pl-3 is-hidden"
-        id="nspanel_warnings">
-        <span class="mdi mdi-alert-circle has-text-warning mdi-24px"></span>
-      </span>
-      <div class="dropdown nspanel-actions-button">
-        <div class="dropdown-trigger" onclick="show_dropdown_menu(this);">
-          <span class="mdi mdi-cog pr-2"></span>
+      <!-- Normal view for accepted panels -->
+      <div class="nspanel-status-view">
+        <!-- Name -->
+        <div class="flex justify-between mx-auto mb-1">
+          <div class="w-full">
+            <span class=""><a href="" class="font-medium text-lg" id="nspanel_name"></a></span>
+          </div>
+          <div class="w-full">
+            <span class="flex items-end justify-end text-right italic font-light text-sm" id="panel_header_text">Unknown
+              status</span>
+          </div>
         </div>
-        <div class="dropdown-menu" id="dropdown-menu" role="menu">
-          <div class="dropdown-content">
-            <a class="dropdown-item" onclick="rebootNSPanel(this);">
-              <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot
-            </a>
-            <a class="dropdown-item nspanel-settings-link" href="" target="_blank">
-              <span class="mdi mdi-cog pr-2 has-text-primary"></span>Panel settings
-              page
-            </a>
-            <a class="dropdown-item nspanel-visit-link" href="" target="_blank">
-              <span class="mdi mdi-web pr-2 has-text-primary"></span>Visit panel
-              page
-            </a>
-            <hr class="dropdown-divider" />
-            <a class="dropdown-item" onclick="startNSPanelOtaUpdate(this);">
-              <span class="mdi mdi-upload pr-2 has-text-info"></span>Update
-              firmware
-            </a>
-            <a class="dropdown-item" onclick="startNSPanelTftUpdate(this);">
-              <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update screen
-            </a>
-            <hr class="dropdown-divider" />
-            <a class="dropdown-item has-text-danger" onclick="send_nspanel_delete_request(this);">
-              <span class="mdi mdi-minus-circle pr-2"></span>Delete
-            </a>
+        <!-- Status information -->
+        <div class="flex justify-between items-end">
+          <div>
+            <div class="my-1">
+              <!-- WiFi strength -->
+              <div class="info-item">
+                <span class="icon-text">
+                  <span class="icon me-1">
+                    <i class="mdi mdi-help" id="wifi_signal_strength"></i>
+                  </span>
+                  <span id="wifi_signal_strength_text" class="text-sm">-</span>
+                </span>
+              </div>
+            </div>
+            <div class="my-1">
+              <!-- Temperature -->
+              <div class="info-item">
+                <span class="icon-text">
+                  <span class="icon me-1">
+                    <i class="mdi mdi-thermometer"></i>
+                  </span>
+                  <span id="temperature" class="text-sm">-</span>
+                </span>
+              </div>
+            </div>
+            <div class="my-1">
+              <!-- RAM usage -->
+              <div class="info-item">
+                <span class="icon-text">
+                  <span class="icon me-1">
+                    <i class="mdi mdi-memory"></i>
+                  </span>
+                  <span id="heap_used" class="text-sm">-</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <button data-dropdown-toggle="nspanelActionsMenuDropdown" onclick="show_dropdown_menu(this);"
+              class="font-medium text-sm px-1 py-1 text-center inline-flex items-center">
+              <span class="mdi mdi-cog pr-2"></span>
+            </button>
+            <!-- Dropdown menu -->
+            <div id="nspanelActionsMenuDropdown"
+              class="hidden dropdown z-10 font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600 md:absolute inset-x-auto">
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-400" aria-labelledby="dropdownLargeButton">
+                <li>
+                  <a onclick="rebootNSPanel(this);" data-nspanel-mac=""
+                    class="block px-4 py-2 hover:bg-gray-600 hover:text-white"><span
+                      class="mdi mdi-restart pr-2"></span>Reboot</a>
+                  </a>
+                </li>
+                <li>
+                  <a class="nspanel-settings-link block px-4 py-2 hover:bg-gray-600 hover:text-white"><span
+                      class="mdi mdi-cog pr-2"></span>Settings</a>
+                </li>
+                <li>
+                  <a target="_blank" class="nspanel-visit-link block px-4 py-2 hover:bg-gray-600 hover:text-white"><span
+                      class="mdi mdi-web pr-2"></span>Visit</a>
+                </li>
+              </ul>
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-400" aria-labelledby="dropdownLargeButton">
+                <li>
+                  <a onclick="startNSPanelOtaUpdate(this);" data-nspanel-mac=""
+                    class="block px-4 py-2 hover:bg-gray-600 hover:text-white"><span
+                      class="mdi mdi-upload pr-2"></span>Update firmware</a>
+                </li>
+                <li>
+                  <a onclick="startNSPanelTftUpdate(this);" data-nspanel-mac=""
+                    class="block px-4 py-2 hover:bg-gray-600 hover:text-white"><span
+                      class="mdi mdi-table-arrow-up pr-2"></span>Update screen</a>
+                </li>
+              </ul>
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-400" aria-labelledby="dropdownLargeButton">
+                <li>
+                  <a onclick="send_nspanel_delete_request(this);" data-nspanel-mac=""
+                    class="block px-4 py-2 hover:bg-gray-600 hover:text-white"><span
+                      class="mdi mdi-minus-circle pr-2"></span>Delete</a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
   </div>
 </template>

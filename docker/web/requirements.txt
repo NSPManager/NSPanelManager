@@ -5,7 +5,6 @@ colorama==0.4.6
 distro==1.8.0
 Django==4.2.6
 django-environ==0.11.2
-django-mathfilters==1.0.0
 fasteners==0.19
 gevent==23.9.1
 greenlet==3.0.0
@@ -24,7 +23,5 @@ six==1.16.0
 sqlparse==0.4.4
 urllib3==1.26.18
 uWSGI==2.0.22
-websocket-client==1.6.4
-websockets==11.0.3
 zope.event==5.0
 zope.interface==6.1

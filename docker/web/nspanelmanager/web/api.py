@@ -17,7 +17,7 @@ import os
 
 from .models import NSPanel, Room, Light, LightState, Scene, RelayGroup
 from .apps import start_mqtt_manager
-from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default
+from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default, set_setting_value
 
 
 def restart_mqtt_manager_process():
@@ -27,11 +27,13 @@ def restart_mqtt_manager_process():
             proc.kill()
     start_mqtt_manager()
 
+
 def send_mqttmanager_reload_command():
     for proc in psutil.process_iter():
         if "/usr/src/app/nspm_mqttmanager" in proc.cmdline():
             print("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
             os.kill(proc.pid, signal.SIGUSR1)
+
 
 def get_file_md5sum(filename):
     fs = FileSystemStorage()
@@ -57,27 +59,42 @@ def get_mqtt_manager_config(request):
         "openhab_brightness_channel_max", 255)
     return_json["openhab_color_temp_channel_name"] = get_setting_with_default(
         "openhab_color_temp_channel_name", "")
-    return_json["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name", "")
-    return_json["clock_us_style"] = get_setting_with_default("clock_us_style", False) == "True"
-    return_json["use_farenheit"] = get_setting_with_default("use_farenheit", False) == "True"
-    return_json["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
-    return_json["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size", "10")
-    return_json["manager_address"] = get_setting_with_default("manager_address", "")
+    return_json["openhab_rgb_channel_name"] = get_setting_with_default(
+        "openhab_rgb_channel_name", "")
+    return_json["clock_us_style"] = get_setting_with_default(
+        "clock_us_style", False) == "True"
+    return_json["use_farenheit"] = get_setting_with_default(
+        "use_farenheit", False) == "True"
+    return_json["turn_on_behavior"] = get_setting_with_default(
+        "turn_on_behavior", "color_temp")
+    return_json["max_log_buffer_size"] = get_setting_with_default(
+        "max_log_buffer_size", "10")
+    return_json["manager_address"] = get_setting_with_default(
+        "manager_address", "")
     return_json["manager_port"] = get_setting_with_default("manager_port", "")
-    return_json["date_format"] = get_setting_with_default("date_format", "%a %d/%m %Y");
-    return_json["weather_controller"] = get_setting_with_default("weather_controller", "");
-    return_json["home_assistant_sun_entity"] = get_setting_with_default("sun_entity", "");
-    return_json["home_assistant_weather_entity"] = get_setting_with_default("weather_home_assistant_weather_entity", "");
-    return_json["outside_temp_sensor_provider"] = get_setting_with_default("outside_temp_sensor_provider", "");
-    return_json["outside_temp_sensor_entity_id"] = get_setting_with_default("outside_temp_sensor_entity_id", "");
-    return_json["openhab_current_weather_item"] = get_setting_with_default("weather_openhab_current_weather_item", "");
-    return_json["openhab_forecast_weather_item"] = get_setting_with_default("weather_openhab_forecast_weather_item", "");
+    return_json["date_format"] = get_setting_with_default(
+        "date_format", "%a %d/%m %Y")
+    return_json["weather_controller"] = get_setting_with_default(
+        "weather_controller", "")
+    return_json["home_assistant_sun_entity"] = get_setting_with_default(
+        "sun_entity", "")
+    return_json["home_assistant_weather_entity"] = get_setting_with_default(
+        "weather_home_assistant_weather_entity", "")
+    return_json["outside_temp_sensor_provider"] = get_setting_with_default(
+        "outside_temp_sensor_provider", "")
+    return_json["outside_temp_sensor_entity_id"] = get_setting_with_default(
+        "outside_temp_sensor_entity_id", "")
+    return_json["openhab_current_weather_item"] = get_setting_with_default(
+        "weather_openhab_current_weather_item", "")
+    return_json["openhab_forecast_weather_item"] = get_setting_with_default(
+        "weather_openhab_forecast_weather_item", "")
     if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
         return_json["is_home_assistant_addon"] = True
     else:
         return_json["is_home_assistant_addon"] = False
     fs = FileSystemStorage()
-    return_json["icon_mapping"] = json.loads(fs.open("icon_mapping.json").read())
+    return_json["icon_mapping"] = json.loads(
+        fs.open("icon_mapping.json").read())
 
     return_json["lights"] = {}
     for light in Light.objects.all():
@@ -102,7 +119,8 @@ def get_mqtt_manager_config(request):
 
     return_json["nspanels"] = {}
     for panel in NSPanel.objects.all():
-        return_json["nspanels"][panel.id] = get_nspanel_json_representation(panel)
+        return_json["nspanels"][panel.id] = get_nspanel_json_representation(
+            panel)
 
     return_json["scenes"] = []
     for scene in Scene.objects.all():
@@ -136,7 +154,7 @@ def get_mqtt_manager_config(request):
             "name": room.friendly_name
         }
         return_json["rooms"].append(room_info)
-    
+
     return_json["nspanel_relay_groups"] = []
     for relay_group in RelayGroup.objects.all():
         rg_info = {
@@ -146,10 +164,12 @@ def get_mqtt_manager_config(request):
             "relays": []
         }
         for relay_binding in relay_group.relaygroupbinding_set.all():
-            rg_info["relays"].append({"nspanel_id": relay_binding.nspanel.id, "relay_num": relay_binding.relay_num})
+            rg_info["relays"].append(
+                {"nspanel_id": relay_binding.nspanel.id, "relay_num": relay_binding.relay_num})
         return_json["nspanel_relay_groups"].append(rg_info)
 
     return JsonResponse(return_json)
+
 
 def get_nspanel_json_representation(panel):
     panel_config = {
@@ -163,6 +183,7 @@ def get_nspanel_json_representation(panel):
         "relay2_is_light": panel.register_relay2_as_light
     }
     return panel_config
+
 
 def get_nspanels_warnings(request):
     md5_firmware = get_file_md5sum("firmware.bin")
@@ -198,7 +219,8 @@ def get_all_available_entities(request):
     # TODO: Implement manually entered entities
     home_assistant_type_filter = []
     if "home_assistant_type_filter" in request.GET:
-        home_assistant_type_filter = json.loads(request.GET["home_assistant_type_filter"]);
+        home_assistant_type_filter = json.loads(
+            request.GET["home_assistant_type_filter"])
 
     # Get Home Assistant lights
     return_json = {}
@@ -216,11 +238,15 @@ def get_all_available_entities(request):
         try:
             environment = environ.Env()
             if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
-                home_assistant_api_address = get_setting_with_default("home_assistant_address", "") + "/core/api/states"
+                home_assistant_api_address = get_setting_with_default(
+                    "home_assistant_address", "") + "/core/api/states"
             else:
-                home_assistant_api_address = get_setting_with_default("home_assistant_address", "") + "/api/states"
-            print("Trying to get Home Assistant entities via api address: " + home_assistant_api_address)
-            home_assistant_response = requests.get(home_assistant_api_address, headers=home_assistant_request_headers, timeout=5, verify=False)
+                home_assistant_api_address = get_setting_with_default(
+                    "home_assistant_address", "") + "/api/states"
+            print("Trying to get Home Assistant entities via api address: " +
+                  home_assistant_api_address)
+            home_assistant_response = requests.get(
+                home_assistant_api_address, headers=home_assistant_request_headers, timeout=5, verify=False)
             if home_assistant_response.status_code == 200:
                 for entity in home_assistant_response.json():
                     entity_type = entity["entity_id"].split(".")[0]
@@ -235,10 +261,13 @@ def get_all_available_entities(request):
 
                         return_json["home_assistant_entities"].append(data)
             else:
-                return_json["errors"].append("Failed to get Home Assistant lights, got return code: " + str(home_assistant_response.status_code))
-                print("ERROR! Got status code other than 200. Got code: " + str(home_assistant_response.status_code))
+                return_json["errors"].append(
+                    "Failed to get Home Assistant lights, got return code: " + str(home_assistant_response.status_code))
+                print("ERROR! Got status code other than 200. Got code: " +
+                      str(home_assistant_response.status_code))
         except Exception as e:
-            return_json["errors"].append("Failed to get Home Assistant lights: " + str(traceback.format_exc()))
+            return_json["errors"].append(
+                "Failed to get Home Assistant lights: " + str(traceback.format_exc()))
             logging.exception("Failed to get Home Assistant lights!")
     else:
         print("No home assistant configuration values. Will not gather Home Assistant entities.")
@@ -261,7 +290,8 @@ def get_all_available_entities(request):
                         items = []
                         for channel in entity["channels"]:
                             # Check if this thing has a channel that indicates that it might be a light
-                            add_items_with_channels_of_type = ["Dimmer", "Number", "Color", "Switch", "String"]
+                            add_items_with_channels_of_type = [
+                                "Dimmer", "Number", "Color", "Switch", "String"]
                             if "itemType" in channel and (channel["itemType"] in add_items_with_channels_of_type):
                                 add_entity = True
                             if "linkedItems" in channel:
@@ -277,10 +307,13 @@ def get_all_available_entities(request):
                                 "items": items
                             })
             else:
-                return_json["errors"].append("Failed to get OpenHAB lights, got return code: " + str(openhab_response.status_code))
-                print("ERROR! Got status code other than 200. Got code: " + str(openhab_response.status_code))
+                return_json["errors"].append(
+                    "Failed to get OpenHAB lights, got return code: " + str(openhab_response.status_code))
+                print("ERROR! Got status code other than 200. Got code: " +
+                      str(openhab_response.status_code))
         except Exception as e:
-            return_json["errors"].append("Failed to get OpenHAB lights: " + str(traceback.format_exc()))
+            return_json["errors"].append(
+                "Failed to get OpenHAB lights: " + str(traceback.format_exc()))
             logging.exception("Failed to get OpenHAB lights!")
     else:
         print("No OpenHAB configuration values. Will not gather OpenHAB entities.")
@@ -319,12 +352,14 @@ def register_nspanel(request):
     fs = FileSystemStorage()
     if "md5_firmware" in data:
         if data["md5_firmware"] == "":
-            new_panel.md5_firmware = hashlib.md5(fs.open("firmware.bin").read()).hexdigest()
+            new_panel.md5_firmware = hashlib.md5(
+                fs.open("firmware.bin").read()).hexdigest()
         else:
             new_panel.md5_firmware = data["md5_firmware"]
     if "md5_data_file" in data:
         if data["md5_data_file"] == "":
-            new_panel.md5_data_file = hashlib.md5(fs.open("data_file.bin").read()).hexdigest()
+            new_panel.md5_data_file = hashlib.md5(
+                fs.open("data_file.bin").read()).hexdigest()
         else:
             new_panel.md5_data_file = data["md5_data_file"]
     # TFT file will never be flashed by default with a new panel, always set the MD5 from registration
@@ -357,35 +392,60 @@ def get_nspanel_config(request):
         base = {}
         base["name"] = nspanel.friendly_name
         base["home"] = nspanel.room.id
-        base["default_page"] = get_nspanel_setting_with_default(nspanel.id, "default_page", "0")
+        base["default_page"] = get_nspanel_setting_with_default(
+            nspanel.id, "default_page", "0")
         base["raise_to_100_light_level"] = get_setting_with_default(
             "raise_to_100_light_level", 95)
-        base["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
-        base["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
-        base["reverse_color_temp"] = get_setting_with_default("reverse_color_temp", False)
-        base["min_button_push_time"] = get_setting_with_default("min_button_push_time", 50)
-        base["button_long_press_time"] = get_setting_with_default("button_long_press_time", 5000)
-        base["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time", 300)
-        base["special_mode_release_time"] = get_setting_with_default("special_mode_release_time", 5000)
-        base["mqtt_ignore_time"] = get_setting_with_default("mqtt_ignore_time", 3000)
-        base["screen_dim_level"] = get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level", 100))
-        base["screensaver_dim_level"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level", 0))
-        base["screensaver_activation_timeout"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout", 30000))
-        base["screensaver_mode"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode", "with_background"))
-        base["clock_us_style"] = get_setting_with_default("clock_us_style", "False")
-        base["use_farenheit"] = get_setting_with_default("use_farenheit", "False")
-        base["is_us_panel"] = get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False")
-        base["lock_to_default_room"] = get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False")
-        base["reverse_relays"] = get_nspanel_setting_with_default(nspanel.id, "reverse_relays", False)
-        base["relay1_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", False)
-        base["relay2_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", False)
-        base["temperature_calibration"] = float(get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0))
+        base["color_temp_min"] = get_setting_with_default(
+            "color_temp_min", 2000)
+        base["color_temp_max"] = get_setting_with_default(
+            "color_temp_max", 6000)
+        base["reverse_color_temp"] = get_setting_with_default(
+            "reverse_color_temp", False)
+        base["min_button_push_time"] = get_setting_with_default(
+            "min_button_push_time", 50)
+        base["button_long_press_time"] = get_setting_with_default(
+            "button_long_press_time", 5000)
+        base["special_mode_trigger_time"] = get_setting_with_default(
+            "special_mode_trigger_time", 300)
+        base["special_mode_release_time"] = get_setting_with_default(
+            "special_mode_release_time", 5000)
+        base["mqtt_ignore_time"] = get_setting_with_default(
+            "mqtt_ignore_time", 3000)
+        base["screen_dim_level"] = get_nspanel_setting_with_default(
+            nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level", 100))
+        base["screensaver_dim_level"] = get_nspanel_setting_with_default(
+            nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level", 0))
+        base["screensaver_activation_timeout"] = get_nspanel_setting_with_default(
+            nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout", 30000))
+        base["screensaver_mode"] = get_nspanel_setting_with_default(
+            nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode", "with_background"))
+        base["clock_us_style"] = get_setting_with_default(
+            "clock_us_style", "False")
+        base["use_farenheit"] = get_setting_with_default(
+            "use_farenheit", "False")
+        base["is_us_panel"] = get_nspanel_setting_with_default(
+            nspanel.id, "is_us_panel", "False")
+        base["lock_to_default_room"] = get_nspanel_setting_with_default(
+            nspanel.id, "lock_to_default_room", "False")
+        base["reverse_relays"] = get_nspanel_setting_with_default(
+            nspanel.id, "reverse_relays", False)
+        base["relay1_default_mode"] = get_nspanel_setting_with_default(
+            nspanel.id, "relay1_default_mode", False)
+        base["relay2_default_mode"] = get_nspanel_setting_with_default(
+            nspanel.id, "relay2_default_mode", False)
+        base["temperature_calibration"] = float(
+            get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0))
         base["button1_mode"] = nspanel.button1_mode
-        base["button1_mqtt_topic"] = get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_topic", "")
-        base["button1_mqtt_payload"] = get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_payload", "")
+        base["button1_mqtt_topic"] = get_nspanel_setting_with_default(
+            nspanel.id, "button1_mqtt_topic", "")
+        base["button1_mqtt_payload"] = get_nspanel_setting_with_default(
+            nspanel.id, "button1_mqtt_payload", "")
         base["button2_mode"] = nspanel.button2_mode
-        base["button2_mqtt_topic"] = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_topic", "")
-        base["button2_mqtt_payload"] = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_payload", "")
+        base["button2_mqtt_topic"] = get_nspanel_setting_with_default(
+            nspanel.id, "button2_mqtt_topic", "")
+        base["button2_mqtt_payload"] = get_nspanel_setting_with_default(
+            nspanel.id, "button2_mqtt_payload", "")
 
         if nspanel.button1_detached_mode_light:
             base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
@@ -478,6 +538,7 @@ def set_panel_online_status(request, panel_mac: str):
 
     return HttpResponse("Panel is not registered", status=500)
 
+
 def get_scenes(request):
     return_json = {}
     return_json["scenes"] = []
@@ -502,12 +563,13 @@ def get_scenes(request):
         return_json["scenes"].append(scene_info)
     return JsonResponse(return_json)
 
+
 @csrf_exempt
 def save_scene(request):
     data = json.loads(request.body)
     scene = Scene.objects.filter(id=data["scene_id"]).first()
     if scene:
-        scene.lightstate_set.all().delete() # Remove all old states
+        scene.lightstate_set.all().delete()  # Remove all old states
         for light_state in data["light_states"]:
             light = Light.objects.filter(id=light_state["light_id"]).first()
             if light:
@@ -525,12 +587,20 @@ def save_scene(request):
                     new_state.saturation = light_state["saturation"]
                 new_state.save()
             else:
-                logging.error("ERROR: Couldn't find a light with ID " + light_state["light_id"] + ". Will skip light!")
+                logging.error("ERROR: Couldn't find a light with ID " +
+                              light_state["light_id"] + ". Will skip light!")
         return HttpResponse("OK", status=200)
     else:
         return HttpResponse("Scene does not exist!", status=500)
+
 
 @csrf_exempt
 def restart_mqtt_manager(request):
     restart_mqtt_manager_process()
     return JsonResponse({"result": "OK"})
+
+
+@csrf_exempt
+def save_theme(request):
+    set_setting_value("dark_theme", request.POST["dark"])
+    return HttpResponse("OK", status=200)

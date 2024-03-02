@@ -19,24 +19,24 @@ function requests_log_backtrace() {
 }
 
 function push_log_message_to_view(data) {
-  var add_html = "<tr><td>";
+  var add_html = "<tr><td class='py-1'>";
   add_html += data.time;
-  add_html += "</td><td>";
+  add_html += "</td><td class='py-1'>";
   if (data.level == "ERROR") {
-    add_html += '<span class="tag is-danger">ERROR</span>';
+    add_html += '<span class="dark:text-red-400 text-red-600">ERROR</span>';
   } else if (data.level == "WARNING") {
-    add_html += '<span class="tag is-warning">WARNING</span>';
+    add_html += '<span class="dark:text-yellow-400 text-yellow-600">WARNING</span>';
   } else if (data.level == "INFO") {
-    add_html += '<span class="tag is-info">INFO</span>';
+    add_html += '<span class="dark:text-blue-400 text-blue-600">INFO</span>';
   } else if (data.level == "DEBUG") {
-    add_html += '<span class="tag is-dark">DEBUG</span>';
+    add_html += '<span class="dark:text-black text-black">DEBUG</span>';
   } else if (data.level == "TRACE") {
-    add_html += '<span class="tag is-black">TRACE</span>';
-  } else if (data.level == "WARNING") {
+    add_html += '<span class="dark:text-gray-400 text-gray-800">TRACE</span>';
+  } else {
     add_html += '<span class="tag is-light">???UNKNOWN???</span>';
   }
   add_html += "</td>";
-  add_html += "<td>";
+  add_html += "<td class='py-1'>";
   add_html += data.message;
   add_html += "</td>";
   add_html += "</tr>";
@@ -53,16 +53,20 @@ function update_nspanel_status(data) {
   if ("mac_address" in data) {
     if(data.mac_address == mac_address) { // Check that the status data corresponds to the panel currently in view.
       if ("state" in data) {
+        $("#panel_visit_link").attr("href", "http://" + data.ip_address);
         var new_html = "";
         if (data.state == "online") {
-          $("#online_offline_tag").html("Online");
-          $("#online_offline_tag").attr(
+          $("#state_text").html("Online");
+          $("#state_text").attr(
             "class",
-            "tag is-success"
+            "dark:text-green-400 text-green-600"
           );
         } else if (data.state == "offline") {
-          $("#online_offline_tag").html("Offline");
-          $("#online_offline_tag").attr("class", "tag is-danger");
+          $("#state_text").html("Offline");
+          $("#state_text").attr(
+            "class",
+            "dark:text-red-400 text-red-600"
+          );
         } else {
           // Update panel tag to show update progress if any
           update_text = "";
@@ -86,33 +90,47 @@ function update_nspanel_status(data) {
       }
       if ("rssi" in data) {
         var new_rssi_classes = "";
+        var new_rssi_text = "";
+        var new_rssi_text_classes = "";
         if (data.rssi <= -90) {
-          new_rssi_classes = "mdi mdi-wifi-strength-1-alert";
+          new_rssi_classes = "mdi mdi-wifi-strength-1-alert me-2";
+          new_rssi_text = "Poor";
+          new_rssi_text_classes = "dark:text-red-400 text-red-600";
         } else if (data.rssi <= -80) {
-          new_rssi_classes = "mdi mdi-wifi-strength-1";
+          new_rssi_classes = "mdi mdi-wifi-strength-1 me-2";
+          new_rssi_text = "Low";
+          new_rssi_text_classes = "dark:text-yellow-400 text-yellow-600";
         } else if (data.rssi <= -67) {
-          new_rssi_classes = "mdi mdi-wifi-strength-2";
+          new_rssi_classes = "mdi mdi-wifi-strength-2 me-2";
+          new_rssi_text = "Medium";
+          new_rssi_text_classes = "dark:text-green-400 text-green-600";
         } else if (data.rssi <= -55) {
-          new_rssi_classes = "mdi mdi-wifi-strength-3";
+          new_rssi_classes = "mdi mdi-wifi-strength-3 me-2";
+          new_rssi_text = "Good";
+          new_rssi_text_classes = "dark:text-green-400 text-green-600";
         } else {
-          new_rssi_classes = "mdi mdi-wifi-strength-4";
+          new_rssi_classes = "mdi mdi-wifi-strength-4 me-2";
+          new_rssi_text = "Excellent";
+          new_rssi_text_classes = "dark:text-green-400 text-green-600";
         }
-        $("#wifi_signal_strength").html(
-          '<span class="' +
-            new_rssi_classes +
-            '" id="wifi_signal_strength_' +
-            data.mac +
-            '" title="' +
-            data.rssi +
-            ' dBm"></span>'
-        );
+        $("#wifi_signal_strength_icon").attr("class", new_rssi_classes);
+        $("#wifi_signal_strength").attr("class", new_rssi_text_classes);
+        $("#wifi_signal_strength").html(new_rssi_text);
       }
 
       if ("heap_used_pct" in data) {
-        $("#heap_used")
-          .text(data.heap_used_pct + "%")
-          .text()
-          .slice(-2);
+        var heap_used = data.heap_used_pct;
+        $("#heap_used").text(heap_used + "%")
+
+        var new_heap_used_text_color = "";
+        if(heap_used < 70) {
+          new_heap_used_text_color = "dark:text-green-400 text-green-600";
+        } else if (heap_used < 85) {
+          new_heap_used_text_color = "dark:text-yellow-400 text-yellow-600";
+        } else {
+          new_heap_used_text_color = "dark:text-red-400 text-red-600";
+        }
+        $("#heap_used").attr("class", new_heap_used_text_color);
       }
 
       if ("temperature" in data) {
@@ -130,40 +148,38 @@ function update_nspanel_status(data) {
 function update_shown_elements() {
   if ($("#button1_mode").val() == 0) {
     // Direct mode
-    $("#button1_detached_mode_light_label").hide();
-    $("#button1_detached_mode_light_select").hide();
-    $("#button1_custom_mqtt_container").hide();
+    $("#button1_detached_mode_controls").addClass("hidden");
+    $("#button1_mqtt_mode_controls").addClass("hidden");
   } else if ($("#button1_mode").val() == 1) {
-    $("#button1_detached_mode_light_label").show();
-    $("#button1_detached_mode_light_select").show();
-    $("#button1_custom_mqtt_container").hide();
+    // Detached mode
+    $("#button1_detached_mode_controls").removeClass("hidden");
+    $("#button1_mqtt_mode_controls").addClass("hidden");
   } else if ($("#button1_mode").val() == 2) {
-    $("#button1_detached_mode_light_label").hide();
-    $("#button1_detached_mode_light_select").hide();
-    $("#button1_custom_mqtt_container").show();
+    // MQTT mode
+    $("#button1_detached_mode_controls").addClass("hidden");
+    $("#button1_mqtt_mode_controls").removeClass("hidden");
   } else if ($("#button1_mode").val() == 3) {
-    $("#button1_detached_mode_light_label").hide();
-    $("#button1_detached_mode_light_select").hide();
-    $("#button1_custom_mqtt_container").hide();
+    // Follow mode
+    $("#button1_detached_mode_controls").addClass("hidden");
+    $("#button1_mqtt_mode_controls").addClass("hidden");
   }
 
   if ($("#button2_mode").val() == 0) {
     // Direct mode
-    $("#button2_detached_mode_light_label").hide();
-    $("#button2_detached_mode_light_select").hide();
-    $("#button2_custom_mqtt_container").hide();
+    $("#button2_detached_mode_controls").addClass("hidden");
+    $("#button2_mqtt_mode_controls").addClass("hidden");
   } else if ($("#button2_mode").val() == 1) {
-    $("#button2_detached_mode_light_label").show();
-    $("#button2_detached_mode_light_select").show();
-    $("#button2_custom_mqtt_container").hide();
+    // Detached mode
+    $("#button2_detached_mode_controls").removeClass("hidden");
+    $("#button2_mqtt_mode_controls").addClass("hidden");
   } else if ($("#button2_mode").val() == 2) {
-    $("#button2_detached_mode_light_label").hide();
-    $("#button2_detached_mode_light_select").hide();
-    $("#button2_custom_mqtt_container").show();
+    // MQTT mode
+    $("#button2_detached_mode_controls").addClass("hidden");
+    $("#button2_mqtt_mode_controls").removeClass("hidden");
   } else if ($("#button2_mode").val() == 3) {
-    $("#button2_detached_mode_light_label").hide();
-    $("#button2_detached_mode_light_select").hide();
-    $("#button2_custom_mqtt_container").hide();
+    // Follow mode
+    $("#button2_detached_mode_controls").addClass("hidden");
+    $("#button2_mqtt_mode_controls").addClass("hidden");
   }
 }
 

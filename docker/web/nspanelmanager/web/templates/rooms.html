@@ -1,28 +1,33 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2 class="title is-4">Rooms</h2>
-<button type="button" class="button is-primary" onclick="addNewRoom();">Add new room</button>
-<table class="table is-fullwidth is-hoverable">
-  <thead>
-    <tr>
-      <th>Friendly name</th>
-      <th>NSPanels</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for room in rooms %}
-    <tr>
-      <th><a href="{% url 'edit_room' room_id=room.id %}">{{ room.friendly_name }}</a></th>
-      <td>
-        <div class="tags">
-          {% for nspanel in room.nspanel_set.all %}
-          <a href="{% url 'edit_nspanel' panel_id=nspanel.id %}" class="tag is-light is-link is-small">{{ nspanel.friendly_name }}</a>
-          {% endfor %}
-        </div>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="md:flex md:flex-wrap md:justify-between">
+  <h2 class="font-medium text-2xl" id="nspanel_name">Rooms</h2>
+  <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onclick="addNewRoom();">Add new room</button>
+</div>
+
+<div class="mt-2 p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+  <table class="w-full text-left rtl:text-right">
+    <thead class="uppercase bg-slate-200 dark:bg-slate-950 border-solid border-b-2 border-slate-600 dark:border-slate-800">
+      <tr>
+        <th class="px-3 py-1">Name</th>
+        <th class="px-3 py-1">NSPanels</th>
+      </tr>
+    </thead>
+    <tbody id="log_body" class="bg-slate-100 dark:bg-slate-600 text-black dark:text-white">
+      {% for room in rooms %}
+        <tr>
+          <th class="px-3 py-3">
+            <a href="{% url 'edit_room' room_id=room.id %}">{{ room.friendly_name }}</a>
+          </th>
+          <td>
+            {% for nspanel in room.nspanel_set.all %}
+              <a href="{% url 'edit_nspanel' panel_id=nspanel.id %}"><span class="bg-gray-200 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">{{ nspanel.friendly_name }}</span></a>
+            {% endfor %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

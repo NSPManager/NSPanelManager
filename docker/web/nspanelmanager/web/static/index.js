@@ -1,13 +1,14 @@
 var panels_that_are_updating = [];
 const ws = new MQTTManager_WS();
 var panel_warnings = {};
+var status_header_base_classes = "min-h-1 overflow-hidden rounded-t-md w-full ";
 
 function get_all_online_panel_macs() {
   var panel_macs = [];
   $(".nspanel_mac_container").each((index, obj) => {
-    var panel_mac = $(obj).text();
+    var panel_mac = $(obj).data("nspanel-mac");
     let mac_selector = panel_mac.replaceAll(":", "\\:");
-    if ($("#panel_header_" + mac_selector).hasClass("has-background-success")) {
+    if ($("#panel_header_" + mac_selector).hasClass("bg-green-500")) {
       panel_macs.push(panel_mac);
     }
   });
@@ -21,7 +22,7 @@ function startNSPanelOtaUpdateAll() {
 }
 
 function startNSPanelOtaUpdate(dom) {
-  let mac_selector = $(dom).closest(".nspanel-box").find(".nspanel_mac_container").text();
+  var mac = $(dom).data("nspanel-mac");
   $("#panel_header_" + mac_selector).attr(
     "class",
     "nspanel-status-header has-background-info nspanel-status-header-await"
@@ -51,7 +52,7 @@ function send_nspanel_accept_request(dom) {
 
 function send_nspanel_delete_request(dom) {
   let command_data = {};
-  let nspanel_mac = $(dom).closest(".nspanel-box").find(".nspanel_mac_container").text();
+  let nspanel_mac = $(dom).data("nspanel-mac");
   // Convert selector-mac to real mac.
   let real_mac = nspanel_mac.substring(0, 2) + ":" + nspanel_mac.substring(2, 4) + ":" + nspanel_mac.substring(4, 6) + ":" + nspanel_mac.substring(6, 8) + ":" + nspanel_mac.substring(8, 10) + ":" + nspanel_mac.substring(10, 12);
   command_data.mac_address = real_mac;
@@ -73,10 +74,10 @@ function startNSPanelTftUpdateAll() {
 }
 
 function startNSPanelTftUpdate(dom) {
-  let mac_selector = $(dom).closest(".nspanel-box").find(".nspanel_mac_container").text();
+  let mac_selector = $(dom).data("nspanel-mac");
   $("#panel_header_" + mac_selector).attr(
     "class",
-    "nspanel-status-header has-background-info nspanel-status-header-await"
+    status_header_base_classes + "bg-blue-500 dark:bg-blue-700 animate-pulse"
   );
   $("#panel_header_text_" + mac_selector).text("Awaiting status");
   var panel_id = $("#nspanel_id_" + mac_selector).text();
@@ -90,10 +91,10 @@ function rebootNSPanelAll() {
 }
 
 function rebootNSPanel(dom) {
-  let mac_selector = $(dom).closest(".nspanel-box").find(".nspanel_mac_container").text();
+  let mac_selector = $(dom).data("nspanel-mac");
   $("#panel_header_" + mac_selector).attr(
     "class",
-    "nspanel-status-header has-background-info nspanel-status-header-await"
+    status_header_base_classes + "bg-blue-500 dark:bg-blue-700 animate-pulse"
   );
   $("#panel_header_text_" + mac_selector).text("Awaiting status");
   var panel_id = $("#nspanel_id_" + mac_selector).text();
@@ -104,9 +105,12 @@ function restart_mqtt_manager() {
   $.post("/api/restart_mqtt_manager", (data) => {});
 }
 
-function show_dropdown_menu(dom) {
-  $(dom).closest(".dropdown").toggleClass("is-active");
-  event.stopPropagation();
+function show_dropdown_menu(e) {
+  var dropdown_id = $(this).attr("data-dropdown-toggle");
+  if(dropdown_id != "") {
+    $("#" + dropdown_id).toggleClass("hidden");
+  }
+  if(e.stopPropagation) e.stopPropagation();
 }
 
 function create_nspanel_from_template(data) {
@@ -115,10 +119,17 @@ function create_nspanel_from_template(data) {
   var nspanel = $($("#nspanel_index_box_template").html());
 
   // Setup links
-  nspanel.find(".nspanel-box").attr("id", "panel_status_box_" + data.mac);
+  nspanel.find(".nspanel-box").attr("id", "panel_status_box_" + data.mac_address);
   nspanel.find("#nspanel_name").attr("href", "/nspanel/" + data.id);
   nspanel.find(".nspanel-settings-link").attr("href", "/nspanel/" + data.id);
   nspanel.find(".nspanel-visit-link").attr("href", "http://" + data.ip_address);
+
+  // Setup dropdown
+  nspanel.find("[data-dropdown-toggle]").attr("data-dropdown-toggle", "nspanelActionsMenuDropdown_" + data.mac_address);
+  nspanel.find("#nspanelActionsMenuDropdown").attr("id", "nspanelActionsMenuDropdown_" + data.mac_address);
+
+  nspanel.find("[data-dropdown-toggle]").click(show_dropdown_menu);
+  nspanel.find("[data-nspanel-mac]").attr("data-nspanel-mac", data.mac_address);
 
   nspanel.find("#panel_header").attr("id", "panel_header_" + data.mac_address);
   nspanel.find("#nspanel_id").text(data.id);
@@ -135,10 +146,11 @@ function create_nspanel_from_template(data) {
   nspanel.find("#nspanel_name").attr("id", "nspanel_name_" + data.mac_address);
 
   if(data.state == "awaiting_accept") {
-    nspanel.find(".accept-request-overlay").removeClass("is-hidden");
+    nspanel.find(".accept-request-overlay").removeClass("hidden");
     nspanel.find(".accept-request-overlay").attr("id", "accept_request_overlay_" + data.mac_address);
-    nspanel.find(".accept-request-overlay span").text(data.name);
+    nspanel.find(".accept-request-overlay span").text("Discovered \"" + data.name + "\"!");
     nspanel.find(".accept-request-overlay button.is-success").attr("data-nspanel-mac", data.mac_address);
+    nspanel.find(".nspanel-status-view").addClass("hidden"); // Hide default view to make space for accept
   }
 
   $("#nspanels_container").append(nspanel);
@@ -148,7 +160,7 @@ function create_nspanel_from_template(data) {
 function update_nspanel_status(data) {
   if ("mac_address" in data) {
     
-    if($("#panel_header_" + data.mac_address).length == 0) {
+    if($("#nspanel_mac_container_" + data.mac_address).length == 0) {
       create_nspanel_from_template(data);
       return;
     }
@@ -157,34 +169,34 @@ function update_nspanel_status(data) {
       var new_html = "";
 
       if(data.state != "awaiting_accept") {
-        $("#accept_request_overlay_" + data.mac_address).addClass("is-hidden");
+        $("#accept_request_overlay_" + data.mac_address).addClass("hidden");
       }
 
       if (data.state == "online") {
         $("#panel_header_" + data.mac_address).attr(
           "class",
-          "nspanel-status-header has-background-success"
+          status_header_base_classes + "bg-green-500 dark:bg-green-700"
         );
         $("#panel_header_text_" + data.mac_address).text("");
         $("#panel_header_" + data.mac_address).css("width", "100%");
       } else if (data.state == "offline") {
         $("#panel_header_" + data.mac_address).attr(
           "class",
-          "nspanel-status-header has-background-danger"
+          status_header_base_classes + "bg-red-500 dark:bg-red-700"
         );
         $("#panel_header_text_" + data.mac_address).text("Offline");
         $("#panel_header_" + data.mac_address).css("width", "100%");
       } else if (data.state == "unknown") {
         $("#panel_header_" + data.mac_address).attr(
           "class",
-          "nspanel-status-header has-background-grey"
+          status_header_base_classes + "bg-gray-500 dark:bg-gray-700"
         );
         $("#panel_header_text_" + data.mac_address).text("Unknown");
         $("#panel_header_" + data.mac_address).css("width", "100%");
       } else if (data.state == "awaiting_accept") {
         $("#panel_header_" + data.mac_address).attr(
           "class",
-          "nspanel-status-header has-background-primary"
+          status_header_base_classes + "bg-blue-500 dark:bg-blue-700 animate-pulse",
         );
         $("#panel_header_text_" + data.mac_address).text("Awaiting accept");
         $("#panel_header_" + data.mac_address).css("width", "100%");
@@ -193,7 +205,7 @@ function update_nspanel_status(data) {
         $("#panel_header_" + data.mac_address).css("width", "100%");
         $("#panel_header_" + data.mac_address).attr(
           "class",
-          "nspanel-status-header has-background-info nspanel-status-header-await"
+          status_header_base_classes + "bg-blue-500 dark:bg-blue-700 animate-pulse"
         );
       } else {
         // Update panel tag to show update progress if any
@@ -214,12 +226,12 @@ function update_nspanel_status(data) {
           update_text = "Rebooting";
           $("#panel_header_" + data.mac_address).attr(
             "class",
-            "nspanel-status-header has-background-success-dark"
+            status_header_base_classes + "bg-green-500 dark:bg-green-700"
           );
         } else {
           $("#panel_header_" + data.mac_address).attr(
             "class",
-            "nspanel-status-header has-background-info"
+            status_header_base_classes + "bg-blue-500 dark:bg-blue-700"
           );
         }
 
@@ -231,7 +243,7 @@ function update_nspanel_status(data) {
     }
     if ("rssi" in data) {
       var new_rssi_classes = "";
-      if(data.state == "unknown" || data.state == "waiting") {
+      if(data.state == "unknown" || data.state == "waiting" || data.state == "offline") {
         new_rssi_classes = "mdi mdi-wifi-strength-1-alert";
         data.rssi = "?";
       } else if (data.rssi <= -90) {
@@ -256,7 +268,7 @@ function update_nspanel_status(data) {
       );
     }
 
-    if(data.state == "unknown" || data.state == "waiting") {
+    if(data.state == "unknown" || data.state == "waiting" || data.state == "offline") {
       $("#heap_used_" + data.mac_address).text("?%");
     } else {
       if ("heap_used_pct" in data) {
@@ -267,7 +279,7 @@ function update_nspanel_status(data) {
       }
     }
 
-    if(data.state == "unknown" || data.state == "waiting") {
+    if(data.state == "unknown" || data.state == "waiting" || data.state == "offline") {
       var temperature_unit = $("#temperature_unit").text();
       $("#temperature_" + data.mac_address).html("? " + temperature_unit);
     } else if ("temperature" in data) {
@@ -280,9 +292,9 @@ function update_nspanel_status(data) {
     if ("warnings" in data) {
       $("#nspanel_warnings_" + data.mac_address).attr("data-tooltip", data["warnings"]);
       if(data["warnings"] != "") {
-        $("#nspanel_warnings_" + data.mac_address).removeClass("is-hidden");
+        $("#nspanel_warnings_" + data.mac_address).removeClass("hidden");
       } else {
-        $("#nspanel_warnings_" + data.mac_address).addClass("is-hidden");
+        $("#nspanel_warnings_" + data.mac_address).addClass("hidden");
       }
     }
   }
@@ -397,6 +409,6 @@ $(document).ready(function () {
   });
 
   $(window).click(function () {
-    $(".dropdown").removeClass("is-active");
+    $(".dropdown").addClass("hidden");
   });
 });

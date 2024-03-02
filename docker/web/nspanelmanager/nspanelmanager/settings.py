@@ -49,7 +49,6 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'web',
-    'mathfilters',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

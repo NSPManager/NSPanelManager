@@ -12,6 +12,7 @@ cd nspanelmanager
 /usr/local/bin/python manage.py migrate
 cd ..
 
+cp /etc/nginx/sites-templates/nspanelmanager_prod.template /etc/nginx/sites-enabled/nspanelmanager.conf
 echo "Starting Nginx"
 /etc/init.d/nginx restart
 
@@ -20,4 +21,5 @@ uwsgi --chdir=/usr/src/app/nspanelmanager/ \
 	--module=nspanelmanager.wsgi:application \
 	--env DJANGO_SETTINGS_MODULE=nspanelmanager.settings \
 	--master --pidfile=/tmp/project-master.pid \
-	--socket=127.0.0.1:8001 --processes=5 --harakiri=20 --max-requests=5000 --vacuum
+	--socket=127.0.0.1:8001 --processes=5 --harakiri=20 --max-requests=5000 --vacuum \
+	--touch-reload ./web/templates/index.html

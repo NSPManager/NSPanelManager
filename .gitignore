@@ -4,6 +4,7 @@ docker/web/db.sqlite3
 docker/data/
 docker/web/nspanelmanager/db.sqlite3
 docker/web/nspanelmanager/secret.key
+docker/web/node_modules/
 firmware/NSPanelManagerFirmware/data/config.json
 firmware/NSPanelManagerFirmware/.pio
 firmware/NSPanelManagerFirmware/littlefs.md5

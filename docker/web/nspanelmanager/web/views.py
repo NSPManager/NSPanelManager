@@ -15,6 +15,7 @@ from .models import NSPanel, Room, Light, Settings, Scene, RelayGroup, RelayGrou
 from .apps import start_mqtt_manager
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
 
+
 def restart_mqtt_manager():
     for proc in psutil.process_iter():
         if "/usr/src/app/nspm_mqttmanager" in proc.cmdline():
@@ -22,11 +23,13 @@ def restart_mqtt_manager():
             proc.kill()
     start_mqtt_manager()
 
+
 def send_mqttmanager_reload_command():
     for proc in psutil.process_iter():
         if "/usr/src/app/nspm_mqttmanager" in proc.cmdline():
             print("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
             os.kill(proc.pid, signal.SIGUSR1)
+
 
 def get_file_md5sum(filename):
     fs = FileSystemStorage()
@@ -34,6 +37,7 @@ def get_file_md5sum(filename):
         return hashlib.md5(fs.open(filename).read()).hexdigest()
     else:
         return None
+
 
 def index(request):
     if get_setting_with_default("use_farenheit", False) == "True":
@@ -43,7 +47,8 @@ def index(request):
 
     notifications = []
     if get_setting_with_default("manager_address", "") == "":
-        notifications.append({"text": "No manager address configured in settings.", "classes": "is-danger"})
+        notifications.append(
+            {"text": "No manager address configured in settings.", "classes": "is-danger"})
 
     nspanels = []
     for nspanel in NSPanel.objects.all():
@@ -52,6 +57,7 @@ def index(request):
         nspanels.append(panel_info)
 
     return render(request, 'index.html', {
+        'dark_theme': get_setting_with_default("dark_theme", "false"),
         'nspanels': nspanels,
         'notifications': notifications,
         'temperature_unit': temperature_unit,
@@ -59,11 +65,11 @@ def index(request):
 
 
 def rooms(request):
-    return render(request, 'rooms.html', {'rooms': Room.objects.all().order_by('displayOrder')})
+    return render(request, 'rooms.html', {'dark_theme': get_setting_with_default("dark_theme", "false"), 'rooms': Room.objects.all().order_by('displayOrder')})
 
 
 def rooms_order(request):
-    return render(request, 'rooms_order.html', {'rooms': Room.objects.all().order_by('displayOrder')})
+    return render(request, 'rooms_order.html', {'dark_theme': get_setting_with_default("dark_theme", "false"), 'rooms': Room.objects.all().order_by('displayOrder')})
 
 
 def move_room_up(request, room_id: int):
@@ -115,13 +121,16 @@ def edit_room(request, room_id: int):
     total_num_rooms = Room.objects.all().count()
     room = Room.objects.filter(id=room_id).first()
     data = {
+        'dark_theme': get_setting_with_default("dark_theme", "false"),
         'room': room,
         'total_num_rooms': total_num_rooms
     }
-    lights = Light.objects.filter(room=room, room_view_position__gte=1, room_view_position__lte=12);
+    lights = Light.objects.filter(
+        room=room, room_view_position__gte=1, room_view_position__lte=12)
     for light in lights:
         data["light" + str(light.room_view_position)] = light
     return render(request, 'edit_room.html', data)
+
 
 def save_new_room(request):
     new_room = Room()
@@ -177,6 +186,7 @@ def edit_nspanel(request, panel_id: int):
     }
 
     return render(request, 'edit_nspanel.html', {
+        'dark_theme': get_setting_with_default("dark_theme", "false"),
         'panel': NSPanel.objects.get(id=panel_id),
         'rooms': Room.objects.all(),
         'settings': settings,
@@ -191,70 +201,76 @@ def save_panel_settings(request, panel_id: int):
     panel.room = Room.objects.get(id=request.POST["room_id"])
     panel.friendly_name = request.POST["name"]
     panel.button1_mode = request.POST["button1_mode"]
-    if request.POST["button1_mode"] == "1": # Detached mode
-        panel.button1_detached_mode_light = Light.objects.get(id=request.POST["button1_detached_mode_light"])
+    if request.POST["button1_mode"] == "1":  # Detached mode
+        panel.button1_detached_mode_light = Light.objects.get(
+            id=request.POST["button1_detached_mode_light"])
     else:
         panel.button1_detached_mode_light = None
 
-    if request.POST["button1_mode"] == "2": # Custom MQTT Mode
-        set_nspanel_setting_value(panel_id, "button1_mqtt_topic", request.POST["button1_custom_mqtt_topic"])
-        set_nspanel_setting_value(panel_id, "button1_mqtt_payload", request.POST["button1_custom_mqtt_payload"])
+    if request.POST["button1_mode"] == "2":  # Custom MQTT Mode
+        set_nspanel_setting_value(
+            panel_id, "button1_mqtt_topic", request.POST["button1_custom_mqtt_topic"])
+        set_nspanel_setting_value(
+            panel_id, "button1_mqtt_payload", request.POST["button1_custom_mqtt_payload"])
     else:
         delete_nspanel_setting(panel_id, "button1_mqtt_topic")
         delete_nspanel_setting(panel_id, "button1_mqtt_payload")
 
     panel.button2_mode = request.POST["button2_mode"]
-    if request.POST["button2_mode"] == "1": # Detached mode
-        panel.button2_detached_mode_light = Light.objects.get(id=request.POST["button2_detached_mode_light"])
+    if request.POST["button2_mode"] == "1":  # Detached mode
+        panel.button2_detached_mode_light = Light.objects.get(
+            id=request.POST["button2_detached_mode_light"])
     else:
         panel.button2_detached_mode_light = None
 
-    if request.POST["button1_mode"] == "2": # Custom MQTT Mode
-        set_nspanel_setting_value(panel_id, "button2_mqtt_topic", request.POST["button2_custom_mqtt_topic"])
-        set_nspanel_setting_value(panel_id, "button2_mqtt_payload", request.POST["button2_custom_mqtt_payload"])
+    if request.POST["button1_mode"] == "2":  # Custom MQTT Mode
+        set_nspanel_setting_value(
+            panel_id, "button2_mqtt_topic", request.POST["button2_custom_mqtt_topic"])
+        set_nspanel_setting_value(
+            panel_id, "button2_mqtt_payload", request.POST["button2_custom_mqtt_payload"])
     else:
         delete_nspanel_setting(panel_id, "button2_mqtt_topic")
         delete_nspanel_setting(panel_id, "button2_mqtt_payload")
 
-    if "lock_to_default_room" in request.POST:
-        set_nspanel_setting_value(panel_id, "lock_to_default_room", "True")
-    else:
-        set_nspanel_setting_value(panel_id, "lock_to_default_room", "False")
-
-    if "is_us_panel" in request.POST:
-        set_nspanel_setting_value(panel_id, "is_us_panel", "True")
-    else:
-        set_nspanel_setting_value(panel_id, "is_us_panel", "False")
-
-    if "reverse_relays" in request.POST:
-        set_nspanel_setting_value(panel_id, "reverse_relays", "True")
-    else:
-        set_nspanel_setting_value(panel_id, "reverse_relays", "False")
-
     if request.POST["screen_dim_level"].strip():
-        set_nspanel_setting_value(panel_id, "screen_dim_level", request.POST["screen_dim_level"])
+        set_nspanel_setting_value(
+            panel_id, "screen_dim_level", request.POST["screen_dim_level"])
     else:
         delete_nspanel_setting(panel_id, "screen_dim_level")
 
     if request.POST["screensaver_dim_level"].strip():
-        set_nspanel_setting_value(panel_id, "screensaver_dim_level", request.POST["screensaver_dim_level"])
+        set_nspanel_setting_value(
+            panel_id, "screensaver_dim_level", request.POST["screensaver_dim_level"])
     else:
         delete_nspanel_setting(panel_id, "screensaver_dim_level")
 
     if request.POST["screensaver_activation_timeout"].strip():
-        set_nspanel_setting_value(panel_id, "screensaver_activation_timeout", request.POST["screensaver_activation_timeout"])
+        set_nspanel_setting_value(
+            panel_id, "screensaver_activation_timeout", request.POST["screensaver_activation_timeout"])
     else:
         delete_nspanel_setting(panel_id, "screensaver_activation_timeout")
 
     if request.POST["screensaver_mode"] == "global":
         delete_nspanel_setting(panel_id, "screensaver_mode")
     else:
-        set_nspanel_setting_value(panel_id, "screensaver_mode", request.POST["screensaver_mode"])
+        set_nspanel_setting_value(
+            panel_id, "screensaver_mode", request.POST["screensaver_mode"])
 
-    set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
-    set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
-    set_nspanel_setting_value(panel_id, "temperature_calibration", float(request.POST["temperature_calibration"]))
-    set_nspanel_setting_value(panel_id, "default_page", request.POST["default_page"])
+    set_nspanel_setting_value(
+        panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
+    set_nspanel_setting_value(
+        panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
+    set_nspanel_setting_value(panel_id, "temperature_calibration", float(
+        request.POST["temperature_calibration"]))
+    set_nspanel_setting_value(panel_id, "default_page",
+                              request.POST["default_page"])
+    set_nspanel_setting_value(
+        panel_id, "lock_to_default_room", request.POST["lock_to_default_room"])
+    set_nspanel_setting_value(
+        panel_id, "reverse_relays", request.POST["reverse_relays"])
+    set_nspanel_setting_value(panel_id, "is_us_panel",
+                              request.POST["is_us_panel"])
+
     panel.save()
     send_mqttmanager_reload_command()
     return redirect('edit_nspanel', panel_id)
@@ -313,7 +329,8 @@ def add_light_to_room(request, room_id: int):
         newLight.openhab_item_rgb = ""
 
     if newLight.room_view_position == 0:
-        all_lights = Light.objects.filter(room=room, room_view_position__gte=1, room_view_position__lte=12);
+        all_lights = Light.objects.filter(
+            room=room, room_view_position__gte=1, room_view_position__lte=12)
         for i in range(1, 13):
             position_free = True
             for light in all_lights:
@@ -328,6 +345,7 @@ def add_light_to_room(request, room_id: int):
     send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=room_id)
 
+
 def add_scene_to_room(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
     if request.POST["edit_scene_id"].strip() != "" and int(request.POST["edit_scene_id"]) >= 0:
@@ -340,6 +358,7 @@ def add_scene_to_room(request, room_id: int):
     send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=room_id)
 
+
 def delete_scene(request, scene_id: int):
     scene = Scene.objects.get(id=scene_id)
     if scene:
@@ -347,12 +366,14 @@ def delete_scene(request, scene_id: int):
         send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=scene.room.id)
 
+
 def delete_global_scene(request, scene_id: int):
     scene = Scene.objects.get(id=scene_id)
     if scene:
         scene.delete()
         send_mqttmanager_reload_command()
     return redirect('global_scenes')
+
 
 def add_scene_to_global(request):
     if request.POST["edit_scene_id"].strip() != "" and int(request.POST["edit_scene_id"]) >= 0:
@@ -365,12 +386,14 @@ def add_scene_to_global(request):
     send_mqttmanager_reload_command()
     return redirect('global_scenes')
 
+
 def add_light_to_room_view(request, room_id: int):
     if "light_id" not in request.POST:
         return redirect('edit_room', room_id=room_id)
     room = Room.objects.filter(id=room_id).first()
     light_position = int(request.POST["position"])
-    existing_light_at_position = Light.objects.filter(room=room, room_view_position=light_position).first()
+    existing_light_at_position = Light.objects.filter(
+        room=room, room_view_position=light_position).first()
     if existing_light_at_position != None:
         existing_light_at_position.room_view_position = 0
         existing_light_at_position.save()
@@ -394,7 +417,9 @@ def remove_light_from_room_view(request, room_id: int):
 def settings_page(request):
     environment = environ.Env()
 
-    data = {}
+    data = {
+        'dark_theme': get_setting_with_default("dark_theme", "false"),
+    }
     data["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
     data["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
     data["reverse_color_temp"] = get_setting_with_default(
@@ -421,19 +446,32 @@ def settings_page(request):
         "openhab_rgb_channel_name", "")
     data["raise_to_100_light_level"] = get_setting_with_default(
         "raise_to_100_light_level", 95)
-    data["min_button_push_time"] = get_setting_with_default("min_button_push_time", 50)
-    data["button_long_press_time"] = get_setting_with_default("button_long_press_time", 300)
-    data["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time", 300)
-    data["special_mode_release_time"] = get_setting_with_default("special_mode_release_time", 5000)
-    data["mqtt_ignore_time"] = get_setting_with_default("mqtt_ignore_time", 3000)
-    data["screensaver_activation_timeout"] = get_setting_with_default("screensaver_activation_timeout", 30000)
-    data["screen_dim_level"] = get_setting_with_default("screen_dim_level", 100)
-    data["screensaver_dim_level"] = get_setting_with_default("screensaver_dim_level", 0)
-    data["screensaver_mode"] = get_setting_with_default("screensaver_mode", "with_background")
-    data["turn_on_behavior"] = get_setting_with_default("turn_on_behavior", "color_temp")
-    data["max_live_log_messages"] = get_setting_with_default("max_live_log_messages", 10)
-    data["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size", 10)
-    data["is_home_assistant_addon"] = ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
+    data["min_button_push_time"] = get_setting_with_default(
+        "min_button_push_time", 50)
+    data["button_long_press_time"] = get_setting_with_default(
+        "button_long_press_time", 300)
+    data["special_mode_trigger_time"] = get_setting_with_default(
+        "special_mode_trigger_time", 300)
+    data["special_mode_release_time"] = get_setting_with_default(
+        "special_mode_release_time", 5000)
+    data["mqtt_ignore_time"] = get_setting_with_default(
+        "mqtt_ignore_time", 3000)
+    data["screensaver_activation_timeout"] = get_setting_with_default(
+        "screensaver_activation_timeout", 30000)
+    data["screen_dim_level"] = get_setting_with_default(
+        "screen_dim_level", 100)
+    data["screensaver_dim_level"] = get_setting_with_default(
+        "screensaver_dim_level", 0)
+    data["screensaver_mode"] = get_setting_with_default(
+        "screensaver_mode", "with_background")
+    data["turn_on_behavior"] = get_setting_with_default(
+        "turn_on_behavior", "color_temp")
+    data["max_live_log_messages"] = get_setting_with_default(
+        "max_live_log_messages", 10)
+    data["max_log_buffer_size"] = get_setting_with_default(
+        "max_log_buffer_size", 10)
+    data["is_home_assistant_addon"] = (
+        "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
     data["manager_address"] = get_setting_with_default("manager_address", "")
     data["manager_port"] = get_setting_with_default("manager_port", "")
     return render(request, 'settings.html', data)
@@ -442,38 +480,60 @@ def settings_page(request):
 def save_settings(request):
     set_setting_value(name="mqtt_server", value=request.POST["mqtt_server"])
     set_setting_value(name="mqtt_port", value=request.POST["mqtt_port"])
-    set_setting_value(name="mqtt_username", value=request.POST["mqtt_username"])
-    set_setting_value(name="mqtt_password", value=request.POST["mqtt_password"])
+    set_setting_value(name="mqtt_username",
+                      value=request.POST["mqtt_username"])
+    set_setting_value(name="mqtt_password",
+                      value=request.POST["mqtt_password"])
     if "home_assistant_address" in request.POST:
         home_assistant_address = request.POST["home_assistant_address"]
         if home_assistant_address.endswith("/"):
             home_assistant_address = home_assistant_address[:-1]
-        set_setting_value(name="home_assistant_address", value=home_assistant_address)
+        set_setting_value(name="home_assistant_address",
+                          value=home_assistant_address)
     if "home_assistant_token" in request.POST:
-        set_setting_value(name="home_assistant_token", value=request.POST["home_assistant_token"])
+        set_setting_value(name="home_assistant_token",
+                          value=request.POST["home_assistant_token"])
     openhab_address = request.POST["openhab_address"]
     if openhab_address.endswith("/"):
         openhab_address = openhab_address[:-1]
     set_setting_value(name="openhab_address", value=openhab_address)
-    set_setting_value(name="openhab_token", value=request.POST["openhab_token"])
-    set_setting_value(name="raise_to_100_light_level", value=request.POST["raise_to_100_light_level"])
-    set_setting_value(name="color_temp_min", value=request.POST["color_temp_min"])
-    set_setting_value(name="color_temp_max", value=request.POST["color_temp_max"])
-    set_setting_value(name="reverse_color_temp", value=( "reverse_color_temp" in request.POST))
-    set_setting_value(name="min_button_push_time", value=request.POST["min_button_push_time"])
-    set_setting_value(name="button_long_press_time", value=request.POST["button_long_press_time"])
-    set_setting_value(name="special_mode_trigger_time", value=request.POST["special_mode_trigger_time"])
-    set_setting_value(name="special_mode_release_time", value=request.POST["special_mode_release_time"])
-    set_setting_value(name="mqtt_ignore_time", value=request.POST["mqtt_ignore_time"])
+    set_setting_value(name="openhab_token",
+                      value=request.POST["openhab_token"])
+    set_setting_value(name="raise_to_100_light_level",
+                      value=request.POST["raise_to_100_light_level"])
+    set_setting_value(name="color_temp_min",
+                      value=request.POST["color_temp_min"])
+    set_setting_value(name="color_temp_max",
+                      value=request.POST["color_temp_max"])
+    set_setting_value(name="reverse_color_temp", value=(
+        "reverse_color_temp" in request.POST))
+    set_setting_value(name="min_button_push_time",
+                      value=request.POST["min_button_push_time"])
+    set_setting_value(name="button_long_press_time",
+                      value=request.POST["button_long_press_time"])
+    set_setting_value(name="special_mode_trigger_time",
+                      value=request.POST["special_mode_trigger_time"])
+    set_setting_value(name="special_mode_release_time",
+                      value=request.POST["special_mode_release_time"])
+    set_setting_value(name="mqtt_ignore_time",
+                      value=request.POST["mqtt_ignore_time"])
 
-    set_setting_value(name="screensaver_activation_timeout", value=request.POST["screensaver_activation_timeout"])
-    set_setting_value(name="screen_dim_level", value=request.POST["screen_dim_level"])
-    set_setting_value(name="screensaver_dim_level", value=request.POST["screensaver_dim_level"])
-    set_setting_value(name="screensaver_mode", value=request.POST["screensaver_mode"])
-    set_setting_value(name="turn_on_behavior", value=request.POST["turn_on_behavior"])
-    set_setting_value(name="max_live_log_messages", value=request.POST["max_live_log_messages"])
-    set_setting_value(name="max_log_buffer_size", value=request.POST["max_log_buffer_size"])
-    set_setting_value(name="manager_address", value=request.POST["manager_address"])
+    set_setting_value(name="screensaver_activation_timeout",
+                      value=request.POST["screensaver_activation_timeout"])
+    set_setting_value(name="screen_dim_level",
+                      value=request.POST["screen_dim_level"])
+    set_setting_value(name="screensaver_dim_level",
+                      value=request.POST["screensaver_dim_level"])
+    set_setting_value(name="screensaver_mode",
+                      value=request.POST["screensaver_mode"])
+    set_setting_value(name="turn_on_behavior",
+                      value=request.POST["turn_on_behavior"])
+    set_setting_value(name="max_live_log_messages",
+                      value=request.POST["max_live_log_messages"])
+    set_setting_value(name="max_log_buffer_size",
+                      value=request.POST["max_log_buffer_size"])
+    set_setting_value(name="manager_address",
+                      value=request.POST["manager_address"])
     set_setting_value(name="manager_port", value=request.POST["manager_port"])
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()
@@ -502,6 +562,7 @@ def save_new_data_file(request):
         fs.save("data_file.bin", uploaded_file)
     return redirect('/')
 
+
 @csrf_exempt
 def save_new_merged_flash(request):
     if request.method == 'POST':
@@ -511,6 +572,7 @@ def save_new_merged_flash(request):
         fs.save("merged_flash.bin", uploaded_file)
     return redirect('/')
 # TODO: Make exempt only when Debug = true
+
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -565,7 +627,7 @@ def download_data_file(request):
 def download_tft(request):
     fs = FileSystemStorage()
     panel_ip = get_client_ip(request)
-    nspanel = NSPanel.objects.filter(ip_address = panel_ip).first()
+    nspanel = NSPanel.objects.filter(ip_address=panel_ip).first()
     if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True":
         filename = "gui_us.tft"
     else:
@@ -593,6 +655,7 @@ def download_tft_eu(request):
     else:
         return HttpResponse(fs.open(filename).read(), content_type="application/octet-stream")
 
+
 def download_tft_us(request):
     fs = FileSystemStorage()
     filename = "gui_us.tft"
@@ -616,7 +679,7 @@ def checksum_data_file(request):
 
 def checksum_tft_file(request):
     panel_ip = get_client_ip(request)
-    nspanel = NSPanel.objects.filter(ip_address = panel_ip).first()
+    nspanel = NSPanel.objects.filter(ip_address=panel_ip).first()
     if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True":
         filename = "gui_us.tft"
     else:
@@ -636,18 +699,20 @@ def checksum_tft_file_us(request):
 
 def get_manual(request):
     fs = FileSystemStorage()
-    response = HttpResponse(fs.open("manual.pdf").read(), content_type='application/pdf')
+    response = HttpResponse(fs.open("manual.pdf").read(),
+                            content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="manual.pdf"'
     return response
 
 
 def global_scenes(request):
-    data = {}
+    data = {'dark_theme': get_setting_with_default("dark_theme", "false"), }
     data["global_scenes"] = Scene.objects.filter(room__isnull=True)
     return render(request, 'global_scenes.html', data)
 
+
 def relay_groups(request):
-    data = {}
+    data = {'dark_theme': get_setting_with_default("dark_theme", "false"), }
     data["nspanels"] = NSPanel.objects.all()
     data["relay_groups"] = RelayGroup.objects.all()
     return render(request, 'relay_groups.html', data)
@@ -677,7 +742,8 @@ def add_nspanel_relay_to_group(request):
     nspanel = NSPanel.objects.get(id=request.POST["nspanel_id"])
     relay_num = request.POST["relay_num"]
 
-    exists = RelayGroupBinding.objects.filter(nspanel=nspanel, relay_num=relay_num, relay_group=rg).count() > 0
+    exists = RelayGroupBinding.objects.filter(
+        nspanel=nspanel, relay_num=relay_num, relay_group=rg).count() > 0
     if not exists:
         binding = RelayGroupBinding()
         binding.relay_group = rg
@@ -687,6 +753,7 @@ def add_nspanel_relay_to_group(request):
         send_mqttmanager_reload_command()
     return redirect("relay_groups")
 
+
 def delete_relay_group_binding(request, relay_binding_id):
     binding = RelayGroupBinding.objects.get(id=relay_binding_id)
     if binding:
@@ -694,42 +761,57 @@ def delete_relay_group_binding(request, relay_binding_id):
     send_mqttmanager_reload_command()
     return redirect("relay_groups")
 
+
 def weather_and_time(request):
     if request.method == "POST":
         weather_type = request.POST["weather_type"]
-        set_setting_value("weather_controller", weather_type);
+        set_setting_value("weather_controller", weather_type)
         if weather_type == "home_assistant":
-            set_setting_value("weather_home_assistant_weather_entity", request.POST["weather_home_assistant_entity"]);
-            set_setting_value("sun_entity", request.POST["sun_entity"]);
-            set_setting_value("weather_openhab_current_weather_item", "");
-            set_setting_value("weather_openhab_forecast_weather_item", "");
+            set_setting_value("weather_home_assistant_weather_entity",
+                              request.POST["weather_home_assistant_entity"])
+            set_setting_value("sun_entity", request.POST["sun_entity"])
+            set_setting_value("weather_openhab_current_weather_item", "")
+            set_setting_value("weather_openhab_forecast_weather_item", "")
         elif weather_type == "openhab":
-            set_setting_value("weather_home_assistant_weather_entity", "");
-            set_setting_value("sun_entity", "");
-            set_setting_value("weather_openhab_current_weather_item", request.POST["weather_openhab_current_weather_item"])
-            set_setting_value("weather_openhab_forecast_weather_item", request.POST["weather_openhab_forecast_weather_item"])
+            set_setting_value("weather_home_assistant_weather_entity", "")
+            set_setting_value("sun_entity", "")
+            set_setting_value("weather_openhab_current_weather_item",
+                              request.POST["weather_openhab_current_weather_item"])
+            set_setting_value("weather_openhab_forecast_weather_item",
+                              request.POST["weather_openhab_forecast_weather_item"])
         else:
             print(F"ERROR! Unknown weather controller: {weather_type}")
 
-
-        set_setting_value("outside_temp_sensor_provider", request.POST["outside_temp_provider"]);
-        set_setting_value("outside_temp_sensor_entity_id", request.POST["outside_temp_sensor"]);
+        set_setting_value("outside_temp_sensor_provider",
+                          request.POST["outside_temp_provider"])
+        set_setting_value("outside_temp_sensor_entity_id",
+                          request.POST["outside_temp_sensor"])
         set_setting_value("date_format", request.POST["date_format"])
         set_setting_value("clock_us_style", "clock_us_style" in request.POST)
         set_setting_value("use_farenheit", "use_farenheit" in request.POST)
         restart_mqtt_manager()
         return redirect("weather_and_time")
     else:
-        data = {}
-        data["date_format"] = get_setting_with_default("date_format", "%a %d/%m %Y");
-        data["clock_us_style"] = get_setting_with_default("clock_us_style", False)
-        data["use_farenheit"] = get_setting_with_default("use_farenheit", False)
-        data["weather_type"] = get_setting_with_default("weather_controller", "")
-        data["outside_temp_provider"] = get_setting_with_default("outside_temp_sensor_provider", "")
-        data["outside_temp_sensor"] = get_setting_with_default("outside_temp_sensor_entity_id", "")
-        data["weather_home_assistant_weather_entity"] = get_setting_with_default("weather_home_assistant_weather_entity", "")
-        data["weather_openhab_current_weather_item"] = get_setting_with_default("weather_openhab_current_weather_item", "")
-        data["weather_openhab_forecast_weather_item"] = get_setting_with_default("weather_openhab_forecast_weather_item", "")
+        data = {'dark_theme': get_setting_with_default(
+            "dark_theme", "false"), }
+        data["date_format"] = get_setting_with_default(
+            "date_format", "%a %d/%m %Y")
+        data["clock_us_style"] = get_setting_with_default(
+            "clock_us_style", False)
+        data["use_farenheit"] = get_setting_with_default(
+            "use_farenheit", False)
+        data["weather_type"] = get_setting_with_default(
+            "weather_controller", "")
+        data["outside_temp_provider"] = get_setting_with_default(
+            "outside_temp_sensor_provider", "")
+        data["outside_temp_sensor"] = get_setting_with_default(
+            "outside_temp_sensor_entity_id", "")
+        data["weather_home_assistant_weather_entity"] = get_setting_with_default(
+            "weather_home_assistant_weather_entity", "")
+        data["weather_openhab_current_weather_item"] = get_setting_with_default(
+            "weather_openhab_current_weather_item", "")
+        data["weather_openhab_forecast_weather_item"] = get_setting_with_default(
+            "weather_openhab_forecast_weather_item", "")
         data["sun_entity"] = get_setting_with_default("sun_entity", "")
-            
+
         return render(request, "weather_and_time.html", data)

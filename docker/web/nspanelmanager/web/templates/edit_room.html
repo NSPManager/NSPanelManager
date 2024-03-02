@@ -9,7 +9,7 @@
 {% block content %}
 {% load static %}
 
-<div class="modal" id="modal-add-light">
+<div class="modal hidden" id="modal-add-light">
   <div class="modal-background"></div>
   <div class="modal-card">
     <nav class="panel" style="background-color: white;" id="add_new_light_modal_panel">
@@ -48,7 +48,7 @@
   <input class="input" type="hidden" id="home_assistant_name" name="home_assistant_name">
   <input class="input" type="hidden" id="openhab_name" name="openhab_name">
   <input class="input" type="hidden" id="edit_light_id" name="edit_light_id" default="-1">
-  <div class="modal" id="modal-add-light-options">
+  <div class="modal hidden" id="modal-add-light-options">
     <div class="modal-background"></div>
     <div class="modal-card">
       <header class="modal-card-head">
@@ -156,7 +156,7 @@
 <form method="POST" action="{% url 'add_new_scene_to_room' room.id %}">
   {% csrf_token %}
   <input type="hidden" id="edit_scene_id" name="edit_scene_id">
-  <div class="modal" id="add_new_scene_to_room_modal">
+  <div class="modal hidden" id="add_new_scene_to_room_modal">
     <div class="modal-background"></div>
     <div class="modal-card">
       <header class="modal-card-head">
@@ -181,7 +181,7 @@
 <form method="POST" action="{% url 'add_new_light_to_room_view' room.id %}">
   {% csrf_token %}
   <input type="hidden" id="add_new_light_to_room_view_position" name="position">
-  <div class="modal" id="modal-add-light-to-room-view">
+  <div class="modal hidden" id="modal-add-light-to-room-view">
     <div class="modal-background"></div>
     <div class="modal-card">
       <header class="modal-card-head">
@@ -217,99 +217,131 @@
   </div>
 </form>
 
-<form method="POST" action="{% url 'save_new_room' %}">
+<form method="POST" action="{% url 'update_room_form' room_id=room.id %}">
   {% csrf_token %}
-
-</form>
-<div class="block">
-  <h2 class="title is-4">Room settings</h2>
-  <form method="POST" action="{% url 'update_room_form' room_id=room.id %}">
-    {% csrf_token %}
-    <div class="field">
-      <label class="label">Friendly name</label>
-      <div class="control">
-        <input class="input" type="text" name="friendly_name" value="{{ room.friendly_name }}">
+  <div>
+    <h2 class="font-medium text-2xl" id="nspanel_name">Settings for room '{{ room.friendly_name }}'</h2>
+  </div>
+  <div class="md:flex md:justify-between md:items-start mt-2">
+    <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+      <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">General</span>
+      <!-- Friendly name -->
+      <div class="">
+        <label for="friendly_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Name</label>
+        <div class="flex">
+          <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <title>Friendly name</title>
+              <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
+            </svg>
+          </span>
+          <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+          type="text" class="input" name="friendly_name" value="{{ room.friendly_name }}">
+        </div>
+      </div>
+      <div class="p-4 mb-4 mt-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-700 dark:text-gray-50 {% if total_num_rooms != 1 %}hidden{% endif %}" role="alert">
+        <span class="font-medium">Info.</span> The last room cannot be deleted. Rename this room or create another room before removing this one.
+      </div>
+      <div class="text-right mt-4">
+        <button type="submit"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Save</button>
+          <a type="submit" href="{% if total_num_rooms != 1 %}{% url 'delete_room' room_id=room.id %}{% else %}#{% endif %}"
+          class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none" {% if total_num_rooms == 1 %}disabled{% endif %}
+          >Delete</a>
       </div>
     </div>
-    <button class="button is-primary">Save</button>
-    <a href="{% if total_num_rooms != 1 %}{% url 'delete_room' room_id=room.id %}{% else %}#{% endif %}" class="button is-danger" {% if total_num_rooms == 1 %}disabled{% endif %}>Delete</a>
-    {% if total_num_rooms == 1 %}
-    <div class="notification is-danger mt-3">
-      The last room cannot be deleted. Rename this room or create another room before removing this one.
+  </div>
+</form>
+
+<div class="md:flex md:justify-between md:items-start mt-2">
+  <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+    <div class="md:flex md:flex-wrap md:justify-between items-center">
+      <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">{{ room.friendly_name }} scenes</span>
+      <button type="button" onclick="add_new_scene();"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">New scene</button>
     </div>
-    {% endif %}
-  </form>
+    
+    <table class="w-full text-left rtl:text-right">
+      <thead class="uppercase bg-slate-200 dark:bg-slate-950 border-solid border-b-2 border-slate-600 dark:border-slate-800">
+        <tr>
+          <th class="px-3 py-1">Name</th>
+          <th class="px-3 py-1">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="log_body" class="bg-slate-100 dark:bg-slate-600 text-black dark:text-white">
+        {% for scene in room.scene_set.all %}
+        <tr>
+          <th class="px-3 py-3">{{ scene.friendly_name }}</th>
+          <td class="px-3 py-3">
+            <button type="button" onclick="edit_scene({{ scene.id }}, '{{ scene.friendly_name }}');"
+              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Edit</button>
+            <a href='{% url "delete_scene" scene.id %}'
+              class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none" {% if total_num_rooms == 1 %}disabled{% endif %}
+              >Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
-<hr>
-<div class="block">
-  <h2 class="title is-4">{{ room.friendly_name }} scenes</h2>
-  <button type="button" class="button is-primary" onclick="add_new_scene();">Add new scene</button>
-  <table class="table is-fullwidth is-hoverable">
-    <thead>
-      <tr>
-        <th>Scene name</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for scene in room.scene_set.all %}
-      <tr>
-        <th>{{ scene.friendly_name }}</th>
-        <td>
-          <button onclick="edit_scene({{ scene.id }}, '{{ scene.friendly_name }}');" class="button is-small is-primary">Edit</button>
-          <a href='{% url "delete_scene" scene.id %}' class="button is-small is-danger">Delete</a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-<hr>
-<div class="block">
-  <h2 class="title is-4">{{ room.friendly_name }} lights</h2>
-  <button type="button" class="button is-primary" onclick="add_new_light();">Add new light</button>
-  <table class="table is-fullwidth is-hoverable">
-    <thead>
-      <tr>
-        <th>Light</th>
-        <th>Source</th>
-        <th>Type</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for light in room.light_set.all %}
-      <tr>
-        <th>{{ light.friendly_name }}</th>
-        <td>
-          {% if light.type == "home_assistant" %}
-          <span class="tag is-info">Home Assistant</span>
-          {% elif light.type == "openhab" %}
-          <span class="tag is-warning">OpenHAB</span>
-          {% elif light.type == "manual" %}
-          <span class="tag is-black">Manual</span>
+
+<div class="md:flex md:justify-between md:items-start mt-2">
+  <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+    <div class="md:flex md:flex-wrap md:justify-between items-center">
+      <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">{{ room.friendly_name }} lights</span>
+      <button type="button" onclick="add_new_scene();"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">New scene</button>
+    </div>
+    
+    <table class="w-full text-left rtl:text-right">
+      <thead class="uppercase bg-slate-200 dark:bg-slate-950 border-solid border-b-2 border-slate-600 dark:border-slate-800">
+        <tr>
+          <th class="px-3 py-1">Name</th>
+          <th class="px-3 py-1">Source</th>
+          <th class="px-3 py-1">Type</th>
+          <th class="px-3 py-1">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="log_body" class="bg-slate-100 dark:bg-slate-600 text-black dark:text-white">
+        {% for light in room.light_set.all %}
+        <tr>
+          <th class="px-3 py-3">{{ light.friendly_name }}</th>
+          <td>
+            {% if light.type == "home_assistant" %}
+            <span class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-5 py-2.5 rounded dark:bg-blue-900 dark:text-blue-300">Home Assistant</span>
+            {% elif light.type == "openhab" %}
+            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium me-2 px-5 py-2.5 rounded dark:bg-yellow-900 dark:text-yellow-300">OpenHAB</span>
+            {% elif light.type == "manual" %}
+            <span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-5 py-2.5 rounded dark:bg-gray-700 dark:text-gray-300">Manual</span>
+            {% else %}
+            <span class="bg-red-100 text-red-800 text-xs font-medium me-2 px-5 py-2.5 rounded dark:bg-red-900 dark:text-red-300">Unknown: {{ light.type }}</span>
+            {% endif %}
+          </td>
+          {% if light.is_ceiling_light %}
+          <td>Ceiling</td>
           {% else %}
-          <span class="tag is-danger">Unknown: {{ light.type }}</span>
+          <td>Table</td>
           {% endif %}
-        </td>
-        {% if light.is_ceiling_light %}
-        <td>Ceiling</td>
-        {% else %}
-        <td>Table</td>
-        {% endif %}
-        <td>
-          <button onclick="edit_light({{ light.id }});" class=" button is-small is-primary">Edit</button>
-          <a href='{% url "remove_light_from_room" room.id light.id %}' class="button is-small is-danger">Remove</a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+          <td class="px-3 py-3">
+            <button type="button" onclick="edit_light({{ light.id }});" 
+              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Edit</button>
+            <a href='{% url "remove_light_from_room" room.id light.id %}'
+              class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none" {% if total_num_rooms == 1 %}disabled{% endif %}
+              >Remove</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
-<hr>
-<div class="block">
-  <h2 class="title is-4">Individual light control</h2>
-  <h2 class="subtitle is-6">Click on each "button" to select the light/switch controlled by it.</h2>
+
+
+<div class="md:flex md:justify-between md:items-start mt-2">
+  <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+  <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">Individual light control</span>
+  <span class="block mb-2 text-sm text-gray-900 dark:text-gray-50">Click on each "button" to select the light/switch controlled by it.</span>
   <div class="nspanel_view" id="nspanel_room_view">
     <div id="room_name">{{ room.friendly_name }}</div>
     <span class="light_r1" id="light1" onclick="add_new_light_to_room_view(1);">{{ light1.friendly_name }}</span>
@@ -322,9 +354,10 @@
     <span class="light_r2" id="light7" onclick="add_new_light_to_room_view(7);">{{ light7.friendly_name }}</span>
     <span class="light_r2" id="light8" onclick="add_new_light_to_room_view(8);">{{ light8.friendly_name }}</span>
     <span class="light_r2" id="light9" onclick="add_new_light_to_room_view(9);">{{ light9.friendly_name }}</span>
-    <span class="light_r2" id="light10" onclick="add_new_light_to_room_view(10);"">{{ light10.friendly_name }}</span>
-        <span class=" light_r2" id="light11" onclick="add_new_light_to_room_view(11);"">{{ light11.friendly_name }}</span>
-        <span class=" light_r2" id="light12" onclick="add_new_light_to_room_view(12);"">{{ light12.friendly_name }}</span>
+    <span class="light_r2" id="light10" onclick="add_new_light_to_room_view(10);">{{ light10.friendly_name }}</span>
+    <span class="light_r2" id="light11" onclick="add_new_light_to_room_view(11);">{{ light11.friendly_name }}</span>
+    <span class="light_r2" id="light12" onclick="add_new_light_to_room_view(12);">{{ light12.friendly_name }}</span>
     </div>
+  </div>
 </div>
 {% endblock %}
