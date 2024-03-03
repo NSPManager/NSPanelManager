@@ -12,7 +12,7 @@
         ])
       };
       select_new_entity(types, (element) => {
-        $(".modal").removeClass("is-active");
+        $(".modal").addClass("hidden");
         var weather_entity_id = $(element.currentTarget).data("entity_id");
         var entity_type = $(element.currentTarget).data("type");
         if(entity_type == "home_assistant") {
@@ -57,7 +57,7 @@
       };
       select_new_entity(types, (element) => {
         var weather_entity_id = $(element.currentTarget).data("entity_id");
-        $(".modal").removeClass("is-active");
+        $(".modal").addClass("hidden");
         $("#weather_home_assistant_entity").val(weather_entity_id);
       });
     }
@@ -69,7 +69,7 @@
         ])
       };
       select_new_entity(types, (element) => {
-        $(".modal").removeClass("is-active");
+        $(".modal").addClass("hidden");
 
         var weather_thing = $(element.currentTarget).data("entity_id");
         var items = $(element.currentTarget).data("items");
@@ -103,7 +103,7 @@
         ])
       };
       select_new_entity(types, (element) => {
-        $(".modal").removeClass("is-active");
+        $(".modal").addClass("hidden");
 
         var weather_thing = $(element.currentTarget).data("entity_id");
         var items = $(element.currentTarget).data("items");
@@ -154,15 +154,15 @@
     function update_displayed_weather_select_options(entity) {
       var weather_type = $("#weather_type").val();
       if(weather_type == "home_assistant") {
-        $("#home_assistant_weather_input_group").show();
-        $("#home_assistant_sun_input_group").show();
-        $("#openhab_current_weather_input_group").hide();
-        $("#openhab_forecast_input_group").hide();
+        $("#home_assistant_weather_input_group").removeClass("hidden");
+        $("#home_assistant_sun_input_group").removeClass("hidden");
+        $("#openhab_current_weather_input_group").addClass("hidden");
+        $("#openhab_forecast_input_group").addClass("hidden");
       } else if (weather_type == "openhab") {
-        $("#home_assistant_weather_input_group").hide();
-        $("#home_assistant_sun_input_group").hide();
-        $("#openhab_current_weather_input_group").show();
-        $("#openhab_forecast_input_group").show();
+        $("#home_assistant_weather_input_group").addClass("hidden");
+        $("#home_assistant_sun_input_group").addClass("hidden");
+        $("#openhab_current_weather_input_group").removeClass("hidden");
+        $("#openhab_forecast_input_group").removeClass("hidden")
       } else {
         console.log("ERROR: Weather type '" + weather_type + "' is unkown!");
       }
@@ -178,193 +178,210 @@
 {% block content %}
 {% include 'modal-select-entity.html' %}
 
-<div class="level">
-  <div class="level-left">
-    <div class="level-item">
-      <h2 class="title is-4">Weather & Time</h2>
+<form method="POST" action="{% url 'weather_and_time' %}">
+  {% csrf_token %}
+  <div>
+    <h2 class="font-medium text-2xl" id="nspanel_name">Weather & Time</h2>
+  </div>
+  <div class="mt-2">
+    <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+      <!-- General settings -->
+      <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">Date & Time</span>
+
+      <!-- Date format -->
+      <div class="mt-4">
+        <label for="date_format" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Scene name</label>
+        <div class="flex">
+          <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <title>Scene name</title>
+              <path d="M17,7H22V17H17V19A1,1 0 0,0 18,20H20V22H17.5C16.95,22 16,21.55 16,21C16,21.55 15.05,22 14.5,22H12V20H14A1,1 0 0,0 15,19V5A1,1 0 0,0 14,4H12V2H14.5C15.05,2 16,2.45 16,3C16,2.45 16.95,2 17.5,2H20V4H18A1,1 0 0,0 17,5V7M2,7H13V9H4V15H13V17H2V7M20,15V9H17V15H20Z"></path>
+            </svg>
+          </span>
+          <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+          type="text" class="input" name="date_format" id="date_format" placeholder="Date format" value="{{ date_format }}">
+        </div>
+      </div>
+      <div class="p-4 mb-4 mt-2 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50" role="alert">
+        <div class="font-medium">Info.</div>
+        The format of the date on the NSPanel. This is set using the strftime function. See <a href="https://cplusplus.com/reference/ctime/strftime/" target="_blank" class="border-dotted border-b-2 border-black">available</a> formatting for all options.
+      </div>
+
+      <!-- Clock format-->
+      <div class="flex-auto mt-4">
+        <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Time format</h3>
+        <ul
+          class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
+          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+            <div class="flex items-center ps-3">
+              <input id="relay1_off" type="radio" value="" name="clock_us_style" value="False"
+              {% if clock_us_style != "True" %}checked{% endif %}
+                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+              <label for="relay1_off"
+                class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">24 hour clock</label>
+            </div>
+          </li>
+          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+            <div class="flex items-center ps-3">
+              <input id="relay1_on" type="radio" name="clock_us_style" value="True"
+              {% if clock_us_style == "True" %}checked{% endif %}
+                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+              <label for="relay1_on" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">12 hour clock (AM/PM)</label>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="p-4 mt-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+      <!-- Weather and temp -->
+      <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">Weather & Temperature</span>
+
+      <!-- Weather provider format -->
+      <div class="mt-4">
+        <label for="weather_type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Weather provider</label>
+        <div class="flex">
+          <span
+            class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <title>Weather provider</title>
+              <path
+                d="M6,19A5,5 0 0,1 1,14A5,5 0 0,1 6,9C7,6.65 9.3,5 12,5C15.43,5 18.24,7.66 18.5,11.03L19,11A4,4 0 0,1 23,15A4,4 0 0,1 19,19H6M19,13H17V12A5,5 0 0,0 12,7C9.5,7 7.45,8.82 7.06,11.19C6.73,11.07 6.37,11 6,11A3,3 0 0,0 3,14A3,3 0 0,0 6,17H19A2,2 0 0,0 21,15A2,2 0 0,0 19,13Z" />
+            </svg>
+          </span>
+          <select name="weather_type" id="weather_type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            <option value="home_assistant" {% if weather_type == "home_assistant" %}selected{% endif %}>Home Assistant</option>
+            <option value="openhab" {% if weather_type == "openhab" %}selected{% endif %}>OpenHAB (AccuWeather)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Home Assistant Weather entitiy -->
+      <div class="mt-4" id="home_assistant_weather_input_group">
+        <label for="weather_home_assistant_entity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Weather entity</label>
+        <div class="flex">
+          <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <title>Weather entity</title>
+              <path d="M6,19A5,5 0 0,1 1,14A5,5 0 0,1 6,9C7,6.65 9.3,5 12,5C15.43,5 18.24,7.66 18.5,11.03L19,11A4,4 0 0,1 23,15A4,4 0 0,1 19,19H6M19,13H17V12A5,5 0 0,0 12,7C9.5,7 7.45,8.82 7.06,11.19C6.73,11.07 6.37,11 6,11A3,3 0 0,0 3,14A3,3 0 0,0 6,17H19A2,2 0 0,0 21,15A2,2 0 0,0 19,13Z" />
+            </svg>
+          </span>
+          <input class="rounded-none bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+          type="text" class="input" name="weather_home_assistant_entity" id="weather_home_assistant_entity" readonly value="{{ weather_home_assistant_weather_entity }}">
+          <button type="button" onclick="select_home_assistant_weather_entity();" class="inline-flex items-center px-3 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-e-0 rounded-e-md">
+            Select
+          </button>
+        </div>
+      </div>
+
+      <!-- Home Assistant sun entitiy -->
+      <div class="mt-4" id="home_assistant_sun_input_group">
+        <label for="sun_entity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Weather entity</label>
+        <div class="flex">
+          <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <title>Weather entity</title>
+              <path d="M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,2L14.39,5.42C13.65,5.15 12.84,5 12,5C11.16,5 10.35,5.15 9.61,5.42L12,2M3.34,7L7.5,6.65C6.9,7.16 6.36,7.78 5.94,8.5C5.5,9.24 5.25,10 5.11,10.79L3.34,7M3.36,17L5.12,13.23C5.26,14 5.53,14.78 5.95,15.5C6.37,16.24 6.91,16.86 7.5,17.37L3.36,17M20.65,7L18.88,10.79C18.74,10 18.47,9.23 18.05,8.5C17.63,7.78 17.1,7.15 16.5,6.64L20.65,7M20.64,17L16.5,17.36C17.09,16.85 17.62,16.22 18.04,15.5C18.46,14.77 18.73,14 18.87,13.21L20.64,17M12,22L9.59,18.56C10.33,18.83 11.14,19 12,19C12.82,19 13.63,18.83 14.37,18.56L12,22Z" />
+            </svg>
+          </span>
+          <input class="rounded-none bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-sun_entity block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+          type="text" class="input" name="sun_entity" id="sun_entity" readonly value="{{ sun_entity }}">
+          <button type="button" onclick="select_new_sun_entity();" class="inline-flex items-center px-3 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-e-0 rounded-e-md">
+            Select
+          </button>
+        </div>
+      </div>
+
+      <!-- OpenHAB current Weather entitiy -->
+      <div class="mt-4" id="openhab_current_weather_input_group">
+        <label for="weather_openhab_current_weather_item" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Current weather entity</label>
+        <div class="flex">
+          <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <title>Current weather entity</title>
+              <path d="M6,19A5,5 0 0,1 1,14A5,5 0 0,1 6,9C7,6.65 9.3,5 12,5C15.43,5 18.24,7.66 18.5,11.03L19,11A4,4 0 0,1 23,15A4,4 0 0,1 19,19H6M19,13H17V12A5,5 0 0,0 12,7C9.5,7 7.45,8.82 7.06,11.19C6.73,11.07 6.37,11 6,11A3,3 0 0,0 3,14A3,3 0 0,0 6,17H19A2,2 0 0,0 21,15A2,2 0 0,0 19,13Z" />
+            </svg>
+          </span>
+          <input class="rounded-none bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+          type="text" class="input" name="weather_openhab_current_weather_item" id="weather_openhab_current_weather_item" readonly value="{{ weather_openhab_current_weather_item }}">
+          <button type="button" onclick="select_openhab_weather_entity();" class="inline-flex items-center px-3 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-e-0 rounded-e-md">
+            Select
+          </button>
+        </div>
+      </div>
+
+      <!-- OpenHAB forecast Weather entitiy -->
+      <div class="mt-4" id="openhab_forecast_input_group">
+        <label for="weather_openhab_forecast_weather_item" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Forecast weather entity</label>
+        <div class="flex">
+          <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <title>Forecast weather entity</title>
+              <path d="M6,19A5,5 0 0,1 1,14A5,5 0 0,1 6,9C7,6.65 9.3,5 12,5C15.43,5 18.24,7.66 18.5,11.03L19,11A4,4 0 0,1 23,15A4,4 0 0,1 19,19H6M19,13H17V12A5,5 0 0,0 12,7C9.5,7 7.45,8.82 7.06,11.19C6.73,11.07 6.37,11 6,11A3,3 0 0,0 3,14A3,3 0 0,0 6,17H19A2,2 0 0,0 21,15A2,2 0 0,0 19,13Z" />
+            </svg>
+          </span>
+          <input class="rounded-none bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+          type="text" class="input" name="weather_openhab_forecast_weather_item" id="weather_openhab_forecast_weather_item" readonly value="{{ weather_openhab_forecast_weather_item }}">
+          <button type="button" onclick="select_openhab_forecast_entity();" class="inline-flex items-center px-3 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-e-0 rounded-e-md">
+            Select
+          </button>
+        </div>
+      </div>
+
+      <!-- Outside temperature sensor -->
+      <input type="hidden" name="outside_temp_provider" id="outside_temp_provider" readonly value="{{ outside_temp_provider }}">
+      <div class="mt-4">
+        <label for="outside_temp_sensor" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Outside temperature sensor</label>
+        <div class="flex">
+          <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <title>Outside temperature sensor</title>
+              <path d="M15 13V5A3 3 0 0 0 9 5V13A5 5 0 1 0 15 13M12 4A1 1 0 0 1 13 5V8H11V5A1 1 0 0 1 12 4Z" />
+            </svg>
+          </span>
+          <input class="rounded-none bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+          type="text" class="input" name="outside_temp_sensor" id="outside_temp_sensor" readonly value="{{ outside_temp_sensor }}">
+          <button type="button" onclick="select_new_outside_temp_sensor();" class="inline-flex items-center px-3 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-e-0 rounded-e-md">
+            Select
+          </button>
+        </div>
+      </div>
+      <div class="p-4 mb-4 mt-2 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50" role="alert">
+        <div class="font-medium">Info.</div>
+        The outside temperature is not a requirement for using the weather functionality but it can be used to provide a more accurete value on the screensaver.
+      </div>
+
+      <!-- Clock format-->
+      <div class="flex-auto mt-4">
+        <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Temperature format</h3>
+        <ul
+          class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
+          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+            <div class="flex items-center ps-3">
+              <input id="celcius" type="radio" value="" name="use_farenheit" value="False"
+              {% if use_farenheit != "True" %}checked{% endif %}
+                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+              <label for="celcius"
+                class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Celcius</label>
+            </div>
+          </li>
+          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+            <div class="flex items-center ps-3">
+              <input id="farenheit" type="radio" name="use_farenheit" value="True"
+              {% if use_farenheit == "True" %}checked{% endif %}
+                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+              <label for="farenheit" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Farenheit</label>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
-</div>
-<div>
-  <form method="POST" action="{% url 'weather_and_time' %}">
-    {% csrf_token %}
-    <div class="box">
-      <div class="field">
-        <label class="label">Date format<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            The format of the date on the NSPanel. This is set using the strftime function. See available formatting for all options.
-          </div>
-        </label>
-        <div class="control">
-          <input class="input" type="text" name="date_format" id="date_format"
-              placeholder="strftime format" value="{{ date_format }}">
-        </div>
-        <div class="control mt-2">
-          <a href="https://cplusplus.com/reference/ctime/strftime/" target="_blank" class="button is-link">See available formatting</a>
-        </div>
-      </div>
-
-
-      <div class="field">
-        <label class="label">Outside temperature sensor<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            If you wish to read the outside temperature from a sensor instead of displaying what is gathered from the weather provider.
-          </div>
-        </label>
-        <div class="control">
-          <input type="hidden" name="outside_temp_provider" id="outside_temp_provider" readonly value="{{ outside_temp_provider }}">
-          <input class="input" type="text" name="outside_temp_sensor" id="outside_temp_sensor" readonly value="{{ outside_temp_sensor }}">
-          <div class="control mt-2">
-            <a class="button is-primary" onclick="select_new_outside_temp_sensor();">Select temperature sensor</a>
-          </div>
-        </div>
-      </div>
-
-
-      <div class="field">
-        <label class="label">Weather provider<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            Select from which platform to read the current weather.
-          </div>
-        </label>
-        <div class="control">
-          <div class="control mt-2">
-            <div class="select">
-              <select name="weather_type" id="weather_type">
-                <option value="home_assistant" {% if weather_type == "home_assistant" %}selected{% endif %}>Home Assistant</option>
-                <option value="openhab" {% if weather_type == "openhab" %}selected{% endif %}>OpenHAB (AccuWeather)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label">Weather entity<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            The entity you wish to use for the weather information on the screensaver.
-          </div>
-        </label>
-        <div class="control">
-          <div class="field has-addons has-addons-right" id="home_assistant_weather_input_group">
-            <p class="control">
-              <a class="button is-static">Weather</a>
-            </p>
-            <p class="control is-expanded">
-              <input type="input" class="input" name="weather_home_assistant_entity" id="weather_home_assistant_entity" readonly value="{{ weather_home_assistant_weather_entity }}">
-            </p>
-            <p class="control">
-              <a class="button is-primary" onclick="select_home_assistant_weather_entity();">Select</a>
-            </p>
-          </div>
-          <div class="field has-addons has-addons-right" id="openhab_current_weather_input_group">
-            <p class="control">
-              <a class="button is-static">Current weather</a>
-            </p>
-            <p class="control is-expanded">
-              <input type="input" class="input" name="weather_openhab_current_weather_item" id="weather_openhab_current_weather_item" readonly value="{{ weather_openhab_current_weather_item }}">
-            </p>
-            <p class="control">
-              <a class="button is-primary" onclick="select_openhab_weather_entity();">Select</a>
-            </p>
-          </div>
-          <div class="field has-addons has-addons-right" id="openhab_forecast_input_group">
-            <p class="control">
-              <a class="button is-static">Forecast</a>
-            </p>
-            <p class="control is-expanded">
-              <input type="input" class="input" name="weather_openhab_forecast_weather_item" id="weather_openhab_forecast_weather_item" readonly value="{{ weather_openhab_forecast_weather_item }}">
-            </p>
-            <p class="control">
-              <a class="button is-primary" onclick="select_openhab_forecast_entity();">Select</a>
-            </p>
-          </div>
-          <div class="control mt-2">
-            <a class="button is-primary hidden" id="select_ha_weather_entity" onclick="select_ha_weather_entity();">Select weather entity</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="field" id="home_assistant_sun_input_group">
-        <label class="label">Home Assistant sun<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            The sun entity in Home Assistant is used to get sunrise/sunset information. This is only needed if you are using Home Assistant and can be safely ignored if using OpenHAB.
-          </div>
-        </label>
-        <div class="control">
-          <input class="input" type="text" name="sun_entity" id="sun_entity" readonly value="{{ sun_entity }}">
-          <div class="control mt-2">
-            <a class="button is-primary" onclick="select_new_sun_entity();">Select sun entity</a>
-            <a class="button is-link" href="https://www.home-assistant.io/integrations/sun/">More information</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="field">
-      <label class="checkbox">
-          {% if clock_us_style == "True" %}
-              <input type="checkbox" name="clock_us_style" checked>
-          {% else %}
-              <input type="checkbox" name="clock_us_style">
-          {% endif %}
-          Show the time with AM/PM
-          <span class="question">
-            <span class="icon question_icon">
-              <i class="mdi mdi-information has-text-info"></i>
-            </span>
-            <div class="question_help_text notification is-info is-light">
-              Wether or not to use 24 or 12 hour clock. Enabling this will show the clock with AM and PM.
-            </div>
-          </span>
-      </label>
-      </div>
-      <div class="field">
-        <label class="checkbox">
-            {% if use_farenheit == "True" %}
-                <input type="checkbox" name="use_farenheit" checked>
-            {% else %}
-                <input type="checkbox" name="use_farenheit">
-            {% endif %}
-            Use farenheit
-            <span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                Wether to report temperature in farenheit. Default: Unchecked = report in celcius.
-              </div>
-            </span>
-        </label>
-      </div>
-    </div>
-
-    <!-- Add 1rem of padding to bottom to prevent a white bar appering on the bottom of the page -->
-    <div class="level mt-4" style="padding-bottom: 1rem;">
-      <div class="level-left">
-        <div class="buttons is-right">
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="buttons">
-          <button class="button is-success" type="submit" id="save_button">Save</button>
-        </div>
-      </div>
-    </div>
-  </form>
-</div>
+  
+  <div class="text-right">
+    <button type="submit"
+      class="mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ">Save</button>
+  </div>
+</form>
 {% endblock %}
