@@ -2057,6 +2057,11 @@ select {
   border-color: rgb(30 41 59 / var(--tw-border-opacity));
 }
 
+.dark\:border-gray-500:where(.dark, .dark *) {
+  --tw-border-opacity: 1;
+  border-color: rgb(107 114 128 / var(--tw-border-opacity));
+}
+
 .dark\:bg-blue-600:where(.dark, .dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(37 99 235 / var(--tw-bg-opacity));
@@ -2202,6 +2207,10 @@ select {
   --tw-shadow: var(--tw-shadow-colored);
 }
 
+.dark\:ring-offset-gray-700:where(.dark, .dark *) {
+  --tw-ring-offset-color: #374151;
+}
+
 .dark\:hover\:border-gray-500:hover:where(.dark, .dark *) {
   --tw-border-opacity: 1;
   border-color: rgb(107 114 128 / var(--tw-border-opacity));
@@ -2275,6 +2284,15 @@ select {
 .dark\:focus\:ring-red-800:focus:where(.dark, .dark *) {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(153 27 27 / var(--tw-ring-opacity));
+}
+
+.dark\:focus\:ring-blue-600:focus:where(.dark, .dark *) {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(37 99 235 / var(--tw-ring-opacity));
+}
+
+.dark\:focus\:ring-offset-gray-700:focus:where(.dark, .dark *) {
+  --tw-ring-offset-color: #374151;
 }
 
 @media (min-width: 768px) {

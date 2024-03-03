@@ -88,8 +88,12 @@ function populate_add_new_light_dialog() {
 }
 
 function add_new_light_show_light_page(light_element) {
-  if ($(this).data("type") == "openhab") {
-    $("#openhab_light_options").show();
+  var entity_name = $(light_element.currentTarget).text();
+  var entity_id = $(light_element.currentTarget).data("entity_id");
+  var entity_type = $(light_element.currentTarget).data("type");
+
+  if (entity_type == "openhab") {
+    $("#openhab_light_options").removeClass("hidden");
 
     // Clear any previous options selected
     $("#openhab_dimming_channel_name").find("option").remove();
@@ -126,16 +130,18 @@ function add_new_light_show_light_page(light_element) {
       );
     });
   } else {
-    $("#openhab_light_options").hide();
+    $("#openhab_light_options").addClass("hidden");
   }
 
-  $("#edit_light_loader").hide();
-  $("#modal-add-light-options-inputs").show();
+  close_modals();
+
+  $("#edit_light_loader").addClass("hidden");
+  $("#modal-add-light-options-inputs").removeClass("hidden");
   $("#edit_light_id").val("-1"); // Set text field
-  $("#add_new_light_name").val($(this).text()); // Set text field
-  $("#home_assistant_name").val($(this).data("entity_id")); // Set text field
-  $("#openhab_name").val($(this).text()); // Set text field
-  $("#add_new_light_type").val($(this).data("type")); // Set the correct type
+  $("#add_new_light_name").val(entity_name); // Set text field
+  $("#home_assistant_name").val(entity_id); // Set text field
+  $("#openhab_name").val(entity_name); // Set text field
+  $("#add_new_light_type").val(entity_type); // Set the correct type
 
   $("#light_control_mode_dimmer").click(update_displayed_openhab_selectors);
   $("#light_control_mode_switch").click(update_displayed_openhab_selectors);
@@ -145,8 +151,8 @@ function add_new_light_show_light_page(light_element) {
 
   // Finaly show the modal
   $("#add_save_light_button").text("Add");
-  $("#modal-add-light").removeClass("is-active");
-  $("#modal-add-light-options").addClass("is-active");
+  $("#modal-add-light").addClass("hidden");
+  $("#modal-add-light-options").removeClass("hidden");
 }
 
 function add_new_lights_filter_for_type(type) {
@@ -197,9 +203,14 @@ function add_new_lights_filter() {
 
 function add_new_light() {
   $("#add_new_light_search").val(""); // Clear previous filter
-  populate_add_new_light_dialog();
-  $("#modal-add-light").addClass("is-active");
-  $("#add_new_light_search").select();
+  var types = {
+    "home_assistant_type_filter": JSON.stringify([
+      "light", "switch"
+    ])
+  };
+  select_new_entity(types, (element) => {
+    add_new_light_show_light_page(element);
+  });
 }
 
 function add_new_light_to_room_view(position_id) {
@@ -303,13 +314,13 @@ function edit_light(light_id) {
 
 function add_new_scene() {
   $("#edit_scene_id").val("");
-  $("#add_new_scene_to_room_modal").addClass("is-active");
+  $("#add_new_scene_to_room_modal").removeClass("hidden");
 }
 
 function edit_scene(id, name) {
   $("#edit_scene_id").val(id);
   $("#scene_name").val(name);
-  $("#add_new_scene_to_room_modal").addClass("is-active");
+  $("#add_new_scene_to_room_modal").removeClass("hidden");
 }
 
 $(document).ready(function () {
