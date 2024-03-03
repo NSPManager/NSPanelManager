@@ -215,11 +215,10 @@ function add_new_light() {
 
 function add_new_light_to_room_view(position_id) {
   $("#add_new_light_to_room_view_position").val(position_id);
-  $("#modal-add-light-to-room-view").addClass("is-active");
+  $("#modal-add-light-to-room-view").removeClass("hidden");
 }
 
 function edit_light(light_id) {
-  console.log("Edit light: " + light_id);
   $("#edit_light_loader").show();
   $("#modal-add-light-options-inputs").hide();
   $("#modal-add-light-options").addClass("is-active");
@@ -307,8 +306,8 @@ function edit_light(light_id) {
 
     // Finaly show the modal
     $("#add_save_light_button").text("Save");
-    $("#modal-add-light").removeClass("is-active");
-    $("#modal-add-light-options").addClass("is-active");
+    $("#modal-add-light").addClass("hidden");
+    $("#modal-add-light-options").removeClass("hidden");
   });
 }
 
@@ -327,7 +326,7 @@ $(document).ready(function () {
   $("#add_new_light_search").keyup(add_new_lights_filter);
 
   if ($("#add_new_light_to_position_select option").length == 0) {
-    $("#add_new_light_to_position_select").hide();
+    $("#add_new_light_to_position_select").addClass("hidden");
     $("#add_new_light_to_room_view_position_card_body").html(
       '<div class="notification is-danger">There are no available lights to add.</div>'
     );
