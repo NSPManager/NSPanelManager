@@ -3,7 +3,7 @@
     class="bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md"
     id="panel_status_box">
     <div class="">
-      <div class="bg-gray-500 min-h-1 overflow-hidden rounded-t-md w-full animate-pulse" id="panel_header"></div>
+      <div class="bg-gray-500 min-h-1 overflow-hidden rounded-t-md w-full animate-pulse transition-all" id="panel_header"></div>
     </div>
     <div class="p-2">
       <!-- Hidden data values for the specific panel -->
@@ -26,14 +26,29 @@
       <!-- Normal view for accepted panels -->
       <div class="nspanel-status-view">
         <!-- Name -->
-        <div class="flex justify-between mx-auto mb-1">
+        <div class="flex justify-between mx-auto mb-1 relative">
+          <!-- Name -->
           <div class="w-full">
             <span class=""><a href="" class="font-medium text-lg" id="nspanel_name"></a></span>
           </div>
-          <div class="w-full">
+          <!-- Status-->
+          <div class="w-full me-2 mt-1">
             <span class="flex items-end justify-end text-right italic font-light text-sm" id="panel_header_text">Unknown
               status</span>
           </div>
+          <!-- Warning indicator -->
+          <span class="flex shrink-0 w-3 h-3 mt-2 ms-1 me-2 bg-yellow-400 dark:bg-yellow-300 rounded-full hidden" id="nspanel_warning_indicator" data-popover-target="nspanel_warning_popover">
+            <!-- Warning popover-->
+            <div data-popover id="nspanel_warning_popover" role="tooltip" class="absolute top-7 z-10 invisible inline-block w-60 md:w-96 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 dark:text-gray-400 dark:border-gray-600 dark:bg-gray-800">
+              <div class="px-3 py-2 bg-gray-100 border-b border-gray-200 rounded-t-lg dark:border-gray-600 dark:bg-gray-700">
+                  <h3 class="font-semibold text-gray-900 dark:text-white">Warnings</h3>
+              </div>
+              <div class="px-3 mb-2" id="nspanel_warnings">
+                <!-- Warnings are created in the index.js file-->
+              </div>
+              <div data-popper-arrow></div>
+            </div>
+          </span>
         </div>
         <!-- Status information -->
         <div class="flex justify-between items-end">

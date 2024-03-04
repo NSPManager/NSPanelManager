@@ -1,7 +1,7 @@
 var panels_that_are_updating = [];
 const ws = new MQTTManager_WS();
 var panel_warnings = {};
-var status_header_base_classes = "min-h-1 overflow-hidden rounded-t-md w-full ";
+var status_header_base_classes = "min-h-1 overflow-hidden rounded-t-md w-full transission-all ease-linear duration-500 ";
 
 function get_all_online_panel_macs() {
   var panel_macs = [];
@@ -22,10 +22,10 @@ function startNSPanelOtaUpdateAll() {
 }
 
 function startNSPanelOtaUpdate(dom) {
-  var mac = $(dom).data("nspanel-mac");
+  var mac_selector = $(dom).data("nspanel-mac");
   $("#panel_header_" + mac_selector).attr(
     "class",
-    "nspanel-status-header has-background-info nspanel-status-header-await"
+    status_header_base_classes + "bg-blue-500 dark:bg-blue-700 animate-pulse"
   );
   $("#panel_header_text_" + mac_selector).text("Awaiting status");
   var panel_id = $("#nspanel_id_" + mac_selector).text();
@@ -131,6 +131,22 @@ function create_nspanel_from_template(data) {
   nspanel.find("[data-dropdown-toggle]").click(show_dropdown_menu);
   nspanel.find("[data-nspanel-mac]").attr("data-nspanel-mac", data.mac_address);
 
+  // Warnings
+  nspanel.find("#nspanel_warnings").attr("id", "nspanel_warnings_" + data.mac_address);
+  nspanel.find("#nspanel_warning_indicator").attr("id", "nspanel_warning_indicator_" + data.mac_address);
+
+  // Setup warnings popover
+  nspanel.find('[data-popover-target="nspanel_warning_popover"]').attr("data-popover-target", "nspanel_warning_popover_" + data.mac_address);
+  nspanel.find('#nspanel_warning_popover').attr("id", "nspanel_warning_popover_" + data.mac_address);
+  nspanel.find("[data-popover-target]").hover((e) => {
+    var target = $(e.currentTarget).data("popover-target");
+    $("#" + target).removeClass("invisible opacity-0");
+  }, (e) => {
+    var target = $(e.currentTarget).data("popover-target");
+    $("#" + target).addClass("invisible opacity-0");
+  });
+
+
   nspanel.find("#panel_header").attr("id", "panel_header_" + data.mac_address);
   nspanel.find("#nspanel_id").text(data.id);
   nspanel.find("#nspanel_id").attr("id", "nspanel_id_" + data.mac_address);
@@ -141,7 +157,6 @@ function create_nspanel_from_template(data) {
   nspanel.find("#wifi_signal_strength_text").attr("id", "wifi_signal_strength_text_" + data.mac_address);
   nspanel.find("#temperature").attr("id", "temperature_" + data.mac_address);
   nspanel.find("#heap_used").attr("id", "heap_used_" + data.mac_address);
-  nspanel.find("#nspanel_warnings").attr("id", "nspanel_warnings_" + data.mac_address);
   nspanel.find("#nspanel_name").html(data.name);
   nspanel.find("#nspanel_name").attr("id", "nspanel_name_" + data.mac_address);
 
@@ -290,11 +305,24 @@ function update_nspanel_status(data) {
     }
 
     if ("warnings" in data) {
-      $("#nspanel_warnings_" + data.mac_address).attr("data-tooltip", data["warnings"]);
+      $("#nspanel_warnings_" + data.mac_address).html("");
+      data["warnings"].split("\n").forEach((warning) => {
+        if(warning != "") {
+          console.log(warning);
+          $("#nspanel_warnings_" + data.mac_address).append(
+            $("<div>", {
+              class: "p-4 mt-2 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-300 dark:text-gray-800",
+              role: "alert",
+              text: warning,
+            })
+          );
+        }
+      });
+
       if(data["warnings"] != "") {
-        $("#nspanel_warnings_" + data.mac_address).removeClass("hidden");
+        $("#nspanel_warning_indicator_" + data.mac_address).removeClass("hidden");
       } else {
-        $("#nspanel_warnings_" + data.mac_address).addClass("hidden");
+        $("#nspanel_warning_indicator_" + data.mac_address).addClass("hidden");
       }
     }
   }

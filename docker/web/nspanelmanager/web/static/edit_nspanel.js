@@ -61,38 +61,52 @@ function update_nspanel_status(data) {
             "class",
             "dark:text-green-400 text-green-600"
           );
+          $("#update_progress_container").addClass("hidden");
+          $("#update_progress_container").slideUp("slow", () => {});
         } else if (data.state == "offline") {
           $("#state_text").html("Offline");
           $("#state_text").attr(
             "class",
             "dark:text-red-400 text-red-600"
           );
+          $("#update_progress_container").addClass("hidden");
+          $("#update_progress_container").slideUp("slow", () => {});
         } else {
           // Update panel tag to show update progress if any
           update_text = "";
           update_progress = 0;
           if (data.state == "updating_fw") {
-            update_text = "Updating firmware";
+            update_text = "Updating FW";
             update_progress = data.progress;
           } else if (data.state == "updating_fs") {
-            update_text = "Updating LittleFS";
+            update_text = "Updating FS";
             update_progress = data.progress;
           } else if (data.state == "updating_tft") {
-            update_text = "Updating GUI";
+            update_text = "Updating TFT";
             update_progress = data.progress;
           }
 
-          $("#online_offline_tag").html(
-            update_text + ": " + update_progress + "%"
+          $("#update_progress_container").slideDown("slow", () => {});
+          $("#update_progress_container").removeClass("hidden");
+          $("#update_progress_pct_progressbar").css("width", update_progress + "%");
+          $("#update_progress_pct_text").html(update_progress + "%");
+          $("#state_text").html(update_text);
+          $("#state_text").attr(
+            "class",
+            "dark:text-green-400 text-green-600"
           );
-          $("#online_offline_tag").attr("class", "tag is-info");
         }
       }
       if ("rssi" in data) {
         var new_rssi_classes = "";
         var new_rssi_text = "";
         var new_rssi_text_classes = "";
-        if (data.rssi <= -90) {
+        if(data.state == "offline") {
+          new_rssi_classes = "mdi mdi-wifi-strength-1-alert me-2";
+          new_rssi_text = "Unknown";
+          new_rssi_text_classes = "dark:text-red-400 text-red-600";
+        }
+        else if (data.rssi <= -90) {
           new_rssi_classes = "mdi mdi-wifi-strength-1-alert me-2";
           new_rssi_text = "Poor";
           new_rssi_text_classes = "dark:text-red-400 text-red-600";
@@ -119,27 +133,49 @@ function update_nspanel_status(data) {
       }
 
       if ("heap_used_pct" in data) {
-        var heap_used = data.heap_used_pct;
-        $("#heap_used").text(heap_used + "%")
-
+        var heap_used = data.heap_used_pct + "%";
         var new_heap_used_text_color = "";
-        if(heap_used < 70) {
+
+        if(data.state == "offline") {
+          heap_used = "Unknown";
+          new_heap_used_text_color = "dark:text-red-400 text-red-600";
+        }else if(data.heap_used_pct < 70) {
           new_heap_used_text_color = "dark:text-green-400 text-green-600";
-        } else if (heap_used < 85) {
+        } else if (data.heap_used_pct < 85) {
           new_heap_used_text_color = "dark:text-yellow-400 text-yellow-600";
         } else {
           new_heap_used_text_color = "dark:text-red-400 text-red-600";
         }
+
+        $("#heap_used").text(heap_used)
         $("#heap_used").attr("class", new_heap_used_text_color);
       }
 
-      if ("temperature" in data) {
+      if(data.state == "offline") {
+        $("#temperature").html("Unknown");
+      } else if ("temperature" in data) {
         var temperature_unit = $("#temperature")
           .text()
           .slice(-2);
         $("#temperature").html(
           Math.round(data.temperature * 100) / 100 + " " + temperature_unit
         );
+      }
+
+      if ("warnings" in data) {
+        $("#warning_container").html("");
+        data["warnings"].split("\n").forEach((warning) => {
+          if(warning != "") {
+            console.log(warning);
+            $("#warning_container").append(
+              $("<div>", {
+                class: "p-4 mt-2 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-300 dark:text-gray-800",
+                role: "alert",
+                text: warning,
+              })
+            );
+          }
+        });
       }
     }
   }

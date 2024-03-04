@@ -15,8 +15,10 @@
   <h2 class="font-medium text-2xl" id="nspanel_name">Settings for '{{ panel.friendly_name }}'</h2>
   <h2 class="font-light text-sm">MAC: <span id="nspanel_mac">{{ panel.mac_address }}</span></h2>
 </div>
-<div class="p-4 mb-4 mt-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50" role="alert">
+<div class="p-4 mb-2 mt-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50" role="alert">
   <span class="font-medium">Info.</span> Changes to NSPanel settings on this page requires a reboot of the NSPanel to take effect.
+</div>
+<div class="pm-2" id="warning_container">
 </div>
 <div class="md:flex md:justify-between md:items-start mt-2 mb-6">
   <div class="w-full mr-4">
@@ -512,6 +514,12 @@
         <div class="block mt-2 rounded-lg bg-slate-50 dark:bg-gray-600 border-solid border-2 dark:border-gray-700">
           <div class="p-3 border-solid border-b-2 dark:border-gray-700">
             <span class="mdi mdi-power-cycle me-2"></span>State: <span id="state_text" class=""></span>
+          </div>
+          <div class="relative p-3 border-solid border-b-2 dark:border-gray-700 transition-transform duration-500 ease-linear hidden" id="update_progress_container">
+            <div class="absolute inset-0 h-full transition-all duration-500 ease-linear text-blue-800 bg-blue-200 dark:bg-blue-700 dark:text-gray-50" id="update_progress_pct_progressbar" style="width: 0%"></div>
+            <div class="relative inset-0">
+              <span class="mdi mdi-progress-helper me-2"></span>Progress: <span id="update_progress_pct_text" class="">0%</span>
+            </div>
           </div>
           <div class="p-3 border-solid border-b-2 dark:border-gray-700">
             <span id="wifi_signal_strength_icon" class="mdi mdi-power-cycle me-2"></span>WiFi: <span id="wifi_signal_strength" class=""></span>
