@@ -321,7 +321,7 @@
 
           <!-- Screensaver brightness -->
           <div class="mb-2 w-full md:ms-1">
-            <label for="special_mode_release_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screensaver brightness (%)</label>
+            <label for="screensaver_dim_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screensaver brightness (%)</label>
             <div class="flex">
               <span
                 class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
@@ -334,7 +334,7 @@
               </span>
               <input
                 class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-                type="number" name="special_mode_release_time" id="special_mode_release_time" placeholder="5%"  value="{{ special_mode_release_time }}" required />
+                type="number" name="screensaver_dim_level" id="screensaver_dim_level" placeholder="5%" min=0 max=100  value="{{ screensaver_dim_level }}" required />
             </div>
           </div>
         </div>
@@ -383,7 +383,7 @@
 
         <!-- MQTT ignore time-->
         <div class="mb-2">
-          <label for="screensaver_dim_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">MQTT ignore time (ms)</label>
+          <label for="mqtt_ignore_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">MQTT ignore time (ms)</label>
           <div class="flex">
             <span
               class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
@@ -396,7 +396,7 @@
             </span>
             <input
               class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="number" name="screensaver_dim_level" id="screensaver_dim_level" value="{{ screensaver_dim_level }}" required />
+              type="number" name="mqtt_ignore_time" id="mqtt_ignore_time" value="{{ mqtt_ignore_time }}" required />
           </div>
         </div>
 
