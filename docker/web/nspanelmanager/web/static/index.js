@@ -338,7 +338,12 @@ $(document).ready(function () {
         if (message.mqtt.connected == false) {
           if ($("#failed_to_connect_mqtt_error").length == 0) {
             $("#notification_holder").append(
-              '<div class="notification is-danger" id="failed_to_connect_mqtt_error">Failed to connect to MQTT server. Retrying...</div>'
+              $("<div>", {
+                class: "p-4 mt-2 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-700 dark:text-white",
+                id: "failed_to_connect_mqtt_error",
+                role: "alert",
+                text: "Failed to connect to MQTT server. Retrying...",
+              })
             );
           }
         } else if (message.mqtt.connected) {
@@ -349,7 +354,12 @@ $(document).ready(function () {
           ) {
             if ($("#failed_to_connect_home_assistant_error").length == 0) {
               $("#notification_holder").append(
-                '<div class="notification is-danger" id="failed_to_connect_home_assistant_error">Failed to connect to Home Assistant websocket API. Retrying...</div>'
+                $("<div>", {
+                  class: "p-4 mt-2 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-300 dark:text-gray-800",
+                  id: "failed_to_connect_home_assistant_error",
+                  role: "alert",
+                  text: "Failed to connect to Home Assistant websocket API. Retrying...",
+                })
               );
             }
           } else if (
@@ -360,7 +370,12 @@ $(document).ready(function () {
             if (!message.home_assistant.auth_ok) {
               if ($("#failed_to_auth_home_assistant_error").length == 0) {
                 $("#notification_holder").append(
-                  '<div class="notification is-danger" id="failed_to_auth_home_assistant_error">Authentication error while connecting to Home Assistant. Retrying...</div>'
+                  $("<div>", {
+                    class: "p-4 mt-2 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-300 dark:text-gray-800",
+                    id: "failed_to_auth_home_assistant_error",
+                    role: "alert",
+                    text: "Authentication error while connecting to Home Assistant. Retrying...",
+                  })
                 );
               }
             } else {
@@ -376,7 +391,12 @@ $(document).ready(function () {
           if (message.openhab.configured && !message.openhab.connected) {
             if ($("#failed_to_connect_openhab_error").length == 0) {
               $("#notification_holder").append(
-                '<div class="notification is-danger" id="failed_to_connect_openhab_error">Failed to connect to OpenHAB websocket API. Retrying...</div>'
+                $("<div>", {
+                  class: "p-4 mt-2 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-300 dark:text-gray-800",
+                  id: "failed_to_connect_openhab_error",
+                  role: "alert",
+                  text: "Failed to connect to OpenHAB websocket API. Retrying...",
+                })
               );
             }
           } else if (!message.openhab.configured || message.openhab.connected) {
@@ -404,8 +424,14 @@ $(document).ready(function () {
   ws.register_on_close_handler(() => {
     console.log("Disconnected from MQTTManager via websocket.");
     if ($("#failed_to_connect_error").length == 0) {
+      $("#waiting_for_mqtt_manager_connection_error").remove(); // Remove the "Trying to connect to MQTTManager..." message.
       $("#notification_holder").append(
-        '<div class="notification is-danger" id="failed_to_connect_error">Failed to connect to MQTTManager. Retrying...</div>'
+        $("<div>", {
+          class: "p-4 mt-2 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-700 dark:text-white",
+          id: "failed_to_connect_error",
+          role: "alert",
+          text: "Failed to connect to MQTTManager. Retrying...",
+        })
       );
     }
   });
@@ -414,9 +440,14 @@ $(document).ready(function () {
 
   setTimeout(() => {
     if(!ws.is_connected()) {
-      $("#loading-panels-spinner").css("opacity", "100%");
+      $("#loading-panels-spinner").removeClass("hidden");
       $("#notification_holder").append(
-        '<div class="notification is-warning" id="waiting_for_mqtt_manager_connection_error">Trying to connect to MQTTManager...</div>'
+        $("<div>", {
+          class: "p-4 mt-2 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-300 dark:text-gray-800",
+          id: "waiting_for_mqtt_manager_connection_error",
+          role: "alert",
+          text: "Trying to connect to MQTTManager...",
+        })
       );
     }
   }, 500);

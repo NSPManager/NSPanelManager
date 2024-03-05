@@ -31,12 +31,12 @@
   <div class="w-full flex flex-wrap justify-center mx-auto">
     <div class="w-screen max-w-screen-xl">
       <!-- Displays any warnings or errors -->
-      <div id="notification_holder" class="pb-4">
+      <div id="notification_holder" class="mt-4 mb-4">
         {% for notification in notifications %}
         <div class="notification {{ notification.classes }}">{{ notification.text }}</div>
         {% endfor %}
       </div>
-      <div>
+      <div class="mt-4">
         {% block content %}
         {% endblock %}
       </div>

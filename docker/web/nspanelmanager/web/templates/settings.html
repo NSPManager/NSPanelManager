@@ -11,380 +11,555 @@
 
 <form method="POST" action="{% url 'save_settings' %}" id="config">
     {% csrf_token %}
-    <div class="box">
-        <div class="field">
-            <h5 class="title is-5">NSPanel Manager settings</h5>
-        </div>
-
-        <div class="field">
-            <label class="label">Manager address<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                The addres the NSPanel will use to access the manager (without protocol or port. Ex: 10.0.0.10)
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" name="manager_address" id="manager_address" placeholder="10.0.0.10" value="{{ manager_address }}" required>
-            </div>
-        </div>
-
-        <div class="field">
-            <label class="label">Manager port<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                The port of the manager web interface. This can not be discovered inside the container and therefore has to be entered manually.
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="manager_port" id="manager_port" placeholder="8000" value="{{ manager_port }}" required>
-            </div>
-        </div>
-
-        <div class="field">
-            <label class="label">Number of messages to display on live log<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                The number of messages to display in the live log view on the settings page for individual NSPanels.
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="max_live_log_messages" id="max_live_log_messages" placeholder="10" value="{{ max_live_log_messages }}" required>
-            </div>
-        </div>
-
-        <div class="field">
-            <label class="label">Number of messages in message buffer<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                The number of messages to buffer in the MQTTManager for later display or download for diagnostics.
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="max_log_buffer_size" id="max_log_buffer_size" placeholder="10" value="{{ max_log_buffer_size }}" required>
-            </div>
-        </div>
+    <div>
+      <h2 class="font-medium text-2xl">Settings</h2>
     </div>
-    <div class="box">
-        <div class="field">
-            <h5 class="title is-5">Global NSPanel settings</h5>
-        </div>
-        <div class="notification is-info is-light">
-          Changes to NSPanel settings on this page requires a reboot of each panel to take effect.
-        </div>
-        <div class="field">
-            <label class="label">Color temperature min & max <span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                The min and max color temperature of your lights.
-              </div>
+    <div class="md:flex md:justify-between md:items-start mt-2">
+      <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+        <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">NSPanel Manager settings</span>
+
+        <!-- Manager address -->
+        <div class="mb-2">
+          <label for="manager_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Manager address</label>
+          <div class="flex">
+            <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>Manager address</title>
+                <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
+              </svg>
             </span>
-          </label>
+            <input class="rounded-none bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+            type="text" class="input" name="manager_address" id="manager_address" placeholder="192.168.1.5" value="{{ manager_address }}" required>
+            <button type="button" onclick="$('#manager_address').val(location.hostname);" class="inline-flex items-center px-3 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-e-0 rounded-e-md">
+              Load from URL
+            </button>
+          </div>
         </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="color_temp_min" id="color_temp_min" placeholder="Min" value="{{ color_temp_min }}" required>
-            </div>
-            <div class="control">
-                <input class="input" type="number" name="color_temp_max" id="color_temp_max" placeholder="Max" value="{{ color_temp_max }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="checkbox">
-                {% if reverse_color_temp == "True" %}
-                    <input type="checkbox" name="reverse_color_temp" checked>
-                {% else %}
-                    <input type="checkbox" name="reverse_color_temp">
-                {% endif %}
-                Reverse color temperature slider
-                <span class="question">
-                  <span class="icon question_icon">
-                    <i class="mdi mdi-information has-text-info"></i>
-                  </span>
-                  <div class="question_help_text notification is-info is-light">
-                    Reverse the color temp slider? <br>Unchecked: warm temperature at the bottom, cool temperature at the top.<br>Checked: warm temperature at the top, cool temperature at the bottom.
-                  </div>
-                </span>
-            </label>
-        </div>
-        <div class="field">
-            <label class="label">Turn on behavior<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                If a light is off, turning it back on should:<br>
-                Color temperature: The light will be set to the current value of the color temperature slider.<br>
-                Restore: The light will we set to the current value of the color temperature slider IF the light was in color temperature mode when it was turned off. Otherwise, it will turn on the last powered on state.
-              </div>
+
+        <!-- Manager port -->
+        <div class="mb-2">
+          <label for="manager_port" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Manager port</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>MQTT Port</title>
+                <path
+                  d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+              </svg>
             </span>
-          </label>
-          <div class="control">
-            <div class="select">
-              <select name="turn_on_behavior">
-                <option value="color_temp" {% if turn_on_behavior == "color_temp" %}selected{% endif %}>Color temperature</option>
-                <option value="restore" {% if turn_on_behavior == "restore" %}selected{% endif %}>Restore</option>
-              </select>
+            <input
+              class="rounded-none bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="number" name="manager_port" id="manager_port" placeholder="8000" value="{{ manager_port }}" required />
+            <button type="button" onclick="$('#manager_port').val(location.port);" class="inline-flex items-center px-3 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-e-0 rounded-e-md">
+              Load from URL
+            </button>
+          </div>
+        </div>
+
+        <!-- New section-->
+      </div>
+    </div>
+    <div class="md:flex md:justify-between md:items-start mt-2">
+      <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+        <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">Logging options</span>
+
+        <!-- Number of messages to display on live log -->
+        <div class="mb-2">
+          <label for="max_live_log_messages" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Number of messages to display on live log</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>Number of messages to display on live log</title>
+                <path
+                  d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="number" name="max_live_log_messages" id="max_live_log_messages" placeholder="8000"  value="{{ max_live_log_messages }}" required />
+          </div>
+        </div>
+
+        <!-- Number of messages in buffer -->
+        <div class="mb-2">
+          <label for="max_log_buffer_size" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Number of messages in buffer</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>Number of messages in buffer</title>
+                <path
+                  d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="number" name="max_log_buffer_size" id="max_log_buffer_size" placeholder="8000"  value="{{ max_log_buffer_size }}" required />
+          </div>
+        </div>
+
+        <!-- New section-->
+      </div>
+    </div>
+    <div class="md:flex md:justify-between md:items-start mt-2">
+      <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+        <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">Global NSPanel settings</span>
+
+        <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
+          <!-- Minimum color temperature-->
+          <div class="mb-2 w-full md:me-1">
+            <label for="color_temp_min" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Minimum color temperature</label>
+            <div class="flex">
+              <span
+                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <title>Minimum color temperature</title>
+                  <path
+                    d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+                </svg>
+              </span>
+              <input
+                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+                type="number" name="color_temp_min" id="color_temp_min" placeholder="8000"  value="{{ color_temp_min }}" required />
+            </div>
+          </div>
+
+          <!-- Maximum color temperature -->
+          <div class="mb-2 w-full md:ms-1">
+            <label for="color_temp_max" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Maximum color temperature</label>
+            <div class="flex">
+              <span
+                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <title>Maximum color temperature</title>
+                  <path
+                    d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+                </svg>
+              </span>
+              <input
+                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+                type="number" name="color_temp_max" id="color_temp_max" placeholder="8000"  value="{{ color_temp_max }}" required />
             </div>
           </div>
         </div>
-        <div class="field">
-            <label class="label">Set lights level to 100% above<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                When setting the light level slider is set to this many percent or above, consider it to be 100%.
+
+        <!-- Reverse color temperature slider-->
+        <div class="flex-auto mb-2">
+          <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Reverse color temperature slider</h3>
+          <ul
+            class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex">
+            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+              <div class="flex items-center ps-3">
+                <input id="keep_color_temp_slider" type="radio" value="" name="reverse_color_temp" value="False"
+                {% if reverse_color_temp != "True" %}checked{% endif %}
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                <label for="keep_color_temp_slider"
+                  class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Keep default</label>
               </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="raise_to_100_light_level" id="raise_to_100_light_level" placeholder="95" value="{{ raise_to_100_light_level }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Button min push time & time for long press<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                These times are used to decide wether or not it was a short press or a long press. A short press is when the button has been pressed anywhere between "min push time" and "long press time". Anything longer than "long press time" is considered a long press.
+            </li>
+            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+              <div class="flex items-center ps-3">
+                <input id="reverse_color_temp_slider" type="radio" name="reverse_color_temp" value="True"
+                {% if reverse_color_temp == "True" %}checked{% endif %}
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                <label for="reverse_color_temp_slider" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Reverse</label>
               </div>
-            </span>
-          </label>
+            </li>
+          </ul>
         </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="min_button_push_time" id="min_button_push_time" placeholder="Press time" value="{{ min_button_push_time }}" required>
-            </div>
-            <div class="control">
-                <input class="input" type="number" name="button_long_press_time" id="button_long_press_time" placeholder="Long press time" value="{{ button_long_press_time }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Special mode trigger & release time <span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                These times are used to trigger the special mode (long pressing the ceiling / table lights button). The first value is of how long to press to trigger the mode, the second value is the timeout to exit the "special mode".
+
+        <!-- Turn on behavior-->
+        <div class="flex-auto mb-2">
+          <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Turn on behavior</h3>
+          <ul
+            class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex">
+            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+              <div class="flex items-center ps-3">
+                <input id="turn_on_color_temp" type="radio" value="" name="turn_on_behavior" value="False"
+                {% if turn_on_behavior == "color_temp" %}checked{% endif %}
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                <label for="turn_on_color_temp"
+                  class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Color temperature</label>
               </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="special_mode_trigger_time" id="special_mode_trigger_time" placeholder="Trigger time" value="{{ special_mode_trigger_time }}" required>
-            </div>
-            <div class="control">
-                <input class="input" type="number" name="special_mode_release_time" id="special_mode_release_time" placeholder="Release time" value="{{ special_mode_release_time }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">MQTT ignore time(ms)<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                When a command is sent from the NSPanel over MQTT, this item decides for how many milliseconds the NSPanel should ignore events from MQTT. This is done to prevent flickering of controls on the NSPanel when changing values. Setting this value to 0 disables the ignore function.
+            </li>
+            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+              <div class="flex items-center ps-3">
+                <input id="turn_on_restore" type="radio" name="turn_on_behavior" value="True"
+                {% if turn_on_behavior == "restore" %}checked{% endif %}
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                <label for="turn_on_restore" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Restore</label>
               </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Raise lights to 100% light level above slider threshold -->
+        <div class="mb-2">
+          <label for="raise_to_100_light_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Raise lights to 100% threshold</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>Number of messages to display on live log</title>
+                <path
+                  d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+              </svg>
             </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="mqtt_ignore_time" id="mqtt_ignore_time" placeholder="Trigger time" value="{{ mqtt_ignore_time }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Screen brightness<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                Brightness when the panel is on. 1-100%.
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="screen_dim_level" id="screen_dim_level" placeholder="Screen brightness" min=1 max=100 value="{{ screen_dim_level }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Screensaver brightness<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-                <div class="question_help_text notification is-info is-light">
-                  Brightness level during screensaver. 0-100%. This will always be 0% if screensaver mode is set to show no screensaver.
-                </div>
-              </span>
-            </label>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="number" name="raise_to_100_light_level" id="raise_to_100_light_level" placeholder="95"  value="{{ raise_to_100_light_level }}" required />
           </div>
-          <div class="field is-grouped">
-            <div class="control">
-              <input class="input" type="number" name="screensaver_dim_level" id="screensaver_dim_level" placeholder="Screensaver brightness" min=0 max=100 value="{{ screensaver_dim_level }}" required>
-            </div>
         </div>
 
-        <div class="field">
-            <label class="label">Screensaver activation timeout(ms)<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
+        <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
+          <!-- Minimum button push time-->
+          <div class="mb-2 w-full md:me-1">
+            <label for="min_button_push_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Minimum button push time (ms)</label>
+            <div class="flex">
+              <span
+                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <title>Minimum button push time</title>
+                  <path
+                    d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+                </svg>
               </span>
-              <div class="question_help_text notification is-info is-light">
-                The amount of time before the screensaver is activated. Time is in milliseconds. Default: 30000 (30 seconds).
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="screensaver_activation_timeout" id="screensaver_activation_timeout" placeholder="Screensaver activaion timeout" value="{{ screensaver_activation_timeout }}" required>
+              <input
+                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+                type="number" name="min_button_push_time" id="min_button_push_time" placeholder="30"  value="{{ min_button_push_time }}" required />
             </div>
-        </div>
+          </div>
 
-        <div class="field">
-            <label class="label">Screensaver mode<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
+          <!-- Minimum long press time -->
+          <div class="mb-2 w-full md:ms-1">
+            <label for="button_long_press_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Minimum long press time (ms)</label>
+            <div class="flex">
+              <span
+                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <title>Minimum long press time</title>
+                  <path
+                    d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+                </svg>
               </span>
-              <div class="question_help_text notification is-info is-light">
-                Select the way the screensaver is shown.
-              </div>
-            </span>
-          </label>
-        </div>
-
-        <div class="field">
-          <div class="control">
-            <div class="select">
-              <select name="screensaver_mode">
-                <option value="with_background" {% if screensaver_mode == "with_background" %}selected{% endif %}>Show with background (clock, date and weather)</option>
-                <option value="without_background" {% if screensaver_mode == "without_background" %}selected{% endif %}>Show without background (clock, date and weather)</option>
-                <option value="datetime_with_background" {% if screensaver_mode == "datetime_with_background" %}selected{% endif %}>Show with background (no weather)</option>
-                <option value="datetime_without_background" {% if screensaver_mode == "datetime_without_background" %}selected{% endif %}>Show without background (no weather)</option>
-                <option value="no_screensaver" {% if screensaver_mode == "no_screensaver" %}selected{% endif %}>No screensaver (turn off screen)</option>
-              </select>
+              <input
+                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+                type="number" name="button_long_press_time" id="button_long_press_time" placeholder="600"  value="{{ button_long_press_time }}" required />
             </div>
           </div>
         </div>
+
+        <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
+          <!-- Special mode activation time -->
+          <div class="mb-2 w-full md:me-1">
+            <label for="special_mode_trigger_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Special mode activation time (ms)</label>
+            <div class="flex">
+              <span
+                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <title>Special mode activation time </title>
+                  <path
+                    d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+                </svg>
+              </span>
+              <input
+                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+                type="number" name="special_mode_trigger_time" id="special_mode_trigger_time" placeholder="Trigger time (ms)"  value="{{ special_mode_trigger_time }}" required />
+            </div>
+          </div>
+
+          <!-- Sepcial mode timeout -->
+          <div class="mb-2 w-full md:ms-1">
+            <label for="special_mode_release_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Sepcial mode timeout (ms)</label>
+            <div class="flex">
+              <span
+                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <title>Sepcial mode timeout</title>
+                  <path
+                    d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+                </svg>
+              </span>
+              <input
+                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+                type="number" name="special_mode_release_time" id="special_mode_release_time" placeholder="Trigger time (ms)"  value="{{ special_mode_release_time }}" required />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
+          <!-- Screen brightness -->
+          <div class="mb-2 w-full md:me-1">
+            <label for="screen_dim_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screen brightness (%)</label>
+            <div class="flex">
+              <span
+                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <title>Screen brightness </title>
+                  <path
+                    d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+                </svg>
+              </span>
+              <input
+                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+                type="number" name="screen_dim_level" min=1 max=100 id="screen_dim_level" placeholder="100%"  value="{{ screen_dim_level }}" required />
+            </div>
+          </div>
+
+          <!-- Screensaver brightness -->
+          <div class="mb-2 w-full md:ms-1">
+            <label for="special_mode_release_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screensaver brightness (%)</label>
+            <div class="flex">
+              <span
+                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <title>Screensaver brightness</title>
+                  <path
+                    d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+                </svg>
+              </span>
+              <input
+                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+                type="number" name="special_mode_release_time" id="special_mode_release_time" placeholder="5%"  value="{{ special_mode_release_time }}" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- Screensaver activation timeout-->
+        <div class="mb-2">
+          <label for="screensaver_activation_timeout" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screensaver activation timeout (ms)</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>Screensaver activation timeout (ms)</title>
+                <path
+                  d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="number" name="screensaver_activation_timeout" id="screensaver_activation_timeout" value="{{ screensaver_activation_timeout }}" required />
+          </div>
+        </div>
+
+        <!-- Screensaver mode -->
+        <div class="mb-2">
+          <label for="screensaver_mode" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screensaver mode</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>Default page</title>
+                <path
+                  d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+              </svg>
+            </span>
+            <select name="screensaver_mode" id="screensaver_mode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="with_background" {% if screensaver_mode == "with_background" %}selected{% endif %}>Show with background (clock, date and weather)</option>
+              <option value="without_background" {% if screensaver_mode == "without_background" %}selected{% endif %}>Show without background (clock, date and weather)</option>
+              <option value="datetime_with_background" {% if screensaver_mode == "datetime_with_background" %}selected{% endif %}>Show with background (no weather)</option>
+              <option value="datetime_without_background" {% if screensaver_mode == "datetime_without_background" %}selected{% endif %}>Show without background (no weather)</option>
+              <option value="no_screensaver" {% if screensaver_mode == "no_screensaver" %}selected{% endif %}>No screensaver (turn off screen)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- MQTT ignore time-->
+        <div class="mb-2">
+          <label for="screensaver_dim_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">MQTT ignore time (ms)</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>MQTT ignore time (ms)</title>
+                <path
+                  d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="number" name="screensaver_dim_level" id="screensaver_dim_level" value="{{ screensaver_dim_level }}" required />
+          </div>
+        </div>
+
+        <!-- New section-->
+      </div>
     </div>
-    <div class="box">
-        <div class="field">
-            <h5 class="title is-5">MQTT</h5>
+    <div class="md:flex md:justify-between md:items-start mt-2">
+      <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+        <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">MQTT</span>
+
+        <!-- MQTT address -->
+        <div class="mb-2">
+          <label for="mqtt_server" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">MQTT address</label>
+          <div class="flex">
+            <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>MQTT address</title>
+                <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
+              </svg>
+            </span>
+            <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+            type="text" class="input" name="mqtt_server" id="mqtt_server" placeholder="192.168.1.5" value="{{ mqtt_server }}" required>
+          </div>
         </div>
-        <div class="field">
-            <label class="label">MQTT Server</label>
-            <div class="control">
-                <input class="input" type="text" name="mqtt_server" id="mqtt_server" placeholder="MQTT Server"
-                    value="{{ mqtt_server }}" required>
+
+        <!-- MQTT port -->
+        <div class="mb-2">
+          <label for="mqtt_port" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">MQTT port</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>MQTT port</title>
+                <path
+                  d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="number" name="mqtt_port" id="mqtt_port" placeholder="1883" value="{{ mqtt_port }}" required />
+          </div>
+        </div>
+
+        <div class="flex flex-wrap md:flex-nowrap justify-between items-center">
+          <!-- MQTT username -->
+          <div class="mb-2 w-full md:me-1">
+            <label for="mqtt_username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">MQTT username</label>
+            <div class="flex">
+              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <title>MQTT username</title>
+                  <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
+                </svg>
+              </span>
+              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+              type="text" class="input" name="mqtt_username" id="mqtt_username" placeholder="Username (if required)" value="{{ mqtt_username }}">
             </div>
-        </div>
-        <div class="field">
-            <label class="label">MQTT Port</label>
-            <div class="control">
-                <input class="input" type="number" name="mqtt_port" id="mqtt_port" placeholder="MQTT Port"
-                    value="{{ mqtt_port }}" required>
+          </div>
+
+          <!-- MQTT password -->
+          <div class="mb-2 w-full md:ms-1">
+            <label for="mqtt_password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">MQTT password</label>
+            <div class="flex">
+              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <title>MQTT password</title>
+                  <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
+                </svg>
+              </span>
+              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+              type="password" class="input" name="mqtt_password" id="mqtt_password" placeholder="Username (if required)" value="{{ mqtt_password }}">
             </div>
+          </div>
         </div>
-        <div class="field">
-            <label class="label">MQTT Username</label>
-            <div class="control">
-                <input class="input" type="text" name="mqtt_username" id="mqtt_username" value="{{ mqtt_username }}"
-                    placeholder="MQTT Username">
+
+
+        <!-- New section-->
+        </div>
+      </div>
+      <div class="md:flex md:justify-between md:items-start mt-2">
+        <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+          <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">Home Assistant API</span>
+
+          {% if is_home_assistant_addon %}
+          <div class="p-4 mb-2 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50" role="alert">
+            <span class="font-medium">Info.</span> You are running NSPanel Manager as a Home Assistant addon. These settings are managed by Home Assistant for you and are therefore locked.
+          </div>
+          {% endif %}
+
+
+          <!-- Home Assistant address -->
+          <div class="mb-2">
+            <label for="home_assistant_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Home Assistant address</label>
+            <div class="flex">
+              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <title>Home Assistant address</title>
+                  <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
+                </svg>
+              </span>
+              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+              type="text" class="input" name="home_assistant_address" id="home_assistant_address" placeholder="http://192.168.1.5:8123" value="{{ home_assistant_address }}" {% if is_home_assistant_addon %}disabled{% endif %}>
             </div>
-        </div>
-        <div class="field">
-            <label class="label">MQTT Password</label>
-            <div class="control">
-                <input class="input" type="password" name="mqtt_password" id="mqtt_password" placeholder="MQTT Password"
-                    value="{{ mqtt_password }}">
+          </div>
+
+          <!-- Access Token -->
+          <div class="mb-2">
+            <label for="home_assistant_token" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Access Token</label>
+            <div class="flex">
+              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <title>Access Token</title>
+                  <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
+                </svg>
+              </span>
+              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+              type="password" class="input" name="home_assistant_token" id="home_assistant_token" placeholder="ey..." value="{{ home_assistant_token }}" {% if is_home_assistant_addon %}disabled{% endif %}>
             </div>
+          </div>
+
+          <!-- New section-->
         </div>
+      </div>
+      <div class="md:flex md:justify-between md:items-start mt-2">
+        <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+          <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">OpenHAB API</span>
+
+          <!-- OpenHAB address -->
+          <div class="mb-2">
+            <label for="openhab_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">OpenHAB address</label>
+            <div class="flex">
+              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <title>OpenHAB address</title>
+                  <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
+                </svg>
+              </span>
+              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+              type="text" class="input" name="openhab_address" id="openhab_address" placeholder="http://192.168.1.5:8000" value="{{ openhab_address }}">
+            </div>
+          </div>
+
+          <!-- Access Token -->
+          <div class="mb-2">
+            <label for="openhab_token" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Access Token</label>
+            <div class="flex">
+              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <title>Access Token</title>
+                  <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
+                </svg>
+              </span>
+              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+              type="password" class="input" name="openhab_token" id="openhab_token" placeholder="ey..." value="{{ openhab_token }}">
+            </div>
+          </div>
+      </div>
     </div>
 
-    <div class="box">
-        <div class="field">
-            <h5 class="title is-5">Home Assistant API</h5>
-        </div>
-        {% if is_home_assistant_addon %}
-            <div class="notification is-info is-light">
-              You are running NSPanel Manager as a Home Assistant addon. These settings are managed by Home Assistant for you.
-            </div>
-        {% endif %}
-        <div class="field">
-            <label class="label">Address</label>
-            <div class="control">
-                <input class="input" type="text" name="home_assistant_address" id="home_assistant_address"
-                    placeholder="http://192.168.1.5:8123" value="{{ home_assistant_address }}" {% if is_home_assistant_addon %}disabled{% endif %}>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Access token</label>
-            <div class="control">
-                <input class="input" type="password" name="home_assistant_token" id="home_assistant_token"
-                    value="{{ home_assistant_token }}" placeholder="ey..." {% if is_home_assistant_addon %}disabled{% endif %}>
-            </div>
-        </div>
-    </div>
-
-    <div class="box">
-        <div class="field">
-            <h5 class="title is-5">OpenHAB API</h5>
-        </div>
-        <div class="field">
-            <label class="label">Address</label>
-            <div class="control">
-                <input class="input" type="text" name="openhab_address" id="openhab_address"
-                    placeholder="http://192.168.1.5:8123" value="{{ openhab_address }}">
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Access token</label>
-            <div class="control">
-                <input class="input" type="password" name="openhab_token" id="openhab_token" value="{{ openhab_token }}"
-                    placeholder="ey...">
-            </div>
-        </div>
-    </div>
-
-    <!-- Add 1rem of padding to bottom to prevent a white bar appering on the bottom of the page -->
-    <div class="level" style="padding-bottom: 1rem;">
-        <div class="level-left">
-            <div class="buttons is-right">
-            </div>
-        </div>
-        <div class="level-right">
-            <div class="buttons">
-                <button class="button is-success" type="submit" id="save_button">Save</button>
-            </div>
-        </div>
+    <div class="text-right mt-4 mb-4">
+      <button type="submit"
+        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Save</button>
     </div>
 </form>
 {% endblock %}
