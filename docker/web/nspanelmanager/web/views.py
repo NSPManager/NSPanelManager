@@ -48,7 +48,7 @@ def index(request):
     notifications = []
     if get_setting_with_default("manager_address", "") == "":
         notifications.append(
-            {"text": "No manager address configured in settings.", "classes": "is-danger"})
+            {"text": "No manager address configured in settings.", "class": "error"})
 
     nspanels = []
     for nspanel in NSPanel.objects.all():

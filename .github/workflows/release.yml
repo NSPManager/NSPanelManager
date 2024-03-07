@@ -19,7 +19,7 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v4
       - run: |
-          sed -i "s/^version: [0-9\.]\+/version: ${{ github.ref_name }}/g" docker/config.yaml
+          sed -i "s/^version: [0-9A-Za-z\.\-]\+/version: ${{ github.ref_name }}/g" docker/config.yaml
           sed -i '/^[ \t]/s/.*/  ${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/footer.html
       - name: Get branch name
         shell: bash
