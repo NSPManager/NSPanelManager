@@ -8,7 +8,6 @@ webui: http://[HOST]:[PORT:8000]/
 panel_icon: mdi:fit-to-screen
 ports:
   8000/tcp: 8000
-  8001/tcp: 8001
 environment:
   IS_HOME_ASSISTANT_ADDON: "true"
 init: false
