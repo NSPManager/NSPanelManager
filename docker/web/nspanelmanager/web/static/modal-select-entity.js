@@ -39,10 +39,13 @@ function populate_add_new_entity_dialog(filter, callback) {
     $("#add_new_entity_errors").html("");
     $("#add_new_entity_options").html("");
     data.errors.forEach((error) => {
-      var error_element =
-        '<div class="notification is-danger">' + error + "</div>";
-      $("#add_new_entity_errors").html(
-        $("#add_new_entity_errors").html() + error_element
+      $("#add_new_entity_errors").append(
+        $("<div>", {
+          class: "p-4 mx-2 my-2 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-700 dark:text-white",
+          id: "failed_to_connect_mqtt_error",
+          role: "alert",
+          text: error,
+        })
       );
     });
     data.home_assistant_entities.forEach((light) => {
