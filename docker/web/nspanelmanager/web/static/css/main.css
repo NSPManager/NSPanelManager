@@ -816,11 +816,6 @@ select {
   z-index: 50;
 }
 
-.mx-2 {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
-}
-
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -834,6 +829,11 @@ select {
 .my-auto {
   margin-top: auto;
   margin-bottom: auto;
+}
+
+.my-4 {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .mb-1 {
@@ -1509,6 +1509,11 @@ select {
   padding-bottom: 0.75rem;
 }
 
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
 .pb-0 {
   padding-bottom: 0px;
 }
@@ -1535,6 +1540,10 @@ select {
 
 .pt-5 {
   padding-top: 1.25rem;
+}
+
+.pb-2 {
+  padding-bottom: 0.5rem;
 }
 
 .text-left {
