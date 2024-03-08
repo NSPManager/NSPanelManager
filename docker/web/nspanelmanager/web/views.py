@@ -56,12 +56,30 @@ def index(request):
         panel_info["nspanel"] = nspanel
         nspanels.append(panel_info)
 
-    return render(request, 'index.html', {
+    data = {
         'dark_theme': get_setting_with_default("dark_theme", "false"),
         'nspanels': nspanels,
         'notifications': notifications,
         'temperature_unit': temperature_unit,
-    })
+        'manager_address': get_setting_with_default("manager_address", ""),
+    }
+
+    if (data["manager_address"] == ""):
+        environment = environ.Env()
+        data = {**data, **{
+            'manager_port': get_setting_with_default("manager_port", ""),
+            "mqtt_server": get_setting_with_default("mqtt_server", ""),
+            "mqtt_port": get_setting_with_default("mqtt_port", 1883),
+            "mqtt_username": get_setting_with_default("mqtt_username", ""),
+            "mqtt_password": get_setting_with_default("mqtt_password", ""),
+            "home_assistant_address": get_setting_with_default("home_assistant_address", ""),
+            "home_assistant_token": get_setting_with_default("home_assistant_token", ""),
+            "openhab_address": get_setting_with_default("openhab_address", ""),
+            "openhab_token": get_setting_with_default("openhab_token", ""),
+            "is_home_assistant_addon": ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
+        }}
+
+    return render(request, 'index.html', data)
 
 
 def rooms(request):
@@ -540,6 +558,53 @@ def save_settings(request):
     return redirect('settings')
 
     # TODO: Make exempt only when Debug = true
+
+
+@csrf_exempt
+def initial_setup_manager_config(request):
+    set_setting_value(name="manager_address",
+                      value=request.POST["manager_address"])
+    set_setting_value(name="manager_port", value=request.POST["manager_port"])
+    restart_mqtt_manager()
+    return HttpResponse('OK', 200)
+
+
+@csrf_exempt
+def initial_setup_mqtt_config(request):
+    set_setting_value(name="mqtt_server", value=request.POST["mqtt_server"])
+    set_setting_value(name="mqtt_port", value=request.POST["mqtt_port"])
+    set_setting_value(name="mqtt_username",
+                      value=request.POST["mqtt_username"])
+    set_setting_value(name="mqtt_password",
+                      value=request.POST["mqtt_password"])
+    restart_mqtt_manager()
+    return HttpResponse('OK', 200)
+
+
+@csrf_exempt
+def initial_setup_home_assistant_config(request):
+    if "home_assistant_address" in request.POST:
+        home_assistant_address = request.POST["home_assistant_address"]
+        if home_assistant_address.endswith("/"):
+            home_assistant_address = home_assistant_address[:-1]
+        set_setting_value(name="home_assistant_address",
+                          value=home_assistant_address)
+    if "home_assistant_token" in request.POST:
+        set_setting_value(name="home_assistant_token",
+                          value=request.POST["home_assistant_token"])
+    restart_mqtt_manager()
+    return HttpResponse('OK', 200)
+
+
+@csrf_exempt
+def initial_setup_openhab_config(request):
+    if openhab_address.endswith("/"):
+        openhab_address = openhab_address[:-1]
+    set_setting_value(name="openhab_address", value=openhab_address)
+    set_setting_value(name="openhab_token",
+                      value=request.POST["openhab_token"])
+    restart_mqtt_manager()
+    return HttpResponse('OK', 200)
 
 
 @csrf_exempt

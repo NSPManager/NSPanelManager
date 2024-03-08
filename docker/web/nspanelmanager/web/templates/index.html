@@ -4,9 +4,12 @@
 {% load static %}
 <script src="{% static 'index.js' %}?refresh={% now 'U' %}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'index.css' %}?refresh={% now 'U' %}">
+{% if manager_address == "" %}<script src="{% static 'initial_setup.js' %}?refresh={% now 'U' %}"></script>{% endif %}
 {% endblock %}
 
 {% block content %}
+{% if manager_address == "" %}{% include 'modal-initial-setup.html' %}{% endif %}
+
 <span class="hidden" id="temperature_unit">{{ temperature_unit }}</span>
 <div class="flex flex-wrap justify-between items-center">
   <div class="flex justify-between items-center">

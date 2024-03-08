@@ -11,9 +11,15 @@
 <span class="hidden" id="nspanel_id">{{ panel.id }}</span>
 <span class="hidden" id="max_live_log_messages">{{ max_live_log_messages }}</span>
 
-<div>
-  <h2 class="font-medium text-2xl" id="nspanel_name">Settings for '{{ panel.friendly_name }}'</h2>
-  <h2 class="font-light text-sm">MAC: <span id="nspanel_mac">{{ panel.mac_address }}</span></h2>
+<div class="flex items-center justify-between">
+  <div>
+    <h2 class="font-medium text-2xl" id="nspanel_name">Settings for '{{ panel.friendly_name }}'</h2>
+    <h2 class="font-light text-sm">MAC: <span id="nspanel_mac">{{ panel.mac_address }}</span></h2>
+  </div>
+  <a href="{% url 'manual' %}#sec:nspanel_page" title="Toggle Light/Dark theme"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+      Help
+    </a>
 </div>
 <div class="p-4 mb-2 mt-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50" role="alert">
   <span class="font-medium">Info.</span> Changes to NSPanel settings on this page requires a reboot of the NSPanel to take effect.

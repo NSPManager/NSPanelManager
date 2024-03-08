@@ -141,7 +141,7 @@
     \begin{lstlisting}[language=bash]
     docker run --name nspanelmanager -e TZ=Europe/Stockholm -v \
     "/nspmdata/":"/data/" \
-    -d -p 8000:8000 -p 8001:8001 nspanelmanager/nspanelmanager-amd64:latest
+    -d -p 8000:8000 nspanelmanager/nspanelmanager-amd64:latest
     \end{lstlisting}
     \important{All the data for the container will be stored in the directory mapped to /data/ in the container, in the example above this is the /nspmdata/-directory on your machine.}
     If you wish to manually build and run the container or change options or settings, see below for \hyperref[sec:advanced_setup]{advanced setup}.
@@ -175,22 +175,35 @@
       \item Select the "NSPanel Manager"-add-on and choose to update it.
     \end{itemize}
     \subsection{Container settings}
-    The following has to be done in order to get a fully working container:
+    When first logging in to the NSPanel Manager web interface you will be greeted by a \textbf{Initial setup} dialog. This guide will help you setup the required items in order to have a functional setup.
+    The following is a walkthrough of what to enter:
+
     \begin{itemize}
-      \item Navigate to the web interface. If the port was not changed it is available at port \textbf{8000}.
-      \item Navigate to the "Settings"-page.
-      \item First of all, enter the connection details to the manager. This data is supplied to NSPanels when the try to find managers over the network. 
-      \item In the "Manager address"-field, enter the IP-address used to connect to the manager.
-      \item In the "Manager port"-field, enter the port used to connect to the manager. If you didn't change the port, this is 8000.
-      \item Enter connection details for your MQTT server, leave username and password empty if you do not use MQTT authentication.
-       \note{If you are running the MQTT server as an add-on to Home Assistant, enter the IP-address of your Home Assistant server.}
-      \item If you wish to use NSPanel Manager with Home Assistant, enter the connection details in the "Home Assistant API"-section. Enter the address with http or https and port, E.g. \textit{http://192.168.1.5:8123}. Also enter Home Assistant access token.
-      \important{If you are running the container as an Home Assistant add-on, the address and access token will already be set. Do not change these!}
-      \info{To get an access token in Home Assistant, navigate to Home Assistant and press your username in the bottom left. Scroll down and create a "Long-Lived Access Token".}
-      \item If you wish to use NSPanel Manager with OpenHAB, enter the connection details in the "OpenHAB API"-section. Enter the address with http or https and port, E.g. \textit{http://192.168.1.5:8123}. Also enter OpenHAB access token.
-      \info{To get an access token in OpenHAB, navigate to OpenHAB and press your username in the bottom left. Scroll down and create an "API Token".}
-    \item Save the new settings and continue to \hyperref[sec:nspanel_flashing]{NSPanel flashing}.
+      \item \textbf{Manager config}
+        \begin{itemize}
+          \item \textbf{Manager address} - This address is sent to NSPanel over MQTT when the request to connect with a manager. This can be loaded from the URL using the "Load from URL" button. This address needs to be reachable by all NSPanels.
+          \item \textbf{Manager port} - This port that will be used to connect to the address above.
+        \end{itemize}
+      \item \textbf{MQTT config}
+        \begin{itemize}
+          \item \textbf{MQTT address} - The address to your MQTT broker. If you are running your MQTT broker as an addon to Home Assistant, enter you Home Assistant address (only IP).
+          \item \textbf{MQTT port} - The port to connect to your MQTT broker.
+          \item \textbf{MQTT username} - The username to authenticate to your MQTT broker. Leave empty if you don\'t use authentication.
+          \item \textbf{MQTT password} - The password to authenticate to your MQTT broker. Leave empty if you don\'t use authentication.
+        \end{itemize}
+      \item \textbf{Home Assistant config (optional)}
+        \begin{itemize}
+          \item \textbf{Home Assistant address} - The address to your Home Assistant instance. This address should include "http" or "https" in the beginning and ":8123" (change to your port) at the end.
+          \item \textbf{Home Assistant token} - The long lived access token used to authenticate to Home Assistant.
+        \end{itemize}
+      \item \textbf{OpenHAB (optional)}
+        \begin{itemize}
+          \item \textbf{OpenHAB address} - The address to your OpenHAB instance. This address should include "http" or "https" in the beginning and ":8123" (change to your port) at the end.
+          \item \textbf{OpenHAB token} - The access token used to authenticate to OpenHAB.
+        \end{itemize}
     \end{itemize}
+
+    Once the above is completed, continue on with \hyperref[sec:nspanel_flashing]{NSPanel flashing} to flash the NSPanel Manager firmware on to a NSPanel.
 
     \subsection{NSPanel flashing}
     \label{sec:nspanel_flashing}
@@ -273,6 +286,7 @@
     There is also the "Actions"-button on the top right where you can perform some of the actions from the list above to all panels which are online. There is also an option to \textbf{Restart MQTTManager} which will restart the 
     core component that handles all communication between different components of the NSPanel Manager software.
 
+    \hypertarget{sec:nspanel_page}{}
     \subsection{NSPanel page}
     \label{sec:nspanel_page}
     \begin{figure}[H]
@@ -319,6 +333,7 @@
       \item \textbf{Temperature calibration} - Calibrate the internal temperature sensor. Enter a negative value to bring the reported temperature down and vice versa.
     \end{itemize}
     
+    \hypertarget{sec:room_page}{}
     \subsection{Room page}
     \label{sec:room_page}
     This section will describe how to manage rooms. Most of the configuration done with NSPanel Manager will be done in rooms, please read this chapter for a full understanding on how to work with rooms.
@@ -358,6 +373,13 @@
     There is place for up to 12 lights (per room) to be controlled individually from the NSPanel. The image on the bottom shows a preview on how this might look. When a new light is added to the room it will automatically be assigned to the next free slot on the page. By pressing a slot with an assigned entity you can chose to assign a new entity (if any entity is unasigned) or "clear" the slot which will remove the light from the page but it will still be attached to the room.
     \info{Each entity may only be assigned to one slot. If the list of entities is empty then all entities has been assigned a slot.}
 
+    
+    \hypertarget{sec:relay_groups}{}
+    \subsection{Relay groups}
+    Relay groups are used to bind multiple NSPanels and relays together so that when one relay in the group changes state, all the relays in the group transission to the new state.
+
+
+    \hypertarget{sec:weather_and_time}{}
     \subsection{Weather and Time}
     \begin{figure}[H]
     \centering
@@ -416,8 +438,8 @@
     Once this is done and the weather HTTP-binding is showing up in OpenHAB you can press the "Select weather entity" in the NSPanel Manager web interface, select your weather entity and then select the channels for current weather and forecast.
     \\
     If you wish to show temperature from a local temperature sensor available in OpenHAB, this can be selected in the \textbf{Outside temperature sensor} but it is not required.
-
     
+    \hypertarget{sec:global_settings}{}
     \subsection{Global settings}
     These settings will apply to all NSPanels (if they do not have specific configurations), and the NSPanel Manager container. There are two things that need to be set in order to get up and running. Those are:
     \begin{enumerate}
@@ -599,7 +621,6 @@
           - /nspmdata/:/data/
         ports:
           - 8000:8000
-          - 8001:8001
         restart: always
     \end{lstlisting}
     \important{All data for NSPanel Manager is stored in the directory mapped to "/data" in the container. In this case, the "/nspmdata/"-directory where you are currently standing.}
@@ -681,7 +702,8 @@
     \hline
     \textbf{Topic} & \textbf{Payload}  & \textbf{Description}  \\ \hline
     nspanel/entities/<type>/<id>/state\_<attribute> & The value of the attribute & An update of entity state value sent out by MQTTManager. Example: nspanel/entities/light/42/state\_kelvin \\ \hline
-    nspanel/status/time & Time & Current time sent by MQTTManager. \\ \hline
+    nspanel/status/time & Time as a string & Current time sent by MQTTManager. \\ \hline
+    nspanel/status/weather & JSON & A JSON representation of the current weather and weather forecast. \\ \hline
     nspanel/<panel\_name>/status\_report & JSON & JSON payload with current state of the panel. \\ \hline
     nspanel/mqttmanager/command & JSON & JSON payload from panel with a command for MQTTManager to perform. \\ \hline
     \end{tabular}}

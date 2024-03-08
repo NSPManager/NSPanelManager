@@ -6,6 +6,15 @@ from . import views, api
 urlpatterns = [
     # Web routes
     path('', views.index, name='index'),
+    # Initial setup:
+    path('initial_setup_manager_config', views.initial_setup_manager_config,
+         name='initial_setup_manager_config'),
+    path('initial_setup_mqtt_config', views.initial_setup_mqtt_config,
+         name='initial_setup_mqtt_config'),
+    path('initial_setup_home_assistant_config', views.initial_setup_home_assistant_config,
+         name='initial_setup_home_assistant_config'),
+    path('initial_setup_openhab_config', views.initial_setup_openhab_config,
+         name='initial_setup_openhab_config'),
     path('rooms', views.rooms, name='rooms'),
     path('rooms/order', views.rooms_order, name='rooms_order'),
     path('moveRoomUp/<int:room_id>', views.move_room_up, name='move_room_up'),

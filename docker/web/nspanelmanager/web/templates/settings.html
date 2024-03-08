@@ -11,8 +11,12 @@
 
 <form method="POST" action="{% url 'save_settings' %}" id="config">
     {% csrf_token %}
-    <div>
+    <div class="flex items-center justify-between">
       <h2 class="font-medium text-2xl">Settings</h2>
+      <a href="{% url 'manual' %}#sec:global_settings" title="Toggle Light/Dark theme"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+      Help
+    </a>
     </div>
     <div class="md:flex md:justify-between md:items-start mt-2">
       <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
@@ -44,7 +48,7 @@
               class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
               <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <title>MQTT Port</title>
+                <title>Manager port</title>
                 <path
                   d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
               </svg>
@@ -468,7 +472,7 @@
                 </svg>
               </span>
               <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
-              type="password" class="input" name="mqtt_password" id="mqtt_password" placeholder="Username (if required)" value="{{ mqtt_password }}">
+              type="password" class="input" name="mqtt_password" id="mqtt_password" placeholder="Password (if required)" value="{{ mqtt_password }}">
             </div>
           </div>
         </div>
