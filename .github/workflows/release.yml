@@ -8,41 +8,6 @@ on:
       - 'beta'
 
 jobs:
-  # update-main-beta-branch:
-  #   if: ${{ !github.event.act }} # skip during local actions testing
-  #   name: prepare
-  #   permissions:
-  #     contents: write
-  #     actions: read
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Get branch name
-  #       shell: bash
-  #       id: image_name
-  #       run: |
-  #         if [ "${{ github.event.release.prerelease }}" != "true" ]; then
-  #           echo "branch=main" >> $GITHUB_OUTPUT
-  #         elif [ "${{ github.event.release.prerelease }}" == "true" ]; then
-  #           echo "branch=beta" >> $GITHUB_OUTPUT
-  #         else
-  #           echo "Cannot determine image name!"
-  #           exit 1
-  #         fi
-  #     - name: Checkout the repository
-  #       uses: actions/checkout@v4
-  #       if: ${{ steps.image_name.outputs.branch == "beta" }}
-  #       with:
-  #         ref: main
-  #     - name: Update beta version in main branch
-  #       if: ${{ steps.image_name.outputs.branch == "beta" }}
-  #       run: |
-  #         sed -i "s/^version: [0-9A-Za-z\.\-]\+/version: ${{ github.ref_name }}/g" docker-beta/config.yaml
-  #     - uses: stefanzweifel/git-auto-commit-action@v5
-  #       if: ${{ steps.image_name.outputs.branch == "beta" }}
-  #       with:
-  #         commit_message: Update beta version reference
-  #         branch: "main"
-
   prepare:
     if: ${{ !github.event.act }} # skip during local actions testing
     name: prepare
@@ -292,3 +257,40 @@ jobs:
             --version ${{ github.ref_name }} \
             --release ${{ github.ref_name }} \
             --docker-hub ${{ secrets.DOCKERHUB_USERNAME }}
+
+
+  # update-main-beta-branch:
+  #   if: ${{ !github.event.act }} # skip during local actions testing
+  #   name: prepare
+  #   needs: [publish-x86, publish-x86_64, publish-armhf, publish-armv7, publish-aarch64] # Only tell Home Assistant that a new version exists if the build of all architectures succeeded
+  #   permissions:
+  #     contents: write
+  #     actions: read
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Get branch name
+  #       shell: bash
+  #       id: image_name
+  #       run: |
+  #         if [ "${{ github.event.release.prerelease }}" != "true" ]; then
+  #           echo "branch=main" >> $GITHUB_OUTPUT
+  #         elif [ "${{ github.event.release.prerelease }}" == "true" ]; then
+  #           echo "branch=beta" >> $GITHUB_OUTPUT
+  #         else
+  #           echo "Cannot determine image name!"
+  #           exit 1
+  #         fi
+  #     - name: Checkout the repository
+  #       uses: actions/checkout@v4
+  #       if: ${{ steps.image_name.outputs.branch == "beta" }}
+  #       with:
+  #         ref: main
+  #     - name: Update beta version in main branch
+  #       if: ${{ steps.image_name.outputs.branch == "beta" }}
+  #       run: |
+  #         sed -i "s/^version: [0-9A-Za-z\.\-]\+/version: ${{ github.ref_name }}/g" docker-beta/config.yaml
+  #     - uses: stefanzweifel/git-auto-commit-action@v5
+  #       if: ${{ steps.image_name.outputs.branch == "beta" }}
+  #       with:
+  #         commit_message: Update beta version reference
+  #         branch: "main"
