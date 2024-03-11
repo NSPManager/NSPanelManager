@@ -282,15 +282,15 @@ jobs:
           fi
       - name: Checkout the repository
         uses: actions/checkout@v4
-        if: ${{ steps.image_name.outputs.branch == "beta" }}
+        if: ${{ steps.image_name.outputs.branch == 'beta' }}
         with:
           ref: main
       - name: Update beta version in main branch
-        if: ${{ steps.image_name.outputs.branch == "beta" }}
+        if: ${{ steps.image_name.outputs.branch == 'beta' }}
         run: |
           sed -i "s/^version: [0-9A-Za-z\.\-]\+/version: ${{ github.ref_name }}/g" docker-beta/config.yaml
       - uses: stefanzweifel/git-auto-commit-action@v5
-        if: ${{ steps.image_name.outputs.branch == "beta" }}
+        if: ${{ steps.image_name.outputs.branch == 'beta' }}
         with:
           commit_message: Update beta version reference
           branch: "main"
