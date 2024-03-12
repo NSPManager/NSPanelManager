@@ -441,8 +441,15 @@
     \info{In case the HTTP binding does not initialize, you may need to increase the org.openhab.webclient:maxThreadsShared-value and the org.openhab.webclient:maxThreadsCustom-value in the conf/services/runtime.cfg-file for OpenHAB.}
     \info{If you do not want metric units, replace metric=true with metric=false in the stateExtension.}
     When you have pasted the above into a .things-file, you need to replace <locationid> with your location ID that we found above and replace <apikey> with your API-key from AccuWeather.
+    \\
+    Next create two items to connect to the two things in the things file, either via openhab web interface or textual configuration.
+    If using textual configuration you can add this to your item file:
+    \begin{lstlisting}
+    String Accu_Weather_Current     "Accu Weather Current"  ["Point"]   { channel="http:url:accu_weather:weather" }
+String Accu_Weather_Forecast    "Accu Weather Forecast" ["Point"]	{ channel="http:url:accu_forecast:forecast" }
+    \end{lstlisting}
     
-    Once this is done and the weather HTTP-binding is showing up in OpenHAB you can press the "Select weather entity" in the NSPanel Manager web interface, select your weather entity and then select the channels for current weather and forecast.
+    Once this is done and the weather HTTP-binding is showing up in OpenHAB you can press the "Select weather entity" in the NSPanel Manager web interface, select your weather entity and then select the items for current weather and forecast.
     \\
     If you wish to show temperature from a local temperature sensor available in OpenHAB, this can be selected in the \textbf{Outside temperature sensor} but it is not required.
     
