@@ -111,7 +111,7 @@ void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data
       this->_forecast_weather_info.push_back(info);
     }
 
-    SPDLOG_DEBUG("Loaded forcast for {} days.", this->_forecast_weather_info.size());
+    SPDLOG_DEBUG("Loaded forecast for {} days.", this->_forecast_weather_info.size());
 
     if (this->_forecast_weather_info.size() > 0) {
       if (MqttManagerConfig::outside_temp_sensor_provider.length() == 0 && MqttManagerConfig::outside_temp_sensor_entity_id.length() == 0) {
