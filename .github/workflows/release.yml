@@ -79,6 +79,8 @@ jobs:
 
       - name: Checkout the repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.image_name.outputs.branch }}
       - name: Publish
         uses: home-assistant/builder@master
         with:
@@ -121,6 +123,8 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout the repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.image_name.outputs.branch }}
       - name: Publish
         uses: home-assistant/builder@master
         with:
@@ -163,6 +167,8 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout the repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.image_name.outputs.branch }}
       - name: Publish
         uses: home-assistant/builder@master
         with:
@@ -205,6 +211,8 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout the repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.image_name.outputs.branch }}
       - name: Publish
         uses: home-assistant/builder@master
         with:
@@ -247,6 +255,8 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout the repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.image_name.outputs.branch }}
       - name: Publish
         uses: home-assistant/builder@master
         with:
