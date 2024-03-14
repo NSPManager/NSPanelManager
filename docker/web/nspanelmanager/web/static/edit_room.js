@@ -233,8 +233,8 @@ function edit_light(light_id) {
       $("#openhab_color_temperature_channel_name").find("option").remove();
       $("#openhab_RGB_channel_name").find("option").remove();
 
-      $.get("/api/get_all_available_lights", function (data) {
-        data.openhab_lights.forEach(function (light) {
+      $.get("/api/get_all_available_entities", function (data) {
+        data.openhab_entities.forEach(function (light) {
           if (light.label == result.openhab_name) {
             light.items.forEach((item) => {
               // Populate new options selected
@@ -324,6 +324,8 @@ function edit_scene(id, name) {
 
 $(document).ready(function () {
   $("#add_new_light_search").keyup(add_new_lights_filter);
+  $("#color_temperature").change(update_displayed_openhab_selectors);
+  $("#rgb").change(update_displayed_openhab_selectors);
 
   if ($("#add_new_light_to_position_select option").length == 0) {
     $("#add_new_light_to_position_select").addClass("hidden");

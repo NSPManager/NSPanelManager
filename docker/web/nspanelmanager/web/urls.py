@@ -88,7 +88,7 @@ urlpatterns = [
     path('api/get_all_available_entities', api.get_all_available_entities,
          name='get_all_available_entities'),
     path('api/get_light_config/<int:light_id>',
-         api.get_light_config, name='get_all_available_lights'),
+         api.get_light_config, name='get_all_available_entities'),
     path('api/get_mqtt_manager_config', api.get_mqtt_manager_config,
          name='get_mqtt_manager_config'),
     path('api/set_panel_status/<str:panel_mac>/',
