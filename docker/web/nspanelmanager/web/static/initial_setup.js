@@ -44,14 +44,16 @@ function initial_setup_next() {
     $("#initial_step_manager_config_icon").attr("class", classes_step_icon_completed);
     current_step = "mqtt_config";
   } else if (current_step == "mqtt_config") {
-      if($("#mqtt_address").val() == "" || $("#mqtt_port").val() == "") {
+      if($("#mqtt_server").val() == "" || $("#mqtt_port").val() == "") {
         alert("Both address and port are required.");
         return false;
       }
   
       $.post("/initial_setup_mqtt_config", {
-        mqtt_address: $("#mqtt_address").val(), 
-        mqtt_port: $("#mqtt_port").val()
+        mqtt_server: $("#mqtt_server").val(), 
+        mqtt_port: $("#mqtt_port").val(),
+        mqtt_username: $("#mqtt_username").val(),
+        mqtt_password: $("#mqtt_password").val()
       });
   
       $("#mqtt_screen").addClass("hidden");
@@ -74,7 +76,7 @@ function initial_setup_next() {
     current_step = "openhab_config";
   } else if (current_step == "openhab_config") {
     if($("#openhab_address").val() != "" && $("#openhab_token").val() != "") {
-      $.post("/initial_setup_manager_config", {
+      $.post("/initial_setup_openhab_config", {
         openhab_address: $("#openhab_address").val(), 
         openhab_token: $("#openhab_token").val()
       });

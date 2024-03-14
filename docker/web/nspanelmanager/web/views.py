@@ -596,6 +596,7 @@ def initial_setup_home_assistant_config(request):
 
 @csrf_exempt
 def initial_setup_openhab_config(request):
+    openhab_address = request.POST["openhab_address"]
     if openhab_address.endswith("/"):
         openhab_address = openhab_address[:-1]
     set_setting_value(name="openhab_address", value=openhab_address)
