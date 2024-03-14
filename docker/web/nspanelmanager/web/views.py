@@ -496,7 +496,6 @@ def settings_page(request):
 
 
 def save_settings(request):
-    print(request.POST["turn_on_behavior"])
     set_setting_value(name="mqtt_server", value=request.POST["mqtt_server"])
     set_setting_value(name="mqtt_port", value=request.POST["mqtt_port"])
     set_setting_value(name="mqtt_username",
