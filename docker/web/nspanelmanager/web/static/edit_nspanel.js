@@ -185,36 +185,44 @@ function update_shown_elements() {
   if ($("#button1_mode").val() == 0) {
     // Direct mode
     $("#button1_detached_mode_controls").addClass("hidden");
+    $("#button1_detached_mode_light").prop("required", false);
     $("#button1_mqtt_mode_controls").addClass("hidden");
   } else if ($("#button1_mode").val() == 1) {
     // Detached mode
     $("#button1_detached_mode_controls").removeClass("hidden");
+    $("#button1_detached_mode_light").prop("required", true);
     $("#button1_mqtt_mode_controls").addClass("hidden");
   } else if ($("#button1_mode").val() == 2) {
     // MQTT mode
     $("#button1_detached_mode_controls").addClass("hidden");
+    $("#button1_detached_mode_light").prop("required", false);
     $("#button1_mqtt_mode_controls").removeClass("hidden");
   } else if ($("#button1_mode").val() == 3) {
     // Follow mode
     $("#button1_detached_mode_controls").addClass("hidden");
+    $("#button1_detached_mode_light").prop("required", false);
     $("#button1_mqtt_mode_controls").addClass("hidden");
   }
 
   if ($("#button2_mode").val() == 0) {
     // Direct mode
     $("#button2_detached_mode_controls").addClass("hidden");
+    $("#button2_detached_mode_light").prop("required", false);
     $("#button2_mqtt_mode_controls").addClass("hidden");
   } else if ($("#button2_mode").val() == 1) {
     // Detached mode
     $("#button2_detached_mode_controls").removeClass("hidden");
+    $("#button2_detached_mode_light").prop("required", true);
     $("#button2_mqtt_mode_controls").addClass("hidden");
   } else if ($("#button2_mode").val() == 2) {
     // MQTT mode
     $("#button2_detached_mode_controls").addClass("hidden");
+    $("#button2_detached_mode_light").prop("required", false);
     $("#button2_mqtt_mode_controls").removeClass("hidden");
   } else if ($("#button2_mode").val() == 3) {
     // Follow mode
     $("#button2_detached_mode_controls").addClass("hidden");
+    $("#button2_detached_mode_light").prop("required", false);
     $("#button2_mqtt_mode_controls").addClass("hidden");
   }
 }

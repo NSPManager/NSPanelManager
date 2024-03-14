@@ -207,11 +207,6 @@
                   </svg>
                 </span>
                 <select name="button1_detached_mode_light" id="button1_detached_mode_light" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                  {% if panel.button1_detached_mode_light == None %}
-                  <option value="-1" selected>-</option>
-                  {% else %}
-                  <option value="-1">-</option>
-                  {% endif %}
                   {% for light in panel.room.light_set.all %}
                   {% if panel.button1_detached_mode_light == light %}
                   <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
@@ -296,11 +291,6 @@
                   </svg>
                 </span>
                 <select name="button2_detached_mode_light" id="button2_detached_mode_light" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                  {% if panel.button2_detached_mode_light == None %}
-                  <option value="-1" selected>-</option>
-                  {% else %}
-                  <option value="-1">-</option>
-                  {% endif %}
                   {% for light in panel.room.light_set.all %}
                   {% if panel.button2_detached_mode_light == light %}
                   <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
