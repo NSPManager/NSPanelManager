@@ -496,6 +496,7 @@ def settings_page(request):
 
 
 def save_settings(request):
+    print(request.POST["turn_on_behavior"])
     set_setting_value(name="mqtt_server", value=request.POST["mqtt_server"])
     set_setting_value(name="mqtt_port", value=request.POST["mqtt_port"])
     set_setting_value(name="mqtt_username",
@@ -556,8 +557,6 @@ def save_settings(request):
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()
     return redirect('settings')
-
-    # TODO: Make exempt only when Debug = true
 
 
 @csrf_exempt
@@ -852,8 +851,8 @@ def weather_and_time(request):
         set_setting_value("outside_temp_sensor_entity_id",
                           request.POST["outside_temp_sensor"])
         set_setting_value("date_format", request.POST["date_format"])
-        set_setting_value("clock_us_style", "clock_us_style" in request.POST)
-        set_setting_value("use_farenheit", "use_farenheit" in request.POST)
+        set_setting_value("clock_us_style", request.POST["clock_us_style"])
+        set_setting_value("use_farenheit", request.POST["use_farenheit"])
         restart_mqtt_manager()
         return redirect("weather_and_time")
     else:
