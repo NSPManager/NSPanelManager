@@ -86,16 +86,19 @@ class MQTTManager_WS {
       }
     };
 
+    this.websocket.onerror = () => {
+      this.websocket.close();
+    };
+
     this.websocket.onclose = (event) => {
       this.connected = false;
-      if (event.code != 1001) {
-        // Ignore when browser is leaving page.
+      if (event.code != 1001) { // Ignore when browser is leaving page.
         if (this.on_close_function != null) {
           this.on_close_function();
         }
         setTimeout(() => {
           this.connect();
-        }, 1000);
+        }, 5000);
       }
     };
   }
