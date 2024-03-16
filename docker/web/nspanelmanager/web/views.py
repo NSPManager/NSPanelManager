@@ -523,8 +523,8 @@ def save_settings(request):
                       value=request.POST["color_temp_min"])
     set_setting_value(name="color_temp_max",
                       value=request.POST["color_temp_max"])
-    set_setting_value(name="reverse_color_temp", value=(
-        "reverse_color_temp" in request.POST))
+    set_setting_value(name="reverse_color_temp",
+                      value=request.POST["reverse_color_temp"])
     set_setting_value(name="min_button_push_time",
                       value=request.POST["min_button_push_time"])
     set_setting_value(name="button_long_press_time",

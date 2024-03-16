@@ -70,7 +70,13 @@ void NSPMScene::save() {
   SPDLOG_DEBUG("Saving scene {}::{}.", this->_id, this->_name);
   this->_light_states.clear(); // Clear current light states
   std::list<nlohmann::json> json_light_states;
-  for (Light *light : this->_room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT)) {
+  std::list<Light *> lights;
+  if (this->_is_global_scene) {
+    // lights = this->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+  } else {
+    // lights = this->_room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+  }
+  for (Light *light : lights) {
     nlohmann::json light_state_json;
     LightState new_light_state;
     switch (light->get_mode()) {
@@ -170,7 +176,7 @@ void NSPMScene::post_init() {
     }
 
     for (LightState &state : this->_light_states) {
-      Light *light = EntityManager::get_light_by_id(state.light_id);
+      Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, state.light_id);
       if (light != nullptr) {
         SPDLOG_DEBUG("Attaching light {}::{} to light state attached to scene {}::{}.", light->get_id(), light->get_name(), this->_id, this->_name);
         state._light = light;

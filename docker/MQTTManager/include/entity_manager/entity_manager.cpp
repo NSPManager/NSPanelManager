@@ -16,7 +16,6 @@
 #include <curl/easy.h>
 #include <entity_manager/entity_manager.hpp>
 #include <exception>
-#include <iostream>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <mutex>
@@ -54,14 +53,14 @@ void EntityManager::detach_entity_added_listener(void (*listener)(MqttManagerEnt
 
 void EntityManager::add_light(nlohmann::json &config) {
   try {
-    if (EntityManager::get_light_by_id(config["id"]) == nullptr) {
+    if (EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config["id"]) == nullptr) {
       std::string light_type = config["light_type"];
       if (light_type.compare("home_assistant") == 0) {
         HomeAssistantLight *light = new HomeAssistantLight(config);
-        EntityManager::_lights.push_back(light);
+        EntityManager::_entities.push_back(light);
       } else if (light_type.compare("openhab") == 0) {
         OpenhabLight *light = new OpenhabLight(config);
-        EntityManager::_lights.push_back(light);
+        EntityManager::_entities.push_back(light);
       } else {
         SPDLOG_ERROR("Unknown light type '{}'. Will ignore entity.", light_type);
       }
@@ -170,11 +169,10 @@ void EntityManager::post_init_entities() {
   {
     // Process any loaded lights
     SPDLOG_DEBUG("Updating lights.");
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_lights_mutex);
     std::list<int> light_ids;
     for (nlohmann::json &config : MqttManagerConfig::light_configs) {
       light_ids.push_back(config["id"]);
-      Light *light = EntityManager::get_light_by_id(config["id"]);
+      Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config["id"]);
       if (light != nullptr) {
         light->update_config(config);
       } else {
@@ -185,20 +183,20 @@ void EntityManager::post_init_entities() {
 
     // Check for any removed lights
     SPDLOG_DEBUG("Checking for removed lights.");
-    auto rit = EntityManager::_lights.begin();
-    while (rit != EntityManager::_lights.end()) {
+    auto rit = EntityManager::_entities.cbegin();
+    while (rit != EntityManager::_entities.cend()) {
       bool exists = false;
       for (int light_id : light_ids) {
-        if (light_id == (*rit)->get_id()) {
+        if ((*rit)->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT && light_id == (*rit)->get_id()) {
           exists = true;
           break;
         }
       }
 
       if (!exists) {
-        SPDLOG_DEBUG("Removing Light {}::{} as it doesn't exist in config anymore.", (*rit)->get_id(), (*rit)->get_name());
-        Light *light = (*rit);
-        EntityManager::_lights.erase(rit++);
+        SPDLOG_DEBUG("Removing Light {}::{} as it doesn't exist in config anymore.", (*rit)->get_id(), ((Light *)(*rit))->get_name());
+        Light *light = (Light *)(*rit);
+        EntityManager::_entities.erase(rit++);
         delete light;
         SPDLOG_DEBUG("Light removed successfully.");
       } else {
@@ -341,13 +339,6 @@ void EntityManager::post_init_entities() {
     entity->post_init();
   }
 
-  SPDLOG_INFO("Performing post init on {} lights.", EntityManager::_lights.size());
-  for (Light *light : EntityManager::_lights) {
-    SPDLOG_DEBUG("Performing PostInit on entity Light with id {}", light->get_id());
-    light->post_init();
-  }
-
-  SPDLOG_INFO("Total loaded lights: {}", EntityManager::_lights.size());
   SPDLOG_INFO("Total loaded NSPanels: {}", EntityManager::_nspanels.size());
   SPDLOG_INFO("Total loaded Entities: {}", EntityManager::_entities.size());
 }
@@ -356,7 +347,7 @@ void EntityManager::remove_entity(MqttManagerEntity *entity) {
   SPDLOG_DEBUG("Removing entity with ID {}.", entity->get_id());
   {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-    EntityManager::_entities.remove(entity);
+    EntityManager::_entities.erase(std::find(EntityManager::_entities.cbegin(), EntityManager::_entities.cend(), entity));
   }
   EntityManager::_entity_removed_signal(entity);
 
@@ -400,7 +391,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             std::vector<uint> entity_ids = data["entity_ids"];
             uint8_t new_brightness = data["brightness"];
             for (uint entity_id : entity_ids) {
-              Light *light = EntityManager::get_light_by_id(entity_id);
+              Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
               if (light != nullptr) {
                 if (new_brightness != 0) {
                   light->set_brightness(new_brightness, false);
@@ -414,7 +405,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             std::vector<uint> entity_ids = data["entity_ids"];
             uint new_kelvin = data["kelvin"];
             for (uint entity_id : entity_ids) {
-              Light *light = EntityManager::get_light_by_id(entity_id);
+              Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
               if (light != nullptr) {
                 light->set_color_temperature(new_kelvin, true);
               }
@@ -423,7 +414,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             std::vector<uint> entity_ids = data["entity_ids"];
             uint new_hue = data["hue"];
             for (uint entity_id : entity_ids) {
-              Light *light = EntityManager::get_light_by_id(entity_id);
+              Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
               if (light != nullptr) {
                 light->set_hue(new_hue, true);
               }
@@ -432,7 +423,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             std::vector<uint> entity_ids = data["entity_ids"];
             uint new_saturation = data["saturation"];
             for (uint entity_id : entity_ids) {
-              Light *light = EntityManager::get_light_by_id(entity_id);
+              Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
               if (light != nullptr) {
                 light->set_saturation(new_saturation, true);
               }
@@ -507,18 +498,6 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
       new_nspanel->send_websocket_update();
     }
   }
-}
-
-Light *EntityManager::get_light_by_id(uint id) {
-  auto rit = EntityManager::_lights.cbegin();
-  while (rit != EntityManager::_lights.cend()) {
-    if ((*rit)->get_id() == id) {
-      return (*rit);
-    } else {
-      rit++;
-    }
-  }
-  return nullptr;
 }
 
 NSPanel *EntityManager::get_nspanel_by_id(uint id) {
