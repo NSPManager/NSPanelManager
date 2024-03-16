@@ -92,6 +92,25 @@ void OpenhabLight::send_state_update_to_controller() {
       payload_data["value"] = 0;
       service_data["payload"] = payload_data.dump();
       OpenhabManager::send_json(service_data);
+
+      if (MqttManagerConfig::turn_on_behavior == LIGHT_TURN_ON_BEHAVIOR::COLOR_TEMP && this->_can_color_temperature) {
+        // Calculate color temp percentage
+        uint16_t kelvin_max_floored = MqttManagerConfig::color_temp_max - MqttManagerConfig::color_temp_min;
+        uint16_t kelvin_floored = this->_requested_color_temperature - MqttManagerConfig::color_temp_min;
+        uint8_t color_temp_percentage = 100 - int(((float)kelvin_floored / (float)kelvin_max_floored) * 100);
+        if (color_temp_percentage > 100) {
+          color_temp_percentage = 100;
+        } else if (color_temp_percentage < 0) {
+          color_temp_percentage = 0;
+        }
+
+        SPDLOG_DEBUG("Setting light {}::{} to color temp: {}%", this->_id, this->_name, color_temp_percentage);
+        service_data["topic"] = fmt::format("openhab/items/{}/command", this->_openhab_item_color_temperature);
+        payload_data["value"] = color_temp_percentage;
+        service_data["payload"] = payload_data.dump();
+        this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
+        OpenhabManager::send_json(service_data);
+      }
     } else {
       SPDLOG_DEBUG("Light {}::{} is already off. Will not send update to openhab.");
     }

@@ -2,6 +2,7 @@
 #include "entity/entity.hpp"
 #include "light/light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
+#include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include <boost/bind.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <cstdint>
@@ -43,6 +44,11 @@ void HomeAssistantLight::send_state_update_to_controller() {
 
       if (this->_requested_brightness != this->_current_brightness) {
         service_data["service_data"]["brightness_pct"] = this->_requested_brightness;
+      }
+
+      // This is a turn on event and it currently off. Send kelvin if turn on behavior is to use color temp.
+      if (!this->_current_state && MqttManagerConfig::turn_on_behavior == LIGHT_TURN_ON_BEHAVIOR::COLOR_TEMP) {
+        service_data["service_data"]["kelvin"] = this->_requested_color_temperature;
       }
 
       if (this->_current_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT && this->_requested_color_temperature != this->_current_color_temperature) {

@@ -47,5 +47,4 @@ void Room::detach_entity(MqttManagerEntity *entity) {
 }
 
 void Room::entity_changed_callback(MqttManagerEntity *entity) {
-  SPDLOG_DEBUG("ENTITY CHANGED IN ROOM {}", this->_name);
 }
