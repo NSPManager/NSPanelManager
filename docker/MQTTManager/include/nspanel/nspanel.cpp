@@ -5,6 +5,7 @@
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include <algorithm>
 #include <boost/bind.hpp>
+#include <boost/bind/placeholders.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <chrono>
 #include <cstdint>
@@ -187,10 +188,13 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+    MqttManagerConfig::attach_config_loaded_listener(boost::bind(&NSPanel::send_reload_command, this));
+    this->send_reload_command();
   }
 }
 
 NSPanel::~NSPanel() {
+  SPDLOG_INFO("Destroying NSPanel {}::{}", this->_id, this->_name);
   this->reset_mqtt_topics();
 }
 
@@ -200,6 +204,7 @@ void NSPanel::reset_mqtt_topics() {
   MQTT_Manager::detach_callback(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
   MQTT_Manager::detach_callback(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
   MQTT_Manager::detach_callback(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+  MqttManagerConfig::dettach_config_loaded_listener(boost::bind(&NSPanel::send_reload_command, this));
 
   // This nspanel was removed. Clear any retain on any MQTT topic.
   MQTT_Manager::clear_retain(this->_mqtt_status_topic);
@@ -227,7 +232,7 @@ MQTT_MANAGER_NSPANEL_STATE NSPanel::get_state() {
 }
 
 void NSPanel::mqtt_callback(std::string topic, std::string payload) {
-  if (topic.compare(this->_mqtt_log_topic) == 0) {
+  if (!payload.empty() && topic.compare(this->_mqtt_log_topic) == 0) {
     // Split log message by semicolon to extract MAC, log level and message.
     std::string message = payload;
     std::vector<std::string> message_parts;
@@ -454,9 +459,20 @@ void NSPanel::tft_update() {
   }
 }
 
+void NSPanel::send_reload_command() {
+  SPDLOG_INFO("Sending reload command to nspanel {}::{}.", this->_id, this->_name);
+  nlohmann::json cmd;
+  cmd["command"] = "reload";
+  this->send_command(cmd);
+}
+
 void NSPanel::send_command(nlohmann::json &command) {
-  std::string buffer = command.dump();
-  MQTT_Manager::publish(this->_mqtt_command_topic, buffer);
+  if (!this->_mqtt_command_topic.empty()) {
+    std::string buffer = command.dump();
+    MQTT_Manager::publish(this->_mqtt_command_topic, buffer);
+  } else {
+    SPDLOG_ERROR("Failed to send message to NSPanel Command topic. No command topic was set!");
+  }
 }
 
 std::string NSPanel::get_name() {

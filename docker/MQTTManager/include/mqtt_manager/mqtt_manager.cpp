@@ -166,13 +166,13 @@ const std::vector<int> MQTT_Manager::_get_subscribe_topics_qos() {
 }
 
 void MQTT_Manager::_process_mqtt_message(const std::string topic, const std::string message) {
-  for (auto mqtt_topic_signal_pair : MQTT_Manager::_mqtt_callbacks) {
-    if (mqtt_topic_signal_pair.first.compare(topic) == 0) {
-      MQTT_Manager::_mqtt_callbacks[mqtt_topic_signal_pair.first](topic, message);
-    }
-  }
-
   try {
+    for (auto mqtt_topic_signal_pair : MQTT_Manager::_mqtt_callbacks) {
+      if (mqtt_topic_signal_pair.first.compare(topic) == 0) {
+        MQTT_Manager::_mqtt_callbacks[mqtt_topic_signal_pair.first](topic, message);
+      }
+    }
+
     // Call each observer/listener until a callback return true, ie. the callback was handled.
     for (auto mqtt_callback : MQTT_Manager::_mqtt_observer_callbacks) {
       if (mqtt_callback(topic, message)) {

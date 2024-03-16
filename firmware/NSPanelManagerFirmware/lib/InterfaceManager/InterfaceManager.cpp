@@ -206,6 +206,8 @@ void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned
     NSPMConfig::instance->manager_address = json["address"].as<String>().c_str();
     NSPMConfig::instance->manager_port = json["port"].as<uint16_t>();
     InterfaceManager::hasRegisteredToManager = true;
+  } else if (command.compare("reload") == 0) {
+    RoomManager::performConfigReload();
   } else {
     LOG_WARNING("Received unknown command on MQTT: ", command.c_str());
   }

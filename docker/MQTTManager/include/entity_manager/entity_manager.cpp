@@ -185,22 +185,24 @@ void EntityManager::post_init_entities() {
     SPDLOG_DEBUG("Checking for removed lights.");
     auto rit = EntityManager::_entities.cbegin();
     while (rit != EntityManager::_entities.cend()) {
-      bool exists = false;
-      for (int light_id : light_ids) {
-        if ((*rit)->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT && light_id == (*rit)->get_id()) {
-          exists = true;
-          break;
+      if ((*rit)->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
+        bool exists = false;
+        for (int light_id : light_ids) {
+          if (light_id == (*rit)->get_id()) {
+            exists = true;
+            break;
+          }
         }
-      }
 
-      if (!exists) {
-        SPDLOG_DEBUG("Removing Light {}::{} as it doesn't exist in config anymore.", (*rit)->get_id(), ((Light *)(*rit))->get_name());
-        Light *light = (Light *)(*rit);
-        EntityManager::_entities.erase(rit++);
-        delete light;
-        SPDLOG_DEBUG("Light removed successfully.");
-      } else {
-        ++rit;
+        if (!exists) {
+          SPDLOG_DEBUG("Removing Light {}::{} as it doesn't exist in config anymore.", (*rit)->get_id(), ((Light *)(*rit))->get_name());
+          Light *light = (Light *)(*rit);
+          EntityManager::_entities.erase(rit++);
+          delete light;
+          SPDLOG_DEBUG("Light removed successfully.");
+        } else {
+          ++rit;
+        }
       }
     }
   }

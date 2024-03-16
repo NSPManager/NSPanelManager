@@ -9,7 +9,7 @@ class Room;
 class RoomManager {
 public:
   static void init();
-  static void reloadCallback(char *topic, byte *payload, unsigned int length);
+  static void performConfigReload();
   static inline std::list<Room *> rooms;
   static inline std::list<Room *>::iterator currentRoom;
   static void loadAllRooms(bool is_update);

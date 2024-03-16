@@ -60,32 +60,50 @@ public:
   /**
    * Attach a callback to be called when a new configuration has been added
    */
-  static void attach_config_added_listener(void (*callback)(nlohmann::json *));
+  template <typename CALLBACK_BIND>
+  static void attach_config_added_listener(CALLBACK_BIND callback) {
+    MqttManagerConfig::_config_added_listener.connect(callback);
+  }
 
   /**
    * Detach a callback to be called when a new configuration has been added
    */
-  static void dettach_config_added_listener(void (*callback)(nlohmann::json *));
+  template <typename CALLBACK_BIND>
+  static void dettach_config_added_listener(CALLBACK_BIND callback) {
+    MqttManagerConfig::_config_added_listener.disconnect(callback);
+  }
 
   /**
    * Attach a callback to be called when existing configuration is being removed
    */
-  static void attach_config_removed_listener(void (*callback)(nlohmann::json *));
+  template <typename CALLBACK_BIND>
+  static void attach_config_removed_listener(CALLBACK_BIND callback) {
+    MqttManagerConfig::_config_removed_listener.connect(callback);
+  }
 
   /**
    * Detach a callback to be called when existing configuration is being removed
    */
-  static void dettach_config_removed_listener(void (*callback)(nlohmann::json *));
+  template <typename CALLBACK_BIND>
+  static void dettach_config_removed_listener(CALLBACK_BIND callback) {
+    MqttManagerConfig::_config_removed_listener.disconnect(callback);
+  }
 
   /**
    * Attach a callback to be called when config has been fully loaded.
    */
-  static void attach_config_loaded_listener(void (*callback)());
+  template <typename CALLBACK_BIND>
+  static void attach_config_loaded_listener(CALLBACK_BIND callback) {
+    MqttManagerConfig::_config_loaded_listeners.connect(callback);
+  }
 
   /**
    * Detach a callback to be called when config has been fully loaded.
    */
-  static void dettach_config_loaded_listener(void (*callback)());
+  template <typename CALLBACK_BIND>
+  static void dettach_config_loaded_listener(CALLBACK_BIND callback) {
+    MqttManagerConfig::_config_loaded_listeners.disconnect(callback);
+  }
 
 private:
   static void populate_settings_from_config(nlohmann::json &data);

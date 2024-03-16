@@ -265,27 +265,3 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   SPDLOG_DEBUG("Config loaded. Calling listeners.");
   MqttManagerConfig::_config_loaded_listeners();
 }
-
-void MqttManagerConfig::attach_config_added_listener(void (*callback)(nlohmann::json *config)) {
-  MqttManagerConfig::_config_added_listener.connect(callback);
-}
-
-void MqttManagerConfig::dettach_config_added_listener(void (*callback)(nlohmann::json *config)) {
-  MqttManagerConfig::_config_added_listener.disconnect(callback);
-}
-
-void MqttManagerConfig::attach_config_removed_listener(void (*callback)(nlohmann::json *config)) {
-  MqttManagerConfig::_config_removed_listener.connect(callback);
-}
-
-void MqttManagerConfig::dettach_config_removed_listener(void (*callback)(nlohmann::json *config)) {
-  MqttManagerConfig::_config_removed_listener.disconnect(callback);
-}
-
-void MqttManagerConfig::attach_config_loaded_listener(void (*callback)()) {
-  MqttManagerConfig::_config_loaded_listeners.connect(callback);
-}
-
-void MqttManagerConfig::dettach_config_loaded_listener(void (*callback)()) {
-  MqttManagerConfig::_config_loaded_listeners.disconnect(callback);
-}

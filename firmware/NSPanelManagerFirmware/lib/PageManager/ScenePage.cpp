@@ -224,7 +224,6 @@ void ScenePage::_updateDisplay() {
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE2_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, true);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, true);
-        LOG_DEBUG("Showing scene: ", scenes[1]->name.c_str(), " in slot 2");
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, false);
@@ -238,7 +237,6 @@ void ScenePage::_updateDisplay() {
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE3_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, true);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, true);
-        LOG_DEBUG("Showing scene: ", scenes[2]->name.c_str(), " in slot 3");
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, false);
@@ -252,7 +250,6 @@ void ScenePage::_updateDisplay() {
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE4_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, true);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, true);
-        LOG_DEBUG("Showing scene: ", scenes[3]->name.c_str(), " in slot 1");
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, false);
