@@ -72,9 +72,9 @@ void NSPMScene::save() {
   std::list<nlohmann::json> json_light_states;
   std::list<Light *> lights;
   if (this->_is_global_scene) {
-    // lights = this->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+    lights = EntityManager::get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
   } else {
-    // lights = this->_room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+    lights = this->_room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
   }
   for (Light *light : lights) {
     nlohmann::json light_state_json;
