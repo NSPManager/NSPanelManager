@@ -98,7 +98,7 @@ class MQTTManager_WS {
         }
         setTimeout(() => {
           this.connect();
-        }, 5000);
+        }, 1000);
       }
     };
   }

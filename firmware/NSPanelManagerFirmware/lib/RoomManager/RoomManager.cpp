@@ -115,7 +115,7 @@ void RoomManager::loadAllRooms(bool is_update) {
     NSPMConfig::instance->wifi_hostname = (*roomData)["name"].as<String>().c_str();
     NSPMConfig::instance->saveToLittleFS();
     LOG_DEBUG("Name has changed. Restarting.");
-    vTaskDelay(250 / portTICK_PERIOD_MS);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
     ESP.restart();
     vTaskDelay(portMAX_DELAY);
     vTaskDelete(NULL);

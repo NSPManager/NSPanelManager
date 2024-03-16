@@ -97,7 +97,6 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskProcessMqttMessages", 5000, NULL, 1, &InterfaceManager::_taskHandleProcessMqttMessages, CONFIG_ARDUINO_RUNNING_CORE);
 
   if (NSPanel::instance->ready()) {
-
     PageManager::GetNSPanelManagerPage()->setText("Loading config...");
     RoomManager::loadAllRooms(false);
 

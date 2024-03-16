@@ -579,7 +579,11 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
         response["command"] = "register_accept";
         response["address"] = MqttManagerConfig::manager_address.c_str();
         response["port"] = MqttManagerConfig::manager_port;
-        MQTT_Manager::publish(this->_mqtt_command_topic, response.dump());
+
+        std::string reply_topic = "nspanel/";
+        reply_topic.append(register_request_payload["friendly_name"]);
+        reply_topic.append("/command");
+        MQTT_Manager::publish(reply_topic, response.dump());
 
         this->send_websocket_update();
         curl_easy_cleanup(curl);
