@@ -361,7 +361,7 @@
             </span>
             <input
               class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="number" name="screensaver_activation_timeout" id="screensaver_activation_timeout" value="{{ screensaver_activation_timeout }}" required />
+              type="number" min="1000" max="65535" name="screensaver_activation_timeout" id="screensaver_activation_timeout" value="{{ screensaver_activation_timeout }}" required />
           </div>
         </div>
 

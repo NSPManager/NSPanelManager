@@ -42,6 +42,7 @@ void ScreensaverPage::init() {
     this->_show_weather = false;
     show_background = false;
   } else if (InterfaceConfig::screensaver_mode.compare("no_screensaver") == 0) {
+    this->_screensaver_page_name = SCREENSAVER_PAGE_NAME;
     this->_show_weather = false;
     show_background = false;
     InterfaceConfig::screensaver_dim_level = 0;
