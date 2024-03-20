@@ -94,9 +94,6 @@ void RoomManager::loadAllRooms(bool is_update) {
   bool relay1_default_mode = (*roomData)["relay1_default_mode"].as<String>().equals("True");
   bool relay2_default_mode = (*roomData)["relay2_default_mode"].as<String>().equals("True");
 
-  ButtonManager::setRelayState(1, relay1_default_mode);
-  ButtonManager::setRelayState(2, relay2_default_mode);
-
   if (NSPMConfig::instance->relay1_default_mode != relay1_default_mode) {
     NSPMConfig::instance->relay1_default_mode = relay1_default_mode;
     NSPMConfig::instance->saveToLittleFS();
@@ -160,7 +157,6 @@ void RoomManager::loadAllRooms(bool is_update) {
   }
 
   // Init rooms
-
   for (uint16_t roomId : (*roomData)["rooms"].as<JsonArray>()) {
     if (InterfaceConfig::lock_to_default_room && roomId != InterfaceConfig::homeScreen) {
       continue;
@@ -202,6 +198,8 @@ void RoomManager::loadAllRooms(bool is_update) {
   } else {
     ButtonManager::button2_detached_mode_light = nullptr;
   }
+
+  NSPMConfig::instance->successful_config_load = true;
 }
 
 Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {

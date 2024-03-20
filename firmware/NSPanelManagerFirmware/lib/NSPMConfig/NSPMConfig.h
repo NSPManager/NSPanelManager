@@ -27,6 +27,9 @@ public:
   /// @brief The instance of the config manager
   static NSPMConfig *instance;
 
+  /// @brief Indicates that a config has successfully been loaded from the manager.
+  bool successful_config_load;
+
   /// @brief The address (hostname or IP) to the manager server
   std::string manager_address;
   /// @brief The port to access to manager at
