@@ -162,6 +162,8 @@ void EntityManager::post_init_entities() {
         } else {
           rit++;
         }
+      } else {
+        ++rit;
       }
     }
   }
@@ -203,6 +205,8 @@ void EntityManager::post_init_entities() {
         } else {
           ++rit;
         }
+      } else {
+        ++rit;
       }
     }
   }
@@ -228,7 +232,7 @@ void EntityManager::post_init_entities() {
     }
     SPDLOG_DEBUG("Existing rooms updated.");
 
-    // Check for any removed lights
+    // Check for any removed rooms
     SPDLOG_DEBUG("Checking for removed rooms.");
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     auto rit = EntityManager::_entities.begin();

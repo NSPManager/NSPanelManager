@@ -1,6 +1,7 @@
 #include <ArduinoJson.h>
 #include <FS.h>
 #include <LittleFS.h>
+#include <MqttLog.hpp>
 #include <NSPMConfig.h>
 #include <WiFi.h>
 
@@ -141,9 +142,12 @@ bool NSPMConfig::saveToLittleFS() {
   File config_file = LittleFS.open("/config.json", "w");
   if (!config_file) {
     Serial.println("Failed to open 'config.json' for writing.");
+    LOG_ERROR("Failed to open 'config.json' for writing.");
   } else if (serializeJson(config_json, config_file) == 0) {
+    LOG_ERROR("Failed to save config file.");
     Serial.println("Failed to save config file.");
   } else {
+    LOG_INFO("Saved config file.");
     Serial.println("Saved config file.");
   }
   config_file.close();

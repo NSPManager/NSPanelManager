@@ -25,7 +25,7 @@ jobs:
           root_file: |
             manual.tex
       - run: |
-          sed -i "s/^version: [0-9A-Za-z\.\-]\+/version: ${{ github.ref_name }}/g" docker/config.yaml
+          sed -i "s/^version: [0-9A-Za-z\.\-_]\+/version: ${{ github.ref_name }}/g" docker/config.yaml
           cp docker/web/nspanelmanager/web/templates/footer_template.html docker/web/nspanelmanager/web/templates/footer.html
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/footer.html
           cp docs/tex/manual.pdf docker/web/nspanelmanager/manual.pdf
@@ -298,7 +298,7 @@ jobs:
       - name: Update beta version in main branch
         if: ${{ steps.image_name.outputs.branch == 'beta' }}
         run: |
-          sed -i "s/^version: [0-9A-Za-z\.\-]\+/version: ${{ github.ref_name }}/g" docker-beta/config.yaml
+          sed -i "s/^version: [0-9A-Za-z\.\-_]\+/version: ${{ github.ref_name }}/g" docker-beta/config.yaml
       - uses: stefanzweifel/git-auto-commit-action@v5
         if: ${{ steps.image_name.outputs.branch == 'beta' }}
         with:

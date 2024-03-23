@@ -87,10 +87,12 @@ public:
   static std::list<EntityClass *> get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE type) {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     std::list<EntityClass *> entities;
-    for (MqttManagerEntity *entity : EntityManager::_entities) {
-      if (entity->get_type() == type) {
-        entities.push_back(static_cast<EntityClass *>(entity));
+    auto entity = EntityManager::_entities.cbegin();
+    while (entity != EntityManager::_entities.cend()) {
+      if ((*entity)->get_type() == type) {
+        entities.push_back(static_cast<EntityClass *>(*entity));
       }
+      entity++;
     }
     return entities;
   }
