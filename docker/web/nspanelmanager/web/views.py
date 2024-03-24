@@ -626,7 +626,7 @@ def save_new_firmware(request):
 @csrf_exempt
 def save_new_data_file(request):
     if request.method == 'POST':
-        uploaded_file = request.FILES['data_file']
+        uploaded_file = request.FILES['data_upload_file_name']
         fs = FileSystemStorage()
         fs.delete("data_file.bin")
         fs.save("data_file.bin", uploaded_file)
