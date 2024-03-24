@@ -58,8 +58,8 @@ bool NSPMConfig::loadFromLittleFS() {
   this->tft_upload_baud = doc.containsKey("upload_baud") ? doc["upload_baud"].as<uint32_t>() : 115200;
   this->use_new_upload_protocol = doc.containsKey("use_new_upload_protocol") ? doc["use_new_upload_protocol"].as<String>() == "true" : true;
 
-  this->relay1_default_mode = doc["relay1_default_mode"].as<String>() == "True";
-  this->relay2_default_mode = doc["relay2_default_mode"].as<String>() == "True";
+  this->relay1_default_mode = doc.containsKey("relay1_default_mode") ? doc["relay1_default_mode"].as<String>() == "True" : false;
+  this->relay2_default_mode = doc.containsKey("relay2_default_mode") ? doc["relay2_default_mode"].as<String>() == "True" : false;
 
   // Load calculated values
   this->mqtt_availability_topic = "nspanel/";
