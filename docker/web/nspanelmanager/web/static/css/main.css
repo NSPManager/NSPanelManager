@@ -1941,47 +1941,12 @@ select {
   --tw-ring-color: rgb(252 165 165 / var(--tw-ring-opacity));
 }
 
-.has-\[data-\[active\=true\]\]\:text-blue-700:has(data-[active=true]) {
-  --tw-text-opacity: 1;
-  color: rgb(29 78 216 / var(--tw-text-opacity));
-}
-
-.has-\[active\=true\]\:text-blue-700:has(active=true) {
-  --tw-text-opacity: 1;
-  color: rgb(29 78 216 / var(--tw-text-opacity));
-}
-
-.has-\[\&data-active\=true\]\:text-blue-700:has(.has-\[\&data-active\=true\]\:text-blue-700data-active=true) {
-  --tw-text-opacity: 1;
-  color: rgb(29 78 216 / var(--tw-text-opacity));
-}
-
-.has-\[data-active\=true\]\:text-blue-700:has(data-active=true) {
-  --tw-text-opacity: 1;
-  color: rgb(29 78 216 / var(--tw-text-opacity));
-}
-
-.data-\[active\=true\]\:bg-blue-700[data-active=true] {
-  --tw-bg-opacity: 1;
-  background-color: rgb(29 78 216 / var(--tw-bg-opacity));
-}
-
-.data-\[current\=true\]\:bg-blue-700[data-current=true] {
-  --tw-bg-opacity: 1;
-  background-color: rgb(29 78 216 / var(--tw-bg-opacity));
-}
-
-.data-\[active\=true\]\:text-blue-700[data-active=true] {
-  --tw-text-opacity: 1;
-  color: rgb(29 78 216 / var(--tw-text-opacity));
-}
-
 .data-\[active\=true\]\:text-blue-600[data-active=true] {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
 
-.group[data-active=true] .group-data-\[active\=true\]\:text-blue-700 {
+.data-\[active\=true\]\:text-blue-700[data-active=true] {
   --tw-text-opacity: 1;
   color: rgb(29 78 216 / var(--tw-text-opacity));
 }
@@ -2132,11 +2097,6 @@ select {
     padding: 1.25rem;
   }
 
-  .md\:text-blue-700 {
-    --tw-text-opacity: 1;
-    color: rgb(29 78 216 / var(--tw-text-opacity));
-  }
-
   .md\:hover\:bg-transparent:hover {
     background-color: transparent;
   }
@@ -2144,16 +2104,6 @@ select {
   .md\:hover\:text-blue-500:hover {
     --tw-text-opacity: 1;
     color: rgb(59 130 246 / var(--tw-text-opacity));
-  }
-
-  .data-\[active\=true\]\:md\:text-blue-700[data-active=true] {
-    --tw-text-opacity: 1;
-    color: rgb(29 78 216 / var(--tw-text-opacity));
-  }
-
-  .data-\[current\=true\]\:md\:text-blue-700[data-current=true] {
-    --tw-text-opacity: 1;
-    color: rgb(29 78 216 / var(--tw-text-opacity));
   }
 }
 
@@ -2492,59 +2442,7 @@ select {
   --tw-ring-offset-color: #374151;
 }
 
-.has-\[data-\[active\=true\]\]\:dark\:text-blue-500:where(.dark, .dark *):has(data-[active=true]) {
-  --tw-text-opacity: 1;
-  color: rgb(59 130 246 / var(--tw-text-opacity));
-}
-
-.has-\[active\=true\]\:dark\:text-blue-500:where(.dark, .dark *):has(active=true) {
-  --tw-text-opacity: 1;
-  color: rgb(59 130 246 / var(--tw-text-opacity));
-}
-
-.has-\[\&data-active\=true\]\:dark\:text-blue-500:where(.dark, .dark *):has(.has-\[\&data-active\=true\]\:dark\:text-blue-500:where(.dark, .dark *)data-active=true) {
-  --tw-text-opacity: 1;
-  color: rgb(59 130 246 / var(--tw-text-opacity));
-}
-
-.has-\[data-active\=true\]\:dark\:text-blue-500:where(.dark, .dark *):has(data-active=true) {
-  --tw-text-opacity: 1;
-  color: rgb(59 130 246 / var(--tw-text-opacity));
-}
-
 .data-\[active\=true\]\:dark\:text-blue-500:where(.dark, .dark *)[data-active=true] {
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity));
-}
-
-.data-\[active\=true\]\:dark\:text-blue-400:where(.dark, .dark *)[data-active=true] {
-  --tw-text-opacity: 1;
-  color: rgb(96 165 250 / var(--tw-text-opacity));
-}
-
-.data-\[active\=true\]\:dark\:text-blue-200:where(.dark, .dark *)[data-active=true] {
-  --tw-text-opacity: 1;
-  color: rgb(191 219 254 / var(--tw-text-opacity));
-}
-
-.group[data-active=true] .group-data-\[active\=true\]\:dark\:text-blue-500:where(.dark, .dark *) {
-  --tw-text-opacity: 1;
-  color: rgb(59 130 246 / var(--tw-text-opacity));
-}
-
-@media (min-width: 768px) {
-  .md\:dark\:text-blue-500:where(.dark, .dark *) {
-    --tw-text-opacity: 1;
-    color: rgb(59 130 246 / var(--tw-text-opacity));
-  }
-
-  .data-\[active\=true\]\:md\:dark\:text-blue-500:where(.dark, .dark *)[data-active=true] {
-    --tw-text-opacity: 1;
-    color: rgb(59 130 246 / var(--tw-text-opacity));
-  }
-
-  .data-\[current\=true\]\:md\:dark\:text-blue-500:where(.dark, .dark *)[data-current=true] {
-    --tw-text-opacity: 1;
-    color: rgb(59 130 246 / var(--tw-text-opacity));
-  }
 }

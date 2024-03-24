@@ -666,8 +666,19 @@ void NSPanel::register_to_home_assistant() {
     SPDLOG_DEBUG("Registring relay1 as relay for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
     MQTT_Manager::publish(this->_mqtt_switch_relay1_topic, relay1_data_str, true);
   } else {
-    // TODO
-    SPDLOG_ERROR("Relay1 as light is not implemented yet!");
+    nlohmann::json relay1_data = nlohmann::json(base_json);
+    relay1_data["device_class"] = "light";
+    relay1_data["name"] = "Relay 1";
+    relay1_data["state_topic"] = this->_mqtt_relay1_state_topic;
+    relay1_data["command_topic"] = this->_mqtt_relay1_command_topic;
+    relay1_data["state_template"] = "{% if value == 1 %}on{% else %}off{% endif %}";
+    relay1_data["command_on_template"] = "1";
+    relay1_data["command_off_template"] = "0";
+    relay1_data["unique_id"] = fmt::format("{}_relay1", this->_mqtt_register_mac);
+    std::string relay1_data_str = relay1_data.dump();
+    MQTT_Manager::clear_retain(this->_mqtt_switch_relay1_topic);
+    SPDLOG_DEBUG("Registring relay1 as light for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
+    MQTT_Manager::publish(this->_mqtt_light_relay1_topic, relay1_data_str, true);
   }
 
   // Register relay2
@@ -687,7 +698,19 @@ void NSPanel::register_to_home_assistant() {
     SPDLOG_DEBUG("Registring relay2 as relay for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
     MQTT_Manager::publish(this->_mqtt_switch_relay2_topic, relay2_data_str, true);
   } else {
-    SPDLOG_ERROR("Relay2 as light is not implemented yet!");
+    nlohmann::json relay2_data = nlohmann::json(base_json);
+    relay2_data["device_class"] = "light";
+    relay2_data["name"] = "Relay 2";
+    relay2_data["state_topic"] = this->_mqtt_relay1_state_topic;
+    relay2_data["command_topic"] = this->_mqtt_relay1_command_topic;
+    relay2_data["state_template"] = "{% if value == 1 %}on{% else %}off{% endif %}";
+    relay2_data["command_on_template"] = "1";
+    relay2_data["command_off_template"] = "0";
+    relay2_data["unique_id"] = fmt::format("{}_relay1", this->_mqtt_register_mac);
+    std::string relay2_data_str = relay2_data.dump();
+    MQTT_Manager::clear_retain(this->_mqtt_switch_relay2_topic);
+    SPDLOG_DEBUG("Registring relay2 as light for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
+    MQTT_Manager::publish(this->_mqtt_light_relay2_topic, relay2_data_str, true);
   }
 
   // Register screen switch

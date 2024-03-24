@@ -57,7 +57,7 @@
             class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
             <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
               <div class="flex items-center ps-3">
-                <input id="is_not_use_panel" type="radio" value="" name="is_us_panel" value="False"
+                <input id="is_not_use_panel" type="radio" name="is_us_panel" value="False"
                 {% if settings.is_us_panel != "True" %}checked{% endif %}
                   class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
                 <label for="is_not_use_panel"
@@ -106,7 +106,7 @@
             class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
             <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
               <div class="flex items-center ps-3">
-                <input id="lock_to_default_room" type="radio" value="" name="lock_to_default_room" value="False"
+                <input id="lock_to_default_room" type="radio" name="lock_to_default_room" value="False"
                 {% if settings.lock_to_default_room != "True" %}checked{% endif %}
                   class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
                 <label for="lock_to_default_room"
@@ -152,7 +152,7 @@
             class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
             <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
               <div class="flex items-center ps-3">
-                <input id="do_not_reverse_relays" type="radio" value="" name="reverse_relays" value="False"
+                <input id="do_not_reverse_relays" type="radio" name="reverse_relays" value="False"
                 {% if settings.reverse_relays != "True" %}checked{% endif %}
                   class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
                 <label for="do_not_reverse_relays"
@@ -351,7 +351,7 @@
               class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
               <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
                 <div class="flex items-center ps-3">
-                  <input id="relay1_off" type="radio" value="" name="relay1_default_mode" value="False"
+                  <input id="relay1_off" type="radio" name="relay1_default_mode" value="False"
                   {% if settings.relay1_default_mode != "True" %}checked{% endif %}
                     class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
                   <label for="relay1_off"
@@ -376,7 +376,7 @@
               class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
               <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
                 <div class="flex items-center ps-3">
-                  <input id="relay2_off" type="radio" value="" name="relay2_default_mode" value="False"
+                  <input id="relay2_off" type="radio" name="relay2_default_mode" value="False"
                   {% if settings.relay2_default_mode != "True" %}checked{% endif %}
                     class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
                   <label for="relay2_off"
@@ -389,6 +389,60 @@
                   {% if settings.relay2_default_mode == "True" %}checked{% endif %}
                     class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
                   <label for="relay2_on" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">On</label>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Relay register as light -->
+        <div class="md:flex md:flex-wrap md:justify-between mt-4">
+          <!-- Relay 1 -->
+
+          <div class="flex-auto mr-1">
+            <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Register relay 1 as a</h3>
+            <ul
+              class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
+              <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+                <div class="flex items-center ps-3">
+                  <input id="relay1_is_not_light" type="radio" name="relay1_is_light" value="False"
+                  {% if settings.relay1_is_light != "True" %}checked{% endif %}
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  <label for="relay1_is_not_light"
+                    class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Switch</label>
+                </div>
+              </li>
+              <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+                <div class="flex items-center ps-3">
+                  <input id="relay1_is_light" type="radio" name="relay1_is_light" value="True"
+                  {% if settings.relay1_is_light == "True" %}checked{% endif %}
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  <label for="relay1_is_light" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Light</label>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Relay 2 -->
+          <div class="flex-auto ml-1">
+            <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Register relay 2 as a</h3>
+            <ul
+              class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
+              <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+                <div class="flex items-center ps-3">
+                  <input id="relay2_is_not_light" type="radio" name="relay2_is_light" value="False"
+                  {% if settings.relay2_is_light != "True" %}checked{% endif %}
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  <label for="relay2_is_not_light"
+                    class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Switch</label>
+                </div>
+              </li>
+              <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+                <div class="flex items-center ps-3">
+                  <input id="relay2_is_light" type="radio" name="relay2_is_light" value="True"
+                  {% if settings.relay2_is_light == "True" %}checked{% endif %}
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  <label for="relay2_is_light" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Light</label>
                 </div>
               </li>
             </ul>

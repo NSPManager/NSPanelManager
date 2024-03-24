@@ -73,9 +73,9 @@ void sendMqttManagerRegistrationRequest() {
   // Only send registration requests with a 3 second interval.
   if (MqttManager::connected() && millis() >= lastRegistrationRequest + 3000) {
     LOG_DEBUG("Sending MQTTManager register request.");
-    StaticJsonDocument<512> doc;
+    JsonDocument doc;
     doc["command"] = "register_request";
-    doc["mac_origin"] = WiFi.macAddress().c_str();
+    doc["mac_origin"] = WiFi.macAddress();
     doc["friendly_name"] = NSPMConfig::instance->wifi_hostname.c_str();
     doc["version"] = NSPanelManagerFirmwareVersion;
     doc["md5_firmware"] = NSPMConfig::instance->md5_firmware;
@@ -92,12 +92,14 @@ void sendMqttManagerRegistrationRequest() {
 
 void startAndManageWiFiAccessPoint() {
   for (;;) {
-    Serial.println("Starting AP!");
+    Serial.println("Setting Wifi mode to AP.");
     WiFi.mode(WIFI_MODE_AP);
     IPAddress local_ip(192, 168, 1, 1);
     IPAddress gateway(192, 168, 1, 1);
     IPAddress subnet(255, 255, 255, 0);
 
+    vTaskDelay(250 / portTICK_PERIOD_MS);
+    Serial.println("Starting AP!");
     if (WiFi.softAPConfig(local_ip, gateway, subnet)) {
       Serial.println("Soft-AP configuration applied.");
       if (WiFi.softAP("NSPMPanel", "password")) {
@@ -179,7 +181,7 @@ void taskManageWifiAndMqtt(void *param) {
           sendMqttManagerRegistrationRequest();
         }
         bool force_send_mqtt_update = false;
-        DynamicJsonDocument *status_report_doc = new DynamicJsonDocument(512);
+        JsonDocument *status_report_doc = new JsonDocument;
         if (NSPanel::instance->getUpdateState()) {
           force_send_mqtt_update = true;
           (*status_report_doc)["state"] = "updating_tft";
@@ -234,6 +236,9 @@ void taskManageWifiAndMqtt(void *param) {
 
 void setup() {
   Serial.begin(115200);
+  Serial.print("Starting NSPanel Manager firmware v. ");
+  Serial.println(NSPanelManagerFirmwareVersion);
+  vTaskDelay(250 / portTICK_PERIOD_MS);
   // Load config if any, and if it fails. Factory reset!
   if (!(config.init() && config.loadFromLittleFS())) {
     config.factoryReset();

@@ -8,35 +8,6 @@
   }
 }
 
-.nspanel-box {
-  padding: 0px;
-  height: 7rem;
-  min-width: 20rem;
-  position: relative;
-  animation: fadeIn 0.1s;
-}
-
-/* .accept-request-overlay {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  background: rgba(255, 255, 255, 0.97);
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-  border-radius: 0px 0px 6px 6px;
-} */
-
-.nspanel-status-header-await {
-  border-radius: 6px 6px 0px 0px;
-  min-height: 0.25rem;
-  overflow: hidden;
-  width: 100%;
-  animation: indeterminateAnimation 1s infinite linear;
-  transform-origin: 0% 50%;
-}
-
 @keyframes indeterminateAnimation {
   0% {
     transform: translateX(0) scaleX(0);
@@ -49,45 +20,4 @@
   100% {
     transform: translateX(100%) scaleX(0.5);
   }
-}
-
-.nspanel-status-header {
-  border-radius: 6px 6px 0px 0px;
-  min-height: 0.25rem;
-  margin: 0px;
-  padding: 0px;
-  overflow: hidden;
-  transition: width 1s;
-}
-
-.nspanel-status-footer {
-  border-radius: 6px 6px 0px 0px;
-  padding: 6px;
-  position: relative;
-  bottom: 6px;
-  min-width: 20rem;
-}
-
-.dropdown-trigger>span {
-  cursor: pointer;
-}
-
-.nspanel-actions-button {
-  position: absolute;
-  right: 0px;
-  bottom: 6px;
-}
-
-.nspanel-status-footer>.has-tooltip-warning {
-  position: absolute;
-  right: 40px;
-  bottom: 10px;
-}
-
-.nspanel-status-content-box {
-  padding: 6px;
-}
-
-.nspanel-status-content-box>.level {
-  margin: 0px;
 }

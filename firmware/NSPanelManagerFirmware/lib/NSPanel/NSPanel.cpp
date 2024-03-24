@@ -158,7 +158,7 @@ bool NSPanel::init() {
   this->_isUpdating = false;
   this->_update_progress = 0;
 
-  Serial2.setTxBufferSize(128);
+  Serial2.setTxBufferSize(256);
   Serial2.setRxBufferSize(256);
   Serial2.begin(115200, SERIAL_8N1, 17, 16);
   // Clear Serial2 read buffer

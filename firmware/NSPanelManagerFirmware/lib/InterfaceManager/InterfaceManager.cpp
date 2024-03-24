@@ -187,7 +187,7 @@ void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int len
 
 void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned int length) {
   std::string payload_str = std::string((char *)payload, length);
-  StaticJsonDocument<256> json;
+  JsonDocument json;
   DeserializationError error = deserializeJson(json, payload_str);
   if (error) {
     LOG_ERROR("Failed to serialize NSPanel command.");
@@ -335,7 +335,7 @@ bool InterfaceManager::_getPanelConfig() {
   return false;
 }
 
-bool InterfaceManager::_getRoomConfig(int room_id, DynamicJsonDocument *buffer) {
+bool InterfaceManager::_getRoomConfig(int room_id, JsonDocument *buffer) {
   WiFiClient client;
   unsigned long contentLength = 0;
   bool isValidContentType = false;

@@ -52,7 +52,7 @@ private:
   /// @brief Task handle used to indicate weather or not a special mode has already ben initialized
   static inline TaskHandle_t _taskHandleSpecialModeTimer;
   /// @brief Used temporarely to hold JSON-data from the server while initializing the panel
-  DynamicJsonDocument *_roomDataJson;
+  JsonDocument *_roomDataJson;
   /// @brief Try to download the configuration from the server
   /// @return True if sucessful, otherwise false
   bool _getPanelConfig();
@@ -60,7 +60,7 @@ private:
   /// @param room_id The ID of the room
   /// @param buffer The buffer to put the JSON-data in to
   /// @return True if sucessful, otherwise false
-  bool _getRoomConfig(int room_id, DynamicJsonDocument *buffer);
+  bool _getRoomConfig(int room_id, JsonDocument *buffer);
 
   bool _processMqttMessages;
 };

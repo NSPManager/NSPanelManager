@@ -32,7 +32,9 @@ void RoomManager::performConfigReload() {
 }
 
 void RoomManager::loadAllRooms(bool is_update) {
-  DynamicJsonDocument *roomData = new DynamicJsonDocument(2048);
+  bool save_new_config_to_littlefs_at_end = false;
+  bool reboot_after_config_saved = false;
+  JsonDocument *roomData = new JsonDocument;
   uint8_t tries = 0;
   bool successDownloadingConfig = false;
   do {
@@ -46,6 +48,10 @@ void RoomManager::loadAllRooms(bool is_update) {
     roomDataJsonUrl.append(WiFi.macAddress().c_str());
     successDownloadingConfig = HttpLib::DownloadJSON(roomDataJsonUrl.c_str(), roomData);
     roomDataJsonUrl.end();
+
+    if (roomData->size() == 0) {
+      successDownloadingConfig = false; // The HTTP call succeeded but we got no data, do not count it as a success
+    }
 
     if (!successDownloadingConfig) {
       tries++;
@@ -95,23 +101,34 @@ void RoomManager::loadAllRooms(bool is_update) {
   bool relay2_default_mode = (*roomData)["relay2_default_mode"].as<String>().equals("True");
 
   if (NSPMConfig::instance->relay1_default_mode != relay1_default_mode) {
+    LOG_INFO("Saving new relay 1 default mode: ", relay1_default_mode ? "ON" : "OFF");
     NSPMConfig::instance->relay1_default_mode = relay1_default_mode;
-    NSPMConfig::instance->saveToLittleFS();
+    save_new_config_to_littlefs_at_end = true;
   }
 
   if (NSPMConfig::instance->relay2_default_mode != relay2_default_mode) {
+    LOG_INFO("Saving new relay 2 default mode: ", relay2_default_mode ? "ON" : "OFF");
     NSPMConfig::instance->relay2_default_mode = relay2_default_mode;
-    NSPMConfig::instance->saveToLittleFS();
+    save_new_config_to_littlefs_at_end = true;
   }
 
   if (NSPMConfig::instance->wifi_hostname.compare((*roomData)["name"].as<String>().c_str()) != 0) {
+    save_new_config_to_littlefs_at_end = true;
+    reboot_after_config_saved = true;
     NSPMConfig::instance->wifi_hostname = (*roomData)["name"].as<String>().c_str();
-    NSPMConfig::instance->saveToLittleFS();
     LOG_DEBUG("Name has changed. Restarting.");
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-    ESP.restart();
-    vTaskDelay(portMAX_DELAY);
-    vTaskDelete(NULL);
+  }
+
+  if (save_new_config_to_littlefs_at_end) {
+    while (!NSPMConfig::instance->saveToLittleFS()) {
+      vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+
+    if (reboot_after_config_saved) {
+      ESP.restart();
+      vTaskDelay(portMAX_DELAY);
+      vTaskDelete(NULL);
+    }
   }
 
   // Load global scenes
@@ -203,7 +220,7 @@ void RoomManager::loadAllRooms(bool is_update) {
 }
 
 Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
-  DynamicJsonDocument *roomData = new DynamicJsonDocument(2048);
+  JsonDocument *roomData = new JsonDocument;
   uint8_t tries = 0;
   bool successDownloadingConfig = false;
   std::string roomDataJsonUrl = "http://";

@@ -13,7 +13,7 @@ std::string Scene::getName() {
 
 void Scene::activate() {
   LOG_INFO("Activating scene: ", this->id, "::", this->name.c_str());
-  StaticJsonDocument<512> doc;
+  JsonDocument doc;
   doc["command"] = "activate_scene";
   doc["mac_origin"] = WiFi.macAddress().c_str();
   doc["scene_id"] = this->getId();
@@ -25,7 +25,7 @@ void Scene::activate() {
 
 void Scene::save() {
   LOG_INFO("Saving scene: ", this->id, "::", this->name.c_str());
-  StaticJsonDocument<512> doc;
+  JsonDocument doc;
   doc["command"] = "save_scene";
   doc["mac_origin"] = WiFi.macAddress().c_str();
   doc["scene_id"] = this->getId();

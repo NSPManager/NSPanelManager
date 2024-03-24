@@ -73,7 +73,7 @@ String WebManager::processIndexTemplate(const String &templateVar) {
 }
 
 void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request) {
-  StaticJsonDocument<2048> config_json;
+  JsonDocument config_json;
 
   NSPMConfig::instance->wifi_hostname = request->arg("wifi_hostname").c_str();
   NSPMConfig::instance->wifi_ssid = request->arg("wifi_ssid").c_str();

@@ -1,6 +1,6 @@
 <template id="nspanel_index_box_template">
   <div
-    class="bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md"
+    class="bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md nspanel-box"
     id="panel_status_box">
     <div class="">
       <div class="bg-gray-500 min-h-1 overflow-hidden rounded-t-md w-full animate-pulse transition-all" id="panel_header"></div>
@@ -37,7 +37,7 @@
               status</span>
           </div>
           <!-- Warning indicator -->
-          <span class="flex shrink-0 w-3 h-3 mt-2 ms-1 me-2 bg-yellow-400 dark:bg-yellow-300 rounded-full hidden" id="nspanel_warning_indicator" data-popover-target="nspanel_warning_popover">
+          <span class="flex shrink-0 w-3 h-3 mt-2 ms-1 me-2 bg-yellow-400 dark:bg-yellow-300 rounded-full hidden transition-all duration-300" id="nspanel_warning_indicator" data-popover-target="nspanel_warning_popover">
             <!-- Warning popover-->
             <div data-popover id="nspanel_warning_popover" role="tooltip" class="absolute top-7 z-10 invisible inline-block w-60 md:w-96 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 dark:text-gray-400 dark:border-gray-600 dark:bg-gray-800">
               <div class="px-3 py-2 bg-gray-100 border-b border-gray-200 rounded-t-lg dark:border-gray-600 dark:bg-gray-700">

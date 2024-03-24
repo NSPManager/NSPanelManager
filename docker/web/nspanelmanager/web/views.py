@@ -194,7 +194,9 @@ def edit_nspanel(request, panel_id: int):
         "screensaver_mode": get_nspanel_setting_with_default(panel_id, "screensaver_mode", "global"),
         "reverse_relays": get_nspanel_setting_with_default(panel_id, "reverse_relays", "False"),
         "relay1_default_mode": get_nspanel_setting_with_default(panel_id, "relay1_default_mode", "False"),
+        "relay1_is_light": get_nspanel_setting_with_default(panel_id, "relay1_is_light", "False"),
         "relay2_default_mode": get_nspanel_setting_with_default(panel_id, "relay2_default_mode", "False"),
+        "relay2_is_light": get_nspanel_setting_with_default(panel_id, "relay2_is_light", "False"),
         "temperature_calibration": get_nspanel_setting_with_default(panel_id, "temperature_calibration", 0),
         "button1_custom_mqtt_topic": get_nspanel_setting_with_default(panel_id, "button1_mqtt_topic", ""),
         "button1_custom_mqtt_payload": get_nspanel_setting_with_default(panel_id, "button1_mqtt_payload", ""),
@@ -288,6 +290,10 @@ def save_panel_settings(request, panel_id: int):
         panel_id, "reverse_relays", request.POST["reverse_relays"])
     set_nspanel_setting_value(panel_id, "is_us_panel",
                               request.POST["is_us_panel"])
+    set_nspanel_setting_value(panel_id, "relay1_is_light",
+                              request.POST["relay1_is_light"])
+    set_nspanel_setting_value(panel_id, "relay2_is_light",
+                              request.POST["relay2_is_light"])
 
     panel.save()
     send_mqttmanager_reload_command()

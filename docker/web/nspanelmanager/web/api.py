@@ -431,9 +431,9 @@ def get_nspanel_config(request):
         base["reverse_relays"] = get_nspanel_setting_with_default(
             nspanel.id, "reverse_relays", False)
         base["relay1_default_mode"] = get_nspanel_setting_with_default(
-            nspanel.id, "relay1_default_mode", False)
+            nspanel.id, "relay1_default_mode", "False")
         base["relay2_default_mode"] = get_nspanel_setting_with_default(
-            nspanel.id, "relay2_default_mode", False)
+            nspanel.id, "relay2_default_mode", "False")
         base["temperature_calibration"] = float(
             get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0))
         base["button1_mode"] = nspanel.button1_mode

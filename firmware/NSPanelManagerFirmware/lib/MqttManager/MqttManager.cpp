@@ -184,7 +184,7 @@ bool MqttManager::_connect() {
   }
 
   // Build "offline" message used for last will
-  DynamicJsonDocument *offline_message_doc = new DynamicJsonDocument(512);
+  JsonDocument *offline_message_doc = new JsonDocument;
   (*offline_message_doc)["mac"] = WiFi.macAddress().c_str();
   (*offline_message_doc)["state"] = "offline";
   char offline_message_buffer[512];
@@ -192,7 +192,7 @@ bool MqttManager::_connect() {
   delete offline_message_doc;
 
   // Build "online" message used for last will
-  DynamicJsonDocument *online_message_doc = new DynamicJsonDocument(512);
+  JsonDocument *online_message_doc = new JsonDocument;
   (*online_message_doc)["mac"] = WiFi.macAddress().c_str();
   (*online_message_doc)["state"] = "online";
   char online_message_buffer[512];

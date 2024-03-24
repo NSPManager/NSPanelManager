@@ -34,7 +34,7 @@ bool NSPMConfig::loadFromLittleFS() {
     return false;
   }
 
-  StaticJsonDocument<2048> doc;
+  JsonDocument doc;
   DeserializationError error = deserializeJson(doc, configFile);
   configFile.close();
   if (error) {
@@ -123,34 +123,47 @@ bool NSPMConfig::loadFromLittleFS() {
 }
 
 bool NSPMConfig::saveToLittleFS() {
-  StaticJsonDocument<2048> config_json;
+  Serial.println("Performing a factory reset.");
+  JsonDocument config_json;
 
   config_json["wifi_hostname"] = this->wifi_hostname.c_str();
   config_json["wifi_ssid"] = this->wifi_ssid.c_str();
   config_json["wifi_psk"] = this->wifi_psk.c_str();
   config_json["mqtt_server"] = this->mqtt_server.c_str();
   config_json["mqtt_port"] = this->mqtt_port;
-  config_json["mqtt_username"] = this->mqtt_username;
-  config_json["mqtt_password"] = this->mqtt_password;
+  config_json["mqtt_username"] = this->mqtt_username.c_str();
+  config_json["mqtt_password"] = this->mqtt_password.c_str();
   config_json["log_level"] = this->logging_level;
-  config_json["md5_firmware"] = this->md5_firmware;
-  config_json["md5_data_file"] = this->md5_data_file;
-  config_json["md5_tft_file"] = this->md5_tft_file;
+  config_json["md5_firmware"] = this->md5_firmware.c_str();
+  config_json["md5_data_file"] = this->md5_data_file.c_str();
+  config_json["md5_tft_file"] = this->md5_tft_file.c_str();
   config_json["upload_baud"] = this->tft_upload_baud;
   config_json["use_new_upload_protocol"] = this->use_new_upload_protocol ? "true" : "false";
+  config_json["relay1_default_mode"] = this->relay1_default_mode ? "True" : "False";
+  config_json["relay2_default_mode"] = this->relay2_default_mode ? "True" : "False";
 
-  File config_file = LittleFS.open("/config.json", "w");
+  Serial.println("Serializing JSON");
+  String config_string;
+  size_t error = serializeJson(config_json, config_string);
+  if (error == 0) {
+    Serial.println("Failed to serialize JSON!");
+    LOG_ERROR("Failed to serialize JSON!");
+  }
+
+  File config_file = LittleFS.open("/config.json", FILE_WRITE);
   if (!config_file) {
     Serial.println("Failed to open 'config.json' for writing.");
     LOG_ERROR("Failed to open 'config.json' for writing.");
-  } else if (serializeJson(config_json, config_file) == 0) {
-    LOG_ERROR("Failed to save config file.");
-    Serial.println("Failed to save config file.");
-  } else {
-    LOG_INFO("Saved config file.");
-    Serial.println("Saved config file.");
+    return false;
   }
+
+  Serial.println("Writing the following the config:");
+  Serial.println(config_string);
+  config_file.print(config_string);
   config_file.close();
+
+  Serial.println("Config saved.");
+  LOG_INFO("Config saved.");
 
   return true;
 }
