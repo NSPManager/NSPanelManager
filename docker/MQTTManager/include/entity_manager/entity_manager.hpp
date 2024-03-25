@@ -121,7 +121,7 @@ private:
 
   static bool _process_message(const std::string &topic, const std::string &payload);
   static void _handle_register_request(const nlohmann::json &data);
-  static inline std::list<NSPanel *> _nspanels;
+  static inline std::vector<NSPanel *> _nspanels;
   static inline std::mutex _nspanels_mutex;
   static inline MQTTManagerWeather _weather_manager;
 

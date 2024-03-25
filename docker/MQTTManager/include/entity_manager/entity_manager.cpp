@@ -27,7 +27,7 @@
 #include <string>
 #include <sys/types.h>
 
-#define ITEM_IN_LIST(list, item) (std::find(list.begin(), list.end(), item) != list.end());
+#define ITEM_IN_LIST(list, item) (std::find(list.cbegin(), list.cend(), item) != list.end());
 
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
   ((std::string *)userp)->append((char *)contents, size * nmemb);
@@ -149,15 +149,15 @@ void EntityManager::post_init_entities() {
     // Check for any removed nspanels
     SPDLOG_DEBUG("Checking for removed NSPanels.");
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
-    auto rit = EntityManager::_nspanels.cbegin();
-    while (rit != EntityManager::_nspanels.cend()) {
-      if ((*rit)->has_registered_to_manager()) {
-        bool exists = ITEM_IN_LIST(nspanel_ids, (*rit)->get_id());
+    for (int i = 0; i < EntityManager::_nspanels.size(); i++) {
+      auto rit = EntityManager::_nspanels[i];
+      if (rit->has_registered_to_manager()) {
+        bool exists = ITEM_IN_LIST(nspanel_ids, rit->get_id());
 
         if (!exists) {
-          NSPanel *panel = (*rit);
+          NSPanel *panel = rit;
           SPDLOG_DEBUG("Removing NSPanel {}::{} as it doesn't exist in config anymore.", panel->get_id(), panel->get_name());
-          EntityManager::_nspanels.erase(rit++);
+          EntityManager::_nspanels.erase(EntityManager::_nspanels.begin() + i);
           delete panel;
         } else {
           rit++;
@@ -185,21 +185,21 @@ void EntityManager::post_init_entities() {
 
     // Check for any removed lights
     SPDLOG_DEBUG("Checking for removed lights.");
-    auto rit = EntityManager::_entities.cbegin();
-    while (rit != EntityManager::_entities.cend()) {
-      if ((*rit)->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
+    for (int i = 0; i < EntityManager::_entities.size(); i++) {
+      auto rit = EntityManager::_entities[i];
+      if (rit->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
         bool exists = false;
         for (int light_id : light_ids) {
-          if (light_id == (*rit)->get_id()) {
+          if (light_id == rit->get_id()) {
             exists = true;
             break;
           }
         }
 
         if (!exists) {
-          SPDLOG_DEBUG("Removing Light {}::{} as it doesn't exist in config anymore.", (*rit)->get_id(), ((Light *)(*rit))->get_name());
-          Light *light = (Light *)(*rit);
-          EntityManager::_entities.erase(rit++);
+          Light *light = (Light *)rit;
+          SPDLOG_DEBUG("Removing Light {}::{} as it doesn't exist in config anymore.", light->get_id(), light->get_name());
+          EntityManager::_entities.erase(EntityManager::_entities.begin() + i);
           delete light;
           SPDLOG_DEBUG("Light removed successfully.");
         } else {
@@ -235,21 +235,21 @@ void EntityManager::post_init_entities() {
     // Check for any removed rooms
     SPDLOG_DEBUG("Checking for removed rooms.");
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-    auto rit = EntityManager::_entities.begin();
-    while (rit != EntityManager::_entities.end()) {
-      if ((*rit)->get_type() == MQTT_MANAGER_ENTITY_TYPE::ROOM) {
+    for (int i = 0; i < EntityManager::_entities.size(); i++) {
+      auto rit = EntityManager::_entities[i];
+      if (rit->get_type() == MQTT_MANAGER_ENTITY_TYPE::ROOM) {
         bool exists = false;
         for (int room_id : room_ids) {
-          if (room_id == (*rit)->get_id()) {
+          if (room_id == rit->get_id()) {
             exists = true;
             break;
           }
         }
 
         if (!exists) {
-          SPDLOG_DEBUG("Removing room with id {} as it doesn't exist in config anymore.", (*rit)->get_id());
-          MqttManagerEntity *room = (*rit);
-          EntityManager::_entities.erase(rit++);
+          SPDLOG_DEBUG("Removing room with id {} as it doesn't exist in config anymore.", rit->get_id());
+          MqttManagerEntity *room = rit;
+          EntityManager::_entities.erase(EntityManager::_entities.begin() + i);
           delete room;
           SPDLOG_DEBUG("Room removed successfully.");
         } else {
@@ -274,21 +274,21 @@ void EntityManager::post_init_entities() {
     // Check for any removed lights
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     SPDLOG_DEBUG("Checking for removed relay groups.");
-    auto rit = EntityManager::_entities.begin();
-    while (rit != EntityManager::_entities.end()) {
-      if ((*rit)->get_type() == MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP) {
+    for (int i = 0; i < EntityManager::_entities.size(); i++) {
+      auto rit = EntityManager::_entities[i];
+      if (rit->get_type() == MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP) {
         bool exists = false;
         for (int rg_id : relay_group_ids) {
-          if (rg_id == (*rit)->get_id()) {
+          if (rg_id == rit->get_id()) {
             exists = true;
             break;
           }
         }
 
         if (!exists) {
-          SPDLOG_DEBUG("Removing relay group with id {} as it doesn't exist in config anymore.", (*rit)->get_id());
-          MqttManagerEntity *rg = (*rit);
-          EntityManager::_entities.erase(rit++);
+          SPDLOG_DEBUG("Removing relay group with id {} as it doesn't exist in config anymore.", rit->get_id());
+          MqttManagerEntity *rg = rit;
+          EntityManager::_entities.erase(EntityManager::_entities.begin() + i);
           delete rg;
           SPDLOG_DEBUG("Relay group removed successfully.");
         } else {
@@ -313,21 +313,21 @@ void EntityManager::post_init_entities() {
     // Check for any removed lights
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     SPDLOG_DEBUG("Checking for removed scenes.");
-    auto rit = EntityManager::_entities.begin();
-    while (rit != EntityManager::_entities.end()) {
-      if ((*rit)->get_type() == MQTT_MANAGER_ENTITY_TYPE::SCENE) {
+    for (int i = 0; i < EntityManager::_entities.size(); i++) {
+      auto rit = EntityManager::_entities[i];
+      if (rit->get_type() == MQTT_MANAGER_ENTITY_TYPE::SCENE) {
         bool exists = false;
         for (int scene_id : scene_ids) {
-          if (scene_id == (*rit)->get_id()) {
+          if (scene_id == rit->get_id()) {
             exists = true;
             break;
           }
         }
 
         if (!exists) {
-          SPDLOG_DEBUG("Removing scene with id {} as it doesn't exist in config anymore.", (*rit)->get_id());
-          MqttManagerEntity *scene = (*rit);
-          EntityManager::_entities.erase(rit++);
+          SPDLOG_DEBUG("Removing scene with id {} as it doesn't exist in config anymore.", rit->get_id());
+          MqttManagerEntity *scene = rit;
+          EntityManager::_entities.erase(EntityManager::_entities.begin() + i);
           delete scene;
           SPDLOG_DEBUG("Relay group removed successfully.");
         } else {
