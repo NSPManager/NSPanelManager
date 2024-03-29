@@ -179,8 +179,8 @@ def get_nspanel_json_representation(panel):
         "name": panel.friendly_name,
         "is_us_panel": get_nspanel_setting_with_default(panel.id, "is_us_panel", "False") == "True",
         "address": panel.ip_address,
-        "relay1_is_light": panel.register_relay1_as_light,
-        "relay2_is_light": panel.register_relay2_as_light
+        "relay1_is_light": get_nspanel_setting_with_default(panel.id, "relay1_is_light", "False") == "True",
+        "relay2_is_light": get_nspanel_setting_with_default(panel.id, "relay2_is_light", "False") == "True"
     }
     return panel_config
 

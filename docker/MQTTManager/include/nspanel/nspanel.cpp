@@ -141,16 +141,15 @@ void NSPanel::update_config(nlohmann::json &init_data) {
   } else {
     SPDLOG_DEBUG("Loaded NSPanel {} with no ID.", this->_name);
   }
-  if (init_data.contains("relay1_is_light")) {
-    this->_relay1_is_mqtt_light = init_data["relay1_is_light"];
-  } else {
-    this->_relay1_is_mqtt_light = false;
+  if (this->_relay1_is_mqtt_light != init_data["relay1_is_light"]) {
+    rebuilt_mqtt = true;
   }
-  if (init_data.contains("relay2_is_light")) {
-    this->_relay2_is_mqtt_light = init_data["relay2_is_light"];
-  } else {
-    this->_relay2_is_mqtt_light = false;
+  this->_relay1_is_mqtt_light = init_data["relay1_is_light"];
+
+  if (this->_relay2_is_mqtt_light != init_data["relay2_is_light"]) {
+    rebuilt_mqtt = true;
   }
+  this->_relay2_is_mqtt_light = init_data["relay2_is_light"];
 
   if (rebuilt_mqtt) {
     this->reset_mqtt_topics();
@@ -671,9 +670,9 @@ void NSPanel::register_to_home_assistant() {
     relay1_data["name"] = "Relay 1";
     relay1_data["state_topic"] = this->_mqtt_relay1_state_topic;
     relay1_data["command_topic"] = this->_mqtt_relay1_command_topic;
-    relay1_data["state_template"] = "{% if value == 1 %}on{% else %}off{% endif %}";
-    relay1_data["command_on_template"] = "1";
-    relay1_data["command_off_template"] = "0";
+    // relay1_data["state_template"] = "{% if value == 1 %}on{% else %}off{% endif %}";
+    relay1_data["payload_on"] = "1";
+    relay1_data["payload_off"] = "0";
     relay1_data["unique_id"] = fmt::format("{}_relay1", this->_mqtt_register_mac);
     std::string relay1_data_str = relay1_data.dump();
     MQTT_Manager::clear_retain(this->_mqtt_switch_relay1_topic);
@@ -682,7 +681,7 @@ void NSPanel::register_to_home_assistant() {
   }
 
   // Register relay2
-  if (!this->_relay1_is_mqtt_light) {
+  if (!this->_relay2_is_mqtt_light) {
     nlohmann::json relay2_data = nlohmann::json(base_json);
     relay2_data["device_class"] = "switch";
     relay2_data["name"] = "Relay 2";
@@ -701,12 +700,12 @@ void NSPanel::register_to_home_assistant() {
     nlohmann::json relay2_data = nlohmann::json(base_json);
     relay2_data["device_class"] = "light";
     relay2_data["name"] = "Relay 2";
-    relay2_data["state_topic"] = this->_mqtt_relay1_state_topic;
-    relay2_data["command_topic"] = this->_mqtt_relay1_command_topic;
-    relay2_data["state_template"] = "{% if value == 1 %}on{% else %}off{% endif %}";
-    relay2_data["command_on_template"] = "1";
-    relay2_data["command_off_template"] = "0";
-    relay2_data["unique_id"] = fmt::format("{}_relay1", this->_mqtt_register_mac);
+    relay2_data["state_topic"] = this->_mqtt_relay2_state_topic;
+    relay2_data["command_topic"] = this->_mqtt_relay2_command_topic;
+    // relay2_data["state_template"] = "{% if value == 1 %}on{% else %}off{% endif %}";
+    relay2_data["payload_on"] = "1";
+    relay2_data["payload_off"] = "0";
+    relay2_data["unique_id"] = fmt::format("{}_relay2", this->_mqtt_register_mac);
     std::string relay2_data_str = relay2_data.dump();
     MQTT_Manager::clear_retain(this->_mqtt_switch_relay2_topic);
     SPDLOG_DEBUG("Registring relay2 as light for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);

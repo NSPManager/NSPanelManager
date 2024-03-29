@@ -22,7 +22,7 @@ void ButtonManager::init() {
   LOG_DEBUG("Setting relay 1 to default state: ", NSPMConfig::instance->relay1_default_mode ? "ON" : "OFF");
   ButtonManager::setRelayState(1, NSPMConfig::instance->relay1_default_mode);
   LOG_DEBUG("Setting relay 2 to default state: ", NSPMConfig::instance->relay2_default_mode ? "ON" : "OFF");
-  ButtonManager::setRelayState(2, NSPMConfig::instance->relay1_default_mode);
+  ButtonManager::setRelayState(2, NSPMConfig::instance->relay2_default_mode);
 
   xTaskCreatePinnedToCore(ButtonManager::_loop, "_taskButtonManagerLoop", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 
