@@ -120,15 +120,24 @@ void NSPanel::update_config(nlohmann::json &init_data) {
   } else {
     SPDLOG_ERROR("Creating new NSPanel with no known MAC!");
   }
-  this->_ip_address = init_data["address"];
+
+  if (init_data.contains("address")) {
+    this->_ip_address = init_data["address"];
+  } else {
+    SPDLOG_ERROR("Received init data for panel but no address was specified. Will set default ''.");
+    this->_ip_address = "";
+  }
+
   if (init_data.contains(("is_us_panel"))) {
     this->_is_us_panel = init_data["is_us_panel"];
   } else {
     this->_is_us_panel = false;
   }
+
   if (!init_data.contains("id")) {
     this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
   }
+
   if (this->_state == MQTT_MANAGER_NSPANEL_STATE::OFFLINE || this->_state == MQTT_MANAGER_NSPANEL_STATE::UNKNOWN) {
     this->_rssi = -255;
     this->_heap_used_pct = 0;
@@ -136,20 +145,26 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->_temperature = -255;
     this->_update_progress = 0;
   }
+
   if (init_data.contains("id")) {
     SPDLOG_DEBUG("Loaded NSPanel {}::{}.", this->_id, this->_name);
   } else {
     SPDLOG_DEBUG("Loaded NSPanel {} with no ID.", this->_name);
   }
-  if (this->_relay1_is_mqtt_light != init_data["relay1_is_light"]) {
-    rebuilt_mqtt = true;
-  }
-  this->_relay1_is_mqtt_light = init_data["relay1_is_light"];
 
-  if (this->_relay2_is_mqtt_light != init_data["relay2_is_light"]) {
+  if (init_data.contains("relay1_is_light")) {
+    this->_relay1_is_mqtt_light = init_data["relay1_is_light"];
     rebuilt_mqtt = true;
+  } else {
+    this->_relay1_is_mqtt_light = false;
   }
-  this->_relay2_is_mqtt_light = init_data["relay2_is_light"];
+
+  if (init_data.contains("relay2_is_light")) {
+    this->_relay2_is_mqtt_light = init_data["relay2_is_light"];
+    rebuilt_mqtt = true;
+  } else {
+    this->_relay2_is_mqtt_light = false;
+  }
 
   if (rebuilt_mqtt) {
     this->reset_mqtt_topics();
