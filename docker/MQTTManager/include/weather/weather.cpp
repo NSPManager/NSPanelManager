@@ -1,42 +1,28 @@
 #include "weather.hpp"
 #include "home_assistant_manager/home_assistant_manager.hpp"
-#include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "openhab_manager/openhab_manager.hpp"
 #include <bits/types/time_t.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/bind.hpp>
-#include <cstdint>
 #include <cstdlib>
 #include <ctime>
+#include <curl/curl.h>
 #include <fmt/core.h>
-#include <math.h>
+#include <mqtt_manager/mqtt_manager.hpp>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
-#include <vector>
+
+void MQTTManagerWeather::init() {
+  MQTTManagerWeather::_update_forecast_thread = std::thread(MQTTManagerWeather::_update_forecast);
+
+  MQTTManagerWeather::_update_forecast_thread.join();
+}
 
 void MQTTManagerWeather::update_config() {
-  if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
-    SPDLOG_INFO("Initializing weather controller for Home Assistant.");
-    HomeAssistantManager::attach_event_observer(MqttManagerConfig::home_assistant_weather_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
-    HomeAssistantManager::attach_event_observer(MqttManagerConfig::home_assistant_sun_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
-    OpenhabManager::detach_event_observer(MqttManagerConfig::openhab_current_weather_item, boost::bind(&MQTTManagerWeather::openhab_current_weather_callback, this, _1));
-    OpenhabManager::detach_event_observer(MqttManagerConfig::openhab_forecast_weather_item, boost::bind(&MQTTManagerWeather::openhab_forecast_weather_callback, this, _1));
-  } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
-    SPDLOG_INFO("Initializing weather controller for OpenHAB.");
-    SPDLOG_DEBUG("Current weather item: {}", MqttManagerConfig::openhab_current_weather_item);
-    SPDLOG_DEBUG("Forecast weather item: {}", MqttManagerConfig::openhab_forecast_weather_item);
-    HomeAssistantManager::detach_event_observer(MqttManagerConfig::home_assistant_weather_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
-    HomeAssistantManager::detach_event_observer(MqttManagerConfig::home_assistant_sun_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
-    OpenhabManager::attach_event_observer(MqttManagerConfig::openhab_current_weather_item, boost::bind(&MQTTManagerWeather::openhab_current_weather_callback, this, _1));
-    OpenhabManager::attach_event_observer(MqttManagerConfig::openhab_forecast_weather_item, boost::bind(&MQTTManagerWeather::openhab_forecast_weather_callback, this, _1));
-  } else {
-    SPDLOG_ERROR("Unsupported weather controller '{}'.", MqttManagerConfig::weather_controller);
-  }
-
   if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0) {
     SPDLOG_INFO("Will load outside temperature from Home Assistant sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
     HomeAssistantManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
@@ -51,122 +37,53 @@ void MQTTManagerWeather::update_config() {
 }
 
 void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data) {
-  if (std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::home_assistant_weather_entity) == 0) {
-    nlohmann::json new_state = event_data["event"]["data"]["new_state"];
-
-    this->_forecast_weather_info.clear();
-    for (nlohmann::json forecast : new_state["attributes"]["forecast"]) {
-      weather_info info;
-      SPDLOG_DEBUG("Loading weather forecast for {}", std::string(forecast["datetime"]));
-      info.condition = forecast["condition"];
-      info.wind_speed = forecast["wind_speed"];
-      info.precipitation = forecast["precipitation"];
-      info.precipitation_probability = forecast["precipitation_probability"];
-      info.temperature_low = forecast["templow"];
-      info.temperature_high = forecast["temperature"];
-
-      // Get day of week
-      std::string datetime = forecast["datetime"];
-      std::vector<std::string> datetime_parts;
-      size_t pos = datetime.find("T");
-      std::string date = datetime.substr(0, pos);
-      std::string year = date.substr(0, date.find("-"));
-      date.erase(0, date.find("-") + 1);
-      std::string month = date.substr(0, date.find("-"));
-      date.erase(0, date.find("-") + 1);
-      std::string day_of_month = date;
-
-      std::tm tm = {01, 00, 00, atoi(day_of_month.c_str()), atoi(month.c_str()) - 1, atoi(year.c_str()) - 1900};
-      std::time_t utc_time = std::mktime(&tm);
-      const std::tm *localtime = std::localtime(&utc_time);
-      info.time = *localtime;
-
-      switch (localtime->tm_wday) {
-      case 0:
-        info.day = "Sun";
-        break;
-      case 1:
-        info.day = "Mon";
-        break;
-      case 2:
-        info.day = "Tue";
-        break;
-      case 3:
-        info.day = "Wed";
-        break;
-      case 4:
-        info.day = "Thu";
-        break;
-      case 5:
-        info.day = "Fri";
-        break;
-      case 6:
-        info.day = "Sat";
-        break;
-      default:
-        info.day = std::to_string(localtime->tm_wday);
-        break;
-      }
-
-      this->_forecast_weather_info.push_back(info);
-    }
-
-    SPDLOG_DEBUG("Loaded forecast for {} days.", this->_forecast_weather_info.size());
-
-    if (this->_forecast_weather_info.size() > 0) {
-      if (MqttManagerConfig::outside_temp_sensor_provider.length() == 0 && MqttManagerConfig::outside_temp_sensor_entity_id.length() == 0) {
-        this->_current_temperature = new_state["attributes"]["temperature"];
-      }
-      this->_current_condition = this->_forecast_weather_info[0].condition;
-      this->_current_precipitation_probability = this->_forecast_weather_info[0].precipitation_probability;
-      this->_current_wind_speed = new_state["attributes"]["wind_speed"];
-      this->_windspeed_unit = new_state["attributes"]["wind_speed_unit"];
-      this->_precipitation_unit = new_state["attributes"]["precipitation_unit"];
-      this->_current_min_temperature = this->_forecast_weather_info[0].temperature_low;
-      this->_current_max_temperature = this->_forecast_weather_info[0].temperature_high;
-      std::time_t time = std::time({});
-      this->_current_weather_time = *std::localtime(&time);
-      this->send_state_update();
-    } else {
-      SPDLOG_ERROR("Failed to process forecast information from Home Assistant.");
-      return;
-    }
-
-    return;
-  } else if (std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::home_assistant_sun_entity) == 0) {
-    std::string next_rising = event_data["event"]["data"]["new_state"]["attributes"]["next_rising"];
-    std::string next_setting = event_data["event"]["data"]["new_state"]["attributes"]["next_setting"];
-
-    // Get time parts from sunrise
-    std::string rising_date = next_rising.substr(0, next_rising.find("T"));
-    next_rising.erase(0, next_rising.find("T") + 1);
-    std::string rising_time = next_rising.substr(0, next_rising.find("+"));
-    next_rising.erase(0, next_rising.find("+") + 1);
-
-    std::string rising_hour = rising_time.substr(0, rising_time.find(":"));
-    rising_time.erase(0, rising_time.find(":") + 1);
-    std::string rising_minute = rising_time.substr(0, rising_time.find(":"));
-    rising_time.erase(0, rising_time.find(":") + 1);
-
-    // Get time parts from sunrise
-    std::string setting_date = next_setting.substr(0, next_setting.find("T"));
-    next_setting.erase(0, next_setting.find("T") + 1);
-    std::string setting_time = next_setting.substr(0, next_setting.find("+"));
-    next_setting.erase(0, next_setting.find("+") + 1);
-
-    std::string setting_hour = setting_time.substr(0, setting_time.find(":"));
-    setting_time.erase(0, setting_time.find(":") + 1);
-    std::string setting_minute = setting_time.substr(0, setting_time.find(":"));
-    setting_time.erase(0, setting_time.find(":") + 1);
-
-    this->_next_sunrise_hour = atoi(rising_hour.c_str());
-    this->_next_sunrise = fmt::format("{}:{}", rising_hour, rising_minute);
-    this->_next_sunset_hour = atoi(setting_hour.c_str());
-    this->_next_sunset = fmt::format("{}:{}", setting_hour, setting_minute);
-  } else if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0 && std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::outside_temp_sensor_entity_id) == 0) {
+  if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0 && std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::outside_temp_sensor_entity_id) == 0) {
     nlohmann::json new_state = event_data["event"]["data"]["new_state"];
     this->_current_temperature = atof(std::string(new_state["state"]).c_str());
     this->send_state_update();
+  }
+}
+
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+  ((std::string *)userp)->append((char *)contents, size * nmemb);
+  return size * nmemb;
+}
+
+void MQTTManagerWeather::_update_forecast() {
+  SPDLOG_INFO("Starting 'Update Forecast' thread.");
+  while (true) {
+    SPDLOG_DEBUG("Fetching new weather forecast.");
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+    if (curl) {
+      std::string response_data;
+      curl_easy_setopt(curl, CURLOPT_URL, "https://api.openweathermap.org/data/2.5/forecast?lat=44.34&lon=10.99&appid=4ff881e8b20a81abe808164d88816a6a");
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
+
+      /* Perform the request, res will get the return code */
+      SPDLOG_DEBUG("Requesting weather.");
+      res = curl_easy_perform(curl);
+      long http_code;
+      SPDLOG_DEBUG("Gathering response code.");
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+      /* Check for errors */
+      if (res == CURLE_OK && http_code == 200) {
+        SPDLOG_DEBUG("Got response: {}", response_data);
+      } else {
+        SPDLOG_ERROR("Failed to fetch weather forecast. CURL error: {}", curl_easy_strerror(res));
+      }
+
+      /* always cleanup */
+      SPDLOG_DEBUG("Cleanup.");
+      curl_easy_cleanup(curl);
+    } else {
+      SPDLOG_ERROR("Failed to create curl object.");
+    }
+    SPDLOG_DEBUG("Weather fetched, will try again in 1 minute.");
+    std::this_thread::sleep_for(std::chrono::milliseconds(60000)); // Fetch new forecast every minute TODO: Change this to something more reasonable
   }
 }
 
