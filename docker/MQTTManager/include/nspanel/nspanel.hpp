@@ -53,6 +53,10 @@ public:
   void update_config(nlohmann::json &init_data);
   ~NSPanel();
   void reset_mqtt_topics();
+  /**
+   * Reset MQTT topics used to register entities to HA.
+   */
+  void reset_ha_mqtt_topics();
 
   /**
    * Get the ID of this NSPanel.

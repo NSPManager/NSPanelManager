@@ -132,8 +132,6 @@ int main(void) {
     SPDLOG_WARN("OpenHAB address and/or token missing. Won't start OpenHAB component.");
   }
 
-  MQTTManagerWeather::init();
-
   // Wait for threads to exit
   mqtt_manager_thread.join();
   if (home_assistant_manager_thread.joinable()) {

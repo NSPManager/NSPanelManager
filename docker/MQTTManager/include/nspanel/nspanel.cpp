@@ -100,15 +100,18 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->_is_register_accepted = true;
   }
 
-  bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
+  bool rebuilt_mqtt = false;    // Wether or not to rebuild mqtt topics and subscribe to the new topics.
+  bool rebuilt_ha_mqtt = false; // Wether or not to rebuild mqtt topics for HA entity discovery.
   if (init_data.contains("name")) {
     if (this->_name.compare(init_data["name"]) != 0) {
       rebuilt_mqtt = true;
+      rebuilt_ha_mqtt = true;
     }
     this->_name = init_data["name"];
   } else if (init_data.contains("friendly_name")) {
     if (this->_name.compare(init_data["friendly_name"]) != 0) {
       rebuilt_mqtt = true;
+      rebuilt_ha_mqtt = true;
     }
     this->_name = init_data["friendly_name"];
   }
@@ -154,16 +157,18 @@ void NSPanel::update_config(nlohmann::json &init_data) {
 
   if (init_data.contains("relay1_is_light")) {
     this->_relay1_is_mqtt_light = init_data["relay1_is_light"];
-    rebuilt_mqtt = true;
+    rebuilt_ha_mqtt = true;
   } else {
     this->_relay1_is_mqtt_light = false;
+    rebuilt_ha_mqtt = true;
   }
 
   if (init_data.contains("relay2_is_light")) {
     this->_relay2_is_mqtt_light = init_data["relay2_is_light"];
-    rebuilt_mqtt = true;
+    rebuilt_ha_mqtt = true;
   } else {
     this->_relay2_is_mqtt_light = false;
+    rebuilt_ha_mqtt = true;
   }
 
   if (rebuilt_mqtt) {
@@ -195,6 +200,11 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->register_to_home_assistant();
   }
 
+  if (!rebuilt_mqtt && rebuilt_ha_mqtt) {
+    this->reset_ha_mqtt_topics();
+    this->register_to_home_assistant();
+  }
+
   if (this->_has_registered_to_manager) {
     // If this NSPanel is registered to manager, listen to state topics.
     MQTT_Manager::subscribe(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
@@ -223,6 +233,11 @@ void NSPanel::reset_mqtt_topics() {
   // This nspanel was removed. Clear any retain on any MQTT topic.
   MQTT_Manager::clear_retain(this->_mqtt_status_topic);
   MQTT_Manager::clear_retain(this->_mqtt_command_topic);
+
+  this->reset_ha_mqtt_topics();
+}
+
+void NSPanel::reset_ha_mqtt_topics() {
   MQTT_Manager::clear_retain(this->_mqtt_light_relay1_topic);
   MQTT_Manager::clear_retain(this->_mqtt_light_relay2_topic);
   MQTT_Manager::clear_retain(this->_mqtt_switch_relay1_topic);
@@ -755,7 +770,7 @@ void NSPanel::register_to_home_assistant() {
 
   // Register screensaver brightness
   nlohmann::json screensaver_brightness_data = nlohmann::json(base_json);
-  screensaver_brightness_data["name"] = "Screen brightness";
+  screensaver_brightness_data["name"] = "Screensaver brightness";
   screensaver_brightness_data["command_topic"] = fmt::format("nspanel/{}/brightness_screensaver", this->_name);
   screensaver_brightness_data["min"] = "0";
   screensaver_brightness_data["max"] = "100";

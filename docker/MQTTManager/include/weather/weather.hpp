@@ -7,7 +7,6 @@
 
 class MQTTManagerWeather {
 public:
-  static void init();
   void update_config();
   void home_assistant_event_callback(nlohmann::json event_data);
   void openhab_current_weather_callback(nlohmann::json event_data);
@@ -17,16 +16,10 @@ public:
 
 private:
   std::string _get_icon_from_mapping(std::string &condition, uint8_t hour);
-  static void _update_forecast();
-  static void _process_forecast_data();
-  static void _update_current_weather();
-
-  static inline std::thread _update_current_weather_thread;
-  static inline std::thread _update_forecast_thread;
 
   struct weather_info {
     std::string condition;
-    int condition_id;
+    int condition_id; // Only used for OpenHAB/OpenWeatherMap
     std::string day;
     std::tm time;
     std::tm sunrise;
