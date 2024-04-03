@@ -552,8 +552,8 @@ void NSPanel::update_warnings_from_manager() {
         nlohmann::json data = nlohmann::json::parse(response_data);
         for (nlohmann::json panel : data["panels"]) {
           if (std::string(panel["nspanel"]["mac"]).compare(this->_mac) == 0) {
-            SPDLOG_DEBUG("Found warnings from manager matching MAC {}", this->_mac);
             this->_nspanel_warnings_from_manager = panel["warnings"];
+            SPDLOG_DEBUG("Found warnings {} from manager matching MAC {}.", this->_nspanel_warnings_from_manager.size(), this->_mac);
             break;
           }
         }
