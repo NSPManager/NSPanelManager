@@ -156,6 +156,7 @@ void EntityManager::post_init_entities() {
 
         if (!exists) {
           NSPanel *panel = rit;
+          rit->erase();
           SPDLOG_DEBUG("Removing NSPanel {}::{} as it doesn't exist in config anymore.", panel->get_id(), panel->get_name());
           EntityManager::_nspanels.erase(EntityManager::_nspanels.begin() + i);
           delete panel;

@@ -104,13 +104,13 @@ void NSPanel::update_config(nlohmann::json &init_data) {
   if (init_data.contains("name")) {
     if (this->_name.compare(init_data["name"]) != 0) {
       rebuilt_mqtt = true;
-      this->send_reboot_command();
+      this->reboot();
     }
     this->_name = init_data["name"];
   } else if (init_data.contains("friendly_name")) {
     if (this->_name.compare(init_data["friendly_name"]) != 0) {
       rebuilt_mqtt = true;
-      this->send_reboot_command();
+      this->reboot();
     }
     this->_name = init_data["friendly_name"];
   }
@@ -209,7 +209,6 @@ void NSPanel::update_config(nlohmann::json &init_data) {
 
 NSPanel::~NSPanel() {
   SPDLOG_INFO("Destroying NSPanel {}::{}", this->_id, this->_name);
-  this->reset_mqtt_topics();
 }
 
 void NSPanel::reset_mqtt_topics() {
@@ -236,6 +235,11 @@ void NSPanel::reset_ha_mqtt_topics() {
   MQTT_Manager::clear_retain(this->_mqtt_sensor_temperature_topic);
   MQTT_Manager::clear_retain(this->_mqtt_number_screen_brightness_topic);
   MQTT_Manager::clear_retain(this->_mqtt_number_screensaver_brightness_topic);
+}
+
+void NSPanel::erase() {
+  this->reboot();
+  this->reset_mqtt_topics();
 }
 
 uint NSPanel::get_id() {
@@ -482,13 +486,6 @@ void NSPanel::send_reload_command() {
   SPDLOG_INFO("Sending reload command to nspanel {}::{}.", this->_id, this->_name);
   nlohmann::json cmd;
   cmd["command"] = "reload";
-  this->send_command(cmd);
-}
-
-void NSPanel::send_reboot_command() {
-  SPDLOG_INFO("Sending reload command to nspanel {}::{}.", this->_id, this->_name);
-  nlohmann::json cmd;
-  cmd["command"] = "reboot";
   this->send_command(cmd);
 }
 

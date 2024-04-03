@@ -78,11 +78,6 @@ public:
   void send_reload_command();
 
   /**
-   * Send a reboot command to the panel to reboot it
-   */
-  void send_reboot_command();
-
-  /**
    * Get the JSON message that will be sent over the websocket when a client requests the state of the NSPanel.
    */
   nlohmann::json get_websocket_json_representation();
@@ -106,6 +101,11 @@ public:
    * Sends a command to start TFT screen update.
    */
   void tft_update();
+
+  /**
+   * This panel has been deleted from the manager and we wish to completly remove all details about it every existing.
+   */
+  void erase();
 
   /**
    * Request warnings from maanager (Django) and update internal state.
