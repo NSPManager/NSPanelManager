@@ -73,9 +73,14 @@ public:
   void send_command(nlohmann::json &command);
 
   /**
-   * Send a reload command to the panel to tell it to reload the config
+   * Send a reload command to the panel to reload the config
    */
   void send_reload_command();
+
+  /**
+   * Send a reboot command to the panel to reboot it
+   */
+  void send_reboot_command();
 
   /**
    * Get the JSON message that will be sent over the websocket when a client requests the state of the NSPanel.

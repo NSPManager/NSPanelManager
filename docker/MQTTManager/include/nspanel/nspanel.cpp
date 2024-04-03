@@ -100,18 +100,17 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->_is_register_accepted = true;
   }
 
-  bool rebuilt_mqtt = false;    // Wether or not to rebuild mqtt topics and subscribe to the new topics.
-  bool rebuilt_ha_mqtt = false; // Wether or not to rebuild mqtt topics for HA entity discovery.
+  bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
   if (init_data.contains("name")) {
     if (this->_name.compare(init_data["name"]) != 0) {
       rebuilt_mqtt = true;
-      rebuilt_ha_mqtt = true;
+      this->send_reboot_command();
     }
     this->_name = init_data["name"];
   } else if (init_data.contains("friendly_name")) {
     if (this->_name.compare(init_data["friendly_name"]) != 0) {
       rebuilt_mqtt = true;
-      rebuilt_ha_mqtt = true;
+      this->send_reboot_command();
     }
     this->_name = init_data["friendly_name"];
   }
@@ -157,18 +156,14 @@ void NSPanel::update_config(nlohmann::json &init_data) {
 
   if (init_data.contains("relay1_is_light")) {
     this->_relay1_is_mqtt_light = init_data["relay1_is_light"];
-    rebuilt_ha_mqtt = true;
   } else {
     this->_relay1_is_mqtt_light = false;
-    rebuilt_ha_mqtt = true;
   }
 
   if (init_data.contains("relay2_is_light")) {
     this->_relay2_is_mqtt_light = init_data["relay2_is_light"];
-    rebuilt_ha_mqtt = true;
   } else {
     this->_relay2_is_mqtt_light = false;
-    rebuilt_ha_mqtt = true;
   }
 
   if (rebuilt_mqtt) {
@@ -197,12 +192,6 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/r2_state", this->_name);
     this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_name);
     this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_name);
-    this->register_to_home_assistant();
-  }
-
-  if (!rebuilt_mqtt && rebuilt_ha_mqtt) {
-    this->reset_ha_mqtt_topics();
-    this->register_to_home_assistant();
   }
 
   if (this->_has_registered_to_manager) {
@@ -214,6 +203,7 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MqttManagerConfig::attach_config_loaded_listener(boost::bind(&NSPanel::send_reload_command, this));
     this->send_reload_command();
+    this->register_to_home_assistant();
   }
 }
 
@@ -492,6 +482,13 @@ void NSPanel::send_reload_command() {
   SPDLOG_INFO("Sending reload command to nspanel {}::{}.", this->_id, this->_name);
   nlohmann::json cmd;
   cmd["command"] = "reload";
+  this->send_command(cmd);
+}
+
+void NSPanel::send_reboot_command() {
+  SPDLOG_INFO("Sending reload command to nspanel {}::{}.", this->_id, this->_name);
+  nlohmann::json cmd;
+  cmd["command"] = "reboot";
   this->send_command(cmd);
 }
 
