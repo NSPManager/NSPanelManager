@@ -73,6 +73,7 @@ $(document).ready(function () {
         $("#firmware").prop("files", e.originalEvent.dataTransfer.files);
         var filename = $('#firmware').val().replace(/C:\\fakepath\\/i, '')
         $("#save_new_firmware_modal_subtext").html("Selected file: '" + filename + "'.");
+        $("#save_new_firmware_modal_subtext").attr("class", "text-xs text-blue-500 dark:text-blue-400");
       }
     });
 
@@ -83,6 +84,7 @@ $(document).ready(function () {
         $("#data_upload_file_name").prop("files", e.originalEvent.dataTransfer.files);
         var filename = $('#data_upload_file_name').val().replace(/C:\\fakepath\\/i, '')
         $("#save_new_data_file_modal_subtext").html("Selected file: '" + filename + "'.");
+        $("#save_new_data_file_modal_subtext").attr("class", "text-xs text-blue-500 dark:text-blue-400");
       }
     });
 
@@ -93,6 +95,7 @@ $(document).ready(function () {
         $("#save_new_tft_file_modal_subtext").prop("files", e.originalEvent.dataTransfer.files);
         var filename = $('#tft_file').val().replace(/C:\\fakepath\\/i, '')
         $("#save_new_tft_file_modal_subtext").html("Selected file: '" + filename + "'.");
+        $("#save_new_tft_file_modal_subtext").attr("class", "text-xs text-blue-500 dark:text-blue-400");
       }
     });
 });
