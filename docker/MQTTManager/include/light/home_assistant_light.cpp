@@ -92,7 +92,7 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
                 new_brightness = ((float)new_brightness / 255.0) * 100; // Home assistant sends brightness as 0 to 255. We want percentage (0-100)
                 this->_current_brightness = new_brightness;
                 this->_requested_brightness = new_brightness;
-                MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness));
+                MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
               } else {
                 // Light can dim but no brightness was given in update. Fallback to 100%.
                 this->_current_brightness = 100;

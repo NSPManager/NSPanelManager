@@ -14,7 +14,6 @@ void Light::initFromMap(std::map<std::string, std::string> &data) {
   this->_isCeiling = data["ceiling"].compare("true") == 0;
 
   this->callUpdateCallbacks();
-
   LOG_TRACE("Loaded light ", this->_name.c_str(), " as type: ", this->_isCeiling ? "CEILING" : "TABLE");
 }
 
