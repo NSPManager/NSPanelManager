@@ -5,6 +5,7 @@
 #include "room/room.hpp"
 #include "scenes/home_assistant_scene.hpp"
 #include "scenes/nspm_scene.hpp"
+#include "scenes/openhab_scene.hpp"
 #include "scenes/scene.hpp"
 #include "websocket_server/websocket_server.hpp"
 #include <boost/exception/diagnostic_information.hpp>
@@ -86,8 +87,10 @@ void EntityManager::add_scene(nlohmann::json &config) {
       } else if (scene_type.compare("home_assistant") == 0) {
         Scene *scene = new HomeAssistantScene(config);
         EntityManager::_entities.push_back(scene);
+      } else if (scene_type.compare("openhab") == 0) {
+        Scene *scene = new OpenhabScene(config);
+        EntityManager::_entities.push_back(scene);
       }
-      // TODO: Implement Home Assistant and Openhab scenes.
     } else {
       scene->update_config(config);
     }

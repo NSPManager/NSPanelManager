@@ -327,7 +327,7 @@ def get_all_available_entities(request):
                         if "name" in entity:
                             return_json["openhab_entities"].append({
                                 "label": entity["name"],
-                                "entity_id": entity["name"],
+                                "entity_id": entity["uid"],
                                 "items": []
                             })
                 else:

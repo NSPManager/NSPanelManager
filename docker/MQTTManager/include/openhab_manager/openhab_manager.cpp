@@ -137,7 +137,7 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
   request_url.append("/rest/items/");
   request_url.append(item);
 
-  std::string bearer_token = "Bearer ";
+  std::string bearer_token = "Authorization: Bearer ";
   bearer_token.append(MqttManagerConfig::openhab_access_token);
 
   struct curl_slist *headers = NULL;
