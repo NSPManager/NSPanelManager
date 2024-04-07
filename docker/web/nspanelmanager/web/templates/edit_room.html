@@ -401,6 +401,14 @@
   </div>
 </form>
 
+{% comment %} Form filled in by the "add_existing_scene" function and sent off to register a Home Assistant or OpenHAB scene in the manager {% endcomment %}
+<form id="add_existing_scene_form" class="invisible" method="POST" action="{% url 'add_existing_scene_to_room' room.id %}">
+  {% csrf_token %}
+  <input type="hidden" name="scene_entity_name" id="add_existing_scene_entity_name">
+  <input type="hidden" name="scene_name" id="add_existing_scene_friendly_name">
+  <input type="hidden" name="scene_type" id="add_existing_scene_type">
+</form>
+
 <!-- Beginning of vissible content-->
 <form method="POST" action="{% url 'update_room_form' room_id=room.id %}">
   {% csrf_token %}
@@ -446,8 +454,12 @@
   <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
     <div class="md:flex md:flex-wrap md:justify-between items-center">
       <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">{{ room.friendly_name }} scenes</span>
-      <button type="button" onclick="add_new_scene();"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">New scene</button>
+      <div class="">
+        <button type="button" onclick="add_existing_scene();"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Add scene</button>
+          <button type="button" onclick="add_new_scene();"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">New NSPM scene</button>
+      </div>
     </div>
     
     <table class="w-full text-left rtl:text-right">

@@ -31,6 +31,8 @@ urlpatterns = [
     path('add_light/<int:room_id>', views.add_light_to_room, name="add_new_light"),
     path('add_scene/<int:room_id>', views.add_scene_to_room,
          name="add_new_scene_to_room"),
+    path('add_existing_scene/<int:room_id>', views.add_existing_scene_to_room,
+         name="add_existing_scene_to_room"),
     path('add_scene/', views.add_scene_to_global,
          name="add_new_scene_to_global"),
     path('add_light_to_view/<int:room_id>', views.add_light_to_room_view,

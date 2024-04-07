@@ -56,6 +56,9 @@ function populate_add_new_light_dialog() {
   var types = {
     "home_assistant_type_filter": JSON.stringify([
       "light", "switch"
+    ]),
+    "openhab_type_filter": JSON.stringify([
+      "things"
     ])
   };
   $.get("/api/get_all_available_entities", types, function (data) {
@@ -206,6 +209,9 @@ function add_new_light() {
   var types = {
     "home_assistant_type_filter": JSON.stringify([
       "light", "switch"
+    ]),
+    "openhab_type_filter": JSON.stringify([
+      "things"
     ])
   };
   select_new_entity(types, (element) => {
@@ -320,6 +326,26 @@ function edit_scene(id, name) {
   $("#edit_scene_id").val(id);
   $("#scene_name").val(name);
   $("#add_new_scene_to_room_modal").removeClass("hidden");
+}
+
+// Add a scene from Home Assistant or OpenHAB
+function add_existing_scene() {
+  var types = {
+    "home_assistant_type_filter": JSON.stringify([
+      "scene"
+    ]),
+    "openhab_type_filter": JSON.stringify([
+      "rules"
+    ])
+  };
+
+  select_new_entity(types, (element) => {
+    $("#add_existing_scene_entity_name").val($(element.currentTarget).data("entity_id"));
+    $("#add_existing_scene_friendly_name").val($(element.currentTarget).data("label"));
+    $("#add_existing_scene_type").val($(element.currentTarget).data("type"));
+    $("#add_existing_scene_form").submit();
+    //add_new_light_show_light_page(element);
+  });
 }
 
 $(document).ready(function () {

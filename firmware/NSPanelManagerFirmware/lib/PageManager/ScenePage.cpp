@@ -210,7 +210,7 @@ void ScenePage::_updateDisplay() {
         scene_name.append(scenes[0]->name);
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE1_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_LABEL_NAME, true);
-        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, true);
+        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, scenes[0]->canSave);
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, false);
@@ -223,7 +223,7 @@ void ScenePage::_updateDisplay() {
         scene_name.append(scenes[1]->name);
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE2_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, true);
-        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, true);
+        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, scenes[1]->canSave);
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, false);
@@ -236,7 +236,7 @@ void ScenePage::_updateDisplay() {
         scene_name.append(scenes[2]->name);
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE3_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, true);
-        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, true);
+        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, scenes[2]->canSave);
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, false);
@@ -249,7 +249,7 @@ void ScenePage::_updateDisplay() {
         scene_name.append(scenes[3]->name);
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE4_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, true);
-        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, true);
+        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, scenes[3]->canSave);
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, false);

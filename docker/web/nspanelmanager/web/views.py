@@ -378,6 +378,19 @@ def add_scene_to_room(request, room_id: int):
         new_scene = Scene()
     new_scene.friendly_name = request.POST["scene_name"]
     new_scene.room = room
+    new_scene.scene_type = "nspm_scene"
+    new_scene.save()
+    send_mqttmanager_reload_command()
+    return redirect('edit_room', room_id=room_id)
+
+
+def add_existing_scene_to_room(request, room_id: int):
+    room = Room.objects.filter(id=room_id).first()
+    new_scene = Scene()
+    new_scene.friendly_name = request.POST["scene_name"]
+    new_scene.backend_name = request.POST["scene_entity_name"]
+    new_scene.scene_type = request.POST["scene_type"]
+    new_scene.room = room
     new_scene.save()
     send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=room_id)

@@ -11,6 +11,7 @@ class Settings(models.Model):
     def __str__(self) -> str:
         return self.name
 
+
 class NSPanelSettings(models.Model):
     nspanel = models.ForeignKey("NSPanel", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
@@ -55,14 +56,17 @@ class NSPanel(models.Model):
     temperature = models.FloatField(default=0)
     online_state = models.BooleanField(default=False)
     button1_mode = models.IntegerField(default=0)
-    button1_detached_mode_light = models.ForeignKey("Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
+    button1_detached_mode_light = models.ForeignKey(
+        "Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
     register_relay1_as_light = models.BooleanField(default=False)
     button2_mode = models.IntegerField(default=0)
-    button2_detached_mode_light = models.ForeignKey("Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
+    button2_detached_mode_light = models.ForeignKey(
+        "Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
     register_relay2_as_light = models.BooleanField(default=False)
     md5_firmware = models.CharField(max_length=64, default="")
     md5_data_file = models.CharField(max_length=64, default="")
     md5_tft_file = models.CharField(max_length=64, default="")
+
     def __str__(self) -> str:
         return self.friendly_name
 
@@ -71,10 +75,13 @@ class RelayGroup(models.Model):
     friendly_name = models.CharField(max_length=255, default="")
     register_as_light = models.BooleanField(default=False)
 
+
 class RelayGroupBinding(models.Model):
-    relay_group = models.ForeignKey(RelayGroup, on_delete=models.CASCADE, null=True, default=None)
+    relay_group = models.ForeignKey(
+        RelayGroup, on_delete=models.CASCADE, null=True, default=None)
     nspanel = models.ForeignKey(NSPanel, on_delete=models.CASCADE)
     relay_num = models.IntegerField(default=1)
+
 
 class Light(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
@@ -97,9 +104,15 @@ class Light(models.Model):
     def __str__(self) -> str:
         return F"{self.room.friendly_name} -> {self.friendly_name}"
 
+
 class Scene(models.Model):
     friendly_name = models.CharField(max_length=32)
-    room = models.ForeignKey(Room, null=True, blank=True, on_delete=models.CASCADE)
+    # The name of the scene in Home Assistant or OpenHAB
+    backend_name = models.CharField(max_length=32, null=True, default=None)
+    scene_type = models.CharField(max_length=64)
+    room = models.ForeignKey(
+        Room, null=True, blank=True, on_delete=models.CASCADE)
+
 
 class LightState(models.Model):
     light = models.ForeignKey(Light, on_delete=models.CASCADE)

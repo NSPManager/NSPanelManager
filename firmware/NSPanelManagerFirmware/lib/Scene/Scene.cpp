@@ -24,15 +24,19 @@ void Scene::activate() {
 }
 
 void Scene::save() {
-  LOG_INFO("Saving scene: ", this->id, "::", this->name.c_str());
-  JsonDocument doc;
-  doc["command"] = "save_scene";
-  doc["mac_origin"] = WiFi.macAddress().c_str();
-  doc["scene_id"] = this->getId();
+  if (this->canSave) {
+    LOG_INFO("Saving scene: ", this->id, "::", this->name.c_str());
+    JsonDocument doc;
+    doc["command"] = "save_scene";
+    doc["mac_origin"] = WiFi.macAddress().c_str();
+    doc["scene_id"] = this->getId();
 
-  char buffer[512];
-  serializeJson(doc, buffer);
-  MqttManager::publish("nspanel/mqttmanager/command", buffer);
+    char buffer[512];
+    serializeJson(doc, buffer);
+    MqttManager::publish("nspanel/mqttmanager/command", buffer);
+  } else {
+    LOG_ERROR("Tried saving a scene that does not support saving.");
+  }
 }
 
 void Scene::attachDeconstructCallback(DeviceEntityObserver *observer) {

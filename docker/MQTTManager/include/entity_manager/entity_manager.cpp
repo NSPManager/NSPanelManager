@@ -3,6 +3,7 @@
 #include "light/openhab_light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "room/room.hpp"
+#include "scenes/home_assistant_scene.hpp"
 #include "scenes/nspm_scene.hpp"
 #include "scenes/scene.hpp"
 #include "websocket_server/websocket_server.hpp"
@@ -81,6 +82,9 @@ void EntityManager::add_scene(nlohmann::json &config) {
       std::string scene_type = config["scene_type"];
       if (scene_type.compare("nspm_scene") == 0) {
         Scene *scene = new NSPMScene(config);
+        EntityManager::_entities.push_back(scene);
+      } else if (scene_type.compare("home_assistant") == 0) {
+        Scene *scene = new HomeAssistantScene(config);
         EntityManager::_entities.push_back(scene);
       }
       // TODO: Implement Home Assistant and Openhab scenes.

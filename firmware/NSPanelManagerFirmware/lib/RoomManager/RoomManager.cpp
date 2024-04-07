@@ -145,6 +145,7 @@ void RoomManager::loadAllRooms(bool is_update) {
     newScene->room = nullptr;
     newScene->id = atoi(scenePair.key().c_str());
     newScene->name = scenePair.value()["name"] | "ERR-S";
+    newScene->canSave = scenePair.value()["can_save"].as<String>().equals("true");
     newScene->callUpdateCallbacks();
     if (!existing_scene) {
       InterfaceConfig::global_scenes.push_back(newScene);
@@ -364,6 +365,7 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
     newScene->room = newRoom;
     newScene->id = atoi(scenePair.key().c_str());
     newScene->name = scenePair.value()["name"] | "ERR-S";
+    newScene->canSave = scenePair.value()["can_save"].as<String>().equals("true");
     newScene->callUpdateCallbacks();
     if (!existing_scene) {
       newRoom->scenes.push_back(newScene);

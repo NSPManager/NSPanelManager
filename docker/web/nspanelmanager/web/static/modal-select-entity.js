@@ -11,6 +11,8 @@ function add_new_entity_to_list(entity, type) {
       icon = "mdi-weather-sunny";
     } else if (entity.entity_id.startsWith("sensor.")) {
       icon = "mdi-import";
+    } else if (entity.entity_id.startsWith("scene.")) {
+      icon = "mdi-state-machine"
     } else {
       icon = "mdi-help";
     }
@@ -22,7 +24,7 @@ function add_new_entity_to_list(entity, type) {
     '<div class="select_entity_option w-full py-2 px-2 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300 cursor-pointer" data-type="' +
       type +
       "\" data-items='" +
-      JSON.stringify(entity.items) + "' data-entity_id='" + entity.entity_id +
+      JSON.stringify(entity.items) + "' data-entity_id='" + entity.entity_id + "' data-label='" + entity.label +
       "'><span class=\"mdi " +
       icon +
       ' add_item_icon me-2"></span>' +

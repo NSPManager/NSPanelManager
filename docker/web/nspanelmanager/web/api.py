@@ -127,8 +127,9 @@ def get_mqtt_manager_config(request):
         scene_info = {
             "id": scene.id,
             "type": "scene",
-            "scene_type": "nspm_scene",
+            "scene_type": scene.scene_type,
             "scene_name": scene.friendly_name,
+            "entity_name": scene.backend_name,
             "room_name": scene.room.friendly_name if scene.room != None else None,
             "room_id": scene.room.id if scene.room != None else None,
             "light_states": []
@@ -222,6 +223,11 @@ def get_all_available_entities(request):
         home_assistant_type_filter = json.loads(
             request.GET["home_assistant_type_filter"])
 
+    openhab_type_filter = []
+    if "openhab_type_filter" in request.GET:
+        openhab_type_filter = json.loads(
+            request.GET["openhab_type_filter"])
+
     # Get Home Assistant lights
     return_json = {}
     return_json["home_assistant_entities"] = []
@@ -280,37 +286,55 @@ def get_all_available_entities(request):
             "content-type": "application/json",
         }
         try:
-            openhab_response = requests.get(get_setting_with_default(
-                "openhab_address", "") + "/rest/things", headers=openhab_request_headers, verify=False)
+            if "things" in openhab_type_filter:
+                openhab_response = requests.get(get_setting_with_default(
+                    "openhab_address", "") + "/rest/things", headers=openhab_request_headers, verify=False)
 
-            if openhab_response.status_code == 200:
-                for entity in openhab_response.json():
-                    if "channels" in entity:
-                        add_entity = False
-                        items = []
-                        for channel in entity["channels"]:
-                            # Check if this thing has a channel that indicates that it might be a light
-                            add_items_with_channels_of_type = [
-                                "Dimmer", "Number", "Color", "Switch", "String"]
-                            if "itemType" in channel and (channel["itemType"] in add_items_with_channels_of_type):
-                                add_entity = True
-                            if "linkedItems" in channel:
-                                # Add all available items to the list of items for this thing
-                                for linkedItem in channel["linkedItems"]:
-                                    if linkedItem not in items:
-                                        items.append(linkedItem)
-                        if add_entity:
-                            # return_json["openhab_lights"].append(entity["label"])
+                if openhab_response.status_code == 200:
+                    for entity in openhab_response.json():
+                        if "channels" in entity:
+                            add_entity = False
+                            items = []
+                            for channel in entity["channels"]:
+                                # Check if this thing has a channel that indicates that it might be a light
+                                add_items_with_channels_of_type = [
+                                    "Dimmer", "Number", "Color", "Switch", "String"]
+                                if "itemType" in channel and (channel["itemType"] in add_items_with_channels_of_type):
+                                    add_entity = True
+                                if "linkedItems" in channel:
+                                    # Add all available items to the list of items for this thing
+                                    for linkedItem in channel["linkedItems"]:
+                                        if linkedItem not in items:
+                                            items.append(linkedItem)
+                            if add_entity:
+                                # return_json["openhab_lights"].append(entity["label"])
+                                return_json["openhab_entities"].append({
+                                    "label": entity["label"],
+                                    "entity_id": entity["label"],
+                                    "items": items
+                                })
+                else:
+                    return_json["errors"].append(
+                        "Failed to get OpenHAB lights, got return code: " + str(openhab_response.status_code))
+                    print("ERROR! Got status code other than 200. Got code: " +
+                          str(openhab_response.status_code))
+            elif "rules" in openhab_type_filter:
+                openhab_response = requests.get(get_setting_with_default(
+                    "openhab_address", "") + "/rest/rules", headers=openhab_request_headers, verify=False)
+
+                if openhab_response.status_code == 200:
+                    for entity in openhab_response.json():
+                        if "name" in entity:
                             return_json["openhab_entities"].append({
-                                "label": entity["label"],
-                                "entity_id": entity["label"],
-                                "items": items
+                                "label": entity["name"],
+                                "entity_id": entity["name"],
+                                "items": []
                             })
-            else:
-                return_json["errors"].append(
-                    "Failed to get OpenHAB lights, got return code: " + str(openhab_response.status_code))
-                print("ERROR! Got status code other than 200. Got code: " +
-                      str(openhab_response.status_code))
+                else:
+                    return_json["errors"].append(
+                        "Failed to get OpenHAB lights, got return code: " + str(openhab_response.status_code))
+                    print("ERROR! Got status code other than 200. Got code: " +
+                          str(openhab_response.status_code))
         except Exception as e:
             return_json["errors"].append(
                 "Failed to get OpenHAB lights: " + str(traceback.format_exc()))
@@ -463,6 +487,10 @@ def get_nspanel_config(request):
         for scene in Scene.objects.filter(room__isnull=True):
             base["scenes"][scene.id] = {}
             base["scenes"][scene.id]["name"] = scene.friendly_name
+            if scene.scene_type == "nspm_scene":
+                base["scenes"][scene.id]["can_save"] = True
+            else:
+                base["scenes"][scene.id]["can_save"] = Frue
         return JsonResponse(base)
     except:
         print("Tried to get NSPanel config for panel that was not registered.")
@@ -486,6 +514,10 @@ def get_room_config(request, room_id: int):
     for scene in room.scene_set.all():
         return_json["scenes"][scene.id] = {}
         return_json["scenes"][scene.id]["name"] = scene.friendly_name
+        if scene.scene_type == "nspm_scene":
+            return_json["scenes"][scene.id]["can_save"] = True
+        else:
+            return_json["scenes"][scene.id]["can_save"] = False
     return JsonResponse(return_json)
 
 
