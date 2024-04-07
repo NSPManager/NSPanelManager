@@ -78,6 +78,10 @@ bool NSPMConfig::loadFromLittleFS() {
   this->mqtt_panel_screensaver_brightness.append(NSPMConfig::instance->wifi_hostname);
   this->mqtt_panel_screensaver_brightness.append("/brightness_screensaver");
 
+  this->mqtt_panel_screensaver_mode = "nspanel/";
+  this->mqtt_panel_screensaver_mode.append(NSPMConfig::instance->wifi_hostname);
+  this->mqtt_panel_screensaver_mode.append("/screensaver_mode");
+
   this->mqtt_panel_status_topic = "nspanel/";
   this->mqtt_panel_status_topic.append(NSPMConfig::instance->wifi_hostname);
   this->mqtt_panel_status_topic.append("/status_report");

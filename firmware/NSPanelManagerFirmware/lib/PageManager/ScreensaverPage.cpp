@@ -12,14 +12,13 @@
 #include <TftDefines.h>
 
 void ScreensaverPage::attachMqttCallback() {
-  if (InterfaceConfig::screensaver_mode.compare("no_screensaver") != 0) {
-    MqttManager::subscribeToTopic("nspanel/status/time", &ScreensaverPage::clockMqttCallback);
-    MqttManager::subscribeToTopic("nspanel/status/date", &ScreensaverPage::dateMqttCallback);
-    MqttManager::subscribeToTopic("nspanel/status/weather", &ScreensaverPage::weatherMqttCallback);
+  MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_screensaver_mode.c_str(), &ScreensaverPage::screensaverModeCallback);
+  MqttManager::subscribeToTopic("nspanel/status/time", &ScreensaverPage::clockMqttCallback);
+  MqttManager::subscribeToTopic("nspanel/status/date", &ScreensaverPage::dateMqttCallback);
+  MqttManager::subscribeToTopic("nspanel/status/weather", &ScreensaverPage::weatherMqttCallback);
 
-    if (InterfaceConfig::clock_us_style) {
-      MqttManager::subscribeToTopic("nspanel/status/ampm", &ScreensaverPage::ampmMqttCallback);
-    }
+  if (InterfaceConfig::clock_us_style) {
+    MqttManager::subscribeToTopic("nspanel/status/ampm", &ScreensaverPage::ampmMqttCallback);
   }
 }
 
@@ -29,23 +28,27 @@ void ScreensaverPage::init() {
     this->_screensaver_page_name = SCREENSAVER_PAGE_NAME;
     this->_show_weather = true;
     show_background = true;
+    this->_screensaver_brightness = InterfaceConfig::screensaver_dim_level;
   } else if (InterfaceConfig::screensaver_mode.compare("without_background") == 0) {
     this->_screensaver_page_name = SCREENSAVER_PAGE_NAME;
     this->_show_weather = true;
     show_background = false;
+    this->_screensaver_brightness = InterfaceConfig::screensaver_dim_level;
   } else if (InterfaceConfig::screensaver_mode.compare("datetime_with_background") == 0) {
     this->_screensaver_page_name = SCREENSAVER_MINIMAL_PAGE_NAME;
     this->_show_weather = false;
     show_background = true;
+    this->_screensaver_brightness = InterfaceConfig::screensaver_dim_level;
   } else if (InterfaceConfig::screensaver_mode.compare("datetime_without_background") == 0) {
     this->_screensaver_page_name = SCREENSAVER_MINIMAL_PAGE_NAME;
     this->_show_weather = false;
     show_background = false;
+    this->_screensaver_brightness = InterfaceConfig::screensaver_dim_level;
   } else if (InterfaceConfig::screensaver_mode.compare("no_screensaver") == 0) {
     this->_screensaver_page_name = SCREENSAVER_PAGE_NAME;
     this->_show_weather = false;
     show_background = false;
-    InterfaceConfig::screensaver_dim_level = 0;
+    this->_screensaver_brightness = 0;
   } else {
     LOG_ERROR("Unknown screensaver mode '", InterfaceConfig::screensaver_mode.c_str(), "'!");
   }
@@ -70,13 +73,15 @@ void ScreensaverPage::init() {
 }
 
 void ScreensaverPage::show() {
-  NSPanel::instance->setDimLevel(InterfaceConfig::screensaver_dim_level);
-
-  PageManager::SetCurrentPage(this);
+  NSPanel::instance->setDimLevel(this->_screensaver_brightness);
   NSPanel::instance->goToPage(this->_screensaver_page_name.c_str());
-  MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "0");
-  PageManager::GetHomePage()->setCurrentMode(roomMode::room);
-  RoomManager::goToRoomId(InterfaceConfig::homeScreen);
+
+  if (PageManager::GetCurrentPage() != PageManager::GetScreensaverPage()) {
+    PageManager::SetCurrentPage(this);
+    MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "0");
+    PageManager::GetHomePage()->setCurrentMode(roomMode::room);
+    RoomManager::goToRoomId(InterfaceConfig::homeScreen);
+  }
 
   if (InterfaceConfig::clock_us_style) {
     NSPanel::instance->setComponentVisible(SCREENSAVER_CURRENT_AMPM_TEXT_NAME, true);
@@ -101,6 +106,17 @@ void ScreensaverPage::processTouchEvent(uint8_t page, uint8_t component, bool pr
 void ScreensaverPage::unshow() {
   NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
   MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1");
+}
+
+void ScreensaverPage::screensaverModeCallback(char *topic, byte *payload, unsigned int length) {
+  std::string screensaver_mode = std::string((char *)payload, length);
+  InterfaceConfig::screensaver_mode = screensaver_mode;
+  LOG_INFO("Received command to change screensaver mode to: ", screensaver_mode.c_str());
+  PageManager::GetScreensaverPage()->init(); // Reload all internal variables
+
+  if (PageManager::GetCurrentPage() == PageManager::GetScreensaverPage()) {
+    PageManager::GetScreensaverPage()->show();
+  }
 }
 
 void ScreensaverPage::clockMqttCallback(char *topic, byte *payload, unsigned int length) {

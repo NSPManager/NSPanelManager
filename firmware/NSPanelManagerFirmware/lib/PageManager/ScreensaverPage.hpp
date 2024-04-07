@@ -17,6 +17,7 @@ public:
   static void dateMqttCallback(char *topic, byte *payload, unsigned int length);
   static void weatherMqttCallback(char *topic, byte *payload, unsigned int length);
   static void ampmMqttCallback(char *topic, byte *payload, unsigned int length);
+  static void screensaverModeCallback(char *topic, byte *payload, unsigned int length);
   static void updateRoomTemp(std::string temp_string);
 
 private:
@@ -25,6 +26,7 @@ private:
   std::string _screensaver_ampm_name;
   std::string _screensaver_date_name;
   std::string _screensaver_temperature_name;
+  uint8_t _screensaver_brightness;
   bool _show_weather;
 };
 

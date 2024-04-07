@@ -198,6 +198,7 @@ private:
   std::string _mqtt_switch_screen_topic;
   std::string _mqtt_number_screen_brightness_topic;
   std::string _mqtt_number_screensaver_brightness_topic;
+  std::string _mqtt_select_screensaver_topic;
 
   std::list<NSPanelLogMessage> _log_messages;
 };

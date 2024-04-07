@@ -63,6 +63,8 @@ public:
   std::string mqtt_panel_screen_brightness_topic = "";
   /// @brief MQTT screensaver brightness topic
   std::string mqtt_panel_screensaver_brightness = "";
+  /// @brief MQTT screensaver mode topic
+  std::string mqtt_panel_screensaver_mode = "";
   /// @brief MQTT panel temperature topic
   std::string mqtt_panel_temperature_topic = "";
   /// @brief MQTT topic to send logs to

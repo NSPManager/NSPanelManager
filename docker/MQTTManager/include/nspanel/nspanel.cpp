@@ -186,6 +186,7 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->_mqtt_switch_screen_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_screen/config", mqtt_register_mac);
     this->_mqtt_number_screen_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screen_brightness/config", mqtt_register_mac);
     this->_mqtt_number_screensaver_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screensaver_brightness/config", mqtt_register_mac);
+    this->_mqtt_select_screensaver_topic = fmt::format("homeassistant/select/nspanelmanager/{}_screensaver_select/config", mqtt_register_mac);
     this->_mqtt_relay1_command_topic = fmt::format("nspanel/{}/r1_cmd", this->_name);
     this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/r1_state", this->_name);
     this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/r2_cmd", this->_name);
@@ -235,6 +236,7 @@ void NSPanel::reset_ha_mqtt_topics() {
   MQTT_Manager::clear_retain(this->_mqtt_sensor_temperature_topic);
   MQTT_Manager::clear_retain(this->_mqtt_number_screen_brightness_topic);
   MQTT_Manager::clear_retain(this->_mqtt_number_screensaver_brightness_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_select_screensaver_topic);
 }
 
 void NSPanel::erase() {
@@ -772,6 +774,22 @@ void NSPanel::register_to_home_assistant() {
   std::string screensaver_brightness_data_str = screensaver_brightness_data.dump();
   SPDLOG_DEBUG("Registring screensaver brightness for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
   MQTT_Manager::publish(this->_mqtt_number_screensaver_brightness_topic, screensaver_brightness_data_str, true);
+
+  // Register screensaver select
+  nlohmann::json screensaver_select_data = nlohmann::json(base_json);
+  screensaver_select_data["name"] = "Screensaver mode";
+  screensaver_select_data["command_topic"] = fmt::format("nspanel/{}/screensaver_mode", this->_name);
+  std::list<std::string> options;
+  options.push_back("with_background");
+  options.push_back("without_background");
+  options.push_back("datetime_with_background");
+  options.push_back("datetime_without_background");
+  options.push_back("no_screensaver");
+  screensaver_select_data["options"] = options;
+  screensaver_select_data["unique_id"] = fmt::format("{}_screensaver_mode", this->_mqtt_register_mac);
+  std::string screensaver_select_data_str = screensaver_select_data.dump();
+  SPDLOG_DEBUG("Registring screensaver mode select for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
+  MQTT_Manager::publish(this->_mqtt_select_screensaver_topic, screensaver_select_data_str, true);
 }
 
 void NSPanel::set_relay_state(uint8_t relay, bool state) {
