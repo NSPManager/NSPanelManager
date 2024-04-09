@@ -120,8 +120,36 @@
 {"id":"42", "character-mapping":"R", "text":"Mostly Cloudy w/ T-Storms"},
 {"id":"43", "character-mapping":"L", "text":"Mostly Cloudy w/ Flurries"},
 {"id":"44", "character-mapping":"M", "text":"Mostly Cloudy w/ Snow"}
+],
+
+"openmeteo_weather_mappings": [
+{"id":"0", "character-mapping-day":"A", "character-mapping-night":"B", "text":"Clear sky"},
+{"id":"1", "character-mapping-day":"C", "character-mapping-night":"D", "text":"Mainly clear"},
+{"id":"2", "character-mapping-day":"C", "character-mapping-night":"D", "text":"Partly cloudy"},
+{"id":"3", "character-mapping":"C", "text":"Overcast"},
+{"id":"45", "character-mapping":"G", "text":"Fog"},
+{"id":"48", "character-mapping":"G", "text":"Depositing rime fog"},
+{"id":"51", "character-mapping":"J", "text":"Drizzle: Light"},
+{"id":"53", "character-mapping":"J", "text":"Drizzle: Moderate"},
+{"id":"55", "character-mapping":"J", "text":"Drizzle: Dense"},
+{"id":"56", "character-mapping":"J", "text":"Freezing Drizzle: Light"},
+{"id":"57", "character-mapping":"J", "text":"Freezing Drizzle: Dense"},
+{"id":"61", "character-mapping":"J", "text":"Rain: Slight"},
+{"id":"63", "character-mapping":"I", "text":"Rain: Moderate"},
+{"id":"65", "character-mapping":"I", "text":"Rain: Heavy"},
+{"id":"66", "character-mapping":"N", "text":"Freezing Rain: Light"},
+{"id":"67", "character-mapping":"N", "text":"Freezing Rain: Heavy"},
+{"id":"71", "character-mapping":"L", "text":"Snow fall: Slight"},
+{"id":"73", "character-mapping":"M", "text":"Snow fall: Moderate"},
+{"id":"75", "character-mapping":"M", "text":"Snow fall: Heavy"},
+{"id":"77", "character-mapping":"H", "text":"Snow grains"},
+{"id":"80", "character-mapping":"J", "text":"Rain showers: Slight"},
+{"id":"81", "character-mapping":"I", "text":"Rain showers: Moderate"},
+{"id":"82", "character-mapping":"I", "text":"Rain showers: Violent"},
+{"id":"85", "character-mapping":"L", "text":"Snow showers: Slight"},
+{"id":"86", "character-mapping":"M", "text":"Snow showers: Heavy"},
+{"id":"95", "character-mapping":"Q", "text":"Thunderstorm: Slight or moderate"},
+{"id":"96", "character-mapping":"R", "text":"Thunderstorm: Slight Hail"},
+{"id":"99", "character-mapping":"R", "text":"Thunderstorm: Heavy Hail"}
 ]
 }
-
-
-
