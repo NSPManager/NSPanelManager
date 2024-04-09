@@ -9,12 +9,21 @@ class MQTTManagerWeather {
 public:
   void update_config();
   void home_assistant_event_callback(nlohmann::json event_data);
-  void openhab_current_weather_callback(nlohmann::json event_data);
-  void openhab_forecast_weather_callback(nlohmann::json event_data);
   void openhab_temp_sensor_callback(nlohmann::json event_data);
   void send_state_update();
 
 private:
+  /**
+   * Will pull new data from Open Meteo and if successfull it will automatically
+   * process the data and send it out to the panels.
+   */
+  void _pull_new_weather_data();
+
+  /**
+   * Process new weather data and push out to the panels.
+   */
+  void _process_weather_data(std::string &data);
+
   std::string _get_icon_from_mapping(std::string &condition, uint8_t hour);
 
   struct weather_info {

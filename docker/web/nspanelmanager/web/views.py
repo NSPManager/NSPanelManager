@@ -847,24 +847,14 @@ def delete_relay_group_binding(request, relay_binding_id):
 
 def weather_and_time(request):
     if request.method == "POST":
-        weather_type = request.POST["weather_type"]
-        set_setting_value("weather_controller", weather_type)
-        if weather_type == "home_assistant":
-            set_setting_value("weather_home_assistant_weather_entity",
-                              request.POST["weather_home_assistant_entity"])
-            set_setting_value("sun_entity", request.POST["sun_entity"])
-            set_setting_value("weather_openhab_current_weather_item", "")
-            set_setting_value("weather_openhab_forecast_weather_item", "")
-        elif weather_type == "openhab":
-            set_setting_value("weather_home_assistant_weather_entity", "")
-            set_setting_value("sun_entity", "")
-            set_setting_value("weather_openhab_current_weather_item",
-                              request.POST["weather_openhab_current_weather_item"])
-            set_setting_value("weather_openhab_forecast_weather_item",
-                              request.POST["weather_openhab_forecast_weather_item"])
-        else:
-            print(F"ERROR! Unknown weather controller: {weather_type}")
-
+        set_setting_value("location_latitude",
+                          request.POST["location_latitude"])
+        set_setting_value("location_longitude",
+                          request.POST["location_longitude"])
+        set_setting_value("wind_speed_format",
+                          request.POST["wind_speed_format"])
+        set_setting_value("precipitation_format",
+                          request.POST["precipitation_format"])
         set_setting_value("outside_temp_sensor_provider",
                           request.POST["outside_temp_provider"])
         set_setting_value("outside_temp_sensor_entity_id",
@@ -875,26 +865,17 @@ def weather_and_time(request):
         restart_mqtt_manager()
         return redirect("weather_and_time")
     else:
-        data = {'dark_theme': get_setting_with_default(
-            "dark_theme", "false"), }
-        data["date_format"] = get_setting_with_default(
-            "date_format", "%a %d/%m %Y")
-        data["clock_us_style"] = get_setting_with_default(
-            "clock_us_style", False)
-        data["use_farenheit"] = get_setting_with_default(
-            "use_farenheit", False)
-        data["weather_type"] = get_setting_with_default(
-            "weather_controller", "")
-        data["outside_temp_provider"] = get_setting_with_default(
-            "outside_temp_sensor_provider", "")
-        data["outside_temp_sensor"] = get_setting_with_default(
-            "outside_temp_sensor_entity_id", "")
-        data["weather_home_assistant_weather_entity"] = get_setting_with_default(
-            "weather_home_assistant_weather_entity", "")
-        data["weather_openhab_current_weather_item"] = get_setting_with_default(
-            "weather_openhab_current_weather_item", "")
-        data["weather_openhab_forecast_weather_item"] = get_setting_with_default(
-            "weather_openhab_forecast_weather_item", "")
-        data["sun_entity"] = get_setting_with_default("sun_entity", "")
+        data = {
+            'dark_theme': get_setting_with_default("dark_theme", "false"),
+            'date_format': get_setting_with_default("date_format", "%a %d/%m %Y"),
+            'clock_us_style': get_setting_with_default("clock_us_style", False),
+            'use_farenheit': get_setting_with_default("use_farenheit", False),
+            'outside_temp_provider': get_setting_with_default("outside_temp_sensor_provider", ""),
+            'outside_temp_sensor': get_setting_with_default("outside_temp_sensor_entity_id", ""),
+            'location_latitude': get_setting_with_default("location_latitude", ""),
+            'location_longitude': get_setting_with_default("location_longitude", ""),
+            'wind_speed_format': get_setting_with_default("wind_speed_format", "kmh"),
+            'precipitation_format': get_setting_with_default("precipitation_format", "mm"),
+        }
 
         return render(request, "weather_and_time.html", data)

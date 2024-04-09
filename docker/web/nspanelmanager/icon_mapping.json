@@ -1,127 +1,638 @@
-{"home_assistant_weather_mappings": [
-{"condition":"clear-night", "character-mapping":"B"},
-{"condition":"cloudy", "character-mapping":"F"},
-{"condition":"fog", "character-mapping":"G"},
-{"condition":"hail", "character-mapping":"H"},
-{"condition":"lightning", "character-mapping":"Q"},
-{"condition":"lightning-rainy", "character-mapping":"R"},
-{"condition":"partlycloudy", "character-mapping":"C"},
-{"condition":"pouring", "character-mapping":"I"},
-{"condition":"rainy", "character-mapping":"J"},
-{"condition":"snowy", "character-mapping":"L"},
-{"condition":"snowy-rainy", "character-mapping":"N"},
-{"condition":"sunny", "character-mapping":"A"},
-{"condition":"windy", "character-mapping":"T"},
-{"condition":"windy-variant", "character-mapping":"T"},
-{"condition":"exceptional", "character-mapping":"V"}
-],
-
-"openweathermap_weather_mappings": [
-{"id":"200", "character-mapping":"R"},
-{"id":"201", "character-mapping":"R"},
-{"id":"202", "character-mapping":"R"},
-{"id":"210", "character-mapping":"Q"},
-{"id":"211", "character-mapping":"Q"},
-{"id":"212", "character-mapping":"Q"},
-{"id":"221", "character-mapping":"Q"},
-{"id":"230", "character-mapping":"R"},
-{"id":"231", "character-mapping":"R"},
-{"id":"232", "character-mapping":"R"},
-
-{"id":"300", "character-mapping":"J"},
-{"id":"301", "character-mapping":"J"},
-{"id":"302", "character-mapping":"J"},
-{"id":"310", "character-mapping":"J"},
-{"id":"311", "character-mapping":"J"},
-{"id":"312", "character-mapping":"J"},
-{"id":"313", "character-mapping":"J"},
-{"id":"314", "character-mapping":"J"},
-{"id":"321", "character-mapping":"J"},
-
-{"id":"500", "character-mapping":"J"},
-{"id":"501", "character-mapping":"J"},
-{"id":"502", "character-mapping":"I"},
-{"id":"503", "character-mapping":"I"},
-{"id":"504", "character-mapping":"I"},
-{"id":"511", "character-mapping":"H"},
-{"id":"520", "character-mapping":"J"},
-{"id":"521", "character-mapping":"J"},
-{"id":"522", "character-mapping":"I"},
-{"id":"531", "character-mapping":"I"},
-
-{"id":"600", "character-mapping":"L"},
-{"id":"601", "character-mapping":"L"},
-{"id":"602", "character-mapping":"M"},
-{"id":"611", "character-mapping":"H"},
-{"id":"612", "character-mapping":"H"},
-{"id":"613", "character-mapping":"H"},
-{"id":"615", "character-mapping":"N"},
-{"id":"616", "character-mapping":"N"},
-{"id":"620", "character-mapping":"L"},
-{"id":"621", "character-mapping":"L"},
-{"id":"622", "character-mapping":"M"},
-
-{"id":"701", "character-mapping":"G"},
-{"id":"711", "character-mapping":"G"},
-{"id":"721", "character-mapping":"G"},
-{"id":"731", "character-mapping":"G"},
-{"id":"741", "character-mapping":"G"},
-{"id":"751", "character-mapping":"G"},
-{"id":"761", "character-mapping":"G"},
-{"id":"762", "character-mapping":"G"},
-{"id":"771", "character-mapping":"G"},
-{"id":"781", "character-mapping":"G"},
-
-{"id":"800", "character-mapping-day":"A", "character-mapping-night":"B"},
-{"id":"801", "character-mapping-day":"C", "character-mapping-night":"D"},
-{"id":"802", "character-mapping-day":"C", "character-mapping-night":"D"},
-{"id":"803", "character-mapping-day":"C", "character-mapping-night":"D"},
-{"id":"804", "character-mapping-day":"C", "character-mapping-night":"D"}
-],
-
-"accu_weather_mappings": [
-{"id":"1", "character-mapping":"A", "text":"Sunny"},
-{"id":"2", "character-mapping":"C", "text":"Mostly Sunny"},
-{"id":"3", "character-mapping":"C", "text":"Partly Sunny"},
-{"id":"4", "character-mapping":"C", "text":"Intermittent Clouds"},
-{"id":"5", "character-mapping":"E", "text":"Hazy Sunshine"},
-{"id":"6", "character-mapping":"C", "text":"Mostly Cloudy"},
-{"id":"7", "character-mapping":"F", "text":"Cloudy"},
-{"id":"8", "character-mapping":"F", "text":"Dreary (Overcast"},
-{"id":"11", "character-mapping":"G", "text":"Fog"},
-{"id":"12", "character-mapping":"J", "text":"Showers"},
-{"id":"13", "character-mapping":"K", "text":"Mostly Cloudy w/ Showers"},
-{"id":"14", "character-mapping":"K", "text":"Partly Sunny w/ Showers"},
-{"id":"15", "character-mapping":"R", "text":"T-Storms"},
-{"id":"16", "character-mapping":"S", "text":"Mostly Cloudy w/ T-Storms"},
-{"id":"17", "character-mapping":"S", "text":"Partly Sunny w/ T-Storms"},
-{"id":"18", "character-mapping":"I", "text":"Rain"},
-{"id":"19", "character-mapping":"L", "text":"Flurries"},
-{"id":"20", "character-mapping":"O", "text":"Mostly Cloudy w/ Flurries"},
-{"id":"21", "character-mapping":"O", "text":"Partly Sunny w/ Flurries"},
-{"id":"22", "character-mapping":"M", "text":"Snow"},
-{"id":"23", "character-mapping":"O", "text":"Mostly Cloudy w/ Snow"},
-{"id":"24", "character-mapping":"Z", "text":"Ice"},
-{"id":"25", "character-mapping":"H", "text":"Sleet"},
-{"id":"26", "character-mapping":"N", "text":"Freezing Rain"},
-{"id":"29", "character-mapping":"N", "text":"Rain and Snow"},
-{"id":"30", "character-mapping":"V", "text":"Hot"},
-{"id":"31", "character-mapping":"[", "text":"Cold"},
-{"id":"32", "character-mapping":"T", "text":"Windy"},
-{"id":"33", "character-mapping":"B", "text":"Clear"},
-{"id":"34", "character-mapping":"D", "text":"Mostly Clear"},
-{"id":"35", "character-mapping":"D", "text":"Partly Cloudy"},
-{"id":"36", "character-mapping":"D", "text":"Intermittent Clouds"},
-{"id":"37", "character-mapping":"D", "text":"Hazy Moonlight"},
-{"id":"38", "character-mapping":"D", "text":"Mostly Cloudy"},
-{"id":"39", "character-mapping":"J", "text":"Partly Cloudy w/ Showers"},
-{"id":"40", "character-mapping":"J", "text":"Mostly Cloudy w/ Showers"},
-{"id":"41", "character-mapping":"R", "text":"Partly Cloudy w/ T-Storms"},
-{"id":"42", "character-mapping":"R", "text":"Mostly Cloudy w/ T-Storms"},
-{"id":"43", "character-mapping":"L", "text":"Mostly Cloudy w/ Flurries"},
-{"id":"44", "character-mapping":"M", "text":"Mostly Cloudy w/ Snow"}
-]
+{
+  "home_assistant_weather_mappings": [
+    {
+      "condition": "clear-night",
+      "character-mapping": "B"
+    },
+    {
+      "condition": "cloudy",
+      "character-mapping": "F"
+    },
+    {
+      "condition": "fog",
+      "character-mapping": "G"
+    },
+    {
+      "condition": "hail",
+      "character-mapping": "H"
+    },
+    {
+      "condition": "lightning",
+      "character-mapping": "Q"
+    },
+    {
+      "condition": "lightning-rainy",
+      "character-mapping": "R"
+    },
+    {
+      "condition": "partlycloudy",
+      "character-mapping": "C"
+    },
+    {
+      "condition": "pouring",
+      "character-mapping": "I"
+    },
+    {
+      "condition": "rainy",
+      "character-mapping": "J"
+    },
+    {
+      "condition": "snowy",
+      "character-mapping": "L"
+    },
+    {
+      "condition": "snowy-rainy",
+      "character-mapping": "N"
+    },
+    {
+      "condition": "sunny",
+      "character-mapping": "A"
+    },
+    {
+      "condition": "windy",
+      "character-mapping": "T"
+    },
+    {
+      "condition": "windy-variant",
+      "character-mapping": "T"
+    },
+    {
+      "condition": "exceptional",
+      "character-mapping": "V"
+    }
+  ],
+  "openweathermap_weather_mappings": [
+    {
+      "id": "200",
+      "character-mapping": "R"
+    },
+    {
+      "id": "201",
+      "character-mapping": "R"
+    },
+    {
+      "id": "202",
+      "character-mapping": "R"
+    },
+    {
+      "id": "210",
+      "character-mapping": "Q"
+    },
+    {
+      "id": "211",
+      "character-mapping": "Q"
+    },
+    {
+      "id": "212",
+      "character-mapping": "Q"
+    },
+    {
+      "id": "221",
+      "character-mapping": "Q"
+    },
+    {
+      "id": "230",
+      "character-mapping": "R"
+    },
+    {
+      "id": "231",
+      "character-mapping": "R"
+    },
+    {
+      "id": "232",
+      "character-mapping": "R"
+    },
+    {
+      "id": "300",
+      "character-mapping": "J"
+    },
+    {
+      "id": "301",
+      "character-mapping": "J"
+    },
+    {
+      "id": "302",
+      "character-mapping": "J"
+    },
+    {
+      "id": "310",
+      "character-mapping": "J"
+    },
+    {
+      "id": "311",
+      "character-mapping": "J"
+    },
+    {
+      "id": "312",
+      "character-mapping": "J"
+    },
+    {
+      "id": "313",
+      "character-mapping": "J"
+    },
+    {
+      "id": "314",
+      "character-mapping": "J"
+    },
+    {
+      "id": "321",
+      "character-mapping": "J"
+    },
+    {
+      "id": "500",
+      "character-mapping": "J"
+    },
+    {
+      "id": "501",
+      "character-mapping": "J"
+    },
+    {
+      "id": "502",
+      "character-mapping": "I"
+    },
+    {
+      "id": "503",
+      "character-mapping": "I"
+    },
+    {
+      "id": "504",
+      "character-mapping": "I"
+    },
+    {
+      "id": "511",
+      "character-mapping": "H"
+    },
+    {
+      "id": "520",
+      "character-mapping": "J"
+    },
+    {
+      "id": "521",
+      "character-mapping": "J"
+    },
+    {
+      "id": "522",
+      "character-mapping": "I"
+    },
+    {
+      "id": "531",
+      "character-mapping": "I"
+    },
+    {
+      "id": "600",
+      "character-mapping": "L"
+    },
+    {
+      "id": "601",
+      "character-mapping": "L"
+    },
+    {
+      "id": "602",
+      "character-mapping": "M"
+    },
+    {
+      "id": "611",
+      "character-mapping": "H"
+    },
+    {
+      "id": "612",
+      "character-mapping": "H"
+    },
+    {
+      "id": "613",
+      "character-mapping": "H"
+    },
+    {
+      "id": "615",
+      "character-mapping": "N"
+    },
+    {
+      "id": "616",
+      "character-mapping": "N"
+    },
+    {
+      "id": "620",
+      "character-mapping": "L"
+    },
+    {
+      "id": "621",
+      "character-mapping": "L"
+    },
+    {
+      "id": "622",
+      "character-mapping": "M"
+    },
+    {
+      "id": "701",
+      "character-mapping": "G"
+    },
+    {
+      "id": "711",
+      "character-mapping": "G"
+    },
+    {
+      "id": "721",
+      "character-mapping": "G"
+    },
+    {
+      "id": "731",
+      "character-mapping": "G"
+    },
+    {
+      "id": "741",
+      "character-mapping": "G"
+    },
+    {
+      "id": "751",
+      "character-mapping": "G"
+    },
+    {
+      "id": "761",
+      "character-mapping": "G"
+    },
+    {
+      "id": "762",
+      "character-mapping": "G"
+    },
+    {
+      "id": "771",
+      "character-mapping": "G"
+    },
+    {
+      "id": "781",
+      "character-mapping": "G"
+    },
+    {
+      "id": "800",
+      "character-mapping-day": "A",
+      "character-mapping-night": "B"
+    },
+    {
+      "id": "801",
+      "character-mapping-day": "C",
+      "character-mapping-night": "D"
+    },
+    {
+      "id": "802",
+      "character-mapping-day": "C",
+      "character-mapping-night": "D"
+    },
+    {
+      "id": "803",
+      "character-mapping-day": "C",
+      "character-mapping-night": "D"
+    },
+    {
+      "id": "804",
+      "character-mapping-day": "C",
+      "character-mapping-night": "D"
+    }
+  ],
+  "accu_weather_mappings": [
+    {
+      "id": "1",
+      "character-mapping": "A",
+      "text": "Sunny"
+    },
+    {
+      "id": "2",
+      "character-mapping": "C",
+      "text": "Mostly Sunny"
+    },
+    {
+      "id": "3",
+      "character-mapping": "C",
+      "text": "Partly Sunny"
+    },
+    {
+      "id": "4",
+      "character-mapping": "C",
+      "text": "Intermittent Clouds"
+    },
+    {
+      "id": "5",
+      "character-mapping": "E",
+      "text": "Hazy Sunshine"
+    },
+    {
+      "id": "6",
+      "character-mapping": "C",
+      "text": "Mostly Cloudy"
+    },
+    {
+      "id": "7",
+      "character-mapping": "F",
+      "text": "Cloudy"
+    },
+    {
+      "id": "8",
+      "character-mapping": "F",
+      "text": "Dreary (Overcast"
+    },
+    {
+      "id": "11",
+      "character-mapping": "G",
+      "text": "Fog"
+    },
+    {
+      "id": "12",
+      "character-mapping": "J",
+      "text": "Showers"
+    },
+    {
+      "id": "13",
+      "character-mapping": "K",
+      "text": "Mostly Cloudy w/ Showers"
+    },
+    {
+      "id": "14",
+      "character-mapping": "K",
+      "text": "Partly Sunny w/ Showers"
+    },
+    {
+      "id": "15",
+      "character-mapping": "R",
+      "text": "T-Storms"
+    },
+    {
+      "id": "16",
+      "character-mapping": "S",
+      "text": "Mostly Cloudy w/ T-Storms"
+    },
+    {
+      "id": "17",
+      "character-mapping": "S",
+      "text": "Partly Sunny w/ T-Storms"
+    },
+    {
+      "id": "18",
+      "character-mapping": "I",
+      "text": "Rain"
+    },
+    {
+      "id": "19",
+      "character-mapping": "L",
+      "text": "Flurries"
+    },
+    {
+      "id": "20",
+      "character-mapping": "O",
+      "text": "Mostly Cloudy w/ Flurries"
+    },
+    {
+      "id": "21",
+      "character-mapping": "O",
+      "text": "Partly Sunny w/ Flurries"
+    },
+    {
+      "id": "22",
+      "character-mapping": "M",
+      "text": "Snow"
+    },
+    {
+      "id": "23",
+      "character-mapping": "O",
+      "text": "Mostly Cloudy w/ Snow"
+    },
+    {
+      "id": "24",
+      "character-mapping": "Z",
+      "text": "Ice"
+    },
+    {
+      "id": "25",
+      "character-mapping": "H",
+      "text": "Sleet"
+    },
+    {
+      "id": "26",
+      "character-mapping": "N",
+      "text": "Freezing Rain"
+    },
+    {
+      "id": "29",
+      "character-mapping": "N",
+      "text": "Rain and Snow"
+    },
+    {
+      "id": "30",
+      "character-mapping": "V",
+      "text": "Hot"
+    },
+    {
+      "id": "31",
+      "character-mapping": "[",
+      "text": "Cold"
+    },
+    {
+      "id": "32",
+      "character-mapping": "T",
+      "text": "Windy"
+    },
+    {
+      "id": "33",
+      "character-mapping": "B",
+      "text": "Clear"
+    },
+    {
+      "id": "34",
+      "character-mapping": "D",
+      "text": "Mostly Clear"
+    },
+    {
+      "id": "35",
+      "character-mapping": "D",
+      "text": "Partly Cloudy"
+    },
+    {
+      "id": "36",
+      "character-mapping": "D",
+      "text": "Intermittent Clouds"
+    },
+    {
+      "id": "37",
+      "character-mapping": "D",
+      "text": "Hazy Moonlight"
+    },
+    {
+      "id": "38",
+      "character-mapping": "D",
+      "text": "Mostly Cloudy"
+    },
+    {
+      "id": "39",
+      "character-mapping": "J",
+      "text": "Partly Cloudy w/ Showers"
+    },
+    {
+      "id": "40",
+      "character-mapping": "J",
+      "text": "Mostly Cloudy w/ Showers"
+    },
+    {
+      "id": "41",
+      "character-mapping": "R",
+      "text": "Partly Cloudy w/ T-Storms"
+    },
+    {
+      "id": "42",
+      "character-mapping": "R",
+      "text": "Mostly Cloudy w/ T-Storms"
+    },
+    {
+      "id": "43",
+      "character-mapping": "L",
+      "text": "Mostly Cloudy w/ Flurries"
+    },
+    {
+      "id": "44",
+      "character-mapping": "M",
+      "text": "Mostly Cloudy w/ Snow"
+    }
+  ],
+  "openmeteo_weather_mappings": [
+    {
+      "id": "0",
+      "character-mapping-day": "A",
+      "character-mapping-night": "B",
+      "text": "Clear sky"
+    },
+    {
+      "id": "1",
+      "character-mapping-day": "C",
+      "character-mapping-night": "D",
+      "text": "Mainly clear"
+    },
+    {
+      "id": "2",
+      "character-mapping-day": "C",
+      "character-mapping-night": "D",
+      "text": "Partly cloudy"
+    },
+    {
+      "id": "3",
+      "character-mapping": "C",
+      "text": "Overcast"
+    },
+    {
+      "id": "45",
+      "character-mapping": "G",
+      "text": "Fog"
+    },
+    {
+      "id": "48",
+      "character-mapping": "G",
+      "text": "Depositing rime fog"
+    },
+    {
+      "id": "51",
+      "character-mapping": "J",
+      "text": "Drizzle: Light"
+    },
+    {
+      "id": "53",
+      "character-mapping": "J",
+      "text": "Drizzle: Moderate"
+    },
+    {
+      "id": "55",
+      "character-mapping": "J",
+      "text": "Drizzle: Dense"
+    },
+    {
+      "id": "56",
+      "character-mapping": "J",
+      "text": "Freezing Drizzle: Light"
+    },
+    {
+      "id": "57",
+      "character-mapping": "J",
+      "text": "Freezing Drizzle: Dense"
+    },
+    {
+      "id": "61",
+      "character-mapping": "J",
+      "text": "Rain: Slight"
+    },
+    {
+      "id": "63",
+      "character-mapping": "I",
+      "text": "Rain: Moderate"
+    },
+    {
+      "id": "65",
+      "character-mapping": "I",
+      "text": "Rain: Heavy"
+    },
+    {
+      "id": "66",
+      "character-mapping": "N",
+      "text": "Freezing Rain: Light"
+    },
+    {
+      "id": "67",
+      "character-mapping": "N",
+      "text": "Freezing Rain: Heavy"
+    },
+    {
+      "id": "71",
+      "character-mapping": "L",
+      "text": "Snow fall: Slight"
+    },
+    {
+      "id": "73",
+      "character-mapping": "M",
+      "text": "Snow fall: Moderate"
+    },
+    {
+      "id": "75",
+      "character-mapping": "M",
+      "text": "Snow fall: Heavy"
+    },
+    {
+      "id": "77",
+      "character-mapping": "H",
+      "text": "Snow grains"
+    },
+    {
+      "id": "80",
+      "character-mapping": "J",
+      "text": "Rain showers: Slight"
+    },
+    {
+      "id": "81",
+      "character-mapping": "I",
+      "text": "Rain showers: Moderate"
+    },
+    {
+      "id": "82",
+      "character-mapping": "I",
+      "text": "Rain showers: Violent"
+    },
+    {
+      "id": "85",
+      "character-mapping": "L",
+      "text": "Snow showers: Slight"
+    },
+    {
+      "id": "86",
+      "character-mapping": "M",
+      "text": "Snow showers: Heavy"
+    },
+    {
+      "id": "95",
+      "character-mapping": "Q",
+      "text": "Thunderstorm: Slight or moderate"
+    },
+    {
+      "id": "96",
+      "character-mapping": "R",
+      "text": "Thunderstorm: Slight Hail"
+    },
+    {
+      "id": "99",
+      "character-mapping": "R",
+      "text": "Thunderstorm: Heavy Hail"
+    }
+  ]
 }
-
-
-

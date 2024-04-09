@@ -138,11 +138,10 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   MqttManagerConfig::date_format = std::string(data["date_format"]);
   MqttManagerConfig::outside_temp_sensor_provider = std::string(data["outside_temp_sensor_provider"]);
   MqttManagerConfig::outside_temp_sensor_entity_id = std::string(data["outside_temp_sensor_entity_id"]);
-  MqttManagerConfig::weather_controller = std::string(data["weather_controller"]);
-  MqttManagerConfig::home_assistant_weather_entity = std::string(data["home_assistant_weather_entity"]);
-  MqttManagerConfig::home_assistant_sun_entity = std::string(data["home_assistant_sun_entity"]);
-  MqttManagerConfig::openhab_current_weather_item = std::string(data["openhab_current_weather_item"]);
-  MqttManagerConfig::openhab_forecast_weather_item = std::string(data["openhab_forecast_weather_item"]);
+  MqttManagerConfig::weather_location_latitude = std::string(data["weather_location_latitude"]);
+  MqttManagerConfig::weather_location_longitude = std::string(data["weather_location_longitude"]);
+  MqttManagerConfig::weather_wind_speed_format = std::string(data["weather_wind_speed_format"]);
+  MqttManagerConfig::weather_precipitation_format = std::string(data["weather_precipitation_format"]);
   MqttManagerConfig::icon_mapping = data["icon_mapping"];
   MqttManagerConfig::clock_us_style = data["clock_us_style"];
   MqttManagerConfig::use_farenheit = data["use_farenheit"];

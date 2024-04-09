@@ -10,6 +10,9 @@
 #include <cstdint>
 #include <cstdlib>
 #include <ctime>
+#include <curl/curl.h>
+#include <exception>
+#include <fmt/chrono.h>
 #include <fmt/core.h>
 #include <math.h>
 #include <nlohmann/json.hpp>
@@ -19,23 +22,7 @@
 #include <vector>
 
 void MQTTManagerWeather::update_config() {
-  if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
-    SPDLOG_INFO("Initializing weather controller for Home Assistant.");
-    HomeAssistantManager::attach_event_observer(MqttManagerConfig::home_assistant_weather_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
-    HomeAssistantManager::attach_event_observer(MqttManagerConfig::home_assistant_sun_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
-    OpenhabManager::detach_event_observer(MqttManagerConfig::openhab_current_weather_item, boost::bind(&MQTTManagerWeather::openhab_current_weather_callback, this, _1));
-    OpenhabManager::detach_event_observer(MqttManagerConfig::openhab_forecast_weather_item, boost::bind(&MQTTManagerWeather::openhab_forecast_weather_callback, this, _1));
-  } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
-    SPDLOG_INFO("Initializing weather controller for OpenHAB.");
-    SPDLOG_DEBUG("Current weather item: {}", MqttManagerConfig::openhab_current_weather_item);
-    SPDLOG_DEBUG("Forecast weather item: {}", MqttManagerConfig::openhab_forecast_weather_item);
-    HomeAssistantManager::detach_event_observer(MqttManagerConfig::home_assistant_weather_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
-    HomeAssistantManager::detach_event_observer(MqttManagerConfig::home_assistant_sun_entity, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
-    OpenhabManager::attach_event_observer(MqttManagerConfig::openhab_current_weather_item, boost::bind(&MQTTManagerWeather::openhab_current_weather_callback, this, _1));
-    OpenhabManager::attach_event_observer(MqttManagerConfig::openhab_forecast_weather_item, boost::bind(&MQTTManagerWeather::openhab_forecast_weather_callback, this, _1));
-  } else {
-    SPDLOG_ERROR("Unsupported weather controller '{}'.", MqttManagerConfig::weather_controller);
-  }
+  SPDLOG_INFO("Will gather weather for location {}E, {}N.", MqttManagerConfig::weather_location_latitude, MqttManagerConfig::weather_location_longitude);
 
   if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0) {
     SPDLOG_INFO("Will load outside temperature from Home Assistant sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
@@ -44,42 +31,103 @@ void MQTTManagerWeather::update_config() {
   } else if (MqttManagerConfig::outside_temp_sensor_provider.compare("openhab") == 0) {
     SPDLOG_INFO("Will load outside temperature from OpenHAB sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
     OpenhabManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::openhab_temp_sensor_callback, this, _1));
-    if (MqttManagerConfig::weather_controller.compare("home_assistant") != 0) {
-      HomeAssistantManager::detach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
+  }
+
+  MQTTManagerWeather::_pull_new_weather_data();
+}
+
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+  ((std::string *)userp)->append((char *)contents, size * nmemb);
+  return size * nmemb;
+}
+
+void MQTTManagerWeather::_pull_new_weather_data() {
+  try {
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+    if (curl) {
+      std::string response_data; // This will contain any response data from the CURL request.
+      std::string bearer_token = "Authorization: Bearer ";
+      bearer_token.append(MqttManagerConfig::openhab_access_token);
+
+      struct curl_slist *headers = NULL;
+      headers = curl_slist_append(headers, bearer_token.c_str());
+      if (headers == NULL) {
+        SPDLOG_ERROR("Failed to set bearer token header for OpenHAB light rest request.");
+        curl_easy_cleanup(curl);
+        curl_slist_free_all(headers);
+      }
+      headers = curl_slist_append(headers, "Content-type: application/json");
+      if (headers == NULL) {
+        SPDLOG_ERROR("Failed to set content-type header for OpenHAB light rest request.");
+        curl_easy_cleanup(curl);
+        curl_slist_free_all(headers);
+      }
+
+      std::string pull_weather_url = fmt::format("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&wind_speed_unit={}&timezone={}&precipitation_unit={}", MqttManagerConfig::weather_location_latitude, MqttManagerConfig::weather_location_longitude, MqttManagerConfig::weather_wind_speed_format, MqttManagerConfig::timezone, MqttManagerConfig::weather_precipitation_format);
+      curl_easy_setopt(curl, CURLOPT_URL, pull_weather_url.c_str());
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+
+      SPDLOG_DEBUG("Requesting new weather forecast from Open Meteo.");
+
+      /* Perform the request, res will get the return code */
+      res = curl_easy_perform(curl);
+      long http_code;
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+      /* Check for errors */
+      if (res == CURLE_OK && http_code == 200) {
+        SPDLOG_DEBUG("Successfully received new weather forcast from Open Meteo. Will process new data.");
+        MQTTManagerWeather::_process_weather_data(response_data);
+      } else {
+        SPDLOG_ERROR("curl_easy_perform() when getting new weather forecast, got code: {}.", curl_easy_strerror(res));
+      }
+
+      /* always cleanup */
+      curl_slist_free_all(headers);
+      curl_easy_cleanup(curl);
     }
+  } catch (const std::exception &e) {
+    SPDLOG_ERROR("Caught exception when trying to fetch new weather data: {}", boost::diagnostic_information(e, true));
   }
 }
 
-void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data) {
-  if (std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::home_assistant_weather_entity) == 0) {
-    nlohmann::json new_state = event_data["event"]["data"]["new_state"];
+void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
+  // Set timezone
+  setenv("TZ", MqttManagerConfig::timezone.c_str(), 1);
+  tzset();
 
+  // Start processing data
+  try {
+    nlohmann::json data = nlohmann::json::parse(weather_string);
+    MQTTManagerWeather::_windspeed_unit = data["current_units"]["wind_speed_10m"];
+    MQTTManagerWeather::_precipitation_unit = data["current_units"]["precipitation"];
+
+    // Load forecast, 5 days:
     this->_forecast_weather_info.clear();
-    for (nlohmann::json forecast : new_state["attributes"]["forecast"]) {
+    for (int i = 0; i < 5; i++) {
       weather_info info;
-      SPDLOG_DEBUG("Loading weather forecast for {}", std::string(forecast["datetime"]));
-      info.condition = forecast["condition"];
-      info.wind_speed = forecast["wind_speed"];
-      info.precipitation = forecast["precipitation"];
-      info.precipitation_probability = forecast["precipitation_probability"];
-      info.temperature_low = forecast["templow"];
-      info.temperature_high = forecast["temperature"];
+      info.condition = std::to_string(int(data["daily"]["weather_code"][i]));
+      info.wind_speed = data["daily"]["wind_speed_10m_max"][i];
+      info.precipitation = data["daily"]["precipitation_sum"][i];
+      info.precipitation_probability = data["daily"]["precipitation_probability_max"][i];
+      info.temperature_low = data["daily"]["temperature_2m_min"][i];
+      info.temperature_high = data["daily"]["temperature_2m_max"][i];
 
-      // Get day of week
-      std::string datetime = forecast["datetime"];
-      std::vector<std::string> datetime_parts;
-      size_t pos = datetime.find("T");
-      std::string date = datetime.substr(0, pos);
-      std::string year = date.substr(0, date.find("-"));
-      date.erase(0, date.find("-") + 1);
-      std::string month = date.substr(0, date.find("-"));
-      date.erase(0, date.find("-") + 1);
-      std::string day_of_month = date;
-
-      std::tm tm = {01, 00, 00, atoi(day_of_month.c_str()), atoi(month.c_str()) - 1, atoi(year.c_str()) - 1900};
-      std::time_t utc_time = std::mktime(&tm);
-      const std::tm *localtime = std::localtime(&utc_time);
+      const std::time_t timestamp = data["daily"]["time"][i];
+      std::tm *localtime = std::localtime(&timestamp);
       info.time = *localtime;
+
+      const std::time_t sunrise = data["daily"]["sunrise"][i];
+      std::tm *sunrise_tm = std::localtime(&sunrise);
+      info.sunrise = *sunrise_tm;
+
+      const std::time_t sunset = data["daily"]["sunset"][i];
+      std::tm *sunset_tm = std::localtime(&sunset);
+      info.sunset = *sunset_tm;
 
       switch (localtime->tm_wday) {
       case 0:
@@ -111,220 +159,53 @@ void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data
       this->_forecast_weather_info.push_back(info);
     }
 
-    SPDLOG_DEBUG("Loaded forecast for {} days.", this->_forecast_weather_info.size());
-
     if (this->_forecast_weather_info.size() > 0) {
-      if (MqttManagerConfig::outside_temp_sensor_provider.length() == 0 && MqttManagerConfig::outside_temp_sensor_entity_id.length() == 0) {
-        this->_current_temperature = new_state["attributes"]["temperature"];
-      }
-      this->_current_condition = this->_forecast_weather_info[0].condition;
-      this->_current_precipitation_probability = this->_forecast_weather_info[0].precipitation_probability;
-      this->_current_wind_speed = new_state["attributes"]["wind_speed"];
-      this->_windspeed_unit = new_state["attributes"]["wind_speed_unit"];
-      this->_precipitation_unit = new_state["attributes"]["precipitation_unit"];
+      SPDLOG_DEBUG("Loaded forecast for {} days.", this->_forecast_weather_info.size());
+      this->_next_sunrise = fmt::format("{:%H:%M}", this->_forecast_weather_info[0].sunrise);
+      this->_next_sunset = fmt::format("{:%H:%M}", this->_forecast_weather_info[0].sunset);
+      this->_current_condition = std::to_string(int(data["current"]["weather_code"]));
+      this->_current_temperature = data["current"]["temperature_2m"];
+      this->_current_wind_speed = data["current"]["wind_speed_10m"];
       this->_current_min_temperature = this->_forecast_weather_info[0].temperature_low;
       this->_current_max_temperature = this->_forecast_weather_info[0].temperature_high;
-      std::time_t time = std::time({});
-      this->_current_weather_time = *std::localtime(&time);
+
+      std::time_t current_weather_time = data["current"]["time"];
+      this->_current_weather_time = *std::localtime(&current_weather_time);
       this->send_state_update();
     } else {
-      SPDLOG_ERROR("Failed to process forecast information from Home Assistant.");
-      return;
+      SPDLOG_ERROR("Failed to load forecast!");
     }
 
-    return;
-  } else if (std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::home_assistant_sun_entity) == 0) {
-    std::string next_rising = event_data["event"]["data"]["new_state"]["attributes"]["next_rising"];
-    std::string next_setting = event_data["event"]["data"]["new_state"]["attributes"]["next_setting"];
+  } catch (const std::exception &e) {
+    SPDLOG_ERROR("Caught exception when trying to decode weather data: {}", boost::diagnostic_information(e, true));
+  }
+}
 
-    // Get time parts from sunrise
-    std::string rising_date = next_rising.substr(0, next_rising.find("T"));
-    next_rising.erase(0, next_rising.find("T") + 1);
-    std::string rising_time = next_rising.substr(0, next_rising.find("+"));
-    next_rising.erase(0, next_rising.find("+") + 1);
-
-    std::string rising_hour = rising_time.substr(0, rising_time.find(":"));
-    rising_time.erase(0, rising_time.find(":") + 1);
-    std::string rising_minute = rising_time.substr(0, rising_time.find(":"));
-    rising_time.erase(0, rising_time.find(":") + 1);
-
-    // Get time parts from sunrise
-    std::string setting_date = next_setting.substr(0, next_setting.find("T"));
-    next_setting.erase(0, next_setting.find("T") + 1);
-    std::string setting_time = next_setting.substr(0, next_setting.find("+"));
-    next_setting.erase(0, next_setting.find("+") + 1);
-
-    std::string setting_hour = setting_time.substr(0, setting_time.find(":"));
-    setting_time.erase(0, setting_time.find(":") + 1);
-    std::string setting_minute = setting_time.substr(0, setting_time.find(":"));
-    setting_time.erase(0, setting_time.find(":") + 1);
-
-    this->_next_sunrise_hour = atoi(rising_hour.c_str());
-    this->_next_sunrise = fmt::format("{}:{}", rising_hour, rising_minute);
-    this->_next_sunset_hour = atoi(setting_hour.c_str());
-    this->_next_sunset = fmt::format("{}:{}", setting_hour, setting_minute);
-  } else if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0 && std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::outside_temp_sensor_entity_id) == 0) {
+void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data) {
+  if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0 && std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::outside_temp_sensor_entity_id) == 0) {
     nlohmann::json new_state = event_data["event"]["data"]["new_state"];
     this->_current_temperature = atof(std::string(new_state["state"]).c_str());
     this->send_state_update();
   }
 }
 
-void MQTTManagerWeather::openhab_current_weather_callback(nlohmann::json event_data) {
-  // Set timezone
-  setenv("TZ", MqttManagerConfig::timezone.c_str(), 1);
-  tzset();
-
-  std::string weather_state;
-  if (std::string(event_data["type"]).compare("ItemStateChangedEvent") == 0) {
-    nlohmann::json payload = nlohmann::json::parse(std::string(event_data["payload"]));
-    weather_state = payload["value"];
-  } else if (std::string(event_data["type"]).compare("ItemStateFetched") == 0) {
-    weather_state = event_data["payload"]["state"];
-  }
-
-  if (weather_state.size() > 0) {
-    nlohmann::json json_decode = nlohmann::json::parse(weather_state);
-    nlohmann::json weather_json = json_decode[0];
-
-    this->_current_condition = weather_json["WeatherText"];
-    this->_current_condition_id = weather_json["WeatherIcon"];
-
-    if (MqttManagerConfig::use_farenheit) {
-      if (MqttManagerConfig::outside_temp_sensor_provider.length() == 0 && MqttManagerConfig::outside_temp_sensor_entity_id.length() == 0) {
-        this->_current_temperature = weather_json["Temperature"]["Imperial"]["Value"];
-      }
-      this->_current_min_temperature = weather_json["TemperatureSummary"]["Past6HourRange"]["Minimum"]["Imperial"]["Value"];
-      this->_current_max_temperature = weather_json["TemperatureSummary"]["Past6HourRange"]["Maximum"]["Imperial"]["Value"];
-      this->_current_wind_speed = weather_json["Wind"]["Speed"]["Imperial"]["Value"];
-      this->_windspeed_unit = weather_json["Wind"]["Speed"]["Imperial"]["Unit"];
-      this->_precipitation_unit = weather_json["PrecipitationSummary"]["Precipitation"]["Imperial"]["Unit"];
-    } else {
-      if (MqttManagerConfig::outside_temp_sensor_provider.length() == 0 && MqttManagerConfig::outside_temp_sensor_entity_id.length() == 0) {
-        this->_current_temperature = weather_json["Temperature"]["Metric"]["Value"];
-      }
-      this->_current_min_temperature = weather_json["TemperatureSummary"]["Past6HourRange"]["Minimum"]["Metric"]["Value"];
-      this->_current_max_temperature = weather_json["TemperatureSummary"]["Past6HourRange"]["Maximum"]["Metric"]["Value"];
-      this->_current_wind_speed = weather_json["Wind"]["Speed"]["Metric"]["Value"];
-      this->_windspeed_unit = weather_json["Wind"]["Speed"]["Metric"]["Unit"];
-      this->_precipitation_unit = weather_json["PrecipitationSummary"]["Precipitation"]["Metric"]["Unit"];
-    }
-
-    time_t weather_time = uint64_t(weather_json["EpochTime"]);
-    this->_current_weather_time = *std::localtime(&weather_time);
-
-    this->send_state_update();
-  }
-}
-
-void MQTTManagerWeather::openhab_forecast_weather_callback(nlohmann::json event_data) {
-  // Set timezone
-  setenv("TZ", MqttManagerConfig::timezone.c_str(), 1);
-  tzset();
-
-  std::string forecast_state;
-  if (std::string(event_data["type"]).compare("ItemStateChangedEvent") == 0) {
-    nlohmann::json payload = nlohmann::json::parse(std::string(event_data["payload"]));
-    forecast_state = payload["value"];
-  } else if (std::string(event_data["type"]).compare("ItemStateFetched") == 0) {
-    forecast_state = event_data["payload"]["state"];
-  }
-
-  if (forecast_state.size() > 0) {
-    nlohmann::json forecast_json = nlohmann::json::parse(forecast_state);
-
-    this->_forecast_weather_info.clear();
-    for (nlohmann::json &day_info : forecast_json["DailyForecasts"]) {
-      struct weather_info day_summary;
-      time_t dt = uint64_t(day_info["EpochDate"]);
-      day_summary.time = *std::localtime(&dt);
-
-      day_summary.condition = day_info["Day"]["ShortPhrase"];
-      day_summary.condition_id = day_info["Day"]["Icon"];
-      day_summary.temperature_low = day_info["Temperature"]["Minimum"]["Value"];
-      day_summary.temperature_high = day_info["Temperature"]["Maximum"]["Value"];
-      day_summary.wind_speed = day_info["Day"]["Wind"]["Speed"]["Value"];
-      day_summary.precipitation_probability = day_info["Day"]["PrecipitationProbability"];
-
-      // sunrise
-      time_t dt_sunrise = uint64_t(day_info["Sun"]["EpochRise"]);
-      day_summary.sunrise = *std::localtime(&dt_sunrise);
-      // sunset
-      time_t dt_sunset = uint64_t(day_info["Sun"]["EpochSet"]);
-      day_summary.sunset = *std::localtime(&dt_sunset);
-
-      switch (day_summary.time.tm_wday) {
-      case 0:
-        day_summary.day = "Sun";
-        break;
-      case 1:
-        day_summary.day = "Mon";
-        break;
-      case 2:
-        day_summary.day = "Tue";
-        break;
-      case 3:
-        day_summary.day = "Wed";
-        break;
-      case 4:
-        day_summary.day = "Thu";
-        break;
-      case 5:
-        day_summary.day = "Fri";
-        break;
-      case 6:
-        day_summary.day = "Sat";
-        break;
-      default:
-        day_summary.day = std::to_string(day_summary.time.tm_wday);
-        break;
-      }
-
-      SPDLOG_DEBUG("Adding OpenHAB weather(OpenWeatherMap) for {}-{:0>2}-{:0>2} {:0>2}:{:0>2} to forecast list.", day_summary.time.tm_year + 1900, day_summary.time.tm_mon + 1, day_summary.time.tm_mday, day_summary.time.tm_hour, day_summary.time.tm_min);
-      this->_forecast_weather_info.push_back(day_summary);
-    }
-
-    if (this->_forecast_weather_info.size() > 0) {
-      // Unfortunetly OpenWeatherMap doesn't provide a precipitation_probability for the current time and so the next best thing is the first item in the forecast.
-      this->_current_precipitation_probability = this->_forecast_weather_info[0].precipitation_probability;
-      this->_next_sunrise_hour = this->_forecast_weather_info[0].sunrise.tm_hour;
-      this->_next_sunrise = fmt::format("{:0>2}:{:0>2}", this->_forecast_weather_info[0].sunrise.tm_hour, this->_forecast_weather_info[0].sunrise.tm_min);
-      this->_next_sunset_hour = this->_forecast_weather_info[0].sunset.tm_hour;
-      this->_next_sunset = fmt::format("{:0>2}:{:0>2}", this->_forecast_weather_info[0].sunset.tm_hour, this->_forecast_weather_info[0].sunset.tm_min);
-      this->send_state_update();
-    } else {
-      SPDLOG_ERROR("Failed to load any forecast from OpenHAB weather.");
-    }
-  }
-}
-
 std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, uint8_t hour) {
-  if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
-    for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["home_assistant_weather_mappings"]) {
-      if (std::string(mapping["condition"]).compare(condition) == 0) {
+  for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["openmeteo_weather_mappings"]) {
+    if (std::string(mapping["id"]).compare(condition) == 0) {
+      if (mapping.contains("character-mapping")) {
         return std::string(mapping["character-mapping"]);
+      } else if (mapping.contains("character-mapping-day") && hour >= MQTTManagerWeather::_next_sunrise_hour && hour <= MQTTManagerWeather::_next_sunset_hour) {
+        return mapping["character-mapping-day"];
+      } else if (mapping.contains("character-mapping-night") && (hour <= MQTTManagerWeather::_next_sunrise_hour || hour >= MQTTManagerWeather::_next_sunset_hour)) {
+        return mapping["character-mapping-night"];
+      } else {
+        SPDLOG_ERROR("Found matching condition for {} but no icon-mapping!", condition);
+        SPDLOG_ERROR("Matching condition current hour: {}, sunrise: {}, sunset: {}", hour, MQTTManagerWeather::_next_sunrise_hour, MQTTManagerWeather::_next_sunset_hour);
       }
     }
-  } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
-    for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["accu_weather_mappings"]) {
-      if (std::string(mapping["id"]).compare(condition) == 0) {
-        if (mapping.contains("character-mapping")) {
-          return std::string(mapping["character-mapping"]);
-        } else if (mapping.contains("character-mapping-day") && hour >= MQTTManagerWeather::_next_sunrise_hour && hour <= MQTTManagerWeather::_next_sunset_hour) {
-          return mapping["character-mapping-day"];
-        } else if (mapping.contains("character-mapping-night") && (hour <= MQTTManagerWeather::_next_sunrise_hour || hour >= MQTTManagerWeather::_next_sunset_hour)) {
-          return mapping["character-mapping-night"];
-        } else {
-          SPDLOG_ERROR("Found matching condition for {} but no icon-mapping!", condition);
-          SPDLOG_ERROR("Matching condition current hour: {}, sunrise: {}, sunset: {}", hour, MQTTManagerWeather::_next_sunrise_hour, MQTTManagerWeather::_next_sunset_hour);
-        }
-      }
-    }
-  } else {
-    SPDLOG_ERROR("Unknown controller {}.", MqttManagerConfig::weather_controller);
   }
 
-  SPDLOG_ERROR("Couldn't find a mapping for condition {} using controller {}.", condition, MqttManagerConfig::weather_controller);
+  SPDLOG_ERROR("Couldn't find a mapping for condition {}.", condition);
   return "";
 }
 
@@ -348,15 +229,7 @@ void MQTTManagerWeather::send_state_update() {
   std::list<nlohmann::json> forecast;
   for (struct weather_info info : this->_forecast_weather_info) {
     nlohmann::json forecast_data;
-    if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
-      forecast_data["icon"] = this->_get_icon_from_mapping(info.condition, info.time.tm_hour);
-    } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
-      std::string condition_id = std::to_string(info.condition_id);
-      forecast_data["icon"] = this->_get_icon_from_mapping(condition_id, info.time.tm_hour);
-    } else {
-      SPDLOG_ERROR("Unknown weather controller {}. Will not set an icon!", MqttManagerConfig::weather_controller);
-      weather_info["icon"] = "";
-    }
+    forecast_data["icon"] = this->_get_icon_from_mapping(info.condition, info.time.tm_hour);
     std::string pre = std::to_string((int)round(info.precipitation));
     pre.append(this->_precipitation_unit);
     forecast_data["pre"] = pre;
@@ -380,15 +253,7 @@ void MQTTManagerWeather::send_state_update() {
     forecast.push_back(forecast_data);
   }
   weather_info["forecast"] = forecast;
-  if (MqttManagerConfig::weather_controller.compare("home_assistant") == 0) {
-    weather_info["icon"] = this->_get_icon_from_mapping(this->_current_condition, this->_current_weather_time.tm_hour);
-  } else if (MqttManagerConfig::weather_controller.compare("openhab") == 0) {
-    std::string condition_id = std::to_string(this->_current_condition_id);
-    weather_info["icon"] = this->_get_icon_from_mapping(condition_id, this->_current_weather_time.tm_hour);
-  } else {
-    SPDLOG_ERROR("Unknown weather controller {}. Will not set an icon!", MqttManagerConfig::weather_controller);
-    weather_info["icon"] = "";
-  }
+  weather_info["icon"] = this->_get_icon_from_mapping(this->_current_condition, this->_current_weather_time.tm_hour);
   std::string temp = std::to_string((int)round(this->_current_temperature));
   temp.append("°");
   weather_info["temp"] = temp;

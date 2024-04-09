@@ -37,13 +37,12 @@ public:
 
   static inline bool is_home_assistant_addon;
   static inline std::string date_format;
-  static inline std::string weather_controller;
-  static inline std::string home_assistant_weather_entity;
-  static inline std::string home_assistant_sun_entity;
+  static inline std::string weather_location_latitude;
+  static inline std::string weather_location_longitude;
+  static inline std::string weather_wind_speed_format;
+  static inline std::string weather_precipitation_format;
   static inline std::string outside_temp_sensor_provider;
   static inline std::string outside_temp_sensor_entity_id;
-  static inline std::string openhab_current_weather_item;
-  static inline std::string openhab_forecast_weather_item;
   static inline std::string timezone;
   static inline nlohmann::json icon_mapping;
   static inline bool clock_us_style;

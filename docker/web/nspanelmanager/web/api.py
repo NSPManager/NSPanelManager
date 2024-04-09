@@ -46,48 +46,29 @@ def get_file_md5sum(filename):
 def get_mqtt_manager_config(request):
     environment = environ.Env()
 
-    return_json = {}
-    return_json["color_temp_min"] = int(
-        get_setting_with_default("color_temp_min", 2000))
-    return_json["color_temp_max"] = int(
-        get_setting_with_default("color_temp_max", 6000))
-    return_json["openhab_brightness_channel_name"] = get_setting_with_default(
-        "openhab_brightness_channel_name", "")
-    return_json["openhab_brightness_channel_min"] = get_setting_with_default(
-        "openhab_brightness_channel_min", 0)
-    return_json["openhab_brightness_channel_max"] = get_setting_with_default(
-        "openhab_brightness_channel_max", 255)
-    return_json["openhab_color_temp_channel_name"] = get_setting_with_default(
-        "openhab_color_temp_channel_name", "")
-    return_json["openhab_rgb_channel_name"] = get_setting_with_default(
-        "openhab_rgb_channel_name", "")
-    return_json["clock_us_style"] = get_setting_with_default(
-        "clock_us_style", False) == "True"
-    return_json["use_farenheit"] = get_setting_with_default(
-        "use_farenheit", False) == "True"
-    return_json["turn_on_behavior"] = get_setting_with_default(
-        "turn_on_behavior", "color_temp")
-    return_json["max_log_buffer_size"] = get_setting_with_default(
-        "max_log_buffer_size", "10")
-    return_json["manager_address"] = get_setting_with_default(
-        "manager_address", "")
-    return_json["manager_port"] = get_setting_with_default("manager_port", "")
-    return_json["date_format"] = get_setting_with_default(
-        "date_format", "%a %d/%m %Y")
-    return_json["weather_controller"] = get_setting_with_default(
-        "weather_controller", "")
-    return_json["home_assistant_sun_entity"] = get_setting_with_default(
-        "sun_entity", "")
-    return_json["home_assistant_weather_entity"] = get_setting_with_default(
-        "weather_home_assistant_weather_entity", "")
-    return_json["outside_temp_sensor_provider"] = get_setting_with_default(
-        "outside_temp_sensor_provider", "")
-    return_json["outside_temp_sensor_entity_id"] = get_setting_with_default(
-        "outside_temp_sensor_entity_id", "")
-    return_json["openhab_current_weather_item"] = get_setting_with_default(
-        "weather_openhab_current_weather_item", "")
-    return_json["openhab_forecast_weather_item"] = get_setting_with_default(
-        "weather_openhab_forecast_weather_item", "")
+    return_json = {
+        "color_temp_min": int(get_setting_with_default("color_temp_min", "2000")),
+        "color_temp_max": int(get_setting_with_default("color_temp_max", "6000")),
+        "openhab_brightness_channel_name": get_setting_with_default("openhab_brightness_channel_name", ""),
+        "openhab_brightness_channel_min": get_setting_with_default("openhab_brightness_channel_min", 0),
+        "openhab_brightness_channel_max": get_setting_with_default("openhab_brightness_channel_max", 255),
+        "openhab_color_temp_channel_name": get_setting_with_default("openhab_color_temp_channel_name", ""),
+        "openhab_rgb_channel_name": get_setting_with_default("openhab_rgb_channel_name", ""),
+        "clock_us_style": get_setting_with_default("clock_us_style", False) == "True",
+        "use_farenheit": get_setting_with_default("use_farenheit", False) == "True",
+        "turn_on_behavior": get_setting_with_default("turn_on_behavior", "color_temp"),
+        "max_log_buffer_size": get_setting_with_default("max_log_buffer_size", "10"),
+        "manager_address": get_setting_with_default("manager_address", ""),
+        "manager_port": get_setting_with_default("manager_port", ""),
+        "date_format": get_setting_with_default("date_format", "%a %d/%m %Y"),
+        "outside_temp_sensor_provider": get_setting_with_default("outside_temp_sensor_provider", ""),
+        "outside_temp_sensor_entity_id": get_setting_with_default("outside_temp_sensor_entity_id", ""),
+        "weather_location_latitude": get_setting_with_default("location_latitude", ""),
+        "weather_location_longitude": get_setting_with_default("location_longitude", ""),
+        "weather_wind_speed_format": get_setting_with_default("wind_speed_format", "kmh"),
+        "weather_precipitation_format": get_setting_with_default("precipitation_format", "mm"),
+    }
+
     if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
         return_json["is_home_assistant_addon"] = True
     else:
