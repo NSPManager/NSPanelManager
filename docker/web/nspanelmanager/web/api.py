@@ -55,7 +55,7 @@ def get_mqtt_manager_config(request):
         "openhab_color_temp_channel_name": get_setting_with_default("openhab_color_temp_channel_name", ""),
         "openhab_rgb_channel_name": get_setting_with_default("openhab_rgb_channel_name", ""),
         "clock_us_style": get_setting_with_default("clock_us_style", False) == "True",
-        "use_farenheit": get_setting_with_default("use_farenheit", False) == "True",
+        "use_fahrenheit": get_setting_with_default("use_fahrenheit", False) == "True",
         "turn_on_behavior": get_setting_with_default("turn_on_behavior", "color_temp"),
         "max_log_buffer_size": get_setting_with_default("max_log_buffer_size", "10"),
         "manager_address": get_setting_with_default("manager_address", ""),
@@ -67,6 +67,7 @@ def get_mqtt_manager_config(request):
         "weather_location_longitude": get_setting_with_default("location_longitude", ""),
         "weather_wind_speed_format": get_setting_with_default("wind_speed_format", "kmh"),
         "weather_precipitation_format": get_setting_with_default("precipitation_format", "mm"),
+        "weather_update_interval": int(get_setting_with_default("weather_update_interval", 10)),
     }
 
     if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
@@ -427,8 +428,8 @@ def get_nspanel_config(request):
             nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode", "with_background"))
         base["clock_us_style"] = get_setting_with_default(
             "clock_us_style", "False")
-        base["use_farenheit"] = get_setting_with_default(
-            "use_farenheit", "False")
+        base["use_fahrenheit"] = get_setting_with_default(
+            "use_fahrenheit", "False")
         base["is_us_panel"] = get_nspanel_setting_with_default(
             nspanel.id, "is_us_panel", "False")
         base["lock_to_default_room"] = get_nspanel_setting_with_default(

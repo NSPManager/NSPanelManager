@@ -7,6 +7,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/bind.hpp>
+#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <ctime>
@@ -14,26 +15,38 @@
 #include <exception>
 #include <fmt/chrono.h>
 #include <fmt/core.h>
-#include <math.h>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
-#include <vector>
+
+void MQTTManagerWeather::start() {
+  if (!MQTTManagerWeather::_instance.joinable()) {
+    SPDLOG_INFO("No running instance of weather manager found. Will start new thread.");
+    MQTTManagerWeather::_instance = std::thread(MQTTManagerWeather::_run_weather_thread);
+  } else {
+    SPDLOG_INFO("Weather manager already running.");
+  }
+}
+
+void MQTTManagerWeather::_run_weather_thread() {
+  while (true) {
+    MQTTManagerWeather::_pull_new_weather_data();
+    std::this_thread::sleep_for(std::chrono::minutes(MqttManagerConfig::weather_update_interval));
+  }
+}
 
 void MQTTManagerWeather::update_config() {
-  SPDLOG_INFO("Will gather weather for location {}E, {}N.", MqttManagerConfig::weather_location_latitude, MqttManagerConfig::weather_location_longitude);
-
   if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0) {
     SPDLOG_INFO("Will load outside temperature from Home Assistant sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
-    HomeAssistantManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::home_assistant_event_callback, this, _1));
-    OpenhabManager::detach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::openhab_temp_sensor_callback, this, _1));
+    HomeAssistantManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, &MQTTManagerWeather::home_assistant_event_callback);
+    OpenhabManager::detach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, &MQTTManagerWeather::openhab_temp_sensor_callback);
   } else if (MqttManagerConfig::outside_temp_sensor_provider.compare("openhab") == 0) {
     SPDLOG_INFO("Will load outside temperature from OpenHAB sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
-    OpenhabManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, boost::bind(&MQTTManagerWeather::openhab_temp_sensor_callback, this, _1));
+    OpenhabManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, &MQTTManagerWeather::openhab_temp_sensor_callback);
   }
 
-  MQTTManagerWeather::_pull_new_weather_data();
+  MQTTManagerWeather::start();
 }
 
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
@@ -65,7 +78,14 @@ void MQTTManagerWeather::_pull_new_weather_data() {
         curl_slist_free_all(headers);
       }
 
-      std::string pull_weather_url = fmt::format("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&wind_speed_unit={}&timezone={}&precipitation_unit={}", MqttManagerConfig::weather_location_latitude, MqttManagerConfig::weather_location_longitude, MqttManagerConfig::weather_wind_speed_format, MqttManagerConfig::timezone, MqttManagerConfig::weather_precipitation_format);
+      std::string temperature_unit;
+      if (MqttManagerConfig::use_fahrenheit) {
+        temperature_unit = "fahrenheit";
+      } else {
+        temperature_unit = "celsius";
+      }
+
+      std::string pull_weather_url = fmt::format("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&wind_speed_unit={}&timezone={}&precipitation_unit={}&temperature_unit={}", MqttManagerConfig::weather_location_latitude, MqttManagerConfig::weather_location_longitude, MqttManagerConfig::weather_wind_speed_format, MqttManagerConfig::timezone, MqttManagerConfig::weather_precipitation_format, temperature_unit);
       curl_easy_setopt(curl, CURLOPT_URL, pull_weather_url.c_str());
       curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -107,7 +127,7 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
     MQTTManagerWeather::_precipitation_unit = data["current_units"]["precipitation"];
 
     // Load forecast, 5 days:
-    this->_forecast_weather_info.clear();
+    MQTTManagerWeather::_forecast_weather_info.clear();
     for (int i = 0; i < 5; i++) {
       weather_info info;
       info.condition = std::to_string(int(data["daily"]["weather_code"][i]));
@@ -156,22 +176,22 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
         break;
       }
 
-      this->_forecast_weather_info.push_back(info);
+      MQTTManagerWeather::_forecast_weather_info.push_back(info);
     }
 
-    if (this->_forecast_weather_info.size() > 0) {
-      SPDLOG_DEBUG("Loaded forecast for {} days.", this->_forecast_weather_info.size());
-      this->_next_sunrise = fmt::format("{:%H:%M}", this->_forecast_weather_info[0].sunrise);
-      this->_next_sunset = fmt::format("{:%H:%M}", this->_forecast_weather_info[0].sunset);
-      this->_current_condition = std::to_string(int(data["current"]["weather_code"]));
-      this->_current_temperature = data["current"]["temperature_2m"];
-      this->_current_wind_speed = data["current"]["wind_speed_10m"];
-      this->_current_min_temperature = this->_forecast_weather_info[0].temperature_low;
-      this->_current_max_temperature = this->_forecast_weather_info[0].temperature_high;
+    if (MQTTManagerWeather::_forecast_weather_info.size() > 0) {
+      SPDLOG_DEBUG("Loaded forecast for {} days.", MQTTManagerWeather::_forecast_weather_info.size());
+      MQTTManagerWeather::_next_sunrise = fmt::format("{:%H:%M}", MQTTManagerWeather::_forecast_weather_info[0].sunrise);
+      MQTTManagerWeather::_next_sunset = fmt::format("{:%H:%M}", MQTTManagerWeather::_forecast_weather_info[0].sunset);
+      MQTTManagerWeather::_current_condition = std::to_string(int(data["current"]["weather_code"]));
+      MQTTManagerWeather::_current_temperature = data["current"]["temperature_2m"];
+      MQTTManagerWeather::_current_wind_speed = data["current"]["wind_speed_10m"];
+      MQTTManagerWeather::_current_min_temperature = MQTTManagerWeather::_forecast_weather_info[0].temperature_low;
+      MQTTManagerWeather::_current_max_temperature = MQTTManagerWeather::_forecast_weather_info[0].temperature_high;
 
       std::time_t current_weather_time = data["current"]["time"];
-      this->_current_weather_time = *std::localtime(&current_weather_time);
-      this->send_state_update();
+      MQTTManagerWeather::_current_weather_time = *std::localtime(&current_weather_time);
+      MQTTManagerWeather::send_state_update();
     } else {
       SPDLOG_ERROR("Failed to load forecast!");
     }
@@ -184,8 +204,8 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
 void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data) {
   if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0 && std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::outside_temp_sensor_entity_id) == 0) {
     nlohmann::json new_state = event_data["event"]["data"]["new_state"];
-    this->_current_temperature = atof(std::string(new_state["state"]).c_str());
-    this->send_state_update();
+    MQTTManagerWeather::_current_temperature = atof(std::string(new_state["state"]).c_str());
+    MQTTManagerWeather::send_state_update();
   }
 }
 
@@ -219,19 +239,19 @@ void MQTTManagerWeather::openhab_temp_sensor_callback(nlohmann::json event_data)
   }
 
   if (temp_data.size() > 0) {
-    this->_current_temperature = atof(temp_data.c_str());
-    this->send_state_update();
+    MQTTManagerWeather::_current_temperature = atof(temp_data.c_str());
+    MQTTManagerWeather::send_state_update();
   }
 }
 
 void MQTTManagerWeather::send_state_update() {
   nlohmann::json weather_info;
   std::list<nlohmann::json> forecast;
-  for (struct weather_info info : this->_forecast_weather_info) {
+  for (struct weather_info info : MQTTManagerWeather::_forecast_weather_info) {
     nlohmann::json forecast_data;
-    forecast_data["icon"] = this->_get_icon_from_mapping(info.condition, info.time.tm_hour);
+    forecast_data["icon"] = MQTTManagerWeather::_get_icon_from_mapping(info.condition, info.time.tm_hour);
     std::string pre = std::to_string((int)round(info.precipitation));
-    pre.append(this->_precipitation_unit);
+    pre.append(MQTTManagerWeather::_precipitation_unit);
     forecast_data["pre"] = pre;
     std::string prepro = std::to_string((int)round(info.precipitation_probability));
     prepro.append("%");
@@ -247,33 +267,33 @@ void MQTTManagerWeather::send_state_update() {
     forecast_data["maxmin"] = temp_display;
 
     std::string wind = std::to_string((int)round(info.wind_speed));
-    wind.append(this->_windspeed_unit);
+    wind.append(MQTTManagerWeather::_windspeed_unit);
     forecast_data["wind"] = wind;
     forecast_data["day"] = info.day;
     forecast.push_back(forecast_data);
   }
   weather_info["forecast"] = forecast;
-  weather_info["icon"] = this->_get_icon_from_mapping(this->_current_condition, this->_current_weather_time.tm_hour);
-  std::string temp = std::to_string((int)round(this->_current_temperature));
+  weather_info["icon"] = MQTTManagerWeather::_get_icon_from_mapping(MQTTManagerWeather::_current_condition, MQTTManagerWeather::_current_weather_time.tm_hour);
+  std::string temp = std::to_string((int)round(MQTTManagerWeather::_current_temperature));
   temp.append("°");
   weather_info["temp"] = temp;
 
-  std::string templow = std::to_string((int)round(this->_current_min_temperature));
+  std::string templow = std::to_string((int)round(MQTTManagerWeather::_current_min_temperature));
   templow.append("°");
-  std::string temphigh = std::to_string((int)round(this->_current_max_temperature));
+  std::string temphigh = std::to_string((int)round(MQTTManagerWeather::_current_max_temperature));
   temphigh.append("°");
   std::string temp_display = temphigh;
   temp_display.append("/");
   temp_display.append(templow);
   weather_info["maxmin"] = temp_display;
 
-  std::string wind = std::to_string((int)round(this->_current_wind_speed));
-  wind.append(this->_windspeed_unit);
+  std::string wind = std::to_string((int)round(MQTTManagerWeather::_current_wind_speed));
+  wind.append(MQTTManagerWeather::_windspeed_unit);
   weather_info["wind"] = wind;
 
-  weather_info["sunrise"] = this->_next_sunrise;
-  weather_info["sunset"] = this->_next_sunset;
-  weather_info["prepro"] = fmt::format("{}%", this->_current_precipitation_probability);
+  weather_info["sunrise"] = MQTTManagerWeather::_next_sunrise;
+  weather_info["sunset"] = MQTTManagerWeather::_next_sunset;
+  weather_info["prepro"] = fmt::format("{}%", MQTTManagerWeather::_current_precipitation_probability);
 
   std::string new_weather_data = weather_info.dump();
   MQTT_Manager::publish("nspanel/status/weather", new_weather_data, true);

@@ -1,6 +1,7 @@
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include <curl/curl.h>
+#include <home_assistant_manager/home_assistant_manager.hpp>
 #include <nlohmann/detail/value_t.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <scenes/home_assistant_scene.hpp>

@@ -142,9 +142,10 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   MqttManagerConfig::weather_location_longitude = std::string(data["weather_location_longitude"]);
   MqttManagerConfig::weather_wind_speed_format = std::string(data["weather_wind_speed_format"]);
   MqttManagerConfig::weather_precipitation_format = std::string(data["weather_precipitation_format"]);
+  MqttManagerConfig::weather_update_interval = data["weather_update_interval"];
   MqttManagerConfig::icon_mapping = data["icon_mapping"];
   MqttManagerConfig::clock_us_style = data["clock_us_style"];
-  MqttManagerConfig::use_farenheit = data["use_farenheit"];
+  MqttManagerConfig::use_fahrenheit = data["use_fahrenheit"];
   MqttManagerConfig::is_home_assistant_addon = data["is_home_assistant_addon"];
   MqttManagerConfig::max_log_buffer_size = atoi(std::string(data["max_log_buffer_size"]).c_str());
 

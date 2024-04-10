@@ -662,7 +662,7 @@ void NSPanel::register_to_home_assistant() {
   // Register temperature sensor
   nlohmann::json temperature_sensor_data = nlohmann::json(base_json);
   temperature_sensor_data["device_class"] = "temperature";
-  if (MqttManagerConfig::use_farenheit) {
+  if (MqttManagerConfig::use_fahrenheit) {
     temperature_sensor_data["unit_of_measurement"] = "°F";
   } else {
     temperature_sensor_data["unit_of_measurement"] = "°C";

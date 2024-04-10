@@ -293,26 +293,45 @@
         The outside temperature is not a requirement for using the weather functionality but it can be used to provide a more accurate value on the screensaver.
       </div>
 
-      <!-- Clock format-->
+      <!-- Update interval -->
+      <div class="mt-4">
+        <label for="weather_update_interval" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Update interval (minutes)</label>
+        <div class="flex">
+          <span
+            class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md   ">
+            <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <title>Update interval</title>
+              <path
+                d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+            </svg>
+          </span>
+          <input
+            class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+            type="number" name="weather_update_interval" id="weather_update_interval" placeholder="Weather update interval" min=10 max=255 value="{{ weather_update_interval }}" />
+        </div>
+      </div>
+
+      <!-- Temperature format-->
       <div class="flex-auto mt-4">
         <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Temperature format</h3>
         <ul
           class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
           <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
             <div class="flex items-center ps-3">
-              <input id="celcius" type="radio" name="use_farenheit" value="False"
-              {% if use_farenheit != "True" %}checked{% endif %}
+              <input id="celsius" type="radio" name="use_fahrenheit" value="False"
+              {% if use_fahrenheit != "True" %}checked{% endif %}
                 class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-              <label for="celcius"
-                class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Celcius</label>
+              <label for="celsius"
+                class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Celsius</label>
             </div>
           </li>
           <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
             <div class="flex items-center ps-3">
-              <input id="farenheit" type="radio" name="use_farenheit" value="True"
-              {% if use_farenheit == "True" %}checked{% endif %}
+              <input id="fahrenheit" type="radio" name="use_fahrenheit" value="True"
+              {% if use_fahrenheit == "True" %}checked{% endif %}
                 class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-              <label for="farenheit" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Farenheit</label>
+              <label for="fahrenheit" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Fahrenheit</label>
             </div>
           </li>
         </ul>

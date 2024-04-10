@@ -4,6 +4,7 @@
 #include <curl/curl.h>
 #include <nlohmann/detail/value_t.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <openhab_manager/openhab_manager.hpp>
 #include <scenes/openhab_scene.hpp>
 #include <spdlog/spdlog.h>
 

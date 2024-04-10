@@ -41,12 +41,17 @@ public:
   static inline std::string weather_location_longitude;
   static inline std::string weather_wind_speed_format;
   static inline std::string weather_precipitation_format;
+
+  /**
+   * Weather update interval in minutes.
+   */
+  static inline uint8_t weather_update_interval;
   static inline std::string outside_temp_sensor_provider;
   static inline std::string outside_temp_sensor_entity_id;
   static inline std::string timezone;
   static inline nlohmann::json icon_mapping;
   static inline bool clock_us_style;
-  static inline bool use_farenheit;
+  static inline bool use_fahrenheit;
   static inline bool turn_on_behavior;
   static inline uint16_t max_log_buffer_size;
 

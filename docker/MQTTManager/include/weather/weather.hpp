@@ -1,30 +1,53 @@
-#include "entity/entity.hpp"
-#include "home_assistant_manager/home_assistant_manager.hpp"
-#include "openhab_manager/openhab_manager.hpp"
+#include <nlohmann/json.hpp>
 #include <string>
+#include <thread>
 #include <vector>
 #ifndef MQTT_MANAGER_WEATHER
 
 class MQTTManagerWeather {
 public:
-  void update_config();
-  void home_assistant_event_callback(nlohmann::json event_data);
-  void openhab_temp_sensor_callback(nlohmann::json event_data);
-  void send_state_update();
+  /**
+   * Will initialize the weather manager and start the event loop.
+   */
+  static void start();
+
+  /**
+   * Load new values from config.
+   */
+  static void update_config();
+
+  /**
+   * Trigger for events from Home Assistant.
+   */
+  static void home_assistant_event_callback(nlohmann::json event_data);
+
+  /**
+   * Trigger for events from OpenHAB.
+   */
+  static void openhab_temp_sensor_callback(nlohmann::json event_data);
+
+  /**
+   * Actually send the weather out over MQTT to all panels.
+   */
+  static void send_state_update();
 
 private:
+  static inline std::thread _instance;
+
+  static void _run_weather_thread();
+
   /**
    * Will pull new data from Open Meteo and if successfull it will automatically
    * process the data and send it out to the panels.
    */
-  void _pull_new_weather_data();
+  static void _pull_new_weather_data();
 
   /**
    * Process new weather data and push out to the panels.
    */
-  void _process_weather_data(std::string &data);
+  static void _process_weather_data(std::string &data);
 
-  std::string _get_icon_from_mapping(std::string &condition, uint8_t hour);
+  static std::string _get_icon_from_mapping(std::string &condition, uint8_t hour);
 
   struct weather_info {
     std::string condition;
@@ -40,21 +63,20 @@ private:
     float wind_speed;
   };
 
-  std::vector<weather_info> _forecast_weather_info;
-  std::string _windspeed_unit;
-  std::string _precipitation_unit;
-  std::string _current_condition;
-  std::tm _current_weather_time;
-  int _current_condition_id; // Only used for OpenHAB/OpenWeatherMap
-  int _next_sunrise_hour;
-  int _next_sunset_hour;
-  std::string _next_sunrise;
-  std::string _next_sunset;
-  float _current_temperature;
-  float _current_max_temperature;
-  float _current_min_temperature;
-  float _current_wind_speed;
-  float _current_precipitation_probability;
+  static inline std::vector<weather_info> _forecast_weather_info;
+  static inline std::string _windspeed_unit;
+  static inline std::string _precipitation_unit;
+  static inline std::string _current_condition;
+  static inline std::tm _current_weather_time;
+  static inline int _next_sunrise_hour;
+  static inline int _next_sunset_hour;
+  static inline std::string _next_sunrise;
+  static inline std::string _next_sunset;
+  static inline float _current_temperature;
+  static inline float _current_max_temperature;
+  static inline float _current_min_temperature;
+  static inline float _current_wind_speed;
+  static inline float _current_precipitation_probability;
 };
 
 #endif // !MQTT_MANAGER_WEATHER

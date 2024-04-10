@@ -40,7 +40,7 @@ def get_file_md5sum(filename):
 
 
 def index(request):
-    if get_setting_with_default("use_farenheit", False) == "True":
+    if get_setting_with_default("use_fahrenheit", False) == "True":
         temperature_unit = "°F"
     else:
         temperature_unit = "°C"
@@ -181,7 +181,7 @@ def update_room_form(request, room_id: int):
 
 
 def edit_nspanel(request, panel_id: int):
-    if get_setting_with_default("use_farenheit", False) == "True":
+    if get_setting_with_default("use_fahrenheit", False) == "True":
         temperature_unit = "°F"
     else:
         temperature_unit = "°C"
@@ -352,18 +352,19 @@ def add_light_to_room(request, room_id: int):
         newLight.can_rgb = False
         newLight.openhab_item_rgb = ""
 
-    if newLight.room_view_position == 0:
-        all_lights = Light.objects.filter(
-            room=room, room_view_position__gte=1, room_view_position__lte=12)
-        for i in range(1, 13):
-            position_free = True
-            for light in all_lights:
-                if light.room_view_position == i:
-                    position_free = False
+    if "add_to_room_view" in request.POST:
+        if newLight.room_view_position == 0:
+            all_lights = Light.objects.filter(
+                room=room, room_view_position__gte=1, room_view_position__lte=12)
+            for i in range(1, 13):
+                position_free = True
+                for light in all_lights:
+                    if light.room_view_position == i:
+                        position_free = False
+                        break
+                if position_free:
+                    newLight.room_view_position = i
                     break
-            if position_free:
-                newLight.room_view_position = i
-                break
 
     newLight.save()
     send_mqttmanager_reload_command()
@@ -859,9 +860,11 @@ def weather_and_time(request):
                           request.POST["outside_temp_provider"])
         set_setting_value("outside_temp_sensor_entity_id",
                           request.POST["outside_temp_sensor"])
+        set_setting_value("weather_update_interval",
+                          request.POST["weather_update_interval"])
         set_setting_value("date_format", request.POST["date_format"])
         set_setting_value("clock_us_style", request.POST["clock_us_style"])
-        set_setting_value("use_farenheit", request.POST["use_farenheit"])
+        set_setting_value("use_fahrenheit", request.POST["use_fahrenheit"])
         restart_mqtt_manager()
         return redirect("weather_and_time")
     else:
@@ -869,13 +872,14 @@ def weather_and_time(request):
             'dark_theme': get_setting_with_default("dark_theme", "false"),
             'date_format': get_setting_with_default("date_format", "%a %d/%m %Y"),
             'clock_us_style': get_setting_with_default("clock_us_style", False),
-            'use_farenheit': get_setting_with_default("use_farenheit", False),
+            'use_fahrenheit': get_setting_with_default("use_fahrenheit", False),
             'outside_temp_provider': get_setting_with_default("outside_temp_sensor_provider", ""),
             'outside_temp_sensor': get_setting_with_default("outside_temp_sensor_entity_id", ""),
             'location_latitude': get_setting_with_default("location_latitude", ""),
             'location_longitude': get_setting_with_default("location_longitude", ""),
             'wind_speed_format': get_setting_with_default("wind_speed_format", "kmh"),
             'precipitation_format': get_setting_with_default("precipitation_format", "mm"),
+            'weather_update_interval': get_setting_with_default("weather_update_interval", 10),
         }
 
         return render(request, "weather_and_time.html", data)
