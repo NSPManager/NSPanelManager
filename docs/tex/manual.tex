@@ -356,7 +356,9 @@
     \caption{Room page}%
     \end{figure}
     \subsubsection{Scenes}
-    At the moment, only NSPanel Manager scenes are available. They are easy enough to use. Simply create a scene in the room page and they will be available in the "Scenes"-list for the room on all NSPanels.
+    You can choose to use scenes from Home Assistant or OpenHAB though these scenes will not be able to be saved on the fly. This is something that the NSPanel Manager scenes can perform internally.
+    
+    The NSPanel Manager scenes are easy enough to use. Simply create a scene in the room page and they will be available in the "Scenes"-list for the room on all NSPanels.
     \\ To save a scene, on the NSPanel hold the save button for the scenes for 3 seconds to save all the states of lights \textbf{currently added to the room}.
     \\ To recall/activate a scene, on the NSPanel press the name of the scene and all the saved light states will be restored for that scene.
     \note{If a light was added after a scene was saved, that light is not affected by that scenes until the scene is saved again.}
@@ -401,60 +403,9 @@
     On the Weather \& Time page settings related to time, date and weather can be changed. Date format is configured according to the strftime function and a link to available formatting options is availabel in the information box.
     \\It is also possible to select between 24 and 12-hour clock format.
 
-    To get the weather to work it needs to be configured in Home Assistant or OpenHAB. Please follow relevant text below:
-    \subsubsection{Home Assistant}
-    In order to use weather from Home Assistant, the following requirements has to be met:
-    \begin{itemize}
-      \item In Home Assistant, at least 1 weather provider is configured and working.
-      \item In Home Assistant, at least 1 sun entity is available.
-    \end{itemize}
-    When the above requirements is met, press the "Select weather entitiy"-button and select an entity of type weather from Home Assistant.  
-    Home Assistant doesn't provide sun state in the weather entity and this has to be setup manually, press the "Select sun entity"-button and select an entity of type "sun".  
-    Press the save button to apply the settings.
-    \\
-    If you wish to show temperature from a local temperature sensor available in Home Assistant, this can be selected in the \textbf{Outside temperature sensor} but it is not required.
-
-    \subsubsection{OpenHAB}
-    If using OpenHAB, there are a few things that has to be setup in OpenHAB before configuration in NSPanel Manager can happen. First of all, a weather entity for current weather and weather forecast has to be setup. 
-    NSPanel Manager only has support for AccuWeather and so, this guide will show how to setup AccuWeather in OpenHAB. First of all, create an account at \href{https://developer.accuweather.com/user/register}{AccuWeather}.
-    Once that is complete, you need to create an API-key, this can be done at \href{https://developer.accuweather.com/user/me/apps}{this page}. Give it a good name, something like OpenHAB so you in the future know what it's for.
-    You do not need the "Core Weather" or "MinuteCast" products. Select "Weather app" for type of application, "C++" as language, select "Buissness to consumer", and lastly select your country.
-    \\
-    Next we need to figure out what location ID to use to gather weather information for your location. The easiest way of doing this is to go to \href{https://accuweather.com}{AccuWeather} and locate your city.
-    Once that is done, locate the weather ID in the URL. In the follow example URL the weather ID is 314929:
-    \begin{lstlisting}
-    https://www.accuweather.com/en/se/stockholm/314929/weather-forecast/314929?city=stockholm&postalcode=undefined
-    \end{lstlisting}
-
-    Next, in OpenHAB you need to install the HTTP binding from the Add-on Store. After that is done, create a new .thing-file in the "things"-directory for your OpenHAB configuration and paste the following:
-    \begin{lstlisting}
-    Thing http:url:accu_weather "Accu Weather" [
-      baseURL="http://dataservice.accuweather.com/",
-      refresh=1800] {
-      Channels:
-      Type string : weather "weather" [ stateExtension="/currentconditions/v1/<locationid>?apikey=<apikey>&details=true" ]
-    }
-
-    Thing http:url:accu_forecast "Accu Forecast" [
-      baseURL="http://dataservice.accuweather.com/",
-      refresh=43200] {
-      Channels:
-      Type string : forecast "forecast" [ stateExtension="/forecasts/v1/daily/5day/<locationid>?apikey=<apikey>&details=true&metric=true" ]
-    }
-    \end{lstlisting}
-    \info{Accu Weather only supports 50 API calls/day.There for the first thing (current weather) is set up to one call every 1800 seconds which gives 1 call every 30 minutes, 48 calls per day in total. The second thing (weather forecast is set up to on call every 43200 seconds which is 2 calls/day. In total this will maximize the API calls allowed to Accu Weather API.}
-    \info{In case the HTTP binding does not initialize, you may need to increase the org.openhab.webclient:maxThreadsShared-value and the org.openhab.webclient:maxThreadsCustom-value in the conf/services/runtime.cfg-file for OpenHAB.}
-    \info{If you do not want metric units, replace metric=true with metric=false in the stateExtension.}
-    When you have pasted the above into a .things-file, you need to replace <locationid> with your location ID that we found above and replace <apikey> with your API-key from AccuWeather.
-    \\
-    Next create two items to connect to the two things in the things file, either via openhab web interface or textual configuration.
-    If using textual configuration you can add this to your item file:
-    \begin{lstlisting}
-    String Accu_Weather_Current     "Accu Weather Current"  ["Point"]   { channel="http:url:accu_weather:weather" }
-String Accu_Weather_Forecast    "Accu Weather Forecast" ["Point"]	{ channel="http:url:accu_forecast:forecast" }
-    \end{lstlisting}
     
-    Once this is done and the weather HTTP-binding is showing up in OpenHAB you can press the "Select weather entity" in the NSPanel Manager web interface, select your weather entity and then select the items for current weather and forecast.
+    To configure weather, simply press the "Search" button attached to either the "Latitude" or "Longitude" input fields and search for your city. If it does not show, you can enter your location manually.
+    You can also change between celsius and fahrenheit, difference wind speed units and also difference precipitation units. You can also set the update interval for how often to pull down the current weather and the forecast from Open Meteo.
     \\
     If you wish to show temperature from a local temperature sensor available in OpenHAB, this can be selected in the \textbf{Outside temperature sensor} but it is not required.
     
