@@ -1,2 +1,3 @@
 MQTTManager/conan_cache/
 MQTTManager/.cache/
+MQTTManager/build/CMakeFiles
