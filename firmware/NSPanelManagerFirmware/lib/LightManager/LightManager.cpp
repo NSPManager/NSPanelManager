@@ -338,7 +338,26 @@ void LightManager::_taskProcessMqttMessages(void *param) {
           } else {
             LOG_ERROR("Got kelvin update for unknown light ID: ", entity.c_str());
           }
-          // TODO: Implement RGB management
+        } else if (domain.compare("light") == 0 && attribute.compare("state_hue") == 0) {
+          unsigned long hue = atoi(msg->payload.c_str());
+
+          Light *light = LightManager::getLightById(atoi(entity.c_str()));
+          if (light != nullptr) {
+            light->setHue(hue);
+            light->callUpdateCallbacks();
+          } else {
+            LOG_ERROR("Got hue update for unknown light ID: ", entity.c_str());
+          }
+        } else if (domain.compare("light") == 0 && attribute.compare("state_sat") == 0) {
+          unsigned long sat = atoi(msg->payload.c_str());
+
+          Light *light = LightManager::getLightById(atoi(entity.c_str()));
+          if (light != nullptr) {
+            light->setSaturation(sat);
+            light->callUpdateCallbacks();
+          } else {
+            LOG_ERROR("Got saturation update for unknown light ID: ", entity.c_str());
+          }
         } else {
           LOG_ERROR("Got state update for unknown attribute: ", attribute.c_str());
         }
