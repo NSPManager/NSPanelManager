@@ -492,7 +492,7 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
   std::string name = data["friendly_name"];
   SPDLOG_INFO("Got register request from NSPanel with name {} and MAC: {}", name, mac_address);
   NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_address);
-  if (panel != nullptr && panel->get_state() != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
+  if (panel != nullptr && panel->get_state() != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT && panel->get_state() != MQTT_MANAGER_NSPANEL_STATE::DENIED) {
     SPDLOG_DEBUG("Has registered to manager? {}", panel->has_registered_to_manager() ? "TRUE" : "FALSE");
     if (panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
       SPDLOG_DEBUG("State: WAITING");
@@ -545,6 +545,9 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
     SPDLOG_DEBUG("Processing request for NSPanels status.");
     std::vector<nlohmann::json> panel_responses;
     for (NSPanel *panel : EntityManager::_nspanels) {
+      if (panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::DENIED) {
+        continue; // Skip any panel that is denied.
+      }
       SPDLOG_DEBUG("Requesting state from NSPanel {}::{}", panel->get_id(), panel->get_name());
       if (args.contains("nspanel_id")) {
         if (panel->get_id() == atoi(std::string(args["nspanel_id"]).c_str())) {
@@ -640,6 +643,23 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       return true;
     } else {
       SPDLOG_DEBUG("Received NSPanel accept request for a panel we could not find. Ignoring request.");
+    }
+  } else if (command.compare("nspanel_deny") == 0) {
+    nlohmann::json args = data["args"];
+    std::string mac = args["mac_address"];
+    NSPanel *panel = EntityManager::get_nspanel_by_mac(mac);
+    if (panel != nullptr) {
+      SPDLOG_INFO("Accepting reqister request for NSPanel with MAC {} as per user request from websocket.", mac);
+      panel->deny_register_request();
+      nlohmann::json response;
+      response["cmd_id"] = command_id;
+      response["success"] = true;
+      response["mac"] = mac;
+      (*response_buffer) = response.dump();
+      panel->send_websocket_update();
+      return true;
+    } else {
+      SPDLOG_DEBUG("Received NSPanel deny request for a panel we could not find. Ignoring request.");
     }
   } else if (command.compare("nspanel_delete") == 0) {
     nlohmann::json args = data["args"];

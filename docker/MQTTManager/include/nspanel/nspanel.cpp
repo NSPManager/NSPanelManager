@@ -166,6 +166,20 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->_relay2_is_mqtt_light = false;
   }
 
+  // Last thing to do, check if the panel as actually accepted into our manager.
+  if (init_data.contains("denied")) {
+    if (std::string(init_data["denied"]).compare("True") == 0) {
+
+      SPDLOG_INFO("Loaded denied NSPanel {}::{}.", this->_id, this->_name);
+      this->_is_register_denied = true;
+      this->_is_register_accepted = false;
+      this->_state = MQTT_MANAGER_NSPANEL_STATE::DENIED;
+      this->_has_registered_to_manager = false;
+      rebuilt_mqtt = false;
+      return; // Stop processing here. The panel has been denied.
+    }
+  }
+
   if (rebuilt_mqtt) {
     this->reset_mqtt_topics();
     // Convert stored MAC to MAC used in MQTT, ex. AA:AA:AA:BB:BB:BB to aa_aa_aa_bb_bb_bb
@@ -578,6 +592,18 @@ void NSPanel::accept_register_request() {
   this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
 }
 
+void NSPanel::deny_register_request() {
+  this->_is_register_accepted = false;
+  this->_is_register_denied = true;
+  this->_state = MQTT_MANAGER_NSPANEL_STATE::DENIED;
+
+  nlohmann::json data;
+  data["mac"] = this->_mac;
+  data["friendly_name"] = this->_name;
+  data["denied"] = true;
+  bool result = this->register_to_manager(data);
+}
+
 bool NSPanel::has_registered_to_manager() {
   return this->_has_registered_to_manager;
 }
@@ -604,29 +630,31 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
       /* Check for errors */
       if (res == CURLE_OK && http_code == 200) {
-        SPDLOG_INFO("Panel registration OK. Checking for new warnings.");
-        this->update_warnings_from_manager();
-        SPDLOG_INFO("Panel registration OK. Updating internal data.");
-        nlohmann::json data = nlohmann::json::parse(response_data);
-        this->update_config(data); // Returned data from registration request is the same as data from the global /api/get_mqtt_manager_config
-        this->register_to_home_assistant();
-        if (this->_state == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
-          this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+        SPDLOG_INFO("Panel registration OK.");
+        if (!this->_is_register_denied) {
+          this->update_warnings_from_manager();
+          SPDLOG_INFO("Panel registration OK. Updating internal data.");
+          nlohmann::json data = nlohmann::json::parse(response_data);
+          this->update_config(data); // Returned data from registration request is the same as data from the global /api/get_mqtt_manager_config
+          this->register_to_home_assistant();
+          if (this->_state == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
+            this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+          }
+          SPDLOG_INFO("Panel registration completed. Sending accept command to panel.");
+
+          // Everything was successfull, send registration accept to panel:
+          nlohmann::json response;
+          response["command"] = "register_accept";
+          response["address"] = MqttManagerConfig::manager_address.c_str();
+          response["port"] = MqttManagerConfig::manager_port;
+
+          std::string reply_topic = "nspanel/";
+          reply_topic.append(register_request_payload["friendly_name"]);
+          reply_topic.append("/command");
+          MQTT_Manager::publish(reply_topic, response.dump());
+
+          this->send_websocket_update();
         }
-        SPDLOG_INFO("Panel registration completed. Sending accept command to panel.");
-
-        // Everything was successfull, send registration accept to panel:
-        nlohmann::json response;
-        response["command"] = "register_accept";
-        response["address"] = MqttManagerConfig::manager_address.c_str();
-        response["port"] = MqttManagerConfig::manager_port;
-
-        std::string reply_topic = "nspanel/";
-        reply_topic.append(register_request_payload["friendly_name"]);
-        reply_topic.append("/command");
-        MQTT_Manager::publish(reply_topic, response.dump());
-
-        this->send_websocket_update();
         curl_easy_cleanup(curl);
         return true;
       } else {

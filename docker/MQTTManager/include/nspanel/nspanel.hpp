@@ -15,7 +15,8 @@ enum MQTT_MANAGER_NSPANEL_STATE {
   UPDATING_FIRMWARE,
   UPDATING_DATA,
   UPDATING_TFT,
-  AWAITING_ACCEPT
+  AWAITING_ACCEPT,
+  DENIED
 };
 
 class NSPanelLogMessage {
@@ -153,6 +154,7 @@ private:
   std::string _name;
   bool _is_us_panel;
   bool _is_register_accepted;
+  bool _is_register_denied;
   bool _has_registered_to_manager;
   std::string _ip_address;
   int16_t _rssi;

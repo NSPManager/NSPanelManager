@@ -77,6 +77,10 @@ urlpatterns = [
     path('entities/global_scenes', views.global_scenes, name="global_scenes"),
     path('entities/weather_and_time',
          views.weather_and_time, name="weather_and_time"),
+    path('denied_nspanels',
+         views.denied_nspanels, name="denied_nspanels"),
+    path('unblock_nspanel/<int:nspanel_id>',
+         views.unblock_nspanel, name="unblock_nspanel"),
     # Below are API routes
     path('api/register_nspanel', api.register_nspanel, name='register_nspanel'),
     path('api/delete_nspanel/<int:panel_id>',

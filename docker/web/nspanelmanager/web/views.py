@@ -883,3 +883,18 @@ def weather_and_time(request):
         }
 
         return render(request, "weather_and_time.html", data)
+
+
+def denied_nspanels(request):
+    data = {
+        "nspanels": NSPanel.objects.all()
+    }
+    return render(request, 'denied_nspanels.html', data)
+
+
+def unblock_nspanel(request, nspanel_id):
+    panel = NSPanel.objects.filter(id=nspanel_id).first()
+    if panel:
+        panel.delete()
+        restart_mqtt_manager()
+    return redirect("denied_nspanels")

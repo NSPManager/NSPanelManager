@@ -73,7 +73,7 @@
           </div>
         </li>
         <li>
-          <button data-dropdown-toggle="entitiesMenuDropdown" data-active="{% if request.path == '/entities/relay_groups' %}true{% elif request.path == '/entities/global_scenes' %}true{% elif request.path == '/entities/weather_and_time' %}true{% endif %}"
+          <button data-dropdown-toggle="entitiesMenuDropdown" data-active="{% if request.path == '/entities/relay_groups' %}true{% elif request.path == '/entities/global_scenes' %}true{% elif request.path == '/entities/weather_and_time' %}true{% elif request.path == '/denied_nspanels' %}true{% endif %}"
             class="flex items-center justify-between w-full py-2 px-3 rounded md:border-0 md:p-0 md:w-auto text-white md:hover:text-blue-500 focus:text-white border-gray-700 hover:bg-gray-700 md:hover:bg-transparent data-[active=true]:text-blue-700 data-[active=true]:dark:text-blue-500">
             Entities
             <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -99,6 +99,9 @@
                   class="block px-4 py-2 hover:bg-gray-600 hover:text-white data-[active=true]:text-blue-600 data-[active=true]:dark:text-blue-500">Weather & Time</a>
               </li>
             </ul>
+            <div class="py-1 text-sm text-gray-700 dark:text-gray-400">
+              <a href="{% url 'denied_nspanels' %}" data-active="{% if request.path == '/denied_nspanels' %}true{% endif %}" class="block px-4 py-2 hover:bg-gray-600 hover:text-white data-[active=true]:text-blue-600 data-[active=true]:dark:text-blue-500">Denied NSPanels</a>
+            </div>
           </div>
         <li>
           <button data-dropdown-toggle="uploadMenuDropdown"

@@ -816,10 +816,6 @@ select {
   z-index: 50;
 }
 
-.m-6 {
-  margin: 1.5rem;
-}
-
 .mx-2 {
   margin-left: 0.5rem;
   margin-right: 0.5rem;
@@ -869,10 +865,6 @@ select {
   margin-inline-end: 0.5rem;
 }
 
-.me-2\.5 {
-  margin-inline-end: 0.625rem;
-}
-
 .ml-1 {
   margin-left: 0.25rem;
 }
@@ -915,14 +907,6 @@ select {
 
 .mt-4 {
   margin-top: 1rem;
-}
-
-.ml-6 {
-  margin-left: 1.5rem;
-}
-
-.mt-5 {
-  margin-top: 1.25rem;
 }
 
 .block {
@@ -1047,10 +1031,6 @@ select {
 
 .w-44 {
   width: 11rem;
-}
-
-.w-48 {
-  width: 12rem;
 }
 
 .w-5 {
@@ -1486,10 +1466,6 @@ select {
   padding: 1rem;
 }
 
-.p-6 {
-  padding: 1.5rem;
-}
-
 .px-1 {
   padding-left: 0.25rem;
   padding-right: 0.25rem;
@@ -1555,11 +1531,6 @@ select {
   padding-bottom: 0.75rem;
 }
 
-.py-4 {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
-
 .pb-0 {
   padding-bottom: 0px;
 }
@@ -1572,6 +1543,10 @@ select {
   padding-bottom: 1.5rem;
 }
 
+.pl-4 {
+  padding-left: 1rem;
+}
+
 .pr-2 {
   padding-right: 0.5rem;
 }
@@ -1580,32 +1555,16 @@ select {
   padding-inline-start: 0.75rem;
 }
 
+.pt-1 {
+  padding-top: 0.25rem;
+}
+
 .pt-2 {
   padding-top: 0.5rem;
 }
 
 .pt-5 {
   padding-top: 1.25rem;
-}
-
-.pe-2 {
-  padding-inline-end: 0.5rem;
-}
-
-.pe-2\.5 {
-  padding-inline-end: 0.625rem;
-}
-
-.pl-6 {
-  padding-left: 1.5rem;
-}
-
-.pt-1 {
-  padding-top: 0.25rem;
-}
-
-.pt-4 {
-  padding-top: 1rem;
 }
 
 .text-left {
@@ -2406,6 +2365,10 @@ select {
 
 .dark\:ring-offset-gray-700:where(.dark, .dark *) {
   --tw-ring-offset-color: #374151;
+}
+
+.dark\:ring-offset-gray-800:where(.dark, .dark *) {
+  --tw-ring-offset-color: #1f2937;
 }
 
 .dark\:after\:border-blue-800:where(.dark, .dark *)::after {

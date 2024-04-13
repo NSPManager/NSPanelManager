@@ -40,9 +40,28 @@ function send_nspanel_accept_request(dom) {
   command_data.mac_address = real_mac;
 
   ws.send_command("nspanel_accept", command_data, (response) => {
-    console.log(response);
     if(response.success) {
-      $("#nspanel_id_" + nspanel_mac).html(response.id);
+      location.reload();
+    } else {
+      console.log("Error! Failed to accept register request! Response: ");
+      console.log(response);
+    }
+  });
+}
+
+function send_nspanel_deny_request(dom) {
+  let command_data = {};
+  let nspanel_mac = $(dom).attr("data-nspanel-mac");
+  // Convert selector-mac to real mac.
+  let real_mac = nspanel_mac.substring(0, 2) + ":" + nspanel_mac.substring(2, 4) + ":" + nspanel_mac.substring(4, 6) + ":" + nspanel_mac.substring(6, 8) + ":" + nspanel_mac.substring(8, 10) + ":" + nspanel_mac.substring(10, 12);
+  command_data.mac_address = real_mac;
+
+  ws.send_command("nspanel_deny", command_data, (response) => {
+    if(response.success) {
+      $(dom).closest(".nspanel-box").fadeOut(100);
+      setTimeout(() => {
+        $(dom).closest(".nspanel-box").remove();
+      }, 100);
     } else {
       console.log("Error! Failed to accept register request! Response: ");
       console.log(response);

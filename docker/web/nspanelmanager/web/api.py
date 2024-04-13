@@ -163,7 +163,8 @@ def get_nspanel_json_representation(panel):
         "is_us_panel": get_nspanel_setting_with_default(panel.id, "is_us_panel", "False") == "True",
         "address": panel.ip_address,
         "relay1_is_light": get_nspanel_setting_with_default(panel.id, "relay1_is_light", "False") == "True",
-        "relay2_is_light": get_nspanel_setting_with_default(panel.id, "relay2_is_light", "False") == "True"
+        "relay2_is_light": get_nspanel_setting_with_default(panel.id, "relay2_is_light", "False") == "True",
+        "denied": "True" if panel.denied else "False"
     }
     return panel_config
 
@@ -353,8 +354,8 @@ def register_nspanel(request):
         panel_already_exists = False
 
     new_panel.mac_address = data['mac_address']
-    new_panel.version = data["version"]
-    new_panel.ip_address = get_client_ip(request)
+    new_panel.version = data["version"] if "version" in data else ""
+    new_panel.ip_address = ""  # TODO: Remove ip_address from DB
     fs = FileSystemStorage()
     if "md5_firmware" in data:
         if data["md5_firmware"] == "":
@@ -371,6 +372,12 @@ def register_nspanel(request):
     # TFT file will never be flashed by default with a new panel, always set the MD5 from registration
     if "md5_tft_file" in data:
         new_panel.md5_tft_file = data["md5_tft_file"]
+
+    if "denied" in data:
+        if str(data["denied"]).lower() == "true":
+            new_panel.denied = True
+        else:
+            new_panel.denied = False
 
     # If no room is set, select the first one as default
     try:
