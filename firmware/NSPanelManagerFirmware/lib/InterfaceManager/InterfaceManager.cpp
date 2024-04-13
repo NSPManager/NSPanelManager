@@ -118,13 +118,9 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
   NSPanel::attachSleepCallback(InterfaceManager::processSleepEvent);
   NSPanel::attachWakeCallback(InterfaceManager::processWakeEvent);
 
-  // Attach screen clock MQTT callback if configured from manager.
+  // Attach screen clock, weather and mode MQTT callback
   PageManager::GetScreensaverPage()->init();
-  if (InterfaceConfig::screensaver_mode.compare("no_screensaver") != 0) {
-    PageManager::GetScreensaverPage()->attachMqttCallback();
-  } else {
-    LOG_DEBUG("Not attaching MQTT callback as panel is configured to not show screensaver.");
-  }
+  PageManager::GetScreensaverPage()->attachMqttCallback();
 
   LOG_INFO("Config initialized. Closing taskLoadConfigAndInit");
   vTaskDelete(NULL); // Delete task, we are done
