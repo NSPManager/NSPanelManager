@@ -202,7 +202,7 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         }
 
         SPDLOG_DEBUG("Light {}::{} got new brightness from Openhab, new brightness: {}", this->_id, this->_name, this->_current_brightness);
-        MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness));
+        MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
         this->_last_brightness_change = CurrentTimeMilliseconds();
       }
       this->_signal_entity_changed();
@@ -226,7 +226,7 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         this->_last_color_temp_change = CurrentTimeMilliseconds();
 
         SPDLOG_DEBUG("Light {}::{} got new color temperature from Openhab, new value: {}", this->_id, this->_name, this->_current_color_temperature);
-        MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature));
+        MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature), true);
       }
       this->_last_light_mode_change = CurrentTimeMilliseconds();
       this->_signal_entity_changed();
@@ -250,21 +250,21 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         uint16_t brightness = std::round(atof(payload_parts[2].c_str()));
 
         if (hue != this->_current_hue || hue != this->_requested_hue) {
-          this->_current_hue = std::round(atof(payload_parts[0].c_str()));
+          this->_current_hue = hue;
           this->_requested_hue = this->_current_hue;
-          MQTT_Manager::publish(this->_mqtt_hue_topic, std::to_string(this->_current_hue));
+          MQTT_Manager::publish(this->_mqtt_hue_topic, std::to_string(this->_current_hue), true);
         }
 
         if (saturation != this->_current_saturation || saturation != this->_requested_saturation) {
-          this->_current_saturation = std::round(atof(payload_parts[1].c_str()));
+          this->_current_saturation = saturation;
           this->_requested_saturation = this->_current_saturation;
-          MQTT_Manager::publish(this->_mqtt_saturation_topic, std::to_string(this->_current_saturation));
+          MQTT_Manager::publish(this->_mqtt_saturation_topic, std::to_string(this->_current_saturation), true);
         }
 
         if (brightness != this->_current_brightness || brightness != this->_requested_brightness) {
-          this->_current_brightness = std::round(atof(payload_parts[2].c_str()));
+          this->_current_brightness = brightness;
           this->_requested_brightness = this->_current_brightness;
-          MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness));
+          MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
         }
 
         this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
@@ -293,7 +293,7 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
 
         this->_requested_state = this->_current_state;
         this->_requested_brightness = this->_current_brightness;
-        MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness));
+        MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
       } else if (this->_openhab_control_mode == MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH) {
         this->_current_state = std::string(data["payload"]["state"]).compare("ON") == 0;
         if (this->_current_state) {
@@ -304,26 +304,26 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
 
         this->_requested_state = this->_current_state;
         this->_requested_brightness = this->_current_brightness;
-        MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness));
+        MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
       }
     } else if (this->_openhab_item_color_temperature.compare(data["payload"]["name"]) == 0) {
       this->_current_color_temperature = atoi(std::string(data["payload"]["state"]).c_str());
       this->_requested_color_temperature = this->_current_color_temperature;
-      MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature));
+      MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature), true);
     } else if (this->_openhab_item_rgb.compare(data["payload"]["name"]) == 0) {
       std::vector<std::string> hsb_parts;
       boost::split(hsb_parts, std::string(data["payload"]["state"]), boost::is_any_of(","));
       if (hsb_parts.size() >= 3) {
         this->_current_hue = atoi(hsb_parts[0].c_str());
         this->_current_saturation = atoi(hsb_parts[1].c_str());
-        this->_current_brightness = atoi(hsb_parts[1].c_str());
+        this->_current_brightness = atoi(hsb_parts[2].c_str());
 
         this->_requested_hue = this->_current_hue;
         this->_requested_saturation = this->_current_saturation;
         this->_requested_brightness = this->_current_brightness;
-        MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness));
-        MQTT_Manager::publish(this->_mqtt_hue_topic, std::to_string(this->_current_hue));
-        MQTT_Manager::publish(this->_mqtt_saturation_topic, std::to_string(this->_current_saturation));
+        MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
+        MQTT_Manager::publish(this->_mqtt_hue_topic, std::to_string(this->_current_hue), true);
+        MQTT_Manager::publish(this->_mqtt_saturation_topic, std::to_string(this->_current_saturation), true);
       } else {
         SPDLOG_ERROR("Failed to decode HSB value '{}' into 3 or more parts.", std::string(data["payload"]["state"]));
       }

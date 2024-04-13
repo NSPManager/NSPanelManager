@@ -181,10 +181,13 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
 
     if (MQTTManagerWeather::_forecast_weather_info.size() > 0) {
       SPDLOG_DEBUG("Loaded forecast for {} days.", MQTTManagerWeather::_forecast_weather_info.size());
+      if (MqttManagerConfig::outside_temp_sensor_provider.length() == 0 && MqttManagerConfig::outside_temp_sensor_entity_id.length() == 0) {
+        // Only update the current temperature if no local sensor is configured
+        MQTTManagerWeather::_current_temperature = data["current"]["temperature_2m"];
+      }
       MQTTManagerWeather::_next_sunrise = fmt::format("{:%H:%M}", MQTTManagerWeather::_forecast_weather_info[0].sunrise);
       MQTTManagerWeather::_next_sunset = fmt::format("{:%H:%M}", MQTTManagerWeather::_forecast_weather_info[0].sunset);
       MQTTManagerWeather::_current_condition = std::to_string(int(data["current"]["weather_code"]));
-      MQTTManagerWeather::_current_temperature = data["current"]["temperature_2m"];
       MQTTManagerWeather::_current_wind_speed = data["current"]["wind_speed_10m"];
       MQTTManagerWeather::_current_min_temperature = MQTTManagerWeather::_forecast_weather_info[0].temperature_low;
       MQTTManagerWeather::_current_max_temperature = MQTTManagerWeather::_forecast_weather_info[0].temperature_high;
