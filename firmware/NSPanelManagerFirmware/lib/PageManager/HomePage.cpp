@@ -18,8 +18,8 @@ void HomePage::init() {
 }
 
 void HomePage::show() {
-  PageManager::SetCurrentPage(this);
   NSPanel::instance->goToPage(HOME_PAGE_NAME);
+  PageManager::SetCurrentPage(this);
   this->updateDeviceEntitySubscriptions();
   this->update();
 }
