@@ -887,7 +887,8 @@ def weather_and_time(request):
 
 def denied_nspanels(request):
     data = {
-        "nspanels": NSPanel.objects.all()
+        'dark_theme': get_setting_with_default("dark_theme", "false"),
+        "nspanels": NSPanel.objects.all(),
     }
     return render(request, 'denied_nspanels.html', data)
 

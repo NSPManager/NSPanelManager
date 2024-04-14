@@ -191,7 +191,7 @@ void OpenhabManager::send_json(nlohmann::json &data) {
 void OpenhabManager::_send_string(std::string &data) {
   if (OpenhabManager::_websocket != nullptr) {
     std::lock_guard<std::mutex> mtex_lock(OpenhabManager::_mutex_websocket_write_access);
-    // spdlog::debug("[HA WS] Sending data: {}", data);
+    // spdlog::debug("[OH WS] Sending data: {}", data);
     OpenhabManager::_websocket->send(data);
   }
 }

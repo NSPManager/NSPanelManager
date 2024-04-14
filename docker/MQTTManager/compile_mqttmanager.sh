@@ -85,7 +85,7 @@ BASEDIR=$(dirname "$0")
 pushd "$BASEDIR"
 cd /MQTTManager/
 
-rm -rf build
+# rm -rf build
 #if [ -e CMakeCache.txt ]; then
 #	rm CMakeCache.txt
 #fi
