@@ -469,6 +469,22 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             SPDLOG_ERROR("No scene with ID {} exists.", scene_id);
           }
 
+        } else if (command.compare("get_tft_chunk") == 0) {
+          NSPanel *nspanel = EntityManager::get_nspanel_by_mac(mac_origin);
+          if (nspanel != nullptr) {
+            if (!data.contains("start")) {
+              SPDLOG_ERROR("Request for TFT chunk as made but no start was given.");
+              return true;
+            } else if (!data.contains("size")) {
+              SPDLOG_ERROR("Request for TFT chunk as made but no size was given.");
+              return true;
+            }
+            unsigned long start = data["start"];
+            unsigned long size = data["size"];
+            nspanel->send_tft_chunk(start, size);
+          } else {
+            SPDLOG_ERROR("No NSPanel with mac {} exists.", mac_origin);
+          }
         } else {
           SPDLOG_ERROR("Got command but no handler for it exists. Command: {}", command);
         }

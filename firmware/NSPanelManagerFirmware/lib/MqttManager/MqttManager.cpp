@@ -9,7 +9,7 @@
 void MqttManager::init() {
   MqttManager::_wifiClient = new WiFiClient();                            // Create WifiClient for MQTT Client
   MqttManager::_mqttClient = new PubSubClient(*MqttManager::_wifiClient); // Create MQTT Client used to communicate with MQTT
-  MqttManager::_mqttClient->setBufferSize(2048);
+  MqttManager::_mqttClient->setBufferSize(5000);
   MqttManager::_mqttClient->setCallback(&MqttManager::_mqttClientCallback);
   if (MqttLog::instance->getLogLevel() == MqttLogLevel::Debug) {
     MqttManager::setBufferSize(32);
@@ -126,6 +126,7 @@ void MqttManager::_subscribeToAllRegisteredTopics() {
 }
 
 void MqttManager::_mqttClientCallback(char *topic, byte *payload, unsigned int length) {
+  LOG_DEBUG(topic);
   for (SubscribeTopic &tpc : MqttManager::_subscribeTopics) {
     if (tpc.topic.compare(topic) == 0) {
       tpc.callback(topic, payload, length);

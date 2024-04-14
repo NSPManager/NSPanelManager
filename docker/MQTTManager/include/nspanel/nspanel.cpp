@@ -13,7 +13,9 @@
 #include <curl/curl.h>
 #include <exception>
 #include <fmt/core.h>
+#include <fstream>
 #include <iomanip>
+#include <ios>
 #include <list>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
@@ -192,6 +194,7 @@ void NSPanel::update_config(nlohmann::json &init_data) {
 
     this->_mqtt_log_topic = fmt::format("nspanel/{}/log", this->_name);
     this->_mqtt_command_topic = fmt::format("nspanel/{}/command", this->_name);
+    this->_mqtt_tft_chunk_topic = fmt::format("nspanel/{}/tft_data", this->_name);
     this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
     this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
     this->_mqtt_light_relay1_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay1/config", mqtt_register_mac);
@@ -825,5 +828,28 @@ void NSPanel::set_relay_state(uint8_t relay, bool state) {
     MQTT_Manager::publish(this->_mqtt_relay1_command_topic, state ? "1" : "0");
   } else if (relay == 2 && this->_relay2_state != state) {
     MQTT_Manager::publish(this->_mqtt_relay2_command_topic, state ? "1" : "0");
+  }
+}
+
+void NSPanel::send_tft_chunk(unsigned long start, unsigned long size) {
+  try {
+    std::string tft_file_path;
+    if (this->_is_us_panel) {
+      tft_file_path = "/usr/src/app/nspanelmanager/gui_us.tft";
+    } else {
+      tft_file_path = "/usr/src/app/nspanelmanager/gui.tft";
+    }
+
+    char data[size];
+    std::ifstream file(tft_file_path.c_str(), std::ios::binary);
+    file.seekg(start);
+    file.read((char *)data, size);
+    file.close();
+    SPDLOG_DEBUG("Read {} bytes from {}.", size, tft_file_path);
+
+    MQTT_Manager::publish_raw(this->_mqtt_tft_chunk_topic.c_str(), data, size, false);
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
   }
 }

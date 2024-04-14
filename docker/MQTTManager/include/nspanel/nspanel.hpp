@@ -148,6 +148,11 @@ public:
    */
   void set_relay_state(uint8_t relay, bool state);
 
+  /**
+   * Send a requested TFT data chunk over MQTT to the panel.
+   */
+  void send_tft_chunk(unsigned long start, unsigned long size);
+
 private:
   uint _id;
   std::string _mac;
@@ -191,6 +196,8 @@ private:
   std::string _mqtt_status_report_topic;
   // The topic to send commands to panel to via MQTT
   std::string _mqtt_command_topic;
+  // The topic to send TFT chunk data to panel to via MQTT
+  std::string _mqtt_tft_chunk_topic;
   // Home Assistant MQTT registration topics:
   std::string _mqtt_sensor_temperature_topic;
   std::string _mqtt_switch_relay1_topic;

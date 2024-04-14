@@ -71,6 +71,15 @@ public:
   static void publish(const std::string &topic, const std::string &payload, bool retain);
 
   /**
+   * Will send an MQTT message on given topic with the given payload.
+   * @param topic: The MQTT topic to send payload to.
+   * @param payload: MQTT message payload.
+   * @param size: Size of payload to send.
+   * @param retain: Wether to set the MQTT retain flag or not.
+   */
+  static void publish_raw(const char *topic, const char *data, size_t size, bool retain);
+
+  /**
    * Will clear retain on a topic (not recursive)
    * @param topic: The MQTT topic to send payload to.
    */
