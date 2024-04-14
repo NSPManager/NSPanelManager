@@ -63,13 +63,13 @@ OpenhabLight::OpenhabLight(nlohmann::json &init_data) : Light(init_data) {
 }
 
 void OpenhabLight::send_state_update_to_controller() {
-  SPDLOG_DEBUG("--- Sending light {}::{} event state ---", this->_id, this->_name);
-  SPDLOG_DEBUG("Current mode: {}", this->_current_mode == MQTT_MANAGER_LIGHT_MODE::RGB ? "RGB" : "DEFAULT");
-  SPDLOG_DEBUG("Requested state: {}, current: {}", this->_requested_state, this->_current_state);
-  SPDLOG_DEBUG("Requested brightness: {}, current: {}", this->_requested_brightness, this->_current_brightness);
-  SPDLOG_DEBUG("Requested color_temperature: {}, current: {}", this->_requested_color_temperature, this->_current_color_temperature);
-  SPDLOG_DEBUG("Requested hue: {}, current: {}", this->_requested_hue, this->_current_hue);
-  SPDLOG_DEBUG("Requested saturation: {}, current: {}", this->_requested_saturation, this->_current_saturation);
+  // SPDLOG_DEBUG("--- Sending light {}::{} event state ---", this->_id, this->_name);
+  // SPDLOG_DEBUG("Current mode: {}", this->_current_mode == MQTT_MANAGER_LIGHT_MODE::RGB ? "RGB" : "DEFAULT");
+  // SPDLOG_DEBUG("Requested state: {}, current: {}", this->_requested_state, this->_current_state);
+  // SPDLOG_DEBUG("Requested brightness: {}, current: {}", this->_requested_brightness, this->_current_brightness);
+  // SPDLOG_DEBUG("Requested color_temperature: {}, current: {}", this->_requested_color_temperature, this->_current_color_temperature);
+  // SPDLOG_DEBUG("Requested hue: {}, current: {}", this->_requested_hue, this->_current_hue);
+  // SPDLOG_DEBUG("Requested saturation: {}, current: {}", this->_requested_saturation, this->_current_saturation);
 
   nlohmann::json service_data;
   service_data["type"] = "ItemCommandEvent";

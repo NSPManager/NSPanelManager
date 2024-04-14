@@ -22,10 +22,6 @@ public:
 
 private:
   std::string _screensaver_page_name;
-  std::string _screensaver_time_name;
-  std::string _screensaver_ampm_name;
-  std::string _screensaver_date_name;
-  std::string _screensaver_temperature_name;
   uint8_t _screensaver_brightness;
   bool _show_weather;
 };

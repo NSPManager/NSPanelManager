@@ -53,23 +53,8 @@ void ScreensaverPage::init() {
     LOG_ERROR("Unknown screensaver mode '", InterfaceConfig::screensaver_mode.c_str(), "'!");
   }
 
-  std::string screensaver_background_variable_name = this->_screensaver_page_name;
-  screensaver_background_variable_name.append(".");
-  screensaver_background_variable_name.append(SCREENSAVER_BACKGROUND_CHOICE_VARIABLE_NAME);
-  NSPanel::instance->setComponentVal(screensaver_background_variable_name.c_str(), show_background ? 1 : 0);
-
-  this->_screensaver_time_name = this->_screensaver_page_name;
-  this->_screensaver_time_name.append(".");
-  this->_screensaver_time_name.append(SCREENSAVER_CURRENT_TIME_TEXT_NAME);
-  this->_screensaver_date_name = this->_screensaver_page_name;
-  this->_screensaver_date_name.append(".");
-  this->_screensaver_date_name.append(SCREENSAVER_CURRENT_DAY_TEXT_NAME);
-  this->_screensaver_temperature_name = this->_screensaver_page_name;
-  this->_screensaver_temperature_name.append(".");
-  this->_screensaver_temperature_name.append(SCREENSAVER_CURRENT_ROOMTEMP_TEXT_NAME);
-  this->_screensaver_ampm_name = this->_screensaver_page_name;
-  this->_screensaver_ampm_name.append(".");
-  this->_screensaver_ampm_name.append(SCREENSAVER_CURRENT_AMPM_TEXT_NAME);
+  NSPanel::instance->setComponentVal(SCREENSAVER_PAGE_NAME "." SCREENSAVER_BACKGROUND_CHOICE_VARIABLE_NAME, show_background ? 1 : 0);
+  NSPanel::instance->setComponentVal(SCREENSAVER_MINIMAL_PAGE_NAME "." SCREENSAVER_BACKGROUND_CHOICE_VARIABLE_NAME, show_background ? 1 : 0);
 }
 
 void ScreensaverPage::show() {
@@ -95,7 +80,8 @@ void ScreensaverPage::update() {
 }
 
 void ScreensaverPage::updateRoomTemp(std::string roomtemp_string) {
-  NSPanel::instance->setComponentText(PageManager::GetScreensaverPage()->_screensaver_temperature_name.c_str(), roomtemp_string.c_str());
+  NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_ROOMTEMP_TEXT_NAME, roomtemp_string.c_str());
+  NSPanel::instance->setComponentText(SCREENSAVER_MINIMAL_PAGE_NAME "." SCREENSAVER_CURRENT_ROOMTEMP_TEXT_NAME, roomtemp_string.c_str());
 }
 
 void ScreensaverPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
@@ -121,24 +107,23 @@ void ScreensaverPage::screensaverModeCallback(char *topic, byte *payload, unsign
 
 void ScreensaverPage::clockMqttCallback(char *topic, byte *payload, unsigned int length) {
   std::string clock_string = std::string((char *)payload, length);
-  NSPanel::instance->setComponentText(PageManager::GetScreensaverPage()->_screensaver_time_name.c_str(), clock_string.c_str());
+  NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_TIME_TEXT_NAME, clock_string.c_str());
+  NSPanel::instance->setComponentText(SCREENSAVER_MINIMAL_PAGE_NAME "." SCREENSAVER_CURRENT_TIME_TEXT_NAME, clock_string.c_str());
 }
 
 void ScreensaverPage::ampmMqttCallback(char *topic, byte *payload, unsigned int length) {
   std::string ampm_string = std::string((char *)payload, length);
-  NSPanel::instance->setComponentText(PageManager::GetScreensaverPage()->_screensaver_ampm_name.c_str(), ampm_string.c_str());
+  NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_AMPM_TEXT_NAME, ampm_string.c_str());
+  NSPanel::instance->setComponentText(SCREENSAVER_MINIMAL_PAGE_NAME "." SCREENSAVER_CURRENT_AMPM_TEXT_NAME, ampm_string.c_str());
 }
 
 void ScreensaverPage::dateMqttCallback(char *topic, byte *payload, unsigned int length) {
   std::string date_string = std::string((char *)payload, length);
-  NSPanel::instance->setComponentText(PageManager::GetScreensaverPage()->_screensaver_date_name.c_str(), date_string.c_str());
+  NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_DAY_TEXT_NAME, date_string.c_str());
+  NSPanel::instance->setComponentText(SCREENSAVER_MINIMAL_PAGE_NAME "." SCREENSAVER_CURRENT_DAY_TEXT_NAME, date_string.c_str());
 }
 
 void ScreensaverPage::weatherMqttCallback(char *topic, byte *payload, unsigned int length) {
-  if (!PageManager::GetScreensaverPage()->_show_weather) {
-    return;
-  }
-
   LOG_DEBUG("Received new weather data.");
   std::string payload_str = std::string((char *)payload, length);
   JsonDocument json;
