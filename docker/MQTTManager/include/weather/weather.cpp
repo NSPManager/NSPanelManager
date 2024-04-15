@@ -186,7 +186,9 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
         MQTTManagerWeather::_current_temperature = data["current"]["temperature_2m"];
       }
       MQTTManagerWeather::_next_sunrise = fmt::format("{:%H:%M}", MQTTManagerWeather::_forecast_weather_info[0].sunrise);
+      MQTTManagerWeather::_next_sunrise_hour = MQTTManagerWeather::_forecast_weather_info[0].sunrise.tm_hour;
       MQTTManagerWeather::_next_sunset = fmt::format("{:%H:%M}", MQTTManagerWeather::_forecast_weather_info[0].sunset);
+      MQTTManagerWeather::_next_sunset_hour = MQTTManagerWeather::_forecast_weather_info[0].sunset.tm_hour;
       MQTTManagerWeather::_current_condition = std::to_string(int(data["current"]["weather_code"]));
       MQTTManagerWeather::_current_wind_speed = data["current"]["wind_speed_10m"];
       MQTTManagerWeather::_current_min_temperature = MQTTManagerWeather::_forecast_weather_info[0].temperature_low;
@@ -206,6 +208,7 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
 
 void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data) {
   if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0 && std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::outside_temp_sensor_entity_id) == 0) {
+    SPDLOG_DEBUG("Received current outside temperature from Home Assistant sensor.");
     nlohmann::json new_state = event_data["event"]["data"]["new_state"];
     MQTTManagerWeather::_current_temperature = atof(std::string(new_state["state"]).c_str());
     MQTTManagerWeather::send_state_update();
@@ -215,12 +218,12 @@ void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data
 std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, uint8_t hour) {
   for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["openmeteo_weather_mappings"]) {
     if (std::string(mapping["id"]).compare(condition) == 0) {
-      if (mapping.contains("character-mapping")) {
-        return std::string(mapping["character-mapping"]);
-      } else if (mapping.contains("character-mapping-day") && hour >= MQTTManagerWeather::_next_sunrise_hour && hour <= MQTTManagerWeather::_next_sunset_hour) {
+      if (mapping.contains("character-mapping-day") && hour >= MQTTManagerWeather::_next_sunrise_hour && hour <= MQTTManagerWeather::_next_sunset_hour) {
         return mapping["character-mapping-day"];
       } else if (mapping.contains("character-mapping-night") && (hour <= MQTTManagerWeather::_next_sunrise_hour || hour >= MQTTManagerWeather::_next_sunset_hour)) {
         return mapping["character-mapping-night"];
+      } else if (mapping.contains("character-mapping")) {
+        return std::string(mapping["character-mapping"]);
       } else {
         SPDLOG_ERROR("Found matching condition for {} but no icon-mapping!", condition);
         SPDLOG_ERROR("Matching condition current hour: {}, sunrise: {}, sunset: {}", hour, MQTTManagerWeather::_next_sunrise_hour, MQTTManagerWeather::_next_sunset_hour);
@@ -233,17 +236,20 @@ std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, u
 }
 
 void MQTTManagerWeather::openhab_temp_sensor_callback(nlohmann::json event_data) {
-  std::string temp_data;
-  if (std::string(event_data["type"]).compare("ItemStateChangedEvent") == 0) {
-    nlohmann::json payload = nlohmann::json::parse(std::string(event_data["payload"]));
-    temp_data = payload["value"];
-  } else if (std::string(event_data["type"]).compare("ItemStateFetched") == 0) {
-    temp_data = event_data["payload"]["state"];
-  }
+  if (MqttManagerConfig::outside_temp_sensor_provider.compare("openhab") == 0) {
+    SPDLOG_DEBUG("Received current outside temperature from OpenHAB sensor.");
+    std::string temp_data;
+    if (std::string(event_data["type"]).compare("ItemStateChangedEvent") == 0) {
+      nlohmann::json payload = nlohmann::json::parse(std::string(event_data["payload"]));
+      temp_data = payload["value"];
+    } else if (std::string(event_data["type"]).compare("ItemStateFetched") == 0) {
+      temp_data = event_data["payload"]["state"];
+    }
 
-  if (temp_data.size() > 0) {
-    MQTTManagerWeather::_current_temperature = atof(temp_data.c_str());
-    MQTTManagerWeather::send_state_update();
+    if (temp_data.size() > 0) {
+      MQTTManagerWeather::_current_temperature = atof(temp_data.c_str());
+      MQTTManagerWeather::send_state_update();
+    }
   }
 }
 
