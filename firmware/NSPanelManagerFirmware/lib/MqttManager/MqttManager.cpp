@@ -126,7 +126,6 @@ void MqttManager::_subscribeToAllRegisteredTopics() {
 }
 
 void MqttManager::_mqttClientCallback(char *topic, byte *payload, unsigned int length) {
-  LOG_DEBUG(topic);
   for (SubscribeTopic &tpc : MqttManager::_subscribeTopics) {
     if (tpc.topic.compare(topic) == 0) {
       tpc.callback(topic, payload, length);

@@ -321,8 +321,10 @@ void LightManager::_taskProcessMqttMessages(void *param) {
         } else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0) {
           unsigned long colorTemp = atoi(msg->payload.c_str());
           if (colorTemp > InterfaceConfig::colorTempMax) {
+            LOG_WARNING("Received kelvin value that was outside kelvin range. Received: ", colorTemp, ", max allowed: ", InterfaceConfig::colorTempMax, ". Clamping.");
             colorTemp = InterfaceConfig::colorTempMax;
           } else if (colorTemp < InterfaceConfig::colorTempMin) {
+            LOG_WARNING("Received kelvin value that was outside kelvin range. Received: ", colorTemp, ", min allowed: ", InterfaceConfig::colorTempMin, ". Clamping.");
             colorTemp = InterfaceConfig::colorTempMin;
           }
           colorTemp = ((colorTemp - InterfaceConfig::colorTempMin) * 100) / (InterfaceConfig::colorTempMax - InterfaceConfig::colorTempMin);
@@ -333,6 +335,7 @@ void LightManager::_taskProcessMqttMessages(void *param) {
 
           Light *light = LightManager::getLightById(atoi(entity.c_str()));
           if (light != nullptr) {
+            LOG_DEBUG("Setting light ", light->getId(), "::", light->getName().c_str(), " color temp %: ", std::to_string(colorTemp).c_str());
             light->setColorTemperature(colorTemp);
             light->callUpdateCallbacks();
           } else {

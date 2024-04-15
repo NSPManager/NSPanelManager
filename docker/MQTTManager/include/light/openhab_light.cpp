@@ -205,7 +205,7 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
           color_temperature = 100;
         }
         // Convert from percentage to actual color temp.
-        double kelvin_max_floored = MqttManagerConfig::color_temp_max - MqttManagerConfig::color_temp_min;
+        unsigned long kelvin_max_floored = MqttManagerConfig::color_temp_max - MqttManagerConfig::color_temp_min;
         uint16_t kelvin = MqttManagerConfig::color_temp_min + int((color_temperature / (double)100) * kelvin_max_floored);
 
         this->_current_color_temperature = std::round(kelvin);
@@ -295,7 +295,17 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
       }
     } else if (this->_openhab_item_color_temperature.compare(data["payload"]["name"]) == 0) {
-      this->_current_color_temperature = atoi(std::string(data["payload"]["state"]).c_str());
+      double color_temperature = 100 - atof(std::string(data["payload"]["state"]).c_str());
+      if (color_temperature < 0) {
+        color_temperature = 0;
+      } else if (color_temperature > 100) {
+        color_temperature = 100;
+      }
+      // Convert from percentage to actual color temp.
+      unsigned long kelvin_max_floored = MqttManagerConfig::color_temp_max - MqttManagerConfig::color_temp_min;
+      uint16_t kelvin = MqttManagerConfig::color_temp_min + int((color_temperature / (double)100) * kelvin_max_floored);
+
+      this->_current_color_temperature = kelvin;
       this->_requested_color_temperature = this->_current_color_temperature;
       MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature), true);
     } else if (this->_openhab_item_rgb.compare(data["payload"]["name"]) == 0) {
