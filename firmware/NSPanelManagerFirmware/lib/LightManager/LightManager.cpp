@@ -335,7 +335,7 @@ void LightManager::_taskProcessMqttMessages(void *param) {
 
           Light *light = LightManager::getLightById(atoi(entity.c_str()));
           if (light != nullptr) {
-            LOG_DEBUG("Setting light ", light->getId(), "::", light->getName().c_str(), " color temp %: ", std::to_string(colorTemp).c_str());
+            // LOG_DEBUG("Setting light ", light->getId(), "::", light->getName().c_str(), " color temp %: ", std::to_string(colorTemp).c_str());
             light->setColorTemperature(colorTemp);
             light->callUpdateCallbacks();
           } else {
