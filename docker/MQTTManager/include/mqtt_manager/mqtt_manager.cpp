@@ -21,17 +21,34 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <string>
+#include <sys/stat.h>
 #include <thread>
 #include <utility>
 #include <vector>
 
+inline bool file_exists(const char *name) {
+  struct stat buffer;
+  return (stat(name, &buffer) == 0);
+}
+
 void MQTT_Manager::connect() {
   if (MQTT_Manager::_mqtt_client == nullptr) {
-    std::ifstream f("/sys/class/net/eth0/address", std::ios::in | std::ios::binary);
-    const size_t file_size = std::filesystem::file_size("/sys/class/net/eth0/address");
-    std::string mac_address_str(file_size, '\0');
-    f.read(mac_address_str.data(), file_size);
-    f.close();
+    std::string mac_address_str = "";
+    if (file_exists("/sys/class/net/eth0/address")) {
+      std::ifstream f("/sys/class/net/eth0/address", std::ios::in | std::ios::binary);
+      const size_t file_size = std::filesystem::file_size("/sys/class/net/eth0/address");
+      f.read(mac_address_str.data(), file_size);
+      f.close();
+      mac_address_str.append("\0");
+    } else if (file_exists("/sys/class/net/tap0/address")) {
+      std::ifstream f("/sys/class/net/tap0/address", std::ios::in | std::ios::binary);
+      const size_t file_size = std::filesystem::file_size("/sys/class/net/tap0/address");
+      f.read(mac_address_str.data(), file_size);
+      f.close();
+      mac_address_str.append("\0");
+    } else {
+      SPDLOG_WARN("Neither eth0 or tap0 interfaces was found to use as address suffixes for MQTTManager MQTT name. This could result in instability in the case of 2 or more MQTTManager running at the same time!");
+    }
 
     // Cleanup text
     mac_address_str.erase(std::find_if(mac_address_str.rbegin(), mac_address_str.rend(), [](unsigned char ch) {
