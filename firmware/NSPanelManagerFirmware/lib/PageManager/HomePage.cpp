@@ -539,8 +539,6 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
       }
     }
   }
-  LOG_DEBUG("Total kelvin table lights: ", totalKelvinValueCeilingLights);
-  LOG_DEBUG("Total num table lights: ", totalKelvinLightsCeiling);
 
   uint8_t averageCeilingBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
   uint8_t averageCeilingKelvin = totalKelvinLightsCeiling == 0 ? 0 : totalKelvinValueCeilingLights / totalKelvinLightsCeiling;
@@ -566,8 +564,6 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
       }
     }
   }
-  LOG_DEBUG("Total kelvin table lights: ", totalKelvinValueTableLights);
-  LOG_DEBUG("Total num table lights: ", totalKelvinLightsTable);
 
   uint8_t averageTableBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
   uint8_t averageTableKelvin = totalKelvinLightsTable == 0 ? 0 : totalKelvinValueTableLights / totalKelvinLightsTable;
@@ -603,7 +599,6 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
   } else {
     totalAverageKelvin = 0;
   }
-  LOG_DEBUG("Total kelvin: ", totalAverageKelvin);
 
   // Only set a new value if it is not the same as already set and a new value was discovered (ie, > 0).
   if (updateColorTemperature && totalAverageKelvin != PageManager::GetHomePage()->getColorTempValue()) {

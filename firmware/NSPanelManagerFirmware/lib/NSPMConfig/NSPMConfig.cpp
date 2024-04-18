@@ -131,7 +131,6 @@ bool NSPMConfig::loadFromLittleFS() {
 }
 
 bool NSPMConfig::saveToLittleFS() {
-  Serial.println("Performing a factory reset.");
   JsonDocument config_json;
 
   config_json["wifi_hostname"] = this->wifi_hostname.c_str();
@@ -177,6 +176,7 @@ bool NSPMConfig::saveToLittleFS() {
 }
 
 bool NSPMConfig::factoryReset() {
+  Serial.println("Performing a factory reset.");
   this->wifi_hostname = "NSPMPanel";
   this->wifi_ssid = "";
   this->wifi_psk = "";

@@ -22,7 +22,7 @@ from web.settings_helper import get_setting_with_default, get_nspanel_setting_wi
 
 def restart_mqtt_manager_process():
     for proc in psutil.process_iter():
-        if "/usr/src/app/nspm_mqttmanager" in proc.cmdline():
+        if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
             print("Killing running MQTTManager")
             proc.kill()
     start_mqtt_manager()
@@ -30,7 +30,7 @@ def restart_mqtt_manager_process():
 
 def send_mqttmanager_reload_command():
     for proc in psutil.process_iter():
-        if "/usr/src/app/nspm_mqttmanager" in proc.cmdline():
+        if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
             print("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
             os.kill(proc.pid, signal.SIGUSR1)
 

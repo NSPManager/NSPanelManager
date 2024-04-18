@@ -2,12 +2,19 @@
 echo "Starting to compile MQTTManager."
 
 TARGETPLATFORM=""
+STRIP=""
 
 while true; do
 	case "$1" in
 	--target-platform)
 		TARGETPLATFORM="$2"
 		echo "Will compile for platform $TARGETPLATFORM"
+		shift # Remove --target-platform
+		shift # Remove value for target platform
+		;;
+	--strip)
+		echo "Will strip compiled binaries and .so's"
+		STRIP="1"
 		shift
 		;;
 	*) break ;;
@@ -106,6 +113,8 @@ cmake --build . --config $BUILD_TYPE
 sed -i "s|/MQTTManager/|/home/tim/NSPanelManager/docker/MQTTManager/|g" compile_commands.json
 cp compile_commands.json ../
 
-if [ -d "/usr/src/app" ]; then
-	cp nspm_mqttmanager /usr/src/app/
+if [ "$STRIP" == "1" ]; then
+	echo "Stripping binaries and .so files..."
+	strip /MQTTManager/build/*.so
+	strip /MQTTManager/build/nspm_mqttmanager
 fi

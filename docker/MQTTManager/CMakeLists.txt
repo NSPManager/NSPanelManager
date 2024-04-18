@@ -13,6 +13,14 @@ endif()
 
 set(CMAKE_INCLUDE_SRC_DIRECTORY /MQTTManager/include)
 
+# IF(DEFINED ENV{STRIP})
+#   MESSAGE("Will strip binaries!")
+#   # set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
+#   # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
+# ELSE()
+#   MESSAGE("Will add debug symbols to binaries.")
+# ENDIF()
+
 add_compile_options(-rdynamic -g)
 add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE BOOST_STACKTRACE_USE_BACKTRACE BOOST_BIND_GLOBAL_PLACEHOLDERS)
 
@@ -22,11 +30,8 @@ find_package(CURL REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(ixwebsocket REQUIRED)
 find_package(tz REQUIRED)
-find_package(inja REQUIRED)
-find_package(Boost REQUIRED COMPONENTS signals2 stacktrace_backtrace )
-#find_library(BOOST_STACKTRACE_BACKTRACE_LIBRARY NAMES boost_stacktrace_backtrace)
-#find_library(BOOST_SIGNALS2_LIBRARY NAMES boost_signals2)
-#INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+# find_package(inja REQUIRED)
+find_package(Boost REQUIRED COMPONENTS signals2 stacktrace_backtrace)
 
 add_library(MQTTManager_Entity SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.hpp)
 set_target_properties(MQTTManager_Entity PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.hpp)
@@ -41,7 +46,7 @@ target_link_libraries(MQTT_Manager PahoMqttCpp::paho-mqttpp3-static MQTTManager_
 add_library(MQTTManager_WebsocketServer SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.hpp)
 set_target_properties(MQTTManager_WebsocketServer PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.hpp)
 target_include_directories(MQTTManager_WebsocketServer PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_WebsocketServer ixwebsocket::ixwebsocket spdlog::spdlog nlohmann_json::nlohmann_json pantor::inja)
+target_link_libraries(MQTTManager_WebsocketServer ixwebsocket::ixwebsocket spdlog::spdlog nlohmann_json::nlohmann_json)
 
 add_library(MQTTManager_HomeAssistantManager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.hpp)
 set_target_properties(MQTTManager_HomeAssistantManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.hpp)

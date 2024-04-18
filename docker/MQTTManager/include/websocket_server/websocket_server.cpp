@@ -1,6 +1,5 @@
 #include <fmt/core.h>
 #include <fstream>
-#include <inja/inja.hpp>
 #include <iterator>
 #include <ixwebsocket/IXWebSocketMessageType.h>
 #include <ixwebsocket/IXWebSocketServer.h>
@@ -71,24 +70,4 @@ void WebsocketServer::broadcast_string(std::string &data) {
 
 void WebsocketServer::attach_message_callback(std::function<bool(std::string &message, std::string *response_buf)> callback) {
   WebsocketServer::_callbacks.push_back(callback);
-}
-
-void WebsocketServer::render_template_with_args(std::string template_name, nlohmann::json data) {
-  try {
-    // Read content from template file
-    std::string template_path = fmt::format("../templates/{}", template_name);
-    std::ifstream inFile(template_path);
-    if (!inFile.good()) {
-      SPDLOG_ERROR("Failed to open template '{}'.", template_path);
-      return;
-    }
-
-    std::string template_data = std::string((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
-    std::string rendered_template = inja::render(template_data, data);
-    WebsocketServer::broadcast_string(rendered_template);
-  } catch (std::exception ex) {
-    SPDLOG_ERROR("Caught std::exception while rendering inja template 'templates/{}'. Exception: {}", template_name, ex.what());
-  } catch (...) {
-    SPDLOG_ERROR("Caught exception while rendering inja template 'templates/{}'.", template_name);
-  }
 }
