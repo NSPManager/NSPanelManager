@@ -389,7 +389,7 @@ bool EntityManager::mqtt_callback(const std::string &topic, const std::string &p
 bool EntityManager::_process_message(const std::string &topic, const std::string &payload) {
   try {
     if (topic.compare("nspanel/mqttmanager/command") == 0) {
-      SPDLOG_DEBUG("Received command payload: {}", payload);
+      SPDLOG_TRACE("Received command payload: {}", payload);
       nlohmann::json data = nlohmann::json::parse(payload);
       if (!data.contains("mac_origin")) {
         SPDLOG_ERROR("Command payload did not contain a 'mac_origin' attribute. Will cancel processing.");

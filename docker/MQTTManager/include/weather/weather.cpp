@@ -37,6 +37,7 @@ void MQTTManagerWeather::_run_weather_thread() {
 }
 
 void MQTTManagerWeather::update_config() {
+  std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
   if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0) {
     SPDLOG_INFO("Will load outside temperature from Home Assistant sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
     HomeAssistantManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, &MQTTManagerWeather::home_assistant_event_callback);
@@ -55,6 +56,7 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 }
 
 void MQTTManagerWeather::_pull_new_weather_data() {
+  std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
   try {
     CURL *curl;
     CURLcode res;
@@ -207,6 +209,7 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
 }
 
 void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data) {
+  std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
   if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0 && std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::outside_temp_sensor_entity_id) == 0) {
     SPDLOG_DEBUG("Received current outside temperature from Home Assistant sensor.");
     nlohmann::json new_state = event_data["event"]["data"]["new_state"];
@@ -236,6 +239,7 @@ std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, u
 }
 
 void MQTTManagerWeather::openhab_temp_sensor_callback(nlohmann::json event_data) {
+  std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
   if (MqttManagerConfig::outside_temp_sensor_provider.compare("openhab") == 0) {
     SPDLOG_DEBUG("Received current outside temperature from OpenHAB sensor.");
     std::string temp_data;

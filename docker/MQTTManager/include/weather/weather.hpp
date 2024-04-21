@@ -1,3 +1,4 @@
+#include <mutex>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <thread>
@@ -62,6 +63,12 @@ private:
     float temperature_high;
     float wind_speed;
   };
+
+  /**
+   * Used to make sure that updates from different threads (mostly MQTT thread and the weather update thread)
+   * don't try to access values at the same time.
+   */
+  static inline std::mutex _weater_data_mutex;
 
   static inline std::vector<weather_info> _forecast_weather_info;
   static inline std::string _windspeed_unit;

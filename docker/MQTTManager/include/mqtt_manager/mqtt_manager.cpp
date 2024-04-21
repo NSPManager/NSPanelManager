@@ -238,7 +238,7 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
 }
 
 void MQTT_Manager::publish_raw(const char *topic, const char *payload, size_t size, bool retain) {
-  mqtt::message_ptr msg = mqtt::make_message(topic, payload, size, 0, false);
+  mqtt::message_ptr msg = mqtt::make_message(topic, payload, size, 0, retain);
   if (MQTT_Manager::_mqtt_client != nullptr) {
     if (MQTT_Manager::is_connected()) {
       MQTT_Manager::_mqtt_client->publish(msg);

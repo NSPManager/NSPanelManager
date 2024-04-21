@@ -8,6 +8,7 @@
 #include <boost/bind/placeholders.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <ctime>
 #include <curl/curl.h>
@@ -21,6 +22,7 @@
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
+#include <sys/stat.h>
 #include <unordered_map>
 #include <websocket_server/websocket_server.hpp>
 
@@ -372,7 +374,10 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       }
 
       if (data.contains("progress")) {
-        this->_update_progress = data["progress"];
+        // Update of TFT progress is handled by the manager.
+        if (this->_state != MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT) {
+          this->_update_progress = data["progress"];
+        }
       } else {
         this->_update_progress = 0;
       }
@@ -832,6 +837,14 @@ void NSPanel::set_relay_state(uint8_t relay, bool state) {
 }
 
 void NSPanel::send_tft_chunk(unsigned long start, unsigned long size) {
+  // guards:
+  // Do nothing if this panel is not registed to this manager.
+  if (!this->_is_register_accepted) {
+    return;
+  }
+
+  // If we are trying to read the TFT chunks, we are updating the TFT. Set mode.
+  this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT;
   try {
     std::string tft_file_path;
     if (this->_is_us_panel) {
@@ -840,12 +853,21 @@ void NSPanel::send_tft_chunk(unsigned long start, unsigned long size) {
       tft_file_path = "/usr/src/app/nspanelmanager/gui.tft";
     }
 
+    // Calcuate progress
+    struct stat buffer;
+    if (stat(tft_file_path.c_str(), &buffer) == 0) {
+      float read_end_byte = start + size;
+      float percentage = read_end_byte / (float)buffer.st_size;
+      this->_update_progress = std::round(percentage * 100);
+      this->send_websocket_update();
+    }
+
     char data[size];
     std::ifstream file(tft_file_path.c_str(), std::ios::binary);
     file.seekg(start);
     file.read((char *)data, size);
     file.close();
-    SPDLOG_DEBUG("Read {} bytes from {}.", size, tft_file_path);
+    SPDLOG_TRACE("Read {} bytes from {}.", size, tft_file_path);
 
     MQTT_Manager::publish_raw(this->_mqtt_tft_chunk_topic.c_str(), data, size, false);
   } catch (std::exception &e) {
