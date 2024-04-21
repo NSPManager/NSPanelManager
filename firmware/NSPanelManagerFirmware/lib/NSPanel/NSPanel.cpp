@@ -300,11 +300,15 @@ void NSPanel::_sendCommandClearResponse(const char *command, uint16_t timeout) {
 }
 
 void NSPanel::_addCommandToQueue(NSPanelCommand command) {
+  if (!NSPanel::instance->_writeCommandsToSerial) {
+    return;
+  }
+
   if (this->_taskHandleSendCommandQueue != NULL) {
     this->_commandQueue.push(command);
     xTaskNotifyGive(this->_taskHandleSendCommandQueue);
   } else {
-    LOG_ERROR("Trying to add command to queue before a queue exists!");
+    LOG_ERROR("Task '", pcTaskGetName(xTaskGetCurrentTaskHandle()), "' is trying to add command to queue before a queue exists!");
   }
 }
 
@@ -408,7 +412,7 @@ void NSPanel::_taskProcessPanelOutput(void *param) {
           break;
 
         default:
-          LOG_DEBUG("Read type ", String(itemPayload[0], HEX).c_str());
+          LOG_TRACE("Read type ", String(itemPayload[0], HEX).c_str());
           break;
         }
 
@@ -423,9 +427,7 @@ void NSPanel::_taskProcessPanelOutput(void *param) {
 
 void NSPanel::_sendCommand(NSPanelCommand *command) {
   // Clear buffer before sending
-  while (Serial2.available()) {
-    Serial2.read();
-  }
+  NSPanel::_clearSerialBuffer();
 
   while (!NSPanel::instance->_writeCommandsToSerial) {
     vTaskDelay(50 / portTICK_PERIOD_MS);
@@ -702,7 +704,6 @@ bool NSPanel::_initTFTUpdate(int communication_baud_rate) {
     commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(",1");
   }
-  LOG_DEBUG("Doing one last serial2 clear.");
   NSPanel::_clearSerialBuffer();
   vTaskDelay(500 / portTICK_PERIOD_MS);
 
@@ -758,7 +759,6 @@ bool NSPanel::_updateTFTOTA() {
   } else {
     downloadUrl.append("/download_tft_us");
   }
-  LOG_DEBUG("Will try to download TFT from ", downloadUrl.c_str());
 
   unsigned long file_size = 0;
   while (file_size == 0) {
@@ -766,6 +766,8 @@ bool NSPanel::_updateTFTOTA() {
     if (file_size == 0) {
       LOG_ERROR("Failed to get file size for TFT flashing. Will try again.");
       vTaskDelay(500 / portTICK_PERIOD_MS);
+    } else {
+      LOG_INFO("Will flash TFT, size: ", file_size);
     }
   }
 
@@ -775,43 +777,43 @@ bool NSPanel::_updateTFTOTA() {
     ESP.restart();
   }
 
-  uint8_t dataBuffer[4096];
-
   // Loop until break when all firmware has finished uploading (data available in stream == 0)
   NSPanel::_taskHandleUpdateTFT = xTaskGetCurrentTaskHandle();
   LOG_INFO("Subscribing to TFT data topic: ", NSPMConfig::instance->mqtt_panel_tft_data.c_str());
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_tft_data.c_str(), &NSPanel::writeTftChunk);
 
-  while (true) {
+  for (;;) {
     // Calculate next chunk size
-    int next_write_size;
     if (file_size - NSPanel::_lastReadByte > 4096) {
-      next_write_size = 4096;
+      NSPanel::_next_write_size = 4096;
     } else {
-      next_write_size = file_size - NSPanel::_lastReadByte;
+      NSPanel::_next_write_size = file_size - NSPanel::_lastReadByte;
     }
-    size_t bytesReceived = 0;
-    JsonDocument data;
-    data["command"] = "get_tft_chunk";
-    data["mac_origin"] = WiFi.macAddress();
-    while (bytesReceived != next_write_size) {
+
+    for (;;) {
+      JsonDocument data;
+      data["command"] = "get_tft_chunk";
+      data["mac_origin"] = WiFi.macAddress();
       data["start"] = NSPanel::_nextStartWriteOffset;
-      data["size"] = next_write_size;
+      data["size"] = NSPanel::_next_write_size;
       char buffer[128];
       size_t json_length = serializeJson(data, buffer);
       if (json_length > 0) {
         // Send command to get data
         while (true) {
+          taskYIELD(); // Allow any higher priority task to run before continuing
           if (MqttManager::publish("nspanel/mqttmanager/command", buffer)) {
             break;
           } else {
             LOG_ERROR("Failed to send command!");
-            vTaskDelay(100 / portTICK_PERIOD_MS);
+            vTaskDelay(250 / portTICK_PERIOD_MS);
           }
         }
+
         // Wait for response that data was indeed written
-        if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY)) {
-          break; // We successfully wrote the data to the panel, break loop and start listening for response from panel.
+        if (ulTaskNotifyTake(pdTRUE, 5000 / portTICK_PERIOD_MS)) {
+          taskYIELD(); // Allow any higher priority task to run before continuing
+          break;       // We successfully wrote the data to the panel, break loop and start listening for response from panel.
         } else {
           LOG_ERROR("Timed out while waiting for MQTT callback that data was written. Will try again.");
         }
@@ -832,10 +834,10 @@ bool NSPanel::_updateTFTOTA() {
       break;
     } else if (return_string[0] == 0x05) {
       // Old protocol, just upload next chunk.
-      LOG_DEBUG("Got 0x05, uploading next chunk.");
+      LOG_TRACE("Got 0x05, uploading next chunk.");
     } else if (return_string[0] == 0x08) {
       while (return_string.length() < 4) {
-        LOG_DEBUG("Waiting for offset data byte ", return_string.length() - 1);
+        LOG_TRACE("Waiting for offset data byte ", return_string.length() - 1);
         while (Serial2.available() <= 0) {
           vTaskDelay(20 / portTICK_PERIOD_MS);
         }
@@ -889,12 +891,19 @@ bool NSPanel::_updateTFTOTA() {
 }
 
 void NSPanel::writeTftChunk(char *topic, byte *payload, unsigned int length) {
-  if (NSPanel::_taskHandleUpdateTFT != nullptr) {
-    LOG_DEBUG("Received ", length, " bytes on TFT data topic.");
-    NSPanel::_nextStartWriteOffset += length;
-    Serial2.write(payload, length); // Write data to panel
-    xTaskNotifyGive(NSPanel::_taskHandleUpdateTFT);
-  } else {
+  // Guards:
+  if (length < NSPanel::_next_write_size) {
+    LOG_ERROR("Did not receive the correct number of bytes as requested. Requested: ", NSPanel::_next_write_size, ", recevied: ", length);
+    return;
+  } else if (NSPanel::_taskHandleUpdateTFT == nullptr) {
     LOG_ERROR("Received TFT data but no task handle was set for callback");
+    return;
   }
+
+  // This code will only run if the above checks has been passed.
+  LOG_TRACE("Received ", length, " bytes on TFT data topic. Will use ", NSPanel::_next_write_size, " bytes.");
+  NSPanel::_nextStartWriteOffset += NSPanel::_next_write_size;
+  Serial2.write(payload, NSPanel::_next_write_size); // Write data to panel
+  Serial2.flush();
+  xTaskNotifyGive(NSPanel::_taskHandleUpdateTFT);
 }

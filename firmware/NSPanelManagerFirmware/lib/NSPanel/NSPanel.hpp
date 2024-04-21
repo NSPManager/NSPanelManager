@@ -97,6 +97,8 @@ private:
   static inline unsigned long _startWaitingForOKForNextChunk = 0;
   static inline unsigned long _nextStartWriteOffset = 0;
   static inline unsigned long _lastReadByte = 0;
+  /// @brief The next number of bytes to request/write to the TFT when updating the screen.
+  static inline uint16_t _next_write_size;
   /// @brief Flag indicating wether or not a TFT update is ongoing
   bool _isUpdating;
   /// @brief If updating, contains the % done of the update

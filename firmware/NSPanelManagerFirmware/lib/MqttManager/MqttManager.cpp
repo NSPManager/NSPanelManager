@@ -76,7 +76,7 @@ bool MqttManager::publish(std::string &topic, std::string &message, bool retain)
   msg->data = message;
   msg->retain = retain;
 
-  if (xQueueSendToBack(MqttManager::_sendQueue, (void *)&msg, 100 / portTICK_PERIOD_MS) == pdTRUE) {
+  if (xQueueSendToBack(MqttManager::_sendQueue, (void *)&msg, 250 / portTICK_PERIOD_MS) == pdTRUE) {
     return true;
   } else {
     delete msg;

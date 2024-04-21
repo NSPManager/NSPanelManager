@@ -85,7 +85,6 @@ void ScreensaverPage::updateRoomTemp(std::string roomtemp_string) {
 }
 
 void ScreensaverPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
-  LOG_DEBUG("Got touch event, component ", page, ".", component, " ", pressed ? "pressed" : "released");
   PageManager::GetHomePage()->show();
 }
 
@@ -124,7 +123,7 @@ void ScreensaverPage::dateMqttCallback(char *topic, byte *payload, unsigned int 
 }
 
 void ScreensaverPage::weatherMqttCallback(char *topic, byte *payload, unsigned int length) {
-  LOG_DEBUG("Received new weather data.");
+  LOG_TRACE("Received new weather data.");
   std::string payload_str = std::string((char *)payload, length);
   JsonDocument json;
   DeserializationError error = deserializeJson(json, payload_str);
@@ -134,7 +133,7 @@ void ScreensaverPage::weatherMqttCallback(char *topic, byte *payload, unsigned i
   }
   vTaskDelay(500 / portTICK_PERIOD_MS);
   JsonArray forecast = json["forecast"].as<JsonArray>();
-  LOG_DEBUG("Received forecast for ", forecast.size(), " days.");
+  LOG_TRACE("Received forecast for ", forecast.size(), " days.");
 
   NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_WEATHER_ICON_TEXT_NAME, json["icon"]);
   NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_TEMP_TEXT_NAME, json["temp"]);
