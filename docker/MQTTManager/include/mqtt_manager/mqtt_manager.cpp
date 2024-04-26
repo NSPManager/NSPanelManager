@@ -197,7 +197,7 @@ void MQTT_Manager::_process_mqtt_message(const std::string topic, const std::str
       }
     }
   } catch (std::exception ex) {
-    SPDLOG_ERROR("Caught std::exception while processing message on topic '{}'. message: '{}'. Exception: ", topic, message, ex.what());
+    SPDLOG_ERROR("Caught std::exception while processing message on topic '{}'. message: '{}'. Exception: ", topic, message, boost::diagnostic_information(ex, true));
   } catch (...) {
     SPDLOG_ERROR("Caught exception of type other than std::exception while processing message on topic '{}'. message: {}", topic, message);
   }
