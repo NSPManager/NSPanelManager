@@ -115,7 +115,7 @@ conan install . --build=missing -pr:b default -pr:h host
 cd build
 source $BUILD_TYPE/generators/conanbuild.sh
 cmake .. -DCMAKE_TOOLCHAIN_FILE=$BUILD_TYPE/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-cmake --build . --config $BUILD_TYPE
+cmake --build . --config $BUILD_TYPE -j $(nproc)
 sed -i "s|/MQTTManager/|/home/tim/NSPanelManager/docker/MQTTManager/|g" compile_commands.json
 cp compile_commands.json ../
 
