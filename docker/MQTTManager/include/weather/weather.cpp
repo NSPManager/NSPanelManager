@@ -40,10 +40,11 @@ void MQTTManagerWeather::update_config() {
   std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
   if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0) {
     SPDLOG_INFO("Will load outside temperature from Home Assistant sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
-    HomeAssistantManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, &MQTTManagerWeather::home_assistant_event_callback);
     OpenhabManager::detach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, &MQTTManagerWeather::openhab_temp_sensor_callback);
+    HomeAssistantManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, &MQTTManagerWeather::home_assistant_event_callback);
   } else if (MqttManagerConfig::outside_temp_sensor_provider.compare("openhab") == 0) {
     SPDLOG_INFO("Will load outside temperature from OpenHAB sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
+    HomeAssistantManager::detach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, &MQTTManagerWeather::home_assistant_event_callback);
     OpenhabManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, &MQTTManagerWeather::openhab_temp_sensor_callback);
   }
 
@@ -104,6 +105,7 @@ void MQTTManagerWeather::_pull_new_weather_data() {
       if (res == CURLE_OK && http_code == 200) {
         SPDLOG_DEBUG("Successfully received new weather forcast from Open Meteo. Will process new data.");
         MQTTManagerWeather::_process_weather_data(response_data);
+        SPDLOG_DEBUG("Weather data processed.");
       } else {
         SPDLOG_ERROR("curl_easy_perform() when getting new weather forecast, got code: {}.", curl_easy_strerror(res));
       }
@@ -209,12 +211,13 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
 }
 
 void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data) {
-  std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
   if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0 && std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::outside_temp_sensor_entity_id) == 0) {
+    std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
     SPDLOG_DEBUG("Received current outside temperature from Home Assistant sensor.");
     nlohmann::json new_state = event_data["event"]["data"]["new_state"];
     MQTTManagerWeather::_current_temperature = atof(std::string(new_state["state"]).c_str());
     MQTTManagerWeather::send_state_update();
+    SPDLOG_DEBUG("Temperature data processed.");
   }
 }
 
@@ -239,8 +242,8 @@ std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, u
 }
 
 void MQTTManagerWeather::openhab_temp_sensor_callback(nlohmann::json event_data) {
-  std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
   if (MqttManagerConfig::outside_temp_sensor_provider.compare("openhab") == 0) {
+    std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
     SPDLOG_DEBUG("Received current outside temperature from OpenHAB sensor.");
     std::string temp_data;
     if (std::string(event_data["type"]).compare("ItemStateChangedEvent") == 0) {
@@ -254,13 +257,14 @@ void MQTTManagerWeather::openhab_temp_sensor_callback(nlohmann::json event_data)
       MQTTManagerWeather::_current_temperature = atof(temp_data.c_str());
       MQTTManagerWeather::send_state_update();
     }
+    SPDLOG_DEBUG("Temperature data processed.");
   }
 }
 
 void MQTTManagerWeather::send_state_update() {
   nlohmann::json weather_info;
   std::list<nlohmann::json> forecast;
-  for (struct weather_info info : MQTTManagerWeather::_forecast_weather_info) {
+  for (struct weather_info &info : MQTTManagerWeather::_forecast_weather_info) {
     nlohmann::json forecast_data;
     forecast_data["icon"] = MQTTManagerWeather::_get_icon_from_mapping(info.condition, info.time.tm_hour);
     std::string pre = std::to_string((int)round(info.precipitation));

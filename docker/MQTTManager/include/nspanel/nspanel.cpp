@@ -351,6 +351,8 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       this->_heap_used_pct = data["heap_used_pct"];
       if (data["temperature"].is_number_float()) {
         this->_temperature = data["temperature"];
+      } else if (data["temperature"].is_string()) {
+        this->_temperature = atof(std::string(data["temperature"]).c_str());
       } else {
         SPDLOG_ERROR("Incorrect format of temperature data. Expected float.");
       }
