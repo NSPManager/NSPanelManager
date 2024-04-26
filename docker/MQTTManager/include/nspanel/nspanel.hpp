@@ -163,7 +163,7 @@ private:
   bool _has_registered_to_manager;
   std::string _ip_address;
   int16_t _rssi;
-  int16_t _temperature;
+  float _temperature;
   uint8_t _heap_used_pct;
   uint8_t _update_progress;
   MQTT_MANAGER_NSPANEL_STATE _state;

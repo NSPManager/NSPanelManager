@@ -32,17 +32,21 @@ set -e
 set -x
 
 deb_add_arch=""
+strip_bin=""
 cp /root/.conan2/profiles/default /root/.conan2/profiles/host
 if [ "$TARGETPLATFORM" == "linux/386" ]; then
 	deb_add_arch="i386"
 	conan_target_arch="x86"
+	strip_bin="/usr/bin/strip"
 	apt -y install gcc-multilib g++-multilib
 elif [ "$TARGETPLATFORM" == "linux/amd64" ]; then
 	deb_add_arch="amd64"
 	conan_target_arch="x86_64"
+	strip_bin="/usr/bin/strip"
 elif [ "$TARGETPLATFORM" == "linux/arm/v6" ]; then
 	deb_add_arch="armhf"
 	conan_target_arch="armv6"
+	strip_bin="/usr/bin/arm-linux-gnueabihf-strip"
 	apt -y install binutils-arm-linux-gnueabihf gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
 	echo "" >>/root/.conan2/profiles/host
 	echo "[buildenv]" >>/root/.conan2/profiles/host
@@ -52,6 +56,7 @@ elif [ "$TARGETPLATFORM" == "linux/arm/v6" ]; then
 elif [ "$TARGETPLATFORM" == "linux/arm/v7" ]; then
 	deb_add_arch="armhf"
 	conan_target_arch="armv7hf"
+	strip_bin="/usr/bin/arm-linux-gnueabihf-strip"
 	apt -y install binutils-arm-linux-gnueabihf gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
 	echo "" >>/root/.conan2/profiles/host
 	echo "[buildenv]" >>/root/.conan2/profiles/host
@@ -61,6 +66,7 @@ elif [ "$TARGETPLATFORM" == "linux/arm/v7" ]; then
 elif [ "$TARGETPLATFORM" == "linux/arm64" ]; then
 	deb_add_arch="arm64"
 	conan_target_arch="armv8"
+	strip_bin="/usr/bin/aarch64-linux-gnu-strip"
 	apt -y install binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 	echo "" >>/root/.conan2/profiles/host
 	echo "[buildenv]" >>/root/.conan2/profiles/host
@@ -114,7 +120,7 @@ sed -i "s|/MQTTManager/|/home/tim/NSPanelManager/docker/MQTTManager/|g" compile_
 cp compile_commands.json ../
 
 if [ "$STRIP" == "1" ]; then
-	echo "Stripping binaries and .so files..."
-	strip /MQTTManager/build/*.so
-	strip /MQTTManager/build/nspm_mqttmanager
+	echo "Stripping binaries and .so files using '$strip_bin'..."
+	"$strip_bin" /MQTTManager/build/*.so
+	"$strip_bin" /MQTTManager/build/nspm_mqttmanager
 fi
