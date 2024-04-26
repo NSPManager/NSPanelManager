@@ -80,7 +80,7 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
       }
 
       if (WiFi.isConnected()) {
-        secondary_text = "IP: ";
+        secondary_text = "Panel IP: ";
         secondary_text.append(WiFi.localIP().toString().c_str());
       } else {
         secondary_text = "";

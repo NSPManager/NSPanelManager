@@ -198,25 +198,27 @@ void taskManageWifiAndMqtt(void *param) {
         // Online/Offline state is handled in /status topic managed by MQTTManager.
 
         if (force_send_mqtt_update || millis() >= lastStatusReport + 30000) {
-          float temperature = averageTemperature;
+          char display_temp[7]; // Displayed temperature should NEVER have to be more than 7 chars. Example, 1000.0 is 6 chars, -100.0 is 6 chars. Neither should happen!
+          std::snprintf(display_temp, sizeof(display_temp), "%.1f", averageTemperature);
           (*status_report_doc)["rssi"] = WiFi.RSSI();
           (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
           (*status_report_doc)["mac"] = WiFi.macAddress();
-          (*status_report_doc)["temperature"] = temperature;
+          (*status_report_doc)["temperature"] = display_temp;
           (*status_report_doc)["ip"] = WiFi.localIP().toString();
 
           std::string warning_string = NSPanel::instance->getWarnings();
           (*status_report_doc)["warnings"] = warning_string.c_str();
 
-          MqttManager::publish(NSPMConfig::instance->mqtt_panel_temperature_topic, std::to_string(temperature).c_str());
+          MqttManager::publish(NSPMConfig::instance->mqtt_panel_temperature_topic, display_temp);
 
           char buffer[512];
           uint json_length = serializeJson(*status_report_doc, buffer);
           MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer, true);
 
-          std::string display_temp = std::to_string((int)round(temperature));
-          display_temp.append("°");
-          PageManager::GetScreensaverPage()->updateRoomTemp(display_temp);
+          // std::string display_temp = std::to_string((int)round(temperature));
+          std::string display_temp_display = display_temp;
+          display_temp_display.append("°");
+          PageManager::GetScreensaverPage()->updateRoomTemp(display_temp_display);
 
           lastStatusReport = millis();
         }
