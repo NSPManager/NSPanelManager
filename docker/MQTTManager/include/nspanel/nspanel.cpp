@@ -349,7 +349,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       // Update internal status
       this->_rssi = data["rssi"];
       this->_heap_used_pct = data["heap_used_pct"];
-      this->_temperature = data["temperature"];
+      this->_temperature = atof(std::string(data["temperature"]).c_str());
       this->_ip_address = data["ip"];
       this->_nspanel_warnings = data["warnings"];
 
