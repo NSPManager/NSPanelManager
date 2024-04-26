@@ -46,8 +46,8 @@ void RoomManager::loadAllRooms(bool is_update) {
     roomDataJsonUrl.append(std::to_string(NSPMConfig::instance->manager_port));
     roomDataJsonUrl.append("/api/get_nspanel_config?mac=");
     roomDataJsonUrl.append(WiFi.macAddress().c_str());
+    LOG_INFO("Trying to download config from: ", roomDataJsonUrl.c_str());
     successDownloadingConfig = HttpLib::DownloadJSON(roomDataJsonUrl.c_str(), roomData);
-    roomDataJsonUrl.end();
 
     if (roomData->size() == 0) {
       successDownloadingConfig = false; // The HTTP call succeeded but we got no data, do not count it as a success
@@ -224,14 +224,16 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
   JsonDocument *roomData = new JsonDocument;
   uint8_t tries = 0;
   bool successDownloadingConfig = false;
-  std::string roomDataJsonUrl = "http://";
-  roomDataJsonUrl.append(NSPMConfig::instance->manager_address);
-  roomDataJsonUrl.append(":");
-  roomDataJsonUrl.append(std::to_string(NSPMConfig::instance->manager_port));
-  roomDataJsonUrl.append("/api/get_nspanel_config/room/");
-  roomDataJsonUrl.append(std::to_string(roomId));
 
   do {
+    std::string roomDataJsonUrl = "http://";
+    roomDataJsonUrl.append(NSPMConfig::instance->manager_address);
+    roomDataJsonUrl.append(":");
+    roomDataJsonUrl.append(std::to_string(NSPMConfig::instance->manager_port));
+    roomDataJsonUrl.append("/api/get_nspanel_config/room/");
+    roomDataJsonUrl.append(std::to_string(roomId));
+    LOG_INFO("Downloading room config from: ", roomDataJsonUrl.c_str());
+
     successDownloadingConfig = HttpLib::DownloadJSON(roomDataJsonUrl.c_str(), roomData);
 
     if (!successDownloadingConfig) {
@@ -248,8 +250,7 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
       }
     }
   } while (!successDownloadingConfig);
-  roomDataJsonUrl.end();
-  // Sucessfully downloaded config, proceed to process it
+  // Successfully downloaded config, proceed to process it
   // Load already existing room or if a nullptr was returned, create a new room.
   Room *newRoom = RoomManager::getRoomById(roomId);
   if (newRoom == nullptr) {

@@ -200,9 +200,19 @@ void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned
   } else if (command.compare("register_accept") == 0) {
     NSPMConfig::instance->manager_address = json["address"].as<String>().c_str();
     NSPMConfig::instance->manager_port = json["port"].as<uint16_t>();
+
+    Serial.print("Received register accept from manager: ");
+    Serial.print(NSPMConfig::instance->manager_address.c_str());
+    Serial.print(" at port: ");
+    Serial.println(NSPMConfig::instance->manager_port);
+    LOG_INFO("Received register accept from manager ", NSPMConfig::instance->manager_address.c_str(), " with port: ", NSPMConfig::instance->manager_port);
     InterfaceManager::hasRegisteredToManager = true;
   } else if (command.compare("reload") == 0) {
-    RoomManager::performConfigReload();
+    if (InterfaceManager::hasRegisteredToManager && NSPMConfig::instance->successful_config_load) {
+      RoomManager::performConfigReload();
+    } else {
+      LOG_ERROR("Received command to reload config when the panel hasn't yet registered to a manager or yet once successfully downloaded a config from the manager.");
+    }
   } else {
     LOG_WARNING("Received unknown command on MQTT: ", command.c_str());
   }

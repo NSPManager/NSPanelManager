@@ -28,6 +28,7 @@ struct PublishMessage {
 class MqttManager {
 public:
   static void init();
+  static void start();
   static void setBufferSize(uint8_t bufferSize);
   static bool publish(const char *topic, std::string &message);
   static bool publish(const char *topic, std::string &message, bool retain);
@@ -50,6 +51,7 @@ private:
   static void _taskMqttRunTask(void *params);
   static void _mqttClientCallback(char *topic, byte *payload, unsigned int length);
 
+  static inline bool _hasStarted;
   static inline std::list<SubscribeTopic> _subscribeTopics;
   static inline QueueHandle_t _sendQueue;
   static inline WiFiClient *_wifiClient;

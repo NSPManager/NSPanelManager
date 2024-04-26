@@ -90,43 +90,144 @@ void sendMqttManagerRegistrationRequest() {
   }
 }
 
+void onWiFiEvent(WiFiEvent_t event) {
+  Serial.printf("[WiFi-event] event: %d\n", event);
+
+  switch (event) {
+  case ARDUINO_EVENT_WIFI_READY:
+    Serial.println("WiFi interface ready");
+    break;
+  case ARDUINO_EVENT_WIFI_SCAN_DONE:
+    Serial.println("Completed scan for access points");
+    break;
+  case ARDUINO_EVENT_WIFI_STA_START:
+    Serial.println("WiFi client started");
+    break;
+  case ARDUINO_EVENT_WIFI_STA_STOP:
+    Serial.println("WiFi clients stopped");
+    break;
+  case ARDUINO_EVENT_WIFI_STA_CONNECTED:
+    Serial.println("Connected to access point");
+    break;
+  case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+    Serial.println("Disconnected from WiFi access point");
+    break;
+  case ARDUINO_EVENT_WIFI_STA_AUTHMODE_CHANGE:
+    Serial.println("Authentication mode of access point has changed");
+    break;
+  case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+    Serial.print("Obtained IP address: ");
+    Serial.println(WiFi.localIP());
+    break;
+  case ARDUINO_EVENT_WIFI_STA_LOST_IP:
+    Serial.println("Lost IP address and IP address is reset to 0");
+    break;
+  case ARDUINO_EVENT_WPS_ER_SUCCESS:
+    Serial.println("WiFi Protected Setup (WPS): succeeded in enrollee mode");
+    break;
+  case ARDUINO_EVENT_WPS_ER_FAILED:
+    Serial.println("WiFi Protected Setup (WPS): failed in enrollee mode");
+    break;
+  case ARDUINO_EVENT_WPS_ER_TIMEOUT:
+    Serial.println("WiFi Protected Setup (WPS): timeout in enrollee mode");
+    break;
+  case ARDUINO_EVENT_WPS_ER_PIN:
+    Serial.println("WiFi Protected Setup (WPS): pin code in enrollee mode");
+    break;
+  case ARDUINO_EVENT_WIFI_AP_START:
+    Serial.println("WiFi access point started");
+    break;
+  case ARDUINO_EVENT_WIFI_AP_STOP:
+    Serial.println("WiFi access point  stopped");
+    break;
+  case ARDUINO_EVENT_WIFI_AP_STACONNECTED:
+    Serial.println("Client connected");
+    break;
+  case ARDUINO_EVENT_WIFI_AP_STADISCONNECTED:
+    Serial.println("Client disconnected");
+    break;
+  case ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED:
+    Serial.println("Assigned IP address to client");
+    break;
+  case ARDUINO_EVENT_WIFI_AP_PROBEREQRECVED:
+    Serial.println("Received probe request");
+    break;
+  case ARDUINO_EVENT_WIFI_AP_GOT_IP6:
+    Serial.println("AP IPv6 is preferred");
+    break;
+  case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
+    Serial.println("STA IPv6 is preferred");
+    break;
+  case ARDUINO_EVENT_ETH_GOT_IP6:
+    Serial.println("Ethernet IPv6 is preferred");
+    break;
+  case ARDUINO_EVENT_ETH_START:
+    Serial.println("Ethernet started");
+    break;
+  case ARDUINO_EVENT_ETH_STOP:
+    Serial.println("Ethernet stopped");
+    break;
+  case ARDUINO_EVENT_ETH_CONNECTED:
+    Serial.println("Ethernet connected");
+    break;
+  case ARDUINO_EVENT_ETH_DISCONNECTED:
+    Serial.println("Ethernet disconnected");
+    break;
+  case ARDUINO_EVENT_ETH_GOT_IP:
+    Serial.println("Obtained IP address");
+    break;
+  default:
+    Serial.println("Unknown WiFi event happened!");
+    break;
+  }
+}
+
 void startAndManageWiFiAccessPoint() {
   for (;;) {
     Serial.println("Setting Wifi mode to AP.");
-    WiFi.mode(WIFI_MODE_AP);
+    WiFi.mode(WIFI_AP);
     IPAddress local_ip(192, 168, 1, 1);
-    IPAddress gateway(192, 168, 1, 1);
     IPAddress subnet(255, 255, 255, 0);
 
-    vTaskDelay(250 / portTICK_PERIOD_MS);
     Serial.println("Starting AP!");
-    if (WiFi.softAPConfig(local_ip, gateway, subnet)) {
-      Serial.println("Soft-AP configuration applied.");
-      if (WiFi.softAP("NSPMPanel", "password")) {
-        Serial.println("Soft-AP started.");
+    if (WiFi.softAP("NSPMPanel", NULL)) {
+      Serial.println("Soft-AP started.");
+      if (WiFi.softAPConfig(local_ip, local_ip, subnet)) {
+        Serial.println("Soft-AP configuration applied.");
 
         Serial.println("WiFi SSID: NSPMPanel");
-        Serial.println("WiFi PSK : password");
-        Serial.print("WiFi IP Address: ");
-        Serial.println(WiFi.softAPIP().toString().c_str());
-        webMan.init(NSPanelManagerFirmwareVersion);
-        // Wait indefinitly
-        for (;;) {
-          vTaskDelay(60000 / portTICK_PERIOD_MS); // Scan for the configured network every 60 seconds.
+        Serial.println("No WiFi password.");
+        Serial.print("WiFi IP Address: 192.168.1.1");
 
-          int n = WiFi.scanComplete();
-          if (n == -2) {
-            WiFi.scanNetworks(true);
-          } else if (n) {
-            for (int i = 0; i < n; ++i) {
-              if (!WiFi.SSID(i).isEmpty()) {
-                if (WiFi.SSID(i).equals(config.wifi_ssid.c_str())) {
-                  ESP.restart(); // The configured network was discovered. Reboot.
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+        webMan.init(NSPanelManagerFirmwareVersion);
+        // Wait indefinitely
+        if (!NSPMConfig::instance->wifi_ssid.empty()) {
+          for (;;) {
+            vTaskDelay(60000 / portTICK_PERIOD_MS); // Scan for the configured network every 60 seconds.
+            Serial.println("Scanning for configured wifi.");
+
+            int n = WiFi.scanComplete();
+            if (n == -2) {
+              WiFi.scanNetworks(true);
+            } else if (n) {
+              for (int i = 0; i < n; ++i) {
+                if (!WiFi.SSID(i).isEmpty()) {
+                  if (WiFi.SSID(i).equals(config.wifi_ssid.c_str())) {
+                    Serial.println("Found configured WiFi. Will restart and try to connect.");
+                    vTaskDelay(250 / portTICK_PERIOD_MS);
+                    ESP.restart(); // The configured network was discovered. Reboot.
+                  }
                 }
               }
             }
+            WiFi.scanDelete();
           }
-          WiFi.scanDelete();
+        } else {
+          // Wait indefinitely
+          for (;;) {
+            vTaskDelay(portMAX_DELAY);
+          }
         }
       } else {
         LOG_ERROR("Failed to start Soft-AP!");
@@ -144,6 +245,8 @@ void taskManageWifiAndMqtt(void *param) {
   Serial.println(config.wifi_ssid.c_str());
   Serial.print("with hostname: ");
   Serial.println(config.wifi_hostname.c_str());
+  WiFi.onEvent(onWiFiEvent);
+
   if (!NSPMConfig::instance->wifi_ssid.empty()) {
     for (;;) {
       if (!WiFi.isConnected() && millis() - lastWiFiconnected < 180 * 1000) {
@@ -164,8 +267,10 @@ void taskManageWifiAndMqtt(void *param) {
             LOG_INFO("IP Address: ", WiFi.localIP().toString());
             LOG_INFO("Netmask:    ", WiFi.subnetMask().toString());
             LOG_INFO("Gateway:    ", WiFi.gatewayIP().toString());
-            // Start web server
+
+            // We successfully connected to WiFi. Init the rest of the components.
             webMan.init(NSPanelManagerFirmwareVersion);
+            mqttManager.start();
           } else {
             LOG_ERROR("Failed to connect to WiFi. Will try again in 5 seconds");
             Serial.println("Failed to connect to WiFi. Will try again in 5 seconds");
@@ -254,6 +359,7 @@ void setup() {
   ButtonManager::init();
   xTaskCreatePinnedToCore(readNTCTemperatureTask, "readTempTask", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 
+  vTaskDelay(250 / portTICK_PERIOD_MS);
   LOG_INFO("Initializing NSPanel communication");
   if (nspanel.init()) {
     LOG_INFO("Successfully initiated NSPanel.");
