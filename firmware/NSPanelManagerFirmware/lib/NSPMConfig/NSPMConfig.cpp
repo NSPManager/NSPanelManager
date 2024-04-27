@@ -130,7 +130,21 @@ bool NSPMConfig::loadFromLittleFS() {
   return true;
 }
 
-bool NSPMConfig::saveToLittleFS() {
+bool NSPMConfig::saveToLittleFS(bool remountLittleFs) {
+  if (remountLittleFs) {
+    LOG_INFO("Unmounting LittleFS.");
+    LittleFS.end();
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+    if (LittleFS.begin(false)) {
+      LOG_INFO("LittleFS remounted.");
+      this->littlefs_mount_successfull = true;
+    } else {
+      LOG_ERROR("Failed to remount LittleFS");
+      this->littlefs_mount_successfull = false;
+      return false;
+    }
+  }
+
   JsonDocument config_json;
 
   config_json["wifi_hostname"] = this->wifi_hostname.c_str();
@@ -186,5 +200,5 @@ bool NSPMConfig::factoryReset() {
   this->mqtt_port = 1883;
   this->mqtt_username = "";
   this->mqtt_password = "";
-  return this->saveToLittleFS();
+  return this->saveToLittleFS(false);
 }

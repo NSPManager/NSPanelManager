@@ -120,7 +120,7 @@ void RoomManager::loadAllRooms(bool is_update) {
   }
 
   if (save_new_config_to_littlefs_at_end) {
-    while (!NSPMConfig::instance->saveToLittleFS()) {
+    while (!NSPMConfig::instance->saveToLittleFS(false)) {
       vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 

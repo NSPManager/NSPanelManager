@@ -19,8 +19,9 @@ public:
   /// @return True if successful
   bool loadFromLittleFS();
   /// @brief Save current config file to LittleFS
+  /// @param remountLittleFs: boolean on wether or not to remount littlefs before trying to save the config
   /// @return True if successful
-  bool saveToLittleFS();
+  bool saveToLittleFS(bool remountLittleFs);
   /// @brief Reset all values to default
   /// @return True if successfuly saved to LittleFS
   bool factoryReset();

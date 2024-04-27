@@ -879,7 +879,7 @@ bool NSPanel::_updateTFTOTA() {
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
   NSPMConfig::instance->md5_tft_file = checksum_holder;
-  NSPMConfig::instance->saveToLittleFS();
+  NSPMConfig::instance->saveToLittleFS(false);
 
   LOG_INFO("Will restart in 5 seconds.");
   vTaskDelay(5000 / portTICK_PERIOD_MS);

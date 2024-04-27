@@ -89,7 +89,7 @@ void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request) {
   NSPMConfig::instance->tft_upload_baud = request->arg("upload_buad_rate").toInt();
   NSPMConfig::instance->use_new_upload_protocol = request->arg("upload_protocol") == "latest";
 
-  if (!NSPMConfig::instance->saveToLittleFS()) {
+  if (!NSPMConfig::instance->saveToLittleFS(false)) {
     LOG_ERROR("Failed to save new configuration!");
   }
 
@@ -199,7 +199,6 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
       LOG_INFO("Successfully updated firmware.");
       // Save new firmware checksum
       NSPMConfig::instance->md5_firmware = checksum_holder;
-      NSPMConfig::instance->saveToLittleFS();
       hasAnythingUpdated = true;
     } else {
       LOG_ERROR("Something went wrong during firmware upgrade.");
@@ -238,7 +237,6 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
         LOG_INFO("Successfully updated LittleFS.");
         // Save new LittleFS checksum
         NSPMConfig::instance->md5_data_file = checksum_holder;
-        NSPMConfig::instance->saveToLittleFS();
         hasAnythingUpdated = true;
       } else {
         LOG_ERROR("Something went wrong during LittleFS upgrade.");
@@ -252,8 +250,17 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
   PageManager::GetNSPanelManagerPage()->setText("Restarting...");
   LOG_INFO("Will restart in 5 seconds.");
   vTaskDelay(5000 / portTICK_PERIOD_MS);
-  NSPMConfig::instance->saveToLittleFS();
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  if (hasAnythingUpdated) {
+    bool successfully_saved = false;
+    do {
+      successfully_saved = NSPMConfig::instance->saveToLittleFS(true);
+      if (!successfully_saved) {
+        LOG_ERROR("Failed to save config, will try again in 1 second.");
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+      }
+    } while (!successfully_saved);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+  }
   ESP.restart();
 
   vTaskDelete(NULL); // Task complete. Delete FreeRTOS task
