@@ -153,14 +153,14 @@ protected:
 
   bool _current_state;
   uint8_t _current_brightness;
-  uint _current_color_temperature;
+  uint16_t _current_color_temperature;
   uint16_t _current_hue;
   uint8_t _current_saturation;
   MQTT_MANAGER_LIGHT_MODE _current_mode;
 
   bool _requested_state;
   uint8_t _requested_brightness;
-  uint _requested_color_temperature;
+  uint16_t _requested_color_temperature;
   uint16_t _requested_hue;
   uint8_t _requested_saturation;
 

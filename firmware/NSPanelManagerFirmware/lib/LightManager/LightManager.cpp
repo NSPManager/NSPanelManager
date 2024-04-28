@@ -342,7 +342,7 @@ void LightManager::_taskProcessMqttMessages(void *param) {
             LOG_ERROR("Got kelvin update for unknown light ID: ", entity.c_str());
           }
         } else if (domain.compare("light") == 0 && attribute.compare("state_hue") == 0) {
-          unsigned long hue = atoi(msg->payload.c_str());
+          uint16_t hue = atoi(msg->payload.c_str());
 
           Light *light = LightManager::getLightById(atoi(entity.c_str()));
           if (light != nullptr) {
@@ -352,7 +352,7 @@ void LightManager::_taskProcessMqttMessages(void *param) {
             LOG_ERROR("Got hue update for unknown light ID: ", entity.c_str());
           }
         } else if (domain.compare("light") == 0 && attribute.compare("state_sat") == 0) {
-          unsigned long sat = atoi(msg->payload.c_str());
+          uint8_t sat = atoi(msg->payload.c_str());
 
           Light *light = LightManager::getLightById(atoi(entity.c_str()));
           if (light != nullptr) {

@@ -103,16 +103,28 @@ void LightPage::unshow() {
 void LightPage::updateValues() {
   if (this->selectedLight != nullptr) {
     NSPanel::instance->setComponentText(LIGHT_PAGE_LIGHT_LABEL_NAME, this->selectedLight->getName().c_str());
-    NSPanel::instance->setComponentVal(LIGHT_PAGE_BRIGHTNESS_SLIDER_NAME, this->selectedLight->getLightLevel());
+    if (this->selectedLight->getLightLevel() != this->_last_brightness) {
+      NSPanel::instance->setComponentVal(LIGHT_PAGE_BRIGHTNESS_SLIDER_NAME, this->selectedLight->getLightLevel());
+      this->_last_brightness = this->selectedLight->getLightLevel();
+    }
 
     if (this->selectedLight->canTemperature() && this->_currentMode == LIGHT_PAGE_MODE::COLOR_TEMP) {
-      NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, this->selectedLight->getColorTemperature());
+      if (this->_last_kelvin_saturation != this->selectedLight->getColorTemperature()) {
+        NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, this->selectedLight->getColorTemperature());
+        this->_last_kelvin_saturation = this->selectedLight->getColorTemperature();
+      }
       NSPanel::instance->setComponentPic(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_KELVIN_SLIDER_PIC);
       NSPanel::instance->setComponentPic1(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_KELVIN_SLIDER_PIC1);
       NSPanel::instance->setComponentPic(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, LIGHT_PAGE_COLOR_RGB_MODE_PIC);
     } else if (this->selectedLight->canRgb() && this->_currentMode == LIGHT_PAGE_MODE::COLOR_RGB) {
-      NSPanel::instance->setComponentVal(LIGHT_PAGE_HUE_SLIDER_NAME, this->selectedLight->getHue());
-      NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, this->selectedLight->getSaturation());
+      if (this->_last_hue != this->selectedLight->getHue()) {
+        NSPanel::instance->setComponentVal(LIGHT_PAGE_HUE_SLIDER_NAME, this->selectedLight->getHue());
+        this->_last_hue = this->selectedLight->getHue();
+      }
+      if (this->_last_kelvin_saturation != this->selectedLight->getSaturation()) {
+        NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, this->selectedLight->getSaturation());
+        this->_last_kelvin_saturation = this->selectedLight->getSaturation();
+      }
       NSPanel::instance->setComponentPic(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_SAT_SLIDER_PIC);
       NSPanel::instance->setComponentPic1(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_SAT_SLIDER_PIC1);
       NSPanel::instance->setComponentPic(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, LIGHT_PAGE_COLOR_TEMP_MODE_PIC);

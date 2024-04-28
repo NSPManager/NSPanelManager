@@ -417,7 +417,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             }
           } else if (command_set_attribute.compare("kelvin") == 0) {
             std::vector<uint> entity_ids = data["entity_ids"];
-            uint new_kelvin = data["kelvin"];
+            uint16_t new_kelvin = data["kelvin"];
             for (uint entity_id : entity_ids) {
               Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
               if (light != nullptr) {
@@ -426,7 +426,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             }
           } else if (command_set_attribute.compare("hue") == 0) {
             std::vector<uint> entity_ids = data["entity_ids"];
-            uint new_hue = data["hue"];
+            uint16_t new_hue = data["hue"];
             for (uint entity_id : entity_ids) {
               Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
               if (light != nullptr) {
@@ -435,7 +435,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             }
           } else if (command_set_attribute.compare("saturation") == 0) {
             std::vector<uint> entity_ids = data["entity_ids"];
-            uint new_saturation = data["saturation"];
+            uint8_t new_saturation = data["saturation"];
             for (uint entity_id : entity_ids) {
               Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
               if (light != nullptr) {

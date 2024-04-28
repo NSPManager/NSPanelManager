@@ -56,7 +56,7 @@ void NSPanel::setComponentText(const char *componentId, const char *text) {
   this->_sendCommandWithoutResponse(cmd.c_str());
 }
 
-void NSPanel::setComponentVal(const char *componentId, uint8_t value) {
+void NSPanel::setComponentVal(const char *componentId, int16_t value) {
   std::string cmd = componentId;
   cmd.append(".val=");
   cmd.append(std::to_string(value));
