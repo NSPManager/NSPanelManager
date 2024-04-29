@@ -7,7 +7,10 @@
 #include <esp_task_wdt.h>
 
 void MqttManager::init() {
-  MqttManager::_hasStarted = false;
+  MqttManager::_wifiClient = new WiFiClient();                            // Create WifiClient for MQTT Client
+  MqttManager::_mqttClient = new PubSubClient(*MqttManager::_wifiClient); // Create MQTT Client used to communicate with MQTT
+  MqttManager::_mqttClient->setBufferSize(2048);
+  MqttManager::_mqttClient->setCallback(&MqttManager::_mqttClientCallback);
   if (MqttLog::instance->getLogLevel() == MqttLogLevel::Debug) {
     MqttManager::setBufferSize(32);
   } else {

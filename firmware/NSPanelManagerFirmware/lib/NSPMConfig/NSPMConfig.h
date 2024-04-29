@@ -82,8 +82,6 @@ public:
   std::string mqtt_relay2_cmd_topic = "";
   /// @brief The MQTT topic to send on/off state updates for relay 2
   std::string mqtt_relay2_state_topic = "";
-  /// @brief MQTT panel topic to receive TFT bytes when updating panel
-  std::string mqtt_panel_tft_data = "";
 
   /// @brief The upload baud rate for the serial connection when uploading a new TFT file
   uint32_t tft_upload_baud = 115200;

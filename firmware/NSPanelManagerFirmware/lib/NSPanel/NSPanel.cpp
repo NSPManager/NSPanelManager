@@ -697,7 +697,7 @@ bool NSPanel::_initTFTUpdate(int communication_baud_rate) {
     commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(",1");
   } else {
-    LOG_INFO("Starting upload using v1.1 protocol.");
+    LOG_INFO("Starting upload using v1.0 protocol.");
     commandString = "whmi-wri ";
     commandString.append(std::to_string(file_size));
     commandString.append(",");
@@ -770,6 +770,9 @@ bool NSPanel::_updateTFTOTA() {
       LOG_INFO("Will flash TFT, size: ", file_size);
     }
   }
+  unsigned long startWaitingForOKForNextChunk = 0;
+  unsigned long nextStartWriteOffset = 0;
+  unsigned long lastReadByte = 0;
 
   if (esp_get_free_heap_size() < 4096) {
     LOG_ERROR("Not enough free memory to flash device! Will reboot.");
@@ -777,60 +780,37 @@ bool NSPanel::_updateTFTOTA() {
     ESP.restart();
   }
 
+  uint8_t dataBuffer[4096];
+
   // Loop until break when all firmware has finished uploading (data available in stream == 0)
-  NSPanel::_taskHandleUpdateTFT = xTaskGetCurrentTaskHandle();
-  LOG_INFO("Subscribing to TFT data topic: ", NSPMConfig::instance->mqtt_panel_tft_data.c_str());
-  MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_tft_data.c_str(), &NSPanel::writeTftChunk);
-
-  for (;;) {
+  while (true) {
     // Calculate next chunk size
-    if (file_size - NSPanel::_lastReadByte > 4096) {
-      NSPanel::_next_write_size = 4096;
+    int next_write_size;
+    if (file_size - lastReadByte > 4096) {
+      next_write_size = 4096;
     } else {
-      NSPanel::_next_write_size = file_size - NSPanel::_lastReadByte;
+      next_write_size = file_size - lastReadByte;
     }
-
-    for (;;) {
-      JsonDocument data;
-      data["command"] = "get_tft_chunk";
-      data["mac_origin"] = WiFi.macAddress();
-      data["start"] = NSPanel::_nextStartWriteOffset;
-      data["size"] = NSPanel::_next_write_size;
-      char buffer[128];
-      size_t json_length = serializeJson(data, buffer);
-      if (json_length > 0) {
-        // Send command to get data
-        while (true) {
-          taskYIELD(); // Allow any higher priority task to run before continuing
-          if (MqttManager::publish("nspanel/mqttmanager/command", buffer)) {
-            break;
-          } else {
-            LOG_ERROR("Failed to send command!");
-            vTaskDelay(250 / portTICK_PERIOD_MS);
-          }
-        }
-
-        // Wait for response that data was indeed written
-        if (ulTaskNotifyTake(pdTRUE, 5000 / portTICK_PERIOD_MS)) {
-          taskYIELD(); // Allow any higher priority task to run before continuing
-          break;       // We successfully wrote the data to the panel, break loop and start listening for response from panel.
-        } else {
-          LOG_ERROR("Timed out while waiting for MQTT callback that data was written. Will try again.");
-        }
-      } else {
-        LOG_ERROR("Failed to serialize JSON!");
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+    size_t bytesReceived = 0;
+    while (bytesReceived != next_write_size) {
+      bytesReceived = HttpLib::DownloadChunk(dataBuffer, downloadUrl.c_str(), nextStartWriteOffset, next_write_size);
+      if (bytesReceived != next_write_size) {
+        LOG_ERROR("Bytes received: ", bytesReceived, " requested ", next_write_size, ". Will retry.");
+        vTaskDelay(250 / portTICK_PERIOD_MS);
       }
     }
 
-    NSPanel::_lastReadByte = NSPanel::_nextStartWriteOffset;
-    NSPanel::instance->_update_progress = ((float)NSPanel::_lastReadByte / (float)file_size) * 100;
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+    Serial2.write(dataBuffer, bytesReceived);
+    nextStartWriteOffset += bytesReceived;
+    lastReadByte = nextStartWriteOffset;
+    NSPanel::instance->_update_progress = ((float)lastReadByte / (float)file_size) * 100;
 
     std::string return_string;
-    uint16_t recevied_bytes = NSPanel::instance->_readDataToString(&return_string, 10000, true);
-    if (NSPanel::_lastReadByte >= file_size) {
+    uint16_t recevied_bytes = NSPanel::instance->_readDataToString(&return_string, 5000, true);
+    if (lastReadByte >= file_size) {
       NSPanel::instance->_update_progress = 100;
-      LOG_INFO("TFT Upload complete, processed ", NSPanel::_lastReadByte, " bytes.");
+      LOG_INFO("TFT Upload complete, processed ", lastReadByte, " bytes.");
       break;
     } else if (return_string[0] == 0x05) {
       // Old protocol, just upload next chunk.
@@ -848,8 +828,8 @@ bool NSPanel::_updateTFTOTA() {
       readNextOffset |= return_string[3] << 16;
       readNextOffset |= return_string[4] << 24;
       if (readNextOffset > 0) {
-        NSPanel::_nextStartWriteOffset = readNextOffset;
-        LOG_INFO("Got 0x08 with offset, jumping to: ", NSPanel::_nextStartWriteOffset, " please wait.");
+        nextStartWriteOffset = readNextOffset;
+        LOG_INFO("Got 0x08 with offset, jumping to: ", nextStartWriteOffset, " please wait.");
       }
     } else {
       LOG_DEBUG("Got unexpected return data from panel. Received ", recevied_bytes, " bytes: ");
@@ -888,22 +868,4 @@ bool NSPanel::_updateTFTOTA() {
   vTaskDelay(portMAX_DELAY);
   vTaskDelete(NULL);
   return false;
-}
-
-void NSPanel::writeTftChunk(char *topic, byte *payload, unsigned int length) {
-  // Guards:
-  if (length < NSPanel::_next_write_size) {
-    LOG_ERROR("Did not receive the correct number of bytes as requested. Requested: ", NSPanel::_next_write_size, ", recevied: ", length);
-    return;
-  } else if (NSPanel::_taskHandleUpdateTFT == nullptr) {
-    LOG_ERROR("Received TFT data but no task handle was set for callback");
-    return;
-  }
-
-  // This code will only run if the above checks has been passed.
-  LOG_TRACE("Received ", length, " bytes on TFT data topic. Will use ", NSPanel::_next_write_size, " bytes.");
-  NSPanel::_nextStartWriteOffset += NSPanel::_next_write_size;
-  Serial2.write(payload, NSPanel::_next_write_size); // Write data to panel
-  Serial2.flush();
-  xTaskNotifyGive(NSPanel::_taskHandleUpdateTFT);
 }

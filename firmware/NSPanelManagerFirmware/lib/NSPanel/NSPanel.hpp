@@ -55,16 +55,20 @@ public:
   uint8_t getUpdateProgress();
   int getComponentIntVal(const char *componentId);
   void restart();
-  static void writeTftChunk(char *topic, byte *payload, unsigned int length);
 
 private:
   // Tasks
   TaskHandle_t _taskHandleSendCommandQueue;
   static void _taskSendCommandQueue(void *param);
   TaskHandle_t _taskHandleReadNSPanelData;
-  static inline TaskHandle_t _taskHandleUpdateTFT = nullptr;
   static void _taskReadNSPanelData(void *param);
   static void _taskUpdateTFTConfigOTA(void *param);
+  /// @brief Download a chunk of data from given addres, to the buffer at the given offset
+  /// @param buffer The buffer to store data into
+  /// @param address The address to download the firmware from
+  /// @param offset Offset to request data from (bytes)
+  /// @param size Maximum download chunk size
+  /// @return The number of bytes downloaded
   static bool _initTFTUpdate(int communication_baud_rate);
   static bool _updateTFTOTA();
   std::queue<std::vector<char>> _processQueue;
@@ -94,11 +98,6 @@ private:
   static void _clearSerialBuffer(NSPanelCommand *cmd);
   static void _clearSerialBuffer();
   static inline bool _writeCommandsToSerial;
-  static inline unsigned long _startWaitingForOKForNextChunk = 0;
-  static inline unsigned long _nextStartWriteOffset = 0;
-  static inline unsigned long _lastReadByte = 0;
-  /// @brief The next number of bytes to request/write to the TFT when updating the screen.
-  static inline uint16_t _next_write_size;
   /// @brief Flag indicating wether or not a TFT update is ongoing
   bool _isUpdating;
   /// @brief If updating, contains the % done of the update

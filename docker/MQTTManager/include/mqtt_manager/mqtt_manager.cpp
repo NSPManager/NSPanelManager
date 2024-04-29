@@ -238,19 +238,6 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
   }
 }
 
-void MQTT_Manager::publish_raw(const char *topic, const char *payload, size_t size, bool retain) {
-  mqtt::message_ptr msg = mqtt::make_message(topic, payload, size, 0, retain);
-  if (MQTT_Manager::_mqtt_client != nullptr) {
-    if (MQTT_Manager::is_connected()) {
-      MQTT_Manager::_mqtt_client->publish(msg);
-    } else {
-      MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
-    }
-  } else {
-    MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
-  }
-}
-
 void MQTT_Manager::clear_retain(const std::string &topic) {
   if (topic.size() > 0) {
     mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), "", 0, 0, true);
