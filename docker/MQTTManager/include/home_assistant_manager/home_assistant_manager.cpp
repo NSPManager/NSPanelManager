@@ -1,6 +1,9 @@
 #include "home_assistant_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include <boost/exception/diagnostic_information.hpp>
+#include <boost/stacktrace.hpp>
+#include <boost/stacktrace/frame.hpp>
+#include <boost/stacktrace/stacktrace_fwd.hpp>
 #include <exception>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXSocketTLSOptions.h>
@@ -17,39 +20,49 @@ void HomeAssistantManager::connect() {
   SPDLOG_DEBUG("Initializing Home Assistant Manager component.");
   ix::initNetSystem();
 
-  if (HomeAssistantManager::_websocket == nullptr) {
-    HomeAssistantManager::_websocket = new ix::WebSocket();
-    HomeAssistantManager::_websocket->setPingInterval(30);
-  }
+  bool init_success = false;
+  while (!init_success) {
+    try {
+      if (HomeAssistantManager::_websocket == nullptr) {
+        HomeAssistantManager::_websocket = new ix::WebSocket();
+        HomeAssistantManager::_websocket->setPingInterval(30);
+      }
 
-  std::string home_assistant_websocket_url = MqttManagerConfig::home_assistant_address;
-  if (MqttManagerConfig::is_home_assistant_addon) {
-    home_assistant_websocket_url.append("/core/websocket");
-  } else {
-    home_assistant_websocket_url.append("/api/websocket");
-  }
-  if (home_assistant_websocket_url.find("https://") != std::string::npos) {
-    SPDLOG_DEBUG("Replacing https with wss");
-    // Replace https with wss
-    home_assistant_websocket_url = home_assistant_websocket_url.replace(home_assistant_websocket_url.find("https://"), sizeof("https://") - 1, "wss://");
-    SPDLOG_DEBUG("Settings TLS options");
-    ix::SocketTLSOptions tls_options;
-    tls_options.tls = true;
-    tls_options.caFile = "NONE";
-    HomeAssistantManager::_websocket->setTLSOptions(tls_options);
-  } else if (home_assistant_websocket_url.find("http://") != std::string::npos) {
-    // Replace http with ws
-    SPDLOG_DEBUG("Replacing http with ws");
-    home_assistant_websocket_url = home_assistant_websocket_url.replace(home_assistant_websocket_url.find("http://"), sizeof("http://") - 1, "ws://");
-  } else {
-    SPDLOG_ERROR("Unknown connection type of Home Assistant. Will not continue!");
-    return;
-  }
+      std::string home_assistant_websocket_url = MqttManagerConfig::home_assistant_address;
+      if (MqttManagerConfig::is_home_assistant_addon) {
+        home_assistant_websocket_url.append("/core/websocket");
+      } else {
+        home_assistant_websocket_url.append("/api/websocket");
+      }
+      if (home_assistant_websocket_url.find("https://") != std::string::npos) {
+        SPDLOG_DEBUG("Replacing https with wss");
+        // Replace https with wss
+        home_assistant_websocket_url = home_assistant_websocket_url.replace(home_assistant_websocket_url.find("https://"), sizeof("https://") - 1, "wss://");
+        SPDLOG_DEBUG("Settings TLS options");
+        ix::SocketTLSOptions tls_options;
+        tls_options.tls = true;
+        tls_options.caFile = "NONE";
+        HomeAssistantManager::_websocket->setTLSOptions(tls_options);
+      } else if (home_assistant_websocket_url.find("http://") != std::string::npos) {
+        // Replace http with ws
+        SPDLOG_DEBUG("Replacing http with ws");
+        home_assistant_websocket_url = home_assistant_websocket_url.replace(home_assistant_websocket_url.find("http://"), sizeof("http://") - 1, "ws://");
+      } else {
+        SPDLOG_ERROR("Unknown connection type of Home Assistant. Will not continue!");
+        return;
+      }
 
-  SPDLOG_INFO("Will connect to Home Assistant websocket at {}", home_assistant_websocket_url);
-  HomeAssistantManager::_websocket->setUrl(home_assistant_websocket_url);
-  HomeAssistantManager::_websocket->setOnMessageCallback(&HomeAssistantManager::_websocket_message_callback);
-  HomeAssistantManager::_websocket->start();
+      SPDLOG_INFO("Will connect to Home Assistant websocket at {}", home_assistant_websocket_url);
+      HomeAssistantManager::_websocket->setUrl(home_assistant_websocket_url);
+      HomeAssistantManager::_websocket->setOnMessageCallback(&HomeAssistantManager::_websocket_message_callback);
+      HomeAssistantManager::_websocket->start();
+
+      init_success = true; // We successfully reached end of section without exception, consider it a success and exit loop.
+    } catch (std::exception &e) {
+      SPDLOG_ERROR("Caught exception: {}", e.what());
+      SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+    }
+  }
 }
 
 void HomeAssistantManager::_websocket_message_callback(const ix::WebSocketMessagePtr &msg) {
