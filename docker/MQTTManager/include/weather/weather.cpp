@@ -65,6 +65,8 @@ void MQTTManagerWeather::_pull_new_weather_data() {
     if (curl) {
       std::string response_data; // This will contain any response data from the CURL request.
       std::string bearer_token = "Authorization: Bearer ";
+      char curl_error_buffer[CURL_ERROR_SIZE];
+      curl_error_buffer[0] = 0;
       bearer_token.append(MqttManagerConfig::openhab_access_token);
 
       struct curl_slist *headers = NULL;
@@ -94,6 +96,7 @@ void MQTTManagerWeather::_pull_new_weather_data() {
       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+      curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_error_buffer);
 
       SPDLOG_DEBUG("Requesting new weather forecast from Open Meteo.");
 
@@ -107,7 +110,9 @@ void MQTTManagerWeather::_pull_new_weather_data() {
         MQTTManagerWeather::_process_weather_data(response_data);
         SPDLOG_DEBUG("Weather data processed.");
       } else {
-        SPDLOG_ERROR("curl_easy_perform() when getting new weather forecast, got code: {}.", curl_easy_strerror(res));
+        SPDLOG_ERROR("curl_easy_perform() when getting new weather forecast, got code: {}. Text interpretation: {}", (int)res, curl_easy_strerror(res));
+
+        SPDLOG_ERROR("Curl error buffer: {}", curl_error_buffer);
       }
 
       /* always cleanup */
