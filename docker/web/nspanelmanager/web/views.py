@@ -61,7 +61,7 @@ def index(request):
         'nspanels': nspanels,
         'notifications': notifications,
         'temperature_unit': temperature_unit,
-        'manager_address': get_setting_with_default("manager_address", ""),
+        'manager_address': get_setting_with_default("manager_address", "")
     }
 
     if (data["manager_address"] == ""):
@@ -457,6 +457,7 @@ def settings_page(request):
 
     data = {
         'dark_theme': get_setting_with_default("dark_theme", "false"),
+        'mqttmanager_log_level': get_setting_with_default("mqttmanager_log_level", "debug"),
     }
     data["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
     data["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
@@ -570,6 +571,8 @@ def save_settings(request):
                       value=request.POST["max_live_log_messages"])
     set_setting_value(name="max_log_buffer_size",
                       value=request.POST["max_log_buffer_size"])
+    set_setting_value(name="mqttmanager_log_level",
+                      value=request.POST["mqttmanager_log_level"])
     set_setting_value(name="manager_address",
                       value=request.POST["manager_address"])
     set_setting_value(name="manager_port", value=request.POST["manager_port"])
@@ -899,3 +902,14 @@ def unblock_nspanel(request, nspanel_id):
         panel.delete()
         restart_mqtt_manager()
     return redirect("denied_nspanels")
+
+
+def download_mqttmanager_log(request):
+    if os.path.exists("/dev/shm/mqttmanager.log"):
+        with open("/dev/shm/mqttmanager.log", 'rb') as fh:
+            response = HttpResponse(
+                fh.read(), content_type="application/vnd.ms-excel")
+            response['Content-Disposition'] = 'inline; filename=' + \
+                os.path.basename("mqttmanager_log.txt")
+            return response
+    raise Http404

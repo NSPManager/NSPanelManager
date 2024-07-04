@@ -64,6 +64,8 @@ urlpatterns = [
     path('checksum_tft_file_us', views.checksum_tft_file_us,
          name='checksum_tft_file_us'),
     path('manual', views.get_manual, name="manual"),
+    path('download_mqttmanager_log', views.download_mqttmanager_log,
+         name="download_mqttmanager_log"),
     # Entities:
     path('entities/relay_groups', views.relay_groups, name="relay_groups"),
     path('entities/relay_groups/create', views.create_or_update_relay_group,

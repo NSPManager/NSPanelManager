@@ -98,13 +98,15 @@ void OpenhabManager::_websocket_message_callback(const ix::WebSocketMessagePtr &
 
 void OpenhabManager::_process_websocket_message(const std::string &message) {
   try {
-    SPDLOG_TRACE("Got Openhab message: {}", message);
+    // SPDLOG_TRACE("Got Openhab message: {}", message);
 
     nlohmann::json data = nlohmann::json::parse(message);
     std::string type = data["type"];
 
     if (type.compare("PONG") == 0) {
-      SPDLOG_TRACE("Received PONG from Openhab.");
+      SPDLOG_TRACE("Received PONG.");
+    } else if (type.compare("WebSocketEvent") == 0 && std::string(data["payload"]).compare("PONG") == 0) {
+      SPDLOG_TRACE("Received PONG.");
     } else if (type.compare("ItemStateChangedEvent") == 0 || type.compare("ItemStateUpdatedEvent") == 0) {
       OpenhabManager::_process_openhab_event(data);
     } else {

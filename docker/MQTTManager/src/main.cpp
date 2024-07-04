@@ -1,12 +1,14 @@
 #include "openhab_manager/openhab_manager.hpp"
+#include "spdlog/sinks/ansicolor_sink.h"
+#include "spdlog/sinks/rotating_file_sink.h"
 #include "websocket_server/websocket_server.hpp"
-#include <cctype>
 #include <chrono>
 #include <cstddef>
 #include <cstdlib>
 #include <ctime>
-#include <filesystem>
+#include <memory>
 #include <signal.h>
+#include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,6 +19,7 @@
 #include <home_assistant_manager/home_assistant_manager.hpp>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
+#include <vector>
 
 #define SIGUSR1 10
 std::string last_time_published;
@@ -73,8 +76,43 @@ void publish_time_and_date() {
 }
 
 int main(void) {
+  SPDLOG_INFO("Starting MQTTManager.");
+
+  // Setup logging
+  auto max_size = 1048576 * 30; // Grow log file to 30MB and then rotate
+  auto max_files = 3;           // Keep 3 log files in system
+
+  std::vector<spdlog::sink_ptr> spdlog_sinks;
+  spdlog_sinks.push_back(std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>());                                             // Log to console
+  spdlog_sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_st>("/dev/shm/mqttmanager.log", max_size, max_files)); // Log to rotating log file
+
+  // Setup logging to console and file
+  auto combined_logger = std::make_shared<spdlog::logger>("combined_logger", begin(spdlog_sinks), end(spdlog_sinks));
+  spdlog::register_logger(combined_logger);
+  spdlog::set_default_logger(combined_logger);
+
   spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%s:%#] [%t] %v");
-  spdlog::set_level(spdlog::level::debug); // Set global log level to info
+
+  std::string log_level = std::getenv("LOG_LEVEL");
+  if (log_level.size()) {
+    if (log_level.compare("error") == 0) {
+      spdlog::set_level(spdlog::level::err);
+    } else if (log_level.compare("warning") == 0) {
+      spdlog::set_level(spdlog::level::warn);
+    } else if (log_level.compare("info") == 0) {
+      spdlog::set_level(spdlog::level::info);
+    } else if (log_level.compare("debug") == 0) {
+      spdlog::set_level(spdlog::level::debug);
+    } else if (log_level.compare("trace") == 0) {
+      spdlog::set_level(spdlog::level::trace);
+    } else {
+      SPDLOG_INFO("No log level was set by 'LOG_LEVEL' environment variable. Will assume level debug.");
+      spdlog::set_level(spdlog::level::debug);
+    }
+  } else {
+    SPDLOG_INFO("No log level was set by 'LOG_LEVEL' environment variable. Will assume level debug.");
+    spdlog::set_level(spdlog::level::debug);
+  }
 
   // When a config change is made in the web interface the Django application
   // will send a SIGUSR1 signal to the MQTTManager so that the manager
