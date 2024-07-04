@@ -426,19 +426,20 @@
     \end{figure}
 
     The "Global settings" section of the web interface is where you can settings that apply to all NSPanels or settings that simply are not directly related the the panels themsevles. The following options are available:
-     \textbf{Connection settings}
+    \subsubsection{Connection settings}
     \begin{itemize}
       \item \textbf{Manager address} - The is the IP address that will be sent to each NSPanel when it boots. This address is used in the NSPanel to communicate with the manager and has to be reachable from each and every NSPanel.
       \item \textbf{Manager port} - Port to use when connecting to the above mentioned IP address.
     \end{itemize}
 
-    \textbf{Logging options}
+    \subsubsection{Logging options}
     \begin{itemize}
+      \item \textbf{MQTTManager log level} - Log level for the MQTTManager background component. For more information about MQTTManager see \hyperref[sec:software_components]{Software components}. There is also a "Download"-button available in this section to download the MQTTManager log file as a .txt-file.
       \item \textbf{Number of messages to display on live log} - The number of log messages to display in the live log for each NSPanel in the NSPanel settings page.
       \item \textbf{Number of messages in buffer} - The number of log messages to keep in buffer in the MQTTManager.
     \end{itemize}
 
-    \textbf{Global NSPanel settings}
+    \subsubsection{Global NSPanel settings}
     \begin{itemize}
       \item \textbf{Minimum color temperature} - The minimum kelvin to send to Home Assistant/OpenHAB.
       \item \textbf{Maximum color temperature} - The maximum kelvin to send to Home Assistant/OpenHAB.
@@ -463,7 +464,7 @@
       \item \textbf{MQTT ignore time (ms)} - Time to wait (in milliseconds) after sending a command over MQTT before allowing new values to update the screen. This can be raised or lowered to minimize flickering of sliders on the NSPanel.
     \end{itemize}
 
-    \textbf{MQTT}
+    \subsubsection{MQTT}
     \begin{itemize}
       \item \textbf{MQTT address} - The address used to connect to the MQTT server.
       \item \textbf{MQTT port} - The port used to connect to the MQTT server.
@@ -471,13 +472,13 @@
       \item \textbf{MQTT password} - Password used to authenticate to the MQTT server. Leave empty if not used.
     \end{itemize}
 
-    \textbf{Home Assistant API}
+    \subsubsection{Home Assistant API}
     \begin{itemize}
       \item \textbf{Home Assistant address} - The address used to connect to Home Assistant. This should include "http://" or "https://" in the beginning and port are the end.
       \item \textbf{Access token} - The long lived access token used to authenticate to Home Assistant.
     \end{itemize}
 
-    \textbf{OpenHAB API}
+    \subsubsection{OpenHAB API}
     \begin{itemize}
       \item \textbf{OpenHAB address} - The address used to connect to OpenHAB. This should include "http://" or "https://" in the beginning and port are the end.
       \item \textbf{Access token} - The access token used to authenticate to OpenHAB.
@@ -597,6 +598,7 @@
 
     \clearpage
     \section{Functional information}
+    \label{sec:software_components}
     \subsection{Software components}
     There are really three software components written for the NSPanel Manager project. These are described as below:
     \begin{itemize}
