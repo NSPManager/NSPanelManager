@@ -145,19 +145,21 @@ void MQTT_Manager::_resubscribe() {
 
     mqtt::const_message_ptr msg;
     for (auto mqtt_topic_pair : MQTT_Manager::_subscribed_topics) {
-      SPDLOG_DEBUG("Subscribing to topic {}", mqtt_topic_pair.first);
+      SPDLOG_TRACE("Subscribing to topic {}", mqtt_topic_pair.first);
       auto subscribe_result = MQTT_Manager::_mqtt_client->subscribe(mqtt_topic_pair.first, mqtt_topic_pair.second);
       int result_code = subscribe_result.get_reason_codes().front();
       SPDLOG_DEBUG("Subscribed to {}. Got code: {}", mqtt_topic_pair.first, result_code);
 
       bool received_message;
       do {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait 100ms between each subscribe in order for MQTT to catch up.
-        received_message = MQTT_Manager::_mqtt_client->try_consume_message(&msg);
+        // std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait 100ms between each subscribe in order for MQTT to catch up.
+        //  received_message = MQTT_Manager::_mqtt_client->try_consume_message(&msg);
+        received_message = MQTT_Manager::_mqtt_client->try_consume_message_for(&msg, std::chrono::milliseconds(100)); // Wait for max 100ms to see if a message is to be receved on the recently subscribed topic.
         if (received_message) {
           MQTT_Manager::_process_mqtt_message(msg->get_topic(), msg->get_payload());
         }
       } while (received_message);
+      SPDLOG_TRACE("Received all messages on topic '{}'.", mqtt_topic_pair.first);
     }
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception trying to subscribe to topics: {}", boost::diagnostic_information(e, true));

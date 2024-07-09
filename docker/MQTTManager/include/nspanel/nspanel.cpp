@@ -412,6 +412,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
 }
 
 void NSPanel::send_websocket_update() {
+  SPDLOG_TRACE("Sending websocket update for {}::{}", this->_id, this->_name);
   // Send status over to web interface:
   nlohmann::json status_reps;
   status_reps["type"] = "status";
