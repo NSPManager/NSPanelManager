@@ -1,9 +1,11 @@
 #include "mqtt_manager_config.hpp"
+#include "web_helper/WebHelper.hpp"
 #include <cstddef>
 #include <cstdlib>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <exception>
+#include <fmt/core.h>
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -96,36 +98,16 @@ void MqttManagerConfig::load() {
 
   SPDLOG_INFO("Gathering config from web manager.");
   while (true) {
-    curl = curl_easy_init();
-    if (curl) {
-      std::string response_data;
-      SPDLOG_DEBUG("Requesting config from: http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_mqtt_manager_config");
-      curl_easy_setopt(curl, CURLOPT_URL, "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_mqtt_manager_config");
-      /* example.com is redirected, so we tell libcurl to follow redirection */
-      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
-      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
-
-      /* Perform the request, res will get the return code */
-      res = curl_easy_perform(curl);
-      long http_code;
-      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-      /* Check for errors */
-      if (res == CURLE_OK && !response_data.empty() && http_code == 200) {
-        SPDLOG_DEBUG("Got config data. Processing config.");
-        nlohmann::json data = nlohmann::json::parse(response_data);
-        MqttManagerConfig::populate_settings_from_config(data);
-        break; // Exit loop as we have gather and processed config.
-      } else {
-        SPDLOG_ERROR("curl_easy_perform() failed, got code: '{}' with status code: {}. Will retry.", curl_easy_strerror(res), http_code);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2500));
-      }
-
-      /* always cleanup */
-      curl_easy_cleanup(curl);
+    std::string url = fmt::format("http://{}:{}/api/get_mqtt_manager_config", MANAGER_ADDRESS, MANAGER_PORT);
+    std::string response_data;
+    if (WebHelper::perform_request(&url, &response_data, nullptr, nullptr)) {
+      SPDLOG_DEBUG("Got config data. Processing config.");
+      nlohmann::json data = nlohmann::json::parse(response_data);
+      MqttManagerConfig::populate_settings_from_config(data);
+      break; // We successfully gather settings from DB. Exit loop.
     } else {
-      SPDLOG_ERROR("Failed to curl_easy_init(). Will try again.");
-      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+      SPDLOG_ERROR("Failed to get config. Will try again.");
+      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
   }
 }

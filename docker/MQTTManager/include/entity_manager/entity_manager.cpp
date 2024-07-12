@@ -7,6 +7,7 @@
 #include "scenes/nspm_scene.hpp"
 #include "scenes/openhab_scene.hpp"
 #include "scenes/scene.hpp"
+#include "web_helper/WebHelper.hpp"
 #include "websocket_server/websocket_server.hpp"
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/stacktrace.hpp>
@@ -14,8 +15,6 @@
 #include <boost/stacktrace/stacktrace_fwd.hpp>
 #include <cstdint>
 #include <cstdlib>
-#include <curl/curl.h>
-#include <curl/easy.h>
 #include <entity_manager/entity_manager.hpp>
 #include <exception>
 #include <ixwebsocket/IXWebSocket.h>
@@ -493,11 +492,11 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
   SPDLOG_INFO("Got register request from NSPanel with name {} and MAC: {}", name, mac_address);
   NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_address);
   if (panel != nullptr && panel->get_state() != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT && panel->get_state() != MQTT_MANAGER_NSPANEL_STATE::DENIED) {
-    SPDLOG_DEBUG("Has registered to manager? {}", panel->has_registered_to_manager() ? "TRUE" : "FALSE");
+    SPDLOG_TRACE("Has registered to manager? {}", panel->has_registered_to_manager() ? "TRUE" : "FALSE");
     if (panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
-      SPDLOG_DEBUG("State: WAITING");
+      SPDLOG_TRACE("State: WAITING");
     } else if (panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
-      SPDLOG_DEBUG("State: AWAITING_ACCEPT");
+      SPDLOG_TRACE("State: AWAITING_ACCEPT");
     } else {
       SPDLOG_DEBUG("State: something else, {}.", int(panel->get_state()));
     }
@@ -662,42 +661,25 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       SPDLOG_DEBUG("Received NSPanel deny request for a panel we could not find. Ignoring request.");
     }
   } else if (command.compare("nspanel_delete") == 0) {
+
     nlohmann::json args = data["args"];
     std::string mac = args["mac_address"];
     NSPanel *panel = EntityManager::get_nspanel_by_mac(mac);
     if (panel != nullptr) {
-      CURL *curl;
-      CURLcode res;
-      curl = curl_easy_init();
-      if (curl) {
-        std::string response_data;
-        SPDLOG_DEBUG("Sending delete command for {}::{} to: http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/delete_nspanel/{}", panel->get_id(), panel->get_name(), panel->get_id());
-        curl_easy_setopt(curl, CURLOPT_URL, fmt::format("http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/delete_nspanel/{}", panel->get_id()).c_str());
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
-
-        /* Perform the request, res will get the return code */
-        res = curl_easy_perform(curl);
-        long http_code;
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-        /* Check for errors */
-        if (res == CURLE_OK && !response_data.empty() && http_code == 200) {
-          panel->reboot();
-          nlohmann::json response;
-          response["cmd_id"] = command_id;
-          response["success"] = true;
-          response["mac"] = mac;
-          (*response_buffer) = response.dump();
-          curl_easy_cleanup(curl);
-          SPDLOG_DEBUG("Panel with MAC {} delete call completed.", mac);
-          return true;
-        } else {
-          SPDLOG_ERROR("curl_easy_perform() failed, got code: '{}' with status code: {}. Will retry.", curl_easy_strerror(res), http_code);
-          curl_easy_cleanup(curl);
-        }
+      SPDLOG_INFO("Received command to delete NSPanel {}::{}.", panel->get_id(), panel->get_name());
+      std::string url = fmt::format("http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/delete_nspanel/{}", panel->get_id()).c_str();
+      std::string response_data;
+      if (WebHelper::perform_request(&url, &response_data, nullptr, nullptr) && !response_data.empty()) {
+        panel->reboot();
+        nlohmann::json response;
+        response["cmd_id"] = command_id;
+        response["success"] = true;
+        response["mac"] = mac;
+        (*response_buffer) = response.dump();
+        SPDLOG_DEBUG("Panel with MAC {} delete call completed.", mac);
+        return true;
       } else {
-        SPDLOG_ERROR("Failed to curl_easy_init().");
+        SPDLOG_ERROR("Failed to delete NSPanel with given MAC.");
       }
     } else {
       SPDLOG_ERROR("Received request to delete NSPanel but no NSPanel with MAC {} is register to this manager.", mac);

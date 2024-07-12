@@ -3,6 +3,7 @@
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "openhab_manager/openhab_manager.hpp"
+#include "web_helper/WebHelper.hpp"
 #include <bits/types/time_t.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -58,69 +59,16 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 
 void MQTTManagerWeather::_pull_new_weather_data() {
   std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
-  try {
-    CURL *curl;
-    CURLcode res;
-    curl = curl_easy_init();
-    if (curl) {
-      std::string response_data; // This will contain any response data from the CURL request.
-      std::string bearer_token = "Authorization: Bearer ";
-      char curl_error_buffer[CURL_ERROR_SIZE];
-      curl_error_buffer[0] = 0;
-      bearer_token.append(MqttManagerConfig::openhab_access_token);
-
-      struct curl_slist *headers = NULL;
-      headers = curl_slist_append(headers, bearer_token.c_str());
-      if (headers == NULL) {
-        SPDLOG_ERROR("Failed to set bearer token header for OpenHAB light rest request.");
-        curl_easy_cleanup(curl);
-        curl_slist_free_all(headers);
-      }
-      headers = curl_slist_append(headers, "Content-type: application/json");
-      if (headers == NULL) {
-        SPDLOG_ERROR("Failed to set content-type header for OpenHAB light rest request.");
-        curl_easy_cleanup(curl);
-        curl_slist_free_all(headers);
-      }
-
-      std::string temperature_unit;
-      if (MqttManagerConfig::use_fahrenheit) {
-        temperature_unit = "fahrenheit";
-      } else {
-        temperature_unit = "celsius";
-      }
-
-      std::string pull_weather_url = fmt::format("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&wind_speed_unit={}&timezone={}&precipitation_unit={}&temperature_unit={}", MqttManagerConfig::weather_location_latitude, MqttManagerConfig::weather_location_longitude, MqttManagerConfig::weather_wind_speed_format, MqttManagerConfig::timezone, MqttManagerConfig::weather_precipitation_format, temperature_unit);
-      curl_easy_setopt(curl, CURLOPT_URL, pull_weather_url.c_str());
-      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
-      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
-      curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_error_buffer);
-
-      SPDLOG_DEBUG("Requesting new weather forecast from Open Meteo.");
-
-      /* Perform the request, res will get the return code */
-      res = curl_easy_perform(curl);
-      long http_code;
-      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-      /* Check for errors */
-      if (res == CURLE_OK && http_code == 200) {
-        SPDLOG_DEBUG("Successfully received new weather forcast from Open Meteo. Will process new data.");
-        MQTTManagerWeather::_process_weather_data(response_data);
-        SPDLOG_DEBUG("Weather data processed.");
-      } else {
-        SPDLOG_ERROR("curl_easy_perform() when getting new weather forecast, got code: {}. Text interpretation: {}", (int)res, curl_easy_strerror(res));
-
-        SPDLOG_ERROR("Curl error buffer: {}", curl_error_buffer);
-      }
-
-      /* always cleanup */
-      curl_slist_free_all(headers);
-      curl_easy_cleanup(curl);
-    }
-  } catch (const std::exception &e) {
-    SPDLOG_ERROR("Caught exception when trying to fetch new weather data: {}", boost::diagnostic_information(e, true));
+  std::string temperature_unit = MqttManagerConfig::use_fahrenheit ? "fahrenheit" : "celsius";
+  std::string pull_weather_url = fmt::format("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&wind_speed_unit={}&timezone={}&precipitation_unit={}&temperature_unit={}", MqttManagerConfig::weather_location_latitude, MqttManagerConfig::weather_location_longitude, MqttManagerConfig::weather_wind_speed_format, MqttManagerConfig::timezone, MqttManagerConfig::weather_precipitation_format, temperature_unit);
+  std::list<const char *> headers = {"Content-type: application/json"};
+  std::string response_data;
+  if (WebHelper::perform_request(&pull_weather_url, &response_data, &headers, nullptr)) {
+    SPDLOG_DEBUG("Successfully received new weather forcast from Open Meteo. Will process new data.");
+    MQTTManagerWeather::_process_weather_data(response_data);
+    SPDLOG_DEBUG("Weather data processed.");
+  } else {
+    SPDLOG_ERROR("Failed to get weather.");
   }
 }
 

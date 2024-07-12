@@ -3,6 +3,7 @@
 #include "entity_manager/entity_manager.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include "web_helper/WebHelper.hpp"
 #include <algorithm>
 #include <boost/bind.hpp>
 #include <boost/bind/placeholders.hpp>
@@ -552,47 +553,19 @@ void NSPanel::update_warnings_from_manager() {
   if (!this->_has_registered_to_manager) {
     return;
   }
-  try {
-    CURL *curl;
-    CURLcode res;
-    curl = curl_easy_init();
-    if (curl) {
-      std::string response_data;
-      SPDLOG_DEBUG("Requesting NSPanel warnings from: http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_nspanels_warnings");
-      curl_easy_setopt(curl, CURLOPT_URL, "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_nspanels_warnings");
-      /* example.com is redirected, so we tell libcurl to follow redirection */
-      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
-      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
-
-      /* Perform the request, res will get the return code */
-      res = curl_easy_perform(curl);
-      long http_code;
-      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-      /* Check for errors */
-      if (res == CURLE_OK && !response_data.empty() && http_code == 200) {
-        nlohmann::json data = nlohmann::json::parse(response_data);
-        for (nlohmann::json panel : data["panels"]) {
-          if (std::string(panel["nspanel"]["mac"]).compare(this->_mac) == 0) {
-            this->_nspanel_warnings_from_manager = panel["warnings"];
-            SPDLOG_DEBUG("Found warnings {} from manager matching MAC {}.", this->_nspanel_warnings_from_manager.size(), this->_mac);
-            break;
-          }
-        }
-      } else {
-        SPDLOG_ERROR("curl_easy_perform() failed, got code: '{}' with status code: {}. Will retry.", curl_easy_strerror(res), http_code);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+  std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_nspanels_warnings";
+  std::string response_data;
+  if (WebHelper::perform_request(&url, &response_data, nullptr, nullptr)) {
+    nlohmann::json data = nlohmann::json::parse(response_data);
+    for (nlohmann::json panel : data["panels"]) {
+      if (std::string(panel["nspanel"]["mac"]).compare(this->_mac) == 0) {
+        this->_nspanel_warnings_from_manager = panel["warnings"];
+        SPDLOG_DEBUG("Found warnings {} from manager matching MAC {}.", this->_nspanel_warnings_from_manager.size(), this->_mac);
+        break;
       }
-
-      /* always cleanup */
-      curl_easy_cleanup(curl);
-    } else {
-      SPDLOG_ERROR("Failed to curl_easy_init(). Will try again.");
-      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     }
-  } catch (std::exception &e) {
-    SPDLOG_ERROR("Caught exception: {}", e.what());
-    SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
+  } else {
+    SPDLOG_ERROR("Failed to get active NSPanel warnings from manager.");
   }
 }
 
@@ -620,58 +593,39 @@ bool NSPanel::has_registered_to_manager() {
 bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload) {
   try {
 
-    CURL *curl;
-    CURLcode res;
-    curl = curl_easy_init();
-    if (curl) {
-      std::string response_data;
-      std::string payload_data = register_request_payload.dump();
-      SPDLOG_INFO("Sending registration data to Django for database management.");
-      curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:8000/api/register_nspanel");
-      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload_data.c_str());
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
-      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
-
-      /* Perform the request, res will get the return code */
-      res = curl_easy_perform(curl);
-      long http_code;
-      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-      /* Check for errors */
-      if (res == CURLE_OK && http_code == 200) {
-        SPDLOG_INFO("Panel registration OK.");
-        if (!this->_is_register_denied) {
-          this->update_warnings_from_manager();
-          SPDLOG_INFO("Panel registration OK. Updating internal data.");
-          nlohmann::json data = nlohmann::json::parse(response_data);
-          this->update_config(data); // Returned data from registration request is the same as data from the global /api/get_mqtt_manager_config
-          this->register_to_home_assistant();
-          if (this->_state == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
-            this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
-          }
-          SPDLOG_INFO("Panel registration completed. Sending accept command to panel.");
-
-          // Everything was successfull, send registration accept to panel:
-          nlohmann::json response;
-          response["command"] = "register_accept";
-          response["address"] = MqttManagerConfig::manager_address.c_str();
-          response["port"] = MqttManagerConfig::manager_port;
-
-          std::string reply_topic = "nspanel/";
-          reply_topic.append(register_request_payload["friendly_name"]);
-          reply_topic.append("/command");
-          MQTT_Manager::publish(reply_topic, response.dump());
-
-          this->send_websocket_update();
+    SPDLOG_INFO("Sending registration data to Django for database management.");
+    std::string url = "http://127.0.0.1:8000/api/register_nspanel";
+    std::string response_data;
+    std::string payload_data = register_request_payload.dump();
+    if (WebHelper::perform_request(&url, &response_data, nullptr, &payload_data)) {
+      SPDLOG_INFO("Panel registration OK.");
+      if (!this->_is_register_denied) {
+        this->update_warnings_from_manager();
+        SPDLOG_INFO("Panel registration OK. Updating internal data.");
+        nlohmann::json data = nlohmann::json::parse(response_data);
+        this->update_config(data); // Returned data from registration request is the same as data from the global /api/get_mqtt_manager_config
+        this->register_to_home_assistant();
+        if (this->_state == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
         }
-        curl_easy_cleanup(curl);
-        return true;
-      } else {
-        SPDLOG_ERROR("curl_easy_perform() when registring panel failed, got code: {}.", curl_easy_strerror(res));
-      }
+        SPDLOG_INFO("Panel registration completed. Sending accept command to panel.");
 
-      /* always cleanup */
-      curl_easy_cleanup(curl);
+        // Everything was successfull, send registration accept to panel:
+        nlohmann::json response;
+        response["command"] = "register_accept";
+        response["address"] = MqttManagerConfig::manager_address.c_str();
+        response["port"] = MqttManagerConfig::manager_port;
+
+        std::string reply_topic = "nspanel/";
+        reply_topic.append(register_request_payload["friendly_name"]);
+        reply_topic.append("/command");
+        MQTT_Manager::publish(reply_topic, response.dump());
+
+        SPDLOG_TRACE("Sending websocket update for NSPanel state change.");
+        this->send_websocket_update();
+      } else {
+        SPDLOG_ERROR("Failed to register NSPanel to manager.");
+      }
     }
   } catch (const std::exception &e) {
     SPDLOG_ERROR("Caught exception when trying to register NSPanel: {}", boost::diagnostic_information(e, true));

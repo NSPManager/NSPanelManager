@@ -33,6 +33,11 @@ find_package(tz REQUIRED)
 # find_package(inja REQUIRED)
 find_package(Boost REQUIRED COMPONENTS signals2 stacktrace_backtrace)
 
+add_library(MQTTManager_WebHelper SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/web_helper/WebHelper.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/web_helper/WebHelper.hpp)
+set_target_properties(MQTTManager_WebHelper PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/WebHelper/web_helper.hpp)
+target_include_directories(MQTTManager_WebHelper PUBLIC ${CURL_INCLUDE_DIR} ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_link_libraries(MQTTManager_WebHelper ${CURL_LIBRARIES} spdlog::spdlog Boost::boost)
+
 add_library(MQTTManager_Entity SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.hpp)
 set_target_properties(MQTTManager_Entity PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.hpp)
 target_include_directories(MQTTManager_Entity PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
@@ -61,7 +66,7 @@ target_link_libraries(MQTTManager_OpenhabManager spdlog::spdlog nlohmann_json::n
 add_library(MQTTManager_Weather SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.hpp)
 set_target_properties(MQTTManager_Weather PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.hpp)
 target_include_directories(MQTTManager_Weather PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Weather spdlog::spdlog nlohmann_json::nlohmann_json MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTT_Manager)
+target_link_libraries(MQTTManager_Weather MQTTManager_WebHelper spdlog::spdlog nlohmann_json::nlohmann_json MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTT_Manager)
 
 add_library(MQTTManager_Light SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/light.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/light.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/home_assistant_light.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/home_assistant_light.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/openhab_light.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/openhab_light.hpp)
 set_target_properties(MQTTManager_Light PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/light.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/home_assistant_light.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/openhab_light.hpp)
@@ -84,13 +89,13 @@ target_link_libraries(MQTTManager_Room spdlog::spdlog nlohmann_json::nlohmann_js
 
 add_library(MQTTManager_EntityManager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)
 set_target_properties(MQTTManager_EntityManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)
-target_include_directories(MQTTManager_EntityManager PUBLIC ${CURL_INCLUDE_DIR} ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_EntityManager ${CURL_LIBRARIES} spdlog::spdlog MQTT_Manager MQTTManager_NSPanel MQTTManager_Light MQTTManager_WebsocketServer Boost::boost Boost::stacktrace_backtrace dl MQTTManager_Weather)
+target_include_directories(MQTTManager_EntityManager PUBLIC MQTTManager_WebHelper ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_link_libraries(MQTTManager_EntityManager MQTTManager_WebHelper spdlog::spdlog MQTT_Manager MQTTManager_NSPanel MQTTManager_Light MQTTManager_WebsocketServer Boost::boost Boost::stacktrace_backtrace dl MQTTManager_Weather)
 
 add_library(MQTTManager_Config SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.hpp)
 set_target_properties(MQTTManager_Config PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.hpp)
-target_include_directories(MQTTManager_Config PUBLIC ${CURL_INCLUDE_DIR} ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Config spdlog::spdlog ${CURL_LIBRARIES} nlohmann_json::nlohmann_json Boost::boost)
+target_include_directories(MQTTManager_Config PUBLIC MQTTManager_WebHelper ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_link_libraries(MQTTManager_Config spdlog::spdlog MQTTManager_WebHelper nlohmann_json::nlohmann_json Boost::boost)
 
 
 add_executable(${PROJECT_NAME} src/main.cpp)

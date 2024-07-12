@@ -1,7 +1,7 @@
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "light/light.hpp"
-#include <cstddef>
+#include "web_helper/WebHelper.hpp"
 #include <curl/curl.h>
 #include <nlohmann/detail/value_t.hpp>
 #include <nlohmann/json_fwd.hpp>
@@ -122,30 +122,11 @@ void NSPMScene::save() {
   save_scene_data["light_states"] = json_light_states;
   std::string json_payload = save_scene_data.dump();
 
-  CURL *curl;
-  CURLcode res;
-  curl = curl_easy_init();
-  if (curl) {
-    std::string response_data;
-    curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:8000/api/save_scene");
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_payload.c_str());
-
-    /* Perform the request, res will get the return code */
-    res = curl_easy_perform(curl);
-    long http_code;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-    /* Check for errors */
-    if (res == CURLE_OK && http_code == 200) {
-      SPDLOG_INFO("Saved scene {}::{}.", this->_id, this->_name);
-    } else {
-      SPDLOG_INFO("Failed to save scene {}::{}. Got code: {}", this->_id, this->_name, curl_easy_strerror(res));
-    }
-
-    /* always cleanup */
-    curl_easy_cleanup(curl);
+  std::string url = "http://127.0.0.1:8000/api/save_scene";
+  if (WebHelper::perform_request(&url, nullptr, nullptr, &json_payload)) {
+    SPDLOG_INFO("Saved scene {}::{}.", this->_id, this->_name);
   } else {
-    SPDLOG_ERROR("Failed to curl_easy_init(). Will try again.");
+    SPDLOG_INFO("Failed to save scene {}::{}.", this->_id, this->_name);
   }
 }
 
