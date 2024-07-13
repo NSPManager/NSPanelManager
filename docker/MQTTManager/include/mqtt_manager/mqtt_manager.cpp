@@ -124,7 +124,7 @@ void MQTT_Manager::connect() {
     // Disconnect
     SPDLOG_INFO("Disconnecting from the MQTT server...");
     MQTT_Manager::_mqtt_client->disconnect();
-    SPDLOG_INFO("OK");
+    SPDLOG_INFO("Disconnect OK.");
   } catch (const mqtt::exception &exc) {
     std::cerr << exc.what() << std::endl;
   }
@@ -139,6 +139,8 @@ bool MQTT_Manager::is_connected() {
 }
 
 void MQTT_Manager::_resubscribe() {
+  std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
+
   try {
     SPDLOG_DEBUG("Subscribing to registered MQTT topics.");
     MQTT_Manager::_mqtt_client->subscribe(MQTT_Manager::_get_subscribe_topics(), MQTT_Manager::_get_subscribe_topics_qos());
@@ -152,8 +154,6 @@ void MQTT_Manager::_resubscribe() {
 
       bool received_message;
       do {
-        // std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait 100ms between each subscribe in order for MQTT to catch up.
-        //  received_message = MQTT_Manager::_mqtt_client->try_consume_message(&msg);
         received_message = MQTT_Manager::_mqtt_client->try_consume_message_for(&msg, std::chrono::milliseconds(100)); // Wait for max 100ms to see if a message is to be receved on the recently subscribed topic.
         if (received_message) {
           MQTT_Manager::_process_mqtt_message(msg->get_topic(), msg->get_payload());
@@ -228,6 +228,7 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload)
 }
 
 void MQTT_Manager::publish(const std::string &topic, const std::string &payload, bool retain) {
+  std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
   mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), 0, retain);
   if (MQTT_Manager::_mqtt_client != nullptr) {
     if (MQTT_Manager::is_connected()) {
@@ -241,6 +242,7 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
 }
 
 void MQTT_Manager::clear_retain(const std::string &topic) {
+  std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
   if (topic.size() > 0) {
     mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), "", 0, 0, true);
     if (MQTT_Manager::_mqtt_client != nullptr) {

@@ -11,7 +11,6 @@ size_t WebHelper::write_callback(void *contents, size_t size, size_t nmemb, void
 bool WebHelper::perform_request(std::string *url, std::string *response_data, std::list<const char *> *headers, std::string *post_data) {
   try {
     SPDLOG_TRACE("Performing CURL HTTP request to '{}'.", url->c_str());
-    // TODO: Wrap in try/catch
 
     CURL *curl = curl_easy_init();
     CURLcode res;
