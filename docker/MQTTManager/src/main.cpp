@@ -27,7 +27,9 @@ std::string last_date_published;
 
 void sigusr1_handler(int signal) {
   if (signal == SIGUSR1) {
-    SPDLOG_INFO("Reloading config from manager.");
+    SPDLOG_INFO("Reloading config from manager. Will wait 50ms for other processing to complete before proceeding with config reload.");
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
     MqttManagerConfig::load();
     MQTT_Manager::publish("nspanel/config/reload", "1");
     SPDLOG_INFO("Reload signal processing completed.");
