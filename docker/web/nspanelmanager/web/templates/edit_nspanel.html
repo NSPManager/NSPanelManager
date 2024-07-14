@@ -45,7 +45,7 @@
                   7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
               </svg>
             </span>
-            <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+            <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
             type="text" class="input" name="name" value="{{ panel.friendly_name }}">
           </div>
         </div>
@@ -232,7 +232,7 @@
                         7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
                     </svg>
                   </span>
-                  <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+                  <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
                   type="text" class="input" name="button1_custom_mqtt_topic" value="{{ settings.button1_custom_mqtt_topic }}">
                 </div>
               </div>
@@ -248,7 +248,7 @@
                         7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
                     </svg>
                   </span>
-                  <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+                  <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
                   type="text" class="input" name="button1_custom_mqtt_payload" value="{{ settings.button1_custom_mqtt_payload }}">
                 </div>
               </div>
@@ -316,7 +316,7 @@
                         7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
                     </svg>
                   </span>
-                  <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+                  <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
                   type="text" class="input" name="button2_custom_mqtt_topic" value="{{ settings.button2_custom_mqtt_topic }}">
                 </div>
               </div>
@@ -332,7 +332,7 @@
                         7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
                     </svg>
                   </span>
-                  <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+                  <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
                   type="text" class="input" name="button2_custom_mqtt_payload" value="{{ settings.button2_custom_mqtt_payload }}">
                 </div>
               </div>
@@ -600,6 +600,9 @@
           </div>
           <div onclick="startNSPanelTftUpdate();" class="p-3 w-full border-solid border-b-2 hover:bg-slate-400 dark:border-gray-700 dark:hover:bg-gray-400 cursor-pointer rounded-b-lg">
             <span class="mdi mdi-table-arrow-up me-2"></span><span class="">Update screen</span>
+          </div>
+          <div onclick="deleteNSPanel();" class="p-3 w-full border-solid border-b-2 hover:bg-slate-400 dark:border-gray-700 dark:hover:bg-gray-400 cursor-pointer rounded-b-lg">
+            <span class="mdi mdi-table-arrow-up me-2"></span><span class="">Delete</span>
           </div>
         </div>
       </div>
