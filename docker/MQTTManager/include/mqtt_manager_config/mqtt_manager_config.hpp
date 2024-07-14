@@ -2,6 +2,7 @@
 #define MQTTMANAGER_CONFIG_HPP
 #include <boost/signals2.hpp>
 #include <list>
+#include <mutex>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <string>
@@ -111,6 +112,8 @@ public:
 
 private:
   static void populate_settings_from_config(nlohmann::json &data);
+  // Mutex to make sure only one thread can load settings at the time
+  static inline std::mutex _config_load_mutex;
 
   static inline boost::signals2::signal<void(nlohmann::json *)> _config_added_listener;
   static inline boost::signals2::signal<void(nlohmann::json *)> _config_removed_listener;

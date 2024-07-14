@@ -73,7 +73,7 @@ void HomeAssistantLight::send_state_update_to_controller() {
 void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
   if (std::string(data["event"]["event_type"]).compare("state_changed") == 0) {
     if (std::string(data["event"]["data"]["entity_id"]).compare(this->_home_assistant_name) == 0) {
-      SPDLOG_DEBUG("Got event update for HA light {}::{}.", this->_id, this->_name);
+      SPDLOG_TRACE("Got event update for HA light {}::{}.", this->_id, this->_name);
       nlohmann::json new_state_data = data["event"]["data"]["new_state"];
       nlohmann::json new_state_attributes = new_state_data["attributes"];
 
