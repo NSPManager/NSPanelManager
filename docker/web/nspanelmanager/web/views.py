@@ -420,6 +420,7 @@ def add_scene_to_global(request):
         new_scene = Scene.objects.get(id=int(request.POST["edit_scene_id"]))
     else:
         new_scene = Scene()
+        new_scene.scene_type = "nspm_scene"
     new_scene.friendly_name = request.POST["scene_name"]
     new_scene.room = None
     new_scene.save()
