@@ -479,7 +479,7 @@ def get_nspanel_config(request):
             if scene.scene_type == "nspm_scene":
                 base["scenes"][scene.id]["can_save"] = True
             else:
-                base["scenes"][scene.id]["can_save"] = Frue
+                base["scenes"][scene.id]["can_save"] = False
         return JsonResponse(base)
     except:
         print("Tried to get NSPanel config for panel that was not registered.")
