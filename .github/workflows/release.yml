@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
-      - uses: xu-cheng/latex-action@v2
+      - uses: xu-cheng/latex-action@v3
         name: "Update manual"
         with:
           working_directory: docs/tex/
