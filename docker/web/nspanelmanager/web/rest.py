@@ -69,10 +69,7 @@ def nspanel_warnings(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-
-    return JsonResponse({
-        "status": "error"
-    }, status=405)
+    return JsonResponse({"status": "error"}, status=405)
 
 @csrf_exempt
 def nspanels(request):
@@ -86,72 +83,75 @@ def nspanels(request):
         }, status=405)
 
 def nspanels_get(request):
-    nspanels = list()
-    if request.GET.get('id'):
-        nspanel_objects = NSPanel.objects.filter(id=request.GET.get('id'))
-    elif request.GET.get('mac_address'):
-        nspanel_objects = NSPanel.objects.filter(mac_address=request.GET.get('mac_address'))
-    else:
-        nspanel_objects = NSPanel.objects.all()
+    if request.method == "GET":
+        nspanels = list()
+        if request.GET.get('id'):
+            nspanel_objects = NSPanel.objects.filter(id=request.GET.get('id'))
+        elif request.GET.get('mac_address'):
+            nspanel_objects = NSPanel.objects.filter(mac_address=request.GET.get('mac_address'))
+        else:
+            nspanel_objects = NSPanel.objects.all()
 
-    for nspanel in nspanel_objects:
-        nspanels.append({
-            "id": nspanel.id,
-            "name": nspanel.friendly_name,
-            "home": nspanel.room.id,
-            "default_page": get_nspanel_setting_with_default(nspanel.id, "default_page", 0),
-            "raise_to_100_light_level": get_setting_with_default("raise_to_100_light_level", 95),
-            "color_temp_min": get_setting_with_default("color_temp_min", 2000),
-            "color_temp_max": get_setting_with_default("color_temp_max", 6000),
-            "reverse_color_temp": get_setting_with_default("reverse_color_temp", False),
-            "min_button_push_time": get_setting_with_default("min_button_push_time", 50),
-            "button_long_press_time": get_setting_with_default("button_long_press_time", 5000),
-            "special_mode_trigger_time": get_setting_with_default("special_mode_trigger_time", 300),
-            "special_mode_release_time": get_setting_with_default("special_mode_release_time", 5000),
-            "mqtt_ignore_time": get_nspanel_setting_with_default(nspanel.id, "mqtt_ignore_time", 3000),
-            "screen_dim_level": get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level", 100)),
-            "screensaver_dim_level": get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level", 0)),
-            "screensaver_activation_timeout": get_nspanel_setting_with_default(nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout", 30000)),
-            "screensaver_mode": get_nspanel_setting_with_default(nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode", "with_background")),
-            "clock_us_style": get_setting_with_default("clock_us_style", "False"),
-            "use_fahrenheit": get_setting_with_default("use_fahrenheit", "False"),
-            "is_us_panel": get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False"),
-            "lock_to_default_room": get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False"),
-            "reverse_relays": get_nspanel_setting_with_default(nspanel.id, "reverse_relays", False),
-            "relay1_default_mode": get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", "False"),
-            "relay2_default_mode": get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", "False"),
-            "temperature_calibration": get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0),
-            "button1_mode": nspanel.button1_mode,
-            "button2_mode": nspanel.button2_mode,
-            "button1_mqtt_topic": get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_topic", ""),
-            "button2_mqtt_topic": get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_topic", ""),
-            "button1_mqtt_payload": get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_payload", ""),
-            "button2_mqtt_payload": get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_payload", ""),
-            "button1_detached_light": nspanel.button1_detached_mode_light.id if nspanel.button1_detached_mode_light else -1,
-            "button2_detached_light": nspanel.button2_detached_mode_light.id if nspanel.button2_detached_mode_light else -1,
-            "rooms": [room.id for room in Room.objects.all().order_by('displayOrder')],
-            "scenes": [scene.id for scene in Scene.objects.all()],
+        for nspanel in nspanel_objects:
+            nspanels.append({
+                "id": nspanel.id,
+                "name": nspanel.friendly_name,
+                "home": nspanel.room.id,
+                "default_page": get_nspanel_setting_with_default(nspanel.id, "default_page", 0),
+                "raise_to_100_light_level": get_setting_with_default("raise_to_100_light_level", 95),
+                "color_temp_min": get_setting_with_default("color_temp_min", 2000),
+                "color_temp_max": get_setting_with_default("color_temp_max", 6000),
+                "reverse_color_temp": get_setting_with_default("reverse_color_temp", False),
+                "min_button_push_time": get_setting_with_default("min_button_push_time", 50),
+                "button_long_press_time": get_setting_with_default("button_long_press_time", 5000),
+                "special_mode_trigger_time": get_setting_with_default("special_mode_trigger_time", 300),
+                "special_mode_release_time": get_setting_with_default("special_mode_release_time", 5000),
+                "mqtt_ignore_time": get_nspanel_setting_with_default(nspanel.id, "mqtt_ignore_time", 3000),
+                "screen_dim_level": get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level", 100)),
+                "screensaver_dim_level": get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level", 0)),
+                "screensaver_activation_timeout": get_nspanel_setting_with_default(nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout", 30000)),
+                "screensaver_mode": get_nspanel_setting_with_default(nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode", "with_background")),
+                "clock_us_style": get_setting_with_default("clock_us_style", "False"),
+                "use_fahrenheit": get_setting_with_default("use_fahrenheit", "False"),
+                "is_us_panel": get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False"),
+                "lock_to_default_room": get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False"),
+                "reverse_relays": get_nspanel_setting_with_default(nspanel.id, "reverse_relays", False),
+                "relay1_default_mode": get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", "False"),
+                "relay2_default_mode": get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", "False"),
+                "temperature_calibration": get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0),
+                "button1_mode": nspanel.button1_mode,
+                "button2_mode": nspanel.button2_mode,
+                "button1_mqtt_topic": get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_topic", ""),
+                "button2_mqtt_topic": get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_topic", ""),
+                "button1_mqtt_payload": get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_payload", ""),
+                "button2_mqtt_payload": get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_payload", ""),
+                "button1_detached_light": nspanel.button1_detached_mode_light.id if nspanel.button1_detached_mode_light else -1,
+                "button2_detached_light": nspanel.button2_detached_mode_light.id if nspanel.button2_detached_mode_light else -1,
+                "rooms": [room.id for room in Room.objects.all().order_by('displayOrder')],
+                "scenes": [scene.id for scene in Scene.objects.all()],
+            })
+        return JsonResponse({
+            "status": "ok",
+            "panels": nspanels
         })
-    return JsonResponse({
-        "status": "ok",
-        "panels": nspanels
-    })
-
 
 # Handle DELETE request to "nspanel" endpoint.
 @csrf_exempt
 def nspanel_delete(request, panel_id):
-    try:
-        logging.info(F"Deleting NSPanel with ID {panel_id}.")
-        nspanel = NSPanel.objects.get(id=panel_id)
-        nspanel.delete()
-        return JsonResponse({
-            "status": "ok",
-            "panel_id": panel_id
-        }, status=200)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
+    if request.method == "DELETE":
+        try:
+            logging.info(F"Deleting NSPanel with ID {panel_id}.")
+            nspanel = NSPanel.objects.get(id=panel_id)
+            nspanel.delete()
+            return JsonResponse({
+                "status": "ok",
+                "panel_id": panel_id
+            }, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
 
 # Handle POST request to "nspanel" endpoint.
 @csrf_exempt
@@ -263,31 +263,37 @@ def rooms_get(request):
 
 @csrf_exempt
 def room_delete(request, room_id):
-    try:
-        room = Room.objects.get(id=room_id)
-        room.delete()
-        return JsonResponse({
-            "status": "ok",
-            "room_id": room_id
-        }, status=200)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
+    if request.method == "DELETE":
+        try:
+            room = Room.objects.get(id=room_id)
+            room.delete()
+            return JsonResponse({
+                "status": "ok",
+                "room_id": room_id
+            }, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
 
 @csrf_exempt
 def room_create(request):
-    try:
-        data = json.loads(request.body)
-        new_room = Room()
-        new_room.friendly_name = data["name"]
-        new_room.save()
-        return JsonResponse({
-            "status": "ok",
-            "room_id": new_room.id
-        }, status=200)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            new_room = Room()
+            new_room.friendly_name = data["name"]
+            new_room.save()
+            return JsonResponse({
+                "status": "ok",
+                "room_id": new_room.id
+            }, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
 
 
 #####################
@@ -339,73 +345,89 @@ def lights_get(request):
         return JsonResponse({"status": "error"}, status=500)
 
 def lights_post(request):
-    try:
-        data = json.loads(request.body)
-        room = Room.objects.get(id=data['room_id'])
-        if 'light_id' in data:
-            newLight = Light.objects.get(id=data['light_id'])
-        else:
-            newLight = Light()
-        newLight.room = room
-        newLight.type = data['type']
-        newLight.friendly_name = data['friendly_name']
-        if data["light_type"] == "ceiling":
-            newLight.is_ceiling_light = True
-        else:
-            newLight.is_ceiling_light = False
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            room = Room.objects.get(id=data['room_id'])
+            if 'light_id' in data:
+                newLight = Light.objects.get(id=data['light_id'])
+            else:
+                newLight = Light()
+            newLight.room = room
+            newLight.type = data['type']
+            newLight.friendly_name = data['friendly_name']
+            if data["light_type"] == "ceiling":
+                newLight.is_ceiling_light = True
+            else:
+                newLight.is_ceiling_light = False
 
-        if newLight.type == "home_assistant":
-            newLight.home_assistant_name = data["home_assistant_name"]
-        elif newLight.type == "openhab":
-            newLight.openhab_name = data["openhab_name"]
+            if newLight.type == "home_assistant":
+                newLight.home_assistant_name = data["home_assistant_name"]
+            elif newLight.type == "openhab":
+                newLight.openhab_name = data["openhab_name"]
 
-        if data["light_control_mode"] == "dimmer":
-            newLight.can_dim = True
-            newLight.openhab_control_mode = "dimmer"
-            if newLight.type == "openhab":
-                newLight.openhab_item_dimmer = data["openhab_dimming_channel_name"]
-        else:
-            newLight.openhab_control_mode = "switch"
-            newLight.can_dim = False
-            if newLight.type == "openhab":
-                newLight.openhab_item_switch = data["openhab_switch_channel_name"]
+            if data["light_control_mode"] == "dimmer":
+                newLight.can_dim = True
+                newLight.openhab_control_mode = "dimmer"
+                if newLight.type == "openhab":
+                    newLight.openhab_item_dimmer = data["openhab_dimming_channel_name"]
+            else:
+                newLight.openhab_control_mode = "switch"
+                newLight.can_dim = False
+                if newLight.type == "openhab":
+                    newLight.openhab_item_switch = data["openhab_switch_channel_name"]
 
-        if data["color_temperature"]:
-            newLight.can_color_temperature = True
-            if newLight.type == "openhab":
-                newLight.openhab_item_color_temp = data["openhab_color_temperature_channel_name"]
-        else:
-            newLight.can_color_temperature = False
-            newLight.openhab_item_color_temp = ""
+            if data["color_temperature"]:
+                newLight.can_color_temperature = True
+                if newLight.type == "openhab":
+                    newLight.openhab_item_color_temp = data["openhab_color_temperature_channel_name"]
+            else:
+                newLight.can_color_temperature = False
+                newLight.openhab_item_color_temp = ""
 
-        if data["rgb"]:
-            newLight.can_rgb = True
-            if newLight.type == "openhab":
-                newLight.openhab_item_rgb = data["openhab_rgb_channel_name"]
-        else:
-            newLight.can_rgb = False
-            newLight.openhab_item_rgb = ""
+            if data["rgb"]:
+                newLight.can_rgb = True
+                if newLight.type == "openhab":
+                    newLight.openhab_item_rgb = data["openhab_rgb_channel_name"]
+            else:
+                newLight.can_rgb = False
+                newLight.openhab_item_rgb = ""
 
-        if data["add_to_room_view"]:
-            if newLight.room_view_position == 0:
-                all_lights = Light.objects.filter(room=room, room_view_position__gte=1, room_view_position__lte=12)
-                # Find the first available free position on the room view screen to place the light at
-                for i in range(1, 13):
-                    position_free = True
-                    for light in all_lights:
-                        if light.room_view_position == i:
-                            position_free = False
+            if data["add_to_room_view"]:
+                if newLight.room_view_position == 0:
+                    all_lights = Light.objects.filter(room=room, room_view_position__gte=1, room_view_position__lte=12)
+                    # Find the first available free position on the room view screen to place the light at
+                    for i in range(1, 13):
+                        position_free = True
+                        for light in all_lights:
+                            if light.room_view_position == i:
+                                position_free = False
+                                break
+                        if position_free:
+                            newLight.room_view_position = i
                             break
-                    if position_free:
-                        newLight.room_view_position = i
-                        break
 
-        newLight.save()
-        return JsonResponse({
-            "status": "ok",
-            "light_id": newLight.id
-        }, status=200)
+            newLight.save()
+            return JsonResponse({
+                "status": "ok",
+                "light_id": newLight.id
+            }, status=200)
 
-    except BaseException as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
+        except BaseException as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+
+@csrf_exempt
+def light_delete(request, light_id):
+    if(request.method == "DELETE"):
+        try:
+            Light.objects.get(id=light_id).delete()
+            return JsonResponse({
+                "status": "ok",
+                "light_id": light_id
+            }, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)

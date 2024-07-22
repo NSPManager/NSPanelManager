@@ -120,4 +120,5 @@ urlpatterns = [
     path('rest/rooms', rest.rooms, name='rest_rooms_create'),
     # Light URLs
     path('rest/lights', rest.lights, name='rest_lights'),
+    path('rest/lights/<int:light_id>', rest.light_delete, name='rest_light_delete'),
 ]
