@@ -18,12 +18,12 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
-      - uses: xu-cheng/latex-action@v3
-        name: "Update manual"
-        with:
-          working_directory: docs/tex/
-          root_file: |
-            manual.tex
+      # - uses: xu-cheng/latex-action@v3
+      #   name: "Update manual"
+      #   with:
+      #     working_directory: docs/tex/
+      #     root_file: |
+      #       manual.tex
       - run: |
           sed -i "s/^version: [0-9A-Za-z\.\-_]\+/version: ${{ github.ref_name }}/g" docker/config.yaml
           cp docker/web/nspanelmanager/web/templates/footer_template.html docker/web/nspanelmanager/web/templates/footer.html
