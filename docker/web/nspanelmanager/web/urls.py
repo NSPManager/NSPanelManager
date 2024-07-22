@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-
-from . import views, api
+from . import views, api, rest
 
 urlpatterns = [
     # Web routes
@@ -108,4 +107,17 @@ urlpatterns = [
     path('api/restart_mqtt_manager', api.restart_mqtt_manager,
          name='restart_mqtt_manager'),
     path('api/save_theme', api.save_theme, name='save_theme'),
+
+    #####################
+    ### Rest API URLs ###
+    #####################
+    # NSPanel URLs
+    path('rest/nspanels/warnings', rest.nspanel_warnings, name='rest_nspanel_warnings'),
+    path('rest/nspanels/<int:panel_id>', rest.nspanel_delete, name='rest_nspanel_delete'),
+    path('rest/nspanels', rest.nspanels, name='rest_nspanels'),
+    # Room URLs
+    path('rest/rooms/<int:room_id>', rest.room_delete, name='rest_room_delete'),
+    path('rest/rooms', rest.rooms, name='rest_rooms_create'),
+    # Light URLs
+    path('rest/lights', rest.lights, name='rest_lights'),
 ]

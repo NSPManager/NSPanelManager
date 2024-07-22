@@ -1,6 +1,11 @@
 #include "home_assistant_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include <boost/asio.hpp>
+#include <boost/asio/buffer.hpp>
 #include <boost/exception/diagnostic_information.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/process/async_pipe.hpp>
 #include <boost/stacktrace.hpp>
 #include <boost/stacktrace/frame.hpp>
 #include <boost/stacktrace/stacktrace_fwd.hpp>

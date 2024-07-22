@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <memory>
+#include <pipe_handler/pipe_handler.hpp>
 #include <signal.h>
 #include <spdlog/common.h>
 #include <spdlog/spdlog.h>
@@ -122,6 +123,8 @@ int main(void) {
   sigemptyset(&sigUsr1Handler.sa_mask);
   sigUsr1Handler.sa_flags = 0;
   sigaction(SIGUSR1, &sigUsr1Handler, NULL);
+
+  // PipeHandler::start();
 
   std::thread mqtt_manager_thread;
   std::thread home_assistant_manager_thread;

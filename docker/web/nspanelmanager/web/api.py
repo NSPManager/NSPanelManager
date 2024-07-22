@@ -198,7 +198,7 @@ def get_nspanels_warnings(request):
         nspanels.append(panel_info)
     return JsonResponse({"panels": nspanels})
 
-
+# TODO: Rework how available entities are gathered
 def get_all_available_entities(request):
     # TODO: Implement manually entered entities
     home_assistant_type_filter = []
@@ -369,6 +369,7 @@ def register_nspanel(request):
                 fs.open("data_file.bin").read()).hexdigest()
         else:
             new_panel.md5_data_file = data["md5_data_file"]
+
     # TFT file will never be flashed by default with a new panel, always set the MD5 from registration
     if "md5_tft_file" in data:
         new_panel.md5_tft_file = data["md5_tft_file"]
@@ -530,6 +531,7 @@ def get_light_config(request, light_id: int):
     return JsonResponse(return_json)
 
 
+# TODO: Remove set_panel_status as it is no longer used. All this data is stored in memory in the MQTTManager application.
 @csrf_exempt
 def set_panel_status(request, panel_mac: str):
     nspanels = NSPanel.objects.filter(mac_address=panel_mac)
@@ -547,6 +549,7 @@ def set_panel_status(request, panel_mac: str):
 
 
 @csrf_exempt
+# TODO: Remove set_panel_status as it is no longer used. All this data is stored in memory in the MQTTManager application.
 def set_panel_online_status(request, panel_mac: str):
     nspanels = NSPanel.objects.filter(mac_address=panel_mac)
     if nspanels.exists():
