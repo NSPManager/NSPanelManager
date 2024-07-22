@@ -110,7 +110,7 @@ void OpenhabManager::_process_websocket_message(const std::string &message) {
     } else if (type.compare("ItemStateChangedEvent") == 0 || type.compare("ItemStateUpdatedEvent") == 0) {
       OpenhabManager::_process_openhab_event(data);
     } else {
-      SPDLOG_TRACE("Got unhandled message: {}", message);
+      // SPDLOG_TRACE("Got unhandled message: {}", message);
     }
   } catch (std::exception ex) {
     SPDLOG_ERROR("Caught std::exception while processing WebSocketMessage. Exception: {}, message: {}", ex.what(), message);

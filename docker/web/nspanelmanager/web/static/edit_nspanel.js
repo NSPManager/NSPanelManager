@@ -14,6 +14,33 @@ function rebootNSPanel() {
   ws.send_command("reboot_nspanels", { nspanels: [nspanel_id] }, null);
 }
 
+function deleteNSPanel() {
+  let command_data = {};
+  let nspanel_mac = mac_address;
+  // Convert selector-mac to real mac.
+  let real_mac =
+    nspanel_mac.substring(0, 2) +
+    ":" +
+    nspanel_mac.substring(2, 4) +
+    ":" +
+    nspanel_mac.substring(4, 6) +
+    ":" +
+    nspanel_mac.substring(6, 8) +
+    ":" +
+    nspanel_mac.substring(8, 10) +
+    ":" +
+    nspanel_mac.substring(10, 12);
+  command_data.mac_address = real_mac;
+
+  ws.send_command("nspanel_delete", command_data, (response) => {
+    if (response.success) {
+      window.location = "/";
+    } else {
+      alert("Failed to delete NSPanel.");
+    }
+  });
+}
+
 function requests_log_backtrace() {
   ws.send_command("get_nspanels_logs", { nspanels: [nspanel_id] }, null);
 }
@@ -25,7 +52,8 @@ function push_log_message_to_view(data) {
   if (data.level == "ERROR") {
     add_html += '<span class="dark:text-red-400 text-red-600">ERROR</span>';
   } else if (data.level == "WARNING") {
-    add_html += '<span class="dark:text-yellow-400 text-yellow-600">WARNING</span>';
+    add_html +=
+      '<span class="dark:text-yellow-400 text-yellow-600">WARNING</span>';
   } else if (data.level == "INFO") {
     add_html += '<span class="dark:text-blue-400 text-blue-600">INFO</span>';
   } else if (data.level == "DEBUG") {
@@ -51,24 +79,19 @@ function push_log_message_to_view(data) {
 
 function update_nspanel_status(data) {
   if ("mac_address" in data) {
-    if(data.mac_address == mac_address) { // Check that the status data corresponds to the panel currently in view.
+    if (data.mac_address == mac_address) {
+      // Check that the status data corresponds to the panel currently in view.
       if ("state" in data) {
         $("#panel_visit_link").attr("href", "http://" + data.ip_address);
         var new_html = "";
         if (data.state == "online") {
           $("#state_text").html("Online");
-          $("#state_text").attr(
-            "class",
-            "dark:text-green-400 text-green-600"
-          );
+          $("#state_text").attr("class", "dark:text-green-400 text-green-600");
           $("#update_progress_container").addClass("hidden");
           $("#update_progress_container").slideUp("slow", () => {});
         } else if (data.state == "offline") {
           $("#state_text").html("Offline");
-          $("#state_text").attr(
-            "class",
-            "dark:text-red-400 text-red-600"
-          );
+          $("#state_text").attr("class", "dark:text-red-400 text-red-600");
           $("#update_progress_container").addClass("hidden");
           $("#update_progress_container").slideUp("slow", () => {});
         } else {
@@ -88,25 +111,24 @@ function update_nspanel_status(data) {
 
           $("#update_progress_container").slideDown("slow", () => {});
           $("#update_progress_container").removeClass("hidden");
-          $("#update_progress_pct_progressbar").css("width", update_progress + "%");
+          $("#update_progress_pct_progressbar").css(
+            "width",
+            update_progress + "%",
+          );
           $("#update_progress_pct_text").html(update_progress + "%");
           $("#state_text").html(update_text);
-          $("#state_text").attr(
-            "class",
-            "dark:text-green-400 text-green-600"
-          );
+          $("#state_text").attr("class", "dark:text-green-400 text-green-600");
         }
       }
       if ("rssi" in data) {
         var new_rssi_classes = "";
         var new_rssi_text = "";
         var new_rssi_text_classes = "";
-        if(data.state == "offline") {
+        if (data.state == "offline") {
           new_rssi_classes = "mdi mdi-wifi-strength-1-alert me-2";
           new_rssi_text = "Unknown";
           new_rssi_text_classes = "dark:text-red-400 text-red-600";
-        }
-        else if (data.rssi <= -90) {
+        } else if (data.rssi <= -90) {
           new_rssi_classes = "mdi mdi-wifi-strength-1-alert me-2";
           new_rssi_text = "Poor";
           new_rssi_text_classes = "dark:text-red-400 text-red-600";
@@ -136,10 +158,10 @@ function update_nspanel_status(data) {
         var heap_used = data.heap_used_pct + "%";
         var new_heap_used_text_color = "";
 
-        if(data.state == "offline") {
+        if (data.state == "offline") {
           heap_used = "Unknown";
           new_heap_used_text_color = "dark:text-red-400 text-red-600";
-        }else if(data.heap_used_pct < 70) {
+        } else if (data.heap_used_pct < 70) {
           new_heap_used_text_color = "dark:text-green-400 text-green-600";
         } else if (data.heap_used_pct < 85) {
           new_heap_used_text_color = "dark:text-yellow-400 text-yellow-600";
@@ -147,32 +169,31 @@ function update_nspanel_status(data) {
           new_heap_used_text_color = "dark:text-red-400 text-red-600";
         }
 
-        $("#heap_used").text(heap_used)
+        $("#heap_used").text(heap_used);
         $("#heap_used").attr("class", new_heap_used_text_color);
       }
 
-      if(data.state == "offline") {
+      if (data.state == "offline") {
         $("#temperature").html("Unknown");
       } else if ("temperature" in data) {
-        var temperature_unit = $("#temperature")
-          .text()
-          .slice(-2);
+        var temperature_unit = $("#temperature").text().slice(-2);
         $("#temperature").html(
-          Math.round(data.temperature * 100) / 100 + " " + temperature_unit
+          Math.round(data.temperature * 100) / 100 + " " + temperature_unit,
         );
       }
 
       if ("warnings" in data) {
         $("#warning_container").html("");
         data["warnings"].split("\n").forEach((warning) => {
-          if(warning != "") {
+          if (warning != "") {
             console.log(warning);
             $("#warning_container").append(
               $("<div>", {
-                class: "p-4 mt-2 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-300 dark:text-gray-800",
+                class:
+                  "p-4 mt-2 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-300 dark:text-gray-800",
                 role: "alert",
                 text: warning,
-              })
+              }),
             );
           }
         });
@@ -233,7 +254,10 @@ $(document).ready(() => {
   ws.register_message_handler((data) => {
     if (data.type == "status" || data.type == "status_report") {
       update_nspanel_status(data.payload);
-    } else if (data.type == "log" && data.mac.replaceAll(":", "") == mac_address) {
+    } else if (
+      data.type == "log" &&
+      data.mac.replaceAll(":", "") == mac_address
+    ) {
       push_log_message_to_view(data);
     }
   });
@@ -243,9 +267,13 @@ $(document).ready(() => {
     // Remove any connection error notification
     $("#failed_to_connect_error").remove();
 
-    ws.send_command("get_nspanels_status", { nspanel_id: nspanel_id }, (response) => {
-      update_nspanel_status(response.nspanels[0]);
-    });
+    ws.send_command(
+      "get_nspanels_status",
+      { nspanel_id: nspanel_id },
+      (response) => {
+        update_nspanel_status(response.nspanels[0]);
+      },
+    );
 
     ws.send_command(
       "get_nspanel_logs",
@@ -254,7 +282,7 @@ $(document).ready(() => {
         for (const [id, log] of Object.entries(response.logs)) {
           push_log_message_to_view(log);
         }
-      }
+      },
     );
   });
 
@@ -262,7 +290,7 @@ $(document).ready(() => {
     console.log("Disconnected from MQTTManager via websocket.");
     if ($("#failed_to_connect_error").length == 0) {
       $("#notification_holder").append(
-        '<div class="notification is-danger" id="failed_to_connect_error">Failed to connect to MQTTManager. Retrying...</div>'
+        '<div class="notification is-danger" id="failed_to_connect_error">Failed to connect to MQTTManager. Retrying...</div>',
       );
     }
   });

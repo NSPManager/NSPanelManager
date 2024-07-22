@@ -157,20 +157,15 @@ void EntityManager::post_init_entities() {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
     for (int i = 0; i < EntityManager::_nspanels.size(); i++) {
       auto rit = EntityManager::_nspanels[i];
-      if (rit->has_registered_to_manager()) {
-        bool exists = ITEM_IN_LIST(nspanel_ids, rit->get_id());
-
-        if (!exists) {
-          NSPanel *panel = rit;
-          rit->erase();
-          SPDLOG_DEBUG("Removing NSPanel {}::{} as it doesn't exist in config anymore.", panel->get_id(), panel->get_name());
-          EntityManager::_nspanels.erase(EntityManager::_nspanels.begin() + i);
-          delete panel;
-        } else {
-          rit++;
-        }
+      bool exists = ITEM_IN_LIST(nspanel_ids, rit->get_id());
+      if (!exists) {
+        NSPanel *panel = rit;
+        rit->erase();
+        SPDLOG_DEBUG("Removing NSPanel {}::{} as it doesn't exist in config anymore.", panel->get_id(), panel->get_name());
+        EntityManager::_nspanels.erase(EntityManager::_nspanels.begin() + i);
+        delete panel;
       } else {
-        ++rit;
+        rit++;
       }
     }
   }
@@ -577,7 +572,7 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
         cmd["command"] = "reboot";
         nspanel->send_command(cmd);
       } else {
-        SPDLOG_ERROR("Received command to reboot NSPanel with ID {} but no panel with that ID is loaded.");
+        SPDLOG_ERROR("Received command to reboot NSPanel with ID {} but no panel with that ID is loaded.", nspanel_id);
       }
     }
     return true;

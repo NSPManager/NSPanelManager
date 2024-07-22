@@ -8,8 +8,10 @@
 #include <fmt/core.h>
 #include <fstream>
 #include <iostream>
+#include <mutex>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 #include <string>
 
@@ -21,6 +23,9 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 }
 
 void MqttManagerConfig::load() {
+  std::lock_guard<std::mutex> mutex_guard(MqttManagerConfig::_config_load_mutex);
+
+  SPDLOG_TRACE("Loading timezone from /etc/timezone.");
   // Begin by loading timezone
   std::ifstream f("/etc/timezone", std::ios::in | std::ios::binary);
   const size_t file_size = std::filesystem::file_size("/etc/timezone");
@@ -36,6 +41,7 @@ void MqttManagerConfig::load() {
 
   SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
 
+  SPDLOG_TRACE("Loading sensitive settings from environment variables.");
   // Load sensitive variables from environment and not via http get request to manager.
   char *ha_address = std::getenv("HOME_ASSISTANT_ADDRESS");
   char *ha_token = std::getenv("HOME_ASSISTANT_TOKEN");
@@ -98,7 +104,7 @@ void MqttManagerConfig::load() {
 
   SPDLOG_INFO("Gathering config from web manager.");
   while (true) {
-    std::string url = fmt::format("http://{}:{}/api/get_mqtt_manager_config", MANAGER_ADDRESS, MANAGER_PORT);
+    std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_mqtt_manager_config";
     std::string response_data;
     if (WebHelper::perform_request(&url, &response_data, nullptr, nullptr)) {
       SPDLOG_DEBUG("Got config data. Processing config.");
@@ -134,7 +140,7 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   if (!std::string(data["manager_port"]).empty()) {
     MqttManagerConfig::manager_port = atoi(std::string(data["manager_port"]).c_str());
   } else {
-    SPDLOG_ERROR("Manager port not configured! Setting 0.");
+    SPDLOG_CRITICAL("Manager port not configured! Setting 0.");
     MqttManagerConfig::manager_port = 0;
   }
 
