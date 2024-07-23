@@ -6,8 +6,8 @@
 #include <cstddef>
 #include <cstdlib>
 #include <ctime>
+#include <ipc_handler/ipc_handler.hpp>
 #include <memory>
-#include <pipe_handler/pipe_handler.hpp>
 #include <signal.h>
 #include <spdlog/common.h>
 #include <spdlog/spdlog.h>
@@ -126,7 +126,7 @@ int main(void) {
   sigUsr1Handler.sa_flags = 0;
   sigaction(SIGUSR1, &sigUsr1Handler, NULL);
 
-  // PipeHandler::start();
+  IPCHandler::start();
 
   std::thread mqtt_manager_thread;
   std::thread home_assistant_manager_thread;

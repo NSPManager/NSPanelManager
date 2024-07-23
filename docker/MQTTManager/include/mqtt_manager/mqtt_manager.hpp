@@ -1,13 +1,13 @@
 #ifndef MQTT_MANAGER_HPP
 #define MQTT_MANAGER_HPP
 
-#include <mutex>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/signals2.hpp>
 #include <functional>
 #include <mqtt/client.h>
 #include <mqtt/message.h>
 #include <mqtt/subscribe_options.h>
+#include <mutex>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
 #include <string>

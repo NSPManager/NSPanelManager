@@ -1,4 +1,3 @@
-from re import A
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
@@ -6,6 +5,7 @@ from django.core.files.storage import FileSystemStorage
 import hashlib
 import logging
 import json
+from .mqttmanager_ipc import send_ipc_request
 
 from .models import NSPanel, Room, Light, LightState, Scene, RelayGroup
 from .apps import start_mqtt_manager
@@ -310,6 +310,8 @@ def lights(request):
         return JsonResponse({"status": "error"}, status=405)
 
 def lights_get(request):
+    send_ipc_request("test_topic", {})
+
     try:
         lights = []
         if request.GET.get('light_id'):
