@@ -18,25 +18,25 @@ def start_mqtt_manager():
     logging.info("Starting a new mqtt_manager")
     mqttmanager_env = os.environ.copy()
     mqttmanager_env["MQTT_SERVER"] = get_setting_with_default(
-        "mqtt_server", "")
+        "mqtt_server")
     mqttmanager_env["MQTT_PORT"] = get_setting_with_default(
-        "mqtt_port", "1883")
+        "mqtt_port")
     mqttmanager_env["MQTT_USERNAME"] = get_setting_with_default(
-        "mqtt_username", "")
+        "mqtt_username")
     mqttmanager_env["MQTT_PASSWORD"] = get_setting_with_default(
-        "mqtt_password", "")
+        "mqtt_password")
     mqttmanager_env["HOME_ASSISTANT_ADDRESS"] = get_setting_with_default(
-        "home_assistant_address", "")
+        "home_assistant_address")
     mqttmanager_env["HOME_ASSISTANT_TOKEN"] = get_setting_with_default(
-        "home_assistant_token", "")
+        "home_assistant_token")
     mqttmanager_env["OPENHAB_ADDRESS"] = get_setting_with_default(
-        "openhab_address", "")
+        "openhab_address")
     mqttmanager_env["OPENHAB_TOKEN"] = get_setting_with_default(
-        "openhab_token", "")
+        "openhab_token")
     mqttmanager_env["OPENHAB_TOKEN"] = get_setting_with_default(
-        "openhab_token", "")
+        "openhab_token")
     mqttmanager_env["LOG_LEVEL"] = get_setting_with_default(
-        "mqttmanager_log_level", "debug")
+        "mqttmanager_log_level")
     subprocess.Popen(["/MQTTManager/build/nspm_mqttmanager"],
                      cwd="/usr/src/app/", env=mqttmanager_env)
 
@@ -51,14 +51,14 @@ class WebConfig(AppConfig):
             if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
                 if "SUPERVISOR_TOKEN" in environment:
                     from .settings_helper import get_setting_with_default, set_setting_value
-                    if get_setting_with_default("home_assistant_token", "") == "" and get_setting_with_default("home_assistant_address", "") == "":
+                    if get_setting_with_default("home_assistant_token") == "" and get_setting_with_default("home_assistant_address") == "":
                         print(
                             "No home assistant address or token stored, setting according to addon environment.")
                         set_setting_value(
                             "home_assistant_token", environment("SUPERVISOR_TOKEN"))
                         set_setting_value(
                             "home_assistant_address", "http://supervisor")
-                    elif get_setting_with_default("home_assistant_token", "") != environment("SUPERVISOR_TOKEN"):
+                    elif get_setting_with_default("home_assistant_token") != environment("SUPERVISOR_TOKEN"):
                         print(
                             "Home Assistant token has changed. Will update database.")
                         set_setting_value(

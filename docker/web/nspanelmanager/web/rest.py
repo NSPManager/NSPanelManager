@@ -11,6 +11,68 @@ from .models import NSPanel, Room, Light, LightState, Scene, RelayGroup
 from .apps import start_mqtt_manager
 from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default, set_setting_value
 
+##########################
+## MQTTManager section ###
+##########################
+
+# Keys that are not allowed to be pulled though the REST API beacuse of security concerns.
+banned_setting_keys = [
+    "MQTT_SERVER",
+    "MQTT_PORT",
+    "MQTT_USERNAME",
+    "MQTT_PASSWORD",
+    "HOME_ASSISTANT_ADDRESS",
+    "HOME_ASSISTANT_TOKEN",
+    "OPENHAB_ADDRESS",
+    "OPENHAB_TOKEN",
+    "OPENHAB_TOKEN",
+]
+
+def mqttmanager_get_setting(request, setting_key):
+    if setting_key in banned_setting_keys:
+        return JsonResponse({"status": "error"}, status=403) # Return error forbidden
+
+    try:
+        settings = {}
+        if request.method == 'GET':
+            settings[setting_key] = get_setting_with_default(setting_key)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+
+        return JsonResponse({
+            "status": "ok",
+            "settings": settings,
+        })
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error"}, status=500)
+
+
+@csrf_exempt
+def mqttmanager_settings_post(request):
+    try:
+        settings = {}
+        if request.method == 'POST':
+            data = json.loads(request.body)
+
+            for setting_key in data["settings"]:
+                if setting_key in banned_setting_keys:
+                    return JsonResponse({"status": "error"}, status=403) # Return error forbidden
+                settings[setting_key] = get_setting_with_default(setting_key)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+
+        return JsonResponse({
+            "status": "ok",
+            "settings": settings,
+        })
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error"}, status=500)
+
+
 ######################
 ## NSPanel section ###
 ######################
@@ -64,7 +126,7 @@ def nspanel_warnings(request):
 
             return JsonResponse({
                 "status": "ok",
-                "panels": panels
+                "nspanels": panels
             }, status=200)
     except Exception as ex:
         logging.exception(ex)
@@ -98,21 +160,21 @@ def nspanels_get(request):
                 "name": nspanel.friendly_name,
                 "home": nspanel.room.id,
                 "default_page": get_nspanel_setting_with_default(nspanel.id, "default_page", 0),
-                "raise_to_100_light_level": get_setting_with_default("raise_to_100_light_level", 95),
-                "color_temp_min": get_setting_with_default("color_temp_min", 2000),
-                "color_temp_max": get_setting_with_default("color_temp_max", 6000),
-                "reverse_color_temp": get_setting_with_default("reverse_color_temp", False),
-                "min_button_push_time": get_setting_with_default("min_button_push_time", 50),
-                "button_long_press_time": get_setting_with_default("button_long_press_time", 5000),
-                "special_mode_trigger_time": get_setting_with_default("special_mode_trigger_time", 300),
-                "special_mode_release_time": get_setting_with_default("special_mode_release_time", 5000),
+                "raise_to_100_light_level": get_setting_with_default("raise_to_100_light_level"),
+                "color_temp_min": get_setting_with_default("color_temp_min"),
+                "color_temp_max": get_setting_with_default("color_temp_max"),
+                "reverse_color_temp": get_setting_with_default("reverse_color_temp"),
+                "min_button_push_time": get_setting_with_default("min_button_push_time"),
+                "button_long_press_time": get_setting_with_default("button_long_press_time"),
+                "special_mode_trigger_time": get_setting_with_default("special_mode_trigger_time"),
+                "special_mode_release_time": get_setting_with_default("special_mode_release_time"),
                 "mqtt_ignore_time": get_nspanel_setting_with_default(nspanel.id, "mqtt_ignore_time", 3000),
-                "screen_dim_level": get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level", 100)),
-                "screensaver_dim_level": get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level", 0)),
-                "screensaver_activation_timeout": get_nspanel_setting_with_default(nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout", 30000)),
-                "screensaver_mode": get_nspanel_setting_with_default(nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode", "with_background")),
-                "clock_us_style": get_setting_with_default("clock_us_style", "False"),
-                "use_fahrenheit": get_setting_with_default("use_fahrenheit", "False"),
+                "screen_dim_level": get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level")),
+                "screensaver_dim_level": get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level")),
+                "screensaver_activation_timeout": get_nspanel_setting_with_default(nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout")),
+                "screensaver_mode": get_nspanel_setting_with_default(nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode")),
+                "clock_us_style": get_setting_with_default("clock_us_style"),
+                "use_fahrenheit": get_setting_with_default("use_fahrenheit"),
                 "is_us_panel": get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False"),
                 "lock_to_default_room": get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False"),
                 "reverse_relays": get_nspanel_setting_with_default(nspanel.id, "reverse_relays", False),
@@ -132,7 +194,7 @@ def nspanels_get(request):
             })
         return JsonResponse({
             "status": "ok",
-            "panels": nspanels
+            "nspanels": nspanels
         })
 
 # Handle DELETE request to "nspanel" endpoint.
@@ -145,7 +207,7 @@ def nspanel_delete(request, panel_id):
             nspanel.delete()
             return JsonResponse({
                 "status": "ok",
-                "panel_id": panel_id
+                "nspanel_id": panel_id
             }, status=200)
         except Exception as ex:
             logging.exception(ex)
@@ -210,15 +272,7 @@ def nspanel_post(request):
         new_panel.save()
         json_response = {
             "status": "ok",
-            "type": "nspanel",
-            "id": new_panel.id,
-            "mac": new_panel.mac_address,
-            "name": new_panel.friendly_name,
-            "is_us_panel": get_nspanel_setting_with_default(new_panel.id, "is_us_panel", "False") == "True",
-            "address": new_panel.ip_address,
-            "relay1_is_light": get_nspanel_setting_with_default(new_panel.id, "relay1_is_light", "False") == "True",
-            "relay2_is_light": get_nspanel_setting_with_default(new_panel.id, "relay2_is_light", "False") == "True",
-            "denied": "True" if new_panel.denied else "False"
+            "nspanel_id": new_panel.id,
         }
         return JsonResponse(json_response, status=200)
     except Exception as ex:

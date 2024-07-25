@@ -42,13 +42,13 @@ def get_file_md5sum(filename):
 
 
 def index(request):
-    if get_setting_with_default("use_fahrenheit", False) == "True":
+    if get_setting_with_default("use_fahrenheit") == "True":
         temperature_unit = "°F"
     else:
         temperature_unit = "°C"
 
     notifications = []
-    if get_setting_with_default("manager_address", "") == "":
+    if get_setting_with_default("manager_address") == "":
         notifications.append(
             {"text": "No manager address configured in settings.", "class": "error"})
 
@@ -59,25 +59,25 @@ def index(request):
         nspanels.append(panel_info)
 
     data = {
-        'dark_theme': get_setting_with_default("dark_theme", "false"),
+        'dark_theme': get_setting_with_default("dark_theme"),
         'nspanels': nspanels,
         'notifications': notifications,
         'temperature_unit': temperature_unit,
-        'manager_address': get_setting_with_default("manager_address", "")
+        'manager_address': get_setting_with_default("manager_address")
     }
 
     if (data["manager_address"] == ""):
         environment = environ.Env()
         data = {**data, **{
-            'manager_port': get_setting_with_default("manager_port", ""),
-            "mqtt_server": get_setting_with_default("mqtt_server", ""),
-            "mqtt_port": get_setting_with_default("mqtt_port", 1883),
-            "mqtt_username": get_setting_with_default("mqtt_username", ""),
-            "mqtt_password": get_setting_with_default("mqtt_password", ""),
-            "home_assistant_address": get_setting_with_default("home_assistant_address", ""),
-            "home_assistant_token": get_setting_with_default("home_assistant_token", ""),
-            "openhab_address": get_setting_with_default("openhab_address", ""),
-            "openhab_token": get_setting_with_default("openhab_token", ""),
+            'manager_port': get_setting_with_default("manager_port"),
+            "mqtt_server": get_setting_with_default("mqtt_server"),
+            "mqtt_port": get_setting_with_default("mqtt_port"),
+            "mqtt_username": get_setting_with_default("mqtt_username"),
+            "mqtt_password": get_setting_with_default("mqtt_password"),
+            "home_assistant_address": get_setting_with_default("home_assistant_address"),
+            "home_assistant_token": get_setting_with_default("home_assistant_token"),
+            "openhab_address": get_setting_with_default("openhab_address"),
+            "openhab_token": get_setting_with_default("openhab_token"),
             "is_home_assistant_addon": ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
         }}
 
@@ -85,11 +85,11 @@ def index(request):
 
 
 def rooms(request):
-    return render(request, 'rooms.html', {'dark_theme': get_setting_with_default("dark_theme", "false"), 'rooms': Room.objects.all().order_by('displayOrder')})
+    return render(request, 'rooms.html', {'dark_theme': get_setting_with_default("dark_theme"), 'rooms': Room.objects.all().order_by('displayOrder')})
 
 
 def rooms_order(request):
-    return render(request, 'rooms_order.html', {'dark_theme': get_setting_with_default("dark_theme", "false"), 'rooms': Room.objects.all().order_by('displayOrder')})
+    return render(request, 'rooms_order.html', {'dark_theme': get_setting_with_default("dark_theme"), 'rooms': Room.objects.all().order_by('displayOrder')})
 
 
 def move_room_up(request, room_id: int):
@@ -141,7 +141,7 @@ def edit_room(request, room_id: int):
     total_num_rooms = Room.objects.all().count()
     room = Room.objects.filter(id=room_id).first()
     data = {
-        'dark_theme': get_setting_with_default("dark_theme", "false"),
+        'dark_theme': get_setting_with_default("dark_theme"),
         'room': room,
         'total_num_rooms': total_num_rooms
     }
@@ -183,7 +183,7 @@ def update_room_form(request, room_id: int):
 
 
 def edit_nspanel(request, panel_id: int):
-    if get_setting_with_default("use_fahrenheit", False) == "True":
+    if get_setting_with_default("use_fahrenheit") == "True":
         temperature_unit = "°F"
     else:
         temperature_unit = "°C"
@@ -208,13 +208,13 @@ def edit_nspanel(request, panel_id: int):
     }
 
     return render(request, 'edit_nspanel.html', {
-        'dark_theme': get_setting_with_default("dark_theme", "false"),
+        'dark_theme': get_setting_with_default("dark_theme"),
         'panel': NSPanel.objects.get(id=panel_id),
         'rooms': Room.objects.all(),
         'settings': settings,
         "temperature_unit": temperature_unit,
         "multiple": [1, 2, 3, 4],
-        "max_live_log_messages": get_setting_with_default("max_live_log_messages", 10),
+        "max_live_log_messages": get_setting_with_default("max_live_log_messages"),
     })
 
 
@@ -459,27 +459,27 @@ def settings_page(request):
     environment = environ.Env()
 
     data = {
-        'dark_theme': get_setting_with_default("dark_theme", "false"),
-        'mqttmanager_log_level': get_setting_with_default("mqttmanager_log_level", "debug"),
+        'dark_theme': get_setting_with_default("dark_theme"),
+        'mqttmanager_log_level': get_setting_with_default("mqttmanager_log_level"),
     }
-    data["color_temp_min"] = get_setting_with_default("color_temp_min", 2000)
-    data["color_temp_max"] = get_setting_with_default("color_temp_max", 6000)
+    data["color_temp_min"] = get_setting_with_default("color_temp_min")
+    data["color_temp_max"] = get_setting_with_default("color_temp_max")
     data["reverse_color_temp"] = get_setting_with_default(
-        "reverse_color_temp", False)
-    data["mqtt_server"] = get_setting_with_default("mqtt_server", "")
-    data["mqtt_port"] = get_setting_with_default("mqtt_port", 1883)
-    data["mqtt_username"] = get_setting_with_default("mqtt_username", "")
-    data["mqtt_password"] = get_setting_with_default("mqtt_password", "")
+        "reverse_color_temp")
+    data["mqtt_server"] = get_setting_with_default("mqtt_server")
+    data["mqtt_port"] = get_setting_with_default("mqtt_port")
+    data["mqtt_username"] = get_setting_with_default("mqtt_username")
+    data["mqtt_password"] = get_setting_with_default("mqtt_password")
     data["home_assistant_address"] = get_setting_with_default(
-        "home_assistant_address", "")
+        "home_assistant_address")
     data["home_assistant_token"] = get_setting_with_default(
-        "home_assistant_token", "")
-    data["openhab_address"] = get_setting_with_default("openhab_address", "")
-    data["openhab_token"] = get_setting_with_default("openhab_token", "")
+        "home_assistant_token")
+    data["openhab_address"] = get_setting_with_default("openhab_address")
+    data["openhab_token"] = get_setting_with_default("openhab_token")
     data["openhab_brightness_channel_name"] = get_setting_with_default(
-        "openhab_brightness_channel_name", "")
+        "openhab_brightness_channel_name")
     data["openhab_brightness_channel_min"] = get_setting_with_default(
-        "openhab_brightness_channel_min", 0)
+        "openhab_brightness_channel_min")
     data["openhab_brightness_channel_max"] = get_setting_with_default(
         "openhab_brightness_channel_max", 255)
     data["openhab_color_temp_channel_name"] = get_setting_with_default(
@@ -514,8 +514,8 @@ def settings_page(request):
         "max_log_buffer_size", 10)
     data["is_home_assistant_addon"] = (
         "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
-    data["manager_address"] = get_setting_with_default("manager_address", "")
-    data["manager_port"] = get_setting_with_default("manager_port", "")
+    data["manager_address"] = get_setting_with_default("manager_address")
+    data["manager_port"] = get_setting_with_default("manager_port")
     return render(request, 'settings.html', data)
 
 
@@ -796,13 +796,13 @@ def get_manual(request):
 
 
 def global_scenes(request):
-    data = {'dark_theme': get_setting_with_default("dark_theme", "false"), }
+    data = {'dark_theme': get_setting_with_default("dark_theme"), }
     data["global_scenes"] = Scene.objects.filter(room__isnull=True)
     return render(request, 'global_scenes.html', data)
 
 
 def relay_groups(request):
-    data = {'dark_theme': get_setting_with_default("dark_theme", "false"), }
+    data = {'dark_theme': get_setting_with_default("dark_theme"), }
     data["nspanels"] = NSPanel.objects.all()
     data["relay_groups"] = RelayGroup.objects.all()
     return render(request, 'relay_groups.html', data)
@@ -875,17 +875,17 @@ def weather_and_time(request):
         return redirect("weather_and_time")
     else:
         data = {
-            'dark_theme': get_setting_with_default("dark_theme", "false"),
-            'date_format': get_setting_with_default("date_format", "%a %d/%m %Y"),
-            'clock_us_style': get_setting_with_default("clock_us_style", False),
-            'use_fahrenheit': get_setting_with_default("use_fahrenheit", False),
-            'outside_temp_provider': get_setting_with_default("outside_temp_sensor_provider", ""),
-            'outside_temp_sensor': get_setting_with_default("outside_temp_sensor_entity_id", ""),
-            'location_latitude': get_setting_with_default("location_latitude", ""),
-            'location_longitude': get_setting_with_default("location_longitude", ""),
-            'wind_speed_format': get_setting_with_default("wind_speed_format", "kmh"),
-            'precipitation_format': get_setting_with_default("precipitation_format", "mm"),
-            'weather_update_interval': get_setting_with_default("weather_update_interval", 10),
+            'dark_theme': get_setting_with_default("dark_theme"),
+            'date_format': get_setting_with_default("date_format"),
+            'clock_us_style': get_setting_with_default("clock_us_style"),
+            'use_fahrenheit': get_setting_with_default("use_fahrenheit"),
+            'outside_temp_provider': get_setting_with_default("outside_temp_sensor_provider"),
+            'outside_temp_sensor': get_setting_with_default("outside_temp_sensor_entity_id"),
+            'location_latitude': get_setting_with_default("location_latitude"),
+            'location_longitude': get_setting_with_default("location_longitude"),
+            'wind_speed_format': get_setting_with_default("wind_speed_format"),
+            'precipitation_format': get_setting_with_default("precipitation_format"),
+            'weather_update_interval': get_setting_with_default("weather_update_interval"),
         }
 
         return render(request, "weather_and_time.html", data)
@@ -893,7 +893,7 @@ def weather_and_time(request):
 
 def denied_nspanels(request):
     data = {
-        'dark_theme': get_setting_with_default("dark_theme", "false"),
+        'dark_theme': get_setting_with_default("dark_theme"),
         "nspanels": NSPanel.objects.all(),
     }
     return render(request, 'denied_nspanels.html', data)

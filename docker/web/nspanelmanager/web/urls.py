@@ -111,6 +111,9 @@ urlpatterns = [
     #####################
     ### Rest API URLs ###
     #####################
+    # MQTTManager endpoints
+    path('rest/mqttmanager/settings/<str:setting_key>', rest.mqttmanager_get_setting, name="rest_mqttmanager_get_setting"),
+    path('rest/mqttmanager/settings', rest.mqttmanager_settings_post, name="rest_mqttmanager_settings_post"),
     # NSPanel URLs
     path('rest/nspanels/warnings', rest.nspanel_warnings, name='rest_nspanel_warnings'),
     path('rest/nspanels/<int:panel_id>', rest.nspanel_delete, name='rest_nspanel_delete'),

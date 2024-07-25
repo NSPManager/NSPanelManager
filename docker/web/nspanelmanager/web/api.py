@@ -47,27 +47,27 @@ def get_mqtt_manager_config(request):
     environment = environ.Env()
 
     return_json = {
-        "color_temp_min": int(get_setting_with_default("color_temp_min", "2000")),
-        "color_temp_max": int(get_setting_with_default("color_temp_max", "6000")),
-        "openhab_brightness_channel_name": get_setting_with_default("openhab_brightness_channel_name", ""),
-        "openhab_brightness_channel_min": get_setting_with_default("openhab_brightness_channel_min", 0),
-        "openhab_brightness_channel_max": get_setting_with_default("openhab_brightness_channel_max", 255),
-        "openhab_color_temp_channel_name": get_setting_with_default("openhab_color_temp_channel_name", ""),
-        "openhab_rgb_channel_name": get_setting_with_default("openhab_rgb_channel_name", ""),
-        "clock_us_style": get_setting_with_default("clock_us_style", False) == "True",
-        "use_fahrenheit": get_setting_with_default("use_fahrenheit", False) == "True",
-        "turn_on_behavior": get_setting_with_default("turn_on_behavior", "color_temp"),
-        "max_log_buffer_size": get_setting_with_default("max_log_buffer_size", "10"),
-        "manager_address": get_setting_with_default("manager_address", ""),
-        "manager_port": get_setting_with_default("manager_port", ""),
-        "date_format": get_setting_with_default("date_format", "%a %d/%m %Y"),
-        "outside_temp_sensor_provider": get_setting_with_default("outside_temp_sensor_provider", ""),
-        "outside_temp_sensor_entity_id": get_setting_with_default("outside_temp_sensor_entity_id", ""),
-        "weather_location_latitude": get_setting_with_default("location_latitude", ""),
-        "weather_location_longitude": get_setting_with_default("location_longitude", ""),
-        "weather_wind_speed_format": get_setting_with_default("wind_speed_format", "kmh"),
-        "weather_precipitation_format": get_setting_with_default("precipitation_format", "mm"),
-        "weather_update_interval": int(get_setting_with_default("weather_update_interval", 10)),
+        "color_temp_min": int(get_setting_with_default("color_temp_min")),
+        "color_temp_max": int(get_setting_with_default("color_temp_max")),
+        "openhab_brightness_channel_name": get_setting_with_default("openhab_brightness_channel_name"),
+        "openhab_brightness_channel_min": get_setting_with_default("openhab_brightness_channel_min"),
+        "openhab_brightness_channel_max": get_setting_with_default("openhab_brightness_channel_max"),
+        "openhab_color_temp_channel_name": get_setting_with_default("openhab_color_temp_channel_name"),
+        "openhab_rgb_channel_name": get_setting_with_default("openhab_rgb_channel_name"),
+        "clock_us_style": get_setting_with_default("clock_us_style") == True,
+        "use_fahrenheit": get_setting_with_default("use_fahrenheit") == True,
+        "turn_on_behavior": get_setting_with_default("turn_on_behavior"),
+        "max_log_buffer_size": get_setting_with_default("max_log_buffer_size"),
+        "manager_address": get_setting_with_default("manager_address"),
+        "manager_port": get_setting_with_default("manager_port"),
+        "date_format": get_setting_with_default("date_format"),
+        "outside_temp_sensor_provider": get_setting_with_default("outside_temp_sensor_provider"),
+        "outside_temp_sensor_entity_id": get_setting_with_default("outside_temp_sensor_entity_id"),
+        "weather_location_latitude": get_setting_with_default("location_latitude"),
+        "weather_location_longitude": get_setting_with_default("location_longitude"),
+        "weather_wind_speed_format": get_setting_with_default("wind_speed_format"),
+        "weather_precipitation_format": get_setting_with_default("precipitation_format"),
+        "weather_update_interval": int(get_setting_with_default("weather_update_interval")),
     }
 
     if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
@@ -219,19 +219,19 @@ def get_all_available_entities(request):
     return_json["errors"] = []
 
     # Home Assistant
-    if get_setting_with_default("home_assistant_token", "") != "" and get_setting_with_default("home_assistant_address", "") != "":
+    if get_setting_with_default("home_assistant_token") != "" and get_setting_with_default("home_assistant_address") != "":
         home_assistant_request_headers = {
-            "Authorization": "Bearer " + get_setting_with_default("home_assistant_token", ""),
+            "Authorization": "Bearer " + get_setting_with_default("home_assistant_token"),
             "content-type": "application/json",
         }
         try:
             environment = environ.Env()
             if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
                 home_assistant_api_address = get_setting_with_default(
-                    "home_assistant_address", "") + "/core/api/states"
+                    "home_assistant_address") + "/core/api/states"
             else:
                 home_assistant_api_address = get_setting_with_default(
-                    "home_assistant_address", "") + "/api/states"
+                    "home_assistant_address") + "/api/states"
             print("Trying to get Home Assistant entities via api address: " +
                   home_assistant_api_address)
             home_assistant_response = requests.get(
@@ -262,16 +262,16 @@ def get_all_available_entities(request):
         print("No home assistant configuration values. Will not gather Home Assistant entities.")
 
     # OpenHAB
-    if get_setting_with_default("openhab_token", "") != "" and get_setting_with_default("openhab_address", "") != "":
+    if get_setting_with_default("openhab_token") != "" and get_setting_with_default("openhab_address") != "":
         # TODO: Sort out how to map channels from items to the correct POST request when MQTT is received
         openhab_request_headers = {
-            "Authorization": "Bearer " + get_setting_with_default("openhab_token", ""),
+            "Authorization": "Bearer " + get_setting_with_default("openhab_token"),
             "content-type": "application/json",
         }
         try:
             if "things" in openhab_type_filter:
                 openhab_response = requests.get(get_setting_with_default(
-                    "openhab_address", "") + "/rest/things", headers=openhab_request_headers, verify=False)
+                    "openhab_address") + "/rest/things", headers=openhab_request_headers, verify=False)
 
                 if openhab_response.status_code == 200:
                     for entity in openhab_response.json():
@@ -303,7 +303,7 @@ def get_all_available_entities(request):
                           str(openhab_response.status_code))
             elif "rules" in openhab_type_filter:
                 openhab_response = requests.get(get_setting_with_default(
-                    "openhab_address", "") + "/rest/rules", headers=openhab_request_headers, verify=False)
+                    "openhab_address") + "/rest/rules", headers=openhab_request_headers, verify=False)
 
                 if openhab_response.status_code == 200:
                     for entity in openhab_response.json():
@@ -409,35 +409,35 @@ def get_nspanel_config(request):
         base["default_page"] = get_nspanel_setting_with_default(
             nspanel.id, "default_page", "0")
         base["raise_to_100_light_level"] = get_setting_with_default(
-            "raise_to_100_light_level", 95)
+            "raise_to_100_light_level")
         base["color_temp_min"] = get_setting_with_default(
-            "color_temp_min", 2000)
+            "color_temp_min")
         base["color_temp_max"] = get_setting_with_default(
-            "color_temp_max", 6000)
+            "color_temp_max")
         base["reverse_color_temp"] = get_setting_with_default(
-            "reverse_color_temp", False)
+            "reverse_color_temp")
         base["min_button_push_time"] = get_setting_with_default(
-            "min_button_push_time", 50)
+            "min_button_push_time")
         base["button_long_press_time"] = get_setting_with_default(
-            "button_long_press_time", 5000)
+            "button_long_press_time")
         base["special_mode_trigger_time"] = get_setting_with_default(
-            "special_mode_trigger_time", 300)
+            "special_mode_trigger_time")
         base["special_mode_release_time"] = get_setting_with_default(
-            "special_mode_release_time", 5000)
+            "special_mode_release_time")
         base["mqtt_ignore_time"] = get_setting_with_default(
-            "mqtt_ignore_time", 3000)
+            "mqtt_ignore_time")
         base["screen_dim_level"] = get_nspanel_setting_with_default(
-            nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level", 100))
+            nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level"))
         base["screensaver_dim_level"] = get_nspanel_setting_with_default(
-            nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level", 0))
+            nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level"))
         base["screensaver_activation_timeout"] = get_nspanel_setting_with_default(
-            nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout", 30000))
+            nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout"))
         base["screensaver_mode"] = get_nspanel_setting_with_default(
-            nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode", "with_background"))
+            nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode"))
         base["clock_us_style"] = get_setting_with_default(
-            "clock_us_style", "False")
+            "clock_us_style")
         base["use_fahrenheit"] = get_setting_with_default(
-            "use_fahrenheit", "False")
+            "use_fahrenheit")
         base["is_us_panel"] = get_nspanel_setting_with_default(
             nspanel.id, "is_us_panel", "False")
         base["lock_to_default_room"] = get_nspanel_setting_with_default(
