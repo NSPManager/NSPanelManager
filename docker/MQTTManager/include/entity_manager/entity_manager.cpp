@@ -664,7 +664,7 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       SPDLOG_INFO("Received command to delete NSPanel {}::{}.", panel->get_id(), panel->get_name());
       std::string url = fmt::format("http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/delete_nspanel/{}", panel->get_id()).c_str();
       std::string response_data;
-      if (WebHelper::perform_request(&url, &response_data, nullptr, nullptr) && !response_data.empty()) {
+      if (WebHelper::perform_get_request(&url, &response_data, nullptr) && !response_data.empty()) {
         panel->reboot();
         nlohmann::json response;
         response["cmd_id"] = command_id;

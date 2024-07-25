@@ -36,7 +36,7 @@ void OpenhabScene::activate() {
   std::string response_data;
   std::string post_data = "";
   SPDLOG_DEBUG("Triggering OpenHAB scene {}::{} via POST request to {}", this->_id, this->_name, openhab_trigger_scene_url);
-  if (WebHelper::perform_request(&openhab_trigger_scene_url, &response_data, &headers, &post_data)) {
+  if (WebHelper::perform_post_request(&openhab_trigger_scene_url, &response_data, &headers, &post_data)) {
     SPDLOG_DEBUG("Successfully activated OpenHAB scene {}::{}", this->_id, this->_name);
   } else {
     SPDLOG_ERROR("Failed to activate scene.");

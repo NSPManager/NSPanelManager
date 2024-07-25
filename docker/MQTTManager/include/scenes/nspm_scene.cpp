@@ -123,7 +123,7 @@ void NSPMScene::save() {
   std::string json_payload = save_scene_data.dump();
 
   std::string url = "http://127.0.0.1:8000/api/save_scene";
-  if (WebHelper::perform_request(&url, nullptr, nullptr, &json_payload)) {
+  if (WebHelper::perform_post_request(&url, nullptr, nullptr, &json_payload)) {
     SPDLOG_INFO("Saved scene {}::{}.", this->_id, this->_name);
   } else {
     SPDLOG_INFO("Failed to save scene {}::{}.", this->_id, this->_name);

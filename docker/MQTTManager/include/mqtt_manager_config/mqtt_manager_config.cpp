@@ -106,7 +106,7 @@ void MqttManagerConfig::load() {
   while (true) {
     std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_mqtt_manager_config";
     std::string response_data;
-    if (WebHelper::perform_request(&url, &response_data, nullptr, nullptr)) {
+    if (WebHelper::perform_get_request(&url, &response_data, nullptr)) {
       SPDLOG_DEBUG("Got config data. Processing config.");
       nlohmann::json data = nlohmann::json::parse(response_data);
       MqttManagerConfig::populate_settings_from_config(data);

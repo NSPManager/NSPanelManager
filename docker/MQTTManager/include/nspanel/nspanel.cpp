@@ -555,7 +555,7 @@ void NSPanel::update_warnings_from_manager() {
   }
   std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_nspanels_warnings";
   std::string response_data;
-  if (WebHelper::perform_request(&url, &response_data, nullptr, nullptr)) {
+  if (WebHelper::perform_get_request(&url, &response_data, nullptr)) {
     nlohmann::json data = nlohmann::json::parse(response_data);
     for (nlohmann::json panel : data["panels"]) {
       if (std::string(panel["nspanel"]["mac"]).compare(this->_mac) == 0) {
@@ -597,7 +597,7 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
     std::string url = "http://127.0.0.1:8000/api/register_nspanel";
     std::string response_data;
     std::string payload_data = register_request_payload.dump();
-    if (WebHelper::perform_request(&url, &response_data, nullptr, &payload_data)) {
+    if (WebHelper::perform_post_request(&url, &response_data, nullptr, &payload_data)) {
       SPDLOG_INFO("Panel registration OK.");
       if (!this->_is_register_denied) {
         this->update_warnings_from_manager();

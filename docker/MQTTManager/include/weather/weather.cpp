@@ -63,7 +63,7 @@ void MQTTManagerWeather::_pull_new_weather_data() {
   std::string pull_weather_url = fmt::format("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&wind_speed_unit={}&timezone={}&precipitation_unit={}&temperature_unit={}", MqttManagerConfig::weather_location_latitude, MqttManagerConfig::weather_location_longitude, MqttManagerConfig::weather_wind_speed_format, MqttManagerConfig::timezone, MqttManagerConfig::weather_precipitation_format, temperature_unit);
   std::list<const char *> headers = {"Content-type: application/json"};
   std::string response_data;
-  if (WebHelper::perform_request(&pull_weather_url, &response_data, &headers, nullptr)) {
+  if (WebHelper::perform_get_request(&pull_weather_url, &response_data, &headers)) {
     SPDLOG_DEBUG("Successfully received new weather forcast from Open Meteo. Will process new data.");
     MQTTManagerWeather::_process_weather_data(response_data);
     SPDLOG_DEBUG("Weather data processed.");
