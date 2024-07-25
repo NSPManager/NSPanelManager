@@ -55,8 +55,6 @@ def mqttmanager_settings_post(request):
         settings = {}
         if request.method == 'POST':
             data = json.loads(request.body)
-            print(data)
-
             for setting_key in data["settings"]:
                 if setting_key in banned_setting_keys:
                     return JsonResponse({"status": "error"}, status=403) # Return error forbidden
@@ -365,8 +363,6 @@ def lights(request):
         return JsonResponse({"status": "error"}, status=405)
 
 def lights_get(request):
-    send_ipc_request("test_topic", {})
-
     try:
         lights = []
         if request.GET.get('light_id'):

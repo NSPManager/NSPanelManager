@@ -192,26 +192,50 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
     }
 
     SPDLOG_DEBUG("Loading lights...");
-    MqttManagerConfig::light_configs.clear();
-    for (nlohmann::json light_config : data.at("settings").at("lights")) {
-      MqttManagerConfig::light_configs.push_back(light_config);
+    std::string lights_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/lights";
+    std::string lights_string;
+    if (WebHelper::perform_get_request(&lights_url, &lights_string, nullptr)) {
+      SPDLOG_TRACE("Got lights config: {}", lights_string);
+      nlohmann::json lights_json = nlohmann::json::parse(lights_string);
+      MqttManagerConfig::light_configs.clear();
+      for (nlohmann::json light_config : lights_json.at("lights")) {
+        MqttManagerConfig::light_configs.push_back(light_config);
+      }
+    } else {
+      SPDLOG_ERROR("Failed to get lights config!");
     }
 
     SPDLOG_DEBUG("Loading NSPanels...");
-    MqttManagerConfig::nspanel_configs.clear();
-    for (nlohmann::json nspanel_config : data.at("settings").at("nspanels")) {
-      MqttManagerConfig::nspanel_configs.push_back(nspanel_config);
+    std::string nspanels_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/nspanels";
+    std::string nspanels_string;
+    if (WebHelper::perform_get_request(&nspanels_url, &nspanels_string, nullptr)) {
+      SPDLOG_TRACE("Got NSPanel configs: {}", nspanels_string);
+      nlohmann::json nspanels_json = nlohmann::json::parse(nspanels_string);
+      MqttManagerConfig::nspanel_configs.clear();
+      for (nlohmann::json nspanel_config : nspanels_json.at("nspanels")) {
+        MqttManagerConfig::nspanel_configs.push_back(nspanel_config);
+      }
+    } else {
+      SPDLOG_ERROR("Failed to get NSPanel configs!");
     }
 
     SPDLOG_DEBUG("Loading Scenes...");
     std::list<nlohmann::json> json_scenes;
-    for (nlohmann::json scene_config : data.at("settings").at("scenes")) {
-      json_scenes.push_back(scene_config); // Build light list for next step.
-      bool already_exists = ITEM_IN_LIST(MqttManagerConfig::scenes_configs, scene_config);
-      if (!already_exists) {
-        MqttManagerConfig::scenes_configs.push_back(scene_config);
-        MqttManagerConfig::_config_added_listener(&MqttManagerConfig::scenes_configs.back());
+    std::string scenes_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/scenes";
+    std::string scenes_string;
+    if (WebHelper::perform_get_request(&scenes_url, &scenes_string, nullptr)) {
+      SPDLOG_TRACE("Got Scene configs: {}", scenes_string);
+      nlohmann::json scenes_json = nlohmann::json::parse(scenes_string);
+      for (nlohmann::json scene_config : scenes_json.at("scenes")) {
+        json_scenes.push_back(scene_config); // Build light list for next step.
+        bool already_exists = ITEM_IN_LIST(MqttManagerConfig::scenes_configs, scene_config);
+        if (!already_exists) {
+          MqttManagerConfig::scenes_configs.push_back(scene_config);
+          MqttManagerConfig::_config_added_listener(&MqttManagerConfig::scenes_configs.back());
+        }
       }
+    } else {
+      SPDLOG_ERROR("Failed to get Scene configs!");
     }
 
     try {
@@ -233,13 +257,21 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
 
     SPDLOG_DEBUG("Loading Rooms...");
     std::list<nlohmann::json> json_rooms;
-    for (nlohmann::json room_config : data.at("settings").at("rooms")) {
-      json_rooms.push_back(room_config); // Build light list for next step.
-      bool already_exists = ITEM_IN_LIST(MqttManagerConfig::room_configs, room_config);
-      if (!already_exists) {
-        MqttManagerConfig::room_configs.push_back(room_config);
-        MqttManagerConfig::_config_added_listener(&MqttManagerConfig::room_configs.back());
+    std::string rooms_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/nspanels";
+    std::string rooms_string;
+    if (WebHelper::perform_get_request(&rooms_url, &rooms_string, nullptr)) {
+      nlohmann::json rooms_json = nlohmann::json::parse(rooms_string);
+      SPDLOG_TRACE("Got Room configs: {}", rooms_string);
+      for (nlohmann::json room_config : rooms_json.at("rooms")) {
+        json_rooms.push_back(room_config); // Build light list for next step.
+        bool already_exists = ITEM_IN_LIST(MqttManagerConfig::room_configs, room_config);
+        if (!already_exists) {
+          MqttManagerConfig::room_configs.push_back(room_config);
+          MqttManagerConfig::_config_added_listener(&MqttManagerConfig::room_configs.back());
+        }
       }
+    } else {
+      SPDLOG_ERROR("Failed to get room configs!");
     }
 
     try {
@@ -261,13 +293,21 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
 
     SPDLOG_DEBUG("Loading relay groups...");
     std::list<nlohmann::json> json_rgs;
-    for (nlohmann::json rg_config : data.at("settings").at("nspanel_relay_groups")) {
-      json_rgs.push_back(rg_config); // Build light list for next step.
-      bool already_exists = ITEM_IN_LIST(MqttManagerConfig::nspanel_relay_group_configs, rg_config);
-      if (!already_exists) {
-        MqttManagerConfig::nspanel_relay_group_configs.push_back(rg_config);
-        MqttManagerConfig::_config_added_listener(&MqttManagerConfig::nspanel_relay_group_configs.back());
+    std::string relay_groups_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/nspanels";
+    std::string relay_groups_string;
+    if (WebHelper::perform_get_request(&relay_groups_url, &relay_groups_string, nullptr)) {
+      nlohmann::json relay_groups_json = nlohmann::json::parse(relay_groups_string);
+      SPDLOG_TRACE("Got Relay Group configs: {}", rooms_string);
+      for (nlohmann::json rg_config : relay_groups_json.at("nspanel_relay_groups")) {
+        json_rgs.push_back(rg_config); // Build light list for next step.
+        bool already_exists = ITEM_IN_LIST(MqttManagerConfig::nspanel_relay_group_configs, rg_config);
+        if (!already_exists) {
+          MqttManagerConfig::nspanel_relay_group_configs.push_back(rg_config);
+          MqttManagerConfig::_config_added_listener(&MqttManagerConfig::nspanel_relay_group_configs.back());
+        }
       }
+    } else {
+      SPDLOG_ERROR("Failed to get Relay Group configs!");
     }
 
     try {
