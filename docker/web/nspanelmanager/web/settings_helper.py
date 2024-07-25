@@ -1,4 +1,5 @@
 from .models import Settings, NSPanelSettings, NSPanel
+import logging
 
 default_settings = {
     "button_long_press_time": 5000,
@@ -30,7 +31,7 @@ default_settings = {
     "openhab_rgb_channel_name": "",
     "outside_temp_sensor_entity_id": "",
     "outside_temp_sensor_provider": "",
-    "precipitation_format": "mm",
+    "weather_precipitation_format": "mm",
     "raise_to_100_light_level": 95,
     "reverse_color_temp": False,
     "screen_dim_level": 100,
@@ -42,15 +43,20 @@ default_settings = {
     "turn_on_behavior": "color_temp",
     "use_fahrenheit": False,
     "weather_update_interval": 10,
-    "wind_speed_format": "kmh",
+    "weather_wind_speed_format": "kmh",
+    "weather_location_latitude": "",
+    "weather_location_longitude": "",
 }
 
 def get_setting_with_default(name):
     objects = Settings.objects.filter(name=name)
     if objects.count() > 0:
         return objects.first().value
-    else:
+    elif name in default_settings:
         return default_settings[name]
+    else:
+        logging.error(F"Failed to get default setting for key '{name}'. No default value for setting exists.")
+        return None
 
 def does_setting_exist(name):
     objects = Settings.objects.filter(name=name)

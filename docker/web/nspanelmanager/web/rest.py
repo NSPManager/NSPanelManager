@@ -55,6 +55,7 @@ def mqttmanager_settings_post(request):
         settings = {}
         if request.method == 'POST':
             data = json.loads(request.body)
+            print(data)
 
             for setting_key in data["settings"]:
                 if setting_key in banned_setting_keys:

@@ -13,6 +13,9 @@ def start_mqtt_manager():
         if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
             return None  # MQTT Manager already running
 
+
+    environment = environ.Env()
+
     print("Did not find a running MQTTManager, starting MQTTManager...")
     # Restart the process
     logging.info("Starting a new mqtt_manager")
@@ -37,6 +40,11 @@ def start_mqtt_manager():
         "openhab_token")
     mqttmanager_env["LOG_LEVEL"] = get_setting_with_default(
         "mqttmanager_log_level")
+    if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
+        mqttmanager_env["IS_HOME_ASSISTANT_ADDON"] = "true"
+    else:
+        mqttmanager_env["IS_HOME_ASSISTANT_ADDON"] = "false"
+
     subprocess.Popen(["/MQTTManager/build/nspm_mqttmanager"],
                      cwd="/usr/src/app/", env=mqttmanager_env)
 
