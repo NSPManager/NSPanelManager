@@ -10,7 +10,7 @@ Room::Room(nlohmann::json &config) {
 }
 
 void Room::update_config(nlohmann::json &config) {
-  this->_id = config["id"];
+  this->_id = config["room_id"];
   this->_name = config["name"];
 
   SPDLOG_DEBUG("Room {}::{} initialized.", this->_id, this->_name);

@@ -9,7 +9,7 @@
 #include <spdlog/spdlog.h>
 
 NSPMScene::NSPMScene(nlohmann::json &data) {
-  this->_id = data["id"];
+  this->_id = data["scene_id"];
   this->update_config(data);
 }
 

@@ -14,6 +14,7 @@ import signal
 import subprocess
 import environ
 import os
+import logging
 
 from .models import NSPanel, Room, Light, LightState, Scene, RelayGroup
 from .apps import start_mqtt_manager
@@ -23,7 +24,7 @@ from web.settings_helper import get_setting_with_default, get_nspanel_setting_wi
 def restart_mqtt_manager_process():
     for proc in psutil.process_iter():
         if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
-            print("Killing running MQTTManager")
+            logging.info("Killing running MQTTManager")
             proc.kill()
     start_mqtt_manager()
 
@@ -31,7 +32,7 @@ def restart_mqtt_manager_process():
 def send_mqttmanager_reload_command():
     for proc in psutil.process_iter():
         if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
-            print("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
+            logging.info("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
             os.kill(proc.pid, signal.SIGUSR1)
 
 
@@ -227,12 +228,10 @@ def get_all_available_entities(request):
         try:
             environment = environ.Env()
             if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
-                home_assistant_api_address = get_setting_with_default(
-                    "home_assistant_address") + "/core/api/states"
+                home_assistant_api_address = get_setting_with_default("home_assistant_address") + "/core/api/states"
             else:
-                home_assistant_api_address = get_setting_with_default(
-                    "home_assistant_address") + "/api/states"
-            print("Trying to get Home Assistant entities via api address: " +
+                home_assistant_api_address = get_setting_with_default("home_assistant_address") + "/api/states"
+            logging.debug("Trying to get Home Assistant entities via api address: " +
                   home_assistant_api_address)
             home_assistant_response = requests.get(
                 home_assistant_api_address, headers=home_assistant_request_headers, timeout=5, verify=False)

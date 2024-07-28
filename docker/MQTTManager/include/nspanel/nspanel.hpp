@@ -148,6 +148,14 @@ public:
    */
   void set_relay_state(uint8_t relay, bool state);
 
+  /**
+   * When an IPC request for NSPanel status comes in handle it and send the response back
+   */
+  bool handle_ipc_request_status(nlohmann::json message, nlohmann::json *response_buffer);
+  bool handle_ipc_request_reboot(nlohmann::json message, nlohmann::json *response_buffer);
+  bool handle_ipc_request_update_firmware(nlohmann::json message, nlohmann::json *response_buffer);
+  bool handle_ipc_request_update_screen(nlohmann::json message, nlohmann::json *response_buffer);
+
 private:
   uint _id;
   std::string _mac;
@@ -162,7 +170,7 @@ private:
   uint8_t _heap_used_pct;
   uint8_t _update_progress;
   MQTT_MANAGER_NSPANEL_STATE _state;
-  std::string _nspanel_warnings;
+  std::vector<std::string> _nspanel_warnings;
   std::string _nspanel_warnings_from_manager;
   std::string _mqtt_register_mac;
 

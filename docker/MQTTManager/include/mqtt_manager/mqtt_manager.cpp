@@ -2,6 +2,7 @@
 #include "light/light.hpp"
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/signals2.hpp>
+#include <boost/stacktrace/stacktrace.hpp>
 #include <cctype>
 #include <chrono>
 #include <cstdint>
@@ -199,8 +200,10 @@ void MQTT_Manager::_process_mqtt_message(const std::string topic, const std::str
         break;
       }
     }
-  } catch (std::exception ex) {
-    SPDLOG_ERROR("Caught std::exception while processing message on topic '{}'. message: '{}'. Exception: ", topic, message, boost::diagnostic_information(ex, true));
+  } catch (std::exception &ex) {
+    SPDLOG_ERROR("Caught std::exception while processing message on topic '{}'. message: '{}'", topic, message);
+    SPDLOG_ERROR("Exception: {}", boost::diagnostic_information(ex, true));
+    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
   } catch (...) {
     SPDLOG_ERROR("Caught exception of type other than std::exception while processing message on topic '{}'. message: {}", topic, message);
   }

@@ -105,7 +105,7 @@ def nspanel_warnings(request):
             for nspanel in nspanel_objects:
 
                 panel_info = {
-                    "id": nspanel.id,
+                    "nspanel_id": nspanel.id,
                     "mac_address": nspanel.mac_address,
                     "warnings": []
                 }
@@ -155,7 +155,8 @@ def nspanels_get(request):
 
         for nspanel in nspanel_objects:
             nspanels.append({
-                "id": nspanel.id,
+                "nspanel_id": nspanel.id,
+                "mac_address": nspanel.mac_address,
                 "name": nspanel.friendly_name,
                 "home": nspanel.room.id,
                 "default_page": get_nspanel_setting_with_default(nspanel.id, "default_page", 0),
@@ -279,6 +280,51 @@ def nspanel_post(request):
         return JsonResponse({"status": "error"}, status=500)
 
 
+##############################
+## NSPanel command section ###
+##############################
+
+@csrf_exempt
+def nspanel_reboot(request, panel_id):
+    try:
+        if request.method == 'POST':
+            response = send_ipc_request(F"nspanel/{panel_id}/reboot", {})
+            if response["status"] == "ok":
+                return JsonResponse({"status": "ok"}, status=200)
+            else:
+                return JsonResponse({"status": "error"}, status=500)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+##################################
+## NSPanel Relay Group section ###
+##################################
+
+def relay_groups(request):
+    try:
+        if request.method == 'GET':
+            relay_groups = []
+            for relay_group in RelayGroup.objects.all():
+                rg_info = {
+                    "relay_group_id": relay_group.id,
+                    "name": relay_group.friendly_name,
+                    "relays": []
+                }
+                for relay_binding in relay_group.relaygroupbinding_set.all():
+                    rg_info["relays"].append(
+                        {"nspanel_id": relay_binding.nspanel.id, "relay_num": relay_binding.relay_num})
+                relay_groups.append(rg_info)
+            return JsonResponse({"status": "ok", "relay_groups": relay_groups}, status=200)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
 ####################
 ### Room section ###
 ####################
@@ -301,7 +347,7 @@ def rooms_get(request):
             room_objects = Room.objects.all()
         for room in room_objects:
             rooms.append({
-                "id": room.id,
+                "room_id": room.id,
                 "name": room.friendly_name,
                 "lights": [light.id for light in room.light_set.all()],
                 "scenes": [scene.id for scene in room.scene_set.all()],
@@ -372,27 +418,34 @@ def lights_get(request):
         else:
             light_objects = Light.objects.all()
 
-        for light in light_objects:
-            lights.append({
-                "id": light.id,
-                "name": light.friendly_name,
-                "type": light.type,
-                "ceiling": light.is_ceiling_light,
-                "can_dim": light.can_dim,
-                "can_color_temperature": light.can_color_temperature,
-                "can_rgb": light.can_rgb,
-                "home_assistant_name": light.home_assistant_name,
-                "openhab_name": light.openhab_name,
-                "openhab_control_mode": light.openhab_control_mode,
-                "openhab_item_switch": light.openhab_item_switch,
-                "openhab_item_dimmer": light.openhab_item_dimmer,
-                "openhab_item_color_temp": light.openhab_item_color_temp,
-                "openhab_item_rgb": light.openhab_item_rgb,
-            })
-        return JsonResponse({
-            "status": "ok",
-            "lights": lights
-        }, status=200)
+        if light_objects.count() > 0:
+            for light in light_objects:
+                lights.append({
+                    "light_id": light.id,
+                    "room_id": light.room.id,
+                    "name": light.friendly_name,
+                    "type": light.type,
+                    "ceiling": light.is_ceiling_light,
+                    "can_dim": light.can_dim,
+                    "can_color_temperature": light.can_color_temperature,
+                    "can_rgb": light.can_rgb,
+                    "home_assistant_name": light.home_assistant_name,
+                    "openhab_name": light.openhab_name,
+                    "openhab_control_mode": light.openhab_control_mode,
+                    "openhab_item_switch": light.openhab_item_switch,
+                    "openhab_item_dimmer": light.openhab_item_dimmer,
+                    "openhab_item_color_temp": light.openhab_item_color_temp,
+                    "openhab_item_rgb": light.openhab_item_rgb,
+                })
+            return JsonResponse({
+                "status": "ok",
+                "lights": lights
+            }, status=200)
+        else:
+            return JsonResponse({
+                "status": "error",
+                "lights": lights
+            }, status=404)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
@@ -484,3 +537,95 @@ def light_delete(request, light_id):
             return JsonResponse({"status": "error"}, status=500)
     else:
         return JsonResponse({"status": "error"}, status=405)
+
+
+#####################
+### Scene section ###
+#####################
+
+def scenes(request):
+    if request.method == "GET":
+        return scenes_get(request)
+    elif request.method == "POST":
+        return scenes_post(request)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+def scenes_get(request):
+    try:
+        scenes = []
+        if request.GET.get('light_id'):
+            scenes_objects = Scene.objects.filter(id=request.GET.get('scene_id'))
+        elif request.GET.get('room_id'):
+            scenes_objects = Scene.objects.filter(room_id=request.GET.get('room_id'))
+        else:
+            scenes_objects = Scene.objects.all()
+
+        if scenes_objects.count() > 0:
+            for scene in scenes_objects:
+                scene_info = {
+                    "scene_id": scene.id,
+                    "scene_type": scene.scene_type,
+                    "entity_name": scene.backend_name, # Name for OpenHAB or Home Assistant entity to activate
+                    "scene_name": scene.friendly_name,
+                    "room_id": scene.room.id if scene.room != None else None,
+                    "light_states": []
+                }
+                for state in scene.lightstate_set.all():
+                    scene_info["light_states"].append({
+                        "light_id": state.light.id,
+                        "light_type": state.light.type,
+                        "color_mode": state.color_mode,
+                        "light_level": state.light_level,
+                        "color_temp": state.color_temperature,
+                        "hue": state.hue,
+                        "saturation": state.saturation
+                    })
+                scenes.append(scene_info)
+            return JsonResponse({
+                "status": "ok",
+                "scenes": scenes
+            }, status=200)
+        else:
+            return JsonResponse({
+                "status": "error",
+                "scenes": scenes
+            }, status=404)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+# TODO: This method currently handles both "create new" and "update old".
+# This functionality should be split into two calls as in best practive with REST API.
+def scenes_post(request):
+    try:
+        data = json.loads(request.body)
+        scene = Scene.objects.filter(id=data["scene_id"]).first()
+        if scene:
+            scene.lightstate_set.all().delete()  # Remove all old states
+            # TODO: Convert light states to JSON fields in DB.
+            for light_state in data["light_states"]:
+                light = Light.objects.filter(id=light_state["light_id"]).first()
+                if light:
+                    new_state = LightState()
+                    new_state.light = light
+                    new_state.scene = scene
+                    if light_state["mode"] == "dimmer":
+                        new_state.color_mode = "dimmer"
+                        new_state.light_level = light_state["level"]
+                        new_state.color_temperature = light_state["color_temp"]
+                    elif light_state["mode"] == "color":
+                        new_state.color_mode = "color"
+                        new_state.light_level = light_state["level"]
+                        new_state.hue = light_state["hue"]
+                        new_state.saturation = light_state["saturation"]
+                    new_state.save()
+                else:
+                    logging.warning("ERROR: Couldn't find a light with ID " + light_state["light_id"] + ". Will skip light!")
+            return JsonResponse({"status": "ok"}, status=200)
+        else:
+            logging.error("Could not find scene with that id.")
+            return JsonResponse({"status": "error"}, status=404)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)

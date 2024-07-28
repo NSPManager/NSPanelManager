@@ -82,7 +82,7 @@ target_link_libraries(MQTTManager_Light MQTTManager_HomeAssistantManager spdlog:
 add_library(MQTTManager_NSPanel SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.hpp)
 set_target_properties(MQTTManager_NSPanel PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/light.hpp)
 target_include_directories(MQTTManager_NSPanel PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_WebsocketServer tz::tz Boost::boost MQTTManager_Config)
+target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_WebsocketServer tz::tz Boost::boost MQTTManager_Config MQTTManager_IPCHandler)
 
 add_library(MQTTManager_Scene SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.cpp)
 # set_target_properties(MQTTManager_Scene PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/nspm_scene.hpp)

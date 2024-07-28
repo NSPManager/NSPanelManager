@@ -1,6 +1,12 @@
 from django.contrib import admin
 from django.urls import path, include
-from . import views, api, rest
+from .components.nspanel_status_wifi_signal_strength.nspanel_status_wifi_signal_strength import NSPanelStatusWifiSignalStrength
+from .components.nspanel_status_text.nspanel_status_text import NSPanelStatusText
+from .components.nspanel_status_header.nspanel_status_header import NSPanelHeader
+from .components.nspanel_status_ram_usage.nspanel_status_ram_usage import NSPanelStatusRamUsage
+from .components.nspanel_status_temperature.nspanel_status_temperature import NSPanelStatusTemperature
+from .components.nspanel_visit_link.nspanel_visit_link import NSPanelVisitLink
+from . import views, api, rest, htmx
 
 urlpatterns = [
     # Web routes
@@ -118,10 +124,31 @@ urlpatterns = [
     path('rest/nspanels/warnings', rest.nspanel_warnings, name='rest_nspanel_warnings'),
     path('rest/nspanels/<int:panel_id>', rest.nspanel_delete, name='rest_nspanel_delete'),
     path('rest/nspanels', rest.nspanels, name='rest_nspanels'),
+    # Relay groups
+    path('rest/relay_groups', rest.relay_groups, name='rest_relay_groups'),
     # Room URLs
     path('rest/rooms/<int:room_id>', rest.room_delete, name='rest_room_delete'),
     path('rest/rooms', rest.rooms, name='rest_rooms_create'),
     # Light URLs
     path('rest/lights', rest.lights, name='rest_lights'),
     path('rest/lights/<int:light_id>', rest.light_delete, name='rest_light_delete'),
+    # Scene URLs
+    path('rest/scenes', rest.scenes, name='rest_lights'),
+
+
+
+    #######################
+    ### HTMX "API" URLs ###
+    #######################
+    path('htmx/partial/nspanel_index_view/<int:nspanel_id>', htmx.partial_nspanel_index_view, name="htmx_partial_nspanel_index_view"),
+    path('htmx/nspanels/<int:nspanel_id>/reboot', htmx.nspanel_reboot, name='htmx_nspanel_reboot'),
+    path('htmx/nspanels/<int:nspanel_id>/update_screen', htmx.nspanel_update_screen, name='htmx_nspanel_update_screen'),
+    path('htmx/nspanels/<int:nspanel_id>/update_firmware', htmx.nspanel_update_firmware, name='htmx_nspanel_update_firmware'),
+
+    path('htmx/partial/nspanel_status_header/<str:view>/<int:nspanel_id>', NSPanelHeader.as_view(), name="nspanel_status_header"),
+    path('htmx/partial/nspanel_status_text/<str:view>/<int:nspanel_id>', NSPanelStatusText.as_view(), name="nspanel_status_text"),
+    path('htmx/partial/nspanel_status_wifi_signal_strength/<str:view>/<int:nspanel_id>', NSPanelStatusWifiSignalStrength.as_view(), name="nspanel_status_wifi_signal_strength"),
+    path('htmx/partial/nspanel_status_ram_usage/<str:view>/<int:nspanel_id>', NSPanelStatusRamUsage.as_view(), name="nspanel_status_ram_usage"),
+    path('htmx/partial/nspanel_status_temperature/<str:view>/<int:nspanel_id>', NSPanelStatusTemperature.as_view(), name="nspanel_status_temperature"),
+    path('htmx/partial/nspanel_visit_link/<str:view>/<int:nspanel_id>', NSPanelVisitLink.as_view(), name="nspanel_visit_link"),
 ]

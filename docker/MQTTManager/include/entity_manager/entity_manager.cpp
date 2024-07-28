@@ -54,8 +54,8 @@ void EntityManager::detach_entity_added_listener(void (*listener)(MqttManagerEnt
 
 void EntityManager::add_light(nlohmann::json &config) {
   try {
-    if (EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config["id"]) == nullptr) {
-      std::string light_type = config["light_type"];
+    if (EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config.at("light_id")) == nullptr) {
+      std::string light_type = config["type"];
       if (light_type.compare("home_assistant") == 0) {
         HomeAssistantLight *light = new HomeAssistantLight(config);
         EntityManager::_entities.push_back(light);
@@ -66,8 +66,7 @@ void EntityManager::add_light(nlohmann::json &config) {
         SPDLOG_ERROR("Unknown light type '{}'. Will ignore entity.", light_type);
       }
     } else {
-      int light_id = config["id"];
-      SPDLOG_ERROR("A light with ID {} already exists.", light_id);
+      SPDLOG_ERROR("A light with ID {} already exists.", int(config.at("light_id")));
     }
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
@@ -77,7 +76,7 @@ void EntityManager::add_light(nlohmann::json &config) {
 
 void EntityManager::add_scene(nlohmann::json &config) {
   try {
-    Scene *scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, config["id"]);
+    Scene *scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, config.at("scene_id"));
     if (scene == nullptr) {
       std::string scene_type = config["scene_type"];
       if (scene_type.compare("nspm_scene") == 0) {
@@ -101,7 +100,7 @@ void EntityManager::add_scene(nlohmann::json &config) {
 
 void EntityManager::add_nspanel_relay_group(nlohmann::json &config) {
   try {
-    NSPanelRelayGroup *rg = EntityManager::get_entity_by_id<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP, config["id"]);
+    NSPanelRelayGroup *rg = EntityManager::get_entity_by_id<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP, config.at("relay_group_id"));
     if (rg == nullptr) {
       rg = new NSPanelRelayGroup(config);
       EntityManager::_entities.push_back(rg);
@@ -116,8 +115,8 @@ void EntityManager::add_nspanel_relay_group(nlohmann::json &config) {
 
 void EntityManager::add_nspanel(nlohmann::json &config) {
   try {
-    int panel_id = config["id"];
-    std::string panel_mac = config["mac"];
+    int panel_id = config["nspanel_id"];
+    std::string panel_mac = config["mac_address"];
     NSPanel *panel = EntityManager::get_nspanel_by_id(panel_id);
     if (panel == nullptr) {
       panel = EntityManager::get_nspanel_by_mac(panel_mac);
@@ -149,7 +148,7 @@ void EntityManager::post_init_entities() {
     std::list<int> nspanel_ids;
     for (nlohmann::json &config : MqttManagerConfig::nspanel_configs) {
       EntityManager::add_nspanel(config); // add_nspanel takes care to check if it exists before adding it. IF it exists, update it instead.
-      nspanel_ids.push_back(config["id"]);
+      nspanel_ids.push_back(config["nspanel_id"]);
     }
 
     // Check for any removed nspanels
@@ -175,8 +174,8 @@ void EntityManager::post_init_entities() {
     SPDLOG_DEBUG("Updating lights.");
     std::list<int> light_ids;
     for (nlohmann::json &config : MqttManagerConfig::light_configs) {
-      light_ids.push_back(config["id"]);
-      Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config["id"]);
+      light_ids.push_back(config.at("light_id"));
+      Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config.at("light_id"));
       if (light != nullptr) {
         light->update_config(config);
       } else {
@@ -218,9 +217,9 @@ void EntityManager::post_init_entities() {
     SPDLOG_DEBUG("Updating rooms.");
     std::list<int> room_ids;
     for (nlohmann::json &config : MqttManagerConfig::room_configs) {
-      room_ids.push_back(config["id"]);
+      room_ids.push_back(config["room_id"]);
       SPDLOG_DEBUG("Trying to get room by id.");
-      Room *room = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, config["id"]);
+      Room *room = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, config["room_id"]);
       SPDLOG_DEBUG("Got result. Trying to get mutex.");
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
       SPDLOG_DEBUG("Got mutex.");
@@ -269,7 +268,7 @@ void EntityManager::post_init_entities() {
     std::list<int> relay_group_ids;
     for (nlohmann::json &config : MqttManagerConfig::nspanel_relay_group_configs) {
       EntityManager::add_nspanel_relay_group(config);
-      relay_group_ids.push_back(config["id"]);
+      relay_group_ids.push_back(config["relay_group_id"]);
     }
     SPDLOG_DEBUG("Existing relay groups updated.");
 
@@ -308,7 +307,7 @@ void EntityManager::post_init_entities() {
     std::list<int> scene_ids;
     for (nlohmann::json &config : MqttManagerConfig::scenes_configs) {
       EntityManager::add_scene(config);
-      scene_ids.push_back(config["id"]);
+      scene_ids.push_back(config["scene_id"]);
     }
     SPDLOG_DEBUG("Existing scenes updated.");
 
@@ -631,7 +630,7 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       nlohmann::json response;
       response["cmd_id"] = command_id;
       response["success"] = true;
-      response["mac"] = mac;
+      response["mac_address"] = mac;
       (*response_buffer) = response.dump();
       panel->send_websocket_update();
       return true;
@@ -648,7 +647,7 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       nlohmann::json response;
       response["cmd_id"] = command_id;
       response["success"] = true;
-      response["mac"] = mac;
+      response["mac_address"] = mac;
       (*response_buffer) = response.dump();
       panel->send_websocket_update();
       return true;
@@ -669,7 +668,7 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
         nlohmann::json response;
         response["cmd_id"] = command_id;
         response["success"] = true;
-        response["mac"] = mac;
+        response["mac_address"] = mac;
         (*response_buffer) = response.dump();
         SPDLOG_DEBUG("Panel with MAC {} delete call completed.", mac);
         return true;

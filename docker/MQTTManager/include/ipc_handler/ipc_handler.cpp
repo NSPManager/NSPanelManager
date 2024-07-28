@@ -15,7 +15,7 @@ void IPCHandler::_listen() {
     zmq::socket_t socket{zmq_context, zmq::socket_type::rep}; // Create reply socket with above context
     socket.bind("ipc:///tmp/mqttmanager_ipc");
 
-    std::string response_data = "";
+    nlohmann::json response_data;
     while (true) {
       try {
         zmq::message_t request;
@@ -31,9 +31,10 @@ void IPCHandler::_listen() {
           bool found_handler = false;
           for (auto topic_handler_pair : IPCHandler::_registered_handlers) {
             if (topic_handler_pair.first.compare(topic) == 0) {
-              if (IPCHandler::_registered_handlers[topic](message, &response_data)) {
+              if (IPCHandler::_registered_handlers[topic](data, &response_data)) {
                 found_handler = true;
-                socket.send(zmq::buffer(response_data), zmq::send_flags::none);
+                SPDLOG_TRACE("Sending response {}", nlohmann::to_string((response_data)));
+                socket.send(zmq::buffer(nlohmann::to_string(response_data)), zmq::send_flags::none);
                 break;
               }
             }
@@ -41,15 +42,21 @@ void IPCHandler::_listen() {
 
           if (!found_handler) {
             SPDLOG_ERROR("Received IPC command on topic '{}' but no handler was found. Sending status error.", topic);
-            socket.send(zmq::buffer("{\"status\": \"error\"}"), zmq::send_flags::none);
+            nlohmann::json response = {{"status", "error"}};
+            SPDLOG_TRACE("Sending response {}", nlohmann::to_string((response)));
+            socket.send(zmq::buffer(nlohmann::to_string(response)), zmq::send_flags::none);
           }
         } else {
           SPDLOG_ERROR("Received invalid IPC data. topic is missing or not a string: {}", request.to_string());
-          socket.send(zmq::buffer("{\"status\": \"error\"}"), zmq::send_flags::none);
+          nlohmann::json response = {{"status", "error"}};
+          SPDLOG_TRACE("Sending response {}", nlohmann::to_string((response)));
+          socket.send(zmq::buffer(nlohmann::to_string(response)), zmq::send_flags::none);
         }
       } catch (const std::exception &e) {
         SPDLOG_ERROR("Caught exception when trying to process message from IPC: {}", boost::diagnostic_information(e, true));
-        socket.send(zmq::buffer("{\"status\": \"error\"}"), zmq::send_flags::none);
+        nlohmann::json response = {{"status", "error"}};
+        SPDLOG_TRACE("Sending response {}", nlohmann::to_string((response)));
+        socket.send(zmq::buffer(nlohmann::to_string(response)), zmq::send_flags::none);
       }
     }
   } catch (const std::exception &e) {

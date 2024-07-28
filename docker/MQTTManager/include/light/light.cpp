@@ -7,7 +7,7 @@
 #include <string>
 
 Light::Light(nlohmann::json &init_data) {
-  this->_id = init_data["id"];
+  this->_id = init_data["light_id"];
   this->_room_id = init_data["room_id"];
 
   // Build MQTT Topics
@@ -44,9 +44,9 @@ void Light::update_config(nlohmann::json &init_data) {
     this->_name = init_data["name"];
     SPDLOG_DEBUG("Loading light {}::{}.", this->_id, this->_name);
 
-    if (std::string(init_data["light_type"]).compare("home_assistant") == 0) {
+    if (std::string(init_data["type"]).compare("home_assistant") == 0) {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
-    } else if (std::string(init_data["light_type"]).compare("openhab") == 0) {
+    } else if (std::string(init_data["type"]).compare("openhab") == 0) {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
     } else {
       SPDLOG_ERROR("Got unknown type ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(init_data["type"]), this->_id, this->_name);

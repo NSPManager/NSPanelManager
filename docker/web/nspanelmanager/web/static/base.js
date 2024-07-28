@@ -4,6 +4,42 @@ var _last_collapse_id_activated = "";
 $(document).ready(function () {
     console.log('Document ready, attaching functions.');
 
+    // Hook into HTMX websocket to catch custom JSON triggers for HTMX events.
+    document.querySelectorAll('[hx-ext="ws"]').forEach((element) => {
+      // On message from manager on websocket.
+      element.addEventListener("htmx:wsBeforeMessage", (event) => {
+        if(event.detail.message.startsWith('{')) {
+          try {
+            var data = JSON.parse(event.detail.message);
+            if (data.event_type) {
+              const trigger_event = new Event(data.event_type, data);
+              document.getElementsByTagName("body")[0].dispatchEvent(trigger_event);
+              console.debug("Triggered '" + data.event_type + "' event from websocket on body element.");
+              event.preventDefault();
+            }
+          } catch(error) {
+            // We couldn't parse to json. Just let HTMX continue.
+          }
+        }
+      });
+
+      element.addEventListener("htmx:wsConnecting", (event) => {
+        console.debug("Connecting to MQTTManager.");
+        $("#ws_connection_in_progress_notification").removeClass("hidden");
+      });
+
+      element.addEventListener("htmx:wsError", (event) => {
+        console.log("Connecting to MQTTManager. Session error.");
+        console.log(event.detail.error);
+        $("#ws_connection_in_progress_notification").removeClass("hidden");
+      });
+
+      element.addEventListener("htmx:wsOpen", (event) => {
+        console.log("Connected to MQTTManager.");
+        $("#ws_connection_in_progress_notification").addClass("hidden");
+      });
+    });
+
     $('.modal-background').click(function () {
         $('.modal').removeClass('is-active');
     });

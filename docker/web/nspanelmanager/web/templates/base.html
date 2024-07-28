@@ -11,9 +11,18 @@
   <link rel="stylesheet" href="{% static 'css/main.css' %}"> <!-- Compiled version of Tailwind CSS -->
   <script src="{% static 'jquery.min.js' %}"></script>
   <script src="{% static 'base.js' %}?refresh={% now 'U' %}"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.1"></script>
+  <!-- <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script> -->
+  <script src="{% static 'htmx_ws.js' %}"></script>
   <link rel="stylesheet" href="{% static 'mdi/css/materialdesignicons.min.css' %}">
   <link rel="stylesheet" href="{% static 'loader.css' %}?refresh={% now 'U' %}">
   <link rel="stylesheet" href="{% static 'base.css' %}?refresh={% now 'U' %}">
+
+  <script>
+  // Configure HTMX
+  htmx.config.globalViewTransitions = true;
+  htmx.config.defaultSettleDelay = 500;
+  </script>
 
   <script src="{% static 'mqttmanager_ws.js' %}?refresh={% now 'U' %}"></script>
   <!-- <script type="module" src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"></script> -->
@@ -30,6 +39,9 @@
     <div class="w-screen max-w-screen-xl">
       <!-- Displays any warnings or errors -->
       <div id="notification_holder" class="mt-4 mb-4">
+        <div id="ws_connection_in_progress_notification" class="flex items-center p-4 mb-2 mt-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50 hidden">
+            <img src="{% static 'tail-spin.svg' %}" class="h-4 inline-block pr-2">Connecting to MQTTManager.
+        </div>
         {% for notification in notifications %}
         {% if notification.class == "error" %}
         <div class="p-4 mt-2 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-700 dark:text-white">{{ notification.text }}</div>

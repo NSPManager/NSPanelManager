@@ -12,6 +12,9 @@ import os
 import signal
 from time import sleep
 
+#from nspanelmanager.web.mqttmanager_ipc import send_ipc_request
+from .mqttmanager_ipc import send_ipc_request
+
 from .models import NSPanel, Room, Light, Settings, Scene, RelayGroup, RelayGroupBinding
 from .apps import start_mqtt_manager
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
@@ -55,7 +58,9 @@ def index(request):
     nspanels = []
     for nspanel in NSPanel.objects.all():
         panel_info = {}
-        panel_info["nspanel"] = nspanel
+        panel_info["data"] = nspanel
+        panel_status = send_ipc_request(F"nspanel/{nspanel.id}/status", {"command": "get"})
+        panel_info["status"] = panel_status
         nspanels.append(panel_info)
 
     data = {
@@ -81,7 +86,7 @@ def index(request):
             "is_home_assistant_addon": ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
         }}
 
-    return render(request, 'index.html', data)
+    return render(request, 'index_htmx.html', data)
 
 
 def rooms(request):

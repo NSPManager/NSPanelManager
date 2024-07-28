@@ -36,6 +36,21 @@ void WebsocketServer::start() {
 void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::ConnectionState> connectionState, ix::WebSocket &webSocket, const ix::WebSocketMessagePtr &msg) {
   try {
     if (msg->type == ix::WebSocketMessageType::Message) {
+      try {
+        nlohmann::json json = nlohmann::json::parse(msg->str);
+        if (std::string(json["type"]).compare("broadcast") == 0) {
+          for (auto client : WebsocketServer::_server->getClients()) {
+            if (json["data"].is_string()) {
+              client->sendText(json["data"]);
+            } else {
+              client->sendText(nlohmann::to_string(json["data"]));
+            }
+          }
+          return;
+        }
+      } catch (...) {
+      }
+
       SPDLOG_TRACE("Got message: {}", msg->str);
       std::string message = msg->str;
       std::string response_buffer;

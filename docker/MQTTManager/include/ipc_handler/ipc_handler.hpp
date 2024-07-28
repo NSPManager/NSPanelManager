@@ -2,6 +2,7 @@
 #define MQTTMANAGER_PIPE_HANDLER
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/signals2.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <thread>
 
 /*
@@ -32,7 +33,7 @@ private:
    */
   static void _listen();
 
-  static inline boost::ptr_map<std::string, boost::signals2::signal<bool(std::string message, std::string *response_buffer)>> _registered_handlers;
+  static inline boost::ptr_map<std::string, boost::signals2::signal<bool(nlohmann::json message, nlohmann::json *response_buffer)>> _registered_handlers;
   static inline std::thread _instance; // The thread object of the running _listen() function.
 };
 

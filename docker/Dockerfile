@@ -33,29 +33,20 @@ COPY nginx/sites-templates/ /etc/nginx/sites-templates/
 COPY --from=build /MQTTManager/build /MQTTManager/build
 
 # Update container
-RUN apt-get update \
-  && apt-get -y upgrade
+RUN apt-get update && apt-get -y upgrade
 
-# Install build tools into the container if this is a devel build
-RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get -y install cmake build-essential curl npm \
-  && pip install conan; else echo "Not building MQTTManager."; fi
-
-RUN if [ "$IS_DEVEL" == "yes" ]; then conan profile detect --force && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf \
+# Install software needed to build the manager
+RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get install -y --no-install-recommends cmake build-essential curl npm postgresql-client curl inotify-tools net-tools nginx build-essential \
+  && pip install conan && conan profile detect --force \
+  && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf \
   && sed -i "s|cppstd=gnu14|cppstd=gnu17|g" /root/.conan2/profiles/default \
-  && sed -i "s|build_type=Release|build_type=Debug|g" /root/.conan2/profiles/default; \
-  fi
+  && sed -i "s|build_type=Release|build_type=Debug|g" /root/.conan2/profiles/default \
+  && echo "alias ll='ls -lh --color=auto'" >> /etc/bash.bashrc \
+  #&& rm -rf /var/lib/apt/lists/*
+  ; fi
 
-# Install software needed to build and run the manager
-RUN apt-get install -y --no-install-recommends \
-  postgresql-client curl inotify-tools net-tools nginx build-essential
-# && rm -rf /var/lib/apt/lists/*
 
-RUN pip install -r requirements.txt # Install python packages
-#RUN /bin/bash /MQTTManager/install_cmake.sh # Install cmake from source as it's only available for x86_64 and armv8 in repo
-
-RUN echo "alias ll='ls -lh --color=auto'" >> /etc/bash.bashrc
-
-#RUN if [ -z "$no_mqttmanager_build" ]; then /bin/bash /usr/src/app/make_mqttmanager.sh && /bin/bash /MQTTManager/cleanup_build.sh; else echo "Not building MQTTManager."; fi
+RUN pip install --no-cache-dir -r requirements.txt # Install python packages
 
 EXPOSE 8000
 CMD ["/bin/bash", "./run_uwsgi.sh"]

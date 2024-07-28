@@ -10,7 +10,7 @@
 #include <spdlog/spdlog.h>
 
 OpenhabScene::OpenhabScene(nlohmann::json &data) {
-  this->_id = data["id"];
+  this->_id = data["scene_id"];
   this->update_config(data);
 }
 

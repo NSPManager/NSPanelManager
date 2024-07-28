@@ -1,6 +1,7 @@
 #include "nspanel.hpp"
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
+#include "ipc_handler/ipc_handler.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "web_helper/WebHelper.hpp"
@@ -14,9 +15,11 @@
 #include <ctime>
 #include <curl/curl.h>
 #include <exception>
+#include <fmt/chrono.h>
 #include <fmt/core.h>
 #include <iomanip>
 #include <list>
+#include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
 #include <sstream>
@@ -30,7 +33,7 @@ NSPanelRelayGroup::NSPanelRelayGroup(nlohmann::json &config) {
 }
 
 void NSPanelRelayGroup::update_config(nlohmann::json &config) {
-  this->_id = config["id"];
+  this->_id = config["relay_group_id"];
   this->_name = config["name"];
 
   this->_nspanel_relays.clear();
@@ -91,35 +94,49 @@ void NSPanelRelayGroup::turn_off() {
 }
 
 NSPanel::NSPanel(nlohmann::json &init_data) {
+  // Assume panel to be offline until proven otherwise
+  this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE;
   // If this panel is just a panel in waiting (ie. not accepted the request yet) it won't have an id.
   this->_has_registered_to_manager = false;
   this->update_config(init_data);
+
+  IPCHandler::attach_callback(fmt::format("nspanel/{}/status", this->_id), boost::bind(&NSPanel::handle_ipc_request_status, this, _1, _2));
+  IPCHandler::attach_callback(fmt::format("nspanel/{}/reboot", this->_id), boost::bind(&NSPanel::handle_ipc_request_reboot, this, _1, _2));
+  IPCHandler::attach_callback(fmt::format("nspanel/{}/update_screen", this->_id), boost::bind(&NSPanel::handle_ipc_request_update_screen, this, _1, _2));
+  IPCHandler::attach_callback(fmt::format("nspanel/{}/update_firmware", this->_id), boost::bind(&NSPanel::handle_ipc_request_update_firmware, this, _1, _2));
 }
 
 void NSPanel::update_config(nlohmann::json &init_data) {
-  if (init_data.contains("id")) {
-    this->_id = init_data["id"];
+  // TODO: Remove all "if mac or mac_address" (and similar) and decide on ONE name for all things.
+  if (init_data.contains("nspanel_id")) {
+    this->_id = init_data["nspanel_id"];
     this->_has_registered_to_manager = true; // Data contained an ID which it got from the manager config.
     this->_is_register_accepted = true;
+  } else {
+    this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
   }
 
   bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
   if (init_data.contains("name")) {
     if (this->_name.compare(init_data["name"]) != 0) {
       rebuilt_mqtt = true;
-      this->reboot();
+      if (this->_name.size() > 0) {
+        this->reboot();
+      }
     }
     this->_name = init_data["name"];
   } else if (init_data.contains("friendly_name")) {
     if (this->_name.compare(init_data["friendly_name"]) != 0) {
       rebuilt_mqtt = true;
-      this->reboot();
+      if (this->_name.size() > 0) {
+        this->reboot();
+      }
     }
     this->_name = init_data["friendly_name"];
   }
 
-  if (init_data.contains("mac")) {
-    this->_mac = init_data["mac"];
+  if (init_data.contains("mac_address")) {
+    this->_mac = init_data["mac_address"];
   } else if (init_data.contains("mac_origin")) {
     this->_mac = init_data["mac_origin"];
   } else {
@@ -134,37 +151,33 @@ void NSPanel::update_config(nlohmann::json &init_data) {
   }
 
   if (init_data.contains(("is_us_panel"))) {
-    this->_is_us_panel = init_data["is_us_panel"];
+    this->_is_us_panel = std::string(init_data["is_us_panel"]).compare("True") == 0;
   } else {
     this->_is_us_panel = false;
   }
 
-  if (!init_data.contains("id")) {
-    this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
-  }
-
   if (this->_state == MQTT_MANAGER_NSPANEL_STATE::OFFLINE || this->_state == MQTT_MANAGER_NSPANEL_STATE::UNKNOWN) {
-    this->_rssi = -255;
+    this->_rssi = 0;
     this->_heap_used_pct = 0;
-    this->_nspanel_warnings = "";
-    this->_temperature = -255;
+    this->_nspanel_warnings.clear();
+    this->_temperature = 0;
     this->_update_progress = 0;
   }
 
-  if (init_data.contains("id")) {
+  if (init_data.contains("nspanel_id")) {
     SPDLOG_DEBUG("Loaded NSPanel {}::{}.", this->_id, this->_name);
   } else {
     SPDLOG_DEBUG("Loaded NSPanel {} with no ID.", this->_name);
   }
 
   if (init_data.contains("relay1_is_light")) {
-    this->_relay1_is_mqtt_light = init_data["relay1_is_light"];
+    this->_relay1_is_mqtt_light = std::string(init_data["relay1_is_light"]).compare("True") == 0;
   } else {
     this->_relay1_is_mqtt_light = false;
   }
 
   if (init_data.contains("relay2_is_light")) {
-    this->_relay2_is_mqtt_light = init_data["relay2_is_light"];
+    this->_relay2_is_mqtt_light = std::string(init_data["relay2_is_light"]).compare("True") == 0;
   } else {
     this->_relay2_is_mqtt_light = false;
   }
@@ -223,6 +236,9 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->send_reload_command();
     this->register_to_home_assistant();
   }
+
+  // Config changed, send "reload" command to web interface
+  this->send_websocket_update();
 }
 
 NSPanel::~NSPanel() {
@@ -306,7 +322,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       log_data["type"] = "log";
       log_data["time"] = buffer.str();
       log_data["panel"] = this->_name;
-      log_data["mac"] = message_parts[0];
+      log_data["mac_address"] = message_parts[0];
       log_data["level"] = message_parts[1];
       log_data["message"] = message_parts[2];
       WebsocketServer::broadcast_json(log_data);
@@ -355,7 +371,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         SPDLOG_ERROR("Incorrect format of temperature data. Expected float.");
       }
       this->_ip_address = data["ip"];
-      this->_nspanel_warnings = data["warnings"];
+      // this->_nspanel_warnings = data["warnings"]; // TODO: Load warnings from firmware.
 
       if (data.contains("state")) {
         std::string state = data["state"];
@@ -415,10 +431,9 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
 void NSPanel::send_websocket_update() {
   SPDLOG_TRACE("Sending websocket update for {}::{}", this->_id, this->_name);
   // Send status over to web interface:
-  nlohmann::json status_reps;
-  status_reps["type"] = "status";
-  status_reps["payload"] = this->get_websocket_json_representation();
-  WebsocketServer::broadcast_json(status_reps);
+  nlohmann::json event_trigger_data;
+  event_trigger_data["event_type"] = fmt::format("nspanel-{}-state-change", this->_id);
+  WebsocketServer::broadcast_json(event_trigger_data);
 }
 
 nlohmann::json NSPanel::get_websocket_json_representation() {
@@ -457,7 +472,7 @@ nlohmann::json NSPanel::get_websocket_json_representation() {
   send_mac.erase(std::remove(send_mac.begin(), send_mac.end(), ':'), send_mac.end());
 
   if (this->_has_registered_to_manager) {
-    data["id"] = this->_id;
+    data["nspanel_id"] = this->_id;
   }
   data["name"] = this->_name;
   data["rssi"] = this->_rssi;
@@ -465,12 +480,12 @@ nlohmann::json NSPanel::get_websocket_json_representation() {
   data["mac_address"] = send_mac;
   data["ip_address"] = this->_ip_address;
   data["temperature"] = this->_temperature;
-  std::string warnings_string = this->_nspanel_warnings;
-  if (warnings_string.length() > 0) {
-    warnings_string.append("\\n");
-  }
-  warnings_string.append(this->_nspanel_warnings_from_manager);
-  data["warnings"] = warnings_string;
+  // std::string warnings_string = this->_nspanel_warnings;
+  // if (warnings_string.length() > 0) {
+  //   warnings_string.append("\\n");
+  // }
+  // warnings_string.append(this->_nspanel_warnings_from_manager);
+  // data["warnings"] = warnings_string;
 
   return data;
 }
@@ -553,16 +568,22 @@ void NSPanel::update_warnings_from_manager() {
   if (!this->_has_registered_to_manager) {
     return;
   }
-  std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_nspanels_warnings";
+  std::string url = fmt::format("http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/nspanels/warnings?id={}", this->_id);
   std::string response_data;
   if (WebHelper::perform_get_request(&url, &response_data, nullptr)) {
     nlohmann::json data = nlohmann::json::parse(response_data);
-    for (nlohmann::json panel : data["panels"]) {
-      if (std::string(panel["nspanel"]["mac"]).compare(this->_mac) == 0) {
-        this->_nspanel_warnings_from_manager = panel["warnings"];
+    if (data.contains("nspanels") && data.at("nspanels").is_array()) {
+      std::vector<nlohmann::json> nspanel_warnings = data.at("nspanels");
+      if (nspanel_warnings.size() > 0) {
+        // TODO: Load warnings from array
+        this->_nspanel_warnings_from_manager = "TODO!";
+        // this->_nspanel_warnings_from_manager = nspanel_warnings[0]["warnings"];
         SPDLOG_DEBUG("Found warnings {} from manager matching MAC {}.", this->_nspanel_warnings_from_manager.size(), this->_mac);
-        break;
+      } else {
+        SPDLOG_ERROR("Performed request successfully but no NSPanels was in list of errors.");
       }
+    } else {
+      SPDLOG_ERROR("Performed request successfully but no NSPanels was in list of errors.");
     }
   } else {
     SPDLOG_ERROR("Failed to get active NSPanel warnings from manager.");
@@ -580,7 +601,7 @@ void NSPanel::deny_register_request() {
   this->_state = MQTT_MANAGER_NSPANEL_STATE::DENIED;
 
   nlohmann::json data;
-  data["mac"] = this->_mac;
+  data["mac_address"] = this->_mac;
   data["friendly_name"] = this->_name;
   data["denied"] = true;
   bool result = this->register_to_manager(data);
@@ -594,7 +615,7 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
   try {
 
     SPDLOG_INFO("Sending registration data to Django for database management.");
-    std::string url = "http://127.0.0.1:8000/api/register_nspanel";
+    std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/nspanels";
     std::string response_data;
     std::string payload_data = register_request_payload.dump();
     if (WebHelper::perform_post_request(&url, &response_data, nullptr, &payload_data)) {
@@ -603,11 +624,14 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
         this->update_warnings_from_manager();
         SPDLOG_INFO("Panel registration OK. Updating internal data.");
         nlohmann::json data = nlohmann::json::parse(response_data);
-        this->update_config(data); // Returned data from registration request is the same as data from the global /api/get_mqtt_manager_config
-        this->register_to_home_assistant();
-        if (this->_state == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
-          this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+        // this->update_config(data); // Returned data from registration request is the same as data from the global /api/get_mqtt_manager_config
+        this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+        this->_id = data["nspanel_id"];
+        if (this->_name.size() == 0) {
+          this->_name = register_request_payload["friendly_name"];
+          this->_mac = register_request_payload["mac_origin"];
         }
+        this->register_to_home_assistant();
         SPDLOG_INFO("Panel registration completed. Sending accept command to panel.");
 
         // Everything was successfull, send registration accept to panel:
@@ -789,4 +813,70 @@ void NSPanel::set_relay_state(uint8_t relay, bool state) {
   } else if (relay == 2 && this->_relay2_state != state) {
     MQTT_Manager::publish(this->_mqtt_relay2_command_topic, state ? "1" : "0");
   }
+}
+
+bool NSPanel::handle_ipc_request_status(nlohmann::json request, nlohmann::json *response_buffer) {
+  nlohmann::json data = {
+      {"ip_address", this->_ip_address},
+      {"rssi", this->_rssi},
+      {"temperature", this->_temperature},
+      {"ram_usage", this->_heap_used_pct},
+      {"update_progress", this->_update_progress},
+      {"warnings", this->_nspanel_warnings},
+  };
+  switch (this->_state) {
+  case MQTT_MANAGER_NSPANEL_STATE::ONLINE:
+    data["state"] = "online";
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::OFFLINE:
+    data["state"] = "offline";
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::UPDATING_FIRMWARE:
+    data["state"] = "updating_fw";
+    data["progress"] = this->_update_progress;
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA:
+    data["state"] = "updating_fs";
+    data["progress"] = this->_update_progress;
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT:
+    data["state"] = "updating_tft";
+    data["progress"] = this->_update_progress;
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::WAITING:
+    data["state"] = "waiting";
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT:
+    data["state"] = "awaiting_accept";
+    break;
+  default:
+    data["state"] = "unknown";
+    break;
+  }
+  (*response_buffer) = data;
+  return true;
+}
+
+bool NSPanel::handle_ipc_request_reboot(nlohmann::json request, nlohmann::json *response_buffer) {
+  this->reboot();
+  this->send_websocket_update();
+  nlohmann::json data = {{"status", "ok"}};
+  (*response_buffer) = data;
+  return true;
+}
+
+bool NSPanel::handle_ipc_request_update_firmware(nlohmann::json request, nlohmann::json *response_buffer) {
+  this->firmware_update();
+  this->send_websocket_update();
+  nlohmann::json data = {{"status", "ok"}};
+  (*response_buffer) = data;
+  return true;
+}
+
+bool NSPanel::handle_ipc_request_update_screen(nlohmann::json request, nlohmann::json *response_buffer) {
+  this->tft_update();
+  this->send_websocket_update();
+  nlohmann::json data = {{"status", "ok"}};
+  (*response_buffer) = data;
+  return true;
 }

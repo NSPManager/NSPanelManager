@@ -3,6 +3,7 @@
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/stacktrace/stacktrace_fwd.hpp>
+#include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
@@ -257,7 +258,7 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
 
     SPDLOG_DEBUG("Loading Rooms...");
     std::list<nlohmann::json> json_rooms;
-    std::string rooms_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/nspanels";
+    std::string rooms_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/rooms";
     std::string rooms_string;
     if (WebHelper::perform_get_request(&rooms_url, &rooms_string, nullptr)) {
       nlohmann::json rooms_json = nlohmann::json::parse(rooms_string);
@@ -291,23 +292,27 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
       SPDLOG_ERROR("Chaught exception when checking for any removed rooms. Exception: {}", e.what());
     }
 
-    SPDLOG_DEBUG("Loading relay groups...");
     std::list<nlohmann::json> json_rgs;
-    std::string relay_groups_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/nspanels";
-    std::string relay_groups_string;
-    if (WebHelper::perform_get_request(&relay_groups_url, &relay_groups_string, nullptr)) {
-      nlohmann::json relay_groups_json = nlohmann::json::parse(relay_groups_string);
-      SPDLOG_TRACE("Got Relay Group configs: {}", rooms_string);
-      for (nlohmann::json rg_config : relay_groups_json.at("nspanel_relay_groups")) {
-        json_rgs.push_back(rg_config); // Build light list for next step.
-        bool already_exists = ITEM_IN_LIST(MqttManagerConfig::nspanel_relay_group_configs, rg_config);
-        if (!already_exists) {
-          MqttManagerConfig::nspanel_relay_group_configs.push_back(rg_config);
-          MqttManagerConfig::_config_added_listener(&MqttManagerConfig::nspanel_relay_group_configs.back());
+    try {
+      SPDLOG_DEBUG("Loading relay groups...");
+      std::string relay_groups_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/relay_groups";
+      std::string relay_groups_string;
+      if (WebHelper::perform_get_request(&relay_groups_url, &relay_groups_string, nullptr)) {
+        nlohmann::json relay_groups_json = nlohmann::json::parse(relay_groups_string);
+        SPDLOG_TRACE("Got Relay Group configs: {}", rooms_string);
+        for (nlohmann::json rg_config : relay_groups_json.at("relay_groups")) {
+          json_rgs.push_back(rg_config); // Build light list for next step.
+          bool already_exists = ITEM_IN_LIST(MqttManagerConfig::nspanel_relay_group_configs, rg_config);
+          if (!already_exists) {
+            MqttManagerConfig::nspanel_relay_group_configs.push_back(rg_config);
+            MqttManagerConfig::_config_added_listener(&MqttManagerConfig::nspanel_relay_group_configs.back());
+          }
         }
+      } else {
+        SPDLOG_ERROR("Failed to get Relay Group configs!");
       }
-    } else {
-      SPDLOG_ERROR("Failed to get Relay Group configs!");
+    } catch (std::exception &e) {
+      SPDLOG_ERROR("Chaught exception when loading relay groups. Exception: {}", e.what());
     }
 
     try {
