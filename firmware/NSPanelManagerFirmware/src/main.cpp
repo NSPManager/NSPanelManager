@@ -47,7 +47,7 @@ void readNTCTemperatureTask(void *param) {
     temperature = 1 / (1 / 298.15 + log(temperature / 10000) / 3950);
     temperature = temperature - 273.15; // Celsius
 
-    if (NSPMConfig::instance->use_farenheit) {
+    if (NSPMConfig::instance->use_fahrenheit) {
       temperature = (temperature * 9 / 5) + 32;
     }
     tempSensorReadings[temperatureSlotNumber] = temperature + NSPMConfig::instance->temperature_calibration;

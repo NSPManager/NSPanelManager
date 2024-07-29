@@ -133,7 +133,7 @@ public:
   bool littlefs_mount_successfull = false;
 
   /// @brief Should we report time in farenheit or celcius? True = farenheit, false = Celcius
-  bool use_farenheit = false;
+  bool use_fahrenheit = false;
 
   /// @brief Indicates what TFT and checksums to check.
   bool is_us_panel = false;
