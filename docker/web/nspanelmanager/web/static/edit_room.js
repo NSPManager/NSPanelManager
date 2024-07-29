@@ -239,7 +239,15 @@ function edit_light(light_id) {
       $("#openhab_color_temperature_channel_name").find("option").remove();
       $("#openhab_RGB_channel_name").find("option").remove();
 
-      $.get("/api/get_all_available_entities", function (data) {
+      var types = {
+        "home_assistant_type_filter": JSON.stringify([
+          "light", "switch"
+        ]),
+        "openhab_type_filter": JSON.stringify([
+          "things"
+        ])
+      };
+      $.get("/api/get_all_available_entities", types, function (data) {
         data.openhab_entities.forEach(function (light) {
           if (light.label == result.openhab_name) {
             light.items.forEach((item) => {
