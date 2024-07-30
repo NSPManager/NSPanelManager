@@ -1,4 +1,6 @@
 # NSPanelManager
+Standardised Smart Home control for Home Assistant and/or Openhab users using the original Sonoff NSpanel.
+
 NSPanel Manager is a custom software solution for the Sonoff NSPanel (not the NSPanel pro). The software is designed to be easy to use on a day to day basis and to easily manage multiple NSPanels around your home. The interface on the NSPanel itself has been designed to be intuitive to use for people of all ages and backgrounds.
 
 All the NSPanel that are installed with the NSPanel Manager solution communicate back to a Docker container that is used to manage the panels, NSPanel Manager specific solutions and also all communication back and forth to/from Home Assisant and/or OpenHAB.
