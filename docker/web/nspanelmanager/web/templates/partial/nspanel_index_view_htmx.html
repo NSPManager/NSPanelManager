@@ -1,5 +1,5 @@
-<div class="bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md nspanel-box" id="panel_status_box-{{ nspanel.data.id }}">
-<div class="">
+<div class="dark:bg-slate-800 text-base-content rounded-md nspanel-box bg-base-100 shadow-xl" id="panel_status_box-{{ nspanel.data.id }}">
+    <div class="">
     {% component "nspanel_status_header" id=nspanel.data.id state=nspanel.status.state update_progress=nspanel.status.progress %}{% endcomponent %}
 </div>
 <div class="p-2">
@@ -14,8 +14,8 @@
     </div>
     <div class="flex w-full items-center justify-center pt-2 pb-4">
         <div>
-        <button class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800" data-nspanel-mac="" onclick="send_nspanel_deny_request(this);">Deny</button>
-        <button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" data-nspanel-mac="" onclick="send_nspanel_accept_request(this);">Accept</button>
+        <button class="text-base-content bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800" data-nspanel-mac="" onclick="send_nspanel_deny_request(this);">Deny</button>
+        <button class="text-base-content bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" data-nspanel-mac="" onclick="send_nspanel_accept_request(this);">Accept</button>
         </div>
     </div>
     </div>
@@ -35,7 +35,7 @@
             {% component "nspanel_status_text" id=nspanel.data.id progress=nspanel.status.update_progress state=nspanel.status.state %}{% endcomponent %}
         </div>
         <!-- Warning indicator -->
-        <span class="flex shrink-0 w-3 h-3 mt-2 ms-1 me-2 bg-yellow-400 dark:bg-yellow-300 rounded-full hidden transition-all duration-300" id="nspanel_warning_indicator" data-popover-target="nspanel_warning_popover">
+        <!-- <div class="badge badge-warning badge-xs mt-2 me-2 ms-1"></div> -->
         <!-- Warning popover-->
         <div data-popover id="nspanel_warning_popover" role="tooltip" class="absolute top-7 z-10 invisible inline-block w-60 md:w-96 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 dark:text-gray-400 dark:border-gray-600 dark:bg-gray-800">
             <div class="px-3 py-2 bg-gray-100 border-b border-gray-200 rounded-t-lg dark:border-gray-600 dark:bg-gray-700">
@@ -81,10 +81,7 @@
             class="hidden dropdown z-10 font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600 md:absolute inset-x-auto">
             <ul class="py-2 text-sm text-gray-700 dark:text-gray-400" aria-labelledby="dropdownLargeButton">
             <li>
-                <a hx-post="{% url 'htmx_nspanel_reboot' nspanel.data.id %}" id="reboot-{{ nspanel.data.id }}" hx-trigger="click, {% if nspanel.status.state != 'offline' %}reboot-all-nspanels from:body{% endif %}" hx-swap="none"
-                class="block px-4 py-2 hover:bg-gray-600 hover:text-white"><span
-                    class="mdi mdi-restart pr-2"></span>Reboot</a>
-                </a>
+                <!-- {% component "nspanel_reboot_button" id=nspanel.data.id state=nspanel.status.state %}{% endcomponent %} -->
             </li>
             <li>
                 <a class="nspanel-settings-link block px-4 py-2 hover:bg-gray-600 hover:text-white"><span

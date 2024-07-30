@@ -1,7 +1,6 @@
 {% load static %}
 
-
-<nav class="bg-gray-900 w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600">
+<nav class="bg-neutral text-neutral-content w-full z-20 top-0 start-0 border-b border-neutral-content">
   <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
     <a href="/" class=" flex items-center space-x-3 rtl:space-x-reverse">
       <img src="{% static 'logo.svg' %}" alt="Logo" class="h-8">
@@ -9,7 +8,7 @@
     <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
       <div>
         <button onclick="toggle_theme();" title="Toggle Light/Dark theme"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          class="btn btn-sm btn-primary btn-rounded rounded-md">
           <svg class="w-5 h-5 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
             viewBox="0 0 24 24">
             <path
@@ -17,7 +16,7 @@
           </svg>
         </button>
         <a href="{% url 'manual' %}" target="_blank"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          class="btn btn-sm btn-primary rounded-md">
           <svg class="w-5 h-5 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
             viewBox="0 0 24 24">
             <path
@@ -27,7 +26,7 @@
         </a>
       </div>
       <button data-collapse-toggle="navbar" type="button"
-        class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+        class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark: hover:bg-neutral dark:focus:ring-gray-600"
         aria-controls="navbar" aria-expanded="false">
         <span class="sr-only">Open main menu</span>
         <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
@@ -39,14 +38,14 @@
     <div class="items-center justify-between max-md:hidden md:visible md:flex md:flex-wrap w-full md:w-auto md:order-1"
       id="navbar">
       <ul
-        class="flex flex-col p-4 md:p-0 mt-4 font-medium border rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 bg-gray-800 md:bg-gray-900 border-gray-700">
+        class="flex flex-col p-4 md:p-0 mt-4 font-medium border rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0">
         <li>
           <a href="/" data-active="{% if request.path == '/' %}true{% endif %}"
-            class="block py-2 px-3 text-white rounded md:bg-transparent data-[active=true]:text-blue-700 md:p-0 data-[active=true]:dark:text-blue-500">NSPanels</a>
+            class="block py-2 px-3  rounded md:bg-transparent data-[active=true]:text-accent md:p-0 ">NSPanels</a>
         </li>
         <li>
           <button data-dropdown-toggle="roomsMenuDropdown" data-active="{% if request.path == '/rooms' %}true{% elif request.path == '/rooms/order' %}true{% endif %}"
-            class="flex items-center justify-between w-full py-2 px-3 rounded md:border-0 md:p-0 md:w-auto text-white md:hover:text-blue-500 focus:text-white border-gray-700 hover:bg-gray-700 md:hover:bg-transparent data-[active=true]:text-blue-700 data-[active=true]:dark:text-blue-500">
+            class="flex items-center justify-between w-full py-2 px-3 rounded md:border-0 md:p-0 md:w-auto  md:hover:text-accent focus: border-gray-700  hover:bg-neutral md:hover:bg-transparent data-[active=true]:text-accent ">
             Rooms
             <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
               viewBox="0 0 10 6">
@@ -59,22 +58,22 @@
             class="hidden z-10 font-normal bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 md:absolute inset-x-auto w-full md:w-44">
             <ul class="py-2 text-sm text-gray-700 dark:text-gray-400" aria-labelledby="dropdownLargeButton">
               <li>
-                <a href="{% url 'rooms' %}" data-active="{% if request.path == '/rooms' %}true{% endif %}" class="block px-4 py-2 hover:bg-gray-600 hover:text-white data-[active=true]:text-blue-600 data-[active=true]:dark:text-blue-500">Rooms</a>
+                <a href="{% url 'rooms' %}" data-active="{% if request.path == '/rooms' %}true{% endif %}" class="block px-4 py-2  hover:bg-neutral hover:text-neutral-content hover: data-[active=true]:text-blue-600 ">Rooms</a>
               </li>
               <li>
-                <a href="{% url 'rooms_order' %}" data-active="{% if request.path == '/rooms/order' %}true{% endif %}" class="block px-4 py-2 hover:bg-gray-600 hover:text-white data-[active=true]:text-blue-600 data-[active=true]:dark:text-blue-500">Reorder
+                <a href="{% url 'rooms_order' %}" data-active="{% if request.path == '/rooms/order' %}true{% endif %}" class="block px-4 py-2  hover:bg-neutral hover:text-neutral-content hover: data-[active=true]:text-blue-600 ">Reorder
                   rooms</a>
               </li>
               <li>
                 <a onclick="addNewRoom();"
-                  class="block px-4 py-2 hover:bg-gray-600 hover:text-white">Create new room</a>
+                  class="block px-4 py-2  hover:bg-neutral hover:text-neutral-content hover:">Create new room</a>
               </li>
             </ul>
           </div>
         </li>
         <li>
           <button data-dropdown-toggle="entitiesMenuDropdown" data-active="{% if request.path == '/entities/relay_groups' %}true{% elif request.path == '/entities/global_scenes' %}true{% elif request.path == '/entities/weather_and_time' %}true{% elif request.path == '/denied_nspanels' %}true{% endif %}"
-            class="flex items-center justify-between w-full py-2 px-3 rounded md:border-0 md:p-0 md:w-auto text-white md:hover:text-blue-500 focus:text-white border-gray-700 hover:bg-gray-700 md:hover:bg-transparent data-[active=true]:text-blue-700 data-[active=true]:dark:text-blue-500">
+            class="flex items-center justify-between w-full py-2 px-3 rounded md:border-0 md:p-0 md:w-auto  md:hover:text-accent focus: border-gray-700  hover:bg-neutral md:hover:bg-transparent data-[active=true]:text-accent ">
             Entities
             <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
               viewBox="0 0 10 6">
@@ -88,24 +87,24 @@
             <ul class="py-2 text-sm text-gray-700 dark:text-gray-400" aria-labelledby="dropdownLargeButton">
               <li>
                 <a href="{% url 'relay_groups' %}" data-active="{% if request.path == '/entities/relay_groups' %}true{% endif %}"
-                  class="block px-4 py-2 hover:bg-gray-600 hover:text-white data-[active=true]:text-blue-600 data-[active=true]:dark:text-blue-500">Relay/Light groups</a>
+                  class="block px-4 py-2  hover:bg-neutral hover:text-neutral-content hover: data-[active=true]:text-blue-600 ">Relay/Light groups</a>
               </li>
               <li>
-                <a href="{% url 'global_scenes' %}" data-active="{% if request.path == '/entities/global_scenes' %}true{% endif %}" class="block px-4 py-2 hover:bg-gray-600 hover:text-white data-[active=true]:text-blue-600 data-[active=true]:dark:text-blue-500">
+                <a href="{% url 'global_scenes' %}" data-active="{% if request.path == '/entities/global_scenes' %}true{% endif %}" class="block px-4 py-2  hover:bg-neutral hover:text-neutral-content hover: data-[active=true]:text-blue-600 ">
                   Global scenes</a>
               </li>
               <li>
                 <a href="{% url 'weather_and_time' %}" data-active="{% if request.path == '/entities/weather_and_time' %}true{% endif %}"
-                  class="block px-4 py-2 hover:bg-gray-600 hover:text-white data-[active=true]:text-blue-600 data-[active=true]:dark:text-blue-500">Weather & Time</a>
+                  class="block px-4 py-2  hover:bg-neutral hover:text-neutral-content hover: data-[active=true]:text-blue-600 ">Weather & Time</a>
               </li>
             </ul>
             <div class="py-1 text-sm text-gray-700 dark:text-gray-400">
-              <a href="{% url 'denied_nspanels' %}" data-active="{% if request.path == '/denied_nspanels' %}true{% endif %}" class="block px-4 py-2 hover:bg-gray-600 hover:text-white data-[active=true]:text-blue-600 data-[active=true]:dark:text-blue-500">Denied NSPanels</a>
+              <a href="{% url 'denied_nspanels' %}" data-active="{% if request.path == '/denied_nspanels' %}true{% endif %}" class="block px-4 py-2  hover:bg-neutral hover:text-neutral-content hover: data-[active=true]:text-blue-600 ">Denied NSPanels</a>
             </div>
           </div>
         <li>
           <button data-dropdown-toggle="uploadMenuDropdown"
-            class="flex items-center justify-between w-full py-2 px-3 rounded md:border-0 md:p-0 md:w-auto text-white md:hover:text-blue-500 focus:text-white border-gray-700 hover:bg-gray-700 md:hover:bg-transparent">
+            class="flex items-center justify-between w-full py-2 px-3 rounded md:border-0 md:p-0 md:w-auto  md:hover:text-accent focus: border-gray-700  hover:bg-neutral md:hover:bg-transparent">
             Upload
             <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
               viewBox="0 0 10 6">
@@ -119,22 +118,22 @@
             <ul class="py-2 text-sm text-gray-700 dark:text-gray-400" aria-labelledby="dropdownLargeButton">
               <li>
                 <a onclick="$('#modal-upload-firmware').removeClass('hidden');"
-                  class="block px-4 py-2 hover:bg-gray-600 hover:text-white">Upload firmware</a>
+                  class="block px-4 py-2  hover:bg-neutral hover:text-neutral-content hover:">Upload firmware</a>
               </li>
               <li>
                 <a onclick="$('#modal-upload-data-file').removeClass('hidden');"
-                  class="block px-4 py-2 hover:bg-gray-600 hover:text-white">Upload data file</a>
+                  class="block px-4 py-2  hover:bg-neutral hover:text-neutral-content hover:">Upload data file</a>
               </li>
               <li>
                 <a onclick="$('#modal-upload-tft-file').removeClass('hidden');"
-                  class="block px-4 py-2 hover:bg-gray-600 hover:text-white">Upload TFT file</a>
+                  class="block px-4 py-2  hover:bg-neutral hover:text-neutral-content hover:">Upload TFT file</a>
               </li>
             </ul>
           </div>
         </li>
         <li>
           <a href="{% url 'settings' %}" data-active="{% if request.path == '/settings' %}true{% endif %}"
-            class="block py-2 px-3 rounded md:p-0 md:hover:text-blue-500 text-white hover:bg-gray-700 hover:text-white md:hover:bg-transparent border-gray-700 data-[active=true]:text-blue-700 data-[active=true]:dark:text-blue-500">Settings</a>
+            class="block py-2 px-3 rounded md:p-0 md:hover:text-accent   hover:bg-neutral hover: md:hover:bg-transparent border-gray-700 data-[active=true]:text-accent ">Settings</a>
         </li>
       </ul>
     </div>

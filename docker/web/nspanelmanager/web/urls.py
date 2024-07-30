@@ -6,6 +6,7 @@ from .components.nspanel_status_header.nspanel_status_header import NSPanelHeade
 from .components.nspanel_status_ram_usage.nspanel_status_ram_usage import NSPanelStatusRamUsage
 from .components.nspanel_status_temperature.nspanel_status_temperature import NSPanelStatusTemperature
 from .components.nspanel_visit_link.nspanel_visit_link import NSPanelVisitLink
+from .components.nspanel_reboot_button.nspanel_reboot_button import NSPanelRebootButton
 from . import views, api, rest, htmx
 
 urlpatterns = [
@@ -145,10 +146,12 @@ urlpatterns = [
     path('htmx/nspanels/<int:nspanel_id>/update_screen', htmx.nspanel_update_screen, name='htmx_nspanel_update_screen'),
     path('htmx/nspanels/<int:nspanel_id>/update_firmware', htmx.nspanel_update_firmware, name='htmx_nspanel_update_firmware'),
 
-    path('htmx/partial/nspanel_status_header/<str:view>/<int:nspanel_id>', NSPanelHeader.as_view(), name="nspanel_status_header"),
-    path('htmx/partial/nspanel_status_text/<str:view>/<int:nspanel_id>', NSPanelStatusText.as_view(), name="nspanel_status_text"),
-    path('htmx/partial/nspanel_status_wifi_signal_strength/<str:view>/<int:nspanel_id>', NSPanelStatusWifiSignalStrength.as_view(), name="nspanel_status_wifi_signal_strength"),
-    path('htmx/partial/nspanel_status_ram_usage/<str:view>/<int:nspanel_id>', NSPanelStatusRamUsage.as_view(), name="nspanel_status_ram_usage"),
-    path('htmx/partial/nspanel_status_temperature/<str:view>/<int:nspanel_id>', NSPanelStatusTemperature.as_view(), name="nspanel_status_temperature"),
-    path('htmx/partial/nspanel_visit_link/<str:view>/<int:nspanel_id>', NSPanelVisitLink.as_view(), name="nspanel_visit_link"),
+    # Components
+    path('htmx/component/nspanel_status_header/<str:view>/<int:nspanel_id>', NSPanelHeader.as_view(), name="nspanel_status_header"),
+    path('htmx/component/nspanel_status_text/<str:view>/<int:nspanel_id>', NSPanelStatusText.as_view(), name="nspanel_status_text"),
+    path('htmx/component/nspanel_status_wifi_signal_strength/<str:view>/<int:nspanel_id>', NSPanelStatusWifiSignalStrength.as_view(), name="nspanel_status_wifi_signal_strength"),
+    path('htmx/component/nspanel_status_ram_usage/<str:view>/<int:nspanel_id>', NSPanelStatusRamUsage.as_view(), name="nspanel_status_ram_usage"),
+    path('htmx/component/nspanel_status_temperature/<str:view>/<int:nspanel_id>', NSPanelStatusTemperature.as_view(), name="nspanel_status_temperature"),
+    path('htmx/component/nspanel_visit_link/<str:view>/<int:nspanel_id>', NSPanelVisitLink.as_view(), name="nspanel_visit_link"),
+    path('htmx/component/nspanel_reboot_button/<str:view>/<int:nspanel_id>', NSPanelRebootButton.as_view(), name="nspanel_reboot_button"),
 ]
