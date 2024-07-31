@@ -5,3 +5,17 @@ function show_dropdown_menu(e) {
   }
   if(e.stopPropagation) e.stopPropagation();
 }
+
+function show_popover(e) {
+  var popover_target = $(e).data("popover-target");
+  if(popover_target) {
+    $("#" + popover_target).removeClass("invisible opacity-0");
+  }
+}
+
+function hide_popover(e) {
+  var popover_target = $(e).data("popover-target");
+  if(popover_target) {
+    $("#" + popover_target).addClass("invisible opacity-0");
+  }
+}

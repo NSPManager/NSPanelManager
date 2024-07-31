@@ -1,4 +1,4 @@
-<div class="dark:bg-slate-800 text-base-content rounded-md nspanel-box bg-base-100 shadow-xl" id="panel_status_box-{{ nspanel.data.id }}">
+<div class="text-base-content rounded-md nspanel-box bg-base-100 shadow-xl" id="panel_status_box-{{ nspanel.data.id }}">
     <div class="">
     {% component "nspanel_status_header" id=nspanel.data.id state=nspanel.status.state update_progress=nspanel.status.progress %}{% endcomponent %}
 </div>
@@ -8,6 +8,7 @@
     <span id="nspanel_mac_container" class="hidden nspanel_mac_container" data-nspanel-mac="{{ nspanel_mac }}">{{ nspanel.mac }}</span>
 
     <!-- Overlay for "accept/deny request" -->
+    <!-- TODO: Move the "accept new panel" into it's own partial -->
     <div class="accept-request-overlay hidden">
     <div class="flex w-full items-/center justify-center pt-2">
         <span class="nspanel-name">NSPanel '{NAME}' is requesting access. THIS TEXT IS REPLACED BY JAVASCRIPT AS NEEDED!!!</span>
@@ -35,14 +36,28 @@
             {% component "nspanel_status_text" id=nspanel.data.id progress=nspanel.status.update_progress state=nspanel.status.state %}{% endcomponent %}
         </div>
         <!-- Warning indicator -->
-        <!-- <div class="badge badge-warning badge-xs mt-2 me-2 ms-1"></div> -->
+        {% if nspanel.status.warnings|length > 0 %}
+        <div class="badge badge-warning badge-xs mt-2 me-2 ms-1 tooltip" onmouseover="show_popover(this);" onmouseleave="hide_popover(this);" data-popover-target="nspanel_warning_popover_{{ nspanel.data.id }}"></div>
+        {% endif %}
         <!-- Warning popover-->
-        <div data-popover id="nspanel_warning_popover" role="tooltip" class="absolute top-7 z-10 invisible inline-block w-60 md:w-96 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 dark:text-gray-400 dark:border-gray-600 dark:bg-gray-800">
-            <div class="px-3 py-2 bg-gray-100 border-b border-gray-200 rounded-t-lg dark:border-gray-600 dark:bg-gray-700">
-                <h3 class="font-semibold text-gray-900 dark:text-white">Warnings</h3>
+        <div id="nspanel_warning_popover_{{ nspanel.data.id }}" role="tooltip" class="absolute bg-base-100 top-7 z-10 invisible inline-block w-60 md:w-96 text-sm transition-opacity duration-300 border border-warning rounded-lg shadow-xl opacity-0">
+            <div class="px-3 py-2 bg-base-100 text-base-content rounded-t-lg">
+                <h3 class="font-semibold">Warnings</h3>
             </div>
             <div class="px-3 mb-2" id="nspanel_warnings">
             <!-- Warnings are created in the index.js file-->
+            {% for warning in nspanel.status.warnings %}
+                {% if warning.level == 'info' %}
+                    <div role="alert" class="alert alert-info my-1">{{ warning.text }}</div>
+                {% elif warning.level == 'warning' %}
+                    <div role="alert" class="alert alert-warning my-1">{{ warning.text }}</div>
+                {% elif warning.level == 'error' %}
+                    <div role="alert" class="alert alert-error my-1">{{ warning.text }}</div>
+                {% else %}
+                    <div role="alert" class="alert alert-error my-1">Unknown alert level: {{ warning.level }}</div>
+                    <div role="alert" class="alert my-1">{{ warning.text }}</div>
+                {% endif %}
+            {% endfor %}
             </div>
             <div data-popper-arrow></div>
         </div>

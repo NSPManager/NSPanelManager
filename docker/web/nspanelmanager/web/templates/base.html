@@ -1,7 +1,7 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en" class="min-h-screen  {% if dark_theme == 'true' %}dark{% endif %} dark:bg-gray-800 dark:text-gray-50" data-theme="nord">
+<html lang="en" class="min-h-screen bg-base-200">
 
 <head>
   <meta charset="UTF-8">
@@ -11,8 +11,7 @@
   <link rel="stylesheet" href="{% static 'css/main.css' %}"> <!-- Compiled version of Tailwind CSS -->
   <script src="{% static 'jquery.min.js' %}"></script>
   <script src="{% static 'base.js' %}?refresh={% now 'U' %}"></script>
-  <script src="https://unpkg.com/htmx.org@2.0.1"></script>
-  <!-- <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script> -->
+  <script src="https://unpkg.com/htmx.org@2.0.1"></script> <!-- TODO: Download and store as static file -->
   <script src="{% static 'htmx_ws.js' %}"></script>
   <link rel="stylesheet" href="{% static 'mdi/css/materialdesignicons.min.css' %}">
   <link rel="stylesheet" href="{% static 'loader.css' %}?refresh={% now 'U' %}">
