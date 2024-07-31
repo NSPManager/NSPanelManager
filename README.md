@@ -5,6 +5,9 @@ NSPanel Manager is a custom software solution for the Sonoff NSPanel (not the NS
 
 All the NSPanel that are installed with the NSPanel Manager solution communicate back to a Docker container that is used to manage the panels, NSPanel Manager specific solutions and also all communication back and forth to/from Home Assisant and/or OpenHAB.
 
+# Video quick look of NSPanel Manager Web UI
+https://github.com/user-attachments/assets/741e51d5-0091-4e9d-980a-c47749142793
+
 # More information
 All information about this project on how it works and how to use it is available in the User & Technical reference manual available [here](docs/tex/manual.pdf).
 
@@ -15,6 +18,7 @@ Head over to our [Discord](https://discord.gg/RwXvAH56fE)!
 
 # Support
 <a href="https://www.buymeacoffee.com/nspanelmanager" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Us A Coffee" height="41" width="174"></a>
+
 
 # Pictures of manager web UI
 
