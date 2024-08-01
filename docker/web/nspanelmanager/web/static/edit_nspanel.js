@@ -256,7 +256,7 @@ $(document).ready(() => {
       update_nspanel_status(data.payload);
     } else if (
       data.type == "log" &&
-      data.mac.replaceAll(":", "") == mac_address
+      data.mac_address.replaceAll(":", "") == mac_address
     ) {
       push_log_message_to_view(data);
     }

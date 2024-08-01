@@ -1,4 +1,3 @@
-<!-- TODO: When this file is rendered and sent over a websocket for replacement via HTMX it doesn't transition. See issue: https://github.com/bigskysoftware/htmx-extensions/issues/65 -->
 {% if state == "online" %}
 <div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}" class="min-h-1 overflow-hidden rounded-t-md w-full transition-all ease-linear duration-300 bg-success" id="panel_header-{{ id }}">
 </div>

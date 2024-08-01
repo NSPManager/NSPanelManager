@@ -6,6 +6,8 @@
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "web_helper/WebHelper.hpp"
 #include <algorithm>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/bind.hpp>
 #include <boost/bind/placeholders.hpp>
 #include <boost/exception/diagnostic_information.hpp>
@@ -371,7 +373,28 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         SPDLOG_ERROR("Incorrect format of temperature data. Expected float.");
       }
       this->_ip_address = data["ip"];
-      // this->_nspanel_warnings = data["warnings"]; // TODO: Load warnings from firmware.
+      if (data.at("warnings").is_string()) {
+        // Loaded from old firmware, split string and assume level warning
+        std::vector<std::string> message_lines;
+        boost::split(message_lines, std::string(data.at("warnings")), boost::is_any_of("\n"));
+        for (std::string line : message_lines) {
+          NSPanelWarning warning_obj = {
+              .level = "warning",
+              .text = line};
+          this->_nspanel_warnings.push_back(warning_obj);
+        }
+      } else if (data.at("warnings").is_array()) {
+        for (nlohmann::json warning : data.at("warnings")) {
+          if (warning.contains("level") && warning.contains("text")) {
+            NSPanelWarning warning_obj = {
+                .level = warning.at("level"),
+                .text = warning.at("text")};
+            this->_nspanel_warnings.push_back(warning_obj);
+          } else {
+            SPDLOG_WARN("Failed to load warning from NSPanel {}::{}. Missing level or text attribute.", this->_id, this->_name);
+          }
+        }
+      }
 
       if (data.contains("state")) {
         std::string state = data["state"];
@@ -563,33 +586,6 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
   return size * nmemb;
 }
 
-void NSPanel::update_warnings_from_manager() {
-  // If this NSPanel hasn't been registered to the manager, then there is no need to fetch warnings from the manager.
-  if (!this->_has_registered_to_manager) {
-    return;
-  }
-  std::string url = fmt::format("http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/nspanels/warnings?id={}", this->_id);
-  std::string response_data;
-  if (WebHelper::perform_get_request(&url, &response_data, nullptr)) {
-    nlohmann::json data = nlohmann::json::parse(response_data);
-    if (data.contains("nspanels") && data.at("nspanels").is_array()) {
-      std::vector<nlohmann::json> nspanel_warnings = data.at("nspanels");
-      if (nspanel_warnings.size() > 0) {
-        // TODO: Load warnings from array
-        this->_nspanel_warnings_from_manager = "TODO!";
-        // this->_nspanel_warnings_from_manager = nspanel_warnings[0]["warnings"];
-        SPDLOG_DEBUG("Found warnings {} from manager matching MAC {}.", this->_nspanel_warnings_from_manager.size(), this->_mac);
-      } else {
-        SPDLOG_ERROR("Performed request successfully but no NSPanels was in list of errors.");
-      }
-    } else {
-      SPDLOG_ERROR("Performed request successfully but no NSPanels was in list of errors.");
-    }
-  } else {
-    SPDLOG_ERROR("Failed to get active NSPanel warnings from manager.");
-  }
-}
-
 void NSPanel::accept_register_request() {
   this->_is_register_accepted = true;
   this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
@@ -621,7 +617,6 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
     if (WebHelper::perform_post_request(&url, &response_data, nullptr, &payload_data)) {
       SPDLOG_INFO("Panel registration OK.");
       if (!this->_is_register_denied) {
-        this->update_warnings_from_manager();
         SPDLOG_INFO("Panel registration OK. Updating internal data.");
         nlohmann::json data = nlohmann::json::parse(response_data);
         // this->update_config(data); // Returned data from registration request is the same as data from the global /api/get_mqtt_manager_config
@@ -822,8 +817,15 @@ bool NSPanel::handle_ipc_request_status(nlohmann::json request, nlohmann::json *
       {"temperature", this->_temperature},
       {"ram_usage", this->_heap_used_pct},
       {"update_progress", this->_update_progress},
-      {"warnings", this->_nspanel_warnings},
   };
+  data["warnings"] = nlohmann::json::array({});
+  for (NSPanelWarning warning : this->_nspanel_warnings) {
+    data["warnings"].push_back(nlohmann::json{
+        {"level", warning.level},
+        {"text", warning.text},
+    });
+  }
+
   switch (this->_state) {
   case MQTT_MANAGER_NSPANEL_STATE::ONLINE:
     data["state"] = "online";

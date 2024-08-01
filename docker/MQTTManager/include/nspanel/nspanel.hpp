@@ -19,6 +19,11 @@ enum MQTT_MANAGER_NSPANEL_STATE {
   DENIED
 };
 
+struct NSPanelWarning {
+  std::string level;
+  std::string text;
+};
+
 class NSPanelLogMessage {
 public:
   std::string time;
@@ -109,11 +114,6 @@ public:
   void erase();
 
   /**
-   * Request warnings from maanager (Django) and update internal state.
-   */
-  void update_warnings_from_manager();
-
-  /**
    * Accept register request from this panel.
    */
   void accept_register_request();
@@ -170,7 +170,7 @@ private:
   uint8_t _heap_used_pct;
   uint8_t _update_progress;
   MQTT_MANAGER_NSPANEL_STATE _state;
-  std::vector<std::string> _nspanel_warnings;
+  std::vector<NSPanelWarning> _nspanel_warnings;
   std::string _nspanel_warnings_from_manager;
   std::string _mqtt_register_mac;
 

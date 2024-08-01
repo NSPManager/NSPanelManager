@@ -12,6 +12,7 @@
 #include <PageManager.hpp>
 #include <PubSubClient.h>
 #include <TftDefines.h>
+#include <WarningManager.hpp>
 #include <WebManager.hpp>
 #include <WiFi.h>
 #include <cmath>
@@ -311,8 +312,14 @@ void taskManageWifiAndMqtt(void *param) {
           (*status_report_doc)["temperature"] = display_temp;
           (*status_report_doc)["ip"] = WiFi.localIP().toString();
 
-          std::string warning_string = NSPanel::instance->getWarnings();
-          (*status_report_doc)["warnings"] = warning_string.c_str();
+          NSPanel::instance->updateWarnings();
+          (*status_report_doc)["warnings"] = JsonArray();
+          for (NSPanelWarning &warning : WarningManager::get_warnings()) {
+            JsonObject warning_obj;
+            warning_obj["level"] = warning.level;
+            warning_obj["text"] = warning.text;
+            (*status_report_doc)["warnings"].add(warning_obj);
+          }
 
           MqttManager::publish(NSPMConfig::instance->mqtt_panel_temperature_topic, display_temp);
 

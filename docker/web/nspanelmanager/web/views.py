@@ -506,50 +506,29 @@ def settings_page(request):
     data["mqtt_port"] = get_setting_with_default("mqtt_port")
     data["mqtt_username"] = get_setting_with_default("mqtt_username")
     data["mqtt_password"] = get_setting_with_default("mqtt_password")
-    data["home_assistant_address"] = get_setting_with_default(
-        "home_assistant_address")
-    data["home_assistant_token"] = get_setting_with_default(
-        "home_assistant_token")
+    data["home_assistant_address"] = get_setting_with_default("home_assistant_address")
+    data["home_assistant_token"] = get_setting_with_default("home_assistant_token")
     data["openhab_address"] = get_setting_with_default("openhab_address")
     data["openhab_token"] = get_setting_with_default("openhab_token")
-    data["openhab_brightness_channel_name"] = get_setting_with_default(
-        "openhab_brightness_channel_name")
-    data["openhab_brightness_channel_min"] = get_setting_with_default(
-        "openhab_brightness_channel_min")
-    data["openhab_brightness_channel_max"] = get_setting_with_default(
-        "openhab_brightness_channel_max", 255)
-    data["openhab_color_temp_channel_name"] = get_setting_with_default(
-        "openhab_color_temp_channel_name", "")
-    data["openhab_rgb_channel_name"] = get_setting_with_default(
-        "openhab_rgb_channel_name", "")
-    data["raise_to_100_light_level"] = get_setting_with_default(
-        "raise_to_100_light_level", 95)
-    data["min_button_push_time"] = get_setting_with_default(
-        "min_button_push_time", 50)
-    data["button_long_press_time"] = get_setting_with_default(
-        "button_long_press_time", 300)
-    data["special_mode_trigger_time"] = get_setting_with_default(
-        "special_mode_trigger_time", 300)
-    data["special_mode_release_time"] = get_setting_with_default(
-        "special_mode_release_time", 5000)
-    data["mqtt_ignore_time"] = get_setting_with_default(
-        "mqtt_ignore_time", 3000)
-    data["screensaver_activation_timeout"] = get_setting_with_default(
-        "screensaver_activation_timeout", 30000)
-    data["screen_dim_level"] = get_setting_with_default(
-        "screen_dim_level", 100)
-    data["screensaver_dim_level"] = get_setting_with_default(
-        "screensaver_dim_level", 0)
-    data["screensaver_mode"] = get_setting_with_default(
-        "screensaver_mode", "with_background")
-    data["turn_on_behavior"] = get_setting_with_default(
-        "turn_on_behavior", "color_temp")
-    data["max_live_log_messages"] = get_setting_with_default(
-        "max_live_log_messages", 10)
-    data["max_log_buffer_size"] = get_setting_with_default(
-        "max_log_buffer_size", 10)
-    data["is_home_assistant_addon"] = (
-        "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
+    data["openhab_brightness_channel_name"] = get_setting_with_default("openhab_brightness_channel_name")
+    data["openhab_brightness_channel_min"] = get_setting_with_default("openhab_brightness_channel_min")
+    data["openhab_brightness_channel_max"] = get_setting_with_default("openhab_brightness_channel_max")
+    data["openhab_color_temp_channel_name"] = get_setting_with_default("openhab_color_temp_channel_name")
+    data["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name")
+    data["raise_to_100_light_level"] = get_setting_with_default("raise_to_100_light_level")
+    data["min_button_push_time"] = get_setting_with_default("min_button_push_time")
+    data["button_long_press_time"] = get_setting_with_default("button_long_press_time")
+    data["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time")
+    data["special_mode_release_time"] = get_setting_with_default("special_mode_release_time")
+    data["mqtt_ignore_time"] = get_setting_with_default("mqtt_ignore_time")
+    data["screensaver_activation_timeout"] = get_setting_with_default("screensaver_activation_timeout")
+    data["screen_dim_level"] = get_setting_with_default("screen_dim_level")
+    data["screensaver_dim_level"] = get_setting_with_default("screensaver_dim_level")
+    data["screensaver_mode"] = get_setting_with_default("screensaver_mode")
+    data["turn_on_behavior"] = get_setting_with_default("turn_on_behavior")
+    data["max_live_log_messages"] = get_setting_with_default("max_live_log_messages")
+    data["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size")
+    data["is_home_assistant_addon"] = ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
     data["manager_address"] = get_setting_with_default("manager_address")
     data["manager_port"] = get_setting_with_default("manager_port")
     return render(request, 'settings.html', data)

@@ -8,6 +8,7 @@
 #include <NSPMConfig.h>
 #include <NSPanel.hpp>
 #include <NSPanelReturnData.h>
+#include <WarningManager.hpp>
 #include <WiFiClient.h>
 #include <cstddef>
 #include <esp_task_wdt.h>
@@ -604,12 +605,10 @@ uint8_t NSPanel::getUpdateProgress() {
   return this->_update_progress;
 }
 
-std::string NSPanel::getWarnings() {
-  std::string return_string = "";
+void NSPanel::updateWarnings() {
   if (!NSPanel::instance->_has_received_nspm) {
-    return_string.append("Did not receive NSPM-flag from screen. Is the screen running the NSPanel Manager TFT file?\n");
+    WarningManager::register_warning("error", "Did not receive NSPM-flag from screen. Is the screen running the NSPanel Manager TFT file?");
   }
-  return return_string;
 }
 
 bool NSPanel::ready() {

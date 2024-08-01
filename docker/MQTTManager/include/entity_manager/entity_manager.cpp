@@ -126,7 +126,6 @@ void EntityManager::add_nspanel(nlohmann::json &config) {
       panel->update_config(config);
     } else {
       NSPanel *panel = new NSPanel(config);
-      panel->update_warnings_from_manager();
       panel->send_websocket_update();
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
       EntityManager::_nspanels.push_back(panel);
@@ -544,13 +543,11 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       SPDLOG_DEBUG("Requesting state from NSPanel {}::{}", panel->get_id(), panel->get_name());
       if (args.contains("nspanel_id")) {
         if (panel->get_id() == atoi(std::string(args["nspanel_id"]).c_str())) {
-          panel->update_warnings_from_manager();
           panel_responses.push_back(panel->get_websocket_json_representation());
           break;
         }
       } else {
         // In case no ID was specified, send status for all panels.
-        panel->update_warnings_from_manager();
         panel_responses.push_back(panel->get_websocket_json_representation());
       }
     }
