@@ -38,6 +38,7 @@
             <div class="w-full me-2 mt-1">
                 {% component "nspanel_status_text" id=nspanel.data.id progress=nspanel.status.update_progress state=nspanel.status.state %}{% endcomponent %}
             </div>
+            <!-- TODO: Create "Warnings component" -->
             <!-- Warning indicator -->
             {% if nspanel.status.warnings|length > 0 %}
             <div class="badge badge-warning badge-xs mt-2 me-2 ms-1 tooltip" onmouseover="show_popover(this);" onmouseleave="hide_popover(this);" data-popover-target="nspanel_warning_popover_{{ nspanel.data.id }}"></div>

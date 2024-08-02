@@ -111,6 +111,8 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
 }
 
 void NSPanel::update_config(nlohmann::json &init_data) {
+  SPDLOG_TRACE("NSPanel {}::{} received config update. New config: {}", this->_id, this->_name, nlohmann::to_string(init_data));
+
   // TODO: Remove all "if mac or mac_address" (and similar) and decide on ONE name for all things.
   if (init_data.contains("nspanel_id")) {
     this->_id = init_data["nspanel_id"];
@@ -193,7 +195,6 @@ void NSPanel::update_config(nlohmann::json &init_data) {
       this->_is_register_accepted = false;
       this->_state = MQTT_MANAGER_NSPANEL_STATE::DENIED;
       rebuilt_mqtt = false;
-      return; // Stop processing here. The panel has been denied.
     }
   }
 
@@ -204,16 +205,17 @@ void NSPanel::update_config(nlohmann::json &init_data) {
       this->_is_register_accepted = true;
       this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
       rebuilt_mqtt = true;
-      return; // Stop processing here. The panel has been denied.
     }
   }
 
   if (!this->_is_register_denied && !this->_is_register_accepted) {
     // No decission has been made on wether ot accept or deny panel. It is therefore awaiting_accept
     this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
+    rebuilt_mqtt = true;
   }
 
   if (rebuilt_mqtt) {
+    SPDLOG_DEBUG("Building MQTT topics for NSPanel {}::{}", this->_id, this->_name);
     this->reset_mqtt_topics();
     // Convert stored MAC to MAC used in MQTT, ex. AA:AA:AA:BB:BB:BB to aa_aa_aa_bb_bb_bb
     std::string mqtt_register_mac = this->_mac;
@@ -437,7 +439,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         this->_update_progress = 0;
       }
 
-      this->send_websocket_update();
+      this->send_websocket_status_update();
     }
   } else if (topic.compare(this->_mqtt_relay1_state_topic) == 0) {
     this->_relay1_state = (payload.compare("1") == 0);
@@ -467,10 +469,18 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
 }
 
 void NSPanel::send_websocket_update() {
-  SPDLOG_TRACE("Sending websocket update for {}::{}", this->_id, this->_name);
+  SPDLOG_TRACE("Sending websocket state update for {}::{}", this->_id, this->_name);
   // Send status over to web interface:
   nlohmann::json event_trigger_data;
   event_trigger_data["event_type"] = fmt::format("nspanel-{}-state-change", this->_id);
+  WebsocketServer::broadcast_json(event_trigger_data);
+}
+
+void NSPanel::send_websocket_status_update() {
+  SPDLOG_TRACE("Sending websocket status update for {}::{}", this->_id, this->_name);
+  // Send status over to web interface:
+  nlohmann::json event_trigger_data;
+  event_trigger_data["event_type"] = fmt::format("nspanel-{}-status-change", this->_id);
   WebsocketServer::broadcast_json(event_trigger_data);
 }
 

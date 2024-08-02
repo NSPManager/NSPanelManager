@@ -1,19 +1,19 @@
 {% if state == "online" %}
-<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}" class="min-h-1 overflow-hidden rounded-t-md w-full transition-all ease-linear duration-300 bg-success" id="panel_header-{{ id }}">
+<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}" class="min-h-1 overflow-hidden rounded-t-md w-full transition-all ease-linear duration-300 bg-success" id="panel_header-{{ id }}">
 </div>
 {% elif state == "offline" %}
-<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}" class="min-h-1 overflow-hidden rounded-t-md w-full transition-all ease-linear duration-300 bg-error" id="panel_header-{{ id }}">
+<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}" class="min-h-1 overflow-hidden rounded-t-md w-full transition-all ease-linear duration-300 bg-error" id="panel_header-{{ id }}">
 </div>
 {% elif state == "awaiting_accept" %}
-<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}" class="min-h-1 overflow-hidden rounded-t-md w-full transition-all ease-linear duration-300 bg-info animate-pulse" id="panel_header-{{ id }}">
+<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}" class="min-h-1 overflow-hidden rounded-t-md w-full transition-all ease-linear duration-300 bg-info animate-pulse" id="panel_header-{{ id }}">
 </div>
 {% elif state == "waiting" %}
-<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}" class="min-h-1 overflow-hidden rounded-t-md w-full transition-all ease-linear duration-300 bg-info animate-pulse" id="panel_header-{{ id }}">
+<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}" class="min-h-1 overflow-hidden rounded-t-md w-full transition-all ease-linear duration-300 bg-info animate-pulse" id="panel_header-{{ id }}">
 </div>
 {% elif state == "updating_fw" or state == "updating_fs" or state == "updating_tft" %}
-<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}" class="min-h-1 overflow-hidden rounded-t-md w-full transition-all ease-linear duration-300 bg-info" style="width: {{ progress }}%;" id="panel_header-{{ id }}">
+<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}" class="min-h-1 overflow-hidden rounded-t-md w-full transition-all ease-linear duration-300 bg-info" style="width: {{ progress }}%;" id="panel_header-{{ id }}">
 </div>
 {% else %}
-<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}" class="bg-accent min-h-1 overflow-hidden rounded-t-md w-full animate-pulse transition-all duration-300" id="panel_header-{{ id }}">
+<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}" class="bg-accent min-h-1 overflow-hidden rounded-t-md w-full animate-pulse transition-all duration-300" id="panel_header-{{ id }}">
 </div>
 {% endif %}

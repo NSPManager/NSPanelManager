@@ -1,4 +1,4 @@
-<span hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_status_wifi_signal_strength' view='index' nspanel_id=id %}" class="icon-text" id="wifi_signal_strength_container-{{ id }}">
+<span hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_wifi_signal_strength' view='index' nspanel_id=id %}" class="icon-text" id="wifi_signal_strength_container-{{ id }}">
     <span class="icon me-1">
         {% if state == "offline" %}
             <i class="mdi mdi-wifi-strength-1-alert" id="wifi_signal_strength-{{ id }}"></i>
