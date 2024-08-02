@@ -155,6 +155,8 @@ public:
   bool handle_ipc_request_reboot(nlohmann::json message, nlohmann::json *response_buffer);
   bool handle_ipc_request_update_firmware(nlohmann::json message, nlohmann::json *response_buffer);
   bool handle_ipc_request_update_screen(nlohmann::json message, nlohmann::json *response_buffer);
+  bool handle_ipc_request_accept_register_request(nlohmann::json message, nlohmann::json *response_buffer);
+  bool handle_ipc_request_deny_register_request(nlohmann::json message, nlohmann::json *response_buffer);
 
 private:
   uint _id;

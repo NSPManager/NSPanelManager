@@ -67,6 +67,7 @@ class NSPanel(models.Model):
     md5_data_file = models.CharField(max_length=64, default="")
     md5_tft_file = models.CharField(max_length=64, default="")
     denied = models.BooleanField(default=False)
+    accepted = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.friendly_name

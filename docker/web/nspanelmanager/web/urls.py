@@ -145,6 +145,9 @@ urlpatterns = [
     path('htmx/nspanels/<int:nspanel_id>/reboot', htmx.nspanel_reboot, name='htmx_nspanel_reboot'),
     path('htmx/nspanels/<int:nspanel_id>/update_screen', htmx.nspanel_update_screen, name='htmx_nspanel_update_screen'),
     path('htmx/nspanels/<int:nspanel_id>/update_firmware', htmx.nspanel_update_firmware, name='htmx_nspanel_update_firmware'),
+    path('htmx/nspanels/<int:nspanel_id>/accept_register_request', htmx.nspanel_accept_register_request, name='htmx_nspanel_accept_register_request'),
+    path('htmx/nspanels/<int:nspanel_id>/deny_register_request', htmx.nspanel_deny_register_request, name='htmx_nspanel_deny_register_request'),
+    path('htmx/nspanels/<int:nspanel_id>/delete', htmx.nspanel_delete, name='htmx_nspanel_delete'),
 
     # Components
     path('htmx/component/nspanel_status_header/<str:view>/<int:nspanel_id>', NSPanelHeader.as_view(), name="nspanel_status_header"),

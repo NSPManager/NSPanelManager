@@ -37,7 +37,7 @@ public:
   uint16_t manager_port = 8000;
 
   /// @brief The logging level set for runtime
-  uint8_t logging_level = 3;
+  uint8_t logging_level = 4;
 
   /// @brief The hostname of this device
   std::string wifi_hostname = "";

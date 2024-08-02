@@ -53,6 +53,7 @@ def nspanel_reboot(request, nspanel_id):
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
 
+
 @csrf_exempt
 def nspanel_update_screen(request, nspanel_id):
     try:
@@ -68,6 +69,7 @@ def nspanel_update_screen(request, nspanel_id):
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
 
+
 @csrf_exempt
 def nspanel_update_firmware(request, nspanel_id):
     try:
@@ -77,6 +79,63 @@ def nspanel_update_firmware(request, nspanel_id):
                 return JsonResponse({"status": "ok"}, status=200)
             else:
                 return JsonResponse({"status": "error"}, status=500)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+@csrf_exempt
+def nspanel_accept_register_request(request, nspanel_id):
+    try:
+        if request.method == 'POST':
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.denied = False
+            nspanel.accepted = True
+            nspanel.save()
+
+            response = send_ipc_request(F"nspanel/{nspanel_id}/accept_register_request", {})
+            if response["status"] == "ok":
+                response = HttpResponse("", status=200)
+                response["HX-Redirect"] = "/"
+                return response
+            else:
+                return JsonResponse({"status": "error"}, status=500)
+            return HttpResponse("", status=200)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+@csrf_exempt
+def nspanel_deny_register_request(request, nspanel_id):
+    try:
+        if request.method == 'POST':
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.denied = True
+            nspanel.save()
+            response = send_ipc_request(F"nspanel/{nspanel_id}/deny_register_request", {})
+            if response["status"] == "ok":
+                return HttpResponse("", status=200)
+            else:
+                return HttpResponse("", status=500)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+@csrf_exempt
+def nspanel_delete(request, nspanel_id):
+    try:
+        if request.method == 'DELETE':
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.delete()
+            return HttpResponse("", status=200)
         else:
             return JsonResponse({"status": "error"}, status=405)
     except Exception as ex:

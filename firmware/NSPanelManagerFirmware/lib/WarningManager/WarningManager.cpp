@@ -1,7 +1,8 @@
+#include <MqttLog.hpp>
 #include <WarningManager.hpp>
 
 void WarningManager::register_warning(std::string level, std::string text) {
-  WarningManager::register_warning(level.c_str(), text.c_str());
+  LOG_TRACE("Adding warning level '", level.c_str(), "'. Text: ", text.c_str());
 
   for (NSPanelWarning &warning : WarningManager::_warnings) {
     if (warning.text.compare(text) == 0) {
@@ -23,6 +24,7 @@ void WarningManager::register_warning(const char *level, const char *text) {
 void WarningManager::remove_warning(std::string level, std::string text) {
   for (auto it = WarningManager::_warnings.cbegin(); it != WarningManager::_warnings.cend();) {
     if (it->text.compare(text) == 0) {
+      LOG_TRACE("Adding warning text: ", text.c_str());
       WarningManager::_warnings.erase(it);
       break;
     }

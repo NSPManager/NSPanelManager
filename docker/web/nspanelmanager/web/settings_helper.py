@@ -46,6 +46,7 @@ default_settings = {
     "weather_wind_speed_format": "kmh",
     "weather_location_latitude": "",
     "weather_location_longitude": "",
+    "temperature_unit": "celsius",
 }
 
 def get_setting_with_default(name):

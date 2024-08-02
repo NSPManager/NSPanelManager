@@ -106,6 +106,8 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
   IPCHandler::attach_callback(fmt::format("nspanel/{}/reboot", this->_id), boost::bind(&NSPanel::handle_ipc_request_reboot, this, _1, _2));
   IPCHandler::attach_callback(fmt::format("nspanel/{}/update_screen", this->_id), boost::bind(&NSPanel::handle_ipc_request_update_screen, this, _1, _2));
   IPCHandler::attach_callback(fmt::format("nspanel/{}/update_firmware", this->_id), boost::bind(&NSPanel::handle_ipc_request_update_firmware, this, _1, _2));
+  IPCHandler::attach_callback(fmt::format("nspanel/{}/accept_register_request", this->_id), boost::bind(&NSPanel::handle_ipc_request_accept_register_request, this, _1, _2));
+  IPCHandler::attach_callback(fmt::format("nspanel/{}/deny_register_request", this->_id), boost::bind(&NSPanel::handle_ipc_request_deny_register_request, this, _1, _2));
 }
 
 void NSPanel::update_config(nlohmann::json &init_data) {
@@ -113,7 +115,6 @@ void NSPanel::update_config(nlohmann::json &init_data) {
   if (init_data.contains("nspanel_id")) {
     this->_id = init_data["nspanel_id"];
     this->_has_registered_to_manager = true; // Data contained an ID which it got from the manager config.
-    this->_is_register_accepted = true;
   } else {
     this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
   }
@@ -186,16 +187,30 @@ void NSPanel::update_config(nlohmann::json &init_data) {
 
   // Last thing to do, check if the panel as actually accepted into our manager.
   if (init_data.contains("denied")) {
-    if (std::string(init_data["denied"]).compare("True") == 0) {
-
+    if (init_data.at("denied") == true) {
       SPDLOG_INFO("Loaded denied NSPanel {}::{}.", this->_id, this->_name);
       this->_is_register_denied = true;
       this->_is_register_accepted = false;
       this->_state = MQTT_MANAGER_NSPANEL_STATE::DENIED;
-      this->_has_registered_to_manager = false;
       rebuilt_mqtt = false;
       return; // Stop processing here. The panel has been denied.
     }
+  }
+
+  if (init_data.contains("accepted")) {
+    if (init_data.at("accepted") == true) {
+      SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
+      this->_is_register_denied = false;
+      this->_is_register_accepted = true;
+      this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+      rebuilt_mqtt = true;
+      return; // Stop processing here. The panel has been denied.
+    }
+  }
+
+  if (!this->_is_register_denied && !this->_is_register_accepted) {
+    // No decission has been made on wether ot accept or deny panel. It is therefore awaiting_accept
+    this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
   }
 
   if (rebuilt_mqtt) {
@@ -227,7 +242,7 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_name);
   }
 
-  if (this->_has_registered_to_manager) {
+  if (this->_has_registered_to_manager && !this->_is_register_denied && this->_is_register_accepted) {
     // If this NSPanel is registered to manager, listen to state topics.
     MQTT_Manager::subscribe(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
@@ -588,6 +603,7 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 
 void NSPanel::accept_register_request() {
   this->_is_register_accepted = true;
+  this->_is_register_denied = false;
   this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
 }
 
@@ -615,10 +631,12 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
     std::string response_data;
     std::string payload_data = register_request_payload.dump();
     if (WebHelper::perform_post_request(&url, &response_data, nullptr, &payload_data)) {
-      SPDLOG_INFO("Panel registration OK.");
-      if (!this->_is_register_denied) {
-        SPDLOG_INFO("Panel registration OK. Updating internal data.");
-        nlohmann::json data = nlohmann::json::parse(response_data);
+      SPDLOG_INFO("Panel registration OK. Updating internal data.");
+      this->_has_registered_to_manager = true;
+      nlohmann::json data = nlohmann::json::parse(response_data);
+      if (data.contains("denied") && data.at("denied") == false && data.contains("accepted") && data.at("accepted") == true) {
+        this->_is_register_denied = false;
+        this->_is_register_accepted = true;
         // this->update_config(data); // Returned data from registration request is the same as data from the global /api/get_mqtt_manager_config
         this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
         this->_id = data["nspanel_id"];
@@ -643,8 +661,12 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
         SPDLOG_TRACE("Sending websocket update for NSPanel state change.");
         this->send_websocket_update();
       } else {
-        SPDLOG_ERROR("Failed to register NSPanel to manager.");
+        this->_is_register_denied = true;
+        this->_is_register_accepted = false;
+        SPDLOG_INFO("NSPanel {}::{} has yet to be accepted. Will not answer request.", this->_id, this->_name);
       }
+    } else {
+      SPDLOG_ERROR("Failed to register NSPanel to manager.");
     }
   } catch (const std::exception &e) {
     SPDLOG_ERROR("Caught exception when trying to register NSPanel: {}", boost::diagnostic_information(e, true));
@@ -878,6 +900,20 @@ bool NSPanel::handle_ipc_request_update_firmware(nlohmann::json request, nlohman
 bool NSPanel::handle_ipc_request_update_screen(nlohmann::json request, nlohmann::json *response_buffer) {
   this->tft_update();
   this->send_websocket_update();
+  nlohmann::json data = {{"status", "ok"}};
+  (*response_buffer) = data;
+  return true;
+}
+
+bool NSPanel::handle_ipc_request_accept_register_request(nlohmann::json request, nlohmann::json *response_buffer) {
+  this->accept_register_request();
+  nlohmann::json data = {{"status", "ok"}};
+  (*response_buffer) = data;
+  return true;
+}
+
+bool NSPanel::handle_ipc_request_deny_register_request(nlohmann::json request, nlohmann::json *response_buffer) {
+  this->deny_register_request();
   nlohmann::json data = {{"status", "ok"}};
   (*response_buffer) = data;
   return true;

@@ -254,12 +254,12 @@ void taskManageWifiAndMqtt(void *param) {
         LOG_ERROR("WiFi not connected!");
         Serial.println("WiFi not connected!");
         WiFi.setHostname(config.wifi_hostname.c_str());
+        WiFi.begin(config.wifi_ssid.c_str(), config.wifi_psk.c_str());
+        WiFi.setAutoConnect(true);
         WiFi.mode(WIFI_STA);
-        for (uint8_t wifi_connect_tries = 0; wifi_connect_tries < 10 && !WiFi.isConnected(); wifi_connect_tries++) {
+        for (uint8_t wifi_connect_tries = 0; wifi_connect_tries < 10; wifi_connect_tries++) {
           Serial.print("Connecting to WiFi ");
           Serial.println(config.wifi_ssid.c_str());
-          WiFi.begin(config.wifi_ssid.c_str(), config.wifi_psk.c_str());
-          vTaskDelay(2000 / portTICK_PERIOD_MS);
           if (WiFi.isConnected()) {
             Serial.println("Connected to WiFi!");
             LOG_INFO("Connected to WiFi ", config.wifi_ssid.c_str());
@@ -272,11 +272,12 @@ void taskManageWifiAndMqtt(void *param) {
             // We successfully connected to WiFi. Init the rest of the components.
             webMan.init(NSPanelManagerFirmwareVersion);
             mqttManager.start();
+            break; // We successfully connected to WiFi.
           } else {
-            LOG_ERROR("Failed to connect to WiFi. Will try again in 5 seconds");
-            Serial.println("Failed to connect to WiFi. Will try again in 5 seconds");
-            vTaskDelay(5000 / portTICK_PERIOD_MS);
+            LOG_ERROR("Failed to connect to WiFi. Will try again.");
+            // Serial.println("Failed to connect to WiFi. Will try again.");
           }
+          vTaskDelay(2000 / portTICK_PERIOD_MS);
         }
       } else if (!config.wifi_ssid.empty() && !WiFi.isConnected() && millis() - lastWiFiconnected >= 180 * 1000) {
         // Three minutes or more has passed since last successfull WiFi connection. Start the AP by breaking the loop.
@@ -350,7 +351,7 @@ void taskManageWifiAndMqtt(void *param) {
 
 void setup() {
   Serial.begin(115200);
-  Serial.print("Starting NSPanel Manager firmware v. ");
+  Serial.print("Starting NSPanel Manager firmware v");
   Serial.println(NSPanelManagerFirmwareVersion);
   vTaskDelay(250 / portTICK_PERIOD_MS);
   // Load config if any, and if it fails. Factory reset!
@@ -364,7 +365,6 @@ void setup() {
 
   mqttManager.init();
   ButtonManager::init();
-  xTaskCreatePinnedToCore(readNTCTemperatureTask, "readTempTask", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 
   vTaskDelay(250 / portTICK_PERIOD_MS);
   LOG_INFO("Initializing NSPanel communication");
@@ -378,6 +378,7 @@ void setup() {
 
   LOG_INFO("Starting tasks");
   interfaceManager.init();
+  xTaskCreatePinnedToCore(readNTCTemperatureTask, "readTempTask", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 
   pinMode(38, INPUT);
 }

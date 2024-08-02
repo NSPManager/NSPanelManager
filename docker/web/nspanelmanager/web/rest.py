@@ -189,6 +189,8 @@ def nspanels_get(request):
                 "button2_mqtt_payload": get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_payload", ""),
                 "button1_detached_light": nspanel.button1_detached_mode_light.id if nspanel.button1_detached_mode_light else -1,
                 "button2_detached_light": nspanel.button2_detached_mode_light.id if nspanel.button2_detached_mode_light else -1,
+                "denied": nspanel.denied,
+                "accepted": nspanel.accepted,
                 "rooms": [room.id for room in Room.objects.all().order_by('displayOrder')],
                 "scenes": [scene.id for scene in Scene.objects.all()],
             })
@@ -273,6 +275,8 @@ def nspanel_post(request):
         json_response = {
             "status": "ok",
             "nspanel_id": new_panel.id,
+            "denied": new_panel.denied,
+            "accepted": new_panel.accepted,
         }
         return JsonResponse(json_response, status=200)
     except Exception as ex:

@@ -61,13 +61,13 @@ def index(request):
             {"text": "No manager address configured in settings.", "class": "error"})
 
     nspanels = []
-    for nspanel in NSPanel.objects.all():
+    for nspanel in NSPanel.objects.filter(denied=False):
         panel_info = {}
         panel_info["data"] = nspanel
         panel_status = send_ipc_request(F"nspanel/{nspanel.id}/status", {"command": "get"})
         panel_info["status"] = panel_status
         panel_info["status"]["warnings"] = []
-        for panel in NSPanel.objects.all():
+        for panel in NSPanel.objects.filter(denied=False):
             if panel == nspanel:
                 continue
             elif panel.friendly_name == nspanel.friendly_name:
