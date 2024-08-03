@@ -623,13 +623,15 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
         response["address"] = MqttManagerConfig::manager_address.c_str();
         response["port"] = MqttManagerConfig::manager_port;
 
-        std::string reply_topic = "nspanel/";
-        reply_topic.append(register_request_payload["friendly_name"]);
-        reply_topic.append("/command");
-        MQTT_Manager::publish(reply_topic, response.dump());
+        if (register_request_payload.contains("friendly_name")) {
+          std::string reply_topic = fmt::format("nspanel/{}/command", register_request_payload.at("friendly_name"));
+          MQTT_Manager::publish(reply_topic, response.dump());
 
-        SPDLOG_TRACE("Sending websocket update for NSPanel state change.");
-        this->send_websocket_update();
+          SPDLOG_TRACE("Sending websocket update for NSPanel {}::{} state change.", this->_id, this->_name);
+          this->send_websocket_update();
+        } else {
+          SPDLOG_ERROR("Malformed register request data. Missing 'friendly_name'.");
+        }
       } else {
         SPDLOG_ERROR("Failed to register NSPanel to manager.");
       }

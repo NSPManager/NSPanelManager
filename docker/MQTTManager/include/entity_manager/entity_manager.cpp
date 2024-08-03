@@ -520,9 +520,9 @@ NSPanel *EntityManager::get_nspanel_by_id(uint id) {
 
 NSPanel *EntityManager::get_nspanel_by_mac(std::string mac) {
   std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
-  for (NSPanel *nspanel : EntityManager::_nspanels) {
-    if (nspanel->get_mac().compare(mac) == 0) {
-      return nspanel;
+  for (auto it = EntityManager::_nspanels.cbegin(); it != EntityManager::_nspanels.cend(); it++) {
+    if ((*it)->get_mac().compare(mac) == 0) {
+      return (*it);
     }
   }
   return nullptr;
