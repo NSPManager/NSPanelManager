@@ -119,7 +119,9 @@ def nspanel_deny_register_request(request, nspanel_id):
             nspanel.save()
             response = send_ipc_request(F"nspanel/{nspanel_id}/deny_register_request", {})
             if response["status"] == "ok":
-                return HttpResponse("", status=200)
+                response = HttpResponse("", status=200)
+                response["HX-Redirect"] = "/"
+                return response
             else:
                 return HttpResponse("", status=500)
         else:
@@ -135,7 +137,9 @@ def nspanel_delete(request, nspanel_id):
         if request.method == 'DELETE':
             nspanel = NSPanel.objects.get(id=nspanel_id)
             nspanel.delete()
-            return HttpResponse("", status=200)
+            response = HttpResponse("", status=200)
+            response["HX-Redirect"] = "/"
+            return response
         else:
             return JsonResponse({"status": "error"}, status=405)
     except Exception as ex:
