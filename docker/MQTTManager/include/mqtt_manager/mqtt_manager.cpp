@@ -186,7 +186,9 @@ const std::vector<int> MQTT_Manager::_get_subscribe_topics_qos() {
 }
 
 void MQTT_Manager::_process_mqtt_message(const std::string topic, const std::string message) {
+  SPDLOG_TRACE("Processing MQTT message '{}' -> {}", topic, message);
   try {
+    std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_observer_list_mutex);
     for (auto mqtt_topic_signal_pair : MQTT_Manager::_mqtt_callbacks) {
       if (mqtt_topic_signal_pair.first.compare(topic) == 0) {
         MQTT_Manager::_mqtt_callbacks[mqtt_topic_signal_pair.first](topic, message);
@@ -210,10 +212,12 @@ void MQTT_Manager::_process_mqtt_command(nlohmann::json &data) {
 }
 
 void MQTT_Manager::attach_observer(std::function<bool(const std::string &topic, const std::string &payload)> callback) {
+  std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_observer_list_mutex);
   MQTT_Manager::_mqtt_observer_callbacks.push_back(callback);
 }
 
 void MQTT_Manager::detach_observer(std::function<bool(const std::string &topic, const std::string &payload)> callback) {
+  std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_observer_list_mutex);
   for (auto it = MQTT_Manager::_mqtt_observer_callbacks.begin(); it != MQTT_Manager::_mqtt_observer_callbacks.end(); ++it) {
     if (callback.target_type() == it->target_type()) {
       if (callback.target<bool (*)(const std::string &topic, const std::string &payload)>() == it->target<bool (*)(const std::string &topic, const std::string &payload)>()) {
@@ -229,6 +233,7 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload)
 
 void MQTT_Manager::publish(const std::string &topic, const std::string &payload, bool retain) {
   std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
+  SPDLOG_TRACE("Publising '{}' -> {}", topic, payload);
   mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), 0, retain);
   if (MQTT_Manager::_mqtt_client != nullptr) {
     if (MQTT_Manager::is_connected()) {

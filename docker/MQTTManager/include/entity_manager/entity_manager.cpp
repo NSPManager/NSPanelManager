@@ -496,6 +496,7 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
       SPDLOG_DEBUG("State: something else, {}.", int(panel->get_state()));
     }
     panel->register_to_manager(data);
+    SPDLOG_TRACE("Panel registratrion to manager call finished.");
   } else {
     SPDLOG_INFO("Panel is not registered to manager, adding panel but as 'pending accept' status.");
     nlohmann::json init_data = data;
@@ -506,6 +507,7 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
       new_nspanel->send_websocket_update();
     }
   }
+  SPDLOG_TRACE("Registration request handled.");
 }
 
 NSPanel *EntityManager::get_nspanel_by_id(uint id) {

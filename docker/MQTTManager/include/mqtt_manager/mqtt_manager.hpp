@@ -80,6 +80,7 @@ public:
 private:
   static inline mqtt::client *_mqtt_client = nullptr;
   static inline std::mutex _mqtt_client_mutex;
+  static inline std::mutex _observer_list_mutex;
   static inline std::list<mqtt::message_ptr> _mqtt_messages_buffer;
   static inline std::list<std::function<bool(const std::string &topic, const std::string &payload)>> _mqtt_observer_callbacks; // Raw function callbacks
   static const std::vector<std::string> _get_subscribe_topics();
