@@ -538,21 +538,25 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
   if (command.compare("get_nspanels_status") == 0) {
     SPDLOG_DEBUG("Processing request for NSPanels status.");
     std::vector<nlohmann::json> panel_responses;
-    for (NSPanel *panel : EntityManager::_nspanels) {
-      if (panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::DENIED) {
+    for (auto it = EntityManager::_nspanels.cbegin(); it != EntityManager::_nspanels.cend(); it++) {
+      if ((*it)->get_state() == MQTT_MANAGER_NSPANEL_STATE::DENIED) {
         continue; // Skip any panel that is denied.
       }
-      SPDLOG_DEBUG("Requesting state from NSPanel {}::{}", panel->get_id(), panel->get_name());
+      if ((*it)->has_registered_to_manager()) {
+        SPDLOG_DEBUG("Requesting state from NSPanel {}::{}", (*it)->get_id(), (*it)->get_name());
+      } else {
+        SPDLOG_DEBUG("Requesting state from NSPanel ??::{}", (*it)->get_name());
+      }
       if (args.contains("nspanel_id")) {
-        if (panel->get_id() == atoi(std::string(args["nspanel_id"]).c_str())) {
-          panel->update_warnings_from_manager();
-          panel_responses.push_back(panel->get_websocket_json_representation());
+        if ((*it)->get_id() == atoi(std::string(args["nspanel_id"]).c_str())) {
+          (*it)->update_warnings_from_manager();
+          panel_responses.push_back((*it)->get_websocket_json_representation());
           break;
         }
       } else {
         // In case no ID was specified, send status for all panels.
-        panel->update_warnings_from_manager();
-        panel_responses.push_back(panel->get_websocket_json_representation());
+        (*it)->update_warnings_from_manager();
+        panel_responses.push_back((*it)->get_websocket_json_representation());
       }
     }
     nlohmann::json response;

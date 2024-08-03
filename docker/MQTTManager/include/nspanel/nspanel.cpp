@@ -223,10 +223,13 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->send_reload_command();
     this->register_to_home_assistant();
   }
+
+  this->send_websocket_update();
 }
 
 NSPanel::~NSPanel() {
   SPDLOG_INFO("Destroying NSPanel {}::{}", this->_id, this->_name);
+  this->reset_mqtt_topics();
 }
 
 void NSPanel::reset_mqtt_topics() {
@@ -413,7 +416,11 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
 }
 
 void NSPanel::send_websocket_update() {
-  SPDLOG_TRACE("Sending websocket update for {}::{}", this->_id, this->_name);
+  if (this->_has_registered_to_manager) {
+    SPDLOG_TRACE("Sending websocket update for {}::{}", this->_id, this->_name);
+  } else {
+    SPDLOG_TRACE("Sending websocket update for new NSPanel ??::{}", this->_name);
+  }
   // Send status over to web interface:
   nlohmann::json status_reps;
   status_reps["type"] = "status";
