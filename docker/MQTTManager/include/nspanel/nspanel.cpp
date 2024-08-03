@@ -599,7 +599,6 @@ bool NSPanel::has_registered_to_manager() {
 
 bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload) {
   try {
-
     SPDLOG_INFO("Sending registration data to Django for database management.");
     std::string url = "http://127.0.0.1:8000/api/register_nspanel";
     std::string response_data;
@@ -617,18 +616,18 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
         }
         SPDLOG_INFO("Panel registration completed. Sending accept command to panel.");
 
-        // Everything was successfull, send registration accept to panel:
-        nlohmann::json response;
-        response["command"] = "register_accept";
-        response["address"] = MqttManagerConfig::manager_address.c_str();
-        response["port"] = MqttManagerConfig::manager_port;
-
         if (register_request_payload.contains("friendly_name")) {
-          std::string reply_topic = fmt::format("nspanel/{}/command", register_request_payload.at("friendly_name"));
+          // Everything was successfull, send registration accept to panel:
+          nlohmann::json response;
+          response["command"] = "register_accept";
+          response["address"] = MqttManagerConfig::manager_address.c_str();
+          response["port"] = MqttManagerConfig::manager_port;
+          std::string reply_topic = fmt::format("nspanel/{}/command", std::string(register_request_payload.at("friendly_name")));
           MQTT_Manager::publish(reply_topic, response.dump());
 
           SPDLOG_TRACE("Sending websocket update for NSPanel {}::{} state change.", this->_id, this->_name);
           this->send_websocket_update();
+          return true;
         } else {
           SPDLOG_ERROR("Malformed register request data. Missing 'friendly_name'.");
         }
