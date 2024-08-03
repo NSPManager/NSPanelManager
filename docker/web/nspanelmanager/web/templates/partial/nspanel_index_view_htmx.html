@@ -38,33 +38,7 @@
             <div class="w-full me-2 mt-1">
                 {% component "nspanel_status_text" id=nspanel.data.id progress=nspanel.status.update_progress state=nspanel.status.state %}{% endcomponent %}
             </div>
-            <!-- TODO: Create "Warnings component" -->
-            <!-- Warning indicator -->
-            {% if nspanel.status.warnings|length > 0 %}
-            <div class="badge badge-warning badge-xs mt-2 me-2 ms-1 tooltip" onmouseover="show_popover(this);" onmouseleave="hide_popover(this);" data-popover-target="nspanel_warning_popover_{{ nspanel.data.id }}"></div>
-            {% endif %}
-            <!-- Warning popover-->
-            <div id="nspanel_warning_popover_{{ nspanel.data.id }}" role="tooltip" class="absolute bg-base-100 top-7 z-10 invisible inline-block w-60 md:w-96 text-sm transition-opacity duration-300 border border-warning rounded-lg shadow-xl opacity-0">
-                <div class="px-3 py-2 bg-base-100 text-base-content rounded-t-lg">
-                    <h3 class="font-semibold">Warnings</h3>
-                </div>
-                <div class="px-3 mb-2" id="nspanel_warnings">
-                <!-- Warnings are created in the index.js file-->
-                {% for warning in nspanel.status.warnings %}
-                    {% if warning.level == 'info' %}
-                        <div role="alert" class="alert alert-info my-1">{{ warning.text }}</div>
-                    {% elif warning.level == 'warning' %}
-                        <div role="alert" class="alert alert-warning my-1">{{ warning.text }}</div>
-                    {% elif warning.level == 'error' %}
-                        <div role="alert" class="alert alert-error my-1">{{ warning.text }}</div>
-                    {% else %}
-                        <div role="alert" class="alert alert-error my-1">Unknown alert level: {{ warning.level }}</div>
-                        <div role="alert" class="alert my-1">{{ warning.text }}</div>
-                    {% endif %}
-                {% endfor %}
-                </div>
-                <div data-popper-arrow></div>
-            </div>
+            {% component "nspanel_warnings" id=nspanel.data.id warnings=nspanel.status.warnings %}{% endcomponent %}
             </span>
         </div>
         <!-- Status information -->

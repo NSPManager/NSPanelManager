@@ -7,6 +7,7 @@ from .components.nspanel_status_ram_usage.nspanel_status_ram_usage import NSPane
 from .components.nspanel_status_temperature.nspanel_status_temperature import NSPanelStatusTemperature
 from .components.nspanel_visit_link.nspanel_visit_link import NSPanelVisitLink
 from .components.nspanel_reboot_button.nspanel_reboot_button import NSPanelRebootButton
+from .components.nspanel_warnings.nspanel_warnings import NSPanelWarnings
 from . import views, api, rest, htmx
 
 urlpatterns = [
@@ -157,4 +158,5 @@ urlpatterns = [
     path('htmx/component/nspanel_status_temperature/<str:view>/<int:nspanel_id>', NSPanelStatusTemperature.as_view(), name="nspanel_status_temperature"),
     path('htmx/component/nspanel_visit_link/<str:view>/<int:nspanel_id>', NSPanelVisitLink.as_view(), name="nspanel_visit_link"),
     path('htmx/component/nspanel_reboot_button/<str:view>/<int:nspanel_id>', NSPanelRebootButton.as_view(), name="nspanel_reboot_button"),
+    path('htmx/component/nspanel_warnings/<str:view>/<int:nspanel_id>', NSPanelWarnings.as_view(), name="nspanel_warnings"),
 ]
