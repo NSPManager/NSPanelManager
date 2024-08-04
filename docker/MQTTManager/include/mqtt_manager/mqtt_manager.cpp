@@ -245,6 +245,11 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
 }
 
 void MQTT_Manager::clear_retain(const std::string &topic) {
+  if (topic.empty()) {
+    SPDLOG_ERROR("Topic is emptly, will not clear retian.");
+    return;
+  }
+
   std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
   if (topic.size() > 0) {
     mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), "", 0, 0, true);

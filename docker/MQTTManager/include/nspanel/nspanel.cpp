@@ -242,10 +242,29 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/r2_state", this->_name);
     this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_name);
     this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_name);
+
+    SPDLOG_TRACE("_mqtt_log_topic: {}", _mqtt_log_topic);
+    SPDLOG_TRACE("_mqtt_command_topic: {}", _mqtt_command_topic);
+    SPDLOG_TRACE("_mqtt_sensor_temperature_topic: {}", _mqtt_sensor_temperature_topic);
+    SPDLOG_TRACE("_mqtt_switch_relay1_topic: {}", _mqtt_switch_relay1_topic);
+    SPDLOG_TRACE("_mqtt_light_relay1_topic: {}", _mqtt_light_relay1_topic);
+    SPDLOG_TRACE("_mqtt_switch_relay2_topic: {}", _mqtt_switch_relay2_topic);
+    SPDLOG_TRACE("_mqtt_light_relay2_topic: {}", _mqtt_light_relay2_topic);
+    SPDLOG_TRACE("_mqtt_switch_screen_topic: {}", _mqtt_switch_screen_topic);
+    SPDLOG_TRACE("_mqtt_number_screen_brightness_topic: {}", _mqtt_number_screen_brightness_topic);
+    SPDLOG_TRACE("_mqtt_number_screensaver_brightness_topic: {}", _mqtt_number_screensaver_brightness_topic);
+    SPDLOG_TRACE("_mqtt_select_screensaver_topic: {}", _mqtt_select_screensaver_topic);
+    SPDLOG_TRACE("_mqtt_relay1_command_topic: {}", _mqtt_relay1_command_topic);
+    SPDLOG_TRACE("_mqtt_relay1_state_topic: {}", _mqtt_relay1_state_topic);
+    SPDLOG_TRACE("_mqtt_relay2_command_topic: {}", _mqtt_relay2_command_topic);
+    SPDLOG_TRACE("_mqtt_relay2_state_topic: {}", _mqtt_relay2_state_topic);
+    SPDLOG_TRACE("_mqtt_status_topic: {}", _mqtt_status_topic);
+    SPDLOG_TRACE("_mqtt_status_report_topic: {}", _mqtt_status_report_topic);
   }
 
   if (this->_has_registered_to_manager && !this->_is_register_denied && this->_is_register_accepted) {
     // If this NSPanel is registered to manager, listen to state topics.
+    SPDLOG_INFO("Subscribing to NSPanel MQTT topics.");
     MQTT_Manager::subscribe(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
@@ -262,6 +281,7 @@ void NSPanel::update_config(nlohmann::json &init_data) {
 
 NSPanel::~NSPanel() {
   SPDLOG_INFO("Destroying NSPanel {}::{}", this->_id, this->_name);
+  this->reset_mqtt_topics();
 }
 
 void NSPanel::reset_mqtt_topics() {
