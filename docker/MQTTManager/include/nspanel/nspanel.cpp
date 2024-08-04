@@ -106,18 +106,17 @@ void NSPanel::update_config(nlohmann::json &init_data) {
   }
 
   bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
-  bool reboot = false;       // Wether or not to reboot after config load finished.
   SPDLOG_TRACE("Loading NSPanel Name.");
   if (init_data.contains("name")) {
-    if (this->_name.compare(init_data["name"]) != 0 && this->_has_registered_to_manager) {
+    if (this->_name.compare(init_data["name"]) != 0 && this->_has_registered_to_manager && !this->_name.empty()) {
       rebuilt_mqtt = true;
-      reboot = true;
+      this->reboot();
     }
     this->_name = init_data["name"];
   } else if (init_data.contains("friendly_name")) {
-    if (this->_name.compare(init_data["friendly_name"]) != 0 && this->_has_registered_to_manager) {
+    if (this->_name.compare(init_data["friendly_name"]) != 0 && this->_has_registered_to_manager && !this->_name.empty()) {
       rebuilt_mqtt = true;
-      reboot = true;
+      this->reboot();
     }
     this->_name = init_data["friendly_name"];
   }
@@ -231,10 +230,6 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     MqttManagerConfig::attach_config_loaded_listener(boost::bind(&NSPanel::send_reload_command, this));
     this->send_reload_command();
     this->register_to_home_assistant();
-  }
-
-  if (reboot) {
-    this->reboot();
   }
 
   this->send_websocket_update();
