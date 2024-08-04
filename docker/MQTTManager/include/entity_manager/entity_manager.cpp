@@ -494,16 +494,12 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
       SPDLOG_DEBUG("State: something else, {}.", int(panel->get_state()));
     }
     panel->register_to_manager(data);
-  } else {
+  }
+  if (panel == nullptr) {
     nlohmann::json init_data = data;
-    NSPanel *new_nspanel = EntityManager::get_nspanel_by_mac(data["mac_origin"]);
-    if (new_nspanel == nullptr) {
-      SPDLOG_INFO("Panel is not registered to manager, adding panel but as 'pending accept' status.");
-      new_nspanel = new NSPanel(init_data);
-      EntityManager::_nspanels.push_back(new_nspanel);
-    } else {
-      SPDLOG_INFO("Panel already registered but not accepted. Will not send register_accept.");
-    }
+    SPDLOG_INFO("Panel is not registered to manager, adding panel but as 'pending accept' status.");
+    NSPanel *new_nspanel = new NSPanel(init_data);
+    EntityManager::_nspanels.push_back(new_nspanel);
     new_nspanel->register_to_manager(data);
   }
 }
