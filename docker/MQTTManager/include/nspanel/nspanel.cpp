@@ -410,6 +410,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         SPDLOG_ERROR("Incorrect format of temperature data. Expected float.");
       }
       this->_ip_address = data["ip"];
+      this->_nspanel_warnings.clear();
       if (data.at("warnings").is_string()) {
         // Loaded from old firmware, split string and assume level warning
         std::vector<std::string> message_lines;
