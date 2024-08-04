@@ -2,6 +2,7 @@
 #include <HTTPClient.h>
 #include <HttpLib.hpp>
 #include <InterfaceManager.hpp>
+#include <LightManager.hpp>
 #include <LittleFS.h>
 #include <MqttLog.hpp>
 #include <NSPMConfig.h>
@@ -163,7 +164,7 @@ void WebManager::respondAvailableWiFiNetworks(AsyncWebServerRequest *request) {
 }
 
 void WebManager::startOTAUpdate() {
-  xTaskCreatePinnedToCore(WebManager::_taskPerformOTAUpdate, "taskPerformOTAUpdate", 20000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE); // TODO: Move function to InterfaceManager
+  xTaskCreatePinnedToCore(WebManager::_taskPerformOTAUpdate, "taskPerformOTAUpdate", 20000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE); // TODO: Move function to InterfaceManager
 }
 
 void WebManager::_taskPerformOTAUpdate(void *param) {
@@ -184,8 +185,10 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
   }
   LOG_DEBUG("Got firmware MD5 ", checksum_holder);
   LOG_DEBUG("Stored firmware MD5 ", NSPMConfig::instance->md5_firmware.c_str());
+
   bool hasAnythingUpdated = false;
   bool firmwareUpdateSuccessful = true;
+  yield();
   vTaskDelay(250 / portTICK_PERIOD_MS); // Wait for other tasks.
   if (NSPMConfig::instance->md5_firmware.compare(checksum_holder) != 0) {
     do {
@@ -276,6 +279,7 @@ uint8_t WebManager::getUpdateProgress() {
 
 bool WebManager::_update(uint8_t type, const char *url) {
   InterfaceManager::stop();
+  LightManager::stop();
   LOG_INFO("Starting ", type == U_FLASH ? "Firmware" : "LittleFS", " OTA update...");
   WebManager::_update_progress = 0;
   std::string downloadUrl = "http://";

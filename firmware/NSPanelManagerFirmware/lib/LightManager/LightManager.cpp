@@ -261,7 +261,7 @@ void LightManager::subscribeToMqttLightUpdates() {
   if (LightManager::_mqttMessageQueue == NULL) {
     LightManager::_mqttMessageQueue = xQueueCreate(8, sizeof(mqttMessage *));
     if (LightManager::_taskHandleProcessMqttMessage == NULL) {
-      xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskProcessMqttMessages", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+      xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskProcessMqttMessages", 5000, NULL, 1, &LightManager::_taskHandleProcessMqttMessage, CONFIG_ARDUINO_RUNNING_CORE);
     }
   }
 
@@ -279,13 +279,22 @@ void LightManager::subscribeToMqttLightUpdates() {
   }
 }
 
+void LightManager::stop() {
+  if (LightManager::_taskHandleProcessMqttMessage != NULL) {
+    vTaskDelete(LightManager::_taskHandleProcessMqttMessage);
+    LightManager::_mqttMessageQueue = NULL;
+  }
+}
+
 void LightManager::mqttCallback(char *topic, byte *payload, unsigned int length) {
-  // TODO: Ignore MQTT light updates for X millis
-  mqttMessage *msg = new mqttMessage;
-  msg->topic = topic;
-  msg->payload = std::string((char *)payload, length);
-  if (xQueueSendToBack(LightManager::_mqttMessageQueue, (void *)&msg, 20 / portTICK_PERIOD_MS) != pdTRUE) {
-    delete msg;
+  if (LightManager::_mqttMessageQueue != NULL) {
+    // TODO: Ignore MQTT light updates for X millis
+    mqttMessage *msg = new mqttMessage;
+    msg->topic = topic;
+    msg->payload = std::string((char *)payload, length);
+    if (xQueueSendToBack(LightManager::_mqttMessageQueue, (void *)&msg, 20 / portTICK_PERIOD_MS) != pdTRUE) {
+      delete msg;
+    }
   }
 }
 
