@@ -157,15 +157,15 @@ void EntityManager::post_init_entities() {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
     for (int i = 0; i < EntityManager::_nspanels.size(); i++) {
       auto rit = EntityManager::_nspanels[i];
-      bool exists = ITEM_IN_LIST(nspanel_ids, rit->get_id());
-      if (!exists) {
-        NSPanel *panel = rit;
-        rit->erase();
-        SPDLOG_DEBUG("Removing NSPanel {}::{} as it doesn't exist in config anymore.", panel->get_id(), panel->get_name());
-        EntityManager::_nspanels.erase(EntityManager::_nspanels.begin() + i);
-        delete panel;
-      } else {
-        rit++;
+      if (rit->has_registered_to_manager()) {
+        bool exists = ITEM_IN_LIST(nspanel_ids, rit->get_id());
+        if (!exists) {
+          NSPanel *panel = rit;
+          rit->erase();
+          SPDLOG_DEBUG("Removing NSPanel {}::{} as it doesn't exist in config anymore.", panel->get_id(), panel->get_name());
+          EntityManager::_nspanels.erase(EntityManager::_nspanels.begin() + i);
+          delete panel;
+        }
       }
     }
   }
@@ -496,15 +496,13 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
       SPDLOG_DEBUG("State: something else, {}.", int(panel->get_state()));
     }
     panel->register_to_manager(data);
-  } else {
+  }
+  if (panel == nullptr) {
     SPDLOG_INFO("Panel is not registered to manager, adding panel but as 'pending accept' status.");
     nlohmann::json init_data = data;
-    NSPanel *new_nspanel = EntityManager::get_nspanel_by_mac(data["mac_origin"]);
-    if (new_nspanel == nullptr) {
-      new_nspanel = new NSPanel(init_data);
-      EntityManager::_nspanels.push_back(new_nspanel);
-      new_nspanel->send_websocket_update();
-    }
+    NSPanel *new_nspanel = new NSPanel(init_data);
+    EntityManager::_nspanels.push_back(new_nspanel);
+    new_nspanel->send_websocket_update();
   }
 }
 
@@ -521,7 +519,9 @@ NSPanel *EntityManager::get_nspanel_by_id(uint id) {
 NSPanel *EntityManager::get_nspanel_by_mac(std::string mac) {
   std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
   for (NSPanel *nspanel : EntityManager::_nspanels) {
+    SPDLOG_TRACE("Found NSPanel with mac '{}'. Searching for mac '{}'.", nspanel->get_mac(), mac);
     if (nspanel->get_mac().compare(mac) == 0) {
+      SPDLOG_DEBUG("Found existing NSPanel by mac '{}'", mac);
       return nspanel;
     }
   }
@@ -669,12 +669,36 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       std::string url = fmt::format("http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/delete_nspanel/{}", panel->get_id()).c_str();
       std::string response_data;
       if (WebHelper::perform_request(&url, &response_data, nullptr, nullptr) && !response_data.empty()) {
+
         panel->reboot();
         nlohmann::json response;
         response["cmd_id"] = command_id;
         response["success"] = true;
         response["mac"] = mac;
         (*response_buffer) = response.dump();
+
+        // Instantly delete NSPanel from manager.
+        std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
+        for (int i = 0; i < EntityManager::_nspanels.size(); i++) {
+          if (EntityManager::_nspanels[i] == panel) {
+            EntityManager::_nspanels.erase(EntityManager::_nspanels.begin() + i);
+            delete panel;
+            SPDLOG_INFO("Deleted NSPanel instance from EntityManager.");
+            break;
+          }
+        }
+
+        for (int i = 0; i < MqttManagerConfig::nspanel_configs.size(); i++) {
+          SPDLOG_TRACE("Comparing mac from '{}' with mac '{}'.", MqttManagerConfig::nspanel_configs[i].dump(), mac);
+          if (MqttManagerConfig::nspanel_configs[i].contains("mac")) {
+            if (std::string(MqttManagerConfig::nspanel_configs[i].at("mac")).compare(mac) == 0) {
+              MqttManagerConfig::nspanel_configs.erase(MqttManagerConfig::nspanel_configs.begin() + i);
+              SPDLOG_INFO("Deleted NSPanel config from MqttManagerConfig.");
+              break;
+            }
+          }
+        }
+
         SPDLOG_DEBUG("Panel with MAC {} delete call completed.", mac);
         return true;
       } else {

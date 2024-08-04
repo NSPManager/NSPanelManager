@@ -400,7 +400,10 @@ def delete_panel(request, panel_id: int):
 
 
 def get_nspanel_config(request):
+    print(request)
+    print(request.GET)
     try:
+        logging.info("Trying to load config for NSPanel with MAC " + request.GET['mac'])
         nspanel = NSPanel.objects.get(mac_address=request.GET["mac"])
         base = {}
         base["name"] = nspanel.friendly_name
@@ -481,7 +484,8 @@ def get_nspanel_config(request):
             else:
                 base["scenes"][scene.id]["can_save"] = False
         return JsonResponse(base)
-    except:
+    except Exception as ex:
+        logging.exception(ex)
         print("Tried to get NSPanel config for panel that was not registered.")
         return HttpResponse("", status=500)
 

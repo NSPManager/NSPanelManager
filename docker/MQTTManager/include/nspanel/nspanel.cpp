@@ -101,25 +101,28 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->_id = init_data["id"];
     this->_has_registered_to_manager = true; // Data contained an ID which it got from the manager config.
     this->_is_register_accepted = true;
+  } else {
+    this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
   }
 
   bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
   if (init_data.contains("name")) {
-    if (this->_name.compare(init_data["name"]) != 0) {
-      rebuilt_mqtt = true;
+    if (this->_name.compare(init_data["name"]) != 0 && !this->_name.empty()) {
       this->reboot();
     }
+    rebuilt_mqtt = true;
     this->_name = init_data["name"];
   } else if (init_data.contains("friendly_name")) {
-    if (this->_name.compare(init_data["friendly_name"]) != 0) {
-      rebuilt_mqtt = true;
+    if (this->_name.compare(init_data["friendly_name"]) != 0 && !this->_name.empty()) {
       this->reboot();
     }
+    rebuilt_mqtt = true;
     this->_name = init_data["friendly_name"];
   }
 
   if (init_data.contains("mac")) {
     this->_mac = init_data["mac"];
+    SPDLOG_TRACE("Loaded NSPanel with mac '{}'.", this->_mac);
   } else if (init_data.contains("mac_origin")) {
     this->_mac = init_data["mac_origin"];
   } else {
@@ -137,10 +140,6 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->_is_us_panel = init_data["is_us_panel"];
   } else {
     this->_is_us_panel = false;
-  }
-
-  if (!init_data.contains("id")) {
-    this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
   }
 
   if (this->_state == MQTT_MANAGER_NSPANEL_STATE::OFFLINE || this->_state == MQTT_MANAGER_NSPANEL_STATE::UNKNOWN) {
@@ -577,7 +576,7 @@ void NSPanel::update_warnings_from_manager() {
 }
 
 void NSPanel::accept_register_request() {
-  this->_is_register_accepted = true;
+  // this->_is_register_accepted = true;
   this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
 }
 

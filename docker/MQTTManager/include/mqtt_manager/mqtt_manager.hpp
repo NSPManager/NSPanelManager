@@ -21,6 +21,11 @@ public:
 
   template <typename CALLBACK_BIND>
   static void subscribe(std::string topic, int qos, CALLBACK_BIND callback) {
+    if (topic.empty()) {
+      SPDLOG_ERROR("Subscribing to '{}' is not allowed. Will not subscribe.", topic);
+      return;
+    }
+
     bool already_subscribed = MQTT_Manager::_mqtt_callbacks[topic].num_slots() > 0;
     MQTT_Manager::_mqtt_callbacks[topic].disconnect(callback); // Disconnect before doing a connect in case we were already connected.
     MQTT_Manager::_mqtt_callbacks[topic].connect(callback);

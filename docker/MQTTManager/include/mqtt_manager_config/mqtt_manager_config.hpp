@@ -57,7 +57,7 @@ public:
   static inline uint16_t max_log_buffer_size;
 
   static inline std::list<nlohmann::json> light_configs;
-  static inline std::list<nlohmann::json> nspanel_configs;
+  static inline std::vector<nlohmann::json> nspanel_configs;
   static inline std::list<nlohmann::json> scenes_configs;
   static inline std::list<nlohmann::json> nspanel_relay_group_configs;
   static inline std::list<nlohmann::json> room_configs;
