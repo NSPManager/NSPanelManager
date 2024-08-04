@@ -280,6 +280,7 @@ uint8_t WebManager::getUpdateProgress() {
 bool WebManager::_update(uint8_t type, const char *url) {
   InterfaceManager::stop();
   LightManager::stop();
+  PageManager::GetScreensaverPage()->stop();
   LOG_INFO("Starting ", type == U_FLASH ? "Firmware" : "LittleFS", " OTA update...");
   WebManager::_update_progress = 0;
   std::string downloadUrl = "http://";

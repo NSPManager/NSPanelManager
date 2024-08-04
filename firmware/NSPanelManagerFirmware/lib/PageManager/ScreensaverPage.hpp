@@ -10,6 +10,7 @@ public:
   void update();
   void show();
   void unshow();
+  void stop();
   void processTouchEvent(uint8_t page, uint8_t component, bool pressed);
 
   void attachMqttCallback();
@@ -21,9 +22,10 @@ public:
   static void updateRoomTemp(std::string temp_string);
 
 private:
-  std::string _screensaver_page_name;
-  uint8_t _screensaver_brightness;
-  bool _show_weather;
+  static inline std::string _screensaver_page_name;
+  static inline uint8_t _screensaver_brightness;
+  static inline bool _show_weather;
+  static inline bool _stopped;
 };
 
 #endif
