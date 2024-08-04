@@ -426,8 +426,6 @@ void NSPanel::send_websocket_update() {
   status_reps["type"] = "status";
   status_reps["payload"] = this->get_websocket_json_representation();
   WebsocketServer::broadcast_json(status_reps);
-
-  SPDLOG_TRACE("Websocket update sent.");
 }
 
 nlohmann::json NSPanel::get_websocket_json_representation() {
