@@ -38,7 +38,7 @@
             <input class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
             type="text" class="input" name="name" value="{{ panel.friendly_name }}">
             <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
-              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <title>Friendly name</title>
                 <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
                   4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
@@ -76,17 +76,8 @@
         <!-- Default room -->
         <div class="mt-4">
           <label for="room_id" class="block mb-2 text-sm font-medium">Default room</label>
-          <div class="flex">
-            <span
-              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <title>Default room</title>
-                <path
-                  d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
-              </svg>
-            </span>
-            <select name="room_id" id="room_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+          <div class="flex flex-row-reverse">
+            <select name="room_id" id="room_id" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id">
               {% for room in rooms %}
               {% if room.id == panel.room.id %}
               <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
@@ -95,28 +86,35 @@
               {% endif %}
               {% endfor %}
             </select>
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/room_id:border-accent">
+              <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>Default room</title>
+                <path
+                  d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+              </svg>
+            </span>
           </div>
         </div>
 
         <!-- Lock to default room? -->
-        <div class="mt-2">
+        <div class="flex-auto mt-2">
           <ul
-            class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
-            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+            class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex bg-base-300">
+            <li class="w-full sm:border-b-0 sm:border-r border-neutral">
               <div class="flex items-center ps-3">
                 <input id="lock_to_default_room" type="radio" name="lock_to_default_room" value="False"
                 {% if settings.lock_to_default_room != "True" %}checked{% endif %}
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  class="w-4 h-4 radio radio-accent">
                 <label for="lock_to_default_room"
-                  class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Can control other rooms</label>
+                  class="w-full py-3 ms-2 text-sm font-medium">Can control other rooms</label>
               </div>
             </li>
-            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
               <div class="flex items-center ps-3">
                 <input id="cannot_control_other_rooms" type="radio" name="lock_to_default_room" value="True"
                 {% if settings.lock_to_default_room == "True" %}checked{% endif %}
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-                <label for="cannot_control_other_rooms" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Lock to default room</label>
+                  class="w-4 h-4 radio radio-accent">
+                <label for="cannot_control_other_rooms" class="w-full py-3 ms-2 text-sm font-medium">Locked to default room</label>
               </div>
             </li>
           </ul>
@@ -124,45 +122,43 @@
 
         <!-- Default page -->
         <div class="mt-4">
-          <label for="default_page" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Default page</label>
-          <div class="flex">
-            <span
-              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <title>Default page</title>
-                <path
-                  d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
-              </svg>
-            </span>
-            <select name="default_page" id="default_page" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+          <label for="default_page" class="block mb-2 text-sm font-medium">Default page</label>
+          <div class="flex flex-row-reverse">
+            <select name="default_page" id="default_page" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
               <option value="0" {% if settings.default_page == "0" %}selected{% endif %}>Main page</option>
               <option value="1" {% if settings.default_page == "1" %}selected{% endif %}>Scenes page</option>
               <option value="2" {% if settings.default_page == "2" %}selected{% endif %}>Room page</option>
             </select>
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/default_page:border-accent">
+              <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>Default room</title>
+                <path
+                  d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+              </svg>
+            </span>
           </div>
         </div>
 
-        <!-- Reverse relays -->
-        <div class="mt-4">
-          <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Reverse relays</h3>
+        <!-- Lock to default room? -->
+        <div class="flex-auto mt-4">
+          <label for="default_page" class="block mb-2 text-sm font-medium">Reverse relays</label>
           <ul
-            class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
-            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+            class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex bg-base-300">
+            <li class="w-full sm:border-b-0 sm:border-r border-neutral">
               <div class="flex items-center ps-3">
                 <input id="do_not_reverse_relays" type="radio" name="reverse_relays" value="False"
                 {% if settings.reverse_relays != "True" %}checked{% endif %}
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  class="w-4 h-4 radio radio-accent">
                 <label for="do_not_reverse_relays"
-                  class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Do not reverse relays</label>
+                  class="w-full py-3 ms-2 text-sm font-medium">Do not reverse relays</label>
               </div>
             </li>
-            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
               <div class="flex items-center ps-3">
                 <input id="reverse_relays" type="radio" name="reverse_relays" value="True"
                 {% if settings.reverse_relays == "True" %}checked{% endif %}
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-                <label for="reverse_relays" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Reverse relays</label>
+                  class="w-4 h-4 radio radio-accent">
+                <label for="reverse_relays" class="w-full py-3 ms-2 text-sm font-medium">Reverse relays</label>
               </div>
             </li>
           </ul>
