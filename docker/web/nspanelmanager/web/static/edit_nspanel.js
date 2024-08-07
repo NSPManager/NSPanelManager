@@ -46,7 +46,7 @@ function requests_log_backtrace() {
 }
 
 function push_log_message_to_view(data) {
-  var add_html = "<tr><td class='py-1'>";
+  var add_html = "<tr class='hover:bg-base-300'><td class='py-1'>";
   add_html += data.time;
   add_html += "</td><td class='py-1'>";
   if (data.level == "ERROR") {
