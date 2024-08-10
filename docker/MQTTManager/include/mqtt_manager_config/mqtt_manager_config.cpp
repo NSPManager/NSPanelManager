@@ -1,5 +1,7 @@
 #include "mqtt_manager_config.hpp"
 #include "web_helper/WebHelper.hpp"
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/stacktrace/stacktrace_fwd.hpp>
@@ -18,15 +20,19 @@
 #include <nlohmann/detail/exceptions.hpp>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <protobuf/mqttmanager.pb.h>
 #include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 #include <string>
 
 #define ITEM_IN_LIST(list, item) (std::find(list.begin(), list.end(), item) != list.end());
 
-static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
-  ((std::string *)userp)->append((char *)contents, size * nmemb);
-  return size * nmemb;
+MQTTManagerSettings MqttManagerConfig::get_settings() {
+  return MqttManagerConfig::_settings;
+}
+
+MQTTManagerPrivateSettings MqttManagerConfig::get_private_settings() {
+  return MqttManagerConfig::_private_settings;
 }
 
 void MqttManagerConfig::load() {
@@ -39,116 +45,38 @@ void MqttManagerConfig::load() {
   std::string timezone_str(file_size, '\0');
   f.read(timezone_str.data(), file_size);
   f.close();
-
-  timezone_str.erase(std::find_if(timezone_str.rbegin(), timezone_str.rend(), [](unsigned char ch) {
-                       return !std::isspace(ch) && ch != '\n' && ch != '\r';
-                     }).base(),
-                     timezone_str.end());
+  boost::algorithm::trim(timezone_str);
   MqttManagerConfig::timezone = timezone_str;
-
   SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
 
-  SPDLOG_TRACE("Loading sensitive settings from environment variables.");
   // Load sensitive variables from environment and not via http get request to manager.
-  char *ha_address = std::getenv("HOME_ASSISTANT_ADDRESS");
-  char *ha_token = std::getenv("HOME_ASSISTANT_TOKEN");
-  char *openhab_address = std::getenv("OPENHAB_ADDRESS");
-  char *openhab_token = std::getenv("OPENHAB_TOKEN");
-  char *mqtt_server = std::getenv("MQTT_SERVER");
-  char *mqtt_port = std::getenv("MQTT_PORT");
-  char *mqtt_username = std::getenv("MQTT_USERNAME");
-  char *mqtt_password = std::getenv("MQTT_PASSWORD");
-  char *is_home_assistant_addon = std::getenv("IS_HOME_ASSISTANT_ADDON");
+  SPDLOG_TRACE("Loading sensitive settings from environment variables.");
+  const char *settings = std::getenv("SETTINGS");
+  MqttManagerConfig::_private_settings.ParseFromString(settings);
 
-  // Load Home Assistant values
-  if (ha_address != nullptr) {
-    MqttManagerConfig::home_assistant_address = ha_address;
-    if (ha_token != nullptr) {
-      MqttManagerConfig::home_assistant_access_token = ha_token;
-    } else {
-      SPDLOG_ERROR("Configured to use Home Assistant at address '{}' but no token was given.", ha_address);
-    }
-  } else {
-    SPDLOG_WARN("No Home Assistant address set. Will not use Home Assistant.");
-  }
-
-  // Load OpenHAB values
-  if (openhab_address != nullptr) {
-    MqttManagerConfig::openhab_address = openhab_address;
-    if (ha_token != nullptr) {
-      MqttManagerConfig::openhab_access_token = openhab_token;
-    } else {
-      SPDLOG_ERROR("Configured to use OpenHAB at address '{}' but no token was given.", openhab_address);
-    }
-  } else {
-    SPDLOG_WARN("No Home Assistant address set. Will not use OpenHAB.");
-  }
-
-  // Load MQTT values
-  if (mqtt_server != nullptr) {
-    MqttManagerConfig::mqtt_server = mqtt_server;
-
-    if (mqtt_port != nullptr) {
-      MqttManagerConfig::mqtt_port = atoi(mqtt_port);
-    } else {
-      SPDLOG_WARN("No port configured, will use default MQTT port 1883.");
-      MqttManagerConfig::mqtt_port = 1883;
-    }
-
-    if (mqtt_username != nullptr) {
-      MqttManagerConfig::mqtt_username = mqtt_username;
-    }
-
-    if (mqtt_password != nullptr) {
-      MqttManagerConfig::mqtt_password = mqtt_password;
-    }
-  } else {
-    SPDLOG_ERROR("No MQTT server configured!");
-  }
-
-  if (strcmp(is_home_assistant_addon, "true") == 0) {
-    MqttManagerConfig::is_home_assistant_addon = true;
-  } else {
-    MqttManagerConfig::is_home_assistant_addon = false;
-  }
-
+  // Load icon mapping
   std::ifstream icon_mapping_stream("/usr/src/app/nspanelmanager/icon_mapping.json");
   MqttManagerConfig::icon_mapping = nlohmann::json::parse(icon_mapping_stream);
   icon_mapping_stream.close();
 
   // Load all other non-sensitive config via HTTP GET to manager.
+  // TODO: Load via protobuf instead and simplify the checking of removed entities.
   CURL *curl;
   CURLcode res;
 
   SPDLOG_INFO("Gathering config from web manager.");
   while (true) {
-    nlohmann::json request_body = {
-        {"settings", {
-                         "color_temp_min",
-                         "color_temp_max",
-                         "date_format",
-                         "outside_temp_sensor_provider",
-                         "outside_temp_sensor_entity_id",
-                         "weather_location_latitude",
-                         "weather_location_longitude",
-                         "weather_wind_speed_format",
-                         "weather_precipitation_format",
-                         "weather_update_interval",
-                         "clock_us_style",
-                         "use_fahrenheit",
-                         "max_log_buffer_size",
-                         "manager_port",
-                         "manager_address",
-                         "turn_on_behavior",
-                     }}};
-
-    std::string json_body = nlohmann::to_string(request_body);
-    std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/mqttmanager/settings";
+    std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/protobuf/mqttmanager/all_settings";
     std::string response_data;
-    if (WebHelper::perform_post_request(&url, &response_data, nullptr, &json_body)) {
+    if (WebHelper::perform_post_request(&url, &response_data, nullptr, nullptr)) {
       SPDLOG_DEBUG("Got config data. Processing config.");
-      nlohmann::json data = nlohmann::json::parse(response_data);
-      MqttManagerConfig::populate_settings_from_config(data);
+      MqttManagerConfig::_settings.ParseFromString(response_data);
+      if (MqttManagerConfig::_settings.manager_address().empty()) {
+        SPDLOG_CRITICAL("No manager address is configured!");
+      }
+      if (MqttManagerConfig::_settings.manager_port() == 0) {
+        SPDLOG_CRITICAL("No manager port is configured!");
+      }
       break; // We successfully gather settings from DB. Exit loop.
     } else {
       SPDLOG_ERROR("Failed to get config. Will try again.");
@@ -160,38 +88,6 @@ void MqttManagerConfig::load() {
 void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   try {
     SPDLOG_INFO("Got config from web manager, will process and load values.");
-    MqttManagerConfig::manager_address = data.at("settings").at("manager_address");
-    MqttManagerConfig::color_temp_min = atoi(std::string(data.at("settings").at("color_temp_min")).c_str());
-    MqttManagerConfig::color_temp_max = atoi(std::string(data.at("settings").at("color_temp_max")).c_str());
-    MqttManagerConfig::date_format = std::string(data.at("settings").at("date_format"));
-    MqttManagerConfig::outside_temp_sensor_provider = std::string(data.at("settings").at("outside_temp_sensor_provider"));
-    MqttManagerConfig::outside_temp_sensor_entity_id = std::string(data.at("settings").at("outside_temp_sensor_entity_id"));
-    MqttManagerConfig::weather_location_latitude = std::string(data.at("settings").at("weather_location_latitude"));
-    MqttManagerConfig::weather_location_longitude = std::string(data.at("settings").at("weather_location_longitude"));
-    MqttManagerConfig::weather_wind_speed_format = std::string(data.at("settings").at("weather_wind_speed_format"));
-    MqttManagerConfig::weather_precipitation_format = std::string(data.at("settings").at("weather_precipitation_format"));
-    MqttManagerConfig::weather_update_interval = atoi(std::string(data.at("settings").at("weather_update_interval")).c_str());
-    MqttManagerConfig::clock_us_style = std::string(data.at("settings").at("clock_us_style")).compare("True") == 0;
-    MqttManagerConfig::use_fahrenheit = std::string(data.at("settings").at("use_fahrenheit")).compare("True") == 0;
-    MqttManagerConfig::max_log_buffer_size = atoi(std::string(data.at("settings").at("max_log_buffer_size")).c_str());
-
-    if (!std::string(data.at("settings").at("manager_port")).empty()) {
-      MqttManagerConfig::manager_port = atoi(std::string(data.at("settings").at("manager_port")).c_str());
-    } else {
-      SPDLOG_CRITICAL("Manager port not configured! Setting 0.");
-      MqttManagerConfig::manager_port = 0;
-    }
-
-    std::string turn_on_behavior = data.at("settings").at("turn_on_behavior");
-    if (turn_on_behavior.compare("restore") == 0) {
-      MqttManagerConfig::turn_on_behavior = LIGHT_TURN_ON_BEHAVIOR::RESTORE;
-    } else if (turn_on_behavior.compare("color_temp") == 0) {
-      MqttManagerConfig::turn_on_behavior = LIGHT_TURN_ON_BEHAVIOR::COLOR_TEMP;
-    } else {
-      MqttManagerConfig::turn_on_behavior = LIGHT_TURN_ON_BEHAVIOR::COLOR_TEMP; // Set default when error.
-      SPDLOG_ERROR("Unknown turn on behavior for lights: {}. Will use COLOR_TEMP.", turn_on_behavior);
-    }
-
     SPDLOG_DEBUG("Loading lights...");
     std::string lights_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/lights";
     std::string lights_string;

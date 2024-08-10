@@ -1,11 +1,9 @@
 #include "mqtt_manager.hpp"
-#include "light/light.hpp"
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/signals2.hpp>
 #include <boost/stacktrace/stacktrace.hpp>
 #include <cctype>
 #include <chrono>
-#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <exception>
@@ -16,11 +14,8 @@
 #include <mqtt/subscribe_options.h>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <pthread.h>
-#include <ratio>
 #include <spdlog/spdlog.h>
 #include <sstream>
-#include <stdexcept>
-#include <stdio.h>
 #include <string>
 #include <sys/stat.h>
 #include <thread>
@@ -64,16 +59,16 @@ void MQTT_Manager::connect() {
     SPDLOG_INFO("Will connect to MQTT with Client name {}", mqtt_client_name);
 
     std::string connection_url = "tcp://";
-    connection_url.append(MqttManagerConfig::mqtt_server);
+    connection_url.append(MqttManagerConfig::get_private_settings().mqtt_server());
     connection_url.append(":");
-    connection_url.append(std::to_string(MqttManagerConfig::mqtt_port));
+    connection_url.append(std::to_string(MqttManagerConfig::get_private_settings().mqtt_server_port()));
 
     MQTT_Manager::_mqtt_client = new mqtt::client(connection_url, mqtt_client_name.c_str());
   }
 
   auto connOpts = mqtt::connect_options_builder()
-                      .user_name(MqttManagerConfig::mqtt_username)
-                      .password(MqttManagerConfig::mqtt_password)
+                      .user_name(MqttManagerConfig::get_private_settings().mqtt_username())
+                      .password(MqttManagerConfig::get_private_settings().mqtt_password())
                       .keep_alive_interval(std::chrono::seconds(30))
                       .automatic_reconnect(std::chrono::seconds(2), std::chrono::seconds(10))
                       .clean_session(false)

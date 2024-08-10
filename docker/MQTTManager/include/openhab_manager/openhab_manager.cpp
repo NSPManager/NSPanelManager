@@ -23,28 +23,23 @@ void OpenhabManager::connect() {
     OpenhabManager::_websocket = new ix::WebSocket();
   }
 
-  std::string openhab_websocket_url = MqttManagerConfig::openhab_address;
+  std::string openhab_websocket_url = MqttManagerConfig::get_private_settings().openhab_address();
   openhab_websocket_url.append("/ws");
-  if (openhab_websocket_url.find("https://") != std::string::npos) {
-    // Replace https with wss
-    openhab_websocket_url = openhab_websocket_url.replace(openhab_websocket_url.find("https://"), sizeof("https://") - 1, "wss://");
+
+  boost::algorithm::replace_first(openhab_websocket_url, "https://", "wss://");
+  boost::algorithm::replace_first(openhab_websocket_url, "http://", "ws://");
+  if (boost::algorithm::starts_with(openhab_websocket_url, "wss://")) {
     SPDLOG_DEBUG("Settings TLS options");
     ix::SocketTLSOptions tls_options;
     tls_options.tls = true;
     tls_options.caFile = "NONE";
     OpenhabManager::_websocket->setTLSOptions(tls_options);
-  } else if (openhab_websocket_url.find("http://") != std::string::npos) {
-    // Replace http with ws
-    openhab_websocket_url = openhab_websocket_url.replace(openhab_websocket_url.find("http://"), sizeof("http://") - 1, "ws://");
-  } else {
-    SPDLOG_ERROR("Unknown connection type for Openhab. Will not continue!");
-    return;
   }
 
   SPDLOG_INFO("Will connect to Openhab websocket at {}", openhab_websocket_url);
   SPDLOG_DEBUG("Appending Openhab access token to url.");
   openhab_websocket_url.append("?accessToken=");
-  openhab_websocket_url.append(MqttManagerConfig::openhab_access_token);
+  openhab_websocket_url.append(MqttManagerConfig::get_private_settings().openhab_token());
   OpenhabManager::_websocket->setUrl(openhab_websocket_url);
   OpenhabManager::_websocket->setOnMessageCallback(&OpenhabManager::_websocket_message_callback);
   OpenhabManager::_websocket->setPingInterval(10);
@@ -135,12 +130,12 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
   }
 
   std::string response_data;
-  std::string request_url = MqttManagerConfig::openhab_address;
+  std::string request_url = MqttManagerConfig::get_private_settings().openhab_address();
   request_url.append("/rest/items/");
   request_url.append(item);
 
   std::string bearer_token = "Authorization: Bearer ";
-  bearer_token.append(MqttManagerConfig::openhab_access_token);
+  bearer_token.append(MqttManagerConfig::get_private_settings().openhab_token());
 
   struct curl_slist *headers = NULL;
   headers = curl_slist_append(headers, bearer_token.c_str());

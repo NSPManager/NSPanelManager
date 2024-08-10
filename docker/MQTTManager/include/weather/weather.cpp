@@ -33,20 +33,20 @@ void MQTTManagerWeather::start() {
 void MQTTManagerWeather::_run_weather_thread() {
   while (true) {
     MQTTManagerWeather::_pull_new_weather_data();
-    std::this_thread::sleep_for(std::chrono::minutes(MqttManagerConfig::weather_update_interval));
+    std::this_thread::sleep_for(std::chrono::minutes(MqttManagerConfig::get_settings().weather_update_interval_minutes()));
   }
 }
 
 void MQTTManagerWeather::update_config() {
   std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
-  if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0) {
-    SPDLOG_INFO("Will load outside temperature from Home Assistant sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
-    OpenhabManager::detach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, &MQTTManagerWeather::openhab_temp_sensor_callback);
-    HomeAssistantManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, &MQTTManagerWeather::home_assistant_event_callback);
-  } else if (MqttManagerConfig::outside_temp_sensor_provider.compare("openhab") == 0) {
-    SPDLOG_INFO("Will load outside temperature from OpenHAB sensor {}", MqttManagerConfig::outside_temp_sensor_entity_id);
-    HomeAssistantManager::detach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, &MQTTManagerWeather::home_assistant_event_callback);
-    OpenhabManager::attach_event_observer(MqttManagerConfig::outside_temp_sensor_entity_id, &MQTTManagerWeather::openhab_temp_sensor_callback);
+  if (MqttManagerConfig::get_settings().outside_temp_sensor_provider().compare("home_assistant") == 0) {
+    SPDLOG_INFO("Will load outside temperature from Home Assistant sensor {}", MqttManagerConfig::get_settings().outside_temp_sensor_entity_id());
+    OpenhabManager::detach_event_observer(MqttManagerConfig::get_settings().outside_temp_sensor_entity_id(), &MQTTManagerWeather::openhab_temp_sensor_callback);
+    HomeAssistantManager::attach_event_observer(MqttManagerConfig::get_settings().outside_temp_sensor_entity_id(), &MQTTManagerWeather::home_assistant_event_callback);
+  } else if (MqttManagerConfig::get_settings().outside_temp_sensor_provider().compare("openhab") == 0) {
+    SPDLOG_INFO("Will load outside temperature from OpenHAB sensor {}", MqttManagerConfig::get_settings().outside_temp_sensor_entity_id());
+    HomeAssistantManager::detach_event_observer(MqttManagerConfig::get_settings().outside_temp_sensor_entity_id(), &MQTTManagerWeather::home_assistant_event_callback);
+    OpenhabManager::attach_event_observer(MqttManagerConfig::get_settings().outside_temp_sensor_entity_id(), &MQTTManagerWeather::openhab_temp_sensor_callback);
   }
 
   MQTTManagerWeather::start();
@@ -59,8 +59,41 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 
 void MQTTManagerWeather::_pull_new_weather_data() {
   std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
-  std::string temperature_unit = MqttManagerConfig::use_fahrenheit ? "fahrenheit" : "celsius";
-  std::string pull_weather_url = fmt::format("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&wind_speed_unit={}&timezone={}&precipitation_unit={}&temperature_unit={}", MqttManagerConfig::weather_location_latitude, MqttManagerConfig::weather_location_longitude, MqttManagerConfig::weather_wind_speed_format, MqttManagerConfig::timezone, MqttManagerConfig::weather_precipitation_format, temperature_unit);
+  std::string temperature_unit = MqttManagerConfig::get_settings().temperature_format() == MQTTManagerSettings_temperature_unit_FAHRENHEIT ? "fahrenheit" : "celsius";
+  std::string precipitation_format;
+  switch (MqttManagerConfig::get_settings().weather_precipitation_format()) {
+  case MQTTManagerSettings_precipitation_unit_MILLIMETERS:
+    precipitation_format = "mm";
+    break;
+  case MQTTManagerSettings_precipitation_unit_INCES:
+    precipitation_format = "inch";
+    break;
+  case MQTTManagerSettings_precipitation_unit_MQTTManagerSettings_precipitation_unit_INT_MAX_SENTINEL_DO_NOT_USE_:
+  case MQTTManagerSettings_precipitation_unit_MQTTManagerSettings_precipitation_unit_INT_MIN_SENTINEL_DO_NOT_USE_:
+    SPDLOG_ERROR("Unknown precipitation format!");
+    break;
+  }
+
+  std::string wind_speed_format;
+  switch (MqttManagerConfig::get_settings().weather_wind_speed_format()) {
+  case MQTTManagerSettings_wind_speed_format_M_S:
+    wind_speed_format = "ms";
+    break;
+  case MQTTManagerSettings_wind_speed_format_KM_H:
+    wind_speed_format = "kmh";
+    break;
+  case MQTTManagerSettings_wind_speed_format_MP_H:
+    wind_speed_format = "mph";
+    break;
+  case MQTTManagerSettings_wind_speed_format_KNOTS:
+    wind_speed_format = "knots";
+    break;
+  case MQTTManagerSettings_wind_speed_format_MQTTManagerSettings_wind_speed_format_INT_MAX_SENTINEL_DO_NOT_USE_:
+  case MQTTManagerSettings_wind_speed_format_MQTTManagerSettings_wind_speed_format_INT_MIN_SENTINEL_DO_NOT_USE_:
+    SPDLOG_ERROR("Unknown wind speed format!");
+    break;
+  }
+  std::string pull_weather_url = fmt::format("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&wind_speed_unit={}&timezone={}&precipitation_unit={}&temperature_unit={}", MqttManagerConfig::get_settings().weather_location_latitude(), MqttManagerConfig::get_settings().weather_location_longitude(), wind_speed_format, MqttManagerConfig::timezone, precipitation_format, temperature_unit);
   std::list<const char *> headers = {"Content-type: application/json"};
   std::string response_data;
   if (WebHelper::perform_get_request(&pull_weather_url, &response_data, &headers)) {
@@ -138,7 +171,7 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
 
     if (MQTTManagerWeather::_forecast_weather_info.size() > 0) {
       SPDLOG_DEBUG("Loaded forecast for {} days.", MQTTManagerWeather::_forecast_weather_info.size());
-      if (MqttManagerConfig::outside_temp_sensor_provider.length() == 0 && MqttManagerConfig::outside_temp_sensor_entity_id.length() == 0) {
+      if (MqttManagerConfig::get_settings().outside_temp_sensor_provider().empty() && MqttManagerConfig::get_settings().outside_temp_sensor_entity_id().empty()) {
         // Only update the current temperature if no local sensor is configured
         MQTTManagerWeather::_current_temperature = data["current"]["temperature_2m"];
       }
@@ -164,7 +197,7 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
 }
 
 void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data) {
-  if (MqttManagerConfig::outside_temp_sensor_provider.compare("home_assistant") == 0 && std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::outside_temp_sensor_entity_id) == 0) {
+  if (MqttManagerConfig::get_settings().outside_temp_sensor_provider().compare("home_assistant") == 0 && std::string(event_data["event"]["data"]["entity_id"]).compare(MqttManagerConfig::get_settings().outside_temp_sensor_entity_id()) == 0) {
     std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
     SPDLOG_DEBUG("Received current outside temperature from Home Assistant sensor.");
     nlohmann::json new_state = event_data["event"]["data"]["new_state"];
@@ -195,7 +228,7 @@ std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, u
 }
 
 void MQTTManagerWeather::openhab_temp_sensor_callback(nlohmann::json event_data) {
-  if (MqttManagerConfig::outside_temp_sensor_provider.compare("openhab") == 0) {
+  if (MqttManagerConfig::get_settings().outside_temp_sensor_provider().compare("openhab") == 0) {
     std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
     SPDLOG_DEBUG("Received current outside temperature from OpenHAB sensor.");
     std::string temp_data;

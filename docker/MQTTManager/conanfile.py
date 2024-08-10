@@ -18,6 +18,7 @@ class CompressorRecipe(ConanFile):
         # self.requires("inja/3.4.0")
         self.requires("boost/1.84.0")
         self.requires("cppzmq/4.10.0")
+        self.requires("protobuf/5.27.0")
 
     # def build_requirements(self):
     #     self.tool_requires("cmake/3.28.1")

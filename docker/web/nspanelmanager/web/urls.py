@@ -8,7 +8,7 @@ from .components.nspanel_status_temperature.nspanel_status_temperature import NS
 from .components.nspanel_visit_link.nspanel_visit_link import NSPanelVisitLink
 from .components.nspanel_reboot_button.nspanel_reboot_button import NSPanelRebootButton
 from .components.nspanel_warnings.nspanel_warnings import NSPanelWarnings
-from . import views, api, rest, htmx
+from . import views, api, rest, htmx, protobuf_api
 
 urlpatterns = [
     # Web routes
@@ -137,6 +137,10 @@ urlpatterns = [
     # Scene URLs
     path('rest/scenes', rest.scenes, name='rest_lights'),
 
+    ####################
+    ### PROTOBUF API ###
+    ####################
+    path('protobuf/mqttmanager/all_settings', protobuf_api.mqttmanager_get_all_settings, name="protobuf_mqttmanager_get_all_settings"),
 
 
     #######################

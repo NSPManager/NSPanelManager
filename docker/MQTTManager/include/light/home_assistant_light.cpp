@@ -47,7 +47,7 @@ void HomeAssistantLight::send_state_update_to_controller() {
       }
 
       // This is a turn on event and it currently off. Send kelvin if turn on behavior is to use color temp.
-      if (!this->_current_state && MqttManagerConfig::turn_on_behavior == LIGHT_TURN_ON_BEHAVIOR::COLOR_TEMP) {
+      if (!this->_current_state && MqttManagerConfig::get_settings().light_turn_on_behavior() == MQTTManagerSettings_turn_on_behavior::MQTTManagerSettings_turn_on_behavior_color_temperature) {
         service_data["service_data"]["kelvin"] = this->_requested_color_temperature;
       }
 

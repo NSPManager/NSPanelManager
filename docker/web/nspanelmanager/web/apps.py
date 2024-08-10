@@ -5,6 +5,7 @@ import psutil
 import subprocess
 import os
 import time
+from web.protobuf import mqttmanager_pb2
 
 
 def start_mqtt_manager():
@@ -13,40 +14,24 @@ def start_mqtt_manager():
         if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
             return None  # MQTT Manager already running
 
-
-    environment = environ.Env()
-
     print("Did not find a running MQTTManager, starting MQTTManager...")
     # Restart the process
     logging.info("Starting a new mqtt_manager")
-    mqttmanager_env = os.environ.copy()
-    mqttmanager_env["MQTT_SERVER"] = get_setting_with_default(
-        "mqtt_server")
-    mqttmanager_env["MQTT_PORT"] = get_setting_with_default(
-        "mqtt_port")
-    mqttmanager_env["MQTT_USERNAME"] = get_setting_with_default(
-        "mqtt_username")
-    mqttmanager_env["MQTT_PASSWORD"] = get_setting_with_default(
-        "mqtt_password")
-    mqttmanager_env["HOME_ASSISTANT_ADDRESS"] = get_setting_with_default(
-        "home_assistant_address")
-    mqttmanager_env["HOME_ASSISTANT_TOKEN"] = get_setting_with_default(
-        "home_assistant_token")
-    mqttmanager_env["OPENHAB_ADDRESS"] = get_setting_with_default(
-        "openhab_address")
-    mqttmanager_env["OPENHAB_TOKEN"] = get_setting_with_default(
-        "openhab_token")
-    mqttmanager_env["OPENHAB_TOKEN"] = get_setting_with_default(
-        "openhab_token")
-    mqttmanager_env["LOG_LEVEL"] = get_setting_with_default(
-        "mqttmanager_log_level")
-    if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
-        mqttmanager_env["IS_HOME_ASSISTANT_ADDON"] = "true"
-    else:
-        mqttmanager_env["IS_HOME_ASSISTANT_ADDON"] = "false"
+    settings = mqttmanager_pb2.MQTTManagerPrivateSettings()
+    settings.home_assistant_address = get_setting_with_default("home_assistant_address")
+    settings.home_assistant_token = get_setting_with_default("home_assistant_token")
+    settings.openhab_address = get_setting_with_default("openhab_address")
+    settings.openhab_token = get_setting_with_default("openhab_token")
+    settings.mqtt_server = get_setting_with_default("mqtt_server")
+    settings.mqtt_server_port = int(get_setting_with_default("mqtt_port"))
+    settings.mqtt_username = get_setting_with_default("mqtt_username")
+    settings.mqtt_password = get_setting_with_default("mqtt_password")
 
-    subprocess.Popen(["/MQTTManager/build/nspm_mqttmanager"],
-                     cwd="/usr/src/app/", env=mqttmanager_env)
+    mqttmanager_env = os.environ.copy()
+    mqttmanager_env["SETTINGS"] = settings.SerializeToString()
+    mqttmanager_env["LOG_LEVEL"] = get_setting_with_default("mqttmanager_log_level")
+
+    subprocess.Popen(["/MQTTManager/build/nspm_mqttmanager"], cwd="/usr/src/app/", env=mqttmanager_env)
 
 
 class WebConfig(AppConfig):

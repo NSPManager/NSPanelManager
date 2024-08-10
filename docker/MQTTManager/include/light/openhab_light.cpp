@@ -87,7 +87,7 @@ void OpenhabLight::send_state_update_to_controller() {
 
   // If the light is off but in RGB mode and the user has configured the lights to turn on in "color temp" mode, force it back to color temp mode.
   bool force_send_kelvin = false;
-  if (this->_requested_state && !this->_current_state && MqttManagerConfig::turn_on_behavior == LIGHT_TURN_ON_BEHAVIOR::COLOR_TEMP && this->_can_color_temperature && this->_current_mode == MQTT_MANAGER_LIGHT_MODE::RGB) {
+  if (this->_requested_state && !this->_current_state && MqttManagerConfig::get_settings().light_turn_on_behavior() == MQTTManagerSettings_turn_on_behavior::MQTTManagerSettings_turn_on_behavior_color_temperature && this->_can_color_temperature && this->_current_mode == MQTT_MANAGER_LIGHT_MODE::RGB) {
     this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
     force_send_kelvin = true;
   }
@@ -111,8 +111,8 @@ void OpenhabLight::send_state_update_to_controller() {
 
     if ((this->_can_color_temperature && this->_requested_color_temperature != this->_current_color_temperature) || force_send_kelvin) {
       // Calculate color temp percentage
-      uint16_t kelvin_max_floored = MqttManagerConfig::color_temp_max - MqttManagerConfig::color_temp_min;
-      uint16_t kelvin_floored = this->_requested_color_temperature - MqttManagerConfig::color_temp_min;
+      uint16_t kelvin_max_floored = MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min();
+      uint16_t kelvin_floored = this->_requested_color_temperature - MqttManagerConfig::get_settings().color_temp_min();
       uint8_t color_temp_percentage = 100 - int(((float)kelvin_floored / (float)kelvin_max_floored) * 100);
       if (color_temp_percentage > 100) {
         color_temp_percentage = 100;
@@ -205,8 +205,8 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
           color_temperature = 100;
         }
         // Convert from percentage to actual color temp.
-        unsigned long kelvin_max_floored = MqttManagerConfig::color_temp_max - MqttManagerConfig::color_temp_min;
-        uint16_t kelvin = MqttManagerConfig::color_temp_min + int((color_temperature / (double)100) * kelvin_max_floored);
+        unsigned long kelvin_max_floored = MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min();
+        uint16_t kelvin = MqttManagerConfig::get_settings().color_temp_min() + int((color_temperature / (double)100) * kelvin_max_floored);
 
         this->_current_color_temperature = std::round(kelvin);
         this->_requested_color_temperature = this->_current_color_temperature;
@@ -302,8 +302,8 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         color_temperature = 100;
       }
       // Convert from percentage to actual color temp.
-      unsigned long kelvin_max_floored = MqttManagerConfig::color_temp_max - MqttManagerConfig::color_temp_min;
-      uint16_t kelvin = MqttManagerConfig::color_temp_min + int((color_temperature / (double)100) * kelvin_max_floored);
+      unsigned long kelvin_max_floored = MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min();
+      uint16_t kelvin = MqttManagerConfig::get_settings().color_temp_min() + int((color_temperature / (double)100) * kelvin_max_floored);
 
       this->_current_color_temperature = kelvin;
       this->_requested_color_temperature = this->_current_color_temperature;

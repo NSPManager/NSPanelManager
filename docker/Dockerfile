@@ -37,6 +37,7 @@ RUN apt-get update && apt-get -y upgrade
 
 # Install software needed to build the manager
 RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get install -y --no-install-recommends cmake build-essential curl npm postgresql-client curl inotify-tools net-tools nginx build-essential \
+  protobuf-compiler \
   && pip install conan && conan profile detect --force \
   && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf \
   && sed -i "s|cppstd=gnu14|cppstd=gnu17|g" /root/.conan2/profiles/default \

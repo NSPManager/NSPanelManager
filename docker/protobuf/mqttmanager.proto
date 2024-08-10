@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+// Protobufs defined in this .proto file are used to communicate with the MQTTManager
+
+message MQTTManagerPrivateSettings {
+    string home_assistant_address = 1;
+    string home_assistant_token = 2;
+    string openhab_address = 3;
+    string openhab_token = 4;
+    string mqtt_server = 5;
+    int32 mqtt_server_port = 6;
+    string mqtt_username = 7;
+    string mqtt_password = 8;
+}
+
+message MQTTManagerSettings {
+    uint32 color_temp_min = 1;
+    uint32 color_temp_max = 2;
+    string date_format = 3;
+    string outside_temp_sensor_provider = 4;
+    string outside_temp_sensor_entity_id = 5;
+    string weather_location_latitude = 6;
+    string weather_location_longitude = 7;
+    enum wind_speed_format {
+        KM_H  = 0;
+        M_S   = 1;
+        MP_H  = 2;
+        KNOTS = 3;
+    }
+    wind_speed_format weather_wind_speed_format = 8;
+
+    enum precipitation_unit {
+        MILLIMETERS = 0;
+        INCES = 1;
+    }
+    precipitation_unit weather_precipitation_format = 9;
+
+    int32 weather_update_interval_minutes = 10;
+    enum time_format {
+        AM_PM = 0;
+        FULL = 1;
+    }
+    time_format clock_format = 11;
+    enum temperature_unit {
+        FAHRENHEIT = 0;
+        CELCIUS = 1;
+    }
+    temperature_unit temperature_format = 12;
+
+    int32 max_log_buffer_size = 13;
+    int32 manager_port = 14;
+    string manager_address = 15;
+
+    enum turn_on_behavior {
+        color_temperature = 0;
+        restore = 1;
+    }
+    turn_on_behavior light_turn_on_behavior = 16;
+
+    bool is_home_assistant_addon = 17;
+}

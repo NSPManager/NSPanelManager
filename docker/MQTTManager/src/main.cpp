@@ -51,10 +51,10 @@ void publish_time_and_date() {
     std::string date_str;
 
     std::time_t time = std::time({});
-    std::strftime(date_buffer, 100, MqttManagerConfig::date_format.c_str(), std::localtime(&time));
+    std::strftime(date_buffer, 100, MqttManagerConfig::get_settings().date_format().c_str(), std::localtime(&time));
     date_str = date_buffer;
 
-    if (MqttManagerConfig::clock_us_style) {
+    if (MqttManagerConfig::get_settings().clock_format() == MQTTManagerSettings_time_format::MQTTManagerSettings_time_format_AM_PM) {
       std::strftime(time_buffer, 20, "%I:%M", std::localtime(&time));
       std::strftime(ampm_buffer, 20, "%p", std::localtime(&time));
       time_str = time_buffer;
@@ -71,6 +71,7 @@ void publish_time_and_date() {
 
     if (date_str.compare(last_date_published) != 0) {
       MQTT_Manager::publish("nspanel/status/date", date_buffer, true);
+      MQTT_Manager::publish("nspanel/status/ampm", "", true);
       last_date_published = date_buffer;
     }
 
@@ -141,13 +142,13 @@ int main(void) {
   SPDLOG_INFO("Starting Websocket Server on port 8002.");
   websocket_server_thread = std::thread(WebsocketServer::start);
 
-  if (MqttManagerConfig::mqtt_server.empty() || MqttManagerConfig::mqtt_port == 0) {
+  if (MqttManagerConfig::get_private_settings().mqtt_server().empty() || MqttManagerConfig::get_private_settings().mqtt_server_port() == 0) {
     SPDLOG_CRITICAL("No MQTT server or port configured! Will exit with code 1.");
     return 1;
-  } else if (MqttManagerConfig::manager_address.empty()) {
+  } else if (MqttManagerConfig::get_settings().manager_address().empty()) {
     SPDLOG_CRITICAL("No manager address configured. Will exit with code 2.");
     return 2;
-  } else if (MqttManagerConfig::manager_port == 0) {
+  } else if (MqttManagerConfig::get_settings().manager_port() == 0) {
     SPDLOG_CRITICAL("No manager port configured. Will exit with code 3.");
     return 3;
   }
@@ -161,14 +162,14 @@ int main(void) {
   }
 
   time_and_date_thread = std::thread(publish_time_and_date);
-  if (!MqttManagerConfig::home_assistant_address.empty() && !MqttManagerConfig::home_assistant_access_token.empty()) {
+  if (!MqttManagerConfig::get_private_settings().home_assistant_address().empty() && !MqttManagerConfig::get_private_settings().home_assistant_token().empty()) {
     SPDLOG_INFO("Home Assistant address and access token configured. Starting Home Assistant component.");
     home_assistant_manager_thread = std::thread(HomeAssistantManager::connect);
   } else {
     SPDLOG_WARN("Home Assistant address and/or token missing. Won't start Home Assistant component.");
   }
 
-  if (!MqttManagerConfig::openhab_address.empty() && !MqttManagerConfig::openhab_access_token.empty()) {
+  if (!MqttManagerConfig::get_private_settings().openhab_address().empty() && !MqttManagerConfig::get_private_settings().openhab_token().empty()) {
     SPDLOG_INFO("Openhab address and access token configured. Starting Openhab component.");
     openhab_manager_thread = std::thread(OpenhabManager::connect);
   } else {

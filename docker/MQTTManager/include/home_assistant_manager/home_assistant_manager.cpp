@@ -1,5 +1,7 @@
 #include "home_assistant_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/exception/diagnostic_information.hpp>
@@ -33,28 +35,20 @@ void HomeAssistantManager::connect() {
         HomeAssistantManager::_websocket->setPingInterval(30);
       }
 
-      std::string home_assistant_websocket_url = MqttManagerConfig::home_assistant_address;
-      if (MqttManagerConfig::is_home_assistant_addon) {
+      std::string home_assistant_websocket_url = MqttManagerConfig::get_private_settings().home_assistant_address();
+      if (MqttManagerConfig::get_settings().is_home_assistant_addon()) {
         home_assistant_websocket_url.append("/core/websocket");
       } else {
         home_assistant_websocket_url.append("/api/websocket");
       }
-      if (home_assistant_websocket_url.find("https://") != std::string::npos) {
-        SPDLOG_DEBUG("Replacing https with wss");
-        // Replace https with wss
-        home_assistant_websocket_url = home_assistant_websocket_url.replace(home_assistant_websocket_url.find("https://"), sizeof("https://") - 1, "wss://");
+      boost::algorithm::replace_first(home_assistant_websocket_url, "https://", "wss://");
+      boost::algorithm::replace_first(home_assistant_websocket_url, "http://", "ws://");
+      if (boost::algorithm::starts_with(home_assistant_websocket_url, "wss://")) {
         SPDLOG_DEBUG("Settings TLS options");
         ix::SocketTLSOptions tls_options;
         tls_options.tls = true;
         tls_options.caFile = "NONE";
         HomeAssistantManager::_websocket->setTLSOptions(tls_options);
-      } else if (home_assistant_websocket_url.find("http://") != std::string::npos) {
-        // Replace http with ws
-        SPDLOG_DEBUG("Replacing http with ws");
-        home_assistant_websocket_url = home_assistant_websocket_url.replace(home_assistant_websocket_url.find("http://"), sizeof("http://") - 1, "ws://");
-      } else {
-        SPDLOG_ERROR("Unknown connection type of Home Assistant. Will not continue!");
-        return;
       }
 
       SPDLOG_INFO("Will connect to Home Assistant websocket at {}", home_assistant_websocket_url);
@@ -139,7 +133,7 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
 void HomeAssistantManager::_send_auth() {
   nlohmann::json auth_data;
   auth_data["type"] = "auth";
-  auth_data["access_token"] = MqttManagerConfig::home_assistant_access_token;
+  auth_data["access_token"] = MqttManagerConfig::get_private_settings().home_assistant_token();
   std::string buffer = auth_data.dump();
 
   HomeAssistantManager::_send_string(buffer);

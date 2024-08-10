@@ -348,7 +348,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
       std::tm tm = *std::localtime(&now);
       std::stringstream buffer;
-      if (!MqttManagerConfig::clock_us_style) {
+      if (MqttManagerConfig::get_settings().clock_format() == MQTTManagerSettings_time_format::MQTTManagerSettings_time_format_FULL) {
         buffer << std::put_time(&tm, "%H:%M:%S");
       } else {
         buffer << std::put_time(&tm, "%I:%M:%S %p");
@@ -373,7 +373,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       message.message = message_parts[2];
       this->_log_messages.push_front(message);
       // Remove older messages from backtrace.
-      while (this->_log_messages.size() > MqttManagerConfig::max_log_buffer_size) {
+      while (this->_log_messages.size() > MqttManagerConfig::get_settings().max_log_buffer_size()) {
         this->_log_messages.pop_back();
       }
     } else {
@@ -681,8 +681,8 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
         // Everything was successfull, send registration accept to panel:
         nlohmann::json response;
         response["command"] = "register_accept";
-        response["address"] = MqttManagerConfig::manager_address.c_str();
-        response["port"] = MqttManagerConfig::manager_port;
+        response["address"] = MqttManagerConfig::get_settings().manager_address();
+        response["port"] = MqttManagerConfig::get_settings().manager_port();
 
         std::string reply_topic = "nspanel/";
         reply_topic.append(register_request_payload["friendly_name"]);
@@ -725,7 +725,7 @@ void NSPanel::register_to_home_assistant() {
   // Register temperature sensor
   nlohmann::json temperature_sensor_data = nlohmann::json(base_json);
   temperature_sensor_data["device_class"] = "temperature";
-  if (MqttManagerConfig::use_fahrenheit) {
+  if (MqttManagerConfig::get_settings().temperature_format() == MQTTManagerSettings_temperature_unit::MQTTManagerSettings_temperature_unit_FAHRENHEIT) {
     temperature_sensor_data["unit_of_measurement"] = "°F";
   } else {
     temperature_sensor_data["unit_of_measurement"] = "°C";

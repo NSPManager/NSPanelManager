@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+// This file contains definitions that are general and not specific for any given component.
+
+message HomeAssistantEntity {
+    string home_assistant_entity_id = 2;
+    bool can_dim = 3;
+    bool can_color_temperature = 4;
+    bool can_rgb = 5;
+}
+
+message OpenhabLight {
+    string openhab_id = 1;
+    string openhab_dim_channel = 2;
+    string openhab_color_temperature_channel = 3;
+    string openhab_rgb_channel = 4;
+    bool can_dim = 5;
+    bool can_color_temperature = 6;
+    bool can_rgb = 7;
+}

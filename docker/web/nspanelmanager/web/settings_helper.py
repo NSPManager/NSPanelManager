@@ -49,15 +49,15 @@ default_settings = {
     "temperature_unit": "celsius",
 }
 
-def get_setting_with_default(name):
+def get_setting_with_default(name) -> str:
     objects = Settings.objects.filter(name=name)
     if objects.count() > 0:
-        return objects.first().value
+        return str(objects.first().value)
     elif name in default_settings:
-        return default_settings[name]
+        return str(default_settings[name])
     else:
         logging.error(F"Failed to get default setting for key '{name}'. No default value for setting exists.")
-        return None
+        return ""
 
 def does_setting_exist(name):
     objects = Settings.objects.filter(name=name)

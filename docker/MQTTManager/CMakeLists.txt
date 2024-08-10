@@ -12,6 +12,7 @@ elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
 endif()
 
 set(CMAKE_INCLUDE_SRC_DIRECTORY /MQTTManager/include)
+set(PROTOBUF_SRC_DIRECTORY /MQTTManager/include/protobuf)
 
 # IF(DEFINED ENV{STRIP})
 #   MESSAGE("Will strip binaries!")
@@ -31,8 +32,14 @@ find_package(nlohmann_json REQUIRED)
 find_package(ixwebsocket REQUIRED)
 find_package(tz REQUIRED)
 find_package(cppzmq REQUIRED)
+find_package(protobuf REQUIRED)
 # find_package(inja REQUIRED)
 find_package(Boost REQUIRED COMPONENTS signals2 stacktrace_backtrace)
+
+add_library(Protobuf_MQTTManager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/protobuf/mqttmanager.pb.cc ${CMAKE_INCLUDE_SRC_DIRECTORY}/protobuf/mqttmanager.pb.h)
+set_target_properties(Protobuf_MQTTManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/protobuf/mqttmanager.pb.h)
+target_include_directories(Protobuf_MQTTManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_link_libraries(Protobuf_MQTTManager protobuf::protobuf)
 
 add_library(MQTTManager_IPCHandler SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/ipc_handler/ipc_handler.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/ipc_handler/ipc_handler.hpp)
 set_target_properties(MQTTManager_IPCHandler PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/ipc_handler/ipc_handler.hpp)
@@ -62,12 +69,12 @@ target_link_libraries(MQTTManager_WebsocketServer ixwebsocket::ixwebsocket spdlo
 add_library(MQTTManager_HomeAssistantManager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.hpp)
 set_target_properties(MQTTManager_HomeAssistantManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.hpp)
 target_include_directories(MQTTManager_HomeAssistantManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_HomeAssistantManager spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost Boost::stacktrace_backtrace)
+target_link_libraries(MQTTManager_HomeAssistantManager spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost Boost::stacktrace_backtrace MQTTManager_Config)
 
 add_library(MQTTManager_OpenhabManager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/openhab_manager/openhab_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/openhab_manager/openhab_manager.hpp)
 set_target_properties(MQTTManager_OpenhabManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/openhab_manager/openhab_manager.hpp)
 target_include_directories(MQTTManager_OpenhabManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_OpenhabManager spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost)
+target_link_libraries(MQTTManager_OpenhabManager spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost MQTTManager_Config)
 
 add_library(MQTTManager_Weather SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.hpp)
 set_target_properties(MQTTManager_Weather PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.hpp)
@@ -100,8 +107,8 @@ target_link_libraries(MQTTManager_EntityManager MQTTManager_WebHelper spdlog::sp
 
 add_library(MQTTManager_Config SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.hpp)
 set_target_properties(MQTTManager_Config PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.hpp)
-target_include_directories(MQTTManager_Config PUBLIC MQTTManager_WebHelper ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Config spdlog::spdlog MQTTManager_WebHelper nlohmann_json::nlohmann_json Boost::boost)
+target_include_directories(MQTTManager_Config PUBLIC MQTTManager_WebHelper ${CMAKE_INCLUDE_SRC_DIRECTORY} ${PROTOBUF_SRC_DIRECTORY})
+target_link_libraries(MQTTManager_Config spdlog::spdlog MQTTManager_WebHelper nlohmann_json::nlohmann_json Boost::boost Protobuf_MQTTManager)
 
 
 add_executable(${PROJECT_NAME} src/main.cpp)

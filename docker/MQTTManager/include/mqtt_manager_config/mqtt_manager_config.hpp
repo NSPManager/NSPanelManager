@@ -5,57 +5,20 @@
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <protobuf/mqttmanager.pb.h>
 #include <string>
 
 #define MANAGER_ADDRESS "127.0.0.1"
 #define MANAGER_PORT "8000"
 
-enum LIGHT_TURN_ON_BEHAVIOR {
-  RESTORE,
-  COLOR_TEMP
-};
-
 class MqttManagerConfig {
 public:
   static void load();
-
-  static inline std::string manager_address;
-  static inline uint16_t manager_port;
-
-  static inline std::string mqtt_server;
-  static inline uint mqtt_port = 1883;
-  static inline std::string mqtt_username;
-  static inline std::string mqtt_password;
-
-  static inline std::string home_assistant_address;
-  static inline std::string home_assistant_access_token;
-
-  static inline std::string openhab_address;
-  static inline std::string openhab_access_token;
-
-  static inline uint color_temp_min;
-  static inline uint color_temp_max;
-
-  static inline bool is_home_assistant_addon;
-  static inline std::string date_format;
-  static inline std::string weather_location_latitude;
-  static inline std::string weather_location_longitude;
-  static inline std::string weather_wind_speed_format;
-  static inline std::string weather_precipitation_format;
-
-  /**
-   * Weather update interval in minutes.
-   */
-  static inline uint8_t weather_update_interval;
-  static inline std::string outside_temp_sensor_provider;
-  static inline std::string outside_temp_sensor_entity_id;
+  static MQTTManagerSettings get_settings();
+  static MQTTManagerPrivateSettings get_private_settings();
   static inline std::string timezone;
-  static inline nlohmann::json icon_mapping;
-  static inline bool clock_us_style;
-  static inline bool use_fahrenheit;
-  static inline bool turn_on_behavior;
-  static inline uint16_t max_log_buffer_size;
 
+  static inline nlohmann::json icon_mapping;
   static inline std::list<nlohmann::json> light_configs;
   static inline std::list<nlohmann::json> nspanel_configs;
   static inline std::list<nlohmann::json> scenes_configs;
@@ -118,6 +81,9 @@ private:
   static inline boost::signals2::signal<void(nlohmann::json *)> _config_added_listener;
   static inline boost::signals2::signal<void(nlohmann::json *)> _config_removed_listener;
   static inline boost::signals2::signal<void()> _config_loaded_listeners;
+
+  static inline MQTTManagerSettings _settings;
+  static inline MQTTManagerPrivateSettings _private_settings;
 };
 
 #endif // !MQTTMANAGER_CONFIG_HPP
