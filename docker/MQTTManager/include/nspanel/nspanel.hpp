@@ -1,6 +1,7 @@
 #ifndef MQTT_MANAGER_NSPANEL
 #define MQTT_MANAGER_NSPANEL
 #include "entity/entity.hpp"
+#include "protobuf_general.pb.h"
 #include <cstdint>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <nlohmann/json.hpp>
@@ -55,8 +56,8 @@ private:
 
 class NSPanel {
 public:
-  NSPanel(nlohmann::json &init_data);
-  void update_config(nlohmann::json &init_data);
+  NSPanel(NSPanelSettings &init_data);
+  void update_config(NSPanelSettings &init_data);
   ~NSPanel();
   void reset_mqtt_topics();
   /**
@@ -182,16 +183,16 @@ private:
   std::string _mqtt_register_mac;
 
   // MQTT Stuff:
-  // Wether or not relay1 should be registered to Home Assistant as a switch or light (true = register as light).
-  bool _relay1_is_mqtt_light;
+  // Wether or not relay1 should be registered to Home Assistant as a switch or light.
+  NSPanelSettings::RelayRegisterType _relay1_register_type;
   // The topic to send commands to the relay1
   std::string _mqtt_relay1_command_topic;
   // The topic where relay1 state is published
   std::string _mqtt_relay1_state_topic;
   // Wether or not relay1 is on
   bool _relay1_state;
-  // Wether or not relay2 should be registered to Home Assistant as a switch or light (true = register as light).
-  bool _relay2_is_mqtt_light;
+  // Wether or not relay2 should be registered to Home Assistant as a switch or light.
+  NSPanelSettings::RelayRegisterType _relay2_register_type;
   // The topic to send commands to the relay2
   std::string _mqtt_relay2_command_topic;
   // The topic where relay2 state is published

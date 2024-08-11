@@ -54,7 +54,7 @@ void publish_time_and_date() {
     std::strftime(date_buffer, 100, MqttManagerConfig::get_settings().date_format().c_str(), std::localtime(&time));
     date_str = date_buffer;
 
-    if (MqttManagerConfig::get_settings().clock_format() == MQTTManagerSettings_time_format::MQTTManagerSettings_time_format_AM_PM) {
+    if (MqttManagerConfig::get_settings().clock_format() == time_format::AM_PM) {
       std::strftime(time_buffer, 20, "%I:%M", std::localtime(&time));
       std::strftime(ampm_buffer, 20, "%p", std::localtime(&time));
       time_str = time_buffer;

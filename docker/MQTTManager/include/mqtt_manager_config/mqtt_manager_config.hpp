@@ -1,11 +1,12 @@
 #ifndef MQTTMANAGER_CONFIG_HPP
 #define MQTTMANAGER_CONFIG_HPP
+#include "protobuf_general.pb.h"
 #include <boost/signals2.hpp>
 #include <list>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
-#include <protobuf/mqttmanager.pb.h>
+#include <protobuf/protobuf_mqttmanager.pb.h>
 #include <string>
 
 #define MANAGER_ADDRESS "127.0.0.1"
@@ -20,7 +21,7 @@ public:
 
   static inline nlohmann::json icon_mapping;
   static inline std::list<nlohmann::json> light_configs;
-  static inline std::list<nlohmann::json> nspanel_configs;
+  static inline std::list<NSPanelSettings> nspanel_configs;
   static inline std::list<nlohmann::json> scenes_configs;
   static inline std::list<nlohmann::json> nspanel_relay_group_configs;
   static inline std::list<nlohmann::json> room_configs;

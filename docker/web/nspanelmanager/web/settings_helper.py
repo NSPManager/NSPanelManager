@@ -44,8 +44,6 @@ default_settings = {
     "use_fahrenheit": False,
     "weather_update_interval": 10,
     "weather_wind_speed_format": "kmh",
-    "weather_location_latitude": "",
-    "weather_location_longitude": "",
     "temperature_unit": "celsius",
 }
 

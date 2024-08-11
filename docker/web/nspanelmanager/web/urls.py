@@ -141,6 +141,7 @@ urlpatterns = [
     ### PROTOBUF API ###
     ####################
     path('protobuf/mqttmanager/all_settings', protobuf_api.mqttmanager_get_all_settings, name="protobuf_mqttmanager_get_all_settings"),
+    path('protobuf/mqttmanager/all_nspanels', protobuf_api.mqttmanager_get_all_nspanels, name="protobuf_mqttmanager_get_all_nspanels"),
 
 
     #######################

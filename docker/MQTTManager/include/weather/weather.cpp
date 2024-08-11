@@ -59,37 +59,37 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 
 void MQTTManagerWeather::_pull_new_weather_data() {
   std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
-  std::string temperature_unit = MqttManagerConfig::get_settings().temperature_format() == MQTTManagerSettings_temperature_unit_FAHRENHEIT ? "fahrenheit" : "celsius";
+  std::string temperature_unit = MqttManagerConfig::get_settings().temperature_unit() == temperature_format::FAHRENHEIT ? "fahrenheit" : "celsius";
   std::string precipitation_format;
-  switch (MqttManagerConfig::get_settings().weather_precipitation_format()) {
-  case MQTTManagerSettings_precipitation_unit_MILLIMETERS:
+  switch (MqttManagerConfig::get_settings().weather_precipitation_unit()) {
+  case precipitation_format::MILLIMETERS:
     precipitation_format = "mm";
     break;
-  case MQTTManagerSettings_precipitation_unit_INCES:
+  case precipitation_format::INCES:
     precipitation_format = "inch";
     break;
-  case MQTTManagerSettings_precipitation_unit_MQTTManagerSettings_precipitation_unit_INT_MAX_SENTINEL_DO_NOT_USE_:
-  case MQTTManagerSettings_precipitation_unit_MQTTManagerSettings_precipitation_unit_INT_MIN_SENTINEL_DO_NOT_USE_:
+  case precipitation_format::precipitation_format_INT_MIN_SENTINEL_DO_NOT_USE_:
+  case precipitation_format::precipitation_format_INT_MAX_SENTINEL_DO_NOT_USE_:
     SPDLOG_ERROR("Unknown precipitation format!");
     break;
   }
 
   std::string wind_speed_format;
   switch (MqttManagerConfig::get_settings().weather_wind_speed_format()) {
-  case MQTTManagerSettings_wind_speed_format_M_S:
+  case wind_speed_format::M_S:
     wind_speed_format = "ms";
     break;
-  case MQTTManagerSettings_wind_speed_format_KM_H:
+  case wind_speed_format::KM_H:
     wind_speed_format = "kmh";
     break;
-  case MQTTManagerSettings_wind_speed_format_MP_H:
+  case wind_speed_format::MP_H:
     wind_speed_format = "mph";
     break;
-  case MQTTManagerSettings_wind_speed_format_KNOTS:
+  case wind_speed_format::KNOTS:
     wind_speed_format = "knots";
     break;
-  case MQTTManagerSettings_wind_speed_format_MQTTManagerSettings_wind_speed_format_INT_MAX_SENTINEL_DO_NOT_USE_:
-  case MQTTManagerSettings_wind_speed_format_MQTTManagerSettings_wind_speed_format_INT_MIN_SENTINEL_DO_NOT_USE_:
+  case wind_speed_format::wind_speed_format_INT_MIN_SENTINEL_DO_NOT_USE_:
+  case wind_speed_format::wind_speed_format_INT_MAX_SENTINEL_DO_NOT_USE_:
     SPDLOG_ERROR("Unknown wind speed format!");
     break;
   }

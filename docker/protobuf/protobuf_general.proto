@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+// This file contains definitions that are general and not specific for any given component.
+import "protobuf_formats.proto";
+
+message HomeAssistantEntity {
+    string home_assistant_entity_id = 2;
+    bool can_dim = 3;
+    bool can_color_temperature = 4;
+    bool can_rgb = 5;
+}
+
+message OpenhabLightEntity {
+    string openhab_id = 1;
+    string openhab_dim_channel = 2;
+    string openhab_color_temperature_channel = 3;
+    string openhab_rgb_channel = 4;
+    bool can_dim = 5;
+    bool can_color_temperature = 6;
+    bool can_rgb = 7;
+}
+
+message NSPanelSettings {
+    optional int32 id = 1;
+    string mac_address = 2;
+    string name = 3;
+    int32 home = 4;
+
+    enum NSPanelDefaultPage {
+        MAIN_PAGE = 0;
+        SCENES_PAGE = 1;
+        ROOM_PAGE = 2;
+    }
+    NSPanelDefaultPage default_page = 5;
+
+    int32 raise_to_100_light_level = 6;
+    int32 color_temp_min = 7;
+    int32 color_temp_max = 8;
+    bool reverse_color_temp = 9;
+    int32 min_button_push_time = 10;
+    int32 button_long_press_time = 11;
+    int32 special_mode_trigger_time = 12;
+    int32 special_mode_release_time = 13;
+    int32 mqtt_ignore_time = 14;
+    int32 screen_dim_level = 15;
+    int32 screensaver_dim_level = 16;
+    int32 screensaver_activation_timeout = 17;
+
+    enum NSPanelScreensaverMode {
+        WEATHER_WITH_BACKGROUND = 0;
+        WEATHER_WITHOUT_BACKGROUND = 1;
+        DATETIME_WITH_BACKGROUND = 3;
+        DATETIME_WITHOUT_BACKGROUND = 4;
+        NO_SCREENSAVER = 5;
+    }
+    NSPanelScreensaverMode screensaver_mode = 18;
+
+    time_format clock_format = 19;
+    temperature_format temperature_unit = 20;
+    bool is_us_panel = 21;
+    bool lock_to_default_room = 22;
+    bool reverse_relays = 23;
+    bool relay1_default_mode = 24;
+    bool relay2_default_mode = 25;
+    int32 temperature_calibration = 26;
+
+    enum NSPanelButtonMode {
+        DIRECT_MODE = 0;
+        DETACHED_MODE = 1;
+        CUSTOM_MQTT = 2;
+        FOLLOW_MODE = 3;
+    }
+    NSPanelButtonMode button1_mode = 27;
+    NSPanelButtonMode button2_mode = 28;
+
+    optional string button1_mqtt_topic = 29;
+    optional string button2_mqtt_topic = 30;
+    optional string button1_mqtt_payload = 31;
+    optional string button2_mqtt_payload = 32;
+    optional int32 button1_detached_light_id = 33;
+    optional int32 button2_detached_light_id = 34;
+
+    bool denied = 45;
+    bool accepted = 46;
+    repeated int32 rooms = 47;
+    repeated int32 scenes = 48;
+    string ip_address = 49;
+
+    enum RelayRegisterType {
+        SWITCH = 0;
+        LIGHT = 1;
+    }
+    RelayRegisterType relay1_register_type = 50;
+    RelayRegisterType relay2_register_type = 51;
+}

@@ -4,6 +4,7 @@
 #include "ipc_handler/ipc_handler.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include "protobuf_general.pb.h"
 #include "web_helper/WebHelper.hpp"
 #include <algorithm>
 #include <boost/algorithm/string/classification.hpp>
@@ -95,7 +96,7 @@ void NSPanelRelayGroup::turn_off() {
   }
 }
 
-NSPanel::NSPanel(nlohmann::json &init_data) {
+NSPanel::NSPanel(NSPanelSettings &init_data) {
   // Assume panel to be offline until proven otherwise
   this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE;
   // If this panel is just a panel in waiting (ie. not accepted the request yet) it won't have an id.
@@ -110,56 +111,31 @@ NSPanel::NSPanel(nlohmann::json &init_data) {
   IPCHandler::attach_callback(fmt::format("nspanel/{}/deny_register_request", this->_id), boost::bind(&NSPanel::handle_ipc_request_deny_register_request, this, _1, _2));
 }
 
-void NSPanel::update_config(nlohmann::json &init_data) {
-  SPDLOG_TRACE("NSPanel {}::{} received config update. New config: {}", this->_id, this->_name, nlohmann::to_string(init_data));
+void NSPanel::update_config(NSPanelSettings &settings) {
+  SPDLOG_TRACE("NSPanel {}::{} received config update.", this->_id, this->_name);
 
   // TODO: Remove all "if mac or mac_address" (and similar) and decide on ONE name for all things.
-  if (init_data.contains("nspanel_id")) {
-    this->_id = init_data["nspanel_id"];
+  if (settings.has_id()) {
+    this->_id = settings.id();
     this->_has_registered_to_manager = true; // Data contained an ID which it got from the manager config.
   } else {
     this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
   }
 
   bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
-  if (init_data.contains("name")) {
-    if (this->_name.compare(init_data["name"]) != 0) {
-      rebuilt_mqtt = true;
-      if (this->_name.size() > 0) {
-        this->reboot();
-      }
+  if (this->_name.compare(settings.name()) != 0) {
+    rebuilt_mqtt = true;
+    if (this->_name.size() > 0) {
+      this->reboot();
     }
-    this->_name = init_data["name"];
-  } else if (init_data.contains("friendly_name")) {
-    if (this->_name.compare(init_data["friendly_name"]) != 0) {
-      rebuilt_mqtt = true;
-      if (this->_name.size() > 0) {
-        this->reboot();
-      }
-    }
-    this->_name = init_data["friendly_name"];
+    this->_name = settings.name();
   }
 
-  if (init_data.contains("mac_address")) {
-    this->_mac = init_data["mac_address"];
-  } else if (init_data.contains("mac_origin")) {
-    this->_mac = init_data["mac_origin"];
-  } else {
-    SPDLOG_ERROR("Creating new NSPanel with no known MAC!");
-  }
-
-  if (init_data.contains("address")) {
-    this->_ip_address = init_data["address"];
-  } else {
-    SPDLOG_ERROR("Received init data for panel but no address was specified. Will set default ''.");
-    this->_ip_address = "";
-  }
-
-  if (init_data.contains(("is_us_panel"))) {
-    this->_is_us_panel = std::string(init_data["is_us_panel"]).compare("True") == 0;
-  } else {
-    this->_is_us_panel = false;
-  }
+  this->_mac = settings.mac_address();
+  this->_ip_address = settings.ip_address();
+  this->_is_us_panel = settings.is_us_panel();
+  this->_relay1_register_type = settings.relay1_register_type();
+  this->_relay2_register_type = settings.relay2_register_type();
 
   if (this->_state == MQTT_MANAGER_NSPANEL_STATE::OFFLINE || this->_state == MQTT_MANAGER_NSPANEL_STATE::UNKNOWN) {
     this->_rssi = 0;
@@ -169,49 +145,33 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->_update_progress = 0;
   }
 
-  if (init_data.contains("nspanel_id")) {
-    SPDLOG_DEBUG("Loaded NSPanel {}::{}.", this->_id, this->_name);
-  } else {
-    SPDLOG_DEBUG("Loaded NSPanel {} with no ID.", this->_name);
-  }
-
-  if (init_data.contains("relay1_is_light")) {
-    this->_relay1_is_mqtt_light = std::string(init_data["relay1_is_light"]).compare("True") == 0;
-  } else {
-    this->_relay1_is_mqtt_light = false;
-  }
-
-  if (init_data.contains("relay2_is_light")) {
-    this->_relay2_is_mqtt_light = std::string(init_data["relay2_is_light"]).compare("True") == 0;
-  } else {
-    this->_relay2_is_mqtt_light = false;
-  }
-
   // Last thing to do, check if the panel as actually accepted into our manager.
-  if (init_data.contains("denied")) {
-    if (init_data.at("denied") == true) {
-      SPDLOG_INFO("Loaded denied NSPanel {}::{}.", this->_id, this->_name);
-      this->_is_register_denied = true;
-      this->_is_register_accepted = false;
-      this->_state = MQTT_MANAGER_NSPANEL_STATE::DENIED;
-      rebuilt_mqtt = false;
-    }
+  if (settings.denied()) {
+    SPDLOG_INFO("Loaded denied NSPanel {}::{}.", this->_id, this->_name);
+    this->_is_register_denied = true;
+    this->_is_register_accepted = false;
+    this->_state = MQTT_MANAGER_NSPANEL_STATE::DENIED;
+    rebuilt_mqtt = false;
   }
 
-  if (init_data.contains("accepted")) {
-    if (init_data.at("accepted") == true) {
-      SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
-      this->_is_register_denied = false;
-      this->_is_register_accepted = true;
-      this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
-      rebuilt_mqtt = true;
-    }
+  if (settings.accepted() == true) {
+    SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
+    this->_is_register_denied = false;
+    this->_is_register_accepted = true;
+    this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+    rebuilt_mqtt = true;
   }
 
   if (!this->_is_register_denied && !this->_is_register_accepted) {
     // No decission has been made on wether ot accept or deny panel. It is therefore awaiting_accept
     this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
     rebuilt_mqtt = true;
+  }
+
+  if (settings.has_id()) {
+    SPDLOG_DEBUG("Loaded NSPanel {}::{}.", this->_id, this->_name);
+  } else {
+    SPDLOG_DEBUG("Loaded NSPanel {} with no ID.", this->_name);
   }
 
   if (rebuilt_mqtt) {
@@ -348,7 +308,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
       std::tm tm = *std::localtime(&now);
       std::stringstream buffer;
-      if (MqttManagerConfig::get_settings().clock_format() == MQTTManagerSettings_time_format::MQTTManagerSettings_time_format_FULL) {
+      if (MqttManagerConfig::get_settings().clock_format() == time_format::FULL) {
         buffer << std::put_time(&tm, "%H:%M:%S");
       } else {
         buffer << std::put_time(&tm, "%I:%M:%S %p");
@@ -725,7 +685,7 @@ void NSPanel::register_to_home_assistant() {
   // Register temperature sensor
   nlohmann::json temperature_sensor_data = nlohmann::json(base_json);
   temperature_sensor_data["device_class"] = "temperature";
-  if (MqttManagerConfig::get_settings().temperature_format() == MQTTManagerSettings_temperature_unit::MQTTManagerSettings_temperature_unit_FAHRENHEIT) {
+  if (MqttManagerConfig::get_settings().temperature_unit() == temperature_format::FAHRENHEIT) {
     temperature_sensor_data["unit_of_measurement"] = "°F";
   } else {
     temperature_sensor_data["unit_of_measurement"] = "°C";
@@ -738,7 +698,7 @@ void NSPanel::register_to_home_assistant() {
   MQTT_Manager::publish(this->_mqtt_sensor_temperature_topic, temperature_sensor_data_str, true);
 
   // Register relay1
-  if (!this->_relay1_is_mqtt_light) {
+  if (this->_relay1_register_type == NSPanelSettings::RelayRegisterType::NSPanelSettings_RelayRegisterType_SWITCH) {
     nlohmann::json relay1_data = nlohmann::json(base_json);
     relay1_data["device_class"] = "switch";
     relay1_data["name"] = "Relay 1";
@@ -770,7 +730,7 @@ void NSPanel::register_to_home_assistant() {
   }
 
   // Register relay2
-  if (!this->_relay2_is_mqtt_light) {
+  if (this->_relay2_register_type == NSPanelSettings::RelayRegisterType::NSPanelSettings_RelayRegisterType_SWITCH) {
     nlohmann::json relay2_data = nlohmann::json(base_json);
     relay2_data["device_class"] = "switch";
     relay2_data["name"] = "Relay 2";

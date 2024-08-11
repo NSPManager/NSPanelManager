@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+// This file contains strictly format definitions in enum format.
+
+enum time_format {
+    AM_PM = 0;
+    FULL = 1;
+}
+
+enum temperature_format {
+    FAHRENHEIT = 0;
+    CELCIUS = 1;
+}
+
+enum wind_speed_format {
+    KM_H  = 0;
+    M_S   = 1;
+    MP_H  = 2;
+    KNOTS = 3;
+}
+
+enum precipitation_format {
+    MILLIMETERS = 0;
+    INCES = 1;
+}

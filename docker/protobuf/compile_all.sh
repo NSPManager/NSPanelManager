@@ -1,7 +1,7 @@
 #!/bin/bash
 DEST_DIR_MQTTMANAGER=/MQTTManager/include/protobuf/
 DEST_DIR_DJANGO=/usr/src/app/nspanelmanager/web/protobuf/
-SRC_FILES=('mqttmanager.proto' 'general.proto')
+SRC_FILES=('protobuf_mqttmanager.proto' 'protobuf_general.proto' 'protobuf_formats.proto')
 
 for SRC_FILE in ${SRC_FILES[@]}; do
     echo "==> Creating destination directory $DEST_DIR_MQTTMANAGER"
@@ -13,4 +13,11 @@ for SRC_FILE in ${SRC_FILES[@]}; do
     mkdir -p "$DEST_DIR_DJANGO"
     echo "==> Building $SRC_FILE for Django to $DEST_DIR_DJANGO"
     protoc --python_out="$DEST_DIR_DJANGO" "$SRC_FILE"
+done
+
+for file in $(ls $DEST_DIR_DJANGO); do
+    if [[ "$file" == *.py ]]; then
+        echo "==> Changing import statements in $file"
+        sed -i '/^import /s/import /import web.protobuf./g' "$DEST_DIR_DJANGO/$file"
+    fi
 done

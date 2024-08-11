@@ -2,6 +2,7 @@
 #include "light/home_assistant_light.hpp"
 #include "light/openhab_light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
+#include "protobuf_general.pb.h"
 #include "room/room.hpp"
 #include "scenes/home_assistant_scene.hpp"
 #include "scenes/nspm_scene.hpp"
@@ -113,10 +114,10 @@ void EntityManager::add_nspanel_relay_group(nlohmann::json &config) {
   }
 }
 
-void EntityManager::add_nspanel(nlohmann::json &config) {
+void EntityManager::add_nspanel(NSPanelSettings &config) {
   try {
-    int panel_id = config["nspanel_id"];
-    std::string panel_mac = config["mac_address"];
+    int panel_id = config.id();
+    std::string panel_mac = config.mac_address();
     NSPanel *panel = EntityManager::get_nspanel_by_id(panel_id);
     if (panel == nullptr) {
       panel = EntityManager::get_nspanel_by_mac(panel_mac);
@@ -145,9 +146,9 @@ void EntityManager::post_init_entities() {
     // Process any loaded NSPanels
     SPDLOG_DEBUG("Updating NSPanels.");
     std::list<int> nspanel_ids;
-    for (nlohmann::json &config : MqttManagerConfig::nspanel_configs) {
+    for (NSPanelSettings &config : MqttManagerConfig::nspanel_configs) {
       EntityManager::add_nspanel(config); // add_nspanel takes care to check if it exists before adding it. IF it exists, update it instead.
-      nspanel_ids.push_back(config["nspanel_id"]);
+      nspanel_ids.push_back(config.id());
     }
 
     // Check for any removed nspanels
@@ -498,29 +499,56 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
   if (panel == nullptr) {
     nlohmann::json init_data = data;
     SPDLOG_INFO("Panel is not registered to manager, adding panel but as 'pending accept' status.");
-    NSPanel *new_nspanel = new NSPanel(init_data);
+
+    // TODO: Convert JSON to NSPanelSettings object
+    NSPanelSettings settings;
+    settings.set_accepted(false);
+    settings.set_denied(false);
+    if (data.contains("mac")) {
+      settings.set_mac_address(data.at("mac"));
+    } else if (data.contains("mac_origin")) {
+      settings.set_mac_address(data.at("mac_origin"));
+    }
+    if (data.contains("address")) {
+      settings.set_ip_address(data.at("address"));
+    } else if (data.contains("ip_address")) {
+      settings.set_ip_address(data.at("ip_address"));
+    }
+    if (data.contains("name")) {
+      settings.set_name(data.at("name"));
+    } else if (data.contains("friendly_name")) {
+      settings.set_name(data.at("friendly_name"));
+    }
+
+    NSPanel *new_nspanel = new NSPanel(settings);
     EntityManager::_nspanels.push_back(new_nspanel);
     new_nspanel->register_to_manager(data);
   }
 }
 
 NSPanel *EntityManager::get_nspanel_by_id(uint id) {
+  SPDLOG_TRACE("Trying to find NSPanel by ID {}", id);
   std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
   for (NSPanel *nspanel : EntityManager::_nspanels) {
     if (nspanel->get_id() == id) {
+      SPDLOG_TRACE("Found NSPanel by ID {}", id);
       return nspanel;
     }
   }
+  SPDLOG_TRACE("Did not find NSPanel by ID {}", id);
   return nullptr;
 }
 
 NSPanel *EntityManager::get_nspanel_by_mac(std::string mac) {
+  SPDLOG_TRACE("Trying to find NSPanel by MAC {}", mac);
   std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
   for (NSPanel *nspanel : EntityManager::_nspanels) {
     if (nspanel->get_mac().compare(mac) == 0) {
+      SPDLOG_TRACE("Found NSPanel by MAC {}", mac);
       return nspanel;
     }
   }
+  SPDLOG_TRACE("Did not find NSPanel by MAC {}", mac);
   return nullptr;
 }
 

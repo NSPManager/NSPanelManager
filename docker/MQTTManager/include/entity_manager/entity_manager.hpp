@@ -1,6 +1,7 @@
 #ifndef MQTT_MANAGER_ENTITY_MANAGER
 #define MQTT_MANAGER_ENTITY_MANAGER
 
+#include "protobuf_general.pb.h"
 #include <boost/signals2.hpp>
 #include <entity/entity.hpp>
 #include <light/light.hpp>
@@ -49,7 +50,7 @@ public:
   /**
    * Create and add a nspanel to the manager
    */
-  static void add_nspanel(nlohmann::json &config);
+  static void add_nspanel(NSPanelSettings &config);
 
   /**
    * Create and add a scene to the manager

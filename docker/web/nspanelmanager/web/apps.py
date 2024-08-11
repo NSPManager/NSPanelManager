@@ -5,7 +5,7 @@ import psutil
 import subprocess
 import os
 import time
-from web.protobuf import mqttmanager_pb2
+from web.protobuf import protobuf_mqttmanager_pb2
 
 
 def start_mqtt_manager():
@@ -17,7 +17,7 @@ def start_mqtt_manager():
     print("Did not find a running MQTTManager, starting MQTTManager...")
     # Restart the process
     logging.info("Starting a new mqtt_manager")
-    settings = mqttmanager_pb2.MQTTManagerPrivateSettings()
+    settings = protobuf_mqttmanager_pb2.MQTTManagerPrivateSettings()
     settings.home_assistant_address = get_setting_with_default("home_assistant_address")
     settings.home_assistant_token = get_setting_with_default("home_assistant_token")
     settings.openhab_address = get_setting_with_default("openhab_address")

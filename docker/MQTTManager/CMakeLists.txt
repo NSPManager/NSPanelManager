@@ -36,8 +36,10 @@ find_package(protobuf REQUIRED)
 # find_package(inja REQUIRED)
 find_package(Boost REQUIRED COMPONENTS signals2 stacktrace_backtrace)
 
-add_library(Protobuf_MQTTManager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/protobuf/mqttmanager.pb.cc ${CMAKE_INCLUDE_SRC_DIRECTORY}/protobuf/mqttmanager.pb.h)
-set_target_properties(Protobuf_MQTTManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/protobuf/mqttmanager.pb.h)
+file(GLOB PROTOBUF_PB_CC_FILES "${CMAKE_INCLUDE_SRC_DIRECTORY}/protobuf/*.pb.cc")
+file(GLOB PROTOBUF_PB_H_FILES "${CMAKE_INCLUDE_SRC_DIRECTORY}/protobuf/*.pb.h")
+add_library(Protobuf_MQTTManager SHARED ${PROTOBUF_PB_CC_FILES} ${PROTOBUF_PB_H_FILES})
+set_target_properties(Protobuf_MQTTManager PROPERTIES PUBLIC_HEADER ${PROTOBUF_PB_H_FILES})
 target_include_directories(Protobuf_MQTTManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(Protobuf_MQTTManager protobuf::protobuf)
 
@@ -89,7 +91,7 @@ target_link_libraries(MQTTManager_Light MQTTManager_HomeAssistantManager spdlog:
 add_library(MQTTManager_NSPanel SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.hpp)
 set_target_properties(MQTTManager_NSPanel PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/light.hpp)
 target_include_directories(MQTTManager_NSPanel PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_WebsocketServer tz::tz Boost::boost MQTTManager_Config MQTTManager_IPCHandler)
+target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_WebsocketServer tz::tz Boost::boost MQTTManager_Config MQTTManager_IPCHandler Protobuf_MQTTManager)
 
 add_library(MQTTManager_Scene SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.cpp)
 # set_target_properties(MQTTManager_Scene PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/nspm_scene.hpp)
