@@ -576,7 +576,7 @@ void NSPanel::update_warnings_from_manager() {
 }
 
 void NSPanel::accept_register_request() {
-  // this->_is_register_accepted = true;
+  this->_is_register_accepted = true;
   this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
 }
 

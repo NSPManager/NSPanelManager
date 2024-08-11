@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <string>
+#include <vector>
 
 #define MANAGER_ADDRESS "127.0.0.1"
 #define MANAGER_PORT "8000"
@@ -57,7 +58,9 @@ public:
   static inline uint16_t max_log_buffer_size;
 
   static inline std::list<nlohmann::json> light_configs;
-  static inline std::vector<nlohmann::json> nspanel_configs;
+  static std::vector<nlohmann::json> get_nspanel_configs();
+  static void delete_nspanel_config_by_id(uint16_t id);
+  static void delete_nspanel_config_by_mac(std::string mac);
   static inline std::list<nlohmann::json> scenes_configs;
   static inline std::list<nlohmann::json> nspanel_relay_group_configs;
   static inline std::list<nlohmann::json> room_configs;
@@ -118,6 +121,8 @@ private:
   static inline boost::signals2::signal<void(nlohmann::json *)> _config_added_listener;
   static inline boost::signals2::signal<void(nlohmann::json *)> _config_removed_listener;
   static inline boost::signals2::signal<void()> _config_loaded_listeners;
+
+  static inline std::vector<nlohmann::json> _nspanel_configs;
 };
 
 #endif // !MQTTMANAGER_CONFIG_HPP

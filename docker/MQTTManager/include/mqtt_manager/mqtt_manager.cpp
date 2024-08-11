@@ -1,10 +1,8 @@
 #include "mqtt_manager.hpp"
-#include "light/light.hpp"
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/signals2.hpp>
 #include <cctype>
 #include <chrono>
-#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <exception>
@@ -15,11 +13,8 @@
 #include <mqtt/subscribe_options.h>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <pthread.h>
-#include <ratio>
 #include <spdlog/spdlog.h>
 #include <sstream>
-#include <stdexcept>
-#include <stdio.h>
 #include <string>
 #include <sys/stat.h>
 #include <thread>
@@ -32,6 +27,11 @@ inline bool file_exists(const char *name) {
 }
 
 void MQTT_Manager::connect() {
+  if (!MQTT_Manager::_process_messages_thread.joinable()) {
+    SPDLOG_INFO("Starting MQTT message processing thread.");
+    MQTT_Manager::_process_messages_thread = std::thread(MQTT_Manager::_process_mqtt_messages);
+  }
+
   if (MQTT_Manager::_mqtt_client == nullptr) {
     std::stringstream mac_address_str_stream;
     if (file_exists("/sys/class/net/eth0/address")) {
@@ -100,7 +100,12 @@ void MQTT_Manager::connect() {
     while (true) {
       auto msg = MQTT_Manager::_mqtt_client->consume_message();
       if (msg) {
-        MQTT_Manager::_process_mqtt_message(msg->get_topic(), msg->get_payload());
+        MQTTMessage message_struct{
+            .topic = msg->get_topic(),
+            .message = msg->get_payload_str()};
+        while (!MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
+        }
+        SPDLOG_TRACE("Read message from topic {}", msg->get_topic());
       } else if (!MQTT_Manager::_mqtt_client->is_connected()) {
         SPDLOG_ERROR("Lost connection");
         while (!MQTT_Manager::_mqtt_client->is_connected()) {
@@ -156,7 +161,11 @@ void MQTT_Manager::_resubscribe() {
       do {
         received_message = MQTT_Manager::_mqtt_client->try_consume_message_for(&msg, std::chrono::milliseconds(100)); // Wait for max 100ms to see if a message is to be receved on the recently subscribed topic.
         if (received_message) {
-          MQTT_Manager::_process_mqtt_message(msg->get_topic(), msg->get_payload());
+          MQTTMessage message_struct{
+              .topic = msg->get_topic(),
+              .message = msg->get_payload_str()};
+          while (!MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
+          }
         }
       } while (received_message);
       SPDLOG_TRACE("Received all messages on topic '{}'.", mqtt_topic_pair.first);
@@ -185,42 +194,28 @@ const std::vector<int> MQTT_Manager::_get_subscribe_topics_qos() {
   return subscribe_topics;
 }
 
-void MQTT_Manager::_process_mqtt_message(const std::string topic, const std::string message) {
-  try {
-    for (auto mqtt_topic_signal_pair : MQTT_Manager::_mqtt_callbacks) {
-      if (mqtt_topic_signal_pair.first.compare(topic) == 0) {
-        MQTT_Manager::_mqtt_callbacks[mqtt_topic_signal_pair.first](topic, message);
+void MQTT_Manager::_process_mqtt_messages() {
+  while (true) {
+    MQTTMessage message;
+    while (MQTT_Manager::_mqtt_message_queue.pop(message)) {
+      try {
+        SPDLOG_TRACE("Processing message from topic {}", message.topic);
+        // Call each observer/listener until a callback return true, ie. the callback was handled.
+        for (auto mqtt_topic_signal_pair : MQTT_Manager::_mqtt_callbacks) {
+          if (mqtt_topic_signal_pair.first.compare(message.topic) == 0) {
+            MQTT_Manager::_mqtt_callbacks[mqtt_topic_signal_pair.first](message.topic, message.message);
+          }
+        }
+      } catch (std::exception ex) {
+        SPDLOG_ERROR("Caught std::exception while processing message on topic '{}'. message: '{}'. Exception: ", message.topic, message.message, boost::diagnostic_information(ex, true));
+      } catch (...) {
+        SPDLOG_ERROR("Caught exception of type other than std::exception while processing message on topic '{}'. message: {}", message.topic, message.message);
       }
     }
-
-    // Call each observer/listener until a callback return true, ie. the callback was handled.
-    for (auto mqtt_callback : MQTT_Manager::_mqtt_observer_callbacks) {
-      if (mqtt_callback(topic, message)) {
-        break;
-      }
-    }
-  } catch (std::exception ex) {
-    SPDLOG_ERROR("Caught std::exception while processing message on topic '{}'. message: '{}'. Exception: ", topic, message, boost::diagnostic_information(ex, true));
-  } catch (...) {
-    SPDLOG_ERROR("Caught exception of type other than std::exception while processing message on topic '{}'. message: {}", topic, message);
   }
 }
 
 void MQTT_Manager::_process_mqtt_command(nlohmann::json &data) {
-}
-
-void MQTT_Manager::attach_observer(std::function<bool(const std::string &topic, const std::string &payload)> callback) {
-  MQTT_Manager::_mqtt_observer_callbacks.push_back(callback);
-}
-
-void MQTT_Manager::detach_observer(std::function<bool(const std::string &topic, const std::string &payload)> callback) {
-  for (auto it = MQTT_Manager::_mqtt_observer_callbacks.begin(); it != MQTT_Manager::_mqtt_observer_callbacks.end(); ++it) {
-    if (callback.target_type() == it->target_type()) {
-      if (callback.target<bool (*)(const std::string &topic, const std::string &payload)>() == it->target<bool (*)(const std::string &topic, const std::string &payload)>()) {
-        it = MQTT_Manager::_mqtt_observer_callbacks.erase(it);
-      }
-    }
-  }
 }
 
 void MQTT_Manager::publish(const std::string &topic, const std::string &payload) {

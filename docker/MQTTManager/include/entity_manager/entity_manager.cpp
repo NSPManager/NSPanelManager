@@ -140,14 +140,14 @@ void EntityManager::add_nspanel(nlohmann::json &config) {
 
 void EntityManager::post_init_entities() {
   SPDLOG_INFO("New config loaded, processing changes.");
-
   EntityManager::_weather_manager.update_config();
 
   {
     // Process any loaded NSPanels
     SPDLOG_DEBUG("Updating NSPanels.");
     std::list<int> nspanel_ids;
-    for (nlohmann::json &config : MqttManagerConfig::nspanel_configs) {
+    std::vector<nlohmann::json> configs = MqttManagerConfig::get_nspanel_configs();
+    for (nlohmann::json &config : configs) {
       EntityManager::add_nspanel(config); // add_nspanel takes care to check if it exists before adding it. IF it exists, update it instead.
       nspanel_ids.push_back(config["id"]);
     }
@@ -498,6 +498,7 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
     panel->register_to_manager(data);
   }
   if (panel == nullptr) {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
     SPDLOG_INFO("Panel is not registered to manager, adding panel but as 'pending accept' status.");
     nlohmann::json init_data = data;
     NSPanel *new_nspanel = new NSPanel(init_data);
@@ -660,7 +661,6 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       SPDLOG_DEBUG("Received NSPanel deny request for a panel we could not find. Ignoring request.");
     }
   } else if (command.compare("nspanel_delete") == 0) {
-
     nlohmann::json args = data["args"];
     std::string mac = args["mac_address"];
     NSPanel *panel = EntityManager::get_nspanel_by_mac(mac);
@@ -688,17 +688,7 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
           }
         }
 
-        for (int i = 0; i < MqttManagerConfig::nspanel_configs.size(); i++) {
-          SPDLOG_TRACE("Comparing mac from '{}' with mac '{}'.", MqttManagerConfig::nspanel_configs[i].dump(), mac);
-          if (MqttManagerConfig::nspanel_configs[i].contains("mac")) {
-            if (std::string(MqttManagerConfig::nspanel_configs[i].at("mac")).compare(mac) == 0) {
-              MqttManagerConfig::nspanel_configs.erase(MqttManagerConfig::nspanel_configs.begin() + i);
-              SPDLOG_INFO("Deleted NSPanel config from MqttManagerConfig.");
-              break;
-            }
-          }
-        }
-
+        MqttManagerConfig::delete_nspanel_config_by_mac(mac);
         SPDLOG_DEBUG("Panel with MAC {} delete call completed.", mac);
         return true;
       } else {

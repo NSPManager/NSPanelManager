@@ -23,99 +23,104 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 }
 
 void MqttManagerConfig::load() {
-  std::lock_guard<std::mutex> mutex_guard(MqttManagerConfig::_config_load_mutex);
+  {
+    std::lock_guard<std::mutex> mutex_guard(MqttManagerConfig::_config_load_mutex);
 
-  SPDLOG_TRACE("Loading timezone from /etc/timezone.");
-  // Begin by loading timezone
-  std::ifstream f("/etc/timezone", std::ios::in | std::ios::binary);
-  const size_t file_size = std::filesystem::file_size("/etc/timezone");
-  std::string timezone_str(file_size, '\0');
-  f.read(timezone_str.data(), file_size);
-  f.close();
+    SPDLOG_TRACE("Loading timezone from /etc/timezone.");
+    // Begin by loading timezone
+    std::ifstream f("/etc/timezone", std::ios::in | std::ios::binary);
+    const size_t file_size = std::filesystem::file_size("/etc/timezone");
+    std::string timezone_str(file_size, '\0');
+    f.read(timezone_str.data(), file_size);
+    f.close();
 
-  timezone_str.erase(std::find_if(timezone_str.rbegin(), timezone_str.rend(), [](unsigned char ch) {
-                       return !std::isspace(ch) && ch != '\n' && ch != '\r';
-                     }).base(),
-                     timezone_str.end());
-  MqttManagerConfig::timezone = timezone_str;
+    timezone_str.erase(std::find_if(timezone_str.rbegin(), timezone_str.rend(), [](unsigned char ch) {
+                         return !std::isspace(ch) && ch != '\n' && ch != '\r';
+                       }).base(),
+                       timezone_str.end());
+    MqttManagerConfig::timezone = timezone_str;
 
-  SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
+    SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
 
-  SPDLOG_TRACE("Loading sensitive settings from environment variables.");
-  // Load sensitive variables from environment and not via http get request to manager.
-  char *ha_address = std::getenv("HOME_ASSISTANT_ADDRESS");
-  char *ha_token = std::getenv("HOME_ASSISTANT_TOKEN");
-  char *openhab_address = std::getenv("OPENHAB_ADDRESS");
-  char *openhab_token = std::getenv("OPENHAB_TOKEN");
-  char *mqtt_server = std::getenv("MQTT_SERVER");
-  char *mqtt_port = std::getenv("MQTT_PORT");
-  char *mqtt_username = std::getenv("MQTT_USERNAME");
-  char *mqtt_password = std::getenv("MQTT_PASSWORD");
+    SPDLOG_TRACE("Loading sensitive settings from environment variables.");
+    // Load sensitive variables from environment and not via http get request to manager.
+    char *ha_address = std::getenv("HOME_ASSISTANT_ADDRESS");
+    char *ha_token = std::getenv("HOME_ASSISTANT_TOKEN");
+    char *openhab_address = std::getenv("OPENHAB_ADDRESS");
+    char *openhab_token = std::getenv("OPENHAB_TOKEN");
+    char *mqtt_server = std::getenv("MQTT_SERVER");
+    char *mqtt_port = std::getenv("MQTT_PORT");
+    char *mqtt_username = std::getenv("MQTT_USERNAME");
+    char *mqtt_password = std::getenv("MQTT_PASSWORD");
 
-  // Load Home Assistant values
-  if (ha_address != nullptr) {
-    MqttManagerConfig::home_assistant_address = ha_address;
-    if (ha_token != nullptr) {
-      MqttManagerConfig::home_assistant_access_token = ha_token;
+    // Load Home Assistant values
+    if (ha_address != nullptr) {
+      MqttManagerConfig::home_assistant_address = ha_address;
+      if (ha_token != nullptr) {
+        MqttManagerConfig::home_assistant_access_token = ha_token;
+      } else {
+        SPDLOG_ERROR("Configured to use Home Assistant at address '{}' but no token was given.", ha_address);
+      }
     } else {
-      SPDLOG_ERROR("Configured to use Home Assistant at address '{}' but no token was given.", ha_address);
+      SPDLOG_WARN("No Home Assistant address set. Will not use Home Assistant.");
     }
-  } else {
-    SPDLOG_WARN("No Home Assistant address set. Will not use Home Assistant.");
+
+    // Load OpenHAB values
+    if (openhab_address != nullptr) {
+      MqttManagerConfig::openhab_address = openhab_address;
+      if (ha_token != nullptr) {
+        MqttManagerConfig::openhab_access_token = openhab_token;
+      } else {
+        SPDLOG_ERROR("Configured to use OpenHAB at address '{}' but no token was given.", openhab_address);
+      }
+    } else {
+      SPDLOG_WARN("No Home Assistant address set. Will not use OpenHAB.");
+    }
+
+    // Load MQTT values
+    if (mqtt_server != nullptr) {
+      MqttManagerConfig::mqtt_server = mqtt_server;
+
+      if (mqtt_port != nullptr) {
+        MqttManagerConfig::mqtt_port = atoi(mqtt_port);
+      } else {
+        SPDLOG_WARN("No port configured, will use default MQTT port 1883.");
+        MqttManagerConfig::mqtt_port = 1883;
+      }
+
+      if (mqtt_username != nullptr) {
+        MqttManagerConfig::mqtt_username = mqtt_username;
+      }
+
+      if (mqtt_password != nullptr) {
+        MqttManagerConfig::mqtt_password = mqtt_password;
+      }
+    } else {
+      SPDLOG_ERROR("No MQTT server configured!");
+    }
+
+    // Load all other non-sensitive config via HTTP GET to manager.
+    CURL *curl;
+    CURLcode res;
+
+    SPDLOG_INFO("Gathering config from web manager.");
+    while (true) {
+      std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_mqtt_manager_config";
+      std::string response_data;
+      if (WebHelper::perform_request(&url, &response_data, nullptr, nullptr)) {
+        SPDLOG_DEBUG("Got config data. Processing config.");
+        nlohmann::json data = nlohmann::json::parse(response_data);
+        MqttManagerConfig::populate_settings_from_config(data);
+        break; // We successfully gather settings from DB. Exit loop.
+      } else {
+        SPDLOG_ERROR("Failed to get config. Will try again.");
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      }
+    }
   }
 
-  // Load OpenHAB values
-  if (openhab_address != nullptr) {
-    MqttManagerConfig::openhab_address = openhab_address;
-    if (ha_token != nullptr) {
-      MqttManagerConfig::openhab_access_token = openhab_token;
-    } else {
-      SPDLOG_ERROR("Configured to use OpenHAB at address '{}' but no token was given.", openhab_address);
-    }
-  } else {
-    SPDLOG_WARN("No Home Assistant address set. Will not use OpenHAB.");
-  }
-
-  // Load MQTT values
-  if (mqtt_server != nullptr) {
-    MqttManagerConfig::mqtt_server = mqtt_server;
-
-    if (mqtt_port != nullptr) {
-      MqttManagerConfig::mqtt_port = atoi(mqtt_port);
-    } else {
-      SPDLOG_WARN("No port configured, will use default MQTT port 1883.");
-      MqttManagerConfig::mqtt_port = 1883;
-    }
-
-    if (mqtt_username != nullptr) {
-      MqttManagerConfig::mqtt_username = mqtt_username;
-    }
-
-    if (mqtt_password != nullptr) {
-      MqttManagerConfig::mqtt_password = mqtt_password;
-    }
-  } else {
-    SPDLOG_ERROR("No MQTT server configured!");
-  }
-
-  // Load all other non-sensitive config via HTTP GET to manager.
-  CURL *curl;
-  CURLcode res;
-
-  SPDLOG_INFO("Gathering config from web manager.");
-  while (true) {
-    std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/get_mqtt_manager_config";
-    std::string response_data;
-    if (WebHelper::perform_request(&url, &response_data, nullptr, nullptr)) {
-      SPDLOG_DEBUG("Got config data. Processing config.");
-      nlohmann::json data = nlohmann::json::parse(response_data);
-      MqttManagerConfig::populate_settings_from_config(data);
-      break; // We successfully gather settings from DB. Exit loop.
-    } else {
-      SPDLOG_ERROR("Failed to get config. Will try again.");
-      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    }
-  }
+  SPDLOG_DEBUG("Config loaded. Calling listeners.");
+  MqttManagerConfig::_config_loaded_listeners();
 }
 
 void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
@@ -161,9 +166,9 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   }
 
   SPDLOG_DEBUG("Loading NSPanels...");
-  MqttManagerConfig::nspanel_configs.clear();
+  MqttManagerConfig::_nspanel_configs.clear();
   for (nlohmann::json nspanel_config : data["nspanels"]) {
-    MqttManagerConfig::nspanel_configs.push_back(nspanel_config);
+    MqttManagerConfig::_nspanel_configs.push_back(nspanel_config);
   }
 
   SPDLOG_DEBUG("Loading Scenes...");
@@ -249,7 +254,38 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   } catch (std::exception &e) {
     SPDLOG_ERROR("Chaught exception when checking for any removed NSPanel relay groups. Exception: {}", e.what());
   }
+}
 
-  SPDLOG_DEBUG("Config loaded. Calling listeners.");
-  MqttManagerConfig::_config_loaded_listeners();
+std::vector<nlohmann::json> MqttManagerConfig::get_nspanel_configs() {
+  std::lock_guard<std::mutex> mutex_guard(MqttManagerConfig::_config_load_mutex);
+  std::vector<nlohmann::json> configs = MqttManagerConfig::_nspanel_configs;
+  return configs;
+}
+
+void MqttManagerConfig::delete_nspanel_config_by_id(uint16_t id) {
+  std::lock_guard<std::mutex> mutex_guard(MqttManagerConfig::_config_load_mutex);
+  for (int i = 0; i < MqttManagerConfig::_nspanel_configs.size(); i++) {
+    if (MqttManagerConfig::_nspanel_configs[i].at("id") == id) {
+      SPDLOG_DEBUG("Deleting NSPanel by id {}", id);
+      MqttManagerConfig::_nspanel_configs.erase(MqttManagerConfig::_nspanel_configs.begin() + i);
+      return;
+    }
+  }
+  SPDLOG_ERROR("Did not find id {} to delete NSPanel as requested.", id);
+}
+
+void MqttManagerConfig::delete_nspanel_config_by_mac(std::string mac) {
+  std::lock_guard<std::mutex> mutex_guard(MqttManagerConfig::_config_load_mutex);
+  for (int i = 0; i < MqttManagerConfig::_nspanel_configs.size(); i++) {
+    if (MqttManagerConfig::_nspanel_configs[i].contains("mac") && std::string(MqttManagerConfig::_nspanel_configs[i].at("mac")).compare(mac) == 0) {
+      SPDLOG_DEBUG("Deleting NSPanel by mac {}", mac);
+      MqttManagerConfig::_nspanel_configs.erase(MqttManagerConfig::_nspanel_configs.begin() + i);
+      return;
+    } else if (MqttManagerConfig::_nspanel_configs[i].contains("mac_address") && std::string(MqttManagerConfig::_nspanel_configs[i].at("mac_address")).compare(mac) == 0) {
+      SPDLOG_DEBUG("Deleting NSPanel by mac {}", mac);
+      MqttManagerConfig::_nspanel_configs.erase(MqttManagerConfig::_nspanel_configs.begin() + i);
+      return;
+    }
+  }
+  SPDLOG_ERROR("Did not find mac {} to delete NSPanel as requested.", mac);
 }

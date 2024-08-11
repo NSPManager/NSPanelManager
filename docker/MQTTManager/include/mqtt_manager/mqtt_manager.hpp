@@ -1,6 +1,7 @@
 #ifndef MQTT_MANAGER_HPP
 #define MQTT_MANAGER_HPP
 
+#include <boost/lockfree/spsc_queue.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/signals2.hpp>
 #include <functional>
@@ -13,6 +14,11 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+struct MQTTMessage {
+  std::string topic;
+  std::string message;
+};
 
 class MQTT_Manager {
 public:
@@ -83,10 +89,12 @@ public:
   static void clear_retain(const std::string &topic);
 
 private:
+  static inline boost::lockfree::spsc_queue<MQTTMessage, boost::lockfree::capacity<256>> _mqtt_message_queue;
+  static inline std::thread _process_messages_thread;
   static inline mqtt::client *_mqtt_client = nullptr;
   static inline std::mutex _mqtt_client_mutex;
+  static inline std::mutex _mqtt_message_mutex;
   static inline std::list<mqtt::message_ptr> _mqtt_messages_buffer;
-  static inline std::list<std::function<bool(const std::string &topic, const std::string &payload)>> _mqtt_observer_callbacks; // Raw function callbacks
   static const std::vector<std::string> _get_subscribe_topics();
   static const std::vector<int> _get_subscribe_topics_qos();
 
@@ -95,7 +103,7 @@ private:
   static inline boost::ptr_map<std::string, boost::signals2::signal<void(std::string, std::string)>> _mqtt_callbacks;
   static inline std::unordered_map<std::string, int> _subscribed_topics;
 
-  static void _process_mqtt_message(const std::string topic, const std::string message);
+  static void _process_mqtt_messages();
   static void _process_mqtt_command(nlohmann::json &data);
 };
 

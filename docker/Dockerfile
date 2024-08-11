@@ -37,12 +37,16 @@ RUN apt-get update \
   && apt-get -y upgrade
 
 # Install build tools into the container if this is a devel build
-RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get -y install cmake build-essential curl npm \
-  && pip install conan; else echo "Not building MQTTManager."; fi
+RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get -y install cmake build-essential curl npm gdb \
+  && pip install conan pipx; else echo "Not building MQTTManager."; fi
 
 RUN if [ "$IS_DEVEL" == "yes" ]; then conan profile detect --force && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf \
   && sed -i "s|cppstd=gnu14|cppstd=gnu17|g" /root/.conan2/profiles/default \
-  && sed -i "s|build_type=Release|build_type=Debug|g" /root/.conan2/profiles/default; \
+  && sed -i "s|build_type=Release|build_type=Debug|g" /root/.conan2/profiles/default \
+  && pip install pipx \
+  && python3 -m userpath append ~/.local/bin \
+  && source ~/.bashrc \
+  && pipx install gdbgui; \
   fi
 
 # Install software needed to build and run the manager
