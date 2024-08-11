@@ -1,17 +1,18 @@
 #include "entity/entity.hpp"
+#include "protobuf/protobuf_general.pb.h"
 #include <boost/bind.hpp>
 #include <nlohmann/json.hpp>
 #include <room/room.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
 
-Room::Room(nlohmann::json &config) {
+Room::Room(RoomSettings &config) {
   this->update_config(config);
 }
 
-void Room::update_config(nlohmann::json &config) {
-  this->_id = config["room_id"];
-  this->_name = config["name"];
+void Room::update_config(RoomSettings &config) {
+  this->_id = config.id();
+  this->_name = config.name();
 
   SPDLOG_DEBUG("Room {}::{} initialized.", this->_id, this->_name);
 }

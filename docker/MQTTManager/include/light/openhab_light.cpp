@@ -3,6 +3,7 @@
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "openhab_manager/openhab_manager.hpp"
+#include "protobuf_general.pb.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/bind.hpp>
@@ -21,7 +22,7 @@ uint64_t CurrentTimeMilliseconds() {
   return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-OpenhabLight::OpenhabLight(nlohmann::json &init_data) : Light(init_data) {
+OpenhabLight::OpenhabLight(LightSettings &config) : Light(config) {
   // Process OpenHAB specific details. General light data is loaded in the "Light" constructor.
   //
   this->_last_light_mode_change = 0;
@@ -35,27 +36,27 @@ OpenhabLight::OpenhabLight(nlohmann::json &init_data) : Light(init_data) {
     return;
   }
 
-  this->_openhab_name = init_data["openhab_name"];
-  std::string openhab_control_mode = init_data["openhab_control_mode"];
+  this->_openhab_name = config.openhab_name();
+  std::string openhab_control_mode = config.openhab_control_mode();
   if (openhab_control_mode.compare("dimmer") == 0) {
     this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::DIMMER;
-    this->_openhab_on_off_item = init_data["openhab_item_dimmer"];
+    this->_openhab_on_off_item = config.openhab_item_dimmer();
   } else if (openhab_control_mode.compare("switch") == 0) {
     this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH;
-    this->_openhab_on_off_item = init_data["openhab_item_switch"];
+    this->_openhab_on_off_item = config.openhab_item_switch();
   } else {
     SPDLOG_ERROR("Got unknown OpenHAB control mode ({}) for light {}::{}. Will assume switch.", openhab_control_mode, this->_id, this->_name);
     this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH;
-    this->_openhab_on_off_item = init_data["openhab_item_switch"];
+    this->_openhab_on_off_item = config.openhab_item_switch();
   }
 
   OpenhabManager::attach_event_observer(this->_openhab_on_off_item, boost::bind(&OpenhabLight::openhab_event_callback, this, _1));
   if (this->_can_color_temperature) {
-    this->_openhab_item_color_temperature = init_data["openhab_item_color_temp"];
+    this->_openhab_item_color_temperature = config.openhab_item_color_temp();
     OpenhabManager::attach_event_observer(this->_openhab_item_color_temperature, boost::bind(&OpenhabLight::openhab_event_callback, this, _1));
   }
   if (this->_can_rgb) {
-    this->_openhab_item_rgb = init_data["openhab_item_rgb"];
+    this->_openhab_item_rgb = config.openhab_item_rgb();
     OpenhabManager::attach_event_observer(this->_openhab_item_rgb, boost::bind(&OpenhabLight::openhab_event_callback, this, _1));
   }
 

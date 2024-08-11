@@ -142,6 +142,8 @@ urlpatterns = [
     ####################
     path('protobuf/mqttmanager/all_settings', protobuf_api.mqttmanager_get_all_settings, name="protobuf_mqttmanager_get_all_settings"),
     path('protobuf/mqttmanager/all_nspanels', protobuf_api.mqttmanager_get_all_nspanels, name="protobuf_mqttmanager_get_all_nspanels"),
+    path('protobuf/mqttmanager/all_lights', protobuf_api.mqttmanager_get_all_lights, name="protobuf_mqttmanager_get_all_lights"),
+    path('protobuf/mqttmanager/all_rooms', protobuf_api.mqttmanager_get_all_rooms, name="protobuf_mqttmanager_get_all_rooms"),
 
 
     #######################

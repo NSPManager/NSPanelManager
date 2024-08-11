@@ -7,6 +7,7 @@ public:
   virtual void activate() = 0;
   virtual void save() = 0;
   virtual void remove() = 0;
+  virtual void update_config(nlohmann::json &config) = 0;
 };
 
 #endif // !MQTT_MANAGER_SCENE_BASE_H

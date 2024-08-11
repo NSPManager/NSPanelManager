@@ -85,6 +85,25 @@ void MqttManagerConfig::load() {
       }
     }
 
+    SPDLOG_DEBUG("Loading Rooms...");
+    std::list<RoomSettings> loaded_room_configs;
+    std::string rooms_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/protobuf/mqttmanager/all_rooms";
+    std::string rooms_string;
+    if (WebHelper::perform_get_request(&rooms_url, &rooms_string, nullptr)) {
+      SPDLOG_TRACE("Got Room configs: {}", rooms_string);
+      MqttManagerConfig::room_configs.clear();
+      MultipleRoomsSettings rooms_settings;
+      rooms_settings.ParseFromString(rooms_string);
+      for (RoomSettings room_config : rooms_settings.rooms()) {
+        loaded_room_configs.push_back(room_config); // Build light list for next step.
+        MqttManagerConfig::room_configs.push_back(room_config);
+        // TODO: Remove need for a "config added" listener and only use "config loaded" listener for when all configs has been loaded.
+        // MqttManagerConfig::_config_added_listener(&MqttManagerConfig::room_configs.back());
+      }
+    } else {
+      SPDLOG_ERROR("Failed to get room configs!");
+    }
+
     SPDLOG_DEBUG("Loading NSPanels...");
     std::string nspanels_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/protobuf/mqttmanager/all_nspanels";
     std::string nspanels_string;
@@ -100,6 +119,21 @@ void MqttManagerConfig::load() {
     }
   }
 
+  SPDLOG_DEBUG("Loading lights...");
+  std::string lights_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/protobuf/mqttmanager/all_lights";
+  std::string lights_string;
+  if (WebHelper::perform_get_request(&lights_url, &lights_string, nullptr)) {
+    MqttManagerConfig::light_configs.clear();
+    SPDLOG_TRACE("Got lights config: {}", lights_string);
+    MultipleLightsSettings lights_settings;
+    lights_settings.ParseFromString(lights_string);
+    for (LightSettings light_config : lights_settings.lights()) {
+      MqttManagerConfig::light_configs.push_back(light_config);
+    }
+  } else {
+    SPDLOG_ERROR("Failed to get lights config!");
+  }
+
   // Notify all listeners that the config has been loaded
   MqttManagerConfig::_config_loaded_listeners();
 }
@@ -107,19 +141,6 @@ void MqttManagerConfig::load() {
 void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
   try {
     SPDLOG_INFO("Got config from web manager, will process and load values.");
-    SPDLOG_DEBUG("Loading lights...");
-    std::string lights_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/lights";
-    std::string lights_string;
-    if (WebHelper::perform_get_request(&lights_url, &lights_string, nullptr)) {
-      SPDLOG_TRACE("Got lights config: {}", lights_string);
-      nlohmann::json lights_json = nlohmann::json::parse(lights_string);
-      MqttManagerConfig::light_configs.clear();
-      for (nlohmann::json light_config : lights_json.at("lights")) {
-        MqttManagerConfig::light_configs.push_back(light_config);
-      }
-    } else {
-      SPDLOG_ERROR("Failed to get lights config!");
-    }
 
     SPDLOG_DEBUG("Loading Scenes...");
     std::list<nlohmann::json> json_scenes;
@@ -157,81 +178,62 @@ void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
       SPDLOG_ERROR("Chaught exception when checking for any removed scenes. Exception: {}", e.what());
     }
 
-    SPDLOG_DEBUG("Loading Rooms...");
-    std::list<nlohmann::json> json_rooms;
-    std::string rooms_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/rooms";
-    std::string rooms_string;
-    if (WebHelper::perform_get_request(&rooms_url, &rooms_string, nullptr)) {
-      nlohmann::json rooms_json = nlohmann::json::parse(rooms_string);
-      SPDLOG_TRACE("Got Room configs: {}", rooms_string);
-      for (nlohmann::json room_config : rooms_json.at("rooms")) {
-        json_rooms.push_back(room_config); // Build light list for next step.
-        bool already_exists = ITEM_IN_LIST(MqttManagerConfig::room_configs, room_config);
-        if (!already_exists) {
-          MqttManagerConfig::room_configs.push_back(room_config);
-          MqttManagerConfig::_config_added_listener(&MqttManagerConfig::room_configs.back());
-        }
-      }
-    } else {
-      SPDLOG_ERROR("Failed to get room configs!");
-    }
+    // try {
+    //   SPDLOG_DEBUG("Checking for removed rooms.");
+    //   auto rit = MqttManagerConfig::room_configs.begin();
+    //   while (rit != MqttManagerConfig::room_configs.end()) {
+    //     bool exists = ITEM_IN_LIST(loaded_room_configs, (*rit));
+    //     if (!exists) {
+    //       SPDLOG_DEBUG("Removing room config as it doesn't exist in config anymore.");
+    //       MqttManagerConfig::_config_removed_listener(&(*rit));
+    //       MqttManagerConfig::room_configs.erase(rit++);
+    //     } else {
+    //       ++rit;
+    //     }
+    //   }
+    // } catch (std::exception &e) {
+    //   SPDLOG_ERROR("Chaught exception when checking for any removed rooms. Exception: {}", e.what());
+    // }
 
-    try {
-      SPDLOG_DEBUG("Checking for removed rooms.");
-      auto rit = MqttManagerConfig::room_configs.begin();
-      while (rit != MqttManagerConfig::room_configs.end()) {
-        bool exists = ITEM_IN_LIST(json_rooms, (*rit));
-        if (!exists) {
-          SPDLOG_DEBUG("Removing room config as it doesn't exist in config anymore.");
-          MqttManagerConfig::_config_removed_listener(&(*rit));
-          MqttManagerConfig::room_configs.erase(rit++);
-        } else {
-          ++rit;
-        }
-      }
-    } catch (std::exception &e) {
-      SPDLOG_ERROR("Chaught exception when checking for any removed rooms. Exception: {}", e.what());
-    }
+    // std::list<nlohmann::json> json_rgs;
+    // try {
+    //   SPDLOG_DEBUG("Loading relay groups...");
+    //   std::string relay_groups_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/relay_groups";
+    //   std::string relay_groups_string;
+    //   if (WebHelper::perform_get_request(&relay_groups_url, &relay_groups_string, nullptr)) {
+    //     nlohmann::json relay_groups_json = nlohmann::json::parse(relay_groups_string);
+    //     SPDLOG_TRACE("Got Relay Group configs: {}", rooms_string);
+    //     for (nlohmann::json rg_config : relay_groups_json.at("relay_groups")) {
+    //       json_rgs.push_back(rg_config); // Build light list for next step.
+    //       bool already_exists = ITEM_IN_LIST(MqttManagerConfig::nspanel_relay_group_configs, rg_config);
+    //       if (!already_exists) {
+    //         MqttManagerConfig::nspanel_relay_group_configs.push_back(rg_config);
+    //         MqttManagerConfig::_config_added_listener(&MqttManagerConfig::nspanel_relay_group_configs.back());
+    //       }
+    //     }
+    //   } else {
+    //     SPDLOG_ERROR("Failed to get Relay Group configs!");
+    //   }
+    // } catch (std::exception &e) {
+    //   SPDLOG_ERROR("Chaught exception when loading relay groups. Exception: {}", e.what());
+    // }
 
-    std::list<nlohmann::json> json_rgs;
-    try {
-      SPDLOG_DEBUG("Loading relay groups...");
-      std::string relay_groups_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/relay_groups";
-      std::string relay_groups_string;
-      if (WebHelper::perform_get_request(&relay_groups_url, &relay_groups_string, nullptr)) {
-        nlohmann::json relay_groups_json = nlohmann::json::parse(relay_groups_string);
-        SPDLOG_TRACE("Got Relay Group configs: {}", rooms_string);
-        for (nlohmann::json rg_config : relay_groups_json.at("relay_groups")) {
-          json_rgs.push_back(rg_config); // Build light list for next step.
-          bool already_exists = ITEM_IN_LIST(MqttManagerConfig::nspanel_relay_group_configs, rg_config);
-          if (!already_exists) {
-            MqttManagerConfig::nspanel_relay_group_configs.push_back(rg_config);
-            MqttManagerConfig::_config_added_listener(&MqttManagerConfig::nspanel_relay_group_configs.back());
-          }
-        }
-      } else {
-        SPDLOG_ERROR("Failed to get Relay Group configs!");
-      }
-    } catch (std::exception &e) {
-      SPDLOG_ERROR("Chaught exception when loading relay groups. Exception: {}", e.what());
-    }
-
-    try {
-      SPDLOG_DEBUG("Checking for removed relay groups.");
-      auto rit = MqttManagerConfig::nspanel_relay_group_configs.begin();
-      while (rit != MqttManagerConfig::nspanel_relay_group_configs.end()) {
-        bool exists = ITEM_IN_LIST(json_rgs, (*rit));
-        if (!exists) {
-          SPDLOG_DEBUG("Removing scene config as it doesn't exist in config anymore.");
-          MqttManagerConfig::_config_removed_listener(&(*rit));
-          MqttManagerConfig::nspanel_relay_group_configs.erase(rit++);
-        } else {
-          ++rit;
-        }
-      }
-    } catch (std::exception &e) {
-      SPDLOG_ERROR("Chaught exception when checking for any removed NSPanel relay groups. Exception: {}", e.what());
-    }
+    // try {
+    //   SPDLOG_DEBUG("Checking for removed relay groups.");
+    //   auto rit = MqttManagerConfig::nspanel_relay_group_configs.begin();
+    //   while (rit != MqttManagerConfig::nspanel_relay_group_configs.end()) {
+    //     bool exists = ITEM_IN_LIST(json_rgs, (*rit));
+    //     if (!exists) {
+    //       SPDLOG_DEBUG("Removing scene config as it doesn't exist in config anymore.");
+    //       MqttManagerConfig::_config_removed_listener(&(*rit));
+    //       MqttManagerConfig::nspanel_relay_group_configs.erase(rit++);
+    //     } else {
+    //       ++rit;
+    //     }
+    //   }
+    // } catch (std::exception &e) {
+    //   SPDLOG_ERROR("Chaught exception when checking for any removed NSPanel relay groups. Exception: {}", e.what());
+    // }
 
     SPDLOG_DEBUG("Config loaded. Calling listeners.");
     MqttManagerConfig::_config_loaded_listeners();

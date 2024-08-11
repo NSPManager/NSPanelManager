@@ -168,7 +168,6 @@ void MQTT_Manager::_resubscribe() {
               .message = msg->get_payload_str()};
           while (!MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
           }
-          SPDLOG_TRACE("Read message from topic {}", msg->get_topic());
         }
       } while (received_message);
       SPDLOG_TRACE("Received all messages on topic '{}'.", mqtt_topic_pair.first);
@@ -202,7 +201,6 @@ void MQTT_Manager::_process_mqtt_messages() {
     MQTTMessage message;
     while (MQTT_Manager::_mqtt_message_queue.pop(message)) {
       try {
-        SPDLOG_TRACE("Processing message from topic {}", message.topic);
         // Call each observer/listener until a callback return true, ie. the callback was handled.
         for (auto mqtt_topic_signal_pair : MQTT_Manager::_mqtt_callbacks) {
           if (mqtt_topic_signal_pair.first.compare(message.topic) == 0) {

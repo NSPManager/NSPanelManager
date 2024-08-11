@@ -42,7 +42,6 @@ RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get install -y --no-install-recommends
   && sed -i "s|cppstd=gnu14|cppstd=gnu17|g" /root/.conan2/profiles/default \
   && sed -i "s|build_type=Release|build_type=Debug|g" /root/.conan2/profiles/default \
   && echo "alias ll='ls -lh --color=auto'" >> /etc/bash.bashrc \
-  && /bin/bash /protobuf/install_protobuf.sh \
   #&& rm -rf /var/lib/apt/lists/*
   ; fi
 

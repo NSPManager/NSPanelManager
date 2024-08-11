@@ -39,11 +39,6 @@ public:
   virtual void post_init() = 0;
 
   /**
-   * Update the config for the given object
-   */
-  virtual void update_config(nlohmann::json &config) = 0;
-
-  /**
    * Register a entity_changed callback listener.
    */
   void attach_entity_changed_callback(void (*callback)(MqttManagerEntity *)) {

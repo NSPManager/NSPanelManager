@@ -45,7 +45,7 @@ public:
   /**
    * Create and add a light to the manager
    */
-  static void add_light(nlohmann::json &config);
+  static void add_light(LightSettings &config);
 
   /**
    * Create and add a nspanel to the manager

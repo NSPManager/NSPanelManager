@@ -171,3 +171,55 @@ def mqttmanager_get_all_nspanels(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
+
+def mqttmanager_get_all_lights(request):
+    try:
+        if request.method == "GET":
+            proto = protobuf_general_pb2.MultipleLightsSettings()
+            for light in Light.objects.all():
+                proto_light = proto.lights.add()
+                proto_light.id = light.id
+                proto_light.room_id = light.room.id
+                proto_light.name = light.friendly_name
+                proto_light.type = light.type
+                proto_light.is_ceiling_light = light.is_ceiling_light
+                proto_light.can_dim = light.can_dim
+                proto_light.can_color_temperature = light.can_color_temperature
+                proto_light.can_rgb = light.can_rgb
+
+                if proto_light.type == "home_assistant":
+                    proto_light.home_assistant_name = light.home_assistant_name
+                elif proto_light.type == "openhab":
+                    proto_light.openhab_name = light.openhab_name
+                    proto_light.openhab_control_mode = light.openhab_control_mode
+                    proto_light.openhab_item_switch = light.openhab_item_switch
+                    proto_light.openhab_item_dimmer = light.openhab_item_dimmer
+                    proto_light.openhab_item_color_temp = light.openhab_item_color_temp
+                    proto_light.openhab_item_rgb = light.openhab_item_rgb
+
+            return HttpResponse(proto.SerializeToString(), status=200)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+def mqttmanager_get_all_rooms(request):
+    try:
+        if request.method == "GET":
+            proto = protobuf_general_pb2.MultipleRoomsSettings()
+            for room in Room.objects.all():
+                proto_room = proto.rooms.add()
+                proto_room.id = room.id
+                proto_room.name = room.friendly_name
+                for light in room.light_set.all():
+                    proto_room.light_ids.append(light.id)
+                for scene in room.scene_set.all():
+                    proto_room.scene_ids.append(scene.id)
+
+            return HttpResponse(proto.SerializeToString(), status=200)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)

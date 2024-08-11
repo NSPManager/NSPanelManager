@@ -53,10 +53,10 @@ void EntityManager::detach_entity_added_listener(void (*listener)(MqttManagerEnt
   EntityManager::_entity_added_signal.disconnect(listener);
 }
 
-void EntityManager::add_light(nlohmann::json &config) {
+void EntityManager::add_light(LightSettings &config) {
   try {
-    if (EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config.at("light_id")) == nullptr) {
-      std::string light_type = config["type"];
+    if (EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config.id()) == nullptr) {
+      std::string light_type = config.type();
       if (light_type.compare("home_assistant") == 0) {
         HomeAssistantLight *light = new HomeAssistantLight(config);
         EntityManager::_entities.push_back(light);
@@ -67,7 +67,7 @@ void EntityManager::add_light(nlohmann::json &config) {
         SPDLOG_ERROR("Unknown light type '{}'. Will ignore entity.", light_type);
       }
     } else {
-      SPDLOG_ERROR("A light with ID {} already exists.", int(config.at("light_id")));
+      SPDLOG_ERROR("A light with ID {} already exists.", config.id());
     }
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
@@ -173,9 +173,9 @@ void EntityManager::post_init_entities() {
     // Process any loaded lights
     SPDLOG_DEBUG("Updating lights.");
     std::list<int> light_ids;
-    for (nlohmann::json &config : MqttManagerConfig::light_configs) {
-      light_ids.push_back(config.at("light_id"));
-      Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config.at("light_id"));
+    for (LightSettings &config : MqttManagerConfig::light_configs) {
+      light_ids.push_back(config.id());
+      Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config.id());
       if (light != nullptr) {
         light->update_config(config);
       } else {
@@ -216,10 +216,10 @@ void EntityManager::post_init_entities() {
     // Process any loaded rooms
     SPDLOG_DEBUG("Updating rooms.");
     std::list<int> room_ids;
-    for (nlohmann::json &config : MqttManagerConfig::room_configs) {
-      room_ids.push_back(config["room_id"]);
+    for (RoomSettings &config : MqttManagerConfig::room_configs) {
+      room_ids.push_back(config.id());
       SPDLOG_DEBUG("Trying to get room by id.");
-      Room *room = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, config["room_id"]);
+      Room *room = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, config.id());
       SPDLOG_DEBUG("Got result. Trying to get mutex.");
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
       SPDLOG_DEBUG("Got mutex.");

@@ -3,6 +3,7 @@
 #include "light/light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include "protobuf_general.pb.h"
 #include <boost/bind.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <cstdint>
@@ -11,7 +12,7 @@
 #include <spdlog/spdlog.h>
 #include <string>
 
-HomeAssistantLight::HomeAssistantLight(nlohmann::json &init_data) : Light(init_data) {
+HomeAssistantLight::HomeAssistantLight(LightSettings &config) : Light(config) {
   // Process Home Assistant specific details. General light data is loaded in the "Light" constructor.
 
   if (this->_controller != MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT) {
@@ -19,7 +20,7 @@ HomeAssistantLight::HomeAssistantLight(nlohmann::json &init_data) : Light(init_d
     return;
   }
 
-  this->_home_assistant_name = init_data["home_assistant_name"];
+  this->_home_assistant_name = config.home_assistant_name();
   SPDLOG_DEBUG("Loaded light {}::{}.", this->_id, this->_name);
   HomeAssistantManager::attach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantLight::home_assistant_event_callback, this, _1));
 

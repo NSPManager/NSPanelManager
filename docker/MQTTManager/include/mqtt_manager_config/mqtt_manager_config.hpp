@@ -20,11 +20,11 @@ public:
   static inline std::string timezone;
 
   static inline nlohmann::json icon_mapping;
-  static inline std::list<nlohmann::json> light_configs;
+  static inline std::list<LightSettings> light_configs;
   static inline std::list<NSPanelSettings> nspanel_configs;
   static inline std::list<nlohmann::json> scenes_configs;
   static inline std::list<nlohmann::json> nspanel_relay_group_configs;
-  static inline std::list<nlohmann::json> room_configs;
+  static inline std::list<RoomSettings> room_configs;
 
   /**
    * Attach a callback to be called when a new configuration has been added

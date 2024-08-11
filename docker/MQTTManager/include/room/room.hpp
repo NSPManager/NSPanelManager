@@ -4,18 +4,19 @@
 #include "entity/entity.hpp"
 #include <list>
 #include <nlohmann/json_fwd.hpp>
+#include <protobuf/protobuf_general.pb.h>
 #include <string>
 class Room : public MqttManagerEntity {
 public:
   /**
    * Initalize a room and load room settings from given JSON
    */
-  Room(nlohmann::json &config);
+  Room(RoomSettings &config);
 
   /**
    * Update room with given config
    */
-  void update_config(nlohmann::json &config);
+  void update_config(RoomSettings &config);
 
   /**
    * Get the ID of the room.

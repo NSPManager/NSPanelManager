@@ -1,14 +1,15 @@
 #include "light.hpp"
 #include "entity_manager/entity_manager.hpp"
+#include "protobuf_general.pb.h"
 #include <cstdint>
 #include <entity/entity.hpp>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
 
-Light::Light(nlohmann::json &init_data) {
-  this->_id = init_data["light_id"];
-  this->_room_id = init_data["room_id"];
+Light::Light(LightSettings &config) {
+  this->_id = config.id();
+  this->_room_id = config.room_id();
 
   // Build MQTT Topics
   std::string mqtt_base_topic = "nspanel/entities/light/";
@@ -35,27 +36,27 @@ Light::Light(nlohmann::json &init_data) {
   this->_requested_saturation = 50;
   this->_requested_hue = 50;
 
-  this->update_config(init_data);
+  this->update_config(config);
   SPDLOG_DEBUG("Light {}::{} base loaded, can dim: {}, can color temp: {}, can_rgb: {}.", this->_id, this->_name, this->_can_dim ? "yes" : "no", this->_can_color_temperature ? "yes" : "no", this->_can_rgb ? "yes" : "no");
 }
 
-void Light::update_config(nlohmann::json &init_data) {
-  if (this->_name.compare(init_data["name"]) != 0) {
-    this->_name = init_data["name"];
+void Light::update_config(LightSettings &config) {
+  if (this->_name.compare(config.name()) != 0) {
+    this->_name = config.name();
     SPDLOG_DEBUG("Loading light {}::{}.", this->_id, this->_name);
 
-    if (std::string(init_data["type"]).compare("home_assistant") == 0) {
+    if (std::string(config.type()).compare("home_assistant") == 0) {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
-    } else if (std::string(init_data["type"]).compare("openhab") == 0) {
+    } else if (std::string(config.type()).compare("openhab") == 0) {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
     } else {
-      SPDLOG_ERROR("Got unknown type ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(init_data["type"]), this->_id, this->_name);
+      SPDLOG_ERROR("Got unknown type ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(config.type()), this->_id, this->_name);
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
     }
 
-    this->_can_dim = init_data["can_dim"];
-    this->_can_color_temperature = init_data["can_color_temperature"];
-    this->_can_rgb = init_data["can_rgb"];
+    this->_can_dim = config.can_dim();
+    this->_can_color_temperature = config.can_color_temperature();
+    this->_can_rgb = config.can_rgb();
 
     if (this->_can_dim) {
       this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;

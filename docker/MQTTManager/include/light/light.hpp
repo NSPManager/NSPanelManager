@@ -1,6 +1,7 @@
 #ifndef MQTT_MANAGER_LIGHT
 #define MQTT_MANAGER_LIGHT
 
+#include "protobuf_general.pb.h"
 #include "room/room.hpp"
 #include <boost/signals2.hpp>
 #include <cstdint>
@@ -14,12 +15,12 @@ enum MQTT_MANAGER_LIGHT_MODE {
 
 class Light : public MqttManagerEntity {
 public:
-  Light(nlohmann::json &init_data);
+  Light(LightSettings &config);
 
   /**
    * Update the config of the light to reflect the new settings
    */
-  void update_config(nlohmann::json &config);
+  void update_config(LightSettings &config);
 
   /**
    * Turn on the light

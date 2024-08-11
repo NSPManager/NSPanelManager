@@ -24,38 +24,31 @@ namespace _pb = ::google::protobuf;
 namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 
-inline constexpr OpenhabLightEntity::Impl_::Impl_(
+inline constexpr RoomSettings::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : openhab_id_(
+      : light_ids_{},
+        _light_ids_cached_byte_size_{0},
+        scene_ids_{},
+        _scene_ids_cached_byte_size_{0},
+        name_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        openhab_dim_channel_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        openhab_color_temperature_channel_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        openhab_rgb_channel_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        can_dim_{false},
-        can_color_temperature_{false},
-        can_rgb_{false},
+        id_{0},
         _cached_size_{0} {}
 
 template <typename>
-PROTOBUF_CONSTEXPR OpenhabLightEntity::OpenhabLightEntity(::_pbi::ConstantInitialized)
+PROTOBUF_CONSTEXPR RoomSettings::RoomSettings(::_pbi::ConstantInitialized)
     : _impl_(::_pbi::ConstantInitialized()) {}
-struct OpenhabLightEntityDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR OpenhabLightEntityDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~OpenhabLightEntityDefaultTypeInternal() {}
+struct RoomSettingsDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RoomSettingsDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RoomSettingsDefaultTypeInternal() {}
   union {
-    OpenhabLightEntity _instance;
+    RoomSettings _instance;
   };
 };
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 OpenhabLightEntityDefaultTypeInternal _OpenhabLightEntity_default_instance_;
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoomSettingsDefaultTypeInternal _RoomSettings_default_instance_;
 
 inline constexpr NSPanelSettings::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -132,62 +125,100 @@ struct NSPanelSettingsDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelSettingsDefaultTypeInternal _NSPanelSettings_default_instance_;
 
-inline constexpr HomeAssistantEntity::Impl_::Impl_(
+inline constexpr LightSettings::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : home_assistant_entity_id_(
+      : _cached_size_{0},
+        name_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
+        type_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        home_assistant_name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        openhab_name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        openhab_control_mode_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        openhab_item_switch_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        openhab_item_dimmer_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        openhab_item_color_temp_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        openhab_item_rgb_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        id_{0},
+        room_id_{0},
+        is_ceiling_light_{false},
         can_dim_{false},
         can_color_temperature_{false},
-        can_rgb_{false},
-        _cached_size_{0} {}
+        can_rgb_{false} {}
 
 template <typename>
-PROTOBUF_CONSTEXPR HomeAssistantEntity::HomeAssistantEntity(::_pbi::ConstantInitialized)
+PROTOBUF_CONSTEXPR LightSettings::LightSettings(::_pbi::ConstantInitialized)
     : _impl_(::_pbi::ConstantInitialized()) {}
-struct HomeAssistantEntityDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR HomeAssistantEntityDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~HomeAssistantEntityDefaultTypeInternal() {}
+struct LightSettingsDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR LightSettingsDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~LightSettingsDefaultTypeInternal() {}
   union {
-    HomeAssistantEntity _instance;
+    LightSettings _instance;
   };
 };
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 HomeAssistantEntityDefaultTypeInternal _HomeAssistantEntity_default_instance_;
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 LightSettingsDefaultTypeInternal _LightSettings_default_instance_;
+
+inline constexpr MultipleRoomsSettings::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : rooms_{},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR MultipleRoomsSettings::MultipleRoomsSettings(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct MultipleRoomsSettingsDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR MultipleRoomsSettingsDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~MultipleRoomsSettingsDefaultTypeInternal() {}
+  union {
+    MultipleRoomsSettings _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MultipleRoomsSettingsDefaultTypeInternal _MultipleRoomsSettings_default_instance_;
+
+inline constexpr MultipleLightsSettings::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : lights_{},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR MultipleLightsSettings::MultipleLightsSettings(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct MultipleLightsSettingsDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR MultipleLightsSettingsDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~MultipleLightsSettingsDefaultTypeInternal() {}
+  union {
+    MultipleLightsSettings _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MultipleLightsSettingsDefaultTypeInternal _MultipleLightsSettings_default_instance_;
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_protobuf_5fgeneral_2eproto[4];
 static constexpr const ::_pb::ServiceDescriptor**
     file_level_service_descriptors_protobuf_5fgeneral_2eproto = nullptr;
 const ::uint32_t
     TableStruct_protobuf_5fgeneral_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
-        ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::HomeAssistantEntity, _internal_metadata_),
-        ~0u,  // no _extensions_
-        ~0u,  // no _oneof_case_
-        ~0u,  // no _weak_field_map_
-        ~0u,  // no _inlined_string_donated_
-        ~0u,  // no _split_
-        ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::HomeAssistantEntity, _impl_.home_assistant_entity_id_),
-        PROTOBUF_FIELD_OFFSET(::HomeAssistantEntity, _impl_.can_dim_),
-        PROTOBUF_FIELD_OFFSET(::HomeAssistantEntity, _impl_.can_color_temperature_),
-        PROTOBUF_FIELD_OFFSET(::HomeAssistantEntity, _impl_.can_rgb_),
-        ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::OpenhabLightEntity, _internal_metadata_),
-        ~0u,  // no _extensions_
-        ~0u,  // no _oneof_case_
-        ~0u,  // no _weak_field_map_
-        ~0u,  // no _inlined_string_donated_
-        ~0u,  // no _split_
-        ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::OpenhabLightEntity, _impl_.openhab_id_),
-        PROTOBUF_FIELD_OFFSET(::OpenhabLightEntity, _impl_.openhab_dim_channel_),
-        PROTOBUF_FIELD_OFFSET(::OpenhabLightEntity, _impl_.openhab_color_temperature_channel_),
-        PROTOBUF_FIELD_OFFSET(::OpenhabLightEntity, _impl_.openhab_rgb_channel_),
-        PROTOBUF_FIELD_OFFSET(::OpenhabLightEntity, _impl_.can_dim_),
-        PROTOBUF_FIELD_OFFSET(::OpenhabLightEntity, _impl_.can_color_temperature_),
-        PROTOBUF_FIELD_OFFSET(::OpenhabLightEntity, _impl_.can_rgb_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_._has_bits_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -278,79 +309,162 @@ const ::uint32_t
         ~0u,
         ~0u,
         ~0u,
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::RoomSettings, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::RoomSettings, _impl_.id_),
+        PROTOBUF_FIELD_OFFSET(::RoomSettings, _impl_.name_),
+        PROTOBUF_FIELD_OFFSET(::RoomSettings, _impl_.light_ids_),
+        PROTOBUF_FIELD_OFFSET(::RoomSettings, _impl_.scene_ids_),
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::MultipleRoomsSettings, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::MultipleRoomsSettings, _impl_.rooms_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_._has_bits_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.id_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.room_id_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.name_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.type_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.is_ceiling_light_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.can_dim_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.can_color_temperature_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.can_rgb_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.home_assistant_name_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.openhab_name_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.openhab_control_mode_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.openhab_item_switch_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.openhab_item_dimmer_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.openhab_item_color_temp_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.openhab_item_rgb_),
+        ~0u,
+        ~0u,
+        ~0u,
+        ~0u,
+        ~0u,
+        ~0u,
+        ~0u,
+        ~0u,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::MultipleLightsSettings, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::MultipleLightsSettings, _impl_.lights_),
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, -1, -1, sizeof(::HomeAssistantEntity)},
-        {12, -1, -1, sizeof(::OpenhabLightEntity)},
-        {27, 76, -1, sizeof(::NSPanelSettings)},
+        {0, 49, -1, sizeof(::NSPanelSettings)},
+        {90, -1, -1, sizeof(::RoomSettings)},
+        {102, -1, -1, sizeof(::MultipleRoomsSettings)},
+        {111, 134, -1, sizeof(::LightSettings)},
+        {149, -1, -1, sizeof(::MultipleLightsSettings)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
-    &::_HomeAssistantEntity_default_instance_._instance,
-    &::_OpenhabLightEntity_default_instance_._instance,
     &::_NSPanelSettings_default_instance_._instance,
+    &::_RoomSettings_default_instance_._instance,
+    &::_MultipleRoomsSettings_default_instance_._instance,
+    &::_LightSettings_default_instance_._instance,
+    &::_MultipleLightsSettings_default_instance_._instance,
 };
 const char descriptor_table_protodef_protobuf_5fgeneral_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\026protobuf_general.proto\032\026protobuf_forma"
-    "ts.proto\"x\n\023HomeAssistantEntity\022 \n\030home_"
-    "assistant_entity_id\030\002 \001(\t\022\017\n\007can_dim\030\003 \001"
-    "(\010\022\035\n\025can_color_temperature\030\004 \001(\010\022\017\n\007can"
-    "_rgb\030\005 \001(\010\"\316\001\n\022OpenhabLightEntity\022\022\n\nope"
-    "nhab_id\030\001 \001(\t\022\033\n\023openhab_dim_channel\030\002 \001"
-    "(\t\022)\n!openhab_color_temperature_channel\030"
-    "\003 \001(\t\022\033\n\023openhab_rgb_channel\030\004 \001(\t\022\017\n\007ca"
-    "n_dim\030\005 \001(\010\022\035\n\025can_color_temperature\030\006 \001"
-    "(\010\022\017\n\007can_rgb\030\007 \001(\010\"\366\016\n\017NSPanelSettings\022"
-    "\017\n\002id\030\001 \001(\005H\000\210\001\001\022\023\n\013mac_address\030\002 \001(\t\022\014\n"
-    "\004name\030\003 \001(\t\022\014\n\004home\030\004 \001(\005\0229\n\014default_pag"
-    "e\030\005 \001(\0162#.NSPanelSettings.NSPanelDefault"
-    "Page\022 \n\030raise_to_100_light_level\030\006 \001(\005\022\026"
-    "\n\016color_temp_min\030\007 \001(\005\022\026\n\016color_temp_max"
-    "\030\010 \001(\005\022\032\n\022reverse_color_temp\030\t \001(\010\022\034\n\024mi"
-    "n_button_push_time\030\n \001(\005\022\036\n\026button_long_"
-    "press_time\030\013 \001(\005\022!\n\031special_mode_trigger"
-    "_time\030\014 \001(\005\022!\n\031special_mode_release_time"
-    "\030\r \001(\005\022\030\n\020mqtt_ignore_time\030\016 \001(\005\022\030\n\020scre"
-    "en_dim_level\030\017 \001(\005\022\035\n\025screensaver_dim_le"
-    "vel\030\020 \001(\005\022&\n\036screensaver_activation_time"
-    "out\030\021 \001(\005\022A\n\020screensaver_mode\030\022 \001(\0162\'.NS"
-    "PanelSettings.NSPanelScreensaverMode\022\"\n\014"
-    "clock_format\030\023 \001(\0162\014.time_format\022-\n\020temp"
-    "erature_unit\030\024 \001(\0162\023.temperature_format\022"
-    "\023\n\013is_us_panel\030\025 \001(\010\022\034\n\024lock_to_default_"
-    "room\030\026 \001(\010\022\026\n\016reverse_relays\030\027 \001(\010\022\033\n\023re"
-    "lay1_default_mode\030\030 \001(\010\022\033\n\023relay2_defaul"
-    "t_mode\030\031 \001(\010\022\037\n\027temperature_calibration\030"
-    "\032 \001(\005\0228\n\014button1_mode\030\033 \001(\0162\".NSPanelSet"
-    "tings.NSPanelButtonMode\0228\n\014button2_mode\030"
-    "\034 \001(\0162\".NSPanelSettings.NSPanelButtonMod"
-    "e\022\037\n\022button1_mqtt_topic\030\035 \001(\tH\001\210\001\001\022\037\n\022bu"
-    "tton2_mqtt_topic\030\036 \001(\tH\002\210\001\001\022!\n\024button1_m"
-    "qtt_payload\030\037 \001(\tH\003\210\001\001\022!\n\024button2_mqtt_p"
-    "ayload\030  \001(\tH\004\210\001\001\022&\n\031button1_detached_li"
-    "ght_id\030! \001(\005H\005\210\001\001\022&\n\031button2_detached_li"
-    "ght_id\030\" \001(\005H\006\210\001\001\022\016\n\006denied\030- \001(\010\022\020\n\010acc"
-    "epted\030. \001(\010\022\r\n\005rooms\030/ \003(\005\022\016\n\006scenes\0300 \003"
-    "(\005\022\022\n\nip_address\0301 \001(\t\022@\n\024relay1_registe"
-    "r_type\0302 \001(\0162\".NSPanelSettings.RelayRegi"
-    "sterType\022@\n\024relay2_register_type\0303 \001(\0162\""
-    ".NSPanelSettings.RelayRegisterType\"C\n\022NS"
-    "PanelDefaultPage\022\r\n\tMAIN_PAGE\020\000\022\017\n\013SCENE"
-    "S_PAGE\020\001\022\r\n\tROOM_PAGE\020\002\"\250\001\n\026NSPanelScree"
-    "nsaverMode\022\033\n\027WEATHER_WITH_BACKGROUND\020\000\022"
-    "\036\n\032WEATHER_WITHOUT_BACKGROUND\020\001\022\034\n\030DATET"
-    "IME_WITH_BACKGROUND\020\003\022\037\n\033DATETIME_WITHOU"
-    "T_BACKGROUND\020\004\022\022\n\016NO_SCREENSAVER\020\005\"Y\n\021NS"
-    "PanelButtonMode\022\017\n\013DIRECT_MODE\020\000\022\021\n\rDETA"
-    "CHED_MODE\020\001\022\017\n\013CUSTOM_MQTT\020\002\022\017\n\013FOLLOW_M"
-    "ODE\020\003\"*\n\021RelayRegisterType\022\n\n\006SWITCH\020\000\022\t"
-    "\n\005LIGHT\020\001B\005\n\003_idB\025\n\023_button1_mqtt_topicB"
-    "\025\n\023_button2_mqtt_topicB\027\n\025_button1_mqtt_"
-    "payloadB\027\n\025_button2_mqtt_payloadB\034\n\032_but"
-    "ton1_detached_light_idB\034\n\032_button2_detac"
-    "hed_light_idb\006proto3"
+    "ts.proto\"\366\016\n\017NSPanelSettings\022\017\n\002id\030\001 \001(\005"
+    "H\000\210\001\001\022\023\n\013mac_address\030\002 \001(\t\022\014\n\004name\030\003 \001(\t"
+    "\022\014\n\004home\030\004 \001(\005\0229\n\014default_page\030\005 \001(\0162#.N"
+    "SPanelSettings.NSPanelDefaultPage\022 \n\030rai"
+    "se_to_100_light_level\030\006 \001(\005\022\026\n\016color_tem"
+    "p_min\030\007 \001(\005\022\026\n\016color_temp_max\030\010 \001(\005\022\032\n\022r"
+    "everse_color_temp\030\t \001(\010\022\034\n\024min_button_pu"
+    "sh_time\030\n \001(\005\022\036\n\026button_long_press_time\030"
+    "\013 \001(\005\022!\n\031special_mode_trigger_time\030\014 \001(\005"
+    "\022!\n\031special_mode_release_time\030\r \001(\005\022\030\n\020m"
+    "qtt_ignore_time\030\016 \001(\005\022\030\n\020screen_dim_leve"
+    "l\030\017 \001(\005\022\035\n\025screensaver_dim_level\030\020 \001(\005\022&"
+    "\n\036screensaver_activation_timeout\030\021 \001(\005\022A"
+    "\n\020screensaver_mode\030\022 \001(\0162\'.NSPanelSettin"
+    "gs.NSPanelScreensaverMode\022\"\n\014clock_forma"
+    "t\030\023 \001(\0162\014.time_format\022-\n\020temperature_uni"
+    "t\030\024 \001(\0162\023.temperature_format\022\023\n\013is_us_pa"
+    "nel\030\025 \001(\010\022\034\n\024lock_to_default_room\030\026 \001(\010\022"
+    "\026\n\016reverse_relays\030\027 \001(\010\022\033\n\023relay1_defaul"
+    "t_mode\030\030 \001(\010\022\033\n\023relay2_default_mode\030\031 \001("
+    "\010\022\037\n\027temperature_calibration\030\032 \001(\005\0228\n\014bu"
+    "tton1_mode\030\033 \001(\0162\".NSPanelSettings.NSPan"
+    "elButtonMode\0228\n\014button2_mode\030\034 \001(\0162\".NSP"
+    "anelSettings.NSPanelButtonMode\022\037\n\022button"
+    "1_mqtt_topic\030\035 \001(\tH\001\210\001\001\022\037\n\022button2_mqtt_"
+    "topic\030\036 \001(\tH\002\210\001\001\022!\n\024button1_mqtt_payload"
+    "\030\037 \001(\tH\003\210\001\001\022!\n\024button2_mqtt_payload\030  \001("
+    "\tH\004\210\001\001\022&\n\031button1_detached_light_id\030! \001("
+    "\005H\005\210\001\001\022&\n\031button2_detached_light_id\030\" \001("
+    "\005H\006\210\001\001\022\016\n\006denied\030- \001(\010\022\020\n\010accepted\030. \001(\010"
+    "\022\r\n\005rooms\030/ \003(\005\022\016\n\006scenes\0300 \003(\005\022\022\n\nip_ad"
+    "dress\0301 \001(\t\022@\n\024relay1_register_type\0302 \001("
+    "\0162\".NSPanelSettings.RelayRegisterType\022@\n"
+    "\024relay2_register_type\0303 \001(\0162\".NSPanelSet"
+    "tings.RelayRegisterType\"C\n\022NSPanelDefaul"
+    "tPage\022\r\n\tMAIN_PAGE\020\000\022\017\n\013SCENES_PAGE\020\001\022\r\n"
+    "\tROOM_PAGE\020\002\"\250\001\n\026NSPanelScreensaverMode\022"
+    "\033\n\027WEATHER_WITH_BACKGROUND\020\000\022\036\n\032WEATHER_"
+    "WITHOUT_BACKGROUND\020\001\022\034\n\030DATETIME_WITH_BA"
+    "CKGROUND\020\003\022\037\n\033DATETIME_WITHOUT_BACKGROUN"
+    "D\020\004\022\022\n\016NO_SCREENSAVER\020\005\"Y\n\021NSPanelButton"
+    "Mode\022\017\n\013DIRECT_MODE\020\000\022\021\n\rDETACHED_MODE\020\001"
+    "\022\017\n\013CUSTOM_MQTT\020\002\022\017\n\013FOLLOW_MODE\020\003\"*\n\021Re"
+    "layRegisterType\022\n\n\006SWITCH\020\000\022\t\n\005LIGHT\020\001B\005"
+    "\n\003_idB\025\n\023_button1_mqtt_topicB\025\n\023_button2"
+    "_mqtt_topicB\027\n\025_button1_mqtt_payloadB\027\n\025"
+    "_button2_mqtt_payloadB\034\n\032_button1_detach"
+    "ed_light_idB\034\n\032_button2_detached_light_i"
+    "d\"N\n\014RoomSettings\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 "
+    "\001(\t\022\021\n\tlight_ids\030\003 \003(\005\022\021\n\tscene_ids\030\004 \003("
+    "\005\"5\n\025MultipleRoomsSettings\022\034\n\005rooms\030\001 \003("
+    "\0132\r.RoomSettings\"\257\004\n\rLightSettings\022\n\n\002id"
+    "\030\001 \001(\005\022\017\n\007room_id\030\002 \001(\005\022\014\n\004name\030\003 \001(\t\022\014\n"
+    "\004type\030\004 \001(\t\022\030\n\020is_ceiling_light\030\005 \001(\010\022\017\n"
+    "\007can_dim\030\006 \001(\010\022\035\n\025can_color_temperature\030"
+    "\007 \001(\010\022\017\n\007can_rgb\030\010 \001(\010\022 \n\023home_assistant"
+    "_name\030\t \001(\tH\000\210\001\001\022\031\n\014openhab_name\030\n \001(\tH\001"
+    "\210\001\001\022!\n\024openhab_control_mode\030\013 \001(\tH\002\210\001\001\022 "
+    "\n\023openhab_item_switch\030\014 \001(\tH\003\210\001\001\022 \n\023open"
+    "hab_item_dimmer\030\r \001(\tH\004\210\001\001\022$\n\027openhab_it"
+    "em_color_temp\030\016 \001(\tH\005\210\001\001\022\035\n\020openhab_item"
+    "_rgb\030\017 \001(\tH\006\210\001\001B\026\n\024_home_assistant_nameB"
+    "\017\n\r_openhab_nameB\027\n\025_openhab_control_mod"
+    "eB\026\n\024_openhab_item_switchB\026\n\024_openhab_it"
+    "em_dimmerB\032\n\030_openhab_item_color_tempB\023\n"
+    "\021_openhab_item_rgb\"8\n\026MultipleLightsSett"
+    "ings\022\036\n\006lights\030\001 \003(\0132\016.LightSettingsb\006pr"
+    "oto3"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_protobuf_5fgeneral_2eproto_deps[1] =
     {
@@ -360,13 +474,13 @@ static ::absl::once_flag descriptor_table_protobuf_5fgeneral_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fgeneral_2eproto = {
     false,
     false,
-    2300,
+    2724,
     descriptor_table_protodef_protobuf_5fgeneral_2eproto,
     "protobuf_general.proto",
     &descriptor_table_protobuf_5fgeneral_2eproto_once,
     descriptor_table_protobuf_5fgeneral_2eproto_deps,
     1,
-    3,
+    5,
     schemas,
     file_default_instances,
     TableStruct_protobuf_5fgeneral_2eproto::offsets,
@@ -459,650 +573,6 @@ constexpr int NSPanelSettings::RelayRegisterType_ARRAYSIZE;
 
 #endif  // (__cplusplus < 201703) &&
         // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
-// ===================================================================
-
-class HomeAssistantEntity::_Internal {
- public:
-};
-
-HomeAssistantEntity::HomeAssistantEntity(::google::protobuf::Arena* arena)
-    : ::google::protobuf::Message(arena) {
-  SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:HomeAssistantEntity)
-}
-inline PROTOBUF_NDEBUG_INLINE HomeAssistantEntity::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
-    const Impl_& from, const ::HomeAssistantEntity& from_msg)
-      : home_assistant_entity_id_(arena, from.home_assistant_entity_id_),
-        _cached_size_{0} {}
-
-HomeAssistantEntity::HomeAssistantEntity(
-    ::google::protobuf::Arena* arena,
-    const HomeAssistantEntity& from)
-    : ::google::protobuf::Message(arena) {
-  HomeAssistantEntity* const _this = this;
-  (void)_this;
-  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
-      from._internal_metadata_);
-  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  ::memcpy(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, can_dim_),
-           reinterpret_cast<const char *>(&from._impl_) +
-               offsetof(Impl_, can_dim_),
-           offsetof(Impl_, can_rgb_) -
-               offsetof(Impl_, can_dim_) +
-               sizeof(Impl_::can_rgb_));
-
-  // @@protoc_insertion_point(copy_constructor:HomeAssistantEntity)
-}
-inline PROTOBUF_NDEBUG_INLINE HomeAssistantEntity::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility,
-    ::google::protobuf::Arena* arena)
-      : home_assistant_entity_id_(arena),
-        _cached_size_{0} {}
-
-inline void HomeAssistantEntity::SharedCtor(::_pb::Arena* arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
-  ::memset(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, can_dim_),
-           0,
-           offsetof(Impl_, can_rgb_) -
-               offsetof(Impl_, can_dim_) +
-               sizeof(Impl_::can_rgb_));
-}
-HomeAssistantEntity::~HomeAssistantEntity() {
-  // @@protoc_insertion_point(destructor:HomeAssistantEntity)
-  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
-  SharedDtor();
-}
-inline void HomeAssistantEntity::SharedDtor() {
-  ABSL_DCHECK(GetArena() == nullptr);
-  _impl_.home_assistant_entity_id_.Destroy();
-  _impl_.~Impl_();
-}
-
-const ::google::protobuf::MessageLite::ClassData*
-HomeAssistantEntity::GetClassData() const {
-  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
-      ClassDataFull _data_ = {
-          {
-              &_table_.header,
-              nullptr,  // OnDemandRegisterArenaDtor
-              nullptr,  // IsInitialized
-              PROTOBUF_FIELD_OFFSET(HomeAssistantEntity, _impl_._cached_size_),
-              false,
-          },
-          &HomeAssistantEntity::MergeImpl,
-          &HomeAssistantEntity::kDescriptorMethods,
-          &descriptor_table_protobuf_5fgeneral_2eproto,
-          nullptr,  // tracker
-      };
-  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
-  return _data_.base();
-}
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 4, 0, 52, 2> HomeAssistantEntity::_table_ = {
-  {
-    0,  // no _has_bits_
-    0, // no _extensions_
-    5, 24,  // max_field_number, fast_idx_mask
-    offsetof(decltype(_table_), field_lookup_table),
-    4294967265,  // skipmap
-    offsetof(decltype(_table_), field_entries),
-    4,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
-    &_HomeAssistantEntity_default_instance_._instance,
-    nullptr,  // post_loop_handler
-    ::_pbi::TcParser::GenericFallback,  // fallback
-    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::HomeAssistantEntity>(),  // to_prefetch
-    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
-  }, {{
-    // bool can_color_temperature = 4;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(HomeAssistantEntity, _impl_.can_color_temperature_), 63>(),
-     {32, 63, 0, PROTOBUF_FIELD_OFFSET(HomeAssistantEntity, _impl_.can_color_temperature_)}},
-    // bool can_rgb = 5;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(HomeAssistantEntity, _impl_.can_rgb_), 63>(),
-     {40, 63, 0, PROTOBUF_FIELD_OFFSET(HomeAssistantEntity, _impl_.can_rgb_)}},
-    // string home_assistant_entity_id = 2;
-    {::_pbi::TcParser::FastUS1,
-     {18, 63, 0, PROTOBUF_FIELD_OFFSET(HomeAssistantEntity, _impl_.home_assistant_entity_id_)}},
-    // bool can_dim = 3;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(HomeAssistantEntity, _impl_.can_dim_), 63>(),
-     {24, 63, 0, PROTOBUF_FIELD_OFFSET(HomeAssistantEntity, _impl_.can_dim_)}},
-  }}, {{
-    65535, 65535
-  }}, {{
-    // string home_assistant_entity_id = 2;
-    {PROTOBUF_FIELD_OFFSET(HomeAssistantEntity, _impl_.home_assistant_entity_id_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // bool can_dim = 3;
-    {PROTOBUF_FIELD_OFFSET(HomeAssistantEntity, _impl_.can_dim_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // bool can_color_temperature = 4;
-    {PROTOBUF_FIELD_OFFSET(HomeAssistantEntity, _impl_.can_color_temperature_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // bool can_rgb = 5;
-    {PROTOBUF_FIELD_OFFSET(HomeAssistantEntity, _impl_.can_rgb_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-  }},
-  // no aux_entries
-  {{
-    "\23\30\0\0\0\0\0\0"
-    "HomeAssistantEntity"
-    "home_assistant_entity_id"
-  }},
-};
-
-PROTOBUF_NOINLINE void HomeAssistantEntity::Clear() {
-// @@protoc_insertion_point(message_clear_start:HomeAssistantEntity)
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  _impl_.home_assistant_entity_id_.ClearToEmpty();
-  ::memset(&_impl_.can_dim_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.can_rgb_) -
-      reinterpret_cast<char*>(&_impl_.can_dim_)) + sizeof(_impl_.can_rgb_));
-  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
-}
-
-::uint8_t* HomeAssistantEntity::_InternalSerialize(
-    ::uint8_t* target,
-    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:HomeAssistantEntity)
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
-
-  // string home_assistant_entity_id = 2;
-  if (!this->_internal_home_assistant_entity_id().empty()) {
-    const std::string& _s = this->_internal_home_assistant_entity_id();
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "HomeAssistantEntity.home_assistant_entity_id");
-    target = stream->WriteStringMaybeAliased(2, _s, target);
-  }
-
-  // bool can_dim = 3;
-  if (this->_internal_can_dim() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        3, this->_internal_can_dim(), target);
-  }
-
-  // bool can_color_temperature = 4;
-  if (this->_internal_can_color_temperature() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        4, this->_internal_can_color_temperature(), target);
-  }
-
-  // bool can_rgb = 5;
-  if (this->_internal_can_rgb() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        5, this->_internal_can_rgb(), target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target =
-        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:HomeAssistantEntity)
-  return target;
-}
-
-::size_t HomeAssistantEntity::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:HomeAssistantEntity)
-  ::size_t total_size = 0;
-
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
-  // string home_assistant_entity_id = 2;
-  if (!this->_internal_home_assistant_entity_id().empty()) {
-    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                    this->_internal_home_assistant_entity_id());
-  }
-
-  // bool can_dim = 3;
-  if (this->_internal_can_dim() != 0) {
-    total_size += 2;
-  }
-
-  // bool can_color_temperature = 4;
-  if (this->_internal_can_color_temperature() != 0) {
-    total_size += 2;
-  }
-
-  // bool can_rgb = 5;
-  if (this->_internal_can_rgb() != 0) {
-    total_size += 2;
-  }
-
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-
-void HomeAssistantEntity::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
-  auto* const _this = static_cast<HomeAssistantEntity*>(&to_msg);
-  auto& from = static_cast<const HomeAssistantEntity&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:HomeAssistantEntity)
-  ABSL_DCHECK_NE(&from, _this);
-  ::uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (!from._internal_home_assistant_entity_id().empty()) {
-    _this->_internal_set_home_assistant_entity_id(from._internal_home_assistant_entity_id());
-  }
-  if (from._internal_can_dim() != 0) {
-    _this->_impl_.can_dim_ = from._impl_.can_dim_;
-  }
-  if (from._internal_can_color_temperature() != 0) {
-    _this->_impl_.can_color_temperature_ = from._impl_.can_color_temperature_;
-  }
-  if (from._internal_can_rgb() != 0) {
-    _this->_impl_.can_rgb_ = from._impl_.can_rgb_;
-  }
-  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void HomeAssistantEntity::CopyFrom(const HomeAssistantEntity& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:HomeAssistantEntity)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-
-void HomeAssistantEntity::InternalSwap(HomeAssistantEntity* PROTOBUF_RESTRICT other) {
-  using std::swap;
-  auto* arena = GetArena();
-  ABSL_DCHECK_EQ(arena, other->GetArena());
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.home_assistant_entity_id_, &other->_impl_.home_assistant_entity_id_, arena);
-  ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(HomeAssistantEntity, _impl_.can_rgb_)
-      + sizeof(HomeAssistantEntity::_impl_.can_rgb_)
-      - PROTOBUF_FIELD_OFFSET(HomeAssistantEntity, _impl_.can_dim_)>(
-          reinterpret_cast<char*>(&_impl_.can_dim_),
-          reinterpret_cast<char*>(&other->_impl_.can_dim_));
-}
-
-::google::protobuf::Metadata HomeAssistantEntity::GetMetadata() const {
-  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
-}
-// ===================================================================
-
-class OpenhabLightEntity::_Internal {
- public:
-};
-
-OpenhabLightEntity::OpenhabLightEntity(::google::protobuf::Arena* arena)
-    : ::google::protobuf::Message(arena) {
-  SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:OpenhabLightEntity)
-}
-inline PROTOBUF_NDEBUG_INLINE OpenhabLightEntity::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
-    const Impl_& from, const ::OpenhabLightEntity& from_msg)
-      : openhab_id_(arena, from.openhab_id_),
-        openhab_dim_channel_(arena, from.openhab_dim_channel_),
-        openhab_color_temperature_channel_(arena, from.openhab_color_temperature_channel_),
-        openhab_rgb_channel_(arena, from.openhab_rgb_channel_),
-        _cached_size_{0} {}
-
-OpenhabLightEntity::OpenhabLightEntity(
-    ::google::protobuf::Arena* arena,
-    const OpenhabLightEntity& from)
-    : ::google::protobuf::Message(arena) {
-  OpenhabLightEntity* const _this = this;
-  (void)_this;
-  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
-      from._internal_metadata_);
-  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  ::memcpy(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, can_dim_),
-           reinterpret_cast<const char *>(&from._impl_) +
-               offsetof(Impl_, can_dim_),
-           offsetof(Impl_, can_rgb_) -
-               offsetof(Impl_, can_dim_) +
-               sizeof(Impl_::can_rgb_));
-
-  // @@protoc_insertion_point(copy_constructor:OpenhabLightEntity)
-}
-inline PROTOBUF_NDEBUG_INLINE OpenhabLightEntity::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility,
-    ::google::protobuf::Arena* arena)
-      : openhab_id_(arena),
-        openhab_dim_channel_(arena),
-        openhab_color_temperature_channel_(arena),
-        openhab_rgb_channel_(arena),
-        _cached_size_{0} {}
-
-inline void OpenhabLightEntity::SharedCtor(::_pb::Arena* arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
-  ::memset(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, can_dim_),
-           0,
-           offsetof(Impl_, can_rgb_) -
-               offsetof(Impl_, can_dim_) +
-               sizeof(Impl_::can_rgb_));
-}
-OpenhabLightEntity::~OpenhabLightEntity() {
-  // @@protoc_insertion_point(destructor:OpenhabLightEntity)
-  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
-  SharedDtor();
-}
-inline void OpenhabLightEntity::SharedDtor() {
-  ABSL_DCHECK(GetArena() == nullptr);
-  _impl_.openhab_id_.Destroy();
-  _impl_.openhab_dim_channel_.Destroy();
-  _impl_.openhab_color_temperature_channel_.Destroy();
-  _impl_.openhab_rgb_channel_.Destroy();
-  _impl_.~Impl_();
-}
-
-const ::google::protobuf::MessageLite::ClassData*
-OpenhabLightEntity::GetClassData() const {
-  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
-      ClassDataFull _data_ = {
-          {
-              &_table_.header,
-              nullptr,  // OnDemandRegisterArenaDtor
-              nullptr,  // IsInitialized
-              PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_._cached_size_),
-              false,
-          },
-          &OpenhabLightEntity::MergeImpl,
-          &OpenhabLightEntity::kDescriptorMethods,
-          &descriptor_table_protobuf_5fgeneral_2eproto,
-          nullptr,  // tracker
-      };
-  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
-  return _data_.base();
-}
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 7, 0, 108, 2> OpenhabLightEntity::_table_ = {
-  {
-    0,  // no _has_bits_
-    0, // no _extensions_
-    7, 56,  // max_field_number, fast_idx_mask
-    offsetof(decltype(_table_), field_lookup_table),
-    4294967168,  // skipmap
-    offsetof(decltype(_table_), field_entries),
-    7,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
-    &_OpenhabLightEntity_default_instance_._instance,
-    nullptr,  // post_loop_handler
-    ::_pbi::TcParser::GenericFallback,  // fallback
-    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::OpenhabLightEntity>(),  // to_prefetch
-    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
-  }, {{
-    {::_pbi::TcParser::MiniParse, {}},
-    // string openhab_id = 1;
-    {::_pbi::TcParser::FastUS1,
-     {10, 63, 0, PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.openhab_id_)}},
-    // string openhab_dim_channel = 2;
-    {::_pbi::TcParser::FastUS1,
-     {18, 63, 0, PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.openhab_dim_channel_)}},
-    // string openhab_color_temperature_channel = 3;
-    {::_pbi::TcParser::FastUS1,
-     {26, 63, 0, PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.openhab_color_temperature_channel_)}},
-    // string openhab_rgb_channel = 4;
-    {::_pbi::TcParser::FastUS1,
-     {34, 63, 0, PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.openhab_rgb_channel_)}},
-    // bool can_dim = 5;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(OpenhabLightEntity, _impl_.can_dim_), 63>(),
-     {40, 63, 0, PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.can_dim_)}},
-    // bool can_color_temperature = 6;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(OpenhabLightEntity, _impl_.can_color_temperature_), 63>(),
-     {48, 63, 0, PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.can_color_temperature_)}},
-    // bool can_rgb = 7;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(OpenhabLightEntity, _impl_.can_rgb_), 63>(),
-     {56, 63, 0, PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.can_rgb_)}},
-  }}, {{
-    65535, 65535
-  }}, {{
-    // string openhab_id = 1;
-    {PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.openhab_id_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string openhab_dim_channel = 2;
-    {PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.openhab_dim_channel_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string openhab_color_temperature_channel = 3;
-    {PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.openhab_color_temperature_channel_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string openhab_rgb_channel = 4;
-    {PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.openhab_rgb_channel_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // bool can_dim = 5;
-    {PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.can_dim_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // bool can_color_temperature = 6;
-    {PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.can_color_temperature_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // bool can_rgb = 7;
-    {PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.can_rgb_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-  }},
-  // no aux_entries
-  {{
-    "\22\12\23\41\23\0\0\0"
-    "OpenhabLightEntity"
-    "openhab_id"
-    "openhab_dim_channel"
-    "openhab_color_temperature_channel"
-    "openhab_rgb_channel"
-  }},
-};
-
-PROTOBUF_NOINLINE void OpenhabLightEntity::Clear() {
-// @@protoc_insertion_point(message_clear_start:OpenhabLightEntity)
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  _impl_.openhab_id_.ClearToEmpty();
-  _impl_.openhab_dim_channel_.ClearToEmpty();
-  _impl_.openhab_color_temperature_channel_.ClearToEmpty();
-  _impl_.openhab_rgb_channel_.ClearToEmpty();
-  ::memset(&_impl_.can_dim_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.can_rgb_) -
-      reinterpret_cast<char*>(&_impl_.can_dim_)) + sizeof(_impl_.can_rgb_));
-  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
-}
-
-::uint8_t* OpenhabLightEntity::_InternalSerialize(
-    ::uint8_t* target,
-    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:OpenhabLightEntity)
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
-
-  // string openhab_id = 1;
-  if (!this->_internal_openhab_id().empty()) {
-    const std::string& _s = this->_internal_openhab_id();
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "OpenhabLightEntity.openhab_id");
-    target = stream->WriteStringMaybeAliased(1, _s, target);
-  }
-
-  // string openhab_dim_channel = 2;
-  if (!this->_internal_openhab_dim_channel().empty()) {
-    const std::string& _s = this->_internal_openhab_dim_channel();
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "OpenhabLightEntity.openhab_dim_channel");
-    target = stream->WriteStringMaybeAliased(2, _s, target);
-  }
-
-  // string openhab_color_temperature_channel = 3;
-  if (!this->_internal_openhab_color_temperature_channel().empty()) {
-    const std::string& _s = this->_internal_openhab_color_temperature_channel();
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "OpenhabLightEntity.openhab_color_temperature_channel");
-    target = stream->WriteStringMaybeAliased(3, _s, target);
-  }
-
-  // string openhab_rgb_channel = 4;
-  if (!this->_internal_openhab_rgb_channel().empty()) {
-    const std::string& _s = this->_internal_openhab_rgb_channel();
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "OpenhabLightEntity.openhab_rgb_channel");
-    target = stream->WriteStringMaybeAliased(4, _s, target);
-  }
-
-  // bool can_dim = 5;
-  if (this->_internal_can_dim() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        5, this->_internal_can_dim(), target);
-  }
-
-  // bool can_color_temperature = 6;
-  if (this->_internal_can_color_temperature() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        6, this->_internal_can_color_temperature(), target);
-  }
-
-  // bool can_rgb = 7;
-  if (this->_internal_can_rgb() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        7, this->_internal_can_rgb(), target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target =
-        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:OpenhabLightEntity)
-  return target;
-}
-
-::size_t OpenhabLightEntity::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:OpenhabLightEntity)
-  ::size_t total_size = 0;
-
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
-  // string openhab_id = 1;
-  if (!this->_internal_openhab_id().empty()) {
-    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                    this->_internal_openhab_id());
-  }
-
-  // string openhab_dim_channel = 2;
-  if (!this->_internal_openhab_dim_channel().empty()) {
-    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                    this->_internal_openhab_dim_channel());
-  }
-
-  // string openhab_color_temperature_channel = 3;
-  if (!this->_internal_openhab_color_temperature_channel().empty()) {
-    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                    this->_internal_openhab_color_temperature_channel());
-  }
-
-  // string openhab_rgb_channel = 4;
-  if (!this->_internal_openhab_rgb_channel().empty()) {
-    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                    this->_internal_openhab_rgb_channel());
-  }
-
-  // bool can_dim = 5;
-  if (this->_internal_can_dim() != 0) {
-    total_size += 2;
-  }
-
-  // bool can_color_temperature = 6;
-  if (this->_internal_can_color_temperature() != 0) {
-    total_size += 2;
-  }
-
-  // bool can_rgb = 7;
-  if (this->_internal_can_rgb() != 0) {
-    total_size += 2;
-  }
-
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-
-void OpenhabLightEntity::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
-  auto* const _this = static_cast<OpenhabLightEntity*>(&to_msg);
-  auto& from = static_cast<const OpenhabLightEntity&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:OpenhabLightEntity)
-  ABSL_DCHECK_NE(&from, _this);
-  ::uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (!from._internal_openhab_id().empty()) {
-    _this->_internal_set_openhab_id(from._internal_openhab_id());
-  }
-  if (!from._internal_openhab_dim_channel().empty()) {
-    _this->_internal_set_openhab_dim_channel(from._internal_openhab_dim_channel());
-  }
-  if (!from._internal_openhab_color_temperature_channel().empty()) {
-    _this->_internal_set_openhab_color_temperature_channel(from._internal_openhab_color_temperature_channel());
-  }
-  if (!from._internal_openhab_rgb_channel().empty()) {
-    _this->_internal_set_openhab_rgb_channel(from._internal_openhab_rgb_channel());
-  }
-  if (from._internal_can_dim() != 0) {
-    _this->_impl_.can_dim_ = from._impl_.can_dim_;
-  }
-  if (from._internal_can_color_temperature() != 0) {
-    _this->_impl_.can_color_temperature_ = from._impl_.can_color_temperature_;
-  }
-  if (from._internal_can_rgb() != 0) {
-    _this->_impl_.can_rgb_ = from._impl_.can_rgb_;
-  }
-  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void OpenhabLightEntity::CopyFrom(const OpenhabLightEntity& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:OpenhabLightEntity)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-
-void OpenhabLightEntity::InternalSwap(OpenhabLightEntity* PROTOBUF_RESTRICT other) {
-  using std::swap;
-  auto* arena = GetArena();
-  ABSL_DCHECK_EQ(arena, other->GetArena());
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.openhab_id_, &other->_impl_.openhab_id_, arena);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.openhab_dim_channel_, &other->_impl_.openhab_dim_channel_, arena);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.openhab_color_temperature_channel_, &other->_impl_.openhab_color_temperature_channel_, arena);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.openhab_rgb_channel_, &other->_impl_.openhab_rgb_channel_, arena);
-  ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.can_rgb_)
-      + sizeof(OpenhabLightEntity::_impl_.can_rgb_)
-      - PROTOBUF_FIELD_OFFSET(OpenhabLightEntity, _impl_.can_dim_)>(
-          reinterpret_cast<char*>(&_impl_.can_dim_),
-          reinterpret_cast<char*>(&other->_impl_.can_dim_));
-}
-
-::google::protobuf::Metadata OpenhabLightEntity::GetMetadata() const {
-  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
-}
 // ===================================================================
 
 class NSPanelSettings::_Internal {
@@ -2268,6 +1738,1279 @@ void NSPanelSettings::InternalSwap(NSPanelSettings* PROTOBUF_RESTRICT other) {
 }
 
 ::google::protobuf::Metadata NSPanelSettings::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class RoomSettings::_Internal {
+ public:
+};
+
+RoomSettings::RoomSettings(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:RoomSettings)
+}
+inline PROTOBUF_NDEBUG_INLINE RoomSettings::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::RoomSettings& from_msg)
+      : light_ids_{visibility, arena, from.light_ids_},
+        _light_ids_cached_byte_size_{0},
+        scene_ids_{visibility, arena, from.scene_ids_},
+        _scene_ids_cached_byte_size_{0},
+        name_(arena, from.name_),
+        _cached_size_{0} {}
+
+RoomSettings::RoomSettings(
+    ::google::protobuf::Arena* arena,
+    const RoomSettings& from)
+    : ::google::protobuf::Message(arena) {
+  RoomSettings* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  _impl_.id_ = from._impl_.id_;
+
+  // @@protoc_insertion_point(copy_constructor:RoomSettings)
+}
+inline PROTOBUF_NDEBUG_INLINE RoomSettings::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : light_ids_{visibility, arena},
+        _light_ids_cached_byte_size_{0},
+        scene_ids_{visibility, arena},
+        _scene_ids_cached_byte_size_{0},
+        name_(arena),
+        _cached_size_{0} {}
+
+inline void RoomSettings::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.id_ = {};
+}
+RoomSettings::~RoomSettings() {
+  // @@protoc_insertion_point(destructor:RoomSettings)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void RoomSettings::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.name_.Destroy();
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+RoomSettings::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_._cached_size_),
+              false,
+          },
+          &RoomSettings::MergeImpl,
+          &RoomSettings::kDescriptorMethods,
+          &descriptor_table_protobuf_5fgeneral_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 4, 0, 25, 2> RoomSettings::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    4, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967280,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    4,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_RoomSettings_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::RoomSettings>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // repeated int32 scene_ids = 4;
+    {::_pbi::TcParser::FastV32P1,
+     {34, 63, 0, PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.scene_ids_)}},
+    // int32 id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RoomSettings, _impl_.id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.id_)}},
+    // string name = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.name_)}},
+    // repeated int32 light_ids = 3;
+    {::_pbi::TcParser::FastV32P1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.light_ids_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 id = 1;
+    {PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // string name = 2;
+    {PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.name_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // repeated int32 light_ids = 3;
+    {PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.light_ids_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
+    // repeated int32 scene_ids = 4;
+    {PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.scene_ids_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
+  }},
+  // no aux_entries
+  {{
+    "\14\0\4\0\0\0\0\0"
+    "RoomSettings"
+    "name"
+  }},
+};
+
+PROTOBUF_NOINLINE void RoomSettings::Clear() {
+// @@protoc_insertion_point(message_clear_start:RoomSettings)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.light_ids_.Clear();
+  _impl_.scene_ids_.Clear();
+  _impl_.name_.ClearToEmpty();
+  _impl_.id_ = 0;
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* RoomSettings::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:RoomSettings)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<1>(
+            stream, this->_internal_id(), target);
+  }
+
+  // string name = 2;
+  if (!this->_internal_name().empty()) {
+    const std::string& _s = this->_internal_name();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "RoomSettings.name");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
+  }
+
+  // repeated int32 light_ids = 3;
+  {
+    int byte_size = _impl_._light_ids_cached_byte_size_.Get();
+    if (byte_size > 0) {
+      target = stream->WriteInt32Packed(
+          3, _internal_light_ids(), byte_size, target);
+    }
+  }
+
+  // repeated int32 scene_ids = 4;
+  {
+    int byte_size = _impl_._scene_ids_cached_byte_size_.Get();
+    if (byte_size > 0) {
+      target = stream->WriteInt32Packed(
+          4, _internal_scene_ids(), byte_size, target);
+    }
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:RoomSettings)
+  return target;
+}
+
+::size_t RoomSettings::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:RoomSettings)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // repeated int32 light_ids = 3;
+  {
+    std::size_t data_size = ::_pbi::WireFormatLite::Int32Size(
+        this->_internal_light_ids())
+    ;
+    _impl_._light_ids_cached_byte_size_.Set(::_pbi::ToCachedSize(data_size));
+    std::size_t tag_size = data_size == 0
+        ? 0
+        : 1 + ::_pbi::WireFormatLite::Int32Size(
+                            static_cast<int32_t>(data_size))
+    ;
+    total_size += tag_size + data_size;
+  }
+  // repeated int32 scene_ids = 4;
+  {
+    std::size_t data_size = ::_pbi::WireFormatLite::Int32Size(
+        this->_internal_scene_ids())
+    ;
+    _impl_._scene_ids_cached_byte_size_.Set(::_pbi::ToCachedSize(data_size));
+    std::size_t tag_size = data_size == 0
+        ? 0
+        : 1 + ::_pbi::WireFormatLite::Int32Size(
+                            static_cast<int32_t>(data_size))
+    ;
+    total_size += tag_size + data_size;
+  }
+  // string name = 2;
+  if (!this->_internal_name().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_name());
+  }
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_id());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void RoomSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<RoomSettings*>(&to_msg);
+  auto& from = static_cast<const RoomSettings&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:RoomSettings)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_internal_mutable_light_ids()->MergeFrom(from._internal_light_ids());
+  _this->_internal_mutable_scene_ids()->MergeFrom(from._internal_scene_ids());
+  if (!from._internal_name().empty()) {
+    _this->_internal_set_name(from._internal_name());
+  }
+  if (from._internal_id() != 0) {
+    _this->_impl_.id_ = from._impl_.id_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void RoomSettings::CopyFrom(const RoomSettings& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:RoomSettings)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void RoomSettings::InternalSwap(RoomSettings* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.light_ids_.InternalSwap(&other->_impl_.light_ids_);
+  _impl_.scene_ids_.InternalSwap(&other->_impl_.scene_ids_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
+        swap(_impl_.id_, other->_impl_.id_);
+}
+
+::google::protobuf::Metadata RoomSettings::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class MultipleRoomsSettings::_Internal {
+ public:
+};
+
+MultipleRoomsSettings::MultipleRoomsSettings(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:MultipleRoomsSettings)
+}
+inline PROTOBUF_NDEBUG_INLINE MultipleRoomsSettings::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::MultipleRoomsSettings& from_msg)
+      : rooms_{visibility, arena, from.rooms_},
+        _cached_size_{0} {}
+
+MultipleRoomsSettings::MultipleRoomsSettings(
+    ::google::protobuf::Arena* arena,
+    const MultipleRoomsSettings& from)
+    : ::google::protobuf::Message(arena) {
+  MultipleRoomsSettings* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:MultipleRoomsSettings)
+}
+inline PROTOBUF_NDEBUG_INLINE MultipleRoomsSettings::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : rooms_{visibility, arena},
+        _cached_size_{0} {}
+
+inline void MultipleRoomsSettings::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+MultipleRoomsSettings::~MultipleRoomsSettings() {
+  // @@protoc_insertion_point(destructor:MultipleRoomsSettings)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void MultipleRoomsSettings::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+MultipleRoomsSettings::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(MultipleRoomsSettings, _impl_._cached_size_),
+              false,
+          },
+          &MultipleRoomsSettings::MergeImpl,
+          &MultipleRoomsSettings::kDescriptorMethods,
+          &descriptor_table_protobuf_5fgeneral_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 1, 0, 2> MultipleRoomsSettings::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_MultipleRoomsSettings_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::MultipleRoomsSettings>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // repeated .RoomSettings rooms = 1;
+    {::_pbi::TcParser::FastMtR1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(MultipleRoomsSettings, _impl_.rooms_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated .RoomSettings rooms = 1;
+    {PROTOBUF_FIELD_OFFSET(MultipleRoomsSettings, _impl_.rooms_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::RoomSettings>()},
+  }}, {{
+  }},
+};
+
+PROTOBUF_NOINLINE void MultipleRoomsSettings::Clear() {
+// @@protoc_insertion_point(message_clear_start:MultipleRoomsSettings)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.rooms_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* MultipleRoomsSettings::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:MultipleRoomsSettings)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // repeated .RoomSettings rooms = 1;
+  for (unsigned i = 0, n = static_cast<unsigned>(
+                           this->_internal_rooms_size());
+       i < n; i++) {
+    const auto& repfield = this->_internal_rooms().Get(i);
+    target =
+        ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+            1, repfield, repfield.GetCachedSize(),
+            target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:MultipleRoomsSettings)
+  return target;
+}
+
+::size_t MultipleRoomsSettings::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:MultipleRoomsSettings)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // repeated .RoomSettings rooms = 1;
+  total_size += 1UL * this->_internal_rooms_size();
+  for (const auto& msg : this->_internal_rooms()) {
+    total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+  }
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void MultipleRoomsSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<MultipleRoomsSettings*>(&to_msg);
+  auto& from = static_cast<const MultipleRoomsSettings&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:MultipleRoomsSettings)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_internal_mutable_rooms()->MergeFrom(
+      from._internal_rooms());
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void MultipleRoomsSettings::CopyFrom(const MultipleRoomsSettings& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:MultipleRoomsSettings)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void MultipleRoomsSettings::InternalSwap(MultipleRoomsSettings* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.rooms_.InternalSwap(&other->_impl_.rooms_);
+}
+
+::google::protobuf::Metadata MultipleRoomsSettings::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class LightSettings::_Internal {
+ public:
+  using HasBits =
+      decltype(std::declval<LightSettings>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(LightSettings, _impl_._has_bits_);
+};
+
+LightSettings::LightSettings(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:LightSettings)
+}
+inline PROTOBUF_NDEBUG_INLINE LightSettings::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::LightSettings& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        name_(arena, from.name_),
+        type_(arena, from.type_),
+        home_assistant_name_(arena, from.home_assistant_name_),
+        openhab_name_(arena, from.openhab_name_),
+        openhab_control_mode_(arena, from.openhab_control_mode_),
+        openhab_item_switch_(arena, from.openhab_item_switch_),
+        openhab_item_dimmer_(arena, from.openhab_item_dimmer_),
+        openhab_item_color_temp_(arena, from.openhab_item_color_temp_),
+        openhab_item_rgb_(arena, from.openhab_item_rgb_) {}
+
+LightSettings::LightSettings(
+    ::google::protobuf::Arena* arena,
+    const LightSettings& from)
+    : ::google::protobuf::Message(arena) {
+  LightSettings* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, id_),
+           offsetof(Impl_, can_rgb_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::can_rgb_));
+
+  // @@protoc_insertion_point(copy_constructor:LightSettings)
+}
+inline PROTOBUF_NDEBUG_INLINE LightSettings::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0},
+        name_(arena),
+        type_(arena),
+        home_assistant_name_(arena),
+        openhab_name_(arena),
+        openhab_control_mode_(arena),
+        openhab_item_switch_(arena),
+        openhab_item_dimmer_(arena),
+        openhab_item_color_temp_(arena),
+        openhab_item_rgb_(arena) {}
+
+inline void LightSettings::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           0,
+           offsetof(Impl_, can_rgb_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::can_rgb_));
+}
+LightSettings::~LightSettings() {
+  // @@protoc_insertion_point(destructor:LightSettings)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void LightSettings::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.name_.Destroy();
+  _impl_.type_.Destroy();
+  _impl_.home_assistant_name_.Destroy();
+  _impl_.openhab_name_.Destroy();
+  _impl_.openhab_control_mode_.Destroy();
+  _impl_.openhab_item_switch_.Destroy();
+  _impl_.openhab_item_dimmer_.Destroy();
+  _impl_.openhab_item_color_temp_.Destroy();
+  _impl_.openhab_item_rgb_.Destroy();
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+LightSettings::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(LightSettings, _impl_._cached_size_),
+              false,
+          },
+          &LightSettings::MergeImpl,
+          &LightSettings::kDescriptorMethods,
+          &descriptor_table_protobuf_5fgeneral_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<4, 15, 0, 166, 2> LightSettings::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(LightSettings, _impl_._has_bits_),
+    0, // no _extensions_
+    15, 120,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294934528,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    15,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_LightSettings_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::LightSettings>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int32 id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(LightSettings, _impl_.id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.id_)}},
+    // int32 room_id = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(LightSettings, _impl_.room_id_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.room_id_)}},
+    // string name = 3;
+    {::_pbi::TcParser::FastUS1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.name_)}},
+    // string type = 4;
+    {::_pbi::TcParser::FastUS1,
+     {34, 63, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.type_)}},
+    // bool is_ceiling_light = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(LightSettings, _impl_.is_ceiling_light_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.is_ceiling_light_)}},
+    // bool can_dim = 6;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(LightSettings, _impl_.can_dim_), 63>(),
+     {48, 63, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.can_dim_)}},
+    // bool can_color_temperature = 7;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(LightSettings, _impl_.can_color_temperature_), 63>(),
+     {56, 63, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.can_color_temperature_)}},
+    // bool can_rgb = 8;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(LightSettings, _impl_.can_rgb_), 63>(),
+     {64, 63, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.can_rgb_)}},
+    // optional string home_assistant_name = 9;
+    {::_pbi::TcParser::FastUS1,
+     {74, 0, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.home_assistant_name_)}},
+    // optional string openhab_name = 10;
+    {::_pbi::TcParser::FastUS1,
+     {82, 1, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_name_)}},
+    // optional string openhab_control_mode = 11;
+    {::_pbi::TcParser::FastUS1,
+     {90, 2, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_control_mode_)}},
+    // optional string openhab_item_switch = 12;
+    {::_pbi::TcParser::FastUS1,
+     {98, 3, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_item_switch_)}},
+    // optional string openhab_item_dimmer = 13;
+    {::_pbi::TcParser::FastUS1,
+     {106, 4, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_item_dimmer_)}},
+    // optional string openhab_item_color_temp = 14;
+    {::_pbi::TcParser::FastUS1,
+     {114, 5, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_item_color_temp_)}},
+    // optional string openhab_item_rgb = 15;
+    {::_pbi::TcParser::FastUS1,
+     {122, 6, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_item_rgb_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 id = 1;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.id_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 room_id = 2;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.room_id_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // string name = 3;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.name_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string type = 4;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.type_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // bool is_ceiling_light = 5;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.is_ceiling_light_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool can_dim = 6;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.can_dim_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool can_color_temperature = 7;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.can_color_temperature_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool can_rgb = 8;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.can_rgb_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // optional string home_assistant_name = 9;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.home_assistant_name_), _Internal::kHasBitsOffset + 0, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // optional string openhab_name = 10;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_name_), _Internal::kHasBitsOffset + 1, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // optional string openhab_control_mode = 11;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_control_mode_), _Internal::kHasBitsOffset + 2, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // optional string openhab_item_switch = 12;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_item_switch_), _Internal::kHasBitsOffset + 3, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // optional string openhab_item_dimmer = 13;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_item_dimmer_), _Internal::kHasBitsOffset + 4, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // optional string openhab_item_color_temp = 14;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_item_color_temp_), _Internal::kHasBitsOffset + 5, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // optional string openhab_item_rgb = 15;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_item_rgb_), _Internal::kHasBitsOffset + 6, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\15\0\0\4\4\0\0\0\0\23\14\24\23\23\27\20"
+    "LightSettings"
+    "name"
+    "type"
+    "home_assistant_name"
+    "openhab_name"
+    "openhab_control_mode"
+    "openhab_item_switch"
+    "openhab_item_dimmer"
+    "openhab_item_color_temp"
+    "openhab_item_rgb"
+  }},
+};
+
+PROTOBUF_NOINLINE void LightSettings::Clear() {
+// @@protoc_insertion_point(message_clear_start:LightSettings)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.name_.ClearToEmpty();
+  _impl_.type_.ClearToEmpty();
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000007fu) {
+    if (cached_has_bits & 0x00000001u) {
+      _impl_.home_assistant_name_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _impl_.openhab_name_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000004u) {
+      _impl_.openhab_control_mode_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000008u) {
+      _impl_.openhab_item_switch_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000010u) {
+      _impl_.openhab_item_dimmer_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000020u) {
+      _impl_.openhab_item_color_temp_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000040u) {
+      _impl_.openhab_item_rgb_.ClearNonDefaultToEmpty();
+    }
+  }
+  ::memset(&_impl_.id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.can_rgb_) -
+      reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.can_rgb_));
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* LightSettings::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:LightSettings)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<1>(
+            stream, this->_internal_id(), target);
+  }
+
+  // int32 room_id = 2;
+  if (this->_internal_room_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<2>(
+            stream, this->_internal_room_id(), target);
+  }
+
+  // string name = 3;
+  if (!this->_internal_name().empty()) {
+    const std::string& _s = this->_internal_name();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "LightSettings.name");
+    target = stream->WriteStringMaybeAliased(3, _s, target);
+  }
+
+  // string type = 4;
+  if (!this->_internal_type().empty()) {
+    const std::string& _s = this->_internal_type();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "LightSettings.type");
+    target = stream->WriteStringMaybeAliased(4, _s, target);
+  }
+
+  // bool is_ceiling_light = 5;
+  if (this->_internal_is_ceiling_light() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        5, this->_internal_is_ceiling_light(), target);
+  }
+
+  // bool can_dim = 6;
+  if (this->_internal_can_dim() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        6, this->_internal_can_dim(), target);
+  }
+
+  // bool can_color_temperature = 7;
+  if (this->_internal_can_color_temperature() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        7, this->_internal_can_color_temperature(), target);
+  }
+
+  // bool can_rgb = 8;
+  if (this->_internal_can_rgb() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        8, this->_internal_can_rgb(), target);
+  }
+
+  cached_has_bits = _impl_._has_bits_[0];
+  // optional string home_assistant_name = 9;
+  if (cached_has_bits & 0x00000001u) {
+    const std::string& _s = this->_internal_home_assistant_name();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "LightSettings.home_assistant_name");
+    target = stream->WriteStringMaybeAliased(9, _s, target);
+  }
+
+  // optional string openhab_name = 10;
+  if (cached_has_bits & 0x00000002u) {
+    const std::string& _s = this->_internal_openhab_name();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "LightSettings.openhab_name");
+    target = stream->WriteStringMaybeAliased(10, _s, target);
+  }
+
+  // optional string openhab_control_mode = 11;
+  if (cached_has_bits & 0x00000004u) {
+    const std::string& _s = this->_internal_openhab_control_mode();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "LightSettings.openhab_control_mode");
+    target = stream->WriteStringMaybeAliased(11, _s, target);
+  }
+
+  // optional string openhab_item_switch = 12;
+  if (cached_has_bits & 0x00000008u) {
+    const std::string& _s = this->_internal_openhab_item_switch();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "LightSettings.openhab_item_switch");
+    target = stream->WriteStringMaybeAliased(12, _s, target);
+  }
+
+  // optional string openhab_item_dimmer = 13;
+  if (cached_has_bits & 0x00000010u) {
+    const std::string& _s = this->_internal_openhab_item_dimmer();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "LightSettings.openhab_item_dimmer");
+    target = stream->WriteStringMaybeAliased(13, _s, target);
+  }
+
+  // optional string openhab_item_color_temp = 14;
+  if (cached_has_bits & 0x00000020u) {
+    const std::string& _s = this->_internal_openhab_item_color_temp();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "LightSettings.openhab_item_color_temp");
+    target = stream->WriteStringMaybeAliased(14, _s, target);
+  }
+
+  // optional string openhab_item_rgb = 15;
+  if (cached_has_bits & 0x00000040u) {
+    const std::string& _s = this->_internal_openhab_item_rgb();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "LightSettings.openhab_item_rgb");
+    target = stream->WriteStringMaybeAliased(15, _s, target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:LightSettings)
+  return target;
+}
+
+::size_t LightSettings::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:LightSettings)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // string name = 3;
+  if (!this->_internal_name().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_name());
+  }
+
+  // string type = 4;
+  if (!this->_internal_type().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_type());
+  }
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000007fu) {
+    // optional string home_assistant_name = 9;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_home_assistant_name());
+    }
+
+    // optional string openhab_name = 10;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_openhab_name());
+    }
+
+    // optional string openhab_control_mode = 11;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_openhab_control_mode());
+    }
+
+    // optional string openhab_item_switch = 12;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_openhab_item_switch());
+    }
+
+    // optional string openhab_item_dimmer = 13;
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_openhab_item_dimmer());
+    }
+
+    // optional string openhab_item_color_temp = 14;
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_openhab_item_color_temp());
+    }
+
+    // optional string openhab_item_rgb = 15;
+    if (cached_has_bits & 0x00000040u) {
+      total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_openhab_item_rgb());
+    }
+
+  }
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_id());
+  }
+
+  // int32 room_id = 2;
+  if (this->_internal_room_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_room_id());
+  }
+
+  // bool is_ceiling_light = 5;
+  if (this->_internal_is_ceiling_light() != 0) {
+    total_size += 2;
+  }
+
+  // bool can_dim = 6;
+  if (this->_internal_can_dim() != 0) {
+    total_size += 2;
+  }
+
+  // bool can_color_temperature = 7;
+  if (this->_internal_can_color_temperature() != 0) {
+    total_size += 2;
+  }
+
+  // bool can_rgb = 8;
+  if (this->_internal_can_rgb() != 0) {
+    total_size += 2;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void LightSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<LightSettings*>(&to_msg);
+  auto& from = static_cast<const LightSettings&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:LightSettings)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_name().empty()) {
+    _this->_internal_set_name(from._internal_name());
+  }
+  if (!from._internal_type().empty()) {
+    _this->_internal_set_type(from._internal_type());
+  }
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000007fu) {
+    if (cached_has_bits & 0x00000001u) {
+      _this->_internal_set_home_assistant_name(from._internal_home_assistant_name());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _this->_internal_set_openhab_name(from._internal_openhab_name());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      _this->_internal_set_openhab_control_mode(from._internal_openhab_control_mode());
+    }
+    if (cached_has_bits & 0x00000008u) {
+      _this->_internal_set_openhab_item_switch(from._internal_openhab_item_switch());
+    }
+    if (cached_has_bits & 0x00000010u) {
+      _this->_internal_set_openhab_item_dimmer(from._internal_openhab_item_dimmer());
+    }
+    if (cached_has_bits & 0x00000020u) {
+      _this->_internal_set_openhab_item_color_temp(from._internal_openhab_item_color_temp());
+    }
+    if (cached_has_bits & 0x00000040u) {
+      _this->_internal_set_openhab_item_rgb(from._internal_openhab_item_rgb());
+    }
+  }
+  if (from._internal_id() != 0) {
+    _this->_impl_.id_ = from._impl_.id_;
+  }
+  if (from._internal_room_id() != 0) {
+    _this->_impl_.room_id_ = from._impl_.room_id_;
+  }
+  if (from._internal_is_ceiling_light() != 0) {
+    _this->_impl_.is_ceiling_light_ = from._impl_.is_ceiling_light_;
+  }
+  if (from._internal_can_dim() != 0) {
+    _this->_impl_.can_dim_ = from._impl_.can_dim_;
+  }
+  if (from._internal_can_color_temperature() != 0) {
+    _this->_impl_.can_color_temperature_ = from._impl_.can_color_temperature_;
+  }
+  if (from._internal_can_rgb() != 0) {
+    _this->_impl_.can_rgb_ = from._impl_.can_rgb_;
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void LightSettings::CopyFrom(const LightSettings& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:LightSettings)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void LightSettings::InternalSwap(LightSettings* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.type_, &other->_impl_.type_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.home_assistant_name_, &other->_impl_.home_assistant_name_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.openhab_name_, &other->_impl_.openhab_name_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.openhab_control_mode_, &other->_impl_.openhab_control_mode_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.openhab_item_switch_, &other->_impl_.openhab_item_switch_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.openhab_item_dimmer_, &other->_impl_.openhab_item_dimmer_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.openhab_item_color_temp_, &other->_impl_.openhab_item_color_temp_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.openhab_item_rgb_, &other->_impl_.openhab_item_rgb_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.can_rgb_)
+      + sizeof(LightSettings::_impl_.can_rgb_)
+      - PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.id_)>(
+          reinterpret_cast<char*>(&_impl_.id_),
+          reinterpret_cast<char*>(&other->_impl_.id_));
+}
+
+::google::protobuf::Metadata LightSettings::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class MultipleLightsSettings::_Internal {
+ public:
+};
+
+MultipleLightsSettings::MultipleLightsSettings(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:MultipleLightsSettings)
+}
+inline PROTOBUF_NDEBUG_INLINE MultipleLightsSettings::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::MultipleLightsSettings& from_msg)
+      : lights_{visibility, arena, from.lights_},
+        _cached_size_{0} {}
+
+MultipleLightsSettings::MultipleLightsSettings(
+    ::google::protobuf::Arena* arena,
+    const MultipleLightsSettings& from)
+    : ::google::protobuf::Message(arena) {
+  MultipleLightsSettings* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:MultipleLightsSettings)
+}
+inline PROTOBUF_NDEBUG_INLINE MultipleLightsSettings::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : lights_{visibility, arena},
+        _cached_size_{0} {}
+
+inline void MultipleLightsSettings::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+MultipleLightsSettings::~MultipleLightsSettings() {
+  // @@protoc_insertion_point(destructor:MultipleLightsSettings)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void MultipleLightsSettings::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+MultipleLightsSettings::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(MultipleLightsSettings, _impl_._cached_size_),
+              false,
+          },
+          &MultipleLightsSettings::MergeImpl,
+          &MultipleLightsSettings::kDescriptorMethods,
+          &descriptor_table_protobuf_5fgeneral_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 1, 0, 2> MultipleLightsSettings::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_MultipleLightsSettings_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::MultipleLightsSettings>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // repeated .LightSettings lights = 1;
+    {::_pbi::TcParser::FastMtR1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(MultipleLightsSettings, _impl_.lights_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated .LightSettings lights = 1;
+    {PROTOBUF_FIELD_OFFSET(MultipleLightsSettings, _impl_.lights_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::LightSettings>()},
+  }}, {{
+  }},
+};
+
+PROTOBUF_NOINLINE void MultipleLightsSettings::Clear() {
+// @@protoc_insertion_point(message_clear_start:MultipleLightsSettings)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.lights_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* MultipleLightsSettings::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:MultipleLightsSettings)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // repeated .LightSettings lights = 1;
+  for (unsigned i = 0, n = static_cast<unsigned>(
+                           this->_internal_lights_size());
+       i < n; i++) {
+    const auto& repfield = this->_internal_lights().Get(i);
+    target =
+        ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+            1, repfield, repfield.GetCachedSize(),
+            target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:MultipleLightsSettings)
+  return target;
+}
+
+::size_t MultipleLightsSettings::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:MultipleLightsSettings)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // repeated .LightSettings lights = 1;
+  total_size += 1UL * this->_internal_lights_size();
+  for (const auto& msg : this->_internal_lights()) {
+    total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+  }
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void MultipleLightsSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<MultipleLightsSettings*>(&to_msg);
+  auto& from = static_cast<const MultipleLightsSettings&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:MultipleLightsSettings)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_internal_mutable_lights()->MergeFrom(
+      from._internal_lights());
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void MultipleLightsSettings::CopyFrom(const MultipleLightsSettings& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:MultipleLightsSettings)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void MultipleLightsSettings::InternalSwap(MultipleLightsSettings* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.lights_.InternalSwap(&other->_impl_.lights_);
+}
+
+::google::protobuf::Metadata MultipleLightsSettings::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)
