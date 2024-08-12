@@ -105,7 +105,6 @@ void MQTT_Manager::connect() {
             .message = msg->get_payload_str()};
         while (!MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
         }
-        SPDLOG_TRACE("Read message from topic {}", msg->get_topic());
       } else if (!MQTT_Manager::_mqtt_client->is_connected()) {
         SPDLOG_ERROR("Lost connection");
         while (!MQTT_Manager::_mqtt_client->is_connected()) {
@@ -168,7 +167,6 @@ void MQTT_Manager::_resubscribe() {
           }
         }
       } while (received_message);
-      SPDLOG_TRACE("Received all messages on topic '{}'.", mqtt_topic_pair.first);
     }
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception trying to subscribe to topics: {}", boost::diagnostic_information(e, true));
@@ -196,8 +194,7 @@ const std::vector<int> MQTT_Manager::_get_subscribe_topics_qos() {
 
 void MQTT_Manager::_process_mqtt_messages() {
   while (true) {
-    MQTTMessage message;
-    while (MQTT_Manager::_mqtt_message_queue.pop(message)) {
+    MQTT_Manager::_mqtt_message_queue.consume_all([](MQTTMessage message) {
       try {
         SPDLOG_TRACE("Processing message from topic {}", message.topic);
         // Call each observer/listener until a callback return true, ie. the callback was handled.
@@ -211,7 +208,7 @@ void MQTT_Manager::_process_mqtt_messages() {
       } catch (...) {
         SPDLOG_ERROR("Caught exception of type other than std::exception while processing message on topic '{}'. message: {}", message.topic, message.message);
       }
-    }
+    });
   }
 }
 
