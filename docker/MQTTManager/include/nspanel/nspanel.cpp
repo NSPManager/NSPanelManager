@@ -105,15 +105,18 @@ void NSPanel::update_config(nlohmann::json &init_data) {
     this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
   }
 
-  bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
+  bool rebuilt_mqtt = false;     // Wether or not to rebuild mqtt topics and subscribe to the new topics.
+  bool has_name_changed = false; // Whether or not the name has changed since previous load
   if (init_data.contains("name")) {
     if (this->_name.compare(init_data["name"]) != 0 && !this->_name.empty()) {
+      has_name_changed = true;
       this->reboot();
     }
     rebuilt_mqtt = true;
     this->_name = init_data["name"];
   } else if (init_data.contains("friendly_name")) {
     if (this->_name.compare(init_data["friendly_name"]) != 0 && !this->_name.empty()) {
+      has_name_changed = true;
       this->reboot();
     }
     rebuilt_mqtt = true;
@@ -183,7 +186,10 @@ void NSPanel::update_config(nlohmann::json &init_data) {
   }
 
   if (rebuilt_mqtt) {
-    this->reset_mqtt_topics();
+    if (has_name_changed) {
+      this->reset_mqtt_topics();
+    }
+
     // Convert stored MAC to MAC used in MQTT, ex. AA:AA:AA:BB:BB:BB to aa_aa_aa_bb_bb_bb
     std::string mqtt_register_mac = this->_mac;
     std::replace(mqtt_register_mac.begin(), mqtt_register_mac.end(), ':', '_');
