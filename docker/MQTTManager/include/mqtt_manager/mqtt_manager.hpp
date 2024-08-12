@@ -32,6 +32,7 @@ public:
       return;
     }
 
+    std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
     bool already_subscribed = MQTT_Manager::_mqtt_callbacks[topic].num_slots() > 0;
     MQTT_Manager::_mqtt_callbacks[topic].disconnect(callback); // Disconnect before doing a connect in case we were already connected.
     MQTT_Manager::_mqtt_callbacks[topic].connect(callback);
@@ -52,6 +53,7 @@ public:
 
   template <typename CALLBACK_BIND>
   static void detach_callback(std::string topic, CALLBACK_BIND callback) {
+    std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
     MQTT_Manager::_mqtt_callbacks[topic].disconnect(callback);
   }
 
