@@ -228,7 +228,6 @@ void NSPanel::update_config(nlohmann::json &init_data) {
 
 NSPanel::~NSPanel() {
   SPDLOG_INFO("Destroying NSPanel {}::{}", this->_id, this->_name);
-  this->reset_mqtt_topics();
 }
 
 void NSPanel::reset_mqtt_topics() {

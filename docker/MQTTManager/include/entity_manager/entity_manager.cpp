@@ -682,6 +682,7 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
         for (int i = 0; i < EntityManager::_nspanels.size(); i++) {
           if (EntityManager::_nspanels[i] == panel) {
             EntityManager::_nspanels.erase(EntityManager::_nspanels.begin() + i);
+            panel->reset_mqtt_topics();
             delete panel;
             SPDLOG_INFO("Deleted NSPanel instance from EntityManager.");
             break;
