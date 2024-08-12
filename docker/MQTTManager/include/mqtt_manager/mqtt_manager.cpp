@@ -198,11 +198,7 @@ void MQTT_Manager::_process_mqtt_messages() {
       try {
         SPDLOG_TRACE("Processing message from topic {}", message.topic);
         // Call each observer/listener until a callback return true, ie. the callback was handled.
-        for (auto mqtt_topic_signal_pair : MQTT_Manager::_mqtt_callbacks) {
-          if (mqtt_topic_signal_pair.first.compare(message.topic) == 0) {
-            MQTT_Manager::_mqtt_callbacks[mqtt_topic_signal_pair.first](message.topic, message.message);
-          }
-        }
+        MQTT_Manager::_mqtt_callbacks[message.topic](message.topic, message.message);
       } catch (std::exception ex) {
         SPDLOG_ERROR("Caught std::exception while processing message on topic '{}'. message: '{}'. Exception: ", message.topic, message.message, boost::diagnostic_information(ex, true));
       } catch (...) {
