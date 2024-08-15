@@ -347,7 +347,9 @@ void NSPanel::attachWakeCallback(void (*callback)()) {
 }
 
 void IRAM_ATTR NSPanel::_onSerialData(void) {
-  vTaskNotifyGiveFromISR(NSPanel::_taskHandleReadNSPanelData, NULL);
+  if (NSPanel::_taskHandleReadNSPanelData != nullptr) {
+    vTaskNotifyGiveFromISR(NSPanel::_taskHandleReadNSPanelData, NULL);
+  }
 }
 
 void NSPanel::_taskReadNSPanelData(void *param) {
