@@ -280,10 +280,16 @@ void LightManager::subscribeToMqttLightUpdates() {
 }
 
 void LightManager::stop() {
+  LOG_DEBUG("Stopping LightManager.");
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   if (LightManager::_taskHandleProcessMqttMessage != NULL) {
     vTaskDelete(LightManager::_taskHandleProcessMqttMessage);
+    LightManager::_taskHandleProcessMqttMessage = NULL;
     LightManager::_mqttMessageQueue = NULL;
   }
+
+  LOG_INFO("LightManager stopped.");
+  vTaskDelay(50 / portTICK_PERIOD_MS);
 }
 
 void LightManager::mqttCallback(char *topic, byte *payload, unsigned int length) {

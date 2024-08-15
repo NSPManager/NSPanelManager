@@ -60,7 +60,11 @@ void ScreensaverPage::init() {
 }
 
 void ScreensaverPage::stop() {
+  LOG_DEBUG("Stopping ScreensaverPage.");
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   this->_stopped = true;
+  LOG_INFO("ScreensaverPage stopped.");
+  vTaskDelay(50 / portTICK_PERIOD_MS);
 }
 
 void ScreensaverPage::show() {

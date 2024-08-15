@@ -176,6 +176,8 @@ def get_nspanels_warnings(request):
     md5_us_tft_file = get_file_md5sum("gui_us.tft")
     nspanels = []
 
+    print(md5_firmware)
+
     for nspanel in NSPanel.objects.all():
         panel_info = {}
         panel_info["nspanel"] = {
@@ -341,6 +343,7 @@ def get_client_ip(request):
 def register_nspanel(request):
     """Update the already existing NSPanel OR create a new one"""
     data = json.loads(request.body)
+    print(data)
     if "mac" in data:
         data["mac_address"] = data["mac"]
     if "mac_origin" in data:
