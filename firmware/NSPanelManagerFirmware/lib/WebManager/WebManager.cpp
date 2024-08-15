@@ -164,7 +164,11 @@ void WebManager::respondAvailableWiFiNetworks(AsyncWebServerRequest *request) {
 }
 
 void WebManager::startOTAUpdate() {
-  xTaskCreatePinnedToCore(WebManager::_taskPerformOTAUpdate, "taskPerformOTAUpdate", 20000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE); // TODO: Move function to InterfaceManager
+  // TODO: Move function to InterfaceManager
+  BaseType_t result = xTaskCreatePinnedToCore(WebManager::_taskPerformOTAUpdate, "taskPerformOTAUpdate", 20000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+  if (result != pdPASS) {
+    LOG_ERROR("Failed to create task to perform OTA update. Error: ", result);
+  }
 }
 
 void WebManager::_taskPerformOTAUpdate(void *param) {
