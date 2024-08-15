@@ -58,9 +58,10 @@ public:
 
 private:
   // Tasks
-  TaskHandle_t _taskHandleSendCommandQueue;
+  static inline TaskHandle_t _taskHandleSendCommandQueue;
   static void _taskSendCommandQueue(void *param);
-  TaskHandle_t _taskHandleReadNSPanelData;
+  static inline TaskHandle_t _taskHandleReadNSPanelData;
+  static void _onSerialData(void);
   static void _taskReadNSPanelData(void *param);
   static void _taskUpdateTFTConfigOTA(void *param);
   /// @brief Download a chunk of data from given addres, to the buffer at the given offset
