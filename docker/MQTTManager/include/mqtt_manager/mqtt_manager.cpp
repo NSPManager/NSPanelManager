@@ -194,6 +194,9 @@ const std::vector<int> MQTT_Manager::_get_subscribe_topics_qos() {
 
 void MQTT_Manager::_process_mqtt_messages() {
   while (true) {
+    while (MQTT_Manager::_mqtt_message_queue.empty()) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
     MQTT_Manager::_mqtt_message_queue.consume_all([](MQTTMessage message) {
       try {
         SPDLOG_TRACE("Processing message from topic {}", message.topic);
