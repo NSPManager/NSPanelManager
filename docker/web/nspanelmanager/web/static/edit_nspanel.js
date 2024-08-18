@@ -186,13 +186,15 @@ function update_nspanel_status(data) {
         $("#warning_container").html("");
         data["warnings"].split("\n").forEach((warning) => {
           if (warning != "") {
-            console.log(warning);
+            var warning_text = warning;
+            warning_text = warning_text.replace('\\n', '');
+            console.log(warning_text);
             $("#warning_container").append(
               $("<div>", {
                 class:
                   "p-4 mt-2 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-300 dark:text-gray-800",
                 role: "alert",
-                text: warning,
+                text: warning_text,
               }),
             );
           }
