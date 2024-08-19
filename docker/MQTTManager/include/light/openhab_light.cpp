@@ -87,8 +87,8 @@ void OpenhabLight::send_state_update_to_controller() {
 
   // If the light is off but in RGB mode and the user has configured the lights to turn on in "color temp" mode, force it back to color temp mode.
   bool force_send_kelvin = false;
-  if (this->_requested_state && !this->_current_state && MqttManagerConfig::turn_on_behavior == LIGHT_TURN_ON_BEHAVIOR::COLOR_TEMP && this->_can_color_temperature && this->_current_mode == MQTT_MANAGER_LIGHT_MODE::RGB) {
-    this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
+  if (this->_requested_state && !this->_current_state && MqttManagerConfig::turn_on_behavior == LIGHT_TURN_ON_BEHAVIOR::COLOR_TEMP && this->_can_color_temperature && (this->_requested_mode != this->_current_mode && this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT)) {
+    this->_requested_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
     force_send_kelvin = true;
   }
 
@@ -101,7 +101,7 @@ void OpenhabLight::send_state_update_to_controller() {
     } else {
       SPDLOG_DEBUG("Light {}::{} is already off. Will not send update to openhab.", this->_id, this->_name);
     }
-  } else if (this->_requested_state && this->_current_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT) { // Send new brightness and/or kelvin if they have changed.
+  } else if (this->_requested_state && this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT) { // Send new brightness and/or kelvin if they have changed.
     if (this->_requested_brightness != this->_current_brightness || this->_requested_state != this->_current_state) {
       SPDLOG_DEBUG("Setting light {}::{} to level: {}", this->_id, this->_name, this->_requested_brightness);
       payload_data["value"] = this->_requested_brightness;
@@ -127,7 +127,7 @@ void OpenhabLight::send_state_update_to_controller() {
       this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
       OpenhabManager::send_json(service_data);
     }
-  } else if (this->_can_rgb && this->_requested_state && this->_current_mode == MQTT_MANAGER_LIGHT_MODE::RGB) {
+  } else if (this->_can_rgb && this->_requested_state && this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::RGB) {
     SPDLOG_DEBUG("Setting light {}::{} to HSB: {},{},{}", this->_id, this->_name, this->_requested_hue, this->_requested_saturation, this->_requested_brightness);
     service_data["topic"] = fmt::format("openhab/items/{}/command", this->_openhab_item_rgb);
     payload_data["type"] = "HSB";
@@ -211,6 +211,7 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         this->_current_color_temperature = std::round(kelvin);
         this->_requested_color_temperature = this->_current_color_temperature;
         this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
+        this->_requested_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
         this->_last_color_temp_change = CurrentTimeMilliseconds();
 
         SPDLOG_DEBUG("Light {}::{} got new color temperature from Openhab, new value: {}", this->_id, this->_name, this->_current_color_temperature);
@@ -256,6 +257,7 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         }
 
         this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
+        this->_requested_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
         this->_last_rgb_change = CurrentTimeMilliseconds();
         this->_last_brightness_change = CurrentTimeMilliseconds();
 

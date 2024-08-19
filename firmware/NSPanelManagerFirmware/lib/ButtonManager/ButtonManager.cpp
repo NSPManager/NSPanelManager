@@ -90,7 +90,12 @@ void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
       std::list<Light *> lightsToChange;
       lightsToChange.push_back(ButtonManager::button1_detached_mode_light);
       if (ButtonManager::button1_detached_mode_light->getLightLevel() == 0) {
-        LightManager::ChangeLightsToLevel(&lightsToChange, PageManager::GetHomePage()->getDimmingValue());
+        int dim_to_level = PageManager::GetHomePage()->getDimmingValue();
+        if (dim_to_level == 0) {
+          LOG_INFO("Trying to turn on a light but the current average room level is 0. Defaulting to 50%");
+          dim_to_level = 50;
+        }
+        LightManager::ChangeLightsToLevel(&lightsToChange, dim_to_level);
       } else {
         LightManager::ChangeLightsToLevel(&lightsToChange, 0);
       }
@@ -111,7 +116,12 @@ void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
       std::list<Light *> lightsToChange;
       lightsToChange.push_back(ButtonManager::button2_detached_mode_light);
       if (ButtonManager::button2_detached_mode_light->getLightLevel() == 0) {
-        LightManager::ChangeLightsToLevel(&lightsToChange, PageManager::GetHomePage()->getDimmingValue());
+        int dim_to_level = PageManager::GetHomePage()->getDimmingValue();
+        if (dim_to_level == 0) {
+          LOG_INFO("Trying to turn on a light but the current average room level is 0. Defaulting to 50%");
+          dim_to_level = 50;
+        }
+        LightManager::ChangeLightsToLevel(&lightsToChange, dim_to_level);
       } else {
         LightManager::ChangeLightsToLevel(&lightsToChange, 0);
       }

@@ -34,6 +34,11 @@ HomeAssistantLight::HomeAssistantLight(nlohmann::json &init_data) : Light(init_d
 }
 
 void HomeAssistantLight::send_state_update_to_controller() {
+  SPDLOG_TRACE("Light {}::{} current mode  : {}", this->_id, this->_name, (int)this->_current_mode);
+  SPDLOG_TRACE("Light {}::{} requested mode: {}", this->_id, this->_name, (int)this->_requested_mode);
+  SPDLOG_TRACE("Light {}::{} current kelvin  : {}", this->_id, this->_name, this->_current_color_temperature);
+  SPDLOG_TRACE("Light {}::{} requested kelvin: {}", this->_id, this->_name, this->_requested_color_temperature);
+
   nlohmann::json service_data;
   service_data["type"] = "call_service";
   service_data["target"]["entity_id"] = this->_home_assistant_name;
@@ -46,14 +51,14 @@ void HomeAssistantLight::send_state_update_to_controller() {
         service_data["service_data"]["brightness_pct"] = this->_requested_brightness;
       }
 
-      // This is a turn on event and it currently off. Send kelvin if turn on behavior is to use color temp.
-      if (!this->_current_state && MqttManagerConfig::turn_on_behavior == LIGHT_TURN_ON_BEHAVIOR::COLOR_TEMP) {
+      // This is a turn on event and it currently off. Send kelvin if turn on behavior is to use color temp and requested color is the same as current color.
+      if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT || (!this->_current_state && MqttManagerConfig::turn_on_behavior == LIGHT_TURN_ON_BEHAVIOR::COLOR_TEMP)) {
         service_data["service_data"]["kelvin"] = this->_requested_color_temperature;
       }
 
-      if (this->_current_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT && this->_requested_color_temperature != this->_current_color_temperature) {
+      if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT && this->_requested_color_temperature != this->_current_color_temperature) {
         service_data["service_data"]["kelvin"] = this->_requested_color_temperature;
-      } else if (this->_current_mode == MQTT_MANAGER_LIGHT_MODE::RGB && this->_requested_hue != this->_current_hue || this->_requested_saturation != this->_current_saturation) {
+      } else if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::RGB && this->_requested_hue != this->_current_hue || this->_requested_saturation != this->_current_saturation) {
         service_data["service_data"]["hs_color"] = {this->_requested_hue, this->_requested_saturation};
       }
     } else {
@@ -123,6 +128,7 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
           std::string new_color_mode = new_state_attributes["color_mode"];
           if (this->_can_color_temperature && new_color_mode.compare("color_temp") == 0) {
             this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
+            this->_requested_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
             if (new_state_attributes.contains("color_temp_kelvin") && !new_state_attributes["color_temp_kelvin"].is_null()) {
               this->_current_color_temperature = new_state_attributes["color_temp_kelvin"];
               this->_requested_color_temperature = this->_current_color_temperature;
@@ -132,6 +138,7 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
             // Light does not support colors. Do nothing.
           } else if (this->_can_rgb) {
             this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
+            this->_requested_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
             if (new_state_attributes.contains("hs_color") && !new_state_attributes["hs_color"].is_null()) {
               std::vector<float> hs_color = new_state_attributes["hs_color"];
               this->_current_hue = (uint16_t)hs_color[0];

@@ -149,7 +149,7 @@ void HomeAssistantManager::send_json(nlohmann::json &data) {
 void HomeAssistantManager::_send_string(std::string &data) {
   if (HomeAssistantManager::_websocket != nullptr) {
     std::lock_guard<std::mutex> mtex_lock(HomeAssistantManager::_mutex_websocket_write_access);
-    // spdlog::debug("[HA WS] Sending data: {}", data);
+    SPDLOG_TRACE("[HA WS] Sending data: {}", data);
     HomeAssistantManager::_websocket->send(data);
   }
 }
