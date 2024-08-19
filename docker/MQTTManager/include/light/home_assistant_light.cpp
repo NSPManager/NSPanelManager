@@ -34,10 +34,10 @@ HomeAssistantLight::HomeAssistantLight(nlohmann::json &init_data) : Light(init_d
 }
 
 void HomeAssistantLight::send_state_update_to_controller() {
-  SPDLOG_TRACE("Light {}::{} current mode  : {}", this->_id, this->_name, (int)this->_current_mode);
-  SPDLOG_TRACE("Light {}::{} requested mode: {}", this->_id, this->_name, (int)this->_requested_mode);
-  SPDLOG_TRACE("Light {}::{} current kelvin  : {}", this->_id, this->_name, this->_current_color_temperature);
-  SPDLOG_TRACE("Light {}::{} requested kelvin: {}", this->_id, this->_name, this->_requested_color_temperature);
+  // SPDLOG_TRACE("Light {}::{} current mode  : {}", this->_id, this->_name, (int)this->_current_mode);
+  // SPDLOG_TRACE("Light {}::{} requested mode: {}", this->_id, this->_name, (int)this->_requested_mode);
+  // SPDLOG_TRACE("Light {}::{} current kelvin  : {}", this->_id, this->_name, this->_current_color_temperature);
+  // SPDLOG_TRACE("Light {}::{} requested kelvin: {}", this->_id, this->_name, this->_requested_color_temperature);
 
   nlohmann::json service_data;
   service_data["type"] = "call_service";
