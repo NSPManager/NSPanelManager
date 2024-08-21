@@ -392,6 +392,13 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
       std::string mac_origin = data["mac_origin"];
       if (data.contains("method")) {
         NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_origin);
+        if (panel == nullptr) {
+          SPDLOG_TRACE("Received command from an unknown NSPanel. Will ignore it.");
+          return true;
+        } else if (panel != nullptr && !panel->has_registered_to_manager()) {
+          SPDLOG_TRACE("Received command from an NSPanel that hasn't registered to the manager yet. Will ignore it.");
+          return true;
+        }
         std::string command_method = data["method"];
         if (command_method.compare("set") == 0) {
           std::string command_set_attribute = data["attribute"];
