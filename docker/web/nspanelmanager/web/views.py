@@ -95,7 +95,7 @@ def index(request):
         nspanels.append(panel_info)
 
     data = {
-        'dark_theme': get_setting_with_default("dark_theme"),
+        'theme': get_setting_with_default("theme"),
         'nspanels': nspanels,
         'notifications': notifications,
         'temperature_unit': temperature_unit,
@@ -121,11 +121,11 @@ def index(request):
 
 
 def rooms(request):
-    return render(request, 'rooms.html', {'dark_theme': get_setting_with_default("dark_theme"), 'rooms': Room.objects.all().order_by('displayOrder')})
+    return render(request, 'rooms.html', {'theme': get_setting_with_default("theme"), 'rooms': Room.objects.all().order_by('displayOrder')})
 
 
 def rooms_order(request):
-    return render(request, 'rooms_order.html', {'dark_theme': get_setting_with_default("dark_theme"), 'rooms': Room.objects.all().order_by('displayOrder')})
+    return render(request, 'rooms_order.html', {'theme': get_setting_with_default("theme"), 'rooms': Room.objects.all().order_by('displayOrder')})
 
 
 def move_room_up(request, room_id: int):
@@ -177,7 +177,7 @@ def edit_room(request, room_id: int):
     total_num_rooms = Room.objects.all().count()
     room = Room.objects.filter(id=room_id).first()
     data = {
-        'dark_theme': get_setting_with_default("dark_theme"),
+        'theme': get_setting_with_default("theme"),
         'room': room,
         'total_num_rooms': total_num_rooms
     }
@@ -244,7 +244,7 @@ def edit_nspanel(request, panel_id: int):
     }
 
     return render(request, 'edit_nspanel.html', {
-        'dark_theme': get_setting_with_default("dark_theme"),
+        'theme': get_setting_with_default("theme"),
         'panel': NSPanel.objects.get(id=panel_id),
         'rooms': Room.objects.all(),
         'settings': settings,
@@ -495,7 +495,7 @@ def settings_page(request):
     environment = environ.Env()
 
     data = {
-        'dark_theme': get_setting_with_default("dark_theme"),
+        'theme': get_setting_with_default("theme"),
         'mqttmanager_log_level': get_setting_with_default("mqttmanager_log_level"),
     }
     data["color_temp_min"] = get_setting_with_default("color_temp_min")
@@ -811,13 +811,13 @@ def get_manual(request):
 
 
 def global_scenes(request):
-    data = {'dark_theme': get_setting_with_default("dark_theme"), }
+    data = {'theme': get_setting_with_default("theme"), }
     data["global_scenes"] = Scene.objects.filter(room__isnull=True)
     return render(request, 'global_scenes.html', data)
 
 
 def relay_groups(request):
-    data = {'dark_theme': get_setting_with_default("dark_theme"), }
+    data = {'theme': get_setting_with_default("theme"), }
     data["nspanels"] = NSPanel.objects.all()
     data["relay_groups"] = RelayGroup.objects.all()
     return render(request, 'relay_groups.html', data)
@@ -890,7 +890,7 @@ def weather_and_time(request):
         return redirect("weather_and_time")
     else:
         data = {
-            'dark_theme': get_setting_with_default("dark_theme"),
+            'theme': get_setting_with_default("theme"),
             'date_format': get_setting_with_default("date_format"),
             'clock_us_style': get_setting_with_default("clock_us_style"),
             'use_fahrenheit': get_setting_with_default("use_fahrenheit"),
@@ -908,7 +908,7 @@ def weather_and_time(request):
 
 def denied_nspanels(request):
     data = {
-        'dark_theme': get_setting_with_default("dark_theme"),
+        'theme': get_setting_with_default("theme"),
         "nspanels": NSPanel.objects.all(),
     }
     return render(request, 'denied_nspanels.html', data)

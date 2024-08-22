@@ -156,6 +156,7 @@ urlpatterns = [
     path('htmx/nspanels/<int:nspanel_id>/accept_register_request', htmx.nspanel_accept_register_request, name='htmx_nspanel_accept_register_request'),
     path('htmx/nspanels/<int:nspanel_id>/deny_register_request', htmx.nspanel_deny_register_request, name='htmx_nspanel_deny_register_request'),
     path('htmx/nspanels/<int:nspanel_id>/delete', htmx.nspanel_delete, name='htmx_nspanel_delete'),
+    path('htmx/interface/theme', htmx.interface_theme, name='htmx_interface_theme'),
 
     # Components
     path('htmx/component/nspanel_status_header/<str:view>/<int:nspanel_id>', NSPanelHeader.as_view(), name="nspanel_status_header"),

@@ -23,17 +23,20 @@
             </div>
             <ul tabindex="0" class="dropdown-content bg-base-300 text-base-content rounded-box z-[1] w-56 p-2 shadow-2xl">
               {% with 'default light dark cupcake bumblebee emerald corporate synthwave retro cyberpunk valentine halloween garden forest aqua lofi pastel fantasy wireframe black luxury dracula cmyk autumn business acid lemonade night coffee winter dim nord sunset' as theme_list %}
-                  {% for theme in theme_list.split %}
+                  {% for theme_option in theme_list.split %}
                   <li>
-                      <div class="bg-base-100 rounded-lg my-1" data-theme="{{ theme }}">
+                      <div class="bg-base-100 rounded-lg my-1" data-theme="{{ theme_option }}">
                           <label class="label">
                               <input
                                   type="radio"
                                   name="theme-dropdown"
                                   class="theme-controller radio radio-xs checked:bg-success ml-2"
-                                  value="{{ theme }}" />
+                                  value="{{ theme_option }}"
+                                  hx-post="{% url 'htmx_interface_theme' %}" hx-swap="none"
+                                  {% if theme_option == theme %}checked{% endif %}
+                              />
 
-                              <span class="label-text justify-start w-full ml-2">{{ theme|title }}</span>
+                              <span class="label-text justify-start w-full ml-2">{{ theme_option|title }}</span>
                           <div class="flex">
                               <div class="badge badge-primary badge-xs ms-1"></div>
                               <div class="badge badge-accent badge-xs ms-1"></div>

@@ -145,3 +145,10 @@ def nspanel_delete(request, nspanel_id):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
+
+
+@csrf_exempt
+def interface_theme(request):
+    new_theme = request.POST.get('theme-dropdown')
+    set_setting_value("theme", new_theme)
+    return JsonResponse({"status": "OK"}, status=200)
