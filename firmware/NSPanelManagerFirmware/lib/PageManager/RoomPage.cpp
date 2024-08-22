@@ -282,7 +282,12 @@ void RoomPage::_toggleSelectedLight() {
     std::list<Light *> lightsToChange;
     lightsToChange.push_back(this->_selectedLight);
     if (this->_selectedLight->getLightLevel() == 0) {
-      LightManager::ChangeLightsToLevel(&lightsToChange, PageManager::GetHomePage()->getDimmingValue());
+      int dim_to_level = PageManager::GetHomePage()->getDimmingValue();
+      if (dim_to_level == 0) {
+        LOG_INFO("Trying to turn on a light but the current average room level is 0. Defaulting to 50%");
+        dim_to_level = 50;
+      }
+      LightManager::ChangeLightsToLevel(&lightsToChange, dim_to_level);
     } else {
       LightManager::ChangeLightsToLevel(&lightsToChange, 0);
     }

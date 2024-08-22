@@ -177,6 +177,8 @@ def get_nspanels_warnings(request):
     md5_us_tft_file = get_file_md5sum("gui_us.tft")
     nspanels = []
 
+    print(md5_firmware)
+
     for nspanel in NSPanel.objects.all():
         panel_info = {}
         panel_info["nspanel"] = {
@@ -340,6 +342,7 @@ def get_client_ip(request):
 def register_nspanel(request):
     """Update the already existing NSPanel OR create a new one"""
     data = json.loads(request.body)
+    print(data)
     if "mac" in data:
         data["mac_address"] = data["mac"]
     if "mac_origin" in data:
@@ -395,12 +398,15 @@ def register_nspanel(request):
 def delete_panel(request, panel_id: int):
     NSPanel.objects.get(id=panel_id).delete()
     # restart_mqtt_manager()
-    send_mqttmanager_reload_command()
+    #send_mqttmanager_reload_command()
     return HttpResponse("OK", status=200)
 
 
 def get_nspanel_config(request):
+    print(request)
+    print(request.GET)
     try:
+        logging.info("Trying to load config for NSPanel with MAC " + request.GET['mac'])
         nspanel = NSPanel.objects.get(mac_address=request.GET["mac"])
         base = {}
         base["name"] = nspanel.friendly_name
@@ -481,7 +487,8 @@ def get_nspanel_config(request):
             else:
                 base["scenes"][scene.id]["can_save"] = False
         return JsonResponse(base)
-    except:
+    except Exception as ex:
+        logging.exception(ex)
         print("Tried to get NSPanel config for panel that was not registered.")
         return HttpResponse("", status=500)
 

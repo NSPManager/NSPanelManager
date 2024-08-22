@@ -450,7 +450,11 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
 }
 
 void NSPanel::send_websocket_update() {
-  SPDLOG_TRACE("Sending websocket state update for {}::{}", this->_id, this->_name);
+  if (this->_has_registered_to_manager) {
+    SPDLOG_TRACE("Sending websocket update for {}::{}", this->_id, this->_name);
+  } else {
+    SPDLOG_TRACE("Sending websocket update for new NSPanel ??::{}", this->_name);
+  }
   // Send status over to web interface:
   nlohmann::json event_trigger_data;
   event_trigger_data["event_type"] = fmt::format("nspanel-{}-state-change", this->_id);
@@ -616,7 +620,6 @@ bool NSPanel::has_registered_to_manager() {
 
 bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload) {
   try {
-
     SPDLOG_INFO("Sending registration data to Django for database management.");
     std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/nspanels";
     std::string response_data;
@@ -643,21 +646,19 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
         response["command"] = "register_accept";
         response["address"] = MqttManagerConfig::get_settings().manager_address();
         response["port"] = MqttManagerConfig::get_settings().manager_port();
-
-        std::string reply_topic = "nspanel/";
-        reply_topic.append(register_request_payload["friendly_name"]);
-        reply_topic.append("/command");
+        std::string reply_topic = fmt::format("nspanel/{}/command", std::string(register_request_payload.at("friendly_name")));
         MQTT_Manager::publish(reply_topic, response.dump());
 
-        SPDLOG_TRACE("Sending websocket update for NSPanel state change.");
+        SPDLOG_TRACE("Sending websocket update for NSPanel {}::{} state change.", this->_id, this->_name);
         this->send_websocket_update();
+        return true;
       } else {
-        this->_is_register_denied = true;
-        this->_is_register_accepted = false;
-        SPDLOG_INFO("NSPanel {}::{} has yet to be accepted. Will not answer request.", this->_id, this->_name);
+        SPDLOG_ERROR("Malformed register request data. Missing 'friendly_name'.");
       }
     } else {
-      SPDLOG_ERROR("Failed to register NSPanel to manager.");
+      this->_is_register_denied = true;
+      this->_is_register_accepted = false;
+      SPDLOG_INFO("NSPanel {}::{} has yet to be accepted. Will not answer request.", this->_id, this->_name);
     }
   } catch (const std::exception &e) {
     SPDLOG_ERROR("Caught exception when trying to register NSPanel: {}", boost::diagnostic_information(e, true));

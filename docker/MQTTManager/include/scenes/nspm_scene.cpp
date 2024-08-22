@@ -77,6 +77,7 @@ void NSPMScene::save() {
     lights = this->_room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
   }
   for (Light *light : lights) {
+    SPDLOG_TRACE("Saving light {}::{}", light->get_id(), light->get_name());
     nlohmann::json light_state_json;
     LightState new_light_state;
     switch (light->get_mode()) {

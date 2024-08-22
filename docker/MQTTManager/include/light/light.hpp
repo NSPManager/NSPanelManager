@@ -164,6 +164,7 @@ protected:
   uint16_t _requested_color_temperature;
   uint16_t _requested_hue;
   uint8_t _requested_saturation;
+  MQTT_MANAGER_LIGHT_MODE _requested_mode;
 
   std::string _mqtt_brightness_topic;
   std::string _mqtt_kelvin_topic;

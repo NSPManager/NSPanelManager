@@ -23,6 +23,8 @@ void ScreensaverPage::attachMqttCallback() {
 }
 
 void ScreensaverPage::init() {
+  this->_stopped = false;
+
   bool show_background = false;
   if (InterfaceConfig::screensaver_mode.compare("with_background") == 0) {
     this->_screensaver_page_name = SCREENSAVER_PAGE_NAME;
@@ -57,6 +59,14 @@ void ScreensaverPage::init() {
   NSPanel::instance->setComponentVal(SCREENSAVER_MINIMAL_PAGE_NAME "." SCREENSAVER_BACKGROUND_CHOICE_VARIABLE_NAME, show_background ? 1 : 0);
 }
 
+void ScreensaverPage::stop() {
+  LOG_DEBUG("Stopping ScreensaverPage.");
+  vTaskDelay(50 / portTICK_PERIOD_MS);
+  this->_stopped = true;
+  LOG_INFO("ScreensaverPage stopped.");
+  vTaskDelay(50 / portTICK_PERIOD_MS);
+}
+
 void ScreensaverPage::show() {
   NSPanel::instance->setDimLevel(this->_screensaver_brightness);
   NSPanel::instance->goToPage(this->_screensaver_page_name.c_str());
@@ -80,6 +90,9 @@ void ScreensaverPage::update() {
 }
 
 void ScreensaverPage::updateRoomTemp(std::string roomtemp_string) {
+  if (ScreensaverPage::_stopped) {
+    return;
+  }
   NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_ROOMTEMP_TEXT_NAME, roomtemp_string.c_str());
   NSPanel::instance->setComponentText(SCREENSAVER_MINIMAL_PAGE_NAME "." SCREENSAVER_CURRENT_ROOMTEMP_TEXT_NAME, roomtemp_string.c_str());
 }
@@ -94,6 +107,10 @@ void ScreensaverPage::unshow() {
 }
 
 void ScreensaverPage::screensaverModeCallback(char *topic, byte *payload, unsigned int length) {
+  if (ScreensaverPage::_stopped) {
+    return;
+  }
+
   std::string screensaver_mode = std::string((char *)payload, length);
   InterfaceConfig::screensaver_mode = screensaver_mode;
   LOG_INFO("Received command to change screensaver mode to: ", screensaver_mode.c_str());

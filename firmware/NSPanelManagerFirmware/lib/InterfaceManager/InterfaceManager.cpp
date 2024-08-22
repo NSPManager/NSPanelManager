@@ -29,6 +29,7 @@ void InterfaceManager::init() {
 
 void InterfaceManager::stop() {
   LOG_INFO("Stopping interface manager.");
+  vTaskDelay(50 / portTICK_PERIOD_MS);
   try {
     InterfaceManager::instance->_processMqttMessages = false; // Stop processing of MQTT messages.
     if (InterfaceManager::_taskHandleSpecialModeTimer != NULL) {
@@ -51,6 +52,9 @@ void InterfaceManager::stop() {
   } catch (const std::exception &e) {
     LOG_ERROR("Error while stopping Interface Manager: ", e.what());
   }
+
+  LOG_INFO("InterfaceManager stopped.");
+  vTaskDelay(50 / portTICK_PERIOD_MS);
 }
 
 void InterfaceManager::_taskLoadConfigAndInit(void *param) {

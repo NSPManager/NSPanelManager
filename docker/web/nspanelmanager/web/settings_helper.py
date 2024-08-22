@@ -6,7 +6,7 @@ default_settings = {
     "clock_us_style": False,
     "color_temp_max": 6000,
     "color_temp_min": 2000,
-    "dark_theme": False,
+    "theme": "default",
     "date_format": "%a %d/%m %Y",
     "home_assistant_address": "",
     "home_assistant_token": "",

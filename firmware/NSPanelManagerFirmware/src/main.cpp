@@ -341,6 +341,7 @@ void taskManageWifiAndMqtt(void *param) {
       if (WiFi.isConnected()) {
         lastWiFiconnected = millis();
       }
+      yield();
       vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
   } else {

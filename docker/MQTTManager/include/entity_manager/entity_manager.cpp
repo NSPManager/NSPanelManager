@@ -139,7 +139,6 @@ void EntityManager::add_nspanel(NSPanelSettings &config) {
 
 void EntityManager::post_init_entities() {
   SPDLOG_INFO("New config loaded, processing changes.");
-
   EntityManager::_weather_manager.update_config();
 
   {
@@ -156,15 +155,15 @@ void EntityManager::post_init_entities() {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
     for (int i = 0; i < EntityManager::_nspanels.size(); i++) {
       auto rit = EntityManager::_nspanels[i];
-      bool exists = ITEM_IN_LIST(nspanel_ids, rit->get_id());
-      if (!exists) {
-        NSPanel *panel = rit;
-        rit->erase();
-        SPDLOG_DEBUG("Removing NSPanel {}::{} as it doesn't exist in config anymore.", panel->get_id(), panel->get_name());
-        EntityManager::_nspanels.erase(EntityManager::_nspanels.begin() + i);
-        delete panel;
-      } else {
-        rit++;
+      if (rit->has_registered_to_manager()) {
+        bool exists = ITEM_IN_LIST(nspanel_ids, rit->get_id());
+        if (!exists) {
+          NSPanel *panel = rit;
+          rit->erase();
+          SPDLOG_DEBUG("Removing NSPanel {}::{} as it doesn't exist in config anymore.", panel->get_id(), panel->get_name());
+          EntityManager::_nspanels.erase(EntityManager::_nspanels.begin() + i);
+          delete panel;
+        }
       }
     }
   }
@@ -391,6 +390,13 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
       std::string mac_origin = data["mac_origin"];
       if (data.contains("method")) {
         NSPanel *panel = EntityManager::get_nspanel_by_mac(mac_origin);
+        if (panel == nullptr) {
+          SPDLOG_TRACE("Received command from an unknown NSPanel. Will ignore it.");
+          return true;
+        } else if (panel != nullptr && !panel->has_registered_to_manager()) {
+          SPDLOG_TRACE("Received command from an NSPanel that hasn't registered to the manager yet. Will ignore it.");
+          return true;
+        }
         std::string command_method = data["method"];
         if (command_method.compare("set") == 0) {
           std::string command_set_attribute = data["attribute"];
@@ -543,6 +549,7 @@ NSPanel *EntityManager::get_nspanel_by_mac(std::string mac) {
   SPDLOG_TRACE("Trying to find NSPanel by MAC {}", mac);
   std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
   for (NSPanel *nspanel : EntityManager::_nspanels) {
+    SPDLOG_TRACE("Found NSPanel with mac '{}'. Searching for mac '{}'.", nspanel->get_mac(), mac);
     if (nspanel->get_mac().compare(mac) == 0) {
       SPDLOG_TRACE("Found NSPanel by MAC {}", mac);
       return nspanel;
@@ -562,19 +569,23 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
   if (command.compare("get_nspanels_status") == 0) {
     SPDLOG_DEBUG("Processing request for NSPanels status.");
     std::vector<nlohmann::json> panel_responses;
-    for (NSPanel *panel : EntityManager::_nspanels) {
-      if (panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::DENIED) {
+    for (auto it = EntityManager::_nspanels.cbegin(); it != EntityManager::_nspanels.cend(); it++) {
+      if ((*it)->get_state() == MQTT_MANAGER_NSPANEL_STATE::DENIED) {
         continue; // Skip any panel that is denied.
       }
-      SPDLOG_DEBUG("Requesting state from NSPanel {}::{}", panel->get_id(), panel->get_name());
+      if ((*it)->has_registered_to_manager()) {
+        SPDLOG_DEBUG("Requesting state from NSPanel {}::{}", (*it)->get_id(), (*it)->get_name());
+      } else {
+        SPDLOG_DEBUG("Requesting state from NSPanel ??::{}", (*it)->get_name());
+      }
       if (args.contains("nspanel_id")) {
-        if (panel->get_id() == atoi(std::string(args["nspanel_id"]).c_str())) {
-          panel_responses.push_back(panel->get_websocket_json_representation());
+        if ((*it)->get_id() == atoi(std::string(args["nspanel_id"]).c_str())) {
+          panel_responses.push_back((*it)->get_websocket_json_representation());
           break;
         }
       } else {
         // In case no ID was specified, send status for all panels.
-        panel_responses.push_back(panel->get_websocket_json_representation());
+        panel_responses.push_back((*it)->get_websocket_json_representation());
       }
     }
     nlohmann::json response;
@@ -678,7 +689,6 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       SPDLOG_DEBUG("Received NSPanel deny request for a panel we could not find. Ignoring request.");
     }
   } else if (command.compare("nspanel_delete") == 0) {
-
     nlohmann::json args = data["args"];
     std::string mac = args["mac_address"];
     NSPanel *panel = EntityManager::get_nspanel_by_mac(mac);
@@ -693,6 +703,19 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
         response["success"] = true;
         response["mac_address"] = mac;
         (*response_buffer) = response.dump();
+
+        // Instantly delete NSPanel from manager.
+        std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
+        for (int i = 0; i < EntityManager::_nspanels.size(); i++) {
+          if (EntityManager::_nspanels[i] == panel) {
+            EntityManager::_nspanels.erase(EntityManager::_nspanels.begin() + i);
+            panel->reset_mqtt_topics();
+            delete panel;
+            SPDLOG_INFO("Deleted NSPanel instance from EntityManager.");
+            break;
+          }
+        }
+
         SPDLOG_DEBUG("Panel with MAC {} delete call completed.", mac);
         return true;
       } else {

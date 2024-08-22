@@ -27,6 +27,12 @@ public:
 
   template <typename CALLBACK_BIND>
   static void subscribe(std::string topic, int qos, CALLBACK_BIND callback) {
+    if (topic.empty()) {
+      SPDLOG_ERROR("Subscribing to '{}' is not allowed. Will not subscribe.", topic);
+      return;
+    }
+
+    std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
     bool already_subscribed = MQTT_Manager::_mqtt_callbacks[topic].num_slots() > 0;
     MQTT_Manager::_mqtt_callbacks[topic].disconnect(callback); // Disconnect before doing a connect in case we were already connected.
     MQTT_Manager::_mqtt_callbacks[topic].connect(callback);
@@ -47,6 +53,7 @@ public:
 
   template <typename CALLBACK_BIND>
   static void detach_callback(std::string topic, CALLBACK_BIND callback) {
+    std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
     MQTT_Manager::_mqtt_callbacks[topic].disconnect(callback);
   }
 
@@ -88,8 +95,8 @@ private:
   static inline std::thread _process_messages_thread;
   static inline mqtt::client *_mqtt_client = nullptr;
   static inline std::mutex _mqtt_client_mutex;
+  static inline std::mutex _mqtt_message_mutex;
   static inline std::list<mqtt::message_ptr> _mqtt_messages_buffer;
-  static inline std::list<std::function<bool(const std::string &topic, const std::string &payload)>> _mqtt_observer_callbacks; // Raw function callbacks
   static const std::vector<std::string> _get_subscribe_topics();
   static const std::vector<int> _get_subscribe_topics_qos();
 

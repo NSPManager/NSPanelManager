@@ -2,10 +2,12 @@
 #include "spdlog/sinks/ansicolor_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "websocket_server/websocket_server.hpp"
+#include <boost/algorithm/minmax.hpp>
 #include <chrono>
 #include <cstddef>
 #include <cstdlib>
 #include <ctime>
+#include <filesystem>
 #include <ipc_handler/ipc_handler.hpp>
 #include <memory>
 #include <signal.h>
@@ -82,13 +84,26 @@ void publish_time_and_date() {
 int main(void) {
   SPDLOG_INFO("Starting MQTTManager.");
 
+  std::filesystem::path log_partition_path = "/dev/shm/";
+  std::filesystem::space_info log_partition_space_info = std::filesystem::space(log_partition_path);
+  const uintmax_t free_space = log_partition_space_info.free;
+  const uintmax_t free_space_10_percent = free_space * 0.10; // 10% of free space.
+  const uintmax_t max_log_size = 1048576 * 30;
+
+  SPDLOG_INFO("/dev/shm has {} bytes free.", log_partition_space_info.free);
+
   // Setup logging
-  auto max_size = 1048576 * 30; // Grow log file to 30MB and then rotate
-  auto max_files = 3;           // Keep 3 log files in system
+  auto max_size = boost::minmax(free_space_10_percent, free_space).head; // Grow log file to 10% of free space or max 30MB and then rotate
+
+  SPDLOG_INFO("Will log to /dev/shm/mqttmanager.log with a max size of {} bytes.", max_size);
 
   std::vector<spdlog::sink_ptr> spdlog_sinks;
-  spdlog_sinks.push_back(std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>());                                             // Log to console
-  spdlog_sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_st>("/dev/shm/mqttmanager.log", max_size, max_files)); // Log to rotating log file
+  spdlog_sinks.push_back(std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>()); // Log to console
+  if (max_size > 1024) {
+    spdlog_sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_st>("/dev/shm/mqttmanager.log", max_size, 1)); // Log to rotating log file
+  } else {
+    SPDLOG_ERROR("Not enough storage/momory available on /dev/shm partition. Will not log to file!");
+  }
 
   // Setup logging to console and file
   auto combined_logger = std::make_shared<spdlog::logger>("combined_logger", begin(spdlog_sinks), end(spdlog_sinks));

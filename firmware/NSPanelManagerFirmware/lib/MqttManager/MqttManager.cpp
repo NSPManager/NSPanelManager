@@ -231,7 +231,10 @@ bool MqttManager::_connect() {
   MqttManager::_mqttClient->connect(mqtt_device_name.c_str(), NSPMConfig::instance->mqtt_username.c_str(), NSPMConfig::instance->mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, true, offline_message_buffer);
   vTaskDelay(1000 / portTICK_PERIOD_MS);
   if (MqttManager::connected()) {
-    MqttManager::_mqttClient->publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), online_message_buffer, true);
+    while (!MqttManager::_mqttClient->publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), online_message_buffer, true)) {
+      LOG_ERROR("Failed to send online/offline message");
+      vTaskDelay(250 / portTICK_PERIOD_MS);
+    }
     Serial.print("Connected to MQTT server ");
     Serial.println(NSPMConfig::instance->mqtt_server.c_str());
     LOG_INFO("Connected to MQTT server ", NSPMConfig::instance->mqtt_server.c_str());

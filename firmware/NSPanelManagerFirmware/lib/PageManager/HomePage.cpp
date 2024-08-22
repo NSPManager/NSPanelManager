@@ -345,7 +345,7 @@ void HomePage::_updateAllLightsWithNewBrightness(uint8_t brightness) {
 
 void HomePage::_startSpecialModeTriggerTask(editLightMode triggerMode) {
   InterfaceConfig::_triggerSpecialLightMode = triggerMode;
-  xTaskCreatePinnedToCore(_taskTriggerSpecialModeTriggerTask, "taskSpecialModeTriggerTask", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+  xTaskCreatePinnedToCore(_taskTriggerSpecialModeTriggerTask, "taskSpecialModeTriggerTask", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 }
 
 void HomePage::_taskTriggerSpecialModeTriggerTask(void *param) {
@@ -376,7 +376,7 @@ void HomePage::_taskTriggerSpecialModeTriggerTask(void *param) {
 void HomePage::_startSpecialModeTimerTask() {
   this->_lastSpecialModeEventMillis = millis();
   if (this->_specialModeTimerTaskHandle == NULL) {
-    xTaskCreatePinnedToCore(_taskSpecialModeTimerTask, "taskSpecialModeTimer", 5000, NULL, 1, &HomePage::_specialModeTimerTaskHandle, CONFIG_ARDUINO_RUNNING_CORE);
+    xTaskCreatePinnedToCore(_taskSpecialModeTimerTask, "taskSpecialModeTimer", 5000, NULL, 0, &HomePage::_specialModeTimerTaskHandle, CONFIG_ARDUINO_RUNNING_CORE);
   }
 }
 

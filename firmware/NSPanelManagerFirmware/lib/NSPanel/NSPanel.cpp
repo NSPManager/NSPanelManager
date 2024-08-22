@@ -249,6 +249,7 @@ bool NSPanel::init() {
 
   xSemaphoreGive(NSPanel::instance->_mutexWriteSerialData);
   xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
+  Serial2.onReceive(NSPanel::_onSerialData, false);
   LOG_INFO("NSPanel::init complete.");
   return this->_has_received_nspm;
 }
@@ -346,10 +347,16 @@ void NSPanel::attachWakeCallback(void (*callback)()) {
   NSPanel::_wakeCallback = callback;
 }
 
+void IRAM_ATTR NSPanel::_onSerialData(void) {
+  if (NSPanel::_taskHandleReadNSPanelData != NULL && NSPanel::_taskHandleReadNSPanelData != nullptr) {
+    vTaskNotifyGiveFromISR(NSPanel::_taskHandleReadNSPanelData, NULL);
+  }
+}
+
 void NSPanel::_taskReadNSPanelData(void *param) {
   LOG_INFO("Starting taskReadNSPanelData.");
   for (;;) {
-    while (Serial2.available() == 0) {
+    while (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) != pdTRUE) {
       vTaskDelay(25 / portTICK_PERIOD_MS);
     }
 

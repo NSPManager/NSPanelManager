@@ -8,6 +8,7 @@
 #include <nlohmann/json_fwd.hpp>
 #include <protobuf/protobuf_mqttmanager.pb.h>
 #include <string>
+#include <vector>
 
 #define MANAGER_ADDRESS "127.0.0.1"
 #define MANAGER_PORT "8000"

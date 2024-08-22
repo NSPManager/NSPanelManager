@@ -2,6 +2,7 @@
 #include <HTTPClient.h>
 #include <HttpLib.hpp>
 #include <InterfaceManager.hpp>
+#include <LightManager.hpp>
 #include <LittleFS.h>
 #include <MqttLog.hpp>
 #include <NSPMConfig.h>
@@ -163,7 +164,11 @@ void WebManager::respondAvailableWiFiNetworks(AsyncWebServerRequest *request) {
 }
 
 void WebManager::startOTAUpdate() {
-  xTaskCreatePinnedToCore(WebManager::_taskPerformOTAUpdate, "taskPerformOTAUpdate", 20000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE); // TODO: Move function to InterfaceManager
+  // TODO: Move function to InterfaceManager
+  BaseType_t result = xTaskCreatePinnedToCore(WebManager::_taskPerformOTAUpdate, "taskPerformOTAUpdate", 10000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+  if (result != pdPASS) {
+    LOG_ERROR("Failed to create task to perform OTA update. Error: ", result);
+  }
 }
 
 void WebManager::_taskPerformOTAUpdate(void *param) {
@@ -184,8 +189,10 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
   }
   LOG_DEBUG("Got firmware MD5 ", checksum_holder);
   LOG_DEBUG("Stored firmware MD5 ", NSPMConfig::instance->md5_firmware.c_str());
+
   bool hasAnythingUpdated = false;
   bool firmwareUpdateSuccessful = true;
+  yield();
   vTaskDelay(250 / portTICK_PERIOD_MS); // Wait for other tasks.
   if (NSPMConfig::instance->md5_firmware.compare(checksum_holder) != 0) {
     do {
@@ -225,6 +232,8 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
     LOG_DEBUG("Stored LittleFS MD5 ", NSPMConfig::instance->md5_data_file.c_str());
     vTaskDelay(250 / portTICK_PERIOD_MS); // Wait for other tasks.
     if (NSPMConfig::instance->md5_data_file.compare(checksum_holder) != 0) {
+      LOG_INFO("Will update LittleFS.");
+      vTaskDelay(250 / portTICK_PERIOD_MS);
       bool littleFSUpdateSuccessful = false;
       do {
         littleFSUpdateSuccessful = WebManager::_update(U_SPIFFS, "/download_data_file");
@@ -275,8 +284,11 @@ uint8_t WebManager::getUpdateProgress() {
 }
 
 bool WebManager::_update(uint8_t type, const char *url) {
-  InterfaceManager::stop();
   LOG_INFO("Starting ", type == U_FLASH ? "Firmware" : "LittleFS", " OTA update...");
+  vTaskDelay(250 / portTICK_PERIOD_MS);
+  InterfaceManager::stop();
+  LightManager::stop();
+  PageManager::GetScreensaverPage()->stop();
   WebManager::_update_progress = 0;
   std::string downloadUrl = "http://";
   downloadUrl.append(NSPMConfig::instance->manager_address);
