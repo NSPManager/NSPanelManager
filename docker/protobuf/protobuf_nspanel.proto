@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+// Protobufs defined in this .proto file are used to communicate with the MQTTManager
+
+message NSPanelStatusReport {
+    enum state {
+        ONLINE = 0;
+        OFFLINE = 1;
+        UPDATING_TFT = 2;
+        UPDATING_FIRMWARE = 3;
+        UPDATING_LITTLEFS = 4;
+    }
+    state nspanel_state = 1;
+    optional int32 update_progress = 2;
+    int32 rssi = 3;
+    int32 heap_used_pct = 4;
+    string mac_address = 5;
+    string temperature = 6;
+    string ip_address = 7;
+
+    message NSPanelWarning {
+        enum NSPanelWarningLevel {
+            CRITICAL = 0;
+            ERROR =1;
+            WARNING = 2;
+            INFO = 3;
+            DEBUG = 4;
+            TRACE = 5;
+        }
+        NSPanelWarningLevel level = 1;
+        string text = 2;
+    }
+    repeated NSPanelWarning warnings = 8;
+}

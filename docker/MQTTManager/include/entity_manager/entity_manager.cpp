@@ -3,6 +3,7 @@
 #include "light/openhab_light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "protobuf_general.pb.h"
+#include "protobuf_nspanel.pb.h"
 #include "room/room.hpp"
 #include "scenes/home_assistant_scene.hpp"
 #include "scenes/nspm_scene.hpp"
@@ -10,6 +11,7 @@
 #include "scenes/scene.hpp"
 #include "web_helper/WebHelper.hpp"
 #include "websocket_server/websocket_server.hpp"
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/stacktrace.hpp>
 #include <boost/stacktrace/frame.hpp>
@@ -42,7 +44,6 @@ void EntityManager::init() {
   MqttManagerConfig::attach_config_loaded_listener(EntityManager::post_init_entities);
   MQTT_Manager::subscribe("nspanel/mqttmanager/command", &EntityManager::mqtt_topic_callback);
   MQTT_Manager::subscribe("nspanel/+/status", &EntityManager::mqtt_topic_callback);
-  MQTT_Manager::subscribe("nspanel/+/status_report", &EntityManager::mqtt_topic_callback);
 }
 
 void EntityManager::attach_entity_added_listener(void (*listener)(MqttManagerEntity *)) {

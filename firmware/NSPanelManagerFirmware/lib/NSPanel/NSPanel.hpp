@@ -36,8 +36,6 @@ public:
   static void attachTouchEventCallback(void (*callback)(uint8_t, uint8_t, bool));
   static void attachSleepCallback(void (*callback)());
   static void attachWakeCallback(void (*callback)());
-  /// @brief Update any warnings to the WarningManager
-  static void updateWarnings();
   bool ready();
   bool init();
   bool startOTAUpdate();

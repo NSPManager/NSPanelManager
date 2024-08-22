@@ -176,6 +176,8 @@ bool NSPanel::init() {
   this->_readDataToString(&result, 2500, false);
   if (result.compare("NSPM") == 0) {
     this->_has_received_nspm = true;
+  } else {
+    WarningManager::register_warning("error", "Did not receive NSPM-flag from screen. Is the screen running the NSPanel Manager TFT file?");
   }
 
   LOG_DEBUG("Got text from panel: ", result.c_str());
@@ -610,12 +612,6 @@ bool NSPanel::getUpdateState() {
 
 uint8_t NSPanel::getUpdateProgress() {
   return this->_update_progress;
-}
-
-void NSPanel::updateWarnings() {
-  if (!NSPanel::instance->_has_received_nspm) {
-    WarningManager::register_warning("error", "Did not receive NSPM-flag from screen. Is the screen running the NSPanel Manager TFT file?");
-  }
 }
 
 bool NSPanel::ready() {

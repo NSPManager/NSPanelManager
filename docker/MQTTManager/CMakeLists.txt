@@ -39,7 +39,7 @@ find_package(Boost REQUIRED COMPONENTS signals2 stacktrace_backtrace)
 file(GLOB PROTOBUF_PB_CC_FILES "${CMAKE_INCLUDE_SRC_DIRECTORY}/protobuf/*.pb.cc")
 file(GLOB PROTOBUF_PB_H_FILES "${CMAKE_INCLUDE_SRC_DIRECTORY}/protobuf/*.pb.h")
 add_library(Protobuf_MQTTManager SHARED ${PROTOBUF_PB_CC_FILES} ${PROTOBUF_PB_H_FILES})
-set_target_properties(Protobuf_MQTTManager PROPERTIES PUBLIC_HEADER ${PROTOBUF_PB_H_FILES})
+#set_target_properties(Protobuf_MQTTManager PROPERTIES PUBLIC_HEADER ${PROTOBUF_PB_H_FILES})
 target_include_directories(Protobuf_MQTTManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(Protobuf_MQTTManager protobuf::protobuf)
 

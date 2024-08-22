@@ -5,9 +5,11 @@
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_general.pb.h"
+#include "protobuf_nspanel.pb.h"
 #include "web_helper/WebHelper.hpp"
 #include <algorithm>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/bind.hpp>
 #include <boost/bind/placeholders.hpp>
@@ -289,162 +291,225 @@ MQTT_MANAGER_NSPANEL_STATE NSPanel::get_state() {
 }
 
 void NSPanel::mqtt_callback(std::string topic, std::string payload) {
-  if (!payload.empty() && topic.compare(this->_mqtt_log_topic) == 0) {
-    // Split log message by semicolon to extract MAC, log level and message.
-    std::string message = payload;
-    std::vector<std::string> message_parts;
-    size_t pos = 0;
-    uint8_t count = 0;
-    std::string token;
-    while ((pos = message.find(";")) != std::string::npos && count < 2) {
-      token = message.substr(0, pos);
-      message_parts.push_back(token);
-      message.erase(0, pos + 1); // Remove current part from beginning of topic string (including delimiter)
-      count++;
-    }
-    message_parts.push_back(message);
-
-    if (message_parts.size() == 3) {
-      std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-      std::tm tm = *std::localtime(&now);
-      std::stringstream buffer;
-      if (MqttManagerConfig::get_settings().clock_format() == time_format::FULL) {
-        buffer << std::put_time(&tm, "%H:%M:%S");
-      } else {
-        buffer << std::put_time(&tm, "%I:%M:%S %p");
+  bool parse_fail = false;
+  try {
+    if (!payload.empty() && topic.compare(this->_mqtt_log_topic) == 0) {
+      // Split log message by semicolon to extract MAC, log level and message.
+      std::string message = payload;
+      std::vector<std::string> message_parts;
+      size_t pos = 0;
+      uint8_t count = 0;
+      std::string token;
+      while ((pos = message.find(";")) != std::string::npos && count < 2) {
+        token = message.substr(0, pos);
+        message_parts.push_back(token);
+        message.erase(0, pos + 1); // Remove current part from beginning of topic string (including delimiter)
+        count++;
       }
+      message_parts.push_back(message);
 
-      std::string send_mac = message_parts[0];
-      send_mac.erase(std::remove(send_mac.begin(), send_mac.end(), ':'), send_mac.end());
-
-      nlohmann::json log_data;
-      log_data["type"] = "log";
-      log_data["time"] = buffer.str();
-      log_data["panel"] = this->_name;
-      log_data["mac_address"] = message_parts[0];
-      log_data["level"] = message_parts[1];
-      log_data["message"] = message_parts[2];
-      WebsocketServer::broadcast_json(log_data);
-
-      // Save log message in backtrace for when (if) the log interface requests it.
-      NSPanelLogMessage message;
-      message.time = buffer.str();
-      message.level = message_parts[1];
-      message.message = message_parts[2];
-      this->_log_messages.push_front(message);
-      // Remove older messages from backtrace.
-      while (this->_log_messages.size() > MqttManagerConfig::get_settings().max_log_buffer_size()) {
-        this->_log_messages.pop_back();
-      }
-    } else {
-      SPDLOG_ERROR("Received message on log topic {} with wrong format. Message: {}", topic, payload);
-    }
-  } else if (topic.compare(this->_mqtt_status_topic) == 0) {
-    nlohmann::json data = nlohmann::json::parse(payload);
-    if (std::string(data["mac"]).compare(this->_mac) == 0) {
-      // Update internal state.
-      std::string state = data["state"];
-      if (state.compare("online") == 0) {
-        this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
-        SPDLOG_DEBUG("NSPanel {}::{} became ONLINE.", this->_id, this->_name);
-      } else if (state.compare("offline") == 0) {
-        this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE;
-        SPDLOG_DEBUG("NSPanel {}::{} became OFFLINE.", this->_id, this->_name);
-      } else {
-        SPDLOG_ERROR("Received unknown state for nspanel {}::{}. State: {}", this->_id, this->_name, state);
-      }
-
-      this->send_websocket_update();
-    }
-  } else if (topic.compare(this->_mqtt_status_report_topic) == 0) {
-    nlohmann::json data = nlohmann::json::parse(payload);
-    if (std::string(data["mac"]).compare(this->_mac) == 0) {
-      // Update internal status
-      this->_rssi = data["rssi"];
-      this->_heap_used_pct = data["heap_used_pct"];
-      if (data["temperature"].is_number_float()) {
-        this->_temperature = data["temperature"];
-      } else if (data["temperature"].is_string()) {
-        this->_temperature = atof(std::string(data["temperature"]).c_str());
-      } else {
-        SPDLOG_ERROR("Incorrect format of temperature data. Expected float.");
-      }
-      this->_ip_address = data["ip"];
-      this->_nspanel_warnings.clear();
-      if (data.at("warnings").is_string()) {
-        // Loaded from old firmware, split string and assume level warning
-        std::vector<std::string> message_lines;
-        boost::split(message_lines, std::string(data.at("warnings")), boost::is_any_of("\n"));
-        for (std::string line : message_lines) {
-          NSPanelWarning warning_obj = {
-              .level = "warning",
-              .text = line};
-          this->_nspanel_warnings.push_back(warning_obj);
+      if (message_parts.size() == 3) {
+        std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        std::tm tm = *std::localtime(&now);
+        std::stringstream buffer;
+        if (MqttManagerConfig::get_settings().clock_format() == time_format::FULL) {
+          buffer << std::put_time(&tm, "%H:%M:%S");
+        } else {
+          buffer << std::put_time(&tm, "%I:%M:%S %p");
         }
-      } else if (data.at("warnings").is_array()) {
-        for (nlohmann::json warning : data.at("warnings")) {
-          if (warning.contains("level") && warning.contains("text")) {
+
+        std::string send_mac = message_parts[0];
+        send_mac.erase(std::remove(send_mac.begin(), send_mac.end(), ':'), send_mac.end());
+
+        nlohmann::json log_data;
+        log_data["type"] = "log";
+        log_data["time"] = buffer.str();
+        log_data["panel"] = this->_name;
+        log_data["mac_address"] = message_parts[0];
+        log_data["level"] = message_parts[1];
+        log_data["message"] = message_parts[2];
+        WebsocketServer::broadcast_json(log_data);
+
+        // Save log message in backtrace for when (if) the log interface requests it.
+        NSPanelLogMessage message;
+        message.time = buffer.str();
+        message.level = message_parts[1];
+        message.message = message_parts[2];
+        this->_log_messages.push_front(message);
+        // Remove older messages from backtrace.
+        while (this->_log_messages.size() > MqttManagerConfig::get_settings().max_log_buffer_size()) {
+          this->_log_messages.pop_back();
+        }
+      } else {
+        SPDLOG_ERROR("Received message on log topic {} with wrong format. Message: {}", topic, payload);
+      }
+    } else if (topic.compare(this->_mqtt_status_topic) == 0) {
+      nlohmann::json data = nlohmann::json::parse(payload);
+      if (std::string(data["mac"]).compare(this->_mac) == 0) {
+        // Update internal state.
+        std::string state = data["state"];
+        if (state.compare("online") == 0) {
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+          SPDLOG_DEBUG("NSPanel {}::{} became ONLINE.", this->_id, this->_name);
+        } else if (state.compare("offline") == 0) {
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE;
+          SPDLOG_DEBUG("NSPanel {}::{} became OFFLINE.", this->_id, this->_name);
+        } else {
+          SPDLOG_ERROR("Received unknown state for nspanel {}::{}. State: {}", this->_id, this->_name, state);
+        }
+
+        this->send_websocket_update();
+      }
+    } else if (topic.compare(this->_mqtt_status_report_topic) == 0) {
+      nlohmann::json data = nlohmann::json::parse(payload);
+      if (std::string(data["mac"]).compare(this->_mac) == 0) {
+        // Update internal status
+        this->_rssi = data["rssi"];
+        this->_heap_used_pct = data["heap_used_pct"];
+        if (data["temperature"].is_number_float()) {
+          this->_temperature = data["temperature"];
+        } else if (data["temperature"].is_string()) {
+          this->_temperature = atof(std::string(data["temperature"]).c_str());
+        } else {
+          SPDLOG_ERROR("Incorrect format of temperature data. Expected float.");
+        }
+        this->_ip_address = data["ip"];
+        this->_nspanel_warnings.clear();
+        if (data.at("warnings").is_string()) {
+          // Loaded from old firmware, split string and assume level warning
+          std::vector<std::string> message_lines;
+          boost::split(message_lines, std::string(data.at("warnings")), boost::is_any_of("\n"));
+          for (std::string line : message_lines) {
             NSPanelWarning warning_obj = {
-                .level = warning.at("level"),
-                .text = warning.at("text")};
+                .level = "warning",
+                .text = line};
             this->_nspanel_warnings.push_back(warning_obj);
+          }
+        } else if (data.at("warnings").is_array()) {
+          for (nlohmann::json warning : data.at("warnings")) {
+            if (warning.contains("level") && warning.contains("text")) {
+              NSPanelWarning warning_obj = {
+                  .level = warning.at("level"),
+                  .text = warning.at("text")};
+              this->_nspanel_warnings.push_back(warning_obj);
+            } else {
+              SPDLOG_WARN("Failed to load warning from NSPanel {}::{}. Missing level or text attribute.", this->_id, this->_name);
+            }
+          }
+        }
+
+        if (data.contains("state")) {
+          std::string state = data["state"];
+          if (this->_state == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
+            // Do nothing, simply block state change to something else.
+          } else if (state.compare("updating_tft") == 0) {
+            this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT;
+          } else if (state.compare("updating_fw") == 0) {
+            this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_FIRMWARE;
+          } else if (state.compare("updating_fs") == 0) {
+            this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA;
           } else {
-            SPDLOG_WARN("Failed to load warning from NSPanel {}::{}. Missing level or text attribute.", this->_id, this->_name);
+            SPDLOG_ERROR("Received unknown state from nspanel {}::{}. State: {}", this->_id, this->_name, state);
+          }
+        } else {
+          if (this->_state == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
+            // We were waiting for a new status report. Set panel to online.
+            this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+          }
+        }
+
+        if (data.contains("progress")) {
+          this->_update_progress = data["progress"];
+        } else {
+          this->_update_progress = 0;
+        }
+
+        this->send_websocket_status_update();
+      }
+    } else if (topic.compare(this->_mqtt_relay1_state_topic) == 0) {
+      this->_relay1_state = (payload.compare("1") == 0);
+      std::list<NSPanelRelayGroup *> relay_groups = EntityManager::get_all_entities_by_type<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP);
+      for (NSPanelRelayGroup *relay_group : relay_groups) {
+        if (relay_group->contains(this->_id, 1)) {
+          if (payload.compare("1") == 0) {
+            relay_group->turn_on();
+          } else {
+            relay_group->turn_off();
           }
         }
       }
-
-      if (data.contains("state")) {
-        std::string state = data["state"];
-        if (this->_state == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
-          // Do nothing, simply block state change to something else.
-        } else if (state.compare("updating_tft") == 0) {
-          this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT;
-        } else if (state.compare("updating_fw") == 0) {
-          this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_FIRMWARE;
-        } else if (state.compare("updating_fs") == 0) {
-          this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA;
-        } else {
-          SPDLOG_ERROR("Received unknown state from nspanel {}::{}. State: {}", this->_id, this->_name, state);
-        }
-      } else {
-        if (this->_state == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
-          // We were waiting for a new status report. Set panel to online.
-          this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+    } else if (topic.compare(this->_mqtt_relay2_state_topic) == 0) {
+      this->_relay2_state = (payload.compare("1") == 0);
+      std::list<NSPanelRelayGroup *> relay_groups = EntityManager::get_all_entities_by_type<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP);
+      for (NSPanelRelayGroup *relay_group : relay_groups) {
+        if (relay_group->contains(this->_id, 2)) {
+          if (payload.compare("1") == 0) {
+            relay_group->turn_on();
+          } else {
+            relay_group->turn_off();
+          }
         }
       }
+    }
+  } catch (std::exception &e) {
+    parse_fail = true;
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
+  }
 
-      if (data.contains("progress")) {
-        this->_update_progress = data["progress"];
+  if (parse_fail) {
+    SPDLOG_INFO("Failed to parse data. Will try as protobuf.");
+
+    if (boost::ends_with(topic, "/status_report")) {
+      SPDLOG_TRACE("Trying to parse status_report as protobuf.");
+
+      NSPanelStatusReport report;
+      if (!report.MergeFromString(payload)) {
+        SPDLOG_ERROR("Failed to parse NSPanelStatusReport from string as protobuf.");
+        return;
+      } else {
+        // TODO: Remove log.
+        SPDLOG_INFO("Successfully parse status_report as protobuf.");
+      }
+
+      this->_ip_address = report.ip_address();
+      this->_rssi = report.rssi();
+      this->_heap_used_pct = report.heap_used_pct();
+      this->_temperature = atof(report.temperature().c_str());
+      switch (report.nspanel_state()) {
+      case NSPanelStatusReport_state::NSPanelStatusReport_state_ONLINE:
+        this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+        break;
+      case NSPanelStatusReport_state_OFFLINE:
+        this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE; // This should never happen, offline state is handled in "/status" and not "/status_report"
+        break;
+      case NSPanelStatusReport_state_UPDATING_TFT:
+        this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT;
+        break;
+      case NSPanelStatusReport_state_UPDATING_FIRMWARE:
+        this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_FIRMWARE;
+        break;
+      case NSPanelStatusReport_state_UPDATING_LITTLEFS:
+        this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA;
+        break;
+      case NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MIN_SENTINEL_DO_NOT_USE_:
+      case NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MAX_SENTINEL_DO_NOT_USE_:
+        break;
+      }
+
+      // TODO: Load warnings from protobuf report.
+
+      if (report.has_update_progress()) {
+        this->_update_progress = report.update_progress();
       } else {
         this->_update_progress = 0;
       }
 
-      this->send_websocket_status_update();
-    }
-  } else if (topic.compare(this->_mqtt_relay1_state_topic) == 0) {
-    this->_relay1_state = (payload.compare("1") == 0);
-    std::list<NSPanelRelayGroup *> relay_groups = EntityManager::get_all_entities_by_type<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP);
-    for (NSPanelRelayGroup *relay_group : relay_groups) {
-      if (relay_group->contains(this->_id, 1)) {
-        if (payload.compare("1") == 0) {
-          relay_group->turn_on();
-        } else {
-          relay_group->turn_off();
-        }
-      }
-    }
-  } else if (topic.compare(this->_mqtt_relay2_state_topic) == 0) {
-    this->_relay2_state = (payload.compare("1") == 0);
-    std::list<NSPanelRelayGroup *> relay_groups = EntityManager::get_all_entities_by_type<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP);
-    for (NSPanelRelayGroup *relay_group : relay_groups) {
-      if (relay_group->contains(this->_id, 2)) {
-        if (payload.compare("1") == 0) {
-          relay_group->turn_on();
-        } else {
-          relay_group->turn_off();
-        }
-      }
+      SPDLOG_TRACE("MAC: {}", report.mac_address());
+      SPDLOG_TRACE("IP : {}", report.ip_address());
+      SPDLOG_TRACE("TMP: {}", report.temperature());
+      SPDLOG_TRACE("HEP: {}", report.heap_used_pct());
+      SPDLOG_TRACE("RSI: {}", report.rssi());
     }
   }
 }
