@@ -10,6 +10,11 @@
 Light::Light(LightSettings &config) {
   this->_id = config.id();
   this->_room_id = config.room_id();
+  if (config.is_ceiling_light()) {
+    this->_light_type = MQTT_MANAGER_LIGHT_TYPE::CEILING;
+  } else {
+    this->_light_type = MQTT_MANAGER_LIGHT_TYPE::TABLE;
+  }
 
   // Build MQTT Topics
   std::string mqtt_base_topic = "nspanel/entities/light/";
@@ -38,6 +43,10 @@ Light::Light(LightSettings &config) {
 
   this->update_config(config);
   SPDLOG_DEBUG("Light {}::{} base loaded, can dim: {}, can color temp: {}, can_rgb: {}.", this->_id, this->_name, this->_can_dim ? "yes" : "no", this->_can_color_temperature ? "yes" : "no", this->_can_rgb ? "yes" : "no");
+}
+
+MQTT_MANAGER_LIGHT_TYPE Light::get_light_type() {
+  return this->_light_type;
 }
 
 void Light::update_config(LightSettings &config) {
@@ -209,4 +218,16 @@ void Light::reset_requests() {
   this->_requested_brightness = this->_current_brightness;
   this->_requested_saturation = this->_current_saturation;
   this->_requested_color_temperature = this->_current_color_temperature;
+}
+
+bool Light::can_dim() {
+  return this->_can_dim;
+}
+
+bool Light::can_color_temperature() {
+  return this->_can_color_temperature;
+}
+
+bool Light::can_rgb() {
+  return this->_can_rgb;
 }

@@ -32,3 +32,20 @@ message NSPanelStatusReport {
     }
     repeated NSPanelWarning warnings = 8;
 }
+
+message NSPanelLightStatus {
+    int32 id = 1;
+    string name = 2;
+    bool can_dim = 3;
+    bool can_color_temperature = 4;
+    bool can_rgb = 5;
+}
+
+message NSPanelRoomStatus {
+    int32 id = 1;
+    string name = 2;
+    int32 average_dim_level = 3;
+    int32 ceiling_lights_dim_level = 4;
+    int32 table_lights_dim_level = 5;
+    repeated NSPanelLightStatus lights = 6;
+}

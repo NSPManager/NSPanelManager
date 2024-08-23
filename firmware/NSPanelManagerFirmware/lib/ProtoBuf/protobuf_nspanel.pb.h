@@ -45,6 +45,23 @@ typedef struct _NSPanelStatusReport_NSPanelWarning {
     pb_callback_t text;
 } NSPanelStatusReport_NSPanelWarning;
 
+typedef struct _NSPanelLightStatus {
+    int32_t id;
+    pb_callback_t name;
+    bool can_dim;
+    bool can_color_temperature;
+    bool can_rgb;
+} NSPanelLightStatus;
+
+typedef struct _NSPanelRoomStatus {
+    int32_t id;
+    pb_callback_t name;
+    int32_t average_dim_level;
+    int32_t ceiling_lights_dim_level;
+    int32_t table_lights_dim_level;
+    pb_callback_t lights;
+} NSPanelRoomStatus;
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,11 +81,17 @@ extern "C" {
 #define NSPanelStatusReport_NSPanelWarning_level_ENUMTYPE NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel
 
 
+
+
 /* Initializer values for message structs */
 #define NSPanelStatusReport_init_default         {_NSPanelStatusReport_state_MIN, false, 0, 0, 0, {{NULL}, NULL}, {{NULL}, NULL}, {{NULL}, NULL}, {{NULL}, NULL}}
 #define NSPanelStatusReport_NSPanelWarning_init_default {_NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel_MIN, {{NULL}, NULL}}
+#define NSPanelLightStatus_init_default          {0, {{NULL}, NULL}, 0, 0, 0}
+#define NSPanelRoomStatus_init_default           {0, {{NULL}, NULL}, 0, 0, 0, {{NULL}, NULL}}
 #define NSPanelStatusReport_init_zero            {_NSPanelStatusReport_state_MIN, false, 0, 0, 0, {{NULL}, NULL}, {{NULL}, NULL}, {{NULL}, NULL}, {{NULL}, NULL}}
 #define NSPanelStatusReport_NSPanelWarning_init_zero {_NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel_MIN, {{NULL}, NULL}}
+#define NSPanelLightStatus_init_zero             {0, {{NULL}, NULL}, 0, 0, 0}
+#define NSPanelRoomStatus_init_zero              {0, {{NULL}, NULL}, 0, 0, 0, {{NULL}, NULL}}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define NSPanelStatusReport_nspanel_state_tag    1
@@ -81,6 +104,17 @@ extern "C" {
 #define NSPanelStatusReport_warnings_tag         8
 #define NSPanelStatusReport_NSPanelWarning_level_tag 1
 #define NSPanelStatusReport_NSPanelWarning_text_tag 2
+#define NSPanelLightStatus_id_tag                1
+#define NSPanelLightStatus_name_tag              2
+#define NSPanelLightStatus_can_dim_tag           3
+#define NSPanelLightStatus_can_color_temperature_tag 4
+#define NSPanelLightStatus_can_rgb_tag           5
+#define NSPanelRoomStatus_id_tag                 1
+#define NSPanelRoomStatus_name_tag               2
+#define NSPanelRoomStatus_average_dim_level_tag  3
+#define NSPanelRoomStatus_ceiling_lights_dim_level_tag 4
+#define NSPanelRoomStatus_table_lights_dim_level_tag 5
+#define NSPanelRoomStatus_lights_tag             6
 
 /* Struct field encoding specification for nanopb */
 #define NSPanelStatusReport_FIELDLIST(X, a) \
@@ -102,16 +136,42 @@ X(a, CALLBACK, SINGULAR, STRING,   text,              2)
 #define NSPanelStatusReport_NSPanelWarning_CALLBACK pb_default_field_callback
 #define NSPanelStatusReport_NSPanelWarning_DEFAULT NULL
 
+#define NSPanelLightStatus_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, INT32,    id,                1) \
+X(a, CALLBACK, SINGULAR, STRING,   name,              2) \
+X(a, STATIC,   SINGULAR, BOOL,     can_dim,           3) \
+X(a, STATIC,   SINGULAR, BOOL,     can_color_temperature,   4) \
+X(a, STATIC,   SINGULAR, BOOL,     can_rgb,           5)
+#define NSPanelLightStatus_CALLBACK pb_default_field_callback
+#define NSPanelLightStatus_DEFAULT NULL
+
+#define NSPanelRoomStatus_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, INT32,    id,                1) \
+X(a, CALLBACK, SINGULAR, STRING,   name,              2) \
+X(a, STATIC,   SINGULAR, INT32,    average_dim_level,   3) \
+X(a, STATIC,   SINGULAR, INT32,    ceiling_lights_dim_level,   4) \
+X(a, STATIC,   SINGULAR, INT32,    table_lights_dim_level,   5) \
+X(a, CALLBACK, REPEATED, MESSAGE,  lights,            6)
+#define NSPanelRoomStatus_CALLBACK pb_default_field_callback
+#define NSPanelRoomStatus_DEFAULT NULL
+#define NSPanelRoomStatus_lights_MSGTYPE NSPanelLightStatus
+
 extern const pb_msgdesc_t NSPanelStatusReport_msg;
 extern const pb_msgdesc_t NSPanelStatusReport_NSPanelWarning_msg;
+extern const pb_msgdesc_t NSPanelLightStatus_msg;
+extern const pb_msgdesc_t NSPanelRoomStatus_msg;
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
 #define NSPanelStatusReport_fields &NSPanelStatusReport_msg
 #define NSPanelStatusReport_NSPanelWarning_fields &NSPanelStatusReport_NSPanelWarning_msg
+#define NSPanelLightStatus_fields &NSPanelLightStatus_msg
+#define NSPanelRoomStatus_fields &NSPanelRoomStatus_msg
 
 /* Maximum encoded size of messages (where known) */
 /* NSPanelStatusReport_size depends on runtime parameters */
 /* NSPanelStatusReport_NSPanelWarning_size depends on runtime parameters */
+/* NSPanelLightStatus_size depends on runtime parameters */
+/* NSPanelRoomStatus_size depends on runtime parameters */
 
 #ifdef __cplusplus
 } /* extern "C" */

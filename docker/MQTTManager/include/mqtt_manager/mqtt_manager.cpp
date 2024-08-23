@@ -160,7 +160,7 @@ void MQTT_Manager::_resubscribe() {
 
       bool received_message;
       do {
-        received_message = MQTT_Manager::_mqtt_client->try_consume_message_for(&msg, std::chrono::milliseconds(100)); // Wait for max 100ms to see if a message is to be receved on the recently subscribed topic.
+        received_message = MQTT_Manager::_mqtt_client->try_consume_message_for(&msg, std::chrono::milliseconds(5)); // Wait for max 100ms to see if a message is to be receved on the recently subscribed topic.
         if (received_message) {
           MQTTMessage message_struct{
               .topic = msg->get_topic(),

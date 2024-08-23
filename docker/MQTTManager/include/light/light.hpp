@@ -13,6 +13,11 @@ enum MQTT_MANAGER_LIGHT_MODE {
   RGB      // Send updated values as HSV and not brightness and/or color_temperature.
 };
 
+enum MQTT_MANAGER_LIGHT_TYPE {
+  CEILING,
+  TABLE
+};
+
 class Light : public MqttManagerEntity {
 public:
   Light(LightSettings &config);
@@ -21,6 +26,11 @@ public:
    * Update the config of the light to reflect the new settings
    */
   void update_config(LightSettings &config);
+
+  /**
+   * Get light type (ceiling or table)
+   */
+  MQTT_MANAGER_LIGHT_TYPE get_light_type();
 
   /**
    * Turn on the light
@@ -117,6 +127,21 @@ public:
   MQTT_MANAGER_LIGHT_MODE get_mode();
 
   /**
+   * Is the light dimmable?
+   */
+  bool can_dim();
+
+  /**
+   * Can the light change color temperature?
+   */
+  bool can_color_temperature();
+
+  /**
+   * Can the light do RGB colors?
+   */
+  bool can_rgb();
+
+  /**
    * Post init, attach to room.
    */
   void post_init();
@@ -158,6 +183,7 @@ protected:
   uint16_t _current_hue;
   uint8_t _current_saturation;
   MQTT_MANAGER_LIGHT_MODE _current_mode;
+  MQTT_MANAGER_LIGHT_TYPE _light_type;
 
   bool _requested_state;
   uint8_t _requested_brightness;

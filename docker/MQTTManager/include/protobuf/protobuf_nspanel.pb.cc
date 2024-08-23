@@ -46,6 +46,31 @@ struct NSPanelStatusReport_NSPanelWarningDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelStatusReport_NSPanelWarningDefaultTypeInternal _NSPanelStatusReport_NSPanelWarning_default_instance_;
 
+inline constexpr NSPanelLightStatus::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        id_{0},
+        can_dim_{false},
+        can_color_temperature_{false},
+        can_rgb_{false},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR NSPanelLightStatus::NSPanelLightStatus(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct NSPanelLightStatusDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR NSPanelLightStatusDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~NSPanelLightStatusDefaultTypeInternal() {}
+  union {
+    NSPanelLightStatus _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelLightStatusDefaultTypeInternal _NSPanelLightStatus_default_instance_;
+
 inline constexpr NSPanelStatusReport::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -77,6 +102,32 @@ struct NSPanelStatusReportDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelStatusReportDefaultTypeInternal _NSPanelStatusReport_default_instance_;
+
+inline constexpr NSPanelRoomStatus::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : lights_{},
+        name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        id_{0},
+        average_dim_level_{0},
+        ceiling_lights_dim_level_{0},
+        table_lights_dim_level_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR NSPanelRoomStatus::NSPanelRoomStatus(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct NSPanelRoomStatusDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR NSPanelRoomStatusDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~NSPanelRoomStatusDefaultTypeInternal() {}
+  union {
+    NSPanelRoomStatus _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelRoomStatusDefaultTypeInternal _NSPanelRoomStatus_default_instance_;
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_protobuf_5fnspanel_2eproto[2];
 static constexpr const ::_pb::ServiceDescriptor**
     file_level_service_descriptors_protobuf_5fnspanel_2eproto = nullptr;
@@ -117,16 +168,47 @@ const ::uint32_t
         ~0u,
         ~0u,
         ~0u,
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::NSPanelLightStatus, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::NSPanelLightStatus, _impl_.id_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelLightStatus, _impl_.name_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelLightStatus, _impl_.can_dim_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelLightStatus, _impl_.can_color_temperature_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelLightStatus, _impl_.can_rgb_),
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::NSPanelRoomStatus, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::NSPanelRoomStatus, _impl_.id_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelRoomStatus, _impl_.name_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelRoomStatus, _impl_.average_dim_level_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelRoomStatus, _impl_.ceiling_lights_dim_level_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelRoomStatus, _impl_.table_lights_dim_level_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelRoomStatus, _impl_.lights_),
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::NSPanelStatusReport_NSPanelWarning)},
         {10, 26, -1, sizeof(::NSPanelStatusReport)},
+        {34, -1, -1, sizeof(::NSPanelLightStatus)},
+        {47, -1, -1, sizeof(::NSPanelRoomStatus)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelStatusReport_NSPanelWarning_default_instance_._instance,
     &::_NSPanelStatusReport_default_instance_._instance,
+    &::_NSPanelLightStatus_default_instance_._instance,
+    &::_NSPanelRoomStatus_default_instance_._instance,
 };
 const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
@@ -144,20 +226,27 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "WARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n\005TRACE\020"
     "\005\"`\n\005state\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE\020\001\022\020\n\014U"
     "PDATING_TFT\020\002\022\025\n\021UPDATING_FIRMWARE\020\003\022\025\n\021"
-    "UPDATING_LITTLEFS\020\004B\022\n\020_update_progressb"
-    "\006proto3"
+    "UPDATING_LITTLEFS\020\004B\022\n\020_update_progress\""
+    "o\n\022NSPanelLightStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004nam"
+    "e\030\002 \001(\t\022\017\n\007can_dim\030\003 \001(\010\022\035\n\025can_color_te"
+    "mperature\030\004 \001(\010\022\017\n\007can_rgb\030\005 \001(\010\"\257\001\n\021NSP"
+    "anelRoomStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t"
+    "\022\031\n\021average_dim_level\030\003 \001(\005\022 \n\030ceiling_l"
+    "ights_dim_level\030\004 \001(\005\022\036\n\026table_lights_di"
+    "m_level\030\005 \001(\005\022#\n\006lights\030\006 \003(\0132\023.NSPanelL"
+    "ightStatusb\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    607,
+    898,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
     nullptr,
     0,
-    2,
+    4,
     schemas,
     file_default_instances,
     TableStruct_protobuf_5fnspanel_2eproto::offsets,
@@ -830,6 +919,642 @@ void NSPanelStatusReport::InternalSwap(NSPanelStatusReport* PROTOBUF_RESTRICT ot
 }
 
 ::google::protobuf::Metadata NSPanelStatusReport::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class NSPanelLightStatus::_Internal {
+ public:
+};
+
+NSPanelLightStatus::NSPanelLightStatus(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:NSPanelLightStatus)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelLightStatus::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::NSPanelLightStatus& from_msg)
+      : name_(arena, from.name_),
+        _cached_size_{0} {}
+
+NSPanelLightStatus::NSPanelLightStatus(
+    ::google::protobuf::Arena* arena,
+    const NSPanelLightStatus& from)
+    : ::google::protobuf::Message(arena) {
+  NSPanelLightStatus* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, id_),
+           offsetof(Impl_, can_rgb_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::can_rgb_));
+
+  // @@protoc_insertion_point(copy_constructor:NSPanelLightStatus)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelLightStatus::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : name_(arena),
+        _cached_size_{0} {}
+
+inline void NSPanelLightStatus::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           0,
+           offsetof(Impl_, can_rgb_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::can_rgb_));
+}
+NSPanelLightStatus::~NSPanelLightStatus() {
+  // @@protoc_insertion_point(destructor:NSPanelLightStatus)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void NSPanelLightStatus::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.name_.Destroy();
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+NSPanelLightStatus::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(NSPanelLightStatus, _impl_._cached_size_),
+              false,
+          },
+          &NSPanelLightStatus::MergeImpl,
+          &NSPanelLightStatus::kDescriptorMethods,
+          &descriptor_table_protobuf_5fnspanel_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<3, 5, 0, 31, 2> NSPanelLightStatus::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    5, 56,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967264,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    5,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_NSPanelLightStatus_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::NSPanelLightStatus>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int32 id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelLightStatus, _impl_.id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelLightStatus, _impl_.id_)}},
+    // string name = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelLightStatus, _impl_.name_)}},
+    // bool can_dim = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelLightStatus, _impl_.can_dim_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelLightStatus, _impl_.can_dim_)}},
+    // bool can_color_temperature = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelLightStatus, _impl_.can_color_temperature_), 63>(),
+     {32, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelLightStatus, _impl_.can_color_temperature_)}},
+    // bool can_rgb = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelLightStatus, _impl_.can_rgb_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelLightStatus, _impl_.can_rgb_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 id = 1;
+    {PROTOBUF_FIELD_OFFSET(NSPanelLightStatus, _impl_.id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // string name = 2;
+    {PROTOBUF_FIELD_OFFSET(NSPanelLightStatus, _impl_.name_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // bool can_dim = 3;
+    {PROTOBUF_FIELD_OFFSET(NSPanelLightStatus, _impl_.can_dim_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool can_color_temperature = 4;
+    {PROTOBUF_FIELD_OFFSET(NSPanelLightStatus, _impl_.can_color_temperature_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool can_rgb = 5;
+    {PROTOBUF_FIELD_OFFSET(NSPanelLightStatus, _impl_.can_rgb_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+  }},
+  // no aux_entries
+  {{
+    "\22\0\4\0\0\0\0\0"
+    "NSPanelLightStatus"
+    "name"
+  }},
+};
+
+PROTOBUF_NOINLINE void NSPanelLightStatus::Clear() {
+// @@protoc_insertion_point(message_clear_start:NSPanelLightStatus)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.name_.ClearToEmpty();
+  ::memset(&_impl_.id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.can_rgb_) -
+      reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.can_rgb_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* NSPanelLightStatus::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:NSPanelLightStatus)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<1>(
+            stream, this->_internal_id(), target);
+  }
+
+  // string name = 2;
+  if (!this->_internal_name().empty()) {
+    const std::string& _s = this->_internal_name();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelLightStatus.name");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
+  }
+
+  // bool can_dim = 3;
+  if (this->_internal_can_dim() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        3, this->_internal_can_dim(), target);
+  }
+
+  // bool can_color_temperature = 4;
+  if (this->_internal_can_color_temperature() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        4, this->_internal_can_color_temperature(), target);
+  }
+
+  // bool can_rgb = 5;
+  if (this->_internal_can_rgb() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        5, this->_internal_can_rgb(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:NSPanelLightStatus)
+  return target;
+}
+
+::size_t NSPanelLightStatus::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:NSPanelLightStatus)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // string name = 2;
+  if (!this->_internal_name().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_name());
+  }
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_id());
+  }
+
+  // bool can_dim = 3;
+  if (this->_internal_can_dim() != 0) {
+    total_size += 2;
+  }
+
+  // bool can_color_temperature = 4;
+  if (this->_internal_can_color_temperature() != 0) {
+    total_size += 2;
+  }
+
+  // bool can_rgb = 5;
+  if (this->_internal_can_rgb() != 0) {
+    total_size += 2;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void NSPanelLightStatus::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<NSPanelLightStatus*>(&to_msg);
+  auto& from = static_cast<const NSPanelLightStatus&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelLightStatus)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_name().empty()) {
+    _this->_internal_set_name(from._internal_name());
+  }
+  if (from._internal_id() != 0) {
+    _this->_impl_.id_ = from._impl_.id_;
+  }
+  if (from._internal_can_dim() != 0) {
+    _this->_impl_.can_dim_ = from._impl_.can_dim_;
+  }
+  if (from._internal_can_color_temperature() != 0) {
+    _this->_impl_.can_color_temperature_ = from._impl_.can_color_temperature_;
+  }
+  if (from._internal_can_rgb() != 0) {
+    _this->_impl_.can_rgb_ = from._impl_.can_rgb_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void NSPanelLightStatus::CopyFrom(const NSPanelLightStatus& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelLightStatus)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void NSPanelLightStatus::InternalSwap(NSPanelLightStatus* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(NSPanelLightStatus, _impl_.can_rgb_)
+      + sizeof(NSPanelLightStatus::_impl_.can_rgb_)
+      - PROTOBUF_FIELD_OFFSET(NSPanelLightStatus, _impl_.id_)>(
+          reinterpret_cast<char*>(&_impl_.id_),
+          reinterpret_cast<char*>(&other->_impl_.id_));
+}
+
+::google::protobuf::Metadata NSPanelLightStatus::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class NSPanelRoomStatus::_Internal {
+ public:
+};
+
+NSPanelRoomStatus::NSPanelRoomStatus(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:NSPanelRoomStatus)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelRoomStatus::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::NSPanelRoomStatus& from_msg)
+      : lights_{visibility, arena, from.lights_},
+        name_(arena, from.name_),
+        _cached_size_{0} {}
+
+NSPanelRoomStatus::NSPanelRoomStatus(
+    ::google::protobuf::Arena* arena,
+    const NSPanelRoomStatus& from)
+    : ::google::protobuf::Message(arena) {
+  NSPanelRoomStatus* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, id_),
+           offsetof(Impl_, table_lights_dim_level_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::table_lights_dim_level_));
+
+  // @@protoc_insertion_point(copy_constructor:NSPanelRoomStatus)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelRoomStatus::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : lights_{visibility, arena},
+        name_(arena),
+        _cached_size_{0} {}
+
+inline void NSPanelRoomStatus::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           0,
+           offsetof(Impl_, table_lights_dim_level_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::table_lights_dim_level_));
+}
+NSPanelRoomStatus::~NSPanelRoomStatus() {
+  // @@protoc_insertion_point(destructor:NSPanelRoomStatus)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void NSPanelRoomStatus::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.name_.Destroy();
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+NSPanelRoomStatus::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_._cached_size_),
+              false,
+          },
+          &NSPanelRoomStatus::MergeImpl,
+          &NSPanelRoomStatus::kDescriptorMethods,
+          &descriptor_table_protobuf_5fnspanel_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<3, 6, 1, 30, 2> NSPanelRoomStatus::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    6, 56,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967232,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    6,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_NSPanelRoomStatus_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::NSPanelRoomStatus>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int32 id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelRoomStatus, _impl_.id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.id_)}},
+    // string name = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.name_)}},
+    // int32 average_dim_level = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelRoomStatus, _impl_.average_dim_level_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.average_dim_level_)}},
+    // int32 ceiling_lights_dim_level = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelRoomStatus, _impl_.ceiling_lights_dim_level_), 63>(),
+     {32, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.ceiling_lights_dim_level_)}},
+    // int32 table_lights_dim_level = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelRoomStatus, _impl_.table_lights_dim_level_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.table_lights_dim_level_)}},
+    // repeated .NSPanelLightStatus lights = 6;
+    {::_pbi::TcParser::FastMtR1,
+     {50, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.lights_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 id = 1;
+    {PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // string name = 2;
+    {PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.name_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int32 average_dim_level = 3;
+    {PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.average_dim_level_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 ceiling_lights_dim_level = 4;
+    {PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.ceiling_lights_dim_level_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 table_lights_dim_level = 5;
+    {PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.table_lights_dim_level_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // repeated .NSPanelLightStatus lights = 6;
+    {PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.lights_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::NSPanelLightStatus>()},
+  }}, {{
+    "\21\0\4\0\0\0\0\0"
+    "NSPanelRoomStatus"
+    "name"
+  }},
+};
+
+PROTOBUF_NOINLINE void NSPanelRoomStatus::Clear() {
+// @@protoc_insertion_point(message_clear_start:NSPanelRoomStatus)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.lights_.Clear();
+  _impl_.name_.ClearToEmpty();
+  ::memset(&_impl_.id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.table_lights_dim_level_) -
+      reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.table_lights_dim_level_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* NSPanelRoomStatus::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:NSPanelRoomStatus)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<1>(
+            stream, this->_internal_id(), target);
+  }
+
+  // string name = 2;
+  if (!this->_internal_name().empty()) {
+    const std::string& _s = this->_internal_name();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelRoomStatus.name");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
+  }
+
+  // int32 average_dim_level = 3;
+  if (this->_internal_average_dim_level() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<3>(
+            stream, this->_internal_average_dim_level(), target);
+  }
+
+  // int32 ceiling_lights_dim_level = 4;
+  if (this->_internal_ceiling_lights_dim_level() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<4>(
+            stream, this->_internal_ceiling_lights_dim_level(), target);
+  }
+
+  // int32 table_lights_dim_level = 5;
+  if (this->_internal_table_lights_dim_level() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<5>(
+            stream, this->_internal_table_lights_dim_level(), target);
+  }
+
+  // repeated .NSPanelLightStatus lights = 6;
+  for (unsigned i = 0, n = static_cast<unsigned>(
+                           this->_internal_lights_size());
+       i < n; i++) {
+    const auto& repfield = this->_internal_lights().Get(i);
+    target =
+        ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+            6, repfield, repfield.GetCachedSize(),
+            target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:NSPanelRoomStatus)
+  return target;
+}
+
+::size_t NSPanelRoomStatus::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:NSPanelRoomStatus)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // repeated .NSPanelLightStatus lights = 6;
+  total_size += 1UL * this->_internal_lights_size();
+  for (const auto& msg : this->_internal_lights()) {
+    total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+  }
+  // string name = 2;
+  if (!this->_internal_name().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_name());
+  }
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_id());
+  }
+
+  // int32 average_dim_level = 3;
+  if (this->_internal_average_dim_level() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_average_dim_level());
+  }
+
+  // int32 ceiling_lights_dim_level = 4;
+  if (this->_internal_ceiling_lights_dim_level() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_ceiling_lights_dim_level());
+  }
+
+  // int32 table_lights_dim_level = 5;
+  if (this->_internal_table_lights_dim_level() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_table_lights_dim_level());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void NSPanelRoomStatus::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<NSPanelRoomStatus*>(&to_msg);
+  auto& from = static_cast<const NSPanelRoomStatus&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelRoomStatus)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_internal_mutable_lights()->MergeFrom(
+      from._internal_lights());
+  if (!from._internal_name().empty()) {
+    _this->_internal_set_name(from._internal_name());
+  }
+  if (from._internal_id() != 0) {
+    _this->_impl_.id_ = from._impl_.id_;
+  }
+  if (from._internal_average_dim_level() != 0) {
+    _this->_impl_.average_dim_level_ = from._impl_.average_dim_level_;
+  }
+  if (from._internal_ceiling_lights_dim_level() != 0) {
+    _this->_impl_.ceiling_lights_dim_level_ = from._impl_.ceiling_lights_dim_level_;
+  }
+  if (from._internal_table_lights_dim_level() != 0) {
+    _this->_impl_.table_lights_dim_level_ = from._impl_.table_lights_dim_level_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void NSPanelRoomStatus::CopyFrom(const NSPanelRoomStatus& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelRoomStatus)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void NSPanelRoomStatus::InternalSwap(NSPanelRoomStatus* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.lights_.InternalSwap(&other->_impl_.lights_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.table_lights_dim_level_)
+      + sizeof(NSPanelRoomStatus::_impl_.table_lights_dim_level_)
+      - PROTOBUF_FIELD_OFFSET(NSPanelRoomStatus, _impl_.id_)>(
+          reinterpret_cast<char*>(&_impl_.id_),
+          reinterpret_cast<char*>(&other->_impl_.id_));
+}
+
+::google::protobuf::Metadata NSPanelRoomStatus::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)

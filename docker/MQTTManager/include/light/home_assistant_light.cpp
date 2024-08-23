@@ -154,6 +154,7 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
           SPDLOG_ERROR("Caught exception when trying to update color mode for light {}::{} message: {}. Working data: {}", this->_id, this->_name, boost::diagnostic_information(e, true), new_state_attributes.dump());
         }
       }
+      this->_signal_entity_changed();
     }
   }
 }

@@ -73,7 +73,9 @@ public:
 private:
   uint16_t _id;
   std::string _name;
+  std::string _mqtt_status_topic;
   std::list<MqttManagerEntity *> _entities;
+  void _publish_protobuf_status();
 };
 
 #endif // !MQTT_MANAGER_ROOM_H

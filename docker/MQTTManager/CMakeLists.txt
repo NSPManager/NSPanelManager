@@ -100,7 +100,7 @@ target_link_libraries(MQTTManager_Scene spdlog::spdlog nlohmann_json::nlohmann_j
 
 add_library(MQTTManager_Room SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room.cpp)
 target_include_directories(MQTTManager_Room PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Room spdlog::spdlog nlohmann_json::nlohmann_json MQTTManager_Entity Protobuf_MQTTManager)
+target_link_libraries(MQTTManager_Room spdlog::spdlog nlohmann_json::nlohmann_json MQTTManager_Entity MQTTManager_Light Protobuf_MQTTManager MQTT_Manager)
 
 add_library(MQTTManager_EntityManager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)
 set_target_properties(MQTTManager_EntityManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)

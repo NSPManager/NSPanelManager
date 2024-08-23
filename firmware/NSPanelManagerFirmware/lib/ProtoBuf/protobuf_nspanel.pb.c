@@ -12,6 +12,12 @@ PB_BIND(NSPanelStatusReport, NSPanelStatusReport, AUTO)
 PB_BIND(NSPanelStatusReport_NSPanelWarning, NSPanelStatusReport_NSPanelWarning, AUTO)
 
 
+PB_BIND(NSPanelLightStatus, NSPanelLightStatus, AUTO)
+
+
+PB_BIND(NSPanelRoomStatus, NSPanelRoomStatus, AUTO)
+
+
 
 
 
