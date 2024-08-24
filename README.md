@@ -5,6 +5,9 @@ NSPanel Manager is a custom software solution for the Sonoff NSPanel (not the NS
 
 All the NSPanels that are installed with the NSPanel Manager solution communicate back to a Docker container that is used to manage the panels, NSPanel Manager specific solutions and also all communication back and forth to/from Home Assisant and/or OpenHAB.
 
+# Complete walkthrough and installation guide on Youtube:
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/EzDDtguwFd4/0.jpg)](https://www.youtube.com/watch?v=EzDDtguwFd4)
+
 # Slides of custom GUI for NSPanel
 https://github.com/user-attachments/assets/a0bf2858-8384-4e67-b25e-44e3d41ccfa6
 
