@@ -24,27 +24,60 @@ namespace _pb = ::google::protobuf;
 namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 
-inline constexpr NSPanelStatusReport_NSPanelWarning::Impl_::Impl_(
+inline constexpr NSPanelWeatherUpdate_ForecastItem::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : text_(
+      : weather_icon_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        level_{static_cast< ::NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel >(0)},
+        precipitation_string_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        temperature_maxmin_string_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        wind_string_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        display_string_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
         _cached_size_{0} {}
 
 template <typename>
-PROTOBUF_CONSTEXPR NSPanelStatusReport_NSPanelWarning::NSPanelStatusReport_NSPanelWarning(::_pbi::ConstantInitialized)
+PROTOBUF_CONSTEXPR NSPanelWeatherUpdate_ForecastItem::NSPanelWeatherUpdate_ForecastItem(::_pbi::ConstantInitialized)
     : _impl_(::_pbi::ConstantInitialized()) {}
-struct NSPanelStatusReport_NSPanelWarningDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR NSPanelStatusReport_NSPanelWarningDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~NSPanelStatusReport_NSPanelWarningDefaultTypeInternal() {}
+struct NSPanelWeatherUpdate_ForecastItemDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR NSPanelWeatherUpdate_ForecastItemDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~NSPanelWeatherUpdate_ForecastItemDefaultTypeInternal() {}
   union {
-    NSPanelStatusReport_NSPanelWarning _instance;
+    NSPanelWeatherUpdate_ForecastItem _instance;
   };
 };
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelStatusReport_NSPanelWarningDefaultTypeInternal _NSPanelStatusReport_NSPanelWarning_default_instance_;
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelWeatherUpdate_ForecastItemDefaultTypeInternal _NSPanelWeatherUpdate_ForecastItem_default_instance_;
+
+inline constexpr NSPanelWarning::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : text_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        level_{static_cast< ::NSPanelWarningLevel >(0)},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR NSPanelWarning::NSPanelWarning(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct NSPanelWarningDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR NSPanelWarningDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~NSPanelWarningDefaultTypeInternal() {}
+  union {
+    NSPanelWarning _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelWarningDefaultTypeInternal _NSPanelWarning_default_instance_;
 
 inline constexpr NSPanelLightStatus::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -71,10 +104,51 @@ struct NSPanelLightStatusDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelLightStatusDefaultTypeInternal _NSPanelLightStatus_default_instance_;
 
+inline constexpr NSPanelWeatherUpdate::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : forecast_items_{},
+        test_field_{},
+        _test_field_cached_byte_size_{0},
+        current_weather_icon_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        current_temperature_string_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        current_maxmin_temperature_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        current_wind_string_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        sunrise_string_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        sunset_string_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        current_precipitation_string_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR NSPanelWeatherUpdate::NSPanelWeatherUpdate(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct NSPanelWeatherUpdateDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR NSPanelWeatherUpdateDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~NSPanelWeatherUpdateDefaultTypeInternal() {}
+  union {
+    NSPanelWeatherUpdate _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelWeatherUpdateDefaultTypeInternal _NSPanelWeatherUpdate_default_instance_;
+
 inline constexpr NSPanelStatusReport::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : _cached_size_{0},
-        warnings_{},
+      : warnings_{},
         mac_address_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
@@ -87,7 +161,8 @@ inline constexpr NSPanelStatusReport::Impl_::Impl_(
         nspanel_state_{static_cast< ::NSPanelStatusReport_state >(0)},
         update_progress_{0},
         rssi_{0},
-        heap_used_pct_{0} {}
+        heap_used_pct_{0},
+        _cached_size_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR NSPanelStatusReport::NSPanelStatusReport(::_pbi::ConstantInitialized)
@@ -135,16 +210,16 @@ const ::uint32_t
     TableStruct_protobuf_5fnspanel_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
         ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport_NSPanelWarning, _internal_metadata_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWarning, _internal_metadata_),
         ~0u,  // no _extensions_
         ~0u,  // no _oneof_case_
         ~0u,  // no _weak_field_map_
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport_NSPanelWarning, _impl_.level_),
-        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport_NSPanelWarning, _impl_.text_),
-        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_._has_bits_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWarning, _impl_.level_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWarning, _impl_.text_),
+        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _internal_metadata_),
         ~0u,  // no _extensions_
         ~0u,  // no _oneof_case_
@@ -160,14 +235,6 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.temperature_),
         PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.ip_address_),
         PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.warnings_),
-        ~0u,
-        0,
-        ~0u,
-        ~0u,
-        ~0u,
-        ~0u,
-        ~0u,
-        ~0u,
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelLightStatus, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -195,91 +262,111 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelRoomStatus, _impl_.ceiling_lights_dim_level_),
         PROTOBUF_FIELD_OFFSET(::NSPanelRoomStatus, _impl_.table_lights_dim_level_),
         PROTOBUF_FIELD_OFFSET(::NSPanelRoomStatus, _impl_.lights_),
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate_ForecastItem, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate_ForecastItem, _impl_.weather_icon_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate_ForecastItem, _impl_.precipitation_string_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate_ForecastItem, _impl_.temperature_maxmin_string_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate_ForecastItem, _impl_.wind_string_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate_ForecastItem, _impl_.display_string_),
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _impl_.forecast_items_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _impl_.current_weather_icon_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _impl_.current_temperature_string_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _impl_.current_maxmin_temperature_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _impl_.current_wind_string_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _impl_.sunrise_string_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _impl_.sunset_string_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _impl_.current_precipitation_string_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _impl_.test_field_),
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, -1, -1, sizeof(::NSPanelStatusReport_NSPanelWarning)},
-        {10, 26, -1, sizeof(::NSPanelStatusReport)},
-        {34, -1, -1, sizeof(::NSPanelLightStatus)},
-        {47, -1, -1, sizeof(::NSPanelRoomStatus)},
+        {0, -1, -1, sizeof(::NSPanelWarning)},
+        {10, -1, -1, sizeof(::NSPanelStatusReport)},
+        {26, -1, -1, sizeof(::NSPanelLightStatus)},
+        {39, -1, -1, sizeof(::NSPanelRoomStatus)},
+        {53, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
+        {66, -1, -1, sizeof(::NSPanelWeatherUpdate)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
-    &::_NSPanelStatusReport_NSPanelWarning_default_instance_._instance,
+    &::_NSPanelWarning_default_instance_._instance,
     &::_NSPanelStatusReport_default_instance_._instance,
     &::_NSPanelLightStatus_default_instance_._instance,
     &::_NSPanelRoomStatus_default_instance_._instance,
+    &::_NSPanelWeatherUpdate_ForecastItem_default_instance_._instance,
+    &::_NSPanelWeatherUpdate_default_instance_._instance,
 };
 const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\026protobuf_nspanel.proto\"\274\004\n\023NSPanelStat"
-    "usReport\0221\n\rnspanel_state\030\001 \001(\0162\032.NSPane"
-    "lStatusReport.state\022\034\n\017update_progress\030\002"
-    " \001(\005H\000\210\001\001\022\014\n\004rssi\030\003 \001(\005\022\025\n\rheap_used_pct"
-    "\030\004 \001(\005\022\023\n\013mac_address\030\005 \001(\t\022\023\n\013temperatu"
-    "re\030\006 \001(\t\022\022\n\nip_address\030\007 \001(\t\0225\n\010warnings"
-    "\030\010 \003(\0132#.NSPanelStatusReport.NSPanelWarn"
-    "ing\032\303\001\n\016NSPanelWarning\022F\n\005level\030\001 \001(\01627."
-    "NSPanelStatusReport.NSPanelWarning.NSPan"
-    "elWarningLevel\022\014\n\004text\030\002 \001(\t\"[\n\023NSPanelW"
-    "arningLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ERROR\020\001\022\013\n\007"
-    "WARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n\005TRACE\020"
-    "\005\"`\n\005state\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE\020\001\022\020\n\014U"
-    "PDATING_TFT\020\002\022\025\n\021UPDATING_FIRMWARE\020\003\022\025\n\021"
-    "UPDATING_LITTLEFS\020\004B\022\n\020_update_progress\""
-    "o\n\022NSPanelLightStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004nam"
-    "e\030\002 \001(\t\022\017\n\007can_dim\030\003 \001(\010\022\035\n\025can_color_te"
-    "mperature\030\004 \001(\010\022\017\n\007can_rgb\030\005 \001(\010\"\257\001\n\021NSP"
-    "anelRoomStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t"
-    "\022\031\n\021average_dim_level\030\003 \001(\005\022 \n\030ceiling_l"
-    "ights_dim_level\030\004 \001(\005\022\036\n\026table_lights_di"
-    "m_level\030\005 \001(\005\022#\n\006lights\030\006 \003(\0132\023.NSPanelL"
-    "ightStatusb\006proto3"
+    "\n\026protobuf_nspanel.proto\"C\n\016NSPanelWarni"
+    "ng\022#\n\005level\030\001 \001(\0162\024.NSPanelWarningLevel\022"
+    "\014\n\004text\030\002 \001(\t\"\311\002\n\023NSPanelStatusReport\0221\n"
+    "\rnspanel_state\030\001 \001(\0162\032.NSPanelStatusRepo"
+    "rt.state\022\027\n\017update_progress\030\002 \001(\005\022\014\n\004rss"
+    "i\030\003 \001(\005\022\025\n\rheap_used_pct\030\004 \001(\005\022\023\n\013mac_ad"
+    "dress\030\005 \001(\t\022\023\n\013temperature\030\006 \001(\t\022\022\n\nip_a"
+    "ddress\030\007 \001(\t\022!\n\010warnings\030\010 \003(\0132\017.NSPanel"
+    "Warning\"`\n\005state\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE\020"
+    "\001\022\020\n\014UPDATING_TFT\020\002\022\025\n\021UPDATING_FIRMWARE"
+    "\020\003\022\025\n\021UPDATING_LITTLEFS\020\004\"o\n\022NSPanelLigh"
+    "tStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\017\n\007can"
+    "_dim\030\003 \001(\010\022\035\n\025can_color_temperature\030\004 \001("
+    "\010\022\017\n\007can_rgb\030\005 \001(\010\"\257\001\n\021NSPanelRoomStatus"
+    "\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\031\n\021average_di"
+    "m_level\030\003 \001(\005\022 \n\030ceiling_lights_dim_leve"
+    "l\030\004 \001(\005\022\036\n\026table_lights_dim_level\030\005 \001(\005\022"
+    "#\n\006lights\030\006 \003(\0132\023.NSPanelLightStatus\"\323\003\n"
+    "\024NSPanelWeatherUpdate\022:\n\016forecast_items\030"
+    "\001 \003(\0132\".NSPanelWeatherUpdate.ForecastIte"
+    "m\022\034\n\024current_weather_icon\030\002 \001(\t\022\"\n\032curre"
+    "nt_temperature_string\030\003 \001(\t\022\"\n\032current_m"
+    "axmin_temperature\030\004 \001(\t\022\033\n\023current_wind_"
+    "string\030\005 \001(\t\022\026\n\016sunrise_string\030\006 \001(\t\022\025\n\r"
+    "sunset_string\030\007 \001(\t\022$\n\034current_precipita"
+    "tion_string\030\010 \001(\t\022\022\n\ntest_field\030\t \003(\005\032\222\001"
+    "\n\014ForecastItem\022\024\n\014weather_icon\030\001 \001(\t\022\034\n\024"
+    "precipitation_string\030\002 \001(\t\022!\n\031temperatur"
+    "e_maxmin_string\030\003 \001(\t\022\023\n\013wind_string\030\004 \001"
+    "(\t\022\026\n\016display_string\030\005 \001(\t*[\n\023NSPanelWar"
+    "ningLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ERROR\020\001\022\013\n\007WA"
+    "RNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n\005TRACE\020\005b"
+    "\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    898,
+    1287,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
     nullptr,
     0,
-    4,
+    6,
     schemas,
     file_default_instances,
     TableStruct_protobuf_5fnspanel_2eproto::offsets,
     file_level_enum_descriptors_protobuf_5fnspanel_2eproto,
     file_level_service_descriptors_protobuf_5fnspanel_2eproto,
 };
-const ::google::protobuf::EnumDescriptor* NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel_descriptor() {
-  ::google::protobuf::internal::AssignDescriptors(&descriptor_table_protobuf_5fnspanel_2eproto);
-  return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[0];
-}
-PROTOBUF_CONSTINIT const uint32_t NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel_internal_data_[] = {
-    393216u, 0u, };
-bool NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel_IsValid(int value) {
-  return 0 <= value && value <= 5;
-}
-#if (__cplusplus < 201703) && \
-  (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
-
-constexpr NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel NSPanelStatusReport_NSPanelWarning::CRITICAL;
-constexpr NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel NSPanelStatusReport_NSPanelWarning::ERROR;
-constexpr NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel NSPanelStatusReport_NSPanelWarning::WARNING;
-constexpr NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel NSPanelStatusReport_NSPanelWarning::INFO;
-constexpr NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel NSPanelStatusReport_NSPanelWarning::DEBUG;
-constexpr NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel NSPanelStatusReport_NSPanelWarning::TRACE;
-constexpr NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel NSPanelStatusReport_NSPanelWarning::NSPanelWarningLevel_MIN;
-constexpr NSPanelStatusReport_NSPanelWarning_NSPanelWarningLevel NSPanelStatusReport_NSPanelWarning::NSPanelWarningLevel_MAX;
-constexpr int NSPanelStatusReport_NSPanelWarning::NSPanelWarningLevel_ARRAYSIZE;
-
-#endif  // (__cplusplus < 201703) &&
-        // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
 const ::google::protobuf::EnumDescriptor* NSPanelStatusReport_state_descriptor() {
   ::google::protobuf::internal::AssignDescriptors(&descriptor_table_protobuf_5fnspanel_2eproto);
-  return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[1];
+  return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[0];
 }
 PROTOBUF_CONSTINIT const uint32_t NSPanelStatusReport_state_internal_data_[] = {
     327680u, 0u, };
@@ -300,70 +387,79 @@ constexpr int NSPanelStatusReport::state_ARRAYSIZE;
 
 #endif  // (__cplusplus < 201703) &&
         // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
+const ::google::protobuf::EnumDescriptor* NSPanelWarningLevel_descriptor() {
+  ::google::protobuf::internal::AssignDescriptors(&descriptor_table_protobuf_5fnspanel_2eproto);
+  return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[1];
+}
+PROTOBUF_CONSTINIT const uint32_t NSPanelWarningLevel_internal_data_[] = {
+    393216u, 0u, };
+bool NSPanelWarningLevel_IsValid(int value) {
+  return 0 <= value && value <= 5;
+}
 // ===================================================================
 
-class NSPanelStatusReport_NSPanelWarning::_Internal {
+class NSPanelWarning::_Internal {
  public:
 };
 
-NSPanelStatusReport_NSPanelWarning::NSPanelStatusReport_NSPanelWarning(::google::protobuf::Arena* arena)
+NSPanelWarning::NSPanelWarning(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
   SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:NSPanelStatusReport.NSPanelWarning)
+  // @@protoc_insertion_point(arena_constructor:NSPanelWarning)
 }
-inline PROTOBUF_NDEBUG_INLINE NSPanelStatusReport_NSPanelWarning::Impl_::Impl_(
+inline PROTOBUF_NDEBUG_INLINE NSPanelWarning::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
-    const Impl_& from, const ::NSPanelStatusReport_NSPanelWarning& from_msg)
+    const Impl_& from, const ::NSPanelWarning& from_msg)
       : text_(arena, from.text_),
         _cached_size_{0} {}
 
-NSPanelStatusReport_NSPanelWarning::NSPanelStatusReport_NSPanelWarning(
+NSPanelWarning::NSPanelWarning(
     ::google::protobuf::Arena* arena,
-    const NSPanelStatusReport_NSPanelWarning& from)
+    const NSPanelWarning& from)
     : ::google::protobuf::Message(arena) {
-  NSPanelStatusReport_NSPanelWarning* const _this = this;
+  NSPanelWarning* const _this = this;
   (void)_this;
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
   _impl_.level_ = from._impl_.level_;
 
-  // @@protoc_insertion_point(copy_constructor:NSPanelStatusReport.NSPanelWarning)
+  // @@protoc_insertion_point(copy_constructor:NSPanelWarning)
 }
-inline PROTOBUF_NDEBUG_INLINE NSPanelStatusReport_NSPanelWarning::Impl_::Impl_(
+inline PROTOBUF_NDEBUG_INLINE NSPanelWarning::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
       : text_(arena),
         _cached_size_{0} {}
 
-inline void NSPanelStatusReport_NSPanelWarning::SharedCtor(::_pb::Arena* arena) {
+inline void NSPanelWarning::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   _impl_.level_ = {};
 }
-NSPanelStatusReport_NSPanelWarning::~NSPanelStatusReport_NSPanelWarning() {
-  // @@protoc_insertion_point(destructor:NSPanelStatusReport.NSPanelWarning)
+NSPanelWarning::~NSPanelWarning() {
+  // @@protoc_insertion_point(destructor:NSPanelWarning)
   _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-inline void NSPanelStatusReport_NSPanelWarning::SharedDtor() {
+inline void NSPanelWarning::SharedDtor() {
   ABSL_DCHECK(GetArena() == nullptr);
   _impl_.text_.Destroy();
   _impl_.~Impl_();
 }
 
 const ::google::protobuf::MessageLite::ClassData*
-NSPanelStatusReport_NSPanelWarning::GetClassData() const {
+NSPanelWarning::GetClassData() const {
   PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
       ClassDataFull _data_ = {
           {
               &_table_.header,
               nullptr,  // OnDemandRegisterArenaDtor
               nullptr,  // IsInitialized
-              PROTOBUF_FIELD_OFFSET(NSPanelStatusReport_NSPanelWarning, _impl_._cached_size_),
+              PROTOBUF_FIELD_OFFSET(NSPanelWarning, _impl_._cached_size_),
               false,
           },
-          &NSPanelStatusReport_NSPanelWarning::MergeImpl,
-          &NSPanelStatusReport_NSPanelWarning::kDescriptorMethods,
+          &NSPanelWarning::MergeImpl,
+          &NSPanelWarning::kDescriptorMethods,
           &descriptor_table_protobuf_5fnspanel_2eproto,
           nullptr,  // tracker
       };
@@ -372,7 +468,7 @@ NSPanelStatusReport_NSPanelWarning::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<1, 2, 0, 47, 2> NSPanelStatusReport_NSPanelWarning::_table_ = {
+const ::_pbi::TcParseTable<1, 2, 0, 27, 2> NSPanelWarning::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
@@ -383,39 +479,39 @@ const ::_pbi::TcParseTable<1, 2, 0, 47, 2> NSPanelStatusReport_NSPanelWarning::_
     2,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
-    &_NSPanelStatusReport_NSPanelWarning_default_instance_._instance,
+    &_NSPanelWarning_default_instance_._instance,
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
     #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::NSPanelStatusReport_NSPanelWarning>(),  // to_prefetch
+    ::_pbi::TcParser::GetTable<::NSPanelWarning>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     // string text = 2;
     {::_pbi::TcParser::FastUS1,
-     {18, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport_NSPanelWarning, _impl_.text_)}},
-    // .NSPanelStatusReport.NSPanelWarning.NSPanelWarningLevel level = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelStatusReport_NSPanelWarning, _impl_.level_), 63>(),
-     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport_NSPanelWarning, _impl_.level_)}},
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWarning, _impl_.text_)}},
+    // .NSPanelWarningLevel level = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelWarning, _impl_.level_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWarning, _impl_.level_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // .NSPanelStatusReport.NSPanelWarning.NSPanelWarningLevel level = 1;
-    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport_NSPanelWarning, _impl_.level_), 0, 0,
+    // .NSPanelWarningLevel level = 1;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWarning, _impl_.level_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
     // string text = 2;
-    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport_NSPanelWarning, _impl_.text_), 0, 0,
+    {PROTOBUF_FIELD_OFFSET(NSPanelWarning, _impl_.text_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   // no aux_entries
   {{
-    "\42\0\4\0\0\0\0\0"
-    "NSPanelStatusReport.NSPanelWarning"
+    "\16\0\4\0\0\0\0\0"
+    "NSPanelWarning"
     "text"
   }},
 };
 
-PROTOBUF_NOINLINE void NSPanelStatusReport_NSPanelWarning::Clear() {
-// @@protoc_insertion_point(message_clear_start:NSPanelStatusReport.NSPanelWarning)
+PROTOBUF_NOINLINE void NSPanelWarning::Clear() {
+// @@protoc_insertion_point(message_clear_start:NSPanelWarning)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
@@ -426,14 +522,14 @@ PROTOBUF_NOINLINE void NSPanelStatusReport_NSPanelWarning::Clear() {
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
-::uint8_t* NSPanelStatusReport_NSPanelWarning::_InternalSerialize(
+::uint8_t* NSPanelWarning::_InternalSerialize(
     ::uint8_t* target,
     ::google::protobuf::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:NSPanelStatusReport.NSPanelWarning)
+  // @@protoc_insertion_point(serialize_to_array_start:NSPanelWarning)
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // .NSPanelStatusReport.NSPanelWarning.NSPanelWarningLevel level = 1;
+  // .NSPanelWarningLevel level = 1;
   if (this->_internal_level() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
@@ -444,7 +540,7 @@ PROTOBUF_NOINLINE void NSPanelStatusReport_NSPanelWarning::Clear() {
   if (!this->_internal_text().empty()) {
     const std::string& _s = this->_internal_text();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelStatusReport.NSPanelWarning.text");
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelWarning.text");
     target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
@@ -453,12 +549,12 @@ PROTOBUF_NOINLINE void NSPanelStatusReport_NSPanelWarning::Clear() {
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
             _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:NSPanelStatusReport.NSPanelWarning)
+  // @@protoc_insertion_point(serialize_to_array_end:NSPanelWarning)
   return target;
 }
 
-::size_t NSPanelStatusReport_NSPanelWarning::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:NSPanelStatusReport.NSPanelWarning)
+::size_t NSPanelWarning::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:NSPanelWarning)
   ::size_t total_size = 0;
 
   ::uint32_t cached_has_bits = 0;
@@ -472,7 +568,7 @@ PROTOBUF_NOINLINE void NSPanelStatusReport_NSPanelWarning::Clear() {
                                     this->_internal_text());
   }
 
-  // .NSPanelStatusReport.NSPanelWarning.NSPanelWarningLevel level = 1;
+  // .NSPanelWarningLevel level = 1;
   if (this->_internal_level() != 0) {
     total_size += 1 +
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_level());
@@ -482,10 +578,10 @@ PROTOBUF_NOINLINE void NSPanelStatusReport_NSPanelWarning::Clear() {
 }
 
 
-void NSPanelStatusReport_NSPanelWarning::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
-  auto* const _this = static_cast<NSPanelStatusReport_NSPanelWarning*>(&to_msg);
-  auto& from = static_cast<const NSPanelStatusReport_NSPanelWarning&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelStatusReport.NSPanelWarning)
+void NSPanelWarning::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<NSPanelWarning*>(&to_msg);
+  auto& from = static_cast<const NSPanelWarning&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelWarning)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -499,15 +595,15 @@ void NSPanelStatusReport_NSPanelWarning::MergeImpl(::google::protobuf::MessageLi
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
-void NSPanelStatusReport_NSPanelWarning::CopyFrom(const NSPanelStatusReport_NSPanelWarning& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelStatusReport.NSPanelWarning)
+void NSPanelWarning::CopyFrom(const NSPanelWarning& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelWarning)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
 
-void NSPanelStatusReport_NSPanelWarning::InternalSwap(NSPanelStatusReport_NSPanelWarning* PROTOBUF_RESTRICT other) {
+void NSPanelWarning::InternalSwap(NSPanelWarning* PROTOBUF_RESTRICT other) {
   using std::swap;
   auto* arena = GetArena();
   ABSL_DCHECK_EQ(arena, other->GetArena());
@@ -516,17 +612,13 @@ void NSPanelStatusReport_NSPanelWarning::InternalSwap(NSPanelStatusReport_NSPane
   swap(_impl_.level_, other->_impl_.level_);
 }
 
-::google::protobuf::Metadata NSPanelStatusReport_NSPanelWarning::GetMetadata() const {
+::google::protobuf::Metadata NSPanelWarning::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // ===================================================================
 
 class NSPanelStatusReport::_Internal {
  public:
-  using HasBits =
-      decltype(std::declval<NSPanelStatusReport>()._impl_._has_bits_);
-  static constexpr ::int32_t kHasBitsOffset =
-      8 * PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_._has_bits_);
 };
 
 NSPanelStatusReport::NSPanelStatusReport(::google::protobuf::Arena* arena)
@@ -537,12 +629,11 @@ NSPanelStatusReport::NSPanelStatusReport(::google::protobuf::Arena* arena)
 inline PROTOBUF_NDEBUG_INLINE NSPanelStatusReport::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
     const Impl_& from, const ::NSPanelStatusReport& from_msg)
-      : _has_bits_{from._has_bits_},
-        _cached_size_{0},
-        warnings_{visibility, arena, from.warnings_},
+      : warnings_{visibility, arena, from.warnings_},
         mac_address_(arena, from.mac_address_),
         temperature_(arena, from.temperature_),
-        ip_address_(arena, from.ip_address_) {}
+        ip_address_(arena, from.ip_address_),
+        _cached_size_{0} {}
 
 NSPanelStatusReport::NSPanelStatusReport(
     ::google::protobuf::Arena* arena,
@@ -566,11 +657,11 @@ NSPanelStatusReport::NSPanelStatusReport(
 inline PROTOBUF_NDEBUG_INLINE NSPanelStatusReport::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
-      : _cached_size_{0},
-        warnings_{visibility, arena},
+      : warnings_{visibility, arena},
         mac_address_(arena),
         temperature_(arena),
-        ip_address_(arena) {}
+        ip_address_(arena),
+        _cached_size_{0} {}
 
 inline void NSPanelStatusReport::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
@@ -617,7 +708,7 @@ NSPanelStatusReport::GetClassData() const {
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
 const ::_pbi::TcParseTable<3, 8, 1, 68, 2> NSPanelStatusReport::_table_ = {
   {
-    PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_._has_bits_),
+    0,  // no _has_bits_
     0, // no _extensions_
     8, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
@@ -633,15 +724,15 @@ const ::_pbi::TcParseTable<3, 8, 1, 68, 2> NSPanelStatusReport::_table_ = {
     ::_pbi::TcParser::GetTable<::NSPanelStatusReport>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // repeated .NSPanelStatusReport.NSPanelWarning warnings = 8;
+    // repeated .NSPanelWarning warnings = 8;
     {::_pbi::TcParser::FastMtR1,
      {66, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.warnings_)}},
     // .NSPanelStatusReport.state nspanel_state = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelStatusReport, _impl_.nspanel_state_), 63>(),
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.nspanel_state_)}},
-    // optional int32 update_progress = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelStatusReport, _impl_.update_progress_), 0>(),
-     {16, 0, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.update_progress_)}},
+    // int32 update_progress = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelStatusReport, _impl_.update_progress_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.update_progress_)}},
     // int32 rssi = 3;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelStatusReport, _impl_.rssi_), 63>(),
      {24, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.rssi_)}},
@@ -661,31 +752,31 @@ const ::_pbi::TcParseTable<3, 8, 1, 68, 2> NSPanelStatusReport::_table_ = {
     65535, 65535
   }}, {{
     // .NSPanelStatusReport.state nspanel_state = 1;
-    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.nspanel_state_), -1, 0,
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.nspanel_state_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
-    // optional int32 update_progress = 2;
-    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.update_progress_), _Internal::kHasBitsOffset + 0, 0,
-    (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int32 update_progress = 2;
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.update_progress_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
     // int32 rssi = 3;
-    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.rssi_), -1, 0,
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.rssi_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
     // int32 heap_used_pct = 4;
-    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.heap_used_pct_), -1, 0,
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.heap_used_pct_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
     // string mac_address = 5;
-    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.mac_address_), -1, 0,
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.mac_address_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // string temperature = 6;
-    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.temperature_), -1, 0,
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.temperature_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // string ip_address = 7;
-    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.ip_address_), -1, 0,
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.ip_address_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // repeated .NSPanelStatusReport.NSPanelWarning warnings = 8;
-    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.warnings_), -1, 0,
+    // repeated .NSPanelWarning warnings = 8;
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.warnings_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
-    {::_pbi::TcParser::GetTable<::NSPanelStatusReport_NSPanelWarning>()},
+    {::_pbi::TcParser::GetTable<::NSPanelWarning>()},
   }}, {{
     "\23\0\0\0\0\13\13\12\0\0\0\0\0\0\0\0"
     "NSPanelStatusReport"
@@ -706,12 +797,9 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
   _impl_.mac_address_.ClearToEmpty();
   _impl_.temperature_.ClearToEmpty();
   _impl_.ip_address_.ClearToEmpty();
-  _impl_.nspanel_state_ = 0;
-  _impl_.update_progress_ = 0;
-  ::memset(&_impl_.rssi_, 0, static_cast<::size_t>(
+  ::memset(&_impl_.nspanel_state_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.heap_used_pct_) -
-      reinterpret_cast<char*>(&_impl_.rssi_)) + sizeof(_impl_.heap_used_pct_));
-  _impl_._has_bits_.Clear();
+      reinterpret_cast<char*>(&_impl_.nspanel_state_)) + sizeof(_impl_.heap_used_pct_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -729,9 +817,8 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
         1, this->_internal_nspanel_state(), target);
   }
 
-  cached_has_bits = _impl_._has_bits_[0];
-  // optional int32 update_progress = 2;
-  if (cached_has_bits & 0x00000001u) {
+  // int32 update_progress = 2;
+  if (this->_internal_update_progress() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::
         WriteInt32ToArrayWithField<2>(
             stream, this->_internal_update_progress(), target);
@@ -775,7 +862,7 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
     target = stream->WriteStringMaybeAliased(7, _s, target);
   }
 
-  // repeated .NSPanelStatusReport.NSPanelWarning warnings = 8;
+  // repeated .NSPanelWarning warnings = 8;
   for (unsigned i = 0, n = static_cast<unsigned>(
                            this->_internal_warnings_size());
        i < n; i++) {
@@ -804,7 +891,7 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
   (void) cached_has_bits;
 
   ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
-  // repeated .NSPanelStatusReport.NSPanelWarning warnings = 8;
+  // repeated .NSPanelWarning warnings = 8;
   total_size += 1UL * this->_internal_warnings_size();
   for (const auto& msg : this->_internal_warnings()) {
     total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
@@ -833,9 +920,8 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_nspanel_state());
   }
 
-  // optional int32 update_progress = 2;
-  cached_has_bits = _impl_._has_bits_[0];
-  if (cached_has_bits & 0x00000001u) {
+  // int32 update_progress = 2;
+  if (this->_internal_update_progress() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
         this->_internal_update_progress());
   }
@@ -878,8 +964,7 @@ void NSPanelStatusReport::MergeImpl(::google::protobuf::MessageLite& to_msg, con
   if (from._internal_nspanel_state() != 0) {
     _this->_impl_.nspanel_state_ = from._impl_.nspanel_state_;
   }
-  cached_has_bits = from._impl_._has_bits_[0];
-  if (cached_has_bits & 0x00000001u) {
+  if (from._internal_update_progress() != 0) {
     _this->_impl_.update_progress_ = from._impl_.update_progress_;
   }
   if (from._internal_rssi() != 0) {
@@ -888,7 +973,6 @@ void NSPanelStatusReport::MergeImpl(::google::protobuf::MessageLite& to_msg, con
   if (from._internal_heap_used_pct() != 0) {
     _this->_impl_.heap_used_pct_ = from._impl_.heap_used_pct_;
   }
-  _this->_impl_._has_bits_[0] |= cached_has_bits;
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -905,7 +989,6 @@ void NSPanelStatusReport::InternalSwap(NSPanelStatusReport* PROTOBUF_RESTRICT ot
   auto* arena = GetArena();
   ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   _impl_.warnings_.InternalSwap(&other->_impl_.warnings_);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.mac_address_, &other->_impl_.mac_address_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.temperature_, &other->_impl_.temperature_, arena);
@@ -1555,6 +1638,755 @@ void NSPanelRoomStatus::InternalSwap(NSPanelRoomStatus* PROTOBUF_RESTRICT other)
 }
 
 ::google::protobuf::Metadata NSPanelRoomStatus::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class NSPanelWeatherUpdate_ForecastItem::_Internal {
+ public:
+};
+
+NSPanelWeatherUpdate_ForecastItem::NSPanelWeatherUpdate_ForecastItem(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:NSPanelWeatherUpdate.ForecastItem)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelWeatherUpdate_ForecastItem::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::NSPanelWeatherUpdate_ForecastItem& from_msg)
+      : weather_icon_(arena, from.weather_icon_),
+        precipitation_string_(arena, from.precipitation_string_),
+        temperature_maxmin_string_(arena, from.temperature_maxmin_string_),
+        wind_string_(arena, from.wind_string_),
+        display_string_(arena, from.display_string_),
+        _cached_size_{0} {}
+
+NSPanelWeatherUpdate_ForecastItem::NSPanelWeatherUpdate_ForecastItem(
+    ::google::protobuf::Arena* arena,
+    const NSPanelWeatherUpdate_ForecastItem& from)
+    : ::google::protobuf::Message(arena) {
+  NSPanelWeatherUpdate_ForecastItem* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:NSPanelWeatherUpdate.ForecastItem)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelWeatherUpdate_ForecastItem::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : weather_icon_(arena),
+        precipitation_string_(arena),
+        temperature_maxmin_string_(arena),
+        wind_string_(arena),
+        display_string_(arena),
+        _cached_size_{0} {}
+
+inline void NSPanelWeatherUpdate_ForecastItem::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+NSPanelWeatherUpdate_ForecastItem::~NSPanelWeatherUpdate_ForecastItem() {
+  // @@protoc_insertion_point(destructor:NSPanelWeatherUpdate.ForecastItem)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void NSPanelWeatherUpdate_ForecastItem::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.weather_icon_.Destroy();
+  _impl_.precipitation_string_.Destroy();
+  _impl_.temperature_maxmin_string_.Destroy();
+  _impl_.wind_string_.Destroy();
+  _impl_.display_string_.Destroy();
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+NSPanelWeatherUpdate_ForecastItem::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate_ForecastItem, _impl_._cached_size_),
+              false,
+          },
+          &NSPanelWeatherUpdate_ForecastItem::MergeImpl,
+          &NSPanelWeatherUpdate_ForecastItem::kDescriptorMethods,
+          &descriptor_table_protobuf_5fnspanel_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<3, 5, 0, 124, 2> NSPanelWeatherUpdate_ForecastItem::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    5, 56,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967264,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    5,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_NSPanelWeatherUpdate_ForecastItem_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::NSPanelWeatherUpdate_ForecastItem>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // string weather_icon = 1;
+    {::_pbi::TcParser::FastUS1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate_ForecastItem, _impl_.weather_icon_)}},
+    // string precipitation_string = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate_ForecastItem, _impl_.precipitation_string_)}},
+    // string temperature_maxmin_string = 3;
+    {::_pbi::TcParser::FastUS1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate_ForecastItem, _impl_.temperature_maxmin_string_)}},
+    // string wind_string = 4;
+    {::_pbi::TcParser::FastUS1,
+     {34, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate_ForecastItem, _impl_.wind_string_)}},
+    // string display_string = 5;
+    {::_pbi::TcParser::FastUS1,
+     {42, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate_ForecastItem, _impl_.display_string_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string weather_icon = 1;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate_ForecastItem, _impl_.weather_icon_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string precipitation_string = 2;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate_ForecastItem, _impl_.precipitation_string_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string temperature_maxmin_string = 3;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate_ForecastItem, _impl_.temperature_maxmin_string_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string wind_string = 4;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate_ForecastItem, _impl_.wind_string_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string display_string = 5;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate_ForecastItem, _impl_.display_string_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\41\14\24\31\13\16\0\0"
+    "NSPanelWeatherUpdate.ForecastItem"
+    "weather_icon"
+    "precipitation_string"
+    "temperature_maxmin_string"
+    "wind_string"
+    "display_string"
+  }},
+};
+
+PROTOBUF_NOINLINE void NSPanelWeatherUpdate_ForecastItem::Clear() {
+// @@protoc_insertion_point(message_clear_start:NSPanelWeatherUpdate.ForecastItem)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.weather_icon_.ClearToEmpty();
+  _impl_.precipitation_string_.ClearToEmpty();
+  _impl_.temperature_maxmin_string_.ClearToEmpty();
+  _impl_.wind_string_.ClearToEmpty();
+  _impl_.display_string_.ClearToEmpty();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* NSPanelWeatherUpdate_ForecastItem::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:NSPanelWeatherUpdate.ForecastItem)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // string weather_icon = 1;
+  if (!this->_internal_weather_icon().empty()) {
+    const std::string& _s = this->_internal_weather_icon();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelWeatherUpdate.ForecastItem.weather_icon");
+    target = stream->WriteStringMaybeAliased(1, _s, target);
+  }
+
+  // string precipitation_string = 2;
+  if (!this->_internal_precipitation_string().empty()) {
+    const std::string& _s = this->_internal_precipitation_string();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelWeatherUpdate.ForecastItem.precipitation_string");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
+  }
+
+  // string temperature_maxmin_string = 3;
+  if (!this->_internal_temperature_maxmin_string().empty()) {
+    const std::string& _s = this->_internal_temperature_maxmin_string();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelWeatherUpdate.ForecastItem.temperature_maxmin_string");
+    target = stream->WriteStringMaybeAliased(3, _s, target);
+  }
+
+  // string wind_string = 4;
+  if (!this->_internal_wind_string().empty()) {
+    const std::string& _s = this->_internal_wind_string();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelWeatherUpdate.ForecastItem.wind_string");
+    target = stream->WriteStringMaybeAliased(4, _s, target);
+  }
+
+  // string display_string = 5;
+  if (!this->_internal_display_string().empty()) {
+    const std::string& _s = this->_internal_display_string();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelWeatherUpdate.ForecastItem.display_string");
+    target = stream->WriteStringMaybeAliased(5, _s, target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:NSPanelWeatherUpdate.ForecastItem)
+  return target;
+}
+
+::size_t NSPanelWeatherUpdate_ForecastItem::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:NSPanelWeatherUpdate.ForecastItem)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // string weather_icon = 1;
+  if (!this->_internal_weather_icon().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_weather_icon());
+  }
+
+  // string precipitation_string = 2;
+  if (!this->_internal_precipitation_string().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_precipitation_string());
+  }
+
+  // string temperature_maxmin_string = 3;
+  if (!this->_internal_temperature_maxmin_string().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_temperature_maxmin_string());
+  }
+
+  // string wind_string = 4;
+  if (!this->_internal_wind_string().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_wind_string());
+  }
+
+  // string display_string = 5;
+  if (!this->_internal_display_string().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_display_string());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void NSPanelWeatherUpdate_ForecastItem::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<NSPanelWeatherUpdate_ForecastItem*>(&to_msg);
+  auto& from = static_cast<const NSPanelWeatherUpdate_ForecastItem&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelWeatherUpdate.ForecastItem)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_weather_icon().empty()) {
+    _this->_internal_set_weather_icon(from._internal_weather_icon());
+  }
+  if (!from._internal_precipitation_string().empty()) {
+    _this->_internal_set_precipitation_string(from._internal_precipitation_string());
+  }
+  if (!from._internal_temperature_maxmin_string().empty()) {
+    _this->_internal_set_temperature_maxmin_string(from._internal_temperature_maxmin_string());
+  }
+  if (!from._internal_wind_string().empty()) {
+    _this->_internal_set_wind_string(from._internal_wind_string());
+  }
+  if (!from._internal_display_string().empty()) {
+    _this->_internal_set_display_string(from._internal_display_string());
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void NSPanelWeatherUpdate_ForecastItem::CopyFrom(const NSPanelWeatherUpdate_ForecastItem& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelWeatherUpdate.ForecastItem)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void NSPanelWeatherUpdate_ForecastItem::InternalSwap(NSPanelWeatherUpdate_ForecastItem* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.weather_icon_, &other->_impl_.weather_icon_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.precipitation_string_, &other->_impl_.precipitation_string_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.temperature_maxmin_string_, &other->_impl_.temperature_maxmin_string_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.wind_string_, &other->_impl_.wind_string_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.display_string_, &other->_impl_.display_string_, arena);
+}
+
+::google::protobuf::Metadata NSPanelWeatherUpdate_ForecastItem::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class NSPanelWeatherUpdate::_Internal {
+ public:
+};
+
+NSPanelWeatherUpdate::NSPanelWeatherUpdate(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:NSPanelWeatherUpdate)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelWeatherUpdate::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::NSPanelWeatherUpdate& from_msg)
+      : forecast_items_{visibility, arena, from.forecast_items_},
+        test_field_{visibility, arena, from.test_field_},
+        _test_field_cached_byte_size_{0},
+        current_weather_icon_(arena, from.current_weather_icon_),
+        current_temperature_string_(arena, from.current_temperature_string_),
+        current_maxmin_temperature_(arena, from.current_maxmin_temperature_),
+        current_wind_string_(arena, from.current_wind_string_),
+        sunrise_string_(arena, from.sunrise_string_),
+        sunset_string_(arena, from.sunset_string_),
+        current_precipitation_string_(arena, from.current_precipitation_string_),
+        _cached_size_{0} {}
+
+NSPanelWeatherUpdate::NSPanelWeatherUpdate(
+    ::google::protobuf::Arena* arena,
+    const NSPanelWeatherUpdate& from)
+    : ::google::protobuf::Message(arena) {
+  NSPanelWeatherUpdate* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:NSPanelWeatherUpdate)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelWeatherUpdate::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : forecast_items_{visibility, arena},
+        test_field_{visibility, arena},
+        _test_field_cached_byte_size_{0},
+        current_weather_icon_(arena),
+        current_temperature_string_(arena),
+        current_maxmin_temperature_(arena),
+        current_wind_string_(arena),
+        sunrise_string_(arena),
+        sunset_string_(arena),
+        current_precipitation_string_(arena),
+        _cached_size_{0} {}
+
+inline void NSPanelWeatherUpdate::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+NSPanelWeatherUpdate::~NSPanelWeatherUpdate() {
+  // @@protoc_insertion_point(destructor:NSPanelWeatherUpdate)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void NSPanelWeatherUpdate::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.current_weather_icon_.Destroy();
+  _impl_.current_temperature_string_.Destroy();
+  _impl_.current_maxmin_temperature_.Destroy();
+  _impl_.current_wind_string_.Destroy();
+  _impl_.sunrise_string_.Destroy();
+  _impl_.sunset_string_.Destroy();
+  _impl_.current_precipitation_string_.Destroy();
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+NSPanelWeatherUpdate::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_._cached_size_),
+              false,
+          },
+          &NSPanelWeatherUpdate::MergeImpl,
+          &NSPanelWeatherUpdate::kDescriptorMethods,
+          &descriptor_table_protobuf_5fnspanel_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<4, 9, 1, 183, 2> NSPanelWeatherUpdate::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    9, 120,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294966784,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    9,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_NSPanelWeatherUpdate_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::NSPanelWeatherUpdate>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // repeated .NSPanelWeatherUpdate.ForecastItem forecast_items = 1;
+    {::_pbi::TcParser::FastMtR1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.forecast_items_)}},
+    // string current_weather_icon = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.current_weather_icon_)}},
+    // string current_temperature_string = 3;
+    {::_pbi::TcParser::FastUS1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.current_temperature_string_)}},
+    // string current_maxmin_temperature = 4;
+    {::_pbi::TcParser::FastUS1,
+     {34, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.current_maxmin_temperature_)}},
+    // string current_wind_string = 5;
+    {::_pbi::TcParser::FastUS1,
+     {42, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.current_wind_string_)}},
+    // string sunrise_string = 6;
+    {::_pbi::TcParser::FastUS1,
+     {50, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.sunrise_string_)}},
+    // string sunset_string = 7;
+    {::_pbi::TcParser::FastUS1,
+     {58, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.sunset_string_)}},
+    // string current_precipitation_string = 8;
+    {::_pbi::TcParser::FastUS1,
+     {66, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.current_precipitation_string_)}},
+    // repeated int32 test_field = 9;
+    {::_pbi::TcParser::FastV32P1,
+     {74, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.test_field_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated .NSPanelWeatherUpdate.ForecastItem forecast_items = 1;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.forecast_items_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+    // string current_weather_icon = 2;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.current_weather_icon_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string current_temperature_string = 3;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.current_temperature_string_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string current_maxmin_temperature = 4;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.current_maxmin_temperature_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string current_wind_string = 5;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.current_wind_string_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string sunrise_string = 6;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.sunrise_string_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string sunset_string = 7;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.sunset_string_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string current_precipitation_string = 8;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.current_precipitation_string_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // repeated int32 test_field = 9;
+    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.test_field_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::NSPanelWeatherUpdate_ForecastItem>()},
+  }}, {{
+    "\24\0\24\32\32\23\16\15\34\0\0\0\0\0\0\0"
+    "NSPanelWeatherUpdate"
+    "current_weather_icon"
+    "current_temperature_string"
+    "current_maxmin_temperature"
+    "current_wind_string"
+    "sunrise_string"
+    "sunset_string"
+    "current_precipitation_string"
+  }},
+};
+
+PROTOBUF_NOINLINE void NSPanelWeatherUpdate::Clear() {
+// @@protoc_insertion_point(message_clear_start:NSPanelWeatherUpdate)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.forecast_items_.Clear();
+  _impl_.test_field_.Clear();
+  _impl_.current_weather_icon_.ClearToEmpty();
+  _impl_.current_temperature_string_.ClearToEmpty();
+  _impl_.current_maxmin_temperature_.ClearToEmpty();
+  _impl_.current_wind_string_.ClearToEmpty();
+  _impl_.sunrise_string_.ClearToEmpty();
+  _impl_.sunset_string_.ClearToEmpty();
+  _impl_.current_precipitation_string_.ClearToEmpty();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* NSPanelWeatherUpdate::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:NSPanelWeatherUpdate)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // repeated .NSPanelWeatherUpdate.ForecastItem forecast_items = 1;
+  for (unsigned i = 0, n = static_cast<unsigned>(
+                           this->_internal_forecast_items_size());
+       i < n; i++) {
+    const auto& repfield = this->_internal_forecast_items().Get(i);
+    target =
+        ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+            1, repfield, repfield.GetCachedSize(),
+            target, stream);
+  }
+
+  // string current_weather_icon = 2;
+  if (!this->_internal_current_weather_icon().empty()) {
+    const std::string& _s = this->_internal_current_weather_icon();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelWeatherUpdate.current_weather_icon");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
+  }
+
+  // string current_temperature_string = 3;
+  if (!this->_internal_current_temperature_string().empty()) {
+    const std::string& _s = this->_internal_current_temperature_string();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelWeatherUpdate.current_temperature_string");
+    target = stream->WriteStringMaybeAliased(3, _s, target);
+  }
+
+  // string current_maxmin_temperature = 4;
+  if (!this->_internal_current_maxmin_temperature().empty()) {
+    const std::string& _s = this->_internal_current_maxmin_temperature();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelWeatherUpdate.current_maxmin_temperature");
+    target = stream->WriteStringMaybeAliased(4, _s, target);
+  }
+
+  // string current_wind_string = 5;
+  if (!this->_internal_current_wind_string().empty()) {
+    const std::string& _s = this->_internal_current_wind_string();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelWeatherUpdate.current_wind_string");
+    target = stream->WriteStringMaybeAliased(5, _s, target);
+  }
+
+  // string sunrise_string = 6;
+  if (!this->_internal_sunrise_string().empty()) {
+    const std::string& _s = this->_internal_sunrise_string();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelWeatherUpdate.sunrise_string");
+    target = stream->WriteStringMaybeAliased(6, _s, target);
+  }
+
+  // string sunset_string = 7;
+  if (!this->_internal_sunset_string().empty()) {
+    const std::string& _s = this->_internal_sunset_string();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelWeatherUpdate.sunset_string");
+    target = stream->WriteStringMaybeAliased(7, _s, target);
+  }
+
+  // string current_precipitation_string = 8;
+  if (!this->_internal_current_precipitation_string().empty()) {
+    const std::string& _s = this->_internal_current_precipitation_string();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelWeatherUpdate.current_precipitation_string");
+    target = stream->WriteStringMaybeAliased(8, _s, target);
+  }
+
+  // repeated int32 test_field = 9;
+  {
+    int byte_size = _impl_._test_field_cached_byte_size_.Get();
+    if (byte_size > 0) {
+      target = stream->WriteInt32Packed(
+          9, _internal_test_field(), byte_size, target);
+    }
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:NSPanelWeatherUpdate)
+  return target;
+}
+
+::size_t NSPanelWeatherUpdate::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:NSPanelWeatherUpdate)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // repeated .NSPanelWeatherUpdate.ForecastItem forecast_items = 1;
+  total_size += 1UL * this->_internal_forecast_items_size();
+  for (const auto& msg : this->_internal_forecast_items()) {
+    total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+  }
+  // repeated int32 test_field = 9;
+  {
+    std::size_t data_size = ::_pbi::WireFormatLite::Int32Size(
+        this->_internal_test_field())
+    ;
+    _impl_._test_field_cached_byte_size_.Set(::_pbi::ToCachedSize(data_size));
+    std::size_t tag_size = data_size == 0
+        ? 0
+        : 1 + ::_pbi::WireFormatLite::Int32Size(
+                            static_cast<int32_t>(data_size))
+    ;
+    total_size += tag_size + data_size;
+  }
+  // string current_weather_icon = 2;
+  if (!this->_internal_current_weather_icon().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_current_weather_icon());
+  }
+
+  // string current_temperature_string = 3;
+  if (!this->_internal_current_temperature_string().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_current_temperature_string());
+  }
+
+  // string current_maxmin_temperature = 4;
+  if (!this->_internal_current_maxmin_temperature().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_current_maxmin_temperature());
+  }
+
+  // string current_wind_string = 5;
+  if (!this->_internal_current_wind_string().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_current_wind_string());
+  }
+
+  // string sunrise_string = 6;
+  if (!this->_internal_sunrise_string().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_sunrise_string());
+  }
+
+  // string sunset_string = 7;
+  if (!this->_internal_sunset_string().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_sunset_string());
+  }
+
+  // string current_precipitation_string = 8;
+  if (!this->_internal_current_precipitation_string().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_current_precipitation_string());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void NSPanelWeatherUpdate::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<NSPanelWeatherUpdate*>(&to_msg);
+  auto& from = static_cast<const NSPanelWeatherUpdate&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelWeatherUpdate)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_internal_mutable_forecast_items()->MergeFrom(
+      from._internal_forecast_items());
+  _this->_internal_mutable_test_field()->MergeFrom(from._internal_test_field());
+  if (!from._internal_current_weather_icon().empty()) {
+    _this->_internal_set_current_weather_icon(from._internal_current_weather_icon());
+  }
+  if (!from._internal_current_temperature_string().empty()) {
+    _this->_internal_set_current_temperature_string(from._internal_current_temperature_string());
+  }
+  if (!from._internal_current_maxmin_temperature().empty()) {
+    _this->_internal_set_current_maxmin_temperature(from._internal_current_maxmin_temperature());
+  }
+  if (!from._internal_current_wind_string().empty()) {
+    _this->_internal_set_current_wind_string(from._internal_current_wind_string());
+  }
+  if (!from._internal_sunrise_string().empty()) {
+    _this->_internal_set_sunrise_string(from._internal_sunrise_string());
+  }
+  if (!from._internal_sunset_string().empty()) {
+    _this->_internal_set_sunset_string(from._internal_sunset_string());
+  }
+  if (!from._internal_current_precipitation_string().empty()) {
+    _this->_internal_set_current_precipitation_string(from._internal_current_precipitation_string());
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void NSPanelWeatherUpdate::CopyFrom(const NSPanelWeatherUpdate& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelWeatherUpdate)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void NSPanelWeatherUpdate::InternalSwap(NSPanelWeatherUpdate* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.forecast_items_.InternalSwap(&other->_impl_.forecast_items_);
+  _impl_.test_field_.InternalSwap(&other->_impl_.test_field_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.current_weather_icon_, &other->_impl_.current_weather_icon_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.current_temperature_string_, &other->_impl_.current_temperature_string_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.current_maxmin_temperature_, &other->_impl_.current_maxmin_temperature_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.current_wind_string_, &other->_impl_.current_wind_string_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.sunrise_string_, &other->_impl_.sunrise_string_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.sunset_string_, &other->_impl_.sunset_string_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.current_precipitation_string_, &other->_impl_.current_precipitation_string_, arena);
+}
+
+::google::protobuf::Metadata NSPanelWeatherUpdate::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)

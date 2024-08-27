@@ -18,6 +18,7 @@
 #include <fmt/core.h>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <protobuf_nspanel.pb.h>
 #include <spdlog/spdlog.h>
 #include <string>
 
@@ -28,6 +29,8 @@ void MQTTManagerWeather::start() {
   } else {
     SPDLOG_INFO("Weather manager already running.");
   }
+  // Clear old topic of old retain data.
+  MQTT_Manager::clear_retain("nspanel/status/weather");
 }
 
 void MQTTManagerWeather::_run_weather_thread() {
@@ -97,7 +100,7 @@ void MQTTManagerWeather::_pull_new_weather_data() {
   std::list<const char *> headers = {"Content-type: application/json"};
   std::string response_data;
   if (WebHelper::perform_get_request(&pull_weather_url, &response_data, &headers)) {
-    SPDLOG_DEBUG("Successfully received new weather forcast from Open Meteo. Will process new data.");
+    SPDLOG_DEBUG("Successfully received new weather forecast from Open Meteo. Will process new data.");
     MQTTManagerWeather::_process_weather_data(response_data);
     SPDLOG_DEBUG("Weather data processed.");
   } else {
@@ -248,56 +251,30 @@ void MQTTManagerWeather::openhab_temp_sensor_callback(nlohmann::json event_data)
 }
 
 void MQTTManagerWeather::send_state_update() {
-  nlohmann::json weather_info;
-  std::list<nlohmann::json> forecast;
+  NSPanelWeatherUpdate weather_protbuf;
   for (struct weather_info &info : MQTTManagerWeather::_forecast_weather_info) {
-    nlohmann::json forecast_data;
-    forecast_data["icon"] = MQTTManagerWeather::_get_icon_from_mapping(info.condition, info.time.tm_hour);
-    std::string pre = std::to_string((int)round(info.precipitation));
-    pre.append(MQTTManagerWeather::_precipitation_unit);
-    forecast_data["pre"] = pre;
-    std::string prepro = std::to_string((int)round(info.precipitation_probability));
-    prepro.append("%");
-    forecast_data["prepro"] = prepro;
-
-    std::string templow = std::to_string((int)round(info.temperature_low));
-    templow.append("°");
-    std::string temphigh = std::to_string((int)round(info.temperature_high));
-    temphigh.append("°");
-    std::string temp_display = temphigh;
-    temp_display.append("/");
-    temp_display.append(templow);
-    forecast_data["maxmin"] = temp_display;
-
-    std::string wind = std::to_string((int)round(info.wind_speed));
-    wind.append(MQTTManagerWeather::_windspeed_unit);
-    forecast_data["wind"] = wind;
-    forecast_data["day"] = info.day;
-    forecast.push_back(forecast_data);
+    NSPanelWeatherUpdate_ForecastItem *forecast_item = weather_protbuf.add_forecast_items();
+    forecast_item->set_weather_icon(MQTTManagerWeather::_get_icon_from_mapping(info.condition, info.time.tm_hour));
+    // TODO: Implement ability for users to select precipitation volume instead of probability.
+    forecast_item->set_precipitation_string(fmt::format("{:.0f}%", info.precipitation));
+    forecast_item->set_temperature_maxmin_string(fmt::format("{:.0f}°/{:.0f}°", info.temperature_high, info.temperature_low));
+    forecast_item->set_wind_string(fmt::format("{:.0f}{}", info.wind_speed, MQTTManagerWeather::_windspeed_unit));
+    // TODO: Implement ability for users to display comming 5 hours instead of 5 days.
+    forecast_item->set_display_string(info.day);
   }
-  weather_info["forecast"] = forecast;
-  weather_info["icon"] = MQTTManagerWeather::_get_icon_from_mapping(MQTTManagerWeather::_current_condition, MQTTManagerWeather::_current_weather_time.tm_hour);
-  std::string temp = std::to_string((int)round(MQTTManagerWeather::_current_temperature));
-  temp.append("°");
-  weather_info["temp"] = temp;
+  weather_protbuf.set_current_weather_icon(MQTTManagerWeather::_get_icon_from_mapping(MQTTManagerWeather::_current_condition, MQTTManagerWeather::_current_weather_time.tm_hour));
+  weather_protbuf.set_current_temperature_string(fmt::format("{:.0f}°", MQTTManagerWeather::_current_temperature));
+  weather_protbuf.set_current_maxmin_temperature(fmt::format("{:.0f}°/{:.0f}°", MQTTManagerWeather::_current_max_temperature, MQTTManagerWeather::_current_min_temperature));
+  weather_protbuf.set_current_wind_string(fmt::format("{:.0f}{}", MQTTManagerWeather::_current_wind_speed, MQTTManagerWeather::_windspeed_unit));
+  weather_protbuf.set_sunrise_string(MQTTManagerWeather::_next_sunrise);
+  weather_protbuf.set_sunset_string(MQTTManagerWeather::_next_sunset);
+  // TODO: Implement ability for users to select precipitation volume instead of probability.
+  weather_protbuf.set_current_precipitation_string(fmt::format("{:.0f}%", MQTTManagerWeather::_current_precipitation_probability));
 
-  std::string templow = std::to_string((int)round(MQTTManagerWeather::_current_min_temperature));
-  templow.append("°");
-  std::string temphigh = std::to_string((int)round(MQTTManagerWeather::_current_max_temperature));
-  temphigh.append("°");
-  std::string temp_display = temphigh;
-  temp_display.append("/");
-  temp_display.append(templow);
-  weather_info["maxmin"] = temp_display;
-
-  std::string wind = std::to_string((int)round(MQTTManagerWeather::_current_wind_speed));
-  wind.append(MQTTManagerWeather::_windspeed_unit);
-  weather_info["wind"] = wind;
-
-  weather_info["sunrise"] = MQTTManagerWeather::_next_sunrise;
-  weather_info["sunset"] = MQTTManagerWeather::_next_sunset;
-  weather_info["prepro"] = fmt::format("{}%", MQTTManagerWeather::_current_precipitation_probability);
-
-  std::string new_weather_data = weather_info.dump();
-  MQTT_Manager::publish("nspanel/status/weather", new_weather_data, true);
+  std::string new_weather_data;
+  if (weather_protbuf.SerializeToString(&new_weather_data)) {
+    MQTT_Manager::publish(fmt::format("nspanel/status/mqttmanager_{}:{}/weather", MqttManagerConfig::get_settings().manager_address(), MqttManagerConfig::get_settings().manager_port()), new_weather_data, true);
+  } else {
+    SPDLOG_ERROR("Failed to serialize weather info to string.");
+  }
 }

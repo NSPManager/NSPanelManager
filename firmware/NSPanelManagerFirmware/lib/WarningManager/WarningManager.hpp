@@ -1,22 +1,17 @@
-#include <string>
-#include <vector>
-
 #ifndef WARNING_MANAGER_HPP
 #define WARNING_MANAGER_HPP
 
-class NSPanelWarning {
-public:
-  std::string level;
-  std::string text;
-};
+#include <protobuf_nspanel.pb-c.h>
+#include <string>
+#include <vector>
 
 class WarningManager {
 public:
-  static void register_warning(std::string level, std::string text);
-  static void register_warning(const char *level, const char *text);
+  static void register_warning(NSPanelWarningLevel level, std::string text);
+  static void register_warning(NSPanelWarningLevel level, const char *text);
 
-  static void remove_warning(std::string level, std::string text);
-  static void remove_warning(const char *level, const char *text);
+  static void remove_warning(NSPanelWarningLevel level, std::string text);
+  static void remove_warning(NSPanelWarningLevel level, const char *text);
 
   static std::vector<NSPanelWarning> get_warnings();
 

@@ -14,6 +14,10 @@
 #include <boost/bind.hpp>
 #include <boost/bind/placeholders.hpp>
 #include <boost/exception/diagnostic_information.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/write.hpp>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
@@ -22,6 +26,7 @@
 #include <exception>
 #include <fmt/chrono.h>
 #include <fmt/core.h>
+#include <fstream>
 #include <iomanip>
 #include <list>
 #include <nlohmann/json.hpp>
@@ -380,7 +385,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
           std::vector<std::string> message_lines;
           boost::split(message_lines, std::string(data.at("warnings")), boost::is_any_of("\n"));
           for (std::string line : message_lines) {
-            NSPanelWarning warning_obj = {
+            NSPanelWarningWebsocketRepresentation warning_obj = {
                 .level = "warning",
                 .text = line};
             this->_nspanel_warnings.push_back(warning_obj);
@@ -388,7 +393,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         } else if (data.at("warnings").is_array()) {
           for (nlohmann::json warning : data.at("warnings")) {
             if (warning.contains("level") && warning.contains("text")) {
-              NSPanelWarning warning_obj = {
+              NSPanelWarningWebsocketRepresentation warning_obj = {
                   .level = warning.at("level"),
                   .text = warning.at("text")};
               this->_nspanel_warnings.push_back(warning_obj);
@@ -464,8 +469,18 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       SPDLOG_TRACE("Trying to parse status_report as protobuf.");
 
       NSPanelStatusReport report;
-      if (!report.MergeFromString(payload)) {
+      if (!report.ParseFromString(payload)) {
         SPDLOG_ERROR("Failed to parse NSPanelStatusReport from string as protobuf.");
+        SPDLOG_TRACE("Payload: {}", payload);
+        boost::filesystem::path file_path(fmt::format("nspanel_status_report_{}.bin", this->_id));
+        std::ofstream output_file(file_path.string(), std::ios::out);
+
+        if (output_file.is_open()) {
+          output_file << payload;
+          output_file.close();
+          SPDLOG_TRACE("Wrote payload to {}.", file_path.string());
+        }
+
         return;
       } else {
         // TODO: Remove log.
@@ -498,11 +513,35 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       }
 
       // TODO: Load warnings from protobuf report.
-
-      if (report.has_update_progress()) {
-        this->_update_progress = report.update_progress();
-      } else {
-        this->_update_progress = 0;
+      this->_update_progress = report.update_progress();
+      this->_nspanel_warnings.clear();
+      for (const NSPanelWarning &warning : report.warnings()) {
+        NSPanelWarningWebsocketRepresentation ws_warn;
+        ws_warn.text = warning.text();
+        switch (warning.level()) {
+        case CRITICAL:
+          ws_warn.level = "CRITICAL";
+          break;
+        case ERROR:
+          ws_warn.level = "ERROR";
+          break;
+        case WARNING:
+          ws_warn.level = "WARNING";
+          break;
+        case INFO:
+          ws_warn.level = "INFO";
+          break;
+        case DEBUG:
+          ws_warn.level = "DEBUG";
+          break;
+        case TRACE:
+          ws_warn.level = "TRACE";
+          break;
+        case NSPanelWarningLevel_INT_MIN_SENTINEL_DO_NOT_USE_:
+        case NSPanelWarningLevel_INT_MAX_SENTINEL_DO_NOT_USE_:
+          break;
+        }
+        this->_nspanel_warnings.push_back(ws_warn);
       }
 
       SPDLOG_TRACE("MAC: {}", report.mac_address());
@@ -510,6 +549,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       SPDLOG_TRACE("TMP: {}", report.temperature());
       SPDLOG_TRACE("HEP: {}", report.heap_used_pct());
       SPDLOG_TRACE("RSI: {}", report.rssi());
+      this->send_websocket_update();
     }
   }
 }
@@ -898,7 +938,7 @@ bool NSPanel::handle_ipc_request_status(nlohmann::json request, nlohmann::json *
       {"update_progress", this->_update_progress},
   };
   data["warnings"] = nlohmann::json::array({});
-  for (NSPanelWarning warning : this->_nspanel_warnings) {
+  for (NSPanelWarningWebsocketRepresentation warning : this->_nspanel_warnings) {
     data["warnings"].push_back(nlohmann::json{
         {"level", warning.level},
         {"text", warning.text},

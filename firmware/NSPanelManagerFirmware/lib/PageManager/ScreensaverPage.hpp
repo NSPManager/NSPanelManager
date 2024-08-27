@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <PageBase.hpp>
+// #include <pb.h>
 
 class ScreensaverPage : public PageBase {
 public:
@@ -20,6 +21,8 @@ public:
   static void ampmMqttCallback(char *topic, byte *payload, unsigned int length);
   static void screensaverModeCallback(char *topic, byte *payload, unsigned int length);
   static void updateRoomTemp(std::string temp_string);
+
+  // static bool decodeForecastItemProtobuf(pb_istream_t *stream, const pb_field_t *field, void **arg);
 
 private:
   static inline std::string _screensaver_page_name;

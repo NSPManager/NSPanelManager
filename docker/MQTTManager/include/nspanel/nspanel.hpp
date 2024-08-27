@@ -20,7 +20,7 @@ enum MQTT_MANAGER_NSPANEL_STATE {
   DENIED
 };
 
-struct NSPanelWarning {
+struct NSPanelWarningWebsocketRepresentation {
   std::string level;
   std::string text;
 };
@@ -178,7 +178,7 @@ private:
   uint8_t _heap_used_pct;
   uint8_t _update_progress;
   MQTT_MANAGER_NSPANEL_STATE _state;
-  std::vector<NSPanelWarning> _nspanel_warnings;
+  std::vector<NSPanelWarningWebsocketRepresentation> _nspanel_warnings;
   std::string _nspanel_warnings_from_manager;
   std::string _mqtt_register_mac;
 

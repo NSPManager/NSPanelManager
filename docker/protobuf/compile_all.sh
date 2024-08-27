@@ -17,7 +17,8 @@ for SRC_FILE in ${SRC_FILES[@]}; do
 done
 
 echo "==> Building protobuf_nspanel.proto for ESP32 NSPanel to $DEST_DIR_FIRMWARE"
-nanopb_generator.py "protobuf_nspanel.proto" -D "$DEST_DIR_FIRMWARE"
+#nanopb_generator.py "protobuf_nspanel.proto" -D "$DEST_DIR_FIRMWARE"
+protoc --c_out="$DEST_DIR_FIRMWARE" "protobuf_nspanel.proto"
 echo "==> Building protobuf_nspanel.proto for MQTTManager to $DEST_DIR_MQTTMANAGER"
 protoc --cpp_out="$DEST_DIR_MQTTMANAGER" "protobuf_nspanel.proto"
 

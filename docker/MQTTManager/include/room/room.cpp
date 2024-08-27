@@ -71,8 +71,6 @@ void Room::entity_changed_callback(MqttManagerEntity *entity) {
 }
 
 void Room::_publish_protobuf_status() {
-  SPDLOG_TRACE("Publising protobuf status on topic {}", this->_mqtt_status_topic);
-
   NSPanelRoomStatus status;
   status.set_id(this->_id);
   status.set_name(this->_name);
@@ -84,7 +82,6 @@ void Room::_publish_protobuf_status() {
   uint16_t num_lights_total = 0;
   uint16_t num_lights_ceiling = 0;
   uint16_t num_lights_table = 0;
-  SPDLOG_TRACE("Checking registered _entities to calculate average light levels.");
   for (auto entity : this->_entities) {
     if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
       Light *light = (Light *)entity;
@@ -129,8 +126,6 @@ void Room::_publish_protobuf_status() {
 
   // Format and send
   std::string data;
-  SPDLOG_TRACE("Formating...");
   status.SerializeToString(&data);
-  SPDLOG_TRACE("Sending room status '{}' to status topic {}", data, this->_mqtt_status_topic);
   MQTT_Manager::publish(this->_mqtt_status_topic, data, true);
 }

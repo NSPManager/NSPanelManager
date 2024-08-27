@@ -7,9 +7,13 @@
 #include <cstddef>
 #include <cstdlib>
 #include <ctime>
+#include <entity_manager/entity_manager.hpp>
 #include <filesystem>
+#include <home_assistant_manager/home_assistant_manager.hpp>
 #include <ipc_handler/ipc_handler.hpp>
 #include <memory>
+#include <mqtt_manager/mqtt_manager.hpp>
+#include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <signal.h>
 #include <spdlog/common.h>
 #include <spdlog/spdlog.h>
@@ -17,11 +21,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <thread>
-
-#include <entity_manager/entity_manager.hpp>
-#include <home_assistant_manager/home_assistant_manager.hpp>
-#include <mqtt_manager/mqtt_manager.hpp>
-#include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <vector>
 
 #define SIGUSR1 10

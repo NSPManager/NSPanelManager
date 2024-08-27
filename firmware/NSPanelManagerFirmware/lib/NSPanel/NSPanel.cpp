@@ -177,7 +177,7 @@ bool NSPanel::init() {
   if (result.compare("NSPM") == 0) {
     this->_has_received_nspm = true;
   } else {
-    WarningManager::register_warning("error", "Did not receive NSPM-flag from screen. Is the screen running the NSPanel Manager TFT file?");
+    WarningManager::register_warning(NSPanelWarningLevel::NSPANEL_WARNING_LEVEL__CRITICAL, "Did not receive NSPM-flag from screen. Is the screen running the NSPanel Manager TFT file?");
   }
 
   LOG_DEBUG("Got text from panel: ", result.c_str());

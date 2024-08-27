@@ -18,11 +18,7 @@
 #include <cmath>
 #include <math.h>
 #include <nspm-bin-version.h>
-#include <pb.h>
-#include <pb_common.h>
-#include <pb_encode.h>
-#include <protobuf_helpers.hpp>
-#include <protobuf_nspanel.pb.h>
+#include <protobuf_nspanel.pb-c.h>
 #include <string>
 
 NSPanel nspanel;
@@ -37,6 +33,7 @@ MqttManager mqttManager;
 unsigned long lastRegistrationRequest = 0;
 unsigned long lastStatusReport = 0;
 unsigned long lastWiFiconnected = 0;
+uint8_t lastUpdateProgress = 0;
 // Temperature sensing variables:
 #define READ_TEMP_SENSE_DELAY_MS 1000
 #define NUM_TEMP_SENSE_AVERAGE 30
@@ -293,26 +290,27 @@ void taskManageWifiAndMqtt(void *param) {
           sendMqttManagerRegistrationRequest();
         }
         bool force_send_mqtt_update = false;
-        NSPanelStatusReport report = NSPanelStatusReport_init_zero;
+        // NSPanelStatusReport report = NSPanelStatusReport_init_zero;
+        NSPanelStatusReport report = NSPANEL_STATUS_REPORT__INIT;
 
         if (NSPanel::instance->getUpdateState()) {
           force_send_mqtt_update = true;
-          report.nspanel_state = NSPanelStatusReport_state::NSPanelStatusReport_state_UPDATING_TFT;
+          report.nspanel_state = NSPanelStatusReport__State::NSPANEL_STATUS_REPORT__STATE__UPDATING_TFT;
           report.update_progress = NSPanel::instance->getUpdateProgress();
-          report.has_update_progress = true;
         } else if (WebManager::getState() == WebManagerState::UPDATING_FIRMWARE) {
           force_send_mqtt_update = true;
-          report.nspanel_state = NSPanelStatusReport_state::NSPanelStatusReport_state_UPDATING_FIRMWARE;
+          report.nspanel_state = NSPanelStatusReport__State::NSPANEL_STATUS_REPORT__STATE__UPDATING_FIRMWARE;
           report.update_progress = WebManager::getUpdateProgress();
-          report.has_update_progress = true;
         } else if (WebManager::getState() == WebManagerState::UPDATING_LITTLEFS) {
           force_send_mqtt_update = true;
-          report.nspanel_state = NSPanelStatusReport_state::NSPanelStatusReport_state_UPDATING_LITTLEFS;
+          report.nspanel_state = NSPanelStatusReport__State::NSPANEL_STATUS_REPORT__STATE__UPDATING_LITTLEFS;
           report.update_progress = WebManager::getUpdateProgress();
-          report.has_update_progress = true;
+        } else {
+          report.nspanel_state = NSPanelStatusReport__State::NSPANEL_STATUS_REPORT__STATE__ONLINE;
+          report.update_progress = 0;
         }
 
-        if (force_send_mqtt_update || millis() >= lastStatusReport + 30000) {
+        if ((force_send_mqtt_update && lastUpdateProgress != report.update_progress) || millis() >= lastStatusReport + 30000) {
           char display_temp[7]; // Displayed temperature should NEVER have to be more than 7 chars. Example, 1000.0 is 6 chars, -100.0 is 6 chars. Neither should happen!
           std::snprintf(display_temp, sizeof(display_temp), "%.1f", averageTemperature);
           std::string ip_address = WiFi.localIP().toString().c_str();
@@ -320,29 +318,33 @@ void taskManageWifiAndMqtt(void *param) {
 
           report.rssi = WiFi.RSSI();
           report.heap_used_pct = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
-          report.ip_address.arg = (void *)ip_address.c_str();
-          report.ip_address.funcs.encode = &ProtobufHelpers::write_string;
-          report.mac_address.arg = (void *)mac_address.c_str();
-          report.mac_address.funcs.encode = &ProtobufHelpers::write_string;
-          report.nspanel_state = NSPanelStatusReport_state::NSPanelStatusReport_state_ONLINE;
-          report.temperature.arg = (void *)display_temp;
-          report.temperature.funcs.encode = &ProtobufHelpers::write_string;
+          report.ip_address = (char *)ip_address.c_str();
+          report.mac_address = (char *)mac_address.c_str();
+          report.temperature = display_temp;
 
-          // TODO: Send warnings from NSPanel via protobuf
-          // (*status_report_doc)["warnings"] = JsonArray();
-          // for (NSPanelWarning &warning : WarningManager::get_warnings()) {
-          //   JsonObject warning_obj;
-          //   warning_obj["level"] = warning.level;
-          //   warning_obj["text"] = warning.text;
-          //   (*status_report_doc)["warnings"].add(warning_obj);
-          // }
+          std::vector<NSPanelWarning> warnings = WarningManager::get_warnings();
+          report.n_warnings = warnings.size();
+          report.warnings = (NSPanelWarning **)malloc(sizeof(NSPanelWarning *) * warnings.size());
+          for (int i = 0; i < warnings.size(); i++) {
+            report.warnings[i] = &(warnings[i]);
+          }
+          LOG_DEBUG("Loaded ", warnings.size(), " warnings.");
 
+          LOG_DEBUG("Building status_report warnings.");
+          size_t pack_length = nspanel_status_report__get_packed_size(&report);
+          uint8_t buffer[pack_length];
+          size_t pack_size = nspanel_status_report__pack(&report, buffer);
+
+          LOG_DEBUG("Sending status_report.");
+          std::string full_buffer = std::string(buffer, buffer + pack_size);
+          MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, full_buffer, true);
+          // Cleanup buffers
+          LOG_DEBUG("Cleaning buffers from status_report.");
+          free(report.warnings);
+          warnings.clear();
+
+          // Send temperature update
           MqttManager::publish(NSPMConfig::instance->mqtt_panel_temperature_topic, display_temp);
-
-          uint8_t buffer[256];
-          pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
-          pb_encode(&stream, NSPanelStatusReport_fields, &report);
-          MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, (char *)buffer, true);
 
           // std::string display_temp = std::to_string((int)round(temperature));
           std::string display_temp_display = display_temp;

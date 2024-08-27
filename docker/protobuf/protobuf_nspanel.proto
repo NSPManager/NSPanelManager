@@ -2,6 +2,20 @@ syntax = "proto3";
 
 // Protobufs defined in this .proto file are used to communicate with the MQTTManager
 
+enum NSPanelWarningLevel {
+    CRITICAL = 0;
+    ERROR =1;
+    WARNING = 2;
+    INFO = 3;
+    DEBUG = 4;
+    TRACE = 5;
+}
+
+message NSPanelWarning {
+    NSPanelWarningLevel level = 1;
+    string text = 2;
+}
+
 message NSPanelStatusReport {
     enum state {
         ONLINE = 0;
@@ -11,25 +25,13 @@ message NSPanelStatusReport {
         UPDATING_LITTLEFS = 4;
     }
     state nspanel_state = 1;
-    optional int32 update_progress = 2;
+    int32 update_progress = 2;
     int32 rssi = 3;
     int32 heap_used_pct = 4;
     string mac_address = 5;
     string temperature = 6;
     string ip_address = 7;
 
-    message NSPanelWarning {
-        enum NSPanelWarningLevel {
-            CRITICAL = 0;
-            ERROR =1;
-            WARNING = 2;
-            INFO = 3;
-            DEBUG = 4;
-            TRACE = 5;
-        }
-        NSPanelWarningLevel level = 1;
-        string text = 2;
-    }
     repeated NSPanelWarning warnings = 8;
 }
 
@@ -48,4 +50,24 @@ message NSPanelRoomStatus {
     int32 ceiling_lights_dim_level = 4;
     int32 table_lights_dim_level = 5;
     repeated NSPanelLightStatus lights = 6;
+}
+
+
+message NSPanelWeatherUpdate {
+    message ForecastItem {
+        string weather_icon = 1;
+        string precipitation_string = 2;
+        string temperature_maxmin_string = 3;
+        string wind_string = 4;
+        string display_string = 5;
+    }
+    repeated ForecastItem forecast_items = 1;
+    string current_weather_icon = 2;
+    string current_temperature_string = 3;
+    string current_maxmin_temperature = 4;
+    string current_wind_string = 5;
+    string sunrise_string = 6;
+    string sunset_string = 7;
+    string current_precipitation_string = 8;
+    repeated int32 test_field = 9;
 }

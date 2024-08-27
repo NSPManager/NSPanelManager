@@ -160,7 +160,7 @@ void MqttManager::_sendMqttMessage() {
     if (uxQueueMessagesWaiting(MqttManager::_sendQueue) > 0) {
       PublishMessage *msg;
       if (xQueuePeek(MqttManager::_sendQueue, &(msg), 5 / portTICK_PERIOD_MS)) {
-        if (MqttManager::_mqttClient->publish(msg->topic.c_str(), msg->data.c_str(), msg->retain)) {
+        if (MqttManager::_mqttClient->publish(msg->topic.c_str(), (uint8_t *)msg->data.c_str(), msg->data.length(), msg->retain)) {
           // Message was successfully sent, pop item from queue
           if (xQueueReceive(MqttManager::_sendQueue, &(msg), 100 / portTICK_PERIOD_MS)) {
             delete msg;
