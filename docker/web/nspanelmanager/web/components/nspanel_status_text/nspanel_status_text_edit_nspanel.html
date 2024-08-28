@@ -1,6 +1,6 @@
 <div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_text' view='edit_nspanel' nspanel_id=id %}" id="state_text_nspanel_{{ id }}">
     <span class="mdi mdi-power-cycle me-2"></span>
-    State: <span  class="{% if state == 'online' %}text-success{% elif state == 'offline' %}text-error{% endif %}">
+    State: <span  class="{% if state == 'online' %}text-success{% elif state == 'offline' %}text-error{% elif state == 'waiting' %}text-info{% endif %}">
         {% if state == "online" %}
             Online
         {% elif state == "offline" %}

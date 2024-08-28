@@ -2,11 +2,12 @@
 
 {% block head %}
 {% load static %}
+<script src="{% static 'edit_nspanel.js' %}"></script>
 {% endblock %}
 
 {% block content %}
 <!-- Data needed by javascript -->
-<span class="hidden" id="nspanel_id">{{ panel.id }}</span>
+<span class="hidden" id="nspanel_id">{{ panel_info.data.id }}</span>
 <span class="hidden" id="max_live_log_messages">{{ max_live_log_messages }}</span>
 
 <div class="flex items-center justify-between" hx-ext="ws" ws-connect="/websocket">
@@ -551,21 +552,15 @@
       <div class="mt-4">
         <span class="font-medium text-lg">Actions</span>
         <div class="block mt-2 rounded-lg bg-base-100 shadow-lg">
-          <div onclick="rebootNSPanel();" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer rounded-t-lg">
-            <span class="mdi mdi-power-cycle me-2"></span><span class="">Reboot</span>
-          </div>
-          <a href="http://{{ panel_info.data.ip_address }}" id="panel_visit_link" target="_blank">
-            <div class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
-              <span class="mdi mdi-web me-2"></span><span class="">Visit</span>
-            </div>
-          </a>
-          <div onclick="startNSPanelOtaUpdate();" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
+          {% component "nspanel_reboot_button" id=panel_info.data.id state=panel_info.status.state %}{% endcomponent %}
+          {% component "nspanel_visit_link" id=panel_info.data.id state=panel_info.status.state address=panel_info.status.ip_address %}{% endcomponent %}
+          <div hx-post="{% url 'htmx_nspanel_update_firmware' panel_info.data.id %}" hx-trigger="click" hx-swap="none" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
             <span class="mdi mdi-upload me-2"></span><span class="">Update firmware</span>
           </div>
-          <div onclick="startNSPanelTftUpdate();" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
+          <div hx-post="{% url 'htmx_nspanel_update_screen' panel_info.data.id %}" hx-trigger="click" hx-swap="none" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
             <span class="mdi mdi-table-arrow-up me-2"></span><span class="">Update screen</span>
           </div>
-          <div onclick="deleteNSPanel();" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer rounded-b-lg text-red-600">
+          <div hx-delete="{% url 'htmx_nspanel_delete' nspanel_id=panel_info.data.id %}" hx-trigger="click" class="nspanel-delete-button p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer rounded-b-lg text-red-600">
             <span class="mdi mdi-table-arrow-up me-2"></span><span class="">Delete</span>
           </div>
         </div>

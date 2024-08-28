@@ -251,6 +251,20 @@ function update_shown_elements() {
 }
 
 $(document).ready(() => {
+  document.querySelectorAll('.nspanel-delete-button').forEach((element) => {
+    // On message from manager on websocket.
+    element.addEventListener("htmx:afterRequest", (event) => {
+      if(event.detail.successful) {
+        window.Location = "/";
+      }
+    });
+  });
+
+
+
+
+
+
   mac_address = $("#nspanel_mac").text().replaceAll(":", ""); // Convert from Django mac format to MQTTManager mac format.
   nspanel_id = $("#nspanel_id").text();
   ws.register_message_handler((data) => {
