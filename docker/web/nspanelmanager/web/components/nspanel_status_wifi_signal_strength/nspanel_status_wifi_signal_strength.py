@@ -21,6 +21,8 @@ class NSPanelStatusWifiSignalStrength(component.Component):
                 url_name = context.request.resolver_match.url_name
             if url_name == "index":
                 return "nspanel_status_wifi_signal_strength/nspanel_status_wifi_signal_strength_index.html"
+            elif url_name == "edit_nspanel":
+                return "nspanel_status_wifi_signal_strength/nspanel_status_wifi_signal_strength_edit_nspanel.html"
 
     def get(self, request, view, nspanel_id):
         self.template_view = view

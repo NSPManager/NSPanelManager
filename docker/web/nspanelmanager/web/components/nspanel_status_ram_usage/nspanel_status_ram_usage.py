@@ -21,6 +21,8 @@ class NSPanelStatusRamUsage(component.Component):
                 url_name = context.request.resolver_match.url_name
             if url_name == "index":
                 return "nspanel_status_ram_usage/nspanel_status_ram_usage_index.html"
+            elif url_name == "edit_nspanel":
+                return "nspanel_status_ram_usage/nspanel_status_ram_usage_edit_nspanel.html"
 
     def get(self, request, view, nspanel_id):
         panel_status = send_ipc_request(F"nspanel/{nspanel_id}/status", {"command": "get"})

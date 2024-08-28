@@ -219,6 +219,11 @@ def update_room_form(request, room_id: int):
 
 
 def edit_nspanel(request, panel_id: int):
+    md5_firmware = get_file_md5sum("firmware.bin")
+    md5_data_file = get_file_md5sum("data_file.bin")
+    md5_tft_file = get_file_md5sum("gui.tft")
+    md5_us_tft_file = get_file_md5sum("gui_us.tft")
+
     if get_setting_with_default("use_fahrenheit") == "True":
         temperature_unit = "°F"
     else:
@@ -243,9 +248,41 @@ def edit_nspanel(request, panel_id: int):
         "default_page": get_nspanel_setting_with_default(panel_id, "default_page", "0"),
     }
 
+
+    nspanel = NSPanel.objects.get(id=panel_id)
+    panel_info = {}
+    panel_info["data"] = nspanel
+    panel_status = send_ipc_request(F"nspanel/{nspanel.id}/status", {"command": "get"})
+    panel_info["status"] = panel_status
+    panel_info["status"]["warnings"] = []
+    for panel in NSPanel.objects.filter(denied=False):
+        if panel == nspanel:
+            continue
+        elif panel.friendly_name == nspanel.friendly_name:
+            panel_info["status"]["warnings"].append({
+                "level": "error",
+                "text": "Two or more panels exists with the same name. This may have unintended consequences"
+            })
+            break
+    if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
+        panel_info["status"]["warnings"].append({
+            "level": "info",
+            "text": "Firmware update available."
+        })
+    if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "False" and nspanel.md5_tft_file != md5_tft_file:
+        panel_info["status"]["warnings"].append({
+            "level": "info",
+            "text": "GUI update available."
+        })
+    if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True" and nspanel.md5_tft_file != md5_us_tft_file:
+        panel_info["status"]["warnings"].append({
+            "level": "info",
+            "text": "GUI update available."
+        })
+
     return render(request, 'edit_nspanel.html', {
         'theme': get_setting_with_default("theme"),
-        'panel': NSPanel.objects.get(id=panel_id),
+        'panel_info': panel_info,
         'rooms': Room.objects.all(),
         'settings': settings,
         "temperature_unit": temperature_unit,

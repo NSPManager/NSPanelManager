@@ -1,0 +1,10 @@
+<span hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_temperature' view='edit_nspanel' nspanel_id=id %}" class="icon-text" id="temperature_container-{{ id }}">
+    <span class="icon me-1">
+    <i class="mdi mdi-thermometer"></i>
+    </span>
+    {% if state == "offline" or state == "unknown" %}
+    Temp: <span id="temperature-{{ id }}">?{{ temperature_unit }}</span>
+    {% else %}
+    Temp: <span id="temperature-{{ id }}">{{ temperature | floatformat:1 }}{{ temperature_unit }}</span>
+    {% endif %}
+</span>

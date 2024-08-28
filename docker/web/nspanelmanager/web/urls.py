@@ -5,6 +5,7 @@ from .components.nspanel_status_text.nspanel_status_text import NSPanelStatusTex
 from .components.nspanel_status_header.nspanel_status_header import NSPanelHeader
 from .components.nspanel_status_ram_usage.nspanel_status_ram_usage import NSPanelStatusRamUsage
 from .components.nspanel_status_temperature.nspanel_status_temperature import NSPanelStatusTemperature
+from .components.nspanel_update_progress.nspanel_update_progress import NSPanelUpdateProgress
 from .components.nspanel_visit_link.nspanel_visit_link import NSPanelVisitLink
 from .components.nspanel_reboot_button.nspanel_reboot_button import NSPanelRebootButton
 from .components.nspanel_warnings.nspanel_warnings import NSPanelWarnings
@@ -161,6 +162,7 @@ urlpatterns = [
     # Components
     path('htmx/component/nspanel_status_header/<str:view>/<int:nspanel_id>', NSPanelHeader.as_view(), name="nspanel_status_header"),
     path('htmx/component/nspanel_status_text/<str:view>/<int:nspanel_id>', NSPanelStatusText.as_view(), name="nspanel_status_text"),
+    path('htmx/component/nspanel_status_update_progress/<str:view>/<int:nspanel_id>', NSPanelUpdateProgress.as_view(), name="nspanel_status_update_progress"),
     path('htmx/component/nspanel_status_wifi_signal_strength/<str:view>/<int:nspanel_id>', NSPanelStatusWifiSignalStrength.as_view(), name="nspanel_status_wifi_signal_strength"),
     path('htmx/component/nspanel_status_ram_usage/<str:view>/<int:nspanel_id>', NSPanelStatusRamUsage.as_view(), name="nspanel_status_ram_usage"),
     path('htmx/component/nspanel_status_temperature/<str:view>/<int:nspanel_id>', NSPanelStatusTemperature.as_view(), name="nspanel_status_temperature"),

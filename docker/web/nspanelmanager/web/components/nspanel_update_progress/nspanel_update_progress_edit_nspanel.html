@@ -1,0 +1,6 @@
+<div hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-swap="outerHTML" hx-get="{% url 'nspanel_status_update_progress' view='edit_nspanel' nspanel_id=id %}" class="relative p-3 border-solid border-b-2 border-base-300 transition-transform duration-500 ease-linear {% if progress == 0 %}hidden{% endif %}" id="update_progress_container_nspanel_{{ id }}">
+  <div class="absolute inset-0 h-full transition-all duration-500 ease-linear text-blue-800 bg-blue-200 dark:bg-blue-700 dark:text-gray-50" id="update_progress_pct_progressbar" style="width: {{ progress }}%"></div>
+  <div class="relative inset-0">
+    <span class="mdi mdi-progress-helper me-2"></span>Progress: <span id="update_progress_pct_text" class="">{{ progress }}%</span>
+  </div>
+</div>

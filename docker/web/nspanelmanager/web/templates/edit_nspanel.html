@@ -2,8 +2,6 @@
 
 {% block head %}
 {% load static %}
-<script src="{% static 'edit_nspanel.js' %}?refresh={% now 'U' %}"></script>
-<script src="{% static 'question.js' %}?refresh={% now 'U' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -11,10 +9,10 @@
 <span class="hidden" id="nspanel_id">{{ panel.id }}</span>
 <span class="hidden" id="max_live_log_messages">{{ max_live_log_messages }}</span>
 
-<div class="flex items-center justify-between">
+<div class="flex items-center justify-between" hx-ext="ws" ws-connect="/websocket">
   <div>
-    <h2 class="font-medium text-2xl" id="nspanel_name">Settings for '{{ panel.friendly_name }}'</h2>
-    <h2 class="font-light text-xs">MAC: <span id="nspanel_mac">{{ panel.mac_address }}</span></h2>
+    <h2 class="font-medium text-2xl" id="nspanel_name">Settings for '{{ panel_info.data.friendly_name }}'</h2>
+    <h2 class="font-light text-xs">MAC: <span id="nspanel_mac">{{ panel_info.data.mac_address }}</span></h2>
   </div>
   <a href="{% url 'manual' %}#sec:nspanel_page" class="btn btn-outline btn-info">
       Help
@@ -25,7 +23,7 @@
 <div class="md:flex md:justify-between md:items-start mt-2 mb-6">
   <div class="w-full mr-4">
     {% component "alert" level="info" text="Changes to NSPanel settings on this page requires a reboot of the NSPanel to take effect." %}{% endcomponent %}
-    <form method="POST" class="mt-2" action="{% url 'save_panel_settings' panel_id=panel.id %}">
+    <form method="POST" class="mt-2" action="{% url 'save_panel_settings' panel_id=panel_info.data.id %}">
       {% csrf_token %}
 
       <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
@@ -36,7 +34,7 @@
           <label for="friendly_name" class="block mb-2 text-sm font-medium">Friendly name</label>
           <div class="flex flex-row-reverse">
             <input class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
-            type="text" class="input" name="name" value="{{ panel.friendly_name }}">
+            type="text" class="input" name="name" value="{{ panel_info.data.friendly_name }}">
             <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
               <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <title>Friendly name</title>
@@ -79,7 +77,7 @@
           <div class="flex flex-row-reverse">
             <select name="room_id" id="room_id" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id">
               {% for room in rooms %}
-              {% if room.id == panel.room.id %}
+              {% if room.id == panel_info.data.room.id %}
               <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
               {% else %}
               <option value="{{ room.id }}">{{ room.friendly_name }}</option>
@@ -171,10 +169,10 @@
             <label for="button1_mode" class="block mb-2 text-sm font-medium">Left button mode</label>
             <div class="flex flex-row-reverse">
               <select name="button1_mode" id="button1_mode" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
-                <option value="0" {% if panel.button1_mode == 0 %}selected{% endif %}>Direct mode</option>
-                <option value="1" {% if panel.button1_mode == 1 %}selected{% endif %}>Detached mode</option>
-                <option value="2" {% if panel.button1_mode == 2 %}selected{% endif %}>Custom MQTT</option>
-                <option value="3" {% if panel.button1_mode == 3 %}selected{% endif %}>Follow mode</option>
+                <option value="0" {% if panel_info.data.button1_mode == 0 %}selected{% endif %}>Direct mode</option>
+                <option value="1" {% if panel_info.data.button1_mode == 1 %}selected{% endif %}>Detached mode</option>
+                <option value="2" {% if panel_info.data.button1_mode == 2 %}selected{% endif %}>Custom MQTT</option>
+                <option value="3" {% if panel_info.data.button1_mode == 3 %}selected{% endif %}>Follow mode</option>
               </select>
               <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/default_page:border-accent">
                 <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -190,8 +188,8 @@
               <label for="button1_detached_mode_light" class="block mb-2 text-sm font-medium">Left button controls light</label>
               <div class="flex flex-row-reverse">
                 <select name="button1_detached_mode_light" id="button1_detached_mode_light" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
-                  {% for light in panel.room.light_set.all %}
-                  {% if panel.button1_detached_mode_light == light %}
+                  {% for light in panel_info.data.room.light_set.all %}
+                  {% if panel_info.data.button1_detached_mode_light == light %}
                   <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
                   {% else %}
                   <option value="{{ light.id }}">{{ light.friendly_name }}</option>
@@ -250,10 +248,10 @@
             <label for="button2_mode" class="block mb-2 text-sm font-medium">Right button mode</label>
             <div class="flex flex-row-reverse">
               <select name="button2_mode" id="button2_mode" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
-                <option value="0" {% if panel.button2_mode == 0 %}selected{% endif %}>Direct mode</option>
-                <option value="1" {% if panel.button2_mode == 1 %}selected{% endif %}>Detached mode</option>
-                <option value="2" {% if panel.button2_mode == 2 %}selected{% endif %}>Custom MQTT</option>
-                <option value="3" {% if panel.button2_mode == 3 %}selected{% endif %}>Follow mode</option>
+                <option value="0" {% if panel_info.data.button2_mode == 0 %}selected{% endif %}>Direct mode</option>
+                <option value="1" {% if panel_info.data.button2_mode == 1 %}selected{% endif %}>Detached mode</option>
+                <option value="2" {% if panel_info.data.button2_mode == 2 %}selected{% endif %}>Custom MQTT</option>
+                <option value="3" {% if panel_info.data.button2_mode == 3 %}selected{% endif %}>Follow mode</option>
               </select>
               <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/default_page:border-accent">
                 <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -269,8 +267,8 @@
               <label for="button2_detached_mode_light" class="block mb-2 text-sm font-medium">Right button controls light</label>
               <div class="flex flex-row-reverse">
                 <select name="button2_detached_mode_light" id="button1_detached_mode_light" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
-                  {% for light in panel.room.light_set.all %}
-                  {% if panel.button2_detached_mode_light == light %}
+                  {% for light in panel_info.data.room.light_set.all %}
+                  {% if panel_info.data.button2_detached_mode_light == light %}
                   <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
                   {% else %}
                   <option value="{{ light.id }}">{{ light.friendly_name }}</option>
@@ -534,22 +532,17 @@
         <span class="font-medium text-lg">Status</span>
         <div class="block mt-2 rounded-lg bg-base-100 border-solid border-1 shadow-lg">
           <div class="p-3 border-solid border-b-2 border-base-300">
-            <span class="mdi mdi-power-cycle me-2"></span>State: <span id="state_text" class=""></span>
+            {% component "nspanel_status_text" id=panel_info.data.id state=panel_info.status.state progress=panel_info.status.update_progress %}{% endcomponent %}
           </div>
-          <div class="relative p-3 border-solid border-b-2 border-base-300 transition-transform duration-500 ease-linear hidden" id="update_progress_container">
-            <div class="absolute inset-0 h-full transition-all duration-500 ease-linear text-blue-800 bg-blue-200 dark:bg-blue-700 dark:text-gray-50" id="update_progress_pct_progressbar" style="width: 0%"></div>
-            <div class="relative inset-0">
-              <span class="mdi mdi-progress-helper me-2"></span>Progress: <span id="update_progress_pct_text" class="">0%</span>
-            </div>
+          {% component "nspanel_update_progress" id=panel_info.data.id progress=panel_info.status.update_progress %}{% endcomponent %}
+          <div class="p-3 border-solid border-b-2 border-base-300">
+            {% component "nspanel_status_wifi_signal_strength" id=panel_info.data.id state=panel_info.status.state signal_strength=panel_info.status.rssi %}{% endcomponent %}
           </div>
           <div class="p-3 border-solid border-b-2 border-base-300">
-            <span id="wifi_signal_strength_icon" class="mdi mdi-power-cycle me-2"></span>WiFi: <span id="wifi_signal_strength" class=""></span>
-          </div>
-          <div class="p-3 border-solid border-b-2 border-base-300">
-            <span class="mdi mdi-memory me-2"></span>RAM: <span id="heap_used" class=""></span>
+            {% component "nspanel_status_ram_usage" id=panel_info.data.id state=panel_info.status.state ram_usage=panel_info.status.ram_usage %}{% endcomponent %}
           </div>
           <div class="p-3">
-            <span class="mdi mdi-thermometer me-2"></span>Temp: <span id="temperature" class="">? {{ temperature_unit }}</span>
+            {% component "nspanel_status_temperature" id=panel_info.data.id state=panel_info.status.state temperature=panel_info.status.temperature %}{% endcomponent %}
           </div>
         </div>
       </div>
@@ -561,7 +554,7 @@
           <div onclick="rebootNSPanel();" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer rounded-t-lg">
             <span class="mdi mdi-power-cycle me-2"></span><span class="">Reboot</span>
           </div>
-          <a href="http://{{ panel.ip_address }}" id="panel_visit_link" target="_blank">
+          <a href="http://{{ panel_info.data.ip_address }}" id="panel_visit_link" target="_blank">
             <div class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
               <span class="mdi mdi-web me-2"></span><span class="">Visit</span>
             </div>

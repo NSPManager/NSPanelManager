@@ -14,10 +14,11 @@ $(document).ready(function () {
             if (data.event_type) {
               const trigger_event = new Event(data.event_type, data);
               document.getElementsByTagName("body")[0].dispatchEvent(trigger_event);
-              console.debug("Triggered '" + data.event_type + "' event from websocket on body element.");
+              console.log("Triggered '" + data.event_type + "' event from websocket on body element.");
               event.preventDefault();
             }
           } catch(error) {
+            console.error(error)
             // We couldn't parse to json. Just let HTMX continue.
           }
         }
