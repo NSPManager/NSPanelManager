@@ -7,9 +7,10 @@ from web.mqttmanager_ipc import send_ipc_request
 class NSPanelUpdateProgress(component.Component):
     template_view = None
 
-    def get_context_data(self, id, progress):
+    def get_context_data(self, id, state, progress):
         return {
             "id": id,
+            "state": state,
             "progress": progress,
         }
 
@@ -26,6 +27,7 @@ class NSPanelUpdateProgress(component.Component):
         panel_status = send_ipc_request(F"nspanel/{nspanel_id}/status", {"command": "get"})
         args = {
             "id": nspanel_id,
+            "state": panel_status["state"],
             "progress": panel_status["update_progress"],
         }
         return self.render_to_response(kwargs=args)
