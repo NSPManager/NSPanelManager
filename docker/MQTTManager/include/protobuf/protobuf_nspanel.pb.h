@@ -941,7 +941,6 @@ class NSPanelWeatherUpdate final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kForecastItemsFieldNumber = 1,
-    kTestFieldFieldNumber = 9,
     kCurrentWeatherIconFieldNumber = 2,
     kCurrentTemperatureStringFieldNumber = 3,
     kCurrentMaxminTemperatureFieldNumber = 4,
@@ -967,24 +966,6 @@ class NSPanelWeatherUpdate final : public ::google::protobuf::Message
   const ::NSPanelWeatherUpdate_ForecastItem& forecast_items(int index) const;
   ::NSPanelWeatherUpdate_ForecastItem* add_forecast_items();
   const ::google::protobuf::RepeatedPtrField<::NSPanelWeatherUpdate_ForecastItem>& forecast_items() const;
-  // repeated int32 test_field = 9;
-  int test_field_size() const;
-  private:
-  int _internal_test_field_size() const;
-
-  public:
-  void clear_test_field() ;
-  ::int32_t test_field(int index) const;
-  void set_test_field(int index, ::int32_t value);
-  void add_test_field(::int32_t value);
-  const ::google::protobuf::RepeatedField<::int32_t>& test_field() const;
-  ::google::protobuf::RepeatedField<::int32_t>* mutable_test_field();
-
-  private:
-  const ::google::protobuf::RepeatedField<::int32_t>& _internal_test_field() const;
-  ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_test_field();
-
-  public:
   // string current_weather_icon = 2;
   void clear_current_weather_icon() ;
   const std::string& current_weather_icon() const;
@@ -1102,7 +1083,7 @@ class NSPanelWeatherUpdate final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 9, 1,
+      3, 8, 1,
       183, 2>
       _table_;
 
@@ -1124,8 +1105,6 @@ class NSPanelWeatherUpdate final : public ::google::protobuf::Message
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const NSPanelWeatherUpdate& from_msg);
     ::google::protobuf::RepeatedPtrField< ::NSPanelWeatherUpdate_ForecastItem > forecast_items_;
-    ::google::protobuf::RepeatedField<::int32_t> test_field_;
-    mutable ::google::protobuf::internal::CachedSize _test_field_cached_byte_size_;
     ::google::protobuf::internal::ArenaStringPtr current_weather_icon_;
     ::google::protobuf::internal::ArenaStringPtr current_temperature_string_;
     ::google::protobuf::internal::ArenaStringPtr current_maxmin_temperature_;
@@ -3053,51 +3032,6 @@ inline void NSPanelWeatherUpdate::set_allocated_current_precipitation_string(std
         }
   #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:NSPanelWeatherUpdate.current_precipitation_string)
-}
-
-// repeated int32 test_field = 9;
-inline int NSPanelWeatherUpdate::_internal_test_field_size() const {
-  return _internal_test_field().size();
-}
-inline int NSPanelWeatherUpdate::test_field_size() const {
-  return _internal_test_field_size();
-}
-inline void NSPanelWeatherUpdate::clear_test_field() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.test_field_.Clear();
-}
-inline ::int32_t NSPanelWeatherUpdate::test_field(int index) const {
-  // @@protoc_insertion_point(field_get:NSPanelWeatherUpdate.test_field)
-  return _internal_test_field().Get(index);
-}
-inline void NSPanelWeatherUpdate::set_test_field(int index, ::int32_t value) {
-  _internal_mutable_test_field()->Set(index, value);
-  // @@protoc_insertion_point(field_set:NSPanelWeatherUpdate.test_field)
-}
-inline void NSPanelWeatherUpdate::add_test_field(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _internal_mutable_test_field()->Add(value);
-  // @@protoc_insertion_point(field_add:NSPanelWeatherUpdate.test_field)
-}
-inline const ::google::protobuf::RepeatedField<::int32_t>& NSPanelWeatherUpdate::test_field() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_list:NSPanelWeatherUpdate.test_field)
-  return _internal_test_field();
-}
-inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelWeatherUpdate::mutable_test_field()
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_mutable_list:NSPanelWeatherUpdate.test_field)
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _internal_mutable_test_field();
-}
-inline const ::google::protobuf::RepeatedField<::int32_t>&
-NSPanelWeatherUpdate::_internal_test_field() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.test_field_;
-}
-inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelWeatherUpdate::_internal_mutable_test_field() {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return &_impl_.test_field_;
 }
 
 #ifdef __GNUC__

@@ -130,12 +130,10 @@ struct  NSPanelWeatherUpdate
   char *sunrise_string;
   char *sunset_string;
   char *current_precipitation_string;
-  size_t n_test_field;
-  int32_t *test_field;
 };
 #define NSPANEL_WEATHER_UPDATE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_weather_update__descriptor) \
-    , 0,NULL, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL }
+    , 0,NULL, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
 /* NSPanelWarning methods */

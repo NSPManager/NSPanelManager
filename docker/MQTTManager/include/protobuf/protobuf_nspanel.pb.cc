@@ -107,8 +107,6 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 inline constexpr NSPanelWeatherUpdate::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : forecast_items_{},
-        test_field_{},
-        _test_field_cached_byte_size_{0},
         current_weather_icon_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
@@ -291,7 +289,6 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _impl_.sunrise_string_),
         PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _impl_.sunset_string_),
         PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _impl_.current_precipitation_string_),
-        PROTOBUF_FIELD_OFFSET(::NSPanelWeatherUpdate, _impl_.test_field_),
 };
 
 static const ::_pbi::MigrationSchema
@@ -330,7 +327,7 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\031\n\021average_di"
     "m_level\030\003 \001(\005\022 \n\030ceiling_lights_dim_leve"
     "l\030\004 \001(\005\022\036\n\026table_lights_dim_level\030\005 \001(\005\022"
-    "#\n\006lights\030\006 \003(\0132\023.NSPanelLightStatus\"\323\003\n"
+    "#\n\006lights\030\006 \003(\0132\023.NSPanelLightStatus\"\277\003\n"
     "\024NSPanelWeatherUpdate\022:\n\016forecast_items\030"
     "\001 \003(\0132\".NSPanelWeatherUpdate.ForecastIte"
     "m\022\034\n\024current_weather_icon\030\002 \001(\t\022\"\n\032curre"
@@ -338,20 +335,19 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "axmin_temperature\030\004 \001(\t\022\033\n\023current_wind_"
     "string\030\005 \001(\t\022\026\n\016sunrise_string\030\006 \001(\t\022\025\n\r"
     "sunset_string\030\007 \001(\t\022$\n\034current_precipita"
-    "tion_string\030\010 \001(\t\022\022\n\ntest_field\030\t \003(\005\032\222\001"
-    "\n\014ForecastItem\022\024\n\014weather_icon\030\001 \001(\t\022\034\n\024"
-    "precipitation_string\030\002 \001(\t\022!\n\031temperatur"
-    "e_maxmin_string\030\003 \001(\t\022\023\n\013wind_string\030\004 \001"
-    "(\t\022\026\n\016display_string\030\005 \001(\t*[\n\023NSPanelWar"
-    "ningLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ERROR\020\001\022\013\n\007WA"
-    "RNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n\005TRACE\020\005b"
-    "\006proto3"
+    "tion_string\030\010 \001(\t\032\222\001\n\014ForecastItem\022\024\n\014we"
+    "ather_icon\030\001 \001(\t\022\034\n\024precipitation_string"
+    "\030\002 \001(\t\022!\n\031temperature_maxmin_string\030\003 \001("
+    "\t\022\023\n\013wind_string\030\004 \001(\t\022\026\n\016display_string"
+    "\030\005 \001(\t*[\n\023NSPanelWarningLevel\022\014\n\010CRITICA"
+    "L\020\000\022\t\n\005ERROR\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022\t\n"
+    "\005DEBUG\020\004\022\t\n\005TRACE\020\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    1287,
+    1267,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
@@ -1967,8 +1963,6 @@ inline PROTOBUF_NDEBUG_INLINE NSPanelWeatherUpdate::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
     const Impl_& from, const ::NSPanelWeatherUpdate& from_msg)
       : forecast_items_{visibility, arena, from.forecast_items_},
-        test_field_{visibility, arena, from.test_field_},
-        _test_field_cached_byte_size_{0},
         current_weather_icon_(arena, from.current_weather_icon_),
         current_temperature_string_(arena, from.current_temperature_string_),
         current_maxmin_temperature_(arena, from.current_maxmin_temperature_),
@@ -1994,8 +1988,6 @@ inline PROTOBUF_NDEBUG_INLINE NSPanelWeatherUpdate::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
       : forecast_items_{visibility, arena},
-        test_field_{visibility, arena},
-        _test_field_cached_byte_size_{0},
         current_weather_icon_(arena),
         current_temperature_string_(arena),
         current_maxmin_temperature_(arena),
@@ -2046,15 +2038,15 @@ NSPanelWeatherUpdate::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<4, 9, 1, 183, 2> NSPanelWeatherUpdate::_table_ = {
+const ::_pbi::TcParseTable<3, 8, 1, 183, 2> NSPanelWeatherUpdate::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    9, 120,  // max_field_number, fast_idx_mask
+    8, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294966784,  // skipmap
+    4294967040,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    9,  // num_field_entries
+    8,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelWeatherUpdate_default_instance_._instance,
@@ -2064,7 +2056,9 @@ const ::_pbi::TcParseTable<4, 9, 1, 183, 2> NSPanelWeatherUpdate::_table_ = {
     ::_pbi::TcParser::GetTable<::NSPanelWeatherUpdate>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
+    // string current_precipitation_string = 8;
+    {::_pbi::TcParser::FastUS1,
+     {66, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.current_precipitation_string_)}},
     // repeated .NSPanelWeatherUpdate.ForecastItem forecast_items = 1;
     {::_pbi::TcParser::FastMtR1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.forecast_items_)}},
@@ -2086,18 +2080,6 @@ const ::_pbi::TcParseTable<4, 9, 1, 183, 2> NSPanelWeatherUpdate::_table_ = {
     // string sunset_string = 7;
     {::_pbi::TcParser::FastUS1,
      {58, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.sunset_string_)}},
-    // string current_precipitation_string = 8;
-    {::_pbi::TcParser::FastUS1,
-     {66, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.current_precipitation_string_)}},
-    // repeated int32 test_field = 9;
-    {::_pbi::TcParser::FastV32P1,
-     {74, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.test_field_)}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -2125,9 +2107,6 @@ const ::_pbi::TcParseTable<4, 9, 1, 183, 2> NSPanelWeatherUpdate::_table_ = {
     // string current_precipitation_string = 8;
     {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.current_precipitation_string_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // repeated int32 test_field = 9;
-    {PROTOBUF_FIELD_OFFSET(NSPanelWeatherUpdate, _impl_.test_field_), 0, 0,
-    (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
   }}, {{
     {::_pbi::TcParser::GetTable<::NSPanelWeatherUpdate_ForecastItem>()},
   }}, {{
@@ -2151,7 +2130,6 @@ PROTOBUF_NOINLINE void NSPanelWeatherUpdate::Clear() {
   (void) cached_has_bits;
 
   _impl_.forecast_items_.Clear();
-  _impl_.test_field_.Clear();
   _impl_.current_weather_icon_.ClearToEmpty();
   _impl_.current_temperature_string_.ClearToEmpty();
   _impl_.current_maxmin_temperature_.ClearToEmpty();
@@ -2236,15 +2214,6 @@ PROTOBUF_NOINLINE void NSPanelWeatherUpdate::Clear() {
     target = stream->WriteStringMaybeAliased(8, _s, target);
   }
 
-  // repeated int32 test_field = 9;
-  {
-    int byte_size = _impl_._test_field_cached_byte_size_.Get();
-    if (byte_size > 0) {
-      target = stream->WriteInt32Packed(
-          9, _internal_test_field(), byte_size, target);
-    }
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -2267,19 +2236,6 @@ PROTOBUF_NOINLINE void NSPanelWeatherUpdate::Clear() {
   total_size += 1UL * this->_internal_forecast_items_size();
   for (const auto& msg : this->_internal_forecast_items()) {
     total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
-  }
-  // repeated int32 test_field = 9;
-  {
-    std::size_t data_size = ::_pbi::WireFormatLite::Int32Size(
-        this->_internal_test_field())
-    ;
-    _impl_._test_field_cached_byte_size_.Set(::_pbi::ToCachedSize(data_size));
-    std::size_t tag_size = data_size == 0
-        ? 0
-        : 1 + ::_pbi::WireFormatLite::Int32Size(
-                            static_cast<int32_t>(data_size))
-    ;
-    total_size += tag_size + data_size;
   }
   // string current_weather_icon = 2;
   if (!this->_internal_current_weather_icon().empty()) {
@@ -2337,7 +2293,6 @@ void NSPanelWeatherUpdate::MergeImpl(::google::protobuf::MessageLite& to_msg, co
 
   _this->_internal_mutable_forecast_items()->MergeFrom(
       from._internal_forecast_items());
-  _this->_internal_mutable_test_field()->MergeFrom(from._internal_test_field());
   if (!from._internal_current_weather_icon().empty()) {
     _this->_internal_set_current_weather_icon(from._internal_current_weather_icon());
   }
@@ -2376,7 +2331,6 @@ void NSPanelWeatherUpdate::InternalSwap(NSPanelWeatherUpdate* PROTOBUF_RESTRICT 
   ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   _impl_.forecast_items_.InternalSwap(&other->_impl_.forecast_items_);
-  _impl_.test_field_.InternalSwap(&other->_impl_.test_field_);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.current_weather_icon_, &other->_impl_.current_weather_icon_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.current_temperature_string_, &other->_impl_.current_temperature_string_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.current_maxmin_temperature_, &other->_impl_.current_maxmin_temperature_, arena);

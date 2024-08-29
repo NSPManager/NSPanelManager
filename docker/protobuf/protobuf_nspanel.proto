@@ -69,5 +69,4 @@ message NSPanelWeatherUpdate {
     string sunrise_string = 6;
     string sunset_string = 7;
     string current_precipitation_string = 8;
-    repeated int32 test_field = 9;
 }

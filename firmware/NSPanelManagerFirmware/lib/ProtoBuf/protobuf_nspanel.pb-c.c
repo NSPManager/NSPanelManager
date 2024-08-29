@@ -735,7 +735,7 @@ const ProtobufCMessageDescriptor nspanel_weather_update__forecast_item__descript
   (ProtobufCMessageInit) nspanel_weather_update__forecast_item__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor nspanel_weather_update__field_descriptors[9] =
+static const ProtobufCFieldDescriptor nspanel_weather_update__field_descriptors[8] =
 {
   {
     "forecast_items",
@@ -833,18 +833,6 @@ static const ProtobufCFieldDescriptor nspanel_weather_update__field_descriptors[
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
-  {
-    "test_field",
-    9,
-    PROTOBUF_C_LABEL_REPEATED,
-    PROTOBUF_C_TYPE_INT32,
-    offsetof(NSPanelWeatherUpdate, n_test_field),
-    offsetof(NSPanelWeatherUpdate, test_field),
-    NULL,
-    NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_PACKED,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
 };
 static const unsigned nspanel_weather_update__field_indices_by_name[] = {
   3,   /* field[3] = current_maxmin_temperature */
@@ -855,12 +843,11 @@ static const unsigned nspanel_weather_update__field_indices_by_name[] = {
   0,   /* field[0] = forecast_items */
   5,   /* field[5] = sunrise_string */
   6,   /* field[6] = sunset_string */
-  8,   /* field[8] = test_field */
 };
 static const ProtobufCIntRange nspanel_weather_update__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 9 }
+  { 0, 8 }
 };
 const ProtobufCMessageDescriptor nspanel_weather_update__descriptor =
 {
@@ -870,7 +857,7 @@ const ProtobufCMessageDescriptor nspanel_weather_update__descriptor =
   "NSPanelWeatherUpdate",
   "",
   sizeof(NSPanelWeatherUpdate),
-  9,
+  8,
   nspanel_weather_update__field_descriptors,
   nspanel_weather_update__field_indices_by_name,
   1,  nspanel_weather_update__number_ranges,
