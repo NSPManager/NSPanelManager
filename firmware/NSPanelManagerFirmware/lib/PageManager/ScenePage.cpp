@@ -58,7 +58,7 @@ void ScenePage::doSceneSaveProgress(void *param) {
     }
   }
 
-  if (InterfaceConfig::currentRoomMode == roomMode::room) {
+  if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
     PageManager::GetScenePage()->_setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
   } else {
     PageManager::GetScenePage()->_setRoomLabelText("Global Scenes");
@@ -69,7 +69,7 @@ void ScenePage::doSceneSaveProgress(void *param) {
 
 void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
   std::vector<Scene *> scenes;
-  if (InterfaceConfig::currentRoomMode == roomMode::room) {
+  if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
     scenes = (*RoomManager::currentRoom)->scenes;
   } else {
     scenes = InterfaceConfig::global_scenes;
@@ -174,14 +174,14 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
     break;
   }
   case SCENES_PAGE_PREVIOUS_SCENES_BUTTON_ID: {
-    if (InterfaceConfig::currentRoomMode == roomMode::room) {
+    if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
       RoomManager::goToPreviousRoom();
       ScenePage::_setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
     }
     break;
   }
   case SCENES_PAGE_NEXT_SCENES_BUTTON_ID: {
-    if (InterfaceConfig::currentRoomMode == roomMode::room) {
+    if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
       RoomManager::goToNextRoom();
       ScenePage::_setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
     }
@@ -194,7 +194,7 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
 
 void ScenePage::_updateDisplay() {
   std::vector<Scene *> scenes;
-  if (InterfaceConfig::currentRoomMode == roomMode::room) {
+  if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
     scenes = (*RoomManager::currentRoom)->scenes;
     this->_setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
   } else {

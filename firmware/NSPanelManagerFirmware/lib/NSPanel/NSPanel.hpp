@@ -58,9 +58,7 @@ private:
   // Tasks
   static inline TaskHandle_t _taskHandleSendCommandQueue;
   static void _taskSendCommandQueue(void *param);
-  static inline TaskHandle_t _taskHandleReadNSPanelData;
   static void _onSerialData(void);
-  static void _taskReadNSPanelData(void *param);
   static void _taskUpdateTFTConfigOTA(void *param);
   /// @brief Download a chunk of data from given addres, to the buffer at the given offset
   /// @param buffer The buffer to store data into
@@ -92,8 +90,8 @@ private:
   /// @brief Call reigstered callback when a touch event occured
   static inline void (*_touchEventCallback)(uint8_t, uint8_t, bool);
   /// @brief Call registered callback when screen goes to sleep
-  static inline void (*_sleepCallback)();
-  static inline void (*_wakeCallback)();
+  static inline void (*_sleepCallback)() = nullptr;
+  static inline void (*_wakeCallback)() = nullptr;
   static void _clearSerialBuffer(NSPanelCommand *cmd);
   static void _clearSerialBuffer();
   static inline bool _writeCommandsToSerial;
