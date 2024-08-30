@@ -188,7 +188,16 @@ void RoomManager::loadAllRooms(bool is_update) {
   }
 
   if (!is_update) {
-    RoomManager::goToRoomId(InterfaceConfig::homeScreen); // Set currentRoom to the default room for this panel
+    // Set currentRoom to the default room for this panel
+    if (!RoomManager::goToRoomId(InterfaceConfig::homeScreen)) {
+      LOG_ERROR("Failed to go to default room.");
+      if (RoomManager::rooms.size() > 0) {
+        LOG_WARNING("Navigating to first room instead of default room as that failed.");
+        RoomManager::currentRoom = RoomManager::rooms.begin();
+      } else {
+        LOG_ERROR("No rooms loaded!");
+      }
+    }
   } else {
     // TODO: Implement function that remove any rooms currecntly loaded but not configured (ie. removed through manager)
     LOG_DEBUG("Calling roomChangedCallback");
@@ -238,12 +247,12 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
 
     if (!successDownloadingConfig) {
       tries++;
-      LOG_ERROR("Failed to download config, will try again in 5 seconds.");
+      LOG_ERROR("Failed to download config for room ", roomId, " will try again in 5 seconds.");
       vTaskDelay(5000 / portTICK_PERIOD_MS);
 
       // 30 failed tries to download config, restart and try again.
       if (tries == 30) {
-        LOG_ERROR("Failed to download config, will restart and try again.");
+        LOG_ERROR("Failed to download config for room ", roomId, ", will restart and try again.");
         // NspanelManagerPage::setText("Restarting...");
         vTaskDelay(5000 / portTICK_PERIOD_MS);
         ESP.restart();
@@ -396,18 +405,18 @@ void RoomManager::goToPreviousRoom() {
   RoomManager::_callRoomChangeCallbacks();
 }
 
-void RoomManager::goToRoomId(uint16_t roomId) {
+bool RoomManager::goToRoomId(uint16_t roomId) {
   bool foundRoom = false;
   for (std::list<Room *>::iterator it = RoomManager::rooms.begin(); it != RoomManager::rooms.end(); it++) {
     if ((*it)->id == roomId) {
       RoomManager::currentRoom = it;
       RoomManager::_callRoomChangeCallbacks();
-      return;
+      return true;
     }
   }
 
   LOG_ERROR("Did not find requested room. Will cancel operation.");
-  return;
+  return false;
 }
 
 Room *RoomManager::getRoomById(uint16_t roomId) {
@@ -435,4 +444,12 @@ void RoomManager::_callRoomChangeCallbacks() {
       observer->roomChangedCallback();
     }
   }
+}
+
+bool RoomManager::hasValidCurrentRoom() {
+  if (RoomManager::currentRoom == RoomManager::rooms.end()) {
+    LOG_ERROR("Current room is invalid iterator!");
+    return false;
+  }
+  return true;
 }

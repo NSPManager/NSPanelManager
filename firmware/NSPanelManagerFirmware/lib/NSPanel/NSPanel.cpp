@@ -255,15 +255,9 @@ bool NSPanel::init() {
 
 void NSPanel::_startListeningToPanel() {
   xTaskCreatePinnedToCore(_taskProcessPanelOutput, "taskProcessPanelOutput", 5000, NULL, 1, &this->_taskHandleProcessPanelOutput, CONFIG_ARDUINO_RUNNING_CORE);
-  xTaskCreatePinnedToCore(_taskReadNSPanelData, "taskReadNSPanelData", 5000, NULL, 1, &this->_taskHandleReadNSPanelData, CONFIG_ARDUINO_RUNNING_CORE);
 }
 
 void NSPanel::_stopListeningToPanel() {
-  if (this->_taskHandleReadNSPanelData != NULL) {
-    vTaskDelete(this->_taskHandleReadNSPanelData);
-    this->_taskHandleReadNSPanelData = NULL;
-  }
-
   if (this->_taskHandleProcessPanelOutput != NULL) {
     vTaskDelete(this->_taskHandleProcessPanelOutput);
     this->_taskHandleProcessPanelOutput = NULL;
@@ -347,53 +341,40 @@ void NSPanel::attachWakeCallback(void (*callback)()) {
 }
 
 void IRAM_ATTR NSPanel::_onSerialData(void) {
-  if (NSPanel::_taskHandleReadNSPanelData != NULL && NSPanel::_taskHandleReadNSPanelData != nullptr) {
-    vTaskNotifyGiveFromISR(NSPanel::_taskHandleReadNSPanelData, NULL);
-  }
-}
+  if (xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, 5 * portTICK_PERIOD_MS) == pdTRUE) {
+    if (Serial2.available() > 0) {
+      std::vector<char> data;
+      bool read_to_end = false;
+      uint8_t num_ff_read_in_row = 0;
 
-void NSPanel::_taskReadNSPanelData(void *param) {
-  LOG_INFO("Starting taskReadNSPanelData.");
-  for (;;) {
-    while (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) != pdTRUE) {
-      vTaskDelay(25 / portTICK_PERIOD_MS);
-    }
-
-    if (xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, portMAX_DELAY) == pdTRUE) {
-      if (Serial2.available() > 0) {
-        std::vector<char> data;
-        bool read_to_end = false;
-        uint8_t num_ff_read_in_row = 0;
-
-        while (Serial2.available() > 0) {
-          uint8_t read = Serial2.read();
-          data.push_back((char)read);
-          if (read == 0xFF) {
-            num_ff_read_in_row++;
-            if (num_ff_read_in_row >= 3) { // End of command, clear bugger and read next if any
-              NSPanel::instance->_processQueue.push(data);
-              if (NSPanel::instance->_taskHandleProcessPanelOutput != NULL) {
-                xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
-              }
-              data.clear();
+      while (Serial2.available() > 0) {
+        uint8_t read = Serial2.read();
+        data.push_back((char)read);
+        if (read == 0xFF) {
+          num_ff_read_in_row++;
+          if (num_ff_read_in_row >= 3) { // End of command, clear bugger and read next if any
+            NSPanel::instance->_processQueue.push(data);
+            if (NSPanel::instance->_taskHandleProcessPanelOutput != NULL) {
+              xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
             }
-          } else {
-            num_ff_read_in_row = 0;
+            data.clear();
           }
-          if (Serial2.available() == 0) {
-            vTaskDelay(50 / portTICK_PERIOD_MS);
-          }
+        } else {
+          num_ff_read_in_row = 0;
         }
-
-        if (data.size() > 0) { // This will only trigger if data did not end in 0xFF 0xFF 0xFF which should never happen
-          NSPanel::instance->_processQueue.push(data);
-          if (NSPanel::instance->_taskHandleProcessPanelOutput != NULL) {
-            xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
-          }
+        if (Serial2.available() == 0) {
+          vTaskDelay(50 / portTICK_PERIOD_MS);
         }
       }
-      xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
+
+      if (data.size() > 0) { // This will only trigger if data did not end in 0xFF 0xFF 0xFF which should never happen
+        NSPanel::instance->_processQueue.push(data);
+        if (NSPanel::instance->_taskHandleProcessPanelOutput != NULL) {
+          xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
+        }
+      }
     }
+    xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
   }
 }
 
@@ -405,22 +386,32 @@ void NSPanel::_taskProcessPanelOutput(void *param) {
         std::vector<char> itemPayload = NSPanel::instance->_processQueue.front();
 
         // Select correct action depending on type of event
-        switch (itemPayload[0]) {
-        case NEX_OUT_TOUCH_EVENT:
-          NSPanel::_touchEventCallback(itemPayload[1], itemPayload[2], itemPayload[3] == 0x01);
-          break;
+        if (!itemPayload.empty()) {
+          switch (itemPayload[0]) {
+          case NEX_OUT_TOUCH_EVENT:
+            if (itemPayload.size() >= 3) {
+              NSPanel::_touchEventCallback(itemPayload[1], itemPayload[2], itemPayload[3] == 0x01);
+            } else {
+              LOG_ERROR("Read nextion touch event but there wasn't enough data to process.");
+            }
+            break;
 
-        case NEX_OUT_SLEEP:
-          NSPanel::_sleepCallback();
-          break;
+          case NEX_OUT_SLEEP:
+            if (NSPanel::_sleepCallback != nullptr) {
+              NSPanel::_sleepCallback();
+            }
+            break;
 
-        case NEX_OUT_WAKE:
-          NSPanel::_wakeCallback();
-          break;
+          case NEX_OUT_WAKE:
+            if (NSPanel::_wakeCallback != nullptr) {
+              NSPanel::_wakeCallback();
+            }
+            break;
 
-        default:
-          LOG_TRACE("Read type ", String(itemPayload[0], HEX).c_str());
-          break;
+          default:
+            LOG_TRACE("Read type ", String(itemPayload[0], HEX).c_str());
+            break;
+          }
         }
 
         // Done with item, pop it off the queue
