@@ -260,6 +260,8 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         this->_requested_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
         this->_last_rgb_change = CurrentTimeMilliseconds();
         this->_last_brightness_change = CurrentTimeMilliseconds();
+        this->_current_state = brightness > 0;
+        this->_requested_state = this->_current_state;
 
         SPDLOG_DEBUG("Light {}::{} got new HSB from Openhab, new values: {},{},{}", this->_id, this->_name, this->_current_hue, this->_current_saturation, this->_current_brightness);
       }
@@ -314,14 +316,16 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
       std::vector<std::string> hsb_parts;
       boost::split(hsb_parts, std::string(data["payload"]["state"]), boost::is_any_of(","));
       if (hsb_parts.size() >= 3) {
+        SPDLOG_TRACE("Light {}::{} got new HSB values: {},{},{}", this->_id, this->_name, hsb_parts[0], hsb_parts[1], hsb_parts[2]);
         this->_current_hue = atoi(hsb_parts[0].c_str());
         this->_current_saturation = atoi(hsb_parts[1].c_str());
-        this->_requested_state = atoi(hsb_parts[2].c_str()) > 0;
-        this->_current_state = this->_requested_state;
         // this->_current_brightness = atoi(hsb_parts[2].c_str());
+        this->_current_state = atoi(hsb_parts[2].c_str()) > 0;
+        SPDLOG_TRACE("State: {}", this->_current_state ? "ON" : "OFF");
 
         this->_requested_hue = this->_current_hue;
         this->_requested_saturation = this->_current_saturation;
+        this->_requested_state = this->_current_state;
         // Don't set/send out brightness from HSB when initially loading the light state.
         // this->_requested_brightness = this->_current_brightness;
         // MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
