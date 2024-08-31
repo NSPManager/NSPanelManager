@@ -210,10 +210,10 @@ void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data
   }
 }
 
-std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, uint8_t hour) {
+std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, uint8_t hour, bool allow_night_icon) {
   for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["openmeteo_weather_mappings"]) {
     if (std::string(mapping["id"]).compare(condition) == 0) {
-      if (mapping.contains("character-mapping-day") && hour >= MQTTManagerWeather::_next_sunrise_hour && hour <= MQTTManagerWeather::_next_sunset_hour) {
+      if (mapping.contains("character-mapping-day") && ((hour >= MQTTManagerWeather::_next_sunrise_hour && hour <= MQTTManagerWeather::_next_sunset_hour) || !allow_night_icon)) {
         return mapping["character-mapping-day"];
       } else if (mapping.contains("character-mapping-night") && (hour <= MQTTManagerWeather::_next_sunrise_hour || hour >= MQTTManagerWeather::_next_sunset_hour)) {
         return mapping["character-mapping-night"];
@@ -254,7 +254,7 @@ void MQTTManagerWeather::send_state_update() {
   NSPanelWeatherUpdate weather_protbuf;
   for (struct weather_info &info : MQTTManagerWeather::_forecast_weather_info) {
     NSPanelWeatherUpdate_ForecastItem *forecast_item = weather_protbuf.add_forecast_items();
-    forecast_item->set_weather_icon(MQTTManagerWeather::_get_icon_from_mapping(info.condition, info.time.tm_hour));
+    forecast_item->set_weather_icon(MQTTManagerWeather::_get_icon_from_mapping(info.condition, info.time.tm_hour, false));
     // TODO: Implement ability for users to select precipitation volume instead of probability.
     forecast_item->set_precipitation_string(fmt::format("{:.0f}%", info.precipitation));
     forecast_item->set_temperature_maxmin_string(fmt::format("{:.0f}°/{:.0f}°", info.temperature_high, info.temperature_low));
@@ -262,7 +262,7 @@ void MQTTManagerWeather::send_state_update() {
     // TODO: Implement ability for users to display comming 5 hours instead of 5 days.
     forecast_item->set_display_string(info.day);
   }
-  weather_protbuf.set_current_weather_icon(MQTTManagerWeather::_get_icon_from_mapping(MQTTManagerWeather::_current_condition, MQTTManagerWeather::_current_weather_time.tm_hour));
+  weather_protbuf.set_current_weather_icon(MQTTManagerWeather::_get_icon_from_mapping(MQTTManagerWeather::_current_condition, MQTTManagerWeather::_current_weather_time.tm_hour, true));
   weather_protbuf.set_current_temperature_string(fmt::format("{:.0f}°", MQTTManagerWeather::_current_temperature));
   weather_protbuf.set_current_maxmin_temperature(fmt::format("{:.0f}°/{:.0f}°", MQTTManagerWeather::_current_max_temperature, MQTTManagerWeather::_current_min_temperature));
   weather_protbuf.set_current_wind_string(fmt::format("{:.0f}{}", MQTTManagerWeather::_current_wind_speed, MQTTManagerWeather::_windspeed_unit));
