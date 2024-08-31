@@ -89,7 +89,7 @@
                     7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
                 </svg>
               </span>
-              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
               type="text" class="input" name="add_new_light_name" id="add_new_light_name" placeholder="Office">
             </div>
             <!-- Control mode (dimmer/switch etc...) -->
@@ -286,7 +286,7 @@
                     7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
                 </svg>
               </span>
-              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
               type="text" class="input" name="scene_name" id="scene_name" placeholder="Scene name">
             </div>
           </div>
@@ -400,7 +400,7 @@
               <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
             </svg>
           </span>
-          <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+          <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
           type="text" class="input" name="friendly_name" value="{{ room.friendly_name }}">
         </div>
       </div>
@@ -423,13 +423,19 @@
     <div class="md:flex md:flex-wrap md:justify-between items-center">
       <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">{{ room.friendly_name }} scenes</span>
       <div class="">
+          {% if room.scene_set.all|length < 4 %}
         <button type="button" onclick="add_existing_scene();"
             class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Add scene</button>
           <button type="button" onclick="add_new_scene();"
             class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">New NSPM scene</button>
+        {% else %}
+        <div class="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-300 dark:text-black" role="alert">
+          <span class="font-medium">Info!</span> Only 4 scenes can be assigned per room.
+        </div>
+        {% endif %}
       </div>
     </div>
-    
+
     <table class="w-full text-left rtl:text-right">
       <thead class="uppercase bg-slate-200 dark:bg-slate-950 border-solid border-b-2 border-slate-600 dark:border-slate-800">
         <tr>
@@ -462,7 +468,7 @@
       <button type="button" onclick="add_new_light();"
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">New light</button>
     </div>
-    
+
     <table class="w-full text-left rtl:text-right">
       <thead class="uppercase bg-slate-200 dark:bg-slate-950 border-solid border-b-2 border-slate-600 dark:border-slate-800">
         <tr>
@@ -493,7 +499,7 @@
           <td>Table</td>
           {% endif %}
           <td class="px-3 py-3">
-            <button type="button" onclick="edit_light({{ light.id }});" 
+            <button type="button" onclick="edit_light({{ light.id }});"
               class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Edit</button>
             <a href='{% url "remove_light_from_room" room.id light.id %}'
               class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none" {% if total_num_rooms == 1 %}disabled{% endif %}
