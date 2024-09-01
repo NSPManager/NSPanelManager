@@ -144,6 +144,7 @@
     -d -p 8000:8000 nspanelmanager/nspanelmanager-amd64:latest
     \end{lstlisting}
     \important{All the data for the container will be stored in the directory mapped to /data/ in the container, in the example above this is the /nspmdata/-directory on your machine.}
+    \info{If you wish to run the beta version of NSPanel Manager, replace nspanelmanager/nspanelmanager-amd64 with nspanelmanager/nspanelmanager-beta-amd64.}
     If you wish to manually build and run the container or change options or settings, see below for \hyperref[sec:advanced_setup]{advanced setup}.
     \bigbreak
     \textbf{Update an existing installation}\newline
@@ -163,7 +164,7 @@
       \item In the Home Assistant web interface, navigate to Settings $\rightarrow$ Add-ons $\rightarrow$ Add-on store.
       \item In the upper right corner, press the three dots and choose "Repositories".
       \item Add \textbf{https://github.com/NSPManager/NSPanelManager} to the list of repositories and close the dialog.
-      \item Select the "NSPanel Manager" add-on and install it.
+      \item Select the "NSPanel Manager" or "NSPanel Manager BETA" add-on and install it.
       \item Check that the add-on should start automatically.
       \item Start the add-on.
     \end{itemize}
@@ -219,14 +220,17 @@
     \begin{itemize}
       \item Working TTL flasher for 3.3V.
       \item Working serial setup for your PC and known serial port (in Windows known as COM-port).
+      \item The merged\_flash.bin file used to flash the NSPanel.
     \end{itemize}
-    In order to connect to the NSPanel and be able to flash it, you must dismantle it. For a guide on how to dismantle and connect your serial flasher to the NSPAnel, refer to \href{https://www.youtube.com/watch?v=p-AK4o5jOSI}{this} guide from MarkWattTech.
+    In order to connect to the NSPanel and be able to flash it, you must dismantle it. For a guide on how to dismantle and connect your serial flasher to the NSPanel, refer to \href{https://www.youtube.com/watch?v=p-AK4o5jOSI}{this} guide from MarkWattTech.
+    The merged\_flash.bin file can be downloaded from Github in the "docker/web/nspanelmanager/"-directory. If you plan on running the stable release of NSPanel Manager, download the file from the branch "main"
+    and if you plan on running the beta release of NSPanel Manager, make sure to switch to the branch "beta" before downloading the file. Or simply download the stable file \href{https://github.com/NSPManager/NSPanelManager/blob/main/docker/web/nspanelmanager/merged_flash.bin}{here} or the beta file \href{https://github.com/NSPManager/NSPanelManager/blob/beta/docker/web/nspanelmanager/merged_flash.bin}{here}.
     \subsubsection{Flashing with Espressif ESP32 DOWNLOADER TOOL (Windows only)}
     To flash the panel, perform the following:
     \begin{itemize}
       \item Download the tool from Espressif from \href{https://www.espressif.com/en/support/download/other-tools}{here}.
       \item Open the tool and choose to flash an ESP32 chip.
-      \item Check one checkbox and select the "merged\_flash.bin"-file in the "docker/web/nspanelmanager/"-directory.
+      \item Check one checkbox and select the "merged\_flash.bin"-file you downloaded earlier.
       \item Enter "0x0" as the upload address.
       \item Connect your flasher to the NSPanel and press "START".
     \end{itemize}
@@ -237,7 +241,7 @@
     By installing esptool it is possible to upload the merged flash using the command line. Do the following:
     \begin{itemize}
       \item Open a terminal.
-      \item Navigate to the "docker/web/nspanelmanager/"-directory.
+      \item Navigate to the directory where you saved the "merged\_flash.bin"-file.
       \item To determine if you have selected the right port, run \lstinline[language=bash]|esptool.py flash_id --port <port>|. You will have to replace "<port>" with the actual port connected to the NSPanel. This will do a check and see if the tool can communicate with the NSPanel.
       \item Run \lstinline[language=bash]|esptool.py --baud 921600 --port /dev/ttyUSB0 write_flash 0x0 merged_flash.bin|. You will have to replace "/dev/ttyUSB0" with the actual port connected to the NSPanel.
       \info{On Windows it might be just "esptool" without the ".py" at the end.}
