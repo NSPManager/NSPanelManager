@@ -1,5 +1,5 @@
 from requests import delete
-from django.shortcuts import render, redirect, HttpResponse
+from django.shortcuts import render, redirect, HttpResponse, Http404
 from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
 
@@ -42,6 +42,13 @@ def get_file_md5sum(filename):
         return hashlib.md5(fs.open(filename).read()).hexdigest()
     else:
         return None
+
+def get_base_data(request):
+    """Get data that is used on ALL rendered views."""
+    return {
+        'ingress_path':  request.headers["X-Ingress-Path"] if "X-Ingress-Path" in request.headers else "",
+        'theme': get_setting_with_default("theme"),
+    }
 
 
 def index(request):
@@ -95,12 +102,12 @@ def index(request):
         nspanels.append(panel_info)
 
     data = {
-        'theme': get_setting_with_default("theme"),
         'nspanels': nspanels,
         'notifications': notifications,
         'temperature_unit': temperature_unit,
         'manager_address': get_setting_with_default("manager_address")
     }
+    data = data|get_base_data(request)
 
     if (data["manager_address"] == ""):
         environment = environ.Env()
@@ -121,11 +128,15 @@ def index(request):
 
 
 def rooms(request):
-    return render(request, 'rooms.html', {'theme': get_setting_with_default("theme"), 'rooms': Room.objects.all().order_by('displayOrder')})
+    data = get_base_data(request)
+    data["rooms"] = Room.objects.all().order_by("displayOrder")
+    return render(request, 'rooms.html', data)
 
 
 def rooms_order(request):
-    return render(request, 'rooms_order.html', {'theme': get_setting_with_default("theme"), 'rooms': Room.objects.all().order_by('displayOrder')})
+    data = get_base_data(request)
+    data["rooms"] = Room.objects.all().order_by("displayOrder")
+    return render(request, 'rooms_order.html', data)
 
 
 def move_room_up(request, room_id: int):
@@ -176,11 +187,10 @@ def move_room_down(request, room_id: int):
 def edit_room(request, room_id: int):
     total_num_rooms = Room.objects.all().count()
     room = Room.objects.filter(id=room_id).first()
-    data = {
-        'theme': get_setting_with_default("theme"),
-        'room': room,
-        'total_num_rooms': total_num_rooms
-    }
+    data = get_base_data(request)
+    data["room"] = room
+    data["total_num_rooms"] = total_num_rooms
+
     lights = Light.objects.filter(
         room=room, room_view_position__gte=1, room_view_position__lte=12)
     for light in lights:
@@ -280,15 +290,17 @@ def edit_nspanel(request, panel_id: int):
             "text": "GUI update available."
         })
 
-    return render(request, 'edit_nspanel.html', {
-        'theme': get_setting_with_default("theme"),
+    data = get_base_data(request)
+    data = data|{
         'panel_info': panel_info,
         'rooms': Room.objects.all(),
         'settings': settings,
         "temperature_unit": temperature_unit,
         "multiple": [1, 2, 3, 4],
         "max_live_log_messages": get_setting_with_default("max_live_log_messages"),
-    })
+    }
+
+    return render(request, 'edit_nspanel.html', data)
 
 
 def save_panel_settings(request, panel_id: int):
@@ -531,14 +543,11 @@ def remove_light_from_room_view(request, room_id: int):
 def settings_page(request):
     environment = environ.Env()
 
-    data = {
-        'theme': get_setting_with_default("theme"),
-        'mqttmanager_log_level': get_setting_with_default("mqttmanager_log_level"),
-    }
+    data = get_base_data(request)
+    data["mqttmanager_log_level"] = get_setting_with_default("mqttmanager_log_level")
     data["color_temp_min"] = get_setting_with_default("color_temp_min")
     data["color_temp_max"] = get_setting_with_default("color_temp_max")
-    data["reverse_color_temp"] = get_setting_with_default(
-        "reverse_color_temp")
+    data["reverse_color_temp"] = get_setting_with_default("reverse_color_temp")
     data["mqtt_server"] = get_setting_with_default("mqtt_server")
     data["mqtt_port"] = get_setting_with_default("mqtt_port")
     data["mqtt_username"] = get_setting_with_default("mqtt_username")
@@ -766,25 +775,6 @@ def download_data_file(request):
         return HttpResponse(fs.open("data_file.bin").read(), content_type="application/octet-stream")
 
 
-def download_tft(request):
-    fs = FileSystemStorage()
-    panel_ip = get_client_ip(request)
-    nspanel = NSPanel.objects.filter(ip_address=panel_ip).first()
-    if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True":
-        filename = "gui_us.tft"
-    else:
-        filename = "gui.tft"
-
-    if "Range" in request.headers and request.headers["Range"].startswith("bytes="):
-        parts = request.headers["Range"][6:].split('-')
-        range_start = int(parts[0])
-        range_end = int(parts[1])
-        data = fs.open(filename).read()
-        return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
-    else:
-        return HttpResponse(fs.open(filename).read(), content_type="application/octet-stream")
-
-
 def download_tft_eu(request):
     fs = FileSystemStorage()
     filename = "gui.tft"
@@ -848,13 +838,13 @@ def get_manual(request):
 
 
 def global_scenes(request):
-    data = {'theme': get_setting_with_default("theme"), }
+    data = get_base_data(request)
     data["global_scenes"] = Scene.objects.filter(room__isnull=True)
     return render(request, 'global_scenes.html', data)
 
 
 def relay_groups(request):
-    data = {'theme': get_setting_with_default("theme"), }
+    data = get_base_data(request)
     data["nspanels"] = NSPanel.objects.all()
     data["relay_groups"] = RelayGroup.objects.all()
     return render(request, 'relay_groups.html', data)
@@ -926,8 +916,8 @@ def weather_and_time(request):
         restart_mqtt_manager()
         return redirect("weather_and_time")
     else:
-        data = {
-            'theme': get_setting_with_default("theme"),
+        data = get_base_data(request)
+        data = data|{
             'date_format': get_setting_with_default("date_format"),
             'clock_us_style': get_setting_with_default("clock_us_style"),
             'use_fahrenheit': get_setting_with_default("use_fahrenheit"),
@@ -944,10 +934,8 @@ def weather_and_time(request):
 
 
 def denied_nspanels(request):
-    data = {
-        'theme': get_setting_with_default("theme"),
-        "nspanels": NSPanel.objects.all(),
-    }
+    data = get_base_data(request)
+    data["nspanels"] = NSPanel.objects.all()
     return render(request, 'denied_nspanels.html', data)
 
 

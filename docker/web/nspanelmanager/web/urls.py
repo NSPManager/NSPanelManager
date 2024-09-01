@@ -61,7 +61,6 @@ urlpatterns = [
     path('save_new_tft_file', views.save_new_tft_file, name='save_new_tft_file'),
     path('download_firmware', views.download_firmware, name='download_firmware'),
     path('download_data_file', views.download_data_file, name='download_data_file'),
-    path('download_tft', views.download_tft, name='download_tft'),
     path('download_tft_eu', views.download_tft_eu, name='download_tft_eu'),
     path('download_tft_us', views.download_tft_us, name='download_tft_us'),
     path('checksum_firmware', views.checksum_firmware, name='checksum_firmware'),
