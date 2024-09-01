@@ -10,6 +10,8 @@ public:
   uint16_t id = 0;
   std::string name;
   Room *room = nullptr;
+  bool canSave;
+
   void save();
   void activate();
   uint16_t getId();

@@ -1,0 +1,28 @@
+name: "Update manual PDF from .tex files"
+
+on:
+  push:
+    paths:
+      - 'docs/**'
+      - '!docs/tex/manual.pdf'
+
+jobs:
+  update_manual:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      deployments: read
+    outputs:
+      output1: ${{ steps.filter.outputs.docs_updated }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: xu-cheng/latex-action@v2
+        name: "Compile LaTeX"
+        with:
+          working_directory: docs/tex/
+          root_file: |
+            manual.tex
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        if: ${{ !github.event.act }}
+        with:
+          commit_message: Push updated manual back to repo

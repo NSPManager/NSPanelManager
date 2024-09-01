@@ -56,7 +56,7 @@ void NSPanel::setComponentText(const char *componentId, const char *text) {
   this->_sendCommandWithoutResponse(cmd.c_str());
 }
 
-void NSPanel::setComponentVal(const char *componentId, uint8_t value) {
+void NSPanel::setComponentVal(const char *componentId, int16_t value) {
   std::string cmd = componentId;
   cmd.append(".val=");
   cmd.append(std::to_string(value));
@@ -158,7 +158,7 @@ bool NSPanel::init() {
   this->_isUpdating = false;
   this->_update_progress = 0;
 
-  Serial2.setTxBufferSize(128);
+  Serial2.setTxBufferSize(256);
   Serial2.setRxBufferSize(256);
   Serial2.begin(115200, SERIAL_8N1, 17, 16);
   // Clear Serial2 read buffer
@@ -248,21 +248,16 @@ bool NSPanel::init() {
 
   xSemaphoreGive(NSPanel::instance->_mutexWriteSerialData);
   xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
+  Serial2.onReceive(NSPanel::_onSerialData, false);
   LOG_INFO("NSPanel::init complete.");
   return this->_has_received_nspm;
 }
 
 void NSPanel::_startListeningToPanel() {
   xTaskCreatePinnedToCore(_taskProcessPanelOutput, "taskProcessPanelOutput", 5000, NULL, 1, &this->_taskHandleProcessPanelOutput, CONFIG_ARDUINO_RUNNING_CORE);
-  xTaskCreatePinnedToCore(_taskReadNSPanelData, "taskReadNSPanelData", 5000, NULL, 1, &this->_taskHandleReadNSPanelData, CONFIG_ARDUINO_RUNNING_CORE);
 }
 
 void NSPanel::_stopListeningToPanel() {
-  if (this->_taskHandleReadNSPanelData != NULL) {
-    vTaskDelete(this->_taskHandleReadNSPanelData);
-    this->_taskHandleReadNSPanelData = NULL;
-  }
-
   if (this->_taskHandleProcessPanelOutput != NULL) {
     vTaskDelete(this->_taskHandleProcessPanelOutput);
     this->_taskHandleProcessPanelOutput = NULL;
@@ -300,11 +295,15 @@ void NSPanel::_sendCommandClearResponse(const char *command, uint16_t timeout) {
 }
 
 void NSPanel::_addCommandToQueue(NSPanelCommand command) {
+  if (!NSPanel::instance->_writeCommandsToSerial) {
+    return;
+  }
+
   if (this->_taskHandleSendCommandQueue != NULL) {
     this->_commandQueue.push(command);
     xTaskNotifyGive(this->_taskHandleSendCommandQueue);
   } else {
-    LOG_ERROR("Trying to add command to queue before a queue exists!");
+    LOG_ERROR("Task '", pcTaskGetName(xTaskGetCurrentTaskHandle()), "' is trying to add command to queue before a queue exists!");
   }
 }
 
@@ -341,48 +340,41 @@ void NSPanel::attachWakeCallback(void (*callback)()) {
   NSPanel::_wakeCallback = callback;
 }
 
-void NSPanel::_taskReadNSPanelData(void *param) {
-  LOG_INFO("Starting taskReadNSPanelData.");
-  for (;;) {
-    while (Serial2.available() == 0) {
-      vTaskDelay(25 / portTICK_PERIOD_MS);
-    }
+void IRAM_ATTR NSPanel::_onSerialData(void) {
+  if (xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, 5 * portTICK_PERIOD_MS) == pdTRUE) {
+    if (Serial2.available() > 0) {
+      std::vector<char> data;
+      bool read_to_end = false;
+      uint8_t num_ff_read_in_row = 0;
 
-    if (xSemaphoreTake(NSPanel::instance->_mutexReadSerialData, portMAX_DELAY) == pdTRUE) {
-      if (Serial2.available() > 0) {
-        std::vector<char> data;
-        bool read_to_end = false;
-        uint8_t num_ff_read_in_row = 0;
-
-        while (Serial2.available() > 0) {
-          uint8_t read = Serial2.read();
-          data.push_back((char)read);
-          if (read == 0xFF) {
-            num_ff_read_in_row++;
-            if (num_ff_read_in_row >= 3) { // End of command, clear bugger and read next if any
-              NSPanel::instance->_processQueue.push(data);
-              if (NSPanel::instance->_taskHandleProcessPanelOutput != NULL) {
-                xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
-              }
-              data.clear();
+      while (Serial2.available() > 0) {
+        uint8_t read = Serial2.read();
+        data.push_back((char)read);
+        if (read == 0xFF) {
+          num_ff_read_in_row++;
+          if (num_ff_read_in_row >= 3) { // End of command, clear bugger and read next if any
+            NSPanel::instance->_processQueue.push(data);
+            if (NSPanel::instance->_taskHandleProcessPanelOutput != NULL) {
+              xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
             }
-          } else {
-            num_ff_read_in_row = 0;
+            data.clear();
           }
-          if (Serial2.available() == 0) {
-            vTaskDelay(50 / portTICK_PERIOD_MS);
-          }
+        } else {
+          num_ff_read_in_row = 0;
         }
-
-        if (data.size() > 0) { // This will only trigger if data did not end in 0xFF 0xFF 0xFF which should never happen
-          NSPanel::instance->_processQueue.push(data);
-          if (NSPanel::instance->_taskHandleProcessPanelOutput != NULL) {
-            xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
-          }
+        if (Serial2.available() == 0) {
+          vTaskDelay(50 / portTICK_PERIOD_MS);
         }
       }
-      xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
+
+      if (data.size() > 0) { // This will only trigger if data did not end in 0xFF 0xFF 0xFF which should never happen
+        NSPanel::instance->_processQueue.push(data);
+        if (NSPanel::instance->_taskHandleProcessPanelOutput != NULL) {
+          xTaskNotifyGive(NSPanel::instance->_taskHandleProcessPanelOutput);
+        }
+      }
     }
+    xSemaphoreGive(NSPanel::instance->_mutexReadSerialData);
   }
 }
 
@@ -394,22 +386,32 @@ void NSPanel::_taskProcessPanelOutput(void *param) {
         std::vector<char> itemPayload = NSPanel::instance->_processQueue.front();
 
         // Select correct action depending on type of event
-        switch (itemPayload[0]) {
-        case NEX_OUT_TOUCH_EVENT:
-          NSPanel::_touchEventCallback(itemPayload[1], itemPayload[2], itemPayload[3] == 0x01);
-          break;
+        if (!itemPayload.empty()) {
+          switch (itemPayload[0]) {
+          case NEX_OUT_TOUCH_EVENT:
+            if (itemPayload.size() >= 3) {
+              NSPanel::_touchEventCallback(itemPayload[1], itemPayload[2], itemPayload[3] == 0x01);
+            } else {
+              LOG_ERROR("Read nextion touch event but there wasn't enough data to process.");
+            }
+            break;
 
-        case NEX_OUT_SLEEP:
-          NSPanel::_sleepCallback();
-          break;
+          case NEX_OUT_SLEEP:
+            if (NSPanel::_sleepCallback != nullptr) {
+              NSPanel::_sleepCallback();
+            }
+            break;
 
-        case NEX_OUT_WAKE:
-          NSPanel::_wakeCallback();
-          break;
+          case NEX_OUT_WAKE:
+            if (NSPanel::_wakeCallback != nullptr) {
+              NSPanel::_wakeCallback();
+            }
+            break;
 
-        default:
-          LOG_DEBUG("Read type ", String(itemPayload[0], HEX).c_str());
-          break;
+          default:
+            LOG_TRACE("Read type ", String(itemPayload[0], HEX).c_str());
+            break;
+          }
         }
 
         // Done with item, pop it off the queue
@@ -423,9 +425,7 @@ void NSPanel::_taskProcessPanelOutput(void *param) {
 
 void NSPanel::_sendCommand(NSPanelCommand *command) {
   // Clear buffer before sending
-  while (Serial2.available()) {
-    Serial2.read();
-  }
+  NSPanel::_clearSerialBuffer();
 
   while (!NSPanel::instance->_writeCommandsToSerial) {
     vTaskDelay(50 / portTICK_PERIOD_MS);
@@ -667,7 +667,11 @@ bool NSPanel::_initTFTUpdate(int communication_baud_rate) {
   downloadUrl.append(NSPMConfig::instance->manager_address);
   downloadUrl.append(":");
   downloadUrl.append(std::to_string(NSPMConfig::instance->manager_port));
-  downloadUrl.append("/download_tft");
+  if (!NSPMConfig::instance->is_us_panel) {
+    downloadUrl.append("/download_tft_eu");
+  } else {
+    downloadUrl.append("/download_tft_us");
+  }
 
   LOG_INFO("Will download TFT file from: ", downloadUrl.c_str());
   unsigned long file_size = 0;
@@ -691,14 +695,13 @@ bool NSPanel::_initTFTUpdate(int communication_baud_rate) {
     commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(",1");
   } else {
-    LOG_INFO("Starting upload using v1.1 protocol.");
+    LOG_INFO("Starting upload using v1.0 protocol.");
     commandString = "whmi-wri ";
     commandString.append(std::to_string(file_size));
     commandString.append(",");
     commandString.append(std::to_string(NSPMConfig::instance->tft_upload_baud));
     commandString.append(",1");
   }
-  LOG_DEBUG("Doing one last serial2 clear.");
   NSPanel::_clearSerialBuffer();
   vTaskDelay(500 / portTICK_PERIOD_MS);
 
@@ -749,8 +752,11 @@ bool NSPanel::_updateTFTOTA() {
   downloadUrl.append(NSPMConfig::instance->manager_address);
   downloadUrl.append(":");
   downloadUrl.append(std::to_string(NSPMConfig::instance->manager_port));
-  downloadUrl.append("/download_tft");
-  LOG_DEBUG("Will try to download TFT from ", downloadUrl.c_str());
+  if (!NSPMConfig::instance->is_us_panel) {
+    downloadUrl.append("/download_tft_eu");
+  } else {
+    downloadUrl.append("/download_tft_us");
+  }
 
   unsigned long file_size = 0;
   while (file_size == 0) {
@@ -758,6 +764,8 @@ bool NSPanel::_updateTFTOTA() {
     if (file_size == 0) {
       LOG_ERROR("Failed to get file size for TFT flashing. Will try again.");
       vTaskDelay(500 / portTICK_PERIOD_MS);
+    } else {
+      LOG_INFO("Will flash TFT, size: ", file_size);
     }
   }
   unsigned long startWaitingForOKForNextChunk = 0;
@@ -804,10 +812,10 @@ bool NSPanel::_updateTFTOTA() {
       break;
     } else if (return_string[0] == 0x05) {
       // Old protocol, just upload next chunk.
-      LOG_DEBUG("Got 0x05, uploading next chunk.");
+      LOG_TRACE("Got 0x05, uploading next chunk.");
     } else if (return_string[0] == 0x08) {
       while (return_string.length() < 4) {
-        LOG_DEBUG("Waiting for offset data byte ", return_string.length() - 1);
+        LOG_TRACE("Waiting for offset data byte ", return_string.length() - 1);
         while (Serial2.available() <= 0) {
           vTaskDelay(20 / portTICK_PERIOD_MS);
         }
@@ -838,14 +846,18 @@ bool NSPanel::_updateTFTOTA() {
     checksumUrl.append(NSPMConfig::instance->manager_address);
     checksumUrl.append(":");
     checksumUrl.append(std::to_string(NSPMConfig::instance->manager_port));
-    checksumUrl.append("/checksum_tft_file");
+    if (!NSPMConfig::instance->is_us_panel) {
+      checksumUrl.append("/checksum_tft_file_eu");
+    } else {
+      checksumUrl.append("/checksum_tft_file_us");
+    }
     if (HttpLib::GetMD5sum(checksumUrl.c_str(), checksum_holder)) {
       break;
     }
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
   NSPMConfig::instance->md5_tft_file = checksum_holder;
-  NSPMConfig::instance->saveToLittleFS();
+  NSPMConfig::instance->saveToLittleFS(false);
 
   LOG_INFO("Will restart in 5 seconds.");
   vTaskDelay(5000 / portTICK_PERIOD_MS);

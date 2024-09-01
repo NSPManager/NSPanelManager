@@ -1,3 +1,4 @@
+#include <ArduinoJson.h>
 #include <MqttLog.hpp>
 #include <Room.hpp>
 #include <Scene.hpp>
@@ -11,35 +12,31 @@ std::string Scene::getName() {
 }
 
 void Scene::activate() {
-  std::string mqtt_activation_topic = "nspanel/scenes/";
-  if (this->room != nullptr) {
-    mqtt_activation_topic.append("room/");
-    mqtt_activation_topic.append(this->room->name);
-    mqtt_activation_topic.append("/");
-  } else {
-    mqtt_activation_topic.append("global/");
-  }
-  mqtt_activation_topic.append(this->name);
-  mqtt_activation_topic.append("/activate");
   LOG_INFO("Activating scene: ", this->id, "::", this->name.c_str());
+  JsonDocument doc;
+  doc["command"] = "activate_scene";
+  doc["mac_origin"] = WiFi.macAddress().c_str();
+  doc["scene_id"] = this->getId();
 
-  MqttManager::publish(mqtt_activation_topic, "1");
+  char buffer[512];
+  serializeJson(doc, buffer);
+  MqttManager::publish("nspanel/mqttmanager/command", buffer);
 }
 
 void Scene::save() {
-  std::string mqtt_activation_topic = "nspanel/scenes/";
-  if (this->room != nullptr) {
-    mqtt_activation_topic.append("room/");
-    mqtt_activation_topic.append(this->room->name);
-    mqtt_activation_topic.append("/");
-  } else {
-    mqtt_activation_topic.append("global/");
-  }
-  mqtt_activation_topic.append(this->name);
-  mqtt_activation_topic.append("/save");
-  LOG_INFO("Saving scene: ", this->id, "::", this->name.c_str());
+  if (this->canSave) {
+    LOG_INFO("Saving scene: ", this->id, "::", this->name.c_str());
+    JsonDocument doc;
+    doc["command"] = "save_scene";
+    doc["mac_origin"] = WiFi.macAddress().c_str();
+    doc["scene_id"] = this->getId();
 
-  MqttManager::publish(mqtt_activation_topic, "1");
+    char buffer[512];
+    serializeJson(doc, buffer);
+    MqttManager::publish("nspanel/mqttmanager/command", buffer);
+  } else {
+    LOG_ERROR("Tried saving a scene that does not support saving.");
+  }
 }
 
 void Scene::attachDeconstructCallback(DeviceEntityObserver *observer) {

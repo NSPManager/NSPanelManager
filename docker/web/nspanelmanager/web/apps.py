@@ -4,25 +4,41 @@ import logging
 import psutil
 import subprocess
 import os
+import time
 
 
 def start_mqtt_manager():
     from .settings_helper import get_setting_with_default
     for proc in psutil.process_iter():
-        if "./mqtt_manager.py" in proc.cmdline():
-            return None # MQTT Manager already running
+        if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
+            return None  # MQTT Manager already running
+
+    print("Did not find a running MQTTManager, starting MQTTManager...")
     # Restart the process
     logging.info("Starting a new mqtt_manager")
     mqttmanager_env = os.environ.copy()
-    mqttmanager_env["MQTT_SERVER"] = get_setting_with_default("mqtt_server", "")
-    mqttmanager_env["MQTT_PORT"] = get_setting_with_default("mqtt_port", "1883")
-    mqttmanager_env["MQTT_USERNAME"] = get_setting_with_default("mqtt_username", "")
-    mqttmanager_env["MQTT_PASSWORD"] = get_setting_with_default("mqtt_password", "")
-    mqttmanager_env["HOME_ASSISTANT_ADDRESS"] = get_setting_with_default("home_assistant_address", "")
-    mqttmanager_env["HOME_ASSISTANT_TOKEN"] = get_setting_with_default("home_assistant_token", "")
-    mqttmanager_env["OPENHAB_ADDRESS"] = get_setting_with_default("openhab_address", "")
-    mqttmanager_env["OPENHAB_TOKEN"] = get_setting_with_default("openhab_token", "")
-    subprocess.Popen(["/usr/local/bin/python", "./mqtt_manager.py"], cwd="/usr/src/app/", env=mqttmanager_env)
+    mqttmanager_env["MQTT_SERVER"] = get_setting_with_default(
+        "mqtt_server", "")
+    mqttmanager_env["MQTT_PORT"] = get_setting_with_default(
+        "mqtt_port", "1883")
+    mqttmanager_env["MQTT_USERNAME"] = get_setting_with_default(
+        "mqtt_username", "")
+    mqttmanager_env["MQTT_PASSWORD"] = get_setting_with_default(
+        "mqtt_password", "")
+    mqttmanager_env["HOME_ASSISTANT_ADDRESS"] = get_setting_with_default(
+        "home_assistant_address", "")
+    mqttmanager_env["HOME_ASSISTANT_TOKEN"] = get_setting_with_default(
+        "home_assistant_token", "")
+    mqttmanager_env["OPENHAB_ADDRESS"] = get_setting_with_default(
+        "openhab_address", "")
+    mqttmanager_env["OPENHAB_TOKEN"] = get_setting_with_default(
+        "openhab_token", "")
+    mqttmanager_env["OPENHAB_TOKEN"] = get_setting_with_default(
+        "openhab_token", "")
+    mqttmanager_env["LOG_LEVEL"] = get_setting_with_default(
+        "mqttmanager_log_level", "debug")
+    subprocess.Popen(["/MQTTManager/build/nspm_mqttmanager"],
+                     cwd="/usr/src/app/", env=mqttmanager_env)
 
 
 class WebConfig(AppConfig):
@@ -36,14 +52,20 @@ class WebConfig(AppConfig):
                 if "SUPERVISOR_TOKEN" in environment:
                     from .settings_helper import get_setting_with_default, set_setting_value
                     if get_setting_with_default("home_assistant_token", "") == "" and get_setting_with_default("home_assistant_address", "") == "":
-                        print("No home assistant address or token stored, setting according to addon environment.")
-                        set_setting_value("home_assistant_token", environment("SUPERVISOR_TOKEN"))
-                        set_setting_value("home_assistant_address", "http://supervisor")
+                        print(
+                            "No home assistant address or token stored, setting according to addon environment.")
+                        set_setting_value(
+                            "home_assistant_token", environment("SUPERVISOR_TOKEN"))
+                        set_setting_value(
+                            "home_assistant_address", "http://supervisor")
                     elif get_setting_with_default("home_assistant_token", "") != environment("SUPERVISOR_TOKEN"):
-                        print("Home Assistant token has changed. Will update database.")
-                        set_setting_value("home_assistant_token", environment("SUPERVISOR_TOKEN"))
-                    #from .models import Settings
-                    #objects = Settings.objects.filter(name=name)
+                        print(
+                            "Home Assistant token has changed. Will update database.")
+                        set_setting_value(
+                            "home_assistant_token", environment("SUPERVISOR_TOKEN"))
+                    # from .models import Settings
+                    # objects = Settings.objects.filter(name=name)
             start_mqtt_manager()
         except:
-            logging.exception("Failed to populate Home Assistant addon settings.")
+            logging.exception(
+                "Failed to populate Home Assistant addon settings.")

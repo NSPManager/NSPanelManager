@@ -1,0 +1,10 @@
+{
+    "version": 4,
+    "vendor": {
+        "conan": {}
+    },
+    "include": [
+        "/MQTTManager/build/Debug/generators/CMakePresets.json",
+        "build/Debug/generators/CMakePresets.json"
+    ]
+}

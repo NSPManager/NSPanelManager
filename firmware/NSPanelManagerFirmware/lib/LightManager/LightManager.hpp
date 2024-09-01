@@ -25,6 +25,7 @@ public:
   static bool anyTableLightsOn();
   static bool anyLightsOn();
   static void subscribeToMqttLightUpdates();
+  static void stop();
 
   static void mqttCallback(char *topic, byte *payload, unsigned int length);
 

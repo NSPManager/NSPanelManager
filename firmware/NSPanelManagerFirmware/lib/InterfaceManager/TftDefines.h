@@ -6,11 +6,129 @@
 #define ROOM_BUTTON_ID 5                   // ID of button to go into "room"-view
 #define SCENES_BUTTON_ID 17                // ID of button to go into Scenes page
 
+
+//BOOTSCREEN PAGE
 #define NSPANELMANAGER_PAGE_NAME "bootscreen"
 #define NSPANELMANAGER_TEXT_NAME "bootscreen.t_loading"
+#define NSPANELMANAGER_TEXT_IP_NAME "bootscreen.t_ip"
 
-#define SCREENSAVE_PAGE_NAME "screensaver"
-#define SCREENSAVE_PAGE_TEXT_NAME SCREENSAVE_PAGE_NAME ".curTime"
+// SCREENSAVER PAGE
+#define SCREENSAVER_PAGE_NAME "screensaver"
+
+#define SCREENSAVER_FIRSTVIEW_VARIABLE_NAME "screensaver.firstview" // Variable used to check if Screensaver page is loaded for the first time. Set to 1 when Nextion Screen starts. Variable is used to run code in Nextion screen to hide/show background on screensaver depending on user choice in NSPanel Manager (screensaver.ssBackground). After sceenpage is loaded for the first time this variable is set to 0 so the code just have to be run once.
+#define SCREENSAVER_BACKGROUND_CHOICE_VARIABLE_NAME "ssBackground"  // Variable represents the user choice Background/No Background for screensaver page that is done in NSPanelManager. 1=Backgroud, 0=No background. Background picture change for all components is done when screensaver page loads for the first time.
+
+// SCREENSAVER TEXT COMPONENT NAMES
+#define SCREENSAVER_CURRENT_WEATHER_ICON_TEXT_NAME "curIcon"
+#define SCREENSAVER_CURRENT_TEMP_TEXT_NAME "curTemp"
+#define SCREENSAVER_CURRENT_MAXMIN_TEXT_NAME "curMaxmin"
+#define SCREENSAVER_CURRENT_RAIN_TEXT_NAME "curRain"
+#define SCREENSAVER_CURRENT_WIND_TEXT_NAME "curWind"
+
+#define SCREENSAVER_CURRENT_ROOMTEMP_TEXT_NAME "curRoomtemp"
+#define SCREENSAVER_CURRENT_ROOMTEMP_ICON_TEXT_NAME "t7"
+#define SCREENSAVER_CURRENT_DAY_TEXT_NAME "curDay"
+#define SCREENSAVER_CURRENT_TIME_TEXT_NAME "curTime"
+#define SCREENSAVER_CURRENT_AMPM_TEXT_NAME "curAMPM"
+#define SCREENSAVER_CURRENT_SUNRISE_TEXT_NAME "curSunrise"
+#define SCREENSAVER_CURRENT_SUNSET_TEXT_NAME "curSunset"
+
+#define SCREENSAVER_FORECAST_DAY1_TEXT_NAME "forDay1"
+#define SCREENSAVER_FORECAST_DAY2_TEXT_NAME "forDay2"
+#define SCREENSAVER_FORECAST_DAY3_TEXT_NAME "forDay3"
+#define SCREENSAVER_FORECAST_DAY4_TEXT_NAME "forDay4"
+#define SCREENSAVER_FORECAST_DAY5_TEXT_NAME "forDay5"
+
+#define SCREENSAVER_FORECAST_ICON1_TEXT_NAME "forIcon1"
+#define SCREENSAVER_FORECAST_ICON2_TEXT_NAME "forIcon2"
+#define SCREENSAVER_FORECAST_ICON3_TEXT_NAME "forIcon3"
+#define SCREENSAVER_FORECAST_ICON4_TEXT_NAME "forIcon4"
+#define SCREENSAVER_FORECAST_ICON5_TEXT_NAME "forIcon5"
+
+#define SCREENSAVER_FORECAST_MAXMIN1_TEXT_NAME "forMaxmin1"
+#define SCREENSAVER_FORECAST_MAXMIN2_TEXT_NAME "forMaxmin2"
+#define SCREENSAVER_FORECAST_MAXMIN3_TEXT_NAME "forMaxmin3"
+#define SCREENSAVER_FORECAST_MAXMIN4_TEXT_NAME "forMaxmin4"
+#define SCREENSAVER_FORECAST_MAXMIN5_TEXT_NAME "forMaxmin5"
+
+#define SCREENSAVER_FORECAST_RAIN1_TEXT_NAME "forRain1"
+#define SCREENSAVER_FORECAST_RAIN2_TEXT_NAME "forRain2"
+#define SCREENSAVER_FORECAST_RAIN3_TEXT_NAME "forRain3"
+#define SCREENSAVER_FORECAST_RAIN4_TEXT_NAME "forRain4"
+#define SCREENSAVER_FORECAST_RAIN5_TEXT_NAME "forRain5"
+
+#define SCREENSAVER_FORECAST_WIND1_TEXT_NAME "forWind1"
+#define SCREENSAVER_FORECAST_WIND2_TEXT_NAME "forWind2"
+#define SCREENSAVER_FORECAST_WIND3_TEXT_NAME "forWind3"
+#define SCREENSAVER_FORECAST_WIND4_TEXT_NAME "forWind4"
+#define SCREENSAVER_FORECAST_WIND5_TEXT_NAME "forWind5"
+
+// SCREENSAVER TEXT COMPONENT ID's
+#define SCREENSAVER_CURRENT_WEATHER_ICON_TEXT_ID 28
+#define SCREENSAVER_CURRENT_TEMP_TEXT_ID 29
+#define SCREENSAVER_CURRENT_MAXMIN_TEXT_ID 30
+#define SCREENSAVER_CURRENT_RAIN_TEXT_ID 32
+#define SCREENSAVER_CURRENT_WIND_TEXT_ID 34
+
+#define SCREENSAVER_CURRENT_ROOMTEMP_TEXT_ID 46
+#define SCREENSAVER_CURRENT_ROOMTEMP_ICON_TEXT_ID 6
+#define SCREENSAVER_CURRENT_DAY_TEXT_ID 44
+#define SCREENSAVER_CURRENT_TIME_TEXT_ID 35
+#define SCREENSAVER_CURRENT_AMPM_TEXT_ID 36
+#define SCREENSAVER_CURRENT_SUNRISE_TEXT_ID 38
+#define SCREENSAVER_CURRENT_SUNSET_TEXT_ID 40
+
+#define SCREENSAVER_FORECAST_DAY1_TEXT_ID 1
+#define SCREENSAVER_FORECAST_DAY2_TEXT_ID 2
+#define SCREENSAVER_FORECAST_DAY3_TEXT_ID 3
+#define SCREENSAVER_FORECAST_DAY4_TEXT_ID 4
+#define SCREENSAVER_FORECAST_DAY5_TEXT_ID 5
+
+#define SCREENSAVER_FORECAST_ICON1_TEXT_ID 6
+#define SCREENSAVER_FORECAST_ICON2_TEXT_ID 7
+#define SCREENSAVER_FORECAST_ICON3_TEXT_ID 8
+#define SCREENSAVER_FORECAST_ICON4_TEXT_ID 9
+#define SCREENSAVER_FORECAST_ICON5_TEXT_ID 10
+
+#define SCREENSAVER_FORECAST_MAXMIN1_TEXT_ID 11
+#define SCREENSAVER_FORECAST_MAXMIN2_TEXT_ID 12
+#define SCREENSAVER_FORECAST_MAXMIN3_TEXT_ID 13
+#define SCREENSAVER_FORECAST_MAXMIN4_TEXT_ID 14
+#define SCREENSAVER_FORECAST_MAXMIN5_TEXT_ID 15
+
+#define SCREENSAVER_FORECAST_RAIN1_TEXT_ID 16
+#define SCREENSAVER_FORECAST_RAIN2_TEXT_ID 17
+#define SCREENSAVER_FORECAST_RAIN3_TEXT_ID 18
+#define SCREENSAVER_FORECAST_RAIN4_TEXT_ID 19
+#define SCREENSAVER_FORECAST_RAIN5_TEXT_ID 20
+
+#define SCREENSAVER_FORECAST_WIND1_TEXT_ID 21
+#define SCREENSAVER_FORECAST_WIND2_TEXT_ID 22
+#define SCREENSAVER_FORECAST_WIND3_TEXT_ID 23
+#define SCREENSAVER_FORECAST_WIND4_TEXT_ID 24
+#define SCREENSAVER_FORECAST_WIND5_TEXT_ID 25
+
+// SCREENSAVER2 PAGE //Used for users that only wants time on screensaver or a completely black page
+#define SCREENSAVER_MINIMAL_PAGE_NAME "screensaver2"
+
+#define SCREENSAVER2_FIRSTVIEW_VARIABLE_NAME "screensaver2.firstview"            // Variable used to check if Screensaver page is loaded for the first time. Set to 1 when Nextion Screen starts. Variable is used to run code in Nextion screen to hide/show background on screensaver depending on user choice in NSPanel Manager (screensaver.ssBackground). After sceenpage is loaded for the first time this variable is set to 0 so the code just have to be run once.
+#define SCREENSAVER2_BACKGROUND_CHOICE_VARIABLE_NAME "screensaver2.ssBackground" // Variable represents the user choice Background/No Background for screensaver page that is done in NSPanelManager. 1=Backgroud, 0=No background. Background picture change for all components is done when screensaver page loads for the first time.
+
+// SCREENSAVER2 TEXT COMPONENT NAMES
+
+#define SCREENSAVER2_CURRENT_ROOMTEMP_TEXT_NAME "curRoomtemp"
+#define SCREENSAVER2_CURRENT_ROOMTEMP_ICON_TEXT_NAME "t7"
+#define SCREENSAVER2_CURRENT_DAY_TEXT_NAME "curDay"
+#define SCREENSAVER2_CURRENT_TIME_TEXT_NAME "curTime"
+#define SCREENSAVER2_CURRENT_AMPM_TEXT_NAME "curAMPM"
+
+// SCREENSAVER TEXT COMPONENT ID's
+
+#define SCREENSAVER2_CURRENT_ROOMTEMP_TEXT_ID 7
+#define SCREENSAVER2_CURRENT_ROOMTEMP_ICON_TEXT_ID 6
+#define SCREENSAVER2_CURRENT_DAY_TEXT_ID 5
+#define SCREENSAVER2_CURRENT_TIME_TEXT_ID 1
+#define SCREENSAVER2_CURRENT_AMPM_TEXT_ID 9
 
 #define HOME_PIC_HIGHLIGHT_CEILING_NAME "p_lockceiling" // Should not have "home." in front as visibility command for Nextion is not as other commands
 #define HOME_PIC_HIGHLIGHT_TABLE_NAME "p_locktable"     // Should not have "home." in front as visibility command for Nextion is not as other commands

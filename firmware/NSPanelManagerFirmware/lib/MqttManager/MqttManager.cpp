@@ -16,7 +16,16 @@ void MqttManager::init() {
   } else {
     MqttManager::setBufferSize(8);
   }
-  xTaskCreatePinnedToCore(MqttManager::_taskMqttRunTask, "taskRunMQTT", 50000, NULL, 2, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+}
+
+void MqttManager::start() {
+  if (!MqttManager::_hasStarted) {
+    MqttManager::_wifiClient = new WiFiClient();                            // Create WifiClient for MQTT Client
+    MqttManager::_mqttClient = new PubSubClient(*MqttManager::_wifiClient); // Create MQTT Client used to communicate with MQTT
+    MqttManager::_mqttClient->setBufferSize(5000);
+    MqttManager::_mqttClient->setCallback(&MqttManager::_mqttClientCallback);
+    xTaskCreatePinnedToCore(MqttManager::_taskMqttRunTask, "taskRunMQTT", 50000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+  }
 }
 
 void MqttManager::setBufferSize(uint8_t size) {
@@ -35,7 +44,11 @@ void MqttManager::setBufferSize(uint8_t size) {
 }
 
 bool MqttManager::connected() {
-  return MqttManager::_mqttClient->connected();
+  if (!MqttManager::_hasStarted) {
+    return false;
+  } else {
+    return MqttManager::_mqttClient->connected();
+  }
 }
 
 bool MqttManager::publish(const char *topic, std::string &message) {
@@ -76,7 +89,7 @@ bool MqttManager::publish(std::string &topic, std::string &message, bool retain)
   msg->data = message;
   msg->retain = retain;
 
-  if (xQueueSendToBack(MqttManager::_sendQueue, (void *)&msg, 100 / portTICK_PERIOD_MS) == pdTRUE) {
+  if (xQueueSendToBack(MqttManager::_sendQueue, (void *)&msg, 250 / portTICK_PERIOD_MS) == pdTRUE) {
     return true;
   } else {
     delete msg;
@@ -111,9 +124,10 @@ void MqttManager::subscribeToTopic(SubscribeTopic &topic) {
 }
 
 void MqttManager::_subscribeToTopic(SubscribeTopic &topic) {
-  if (MqttManager::_mqttClient->connected()) {
+  if (MqttManager::connected()) {
     LOG_TRACE("Subscribing to topic ", topic.topic.c_str());
     MqttManager::_mqttClient->subscribe(topic.topic.c_str());
+    MqttManager::_mqttClient->loop();
   }
 }
 
@@ -125,11 +139,13 @@ void MqttManager::_subscribeToAllRegisteredTopics() {
 }
 
 void MqttManager::_mqttClientCallback(char *topic, byte *payload, unsigned int length) {
-  for (SubscribeTopic &tpc : MqttManager::_subscribeTopics) {
-    if (tpc.topic.compare(topic) == 0) {
-      tpc.callback(topic, payload, length);
+  auto it = MqttManager::_subscribeTopics.cbegin();
+  while (it != MqttManager::_subscribeTopics.cend()) {
+    if ((*it).topic.compare(topic) == 0) {
+      (*it).callback(topic, payload, length);
       break;
     }
+    it++;
   }
 }
 
@@ -140,7 +156,7 @@ void MqttManager::_sendMqttMessage() {
     return;
   }
 
-  if (MqttManager::_mqttClient->connected()) {
+  if (MqttManager::connected()) {
     if (uxQueueMessagesWaiting(MqttManager::_sendQueue) > 0) {
       PublishMessage *msg;
       if (xQueuePeek(MqttManager::_sendQueue, &(msg), 5 / portTICK_PERIOD_MS)) {
@@ -161,6 +177,7 @@ void MqttManager::_taskMqttRunTask(void *param) {
     vTaskDelete(NULL);
   }
 
+  MqttManager::_hasStarted = true;
   for (;;) {
     if (MqttManager::connected()) {
       MqttManager::_sendMqttMessage();
@@ -177,13 +194,17 @@ void MqttManager::_taskMqttRunTask(void *param) {
 }
 
 bool MqttManager::_connect() {
+  if (!MqttManager::_hasStarted) {
+    return false;
+  }
+
   // Stop processing if not connected to WiFi
   if (!WiFi.isConnected()) {
     return false;
   }
 
   // Build "offline" message used for last will
-  DynamicJsonDocument *offline_message_doc = new DynamicJsonDocument(512);
+  JsonDocument *offline_message_doc = new JsonDocument;
   (*offline_message_doc)["mac"] = WiFi.macAddress().c_str();
   (*offline_message_doc)["state"] = "offline";
   char offline_message_buffer[512];
@@ -191,7 +212,7 @@ bool MqttManager::_connect() {
   delete offline_message_doc;
 
   // Build "online" message used for last will
-  DynamicJsonDocument *online_message_doc = new DynamicJsonDocument(512);
+  JsonDocument *online_message_doc = new JsonDocument;
   (*online_message_doc)["mac"] = WiFi.macAddress().c_str();
   (*online_message_doc)["state"] = "online";
   char online_message_buffer[512];
@@ -209,8 +230,11 @@ bool MqttManager::_connect() {
   MqttManager::_mqttClient->setServer(NSPMConfig::instance->mqtt_server.c_str(), NSPMConfig::instance->mqtt_port);
   MqttManager::_mqttClient->connect(mqtt_device_name.c_str(), NSPMConfig::instance->mqtt_username.c_str(), NSPMConfig::instance->mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, true, offline_message_buffer);
   vTaskDelay(1000 / portTICK_PERIOD_MS);
-  if (MqttManager::_mqttClient->connected()) {
-    MqttManager::_mqttClient->publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), online_message_buffer, true);
+  if (MqttManager::connected()) {
+    while (!MqttManager::_mqttClient->publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), online_message_buffer, true)) {
+      LOG_ERROR("Failed to send online/offline message");
+      vTaskDelay(250 / portTICK_PERIOD_MS);
+    }
     Serial.print("Connected to MQTT server ");
     Serial.println(NSPMConfig::instance->mqtt_server.c_str());
     LOG_INFO("Connected to MQTT server ", NSPMConfig::instance->mqtt_server.c_str());

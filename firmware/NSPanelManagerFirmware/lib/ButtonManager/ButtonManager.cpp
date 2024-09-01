@@ -8,6 +8,7 @@
 #include <PageManager.hpp>
 
 void ButtonManager::init() {
+  // TODO: Read button state via interupts instead of polling
   // Setup pins for input/output
   pinMode(BUTTON_MANAGER_BUTTON1_PIN, INPUT);
   pinMode(BUTTON_MANAGER_BUTTON2_PIN, INPUT);
@@ -19,15 +20,27 @@ void ButtonManager::init() {
   ButtonManager::_lastButton2State = !digitalRead(BUTTON_MANAGER_BUTTON2_PIN);
   ButtonManager::_newButton2State = ButtonManager::_lastButton2State;
 
-  // Leave button state alone. Default states are set as soon as a config
-  // is received from the NSPanel Manager. This is done in RoomManager.cpp.
-  // ButtonManager::setRelayState(1, ButtonManager::_newButton1State);
-  // ButtonManager::setRelayState(2, ButtonManager::_newButton2State);
+  LOG_DEBUG("Setting relay 1 to default state: ", NSPMConfig::instance->relay1_default_mode ? "ON" : "OFF");
+  ButtonManager::setRelayState(1, NSPMConfig::instance->relay1_default_mode);
+  LOG_DEBUG("Setting relay 2 to default state: ", NSPMConfig::instance->relay2_default_mode ? "ON" : "OFF");
+  ButtonManager::setRelayState(2, NSPMConfig::instance->relay2_default_mode);
 
-  xTaskCreatePinnedToCore(ButtonManager::_loop, "_taskButtonManagerLoop", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+  xTaskCreatePinnedToCore(ButtonManager::_loop, "_taskButtonManagerLoop", 5000, NULL, 0, &ButtonManager::_loop_task_handle, CONFIG_ARDUINO_RUNNING_CORE);
 
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_relay1_cmd_topic.c_str(), &ButtonManager::mqttCallback);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_relay2_cmd_topic.c_str(), &ButtonManager::mqttCallback);
+  attachInterrupt(BUTTON_MANAGER_BUTTON1_PIN, ButtonManager::button1_state_change, CHANGE);
+  attachInterrupt(BUTTON_MANAGER_BUTTON2_PIN, ButtonManager::button2_state_change, CHANGE);
+}
+
+void IRAM_ATTR ButtonManager::button1_state_change() {
+  ButtonManager::_button_state_change = 1;
+  vTaskNotifyGiveFromISR(ButtonManager::_loop_task_handle, NULL);
+}
+
+void IRAM_ATTR ButtonManager::button2_state_change() {
+  ButtonManager::_button_state_change = 2;
+  vTaskNotifyGiveFromISR(ButtonManager::_loop_task_handle, NULL);
 }
 
 void ButtonManager::mqttCallback(char *topic, byte *payload, unsigned int length) {
@@ -61,6 +74,8 @@ void ButtonManager::setRelayState(uint8_t relay, bool state) {
 }
 
 void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
+  LOG_DEBUG("Got new button state ", new_state ? "ON" : "OFF", " for button ", button);
+
   if (button == 1) {
     if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DIRECT && new_state) {
       if (NSPMConfig::instance->reverse_relays) {
@@ -75,7 +90,12 @@ void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
       std::list<Light *> lightsToChange;
       lightsToChange.push_back(ButtonManager::button1_detached_mode_light);
       if (ButtonManager::button1_detached_mode_light->getLightLevel() == 0) {
-        LightManager::ChangeLightsToLevel(&lightsToChange, PageManager::GetHomePage()->getDimmingValue());
+        int dim_to_level = PageManager::GetHomePage()->getDimmingValue();
+        if (dim_to_level == 0) {
+          LOG_INFO("Trying to turn on a light but the current average room level is 0. Defaulting to 50%");
+          dim_to_level = 50;
+        }
+        LightManager::ChangeLightsToLevel(&lightsToChange, dim_to_level);
       } else {
         LightManager::ChangeLightsToLevel(&lightsToChange, 0);
       }
@@ -96,7 +116,12 @@ void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
       std::list<Light *> lightsToChange;
       lightsToChange.push_back(ButtonManager::button2_detached_mode_light);
       if (ButtonManager::button2_detached_mode_light->getLightLevel() == 0) {
-        LightManager::ChangeLightsToLevel(&lightsToChange, PageManager::GetHomePage()->getDimmingValue());
+        int dim_to_level = PageManager::GetHomePage()->getDimmingValue();
+        if (dim_to_level == 0) {
+          LOG_INFO("Trying to turn on a light but the current average room level is 0. Defaulting to 50%");
+          dim_to_level = 50;
+        }
+        LightManager::ChangeLightsToLevel(&lightsToChange, dim_to_level);
       } else {
         LightManager::ChangeLightsToLevel(&lightsToChange, 0);
       }
@@ -110,23 +135,34 @@ void ButtonManager::_loop(void *param) {
   LOG_DEBUG("Started ButtonManager _loop.");
 
   for (;;) {
-    ButtonManager::_newButton1State = !digitalRead(BUTTON_MANAGER_BUTTON1_PIN);
-    ButtonManager::_newButton2State = !digitalRead(BUTTON_MANAGER_BUTTON2_PIN);
+    if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) == pdTRUE) {
+      vTaskDelay(BUTTON_MANAGER_BUTTON_DEBOUNCE_MS / portTICK_PERIOD_MS); // Wait for button to debounce and reach steady state
+      for (;;) {
+        if (ButtonManager::_button_state_change == 1) {
+          ButtonManager::_newButton1State = !digitalRead(BUTTON_MANAGER_BUTTON1_PIN);
+          if (ButtonManager::_newButton1State != ButtonManager::_lastButton1State) {
+            LOG_DEBUG("New button 1 state: ", _newButton1State ? "ON" : "OFF");
+            ButtonManager::_lastButton1StateChange = millis();
+            ButtonManager::_lastButton1State = ButtonManager::_newButton1State;
+          } else if (ButtonManager::_newButton1State == ButtonManager::_lastButton1State && millis() - ButtonManager::_lastButton1StateChange >= BUTTON_MANAGER_BUTTON_DEBOUNCE_MS) {
+            ButtonManager::_processButtonStateChange(1, ButtonManager::_newButton1State);
+            break; // Exit inner loop and start waiting for state change again.
+          }
+        }
 
-    if (ButtonManager::_newButton1State != ButtonManager::_lastButton1State) {
-      ButtonManager::_lastButton1StateChange = millis();
-      ButtonManager::_lastButton1State = ButtonManager::_newButton1State;
-    } else if (ButtonManager::_newButton1State == ButtonManager::_lastButton1State && millis() - ButtonManager::_lastButton1StateChange <= BUTTON_MANAGER_BUTTON_DEBOUNCE_MS) {
-      ButtonManager::_processButtonStateChange(1, ButtonManager::_newButton1State);
+        if (ButtonManager::_button_state_change == 2) {
+          ButtonManager::_newButton2State = !digitalRead(BUTTON_MANAGER_BUTTON2_PIN);
+          if (ButtonManager::_newButton2State != ButtonManager::_lastButton2State) {
+            ButtonManager::_lastButton2StateChange = millis();
+            LOG_DEBUG("New button 2 state: ", _newButton2State ? "ON" : "OFF");
+            ButtonManager::_lastButton2State = ButtonManager::_newButton2State;
+          } else if (ButtonManager::_newButton2State == ButtonManager::_lastButton2State && millis() - ButtonManager::_lastButton2StateChange >= BUTTON_MANAGER_BUTTON_DEBOUNCE_MS) {
+            ButtonManager::_processButtonStateChange(2, ButtonManager::_newButton2State);
+            break; // Exit inner loop and start waiting for state change again.
+          }
+        }
+        vTaskDelay(BUTTON_MANAGER_BUTTON_DEBOUNCE_MS / portTICK_PERIOD_MS);
+      }
     }
-
-    if (ButtonManager::_newButton2State != ButtonManager::_lastButton2State) {
-      ButtonManager::_lastButton2StateChange = millis();
-      ButtonManager::_lastButton2State = ButtonManager::_newButton2State;
-    } else if (ButtonManager::_newButton2State == ButtonManager::_lastButton2State && millis() - ButtonManager::_lastButton2StateChange <= BUTTON_MANAGER_BUTTON_DEBOUNCE_MS) {
-      ButtonManager::_processButtonStateChange(2, ButtonManager::_newButton2State);
-    }
-
-    vTaskDelay(BUTTON_MANAGER_BUTTON_DEBOUNCE_MS / portTICK_PERIOD_MS);
   }
 }

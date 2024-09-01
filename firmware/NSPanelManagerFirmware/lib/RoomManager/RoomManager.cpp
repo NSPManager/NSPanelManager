@@ -16,27 +16,25 @@
 #include <string>
 
 void RoomManager::init() {
-  MqttManager::subscribeToTopic("nspanel/config/reload", &RoomManager::reloadCallback);
   RoomManager::currentRoom = RoomManager::rooms.end();
   RoomManager::_lastReloadCommand = millis();
 }
 
-void RoomManager::reloadCallback(char *topic, byte *payload, unsigned int length) {
+void RoomManager::performConfigReload() {
   if (RoomManager::_lastReloadCommand + 5000 >= millis()) {
     LOG_ERROR("Received reload command within 5 seconds of a reload. Ignoring command.");
     return;
   }
 
-  std::string payload_str = std::string((char *)payload, 1);
-  if (payload_str.compare("1") == 0) {
-    LOG_DEBUG("Got reload command, reloading rooms.");
-    RoomManager::loadAllRooms(true);
-    RoomManager::_lastReloadCommand = millis();
-  }
+  LOG_DEBUG("Got reload command, reloading rooms.");
+  RoomManager::loadAllRooms(true);
+  RoomManager::_lastReloadCommand = millis();
 }
 
 void RoomManager::loadAllRooms(bool is_update) {
-  DynamicJsonDocument *roomData = new DynamicJsonDocument(2048);
+  bool save_new_config_to_littlefs_at_end = false;
+  bool reboot_after_config_saved = false;
+  JsonDocument *roomData = new JsonDocument;
   uint8_t tries = 0;
   bool successDownloadingConfig = false;
   do {
@@ -48,8 +46,12 @@ void RoomManager::loadAllRooms(bool is_update) {
     roomDataJsonUrl.append(std::to_string(NSPMConfig::instance->manager_port));
     roomDataJsonUrl.append("/api/get_nspanel_config?mac=");
     roomDataJsonUrl.append(WiFi.macAddress().c_str());
+    LOG_INFO("Trying to download config from: ", roomDataJsonUrl.c_str());
     successDownloadingConfig = HttpLib::DownloadJSON(roomDataJsonUrl.c_str(), roomData);
-    roomDataJsonUrl.end();
+
+    if (roomData->size() == 0) {
+      successDownloadingConfig = false; // The HTTP call succeeded but we got no data, do not count it as a success
+    }
 
     if (!successDownloadingConfig) {
       tries++;
@@ -81,12 +83,13 @@ void RoomManager::loadAllRooms(bool is_update) {
   InterfaceConfig::screen_dim_level = (*roomData)["screen_dim_level"].as<uint8_t>();
   InterfaceConfig::screensaver_dim_level = (*roomData)["screensaver_dim_level"].as<uint8_t>();
   InterfaceConfig::screensaver_activation_timeout = (*roomData)["screensaver_activation_timeout"].as<uint16_t>();
-  InterfaceConfig::show_screensaver_clock = (*roomData)["show_screensaver_clock"].as<String>().equals("True");
+  InterfaceConfig::screensaver_mode = (*roomData)["screensaver_mode"].as<String>().c_str();
   InterfaceConfig::clock_us_style = (*roomData)["clock_us_style"].as<String>().equals("True");
   InterfaceConfig::lock_to_default_room = (*roomData)["lock_to_default_room"].as<String>().equals("True");
+  NSPMConfig::instance->is_us_panel = (*roomData)["is_us_panel"].as<String>().equals("True");
   NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>((*roomData)["button1_mode"].as<uint8_t>());
   NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>((*roomData)["button2_mode"].as<uint8_t>());
-  NSPMConfig::instance->use_farenheit = (*roomData)["use_farenheit"].as<String>().equals("True");
+  NSPMConfig::instance->use_fahrenheit = (*roomData)["use_fahrenheit"].as<String>().equals("True");
   NSPMConfig::instance->temperature_calibration = (*roomData)["temperature_calibration"].as<float>();
   NSPMConfig::instance->reverse_relays = (*roomData)["reverse_relays"].as<String>().equals("True");
   NSPMConfig::instance->button1_mqtt_topic = (*roomData)["button1_mqtt_topic"].as<String>().c_str();
@@ -97,27 +100,35 @@ void RoomManager::loadAllRooms(bool is_update) {
   bool relay1_default_mode = (*roomData)["relay1_default_mode"].as<String>().equals("True");
   bool relay2_default_mode = (*roomData)["relay2_default_mode"].as<String>().equals("True");
 
-  ButtonManager::setRelayState(1, relay1_default_mode);
-  ButtonManager::setRelayState(2, relay2_default_mode);
-
   if (NSPMConfig::instance->relay1_default_mode != relay1_default_mode) {
+    LOG_INFO("Saving new relay 1 default mode: ", relay1_default_mode ? "ON" : "OFF");
     NSPMConfig::instance->relay1_default_mode = relay1_default_mode;
-    NSPMConfig::instance->saveToLittleFS();
+    save_new_config_to_littlefs_at_end = true;
   }
 
   if (NSPMConfig::instance->relay2_default_mode != relay2_default_mode) {
+    LOG_INFO("Saving new relay 2 default mode: ", relay2_default_mode ? "ON" : "OFF");
     NSPMConfig::instance->relay2_default_mode = relay2_default_mode;
-    NSPMConfig::instance->saveToLittleFS();
+    save_new_config_to_littlefs_at_end = true;
   }
 
   if (NSPMConfig::instance->wifi_hostname.compare((*roomData)["name"].as<String>().c_str()) != 0) {
+    save_new_config_to_littlefs_at_end = true;
+    reboot_after_config_saved = true;
     NSPMConfig::instance->wifi_hostname = (*roomData)["name"].as<String>().c_str();
-    NSPMConfig::instance->saveToLittleFS();
     LOG_DEBUG("Name has changed. Restarting.");
-    vTaskDelay(250 / portTICK_PERIOD_MS);
-    ESP.restart();
-    vTaskDelay(portMAX_DELAY);
-    vTaskDelete(NULL);
+  }
+
+  if (save_new_config_to_littlefs_at_end) {
+    while (!NSPMConfig::instance->saveToLittleFS(false)) {
+      vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+
+    if (reboot_after_config_saved) {
+      ESP.restart();
+      vTaskDelay(portMAX_DELAY);
+      vTaskDelete(NULL);
+    }
   }
 
   // Load global scenes
@@ -134,6 +145,7 @@ void RoomManager::loadAllRooms(bool is_update) {
     newScene->room = nullptr;
     newScene->id = atoi(scenePair.key().c_str());
     newScene->name = scenePair.value()["name"] | "ERR-S";
+    newScene->canSave = scenePair.value()["can_save"].as<String>().equals("true");
     newScene->callUpdateCallbacks();
     if (!existing_scene) {
       InterfaceConfig::global_scenes.push_back(newScene);
@@ -163,7 +175,6 @@ void RoomManager::loadAllRooms(bool is_update) {
   }
 
   // Init rooms
-
   for (uint16_t roomId : (*roomData)["rooms"].as<JsonArray>()) {
     if (InterfaceConfig::lock_to_default_room && roomId != InterfaceConfig::homeScreen) {
       continue;
@@ -177,7 +188,16 @@ void RoomManager::loadAllRooms(bool is_update) {
   }
 
   if (!is_update) {
-    RoomManager::goToRoomId(InterfaceConfig::homeScreen); // Set currentRoom to the default room for this panel
+    // Set currentRoom to the default room for this panel
+    if (!RoomManager::goToRoomId(InterfaceConfig::homeScreen)) {
+      LOG_ERROR("Failed to go to default room.");
+      if (RoomManager::rooms.size() > 0) {
+        LOG_WARNING("Navigating to first room instead of default room as that failed.");
+        RoomManager::currentRoom = RoomManager::rooms.begin();
+      } else {
+        LOG_ERROR("No rooms loaded!");
+      }
+    }
   } else {
     // TODO: Implement function that remove any rooms currecntly loaded but not configured (ie. removed through manager)
     LOG_DEBUG("Calling roomChangedCallback");
@@ -205,38 +225,41 @@ void RoomManager::loadAllRooms(bool is_update) {
   } else {
     ButtonManager::button2_detached_mode_light = nullptr;
   }
+
+  NSPMConfig::instance->successful_config_load = true;
 }
 
 Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
-  DynamicJsonDocument *roomData = new DynamicJsonDocument(2048);
+  JsonDocument *roomData = new JsonDocument;
   uint8_t tries = 0;
   bool successDownloadingConfig = false;
-  std::string roomDataJsonUrl = "http://";
-  roomDataJsonUrl.append(NSPMConfig::instance->manager_address);
-  roomDataJsonUrl.append(":");
-  roomDataJsonUrl.append(std::to_string(NSPMConfig::instance->manager_port));
-  roomDataJsonUrl.append("/api/get_nspanel_config/room/");
-  roomDataJsonUrl.append(std::to_string(roomId));
 
   do {
+    std::string roomDataJsonUrl = "http://";
+    roomDataJsonUrl.append(NSPMConfig::instance->manager_address);
+    roomDataJsonUrl.append(":");
+    roomDataJsonUrl.append(std::to_string(NSPMConfig::instance->manager_port));
+    roomDataJsonUrl.append("/api/get_nspanel_config/room/");
+    roomDataJsonUrl.append(std::to_string(roomId));
+    LOG_INFO("Downloading room config from: ", roomDataJsonUrl.c_str());
+
     successDownloadingConfig = HttpLib::DownloadJSON(roomDataJsonUrl.c_str(), roomData);
 
     if (!successDownloadingConfig) {
       tries++;
-      LOG_ERROR("Failed to download config, will try again in 5 seconds.");
+      LOG_ERROR("Failed to download config for room ", roomId, " will try again in 5 seconds.");
       vTaskDelay(5000 / portTICK_PERIOD_MS);
 
       // 30 failed tries to download config, restart and try again.
       if (tries == 30) {
-        LOG_ERROR("Failed to download config, will restart and try again.");
+        LOG_ERROR("Failed to download config for room ", roomId, ", will restart and try again.");
         // NspanelManagerPage::setText("Restarting...");
         vTaskDelay(5000 / portTICK_PERIOD_MS);
         ESP.restart();
       }
     }
   } while (!successDownloadingConfig);
-  roomDataJsonUrl.end();
-  // Sucessfully downloaded config, proceed to process it
+  // Successfully downloaded config, proceed to process it
   // Load already existing room or if a nullptr was returned, create a new room.
   Room *newRoom = RoomManager::getRoomById(roomId);
   if (newRoom == nullptr) {
@@ -328,7 +351,7 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
 
       if (!light_id_found) {
         Scene *scene_to_remove = (*it);
-        LOG_DEBUG("Removing light: ", scene_to_remove->getName().c_str(), ". ID: ", scene_to_remove->getId());
+        LOG_DEBUG("Removing scene: ", scene_to_remove->getName().c_str(), ". ID: ", scene_to_remove->getId());
         it = newRoom->scenes.erase(it);
         scene_to_remove->callDeconstructCallbacks();
         delete scene_to_remove;
@@ -352,6 +375,7 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
     newScene->room = newRoom;
     newScene->id = atoi(scenePair.key().c_str());
     newScene->name = scenePair.value()["name"] | "ERR-S";
+    newScene->canSave = scenePair.value()["can_save"].as<String>().equals("true");
     newScene->callUpdateCallbacks();
     if (!existing_scene) {
       newRoom->scenes.push_back(newScene);
@@ -381,18 +405,18 @@ void RoomManager::goToPreviousRoom() {
   RoomManager::_callRoomChangeCallbacks();
 }
 
-void RoomManager::goToRoomId(uint16_t roomId) {
+bool RoomManager::goToRoomId(uint16_t roomId) {
   bool foundRoom = false;
   for (std::list<Room *>::iterator it = RoomManager::rooms.begin(); it != RoomManager::rooms.end(); it++) {
     if ((*it)->id == roomId) {
       RoomManager::currentRoom = it;
       RoomManager::_callRoomChangeCallbacks();
-      return;
+      return true;
     }
   }
 
   LOG_ERROR("Did not find requested room. Will cancel operation.");
-  return;
+  return false;
 }
 
 Room *RoomManager::getRoomById(uint16_t roomId) {
@@ -420,4 +444,12 @@ void RoomManager::_callRoomChangeCallbacks() {
       observer->roomChangedCallback();
     }
   }
+}
+
+bool RoomManager::hasValidCurrentRoom() {
+  if (RoomManager::currentRoom == RoomManager::rooms.end()) {
+    LOG_ERROR("Current room is invalid iterator!");
+    return false;
+  }
+  return true;
 }

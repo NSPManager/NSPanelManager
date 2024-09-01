@@ -1,220 +1,224 @@
 <form method="POST" action="{% url 'save_new_room' %}">
   {% csrf_token %}
-  <div class="modal" id="modal-new-room">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-      <header class="modal-card-head">
-        <p class="modal-card-title">Create new room</p>
-        <button type="button" class="delete" aria-label="close"></button>
-      </header>
-      <section class="modal-card-body">
-        <div class="field">
-          <label class="label">Friendly name</label>
-          <div class="control">
-            <input class="input" type="text" id="new_room_name" name="friendly_name" placeholder="Office">
+  <div id="modal-new-room" tabindex="-1" aria-hidden="true"
+    class="hidden modal overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full max-h-full p-4 max-w- mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">
+    <div class="w-full h-full fixed bg-black/80 backdrop-blur-sm" onclick="close_modals();"></div>
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+      <!-- Modal content -->
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Create new room
+          </h3>
+          <button type="button" onclick="close_modals();"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+            data-modal-hide="default-modal">
+            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+            </svg>
+            <span class="sr-only">Close wifi select dialog</span>
+          </button>
+        </div>
+        <!-- Modal content -->
+        <div class="p-4 md:p-5 space-y-4">
+          <div class="">
+            <label for="friendly_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Name</label>
+            <div class="flex">
+              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <title>Friendly name</title>
+                  <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
+                    4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
+                    7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
+                </svg>
+              </span>
+              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
+              type="text" class="input" name="friendly_name" placeholder="Office">
+            </div>
           </div>
         </div>
-      </section>
-      <footer class="modal-card-foot">
-        <button type="submit" class="button is-success">Save changes</button>
-        <button type="button" class="button modal-cancel-button">Cancel</button>
-      </footer>
+        <!-- Modal footer -->
+        <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+          <button data-modal-hide="static-modal" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >Create room</button>
+          <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+          onclick="close_modals();">Close</button>
+        </div>
+      </div>
     </div>
   </div>
 </form>
 
+<!-- Save new firmware modal -->
 <form method="POST" action="{% url 'save_new_firmware' %}" enctype="multipart/form-data">
   {% csrf_token %}
-  <div class="modal" id="modal-upload-firmware">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-      <header class="modal-card-head">
-        <p class="modal-card-title">Upload new firmware</p>
-        <button type="button" class="delete" aria-label="close"></button>
-      </header>
-      <section class="modal-card-body">
-        <div class="file has-name">
-          <label class="file-label">
-            <input class="file-input" type="file" name="firmware" accept=".bin" id="firmware_upload_file_input">
-            <span class="file-cta">
-              <span class="mdi mdi-upload mr-1"></span>
-              <span class="file-label">
-                Choose a file…
-              </span>
-            </span>
-          </label>
-          <span class="file-name" id="firmware_upload_file_name">
-            - No file selected -
-          </span>
+  <div id="modal-upload-firmware" tabindex="-1" aria-hidden="true"
+    class="hidden modal overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full max-h-full p-4 max-w- mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">
+    <div class="w-full h-full fixed bg-black/80 backdrop-blur-sm" onclick="close_modals();"></div>
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+      <!-- Modal content -->
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Upload new firmware
+          </h3>
+          <button type="button" onclick="close_modals();"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+            data-modal-hide="default-modal">
+            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+            </svg>
+            <span class="sr-only">Close upload dialog</span>
+          </button>
         </div>
-      </section>
-      <footer class="modal-card-foot">
-        <button type="submit" class="button is-success">Upload</button>
-        <button type="button" class="button modal-cancel-button">Cancel</button>
-      </footer>
+        <!-- Modal content -->
+        <div id="firmware_dragdrop_target" class="p-4 md:p-5 space-y-4">
+          <div class="flex items-center justify-center w-full">
+            <label for="firmware" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                    </svg>
+                    <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                    <p id="save_new_firmware_modal_subtext" class="text-xs text-gray-500 dark:text-gray-400">.bin files</p>
+                </div>
+                <input id="firmware" name="firmware" type="file" accept=".bin" class="hidden" />
+            </label>
+          </div> 
+        </div>
+        <!-- Modal footer -->
+        <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+          <button data-modal-hide="static-modal" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >Upload</button>
+          <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+          onclick="close_modals();">Close</button>
+        </div>
+      </div>
     </div>
   </div>
 </form>
 
+<!-- Data file upload modal -->
 <form method="POST" action="{% url 'save_new_data_file' %}" enctype="multipart/form-data">
   {% csrf_token %}
-  <div class="modal" id="modal-upload-data-file">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-      <header class="modal-card-head">
-        <p class="modal-card-title">Upload new data file</p>
-        <button type="button" class="delete" aria-label="close"></button>
-      </header>
-      <section class="modal-card-body">
-        <div class="file has-name">
-          <label class="file-label">
-            <input class="file-input" type="file" name="data_file" accept=".bin" id="data_upload_file_input">
-            <span class="file-cta">
-              <span class="mdi mdi-upload mr-1"></span>
-              <span class="file-label">
-                Choose a file…
-              </span>
-            </span>
-          </label>
-          <span class="file-name" id="data_upload_file_name">
-            - No file selected -
-          </span>
+  <div id="modal-upload-data-file" tabindex="-1" aria-hidden="true"
+    class="hidden modal overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full max-h-full p-4 max-w- mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">
+    <div class="w-full h-full fixed bg-black/80 backdrop-blur-sm" onclick="close_modals();"></div>
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+      <!-- Modal content -->
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Upload new data file
+          </h3>
+          <button type="button" onclick="close_modals();"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+            data-modal-hide="default-modal">
+            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+            </svg>
+            <span class="sr-only">Close upload dialog</span>
+          </button>
         </div>
-      </section>
-      <footer class="modal-card-foot">
-        <button type="submit" class="button is-success">Upload</button>
-        <button type="button" class="button modal-cancel-button">Cancel</button>
-      </footer>
+        <!-- Modal content -->
+        <div id="data_file_dragdrop_target" class="p-4 md:p-5 space-y-4">
+          <div class="flex items-center justify-center w-full">
+            <label for="data_upload_file_name" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                    </svg>
+                    <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                    <p id="save_new_data_file_modal_subtext" class="text-xs text-gray-500 dark:text-gray-400">.bin files</p>
+                </div>
+                <input id="data_upload_file_name" name="data_upload_file_name" type="file" accept=".bin" class="hidden" />
+            </label>
+          </div> 
+        </div>
+        <!-- Modal footer -->
+        <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+          <button data-modal-hide="static-modal" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >Upload</button>
+          <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+          onclick="close_modals();">Close</button>
+        </div>
+      </div>
     </div>
   </div>
 </form>
 
+<!-- TFT Upload modal -->
 <form method="POST" action="{% url 'save_new_tft_file' %}" enctype="multipart/form-data">
   {% csrf_token %}
-  <div class="modal" id="modal-upload-tft-file">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-      <header class="modal-card-head">
-        <p class="modal-card-title">Upload new GUI tft file</p>
-        <button type="button" class="delete" aria-label="close"></button>
-      </header>
-      <section class="modal-card-body">
-        <div class="field">
-          <div class="control">
-            <div class="select">
-              <select name="file_version">
+  <div id="modal-upload-tft-file" tabindex="-1" aria-hidden="true"
+    class="hidden modal overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full max-h-full p-4 max-w- mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">
+    <div class="w-full h-full fixed bg-black/80 backdrop-blur-sm" onclick="close_modals();"></div>
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+      <!-- Modal content -->
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Upload new TFT file
+          </h3>
+          <button type="button" onclick="close_modals();"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+            data-modal-hide="default-modal">
+            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+            </svg>
+            <span class="sr-only">Close upload dialog</span>
+          </button>
+        </div>
+        <!-- Modal content -->
+        <div class="p-4 md:p-5 space-y-4">
+          <div class="mt-4">
+            <label for="file_version" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">File type</label>
+            <div class="flex">
+              <span
+                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <title>File type</title>
+                  <path
+                    d="M13,9V3.5L18.5,9M6,2C4.89,2 4,2.89 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6Z" />
+                </svg>
+              </span>
+              <select name="file_version" id="file_version" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                 <option>Europe</option>
                 <option>US</option>
               </select>
             </div>
           </div>
+
+          <div id="tft_dragdrop_target" class="flex items-center justify-center w-full">
+            <label for="tft_file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                    </svg>
+                    <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                    <p id="save_new_tft_file_modal_subtext" class="text-xs text-gray-500 dark:text-gray-400">.tft files</p>
+                </div>
+                <input id="tft_file" name="tft_file" type="file" accept=".tft" class="hidden" />
+            </label>
+          </div> 
         </div>
-        <div class="file has-name">
-          <label class="file-label">
-            <input class="file-input" type="file" name="tft_file" accept=".tft" id="tft_upload_file_input">
-            <span class="file-cta">
-              <span class="mdi mdi-upload mr-1"></span>
-              <span class="file-label">
-                Choose a file…
-              </span>
-            </span>
-          </label>
-          <span class="file-name" id="tft_upload_file_name">
-            - No file selected -
-          </span>
+        <!-- Modal footer -->
+        <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+          <button data-modal-hide="static-modal" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >Upload</button>
+          <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+          onclick="close_modals();">Close</button>
         </div>
-      </section>
-      <footer class="modal-card-foot">
-        <button type="submit" class="button is-success">Upload</button>
-        <button type="button" class="button modal-cancel-button">Cancel</button>
-      </footer>
+      </div>
     </div>
   </div>
 </form>
-
-<div class="modal" id="modal-command-sent">
-  <div class="modal-background"></div>
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">Command sent</p>
-      <button type="button" class="delete" aria-label="close"></button>
-    </header>
-    <section class="modal-card-body">
-      <p>Command sent</p>
-    </section>
-    <footer class="modal-card-foot">
-      <button type="button" class="button is-primary modal-cancel-button">OK</button>
-    </footer>
-  </div>
-</div>
-
-<div class="modal" id="modal-test">
-  <div class="modal-background"></div>
-  <div class="modal-card">
-    <nav class="panel" style="background-color: white;">
-      <p class="panel-heading">
-        Choose a light
-      </p>
-      <div class="panel-block">
-        <p class="control has-icons-left">
-          <input class="input" type="text" placeholder="Search">
-          <span class="icon is-left">
-            <i class="fas fa-search" aria-hidden="true"></i>
-          </span>
-        </p>
-      </div>
-      <p class="panel-tabs">
-        <a class="is-active">All</a>
-        <a>Public</a>
-        <a>Private</a>
-        <a>Sources</a>
-        <a>Forks</a>
-      </p>
-      <a class="panel-block is-active">
-        <span class="panel-icon">
-          <i class="fas fa-book" aria-hidden="true"></i>
-        </span>
-        bulma
-      </a>
-      <a class="panel-block">
-        <span class="panel-icon">
-          <i class="fas fa-book" aria-hidden="true"></i>
-        </span>
-        marksheet
-      </a>
-      <a class="panel-block">
-        <span class="panel-icon">
-          <i class="fas fa-book" aria-hidden="true"></i>
-        </span>
-        minireset.css
-      </a>
-      <a class="panel-block">
-        <span class="panel-icon">
-          <i class="fas fa-book" aria-hidden="true"></i>
-        </span>
-        jgthms.github.io
-      </a>
-      <a class="panel-block">
-        <span class="panel-icon">
-          <i class="fas fa-code-branch" aria-hidden="true"></i>
-        </span>
-        daniellowtw/infboard
-      </a>
-      <a class="panel-block">
-        <span class="panel-icon">
-          <i class="fas fa-code-branch" aria-hidden="true"></i>
-        </span>
-        mojs
-      </a>
-      <label class="panel-block">
-        <input type="checkbox">
-        remember me
-      </label>
-      <div class="panel-block">
-        <button class="button is-link is-outlined is-fullwidth">
-          Reset all filters
-        </button>
-      </div>
-    </nav>
-  </div>
-</div>

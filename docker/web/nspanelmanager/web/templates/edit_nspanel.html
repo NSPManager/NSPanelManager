@@ -7,403 +7,622 @@
 {% endblock %}
 
 {% block content %}
-<h2 class="title is-4" id="nspanel_name">{{ panel.friendly_name }} settings</h2>
-<h2 class="subtitle is-6">MAC: <span id="nspanel_mac">{{ panel.mac_address }}</span></h2>
-<div class="field is-grouped">
-  <div class="control">
-    <div class="tags has-addons">
-      <span class="tag is-dark">State</span>
-      <span id="online_offline_tag_{{ panel.mac_address }}" class="tag is-light">?</span>
-    </div>
+<!-- Data needed by javascript -->
+<span class="hidden" id="nspanel_id">{{ panel.id }}</span>
+<span class="hidden" id="max_live_log_messages">{{ max_live_log_messages }}</span>
+
+<div class="flex items-center justify-between">
+  <div>
+    <h2 class="font-medium text-2xl" id="nspanel_name">Settings for '{{ panel.friendly_name }}'</h2>
+    <h2 class="font-light text-sm">MAC: <span id="nspanel_mac">{{ panel.mac_address }}</span></h2>
   </div>
-  <div class="control">
-    <div class="tags has-addons">
-      <span class="tag is-dark">WiFi</span>
-      <span class="tag is-info" id="wifi_signal_strength_{{ panel.mac_address }}" >?</span>
-    </div>
+  <a href="{% url 'manual' %}#sec:nspanel_page" title="Toggle Light/Dark theme"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+      Help
+    </a>
+</div>
+<div class="p-4 mb-2 mt-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50" role="alert">
+  <span class="font-medium">Info.</span> Changes to NSPanel settings on this page requires a reboot of the NSPanel to take effect.
+</div>
+<div class="pm-2" id="warning_container">
+</div>
+<div class="md:flex md:justify-between md:items-start mt-2 mb-6">
+  <div class="w-full mr-4">
+    <form method="POST" action="{% url 'save_panel_settings' panel_id=panel.id %}">
+      {% csrf_token %}
+      <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+        <!-- General settings -->
+        <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">General</span>
+        <!-- Friendly name -->
+        <div class="">
+          <label for="wifi_hostname" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Friendly name</label>
+          <div class="flex">
+            <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>Friendly name</title>
+                <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
+                  4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
+                  7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
+              </svg>
+            </span>
+            <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+            type="text" class="input" name="name" value="{{ panel.friendly_name }}">
+          </div>
+        </div>
+
+        <!-- Panel type-->
+        <div class="flex-auto mt-4">
+          <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">NSPanel type</h3>
+          <ul
+            class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
+            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+              <div class="flex items-center ps-3">
+                <input id="is_not_use_panel" type="radio" name="is_us_panel" value="False"
+                {% if settings.is_us_panel != "True" %}checked{% endif %}
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                <label for="is_not_use_panel"
+                  class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">EU</label>
+              </div>
+            </li>
+            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+              <div class="flex items-center ps-3">
+                <input id="is_us_panel" type="radio" name="is_us_panel" value="True"
+                {% if settings.is_us_panel == "True" %}checked{% endif %}
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                <label for="is_us_panel" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">US</label>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Default room -->
+        <div class="mt-4">
+          <label for="room_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Default room</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>Default room</title>
+                <path
+                  d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+              </svg>
+            </span>
+            <select name="room_id" id="room_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              {% for room in rooms %}
+              {% if room.id == panel.room.id %}
+              <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
+              {% else %}
+              <option value="{{ room.id }}">{{ room.friendly_name }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Lock to default room? -->
+        <div class="mt-2">
+          <ul
+            class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
+            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+              <div class="flex items-center ps-3">
+                <input id="lock_to_default_room" type="radio" name="lock_to_default_room" value="False"
+                {% if settings.lock_to_default_room != "True" %}checked{% endif %}
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                <label for="lock_to_default_room"
+                  class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Can control other rooms</label>
+              </div>
+            </li>
+            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+              <div class="flex items-center ps-3">
+                <input id="cannot_control_other_rooms" type="radio" name="lock_to_default_room" value="True"
+                {% if settings.lock_to_default_room == "True" %}checked{% endif %}
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                <label for="cannot_control_other_rooms" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Lock to default room</label>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Default page -->
+        <div class="mt-4">
+          <label for="default_page" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Default page</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>Default page</title>
+                <path
+                  d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+              </svg>
+            </span>
+            <select name="default_page" id="default_page" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="0" {% if settings.default_page == "0" %}selected{% endif %}>Main page</option>
+              <option value="1" {% if settings.default_page == "1" %}selected{% endif %}>Scenes page</option>
+              <option value="2" {% if settings.default_page == "2" %}selected{% endif %}>Room page</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Reverse relays -->
+        <div class="mt-4">
+          <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Reverse relays</h3>
+          <ul
+            class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
+            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+              <div class="flex items-center ps-3">
+                <input id="do_not_reverse_relays" type="radio" name="reverse_relays" value="False"
+                {% if settings.reverse_relays != "True" %}checked{% endif %}
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                <label for="do_not_reverse_relays"
+                  class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Do not reverse relays</label>
+              </div>
+            </li>
+            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+              <div class="flex items-center ps-3">
+                <input id="reverse_relays" type="radio" name="reverse_relays" value="True"
+                {% if settings.reverse_relays == "True" %}checked{% endif %}
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                <label for="reverse_relays" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Reverse relays</label>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Button modes -->
+        <div class="md:flex md:flex-wrap md:justify-between mt-4">
+          <!-- Button 1 -->
+          <div class="flex-auto mr-1">
+            <label for="button1_mode" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Left button mode</label>
+            <div class="flex">
+              <span
+                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <title>Default page</title>
+                  <path
+                    d="M13 5C15.21 5 17 6.79 17 9C17 10.5 16.2 11.77 15 12.46V11.24C15.61 10.69 16 9.89 16 9C16 7.34 14.66 6 13 6S10 7.34 10 9C10 9.89 10.39 10.69 11 11.24V12.46C9.8 11.77 9 10.5 9 9C9 6.79 10.79 5 13 5M20 20.5C19.97 21.32 19.32 21.97 18.5 22H13C12.62 22 12.26 21.85 12 21.57L8 17.37L8.74 16.6C8.93 16.39 9.2 16.28 9.5 16.28H9.7L12 18V9C12 8.45 12.45 8 13 8S14 8.45 14 9V13.47L15.21 13.6L19.15 15.79C19.68 16.03 20 16.56 20 17.14V20.5M20 2H4C2.9 2 2 2.9 2 4V12C2 13.11 2.9 14 4 14H8V12L4 12L4 4H20L20 12H18V14H20V13.96L20.04 14C21.13 14 22 13.09 22 12V4C22 2.9 21.11 2 20 2Z" />
+                </svg>
+              </span>
+              <select name="button1_mode" id="button1_mode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <option value="0" {% if panel.button1_mode == 0 %}selected{% endif %}>Direct mode</option>
+                <option value="1" {% if panel.button1_mode == 1 %}selected{% endif %}>Detached mode</option>
+                <option value="2" {% if panel.button1_mode == 2 %}selected{% endif %}>Custom MQTT</option>
+                <option value="3" {% if panel.button1_mode == 3 %}selected{% endif %}>Follow mode</option>
+              </select>
+            </div>
+
+            <!-- Button 1 detached mode -->
+            <div id="button1_detached_mode_controls" class="hidden">
+              <label for="button1_detached_mode_light" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Left button controls light</label>
+              <div class="flex">
+                <span
+                  class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                  <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <title>Default page</title>
+                    <path
+                      d="M13 5C15.21 5 17 6.79 17 9C17 10.5 16.2 11.77 15 12.46V11.24C15.61 10.69 16 9.89 16 9C16 7.34 14.66 6 13 6S10 7.34 10 9C10 9.89 10.39 10.69 11 11.24V12.46C9.8 11.77 9 10.5 9 9C9 6.79 10.79 5 13 5M20 20.5C19.97 21.32 19.32 21.97 18.5 22H13C12.62 22 12.26 21.85 12 21.57L8 17.37L8.74 16.6C8.93 16.39 9.2 16.28 9.5 16.28H9.7L12 18V9C12 8.45 12.45 8 13 8S14 8.45 14 9V13.47L15.21 13.6L19.15 15.79C19.68 16.03 20 16.56 20 17.14V20.5M20 2H4C2.9 2 2 2.9 2 4V12C2 13.11 2.9 14 4 14H8V12L4 12L4 4H20L20 12H18V14H20V13.96L20.04 14C21.13 14 22 13.09 22 12V4C22 2.9 21.11 2 20 2Z" />
+                  </svg>
+                </span>
+                <select name="button1_detached_mode_light" id="button1_detached_mode_light" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                  {% for light in panel.room.light_set.all %}
+                  {% if panel.button1_detached_mode_light == light %}
+                  <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
+                  {% else %}
+                  <option value="{{ light.id }}">{{ light.friendly_name }}</option>
+                  {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+
+            <!-- Button 1 MQTT mode -->
+            <div id="button1_mqtt_mode_controls" class="hidden">
+              <div class="">
+                <label for="button1_custom_mqtt_topic" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Left button MQTT topic</label>
+                <div class="flex">
+                  <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                    <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <title>Friendly name</title>
+                      <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
+                        4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
+                        7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
+                    </svg>
+                  </span>
+                  <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+                  type="text" class="input" name="button1_custom_mqtt_topic" value="{{ settings.button1_custom_mqtt_topic }}">
+                </div>
+              </div>
+
+              <div class="">
+                <label for="button1_custom_mqtt_payload" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Left button MQTT payload</label>
+                <div class="flex">
+                  <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                    <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <title>Friendly name</title>
+                      <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
+                        4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
+                        7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
+                    </svg>
+                  </span>
+                  <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+                  type="text" class="input" name="button1_custom_mqtt_payload" value="{{ settings.button1_custom_mqtt_payload }}">
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Button 2 -->
+          <div class="flex-auto mr-1">
+            <label for="button2_mode" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Right button mode</label>
+            <div class="flex">
+              <span
+                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <title>Default page</title>
+                  <path
+                    d="M13 5C15.21 5 17 6.79 17 9C17 10.5 16.2 11.77 15 12.46V11.24C15.61 10.69 16 9.89 16 9C16 7.34 14.66 6 13 6S10 7.34 10 9C10 9.89 10.39 10.69 11 11.24V12.46C9.8 11.77 9 10.5 9 9C9 6.79 10.79 5 13 5M20 20.5C19.97 21.32 19.32 21.97 18.5 22H13C12.62 22 12.26 21.85 12 21.57L8 17.37L8.74 16.6C8.93 16.39 9.2 16.28 9.5 16.28H9.7L12 18V9C12 8.45 12.45 8 13 8S14 8.45 14 9V13.47L15.21 13.6L19.15 15.79C19.68 16.03 20 16.56 20 17.14V20.5M20 2H4C2.9 2 2 2.9 2 4V12C2 13.11 2.9 14 4 14H8V12L4 12L4 4H20L20 12H18V14H20V13.96L20.04 14C21.13 14 22 13.09 22 12V4C22 2.9 21.11 2 20 2Z" />
+                </svg>
+              </span>
+              <select name="button2_mode" id="button2_mode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <option value="0" {% if panel.button2_mode == 0 %}selected{% endif %}>Direct mode</option>
+                <option value="1" {% if panel.button2_mode == 1 %}selected{% endif %}>Detached mode</option>
+                <option value="2" {% if panel.button2_mode == 2 %}selected{% endif %}>Custom MQTT</option>
+                <option value="3" {% if panel.button2_mode == 3 %}selected{% endif %}>Follow mode</option>
+              </select>
+            </div>
+
+            <!-- Button 1 detached mode -->
+            <div id="button2_detached_mode_controls" class="hidden">
+              <label for="button2_detached_mode_light" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Right button controls light</label>
+              <div class="flex">
+                <span
+                  class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                  <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <title>Default page</title>
+                    <path
+                      d="M13 5C15.21 5 17 6.79 17 9C17 10.5 16.2 11.77 15 12.46V11.24C15.61 10.69 16 9.89 16 9C16 7.34 14.66 6 13 6S10 7.34 10 9C10 9.89 10.39 10.69 11 11.24V12.46C9.8 11.77 9 10.5 9 9C9 6.79 10.79 5 13 5M20 20.5C19.97 21.32 19.32 21.97 18.5 22H13C12.62 22 12.26 21.85 12 21.57L8 17.37L8.74 16.6C8.93 16.39 9.2 16.28 9.5 16.28H9.7L12 18V9C12 8.45 12.45 8 13 8S14 8.45 14 9V13.47L15.21 13.6L19.15 15.79C19.68 16.03 20 16.56 20 17.14V20.5M20 2H4C2.9 2 2 2.9 2 4V12C2 13.11 2.9 14 4 14H8V12L4 12L4 4H20L20 12H18V14H20V13.96L20.04 14C21.13 14 22 13.09 22 12V4C22 2.9 21.11 2 20 2Z" />
+                  </svg>
+                </span>
+                <select name="button2_detached_mode_light" id="button2_detached_mode_light" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                  {% for light in panel.room.light_set.all %}
+                  {% if panel.button2_detached_mode_light == light %}
+                  <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
+                  {% else %}
+                  <option value="{{ light.id }}">{{ light.friendly_name }}</option>
+                  {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+
+            <!-- Button 1 MQTT mode -->
+            <div id="button2_mqtt_mode_controls" class="hidden">
+              <div class="">
+                <label for="button2_custom_mqtt_topic" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Right button MQTT topic</label>
+                <div class="flex">
+                  <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                    <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <title>Friendly name</title>
+                      <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
+                        4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
+                        7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
+                    </svg>
+                  </span>
+                  <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+                  type="text" class="input" name="button2_custom_mqtt_topic" value="{{ settings.button2_custom_mqtt_topic }}">
+                </div>
+              </div>
+
+              <div class="">
+                <label for="button2_custom_mqtt_payload" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Right button MQTT payload</label>
+                <div class="flex">
+                  <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+                    <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <title>Friendly name</title>
+                      <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
+                        4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
+                        7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
+                    </svg>
+                  </span>
+                  <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+                  type="text" class="input" name="button2_custom_mqtt_payload" value="{{ settings.button2_custom_mqtt_payload }}">
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Relay default modes-->
+        <div class="md:flex md:flex-wrap md:justify-between mt-4">
+          <!-- Relay 1 default mode -->
+
+          <div class="flex-auto mr-1">
+            <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Relay 1 default mode</h3>
+            <ul
+              class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
+              <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+                <div class="flex items-center ps-3">
+                  <input id="relay1_off" type="radio" name="relay1_default_mode" value="False"
+                  {% if settings.relay1_default_mode != "True" %}checked{% endif %}
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  <label for="relay1_off"
+                    class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Off</label>
+                </div>
+              </li>
+              <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+                <div class="flex items-center ps-3">
+                  <input id="relay1_on" type="radio" name="relay1_default_mode" value="True"
+                  {% if settings.relay1_default_mode == "True" %}checked{% endif %}
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  <label for="relay1_on" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">On</label>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Relay 2 default mode-->
+          <div class="flex-auto ml-1">
+            <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Relay 2 default mode</h3>
+            <ul
+              class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
+              <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+                <div class="flex items-center ps-3">
+                  <input id="relay2_off" type="radio" name="relay2_default_mode" value="False"
+                  {% if settings.relay2_default_mode != "True" %}checked{% endif %}
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  <label for="relay2_off"
+                    class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Off</label>
+                </div>
+              </li>
+              <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+                <div class="flex items-center ps-3">
+                  <input id="relay2_on" type="radio" name="relay2_default_mode" value="True"
+                  {% if settings.relay2_default_mode == "True" %}checked{% endif %}
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  <label for="relay2_on" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">On</label>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Relay register as light -->
+        <div class="md:flex md:flex-wrap md:justify-between mt-4">
+          <!-- Relay 1 -->
+
+          <div class="flex-auto mr-1">
+            <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Register relay 1 as a</h3>
+            <ul
+              class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
+              <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+                <div class="flex items-center ps-3">
+                  <input id="relay1_is_not_light" type="radio" name="relay1_is_light" value="False"
+                  {% if settings.relay1_is_light != "True" %}checked{% endif %}
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  <label for="relay1_is_not_light"
+                    class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Switch</label>
+                </div>
+              </li>
+              <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+                <div class="flex items-center ps-3">
+                  <input id="relay1_is_light" type="radio" name="relay1_is_light" value="True"
+                  {% if settings.relay1_is_light == "True" %}checked{% endif %}
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  <label for="relay1_is_light" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Light</label>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Relay 2 -->
+          <div class="flex-auto ml-1">
+            <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Register relay 2 as a</h3>
+            <ul
+              class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
+              <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+                <div class="flex items-center ps-3">
+                  <input id="relay2_is_not_light" type="radio" name="relay2_is_light" value="False"
+                  {% if settings.relay2_is_light != "True" %}checked{% endif %}
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  <label for="relay2_is_not_light"
+                    class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Switch</label>
+                </div>
+              </li>
+              <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+                <div class="flex items-center ps-3">
+                  <input id="relay2_is_light" type="radio" name="relay2_is_light" value="True"
+                  {% if settings.relay2_is_light == "True" %}checked{% endif %}
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                  <label for="relay2_is_light" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Light</label>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Screen brightness -->
+        <div class="mt-4">
+          <label for="screen_dim_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screen brightness</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md   ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>MQTT Port</title>
+                <path
+                  d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="number" name="screen_dim_level" id="screen_dim_level" placeholder="Global" min=1 max=100 value="{{ settings.screen_dim_level }}" />
+          </div>
+        </div>
+
+        <!-- Screensaver brightness -->
+        <div class="mt-4">
+          <label for="screensaver_dim_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screensaver brightness</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md   ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>MQTT Port</title>
+                <path
+                  d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="number" name="screensaver_dim_level" id="screensaver_dim_level" placeholder="Global" min=1 max=100 value="{{ settings.screensaver_dim_level }}" />
+          </div>
+        </div>
+
+        <!-- Screensaver activation timeout -->
+        <div class="mt-4">
+          <label for="screensaver_activation_timeout" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screensaver activation timeout (ms)</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md   ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>MQTT Port</title>
+                <path
+                  d="M6,2H18V8H18V8L14,12L18,16V16H18V22H6V16H6V16L10,12L6,8V8H6V2M16,16.5L12,12.5L8,16.5V20H16V16.5M12,11.5L16,7.5V4H8V7.5L12,11.5M10,6H14V6.75L12,8.75L10,6.75V6Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="number" min="1000" max="65535" name="screensaver_activation_timeout" id="screensaver_activation_timeout" placeholder="Global" value="{{ settings.screensaver_activation_timeout }}" />
+          </div>
+        </div>
+
+        <!-- Screensaver mode -->
+        <div class="mt-4">
+          <label for="screensaver_mode" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screensaver mode</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>Default page</title>
+                <path
+                  d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+              </svg>
+            </span>
+            <select name="screensaver_mode" id="screensaver_mode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              <option value="with_background" {% if settings.screensaver_mode == "with_background" %}selected{% endif %}>Show with background (clock, date and weather)</option>
+              <option value="without_background" {% if settings.screensaver_mode == "without_background" %}selected{% endif %}>Show without background (clock, date and weather)</option>
+              <option value="datetime_with_background" {% if settings.screensaver_mode == "datetime_with_background" %}selected{% endif %}>Show with background (no weather)</option>
+              <option value="datetime_without_background" {% if settings.screensaver_mode == "datetime_without_background" %}selected{% endif %}>Show without background (no weather)</option>
+              <option value="no_screensaver" {% if settings.screensaver_mode == "no_screensaver" %}selected{% endif %}>No screensaver (turn off screen)</option>
+              <option value="global" {% if settings.screensaver_mode == "global" %}selected{% endif %}>Global (use global setting)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Temperature calibration -->
+        <div class="mt-4">
+          <label for="temperature_calibration" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Temperature calibration</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md   ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>MQTT Port</title>
+                <path
+                  d="M15 13V5A3 3 0 0 0 9 5V13A5 5 0 1 0 15 13M12 4A1 1 0 0 1 13 5V8H11V5A1 1 0 0 1 12 4Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="number" name="temperature_calibration" id="temperature_calibration" placeholder="Global" step="0.1" value="{{ settings.temperature_calibration }}" />
+          </div>
+        </div>
+
+        <div class="text-right">
+          <button type="submit"
+            class="mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ">Save</button>
+        </div>
+      </div>
+    </form>
   </div>
-  <div class="control">
-    <div class="tags has-addons">
-      <span class="tag is-dark">RAM used: </span>
-      <span class="tag is-info" id="heap_used_{{ panel.mac_address }}">?</span>
-    </div>
-  </div>
-  <div class="control">
-    <div class="tags has-addons">
-      <span class="tag is-dark">Reported temperature: </span>
-      <span class="tag is-info" id="temperature_{{ panel.mac_address }}">? {{ temperature_unit }}</span>
+  <div class="md:sticky md:top-4 w-full md:w-72">
+    <div class="block p-4 pb-0 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950">
+      <!-- Status -->
+      <div>
+        <span class="font-medium text-lg">Status</span>
+        <div class="block mt-2 rounded-lg bg-slate-50 dark:bg-gray-600 border-solid border-2 dark:border-gray-700">
+          <div class="p-3 border-solid border-b-2 dark:border-gray-700">
+            <span class="mdi mdi-power-cycle me-2"></span>State: <span id="state_text" class=""></span>
+          </div>
+          <div class="relative p-3 border-solid border-b-2 dark:border-gray-700 transition-transform duration-500 ease-linear hidden" id="update_progress_container">
+            <div class="absolute inset-0 h-full transition-all duration-500 ease-linear text-blue-800 bg-blue-200 dark:bg-blue-700 dark:text-gray-50" id="update_progress_pct_progressbar" style="width: 0%"></div>
+            <div class="relative inset-0">
+              <span class="mdi mdi-progress-helper me-2"></span>Progress: <span id="update_progress_pct_text" class="">0%</span>
+            </div>
+          </div>
+          <div class="p-3 border-solid border-b-2 dark:border-gray-700">
+            <span id="wifi_signal_strength_icon" class="mdi mdi-power-cycle me-2"></span>WiFi: <span id="wifi_signal_strength" class=""></span>
+          </div>
+          <div class="p-3 border-solid border-b-2 dark:border-gray-700">
+            <span class="mdi mdi-memory me-2"></span>RAM: <span id="heap_used" class=""></span>
+          </div>
+          <div class="p-3">
+            <span class="mdi mdi-thermometer me-2"></span>Temp: <span id="temperature" class="">? {{ temperature_unit }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-4">
+        <span class="font-medium text-lg">Actions</span>
+        <div class="block mt-2 rounded-lg bg-slate-50 dark:bg-gray-600 border-solid border-2 dark:border-gray-700">
+          <div onclick="rebootNSPanel();" class="p-3 w-full border-solid border-b-2 hover:bg-slate-400 dark:border-gray-700 dark:hover:bg-gray-400 cursor-pointer rounded-t-lg">
+            <span class="mdi mdi-power-cycle me-2"></span><span class="">Reboot</span>
+          </div>
+          <a href="http://{{ panel.ip_address }}" id="panel_visit_link" target="_blank">
+            <div class="p-3 w-full border-solid border-b-2 hover:bg-slate-400 dark:border-gray-700 dark:hover:bg-gray-400 cursor-pointer">
+              <span class="mdi mdi-web me-2"></span><span class="">Visit</span>
+            </div>
+          </a>
+          <div onclick="startNSPanelOtaUpdate();" class="p-3 w-full border-solid border-b-2 hover:bg-slate-400 dark:border-gray-700 dark:hover:bg-gray-400 cursor-pointer">
+            <span class="mdi mdi-upload me-2"></span><span class="">Update firmware</span>
+          </div>
+          <div onclick="startNSPanelTftUpdate();" class="p-3 w-full border-solid border-b-2 hover:bg-slate-400 dark:border-gray-700 dark:hover:bg-gray-400 cursor-pointer">
+            <span class="mdi mdi-table-arrow-up me-2"></span><span class="">Update GUI</span>
+          </div>
+          <div onclick="deleteNSPanel();" class="p-3 w-full border-solid border-b-2 hover:bg-slate-400 dark:border-gray-700 dark:hover:bg-gray-400 cursor-pointer rounded-b-lg dark:text-red-400 text-red-600">
+            <span class="mdi mdi-table-arrow-up me-2"></span><span class="">Delete</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-<span class="is-hidden" id="nspanel_id">{{ panel.id }}</span>
-<span class="is-hidden" id="max_live_log_messages">{{ max_live_log_messages }}</span>
-<div class="box">
-  <div class="notification is-info is-light">
-    Changes to NSPanel settings on this page requires a reboot of the panel to take effect.
-  </div>
-  <form method="POST" action="{% url 'save_panel_settings' panel_id=panel.id %}">
-    {% csrf_token %}
-    <div class="field">
-      <label class="label">Name</label>
-      <div class="control">
-        <input type="text" class="input" name="name" value="{{ panel.friendly_name }}">
-      </div>
-    </div>
-    <div class="field">
-      <label class="label">Default room</label>
-      <div class="control">
-        <div class="select">
-          <select name="room_id">
-            {% for room in rooms %}
-            {% if room.id == panel.room.id %}
-            <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
-            {% else %}
-            <option value="{{ room.id }}">{{ room.friendly_name }}</option>
-            {% endif %}
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="field">
-      <label class="label">Default page</label>
-      <div class="control">
-        <div class="select">
-          <select name="default_page">
-            <option value="0" {% if settings.default_page == "0" %}selected{% endif %}>Main page</option>
-            <option value="1" {% if settings.default_page == "1" %}selected{% endif %}>Scenes page</option>
-            <option value="2" {% if settings.default_page == "2" %}selected{% endif %}>Room page</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="field">
-      <label class="checkbox">
-        {% if settings.lock_to_default_room == "True" %}
-            <input type="checkbox" name="lock_to_default_room" checked>
-        {% else %}
-            <input type="checkbox" name="lock_to_default_room">
-        {% endif %}
-        Lock to default room
-        <span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            Wether this panel control other rooms other than the default room. T setting causes the panel to only load the selected room.
-          </div>
-        </span>
-      </label>
-    </div>
-    <div class="field">
-      <label class="checkbox">
-        {% if settings.reverse_relays == "True" %}
-            <input type="checkbox" name="reverse_relays" checked>
-        {% else %}
-            <input type="checkbox" name="reverse_relays">
-        {% endif %}
-        Reverse relays
-        <span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            When this box i checked, it is like you have switches places of the cables for the relays on the back of the unit. All options in the web interface named for "relay 1" are applied to relay 2 and vice versa.
-          </div>
-        </span>
-      </label>
-    </div>
-    <div class="field">
-      <label class="label">Button 1 mode<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            <b>Direct mode</b>: The button directly controls the relay.<br>
-            <b>Detached mode</b>: The button does not directly control the relay but is instead coupled to a light added in the
-            room. In case the lights is removed from the room, the button will will remain in detached mode but will no
-            longed be coupled to any button.<br>
-            <b>Custom MQTT</b>: Send a custom MQTT payload to a custom MQTT topic.<br>
-            <b>Follow mode</b>: The relay state will follow the button state. If the button is pressed, the relay is on, if the button is released, the relay is off.<br>
-          </div>
-        </span>
-      </label>
-      <div class="control">
-        <div class="select">
-          <select name="button1_mode" id="button1_mode">
-            <option value="0" {% if panel.button1_mode == 0 %}selected{% endif %}>Direct mode</option>
-            <option value="1" {% if panel.button1_mode == 1 %}selected{% endif %}>Detached mode</option>
-            <option value="2" {% if panel.button1_mode == 2 %}selected{% endif %}>Custom MQTT</option>
-            <option value="3" {% if panel.button1_mode == 3 %}selected{% endif %}>Follow mode</option>
-          </select>
-        </div>
-      </div>
-      <label class="label" id="button1_detached_mode_light_label">Button 1 controls light in room {{ panel.room.friendly_name }}</label>
-      <div class="control" id="button1_detached_mode_light_select">
-        <div class="select">
-          <select name="button1_detached_mode_light" id="button1_detached_mode_light">
-            {% if panel.button1_detached_mode_light == None %}
-            <option value="-1" selected>-</option>
-            {% else %}
-            <option value="-1">-</option>
-            {% endif %}
-            {% for light in panel.room.light_set.all %}
-            {% if panel.button1_detached_mode_light == light %}
-            <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
-            {% else %}
-            <option value="{{ light.id }}">{{ light.friendly_name }}</option>
-            {% endif %}
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-      <div id="button1_custom_mqtt_container">
-        <label class="label">MQTT Topic:</label>
-        <div class="control" id="">
-          <input type="text" class="input" name="button1_custom_mqtt_topic" value="{{ settings.button1_custom_mqtt_topic }}">
-        </div>
-        <label class="label">MQTT Payload:</label>
-        <div class="control" id="">
-          <input type="text" class="input" name="button1_custom_mqtt_payload" value="{{ settings.button1_custom_mqtt_payload }}" maxlength=128>
-        </div>
-      </div>
-    </div>
-    <div class="field">
-      <label class="label">Button 2 mode<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            <b>Direct mode</b>: The button directly controls the relay.<br>
-            <b>Detached mode</b>: The button does not directly control the relay but is instead coupled to a light added in the
-            room. In case the lights is removed from the room, the button will will remain in detached mode but will no
-            longed be coupled to any button.<br>
-            <b>Custom MQTT</b>: Send a custom MQTT payload to a custom MQTT topic.<br>
-            <b>Follow mode</b>: The relay state will follow the button state. If the button is pressed, the relay is on, if the button is released, the relay is off.<br>
-          </div>
-        </span>
-      </label>
-      <div class="control">
-        <div class="select">
-          <select name="button2_mode" id="button2_mode">
-            <option value="0" {% if panel.button2_mode == 0 %}selected{% endif %}>Direct mode</option>
-            <option value="1" {% if panel.button2_mode == 1 %}selected{% endif %}>Detached mode</option>
-            <option value="2" {% if panel.button2_mode == 2 %}selected{% endif %}>Custom MQTT</option>
-            <option value="3" {% if panel.button2_mode == 3 %}selected{% endif %}>Follow mode</option>
-          </select>
-        </div>
-      </div>
-      <label class="label" id="button2_detached_mode_light_label">Button 2 controls light in room {{ panel.room.friendly_name }}</label>
-      <div class="control" id="button2_detached_mode_light_select">
-        <div class="select">
-          <select name="button2_detached_mode_light" id="button2_detached_mode_light">
-            {% if panel.button2_detached_mode_light == None %}
-            <option value="-1" selected>-</option>
-            {% else %}
-            <option value="-1">-</option>
-            {% endif %}
-            {% for light in panel.room.light_set.all %}
-            {% if panel.button2_detached_mode_light == light %}
-            <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
-            {% else %}
-            <option value="{{ light.id }}">{{ light.friendly_name }}</option>
-            {% endif %}
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-      <div id="button2_custom_mqtt_container">
-        <label class="label">MQTT Topic:</label>
-        <div class="control" id="">
-          <input type="text" class="input" name="button2_custom_mqtt_topic" value="{{ settings.button2_custom_mqtt_topic }}">
-        </div>
-        <label class="label">MQTT Payload:</label>
-        <div class="control" id="">
-          <input type="text" class="input" name="button2_custom_mqtt_payload" value="{{ settings.button2_custom_mqtt_payload }}" maxlength=128>
-        </div>
-      </div>
-    </div>
-    <div class="field">
-      <label class="label">Relay 1 default mode<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            Controls the default power state of relay 1 after power on.<br>
-            On: The relay is powered and power is flowing to the connected device.<br>
-            Off: The relay is not powered and power is not flowing to the connected device. This is the default behavior<br>
-          </div>
-        </span>
-      </label>
-      <div class="control">
-        <div class="select">
-          <select name="relay1_default_mode" id="relay1_default_mode">
-            <option value="True" {% if settings.relay1_default_mode == "True" %}selected{% endif %}>On</option>
-            <option value="False" {% if settings.relay1_default_mode == "False" %}selected{% endif %}>Off</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="field">
-      <label class="label">Relay 2 default mode<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            Controls the default power state of relay 2 after power on.<br>
-            On: The relay is powered and power is flowing to the connected device.<br>
-            Off: The relay is not powered and power is not flowing to the connected device. This is the default behavior<br>
-          </div>
-        </span>
-      </label>
-      <div class="control">
-        <div class="select">
-          <select name="relay2_default_mode" id="relay2_default_mode">
-            <option value="True" {% if settings.relay2_default_mode == "True" %}selected{% endif %}>On</option>
-            <option value="False" {% if settings.relay2_default_mode == "False" %}selected{% endif %}>Off</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="field">
-      <label class="checkbox">
-        {% if settings.is_us_panel == "True" %}
-            <input type="checkbox" name="is_us_panel" checked>
-        {% else %}
-            <input type="checkbox" name="is_us_panel">
-        {% endif %}
-        Is US panel
-        <span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            Wether this panel is a US version or Europe version. Check for US version.
-          </div>
-        </span>
-      </label>
-    </div>
-    <div class="field">
-        <label class="label">Screen brightness<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            Brightness when the panel is on. 1-100%. Leave empty to use global setting.
-          </div>
-        </span>
-      </label>
-    </div>
-    <div class="field is-grouped">
-        <div class="control">
-            <input class="input" type="number" name="screen_dim_level" id="screen_dim_level" placeholder="Global" min=1 max=100 value="{{ settings.screen_dim_level }}">
-        </div>
-    </div>
-    <div class="field">
-        <label class="label">Screensaver brightness<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            Brightness level during screensaver. 0-100%. Leave empty to use global setting.
-          </div>
-        </span>
-      </label>
-    </div>
-    <div class="field is-grouped">
-        <div class="control">
-            <input class="input" type="number" name="screensaver_dim_level" id="screensaver_dim_level" placeholder="Global" min=0 max=100 value="{{ settings.screensaver_dim_level }}">
-        </div>
-    </div>
-    <div class="field">
-        <label class="label">Screensaver activation timeout<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            The amount of time before the screensaver is activated. Time is in milliseconds. Default: 30000 (30 seconds). Leave empty to use global setting.
-          </div>
-        </span>
-      </label>
-    </div>
-    <div class="field is-grouped">
-        <div class="control">
-            <input class="input" type="number" name="screensaver_activation_timeout" id="screensaver_activation_timeout" placeholder="Global" value="{{ settings.screensaver_activation_timeout }}">
-        </div>
-    </div>
-    <div class="field">
-      <label class="label">Show clock on screensaver<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            True: show clock on screensaver<br>
-            False: do not show clock on screensaver<br>
-            Global: use global setting.
-          </div>
-        </span>
-      </label>
-      <div class="control">
-        <div class="select">
-          <select name="show_screensaver_clock" id="show_screensaver_clock">
-            <option value="True" {% if settings.show_screensaver_clock == "True" %}selected{% endif %}>True</option>
-            <option value="False" {% if settings.show_screensaver_clock == "False" %}selected{% endif %}>False</option>
-            <option value="Global" {% if settings.show_screensaver_clock == "Global" %}selected{% endif %}>Global</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="field">
-        <label class="label">Temperature calibration<span class="question">
-          <span class="icon question_icon">
-            <i class="mdi mdi-information has-text-info"></i>
-          </span>
-          <div class="question_help_text notification is-info is-light">
-            Enter the number of degrees to calibrate. Entering a positive number (ex. 5) will add 5 degrees to the read temperature. Entering a negative number (ex. -5) will subtract 5 degrees from the read temperature.
-          </div>
-        </span>
-      </label>
-    </div>
-    <div class="field is-grouped">
-        <div class="control">
-            <input class="input" type="number" step="0.1" name="temperature_calibration" id="temperature_calibration" placeholder="Temperature Calibration" value="{{ settings.temperature_calibration }}" required>
-        </div>
-    </div>
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <button class="button is-primary">Save</button>
-        </div>
-        <div class="level-item">
-          <button type="button" class="button is-success is-pulled-left" onclick="rebootNSPanel();">Reboot</button>
-        </div>
-        <div class="level-item">
-          <a type="button" class="button is-link" href="http://{{ panel.ip_address }}" target="_blank">Go to panel</a>
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <a type="button" class="button is-info" onclick="startNSPanelOtaUpdate();">Update firmware</a>
-        </div>
-        <div class="level-item">
-          <a type="button" class="button is-info is-pulled-right" onclick="startNSPanelTftUpdate();">Update screen</a>
-        </div>
-      </div>
-    </div>
-  </form>
-</div>
-<div class="box">
-  <h2 class="title is-4 mt-6" id="nspanel_name">{{ panel.friendly_name }} live log</h2>
-  <table class="table is-fullwidth is-narrow" style="min-height: 20rem;">
-    <thead>
+
+<!-- Logging -->
+<div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+  <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">Logs</span>
+
+  <table class="w-full text-left rtl:text-right">
+    <thead class="uppercase bg-slate-200 dark:bg-slate-950 border-solid border-b-2 border-slate-600 dark:border-slate-800">
       <tr>
-        <th>Time</th>
-        <th>Level</th>
-        <th>Message</th>
+        <th class="px-3 py-1">Time</th>
+        <th class="px-3 py-1">Level</th>
+        <th class="px-3 py-1">Message</th>
       </tr>
     </thead>
-    <tbody id="log_body">
-  
+    <tbody id="log_body" class="bg-slate-100 dark:bg-slate-600 text-black dark:text-white">
     </tbody>
   </table>
 </div>

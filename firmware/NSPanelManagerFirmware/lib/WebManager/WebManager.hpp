@@ -34,11 +34,13 @@ private:
   AsyncWebServer _server = AsyncWebServer(80);
   static bool _update(uint8_t type, const char *url);
   static void _taskPerformOTAUpdate(void *param);
+  static void _onProgress(size_t current, size_t total);
   std::string _nspmFirmwareVersion;
   /// @brief Contains the current state of actions.
   static inline WebManagerState _state;
   /// @brief If updating, contains the % done of the update
   static inline uint8_t _update_progress;
+  static inline uint8_t _last_displayed_update_progress;
 
   static inline bool _has_already_been_started = false;
 };

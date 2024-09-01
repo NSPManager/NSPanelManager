@@ -12,7 +12,7 @@
 #define ELEMENT_IN_LIST(element, list) (std::find(list.begin(), list.end(), element) != list.end())
 
 void LightManager::ChangeLightsToLevel(std::list<Light *> *lights, uint8_t level) {
-  DynamicJsonDocument doc(1024);
+  JsonDocument doc;
   doc["mac_origin"] = WiFi.macAddress();
   doc["method"] = "set";
   doc["attribute"] = "brightness";
@@ -46,7 +46,7 @@ void LightManager::ChangeLightToColorTemperature(std::list<Light *> *lights, uin
     sendKelvin = InterfaceConfig::colorTempMin + sendKelvin;
   }
 
-  DynamicJsonDocument doc(1024);
+  JsonDocument doc;
   doc["mac_origin"] = WiFi.macAddress();
   doc["method"] = "set";
   doc["attribute"] = "kelvin";
@@ -71,7 +71,7 @@ void LightManager::ChangeLightToColorTemperature(std::list<Light *> *lights, uin
 void LightManager::ChangeLightsToColorSaturation(std::list<Light *> *lights, uint16_t saturation) {
   InterfaceConfig::ignore_mqtt_state_events_until = millis() + InterfaceConfig::mqtt_ignore_time;
 
-  DynamicJsonDocument doc(1024);
+  JsonDocument doc;
   doc["mac_origin"] = WiFi.macAddress();
   doc["method"] = "set";
   doc["attribute"] = "saturation";
@@ -96,7 +96,7 @@ void LightManager::ChangeLightsToColorSaturation(std::list<Light *> *lights, uin
 void LightManager::ChangeLightsToColorHue(std::list<Light *> *lights, uint16_t hue) {
   InterfaceConfig::ignore_mqtt_state_events_until = millis() + InterfaceConfig::mqtt_ignore_time;
 
-  DynamicJsonDocument doc(1024);
+  JsonDocument doc;
   doc["mac_origin"] = WiFi.macAddress();
   doc["method"] = "set";
   doc["attribute"] = "hue";
@@ -261,7 +261,7 @@ void LightManager::subscribeToMqttLightUpdates() {
   if (LightManager::_mqttMessageQueue == NULL) {
     LightManager::_mqttMessageQueue = xQueueCreate(8, sizeof(mqttMessage *));
     if (LightManager::_taskHandleProcessMqttMessage == NULL) {
-      xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskProcessMqttMessages", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+      xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskProcessMqttMessages", 5000, NULL, 1, &LightManager::_taskHandleProcessMqttMessage, CONFIG_ARDUINO_RUNNING_CORE);
     }
   }
 
@@ -279,13 +279,28 @@ void LightManager::subscribeToMqttLightUpdates() {
   }
 }
 
+void LightManager::stop() {
+  LOG_DEBUG("Stopping LightManager.");
+  vTaskDelay(50 / portTICK_PERIOD_MS);
+  if (LightManager::_taskHandleProcessMqttMessage != NULL) {
+    vTaskDelete(LightManager::_taskHandleProcessMqttMessage);
+    LightManager::_taskHandleProcessMqttMessage = NULL;
+    LightManager::_mqttMessageQueue = NULL;
+  }
+
+  LOG_INFO("LightManager stopped.");
+  vTaskDelay(50 / portTICK_PERIOD_MS);
+}
+
 void LightManager::mqttCallback(char *topic, byte *payload, unsigned int length) {
-  // TODO: Ignore MQTT light updates for X millis
-  mqttMessage *msg = new mqttMessage;
-  msg->topic = topic;
-  msg->payload = std::string((char *)payload, length);
-  if (xQueueSendToBack(LightManager::_mqttMessageQueue, (void *)&msg, 20 / portTICK_PERIOD_MS) != pdTRUE) {
-    delete msg;
+  if (LightManager::_mqttMessageQueue != NULL) {
+    // TODO: Ignore MQTT light updates for X millis
+    mqttMessage *msg = new mqttMessage;
+    msg->topic = topic;
+    msg->payload = std::string((char *)payload, length);
+    if (xQueueSendToBack(LightManager::_mqttMessageQueue, (void *)&msg, 20 / portTICK_PERIOD_MS) != pdTRUE) {
+      delete msg;
+    }
   }
 }
 
@@ -294,6 +309,7 @@ void LightManager::_taskProcessMqttMessages(void *param) {
   mqttMessage *msg;
   for (;;) {
     if (xQueueReceive(LightManager::_mqttMessageQueue, &msg, portMAX_DELAY) == pdTRUE) {
+      // Delete any message that does not contain any payload
       if (msg->payload.size() <= 0) {
         delete msg;
         continue;
@@ -320,8 +336,10 @@ void LightManager::_taskProcessMqttMessages(void *param) {
         } else if (domain.compare("light") == 0 && attribute.compare("state_kelvin") == 0) {
           unsigned long colorTemp = atoi(msg->payload.c_str());
           if (colorTemp > InterfaceConfig::colorTempMax) {
+            LOG_WARNING("Received kelvin value that was outside kelvin range. Received: ", colorTemp, ", max allowed: ", InterfaceConfig::colorTempMax, ". Clamping.");
             colorTemp = InterfaceConfig::colorTempMax;
           } else if (colorTemp < InterfaceConfig::colorTempMin) {
+            LOG_WARNING("Received kelvin value that was outside kelvin range. Received: ", colorTemp, ", min allowed: ", InterfaceConfig::colorTempMin, ". Clamping.");
             colorTemp = InterfaceConfig::colorTempMin;
           }
           colorTemp = ((colorTemp - InterfaceConfig::colorTempMin) * 100) / (InterfaceConfig::colorTempMax - InterfaceConfig::colorTempMin);
@@ -332,10 +350,31 @@ void LightManager::_taskProcessMqttMessages(void *param) {
 
           Light *light = LightManager::getLightById(atoi(entity.c_str()));
           if (light != nullptr) {
+            // LOG_DEBUG("Setting light ", light->getId(), "::", light->getName().c_str(), " color temp %: ", std::to_string(colorTemp).c_str());
             light->setColorTemperature(colorTemp);
             light->callUpdateCallbacks();
           } else {
             LOG_ERROR("Got kelvin update for unknown light ID: ", entity.c_str());
+          }
+        } else if (domain.compare("light") == 0 && attribute.compare("state_hue") == 0) {
+          uint16_t hue = atoi(msg->payload.c_str());
+
+          Light *light = LightManager::getLightById(atoi(entity.c_str()));
+          if (light != nullptr) {
+            light->setHue(hue);
+            light->callUpdateCallbacks();
+          } else {
+            LOG_ERROR("Got hue update for unknown light ID: ", entity.c_str());
+          }
+        } else if (domain.compare("light") == 0 && attribute.compare("state_sat") == 0) {
+          uint8_t sat = atoi(msg->payload.c_str());
+
+          Light *light = LightManager::getLightById(atoi(entity.c_str()));
+          if (light != nullptr) {
+            light->setSaturation(sat);
+            light->callUpdateCallbacks();
+          } else {
+            LOG_ERROR("Got saturation update for unknown light ID: ", entity.c_str());
           }
         } else {
           LOG_ERROR("Got state update for unknown attribute: ", attribute.c_str());

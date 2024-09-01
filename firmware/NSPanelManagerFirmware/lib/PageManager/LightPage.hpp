@@ -31,6 +31,9 @@ public:
 
 private:
   LIGHT_PAGE_MODE _currentMode;
+  uint8_t _last_brightness = 0;
+  uint8_t _last_kelvin_saturation = 0;
+  uint16_t _last_hue = 0;
 };
 
 #endif

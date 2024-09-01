@@ -13,41 +13,47 @@ void RoomPage::show() {
   NSPanel::instance->goToPage(ROOM_PAGE_NAME);
   this->update();
 
-  for (int i = 0; i < 12; i++) {
-    Light *displayLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(i + 1);
-    if (displayLight != nullptr) {
-      displayLight->attachUpdateCallback(this);
-      displayLight->attachDeconstructCallback(this);
+  if (RoomManager::hasValidCurrentRoom()) {
+    for (int i = 0; i < 12; i++) {
+      Light *displayLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(i + 1);
+      if (displayLight != nullptr) {
+        displayLight->attachUpdateCallback(this);
+        displayLight->attachDeconstructCallback(this);
+      }
     }
   }
 }
 
 void RoomPage::update() {
-  this->setCurrentRoomLabel((*RoomManager::currentRoom)->name.c_str());
-  for (int i = 0; i < 12; i++) {
-    Light *displayLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(i + 1);
+  if (RoomManager::hasValidCurrentRoom()) {
+    this->setCurrentRoomLabel((*RoomManager::currentRoom)->name.c_str());
+    for (int i = 0; i < 12; i++) {
+      Light *displayLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(i + 1);
 
-    if (displayLight != nullptr) {
-      // Add two spaces to the left of the name before sending name to panel
-      // See issue #22
-      std::string display_name = "  ";
-      display_name.append(displayLight->getName());
+      if (displayLight != nullptr) {
+        // Add two spaces to the left of the name before sending name to panel
+        // See issue #22
+        std::string display_name = "  ";
+        display_name.append(displayLight->getName());
 
-      this->setLightName(displayLight->getRoomViewPosition(), display_name.c_str());
-      this->setLightState(displayLight->getRoomViewPosition(), displayLight->getLightLevel() > 0);
-      this->setLightVisibility(displayLight->getRoomViewPosition(), true);
-    } else {
-      this->setLightVisibility(i + 1, false); // If no light was found, hide the position
+        this->setLightName(displayLight->getRoomViewPosition(), display_name.c_str());
+        this->setLightState(displayLight->getRoomViewPosition(), displayLight->getLightLevel() > 0);
+        this->setLightVisibility(displayLight->getRoomViewPosition(), true);
+      } else {
+        this->setLightVisibility(i + 1, false); // If no light was found, hide the position
+      }
     }
   }
 }
 
 void RoomPage::unshow() {
-  for (int i = 0; i < 12; i++) {
-    Light *displayLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(i + 1);
-    if (displayLight != nullptr) {
-      displayLight->detachUpdateCallback(this);
-      displayLight->detachDeconstructCallback(this);
+  if (RoomManager::hasValidCurrentRoom()) {
+    for (int i = 0; i < 12; i++) {
+      Light *displayLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(i + 1);
+      if (displayLight != nullptr) {
+        displayLight->detachUpdateCallback(this);
+        displayLight->detachDeconstructCallback(this);
+      }
     }
   }
 }
@@ -67,206 +73,254 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
     this->update();
     break;
   case ROOM_LIGHT1_SW_CAP_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(1);
-    if (this->_selectedLight != nullptr) {
-      this->_toggleSelectedLight();
-      RoomPage::setLightState(1, this->_selectedLight->getLightLevel() > 0);
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(1);
+      if (this->_selectedLight != nullptr) {
+        this->_toggleSelectedLight();
+        RoomPage::setLightState(1, this->_selectedLight->getLightLevel() > 0);
+      }
     }
     break;
   }
   case ROOM_LIGHT2_SW_CAP_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(2);
-    if (this->_selectedLight != nullptr) {
-      this->_toggleSelectedLight();
-      RoomPage::setLightState(2, this->_selectedLight->getLightLevel() > 0);
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(2);
+      if (this->_selectedLight != nullptr) {
+        this->_toggleSelectedLight();
+        RoomPage::setLightState(2, this->_selectedLight->getLightLevel() > 0);
+      }
     }
     break;
   }
   case ROOM_LIGHT3_SW_CAP_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(3);
-    if (this->_selectedLight != nullptr) {
-      this->_toggleSelectedLight();
-      RoomPage::setLightState(3, this->_selectedLight->getLightLevel() > 0);
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(3);
+      if (this->_selectedLight != nullptr) {
+        this->_toggleSelectedLight();
+        RoomPage::setLightState(3, this->_selectedLight->getLightLevel() > 0);
+      }
     }
     break;
   }
   case ROOM_LIGHT4_SW_CAP_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(4);
-    if (this->_selectedLight != nullptr) {
-      this->_toggleSelectedLight();
-      RoomPage::setLightState(4, this->_selectedLight->getLightLevel() > 0);
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(4);
+      if (this->_selectedLight != nullptr) {
+        this->_toggleSelectedLight();
+        RoomPage::setLightState(4, this->_selectedLight->getLightLevel() > 0);
+      }
     }
     break;
   }
   case ROOM_LIGHT5_SW_CAP_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(5);
-    if (this->_selectedLight != nullptr) {
-      this->_toggleSelectedLight();
-      RoomPage::setLightState(4, this->_selectedLight->getLightLevel() > 0);
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(5);
+      if (this->_selectedLight != nullptr) {
+        this->_toggleSelectedLight();
+        RoomPage::setLightState(4, this->_selectedLight->getLightLevel() > 0);
+      }
     }
     break;
   }
   case ROOM_LIGHT6_SW_CAP_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(6);
-    if (this->_selectedLight != nullptr) {
-      this->_toggleSelectedLight();
-      RoomPage::setLightState(6, this->_selectedLight->getLightLevel() > 0);
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(6);
+      if (this->_selectedLight != nullptr) {
+        this->_toggleSelectedLight();
+        RoomPage::setLightState(6, this->_selectedLight->getLightLevel() > 0);
+      }
     }
     break;
   }
   case ROOM_LIGHT7_SW_CAP_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(7);
-    if (this->_selectedLight != nullptr) {
-      this->_toggleSelectedLight();
-      RoomPage::setLightState(7, this->_selectedLight->getLightLevel() > 0);
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(7);
+      if (this->_selectedLight != nullptr) {
+        this->_toggleSelectedLight();
+        RoomPage::setLightState(7, this->_selectedLight->getLightLevel() > 0);
+      }
     }
     break;
   }
   case ROOM_LIGHT8_SW_CAP_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(8);
-    if (this->_selectedLight != nullptr) {
-      this->_toggleSelectedLight();
-      RoomPage::setLightState(8, this->_selectedLight->getLightLevel() > 0);
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(8);
+      if (this->_selectedLight != nullptr) {
+        this->_toggleSelectedLight();
+        RoomPage::setLightState(8, this->_selectedLight->getLightLevel() > 0);
+      }
     }
     break;
   }
   case ROOM_LIGHT9_SW_CAP_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(9);
-    if (this->_selectedLight != nullptr) {
-      this->_toggleSelectedLight();
-      RoomPage::setLightState(9, this->_selectedLight->getLightLevel() > 0);
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(9);
+      if (this->_selectedLight != nullptr) {
+        this->_toggleSelectedLight();
+        RoomPage::setLightState(9, this->_selectedLight->getLightLevel() > 0);
+      }
     }
     break;
   }
   case ROOM_LIGHT10_SW_CAP_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(10);
-    if (this->_selectedLight != nullptr) {
-      this->_toggleSelectedLight();
-      RoomPage::setLightState(10, this->_selectedLight->getLightLevel() > 0);
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(10);
+      if (this->_selectedLight != nullptr) {
+        this->_toggleSelectedLight();
+        RoomPage::setLightState(10, this->_selectedLight->getLightLevel() > 0);
+      }
     }
     break;
   }
   case ROOM_LIGHT11_SW_CAP_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(11);
-    if (this->_selectedLight != nullptr) {
-      this->_toggleSelectedLight();
-      RoomPage::setLightState(11, this->_selectedLight->getLightLevel() > 0);
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(11);
+      if (this->_selectedLight != nullptr) {
+        this->_toggleSelectedLight();
+        RoomPage::setLightState(11, this->_selectedLight->getLightLevel() > 0);
+      }
     }
     break;
   }
   case ROOM_LIGHT12_SW_CAP_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(12);
-    if (this->_selectedLight != nullptr) {
-      this->_toggleSelectedLight();
-      RoomPage::setLightState(12, this->_selectedLight->getLightLevel() > 0);
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(12);
+      if (this->_selectedLight != nullptr) {
+        this->_toggleSelectedLight();
+        RoomPage::setLightState(12, this->_selectedLight->getLightLevel() > 0);
+      }
     }
     break;
   }
   case ROOM_LIGHT1_LABEL_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(1);
-    if (this->_selectedLight != nullptr) {
-      PageManager::GetLightPage()->selectedLight = this->_selectedLight;
-      PageManager::GetLightPage()->show();
-      PageManager::GetLightPage()->updateValues();
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(1);
+      if (this->_selectedLight != nullptr) {
+        PageManager::GetLightPage()->selectedLight = this->_selectedLight;
+        PageManager::GetLightPage()->show();
+        PageManager::GetLightPage()->updateValues();
+      }
     }
     break;
   }
   case ROOM_LIGHT2_LABEL_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(2);
-    if (this->_selectedLight != nullptr) {
-      PageManager::GetLightPage()->selectedLight = this->_selectedLight;
-      PageManager::GetLightPage()->show();
-      PageManager::GetLightPage()->updateValues();
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(2);
+      if (this->_selectedLight != nullptr) {
+        PageManager::GetLightPage()->selectedLight = this->_selectedLight;
+        PageManager::GetLightPage()->show();
+        PageManager::GetLightPage()->updateValues();
+      }
     }
     break;
   }
   case ROOM_LIGHT3_LABEL_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(3);
-    if (this->_selectedLight != nullptr) {
-      PageManager::GetLightPage()->selectedLight = this->_selectedLight;
-      PageManager::GetLightPage()->show();
-      PageManager::GetLightPage()->updateValues();
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(3);
+      if (this->_selectedLight != nullptr) {
+        PageManager::GetLightPage()->selectedLight = this->_selectedLight;
+        PageManager::GetLightPage()->show();
+        PageManager::GetLightPage()->updateValues();
+      }
     }
     break;
   }
   case ROOM_LIGHT4_LABEL_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(4);
-    if (this->_selectedLight != nullptr) {
-      PageManager::GetLightPage()->selectedLight = this->_selectedLight;
-      PageManager::GetLightPage()->show();
-      PageManager::GetLightPage()->updateValues();
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(4);
+      if (this->_selectedLight != nullptr) {
+        PageManager::GetLightPage()->selectedLight = this->_selectedLight;
+        PageManager::GetLightPage()->show();
+        PageManager::GetLightPage()->updateValues();
+      }
     }
     break;
   }
   case ROOM_LIGHT5_LABEL_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(5);
-    if (this->_selectedLight != nullptr) {
-      PageManager::GetLightPage()->selectedLight = this->_selectedLight;
-      PageManager::GetLightPage()->show();
-      PageManager::GetLightPage()->updateValues();
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(5);
+      if (this->_selectedLight != nullptr) {
+        PageManager::GetLightPage()->selectedLight = this->_selectedLight;
+        PageManager::GetLightPage()->show();
+        PageManager::GetLightPage()->updateValues();
+      }
     }
     break;
   }
   case ROOM_LIGHT6_LABEL_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(6);
-    if (this->_selectedLight != nullptr) {
-      PageManager::GetLightPage()->selectedLight = this->_selectedLight;
-      PageManager::GetLightPage()->show();
-      PageManager::GetLightPage()->updateValues();
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(6);
+      if (this->_selectedLight != nullptr) {
+        PageManager::GetLightPage()->selectedLight = this->_selectedLight;
+        PageManager::GetLightPage()->show();
+        PageManager::GetLightPage()->updateValues();
+      }
     }
     break;
   }
   case ROOM_LIGHT7_LABEL_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(7);
-    if (this->_selectedLight != nullptr) {
-      PageManager::GetLightPage()->selectedLight = this->_selectedLight;
-      PageManager::GetLightPage()->show();
-      PageManager::GetLightPage()->updateValues();
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(7);
+      if (this->_selectedLight != nullptr) {
+        PageManager::GetLightPage()->selectedLight = this->_selectedLight;
+        PageManager::GetLightPage()->show();
+        PageManager::GetLightPage()->updateValues();
+      }
     }
     break;
   }
   case ROOM_LIGHT8_LABEL_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(8);
-    if (this->_selectedLight != nullptr) {
-      PageManager::GetLightPage()->selectedLight = this->_selectedLight;
-      PageManager::GetLightPage()->show();
-      PageManager::GetLightPage()->updateValues();
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(8);
+      if (this->_selectedLight != nullptr) {
+        PageManager::GetLightPage()->selectedLight = this->_selectedLight;
+        PageManager::GetLightPage()->show();
+        PageManager::GetLightPage()->updateValues();
+      }
     }
     break;
   }
   case ROOM_LIGHT9_LABEL_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(9);
-    if (this->_selectedLight != nullptr) {
-      PageManager::GetLightPage()->selectedLight = this->_selectedLight;
-      PageManager::GetLightPage()->show();
-      PageManager::GetLightPage()->updateValues();
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(9);
+      if (this->_selectedLight != nullptr) {
+        PageManager::GetLightPage()->selectedLight = this->_selectedLight;
+        PageManager::GetLightPage()->show();
+        PageManager::GetLightPage()->updateValues();
+      }
     }
     break;
   }
   case ROOM_LIGHT10_LABEL_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(10);
-    if (this->_selectedLight != nullptr) {
-      PageManager::GetLightPage()->selectedLight = this->_selectedLight;
-      PageManager::GetLightPage()->show();
-      PageManager::GetLightPage()->updateValues();
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(10);
+      if (this->_selectedLight != nullptr) {
+        PageManager::GetLightPage()->selectedLight = this->_selectedLight;
+        PageManager::GetLightPage()->show();
+        PageManager::GetLightPage()->updateValues();
+      }
     }
     break;
   }
   case ROOM_LIGHT11_LABEL_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(11);
-    if (this->_selectedLight != nullptr) {
-      PageManager::GetLightPage()->selectedLight = this->_selectedLight;
-      PageManager::GetLightPage()->show();
-      PageManager::GetLightPage()->updateValues();
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(11);
+      if (this->_selectedLight != nullptr) {
+        PageManager::GetLightPage()->selectedLight = this->_selectedLight;
+        PageManager::GetLightPage()->show();
+        PageManager::GetLightPage()->updateValues();
+      }
     }
     break;
   }
   case ROOM_LIGHT12_LABEL_ID: {
-    this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(12);
-    if (this->_selectedLight != nullptr) {
-      PageManager::GetLightPage()->selectedLight = this->_selectedLight;
-      PageManager::GetLightPage()->show();
-      PageManager::GetLightPage()->updateValues();
+    if (RoomManager::hasValidCurrentRoom()) {
+      this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(12);
+      if (this->_selectedLight != nullptr) {
+        PageManager::GetLightPage()->selectedLight = this->_selectedLight;
+        PageManager::GetLightPage()->show();
+        PageManager::GetLightPage()->updateValues();
+      }
     }
     break;
   }
@@ -282,7 +336,12 @@ void RoomPage::_toggleSelectedLight() {
     std::list<Light *> lightsToChange;
     lightsToChange.push_back(this->_selectedLight);
     if (this->_selectedLight->getLightLevel() == 0) {
-      LightManager::ChangeLightsToLevel(&lightsToChange, PageManager::GetHomePage()->getDimmingValue());
+      int dim_to_level = PageManager::GetHomePage()->getDimmingValue();
+      if (dim_to_level == 0) {
+        LOG_INFO("Trying to turn on a light but the current average room level is 0. Defaulting to 50%");
+        dim_to_level = 50;
+      }
+      LightManager::ChangeLightsToLevel(&lightsToChange, dim_to_level);
     } else {
       LightManager::ChangeLightsToLevel(&lightsToChange, 0);
     }
