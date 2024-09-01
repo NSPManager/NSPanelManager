@@ -94,7 +94,7 @@
                 <li>
                     <a hx-post="{% url 'htmx_nspanel_update_screen' nspanel.data.id %}" id="screen-update-{{ nspanel.data.id }}" hx-trigger="click, {% if nspanel.status.state != 'offline' %}screen-update-all-nspanels from:body{% endif %}" hx-swap="none"
                     class="block px-4 py-2 hover:bg-gray-600 hover:text-white cursor-pointer"><span
-                        class="mdi mdi-table-arrow-up pr-2"></span>Update screen
+                        class="mdi mdi-table-arrow-up pr-2"></span>Update GUI
                     </a>
                 </li>
                 </ul>
