@@ -270,7 +270,7 @@ jobs:
 
   update-main-beta-branch:
     if: ${{ !github.event.act }} # skip during local actions testing
-    name: Update main branch with new beta build information
+    name: Update main branch with new build information
     needs: [publish-x86, publish-x86_64, publish-armhf, publish-armv7, publish-aarch64] # Only tell Home Assistant that a new version exists if the build of all architectures succeeded
     permissions:
       contents: write
