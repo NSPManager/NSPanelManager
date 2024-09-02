@@ -328,18 +328,15 @@ void taskManageWifiAndMqtt(void *param) {
           for (int i = 0; i < warnings.size(); i++) {
             report.warnings[i] = &(warnings[i]);
           }
-          LOG_DEBUG("Loaded ", warnings.size(), " warnings.");
+          LOG_TRACE("Loaded ", warnings.size(), " warnings.");
 
-          LOG_DEBUG("Building status_report warnings.");
           size_t pack_length = nspanel_status_report__get_packed_size(&report);
           uint8_t buffer[pack_length];
           size_t pack_size = nspanel_status_report__pack(&report, buffer);
 
-          LOG_DEBUG("Sending status_report.");
           std::string full_buffer = std::string(buffer, buffer + pack_size);
           MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, full_buffer, true);
           // Cleanup buffers
-          LOG_DEBUG("Cleaning buffers from status_report.");
           free(report.warnings);
           warnings.clear();
 

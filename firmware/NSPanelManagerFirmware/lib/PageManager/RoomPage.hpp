@@ -5,7 +5,7 @@
 #include <DeviceEntity.hpp>
 #include <PageBase.hpp>
 #include <RoomManagerObserver.hpp>
-class Light;
+#include <protobuf_nspanel.pb-c.h>
 
 class RoomPage : public PageBase, DeviceEntityObserver, RoomManagerObserver {
 public:
@@ -24,7 +24,7 @@ private:
   void setLightName(uint8_t position, const char *name);
   void setLightState(uint8_t position, bool state);
   void setCurrentRoomLabel(const char *label);
-  Light *_selectedLight;
+  NSPanelLightStatus *_selectedLight;
   void _toggleSelectedLight();
 };
 

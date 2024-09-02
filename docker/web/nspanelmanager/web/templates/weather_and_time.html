@@ -2,8 +2,8 @@
 
 {% block head %}
 {% load static %}
-  <script src="{% static 'question.js' %}?refresh={% now 'U' %}"></script>
-  <script src="{% static 'modal-select-entity.js' %}?refresh={% now 'U' %}"></script>
+  <script src="{{ ingress_path }}{% static 'question.js' %}?refresh={% now 'U' %}"></script>
+  <script src="{{ ingress_path }}{% static 'modal-select-entity.js' %}?refresh={% now 'U' %}"></script>
   <script>
     function select_new_outside_temp_sensor() {
       var types = {

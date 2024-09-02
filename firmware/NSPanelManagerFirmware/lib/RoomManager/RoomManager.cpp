@@ -3,8 +3,6 @@
 #include <ButtonManager.hpp>
 #include <HttpLib.hpp>
 #include <InterfaceConfig.hpp>
-#include <Light.hpp>
-#include <LightManager.hpp>
 #include <MqttLog.hpp>
 #include <MqttManager.hpp>
 #include <NSPMConfig.h>
@@ -205,26 +203,27 @@ void RoomManager::loadAllRooms(bool is_update) {
   }
 
   // All rooms and lights has loaded, prep buttonmanager
-  if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DETACHED) {
-    ButtonManager::button1_detached_mode_light = LightManager::getLightById((*roomData)["button1_detached_light"].as<uint16_t>());
-    if (ButtonManager::button1_detached_mode_light != nullptr) {
-      LOG_DEBUG("Button 1 detached mode light: ", ButtonManager::button1_detached_mode_light->getName().c_str());
-    } else {
-      LOG_ERROR("Coudln't find Button 1 detached mode light with ID: ", (*roomData)["button1_detached_light"].as<uint16_t>());
-    }
-  } else {
-    ButtonManager::button1_detached_mode_light = nullptr;
-  }
-  if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DETACHED) {
-    ButtonManager::button2_detached_mode_light = LightManager::getLightById((*roomData)["button2_detached_light"].as<uint16_t>());
-    if (ButtonManager::button2_detached_mode_light != nullptr) {
-      LOG_DEBUG("Button 2 detached mode light: ", ButtonManager::button2_detached_mode_light->getName().c_str());
-    } else {
-      LOG_ERROR("Coudln't find Button 2 detached mode light with ID: ", (*roomData)["button2_detached_light"].as<uint16_t>());
-    }
-  } else {
-    ButtonManager::button2_detached_mode_light = nullptr;
-  }
+  // TODO: Implement detached buttons with protobuf
+  // if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DETACHED) {
+  //   ButtonManager::button1_detached_mode_light = LightManager::getLightById((*roomData)["button1_detached_light"].as<uint16_t>());
+  //   if (ButtonManager::button1_detached_mode_light != nullptr) {
+  //     LOG_DEBUG("Button 1 detached mode light: ", ButtonManager::button1_detached_mode_light->getName().c_str());
+  //   } else {
+  //     LOG_ERROR("Coudln't find Button 1 detached mode light with ID: ", (*roomData)["button1_detached_light"].as<uint16_t>());
+  //   }
+  // } else {
+  //   ButtonManager::button1_detached_mode_light = nullptr;
+  // }
+  // if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DETACHED) {
+  //   ButtonManager::button2_detached_mode_light = LightManager::getLightById((*roomData)["button2_detached_light"].as<uint16_t>());
+  //   if (ButtonManager::button2_detached_mode_light != nullptr) {
+  //     LOG_DEBUG("Button 2 detached mode light: ", ButtonManager::button2_detached_mode_light->getName().c_str());
+  //   } else {
+  //     LOG_ERROR("Coudln't find Button 2 detached mode light with ID: ", (*roomData)["button2_detached_light"].as<uint16_t>());
+  //   }
+  // } else {
+  //   ButtonManager::button2_detached_mode_light = nullptr;
+  // }
 
   NSPMConfig::instance->successful_config_load = true;
 }
@@ -263,103 +262,106 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
   // Load already existing room or if a nullptr was returned, create a new room.
   Room *newRoom = RoomManager::getRoomById(roomId);
   if (newRoom == nullptr) {
-    newRoom = new Room();
+    newRoom = new Room(roomId);
   }
-  newRoom->id = roomId;
   newRoom->name = (*roomData)["name"] | "ERR";
+  std::string mqtt_room_status_topic = "nspanel/mqttmanager_";
+  mqtt_room_status_topic.append(NSPMConfig::instance->manager_address);
+  mqtt_room_status_topic.append("/command");
+  MqttManager::subscribeToTopic(mqtt_room_status_topic.c_str(), &RoomManager::mqtt_callback);
 
   // Load and init all lights for the room
-  JsonVariant json_lights = (*roomData)["lights"];
-  for (JsonPair lightPair : json_lights.as<JsonObject>()) {
-    bool existing_light;
-    Light *newLight = newRoom->getLightById(atoi(lightPair.key().c_str()));
-    if (newLight == nullptr) {
-      existing_light = false;
-      newLight = new Light();
-    } else {
-      existing_light = true;
-    }
-    std::map<std::string, std::string> data;
-    data["id"] = lightPair.key().c_str();
-    for (JsonPair lightSettingsPair : lightPair.value().as<JsonObject>()) {
-      data[lightSettingsPair.key().c_str()] = lightSettingsPair.value().as<String>().c_str();
-    }
-    newLight->initFromMap(data);
+  // JsonVariant json_lights = (*roomData)["lights"];
+  // for (JsonPair lightPair : json_lights.as<JsonObject>()) {
+  //   bool existing_light;
+  //   Light *newLight = newRoom->getLightById(atoi(lightPair.key().c_str()));
+  //   if (newLight == nullptr) {
+  //     existing_light = false;
+  //     newLight = new Light();
+  //   } else {
+  //     existing_light = true;
+  //   }
+  //   std::map<std::string, std::string> data;
+  //   data["id"] = lightPair.key().c_str();
+  //   for (JsonPair lightSettingsPair : lightPair.value().as<JsonObject>()) {
+  //     data[lightSettingsPair.key().c_str()] = lightSettingsPair.value().as<String>().c_str();
+  //   }
+  //   newLight->initFromMap(data);
 
-    //  If the light is new (ie. not updated from existing) push it into the correct list.
-    if (!existing_light) {
-      if (lightPair.value()["ceiling"] == true) {
-        newRoom->ceilingLights.insert(std::make_pair(newLight->getId(), newLight));
-      } else {
-        newRoom->tableLights.insert(std::make_pair(newLight->getId(), newLight));
-      }
-    }
-  }
+  //   //  If the light is new (ie. not updated from existing) push it into the correct list.
+  //   if (!existing_light) {
+  //     if (lightPair.value()["ceiling"] == true) {
+  //       newRoom->ceilingLights.insert(std::make_pair(newLight->getId(), newLight));
+  //     } else {
+  //       newRoom->tableLights.insert(std::make_pair(newLight->getId(), newLight));
+  //     }
+  //   }
+  // }
 
-  if (is_update) {
-    for (auto it = newRoom->ceilingLights.cbegin(); it != newRoom->ceilingLights.cend();) {
-      // Check if this light ID exist in JSON config
-      bool light_id_found = false;
-      for (JsonPair jsonLightPair : json_lights.as<JsonObject>()) {
-        if (atoi(jsonLightPair.key().c_str()) == (*it).first) {
-          light_id_found = true;
-          break;
-        }
-      }
+  // if (is_update) {
+  //   for (auto it = newRoom->ceilingLights.cbegin(); it != newRoom->ceilingLights.cend();) {
+  //     // Check if this light ID exist in JSON config
+  //     bool light_id_found = false;
+  //     for (JsonPair jsonLightPair : json_lights.as<JsonObject>()) {
+  //       if (atoi(jsonLightPair.key().c_str()) == (*it).first) {
+  //         light_id_found = true;
+  //         break;
+  //       }
+  //     }
 
-      if (!light_id_found) {
-        Light *light_to_remove = (*it).second;
-        LOG_DEBUG("Removing light: ", light_to_remove->getName().c_str(), ". ID: ", light_to_remove->getId());
-        it = newRoom->ceilingLights.erase(it);
-        light_to_remove->callDeconstructCallbacks();
-        delete light_to_remove;
-      } else {
-        it++;
-      }
-    }
+  //     if (!light_id_found) {
+  //       Light *light_to_remove = (*it).second;
+  //       LOG_DEBUG("Removing light: ", light_to_remove->getName().c_str(), ". ID: ", light_to_remove->getId());
+  //       it = newRoom->ceilingLights.erase(it);
+  //       light_to_remove->callDeconstructCallbacks();
+  //       delete light_to_remove;
+  //     } else {
+  //       it++;
+  //     }
+  //   }
 
-    for (auto it = newRoom->tableLights.cbegin(); it != newRoom->tableLights.cend();) {
-      // Check if this light ID exist in JSON config
-      bool light_id_found = false;
-      for (JsonPair jsonLightPair : json_lights.as<JsonObject>()) {
-        if (atoi(jsonLightPair.key().c_str()) == (*it).first) {
-          light_id_found = true;
-          break;
-        }
-      }
+  //   for (auto it = newRoom->tableLights.cbegin(); it != newRoom->tableLights.cend();) {
+  //     // Check if this light ID exist in JSON config
+  //     bool light_id_found = false;
+  //     for (JsonPair jsonLightPair : json_lights.as<JsonObject>()) {
+  //       if (atoi(jsonLightPair.key().c_str()) == (*it).first) {
+  //         light_id_found = true;
+  //         break;
+  //       }
+  //     }
 
-      if (!light_id_found) {
-        Light *light_to_remove = (*it).second;
-        LOG_DEBUG("Removing light: ", light_to_remove->getName().c_str(), ". ID: ", light_to_remove->getId());
-        it = newRoom->tableLights.erase(it);
-        light_to_remove->callDeconstructCallbacks();
-        delete light_to_remove;
-      } else {
-        it++;
-      }
-    }
+  //     if (!light_id_found) {
+  //       Light *light_to_remove = (*it).second;
+  //       LOG_DEBUG("Removing light: ", light_to_remove->getName().c_str(), ". ID: ", light_to_remove->getId());
+  //       it = newRoom->tableLights.erase(it);
+  //       light_to_remove->callDeconstructCallbacks();
+  //       delete light_to_remove;
+  //     } else {
+  //       it++;
+  //     }
+  //   }
 
-    for (auto it = newRoom->scenes.cbegin(); it != newRoom->scenes.cend();) {
-      // Check if this light ID exist in JSON config
-      bool light_id_found = false;
-      for (JsonPair jsonLightPair : json_lights.as<JsonObject>()) {
-        if (atoi(jsonLightPair.key().c_str()) == (*it)->getId()) {
-          light_id_found = true;
-          break;
-        }
-      }
+  //   for (auto it = newRoom->scenes.cbegin(); it != newRoom->scenes.cend();) {
+  //     // Check if this light ID exist in JSON config
+  //     bool light_id_found = false;
+  //     for (JsonPair jsonLightPair : json_lights.as<JsonObject>()) {
+  //       if (atoi(jsonLightPair.key().c_str()) == (*it)->getId()) {
+  //         light_id_found = true;
+  //         break;
+  //       }
+  //     }
 
-      if (!light_id_found) {
-        Scene *scene_to_remove = (*it);
-        LOG_DEBUG("Removing scene: ", scene_to_remove->getName().c_str(), ". ID: ", scene_to_remove->getId());
-        it = newRoom->scenes.erase(it);
-        scene_to_remove->callDeconstructCallbacks();
-        delete scene_to_remove;
-      } else {
-        it++;
-      }
-    }
-  }
+  //     if (!light_id_found) {
+  //       Scene *scene_to_remove = (*it);
+  //       LOG_DEBUG("Removing scene: ", scene_to_remove->getName().c_str(), ". ID: ", scene_to_remove->getId());
+  //       it = newRoom->scenes.erase(it);
+  //       scene_to_remove->callDeconstructCallbacks();
+  //       delete scene_to_remove;
+  //     } else {
+  //       it++;
+  //     }
+  //   }
+  // }
 
   // Load and init all the scenes for the room
   JsonVariant json_scenes = (*roomData)["scenes"];

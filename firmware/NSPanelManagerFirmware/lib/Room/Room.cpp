@@ -1,133 +1,31 @@
-#include <Light.hpp>
 #include <Room.hpp>
 #include <Scene.hpp>
 
-std::list<Light *> Room::getCeilingLightsThatAreOn() {
-  std::list<Light *> returnList;
-  for (auto lightPair : this->ceilingLights) {
-    if (lightPair.second->getLightLevel() > 0) {
-      returnList.push_back(lightPair.second);
-    }
+Room::Room(int32_t id) {
+  this->id = id;
+}
+
+std::list<NSPanelLightStatus *> Room::getAllLights() {
+  std::list<NSPanelLightStatus *> returnList;
+  for (int i = 0; i < this->status.n_lights; i++) {
+    returnList.push_back(this->status.lights[i]);
   }
   return returnList;
-}
-
-std::list<Light *> Room::getTableLightsThatAreOn() {
-  std::list<Light *> returnList;
-  for (auto lightPair : this->tableLights) {
-    if (lightPair.second->getLightLevel() > 0) {
-      returnList.push_back(lightPair.second);
-    }
-  }
-  return returnList;
-}
-
-std::list<Light *> Room::getAllLightsThatAreOn() {
-  std::list<Light *> returnList;
-  for (auto lightPair : this->tableLights) {
-    if (lightPair.second->getLightLevel() > 0) {
-      returnList.push_back(lightPair.second);
-    }
-  }
-  for (auto lightPair : this->ceilingLights) {
-    if (lightPair.second->getLightLevel() > 0) {
-      returnList.push_back(lightPair.second);
-    }
-  }
-  return returnList;
-}
-
-std::list<Light *> Room::getAllCeilingLights() {
-  std::list<Light *> returnList;
-  for (auto lightPair : this->ceilingLights) {
-    returnList.push_back(lightPair.second);
-  }
-  return returnList;
-}
-
-std::list<Light *> Room::getAllTableLights() {
-  std::list<Light *> returnList;
-  for (auto lightPair : this->tableLights) {
-    returnList.push_back(lightPair.second);
-  }
-  return returnList;
-}
-
-std::list<Light *> Room::getAllLights() {
-  std::list<Light *> returnList;
-  for (auto lightPair : this->tableLights) {
-    returnList.push_back(lightPair.second);
-  }
-  for (auto lightPair : this->ceilingLights) {
-    returnList.push_back(lightPair.second);
-  }
-  return returnList;
-}
-
-bool Room::anyCeilingLightsOn() {
-  for (auto lightPair : this->ceilingLights) {
-    if (lightPair.second->getLightLevel() > 0) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool Room::anyTableLightsOn() {
-  for (auto lightPair : this->tableLights) {
-    if (lightPair.second->getLightLevel() > 0) {
-      return true;
-    }
-  }
-  return false;
 }
 
 bool Room::anyLightsOn() {
-  return this->anyCeilingLightsOn() || this->anyTableLightsOn();
+  for (int i = 0; i < this->status.n_lights; i++) {
+    if (this->status.lights[i]->light_level > 0) {
+      return true;
+    }
+  }
+  return false;
 }
 
-std::list<Light *> Room::getAllRoomViewLights() {
-  std::list<Light *> returnList;
-  for (auto lightPair : this->ceilingLights) {
-    if (lightPair.second->getRoomViewPosition() > 0) {
-      returnList.push_back(lightPair.second);
-    }
-  }
-
-  for (auto lightPair : this->tableLights) {
-    if (lightPair.second->getRoomViewPosition() > 0) {
-      returnList.push_back(lightPair.second);
-    }
-  }
-  return returnList;
-}
-
-Light *Room::getLightAtRoomViewPosition(int room_view_position) {
-  for (auto lightPair : this->ceilingLights) {
-    if (lightPair.second->getRoomViewPosition() == room_view_position) {
-      return lightPair.second;
-    }
-  }
-
-  for (auto lightPair : this->tableLights) {
-    if (lightPair.second->getRoomViewPosition() == room_view_position) {
-      return lightPair.second;
-    }
-  }
-
-  return nullptr;
-}
-
-Light *Room::getLightById(uint16_t id) {
-  for (auto lightPair : this->ceilingLights) {
-    if (lightPair.first == id) {
-      return lightPair.second;
-    }
-  }
-
-  for (auto lightPair : this->tableLights) {
-    if (lightPair.first == id) {
-      return lightPair.second;
+NSPanelLightStatus *Room::getLightAtRoomViewPosition(int room_view_position) {
+  for (int i = 0; i < this->status.n_lights; i++) {
+    if (this->status.lights[i]->room_view_position == room_view_position) {
+      return this->status.lights[i];
     }
   }
 

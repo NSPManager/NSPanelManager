@@ -41,6 +41,11 @@ message NSPanelLightStatus {
     bool can_dim = 3;
     bool can_color_temperature = 4;
     bool can_rgb = 5;
+    int32 light_level = 6;
+    int32 color_temp = 7;
+    int32 hue = 8;
+    int32 saturation = 9;
+    int32 room_view_position = 10;
 }
 
 message NSPanelRoomStatus {
@@ -49,7 +54,10 @@ message NSPanelRoomStatus {
     int32 average_dim_level = 3;
     int32 ceiling_lights_dim_level = 4;
     int32 table_lights_dim_level = 5;
-    repeated NSPanelLightStatus lights = 6;
+    int32 average_color_temperature = 6;
+    int32 ceiling_lights_color_temperature_value = 7;
+    int32 table_lights_color_temperature_value = 8;
+    repeated NSPanelLightStatus lights = 9;
 }
 
 
@@ -69,4 +77,26 @@ message NSPanelWeatherUpdate {
     string sunrise_string = 6;
     string sunset_string = 7;
     string current_precipitation_string = 8;
+}
+
+// Command send from NSPanel to MQTTManager
+message NSPanelMQTTManagerCommand {
+    enum AffectLightsOptions {
+        ALL = 0;
+        TABLE_LIGHTS = 1;
+        CEILING_LIGHTS = 2;
+    }
+    message FirstPageTurnLightOn {
+        AffectLightsOptions affect_lights = 1;
+        int32 brightness_slider_value = 2;
+        int32 kelvin_slider_value = 3;
+    }
+    message FirstPageTurnLightOff {
+        AffectLightsOptions affect_lights = 1;
+    }
+
+    oneof CommandData {
+        FirstPageTurnLightOn first_page_turn_on = 1;
+        FirstPageTurnLightOff first_page_turn_off = 2;
+    }
 }

@@ -2,7 +2,6 @@
 #include <HTTPClient.h>
 #include <HttpLib.hpp>
 #include <InterfaceManager.hpp>
-#include <LightManager.hpp>
 #include <LittleFS.h>
 #include <MqttLog.hpp>
 #include <NSPMConfig.h>
@@ -287,7 +286,6 @@ bool WebManager::_update(uint8_t type, const char *url) {
   LOG_INFO("Starting ", type == U_FLASH ? "Firmware" : "LittleFS", " OTA update...");
   vTaskDelay(250 / portTICK_PERIOD_MS);
   InterfaceManager::stop();
-  LightManager::stop();
   PageManager::GetScreensaverPage()->stop();
   WebManager::_update_progress = 0;
   std::string downloadUrl = "http://";

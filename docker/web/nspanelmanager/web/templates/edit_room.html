@@ -2,9 +2,9 @@
 
 {% block head %}
 {% load static %}
-<script src="{% static 'edit_room.js' %}?refresh={% now 'U' %}"></script>
-<script src="{% static 'modal-select-entity.js' %}?refresh={% now 'U' %}"></script>
-<link rel="stylesheet" href="{% static 'edit_room.css' %}">
+<script src="{{ ingress_path }}{% static 'edit_room.js' %}?refresh={% now 'U' %}"></script>
+<script src="{{ ingress_path }}{% static 'modal-select-entity.js' %}?refresh={% now 'U' %}"></script>
+<link rel="stylesheet" href="{{ ingress_path }}{% static 'edit_room.css' %}">
 {% endblock %}
 
 {% block content %}

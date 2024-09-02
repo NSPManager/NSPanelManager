@@ -1,5 +1,3 @@
-#include <Light.hpp>
-#include <LightManager.hpp>
 #include <NSPanel.hpp>
 #include <PageManager.hpp>
 #include <Room.hpp>
@@ -14,13 +12,14 @@ void RoomPage::show() {
   this->update();
 
   if (RoomManager::hasValidCurrentRoom()) {
-    for (int i = 0; i < 12; i++) {
-      Light *displayLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(i + 1);
-      if (displayLight != nullptr) {
-        displayLight->attachUpdateCallback(this);
-        displayLight->attachDeconstructCallback(this);
-      }
-    }
+    // TODO: Listen to room state change instead
+    // for (int i = 0; i < 12; i++) {
+    //   Light *displayLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(i + 1);
+    //   if (displayLight != nullptr) {
+    //     displayLight->attachUpdateCallback(this);
+    //     displayLight->attachDeconstructCallback(this);
+    //   }
+    // }
   }
 }
 
@@ -28,17 +27,17 @@ void RoomPage::update() {
   if (RoomManager::hasValidCurrentRoom()) {
     this->setCurrentRoomLabel((*RoomManager::currentRoom)->name.c_str());
     for (int i = 0; i < 12; i++) {
-      Light *displayLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(i + 1);
+      NSPanelLightStatus *displayLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(i + 1);
 
       if (displayLight != nullptr) {
         // Add two spaces to the left of the name before sending name to panel
         // See issue #22
         std::string display_name = "  ";
-        display_name.append(displayLight->getName());
+        display_name.append(displayLight->name);
 
-        this->setLightName(displayLight->getRoomViewPosition(), display_name.c_str());
-        this->setLightState(displayLight->getRoomViewPosition(), displayLight->getLightLevel() > 0);
-        this->setLightVisibility(displayLight->getRoomViewPosition(), true);
+        this->setLightName(displayLight->room_view_position, display_name.c_str());
+        this->setLightState(displayLight->room_view_position, displayLight->light_level > 0);
+        this->setLightVisibility(displayLight->room_view_position, true);
       } else {
         this->setLightVisibility(i + 1, false); // If no light was found, hide the position
       }
@@ -48,13 +47,14 @@ void RoomPage::update() {
 
 void RoomPage::unshow() {
   if (RoomManager::hasValidCurrentRoom()) {
-    for (int i = 0; i < 12; i++) {
-      Light *displayLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(i + 1);
-      if (displayLight != nullptr) {
-        displayLight->detachUpdateCallback(this);
-        displayLight->detachDeconstructCallback(this);
-      }
-    }
+    // TODO: Detach room callback
+    // for (int i = 0; i < 12; i++) {
+    //   Light *displayLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(i + 1);
+    //   if (displayLight != nullptr) {
+    //     displayLight->detachUpdateCallback(this);
+    //     displayLight->detachDeconstructCallback(this);
+    //   }
+    // }
   }
 }
 
@@ -77,7 +77,7 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(1);
       if (this->_selectedLight != nullptr) {
         this->_toggleSelectedLight();
-        RoomPage::setLightState(1, this->_selectedLight->getLightLevel() > 0);
+        RoomPage::setLightState(1, this->_selectedLight->light_level > 0);
       }
     }
     break;
@@ -87,7 +87,7 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(2);
       if (this->_selectedLight != nullptr) {
         this->_toggleSelectedLight();
-        RoomPage::setLightState(2, this->_selectedLight->getLightLevel() > 0);
+        RoomPage::setLightState(2, this->_selectedLight->light_level > 0);
       }
     }
     break;
@@ -97,7 +97,7 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(3);
       if (this->_selectedLight != nullptr) {
         this->_toggleSelectedLight();
-        RoomPage::setLightState(3, this->_selectedLight->getLightLevel() > 0);
+        RoomPage::setLightState(3, this->_selectedLight->light_level > 0);
       }
     }
     break;
@@ -107,7 +107,7 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(4);
       if (this->_selectedLight != nullptr) {
         this->_toggleSelectedLight();
-        RoomPage::setLightState(4, this->_selectedLight->getLightLevel() > 0);
+        RoomPage::setLightState(4, this->_selectedLight->light_level > 0);
       }
     }
     break;
@@ -117,7 +117,7 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(5);
       if (this->_selectedLight != nullptr) {
         this->_toggleSelectedLight();
-        RoomPage::setLightState(4, this->_selectedLight->getLightLevel() > 0);
+        RoomPage::setLightState(4, this->_selectedLight->light_level > 0);
       }
     }
     break;
@@ -127,7 +127,7 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(6);
       if (this->_selectedLight != nullptr) {
         this->_toggleSelectedLight();
-        RoomPage::setLightState(6, this->_selectedLight->getLightLevel() > 0);
+        RoomPage::setLightState(6, this->_selectedLight->light_level > 0);
       }
     }
     break;
@@ -137,7 +137,7 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(7);
       if (this->_selectedLight != nullptr) {
         this->_toggleSelectedLight();
-        RoomPage::setLightState(7, this->_selectedLight->getLightLevel() > 0);
+        RoomPage::setLightState(7, this->_selectedLight->light_level > 0);
       }
     }
     break;
@@ -147,7 +147,7 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(8);
       if (this->_selectedLight != nullptr) {
         this->_toggleSelectedLight();
-        RoomPage::setLightState(8, this->_selectedLight->getLightLevel() > 0);
+        RoomPage::setLightState(8, this->_selectedLight->light_level > 0);
       }
     }
     break;
@@ -157,7 +157,7 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(9);
       if (this->_selectedLight != nullptr) {
         this->_toggleSelectedLight();
-        RoomPage::setLightState(9, this->_selectedLight->getLightLevel() > 0);
+        RoomPage::setLightState(9, this->_selectedLight->light_level > 0);
       }
     }
     break;
@@ -167,7 +167,7 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(10);
       if (this->_selectedLight != nullptr) {
         this->_toggleSelectedLight();
-        RoomPage::setLightState(10, this->_selectedLight->getLightLevel() > 0);
+        RoomPage::setLightState(10, this->_selectedLight->light_level > 0);
       }
     }
     break;
@@ -177,7 +177,7 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(11);
       if (this->_selectedLight != nullptr) {
         this->_toggleSelectedLight();
-        RoomPage::setLightState(11, this->_selectedLight->getLightLevel() > 0);
+        RoomPage::setLightState(11, this->_selectedLight->light_level > 0);
       }
     }
     break;
@@ -187,7 +187,7 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
       this->_selectedLight = (*RoomManager::currentRoom)->getLightAtRoomViewPosition(12);
       if (this->_selectedLight != nullptr) {
         this->_toggleSelectedLight();
-        RoomPage::setLightState(12, this->_selectedLight->getLightLevel() > 0);
+        RoomPage::setLightState(12, this->_selectedLight->light_level > 0);
       }
     }
     break;
@@ -333,18 +333,19 @@ void RoomPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) 
 
 void RoomPage::_toggleSelectedLight() {
   if (this->_selectedLight != nullptr) {
-    std::list<Light *> lightsToChange;
-    lightsToChange.push_back(this->_selectedLight);
-    if (this->_selectedLight->getLightLevel() == 0) {
-      int dim_to_level = PageManager::GetHomePage()->getDimmingValue();
-      if (dim_to_level == 0) {
-        LOG_INFO("Trying to turn on a light but the current average room level is 0. Defaulting to 50%");
-        dim_to_level = 50;
-      }
-      LightManager::ChangeLightsToLevel(&lightsToChange, dim_to_level);
-    } else {
-      LightManager::ChangeLightsToLevel(&lightsToChange, 0);
-    }
+    // TODO: Implement with protobuf
+    // std::list<Light *> lightsToChange;
+    // lightsToChange.push_back(this->_selectedLight);
+    // if (this->_selectedLight->getLightLevel() == 0) {
+    //   int dim_to_level = PageManager::GetHomePage()->getDimmingValue();
+    //   if (dim_to_level == 0) {
+    //     LOG_INFO("Trying to turn on a light but the current average room level is 0. Defaulting to 50%");
+    //     dim_to_level = 50;
+    //   }
+    //   LightManager::ChangeLightsToLevel(&lightsToChange, dim_to_level);
+    // } else {
+    //   LightManager::ChangeLightsToLevel(&lightsToChange, 0);
+    // }
     this->update();
   }
 }

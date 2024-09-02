@@ -105,6 +105,10 @@ void Room::_publish_protobuf_status() {
       light_status->set_can_dim(light->can_dim());
       light_status->set_can_color_temperature(light->can_color_temperature());
       light_status->set_can_rgb(light->can_rgb());
+      light_status->set_light_level(light->get_brightness());
+      light_status->set_color_temp(light->get_color_temperature());
+      light_status->set_hue(light->get_hue());
+      light_status->set_saturation(light->get_saturation());
     }
   }
 

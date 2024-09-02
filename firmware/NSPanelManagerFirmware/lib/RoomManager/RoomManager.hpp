@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 #include <RoomManagerObserver.hpp>
-class Room;
 #include <list>
+class Room;
 
 class RoomManager {
 public:

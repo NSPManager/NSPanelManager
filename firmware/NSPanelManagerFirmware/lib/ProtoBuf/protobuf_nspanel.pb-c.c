@@ -238,6 +238,63 @@ void   nspanel_weather_update__free_unpacked
   assert(message->base.descriptor == &nspanel_weather_update__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
+void   nspanel_mqttmanager_command__first_page_turn_light_on__init
+                     (NSPanelMQTTManagerCommand__FirstPageTurnLightOn         *message)
+{
+  static const NSPanelMQTTManagerCommand__FirstPageTurnLightOn init_value = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_ON__INIT;
+  *message = init_value;
+}
+void   nspanel_mqttmanager_command__first_page_turn_light_off__init
+                     (NSPanelMQTTManagerCommand__FirstPageTurnLightOff         *message)
+{
+  static const NSPanelMQTTManagerCommand__FirstPageTurnLightOff init_value = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_OFF__INIT;
+  *message = init_value;
+}
+void   nspanel_mqttmanager_command__init
+                     (NSPanelMQTTManagerCommand         *message)
+{
+  static const NSPanelMQTTManagerCommand init_value = NSPANEL_MQTTMANAGER_COMMAND__INIT;
+  *message = init_value;
+}
+size_t nspanel_mqttmanager_command__get_packed_size
+                     (const NSPanelMQTTManagerCommand *message)
+{
+  assert(message->base.descriptor == &nspanel_mqttmanager_command__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t nspanel_mqttmanager_command__pack
+                     (const NSPanelMQTTManagerCommand *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &nspanel_mqttmanager_command__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t nspanel_mqttmanager_command__pack_to_buffer
+                     (const NSPanelMQTTManagerCommand *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &nspanel_mqttmanager_command__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+NSPanelMQTTManagerCommand *
+       nspanel_mqttmanager_command__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (NSPanelMQTTManagerCommand *)
+     protobuf_c_message_unpack (&nspanel_mqttmanager_command__descriptor,
+                                allocator, len, data);
+}
+void   nspanel_mqttmanager_command__free_unpacked
+                     (NSPanelMQTTManagerCommand *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &nspanel_mqttmanager_command__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
 static const ProtobufCFieldDescriptor nspanel_warning__field_descriptors[2] =
 {
   {
@@ -452,7 +509,7 @@ const ProtobufCMessageDescriptor nspanel_status_report__descriptor =
   (ProtobufCMessageInit) nspanel_status_report__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor nspanel_light_status__field_descriptors[5] =
+static const ProtobufCFieldDescriptor nspanel_light_status__field_descriptors[10] =
 {
   {
     "id",
@@ -514,18 +571,83 @@ static const ProtobufCFieldDescriptor nspanel_light_status__field_descriptors[5]
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "light_level",
+    6,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelLightStatus, light_level),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "color_temp",
+    7,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelLightStatus, color_temp),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "hue",
+    8,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelLightStatus, hue),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "saturation",
+    9,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelLightStatus, saturation),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "room_view_position",
+    10,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelLightStatus, room_view_position),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_light_status__field_indices_by_name[] = {
   3,   /* field[3] = can_color_temperature */
   2,   /* field[2] = can_dim */
   4,   /* field[4] = can_rgb */
+  6,   /* field[6] = color_temp */
+  7,   /* field[7] = hue */
   0,   /* field[0] = id */
+  5,   /* field[5] = light_level */
   1,   /* field[1] = name */
+  9,   /* field[9] = room_view_position */
+  8,   /* field[8] = saturation */
 };
 static const ProtobufCIntRange nspanel_light_status__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 5 }
+  { 0, 10 }
 };
 const ProtobufCMessageDescriptor nspanel_light_status__descriptor =
 {
@@ -535,14 +657,14 @@ const ProtobufCMessageDescriptor nspanel_light_status__descriptor =
   "NSPanelLightStatus",
   "",
   sizeof(NSPanelLightStatus),
-  5,
+  10,
   nspanel_light_status__field_descriptors,
   nspanel_light_status__field_indices_by_name,
   1,  nspanel_light_status__number_ranges,
   (ProtobufCMessageInit) nspanel_light_status__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor nspanel_room_status__field_descriptors[6] =
+static const ProtobufCFieldDescriptor nspanel_room_status__field_descriptors[9] =
 {
   {
     "id",
@@ -605,8 +727,44 @@ static const ProtobufCFieldDescriptor nspanel_room_status__field_descriptors[6] 
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "lights",
+    "average_color_temperature",
     6,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomStatus, average_color_temperature),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "ceiling_lights_color_temperature_value",
+    7,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomStatus, ceiling_lights_color_temperature_value),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "table_lights_color_temperature_value",
+    8,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomStatus, table_lights_color_temperature_value),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "lights",
+    9,
     PROTOBUF_C_LABEL_REPEATED,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(NSPanelRoomStatus, n_lights),
@@ -618,17 +776,20 @@ static const ProtobufCFieldDescriptor nspanel_room_status__field_descriptors[6] 
   },
 };
 static const unsigned nspanel_room_status__field_indices_by_name[] = {
+  5,   /* field[5] = average_color_temperature */
   2,   /* field[2] = average_dim_level */
+  6,   /* field[6] = ceiling_lights_color_temperature_value */
   3,   /* field[3] = ceiling_lights_dim_level */
   0,   /* field[0] = id */
-  5,   /* field[5] = lights */
+  8,   /* field[8] = lights */
   1,   /* field[1] = name */
+  7,   /* field[7] = table_lights_color_temperature_value */
   4,   /* field[4] = table_lights_dim_level */
 };
 static const ProtobufCIntRange nspanel_room_status__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 6 }
+  { 0, 9 }
 };
 const ProtobufCMessageDescriptor nspanel_room_status__descriptor =
 {
@@ -638,7 +799,7 @@ const ProtobufCMessageDescriptor nspanel_room_status__descriptor =
   "NSPanelRoomStatus",
   "",
   sizeof(NSPanelRoomStatus),
-  6,
+  9,
   nspanel_room_status__field_descriptors,
   nspanel_room_status__field_indices_by_name,
   1,  nspanel_room_status__number_ranges,
@@ -862,6 +1023,189 @@ const ProtobufCMessageDescriptor nspanel_weather_update__descriptor =
   nspanel_weather_update__field_indices_by_name,
   1,  nspanel_weather_update__number_ranges,
   (ProtobufCMessageInit) nspanel_weather_update__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__first_page_turn_light_on__field_descriptors[3] =
+{
+  {
+    "affect_lights",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__FirstPageTurnLightOn, affect_lights),
+    &nspanel_mqttmanager_command__affect_lights_options__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "brightness_slider_value",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__FirstPageTurnLightOn, brightness_slider_value),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "kelvin_slider_value",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__FirstPageTurnLightOn, kelvin_slider_value),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_mqttmanager_command__first_page_turn_light_on__field_indices_by_name[] = {
+  0,   /* field[0] = affect_lights */
+  1,   /* field[1] = brightness_slider_value */
+  2,   /* field[2] = kelvin_slider_value */
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__first_page_turn_light_on__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 3 }
+};
+const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_turn_light_on__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand.FirstPageTurnLightOn",
+  "FirstPageTurnLightOn",
+  "NSPanelMQTTManagerCommand__FirstPageTurnLightOn",
+  "",
+  sizeof(NSPanelMQTTManagerCommand__FirstPageTurnLightOn),
+  3,
+  nspanel_mqttmanager_command__first_page_turn_light_on__field_descriptors,
+  nspanel_mqttmanager_command__first_page_turn_light_on__field_indices_by_name,
+  1,  nspanel_mqttmanager_command__first_page_turn_light_on__number_ranges,
+  (ProtobufCMessageInit) nspanel_mqttmanager_command__first_page_turn_light_on__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__first_page_turn_light_off__field_descriptors[1] =
+{
+  {
+    "affect_lights",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__FirstPageTurnLightOff, affect_lights),
+    &nspanel_mqttmanager_command__affect_lights_options__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_mqttmanager_command__first_page_turn_light_off__field_indices_by_name[] = {
+  0,   /* field[0] = affect_lights */
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__first_page_turn_light_off__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_turn_light_off__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand.FirstPageTurnLightOff",
+  "FirstPageTurnLightOff",
+  "NSPanelMQTTManagerCommand__FirstPageTurnLightOff",
+  "",
+  sizeof(NSPanelMQTTManagerCommand__FirstPageTurnLightOff),
+  1,
+  nspanel_mqttmanager_command__first_page_turn_light_off__field_descriptors,
+  nspanel_mqttmanager_command__first_page_turn_light_off__field_indices_by_name,
+  1,  nspanel_mqttmanager_command__first_page_turn_light_off__number_ranges,
+  (ProtobufCMessageInit) nspanel_mqttmanager_command__first_page_turn_light_off__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCEnumValue nspanel_mqttmanager_command__affect_lights_options__enum_values_by_number[3] =
+{
+  { "ALL", "NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL", 0 },
+  { "TABLE_LIGHTS", "NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__TABLE_LIGHTS", 1 },
+  { "CEILING_LIGHTS", "NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__CEILING_LIGHTS", 2 },
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__affect_lights_options__value_ranges[] = {
+{0, 0},{0, 3}
+};
+static const ProtobufCEnumValueIndex nspanel_mqttmanager_command__affect_lights_options__enum_values_by_name[3] =
+{
+  { "ALL", 0 },
+  { "CEILING_LIGHTS", 2 },
+  { "TABLE_LIGHTS", 1 },
+};
+const ProtobufCEnumDescriptor nspanel_mqttmanager_command__affect_lights_options__descriptor =
+{
+  PROTOBUF_C__ENUM_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand.AffectLightsOptions",
+  "AffectLightsOptions",
+  "NSPanelMQTTManagerCommand__AffectLightsOptions",
+  "",
+  3,
+  nspanel_mqttmanager_command__affect_lights_options__enum_values_by_number,
+  3,
+  nspanel_mqttmanager_command__affect_lights_options__enum_values_by_name,
+  1,
+  nspanel_mqttmanager_command__affect_lights_options__value_ranges,
+  NULL,NULL,NULL,NULL   /* reserved[1234] */
+};
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[2] =
+{
+  {
+    "first_page_turn_on",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(NSPanelMQTTManagerCommand, command_data_case),
+    offsetof(NSPanelMQTTManagerCommand, first_page_turn_on),
+    &nspanel_mqttmanager_command__first_page_turn_light_on__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "first_page_turn_off",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(NSPanelMQTTManagerCommand, command_data_case),
+    offsetof(NSPanelMQTTManagerCommand, first_page_turn_off),
+    &nspanel_mqttmanager_command__first_page_turn_light_off__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_mqttmanager_command__field_indices_by_name[] = {
+  1,   /* field[1] = first_page_turn_off */
+  0,   /* field[0] = first_page_turn_on */
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 2 }
+};
+const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand",
+  "NSPanelMQTTManagerCommand",
+  "NSPanelMQTTManagerCommand",
+  "",
+  sizeof(NSPanelMQTTManagerCommand),
+  2,
+  nspanel_mqttmanager_command__field_descriptors,
+  nspanel_mqttmanager_command__field_indices_by_name,
+  1,  nspanel_mqttmanager_command__number_ranges,
+  (ProtobufCMessageInit) nspanel_mqttmanager_command__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
 static const ProtobufCEnumValue nspanel_warning_level__enum_values_by_number[6] =

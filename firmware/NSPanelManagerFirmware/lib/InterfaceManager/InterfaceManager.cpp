@@ -4,8 +4,6 @@
 #include <HomePage.hpp>
 #include <InterfaceConfig.hpp>
 #include <InterfaceManager.hpp>
-#include <Light.hpp>
-#include <LightManager.hpp>
 #include <LightPage.hpp>
 #include <MqttLog.hpp>
 #include <NSPanel.hpp>
@@ -37,16 +35,17 @@ void InterfaceManager::stop() {
       InterfaceManager::_taskHandleSpecialModeTimer = NULL;
     }
 
-    for (Room *room : RoomManager::rooms) {
-      for (auto lightPair : room->ceilingLights) {
-        delete lightPair.second;
-      }
-      room->ceilingLights.clear();
-      for (auto lightPair : room->tableLights) {
-        delete lightPair.second;
-      }
-      room->tableLights.clear();
-    }
+    // TODO: Clear rooms with RoomManager
+    // for (Room *room : RoomManager::rooms) {
+    //   for (auto lightPair : room->ceilingLights) {
+    //     delete lightPair.second;
+    //   }
+    //   room->ceilingLights.clear();
+    //   for (auto lightPair : room->tableLights) {
+    //     delete lightPair.second;
+    //   }
+    //   room->tableLights.clear();
+    // }
 
     RoomManager::rooms.clear();
   } catch (const std::exception &e) {
@@ -110,7 +109,6 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
     // As there may be may be MANY topics to subscribe to, do it in checks of 5 with delays
     // between them to allow for processing all the incoming data.
     PageManager::GetNSPanelManagerPage()->setText("Subscribing...");
-    LightManager::subscribeToMqttLightUpdates();
 
     // Loading is done, show Home page
     NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
@@ -204,6 +202,9 @@ void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned
   } else if (command.compare("register_accept") == 0) {
     NSPMConfig::instance->manager_address = json["address"].as<String>().c_str();
     NSPMConfig::instance->manager_port = json["port"].as<uint16_t>();
+    NSPMConfig::instance->mqttmanager_command_topic = "nspanel/mqttmanager_";
+    NSPMConfig::instance->mqttmanager_command_topic.append(NSPMConfig::instance->manager_address);
+    NSPMConfig::instance->mqttmanager_command_topic.append("/command");
 
     Serial.print("Received register accept from manager: ");
     Serial.print(NSPMConfig::instance->manager_address.c_str());
