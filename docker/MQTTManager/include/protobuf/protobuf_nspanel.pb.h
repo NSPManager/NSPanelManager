@@ -62,6 +62,9 @@ extern NSPanelMQTTManagerCommand_FirstPageTurnLightOffDefaultTypeInternal _NSPan
 class NSPanelMQTTManagerCommand_FirstPageTurnLightOn;
 struct NSPanelMQTTManagerCommand_FirstPageTurnLightOnDefaultTypeInternal;
 extern NSPanelMQTTManagerCommand_FirstPageTurnLightOnDefaultTypeInternal _NSPanelMQTTManagerCommand_FirstPageTurnLightOn_default_instance_;
+class NSPanelMQTTManagerCommand_LightCommand;
+struct NSPanelMQTTManagerCommand_LightCommandDefaultTypeInternal;
+extern NSPanelMQTTManagerCommand_LightCommandDefaultTypeInternal _NSPanelMQTTManagerCommand_LightCommand_default_instance_;
 class NSPanelRoomStatus;
 struct NSPanelRoomStatusDefaultTypeInternal;
 extern NSPanelRoomStatusDefaultTypeInternal _NSPanelRoomStatus_default_instance_;
@@ -625,6 +628,282 @@ class NSPanelWarning final : public ::google::protobuf::Message
                           const NSPanelWarning& from_msg);
     ::google::protobuf::internal::ArenaStringPtr text_;
     int level_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
+};
+// -------------------------------------------------------------------
+
+class NSPanelMQTTManagerCommand_LightCommand final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:NSPanelMQTTManagerCommand.LightCommand) */ {
+ public:
+  inline NSPanelMQTTManagerCommand_LightCommand() : NSPanelMQTTManagerCommand_LightCommand(nullptr) {}
+  ~NSPanelMQTTManagerCommand_LightCommand() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_LightCommand(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline NSPanelMQTTManagerCommand_LightCommand(const NSPanelMQTTManagerCommand_LightCommand& from) : NSPanelMQTTManagerCommand_LightCommand(nullptr, from) {}
+  inline NSPanelMQTTManagerCommand_LightCommand(NSPanelMQTTManagerCommand_LightCommand&& from) noexcept
+      : NSPanelMQTTManagerCommand_LightCommand(nullptr, std::move(from)) {}
+  inline NSPanelMQTTManagerCommand_LightCommand& operator=(const NSPanelMQTTManagerCommand_LightCommand& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline NSPanelMQTTManagerCommand_LightCommand& operator=(NSPanelMQTTManagerCommand_LightCommand&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const NSPanelMQTTManagerCommand_LightCommand& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const NSPanelMQTTManagerCommand_LightCommand* internal_default_instance() {
+    return reinterpret_cast<const NSPanelMQTTManagerCommand_LightCommand*>(
+        &_NSPanelMQTTManagerCommand_LightCommand_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 8;
+  friend void swap(NSPanelMQTTManagerCommand_LightCommand& a, NSPanelMQTTManagerCommand_LightCommand& b) { a.Swap(&b); }
+  inline void Swap(NSPanelMQTTManagerCommand_LightCommand* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(NSPanelMQTTManagerCommand_LightCommand* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  NSPanelMQTTManagerCommand_LightCommand* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<NSPanelMQTTManagerCommand_LightCommand>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const NSPanelMQTTManagerCommand_LightCommand& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const NSPanelMQTTManagerCommand_LightCommand& from) { NSPanelMQTTManagerCommand_LightCommand::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(NSPanelMQTTManagerCommand_LightCommand* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "NSPanelMQTTManagerCommand.LightCommand"; }
+
+ protected:
+  explicit NSPanelMQTTManagerCommand_LightCommand(::google::protobuf::Arena* arena);
+  NSPanelMQTTManagerCommand_LightCommand(::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_LightCommand& from);
+  NSPanelMQTTManagerCommand_LightCommand(::google::protobuf::Arena* arena, NSPanelMQTTManagerCommand_LightCommand&& from) noexcept
+      : NSPanelMQTTManagerCommand_LightCommand(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kLightIdsFieldNumber = 1,
+    kBrightnessFieldNumber = 3,
+    kColorTemperatureFieldNumber = 5,
+    kHasBrightnessFieldNumber = 2,
+    kHasColorTemperatureFieldNumber = 4,
+    kHasHueFieldNumber = 6,
+    kHasSaturationFieldNumber = 8,
+    kHueFieldNumber = 7,
+    kSaturationFieldNumber = 9,
+  };
+  // repeated int32 light_ids = 1;
+  int light_ids_size() const;
+  private:
+  int _internal_light_ids_size() const;
+
+  public:
+  void clear_light_ids() ;
+  ::int32_t light_ids(int index) const;
+  void set_light_ids(int index, ::int32_t value);
+  void add_light_ids(::int32_t value);
+  const ::google::protobuf::RepeatedField<::int32_t>& light_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* mutable_light_ids();
+
+  private:
+  const ::google::protobuf::RepeatedField<::int32_t>& _internal_light_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_light_ids();
+
+  public:
+  // int32 brightness = 3;
+  void clear_brightness() ;
+  ::int32_t brightness() const;
+  void set_brightness(::int32_t value);
+
+  private:
+  ::int32_t _internal_brightness() const;
+  void _internal_set_brightness(::int32_t value);
+
+  public:
+  // int32 color_temperature = 5;
+  void clear_color_temperature() ;
+  ::int32_t color_temperature() const;
+  void set_color_temperature(::int32_t value);
+
+  private:
+  ::int32_t _internal_color_temperature() const;
+  void _internal_set_color_temperature(::int32_t value);
+
+  public:
+  // bool has_brightness = 2;
+  void clear_has_brightness() ;
+  bool has_brightness() const;
+  void set_has_brightness(bool value);
+
+  private:
+  bool _internal_has_brightness() const;
+  void _internal_set_has_brightness(bool value);
+
+  public:
+  // bool has_color_temperature = 4;
+  void clear_has_color_temperature() ;
+  bool has_color_temperature() const;
+  void set_has_color_temperature(bool value);
+
+  private:
+  bool _internal_has_color_temperature() const;
+  void _internal_set_has_color_temperature(bool value);
+
+  public:
+  // bool has_hue = 6;
+  void clear_has_hue() ;
+  bool has_hue() const;
+  void set_has_hue(bool value);
+
+  private:
+  bool _internal_has_hue() const;
+  void _internal_set_has_hue(bool value);
+
+  public:
+  // bool has_saturation = 8;
+  void clear_has_saturation() ;
+  bool has_saturation() const;
+  void set_has_saturation(bool value);
+
+  private:
+  bool _internal_has_saturation() const;
+  void _internal_set_has_saturation(bool value);
+
+  public:
+  // int32 hue = 7;
+  void clear_hue() ;
+  ::int32_t hue() const;
+  void set_hue(::int32_t value);
+
+  private:
+  ::int32_t _internal_hue() const;
+  void _internal_set_hue(::int32_t value);
+
+  public:
+  // int32 saturation = 9;
+  void clear_saturation() ;
+  ::int32_t saturation() const;
+  void set_saturation(::int32_t value);
+
+  private:
+  ::int32_t _internal_saturation() const;
+  void _internal_set_saturation(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:NSPanelMQTTManagerCommand.LightCommand)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      4, 9, 0,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_NSPanelMQTTManagerCommand_LightCommand_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const NSPanelMQTTManagerCommand_LightCommand& from_msg);
+    ::google::protobuf::RepeatedField<::int32_t> light_ids_;
+    mutable ::google::protobuf::internal::CachedSize _light_ids_cached_byte_size_;
+    ::int32_t brightness_;
+    ::int32_t color_temperature_;
+    bool has_brightness_;
+    bool has_color_temperature_;
+    bool has_hue_;
+    bool has_saturation_;
+    ::int32_t hue_;
+    ::int32_t saturation_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -2225,13 +2504,14 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   enum CommandDataCase {
     kFirstPageTurnOn = 1,
     kFirstPageTurnOff = 2,
+    kLightCommand = 3,
     COMMANDDATA_NOT_SET = 0,
   };
   static inline const NSPanelMQTTManagerCommand* internal_default_instance() {
     return reinterpret_cast<const NSPanelMQTTManagerCommand*>(
         &_NSPanelMQTTManagerCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 8;
+  static constexpr int kIndexInFileMessages = 9;
   friend void swap(NSPanelMQTTManagerCommand& a, NSPanelMQTTManagerCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand* other) {
     if (other == this) return;
@@ -2299,6 +2579,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   // nested types ----------------------------------------------------
   using FirstPageTurnLightOn = NSPanelMQTTManagerCommand_FirstPageTurnLightOn;
   using FirstPageTurnLightOff = NSPanelMQTTManagerCommand_FirstPageTurnLightOff;
+  using LightCommand = NSPanelMQTTManagerCommand_LightCommand;
   using AffectLightsOptions = NSPanelMQTTManagerCommand_AffectLightsOptions;
   static constexpr AffectLightsOptions ALL = NSPanelMQTTManagerCommand_AffectLightsOptions_ALL;
   static constexpr AffectLightsOptions TABLE_LIGHTS = NSPanelMQTTManagerCommand_AffectLightsOptions_TABLE_LIGHTS;
@@ -2324,6 +2605,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   enum : int {
     kFirstPageTurnOnFieldNumber = 1,
     kFirstPageTurnOffFieldNumber = 2,
+    kLightCommandFieldNumber = 3,
   };
   // .NSPanelMQTTManagerCommand.FirstPageTurnLightOn first_page_turn_on = 1;
   bool has_first_page_turn_on() const;
@@ -2363,6 +2645,25 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   ::NSPanelMQTTManagerCommand_FirstPageTurnLightOff* _internal_mutable_first_page_turn_off();
 
   public:
+  // .NSPanelMQTTManagerCommand.LightCommand light_command = 3;
+  bool has_light_command() const;
+  private:
+  bool _internal_has_light_command() const;
+
+  public:
+  void clear_light_command() ;
+  const ::NSPanelMQTTManagerCommand_LightCommand& light_command() const;
+  PROTOBUF_NODISCARD ::NSPanelMQTTManagerCommand_LightCommand* release_light_command();
+  ::NSPanelMQTTManagerCommand_LightCommand* mutable_light_command();
+  void set_allocated_light_command(::NSPanelMQTTManagerCommand_LightCommand* value);
+  void unsafe_arena_set_allocated_light_command(::NSPanelMQTTManagerCommand_LightCommand* value);
+  ::NSPanelMQTTManagerCommand_LightCommand* unsafe_arena_release_light_command();
+
+  private:
+  const ::NSPanelMQTTManagerCommand_LightCommand& _internal_light_command() const;
+  ::NSPanelMQTTManagerCommand_LightCommand* _internal_mutable_light_command();
+
+  public:
   void clear_CommandData();
   CommandDataCase CommandData_case() const;
   // @@protoc_insertion_point(class_scope:NSPanelMQTTManagerCommand)
@@ -2370,11 +2671,12 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   class _Internal;
   void set_has_first_page_turn_on();
   void set_has_first_page_turn_off();
+  void set_has_light_command();
   inline bool has_CommandData() const;
   inline void clear_has_CommandData();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 2, 2,
+      0, 3, 3,
       0, 2>
       _table_;
 
@@ -2400,6 +2702,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
       ::google::protobuf::internal::ConstantInitialized _constinit_;
       ::NSPanelMQTTManagerCommand_FirstPageTurnLightOn* first_page_turn_on_;
       ::NSPanelMQTTManagerCommand_FirstPageTurnLightOff* first_page_turn_off_;
+      ::NSPanelMQTTManagerCommand_LightCommand* light_command_;
     } CommandData_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
@@ -4052,6 +4355,231 @@ inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOff::_internal_set_affec
 
 // -------------------------------------------------------------------
 
+// NSPanelMQTTManagerCommand_LightCommand
+
+// repeated int32 light_ids = 1;
+inline int NSPanelMQTTManagerCommand_LightCommand::_internal_light_ids_size() const {
+  return _internal_light_ids().size();
+}
+inline int NSPanelMQTTManagerCommand_LightCommand::light_ids_size() const {
+  return _internal_light_ids_size();
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::clear_light_ids() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.light_ids_.Clear();
+}
+inline ::int32_t NSPanelMQTTManagerCommand_LightCommand::light_ids(int index) const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.LightCommand.light_ids)
+  return _internal_light_ids().Get(index);
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::set_light_ids(int index, ::int32_t value) {
+  _internal_mutable_light_ids()->Set(index, value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.LightCommand.light_ids)
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::add_light_ids(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_light_ids()->Add(value);
+  // @@protoc_insertion_point(field_add:NSPanelMQTTManagerCommand.LightCommand.light_ids)
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>& NSPanelMQTTManagerCommand_LightCommand::light_ids() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelMQTTManagerCommand.LightCommand.light_ids)
+  return _internal_light_ids();
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelMQTTManagerCommand_LightCommand::mutable_light_ids()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelMQTTManagerCommand.LightCommand.light_ids)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_light_ids();
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>&
+NSPanelMQTTManagerCommand_LightCommand::_internal_light_ids() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.light_ids_;
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelMQTTManagerCommand_LightCommand::_internal_mutable_light_ids() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.light_ids_;
+}
+
+// bool has_brightness = 2;
+inline void NSPanelMQTTManagerCommand_LightCommand::clear_has_brightness() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_brightness_ = false;
+}
+inline bool NSPanelMQTTManagerCommand_LightCommand::has_brightness() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.LightCommand.has_brightness)
+  return _internal_has_brightness();
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::set_has_brightness(bool value) {
+  _internal_set_has_brightness(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.LightCommand.has_brightness)
+}
+inline bool NSPanelMQTTManagerCommand_LightCommand::_internal_has_brightness() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_brightness_;
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::_internal_set_has_brightness(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_brightness_ = value;
+}
+
+// int32 brightness = 3;
+inline void NSPanelMQTTManagerCommand_LightCommand::clear_brightness() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.brightness_ = 0;
+}
+inline ::int32_t NSPanelMQTTManagerCommand_LightCommand::brightness() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.LightCommand.brightness)
+  return _internal_brightness();
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::set_brightness(::int32_t value) {
+  _internal_set_brightness(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.LightCommand.brightness)
+}
+inline ::int32_t NSPanelMQTTManagerCommand_LightCommand::_internal_brightness() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.brightness_;
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::_internal_set_brightness(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.brightness_ = value;
+}
+
+// bool has_color_temperature = 4;
+inline void NSPanelMQTTManagerCommand_LightCommand::clear_has_color_temperature() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_color_temperature_ = false;
+}
+inline bool NSPanelMQTTManagerCommand_LightCommand::has_color_temperature() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.LightCommand.has_color_temperature)
+  return _internal_has_color_temperature();
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::set_has_color_temperature(bool value) {
+  _internal_set_has_color_temperature(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.LightCommand.has_color_temperature)
+}
+inline bool NSPanelMQTTManagerCommand_LightCommand::_internal_has_color_temperature() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_color_temperature_;
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::_internal_set_has_color_temperature(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_color_temperature_ = value;
+}
+
+// int32 color_temperature = 5;
+inline void NSPanelMQTTManagerCommand_LightCommand::clear_color_temperature() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.color_temperature_ = 0;
+}
+inline ::int32_t NSPanelMQTTManagerCommand_LightCommand::color_temperature() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.LightCommand.color_temperature)
+  return _internal_color_temperature();
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::set_color_temperature(::int32_t value) {
+  _internal_set_color_temperature(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.LightCommand.color_temperature)
+}
+inline ::int32_t NSPanelMQTTManagerCommand_LightCommand::_internal_color_temperature() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.color_temperature_;
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::_internal_set_color_temperature(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.color_temperature_ = value;
+}
+
+// bool has_hue = 6;
+inline void NSPanelMQTTManagerCommand_LightCommand::clear_has_hue() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_hue_ = false;
+}
+inline bool NSPanelMQTTManagerCommand_LightCommand::has_hue() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.LightCommand.has_hue)
+  return _internal_has_hue();
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::set_has_hue(bool value) {
+  _internal_set_has_hue(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.LightCommand.has_hue)
+}
+inline bool NSPanelMQTTManagerCommand_LightCommand::_internal_has_hue() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_hue_;
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::_internal_set_has_hue(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_hue_ = value;
+}
+
+// int32 hue = 7;
+inline void NSPanelMQTTManagerCommand_LightCommand::clear_hue() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.hue_ = 0;
+}
+inline ::int32_t NSPanelMQTTManagerCommand_LightCommand::hue() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.LightCommand.hue)
+  return _internal_hue();
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::set_hue(::int32_t value) {
+  _internal_set_hue(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.LightCommand.hue)
+}
+inline ::int32_t NSPanelMQTTManagerCommand_LightCommand::_internal_hue() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.hue_;
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::_internal_set_hue(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.hue_ = value;
+}
+
+// bool has_saturation = 8;
+inline void NSPanelMQTTManagerCommand_LightCommand::clear_has_saturation() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_saturation_ = false;
+}
+inline bool NSPanelMQTTManagerCommand_LightCommand::has_saturation() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.LightCommand.has_saturation)
+  return _internal_has_saturation();
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::set_has_saturation(bool value) {
+  _internal_set_has_saturation(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.LightCommand.has_saturation)
+}
+inline bool NSPanelMQTTManagerCommand_LightCommand::_internal_has_saturation() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_saturation_;
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::_internal_set_has_saturation(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_saturation_ = value;
+}
+
+// int32 saturation = 9;
+inline void NSPanelMQTTManagerCommand_LightCommand::clear_saturation() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.saturation_ = 0;
+}
+inline ::int32_t NSPanelMQTTManagerCommand_LightCommand::saturation() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.LightCommand.saturation)
+  return _internal_saturation();
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::set_saturation(::int32_t value) {
+  _internal_set_saturation(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.LightCommand.saturation)
+}
+inline ::int32_t NSPanelMQTTManagerCommand_LightCommand::_internal_saturation() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.saturation_;
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::_internal_set_saturation(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.saturation_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // NSPanelMQTTManagerCommand
 
 // .NSPanelMQTTManagerCommand.FirstPageTurnLightOn first_page_turn_on = 1;
@@ -4209,6 +4737,85 @@ inline ::NSPanelMQTTManagerCommand_FirstPageTurnLightOff* NSPanelMQTTManagerComm
 inline ::NSPanelMQTTManagerCommand_FirstPageTurnLightOff* NSPanelMQTTManagerCommand::mutable_first_page_turn_off() ABSL_ATTRIBUTE_LIFETIME_BOUND {
   ::NSPanelMQTTManagerCommand_FirstPageTurnLightOff* _msg = _internal_mutable_first_page_turn_off();
   // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.first_page_turn_off)
+  return _msg;
+}
+
+// .NSPanelMQTTManagerCommand.LightCommand light_command = 3;
+inline bool NSPanelMQTTManagerCommand::has_light_command() const {
+  return CommandData_case() == kLightCommand;
+}
+inline bool NSPanelMQTTManagerCommand::_internal_has_light_command() const {
+  return CommandData_case() == kLightCommand;
+}
+inline void NSPanelMQTTManagerCommand::set_has_light_command() {
+  _impl_._oneof_case_[0] = kLightCommand;
+}
+inline void NSPanelMQTTManagerCommand::clear_light_command() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (CommandData_case() == kLightCommand) {
+    if (GetArena() == nullptr) {
+      delete _impl_.CommandData_.light_command_;
+    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.light_command_);
+    }
+    clear_has_CommandData();
+  }
+}
+inline ::NSPanelMQTTManagerCommand_LightCommand* NSPanelMQTTManagerCommand::release_light_command() {
+  // @@protoc_insertion_point(field_release:NSPanelMQTTManagerCommand.light_command)
+  if (CommandData_case() == kLightCommand) {
+    clear_has_CommandData();
+    auto* temp = _impl_.CommandData_.light_command_;
+    if (GetArena() != nullptr) {
+      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.CommandData_.light_command_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::NSPanelMQTTManagerCommand_LightCommand& NSPanelMQTTManagerCommand::_internal_light_command() const {
+  return CommandData_case() == kLightCommand ? *_impl_.CommandData_.light_command_ : reinterpret_cast<::NSPanelMQTTManagerCommand_LightCommand&>(::_NSPanelMQTTManagerCommand_LightCommand_default_instance_);
+}
+inline const ::NSPanelMQTTManagerCommand_LightCommand& NSPanelMQTTManagerCommand::light_command() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.light_command)
+  return _internal_light_command();
+}
+inline ::NSPanelMQTTManagerCommand_LightCommand* NSPanelMQTTManagerCommand::unsafe_arena_release_light_command() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:NSPanelMQTTManagerCommand.light_command)
+  if (CommandData_case() == kLightCommand) {
+    clear_has_CommandData();
+    auto* temp = _impl_.CommandData_.light_command_;
+    _impl_.CommandData_.light_command_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void NSPanelMQTTManagerCommand::unsafe_arena_set_allocated_light_command(::NSPanelMQTTManagerCommand_LightCommand* value) {
+  // We rely on the oneof clear method to free the earlier contents
+  // of this oneof. We can directly use the pointer we're given to
+  // set the new value.
+  clear_CommandData();
+  if (value) {
+    set_has_light_command();
+    _impl_.CommandData_.light_command_ = value;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:NSPanelMQTTManagerCommand.light_command)
+}
+inline ::NSPanelMQTTManagerCommand_LightCommand* NSPanelMQTTManagerCommand::_internal_mutable_light_command() {
+  if (CommandData_case() != kLightCommand) {
+    clear_CommandData();
+    set_has_light_command();
+    _impl_.CommandData_.light_command_ =
+        ::google::protobuf::Message::DefaultConstruct<::NSPanelMQTTManagerCommand_LightCommand>(GetArena());
+  }
+  return _impl_.CommandData_.light_command_;
+}
+inline ::NSPanelMQTTManagerCommand_LightCommand* NSPanelMQTTManagerCommand::mutable_light_command() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::NSPanelMQTTManagerCommand_LightCommand* _msg = _internal_mutable_light_command();
+  // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.light_command)
   return _msg;
 }
 

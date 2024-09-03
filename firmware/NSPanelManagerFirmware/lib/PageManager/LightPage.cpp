@@ -27,59 +27,82 @@ void LightPage::update() {
 
 void LightPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
   LOG_DEBUG("Got touch event, component ", page, ".", component, " ", pressed ? "pressed" : "released");
-
-  switch (component) {
-  case LIGHT_PAGE_BACK_BUTTON_ID: {
-    PageManager::GoBack();
-    break;
-  }
-  case LIGHT_PAGE_BRIGHTNESS_SLIDER_ID: {
-    if (PageManager::GetLightPage()->selectedLight != nullptr) {
-      // TODO: Implement with protobuf
-      // NSPanelMQTTManagerCommand command = NSPANEL_MQTTMANAGER_COMMAND__INIT;
-      // command.command_data_case = NSPanelMQTTManagerCommand__CommandDataCase::NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON;
-      // command.first_page_turn_on->affect_lights = _NSPanelMQTTManagerCommand__AffectLightsOptions::NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL;
-      // command.first_page_turn_on->brightness_slider_value = PageManager::GetLightPage()->getBrightnessValue();
-      // command.first_page_turn_on->kelvin_slider_value = PageManager::GetLightPage()->selectedLight->color_temp;
-
-      // size_t pack_length = nspanel_mqttmanager_command__get_packed_size(&command);
-      // uint8_t buffer[pack_length];
-      // size_t pack_size = nspanel_mqttmanager_command__pack(&command, buffer);
-
-      // std::string full_buffer = std::string(buffer, buffer + pack_size);
-      // MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, true);
+  if (PageManager::GetLightPage()->selectedLight != nullptr) {
+    switch (component) {
+    case LIGHT_PAGE_BACK_BUTTON_ID: {
+      PageManager::GoBack();
+      break;
     }
-    break;
-  }
-  case LIGHT_PAGE_KELVIN_SLIDER_ID: {
-    // TODO: Implement with protobuf
-    if (PageManager::GetLightPage()->selectedLight != nullptr) {
-      // std::list<Light *> lights;
-      // lights.push_back(PageManager::GetLightPage()->selectedLight);
-      // if (PageManager::GetLightPage()->getCurrentMode() == LIGHT_PAGE_MODE::COLOR_TEMP) {
-      //   LightManager::ChangeLightToColorTemperature(&lights, PageManager::GetLightPage()->getKelvinSatValue());
-      // } else if (PageManager::GetLightPage()->getCurrentMode() == LIGHT_PAGE_MODE::COLOR_RGB) {
-      //   LightManager::ChangeLightsToColorSaturation(&lights, PageManager::GetLightPage()->getKelvinSatValue());
-      // }
-      // PageManager::GetLightPage()->updateValues(); Not needed as slider changes directly
+    case LIGHT_PAGE_BRIGHTNESS_SLIDER_ID: {
+      int32_t light_ids[1] = {PageManager::GetLightPage()->selectedLight->id};
+
+      NSPanelMQTTManagerCommand command = NSPANEL_MQTTMANAGER_COMMAND__INIT;
+      command.command_data_case = NSPanelMQTTManagerCommand__CommandDataCase::NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_LIGHT_COMMAND;
+      command.light_command->n_light_ids = 1;
+      command.light_command->light_ids = light_ids;
+      command.light_command->has_brightness = true;
+      command.light_command->brightness = PageManager::GetLightPage()->getBrightnessValue();
+
+      size_t pack_length = nspanel_mqttmanager_command__get_packed_size(&command);
+      uint8_t buffer[pack_length];
+      size_t pack_size = nspanel_mqttmanager_command__pack(&command, buffer);
+
+      std::string full_buffer = std::string(buffer, buffer + pack_size);
+      MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, true);
+      break;
     }
-    break;
-  }
-  case LIGHT_PAGE_HUE_SLIDER_ID: {
-    // TODO: Implement with protobuf
-    // if (PageManager::GetLightPage()->selectedLight != nullptr) {
-    //   std::list<Light *> lights;
-    //   lights.push_back(PageManager::GetLightPage()->selectedLight);
-    //   LightManager::ChangeLightsToColorHue(&lights, PageManager::GetLightPage()->getHueValue());
-    // }
-    break;
-  }
-  case LIGHT_PAGE_SWITCH_MODE_BUTTON_ID: {
-    PageManager::GetLightPage()->switchMode();
-    break;
-  }
-  default:
-    break;
+    case LIGHT_PAGE_KELVIN_SLIDER_ID: {
+      if (PageManager::GetLightPage()->selectedLight != nullptr) {
+        int32_t light_ids[1] = {PageManager::GetLightPage()->selectedLight->id};
+
+        NSPanelMQTTManagerCommand command = NSPANEL_MQTTMANAGER_COMMAND__INIT;
+        command.command_data_case = NSPanelMQTTManagerCommand__CommandDataCase::NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_LIGHT_COMMAND;
+        command.light_command->n_light_ids = 1;
+        command.light_command->light_ids = light_ids;
+        if (PageManager::GetLightPage()->_currentMode == LIGHT_PAGE_MODE::COLOR_TEMP) {
+          command.light_command->has_color_temperature = true;
+          command.light_command->color_temperature = PageManager::GetLightPage()->getKelvinSatValue();
+        } else if (PageManager::GetLightPage()->_currentMode == LIGHT_PAGE_MODE::COLOR_RGB) {
+          command.light_command->has_color_temperature = true;
+          command.light_command->color_temperature = PageManager::GetLightPage()->getKelvinSatValue();
+        }
+
+        size_t pack_length = nspanel_mqttmanager_command__get_packed_size(&command);
+        uint8_t buffer[pack_length];
+        size_t pack_size = nspanel_mqttmanager_command__pack(&command, buffer);
+
+        std::string full_buffer = std::string(buffer, buffer + pack_size);
+        MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, true);
+        break;
+      }
+      break;
+    }
+    case LIGHT_PAGE_HUE_SLIDER_ID: {
+      int32_t light_ids[1] = {PageManager::GetLightPage()->selectedLight->id};
+
+      NSPanelMQTTManagerCommand command = NSPANEL_MQTTMANAGER_COMMAND__INIT;
+      command.command_data_case = NSPanelMQTTManagerCommand__CommandDataCase::NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_LIGHT_COMMAND;
+      command.light_command->n_light_ids = 1;
+      command.light_command->light_ids = light_ids;
+      command.light_command->has_hue = true;
+      command.light_command->hue = PageManager::GetLightPage()->getHueValue();
+
+      size_t pack_length = nspanel_mqttmanager_command__get_packed_size(&command);
+      uint8_t buffer[pack_length];
+      size_t pack_size = nspanel_mqttmanager_command__pack(&command, buffer);
+
+      std::string full_buffer = std::string(buffer, buffer + pack_size);
+      MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, true);
+      break;
+      break;
+    }
+    case LIGHT_PAGE_SWITCH_MODE_BUTTON_ID: {
+      PageManager::GetLightPage()->switchMode();
+      break;
+    }
+    default:
+      break;
+    }
   }
 }
 

@@ -197,7 +197,7 @@ void RoomManager::loadAllRooms(bool is_update) {
       }
     }
   } else {
-    // TODO: Implement function that remove any rooms currecntly loaded but not configured (ie. removed through manager)
+    // TODO: Implement function that remove any rooms currently loaded but not configured (ie. removed through manager)
     LOG_DEBUG("Calling roomChangedCallback");
     RoomManager::_callRoomChangeCallbacks(); // Call room change update to force an update for other components
   }

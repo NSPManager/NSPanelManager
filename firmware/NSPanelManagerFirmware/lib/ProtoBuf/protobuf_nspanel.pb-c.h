@@ -24,6 +24,7 @@ typedef struct NSPanelWeatherUpdate__ForecastItem NSPanelWeatherUpdate__Forecast
 typedef struct NSPanelMQTTManagerCommand NSPanelMQTTManagerCommand;
 typedef struct NSPanelMQTTManagerCommand__FirstPageTurnLightOn NSPanelMQTTManagerCommand__FirstPageTurnLightOn;
 typedef struct NSPanelMQTTManagerCommand__FirstPageTurnLightOff NSPanelMQTTManagerCommand__FirstPageTurnLightOff;
+typedef struct NSPanelMQTTManagerCommand__LightCommand NSPanelMQTTManagerCommand__LightCommand;
 
 
 /* --- enums --- */
@@ -175,10 +176,34 @@ struct  NSPanelMQTTManagerCommand__FirstPageTurnLightOff
     , NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL }
 
 
+/*
+ * TODO: Once protobuf-c-compiler gets updated, perhaps it's possible to build protobuf C files
+ * with optional arguments.
+ */
+struct  NSPanelMQTTManagerCommand__LightCommand
+{
+  ProtobufCMessage base;
+  size_t n_light_ids;
+  int32_t *light_ids;
+  protobuf_c_boolean has_brightness;
+  int32_t brightness;
+  protobuf_c_boolean has_color_temperature;
+  int32_t color_temperature;
+  protobuf_c_boolean has_hue;
+  int32_t hue;
+  protobuf_c_boolean has_saturation;
+  int32_t saturation;
+};
+#define NSPANEL_MQTTMANAGER_COMMAND__LIGHT_COMMAND__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__light_command__descriptor) \
+    , 0,NULL, 0, 0, 0, 0, 0, 0, 0, 0 }
+
+
 typedef enum {
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__NOT_SET = 0,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON = 1,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_OFF = 2
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_OFF = 2,
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_LIGHT_COMMAND = 3
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__CASE)
 } NSPanelMQTTManagerCommand__CommandDataCase;
 
@@ -192,6 +217,7 @@ struct  NSPanelMQTTManagerCommand
   union {
     NSPanelMQTTManagerCommand__FirstPageTurnLightOn *first_page_turn_on;
     NSPanelMQTTManagerCommand__FirstPageTurnLightOff *first_page_turn_off;
+    NSPanelMQTTManagerCommand__LightCommand *light_command;
   };
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__INIT \
@@ -303,6 +329,9 @@ void   nspanel_mqttmanager_command__first_page_turn_light_on__init
 /* NSPanelMQTTManagerCommand__FirstPageTurnLightOff methods */
 void   nspanel_mqttmanager_command__first_page_turn_light_off__init
                      (NSPanelMQTTManagerCommand__FirstPageTurnLightOff         *message);
+/* NSPanelMQTTManagerCommand__LightCommand methods */
+void   nspanel_mqttmanager_command__light_command__init
+                     (NSPanelMQTTManagerCommand__LightCommand         *message);
 /* NSPanelMQTTManagerCommand methods */
 void   nspanel_mqttmanager_command__init
                      (NSPanelMQTTManagerCommand         *message);
@@ -348,6 +377,9 @@ typedef void (*NSPanelMQTTManagerCommand__FirstPageTurnLightOn_Closure)
 typedef void (*NSPanelMQTTManagerCommand__FirstPageTurnLightOff_Closure)
                  (const NSPanelMQTTManagerCommand__FirstPageTurnLightOff *message,
                   void *closure_data);
+typedef void (*NSPanelMQTTManagerCommand__LightCommand_Closure)
+                 (const NSPanelMQTTManagerCommand__LightCommand *message,
+                  void *closure_data);
 typedef void (*NSPanelMQTTManagerCommand_Closure)
                  (const NSPanelMQTTManagerCommand *message,
                   void *closure_data);
@@ -368,6 +400,7 @@ extern const ProtobufCMessageDescriptor nspanel_weather_update__forecast_item__d
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_turn_light_on__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_turn_light_off__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__light_command__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_mqttmanager_command__affect_lights_options__descriptor;
 
 PROTOBUF_C__END_DECLS

@@ -94,9 +94,23 @@ message NSPanelMQTTManagerCommand {
     message FirstPageTurnLightOff {
         AffectLightsOptions affect_lights = 1;
     }
+    // TODO: Once protobuf-c-compiler gets updated, perhaps it's possible to build protobuf C files
+    // with optional arguments.
+    message LightCommand {
+        repeated int32 light_ids = 1;
+        bool has_brightness = 2;
+        int32 brightness = 3;
+        bool has_color_temperature = 4;
+        int32 color_temperature = 5;
+        bool has_hue = 6;
+        int32 hue = 7;
+        bool has_saturation = 8;
+        int32 saturation = 9;
+    }
 
     oneof CommandData {
         FirstPageTurnLightOn first_page_turn_on = 1;
         FirstPageTurnLightOff first_page_turn_off = 2;
+        LightCommand light_command = 3;
     }
 }

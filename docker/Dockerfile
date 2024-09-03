@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM python:3.11 AS build
+FROM --platform=$BUILDPLATFORM python:3.12.5-bookworm AS build
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 ARG no_mqttmanager_build
@@ -21,7 +21,7 @@ RUN if [ "$IS_DEVEL" != "yes" ]; then conan profile detect --force && echo 'core
 RUN if [ -z "$no_mqttmanager_build" ]; then /bin/bash /MQTTManager/compile_mqttmanager.sh --target-platform "$TARGETPLATFORM" --strip; else echo "Not building MQTTManager."; fi
 
 
-FROM python:3.11
+FROM python:3.12.5-bookworm
 ARG no_mqttmanager_build
 ARG IS_DEVEL
 WORKDIR /usr/src/app
@@ -36,7 +36,7 @@ COPY --from=build /MQTTManager/build /MQTTManager/build
 RUN apt-get update && apt-get -y upgrade
 
 # Install software needed to build the manager
-RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get install -y --no-install-recommends cmake build-essential curl npm postgresql-client curl inotify-tools net-tools nginx build-essential gdb protobuf-c-compiler \
+RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get install -y --no-install-recommends cmake build-essential curl npm postgresql-client curl inotify-tools net-tools nginx build-essential protobuf-c-compiler \
   && pip install conan && conan profile detect --force \
   && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf \
   && sed -i "s|cppstd=gnu14|cppstd=gnu17|g" /root/.conan2/profiles/default \

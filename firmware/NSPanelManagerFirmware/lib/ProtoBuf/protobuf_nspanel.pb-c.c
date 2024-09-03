@@ -250,6 +250,12 @@ void   nspanel_mqttmanager_command__first_page_turn_light_off__init
   static const NSPanelMQTTManagerCommand__FirstPageTurnLightOff init_value = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_OFF__INIT;
   *message = init_value;
 }
+void   nspanel_mqttmanager_command__light_command__init
+                     (NSPanelMQTTManagerCommand__LightCommand         *message)
+{
+  static const NSPanelMQTTManagerCommand__LightCommand init_value = NSPANEL_MQTTMANAGER_COMMAND__LIGHT_COMMAND__INIT;
+  *message = init_value;
+}
 void   nspanel_mqttmanager_command__init
                      (NSPanelMQTTManagerCommand         *message)
 {
@@ -1127,6 +1133,148 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_turn_li
   (ProtobufCMessageInit) nspanel_mqttmanager_command__first_page_turn_light_off__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__light_command__field_descriptors[9] =
+{
+  {
+    "light_ids",
+    1,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(NSPanelMQTTManagerCommand__LightCommand, n_light_ids),
+    offsetof(NSPanelMQTTManagerCommand__LightCommand, light_ids),
+    NULL,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_PACKED,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "has_brightness",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__LightCommand, has_brightness),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "brightness",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__LightCommand, brightness),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "has_color_temperature",
+    4,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__LightCommand, has_color_temperature),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "color_temperature",
+    5,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__LightCommand, color_temperature),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "has_hue",
+    6,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__LightCommand, has_hue),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "hue",
+    7,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__LightCommand, hue),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "has_saturation",
+    8,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__LightCommand, has_saturation),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "saturation",
+    9,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__LightCommand, saturation),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_mqttmanager_command__light_command__field_indices_by_name[] = {
+  2,   /* field[2] = brightness */
+  4,   /* field[4] = color_temperature */
+  1,   /* field[1] = has_brightness */
+  3,   /* field[3] = has_color_temperature */
+  5,   /* field[5] = has_hue */
+  7,   /* field[7] = has_saturation */
+  6,   /* field[6] = hue */
+  0,   /* field[0] = light_ids */
+  8,   /* field[8] = saturation */
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__light_command__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 9 }
+};
+const ProtobufCMessageDescriptor nspanel_mqttmanager_command__light_command__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand.LightCommand",
+  "LightCommand",
+  "NSPanelMQTTManagerCommand__LightCommand",
+  "",
+  sizeof(NSPanelMQTTManagerCommand__LightCommand),
+  9,
+  nspanel_mqttmanager_command__light_command__field_descriptors,
+  nspanel_mqttmanager_command__light_command__field_indices_by_name,
+  1,  nspanel_mqttmanager_command__light_command__number_ranges,
+  (ProtobufCMessageInit) nspanel_mqttmanager_command__light_command__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
 static const ProtobufCEnumValue nspanel_mqttmanager_command__affect_lights_options__enum_values_by_number[3] =
 {
   { "ALL", "NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL", 0 },
@@ -1157,7 +1305,7 @@ const ProtobufCEnumDescriptor nspanel_mqttmanager_command__affect_lights_options
   nspanel_mqttmanager_command__affect_lights_options__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[2] =
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[3] =
 {
   {
     "first_page_turn_on",
@@ -1183,15 +1331,28 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descrip
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "light_command",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(NSPanelMQTTManagerCommand, command_data_case),
+    offsetof(NSPanelMQTTManagerCommand, light_command),
+    &nspanel_mqttmanager_command__light_command__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_mqttmanager_command__field_indices_by_name[] = {
   1,   /* field[1] = first_page_turn_off */
   0,   /* field[0] = first_page_turn_on */
+  2,   /* field[2] = light_command */
 };
 static const ProtobufCIntRange nspanel_mqttmanager_command__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 2 }
+  { 0, 3 }
 };
 const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
 {
@@ -1201,7 +1362,7 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
   "NSPanelMQTTManagerCommand",
   "",
   sizeof(NSPanelMQTTManagerCommand),
-  2,
+  3,
   nspanel_mqttmanager_command__field_descriptors,
   nspanel_mqttmanager_command__field_indices_by_name,
   1,  nspanel_mqttmanager_command__number_ranges,

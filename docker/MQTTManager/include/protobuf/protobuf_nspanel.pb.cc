@@ -79,6 +79,34 @@ struct NSPanelWarningDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelWarningDefaultTypeInternal _NSPanelWarning_default_instance_;
 
+inline constexpr NSPanelMQTTManagerCommand_LightCommand::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : light_ids_{},
+        _light_ids_cached_byte_size_{0},
+        brightness_{0},
+        color_temperature_{0},
+        has_brightness_{false},
+        has_color_temperature_{false},
+        has_hue_{false},
+        has_saturation_{false},
+        hue_{0},
+        saturation_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_LightCommand::NSPanelMQTTManagerCommand_LightCommand(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct NSPanelMQTTManagerCommand_LightCommandDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_LightCommandDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~NSPanelMQTTManagerCommand_LightCommandDefaultTypeInternal() {}
+  union {
+    NSPanelMQTTManagerCommand_LightCommand _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelMQTTManagerCommand_LightCommandDefaultTypeInternal _NSPanelMQTTManagerCommand_LightCommand_default_instance_;
+
 inline constexpr NSPanelMQTTManagerCommand_FirstPageTurnLightOn::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : affect_lights_{static_cast< ::NSPanelMQTTManagerCommand_AffectLightsOptions >(0)},
@@ -386,6 +414,23 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff, _impl_.affect_lights_),
         ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_LightCommand, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_LightCommand, _impl_.light_ids_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_LightCommand, _impl_.has_brightness_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_LightCommand, _impl_.brightness_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_LightCommand, _impl_.has_color_temperature_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_LightCommand, _impl_.color_temperature_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_LightCommand, _impl_.has_hue_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_LightCommand, _impl_.hue_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_LightCommand, _impl_.has_saturation_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_LightCommand, _impl_.saturation_),
+        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand, _internal_metadata_),
         ~0u,  // no _extensions_
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand, _impl_._oneof_case_[0]),
@@ -393,6 +438,7 @@ const ::uint32_t
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
+        ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand, _impl_.CommandData_),
@@ -408,7 +454,8 @@ static const ::_pbi::MigrationSchema
         {74, -1, -1, sizeof(::NSPanelWeatherUpdate)},
         {90, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
         {101, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
-        {110, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {110, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
+        {127, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelWarning_default_instance_._instance,
@@ -419,6 +466,7 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelWeatherUpdate_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_FirstPageTurnLightOn_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_FirstPageTurnLightOff_default_instance_._instance,
+    &::_NSPanelMQTTManagerCommand_LightCommand_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_default_instance_._instance,
 };
 const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -457,35 +505,42 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "ing\030\010 \001(\t\032\222\001\n\014ForecastItem\022\024\n\014weather_ic"
     "on\030\001 \001(\t\022\034\n\024precipitation_string\030\002 \001(\t\022!"
     "\n\031temperature_maxmin_string\030\003 \001(\t\022\023\n\013win"
-    "d_string\030\004 \001(\t\022\026\n\016display_string\030\005 \001(\t\"\216"
-    "\004\n\031NSPanelMQTTManagerCommand\022M\n\022first_pa"
+    "d_string\030\004 \001(\t\022\026\n\016display_string\030\005 \001(\t\"\244"
+    "\006\n\031NSPanelMQTTManagerCommand\022M\n\022first_pa"
     "ge_turn_on\030\001 \001(\0132/.NSPanelMQTTManagerCom"
     "mand.FirstPageTurnLightOnH\000\022O\n\023first_pag"
     "e_turn_off\030\002 \001(\01320.NSPanelMQTTManagerCom"
-    "mand.FirstPageTurnLightOffH\000\032\233\001\n\024FirstPa"
-    "geTurnLightOn\022E\n\raffect_lights\030\001 \001(\0162..N"
-    "SPanelMQTTManagerCommand.AffectLightsOpt"
-    "ions\022\037\n\027brightness_slider_value\030\002 \001(\005\022\033\n"
-    "\023kelvin_slider_value\030\003 \001(\005\032^\n\025FirstPageT"
-    "urnLightOff\022E\n\raffect_lights\030\001 \001(\0162..NSP"
-    "anelMQTTManagerCommand.AffectLightsOptio"
-    "ns\"D\n\023AffectLightsOptions\022\007\n\003ALL\020\000\022\020\n\014TA"
-    "BLE_LIGHTS\020\001\022\022\n\016CEILING_LIGHTS\020\002B\r\n\013Comm"
-    "andData*[\n\023NSPanelWarningLevel\022\014\n\010CRITIC"
-    "AL\020\000\022\t\n\005ERROR\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022\t"
-    "\n\005DEBUG\020\004\022\t\n\005TRACE\020\005b\006proto3"
+    "mand.FirstPageTurnLightOffH\000\022@\n\rlight_co"
+    "mmand\030\003 \001(\0132\'.NSPanelMQTTManagerCommand."
+    "LightCommandH\000\032\233\001\n\024FirstPageTurnLightOn\022"
+    "E\n\raffect_lights\030\001 \001(\0162..NSPanelMQTTMana"
+    "gerCommand.AffectLightsOptions\022\037\n\027bright"
+    "ness_slider_value\030\002 \001(\005\022\033\n\023kelvin_slider"
+    "_value\030\003 \001(\005\032^\n\025FirstPageTurnLightOff\022E\n"
+    "\raffect_lights\030\001 \001(\0162..NSPanelMQTTManage"
+    "rCommand.AffectLightsOptions\032\321\001\n\014LightCo"
+    "mmand\022\021\n\tlight_ids\030\001 \003(\005\022\026\n\016has_brightne"
+    "ss\030\002 \001(\010\022\022\n\nbrightness\030\003 \001(\005\022\035\n\025has_colo"
+    "r_temperature\030\004 \001(\010\022\031\n\021color_temperature"
+    "\030\005 \001(\005\022\017\n\007has_hue\030\006 \001(\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016"
+    "has_saturation\030\010 \001(\010\022\022\n\nsaturation\030\t \001(\005"
+    "\"D\n\023AffectLightsOptions\022\007\n\003ALL\020\000\022\020\n\014TABL"
+    "E_LIGHTS\020\001\022\022\n\016CEILING_LIGHTS\020\002B\r\n\013Comman"
+    "dData*[\n\023NSPanelWarningLevel\022\014\n\010CRITICAL"
+    "\020\000\022\t\n\005ERROR\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005"
+    "DEBUG\020\004\022\t\n\005TRACE\020\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    2028,
+    2306,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
     nullptr,
     0,
-    9,
+    10,
     schemas,
     file_default_instances,
     TableStruct_protobuf_5fnspanel_2eproto::offsets,
@@ -3084,6 +3139,402 @@ void NSPanelMQTTManagerCommand_FirstPageTurnLightOff::InternalSwap(NSPanelMQTTMa
 }
 // ===================================================================
 
+class NSPanelMQTTManagerCommand_LightCommand::_Internal {
+ public:
+};
+
+NSPanelMQTTManagerCommand_LightCommand::NSPanelMQTTManagerCommand_LightCommand(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:NSPanelMQTTManagerCommand.LightCommand)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_LightCommand::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::NSPanelMQTTManagerCommand_LightCommand& from_msg)
+      : light_ids_{visibility, arena, from.light_ids_},
+        _light_ids_cached_byte_size_{0},
+        _cached_size_{0} {}
+
+NSPanelMQTTManagerCommand_LightCommand::NSPanelMQTTManagerCommand_LightCommand(
+    ::google::protobuf::Arena* arena,
+    const NSPanelMQTTManagerCommand_LightCommand& from)
+    : ::google::protobuf::Message(arena) {
+  NSPanelMQTTManagerCommand_LightCommand* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, brightness_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, brightness_),
+           offsetof(Impl_, saturation_) -
+               offsetof(Impl_, brightness_) +
+               sizeof(Impl_::saturation_));
+
+  // @@protoc_insertion_point(copy_constructor:NSPanelMQTTManagerCommand.LightCommand)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_LightCommand::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : light_ids_{visibility, arena},
+        _light_ids_cached_byte_size_{0},
+        _cached_size_{0} {}
+
+inline void NSPanelMQTTManagerCommand_LightCommand::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, brightness_),
+           0,
+           offsetof(Impl_, saturation_) -
+               offsetof(Impl_, brightness_) +
+               sizeof(Impl_::saturation_));
+}
+NSPanelMQTTManagerCommand_LightCommand::~NSPanelMQTTManagerCommand_LightCommand() {
+  // @@protoc_insertion_point(destructor:NSPanelMQTTManagerCommand.LightCommand)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void NSPanelMQTTManagerCommand_LightCommand::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+NSPanelMQTTManagerCommand_LightCommand::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_._cached_size_),
+              false,
+          },
+          &NSPanelMQTTManagerCommand_LightCommand::MergeImpl,
+          &NSPanelMQTTManagerCommand_LightCommand::kDescriptorMethods,
+          &descriptor_table_protobuf_5fnspanel_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<4, 9, 0, 0, 2> NSPanelMQTTManagerCommand_LightCommand::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    9, 120,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294966784,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    9,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_NSPanelMQTTManagerCommand_LightCommand_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_LightCommand>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // repeated int32 light_ids = 1;
+    {::_pbi::TcParser::FastV32P1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.light_ids_)}},
+    // bool has_brightness = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelMQTTManagerCommand_LightCommand, _impl_.has_brightness_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.has_brightness_)}},
+    // int32 brightness = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_LightCommand, _impl_.brightness_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.brightness_)}},
+    // bool has_color_temperature = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelMQTTManagerCommand_LightCommand, _impl_.has_color_temperature_), 63>(),
+     {32, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.has_color_temperature_)}},
+    // int32 color_temperature = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_LightCommand, _impl_.color_temperature_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.color_temperature_)}},
+    // bool has_hue = 6;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelMQTTManagerCommand_LightCommand, _impl_.has_hue_), 63>(),
+     {48, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.has_hue_)}},
+    // int32 hue = 7;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_LightCommand, _impl_.hue_), 63>(),
+     {56, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.hue_)}},
+    // bool has_saturation = 8;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelMQTTManagerCommand_LightCommand, _impl_.has_saturation_), 63>(),
+     {64, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.has_saturation_)}},
+    // int32 saturation = 9;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_LightCommand, _impl_.saturation_), 63>(),
+     {72, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.saturation_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated int32 light_ids = 1;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.light_ids_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
+    // bool has_brightness = 2;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.has_brightness_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // int32 brightness = 3;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.brightness_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // bool has_color_temperature = 4;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.has_color_temperature_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // int32 color_temperature = 5;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.color_temperature_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // bool has_hue = 6;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.has_hue_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // int32 hue = 7;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.hue_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // bool has_saturation = 8;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.has_saturation_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // int32 saturation = 9;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.saturation_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+
+PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_LightCommand::Clear() {
+// @@protoc_insertion_point(message_clear_start:NSPanelMQTTManagerCommand.LightCommand)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.light_ids_.Clear();
+  ::memset(&_impl_.brightness_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.saturation_) -
+      reinterpret_cast<char*>(&_impl_.brightness_)) + sizeof(_impl_.saturation_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* NSPanelMQTTManagerCommand_LightCommand::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:NSPanelMQTTManagerCommand.LightCommand)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // repeated int32 light_ids = 1;
+  {
+    int byte_size = _impl_._light_ids_cached_byte_size_.Get();
+    if (byte_size > 0) {
+      target = stream->WriteInt32Packed(
+          1, _internal_light_ids(), byte_size, target);
+    }
+  }
+
+  // bool has_brightness = 2;
+  if (this->_internal_has_brightness() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        2, this->_internal_has_brightness(), target);
+  }
+
+  // int32 brightness = 3;
+  if (this->_internal_brightness() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<3>(
+            stream, this->_internal_brightness(), target);
+  }
+
+  // bool has_color_temperature = 4;
+  if (this->_internal_has_color_temperature() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        4, this->_internal_has_color_temperature(), target);
+  }
+
+  // int32 color_temperature = 5;
+  if (this->_internal_color_temperature() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<5>(
+            stream, this->_internal_color_temperature(), target);
+  }
+
+  // bool has_hue = 6;
+  if (this->_internal_has_hue() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        6, this->_internal_has_hue(), target);
+  }
+
+  // int32 hue = 7;
+  if (this->_internal_hue() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<7>(
+            stream, this->_internal_hue(), target);
+  }
+
+  // bool has_saturation = 8;
+  if (this->_internal_has_saturation() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        8, this->_internal_has_saturation(), target);
+  }
+
+  // int32 saturation = 9;
+  if (this->_internal_saturation() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<9>(
+            stream, this->_internal_saturation(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:NSPanelMQTTManagerCommand.LightCommand)
+  return target;
+}
+
+::size_t NSPanelMQTTManagerCommand_LightCommand::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:NSPanelMQTTManagerCommand.LightCommand)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // repeated int32 light_ids = 1;
+  {
+    std::size_t data_size = ::_pbi::WireFormatLite::Int32Size(
+        this->_internal_light_ids())
+    ;
+    _impl_._light_ids_cached_byte_size_.Set(::_pbi::ToCachedSize(data_size));
+    std::size_t tag_size = data_size == 0
+        ? 0
+        : 1 + ::_pbi::WireFormatLite::Int32Size(
+                            static_cast<int32_t>(data_size))
+    ;
+    total_size += tag_size + data_size;
+  }
+  // int32 brightness = 3;
+  if (this->_internal_brightness() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_brightness());
+  }
+
+  // int32 color_temperature = 5;
+  if (this->_internal_color_temperature() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_color_temperature());
+  }
+
+  // bool has_brightness = 2;
+  if (this->_internal_has_brightness() != 0) {
+    total_size += 2;
+  }
+
+  // bool has_color_temperature = 4;
+  if (this->_internal_has_color_temperature() != 0) {
+    total_size += 2;
+  }
+
+  // bool has_hue = 6;
+  if (this->_internal_has_hue() != 0) {
+    total_size += 2;
+  }
+
+  // bool has_saturation = 8;
+  if (this->_internal_has_saturation() != 0) {
+    total_size += 2;
+  }
+
+  // int32 hue = 7;
+  if (this->_internal_hue() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_hue());
+  }
+
+  // int32 saturation = 9;
+  if (this->_internal_saturation() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_saturation());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void NSPanelMQTTManagerCommand_LightCommand::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<NSPanelMQTTManagerCommand_LightCommand*>(&to_msg);
+  auto& from = static_cast<const NSPanelMQTTManagerCommand_LightCommand&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelMQTTManagerCommand.LightCommand)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_internal_mutable_light_ids()->MergeFrom(from._internal_light_ids());
+  if (from._internal_brightness() != 0) {
+    _this->_impl_.brightness_ = from._impl_.brightness_;
+  }
+  if (from._internal_color_temperature() != 0) {
+    _this->_impl_.color_temperature_ = from._impl_.color_temperature_;
+  }
+  if (from._internal_has_brightness() != 0) {
+    _this->_impl_.has_brightness_ = from._impl_.has_brightness_;
+  }
+  if (from._internal_has_color_temperature() != 0) {
+    _this->_impl_.has_color_temperature_ = from._impl_.has_color_temperature_;
+  }
+  if (from._internal_has_hue() != 0) {
+    _this->_impl_.has_hue_ = from._impl_.has_hue_;
+  }
+  if (from._internal_has_saturation() != 0) {
+    _this->_impl_.has_saturation_ = from._impl_.has_saturation_;
+  }
+  if (from._internal_hue() != 0) {
+    _this->_impl_.hue_ = from._impl_.hue_;
+  }
+  if (from._internal_saturation() != 0) {
+    _this->_impl_.saturation_ = from._impl_.saturation_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void NSPanelMQTTManagerCommand_LightCommand::CopyFrom(const NSPanelMQTTManagerCommand_LightCommand& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelMQTTManagerCommand.LightCommand)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void NSPanelMQTTManagerCommand_LightCommand::InternalSwap(NSPanelMQTTManagerCommand_LightCommand* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.light_ids_.InternalSwap(&other->_impl_.light_ids_);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.saturation_)
+      + sizeof(NSPanelMQTTManagerCommand_LightCommand::_impl_.saturation_)
+      - PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_LightCommand, _impl_.brightness_)>(
+          reinterpret_cast<char*>(&_impl_.brightness_),
+          reinterpret_cast<char*>(&other->_impl_.brightness_));
+}
+
+::google::protobuf::Metadata NSPanelMQTTManagerCommand_LightCommand::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 class NSPanelMQTTManagerCommand::_Internal {
  public:
   static constexpr ::int32_t kOneofCaseOffset =
@@ -3116,6 +3567,19 @@ void NSPanelMQTTManagerCommand::set_allocated_first_page_turn_off(::NSPanelMQTTM
   }
   // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.first_page_turn_off)
 }
+void NSPanelMQTTManagerCommand::set_allocated_light_command(::NSPanelMQTTManagerCommand_LightCommand* light_command) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_CommandData();
+  if (light_command) {
+    ::google::protobuf::Arena* submessage_arena = light_command->GetArena();
+    if (message_arena != submessage_arena) {
+      light_command = ::google::protobuf::internal::GetOwnedMessage(message_arena, light_command, submessage_arena);
+    }
+    set_has_light_command();
+    _impl_.CommandData_.light_command_ = light_command;
+  }
+  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.light_command)
+}
 NSPanelMQTTManagerCommand::NSPanelMQTTManagerCommand(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
   SharedCtor(arena);
@@ -3145,6 +3609,9 @@ NSPanelMQTTManagerCommand::NSPanelMQTTManagerCommand(
         break;
       case kFirstPageTurnOff:
         _impl_.CommandData_.first_page_turn_off_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_FirstPageTurnLightOff>(arena, *from._impl_.CommandData_.first_page_turn_off_);
+        break;
+      case kLightCommand:
+        _impl_.CommandData_.light_command_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_LightCommand>(arena, *from._impl_.CommandData_.light_command_);
         break;
   }
 
@@ -3193,6 +3660,14 @@ void NSPanelMQTTManagerCommand::clear_CommandData() {
       }
       break;
     }
+    case kLightCommand: {
+      if (GetArena() == nullptr) {
+        delete _impl_.CommandData_.light_command_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.light_command_);
+      }
+      break;
+    }
     case COMMANDDATA_NOT_SET: {
       break;
     }
@@ -3222,16 +3697,16 @@ NSPanelMQTTManagerCommand::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 2, 2, 0, 2> NSPanelMQTTManagerCommand::_table_ = {
+const ::_pbi::TcParseTable<0, 3, 3, 0, 2> NSPanelMQTTManagerCommand::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    2, 0,  // max_field_number, fast_idx_mask
+    3, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967292,  // skipmap
+    4294967288,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    2,  // num_field_entries
-    2,  // num_aux_entries
+    3,  // num_field_entries
+    3,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelMQTTManagerCommand_default_instance_._instance,
     nullptr,  // post_loop_handler
@@ -3250,9 +3725,13 @@ const ::_pbi::TcParseTable<0, 2, 2, 0, 2> NSPanelMQTTManagerCommand::_table_ = {
     // .NSPanelMQTTManagerCommand.FirstPageTurnLightOff first_page_turn_off = 2;
     {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.first_page_turn_off_), _Internal::kOneofCaseOffset + 0, 1,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .NSPanelMQTTManagerCommand.LightCommand light_command = 3;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.light_command_), _Internal::kOneofCaseOffset + 0, 2,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_FirstPageTurnLightOn>()},
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_FirstPageTurnLightOff>()},
+    {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_LightCommand>()},
   }}, {{
   }},
 };
@@ -3286,6 +3765,11 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand::Clear() {
           2, *_impl_.CommandData_.first_page_turn_off_, _impl_.CommandData_.first_page_turn_off_->GetCachedSize(), target, stream);
       break;
     }
+    case kLightCommand: {
+      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+          3, *_impl_.CommandData_.light_command_, _impl_.CommandData_.light_command_->GetCachedSize(), target, stream);
+      break;
+    }
     default:
       break;
   }
@@ -3317,6 +3801,12 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand::Clear() {
     case kFirstPageTurnOff: {
       total_size +=
           1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.first_page_turn_off_);
+      break;
+    }
+    // .NSPanelMQTTManagerCommand.LightCommand light_command = 3;
+    case kLightCommand: {
+      total_size +=
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.light_command_);
       break;
     }
     case COMMANDDATA_NOT_SET: {
@@ -3362,6 +3852,15 @@ void NSPanelMQTTManagerCommand::MergeImpl(::google::protobuf::MessageLite& to_ms
               ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_FirstPageTurnLightOff>(arena, *from._impl_.CommandData_.first_page_turn_off_);
         } else {
           _this->_impl_.CommandData_.first_page_turn_off_->MergeFrom(from._internal_first_page_turn_off());
+        }
+        break;
+      }
+      case kLightCommand: {
+        if (oneof_needs_init) {
+          _this->_impl_.CommandData_.light_command_ =
+              ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_LightCommand>(arena, *from._impl_.CommandData_.light_command_);
+        } else {
+          _this->_impl_.CommandData_.light_command_->MergeFrom(from._internal_light_command());
         }
         break;
       }
