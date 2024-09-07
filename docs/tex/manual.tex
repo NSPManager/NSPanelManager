@@ -260,7 +260,8 @@
       \info{There have been issues when using Android and the Chrome browser that it sometimes just shows a blank page. If this is the case, either use a different browser (E.g. Firefox) or another device with WiFi to access the web page.}
       \item Enter a friendly name for the NSPanel.
       \note{This name is only used to register the NSPanel the first time. After the panel has been registered the name has to be changed from the manager web interface.}
-      \item Enter WiFi name and password.
+      \item Enter WiFi name (or select from a list by pressing the "Select from list" button) and password.
+      \important{There has been an observed behavior that the NSPanel in the current framework version does not play nicely with WPA3 WiFi security.}
       \item Enter MQTT address and port. If you are using authentication for MQTT, enter username and password as well.
       \note{If you are running the MQTT server as an add-on to Home Assistant, enter the IP-address of your Home Assistant server.}
       \item Press the "Save" button on the bottom of the page. The panel will reboot and try to connect to the WiFi network.
