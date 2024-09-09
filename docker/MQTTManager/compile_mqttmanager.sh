@@ -108,13 +108,20 @@ cd /MQTTManager/
 BUILD_TYPE=$(grep -E "^build_type=" /root/.conan2/profiles/default | cut -d'=' -f 2)
 sed -i "s/arch=.*/arch=${conan_target_arch}/g" /root/.conan2/profiles/host
 
+# Determine wether to link libraries statically or dynamically.
+if [ "$BUILD_TYPE" == "Debug" ]; then
+  BUILD_SHARED_LIBS=ON
+else
+  BUILD_SHARED_LIBS=OFF
+fi
+
 echo "Conan profile: "
 cat /root/.conan2/profiles/default
 
 conan install . --build=missing -pr:b default -pr:h host
 cd build
 source $BUILD_TYPE/generators/conanbuild.sh
-cmake .. -DCMAKE_TOOLCHAIN_FILE=$BUILD_TYPE/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+cmake .. -DCMAKE_TOOLCHAIN_FILE=$BUILD_TYPE/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
 cmake --build . --config $BUILD_TYPE -j $(nproc)
 sed -i "s|/MQTTManager/|/home/tim/NSPanelManager/docker/MQTTManager/|g" compile_commands.json
 cp compile_commands.json ../
