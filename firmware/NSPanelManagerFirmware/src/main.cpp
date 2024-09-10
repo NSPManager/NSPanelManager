@@ -259,23 +259,25 @@ void taskManageWifiAndMqtt(void *param) {
           Serial.println(config.wifi_ssid.c_str());
           WiFi.begin(config.wifi_ssid.c_str(), config.wifi_psk.c_str());
           vTaskDelay(2000 / portTICK_PERIOD_MS);
-          if (WiFi.isConnected()) {
-            Serial.println("Connected to WiFi!");
-            LOG_INFO("Connected to WiFi ", config.wifi_ssid.c_str());
-            Serial.print("Connected to WiFi ");
-            Serial.println(config.wifi_ssid.c_str());
-            LOG_INFO("IP Address: ", WiFi.localIP().toString());
-            LOG_INFO("Netmask:    ", WiFi.subnetMask().toString());
-            LOG_INFO("Gateway:    ", WiFi.gatewayIP().toString());
-
-            // We successfully connected to WiFi. Init the rest of the components.
-            webMan.init(NSPanelManagerFirmwareVersion);
-            mqttManager.start();
-          } else {
+          if (!WiFi.isConnected()) {
             LOG_ERROR("Failed to connect to WiFi. Will try again in 5 seconds");
             Serial.println("Failed to connect to WiFi. Will try again in 5 seconds");
             vTaskDelay(5000 / portTICK_PERIOD_MS);
           }
+        }
+
+        if (WiFi.isConnected()) {
+          Serial.println("Connected to WiFi!");
+          LOG_INFO("Connected to WiFi ", config.wifi_ssid.c_str());
+          Serial.print("Connected to WiFi ");
+          Serial.println(config.wifi_ssid.c_str());
+          LOG_INFO("IP Address: ", WiFi.localIP().toString());
+          LOG_INFO("Netmask:    ", WiFi.subnetMask().toString());
+          LOG_INFO("Gateway:    ", WiFi.gatewayIP().toString());
+
+          // We successfully connected to WiFi. Init the rest of the components.
+          webMan.init(NSPanelManagerFirmwareVersion);
+          mqttManager.start();
         }
       } else if (!config.wifi_ssid.empty() && !WiFi.isConnected() && millis() - lastWiFiconnected >= 180 * 1000) {
         // Three minutes or more has passed since last successfull WiFi connection. Start the AP by breaking the loop.

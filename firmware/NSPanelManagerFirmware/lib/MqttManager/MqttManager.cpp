@@ -195,11 +195,13 @@ void MqttManager::_taskMqttRunTask(void *param) {
 
 bool MqttManager::_connect() {
   if (!MqttManager::_hasStarted) {
+    LOG_DEBUG("MQTT Manager has not yet started. Will not try to connect to MQTT Server.");
     return false;
   }
 
   // Stop processing if not connected to WiFi
   if (!WiFi.isConnected()) {
+    LOG_DEBUG("WiFi is not yet connected. Will not try to connect to MQTT Server.");
     return false;
   }
 
@@ -228,6 +230,7 @@ bool MqttManager::_connect() {
   MqttManager::_mqttClient->setSocketTimeout(5); // Set tighter timeout. Default: 15 seconds.
   Serial.println(NSPMConfig::instance->mqtt_server.c_str());
   MqttManager::_mqttClient->setServer(NSPMConfig::instance->mqtt_server.c_str(), NSPMConfig::instance->mqtt_port);
+  LOG_DEBUG("Will try to connect to MQTT Server '", NSPMConfig::instance->mqtt_server.c_str(), "' as user '", NSPMConfig::instance->mqtt_username.c_str(), "' with password '", NSPMConfig::instance->mqtt_password.c_str(), "'.");
   MqttManager::_mqttClient->connect(mqtt_device_name.c_str(), NSPMConfig::instance->mqtt_username.c_str(), NSPMConfig::instance->mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, true, offline_message_buffer);
   vTaskDelay(1000 / portTICK_PERIOD_MS);
   if (MqttManager::connected()) {
