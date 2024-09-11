@@ -63,6 +63,11 @@ set_target_properties(MQTT_Manager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_
 target_include_directories(MQTT_Manager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTT_Manager PahoMqttCpp::paho-mqttpp3-static MQTTManager_Config spdlog::spdlog Boost::boost)
 
+add_library(MQTTManager_CommandManager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/command_manager/command_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/command_manager/command_manager.hpp)
+set_target_properties(MQTTManager_CommandManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/command_manager/command_manager.hpp)
+target_include_directories(MQTTManager_CommandManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_link_libraries(MQTTManager_CommandManager MQTT_Manager spdlog::spdlog Boost::boost Protobuf_MQTTManager nlohmann_json::nlohmann_json)
+
 add_library(MQTTManager_WebsocketServer SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.hpp)
 set_target_properties(MQTTManager_WebsocketServer PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.hpp)
 target_include_directories(MQTTManager_WebsocketServer PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
@@ -115,4 +120,4 @@ target_link_libraries(MQTTManager_Config spdlog::spdlog MQTTManager_WebHelper nl
 
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_IPCHandler)
+target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_IPCHandler MQTTManager_CommandManager)

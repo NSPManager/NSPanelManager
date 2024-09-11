@@ -21,6 +21,9 @@ public:
   NSPanelLightStatus *getLightAtRoomViewPosition(int room_view_position);
   Scene *getSceneById(uint16_t id);
   bool anyLightsOn();
+
+private:
+  bool _is_initiated = false;
 };
 
 #endif

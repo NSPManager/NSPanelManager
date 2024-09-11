@@ -268,7 +268,7 @@ Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {
   std::string mqtt_room_status_topic = "nspanel/mqttmanager_";
   mqtt_room_status_topic.append(NSPMConfig::instance->manager_address);
   mqtt_room_status_topic.append("/command");
-  MqttManager::subscribeToTopic(mqtt_room_status_topic.c_str(), &RoomManager::mqtt_callback);
+  // MqttManager::subscribeToTopic(mqtt_room_status_topic.c_str(), &RoomManager::mqtt_callback);
 
   // Load and init all lights for the room
   // JsonVariant json_lights = (*roomData)["lights"];

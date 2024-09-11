@@ -64,8 +64,7 @@ private:
   void _ceilingMasterButtonEvent();
   void _tableMasterButtonEvent();
 
-  void _updateLightsThatAreOnWithNewBrightness(uint8_t brightness);
-  void _updateAllLightsWithNewBrightness(uint8_t brightness);
+  void _updateLightsWithNewBrightness(uint8_t brightness);
   void _updateLightsColorTempAccordingToSlider();
   void _startSpecialModeTriggerTask(editLightMode mode);
   void _startSpecialModeTimerTask();

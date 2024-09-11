@@ -1039,6 +1039,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOn final : public ::google::pr
     kAffectLightsFieldNumber = 1,
     kBrightnessSliderValueFieldNumber = 2,
     kKelvinSliderValueFieldNumber = 3,
+    kSelectedRoomFieldNumber = 4,
   };
   // .NSPanelMQTTManagerCommand.AffectLightsOptions affect_lights = 1;
   void clear_affect_lights() ;
@@ -1070,12 +1071,22 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOn final : public ::google::pr
   void _internal_set_kelvin_slider_value(::int32_t value);
 
   public:
+  // int32 selected_room = 4;
+  void clear_selected_room() ;
+  ::int32_t selected_room() const;
+  void set_selected_room(::int32_t value);
+
+  private:
+  ::int32_t _internal_selected_room() const;
+  void _internal_set_selected_room(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelMQTTManagerCommand.FirstPageTurnLightOn)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      2, 3, 0,
+      2, 4, 0,
       0, 2>
       _table_;
 
@@ -1099,6 +1110,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOn final : public ::google::pr
     int affect_lights_;
     ::int32_t brightness_slider_value_;
     ::int32_t kelvin_slider_value_;
+    ::int32_t selected_room_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -4325,6 +4337,28 @@ inline ::int32_t NSPanelMQTTManagerCommand_FirstPageTurnLightOn::_internal_kelvi
 inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::_internal_set_kelvin_slider_value(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.kelvin_slider_value_ = value;
+}
+
+// int32 selected_room = 4;
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::clear_selected_room() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.selected_room_ = 0;
+}
+inline ::int32_t NSPanelMQTTManagerCommand_FirstPageTurnLightOn::selected_room() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.FirstPageTurnLightOn.selected_room)
+  return _internal_selected_room();
+}
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::set_selected_room(::int32_t value) {
+  _internal_set_selected_room(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.FirstPageTurnLightOn.selected_room)
+}
+inline ::int32_t NSPanelMQTTManagerCommand_FirstPageTurnLightOn::_internal_selected_room() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.selected_room_;
+}
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::_internal_set_selected_room(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.selected_room_ = value;
 }
 
 // -------------------------------------------------------------------

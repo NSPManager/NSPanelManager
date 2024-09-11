@@ -1,3 +1,4 @@
+#include "command_manager/command_manager.hpp"
 #include "openhab_manager/openhab_manager.hpp"
 #include "spdlog/sinks/ansicolor_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
@@ -108,7 +109,6 @@ int main(void) {
   auto combined_logger = std::make_shared<spdlog::logger>("combined_logger", begin(spdlog_sinks), end(spdlog_sinks));
   spdlog::register_logger(combined_logger);
   spdlog::set_default_logger(combined_logger);
-
   spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%s:%#] [%t] %v");
 
   std::string log_level = std::getenv("LOG_LEVEL");
@@ -189,6 +189,8 @@ int main(void) {
   } else {
     SPDLOG_WARN("OpenHAB address and/or token missing. Won't start OpenHAB component.");
   }
+
+  CommandManager::init();
 
   // Wait for threads to exit
   mqtt_manager_thread.join();

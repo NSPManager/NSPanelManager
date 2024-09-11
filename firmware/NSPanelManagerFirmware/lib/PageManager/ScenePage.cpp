@@ -38,7 +38,7 @@ void ScenePage::doSceneSaveProgress(void *param) {
   unsigned long countStarted = millis();
   NSPanel::instance->setComponentVisible(SCENES_PAGE_SAVE_SLIDER_NAME, true);
   uint8_t lastSaveProgress = 255;
-  while (millis() - countStarted < 3000 && ScenePage::_doSceneSaveProgress) { // TODO: Make timeout configurable
+  while (millis() - countStarted < 3000 && ScenePage::_doSceneSaveProgress) {
     uint8_t saveProgress = (millis() - countStarted) / 30;
     if (saveProgress > 100) {
       saveProgress = 100;

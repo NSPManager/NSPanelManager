@@ -160,10 +160,11 @@ struct  NSPanelMQTTManagerCommand__FirstPageTurnLightOn
   NSPanelMQTTManagerCommand__AffectLightsOptions affect_lights;
   int32_t brightness_slider_value;
   int32_t kelvin_slider_value;
+  int32_t selected_room;
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_ON__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__first_page_turn_light_on__descriptor) \
-    , NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL, 0, 0 }
+    , NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL, 0, 0, 0 }
 
 
 struct  NSPanelMQTTManagerCommand__FirstPageTurnLightOff

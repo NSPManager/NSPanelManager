@@ -259,27 +259,27 @@ void taskManageWifiAndMqtt(void *param) {
         WiFi.begin(config.wifi_ssid.c_str(), config.wifi_psk.c_str());
         WiFi.setAutoConnect(true);
         WiFi.mode(WIFI_STA);
-        for (uint8_t wifi_connect_tries = 0; wifi_connect_tries < 10; wifi_connect_tries++) {
+        for (uint8_t wifi_connect_tries = 0; wifi_connect_tries < 10 && !WiFi.isConnected(); wifi_connect_tries++) {
           Serial.print("Connecting to WiFi ");
           Serial.println(config.wifi_ssid.c_str());
-          if (WiFi.isConnected()) {
-            Serial.println("Connected to WiFi!");
-            LOG_INFO("Connected to WiFi ", config.wifi_ssid.c_str());
-            Serial.print("Connected to WiFi ");
-            Serial.println(config.wifi_ssid.c_str());
-            LOG_INFO("IP Address: ", WiFi.localIP().toString());
-            LOG_INFO("Netmask:    ", WiFi.subnetMask().toString());
-            LOG_INFO("Gateway:    ", WiFi.gatewayIP().toString());
-
-            // We successfully connected to WiFi. Init the rest of the components.
-            webMan.init(NSPanelManagerFirmwareVersion);
-            mqttManager.start();
-            break; // We successfully connected to WiFi.
-          } else {
+          if (!WiFi.isConnected()) {
             LOG_ERROR("Failed to connect to WiFi. Will try again.");
-            // Serial.println("Failed to connect to WiFi. Will try again.");
           }
           vTaskDelay(2000 / portTICK_PERIOD_MS);
+        }
+
+        if (WiFi.isConnected()) {
+          Serial.println("Connected to WiFi!");
+          LOG_INFO("Connected to WiFi ", config.wifi_ssid.c_str());
+          Serial.print("Connected to WiFi ");
+          Serial.println(config.wifi_ssid.c_str());
+          LOG_INFO("IP Address: ", WiFi.localIP().toString());
+          LOG_INFO("Netmask:    ", WiFi.subnetMask().toString());
+          LOG_INFO("Gateway:    ", WiFi.gatewayIP().toString());
+
+          // We successfully connected to WiFi. Init the rest of the components.
+          webMan.init(NSPanelManagerFirmwareVersion);
+          mqttManager.start();
         }
       } else if (!config.wifi_ssid.empty() && !WiFi.isConnected() && millis() - lastWiFiconnected >= 180 * 1000) {
         // Three minutes or more has passed since last successfull WiFi connection. Start the AP by breaking the loop.
