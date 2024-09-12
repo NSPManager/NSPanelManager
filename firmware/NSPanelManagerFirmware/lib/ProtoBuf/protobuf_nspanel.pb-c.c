@@ -1031,7 +1031,7 @@ const ProtobufCMessageDescriptor nspanel_weather_update__descriptor =
   (ProtobufCMessageInit) nspanel_weather_update__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__first_page_turn_light_on__field_descriptors[4] =
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__first_page_turn_light_on__field_descriptors[7] =
 {
   {
     "affect_lights",
@@ -1081,17 +1081,56 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__first_page_tu
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "global",
+    5,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__FirstPageTurnLightOn, global),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "has_brightness_value",
+    6,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__FirstPageTurnLightOn, has_brightness_value),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "has_kelvin_value",
+    7,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__FirstPageTurnLightOn, has_kelvin_value),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_mqttmanager_command__first_page_turn_light_on__field_indices_by_name[] = {
   0,   /* field[0] = affect_lights */
   1,   /* field[1] = brightness_slider_value */
+  4,   /* field[4] = global */
+  5,   /* field[5] = has_brightness_value */
+  6,   /* field[6] = has_kelvin_value */
   2,   /* field[2] = kelvin_slider_value */
   3,   /* field[3] = selected_room */
 };
 static const ProtobufCIntRange nspanel_mqttmanager_command__first_page_turn_light_on__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 4 }
+  { 0, 7 }
 };
 const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_turn_light_on__descriptor =
 {
@@ -1101,7 +1140,7 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_turn_li
   "NSPanelMQTTManagerCommand__FirstPageTurnLightOn",
   "",
   sizeof(NSPanelMQTTManagerCommand__FirstPageTurnLightOn),
-  4,
+  7,
   nspanel_mqttmanager_command__first_page_turn_light_on__field_descriptors,
   nspanel_mqttmanager_command__first_page_turn_light_on__field_indices_by_name,
   1,  nspanel_mqttmanager_command__first_page_turn_light_on__number_ranges,

@@ -1,11 +1,15 @@
 #include "light.hpp"
+#include "command_manager/command_manager.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "protobuf_general.pb.h"
+#include "protobuf_nspanel.pb.h"
+#include <boost/bind/bind.hpp>
 #include <cstdint>
 #include <entity/entity.hpp>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <boost/bind.hpp>
 
 Light::Light(LightSettings &config) {
   this->_id = config.id();
@@ -40,6 +44,7 @@ Light::Light(LightSettings &config) {
   this->_requested_color_temperature = 2500;
   this->_requested_saturation = 50;
   this->_requested_hue = 50;
+  CommandManager::attach_callback(boost::bind(&Light::command_callback, this, _1));
 
   this->update_config(config);
   SPDLOG_DEBUG("Light {}::{} base loaded, can dim: {}, can color temp: {}, can_rgb: {}.", this->_id, this->_name, this->_can_dim ? "yes" : "no", this->_can_color_temperature ? "yes" : "no", this->_can_rgb ? "yes" : "no");
@@ -210,6 +215,7 @@ Light::~Light() {
   SPDLOG_DEBUG("Destructor for light {}::{} called.", this->_id, this->_name);
   this->_light_destroyed_callbacks(this);
   this->_signal_entity_destroyed();
+  CommandManager::detach_callback(boost::bind(&Light::command_callback, this, _1));
 }
 
 void Light::reset_requests() {
@@ -230,4 +236,18 @@ bool Light::can_color_temperature() {
 
 bool Light::can_rgb() {
   return this->_can_rgb;
+}
+
+
+void Light::command_callback(NSPanelMQTTManagerCommand &command) {
+    // std::string command_str = "";
+    // if(command.has_light_command()) {
+    //     command_str = "light command";
+    // } else if (command.has_first_page_turn_on()) {
+    //     command_str = "first page turn on command";
+    // } else if (command.has_first_page_turn_off()) {
+    //     command_str = "first page turn off command";
+    // }
+
+    // SPDLOG_TRACE("Light {}::{} received command: {}", this->_id, this->_name, command_str);
 }

@@ -1,9 +1,12 @@
+#include "command_manager/command_manager.hpp"
 #include "entity/entity.hpp"
 #include "light/light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "protobuf/protobuf_general.pb.h"
 #include "protobuf/protobuf_nspanel.pb.h"
+#include <algorithm>
 #include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <cstdint>
 #include <nlohmann/json.hpp>
 #include <room/room.hpp>
@@ -12,6 +15,11 @@
 
 Room::Room(RoomSettings &config) {
   this->update_config(config);
+  CommandManager::attach_callback(boost::bind(&Room::command_callback, this, _1));
+}
+
+Room::~Room() {
+  CommandManager::detach_callback(boost::bind(&Room::command_callback, this, _1));
 }
 
 void Room::update_config(RoomSettings &config) {
@@ -132,4 +140,46 @@ void Room::_publish_protobuf_status() {
   std::string data;
   status.SerializeToString(&data);
   MQTT_Manager::publish(this->_mqtt_status_topic, data, true);
+}
+
+void Room::command_callback(NSPanelMQTTManagerCommand &command) {
+    if(command.has_first_page_turn_on() && command.first_page_turn_on().selected_room() == this->_id) {
+        SPDLOG_DEBUG("Room {}:{} got command to turn lights on from first page.", this->_id, this->_name);
+        std::vector<MqttManagerEntity*> lights_list;
+        // Get all lights that are on
+        std::copy_if(this->_entities.begin(), this->_entities.end(), std::back_inserter(lights_list) , [](MqttManagerEntity *e){
+            return e->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT && ((Light*)e)->get_state();
+        });
+        if(lights_list.size() == 0) {
+            // No lights that were on were found, get all lights in room.
+            std::copy_if(this->_entities.begin(), this->_entities.end(), std::back_inserter(lights_list) , [](MqttManagerEntity *e){
+                return e->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT;
+            });
+        }
+
+        for(int i = 0; i < lights_list.size(); i++) {
+            // TODO: Rework so that the light can handle to command via command callback.
+            ((Light*)lights_list[i])->turn_on(false);
+            if(command.first_page_turn_on().has_brightness_value()) {
+                ((Light*)lights_list[i])->set_brightness(command.first_page_turn_on().brightness_slider_value(), false);
+            }
+            if(command.first_page_turn_on().has_kelvin_value()) {
+                ((Light*)lights_list[i])->set_color_temperature(command.first_page_turn_on().kelvin_slider_value(), false);
+            }
+            ((Light*)lights_list[i])->send_state_update_to_controller();
+        }
+
+    } else if (command.has_first_page_turn_off()) {
+        SPDLOG_DEBUG("Room {}:{} got command to turn lights off from first page.", this->_id, this->_name);
+        std::vector<MqttManagerEntity*> lights_list;
+        // Get all lights that are on
+        std::copy_if(this->_entities.begin(), this->_entities.end(), std::back_inserter(lights_list) , [](MqttManagerEntity *e){
+            return e->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT && ((Light*)e)->get_state();
+        });
+
+        for(int i = 0; i < lights_list.size(); i++) {
+            // TODO: Rework so that the light can handle to command via command callback.
+            ((Light*)lights_list[i])->turn_off(true);
+        }
+    }
 }

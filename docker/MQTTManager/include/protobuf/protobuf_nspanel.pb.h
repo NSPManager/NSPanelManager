@@ -1040,6 +1040,9 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOn final : public ::google::pr
     kBrightnessSliderValueFieldNumber = 2,
     kKelvinSliderValueFieldNumber = 3,
     kSelectedRoomFieldNumber = 4,
+    kGlobalFieldNumber = 5,
+    kHasBrightnessValueFieldNumber = 6,
+    kHasKelvinValueFieldNumber = 7,
   };
   // .NSPanelMQTTManagerCommand.AffectLightsOptions affect_lights = 1;
   void clear_affect_lights() ;
@@ -1081,12 +1084,42 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOn final : public ::google::pr
   void _internal_set_selected_room(::int32_t value);
 
   public:
+  // bool global = 5;
+  void clear_global() ;
+  bool global() const;
+  void set_global(bool value);
+
+  private:
+  bool _internal_global() const;
+  void _internal_set_global(bool value);
+
+  public:
+  // bool has_brightness_value = 6;
+  void clear_has_brightness_value() ;
+  bool has_brightness_value() const;
+  void set_has_brightness_value(bool value);
+
+  private:
+  bool _internal_has_brightness_value() const;
+  void _internal_set_has_brightness_value(bool value);
+
+  public:
+  // bool has_kelvin_value = 7;
+  void clear_has_kelvin_value() ;
+  bool has_kelvin_value() const;
+  void set_has_kelvin_value(bool value);
+
+  private:
+  bool _internal_has_kelvin_value() const;
+  void _internal_set_has_kelvin_value(bool value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelMQTTManagerCommand.FirstPageTurnLightOn)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      2, 4, 0,
+      3, 7, 0,
       0, 2>
       _table_;
 
@@ -1111,6 +1144,9 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOn final : public ::google::pr
     ::int32_t brightness_slider_value_;
     ::int32_t kelvin_slider_value_;
     ::int32_t selected_room_;
+    bool global_;
+    bool has_brightness_value_;
+    bool has_kelvin_value_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -4359,6 +4395,72 @@ inline ::int32_t NSPanelMQTTManagerCommand_FirstPageTurnLightOn::_internal_selec
 inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::_internal_set_selected_room(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.selected_room_ = value;
+}
+
+// bool global = 5;
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::clear_global() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.global_ = false;
+}
+inline bool NSPanelMQTTManagerCommand_FirstPageTurnLightOn::global() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.FirstPageTurnLightOn.global)
+  return _internal_global();
+}
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::set_global(bool value) {
+  _internal_set_global(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.FirstPageTurnLightOn.global)
+}
+inline bool NSPanelMQTTManagerCommand_FirstPageTurnLightOn::_internal_global() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.global_;
+}
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::_internal_set_global(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.global_ = value;
+}
+
+// bool has_brightness_value = 6;
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::clear_has_brightness_value() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_brightness_value_ = false;
+}
+inline bool NSPanelMQTTManagerCommand_FirstPageTurnLightOn::has_brightness_value() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.FirstPageTurnLightOn.has_brightness_value)
+  return _internal_has_brightness_value();
+}
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::set_has_brightness_value(bool value) {
+  _internal_set_has_brightness_value(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.FirstPageTurnLightOn.has_brightness_value)
+}
+inline bool NSPanelMQTTManagerCommand_FirstPageTurnLightOn::_internal_has_brightness_value() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_brightness_value_;
+}
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::_internal_set_has_brightness_value(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_brightness_value_ = value;
+}
+
+// bool has_kelvin_value = 7;
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::clear_has_kelvin_value() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_kelvin_value_ = false;
+}
+inline bool NSPanelMQTTManagerCommand_FirstPageTurnLightOn::has_kelvin_value() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.FirstPageTurnLightOn.has_kelvin_value)
+  return _internal_has_kelvin_value();
+}
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::set_has_kelvin_value(bool value) {
+  _internal_set_has_kelvin_value(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.FirstPageTurnLightOn.has_kelvin_value)
+}
+inline bool NSPanelMQTTManagerCommand_FirstPageTurnLightOn::_internal_has_kelvin_value() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_kelvin_value_;
+}
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOn::_internal_set_has_kelvin_value(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_kelvin_value_ = value;
 }
 
 // -------------------------------------------------------------------

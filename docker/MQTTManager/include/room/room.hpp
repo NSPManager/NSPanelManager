@@ -2,6 +2,7 @@
 #define MQTT_MANAGER_ROOM_H
 
 #include "entity/entity.hpp"
+#include "protobuf_nspanel.pb.h"
 #include <list>
 #include <nlohmann/json_fwd.hpp>
 #include <protobuf/protobuf_general.pb.h>
@@ -12,6 +13,7 @@ public:
    * Initalize a room and load room settings from given JSON
    */
   Room(RoomSettings &config);
+  ~Room();
 
   /**
    * Update room with given config
@@ -69,6 +71,11 @@ public:
   }
 
   void entity_changed_callback(MqttManagerEntity *entity);
+
+  /**
+  * Callback for NSPanelMQTTManagerCommands sent over MQTT
+  */
+  void command_callback(NSPanelMQTTManagerCommand &command);
 
 private:
   uint16_t _id;

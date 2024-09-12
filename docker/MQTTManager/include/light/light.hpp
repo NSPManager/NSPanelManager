@@ -2,11 +2,14 @@
 #define MQTT_MANAGER_LIGHT
 
 #include "protobuf_general.pb.h"
+#include "protobuf_nspanel.pb.h"
 #include "room/room.hpp"
 #include <boost/signals2.hpp>
 #include <cstdint>
 #include <entity/entity.hpp>
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
+#include <string>
 
 enum MQTT_MANAGER_LIGHT_MODE {
   DEFAULT, // Normal, no special case.
@@ -160,6 +163,11 @@ public:
    * Set all requested values equal to current values.
    */
   void reset_requests();
+
+  /**
+  * Callback for NSPanelMQTTManagerCommand protobuf received from MQTT
+  */
+  void command_callback(NSPanelMQTTManagerCommand &command);
 
   MQTT_MANAGER_ENTITY_TYPE get_type();
   MQTT_MANAGER_ENTITY_CONTROLLER get_controller();

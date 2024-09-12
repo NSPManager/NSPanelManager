@@ -91,6 +91,9 @@ message NSPanelMQTTManagerCommand {
         int32 brightness_slider_value = 2;
         int32 kelvin_slider_value = 3;
         int32 selected_room = 4;
+        bool global = 5;
+        bool has_brightness_value = 6;
+        bool has_kelvin_value = 7;
     }
     message FirstPageTurnLightOff {
         AffectLightsOptions affect_lights = 1;
