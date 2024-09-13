@@ -97,6 +97,7 @@ message NSPanelMQTTManagerCommand {
     }
     message FirstPageTurnLightOff {
         AffectLightsOptions affect_lights = 1;
+        bool global = 2;
     }
     // TODO: Once protobuf-c-compiler gets updated, perhaps it's possible to build protobuf C files
     // with optional arguments.

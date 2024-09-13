@@ -174,10 +174,11 @@ struct  NSPanelMQTTManagerCommand__FirstPageTurnLightOff
 {
   ProtobufCMessage base;
   NSPanelMQTTManagerCommand__AffectLightsOptions affect_lights;
+  protobuf_c_boolean global;
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_OFF__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__first_page_turn_light_off__descriptor) \
-    , NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL }
+    , NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL, 0 }
 
 
 /*

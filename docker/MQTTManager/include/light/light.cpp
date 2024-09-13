@@ -3,13 +3,13 @@
 #include "entity_manager/entity_manager.hpp"
 #include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
+#include <boost/bind.hpp>
 #include <boost/bind/bind.hpp>
 #include <cstdint>
 #include <entity/entity.hpp>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
-#include <boost/bind.hpp>
 
 Light::Light(LightSettings &config) {
   this->_id = config.id();
@@ -238,16 +238,29 @@ bool Light::can_rgb() {
   return this->_can_rgb;
 }
 
-
 void Light::command_callback(NSPanelMQTTManagerCommand &command) {
-    // std::string command_str = "";
-    // if(command.has_light_command()) {
-    //     command_str = "light command";
-    // } else if (command.has_first_page_turn_on()) {
-    //     command_str = "first page turn on command";
-    // } else if (command.has_first_page_turn_off()) {
-    //     command_str = "first page turn off command";
-    // }
+  if (command.has_light_command()) {
+    // Check if this light ID is in command
+    auto light_id = std::find_if(command.light_command().light_ids().begin(), command.light_command().light_ids().end(), [this](int32_t id) {
+      return id == this->_id;
+    });
 
-    // SPDLOG_TRACE("Light {}::{} received command: {}", this->_id, this->_name, command_str);
+    if (light_id != command.light_command().light_ids().end()) {
+      NSPanelMQTTManagerCommand_LightCommand cmd = command.light_command();
+      if (cmd.has_brightness()) {
+        this->set_brightness(cmd.brightness(), false);
+        this->turn_on(false);
+      }
+      if (cmd.has_color_temperature()) {
+        this->set_color_temperature(cmd.color_temperature(), false);
+      }
+      if (cmd.has_hue()) {
+        this->set_hue(cmd.hue(), false);
+      }
+      if (cmd.has_saturation()) {
+        this->set_saturation(cmd.saturation(), false);
+      }
+      this->send_state_update_to_controller();
+    }
+  }
 }

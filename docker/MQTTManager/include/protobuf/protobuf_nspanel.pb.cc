@@ -135,6 +135,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 inline constexpr NSPanelMQTTManagerCommand_FirstPageTurnLightOff::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : affect_lights_{static_cast< ::NSPanelMQTTManagerCommand_AffectLightsOptions >(0)},
+        global_{false},
         _cached_size_{0} {}
 
 template <typename>
@@ -421,6 +422,7 @@ const ::uint32_t
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff, _impl_.affect_lights_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff, _impl_.global_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_LightCommand, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -462,8 +464,8 @@ static const ::_pbi::MigrationSchema
         {74, -1, -1, sizeof(::NSPanelWeatherUpdate)},
         {90, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
         {105, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
-        {114, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
-        {131, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {115, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
+        {132, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelWarning_default_instance_._instance,
@@ -513,7 +515,7 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "ing\030\010 \001(\t\032\222\001\n\014ForecastItem\022\024\n\014weather_ic"
     "on\030\001 \001(\t\022\034\n\024precipitation_string\030\002 \001(\t\022!"
     "\n\031temperature_maxmin_string\030\003 \001(\t\022\023\n\013win"
-    "d_string\030\004 \001(\t\022\026\n\016display_string\030\005 \001(\t\"\203"
+    "d_string\030\004 \001(\t\022\026\n\016display_string\030\005 \001(\t\"\223"
     "\007\n\031NSPanelMQTTManagerCommand\022M\n\022first_pa"
     "ge_turn_on\030\001 \001(\0132/.NSPanelMQTTManagerCom"
     "mand.FirstPageTurnLightOnH\000\022O\n\023first_pag"
@@ -526,26 +528,26 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "ness_slider_value\030\002 \001(\005\022\033\n\023kelvin_slider"
     "_value\030\003 \001(\005\022\025\n\rselected_room\030\004 \001(\005\022\016\n\006g"
     "lobal\030\005 \001(\010\022\034\n\024has_brightness_value\030\006 \001("
-    "\010\022\030\n\020has_kelvin_value\030\007 \001(\010\032^\n\025FirstPage"
+    "\010\022\030\n\020has_kelvin_value\030\007 \001(\010\032n\n\025FirstPage"
     "TurnLightOff\022E\n\raffect_lights\030\001 \001(\0162..NS"
     "PanelMQTTManagerCommand.AffectLightsOpti"
-    "ons\032\321\001\n\014LightCommand\022\021\n\tlight_ids\030\001 \003(\005\022"
-    "\026\n\016has_brightness\030\002 \001(\010\022\022\n\nbrightness\030\003 "
-    "\001(\005\022\035\n\025has_color_temperature\030\004 \001(\010\022\031\n\021co"
-    "lor_temperature\030\005 \001(\005\022\017\n\007has_hue\030\006 \001(\010\022\013"
-    "\n\003hue\030\007 \001(\005\022\026\n\016has_saturation\030\010 \001(\010\022\022\n\ns"
-    "aturation\030\t \001(\005\"D\n\023AffectLightsOptions\022\007"
-    "\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020\001\022\022\n\016CEILING_LIG"
-    "HTS\020\002B\r\n\013CommandData*[\n\023NSPanelWarningLe"
-    "vel\022\014\n\010CRITICAL\020\000\022\t\n\005ERROR\020\001\022\013\n\007WARNING\020"
-    "\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n\005TRACE\020\005b\006proto"
-    "3"
+    "ons\022\016\n\006global\030\002 \001(\010\032\321\001\n\014LightCommand\022\021\n\t"
+    "light_ids\030\001 \003(\005\022\026\n\016has_brightness\030\002 \001(\010\022"
+    "\022\n\nbrightness\030\003 \001(\005\022\035\n\025has_color_tempera"
+    "ture\030\004 \001(\010\022\031\n\021color_temperature\030\005 \001(\005\022\017\n"
+    "\007has_hue\030\006 \001(\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016has_satur"
+    "ation\030\010 \001(\010\022\022\n\nsaturation\030\t \001(\005\"D\n\023Affec"
+    "tLightsOptions\022\007\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020"
+    "\001\022\022\n\016CEILING_LIGHTS\020\002B\r\n\013CommandData*[\n\023"
+    "NSPanelWarningLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ERR"
+    "OR\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t"
+    "\n\005TRACE\020\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    2401,
+    2417,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
@@ -3084,7 +3086,12 @@ inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_FirstPageTurnLightOff::I
 
 inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOff::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.affect_lights_ = {};
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, affect_lights_),
+           0,
+           offsetof(Impl_, global_) -
+               offsetof(Impl_, affect_lights_) +
+               sizeof(Impl_::global_));
 }
 NSPanelMQTTManagerCommand_FirstPageTurnLightOff::~NSPanelMQTTManagerCommand_FirstPageTurnLightOff() {
   // @@protoc_insertion_point(destructor:NSPanelMQTTManagerCommand.FirstPageTurnLightOff)
@@ -3117,15 +3124,15 @@ NSPanelMQTTManagerCommand_FirstPageTurnLightOff::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 1, 0, 0, 2> NSPanelMQTTManagerCommand_FirstPageTurnLightOff::_table_ = {
+const ::_pbi::TcParseTable<1, 2, 0, 0, 2> NSPanelMQTTManagerCommand_FirstPageTurnLightOff::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    1, 0,  // max_field_number, fast_idx_mask
+    2, 8,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967294,  // skipmap
+    4294967292,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    1,  // num_field_entries
+    2,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_NSPanelMQTTManagerCommand_FirstPageTurnLightOff_default_instance_._instance,
@@ -3135,6 +3142,9 @@ const ::_pbi::TcParseTable<0, 1, 0, 0, 2> NSPanelMQTTManagerCommand_FirstPageTur
     ::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_FirstPageTurnLightOff>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
+    // bool global = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelMQTTManagerCommand_FirstPageTurnLightOff, _impl_.global_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_FirstPageTurnLightOff, _impl_.global_)}},
     // .NSPanelMQTTManagerCommand.AffectLightsOptions affect_lights = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_FirstPageTurnLightOff, _impl_.affect_lights_), 63>(),
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_FirstPageTurnLightOff, _impl_.affect_lights_)}},
@@ -3144,6 +3154,9 @@ const ::_pbi::TcParseTable<0, 1, 0, 0, 2> NSPanelMQTTManagerCommand_FirstPageTur
     // .NSPanelMQTTManagerCommand.AffectLightsOptions affect_lights = 1;
     {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_FirstPageTurnLightOff, _impl_.affect_lights_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // bool global = 2;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_FirstPageTurnLightOff, _impl_.global_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
   }},
   // no aux_entries
   {{
@@ -3157,7 +3170,9 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_FirstPageTurnLightOff::Clear() 
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.affect_lights_ = 0;
+  ::memset(&_impl_.affect_lights_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.global_) -
+      reinterpret_cast<char*>(&_impl_.affect_lights_)) + sizeof(_impl_.global_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -3173,6 +3188,13 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_FirstPageTurnLightOff::Clear() 
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
         1, this->_internal_affect_lights(), target);
+  }
+
+  // bool global = 2;
+  if (this->_internal_global() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        2, this->_internal_global(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -3192,10 +3214,16 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_FirstPageTurnLightOff::Clear() 
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
   // .NSPanelMQTTManagerCommand.AffectLightsOptions affect_lights = 1;
   if (this->_internal_affect_lights() != 0) {
     total_size += 1 +
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_affect_lights());
+  }
+
+  // bool global = 2;
+  if (this->_internal_global() != 0) {
+    total_size += 2;
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -3213,6 +3241,9 @@ void NSPanelMQTTManagerCommand_FirstPageTurnLightOff::MergeImpl(::google::protob
   if (from._internal_affect_lights() != 0) {
     _this->_impl_.affect_lights_ = from._impl_.affect_lights_;
   }
+  if (from._internal_global() != 0) {
+    _this->_impl_.global_ = from._impl_.global_;
+  }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -3227,7 +3258,12 @@ void NSPanelMQTTManagerCommand_FirstPageTurnLightOff::CopyFrom(const NSPanelMQTT
 void NSPanelMQTTManagerCommand_FirstPageTurnLightOff::InternalSwap(NSPanelMQTTManagerCommand_FirstPageTurnLightOff* PROTOBUF_RESTRICT other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_.affect_lights_, other->_impl_.affect_lights_);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_FirstPageTurnLightOff, _impl_.global_)
+      + sizeof(NSPanelMQTTManagerCommand_FirstPageTurnLightOff::_impl_.global_)
+      - PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_FirstPageTurnLightOff, _impl_.affect_lights_)>(
+          reinterpret_cast<char*>(&_impl_.affect_lights_),
+          reinterpret_cast<char*>(&other->_impl_.affect_lights_));
 }
 
 ::google::protobuf::Metadata NSPanelMQTTManagerCommand_FirstPageTurnLightOff::GetMetadata() const {

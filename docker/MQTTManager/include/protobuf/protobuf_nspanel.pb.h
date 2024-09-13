@@ -1280,6 +1280,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOff final : public ::google::p
   // accessors -------------------------------------------------------
   enum : int {
     kAffectLightsFieldNumber = 1,
+    kGlobalFieldNumber = 2,
   };
   // .NSPanelMQTTManagerCommand.AffectLightsOptions affect_lights = 1;
   void clear_affect_lights() ;
@@ -1291,12 +1292,22 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOff final : public ::google::p
   void _internal_set_affect_lights(::NSPanelMQTTManagerCommand_AffectLightsOptions value);
 
   public:
+  // bool global = 2;
+  void clear_global() ;
+  bool global() const;
+  void set_global(bool value);
+
+  private:
+  bool _internal_global() const;
+  void _internal_set_global(bool value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelMQTTManagerCommand.FirstPageTurnLightOff)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 1, 0,
+      1, 2, 0,
       0, 2>
       _table_;
 
@@ -1318,6 +1329,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOff final : public ::google::p
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const NSPanelMQTTManagerCommand_FirstPageTurnLightOff& from_msg);
     int affect_lights_;
+    bool global_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -4487,6 +4499,28 @@ inline ::NSPanelMQTTManagerCommand_AffectLightsOptions NSPanelMQTTManagerCommand
 inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOff::_internal_set_affect_lights(::NSPanelMQTTManagerCommand_AffectLightsOptions value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.affect_lights_ = value;
+}
+
+// bool global = 2;
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOff::clear_global() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.global_ = false;
+}
+inline bool NSPanelMQTTManagerCommand_FirstPageTurnLightOff::global() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.FirstPageTurnLightOff.global)
+  return _internal_global();
+}
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOff::set_global(bool value) {
+  _internal_set_global(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.FirstPageTurnLightOff.global)
+}
+inline bool NSPanelMQTTManagerCommand_FirstPageTurnLightOff::_internal_global() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.global_;
+}
+inline void NSPanelMQTTManagerCommand_FirstPageTurnLightOff::_internal_set_global(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.global_ = value;
 }
 
 // -------------------------------------------------------------------

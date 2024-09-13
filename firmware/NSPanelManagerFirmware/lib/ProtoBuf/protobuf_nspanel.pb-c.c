@@ -1147,7 +1147,7 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_turn_li
   (ProtobufCMessageInit) nspanel_mqttmanager_command__first_page_turn_light_on__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__first_page_turn_light_off__field_descriptors[1] =
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__first_page_turn_light_off__field_descriptors[2] =
 {
   {
     "affect_lights",
@@ -1161,14 +1161,27 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__first_page_tu
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "global",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__FirstPageTurnLightOff, global),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_mqttmanager_command__first_page_turn_light_off__field_indices_by_name[] = {
   0,   /* field[0] = affect_lights */
+  1,   /* field[1] = global */
 };
 static const ProtobufCIntRange nspanel_mqttmanager_command__first_page_turn_light_off__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 1 }
+  { 0, 2 }
 };
 const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_turn_light_off__descriptor =
 {
@@ -1178,7 +1191,7 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_turn_li
   "NSPanelMQTTManagerCommand__FirstPageTurnLightOff",
   "",
   sizeof(NSPanelMQTTManagerCommand__FirstPageTurnLightOff),
-  1,
+  2,
   nspanel_mqttmanager_command__first_page_turn_light_off__field_descriptors,
   nspanel_mqttmanager_command__first_page_turn_light_off__field_indices_by_name,
   1,  nspanel_mqttmanager_command__first_page_turn_light_off__number_ranges,

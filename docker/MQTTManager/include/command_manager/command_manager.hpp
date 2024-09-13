@@ -3,6 +3,7 @@
 
 #include "protobuf_nspanel.pb.h"
 #include <boost/signals2/signal.hpp>
+#include <spdlog/spdlog.h>
 #include <string>
 class CommandManager {
 public:
@@ -11,16 +12,19 @@ public:
 
   template <typename CALLBACK_BIND>
   static void attach_callback(CALLBACK_BIND callback) {
+    SPDLOG_TRACE("Attaching command callback.");
+    CommandManager::_callbacks.disconnect(callback);
     CommandManager::_callbacks.connect(callback);
   }
 
   template <typename CALLBACK_BIND>
   static void detach_callback(CALLBACK_BIND callback) {
+    SPDLOG_TRACE("Detaching command callback");
     CommandManager::_callbacks.disconnect(callback);
   }
 
 private:
-    static inline boost::signals2::signal<void(NSPanelMQTTManagerCommand &command)> _callbacks;
+  static inline boost::signals2::signal<void(NSPanelMQTTManagerCommand &command)> _callbacks;
 };
 
 #endif // !MQTTMANAGER_COMMAND_MANAGER

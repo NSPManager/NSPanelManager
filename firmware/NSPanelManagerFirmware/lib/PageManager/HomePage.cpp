@@ -271,7 +271,7 @@ void HomePage::_updateLightsWithNewBrightness(uint8_t brightness) {
     size_t pack_size = nspanel_mqttmanager_command__pack(&command, buffer);
 
     std::string full_buffer = std::string(buffer, buffer + pack_size);
-    MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, true);
+    MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, false);
   }
 }
 
@@ -337,52 +337,67 @@ void HomePage::_stopSpecialMode() {
 }
 
 void HomePage::_ceilingMasterButtonEvent() {
-  // TODO: Implement via protobuf
-  // if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
-  //   std::list<Light *> onLights = (*RoomManager::currentRoom)->getCeilingLightsThatAreOn();
-  //   if (onLights.size() > 0) {
-  //     LightManager::ChangeLightsToLevel(&onLights, 0);
-  //   } else {
-  //     std::list<Light *> lightList = (*RoomManager::currentRoom)->getAllCeilingLights();
-  //     LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
-  //   }
-  // } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
-  //   std::list<Light *> onLights = LightManager::getCeilingLightsThatAreOn();
-  //   if (onLights.size() > 0) {
-  //     LightManager::ChangeLightsToLevel(&onLights, 0);
-  //   } else {
-  //     std::list<Light *> lightList = LightManager::getAllCeilingLights();
-  //     LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
-  //   }
-  // }
+  // TODO: Handle case when a light is on/off
+  if (RoomManager::hasValidCurrentRoom()) {
+    NSPanelMQTTManagerCommand__FirstPageTurnLightOn light_command = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_ON__INIT;
+    light_command.brightness_slider_value = this->getDimmingValue();
+    uint16_t sendKelvin = this->getColorTempValue() * ((InterfaceConfig::colorTempMax - InterfaceConfig::colorTempMin) / 100);
+    // TODO: Move "reverse color temp slider" behavior and option to be managed in MQTTManager.
+    if (InterfaceConfig::reverseColorTempSlider) {
+      light_command.kelvin_slider_value = InterfaceConfig::colorTempMax - sendKelvin;
+    } else {
+      light_command.kelvin_slider_value = InterfaceConfig::colorTempMin + sendKelvin;
+    }
+    light_command.selected_room = (*RoomManager::currentRoom)->id;
+    light_command.global = InterfaceConfig::currentRoomMode == roomMode::house;
+    light_command.has_brightness_value = true;
+    light_command.has_kelvin_value = true;
+    light_command.affect_lights = _NSPanelMQTTManagerCommand__AffectLightsOptions::NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__CEILING_LIGHTS;
 
-  // this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
-  // this->updateLightStatus(true, false);
+    NSPanelMQTTManagerCommand command;
+    nspanel_mqttmanager_command__init(&command);
+    command.command_data_case = NSPanelMQTTManagerCommand__CommandDataCase::NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON;
+    command.first_page_turn_on = &light_command;
+
+    size_t pack_length = nspanel_mqttmanager_command__get_packed_size(&command);
+    uint8_t buffer[pack_length];
+    size_t pack_size = nspanel_mqttmanager_command__pack(&command, buffer);
+
+    std::string full_buffer = std::string(buffer, buffer + pack_size);
+    MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, false);
+  }
 }
 
 void HomePage::_tableMasterButtonEvent() {
-  // TODO: Implement via protobuf
-  // if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
-  //   std::list<Light *> onLights = (*RoomManager::currentRoom)->getTableLightsThatAreOn();
+  // TODO: Handle case when a light is on/off
+  if (RoomManager::hasValidCurrentRoom()) {
+    NSPanelMQTTManagerCommand__FirstPageTurnLightOn light_command = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_ON__INIT;
+    light_command.brightness_slider_value = this->getDimmingValue();
+    uint16_t sendKelvin = this->getColorTempValue() * ((InterfaceConfig::colorTempMax - InterfaceConfig::colorTempMin) / 100);
+    // TODO: Move "reverse color temp slider" behavior and option to be managed in MQTTManager.
+    if (InterfaceConfig::reverseColorTempSlider) {
+      light_command.kelvin_slider_value = InterfaceConfig::colorTempMax - sendKelvin;
+    } else {
+      light_command.kelvin_slider_value = InterfaceConfig::colorTempMin + sendKelvin;
+    }
+    light_command.selected_room = (*RoomManager::currentRoom)->id;
+    light_command.global = InterfaceConfig::currentRoomMode == roomMode::house;
+    light_command.has_brightness_value = true;
+    light_command.has_kelvin_value = true;
+    light_command.affect_lights = _NSPanelMQTTManagerCommand__AffectLightsOptions::NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__TABLE_LIGHTS;
 
-  //   if (onLights.size() > 0) {
-  //     LightManager::ChangeLightsToLevel(&onLights, 0);
-  //   } else {
-  //     std::list<Light *> lightList = (*RoomManager::currentRoom)->getAllTableLights();
-  //     LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
-  //   }
-  // } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
-  //   std::list<Light *> onLights = LightManager::getTableLightsThatAreOn();
-  //   if (onLights.size() > 0) {
-  //     LightManager::ChangeLightsToLevel(&onLights, 0);
-  //   } else {
-  //     std::list<Light *> lightList = LightManager::getAllTableLights();
-  //     LightManager::ChangeLightsToLevel(&lightList, PageManager::GetHomePage()->getDimmingValue());
-  //   }
-  // }
+    NSPanelMQTTManagerCommand command;
+    nspanel_mqttmanager_command__init(&command);
+    command.command_data_case = NSPanelMQTTManagerCommand__CommandDataCase::NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON;
+    command.first_page_turn_on = &light_command;
 
-  // this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
-  // this->updateLightStatus(true, false);
+    size_t pack_length = nspanel_mqttmanager_command__get_packed_size(&command);
+    uint8_t buffer[pack_length];
+    size_t pack_size = nspanel_mqttmanager_command__pack(&command, buffer);
+
+    std::string full_buffer = std::string(buffer, buffer + pack_size);
+    MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, false);
+  }
 }
 
 void HomePage::_updateLightsColorTempAccordingToSlider() {
@@ -418,7 +433,7 @@ void HomePage::_updateLightsColorTempAccordingToSlider() {
     size_t pack_size = nspanel_mqttmanager_command__pack(&command, buffer);
 
     std::string full_buffer = std::string(buffer, buffer + pack_size);
-    MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, true);
+    MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, false);
   }
 
   // TODO: Implement via protobuf

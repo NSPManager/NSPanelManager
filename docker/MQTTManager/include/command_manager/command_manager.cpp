@@ -14,13 +14,15 @@ void CommandManager::init() {
 void CommandManager::process_command(const std::string &topic, const std::string &payload) {
   SPDLOG_TRACE("Received command from MQTT: {}", payload);
   try {
-      NSPanelMQTTManagerCommand command;
-      if(command.ParseFromString(payload)) {
-          CommandManager::_callbacks(command);
-      } else {
-          SPDLOG_ERROR("Failed to parse payload on MQTT command topic into NSPanelMQTTManagerCommand protobuf object. Will ignore it.");
-      }
+    NSPanelMQTTManagerCommand command;
+    if (command.ParseFromString(payload)) {
+      SPDLOG_TRACE("Calling callbacks.");
+      CommandManager::_callbacks(command);
+      SPDLOG_TRACE("Callback completed.");
+    } else {
+      SPDLOG_ERROR("Failed to parse payload on MQTT command topic into NSPanelMQTTManagerCommand protobuf object. Will ignore it.");
+    }
   } catch (std::exception &ex) {
-      SPDLOG_ERROR("Caught exception during processing of command on MQTT command topic. Exception: {}", boost::diagnostic_information(ex));
+    SPDLOG_ERROR("Caught exception during processing of command on MQTT command topic. Exception: {}", boost::diagnostic_information(ex));
   }
 }
