@@ -85,7 +85,7 @@ function update_shown_elements() {
 }
 
 $(document).ready(() => {
-  document.querySelectorAll('.nspanel-delete-button').forEach((element) => {
+  document.querySelectorAll('.nspanel_settings_container').forEach((element) => {
     // On message from manager on websocket.
     element.addEventListener("htmx:afterRequest", (event) => {
       if(event.detail.successful) {

@@ -10,7 +10,7 @@
 <span class="hidden" id="nspanel_id">{{ panel_info.data.id }}</span>
 <span class="hidden" id="max_live_log_messages">{{ max_live_log_messages }}</span>
 
-<div class="flex items-center justify-between" hx-ext="ws" ws-connect="/websocket">
+<div class="flex items-center justify-between" id="nspanel_settings_container" hx-ext="ws" ws-connect="/websocket">
   <div>
     <h2 class="font-medium text-2xl" id="nspanel_name">Settings for '{{ panel_info.data.friendly_name }}'</h2>
     <h2 class="font-light text-xs">MAC: <span id="nspanel_mac">{{ panel_info.data.mac_address }}</span></h2>
@@ -517,9 +517,9 @@
           </div>
         </div>
 
-        <div class="text-right">
+        <div class="text-right mt-4">
           <button type="submit"
-            class="mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ">Save</button>
+            class="btn btn-success">Save</button>
         </div>
       </div>
     </form>

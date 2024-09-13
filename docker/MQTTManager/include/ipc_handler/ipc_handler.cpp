@@ -25,7 +25,7 @@ void IPCHandler::_listen() {
         // Parse data to JSON and check validity of message
         nlohmann::json data = nlohmann::json::parse(message);
         if (data.contains("topic") && data["topic"].is_string()) {
-          SPDLOG_TRACE("Received '{}' on IPC.", message);
+          //SPDLOG_TRACE("Received '{}' on IPC.", message);
           std::string topic = data["topic"];
 
           bool found_handler = false;
@@ -33,7 +33,7 @@ void IPCHandler::_listen() {
             if (topic_handler_pair.first.compare(topic) == 0) {
               if (IPCHandler::_registered_handlers[topic](data, &response_data)) {
                 found_handler = true;
-                SPDLOG_TRACE("Sending response {}", nlohmann::to_string((response_data)));
+                //SPDLOG_TRACE("Sending response {}", nlohmann::to_string((response_data)));
                 socket.send(zmq::buffer(nlohmann::to_string(response_data)), zmq::send_flags::none);
                 break;
               }

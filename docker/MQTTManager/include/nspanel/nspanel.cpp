@@ -544,11 +544,11 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         this->_nspanel_warnings.push_back(ws_warn);
       }
 
-      SPDLOG_TRACE("MAC: {}", report.mac_address());
-      SPDLOG_TRACE("IP : {}", report.ip_address());
-      SPDLOG_TRACE("TMP: {}", report.temperature());
-      SPDLOG_TRACE("HEP: {}", report.heap_used_pct());
-      SPDLOG_TRACE("RSI: {}", report.rssi());
+      // SPDLOG_TRACE("MAC: {}", report.mac_address());
+      // SPDLOG_TRACE("IP : {}", report.ip_address());
+      // SPDLOG_TRACE("TMP: {}", report.temperature());
+      // SPDLOG_TRACE("HEP: {}", report.heap_used_pct());
+      // SPDLOG_TRACE("RSI: {}", report.rssi());
       this->send_websocket_update();
     }
   }
