@@ -35,33 +35,41 @@ void ScreensaverPage::init() {
   this->_stopped = false;
 
   bool show_background = false;
-  if (InterfaceConfig::screensaver_mode.compare("with_background") == 0) {
+  switch (InterfaceConfig::screensaver_mode) {
+  case _NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND:
     this->_screensaver_page_name = SCREENSAVER_PAGE_NAME;
     this->_show_weather = true;
     show_background = true;
     this->_screensaver_brightness = InterfaceConfig::screensaver_dim_level;
-  } else if (InterfaceConfig::screensaver_mode.compare("without_background") == 0) {
+    break;
+  case _NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITHOUT_BACKGROUND:
     this->_screensaver_page_name = SCREENSAVER_PAGE_NAME;
     this->_show_weather = true;
     show_background = false;
     this->_screensaver_brightness = InterfaceConfig::screensaver_dim_level;
-  } else if (InterfaceConfig::screensaver_mode.compare("datetime_with_background") == 0) {
+    break;
+  case _NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITH_BACKGROUND:
     this->_screensaver_page_name = SCREENSAVER_MINIMAL_PAGE_NAME;
     this->_show_weather = false;
     show_background = true;
     this->_screensaver_brightness = InterfaceConfig::screensaver_dim_level;
-  } else if (InterfaceConfig::screensaver_mode.compare("datetime_without_background") == 0) {
+    break;
+  case _NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITHOUT_BACKGROUND:
     this->_screensaver_page_name = SCREENSAVER_MINIMAL_PAGE_NAME;
     this->_show_weather = false;
     show_background = false;
     this->_screensaver_brightness = InterfaceConfig::screensaver_dim_level;
-  } else if (InterfaceConfig::screensaver_mode.compare("no_screensaver") == 0) {
+    break;
+  case _NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__NO_SCREENSAVER:
     this->_screensaver_page_name = SCREENSAVER_PAGE_NAME;
     this->_show_weather = false;
     show_background = false;
     this->_screensaver_brightness = 0;
-  } else {
-    LOG_ERROR("Unknown screensaver mode '", InterfaceConfig::screensaver_mode.c_str(), "'!");
+    break;
+
+  default:
+    LOG_ERROR("Unknown screensaver mode '", (int32_t)InterfaceConfig::screensaver_mode, "'!");
+    break;
   }
 
   NSPanel::instance->setComponentVal(SCREENSAVER_PAGE_NAME "." SCREENSAVER_BACKGROUND_CHOICE_VARIABLE_NAME, show_background ? 1 : 0);
@@ -121,8 +129,21 @@ void ScreensaverPage::screensaverModeCallback(char *topic, byte *payload, unsign
   }
 
   std::string screensaver_mode = std::string((char *)payload, length);
-  InterfaceConfig::screensaver_mode = screensaver_mode;
   LOG_INFO("Received command to change screensaver mode to: ", screensaver_mode.c_str());
+  if (screensaver_mode.compare("with_background")) {
+    InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND;
+  } else if (screensaver_mode.compare("without_background")) {
+    InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITHOUT_BACKGROUND;
+  } else if (screensaver_mode.compare("datetime_with_background")) {
+    InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITH_BACKGROUND;
+  } else if (screensaver_mode.compare("datetime_without_background")) {
+    InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITHOUT_BACKGROUND;
+  } else if (screensaver_mode.compare("no_screensaver")) {
+    InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__NO_SCREENSAVER;
+  } else {
+    LOG_ERROR("Received unknown screensaver mode: ", screensaver_mode.c_str());
+  }
+
   PageManager::GetScreensaverPage()->init(); // Reload all internal variables
 
   if (PageManager::GetCurrentPage() == PageManager::GetScreensaverPage()) {

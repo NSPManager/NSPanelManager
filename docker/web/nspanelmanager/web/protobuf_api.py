@@ -92,6 +92,7 @@ def mqttmanager_get_all_nspanels(request):
             for nspanel in NSPanel.objects.all():
                 proto_panel = proto.nspanels.add()
                 proto_panel.id = nspanel.id
+                proto_panel.default_room = nspanel.room.id
                 proto_panel.mac_address = nspanel.mac_address
                 proto_panel.name = nspanel.friendly_name
                 proto_panel.home = nspanel.room.id
@@ -121,15 +122,15 @@ def mqttmanager_get_all_nspanels(request):
 
                 screensaver_mode = get_nspanel_setting_with_default(nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode"))
                 if screensaver_mode == "with_background":
-                    proto_panel.screensaver_mode = protobuf_general_pb2.NSPanelSettings.WEATHER_WITH_BACKGROUND
+                    proto_panel.screensaver_mode = protobuf_mqttmanager_pb2.NSPanelSettings.WEATHER_WITH_BACKGROUND
                 elif screensaver_mode == "without_background":
-                    proto_panel.screensaver_mode = protobuf_general_pb2.NSPanelSettings.WEATHER_WITHOUT_BACKGROUND
+                    proto_panel.screensaver_mode = protobuf_mqttmanager_pb2.NSPanelSettings.WEATHER_WITHOUT_BACKGROUND
                 elif screensaver_mode == "datetime_with_background":
-                    proto_panel.screensaver_mode = protobuf_general_pb2.NSPanelSettings.DATETIME_WITH_BACKGROUND
+                    proto_panel.screensaver_mode = protobuf_mqttmanager_pb2.NSPanelSettings.DATETIME_WITH_BACKGROUND
                 elif screensaver_mode == "datetime_without_background":
-                    proto_panel.screensaver_mode = protobuf_general_pb2.NSPanelSettings.DATETIME_WITHOUT_BACKGROUND
+                    proto_panel.screensaver_mode = protobuf_mqttmanager_pb2.NSPanelSettings.DATETIME_WITHOUT_BACKGROUND
                 elif screensaver_mode == "no_screensaver":
-                    proto_panel.screensaver_mode = protobuf_general_pb2.NSPanelSettings.NO_SCREENSAVER
+                    proto_panel.screensaver_mode = protobuf_mqttmanager_pb2.NSPanelSettings.NO_SCREENSAVER
 
                 if bool(get_setting_with_default("clock_us_style")):
                     proto_panel.clock_format = protobuf_formats_pb2.time_format.AM_PM
@@ -142,28 +143,28 @@ def mqttmanager_get_all_nspanels(request):
                     proto_panel.temperature_unit = protobuf_formats_pb2.temperature_format.CELSIUS
 
                 if nspanel.button1_mode == 0:
-                    proto_panel.button1_mode = protobuf_general_pb2.NSPanelSettings.NSPanelButtonMode.DIRECT_MODE
+                    proto_panel.button1_mode = protobuf_mqttmanager_pb2.NSPanelSettings.NSPanelButtonMode.DIRECT_MODE
                 elif nspanel.button1_mode == 1:
-                    proto_panel.button1_mode = protobuf_general_pb2.NSPanelSettings.NSPanelButtonMode.DETACHED_MODE
+                    proto_panel.button1_mode = protobuf_mqttmanager_pb2.NSPanelSettings.NSPanelButtonMode.DETACHED_MODE
                     proto_panel.detached_light_id = nspanel.button1_detached_mode_light.id
                 elif nspanel.button1_mode == 2:
-                    proto_panel.button1_mode = protobuf_general_pb2.NSPanelSettings.NSPanelButtonMode.CUSTOM_MQTT
+                    proto_panel.button1_mode = protobuf_mqttmanager_pb2.NSPanelSettings.NSPanelButtonMode.CUSTOM_MQTT
                     proto_panel.button1_mqtt_topic = get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_topic", "")
                     proto_panel.button1_mqtt_payload = get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_payload", "")
                 elif nspanel.button1_mode == 3:
-                    proto_panel.button1_mode = protobuf_general_pb2.NSPanelSettings.NSPanelButtonMode.FOLLOW_MODE
+                    proto_panel.button1_mode = protobuf_mqttmanager_pb2.NSPanelSettings.NSPanelButtonMode.FOLLOW_MODE
 
                 if nspanel.button2_mode == 0:
-                    proto_panel.button2_mode = protobuf_general_pb2.NSPanelSettings.NSPanelButtonMode.DIRECT_MODE
+                    proto_panel.button2_mode = protobuf_mqttmanager_pb2.NSPanelSettings.NSPanelButtonMode.DIRECT_MODE
                 elif nspanel.button2_mode == 1:
-                    proto_panel.button2_mode = protobuf_general_pb2.NSPanelSettings.NSPanelButtonMode.DETACHED_MODE
+                    proto_panel.button2_mode = protobuf_mqttmanager_pb2.NSPanelSettings.NSPanelButtonMode.DETACHED_MODE
                     proto_panel.detached_light_id = nspanel.button2_detached_mode_light.id
                 elif nspanel.button2_mode == 2:
-                    proto_panel.button2_mode = protobuf_general_pb2.NSPanelSettings.NSPanelButtonMode.CUSTOM_MQTT
+                    proto_panel.button2_mode = protobuf_mqttmanager_pb2.NSPanelSettings.NSPanelButtonMode.CUSTOM_MQTT
                     proto_panel.button2_mqtt_topic = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_topic", "")
                     proto_panel.button2_mqtt_payload = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_payload", "")
                 elif nspanel.button2_mode == 3:
-                    proto_panel.button2_mode = protobuf_general_pb2.NSPanelSettings.NSPanelButtonMode.FOLLOW_MODE
+                    proto_panel.button2_mode = protobuf_mqttmanager_pb2.NSPanelSettings.NSPanelButtonMode.FOLLOW_MODE
 
             return HttpResponse(proto.SerializeToString(), status=200)
         else:

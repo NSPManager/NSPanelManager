@@ -35,6 +35,8 @@ public:
   static inline void handleNSPanelCommand(char *topic, byte *payload, unsigned int length);
   static inline void handleNSPanelScreenBrightnessCommand(char *topic, byte *payload, unsigned int length);
   static inline void handleNSPanelScreensaverBrightnessCommand(char *topic, byte *payload, unsigned int length);
+  static inline void handleNSPanelConfigUpdate(char *topic, byte *payload, unsigned int length);
+  static inline void handleNSPanelRoomConfigUpdate(char *topic, byte *payload, unsigned int length);
   static void showDefaultPage();
 
 private:
@@ -42,6 +44,8 @@ private:
   /// @brief makes needed adjustments to make the panel ready for use.
   /// @param param Not used
   static void _taskLoadConfigAndInit(void *param);
+  /// @brief Will load base NSPanel config from MQTT
+  static void _mqtt_config_callback();
   /// @brief MQTT Messages that has been received but not yet processed
   static inline std::list<mqttMessage> _mqttMessages;
   /// @brief The task handle used to notify task to start processing MQTT messages
@@ -63,6 +67,7 @@ private:
   bool _getRoomConfig(int room_id, JsonDocument *buffer);
 
   bool _processMqttMessages;
+  bool _config_loaded;
 };
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef MQTT_MANAGER_NSPANEL
 #define MQTT_MANAGER_NSPANEL
 #include "entity/entity.hpp"
-#include "protobuf_general.pb.h"
+#include "protobuf_mqttmanager.pb.h"
 #include <cstdint>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <nlohmann/json.hpp>
@@ -66,6 +66,11 @@ public:
   void reset_ha_mqtt_topics();
 
   /**
+   * Send an updated config to the config topic on MQTT
+   */
+  void send_config();
+
+  /**
    * Get the ID of this NSPanel.
    */
   uint get_id();
@@ -78,11 +83,6 @@ public:
    * Dump JSON as string and send to NSPanel command topic.
    */
   void send_command(nlohmann::json &command);
-
-  /**
-   * Send a reload command to the panel to reload the config
-   */
-  void send_reload_command();
 
   /**
    * Get the JSON message that will be sent over the websocket when a client requests the state of the NSPanel.
@@ -208,6 +208,7 @@ private:
   // The topic to send commands to panel to via MQTT
   std::string _mqtt_command_topic;
   // Home Assistant MQTT registration topics:
+  std::string _mqtt_config_topic;
   std::string _mqtt_sensor_temperature_topic;
   std::string _mqtt_switch_relay1_topic;
   std::string _mqtt_light_relay1_topic;

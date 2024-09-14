@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <InterfaceConfigEnums.hpp>
+#include <protobuf_nspanel.pb-c.h>
 #include <string>
 #include <vector>
 
@@ -42,7 +43,7 @@ public:
   /// @brief Time before screensaver is activated. Time in milliseconds.
   static inline unsigned long screensaver_activation_timeout = 30000;
   /// @brief Wether or not to show clock on screensaver.
-  static inline std::string screensaver_mode;
+  static inline NSPanelConfig__NSPanelScreensaverMode screensaver_mode;
   /// @brief Show clock in US style. AM/PM?
   static inline bool clock_us_style = false;
   /// @brief All the global scenes.

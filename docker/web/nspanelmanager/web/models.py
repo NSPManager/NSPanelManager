@@ -36,25 +36,12 @@ class Room(models.Model):
     def __str__(self) -> str:
         return self.friendly_name
 
-
-def _default_nspanel_status_data():
-    return {
-        "rssi": 0,
-        "mac": "??:??:??:??:??:??",
-        "free_heap": 0
-    }
-
-
 class NSPanel(models.Model):
     mac_address = models.CharField(max_length=17)
     friendly_name = models.CharField(max_length=100)
     ip_address = models.CharField(max_length=15, default="")
     version = models.CharField(max_length=15, default="")
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    wifi_rssi = models.IntegerField(default=0)
-    heap_used_pct = models.IntegerField(default=0)
-    temperature = models.FloatField(default=0)
-    online_state = models.BooleanField(default=False)
     button1_mode = models.IntegerField(default=0)
     button1_detached_mode_light = models.ForeignKey(
         "Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
@@ -71,6 +58,9 @@ class NSPanel(models.Model):
 
     def __str__(self) -> str:
         return self.friendly_name
+
+def _default_nspanel_status_data():
+    pass
 
 
 class RelayGroup(models.Model):

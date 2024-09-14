@@ -15,6 +15,8 @@ PROTOBUF_C__BEGIN_DECLS
 #endif
 
 
+typedef struct NSPanelScene NSPanelScene;
+typedef struct NSPanelConfig NSPanelConfig;
 typedef struct NSPanelWarning NSPanelWarning;
 typedef struct NSPanelStatusReport NSPanelStatusReport;
 typedef struct NSPanelLightStatus NSPanelLightStatus;
@@ -29,6 +31,17 @@ typedef struct NSPanelMQTTManagerCommand__LightCommand NSPanelMQTTManagerCommand
 
 /* --- enums --- */
 
+/*
+ * Make sure this is updated together with protobuf_mqttmanager
+ */
+typedef enum _NSPanelConfig__NSPanelScreensaverMode {
+  NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND = 0,
+  NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITHOUT_BACKGROUND = 1,
+  NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITH_BACKGROUND = 3,
+  NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITHOUT_BACKGROUND = 4,
+  NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__NO_SCREENSAVER = 5
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE)
+} NSPanelConfig__NSPanelScreensaverMode;
 typedef enum _NSPanelStatusReport__State {
   NSPANEL_STATUS_REPORT__STATE__ONLINE = 0,
   NSPANEL_STATUS_REPORT__STATE__OFFLINE = 1,
@@ -54,6 +67,60 @@ typedef enum _NSPanelWarningLevel {
 } NSPanelWarningLevel;
 
 /* --- messages --- */
+
+struct  NSPanelScene
+{
+  ProtobufCMessage base;
+  int32_t scene_id;
+  protobuf_c_boolean can_save;
+  char *name;
+};
+#define NSPANEL_SCENE__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_scene__descriptor) \
+    , 0, 0, (char *)protobuf_c_empty_string }
+
+
+struct  NSPanelConfig
+{
+  ProtobufCMessage base;
+  char *name;
+  int32_t default_room;
+  int32_t default_page;
+  int32_t screensaver_activation_timeout;
+  int32_t min_button_push_time;
+  int32_t button_long_press_time;
+  int32_t special_mode_trigger_time;
+  int32_t special_mode_release_time;
+  int32_t screen_dim_level;
+  int32_t screensaver_dim_level;
+  NSPanelConfig__NSPanelScreensaverMode screensaver_mode;
+  protobuf_c_boolean clock_us_style;
+  protobuf_c_boolean use_fahrenheit;
+  protobuf_c_boolean is_us_panel;
+  /*
+   * Allowed rooms
+   */
+  size_t n_room_ids;
+  int32_t *room_ids;
+  protobuf_c_boolean reverse_relays;
+  protobuf_c_boolean relay1_default_mode;
+  protobuf_c_boolean relay2_default_mode;
+  float temperature_calibration;
+  int32_t button1_mode;
+  char *button1_mqtt_topic;
+  char *button1_mqtt_payload;
+  int32_t button2_mode;
+  char *button2_mqtt_topic;
+  char *button2_mqtt_payload;
+  int32_t button1_detached_light_id;
+  int32_t button2_detached_light_id;
+  size_t n_global_scenes;
+  NSPanelScene **global_scenes;
+};
+#define NSPANEL_CONFIG__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
+    , (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0,NULL, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0,NULL }
+
 
 struct  NSPanelWarning
 {
@@ -230,6 +297,44 @@ struct  NSPanelMQTTManagerCommand
     , NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__NOT_SET, {0} }
 
 
+/* NSPanelScene methods */
+void   nspanel_scene__init
+                     (NSPanelScene         *message);
+size_t nspanel_scene__get_packed_size
+                     (const NSPanelScene   *message);
+size_t nspanel_scene__pack
+                     (const NSPanelScene   *message,
+                      uint8_t             *out);
+size_t nspanel_scene__pack_to_buffer
+                     (const NSPanelScene   *message,
+                      ProtobufCBuffer     *buffer);
+NSPanelScene *
+       nspanel_scene__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   nspanel_scene__free_unpacked
+                     (NSPanelScene *message,
+                      ProtobufCAllocator *allocator);
+/* NSPanelConfig methods */
+void   nspanel_config__init
+                     (NSPanelConfig         *message);
+size_t nspanel_config__get_packed_size
+                     (const NSPanelConfig   *message);
+size_t nspanel_config__pack
+                     (const NSPanelConfig   *message,
+                      uint8_t             *out);
+size_t nspanel_config__pack_to_buffer
+                     (const NSPanelConfig   *message,
+                      ProtobufCBuffer     *buffer);
+NSPanelConfig *
+       nspanel_config__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   nspanel_config__free_unpacked
+                     (NSPanelConfig *message,
+                      ProtobufCAllocator *allocator);
 /* NSPanelWarning methods */
 void   nspanel_warning__init
                      (NSPanelWarning         *message);
@@ -358,6 +463,12 @@ void   nspanel_mqttmanager_command__free_unpacked
                       ProtobufCAllocator *allocator);
 /* --- per-message closures --- */
 
+typedef void (*NSPanelScene_Closure)
+                 (const NSPanelScene *message,
+                  void *closure_data);
+typedef void (*NSPanelConfig_Closure)
+                 (const NSPanelConfig *message,
+                  void *closure_data);
 typedef void (*NSPanelWarning_Closure)
                  (const NSPanelWarning *message,
                   void *closure_data);
@@ -395,6 +506,9 @@ typedef void (*NSPanelMQTTManagerCommand_Closure)
 /* --- descriptors --- */
 
 extern const ProtobufCEnumDescriptor    nspanel_warning_level__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_scene__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_config__descriptor;
+extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_screensaver_mode__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_warning__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_status_report__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_status_report__state__descriptor;

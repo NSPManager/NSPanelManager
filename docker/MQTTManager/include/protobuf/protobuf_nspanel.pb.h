@@ -50,6 +50,9 @@ struct TableStruct_protobuf_5fnspanel_2eproto {
 };
 extern const ::google::protobuf::internal::DescriptorTable
     descriptor_table_protobuf_5fnspanel_2eproto;
+class NSPanelConfig;
+struct NSPanelConfigDefaultTypeInternal;
+extern NSPanelConfigDefaultTypeInternal _NSPanelConfig_default_instance_;
 class NSPanelLightStatus;
 struct NSPanelLightStatusDefaultTypeInternal;
 extern NSPanelLightStatusDefaultTypeInternal _NSPanelLightStatus_default_instance_;
@@ -68,6 +71,9 @@ extern NSPanelMQTTManagerCommand_LightCommandDefaultTypeInternal _NSPanelMQTTMan
 class NSPanelRoomStatus;
 struct NSPanelRoomStatusDefaultTypeInternal;
 extern NSPanelRoomStatusDefaultTypeInternal _NSPanelRoomStatus_default_instance_;
+class NSPanelScene;
+struct NSPanelSceneDefaultTypeInternal;
+extern NSPanelSceneDefaultTypeInternal _NSPanelScene_default_instance_;
 class NSPanelStatusReport;
 struct NSPanelStatusReportDefaultTypeInternal;
 extern NSPanelStatusReportDefaultTypeInternal _NSPanelStatusReport_default_instance_;
@@ -85,6 +91,42 @@ namespace protobuf {
 }  // namespace protobuf
 }  // namespace google
 
+enum NSPanelConfig_NSPanelScreensaverMode : int {
+  NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND = 0,
+  NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITHOUT_BACKGROUND = 1,
+  NSPanelConfig_NSPanelScreensaverMode_DATETIME_WITH_BACKGROUND = 3,
+  NSPanelConfig_NSPanelScreensaverMode_DATETIME_WITHOUT_BACKGROUND = 4,
+  NSPanelConfig_NSPanelScreensaverMode_NO_SCREENSAVER = 5,
+  NSPanelConfig_NSPanelScreensaverMode_NSPanelConfig_NSPanelScreensaverMode_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::min(),
+  NSPanelConfig_NSPanelScreensaverMode_NSPanelConfig_NSPanelScreensaverMode_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::max(),
+};
+
+bool NSPanelConfig_NSPanelScreensaverMode_IsValid(int value);
+extern const uint32_t NSPanelConfig_NSPanelScreensaverMode_internal_data_[];
+constexpr NSPanelConfig_NSPanelScreensaverMode NSPanelConfig_NSPanelScreensaverMode_NSPanelScreensaverMode_MIN = static_cast<NSPanelConfig_NSPanelScreensaverMode>(0);
+constexpr NSPanelConfig_NSPanelScreensaverMode NSPanelConfig_NSPanelScreensaverMode_NSPanelScreensaverMode_MAX = static_cast<NSPanelConfig_NSPanelScreensaverMode>(5);
+constexpr int NSPanelConfig_NSPanelScreensaverMode_NSPanelScreensaverMode_ARRAYSIZE = 5 + 1;
+const ::google::protobuf::EnumDescriptor*
+NSPanelConfig_NSPanelScreensaverMode_descriptor();
+template <typename T>
+const std::string& NSPanelConfig_NSPanelScreensaverMode_Name(T value) {
+  static_assert(std::is_same<T, NSPanelConfig_NSPanelScreensaverMode>::value ||
+                    std::is_integral<T>::value,
+                "Incorrect type passed to NSPanelScreensaverMode_Name().");
+  return NSPanelConfig_NSPanelScreensaverMode_Name(static_cast<NSPanelConfig_NSPanelScreensaverMode>(value));
+}
+template <>
+inline const std::string& NSPanelConfig_NSPanelScreensaverMode_Name(NSPanelConfig_NSPanelScreensaverMode value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelConfig_NSPanelScreensaverMode_descriptor,
+                                                 0, 5>(
+      static_cast<int>(value));
+}
+inline bool NSPanelConfig_NSPanelScreensaverMode_Parse(absl::string_view name, NSPanelConfig_NSPanelScreensaverMode* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<NSPanelConfig_NSPanelScreensaverMode>(
+      NSPanelConfig_NSPanelScreensaverMode_descriptor(), name, value);
+}
 enum NSPanelStatusReport_state : int {
   NSPanelStatusReport_state_ONLINE = 0,
   NSPanelStatusReport_state_OFFLINE = 1,
@@ -253,7 +295,7 @@ class NSPanelWeatherUpdate_ForecastItem final : public ::google::protobuf::Messa
     return reinterpret_cast<const NSPanelWeatherUpdate_ForecastItem*>(
         &_NSPanelWeatherUpdate_ForecastItem_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 4;
+  static constexpr int kIndexInFileMessages = 6;
   friend void swap(NSPanelWeatherUpdate_ForecastItem& a, NSPanelWeatherUpdate_ForecastItem& b) { a.Swap(&b); }
   inline void Swap(NSPanelWeatherUpdate_ForecastItem* other) {
     if (other == this) return;
@@ -502,7 +544,7 @@ class NSPanelWarning final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelWarning*>(
         &_NSPanelWarning_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 0;
+  static constexpr int kIndexInFileMessages = 2;
   friend void swap(NSPanelWarning& a, NSPanelWarning& b) { a.Swap(&b); }
   inline void Swap(NSPanelWarning* other) {
     if (other == this) return;
@@ -636,6 +678,207 @@ class NSPanelWarning final : public ::google::protobuf::Message
 };
 // -------------------------------------------------------------------
 
+class NSPanelScene final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:NSPanelScene) */ {
+ public:
+  inline NSPanelScene() : NSPanelScene(nullptr) {}
+  ~NSPanelScene() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR NSPanelScene(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline NSPanelScene(const NSPanelScene& from) : NSPanelScene(nullptr, from) {}
+  inline NSPanelScene(NSPanelScene&& from) noexcept
+      : NSPanelScene(nullptr, std::move(from)) {}
+  inline NSPanelScene& operator=(const NSPanelScene& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline NSPanelScene& operator=(NSPanelScene&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const NSPanelScene& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const NSPanelScene* internal_default_instance() {
+    return reinterpret_cast<const NSPanelScene*>(
+        &_NSPanelScene_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 0;
+  friend void swap(NSPanelScene& a, NSPanelScene& b) { a.Swap(&b); }
+  inline void Swap(NSPanelScene* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(NSPanelScene* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  NSPanelScene* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<NSPanelScene>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const NSPanelScene& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const NSPanelScene& from) { NSPanelScene::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(NSPanelScene* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "NSPanelScene"; }
+
+ protected:
+  explicit NSPanelScene(::google::protobuf::Arena* arena);
+  NSPanelScene(::google::protobuf::Arena* arena, const NSPanelScene& from);
+  NSPanelScene(::google::protobuf::Arena* arena, NSPanelScene&& from) noexcept
+      : NSPanelScene(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNameFieldNumber = 3,
+    kSceneIdFieldNumber = 1,
+    kCanSaveFieldNumber = 2,
+  };
+  // string name = 3;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  PROTOBUF_NODISCARD std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_name(
+      const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
+  // int32 scene_id = 1;
+  void clear_scene_id() ;
+  ::int32_t scene_id() const;
+  void set_scene_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_scene_id() const;
+  void _internal_set_scene_id(::int32_t value);
+
+  public:
+  // bool can_save = 2;
+  void clear_can_save() ;
+  bool can_save() const;
+  void set_can_save(bool value);
+
+  private:
+  bool _internal_can_save() const;
+  void _internal_set_can_save(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:NSPanelScene)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      2, 3, 0,
+      25, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_NSPanelScene_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const NSPanelScene& from_msg);
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    ::int32_t scene_id_;
+    bool can_save_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
+};
+// -------------------------------------------------------------------
+
 class NSPanelMQTTManagerCommand_LightCommand final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:NSPanelMQTTManagerCommand.LightCommand) */ {
  public:
@@ -691,7 +934,7 @@ class NSPanelMQTTManagerCommand_LightCommand final : public ::google::protobuf::
     return reinterpret_cast<const NSPanelMQTTManagerCommand_LightCommand*>(
         &_NSPanelMQTTManagerCommand_LightCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 8;
+  static constexpr int kIndexInFileMessages = 10;
   friend void swap(NSPanelMQTTManagerCommand_LightCommand& a, NSPanelMQTTManagerCommand_LightCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_LightCommand* other) {
     if (other == this) return;
@@ -967,7 +1210,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOn final : public ::google::pr
     return reinterpret_cast<const NSPanelMQTTManagerCommand_FirstPageTurnLightOn*>(
         &_NSPanelMQTTManagerCommand_FirstPageTurnLightOn_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 6;
+  static constexpr int kIndexInFileMessages = 8;
   friend void swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOn& a, NSPanelMQTTManagerCommand_FirstPageTurnLightOn& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOn* other) {
     if (other == this) return;
@@ -1210,7 +1453,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOff final : public ::google::p
     return reinterpret_cast<const NSPanelMQTTManagerCommand_FirstPageTurnLightOff*>(
         &_NSPanelMQTTManagerCommand_FirstPageTurnLightOff_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 7;
+  static constexpr int kIndexInFileMessages = 9;
   friend void swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOff& a, NSPanelMQTTManagerCommand_FirstPageTurnLightOff& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOff* other) {
     if (other == this) return;
@@ -1393,7 +1636,7 @@ class NSPanelLightStatus final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelLightStatus*>(
         &_NSPanelLightStatus_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 2;
+  static constexpr int kIndexInFileMessages = 4;
   friend void swap(NSPanelLightStatus& a, NSPanelLightStatus& b) { a.Swap(&b); }
   inline void Swap(NSPanelLightStatus* other) {
     if (other == this) return;
@@ -1678,7 +1921,7 @@ class NSPanelWeatherUpdate final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelWeatherUpdate*>(
         &_NSPanelWeatherUpdate_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 5;
+  static constexpr int kIndexInFileMessages = 7;
   friend void swap(NSPanelWeatherUpdate& a, NSPanelWeatherUpdate& b) { a.Swap(&b); }
   inline void Swap(NSPanelWeatherUpdate* other) {
     if (other == this) return;
@@ -1983,7 +2226,7 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelStatusReport*>(
         &_NSPanelStatusReport_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 3;
   friend void swap(NSPanelStatusReport& a, NSPanelStatusReport& b) { a.Swap(&b); }
   inline void Swap(NSPanelStatusReport* other) {
     if (other == this) return;
@@ -2285,7 +2528,7 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelRoomStatus*>(
         &_NSPanelRoomStatus_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 3;
+  static constexpr int kIndexInFileMessages = 5;
   friend void swap(NSPanelRoomStatus& a, NSPanelRoomStatus& b) { a.Swap(&b); }
   inline void Swap(NSPanelRoomStatus* other) {
     if (other == this) return;
@@ -2571,7 +2814,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelMQTTManagerCommand*>(
         &_NSPanelMQTTManagerCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 9;
+  static constexpr int kIndexInFileMessages = 11;
   friend void swap(NSPanelMQTTManagerCommand& a, NSPanelMQTTManagerCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand* other) {
     if (other == this) return;
@@ -2771,6 +3014,569 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   union { Impl_ _impl_; };
   friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
 };
+// -------------------------------------------------------------------
+
+class NSPanelConfig final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:NSPanelConfig) */ {
+ public:
+  inline NSPanelConfig() : NSPanelConfig(nullptr) {}
+  ~NSPanelConfig() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR NSPanelConfig(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline NSPanelConfig(const NSPanelConfig& from) : NSPanelConfig(nullptr, from) {}
+  inline NSPanelConfig(NSPanelConfig&& from) noexcept
+      : NSPanelConfig(nullptr, std::move(from)) {}
+  inline NSPanelConfig& operator=(const NSPanelConfig& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline NSPanelConfig& operator=(NSPanelConfig&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const NSPanelConfig& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const NSPanelConfig* internal_default_instance() {
+    return reinterpret_cast<const NSPanelConfig*>(
+        &_NSPanelConfig_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 1;
+  friend void swap(NSPanelConfig& a, NSPanelConfig& b) { a.Swap(&b); }
+  inline void Swap(NSPanelConfig* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(NSPanelConfig* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  NSPanelConfig* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<NSPanelConfig>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const NSPanelConfig& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const NSPanelConfig& from) { NSPanelConfig::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(NSPanelConfig* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "NSPanelConfig"; }
+
+ protected:
+  explicit NSPanelConfig(::google::protobuf::Arena* arena);
+  NSPanelConfig(::google::protobuf::Arena* arena, const NSPanelConfig& from);
+  NSPanelConfig(::google::protobuf::Arena* arena, NSPanelConfig&& from) noexcept
+      : NSPanelConfig(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+  using NSPanelScreensaverMode = NSPanelConfig_NSPanelScreensaverMode;
+  static constexpr NSPanelScreensaverMode WEATHER_WITH_BACKGROUND = NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND;
+  static constexpr NSPanelScreensaverMode WEATHER_WITHOUT_BACKGROUND = NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITHOUT_BACKGROUND;
+  static constexpr NSPanelScreensaverMode DATETIME_WITH_BACKGROUND = NSPanelConfig_NSPanelScreensaverMode_DATETIME_WITH_BACKGROUND;
+  static constexpr NSPanelScreensaverMode DATETIME_WITHOUT_BACKGROUND = NSPanelConfig_NSPanelScreensaverMode_DATETIME_WITHOUT_BACKGROUND;
+  static constexpr NSPanelScreensaverMode NO_SCREENSAVER = NSPanelConfig_NSPanelScreensaverMode_NO_SCREENSAVER;
+  static inline bool NSPanelScreensaverMode_IsValid(int value) {
+    return NSPanelConfig_NSPanelScreensaverMode_IsValid(value);
+  }
+  static constexpr NSPanelScreensaverMode NSPanelScreensaverMode_MIN = NSPanelConfig_NSPanelScreensaverMode_NSPanelScreensaverMode_MIN;
+  static constexpr NSPanelScreensaverMode NSPanelScreensaverMode_MAX = NSPanelConfig_NSPanelScreensaverMode_NSPanelScreensaverMode_MAX;
+  static constexpr int NSPanelScreensaverMode_ARRAYSIZE = NSPanelConfig_NSPanelScreensaverMode_NSPanelScreensaverMode_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor* NSPanelScreensaverMode_descriptor() {
+    return NSPanelConfig_NSPanelScreensaverMode_descriptor();
+  }
+  template <typename T>
+  static inline const std::string& NSPanelScreensaverMode_Name(T value) {
+    return NSPanelConfig_NSPanelScreensaverMode_Name(value);
+  }
+  static inline bool NSPanelScreensaverMode_Parse(absl::string_view name, NSPanelScreensaverMode* value) {
+    return NSPanelConfig_NSPanelScreensaverMode_Parse(name, value);
+  }
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kRoomIdsFieldNumber = 15,
+    kGlobalScenesFieldNumber = 28,
+    kNameFieldNumber = 1,
+    kButton1MqttTopicFieldNumber = 21,
+    kButton1MqttPayloadFieldNumber = 22,
+    kButton2MqttTopicFieldNumber = 24,
+    kButton2MqttPayloadFieldNumber = 25,
+    kDefaultRoomFieldNumber = 2,
+    kDefaultPageFieldNumber = 3,
+    kScreensaverActivationTimeoutFieldNumber = 4,
+    kMinButtonPushTimeFieldNumber = 5,
+    kButtonLongPressTimeFieldNumber = 6,
+    kSpecialModeTriggerTimeFieldNumber = 7,
+    kSpecialModeReleaseTimeFieldNumber = 8,
+    kScreenDimLevelFieldNumber = 9,
+    kScreensaverDimLevelFieldNumber = 10,
+    kScreensaverModeFieldNumber = 11,
+    kClockUsStyleFieldNumber = 12,
+    kUseFahrenheitFieldNumber = 13,
+    kIsUsPanelFieldNumber = 14,
+    kReverseRelaysFieldNumber = 16,
+    kRelay1DefaultModeFieldNumber = 17,
+    kRelay2DefaultModeFieldNumber = 18,
+    kTemperatureCalibrationFieldNumber = 19,
+    kButton1ModeFieldNumber = 20,
+    kButton2ModeFieldNumber = 23,
+    kButton1DetachedLightIdFieldNumber = 26,
+    kButton2DetachedLightIdFieldNumber = 27,
+  };
+  // repeated int32 room_ids = 15;
+  int room_ids_size() const;
+  private:
+  int _internal_room_ids_size() const;
+
+  public:
+  void clear_room_ids() ;
+  ::int32_t room_ids(int index) const;
+  void set_room_ids(int index, ::int32_t value);
+  void add_room_ids(::int32_t value);
+  const ::google::protobuf::RepeatedField<::int32_t>& room_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* mutable_room_ids();
+
+  private:
+  const ::google::protobuf::RepeatedField<::int32_t>& _internal_room_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_room_ids();
+
+  public:
+  // repeated .NSPanelScene global_scenes = 28;
+  int global_scenes_size() const;
+  private:
+  int _internal_global_scenes_size() const;
+
+  public:
+  void clear_global_scenes() ;
+  ::NSPanelScene* mutable_global_scenes(int index);
+  ::google::protobuf::RepeatedPtrField<::NSPanelScene>* mutable_global_scenes();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::NSPanelScene>& _internal_global_scenes() const;
+  ::google::protobuf::RepeatedPtrField<::NSPanelScene>* _internal_mutable_global_scenes();
+  public:
+  const ::NSPanelScene& global_scenes(int index) const;
+  ::NSPanelScene* add_global_scenes();
+  const ::google::protobuf::RepeatedPtrField<::NSPanelScene>& global_scenes() const;
+  // string name = 1;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  PROTOBUF_NODISCARD std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_name(
+      const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
+  // string button1_mqtt_topic = 21;
+  void clear_button1_mqtt_topic() ;
+  const std::string& button1_mqtt_topic() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_button1_mqtt_topic(Arg_&& arg, Args_... args);
+  std::string* mutable_button1_mqtt_topic();
+  PROTOBUF_NODISCARD std::string* release_button1_mqtt_topic();
+  void set_allocated_button1_mqtt_topic(std::string* value);
+
+  private:
+  const std::string& _internal_button1_mqtt_topic() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_button1_mqtt_topic(
+      const std::string& value);
+  std::string* _internal_mutable_button1_mqtt_topic();
+
+  public:
+  // string button1_mqtt_payload = 22;
+  void clear_button1_mqtt_payload() ;
+  const std::string& button1_mqtt_payload() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_button1_mqtt_payload(Arg_&& arg, Args_... args);
+  std::string* mutable_button1_mqtt_payload();
+  PROTOBUF_NODISCARD std::string* release_button1_mqtt_payload();
+  void set_allocated_button1_mqtt_payload(std::string* value);
+
+  private:
+  const std::string& _internal_button1_mqtt_payload() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_button1_mqtt_payload(
+      const std::string& value);
+  std::string* _internal_mutable_button1_mqtt_payload();
+
+  public:
+  // string button2_mqtt_topic = 24;
+  void clear_button2_mqtt_topic() ;
+  const std::string& button2_mqtt_topic() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_button2_mqtt_topic(Arg_&& arg, Args_... args);
+  std::string* mutable_button2_mqtt_topic();
+  PROTOBUF_NODISCARD std::string* release_button2_mqtt_topic();
+  void set_allocated_button2_mqtt_topic(std::string* value);
+
+  private:
+  const std::string& _internal_button2_mqtt_topic() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_button2_mqtt_topic(
+      const std::string& value);
+  std::string* _internal_mutable_button2_mqtt_topic();
+
+  public:
+  // string button2_mqtt_payload = 25;
+  void clear_button2_mqtt_payload() ;
+  const std::string& button2_mqtt_payload() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_button2_mqtt_payload(Arg_&& arg, Args_... args);
+  std::string* mutable_button2_mqtt_payload();
+  PROTOBUF_NODISCARD std::string* release_button2_mqtt_payload();
+  void set_allocated_button2_mqtt_payload(std::string* value);
+
+  private:
+  const std::string& _internal_button2_mqtt_payload() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_button2_mqtt_payload(
+      const std::string& value);
+  std::string* _internal_mutable_button2_mqtt_payload();
+
+  public:
+  // int32 default_room = 2;
+  void clear_default_room() ;
+  ::int32_t default_room() const;
+  void set_default_room(::int32_t value);
+
+  private:
+  ::int32_t _internal_default_room() const;
+  void _internal_set_default_room(::int32_t value);
+
+  public:
+  // int32 default_page = 3;
+  void clear_default_page() ;
+  ::int32_t default_page() const;
+  void set_default_page(::int32_t value);
+
+  private:
+  ::int32_t _internal_default_page() const;
+  void _internal_set_default_page(::int32_t value);
+
+  public:
+  // int32 screensaver_activation_timeout = 4;
+  void clear_screensaver_activation_timeout() ;
+  ::int32_t screensaver_activation_timeout() const;
+  void set_screensaver_activation_timeout(::int32_t value);
+
+  private:
+  ::int32_t _internal_screensaver_activation_timeout() const;
+  void _internal_set_screensaver_activation_timeout(::int32_t value);
+
+  public:
+  // int32 min_button_push_time = 5;
+  void clear_min_button_push_time() ;
+  ::int32_t min_button_push_time() const;
+  void set_min_button_push_time(::int32_t value);
+
+  private:
+  ::int32_t _internal_min_button_push_time() const;
+  void _internal_set_min_button_push_time(::int32_t value);
+
+  public:
+  // int32 button_long_press_time = 6;
+  void clear_button_long_press_time() ;
+  ::int32_t button_long_press_time() const;
+  void set_button_long_press_time(::int32_t value);
+
+  private:
+  ::int32_t _internal_button_long_press_time() const;
+  void _internal_set_button_long_press_time(::int32_t value);
+
+  public:
+  // int32 special_mode_trigger_time = 7;
+  void clear_special_mode_trigger_time() ;
+  ::int32_t special_mode_trigger_time() const;
+  void set_special_mode_trigger_time(::int32_t value);
+
+  private:
+  ::int32_t _internal_special_mode_trigger_time() const;
+  void _internal_set_special_mode_trigger_time(::int32_t value);
+
+  public:
+  // int32 special_mode_release_time = 8;
+  void clear_special_mode_release_time() ;
+  ::int32_t special_mode_release_time() const;
+  void set_special_mode_release_time(::int32_t value);
+
+  private:
+  ::int32_t _internal_special_mode_release_time() const;
+  void _internal_set_special_mode_release_time(::int32_t value);
+
+  public:
+  // int32 screen_dim_level = 9;
+  void clear_screen_dim_level() ;
+  ::int32_t screen_dim_level() const;
+  void set_screen_dim_level(::int32_t value);
+
+  private:
+  ::int32_t _internal_screen_dim_level() const;
+  void _internal_set_screen_dim_level(::int32_t value);
+
+  public:
+  // int32 screensaver_dim_level = 10;
+  void clear_screensaver_dim_level() ;
+  ::int32_t screensaver_dim_level() const;
+  void set_screensaver_dim_level(::int32_t value);
+
+  private:
+  ::int32_t _internal_screensaver_dim_level() const;
+  void _internal_set_screensaver_dim_level(::int32_t value);
+
+  public:
+  // .NSPanelConfig.NSPanelScreensaverMode screensaver_mode = 11;
+  void clear_screensaver_mode() ;
+  ::NSPanelConfig_NSPanelScreensaverMode screensaver_mode() const;
+  void set_screensaver_mode(::NSPanelConfig_NSPanelScreensaverMode value);
+
+  private:
+  ::NSPanelConfig_NSPanelScreensaverMode _internal_screensaver_mode() const;
+  void _internal_set_screensaver_mode(::NSPanelConfig_NSPanelScreensaverMode value);
+
+  public:
+  // bool clock_us_style = 12;
+  void clear_clock_us_style() ;
+  bool clock_us_style() const;
+  void set_clock_us_style(bool value);
+
+  private:
+  bool _internal_clock_us_style() const;
+  void _internal_set_clock_us_style(bool value);
+
+  public:
+  // bool use_fahrenheit = 13;
+  void clear_use_fahrenheit() ;
+  bool use_fahrenheit() const;
+  void set_use_fahrenheit(bool value);
+
+  private:
+  bool _internal_use_fahrenheit() const;
+  void _internal_set_use_fahrenheit(bool value);
+
+  public:
+  // bool is_us_panel = 14;
+  void clear_is_us_panel() ;
+  bool is_us_panel() const;
+  void set_is_us_panel(bool value);
+
+  private:
+  bool _internal_is_us_panel() const;
+  void _internal_set_is_us_panel(bool value);
+
+  public:
+  // bool reverse_relays = 16;
+  void clear_reverse_relays() ;
+  bool reverse_relays() const;
+  void set_reverse_relays(bool value);
+
+  private:
+  bool _internal_reverse_relays() const;
+  void _internal_set_reverse_relays(bool value);
+
+  public:
+  // bool relay1_default_mode = 17;
+  void clear_relay1_default_mode() ;
+  bool relay1_default_mode() const;
+  void set_relay1_default_mode(bool value);
+
+  private:
+  bool _internal_relay1_default_mode() const;
+  void _internal_set_relay1_default_mode(bool value);
+
+  public:
+  // bool relay2_default_mode = 18;
+  void clear_relay2_default_mode() ;
+  bool relay2_default_mode() const;
+  void set_relay2_default_mode(bool value);
+
+  private:
+  bool _internal_relay2_default_mode() const;
+  void _internal_set_relay2_default_mode(bool value);
+
+  public:
+  // float temperature_calibration = 19;
+  void clear_temperature_calibration() ;
+  float temperature_calibration() const;
+  void set_temperature_calibration(float value);
+
+  private:
+  float _internal_temperature_calibration() const;
+  void _internal_set_temperature_calibration(float value);
+
+  public:
+  // int32 button1_mode = 20;
+  void clear_button1_mode() ;
+  ::int32_t button1_mode() const;
+  void set_button1_mode(::int32_t value);
+
+  private:
+  ::int32_t _internal_button1_mode() const;
+  void _internal_set_button1_mode(::int32_t value);
+
+  public:
+  // int32 button2_mode = 23;
+  void clear_button2_mode() ;
+  ::int32_t button2_mode() const;
+  void set_button2_mode(::int32_t value);
+
+  private:
+  ::int32_t _internal_button2_mode() const;
+  void _internal_set_button2_mode(::int32_t value);
+
+  public:
+  // int32 button1_detached_light_id = 26;
+  void clear_button1_detached_light_id() ;
+  ::int32_t button1_detached_light_id() const;
+  void set_button1_detached_light_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_button1_detached_light_id() const;
+  void _internal_set_button1_detached_light_id(::int32_t value);
+
+  public:
+  // int32 button2_detached_light_id = 27;
+  void clear_button2_detached_light_id() ;
+  ::int32_t button2_detached_light_id() const;
+  void set_button2_detached_light_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_button2_detached_light_id() const;
+  void _internal_set_button2_detached_light_id(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:NSPanelConfig)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      5, 28, 1,
+      126, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_NSPanelConfig_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const NSPanelConfig& from_msg);
+    ::google::protobuf::RepeatedField<::int32_t> room_ids_;
+    mutable ::google::protobuf::internal::CachedSize _room_ids_cached_byte_size_;
+    ::google::protobuf::RepeatedPtrField< ::NSPanelScene > global_scenes_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    ::google::protobuf::internal::ArenaStringPtr button1_mqtt_topic_;
+    ::google::protobuf::internal::ArenaStringPtr button1_mqtt_payload_;
+    ::google::protobuf::internal::ArenaStringPtr button2_mqtt_topic_;
+    ::google::protobuf::internal::ArenaStringPtr button2_mqtt_payload_;
+    ::int32_t default_room_;
+    ::int32_t default_page_;
+    ::int32_t screensaver_activation_timeout_;
+    ::int32_t min_button_push_time_;
+    ::int32_t button_long_press_time_;
+    ::int32_t special_mode_trigger_time_;
+    ::int32_t special_mode_release_time_;
+    ::int32_t screen_dim_level_;
+    ::int32_t screensaver_dim_level_;
+    int screensaver_mode_;
+    bool clock_us_style_;
+    bool use_fahrenheit_;
+    bool is_us_panel_;
+    bool reverse_relays_;
+    bool relay1_default_mode_;
+    bool relay2_default_mode_;
+    float temperature_calibration_;
+    ::int32_t button1_mode_;
+    ::int32_t button2_mode_;
+    ::int32_t button1_detached_light_id_;
+    ::int32_t button2_detached_light_id_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
+};
 
 // ===================================================================
 
@@ -2784,6 +3590,914 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// NSPanelScene
+
+// int32 scene_id = 1;
+inline void NSPanelScene::clear_scene_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.scene_id_ = 0;
+}
+inline ::int32_t NSPanelScene::scene_id() const {
+  // @@protoc_insertion_point(field_get:NSPanelScene.scene_id)
+  return _internal_scene_id();
+}
+inline void NSPanelScene::set_scene_id(::int32_t value) {
+  _internal_set_scene_id(value);
+  // @@protoc_insertion_point(field_set:NSPanelScene.scene_id)
+}
+inline ::int32_t NSPanelScene::_internal_scene_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.scene_id_;
+}
+inline void NSPanelScene::_internal_set_scene_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.scene_id_ = value;
+}
+
+// bool can_save = 2;
+inline void NSPanelScene::clear_can_save() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_save_ = false;
+}
+inline bool NSPanelScene::can_save() const {
+  // @@protoc_insertion_point(field_get:NSPanelScene.can_save)
+  return _internal_can_save();
+}
+inline void NSPanelScene::set_can_save(bool value) {
+  _internal_set_can_save(value);
+  // @@protoc_insertion_point(field_set:NSPanelScene.can_save)
+}
+inline bool NSPanelScene::_internal_can_save() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_save_;
+}
+inline void NSPanelScene::_internal_set_can_save(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_save_ = value;
+}
+
+// string name = 3;
+inline void NSPanelScene::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+}
+inline const std::string& NSPanelScene::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelScene.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelScene::set_name(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelScene.name)
+}
+inline std::string* NSPanelScene::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:NSPanelScene.name)
+  return _s;
+}
+inline const std::string& NSPanelScene::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void NSPanelScene::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* NSPanelScene::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* NSPanelScene::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelScene.name)
+  return _impl_.name_.Release();
+}
+inline void NSPanelScene::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.name_.IsDefault()) {
+          _impl_.name_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelScene.name)
+}
+
+// -------------------------------------------------------------------
+
+// NSPanelConfig
+
+// string name = 1;
+inline void NSPanelConfig::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+}
+inline const std::string& NSPanelConfig::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig::set_name(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelConfig.name)
+}
+inline std::string* NSPanelConfig::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:NSPanelConfig.name)
+  return _s;
+}
+inline const std::string& NSPanelConfig::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void NSPanelConfig::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* NSPanelConfig::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* NSPanelConfig::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelConfig.name)
+  return _impl_.name_.Release();
+}
+inline void NSPanelConfig::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.name_.IsDefault()) {
+          _impl_.name_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.name)
+}
+
+// int32 default_room = 2;
+inline void NSPanelConfig::clear_default_room() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.default_room_ = 0;
+}
+inline ::int32_t NSPanelConfig::default_room() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.default_room)
+  return _internal_default_room();
+}
+inline void NSPanelConfig::set_default_room(::int32_t value) {
+  _internal_set_default_room(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.default_room)
+}
+inline ::int32_t NSPanelConfig::_internal_default_room() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.default_room_;
+}
+inline void NSPanelConfig::_internal_set_default_room(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.default_room_ = value;
+}
+
+// int32 default_page = 3;
+inline void NSPanelConfig::clear_default_page() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.default_page_ = 0;
+}
+inline ::int32_t NSPanelConfig::default_page() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.default_page)
+  return _internal_default_page();
+}
+inline void NSPanelConfig::set_default_page(::int32_t value) {
+  _internal_set_default_page(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.default_page)
+}
+inline ::int32_t NSPanelConfig::_internal_default_page() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.default_page_;
+}
+inline void NSPanelConfig::_internal_set_default_page(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.default_page_ = value;
+}
+
+// int32 screensaver_activation_timeout = 4;
+inline void NSPanelConfig::clear_screensaver_activation_timeout() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.screensaver_activation_timeout_ = 0;
+}
+inline ::int32_t NSPanelConfig::screensaver_activation_timeout() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.screensaver_activation_timeout)
+  return _internal_screensaver_activation_timeout();
+}
+inline void NSPanelConfig::set_screensaver_activation_timeout(::int32_t value) {
+  _internal_set_screensaver_activation_timeout(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.screensaver_activation_timeout)
+}
+inline ::int32_t NSPanelConfig::_internal_screensaver_activation_timeout() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.screensaver_activation_timeout_;
+}
+inline void NSPanelConfig::_internal_set_screensaver_activation_timeout(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.screensaver_activation_timeout_ = value;
+}
+
+// int32 min_button_push_time = 5;
+inline void NSPanelConfig::clear_min_button_push_time() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.min_button_push_time_ = 0;
+}
+inline ::int32_t NSPanelConfig::min_button_push_time() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.min_button_push_time)
+  return _internal_min_button_push_time();
+}
+inline void NSPanelConfig::set_min_button_push_time(::int32_t value) {
+  _internal_set_min_button_push_time(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.min_button_push_time)
+}
+inline ::int32_t NSPanelConfig::_internal_min_button_push_time() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.min_button_push_time_;
+}
+inline void NSPanelConfig::_internal_set_min_button_push_time(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.min_button_push_time_ = value;
+}
+
+// int32 button_long_press_time = 6;
+inline void NSPanelConfig::clear_button_long_press_time() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button_long_press_time_ = 0;
+}
+inline ::int32_t NSPanelConfig::button_long_press_time() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button_long_press_time)
+  return _internal_button_long_press_time();
+}
+inline void NSPanelConfig::set_button_long_press_time(::int32_t value) {
+  _internal_set_button_long_press_time(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button_long_press_time)
+}
+inline ::int32_t NSPanelConfig::_internal_button_long_press_time() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button_long_press_time_;
+}
+inline void NSPanelConfig::_internal_set_button_long_press_time(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button_long_press_time_ = value;
+}
+
+// int32 special_mode_trigger_time = 7;
+inline void NSPanelConfig::clear_special_mode_trigger_time() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.special_mode_trigger_time_ = 0;
+}
+inline ::int32_t NSPanelConfig::special_mode_trigger_time() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.special_mode_trigger_time)
+  return _internal_special_mode_trigger_time();
+}
+inline void NSPanelConfig::set_special_mode_trigger_time(::int32_t value) {
+  _internal_set_special_mode_trigger_time(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.special_mode_trigger_time)
+}
+inline ::int32_t NSPanelConfig::_internal_special_mode_trigger_time() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.special_mode_trigger_time_;
+}
+inline void NSPanelConfig::_internal_set_special_mode_trigger_time(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.special_mode_trigger_time_ = value;
+}
+
+// int32 special_mode_release_time = 8;
+inline void NSPanelConfig::clear_special_mode_release_time() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.special_mode_release_time_ = 0;
+}
+inline ::int32_t NSPanelConfig::special_mode_release_time() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.special_mode_release_time)
+  return _internal_special_mode_release_time();
+}
+inline void NSPanelConfig::set_special_mode_release_time(::int32_t value) {
+  _internal_set_special_mode_release_time(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.special_mode_release_time)
+}
+inline ::int32_t NSPanelConfig::_internal_special_mode_release_time() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.special_mode_release_time_;
+}
+inline void NSPanelConfig::_internal_set_special_mode_release_time(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.special_mode_release_time_ = value;
+}
+
+// int32 screen_dim_level = 9;
+inline void NSPanelConfig::clear_screen_dim_level() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.screen_dim_level_ = 0;
+}
+inline ::int32_t NSPanelConfig::screen_dim_level() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.screen_dim_level)
+  return _internal_screen_dim_level();
+}
+inline void NSPanelConfig::set_screen_dim_level(::int32_t value) {
+  _internal_set_screen_dim_level(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.screen_dim_level)
+}
+inline ::int32_t NSPanelConfig::_internal_screen_dim_level() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.screen_dim_level_;
+}
+inline void NSPanelConfig::_internal_set_screen_dim_level(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.screen_dim_level_ = value;
+}
+
+// int32 screensaver_dim_level = 10;
+inline void NSPanelConfig::clear_screensaver_dim_level() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.screensaver_dim_level_ = 0;
+}
+inline ::int32_t NSPanelConfig::screensaver_dim_level() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.screensaver_dim_level)
+  return _internal_screensaver_dim_level();
+}
+inline void NSPanelConfig::set_screensaver_dim_level(::int32_t value) {
+  _internal_set_screensaver_dim_level(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.screensaver_dim_level)
+}
+inline ::int32_t NSPanelConfig::_internal_screensaver_dim_level() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.screensaver_dim_level_;
+}
+inline void NSPanelConfig::_internal_set_screensaver_dim_level(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.screensaver_dim_level_ = value;
+}
+
+// .NSPanelConfig.NSPanelScreensaverMode screensaver_mode = 11;
+inline void NSPanelConfig::clear_screensaver_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.screensaver_mode_ = 0;
+}
+inline ::NSPanelConfig_NSPanelScreensaverMode NSPanelConfig::screensaver_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.screensaver_mode)
+  return _internal_screensaver_mode();
+}
+inline void NSPanelConfig::set_screensaver_mode(::NSPanelConfig_NSPanelScreensaverMode value) {
+  _internal_set_screensaver_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.screensaver_mode)
+}
+inline ::NSPanelConfig_NSPanelScreensaverMode NSPanelConfig::_internal_screensaver_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelConfig_NSPanelScreensaverMode>(_impl_.screensaver_mode_);
+}
+inline void NSPanelConfig::_internal_set_screensaver_mode(::NSPanelConfig_NSPanelScreensaverMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.screensaver_mode_ = value;
+}
+
+// bool clock_us_style = 12;
+inline void NSPanelConfig::clear_clock_us_style() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.clock_us_style_ = false;
+}
+inline bool NSPanelConfig::clock_us_style() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.clock_us_style)
+  return _internal_clock_us_style();
+}
+inline void NSPanelConfig::set_clock_us_style(bool value) {
+  _internal_set_clock_us_style(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.clock_us_style)
+}
+inline bool NSPanelConfig::_internal_clock_us_style() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.clock_us_style_;
+}
+inline void NSPanelConfig::_internal_set_clock_us_style(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.clock_us_style_ = value;
+}
+
+// bool use_fahrenheit = 13;
+inline void NSPanelConfig::clear_use_fahrenheit() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.use_fahrenheit_ = false;
+}
+inline bool NSPanelConfig::use_fahrenheit() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.use_fahrenheit)
+  return _internal_use_fahrenheit();
+}
+inline void NSPanelConfig::set_use_fahrenheit(bool value) {
+  _internal_set_use_fahrenheit(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.use_fahrenheit)
+}
+inline bool NSPanelConfig::_internal_use_fahrenheit() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.use_fahrenheit_;
+}
+inline void NSPanelConfig::_internal_set_use_fahrenheit(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.use_fahrenheit_ = value;
+}
+
+// bool is_us_panel = 14;
+inline void NSPanelConfig::clear_is_us_panel() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_us_panel_ = false;
+}
+inline bool NSPanelConfig::is_us_panel() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.is_us_panel)
+  return _internal_is_us_panel();
+}
+inline void NSPanelConfig::set_is_us_panel(bool value) {
+  _internal_set_is_us_panel(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.is_us_panel)
+}
+inline bool NSPanelConfig::_internal_is_us_panel() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.is_us_panel_;
+}
+inline void NSPanelConfig::_internal_set_is_us_panel(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_us_panel_ = value;
+}
+
+// repeated int32 room_ids = 15;
+inline int NSPanelConfig::_internal_room_ids_size() const {
+  return _internal_room_ids().size();
+}
+inline int NSPanelConfig::room_ids_size() const {
+  return _internal_room_ids_size();
+}
+inline void NSPanelConfig::clear_room_ids() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.room_ids_.Clear();
+}
+inline ::int32_t NSPanelConfig::room_ids(int index) const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.room_ids)
+  return _internal_room_ids().Get(index);
+}
+inline void NSPanelConfig::set_room_ids(int index, ::int32_t value) {
+  _internal_mutable_room_ids()->Set(index, value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.room_ids)
+}
+inline void NSPanelConfig::add_room_ids(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_room_ids()->Add(value);
+  // @@protoc_insertion_point(field_add:NSPanelConfig.room_ids)
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>& NSPanelConfig::room_ids() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelConfig.room_ids)
+  return _internal_room_ids();
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig::mutable_room_ids()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelConfig.room_ids)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_room_ids();
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>&
+NSPanelConfig::_internal_room_ids() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.room_ids_;
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig::_internal_mutable_room_ids() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.room_ids_;
+}
+
+// bool reverse_relays = 16;
+inline void NSPanelConfig::clear_reverse_relays() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.reverse_relays_ = false;
+}
+inline bool NSPanelConfig::reverse_relays() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.reverse_relays)
+  return _internal_reverse_relays();
+}
+inline void NSPanelConfig::set_reverse_relays(bool value) {
+  _internal_set_reverse_relays(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.reverse_relays)
+}
+inline bool NSPanelConfig::_internal_reverse_relays() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.reverse_relays_;
+}
+inline void NSPanelConfig::_internal_set_reverse_relays(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.reverse_relays_ = value;
+}
+
+// bool relay1_default_mode = 17;
+inline void NSPanelConfig::clear_relay1_default_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.relay1_default_mode_ = false;
+}
+inline bool NSPanelConfig::relay1_default_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.relay1_default_mode)
+  return _internal_relay1_default_mode();
+}
+inline void NSPanelConfig::set_relay1_default_mode(bool value) {
+  _internal_set_relay1_default_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.relay1_default_mode)
+}
+inline bool NSPanelConfig::_internal_relay1_default_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.relay1_default_mode_;
+}
+inline void NSPanelConfig::_internal_set_relay1_default_mode(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.relay1_default_mode_ = value;
+}
+
+// bool relay2_default_mode = 18;
+inline void NSPanelConfig::clear_relay2_default_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.relay2_default_mode_ = false;
+}
+inline bool NSPanelConfig::relay2_default_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.relay2_default_mode)
+  return _internal_relay2_default_mode();
+}
+inline void NSPanelConfig::set_relay2_default_mode(bool value) {
+  _internal_set_relay2_default_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.relay2_default_mode)
+}
+inline bool NSPanelConfig::_internal_relay2_default_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.relay2_default_mode_;
+}
+inline void NSPanelConfig::_internal_set_relay2_default_mode(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.relay2_default_mode_ = value;
+}
+
+// float temperature_calibration = 19;
+inline void NSPanelConfig::clear_temperature_calibration() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.temperature_calibration_ = 0;
+}
+inline float NSPanelConfig::temperature_calibration() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.temperature_calibration)
+  return _internal_temperature_calibration();
+}
+inline void NSPanelConfig::set_temperature_calibration(float value) {
+  _internal_set_temperature_calibration(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.temperature_calibration)
+}
+inline float NSPanelConfig::_internal_temperature_calibration() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.temperature_calibration_;
+}
+inline void NSPanelConfig::_internal_set_temperature_calibration(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.temperature_calibration_ = value;
+}
+
+// int32 button1_mode = 20;
+inline void NSPanelConfig::clear_button1_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_mode_ = 0;
+}
+inline ::int32_t NSPanelConfig::button1_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button1_mode)
+  return _internal_button1_mode();
+}
+inline void NSPanelConfig::set_button1_mode(::int32_t value) {
+  _internal_set_button1_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button1_mode)
+}
+inline ::int32_t NSPanelConfig::_internal_button1_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button1_mode_;
+}
+inline void NSPanelConfig::_internal_set_button1_mode(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_mode_ = value;
+}
+
+// string button1_mqtt_topic = 21;
+inline void NSPanelConfig::clear_button1_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_mqtt_topic_.ClearToEmpty();
+}
+inline const std::string& NSPanelConfig::button1_mqtt_topic() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button1_mqtt_topic)
+  return _internal_button1_mqtt_topic();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig::set_button1_mqtt_topic(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_mqtt_topic_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button1_mqtt_topic)
+}
+inline std::string* NSPanelConfig::mutable_button1_mqtt_topic() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_button1_mqtt_topic();
+  // @@protoc_insertion_point(field_mutable:NSPanelConfig.button1_mqtt_topic)
+  return _s;
+}
+inline const std::string& NSPanelConfig::_internal_button1_mqtt_topic() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button1_mqtt_topic_.Get();
+}
+inline void NSPanelConfig::_internal_set_button1_mqtt_topic(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_mqtt_topic_.Set(value, GetArena());
+}
+inline std::string* NSPanelConfig::_internal_mutable_button1_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.button1_mqtt_topic_.Mutable( GetArena());
+}
+inline std::string* NSPanelConfig::release_button1_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelConfig.button1_mqtt_topic)
+  return _impl_.button1_mqtt_topic_.Release();
+}
+inline void NSPanelConfig::set_allocated_button1_mqtt_topic(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_mqtt_topic_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.button1_mqtt_topic_.IsDefault()) {
+          _impl_.button1_mqtt_topic_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.button1_mqtt_topic)
+}
+
+// string button1_mqtt_payload = 22;
+inline void NSPanelConfig::clear_button1_mqtt_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_mqtt_payload_.ClearToEmpty();
+}
+inline const std::string& NSPanelConfig::button1_mqtt_payload() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button1_mqtt_payload)
+  return _internal_button1_mqtt_payload();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig::set_button1_mqtt_payload(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_mqtt_payload_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button1_mqtt_payload)
+}
+inline std::string* NSPanelConfig::mutable_button1_mqtt_payload() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_button1_mqtt_payload();
+  // @@protoc_insertion_point(field_mutable:NSPanelConfig.button1_mqtt_payload)
+  return _s;
+}
+inline const std::string& NSPanelConfig::_internal_button1_mqtt_payload() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button1_mqtt_payload_.Get();
+}
+inline void NSPanelConfig::_internal_set_button1_mqtt_payload(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_mqtt_payload_.Set(value, GetArena());
+}
+inline std::string* NSPanelConfig::_internal_mutable_button1_mqtt_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.button1_mqtt_payload_.Mutable( GetArena());
+}
+inline std::string* NSPanelConfig::release_button1_mqtt_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelConfig.button1_mqtt_payload)
+  return _impl_.button1_mqtt_payload_.Release();
+}
+inline void NSPanelConfig::set_allocated_button1_mqtt_payload(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_mqtt_payload_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.button1_mqtt_payload_.IsDefault()) {
+          _impl_.button1_mqtt_payload_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.button1_mqtt_payload)
+}
+
+// int32 button2_mode = 23;
+inline void NSPanelConfig::clear_button2_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_mode_ = 0;
+}
+inline ::int32_t NSPanelConfig::button2_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button2_mode)
+  return _internal_button2_mode();
+}
+inline void NSPanelConfig::set_button2_mode(::int32_t value) {
+  _internal_set_button2_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button2_mode)
+}
+inline ::int32_t NSPanelConfig::_internal_button2_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button2_mode_;
+}
+inline void NSPanelConfig::_internal_set_button2_mode(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_mode_ = value;
+}
+
+// string button2_mqtt_topic = 24;
+inline void NSPanelConfig::clear_button2_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_mqtt_topic_.ClearToEmpty();
+}
+inline const std::string& NSPanelConfig::button2_mqtt_topic() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button2_mqtt_topic)
+  return _internal_button2_mqtt_topic();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig::set_button2_mqtt_topic(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_mqtt_topic_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button2_mqtt_topic)
+}
+inline std::string* NSPanelConfig::mutable_button2_mqtt_topic() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_button2_mqtt_topic();
+  // @@protoc_insertion_point(field_mutable:NSPanelConfig.button2_mqtt_topic)
+  return _s;
+}
+inline const std::string& NSPanelConfig::_internal_button2_mqtt_topic() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button2_mqtt_topic_.Get();
+}
+inline void NSPanelConfig::_internal_set_button2_mqtt_topic(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_mqtt_topic_.Set(value, GetArena());
+}
+inline std::string* NSPanelConfig::_internal_mutable_button2_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.button2_mqtt_topic_.Mutable( GetArena());
+}
+inline std::string* NSPanelConfig::release_button2_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelConfig.button2_mqtt_topic)
+  return _impl_.button2_mqtt_topic_.Release();
+}
+inline void NSPanelConfig::set_allocated_button2_mqtt_topic(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_mqtt_topic_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.button2_mqtt_topic_.IsDefault()) {
+          _impl_.button2_mqtt_topic_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.button2_mqtt_topic)
+}
+
+// string button2_mqtt_payload = 25;
+inline void NSPanelConfig::clear_button2_mqtt_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_mqtt_payload_.ClearToEmpty();
+}
+inline const std::string& NSPanelConfig::button2_mqtt_payload() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button2_mqtt_payload)
+  return _internal_button2_mqtt_payload();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig::set_button2_mqtt_payload(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_mqtt_payload_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button2_mqtt_payload)
+}
+inline std::string* NSPanelConfig::mutable_button2_mqtt_payload() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_button2_mqtt_payload();
+  // @@protoc_insertion_point(field_mutable:NSPanelConfig.button2_mqtt_payload)
+  return _s;
+}
+inline const std::string& NSPanelConfig::_internal_button2_mqtt_payload() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button2_mqtt_payload_.Get();
+}
+inline void NSPanelConfig::_internal_set_button2_mqtt_payload(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_mqtt_payload_.Set(value, GetArena());
+}
+inline std::string* NSPanelConfig::_internal_mutable_button2_mqtt_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.button2_mqtt_payload_.Mutable( GetArena());
+}
+inline std::string* NSPanelConfig::release_button2_mqtt_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelConfig.button2_mqtt_payload)
+  return _impl_.button2_mqtt_payload_.Release();
+}
+inline void NSPanelConfig::set_allocated_button2_mqtt_payload(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_mqtt_payload_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.button2_mqtt_payload_.IsDefault()) {
+          _impl_.button2_mqtt_payload_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.button2_mqtt_payload)
+}
+
+// int32 button1_detached_light_id = 26;
+inline void NSPanelConfig::clear_button1_detached_light_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_detached_light_id_ = 0;
+}
+inline ::int32_t NSPanelConfig::button1_detached_light_id() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button1_detached_light_id)
+  return _internal_button1_detached_light_id();
+}
+inline void NSPanelConfig::set_button1_detached_light_id(::int32_t value) {
+  _internal_set_button1_detached_light_id(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button1_detached_light_id)
+}
+inline ::int32_t NSPanelConfig::_internal_button1_detached_light_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button1_detached_light_id_;
+}
+inline void NSPanelConfig::_internal_set_button1_detached_light_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_detached_light_id_ = value;
+}
+
+// int32 button2_detached_light_id = 27;
+inline void NSPanelConfig::clear_button2_detached_light_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_detached_light_id_ = 0;
+}
+inline ::int32_t NSPanelConfig::button2_detached_light_id() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button2_detached_light_id)
+  return _internal_button2_detached_light_id();
+}
+inline void NSPanelConfig::set_button2_detached_light_id(::int32_t value) {
+  _internal_set_button2_detached_light_id(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button2_detached_light_id)
+}
+inline ::int32_t NSPanelConfig::_internal_button2_detached_light_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button2_detached_light_id_;
+}
+inline void NSPanelConfig::_internal_set_button2_detached_light_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_detached_light_id_ = value;
+}
+
+// repeated .NSPanelScene global_scenes = 28;
+inline int NSPanelConfig::_internal_global_scenes_size() const {
+  return _internal_global_scenes().size();
+}
+inline int NSPanelConfig::global_scenes_size() const {
+  return _internal_global_scenes_size();
+}
+inline void NSPanelConfig::clear_global_scenes() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.global_scenes_.Clear();
+}
+inline ::NSPanelScene* NSPanelConfig::mutable_global_scenes(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:NSPanelConfig.global_scenes)
+  return _internal_mutable_global_scenes()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::NSPanelScene>* NSPanelConfig::mutable_global_scenes()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelConfig.global_scenes)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_global_scenes();
+}
+inline const ::NSPanelScene& NSPanelConfig::global_scenes(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.global_scenes)
+  return _internal_global_scenes().Get(index);
+}
+inline ::NSPanelScene* NSPanelConfig::add_global_scenes() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::NSPanelScene* _add = _internal_mutable_global_scenes()->Add();
+  // @@protoc_insertion_point(field_add:NSPanelConfig.global_scenes)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::NSPanelScene>& NSPanelConfig::global_scenes() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelConfig.global_scenes)
+  return _internal_global_scenes();
+}
+inline const ::google::protobuf::RepeatedPtrField<::NSPanelScene>&
+NSPanelConfig::_internal_global_scenes() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.global_scenes_;
+}
+inline ::google::protobuf::RepeatedPtrField<::NSPanelScene>*
+NSPanelConfig::_internal_mutable_global_scenes() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.global_scenes_;
+}
+
 // -------------------------------------------------------------------
 
 // NSPanelWarning
@@ -5008,6 +6722,12 @@ inline NSPanelMQTTManagerCommand::CommandDataCase NSPanelMQTTManagerCommand::Com
 namespace google {
 namespace protobuf {
 
+template <>
+struct is_proto_enum<::NSPanelConfig_NSPanelScreensaverMode> : std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor<::NSPanelConfig_NSPanelScreensaverMode>() {
+  return ::NSPanelConfig_NSPanelScreensaverMode_descriptor();
+}
 template <>
 struct is_proto_enum<::NSPanelStatusReport_state> : std::true_type {};
 template <>

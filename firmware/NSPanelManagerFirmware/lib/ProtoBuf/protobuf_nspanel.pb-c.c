@@ -7,6 +7,96 @@
 #endif
 
 #include "protobuf_nspanel.pb-c.h"
+void   nspanel_scene__init
+                     (NSPanelScene         *message)
+{
+  static const NSPanelScene init_value = NSPANEL_SCENE__INIT;
+  *message = init_value;
+}
+size_t nspanel_scene__get_packed_size
+                     (const NSPanelScene *message)
+{
+  assert(message->base.descriptor == &nspanel_scene__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t nspanel_scene__pack
+                     (const NSPanelScene *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &nspanel_scene__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t nspanel_scene__pack_to_buffer
+                     (const NSPanelScene *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &nspanel_scene__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+NSPanelScene *
+       nspanel_scene__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (NSPanelScene *)
+     protobuf_c_message_unpack (&nspanel_scene__descriptor,
+                                allocator, len, data);
+}
+void   nspanel_scene__free_unpacked
+                     (NSPanelScene *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &nspanel_scene__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   nspanel_config__init
+                     (NSPanelConfig         *message)
+{
+  static const NSPanelConfig init_value = NSPANEL_CONFIG__INIT;
+  *message = init_value;
+}
+size_t nspanel_config__get_packed_size
+                     (const NSPanelConfig *message)
+{
+  assert(message->base.descriptor == &nspanel_config__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t nspanel_config__pack
+                     (const NSPanelConfig *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &nspanel_config__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t nspanel_config__pack_to_buffer
+                     (const NSPanelConfig *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &nspanel_config__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+NSPanelConfig *
+       nspanel_config__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (NSPanelConfig *)
+     protobuf_c_message_unpack (&nspanel_config__descriptor,
+                                allocator, len, data);
+}
+void   nspanel_config__free_unpacked
+                     (NSPanelConfig *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &nspanel_config__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
 void   nspanel_warning__init
                      (NSPanelWarning         *message)
 {
@@ -301,6 +391,493 @@ void   nspanel_mqttmanager_command__free_unpacked
   assert(message->base.descriptor == &nspanel_mqttmanager_command__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
+static const ProtobufCFieldDescriptor nspanel_scene__field_descriptors[3] =
+{
+  {
+    "scene_id",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelScene, scene_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "can_save",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelScene, can_save),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "name",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelScene, name),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_scene__field_indices_by_name[] = {
+  1,   /* field[1] = can_save */
+  2,   /* field[2] = name */
+  0,   /* field[0] = scene_id */
+};
+static const ProtobufCIntRange nspanel_scene__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 3 }
+};
+const ProtobufCMessageDescriptor nspanel_scene__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelScene",
+  "NSPanelScene",
+  "NSPanelScene",
+  "",
+  sizeof(NSPanelScene),
+  3,
+  nspanel_scene__field_descriptors,
+  nspanel_scene__field_indices_by_name,
+  1,  nspanel_scene__number_ranges,
+  (ProtobufCMessageInit) nspanel_scene__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCEnumValue nspanel_config__nspanel_screensaver_mode__enum_values_by_number[5] =
+{
+  { "WEATHER_WITH_BACKGROUND", "NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND", 0 },
+  { "WEATHER_WITHOUT_BACKGROUND", "NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITHOUT_BACKGROUND", 1 },
+  { "DATETIME_WITH_BACKGROUND", "NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITH_BACKGROUND", 3 },
+  { "DATETIME_WITHOUT_BACKGROUND", "NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITHOUT_BACKGROUND", 4 },
+  { "NO_SCREENSAVER", "NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__NO_SCREENSAVER", 5 },
+};
+static const ProtobufCIntRange nspanel_config__nspanel_screensaver_mode__value_ranges[] = {
+{0, 0},{3, 2},{0, 5}
+};
+static const ProtobufCEnumValueIndex nspanel_config__nspanel_screensaver_mode__enum_values_by_name[5] =
+{
+  { "DATETIME_WITHOUT_BACKGROUND", 3 },
+  { "DATETIME_WITH_BACKGROUND", 2 },
+  { "NO_SCREENSAVER", 4 },
+  { "WEATHER_WITHOUT_BACKGROUND", 1 },
+  { "WEATHER_WITH_BACKGROUND", 0 },
+};
+const ProtobufCEnumDescriptor nspanel_config__nspanel_screensaver_mode__descriptor =
+{
+  PROTOBUF_C__ENUM_DESCRIPTOR_MAGIC,
+  "NSPanelConfig.NSPanelScreensaverMode",
+  "NSPanelScreensaverMode",
+  "NSPanelConfig__NSPanelScreensaverMode",
+  "",
+  5,
+  nspanel_config__nspanel_screensaver_mode__enum_values_by_number,
+  5,
+  nspanel_config__nspanel_screensaver_mode__enum_values_by_name,
+  2,
+  nspanel_config__nspanel_screensaver_mode__value_ranges,
+  NULL,NULL,NULL,NULL   /* reserved[1234] */
+};
+static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[28] =
+{
+  {
+    "name",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, name),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "default_room",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, default_room),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "default_page",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, default_page),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "screensaver_activation_timeout",
+    4,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, screensaver_activation_timeout),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "min_button_push_time",
+    5,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, min_button_push_time),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "button_long_press_time",
+    6,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button_long_press_time),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "special_mode_trigger_time",
+    7,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, special_mode_trigger_time),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "special_mode_release_time",
+    8,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, special_mode_release_time),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "screen_dim_level",
+    9,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, screen_dim_level),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "screensaver_dim_level",
+    10,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, screensaver_dim_level),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "screensaver_mode",
+    11,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, screensaver_mode),
+    &nspanel_config__nspanel_screensaver_mode__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "clock_us_style",
+    12,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, clock_us_style),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "use_fahrenheit",
+    13,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, use_fahrenheit),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "is_us_panel",
+    14,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, is_us_panel),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "room_ids",
+    15,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(NSPanelConfig, n_room_ids),
+    offsetof(NSPanelConfig, room_ids),
+    NULL,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_PACKED,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "reverse_relays",
+    16,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, reverse_relays),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "relay1_default_mode",
+    17,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, relay1_default_mode),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "relay2_default_mode",
+    18,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, relay2_default_mode),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "temperature_calibration",
+    19,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_FLOAT,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, temperature_calibration),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "button1_mode",
+    20,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button1_mode),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "button1_mqtt_topic",
+    21,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button1_mqtt_topic),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "button1_mqtt_payload",
+    22,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button1_mqtt_payload),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "button2_mode",
+    23,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button2_mode),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "button2_mqtt_topic",
+    24,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button2_mqtt_topic),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "button2_mqtt_payload",
+    25,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button2_mqtt_payload),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "button1_detached_light_id",
+    26,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button1_detached_light_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "button2_detached_light_id",
+    27,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button2_detached_light_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "global_scenes",
+    28,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(NSPanelConfig, n_global_scenes),
+    offsetof(NSPanelConfig, global_scenes),
+    &nspanel_scene__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_config__field_indices_by_name[] = {
+  25,   /* field[25] = button1_detached_light_id */
+  19,   /* field[19] = button1_mode */
+  21,   /* field[21] = button1_mqtt_payload */
+  20,   /* field[20] = button1_mqtt_topic */
+  26,   /* field[26] = button2_detached_light_id */
+  22,   /* field[22] = button2_mode */
+  24,   /* field[24] = button2_mqtt_payload */
+  23,   /* field[23] = button2_mqtt_topic */
+  5,   /* field[5] = button_long_press_time */
+  11,   /* field[11] = clock_us_style */
+  2,   /* field[2] = default_page */
+  1,   /* field[1] = default_room */
+  27,   /* field[27] = global_scenes */
+  13,   /* field[13] = is_us_panel */
+  4,   /* field[4] = min_button_push_time */
+  0,   /* field[0] = name */
+  16,   /* field[16] = relay1_default_mode */
+  17,   /* field[17] = relay2_default_mode */
+  15,   /* field[15] = reverse_relays */
+  14,   /* field[14] = room_ids */
+  8,   /* field[8] = screen_dim_level */
+  3,   /* field[3] = screensaver_activation_timeout */
+  9,   /* field[9] = screensaver_dim_level */
+  10,   /* field[10] = screensaver_mode */
+  7,   /* field[7] = special_mode_release_time */
+  6,   /* field[6] = special_mode_trigger_time */
+  18,   /* field[18] = temperature_calibration */
+  12,   /* field[12] = use_fahrenheit */
+};
+static const ProtobufCIntRange nspanel_config__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 28 }
+};
+const ProtobufCMessageDescriptor nspanel_config__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelConfig",
+  "NSPanelConfig",
+  "NSPanelConfig",
+  "",
+  sizeof(NSPanelConfig),
+  28,
+  nspanel_config__field_descriptors,
+  nspanel_config__field_indices_by_name,
+  1,  nspanel_config__number_ranges,
+  (ProtobufCMessageInit) nspanel_config__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
 static const ProtobufCFieldDescriptor nspanel_warning__field_descriptors[2] =
 {
   {

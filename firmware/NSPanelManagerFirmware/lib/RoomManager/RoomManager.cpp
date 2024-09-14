@@ -35,172 +35,172 @@ void RoomManager::loadAllRooms(bool is_update) {
   JsonDocument *roomData = new JsonDocument;
   uint8_t tries = 0;
   bool successDownloadingConfig = false;
-  do {
-    // Sometimes when running WiFi.macAddress garbage is returned.
-    // Keep creation of download URL in the loop.
-    std::string roomDataJsonUrl = "http://";
-    roomDataJsonUrl.append(NSPMConfig::instance->manager_address);
-    roomDataJsonUrl.append(":");
-    roomDataJsonUrl.append(std::to_string(NSPMConfig::instance->manager_port));
-    roomDataJsonUrl.append("/api/get_nspanel_config?mac=");
-    roomDataJsonUrl.append(WiFi.macAddress().c_str());
-    LOG_INFO("Trying to download config from: ", roomDataJsonUrl.c_str());
-    successDownloadingConfig = HttpLib::DownloadJSON(roomDataJsonUrl.c_str(), roomData);
+  // do {
+  //   // Sometimes when running WiFi.macAddress garbage is returned.
+  //   // Keep creation of download URL in the loop.
+  //   std::string roomDataJsonUrl = "http://";
+  //   roomDataJsonUrl.append(NSPMConfig::instance->manager_address);
+  //   roomDataJsonUrl.append(":");
+  //   roomDataJsonUrl.append(std::to_string(NSPMConfig::instance->manager_port));
+  //   roomDataJsonUrl.append("/api/get_nspanel_config?mac=");
+  //   roomDataJsonUrl.append(WiFi.macAddress().c_str());
+  //   LOG_INFO("Trying to download config from: ", roomDataJsonUrl.c_str());
+  //   successDownloadingConfig = HttpLib::DownloadJSON(roomDataJsonUrl.c_str(), roomData);
 
-    if (roomData->size() == 0) {
-      successDownloadingConfig = false; // The HTTP call succeeded but we got no data, do not count it as a success
-    }
+  //   if (roomData->size() == 0) {
+  //     successDownloadingConfig = false; // The HTTP call succeeded but we got no data, do not count it as a success
+  //   }
 
-    if (!successDownloadingConfig) {
-      tries++;
-      LOG_ERROR("Failed to download config, will try again in 5 seconds.");
-      vTaskDelay(5000 / portTICK_PERIOD_MS);
+  //   if (!successDownloadingConfig) {
+  //     tries++;
+  //     LOG_ERROR("Failed to download config, will try again in 5 seconds.");
+  //     vTaskDelay(5000 / portTICK_PERIOD_MS);
 
-      // 30 failed tries to download config, restart and try again.
-      if (tries == 30) {
-        LOG_ERROR("Failed to download config, will restart and try again.");
-        // NspanelManagerPage::setText("Restarting...");
-        vTaskDelay(5000 / portTICK_PERIOD_MS);
-        ESP.restart();
-      }
-    }
-  } while (!successDownloadingConfig);
-  // Config downloaded, process the raw data
-  // The config also contains other config values for the interface. Populate InterfaceConfig
-  InterfaceConfig::homeScreen = (*roomData)["home"].as<uint16_t>();
-  InterfaceConfig::default_page = static_cast<DEFAULT_PAGE>((*roomData)["default_page"].as<uint8_t>());
-  InterfaceConfig::colorTempMin = (*roomData)["color_temp_min"].as<uint16_t>();
-  InterfaceConfig::colorTempMax = (*roomData)["color_temp_max"].as<uint16_t>();
-  InterfaceConfig::reverseColorTempSlider = (*roomData)["reverse_color_temp"].as<String>().equals("True");
-  InterfaceConfig::raiseToMaxLightLevelAbove = (*roomData)["raise_to_100_light_level"].as<uint8_t>();
-  InterfaceConfig::button_min_press_time = (*roomData)["min_button_push_time"].as<uint16_t>();
-  InterfaceConfig::button_long_press_time = (*roomData)["button_long_press_time"].as<uint16_t>();
-  InterfaceConfig::special_mode_trigger_time = (*roomData)["special_mode_trigger_time"].as<uint16_t>();
-  InterfaceConfig::special_mode_release_time = (*roomData)["special_mode_release_time"].as<uint16_t>();
-  InterfaceConfig::mqtt_ignore_time = (*roomData)["mqtt_ignore_time"].as<uint16_t>();
-  InterfaceConfig::screen_dim_level = (*roomData)["screen_dim_level"].as<uint8_t>();
-  InterfaceConfig::screensaver_dim_level = (*roomData)["screensaver_dim_level"].as<uint8_t>();
-  InterfaceConfig::screensaver_activation_timeout = (*roomData)["screensaver_activation_timeout"].as<uint16_t>();
-  InterfaceConfig::screensaver_mode = (*roomData)["screensaver_mode"].as<String>().c_str();
-  InterfaceConfig::clock_us_style = (*roomData)["clock_us_style"].as<String>().equals("True");
-  InterfaceConfig::lock_to_default_room = (*roomData)["lock_to_default_room"].as<String>().equals("True");
-  NSPMConfig::instance->is_us_panel = (*roomData)["is_us_panel"].as<String>().equals("True");
-  NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>((*roomData)["button1_mode"].as<uint8_t>());
-  NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>((*roomData)["button2_mode"].as<uint8_t>());
-  NSPMConfig::instance->use_fahrenheit = (*roomData)["use_fahrenheit"].as<String>().equals("True");
-  NSPMConfig::instance->temperature_calibration = (*roomData)["temperature_calibration"].as<float>();
-  NSPMConfig::instance->reverse_relays = (*roomData)["reverse_relays"].as<String>().equals("True");
-  NSPMConfig::instance->button1_mqtt_topic = (*roomData)["button1_mqtt_topic"].as<String>().c_str();
-  NSPMConfig::instance->button1_mqtt_payload = (*roomData)["button1_mqtt_payload"].as<String>().c_str();
-  NSPMConfig::instance->button2_mqtt_topic = (*roomData)["button2_mqtt_topic"].as<String>().c_str();
-  NSPMConfig::instance->button2_mqtt_payload = (*roomData)["button2_mqtt_payload"].as<String>().c_str();
+  //     // 30 failed tries to download config, restart and try again.
+  //     if (tries == 30) {
+  //       LOG_ERROR("Failed to download config, will restart and try again.");
+  //       // NspanelManagerPage::setText("Restarting...");
+  //       vTaskDelay(5000 / portTICK_PERIOD_MS);
+  //       ESP.restart();
+  //     }
+  //   }
+  // } while (!successDownloadingConfig);
+  // // Config downloaded, process the raw data
+  // // The config also contains other config values for the interface. Populate InterfaceConfig
+  // InterfaceConfig::homeScreen = (*roomData)["home"].as<uint16_t>();
+  // InterfaceConfig::default_page = static_cast<DEFAULT_PAGE>((*roomData)["default_page"].as<uint8_t>());
+  // InterfaceConfig::colorTempMin = (*roomData)["color_temp_min"].as<uint16_t>();
+  // InterfaceConfig::colorTempMax = (*roomData)["color_temp_max"].as<uint16_t>();
+  // InterfaceConfig::reverseColorTempSlider = (*roomData)["reverse_color_temp"].as<String>().equals("True");
+  // InterfaceConfig::raiseToMaxLightLevelAbove = (*roomData)["raise_to_100_light_level"].as<uint8_t>();
+  // InterfaceConfig::button_min_press_time = (*roomData)["min_button_push_time"].as<uint16_t>();
+  // InterfaceConfig::button_long_press_time = (*roomData)["button_long_press_time"].as<uint16_t>();
+  // InterfaceConfig::special_mode_trigger_time = (*roomData)["special_mode_trigger_time"].as<uint16_t>();
+  // InterfaceConfig::special_mode_release_time = (*roomData)["special_mode_release_time"].as<uint16_t>();
+  // InterfaceConfig::mqtt_ignore_time = (*roomData)["mqtt_ignore_time"].as<uint16_t>();
+  // InterfaceConfig::screen_dim_level = (*roomData)["screen_dim_level"].as<uint8_t>();
+  // InterfaceConfig::screensaver_dim_level = (*roomData)["screensaver_dim_level"].as<uint8_t>();
+  // InterfaceConfig::screensaver_activation_timeout = (*roomData)["screensaver_activation_timeout"].as<uint16_t>();
+  // InterfaceConfig::screensaver_mode = (*roomData)["screensaver_mode"].as<String>().c_str();
+  // InterfaceConfig::clock_us_style = (*roomData)["clock_us_style"].as<String>().equals("True");
+  // InterfaceConfig::lock_to_default_room = (*roomData)["lock_to_default_room"].as<String>().equals("True");
+  // NSPMConfig::instance->is_us_panel = (*roomData)["is_us_panel"].as<String>().equals("True");
+  // NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>((*roomData)["button1_mode"].as<uint8_t>());
+  // NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>((*roomData)["button2_mode"].as<uint8_t>());
+  // NSPMConfig::instance->use_fahrenheit = (*roomData)["use_fahrenheit"].as<String>().equals("True");
+  // NSPMConfig::instance->temperature_calibration = (*roomData)["temperature_calibration"].as<float>();
+  // NSPMConfig::instance->reverse_relays = (*roomData)["reverse_relays"].as<String>().equals("True");
+  // NSPMConfig::instance->button1_mqtt_topic = (*roomData)["button1_mqtt_topic"].as<String>().c_str();
+  // NSPMConfig::instance->button1_mqtt_payload = (*roomData)["button1_mqtt_payload"].as<String>().c_str();
+  // NSPMConfig::instance->button2_mqtt_topic = (*roomData)["button2_mqtt_topic"].as<String>().c_str();
+  // NSPMConfig::instance->button2_mqtt_payload = (*roomData)["button2_mqtt_payload"].as<String>().c_str();
 
-  bool relay1_default_mode = (*roomData)["relay1_default_mode"].as<String>().equals("True");
-  bool relay2_default_mode = (*roomData)["relay2_default_mode"].as<String>().equals("True");
+  // bool relay1_default_mode = (*roomData)["relay1_default_mode"].as<String>().equals("True");
+  // bool relay2_default_mode = (*roomData)["relay2_default_mode"].as<String>().equals("True");
 
-  if (NSPMConfig::instance->relay1_default_mode != relay1_default_mode) {
-    LOG_INFO("Saving new relay 1 default mode: ", relay1_default_mode ? "ON" : "OFF");
-    NSPMConfig::instance->relay1_default_mode = relay1_default_mode;
-    save_new_config_to_littlefs_at_end = true;
-  }
+  // if (NSPMConfig::instance->relay1_default_mode != relay1_default_mode) {
+  //   LOG_INFO("Saving new relay 1 default mode: ", relay1_default_mode ? "ON" : "OFF");
+  //   NSPMConfig::instance->relay1_default_mode = relay1_default_mode;
+  //   save_new_config_to_littlefs_at_end = true;
+  // }
 
-  if (NSPMConfig::instance->relay2_default_mode != relay2_default_mode) {
-    LOG_INFO("Saving new relay 2 default mode: ", relay2_default_mode ? "ON" : "OFF");
-    NSPMConfig::instance->relay2_default_mode = relay2_default_mode;
-    save_new_config_to_littlefs_at_end = true;
-  }
+  // if (NSPMConfig::instance->relay2_default_mode != relay2_default_mode) {
+  //   LOG_INFO("Saving new relay 2 default mode: ", relay2_default_mode ? "ON" : "OFF");
+  //   NSPMConfig::instance->relay2_default_mode = relay2_default_mode;
+  //   save_new_config_to_littlefs_at_end = true;
+  // }
 
-  if (NSPMConfig::instance->wifi_hostname.compare((*roomData)["name"].as<String>().c_str()) != 0) {
-    save_new_config_to_littlefs_at_end = true;
-    reboot_after_config_saved = true;
-    NSPMConfig::instance->wifi_hostname = (*roomData)["name"].as<String>().c_str();
-    LOG_DEBUG("Name has changed. Restarting.");
-  }
+  // if (NSPMConfig::instance->wifi_hostname.compare((*roomData)["name"].as<String>().c_str()) != 0) {
+  //   save_new_config_to_littlefs_at_end = true;
+  //   reboot_after_config_saved = true;
+  //   NSPMConfig::instance->wifi_hostname = (*roomData)["name"].as<String>().c_str();
+  //   LOG_DEBUG("Name has changed. Restarting.");
+  // }
 
-  if (save_new_config_to_littlefs_at_end) {
-    while (!NSPMConfig::instance->saveToLittleFS(false)) {
-      vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
+  // if (save_new_config_to_littlefs_at_end) {
+  //   while (!NSPMConfig::instance->saveToLittleFS(false)) {
+  //     vTaskDelay(1000 / portTICK_PERIOD_MS);
+  //   }
 
-    if (reboot_after_config_saved) {
-      ESP.restart();
-      vTaskDelay(portMAX_DELAY);
-      vTaskDelete(NULL);
-    }
-  }
+  //   if (reboot_after_config_saved) {
+  //     ESP.restart();
+  //     vTaskDelay(portMAX_DELAY);
+  //     vTaskDelete(NULL);
+  //   }
+  // }
 
-  // Load global scenes
-  JsonVariant json_scenes = (*roomData)["scenes"];
-  for (JsonPair scenePair : json_scenes.as<JsonObject>()) {
-    bool existing_scene;
-    Scene *newScene = InterfaceConfig::getSceneById(atoi(scenePair.key().c_str()));
-    if (newScene == nullptr) {
-      existing_scene = false;
-      newScene = new Scene();
-    } else {
-      existing_scene = true;
-    }
-    newScene->room = nullptr;
-    newScene->id = atoi(scenePair.key().c_str());
-    newScene->name = scenePair.value()["name"] | "ERR-S";
-    newScene->canSave = scenePair.value()["can_save"].as<String>().equals("true");
-    newScene->callUpdateCallbacks();
-    if (!existing_scene) {
-      InterfaceConfig::global_scenes.push_back(newScene);
-      LOG_TRACE("Loaded scene ", newScene->id, "::", newScene->name.c_str());
-    }
-  }
+  // // Load global scenes
+  // JsonVariant json_scenes = (*roomData)["scenes"];
+  // for (JsonPair scenePair : json_scenes.as<JsonObject>()) {
+  //   bool existing_scene;
+  //   Scene *newScene = InterfaceConfig::getSceneById(atoi(scenePair.key().c_str()));
+  //   if (newScene == nullptr) {
+  //     existing_scene = false;
+  //     newScene = new Scene();
+  //   } else {
+  //     existing_scene = true;
+  //   }
+  //   newScene->room = nullptr;
+  //   newScene->id = atoi(scenePair.key().c_str());
+  //   newScene->name = scenePair.value()["name"] | "ERR-S";
+  //   newScene->canSave = scenePair.value()["can_save"].as<String>().equals("true");
+  //   newScene->callUpdateCallbacks();
+  //   if (!existing_scene) {
+  //     InterfaceConfig::global_scenes.push_back(newScene);
+  //     LOG_TRACE("Loaded scene ", newScene->id, "::", newScene->name.c_str());
+  //   }
+  // }
 
-  for (auto it = InterfaceConfig::global_scenes.cbegin(); it != InterfaceConfig::global_scenes.cend();) {
-    // Check if this light ID exist in JSON config
-    bool scene_found = false;
-    for (JsonPair jsonLightPair : json_scenes.as<JsonObject>()) {
-      if (atoi(jsonLightPair.key().c_str()) == (*it)->getId()) {
-        scene_found = true;
-        break;
-      }
-    }
+  // for (auto it = InterfaceConfig::global_scenes.cbegin(); it != InterfaceConfig::global_scenes.cend();) {
+  //   // Check if this light ID exist in JSON config
+  //   bool scene_found = false;
+  //   for (JsonPair jsonLightPair : json_scenes.as<JsonObject>()) {
+  //     if (atoi(jsonLightPair.key().c_str()) == (*it)->getId()) {
+  //       scene_found = true;
+  //       break;
+  //     }
+  //   }
 
-    if (!scene_found) {
-      Scene *scene_to_remove = (*it);
-      LOG_DEBUG("Removing global scene: ", scene_to_remove->getName().c_str(), ". ID: ", scene_to_remove->getId());
-      it = InterfaceConfig::global_scenes.erase(it);
-      scene_to_remove->callDeconstructCallbacks();
-      delete scene_to_remove;
-    } else {
-      it++;
-    }
-  }
+  //   if (!scene_found) {
+  //     Scene *scene_to_remove = (*it);
+  //     LOG_DEBUG("Removing global scene: ", scene_to_remove->getName().c_str(), ". ID: ", scene_to_remove->getId());
+  //     it = InterfaceConfig::global_scenes.erase(it);
+  //     scene_to_remove->callDeconstructCallbacks();
+  //     delete scene_to_remove;
+  //   } else {
+  //     it++;
+  //   }
+  // }
 
-  // Init rooms
-  for (uint16_t roomId : (*roomData)["rooms"].as<JsonArray>()) {
-    if (InterfaceConfig::lock_to_default_room && roomId != InterfaceConfig::homeScreen) {
-      continue;
-    }
-    LOG_INFO("Getting config for room ", roomId);
-    Room *room = RoomManager::loadRoom(roomId, is_update);
-    if (RoomManager::getRoomById(roomId) == nullptr) {
-      // If a nullptr is returned, a room by that id was not found
-      RoomManager::rooms.push_back(room);
-    }
-  }
+  // // Init rooms
+  // for (uint16_t roomId : (*roomData)["rooms"].as<JsonArray>()) {
+  //   if (InterfaceConfig::lock_to_default_room && roomId != InterfaceConfig::homeScreen) {
+  //     continue;
+  //   }
+  //   LOG_INFO("Getting config for room ", roomId);
+  //   Room *room = RoomManager::loadRoom(roomId, is_update);
+  //   if (RoomManager::getRoomById(roomId) == nullptr) {
+  //     // If a nullptr is returned, a room by that id was not found
+  //     RoomManager::rooms.push_back(room);
+  //   }
+  // }
 
-  if (!is_update) {
-    // Set currentRoom to the default room for this panel
-    if (!RoomManager::goToRoomId(InterfaceConfig::homeScreen)) {
-      LOG_ERROR("Failed to go to default room.");
-      if (RoomManager::rooms.size() > 0) {
-        LOG_WARNING("Navigating to first room instead of default room as that failed.");
-        RoomManager::currentRoom = RoomManager::rooms.begin();
-      } else {
-        LOG_ERROR("No rooms loaded!");
-      }
-    }
-  } else {
-    // TODO: Implement function that remove any rooms currently loaded but not configured (ie. removed through manager)
-    LOG_DEBUG("Calling roomChangedCallback");
-    RoomManager::_callRoomChangeCallbacks(); // Call room change update to force an update for other components
-  }
+  // if (!is_update) {
+  //   // Set currentRoom to the default room for this panel
+  //   if (!RoomManager::goToRoomId(InterfaceConfig::homeScreen)) {
+  //     LOG_ERROR("Failed to go to default room.");
+  //     if (RoomManager::rooms.size() > 0) {
+  //       LOG_WARNING("Navigating to first room instead of default room as that failed.");
+  //       RoomManager::currentRoom = RoomManager::rooms.begin();
+  //     } else {
+  //       LOG_ERROR("No rooms loaded!");
+  //     }
+  //   }
+  // } else {
+  //   // TODO: Implement function that remove any rooms currently loaded but not configured (ie. removed through manager)
+  //   LOG_DEBUG("Calling roomChangedCallback");
+  //   RoomManager::_callRoomChangeCallbacks(); // Call room change update to force an update for other components
+  // }
 
   // All rooms and lights has loaded, prep buttonmanager
   // TODO: Implement detached buttons with protobuf
@@ -225,7 +225,7 @@ void RoomManager::loadAllRooms(bool is_update) {
   //   ButtonManager::button2_detached_mode_light = nullptr;
   // }
 
-  NSPMConfig::instance->successful_config_load = true;
+  // NSPMConfig::instance->successful_config_load = true;
 }
 
 Room *RoomManager::loadRoom(uint16_t roomId, bool is_update) {

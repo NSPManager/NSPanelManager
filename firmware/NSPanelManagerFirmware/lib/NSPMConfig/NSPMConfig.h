@@ -36,6 +36,9 @@ public:
   /// @brief The port to access to manager at
   uint16_t manager_port = 8000;
 
+  /// @brief The topic where the MQTTManager pushes the current config for this panel
+  std::string nspanel_config_topic;
+
   /// @brief The logging level set for runtime
   uint8_t logging_level = 4;
 

@@ -192,6 +192,7 @@ void NSPanel::update_config(NSPanelSettings &settings) {
     });
     this->_mqtt_register_mac = mqtt_register_mac;
 
+    this->_mqtt_config_topic = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/config", MqttManagerConfig::get_settings().manager_address(), this->_name);
     this->_mqtt_log_topic = fmt::format("nspanel/{}/log", this->_name);
     this->_mqtt_command_topic = fmt::format("nspanel/{}/command", this->_name);
     this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
@@ -210,6 +211,7 @@ void NSPanel::update_config(NSPanelSettings &settings) {
     this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_name);
     this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_name);
 
+    SPDLOG_TRACE("_mqtt_config_topic: {}", _mqtt_config_topic);
     SPDLOG_TRACE("_mqtt_log_topic: {}", _mqtt_log_topic);
     SPDLOG_TRACE("_mqtt_command_topic: {}", _mqtt_command_topic);
     SPDLOG_TRACE("_mqtt_sensor_temperature_topic: {}", _mqtt_sensor_temperature_topic);
@@ -237,13 +239,63 @@ void NSPanel::update_config(NSPanelSettings &settings) {
     MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
-    MqttManagerConfig::attach_config_loaded_listener(boost::bind(&NSPanel::send_reload_command, this));
-    this->send_reload_command();
+    MqttManagerConfig::attach_config_loaded_listener(boost::bind(&NSPanel::send_config, this));
     this->register_to_home_assistant();
+    this->send_config();
   }
 
   // Config changed, send "reload" command to web interface
   this->send_websocket_update();
+}
+
+void NSPanel::send_config() {
+  auto settings_it = std::find_if(MqttManagerConfig::nspanel_configs.begin(), MqttManagerConfig::nspanel_configs.end(), [this](NSPanelSettings s) {
+    return s.id() == this->_id;
+  });
+  if (settings_it != MqttManagerConfig::nspanel_configs.end()) {
+    SPDLOG_INFO("Sending config over MQTT for panel {}::{}", this->_id, this->_name);
+    NSPanelSettings settings = (*settings_it);
+    NSPanelConfig config;
+    config.set_name(this->_name);
+    config.set_default_room(settings.default_room());
+    config.set_default_page(settings.default_page());
+    config.set_min_button_push_time(settings.min_button_push_time());
+    config.set_button_long_press_time(settings.button_long_press_time());
+    config.set_special_mode_trigger_time(settings.special_mode_trigger_time());
+    config.set_special_mode_release_time(settings.special_mode_release_time());
+    config.set_screen_dim_level(settings.screen_dim_level());
+    config.set_screensaver_dim_level(settings.screensaver_dim_level());
+    config.set_screensaver_mode(static_cast<NSPanelConfig_NSPanelScreensaverMode>(settings.screensaver_mode()));
+    config.set_screensaver_activation_timeout(settings.screensaver_activation_timeout());
+    config.set_clock_us_style(settings.clock_format() == time_format::AM_PM);
+    config.set_use_fahrenheit(settings.temperature_unit() == temperature_format::FAHRENHEIT);
+    config.set_is_us_panel(settings.is_us_panel());
+    config.set_reverse_relays(settings.reverse_relays());
+    config.set_relay1_default_mode(settings.relay1_default_mode());
+    config.set_relay2_default_mode(settings.relay2_default_mode());
+    config.set_temperature_calibration(settings.temperature_calibration());
+    config.set_button1_mode(settings.button1_mode());
+    config.set_button2_mode(settings.button2_mode());
+    config.set_button1_mqtt_topic(settings.button1_mqtt_topic());
+    config.set_button2_mqtt_topic(settings.button2_mqtt_topic());
+    config.set_button1_mqtt_payload(settings.button1_mqtt_payload());
+    config.set_button2_mqtt_payload(settings.button2_mqtt_payload());
+    config.set_button1_detached_light_id(settings.button1_detached_light_id());
+    config.set_button2_detached_light_id(settings.button2_detached_light_id());
+
+    // Load rooms
+    for (int i = 0; i < settings.rooms().size(); i++) {
+      config.add_room_ids(settings.rooms().Get(i));
+    }
+
+    // TODO: Set scenes
+    config.clear_global_scenes();
+
+    std::string config_str = config.SerializeAsString();
+    MQTT_Manager::publish(this->_mqtt_config_topic, config_str, true);
+  } else {
+    SPDLOG_WARN("Requested sending config for panel {}::{} over MQTT but no such panel exists in MqttManagerConfig.", this->_id, this->_name);
+  }
 }
 
 NSPanel::~NSPanel() {
@@ -257,11 +309,11 @@ void NSPanel::reset_mqtt_topics() {
   MQTT_Manager::detach_callback(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
   MQTT_Manager::detach_callback(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
   MQTT_Manager::detach_callback(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
-  MqttManagerConfig::dettach_config_loaded_listener(boost::bind(&NSPanel::send_reload_command, this));
 
   // This nspanel was removed. Clear any retain on any MQTT topic.
   MQTT_Manager::clear_retain(this->_mqtt_status_topic);
   MQTT_Manager::clear_retain(this->_mqtt_command_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_config_topic);
 
   this->reset_ha_mqtt_topics();
 }
@@ -661,13 +713,6 @@ void NSPanel::tft_update() {
   }
 }
 
-void NSPanel::send_reload_command() {
-  SPDLOG_INFO("Sending reload command to nspanel {}::{}.", this->_id, this->_name);
-  nlohmann::json cmd;
-  cmd["command"] = "reload";
-  this->send_command(cmd);
-}
-
 void NSPanel::send_command(nlohmann::json &command) {
   if (!this->_mqtt_command_topic.empty()) {
     std::string buffer = command.dump();
@@ -751,6 +796,7 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
         response["command"] = "register_accept";
         response["address"] = MqttManagerConfig::get_settings().manager_address();
         response["port"] = MqttManagerConfig::get_settings().manager_port();
+        response["config_topic"] = this->_mqtt_config_topic;
         std::string reply_topic = fmt::format("nspanel/{}/command", std::string(register_request_payload.at("friendly_name")));
         MQTT_Manager::publish(reply_topic, response.dump());
 
