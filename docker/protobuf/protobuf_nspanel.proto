@@ -104,6 +104,7 @@ message NSPanelRoomStatus {
     int32 ceiling_lights_color_temperature_value = 7;
     int32 table_lights_color_temperature_value = 8;
     repeated NSPanelLightStatus lights = 9;
+    repeated NSPanelScene scenes = 10;
 }
 
 

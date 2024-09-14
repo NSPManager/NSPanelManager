@@ -183,10 +183,12 @@ struct  NSPanelRoomStatus
   int32_t table_lights_color_temperature_value;
   size_t n_lights;
   NSPanelLightStatus **lights;
+  size_t n_scenes;
+  NSPanelScene **scenes;
 };
 #define NSPANEL_ROOM_STATUS__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_room_status__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0,NULL }
+    , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0,NULL, 0,NULL }
 
 
 struct  NSPanelWeatherUpdate__ForecastItem

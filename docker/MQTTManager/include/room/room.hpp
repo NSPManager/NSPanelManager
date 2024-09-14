@@ -73,8 +73,8 @@ public:
   void entity_changed_callback(MqttManagerEntity *entity);
 
   /**
-  * Callback for NSPanelMQTTManagerCommands sent over MQTT
-  */
+   * Callback for NSPanelMQTTManagerCommands sent over MQTT
+   */
   void command_callback(NSPanelMQTTManagerCommand &command);
 
 private:
@@ -83,6 +83,7 @@ private:
   std::string _mqtt_status_topic;
   std::list<MqttManagerEntity *> _entities;
   void _publish_protobuf_status();
+  void _publish_protobuf_config();
 };
 
 #endif // !MQTT_MANAGER_ROOM_H

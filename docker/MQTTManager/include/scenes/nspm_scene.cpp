@@ -191,3 +191,11 @@ void NSPMScene::light_destroyed_callback(Light *light) {
     }
   }
 }
+
+std::string NSPMScene::get_name() {
+  return this->_name;
+}
+
+bool NSPMScene::can_save() {
+  return true;
+}

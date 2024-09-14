@@ -5,6 +5,7 @@
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf/protobuf_general.pb.h"
 #include "protobuf/protobuf_nspanel.pb.h"
+#include "scenes/scene.hpp"
 #include <algorithm>
 #include <boost/bind.hpp>
 #include <boost/bind/bind.hpp>
@@ -28,7 +29,7 @@ void Room::update_config(RoomSettings &config) {
   this->_name = config.name();
   this->_mqtt_status_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/status", MqttManagerConfig::get_settings().manager_address(), this->_id);
 
-  SPDLOG_DEBUG("Room {}::{} initialized with status topic '{}'.", this->_id, this->_name, this->_mqtt_status_topic);
+  SPDLOG_TRACE("Room {}::{} initialized with status topic '{}'.", this->_id, this->_name, this->_mqtt_status_topic);
 
   this->_publish_protobuf_status();
 }
@@ -118,6 +119,12 @@ void Room::_publish_protobuf_status() {
       light_status->set_color_temp(light->get_color_temperature());
       light_status->set_hue(light->get_hue());
       light_status->set_saturation(light->get_saturation());
+    } else if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::SCENE) {
+      Scene *scene = (Scene *)entity;
+      NSPanelScene *scene_status = status.add_scenes();
+      scene_status->set_scene_id(scene->get_id());
+      scene_status->set_name(scene->get_name());
+      scene_status->set_can_save(scene->can_save());
     }
   }
 

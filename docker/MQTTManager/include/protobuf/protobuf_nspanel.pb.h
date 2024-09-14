@@ -2598,6 +2598,7 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kLightsFieldNumber = 9,
+    kScenesFieldNumber = 10,
     kNameFieldNumber = 2,
     kIdFieldNumber = 1,
     kAverageDimLevelFieldNumber = 3,
@@ -2624,6 +2625,23 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
   const ::NSPanelLightStatus& lights(int index) const;
   ::NSPanelLightStatus* add_lights();
   const ::google::protobuf::RepeatedPtrField<::NSPanelLightStatus>& lights() const;
+  // repeated .NSPanelScene scenes = 10;
+  int scenes_size() const;
+  private:
+  int _internal_scenes_size() const;
+
+  public:
+  void clear_scenes() ;
+  ::NSPanelScene* mutable_scenes(int index);
+  ::google::protobuf::RepeatedPtrField<::NSPanelScene>* mutable_scenes();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::NSPanelScene>& _internal_scenes() const;
+  ::google::protobuf::RepeatedPtrField<::NSPanelScene>* _internal_mutable_scenes();
+  public:
+  const ::NSPanelScene& scenes(int index) const;
+  ::NSPanelScene* add_scenes();
+  const ::google::protobuf::RepeatedPtrField<::NSPanelScene>& scenes() const;
   // string name = 2;
   void clear_name() ;
   const std::string& name() const;
@@ -2715,7 +2733,7 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 9, 1,
+      4, 10, 2,
       38, 2>
       _table_;
 
@@ -2737,6 +2755,7 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const NSPanelRoomStatus& from_msg);
     ::google::protobuf::RepeatedPtrField< ::NSPanelLightStatus > lights_;
+    ::google::protobuf::RepeatedPtrField< ::NSPanelScene > scenes_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::int32_t id_;
     ::int32_t average_dim_level_;
@@ -5372,6 +5391,55 @@ inline ::google::protobuf::RepeatedPtrField<::NSPanelLightStatus>*
 NSPanelRoomStatus::_internal_mutable_lights() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.lights_;
+}
+
+// repeated .NSPanelScene scenes = 10;
+inline int NSPanelRoomStatus::_internal_scenes_size() const {
+  return _internal_scenes().size();
+}
+inline int NSPanelRoomStatus::scenes_size() const {
+  return _internal_scenes_size();
+}
+inline void NSPanelRoomStatus::clear_scenes() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.scenes_.Clear();
+}
+inline ::NSPanelScene* NSPanelRoomStatus::mutable_scenes(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:NSPanelRoomStatus.scenes)
+  return _internal_mutable_scenes()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::NSPanelScene>* NSPanelRoomStatus::mutable_scenes()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelRoomStatus.scenes)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_scenes();
+}
+inline const ::NSPanelScene& NSPanelRoomStatus::scenes(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelRoomStatus.scenes)
+  return _internal_scenes().Get(index);
+}
+inline ::NSPanelScene* NSPanelRoomStatus::add_scenes() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::NSPanelScene* _add = _internal_mutable_scenes()->Add();
+  // @@protoc_insertion_point(field_add:NSPanelRoomStatus.scenes)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::NSPanelScene>& NSPanelRoomStatus::scenes() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelRoomStatus.scenes)
+  return _internal_scenes();
+}
+inline const ::google::protobuf::RepeatedPtrField<::NSPanelScene>&
+NSPanelRoomStatus::_internal_scenes() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.scenes_;
+}
+inline ::google::protobuf::RepeatedPtrField<::NSPanelScene>*
+NSPanelRoomStatus::_internal_mutable_scenes() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.scenes_;
 }
 
 // -------------------------------------------------------------------

@@ -73,3 +73,11 @@ void OpenhabScene::post_init() {
     }
   }
 }
+
+std::string OpenhabScene::get_name() {
+  return this->_name;
+}
+
+bool OpenhabScene::can_save() {
+  return false;
+}

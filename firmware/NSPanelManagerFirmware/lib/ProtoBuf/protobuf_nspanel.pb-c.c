@@ -1247,7 +1247,7 @@ const ProtobufCMessageDescriptor nspanel_light_status__descriptor =
   (ProtobufCMessageInit) nspanel_light_status__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor nspanel_room_status__field_descriptors[9] =
+static const ProtobufCFieldDescriptor nspanel_room_status__field_descriptors[10] =
 {
   {
     "id",
@@ -1357,6 +1357,18 @@ static const ProtobufCFieldDescriptor nspanel_room_status__field_descriptors[9] 
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "scenes",
+    10,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(NSPanelRoomStatus, n_scenes),
+    offsetof(NSPanelRoomStatus, scenes),
+    &nspanel_scene__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_room_status__field_indices_by_name[] = {
   5,   /* field[5] = average_color_temperature */
@@ -1366,13 +1378,14 @@ static const unsigned nspanel_room_status__field_indices_by_name[] = {
   0,   /* field[0] = id */
   8,   /* field[8] = lights */
   1,   /* field[1] = name */
+  9,   /* field[9] = scenes */
   7,   /* field[7] = table_lights_color_temperature_value */
   4,   /* field[4] = table_lights_dim_level */
 };
 static const ProtobufCIntRange nspanel_room_status__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 9 }
+  { 0, 10 }
 };
 const ProtobufCMessageDescriptor nspanel_room_status__descriptor =
 {
@@ -1382,7 +1395,7 @@ const ProtobufCMessageDescriptor nspanel_room_status__descriptor =
   "NSPanelRoomStatus",
   "",
   sizeof(NSPanelRoomStatus),
-  9,
+  10,
   nspanel_room_status__field_descriptors,
   nspanel_room_status__field_indices_by_name,
   1,  nspanel_room_status__number_ranges,

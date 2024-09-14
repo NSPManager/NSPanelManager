@@ -64,3 +64,11 @@ void HomeAssistantScene::post_init() {
     }
   }
 }
+
+std::string HomeAssistantScene::get_name() {
+  return this->_name;
+}
+
+bool HomeAssistantScene::can_save() {
+  return false;
+}

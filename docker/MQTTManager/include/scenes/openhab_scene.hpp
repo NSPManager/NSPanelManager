@@ -11,6 +11,8 @@ public:
   void save();
   void remove();
   uint16_t get_id();
+  std::string get_name();
+  bool can_save();
   void post_init();
   MQTT_MANAGER_ENTITY_TYPE get_type();
   MQTT_MANAGER_ENTITY_CONTROLLER get_controller();
