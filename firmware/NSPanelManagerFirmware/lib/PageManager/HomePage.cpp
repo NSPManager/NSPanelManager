@@ -3,7 +3,6 @@
 #include <InterfaceManager.hpp>
 #include <NSPanel.hpp>
 #include <PageManager.hpp>
-#include <Room.hpp>
 #include <RoomManager.hpp>
 #include <TftDefines.h>
 
@@ -249,7 +248,7 @@ void HomePage::_updateLightsWithNewBrightness(uint8_t brightness) {
     NSPanelMQTTManagerCommand__FirstPageTurnLightOn light_command = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_ON__INIT;
     light_command.brightness_slider_value = brightness;
     light_command.kelvin_slider_value = 0;
-    light_command.selected_room = (*RoomManager::currentRoom)->id;
+    light_command.selected_room = (*RoomManager::currentRoom).id;
     light_command.global = InterfaceConfig::currentRoomMode == roomMode::house;
     light_command.has_brightness_value = true;
     light_command.has_kelvin_value = false;
@@ -348,7 +347,7 @@ void HomePage::_ceilingMasterButtonEvent() {
     } else {
       light_command.kelvin_slider_value = InterfaceConfig::colorTempMin + sendKelvin;
     }
-    light_command.selected_room = (*RoomManager::currentRoom)->id;
+    light_command.selected_room = (*RoomManager::currentRoom).id;
     light_command.global = InterfaceConfig::currentRoomMode == roomMode::house;
     light_command.has_brightness_value = true;
     light_command.has_kelvin_value = true;
@@ -380,7 +379,7 @@ void HomePage::_tableMasterButtonEvent() {
     } else {
       light_command.kelvin_slider_value = InterfaceConfig::colorTempMin + sendKelvin;
     }
-    light_command.selected_room = (*RoomManager::currentRoom)->id;
+    light_command.selected_room = (*RoomManager::currentRoom).id;
     light_command.global = InterfaceConfig::currentRoomMode == roomMode::house;
     light_command.has_brightness_value = true;
     light_command.has_kelvin_value = true;
@@ -411,7 +410,7 @@ void HomePage::_updateLightsColorTempAccordingToSlider() {
     } else {
       light_command.kelvin_slider_value = InterfaceConfig::colorTempMin + sendKelvin;
     }
-    light_command.selected_room = (*RoomManager::currentRoom)->id;
+    light_command.selected_room = (*RoomManager::currentRoom).id;
     light_command.global = InterfaceConfig::currentRoomMode == roomMode::house;
     light_command.has_brightness_value = false;
     light_command.has_kelvin_value = true;
@@ -478,35 +477,35 @@ void HomePage::setCurrentMode(roomMode mode) {
 void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperature) {
   if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
     if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-      PageManager::GetHomePage()->setCeilingLightsState((*RoomManager::currentRoom)->status.ceiling_lights_dim_level > 0);
-      PageManager::GetHomePage()->setCeilingBrightnessLabelText((*RoomManager::currentRoom)->status.ceiling_lights_dim_level);
-      PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom)->status.table_lights_dim_level > 0);
-      PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom)->status.table_lights_dim_level);
+      PageManager::GetHomePage()->setCeilingLightsState((*RoomManager::currentRoom).ceiling_lights_dim_level > 0);
+      PageManager::GetHomePage()->setCeilingBrightnessLabelText((*RoomManager::currentRoom).ceiling_lights_dim_level);
+      PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom).table_lights_dim_level > 0);
+      PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom).table_lights_dim_level);
       // Only update light level slider if the new value is greater than 0.
-      if ((*RoomManager::currentRoom)->status.average_dim_level > 0) {
-        PageManager::GetHomePage()->setDimmingValue((*RoomManager::currentRoom)->status.average_dim_level);
+      if ((*RoomManager::currentRoom).average_dim_level > 0) {
+        PageManager::GetHomePage()->setDimmingValue((*RoomManager::currentRoom).average_dim_level);
       }
-      PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom)->status.average_color_temperature);
+      PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom).average_color_temperature);
     } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
-      PageManager::GetHomePage()->setCeilingLightsState((*RoomManager::currentRoom)->status.ceiling_lights_dim_level > 0);
-      PageManager::GetHomePage()->setCeilingBrightnessLabelText((*RoomManager::currentRoom)->status.ceiling_lights_dim_level);
+      PageManager::GetHomePage()->setCeilingLightsState((*RoomManager::currentRoom).ceiling_lights_dim_level > 0);
+      PageManager::GetHomePage()->setCeilingBrightnessLabelText((*RoomManager::currentRoom).ceiling_lights_dim_level);
       PageManager::GetHomePage()->setTableLightsState(false);
       PageManager::GetHomePage()->setTableBrightnessLabelText(0);
       // Only update light level slider if the new value is greater than 0.
-      if ((*RoomManager::currentRoom)->status.ceiling_lights_dim_level > 0) {
-        PageManager::GetHomePage()->setDimmingValue((*RoomManager::currentRoom)->status.ceiling_lights_dim_level);
+      if ((*RoomManager::currentRoom).ceiling_lights_dim_level > 0) {
+        PageManager::GetHomePage()->setDimmingValue((*RoomManager::currentRoom).ceiling_lights_dim_level);
       }
-      PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom)->status.ceiling_lights_color_temperature_value);
+      PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom).ceiling_lights_color_temperature_value);
     } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
       PageManager::GetHomePage()->setCeilingLightsState(false);
       PageManager::GetHomePage()->setCeilingBrightnessLabelText(0);
-      PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom)->status.table_lights_dim_level > 0);
-      PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom)->status.table_lights_dim_level);
+      PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom).table_lights_dim_level > 0);
+      PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom).table_lights_dim_level);
       // Only update light level slider if the new value is greater than 0.
-      if ((*RoomManager::currentRoom)->status.table_lights_dim_level > 0) {
-        PageManager::GetHomePage()->setDimmingValue((*RoomManager::currentRoom)->status.table_lights_dim_level);
+      if ((*RoomManager::currentRoom).table_lights_dim_level > 0) {
+        PageManager::GetHomePage()->setDimmingValue((*RoomManager::currentRoom).table_lights_dim_level);
       }
-      PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom)->status.table_lights_color_temperature_value);
+      PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom).table_lights_color_temperature_value);
     } else {
       LOG_ERROR("Unknown editLightMode!");
     }
@@ -630,7 +629,7 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
 void HomePage::updateRoomInfo() {
   if (RoomManager::hasValidCurrentRoom()) {
     if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
-      NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, (*RoomManager::currentRoom)->name.c_str());
+      NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, (*RoomManager::currentRoom).name);
     } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
       NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, "All");
     }

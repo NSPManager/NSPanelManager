@@ -8,9 +8,7 @@
 #include <MqttLog.hpp>
 #include <NSPanel.hpp>
 #include <PageManager.hpp>
-#include <Room.hpp>
 #include <RoomManager.hpp>
-#include <Scene.hpp>
 #include <TftDefines.h>
 #include <WebManager.hpp>
 #include <WiFi.h>
@@ -223,7 +221,7 @@ void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned
     InterfaceManager::hasRegisteredToManager = true;
   } else if (command.compare("reload") == 0) {
     if (InterfaceManager::hasRegisteredToManager && NSPMConfig::instance->successful_config_load) {
-      RoomManager::performConfigReload();
+      // RoomManager::performConfigReload(); // TODO: Is this still needed?
     } else {
       LOG_ERROR("Received command to reload config when the panel hasn't yet registered to a manager or yet once successfully downloaded a config from the manager.");
     }
@@ -263,87 +261,93 @@ void InterfaceManager::handleNSPanelScreensaverBrightnessCommand(char *topic, by
 void InterfaceManager::handleNSPanelConfigUpdate(char *topic, byte *payload, unsigned int length) {
   try {
     NSPanelConfig *config = nspanel_config__unpack(NULL, length, payload);
-    InterfaceConfig::homeScreen = config->default_room;
-    InterfaceConfig::default_page = static_cast<DEFAULT_PAGE>(config->default_page);
-    InterfaceConfig::button_min_press_time = config->min_button_push_time;
-    InterfaceConfig::button_long_press_time = config->button_long_press_time;
-    InterfaceConfig::special_mode_trigger_time = config->special_mode_trigger_time;
-    InterfaceConfig::special_mode_release_time = config->special_mode_release_time;
-    InterfaceConfig::screen_dim_level = config->screen_dim_level;
-    InterfaceConfig::screensaver_dim_level = config->screensaver_dim_level;
-    InterfaceConfig::screensaver_activation_timeout = config->screensaver_activation_timeout;
-    InterfaceConfig::screensaver_mode = config->screensaver_mode;
-    InterfaceConfig::clock_us_style = config->clock_us_style;
-    InterfaceConfig::lock_to_default_room = false; // TODO: Remove as only "allowed" rooms are loaded.
-
-    LOG_DEBUG("Loaded screensaver mode: ", InterfaceConfig::screensaver_mode);
-    LOG_DEBUG("Screensaver activation timeout: ", InterfaceConfig::screensaver_activation_timeout);
-
-    NSPMConfig::instance->is_us_panel = config->is_us_panel;
-    NSPMConfig::instance->use_fahrenheit = config->use_fahrenheit;
-    NSPMConfig::instance->temperature_calibration = config->temperature_calibration;
-    NSPMConfig::instance->reverse_relays = config->reverse_relays;
-    NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>(config->button1_mode);
-    NSPMConfig::instance->button1_mqtt_topic = config->button1_mqtt_topic;
-    NSPMConfig::instance->button1_mqtt_payload = config->button1_mqtt_payload;
-    NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>(config->button2_mode);
-    NSPMConfig::instance->button2_mqtt_topic = config->button2_mqtt_topic;
-    NSPMConfig::instance->button2_mqtt_payload = config->button2_mqtt_payload;
-
-    bool save_new_config_to_littlefs_at_end = false;
-    bool reboot_after_config_saved = false;
-
-    if (NSPMConfig::instance->relay1_default_mode != config->relay1_default_mode) {
-      LOG_INFO("Saving new relay 1 default mode: ", config->relay1_default_mode ? "ON" : "OFF");
-      NSPMConfig::instance->relay1_default_mode = config->relay1_default_mode;
-      save_new_config_to_littlefs_at_end = true;
-    }
-
-    if (NSPMConfig::instance->relay2_default_mode != config->relay2_default_mode) {
-      LOG_INFO("Saving new relay 2 default mode: ", config->relay2_default_mode ? "ON" : "OFF");
-      NSPMConfig::instance->relay2_default_mode = config->relay2_default_mode;
-      save_new_config_to_littlefs_at_end = true;
-    }
-
-    if (NSPMConfig::instance->wifi_hostname.compare(config->name) != 0) {
-      save_new_config_to_littlefs_at_end = true;
-      reboot_after_config_saved = true;
-      NSPMConfig::instance->wifi_hostname = config->name;
-      LOG_INFO("Name has changed. Restarting.");
-    }
-
-    if (save_new_config_to_littlefs_at_end) {
-      while (!NSPMConfig::instance->saveToLittleFS(false)) {
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-      }
-
-      if (reboot_after_config_saved) {
-        ESP.restart();
-        vTaskDelay(portMAX_DELAY);
-        vTaskDelete(NULL);
-      }
-    }
-
-    // Start loading scenes and rooms
-    LOG_DEBUG("Loading global scenes.");
-    InterfaceConfig::global_scenes.clear();
-    for (int i = 0; i < config->n_global_scenes; i++) {
-      Scene *s = new Scene();
-      s->id = config->global_scenes[i]->scene_id;
-      s->name = config->global_scenes[i]->name;
-      s->room = nullptr;
-      s->canSave = config->global_scenes[i]->can_save;
-      InterfaceConfig::global_scenes.push_back(s);
-      LOG_DEBUG("Loaded global scene ", s->name.c_str());
-    }
-    LOG_INFO("Loaded ", InterfaceConfig::global_scenes.size(), " global scenes.");
-
-    // TODO: Load rooms
-
-    InterfaceManager::instance->_config_loaded = true;
+    InterfaceManager::_new_config = *config;
+    LOG_INFO("Received new config and successfully parsed it into protobuf. Will start _taskHandleConfigData.");
+    xTaskCreatePinnedToCore(&InterfaceManager::_taskHandleConfigData, "handle_config", 5000, NULL, 1, NULL, ARDUINO_RUNNING_CORE);
   } catch (const std::exception &e) {
     LOG_ERROR("Caught error while processing protobuf object on config topic.");
   }
+}
+
+void InterfaceManager::_taskHandleConfigData(void *param) {
+  InterfaceConfig::homeScreen = InterfaceManager::_new_config.default_room;
+  InterfaceConfig::default_page = static_cast<DEFAULT_PAGE>(InterfaceManager::_new_config.default_page);
+  InterfaceConfig::button_min_press_time = InterfaceManager::_new_config.min_button_push_time;
+  InterfaceConfig::button_long_press_time = InterfaceManager::_new_config.button_long_press_time;
+  InterfaceConfig::special_mode_trigger_time = InterfaceManager::_new_config.special_mode_trigger_time;
+  InterfaceConfig::special_mode_release_time = InterfaceManager::_new_config.special_mode_release_time;
+  InterfaceConfig::screen_dim_level = InterfaceManager::_new_config.screen_dim_level;
+  InterfaceConfig::screensaver_dim_level = InterfaceManager::_new_config.screensaver_dim_level;
+  InterfaceConfig::screensaver_activation_timeout = InterfaceManager::_new_config.screensaver_activation_timeout;
+  InterfaceConfig::screensaver_mode = InterfaceManager::_new_config.screensaver_mode;
+  InterfaceConfig::clock_us_style = InterfaceManager::_new_config.clock_us_style;
+  InterfaceConfig::lock_to_default_room = false; // TODO: Remove as only "allowed" rooms are loaded.
+
+  LOG_DEBUG("Loaded screensaver mode: ", InterfaceConfig::screensaver_mode);
+  LOG_DEBUG("Screensaver activation timeout: ", InterfaceConfig::screensaver_activation_timeout);
+
+  NSPMConfig::instance->is_us_panel = InterfaceManager::_new_config.is_us_panel;
+  NSPMConfig::instance->use_fahrenheit = InterfaceManager::_new_config.use_fahrenheit;
+  NSPMConfig::instance->temperature_calibration = InterfaceManager::_new_config.temperature_calibration;
+  NSPMConfig::instance->reverse_relays = InterfaceManager::_new_config.reverse_relays;
+  NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>(InterfaceManager::_new_config.button1_mode);
+  NSPMConfig::instance->button1_mqtt_topic = InterfaceManager::_new_config.button1_mqtt_topic;
+  NSPMConfig::instance->button1_mqtt_payload = InterfaceManager::_new_config.button1_mqtt_payload;
+  NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>(InterfaceManager::_new_config.button2_mode);
+  NSPMConfig::instance->button2_mqtt_topic = InterfaceManager::_new_config.button2_mqtt_topic;
+  NSPMConfig::instance->button2_mqtt_payload = InterfaceManager::_new_config.button2_mqtt_payload;
+
+  bool save_new_config_to_littlefs_at_end = false;
+  bool reboot_after_config_saved = false;
+
+  if (NSPMConfig::instance->relay1_default_mode != InterfaceManager::_new_config.relay1_default_mode) {
+    LOG_INFO("Saving new relay 1 default mode: ", InterfaceManager::_new_config.relay1_default_mode ? "ON" : "OFF");
+    NSPMConfig::instance->relay1_default_mode = InterfaceManager::_new_config.relay1_default_mode;
+    save_new_config_to_littlefs_at_end = true;
+  }
+
+  if (NSPMConfig::instance->relay2_default_mode != InterfaceManager::_new_config.relay2_default_mode) {
+    LOG_INFO("Saving new relay 2 default mode: ", InterfaceManager::_new_config.relay2_default_mode ? "ON" : "OFF");
+    NSPMConfig::instance->relay2_default_mode = InterfaceManager::_new_config.relay2_default_mode;
+    save_new_config_to_littlefs_at_end = true;
+  }
+
+  if (NSPMConfig::instance->wifi_hostname.compare(InterfaceManager::_new_config.name) != 0) {
+    save_new_config_to_littlefs_at_end = true;
+    reboot_after_config_saved = true;
+    NSPMConfig::instance->wifi_hostname = InterfaceManager::_new_config.name;
+    LOG_INFO("Name has changed. Restarting.");
+  }
+
+  if (save_new_config_to_littlefs_at_end) {
+    while (!NSPMConfig::instance->saveToLittleFS(false)) {
+      vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+
+    if (reboot_after_config_saved) {
+      ESP.restart();
+      vTaskDelay(portMAX_DELAY);
+      vTaskDelete(NULL);
+    }
+  }
+
+  // Start loading scenes and rooms
+  LOG_DEBUG("Loading global scenes.");
+  InterfaceConfig::global_scenes.clear();
+  for (int i = 0; i < InterfaceManager::_new_config.n_global_scenes; i++) {
+    InterfaceConfig::global_scenes.push_back(*InterfaceManager::_new_config.global_scenes[i]);
+    LOG_DEBUG("Loaded global scene ", InterfaceManager::_new_config.global_scenes[i]->name);
+  }
+  LOG_INFO("Loaded ", InterfaceConfig::global_scenes.size(), " global scenes.");
+
+  RoomManager::loadAllRooms(InterfaceManager::_new_config.room_ids, InterfaceManager::_new_config.n_room_ids);
+  if (!RoomManager::hasValidCurrentRoom()) {
+    RoomManager::goToRoomId(InterfaceConfig::homeScreen);
+  }
+
+  InterfaceManager::instance->_config_loaded = true;
+  LOG_INFO("Config loaded successfully. Will delete task.");
+  vTaskDelete(NULL);
 }
 
 void InterfaceManager::subscribeToMqttTopics() {

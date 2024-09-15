@@ -13,8 +13,6 @@ enum DEFAULT_PAGE {
   ROOM_PAGE
 };
 
-class Scene;
-
 class InterfaceConfig {
 public:
   static inline uint16_t homeScreen = 0;
@@ -47,8 +45,8 @@ public:
   /// @brief Show clock in US style. AM/PM?
   static inline bool clock_us_style = false;
   /// @brief All the global scenes.
-  static inline std::vector<Scene *> global_scenes;
-  static Scene *getSceneById(uint16_t id);
+  static inline std::vector<NSPanelScene> global_scenes;
+  static NSPanelScene *getSceneById(uint16_t id);
   static inline roomMode currentRoomMode;
   static inline editLightMode currentEditLightMode;
   static inline editLightMode _triggerSpecialLightMode;

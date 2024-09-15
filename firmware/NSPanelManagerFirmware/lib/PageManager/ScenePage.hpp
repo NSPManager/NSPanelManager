@@ -5,7 +5,6 @@
 #include <DeviceEntity.hpp>
 #include <PageBase.hpp>
 #include <RoomManagerObserver.hpp>
-class Scene;
 
 class ScenePage : public PageBase, DeviceEntityObserver, RoomManagerObserver {
 public:
@@ -24,7 +23,7 @@ private:
   void _updateDisplay();
   void _setRoomLabelText(const char *text);
   static inline bool _doSceneSaveProgress;
-  static inline Scene *_sceneToSave;
+  static inline NSPanelScene *_sceneToSave;
 };
 
 #endif

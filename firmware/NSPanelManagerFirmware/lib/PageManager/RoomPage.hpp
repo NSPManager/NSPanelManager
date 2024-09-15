@@ -26,6 +26,7 @@ private:
   void setCurrentRoomLabel(const char *label);
   NSPanelLightStatus *_selectedLight;
   void _toggleSelectedLight();
+  NSPanelLightStatus *_getLightAtRoomViewPosition(uint32_t position);
 };
 
 #endif

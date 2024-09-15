@@ -10,6 +10,7 @@
 #include <boost/bind.hpp>
 #include <boost/bind/bind.hpp>
 #include <cstdint>
+#include <iterator>
 #include <nlohmann/json.hpp>
 #include <room/room.hpp>
 #include <spdlog/spdlog.h>
@@ -92,6 +93,7 @@ void Room::_publish_protobuf_status() {
   uint16_t num_lights_total = 0;
   uint16_t num_lights_ceiling = 0;
   uint16_t num_lights_table = 0;
+
   for (auto entity : this->_entities) {
     if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
       Light *light = (Light *)entity;
@@ -99,12 +101,16 @@ void Room::_publish_protobuf_status() {
       num_lights_total++;
       switch (light->get_light_type()) {
       case MQTT_MANAGER_LIGHT_TYPE::TABLE:
-        total_light_level_table += light->get_brightness();
-        num_lights_table++;
+        if (light->get_state()) {
+          total_light_level_table += light->get_brightness();
+          num_lights_table++;
+        }
         break;
       case MQTT_MANAGER_LIGHT_TYPE::CEILING:
-        total_light_level_ceiling += light->get_brightness();
-        num_lights_ceiling++;
+        if (light->get_state()) {
+          total_light_level_ceiling += light->get_brightness();
+          num_lights_ceiling++;
+        }
         break;
       }
 

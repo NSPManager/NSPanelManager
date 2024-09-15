@@ -1,9 +1,7 @@
 #include <InterfaceConfig.hpp>
 #include <NSPanel.hpp>
 #include <PageManager.hpp>
-#include <Room.hpp>
 #include <RoomManager.hpp>
-#include <Scene.hpp>
 #include <ScenePage.hpp>
 #include <TftDefines.h>
 
@@ -52,14 +50,14 @@ void ScenePage::doSceneSaveProgress(void *param) {
   if (ScenePage::_doSceneSaveProgress) {
     // Finger is still held at save button after timeout. Save the page.
     if (ScenePage::_sceneToSave != nullptr) {
-      ScenePage::_sceneToSave->save();
+      // ScenePage::_sceneToSave->save(); // TODO: Save scene command
       PageManager::GetScenePage()->_setRoomLabelText("Saved");
       vTaskDelay(500 / portTICK_PERIOD_MS);
     }
   }
 
   if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
-    PageManager::GetScenePage()->_setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
+    PageManager::GetScenePage()->_setRoomLabelText((*RoomManager::currentRoom).name);
   } else {
     PageManager::GetScenePage()->_setRoomLabelText("Global Scenes");
   }
@@ -68,11 +66,15 @@ void ScenePage::doSceneSaveProgress(void *param) {
 }
 
 void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
-  std::vector<Scene *> scenes;
+  std::vector<NSPanelScene *> scenes;
   if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
-    scenes = (*RoomManager::currentRoom)->scenes;
+    for (int i = 0; i < (*RoomManager::currentRoom).n_scenes; i++) {
+      scenes.push_back((*RoomManager::currentRoom).scenes[i]);
+    }
   } else {
-    scenes = InterfaceConfig::global_scenes;
+    for (int i = 0; i < InterfaceConfig::global_scenes.size(); i++) {
+      scenes.push_back(&InterfaceConfig::global_scenes[i]);
+    }
   }
 
   if (pressed) {
@@ -123,25 +125,25 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
   }
   case SCENES_PAGE_SCENE1_LABEL_ID: {
     if (scenes.size() >= 1) {
-      scenes[0]->activate();
+      // scenes[0]->activate(); // TODO: Activate scene command
     }
     break;
   }
   case SCENES_PAGE_SCENE2_LABEL_ID: {
     if (scenes.size() >= 2) {
-      scenes[1]->activate();
+      // scenes[1]->activate(); // TODO: Activate scene command
     }
     break;
   }
   case SCENES_PAGE_SCENE3_LABEL_ID: {
     if (scenes.size() >= 3) {
-      scenes[2]->activate();
+      // scenes[2]->activate(); // TODO: Activate scene command
     }
     break;
   }
   case SCENES_PAGE_SCENE4_LABEL_ID: {
     if (scenes.size() >= 4) {
-      scenes[3]->activate();
+      // scenes[3]->activate(); // TODO: Activate scene command
     }
     break;
   }
@@ -176,14 +178,14 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
   case SCENES_PAGE_PREVIOUS_SCENES_BUTTON_ID: {
     if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
       RoomManager::goToPreviousRoom();
-      ScenePage::_setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
+      ScenePage::_setRoomLabelText((*RoomManager::currentRoom).name);
     }
     break;
   }
   case SCENES_PAGE_NEXT_SCENES_BUTTON_ID: {
     if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
       RoomManager::goToNextRoom();
-      ScenePage::_setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
+      ScenePage::_setRoomLabelText((*RoomManager::currentRoom).name);
     }
     break;
   }
@@ -193,13 +195,15 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
 }
 
 void ScenePage::_updateDisplay() {
-  std::vector<Scene *> scenes;
+  std::vector<NSPanelScene *> scenes;
   if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
-    scenes = (*RoomManager::currentRoom)->scenes;
-    this->_setRoomLabelText((*RoomManager::currentRoom)->name.c_str());
+    for (int i = 0; i < (*RoomManager::currentRoom).n_scenes; i++) {
+      scenes.push_back((*RoomManager::currentRoom).scenes[i]);
+    }
   } else {
-    scenes = InterfaceConfig::global_scenes;
-    this->_setRoomLabelText("Global Scenes");
+    for (int i = 0; i < InterfaceConfig::global_scenes.size(); i++) {
+      scenes.push_back(&InterfaceConfig::global_scenes[i]);
+    }
   }
 
   for (int i = 0; i < 4; i++) {
@@ -210,7 +214,7 @@ void ScenePage::_updateDisplay() {
         scene_name.append(scenes[0]->name);
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE1_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_LABEL_NAME, true);
-        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, scenes[0]->canSave);
+        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, scenes[0]->can_save);
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, false);
@@ -223,7 +227,7 @@ void ScenePage::_updateDisplay() {
         scene_name.append(scenes[1]->name);
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE2_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, true);
-        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, scenes[1]->canSave);
+        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, scenes[1]->can_save);
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, false);
@@ -236,7 +240,7 @@ void ScenePage::_updateDisplay() {
         scene_name.append(scenes[2]->name);
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE3_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, true);
-        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, scenes[2]->canSave);
+        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, scenes[2]->can_save);
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, false);
@@ -249,7 +253,7 @@ void ScenePage::_updateDisplay() {
         scene_name.append(scenes[3]->name);
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE4_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, true);
-        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, scenes[3]->canSave);
+        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, scenes[3]->can_save);
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, false);
