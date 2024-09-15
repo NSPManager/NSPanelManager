@@ -174,12 +174,12 @@ void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data
   }
 }
 
-std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, uint8_t hour) {
+std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, uint8_t hour, bool night_icon_allowed) {
   for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["openmeteo_weather_mappings"]) {
     if (std::string(mapping["id"]).compare(condition) == 0) {
-      if (mapping.contains("character-mapping-day") && hour >= MQTTManagerWeather::_next_sunrise_hour && hour <= MQTTManagerWeather::_next_sunset_hour) {
+      if (mapping.contains("character-mapping-day") && ((hour >= MQTTManagerWeather::_next_sunrise_hour && hour <= MQTTManagerWeather::_next_sunset_hour) || !night_icon_allowed)) {
         return mapping["character-mapping-day"];
-      } else if (mapping.contains("character-mapping-night") && (hour <= MQTTManagerWeather::_next_sunrise_hour || hour >= MQTTManagerWeather::_next_sunset_hour)) {
+      } else if (mapping.contains("character-mapping-night") && (hour <= MQTTManagerWeather::_next_sunrise_hour || hour >= MQTTManagerWeather::_next_sunset_hour) && night_icon_allowed) {
         return mapping["character-mapping-night"];
       } else if (mapping.contains("character-mapping")) {
         return std::string(mapping["character-mapping"]);
@@ -219,7 +219,7 @@ void MQTTManagerWeather::send_state_update() {
   std::list<nlohmann::json> forecast;
   for (struct weather_info &info : MQTTManagerWeather::_forecast_weather_info) {
     nlohmann::json forecast_data;
-    forecast_data["icon"] = MQTTManagerWeather::_get_icon_from_mapping(info.condition, info.time.tm_hour);
+    forecast_data["icon"] = MQTTManagerWeather::_get_icon_from_mapping(info.condition, info.time.tm_hour, false);
     std::string pre = std::to_string((int)round(info.precipitation));
     pre.append(MQTTManagerWeather::_precipitation_unit);
     forecast_data["pre"] = pre;
@@ -243,7 +243,7 @@ void MQTTManagerWeather::send_state_update() {
     forecast.push_back(forecast_data);
   }
   weather_info["forecast"] = forecast;
-  weather_info["icon"] = MQTTManagerWeather::_get_icon_from_mapping(MQTTManagerWeather::_current_condition, MQTTManagerWeather::_current_weather_time.tm_hour);
+  weather_info["icon"] = MQTTManagerWeather::_get_icon_from_mapping(MQTTManagerWeather::_current_condition, MQTTManagerWeather::_current_weather_time.tm_hour, true);
   std::string temp = std::to_string((int)round(MQTTManagerWeather::_current_temperature));
   temp.append("°");
   weather_info["temp"] = temp;
