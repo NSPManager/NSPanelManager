@@ -8,8 +8,8 @@
     },
     {
       "id": "1",
-      "character-mapping-day": "C",
-      "character-mapping-night": "D",
+      "character-mapping-day": "A",
+      "character-mapping-night": "B",
       "text": "Mainly clear"
     },
     {
@@ -20,7 +20,7 @@
     },
     {
       "id": "3",
-      "character-mapping": "C",
+      "character-mapping": "F",
       "text": "Overcast"
     },
     {
