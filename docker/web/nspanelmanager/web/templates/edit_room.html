@@ -430,7 +430,7 @@
       </thead>
       <tbody>
         {% for light in room.light_set.all %}
-        <tr>
+        <tr class="hover">
           <th class="px-3 py-3">{{ light.friendly_name }}</th>
           <td>
             {% if light.type == "home_assistant" %}

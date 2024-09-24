@@ -154,24 +154,33 @@ void Room::_publish_protobuf_status() {
   }
 
   if (num_lights_total > 0) {
-    auto average_kelvin = total_kelvin_level_all / num_lights_total;
+    float average_kelvin = total_kelvin_level_all / num_lights_total;
     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
+    uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
 
     status.set_average_dim_level(total_light_level_all / num_lights_total);
-    status.set_average_color_temperature(total_kelvin_level_all / num_lights_total);
+    status.set_average_color_temperature(kelvin_pct);
   } else {
     status.set_average_dim_level(0);
     status.set_average_color_temperature(0);
   }
   if (num_lights_table > 0) {
+    float average_kelvin = total_kelvin_table / num_lights_table;
+    average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
+    uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+
     status.set_table_lights_dim_level(total_light_level_table / num_lights_table);
-    status.set_table_lights_color_temperature_value(total_kelvin_table / num_lights_table);
+    status.set_table_lights_color_temperature_value(kelvin_pct);
   } else {
     SPDLOG_TRACE("No table lights found, setting value to 0.");
     status.set_table_lights_dim_level(0);
     status.set_table_lights_color_temperature_value(0);
   }
   if (num_lights_ceiling > 0) {
+    float average_kelvin = total_kelvin_ceiling / num_lights_ceiling;
+    average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
+    uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+
     status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling);
     status.set_ceiling_lights_color_temperature_value(total_kelvin_ceiling / num_lights_ceiling);
   } else {
@@ -179,6 +188,8 @@ void Room::_publish_protobuf_status() {
     status.set_ceiling_lights_dim_level(0);
     status.set_ceiling_lights_color_temperature_value(0);
   }
+
+  SPDLOG_TRACE("Kelvin all: {}", status.average_color_temperature());
 
   // Format and send
   std::string data;
