@@ -50,6 +50,8 @@ def mqttmanager_get_all_settings(request):
             proto.manager_port = int(get_setting_with_default("manager_port"))
             proto.manager_address = get_setting_with_default("manager_address")
             proto.is_home_assistant_addon = "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true"
+            proto.optimistic_mode = bool(get_setting_with_default("optimistic_mode"))
+            proto.mqtt_wait_time = int(get_setting_with_default("mqtt_wait_time"))
 
             wind_speed_unit = get_setting_with_default("wind_speed_format")
             if wind_speed_unit == "kmh":

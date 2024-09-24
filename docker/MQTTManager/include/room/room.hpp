@@ -3,6 +3,7 @@
 
 #include "entity/entity.hpp"
 #include "protobuf_nspanel.pb.h"
+#include <chrono>
 #include <list>
 #include <nlohmann/json_fwd.hpp>
 #include <protobuf/protobuf_general.pb.h>
@@ -83,7 +84,10 @@ private:
   std::string _mqtt_status_topic;
   std::list<MqttManagerEntity *> _entities;
   void _publish_protobuf_status();
-  void _publish_protobuf_config();
+  // If set to true, automatic status updates over MQTT when entities changes are disabled.
+  bool _send_status_updates;
+  // When was the last status update sent.
+  std::chrono::time_point<std::chrono::system_clock> _last_status_update;
 };
 
 #endif // !MQTT_MANAGER_ROOM_H

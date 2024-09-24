@@ -130,7 +130,9 @@ inline constexpr MQTTManagerSettings::Impl_::Impl_(
         max_log_buffer_size_{0},
         manager_port_{0},
         light_turn_on_behavior_{static_cast< ::MQTTManagerSettings_turn_on_behavior >(0)},
+        mqtt_wait_time_{0},
         is_home_assistant_addon_{false},
+        optimistic_mode_{false},
         _cached_size_{0} {}
 
 template <typename>
@@ -344,6 +346,8 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::MQTTManagerSettings, _impl_.manager_address_),
         PROTOBUF_FIELD_OFFSET(::MQTTManagerSettings, _impl_.light_turn_on_behavior_),
         PROTOBUF_FIELD_OFFSET(::MQTTManagerSettings, _impl_.is_home_assistant_addon_),
+        PROTOBUF_FIELD_OFFSET(::MQTTManagerSettings, _impl_.mqtt_wait_time_),
+        PROTOBUF_FIELD_OFFSET(::MQTTManagerSettings, _impl_.optimistic_mode_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::MultipleNSPanelsSettings, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -360,7 +364,7 @@ static const ::_pbi::MigrationSchema
         {0, 50, -1, sizeof(::NSPanelSettings)},
         {92, -1, -1, sizeof(::MQTTManagerPrivateSettings)},
         {108, -1, -1, sizeof(::MQTTManagerSettings)},
-        {133, -1, -1, sizeof(::MultipleNSPanelsSettings)},
+        {135, -1, -1, sizeof(::MultipleNSPanelsSettings)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelSettings_default_instance_._instance,
@@ -425,7 +429,7 @@ const char descriptor_table_protodef_protobuf_5fmqttmanager_2eproto[] ABSL_ATTRI
     "\022\027\n\017openhab_address\030\003 \001(\t\022\025\n\ropenhab_tok"
     "en\030\004 \001(\t\022\023\n\013mqtt_server\030\005 \001(\t\022\030\n\020mqtt_se"
     "rver_port\030\006 \001(\005\022\025\n\rmqtt_username\030\007 \001(\t\022\025"
-    "\n\rmqtt_password\030\010 \001(\t\"\310\005\n\023MQTTManagerSet"
+    "\n\rmqtt_password\030\010 \001(\t\"\371\005\n\023MQTTManagerSet"
     "tings\022\026\n\016color_temp_min\030\001 \001(\r\022\026\n\016color_t"
     "emp_max\030\002 \001(\r\022\023\n\013date_format\030\003 \001(\t\022$\n\034ou"
     "tside_temp_sensor_provider\030\004 \001(\t\022%\n\035outs"
@@ -442,10 +446,11 @@ const char descriptor_table_protodef_protobuf_5fmqttmanager_2eproto[] ABSL_ATTRI
     "er_address\030\017 \001(\t\022E\n\026light_turn_on_behavi"
     "or\030\020 \001(\0162%.MQTTManagerSettings.turn_on_b"
     "ehavior\022\037\n\027is_home_assistant_addon\030\021 \001(\010"
-    "\"6\n\020turn_on_behavior\022\025\n\021color_temperatur"
-    "e\020\000\022\013\n\007restore\020\001\">\n\030MultipleNSPanelsSett"
-    "ings\022\"\n\010nspanels\030\001 \003(\0132\020.NSPanelSettings"
-    "b\006proto3"
+    "\022\026\n\016mqtt_wait_time\030\022 \001(\005\022\027\n\017optimistic_m"
+    "ode\030\023 \001(\010\"6\n\020turn_on_behavior\022\025\n\021color_t"
+    "emperature\020\000\022\013\n\007restore\020\001\">\n\030MultipleNSP"
+    "anelsSettings\022\"\n\010nspanels\030\001 \003(\0132\020.NSPane"
+    "lSettingsb\006proto3"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_protobuf_5fmqttmanager_2eproto_deps[1] =
     {
@@ -455,7 +460,7 @@ static ::absl::once_flag descriptor_table_protobuf_5fmqttmanager_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fmqttmanager_2eproto = {
     false,
     false,
-    3008,
+    3057,
     descriptor_table_protodef_protobuf_5fmqttmanager_2eproto,
     "protobuf_mqttmanager.proto",
     &descriptor_table_protobuf_5fmqttmanager_2eproto_once,
@@ -2188,9 +2193,9 @@ MQTTManagerSettings::MQTTManagerSettings(
                offsetof(Impl_, color_temp_min_),
            reinterpret_cast<const char *>(&from._impl_) +
                offsetof(Impl_, color_temp_min_),
-           offsetof(Impl_, is_home_assistant_addon_) -
+           offsetof(Impl_, optimistic_mode_) -
                offsetof(Impl_, color_temp_min_) +
-               sizeof(Impl_::is_home_assistant_addon_));
+               sizeof(Impl_::optimistic_mode_));
 
   // @@protoc_insertion_point(copy_constructor:MQTTManagerSettings)
 }
@@ -2210,9 +2215,9 @@ inline void MQTTManagerSettings::SharedCtor(::_pb::Arena* arena) {
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, color_temp_min_),
            0,
-           offsetof(Impl_, is_home_assistant_addon_) -
+           offsetof(Impl_, optimistic_mode_) -
                offsetof(Impl_, color_temp_min_) +
-               sizeof(Impl_::is_home_assistant_addon_));
+               sizeof(Impl_::optimistic_mode_));
 }
 MQTTManagerSettings::~MQTTManagerSettings() {
   // @@protoc_insertion_point(destructor:MQTTManagerSettings)
@@ -2251,15 +2256,15 @@ MQTTManagerSettings::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<5, 17, 0, 178, 2> MQTTManagerSettings::_table_ = {
+const ::_pbi::TcParseTable<5, 19, 0, 178, 2> MQTTManagerSettings::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    17, 248,  // max_field_number, fast_idx_mask
+    19, 248,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294836224,  // skipmap
+    4294443008,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    17,  // num_field_entries
+    19,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_MQTTManagerSettings_default_instance_._instance,
@@ -2321,8 +2326,12 @@ const ::_pbi::TcParseTable<5, 17, 0, 178, 2> MQTTManagerSettings::_table_ = {
     // bool is_home_assistant_addon = 17;
     {::_pbi::TcParser::FastV8S2,
      {392, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.is_home_assistant_addon_)}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
+    // int32 mqtt_wait_time = 18;
+    {::_pbi::TcParser::FastV32S2,
+     {400, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.mqtt_wait_time_)}},
+    // bool optimistic_mode = 19;
+    {::_pbi::TcParser::FastV8S2,
+     {408, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.optimistic_mode_)}},
     {::_pbi::TcParser::MiniParse, {}},
     {::_pbi::TcParser::MiniParse, {}},
     {::_pbi::TcParser::MiniParse, {}},
@@ -2389,6 +2398,12 @@ const ::_pbi::TcParseTable<5, 17, 0, 178, 2> MQTTManagerSettings::_table_ = {
     // bool is_home_assistant_addon = 17;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.is_home_assistant_addon_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // int32 mqtt_wait_time = 18;
+    {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.mqtt_wait_time_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // bool optimistic_mode = 19;
+    {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.optimistic_mode_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
   }},
   // no aux_entries
   {{
@@ -2417,8 +2432,8 @@ PROTOBUF_NOINLINE void MQTTManagerSettings::Clear() {
   _impl_.weather_location_longitude_.ClearToEmpty();
   _impl_.manager_address_.ClearToEmpty();
   ::memset(&_impl_.color_temp_min_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.is_home_assistant_addon_) -
-      reinterpret_cast<char*>(&_impl_.color_temp_min_)) + sizeof(_impl_.is_home_assistant_addon_));
+      reinterpret_cast<char*>(&_impl_.optimistic_mode_) -
+      reinterpret_cast<char*>(&_impl_.color_temp_min_)) + sizeof(_impl_.optimistic_mode_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -2554,6 +2569,20 @@ PROTOBUF_NOINLINE void MQTTManagerSettings::Clear() {
         17, this->_internal_is_home_assistant_addon(), target);
   }
 
+  // int32 mqtt_wait_time = 18;
+  if (this->_internal_mqtt_wait_time() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        18, this->_internal_mqtt_wait_time(), target);
+  }
+
+  // bool optimistic_mode = 19;
+  if (this->_internal_optimistic_mode() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        19, this->_internal_optimistic_mode(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -2668,8 +2697,19 @@ PROTOBUF_NOINLINE void MQTTManagerSettings::Clear() {
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_light_turn_on_behavior());
   }
 
+  // int32 mqtt_wait_time = 18;
+  if (this->_internal_mqtt_wait_time() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_mqtt_wait_time());
+  }
+
   // bool is_home_assistant_addon = 17;
   if (this->_internal_is_home_assistant_addon() != 0) {
+    total_size += 3;
+  }
+
+  // bool optimistic_mode = 19;
+  if (this->_internal_optimistic_mode() != 0) {
     total_size += 3;
   }
 
@@ -2733,8 +2773,14 @@ void MQTTManagerSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, con
   if (from._internal_light_turn_on_behavior() != 0) {
     _this->_impl_.light_turn_on_behavior_ = from._impl_.light_turn_on_behavior_;
   }
+  if (from._internal_mqtt_wait_time() != 0) {
+    _this->_impl_.mqtt_wait_time_ = from._impl_.mqtt_wait_time_;
+  }
   if (from._internal_is_home_assistant_addon() != 0) {
     _this->_impl_.is_home_assistant_addon_ = from._impl_.is_home_assistant_addon_;
+  }
+  if (from._internal_optimistic_mode() != 0) {
+    _this->_impl_.optimistic_mode_ = from._impl_.optimistic_mode_;
   }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -2759,8 +2805,8 @@ void MQTTManagerSettings::InternalSwap(MQTTManagerSettings* PROTOBUF_RESTRICT ot
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.weather_location_longitude_, &other->_impl_.weather_location_longitude_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.manager_address_, &other->_impl_.manager_address_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.is_home_assistant_addon_)
-      + sizeof(MQTTManagerSettings::_impl_.is_home_assistant_addon_)
+      PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.optimistic_mode_)
+      + sizeof(MQTTManagerSettings::_impl_.optimistic_mode_)
       - PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.color_temp_min_)>(
           reinterpret_cast<char*>(&_impl_.color_temp_min_),
           reinterpret_cast<char*>(&other->_impl_.color_temp_min_));

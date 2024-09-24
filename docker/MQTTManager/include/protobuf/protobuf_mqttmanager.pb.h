@@ -1217,7 +1217,9 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
     kMaxLogBufferSizeFieldNumber = 13,
     kManagerPortFieldNumber = 14,
     kLightTurnOnBehaviorFieldNumber = 16,
+    kMqttWaitTimeFieldNumber = 18,
     kIsHomeAssistantAddonFieldNumber = 17,
+    kOptimisticModeFieldNumber = 19,
   };
   // string date_format = 3;
   void clear_date_format() ;
@@ -1415,6 +1417,16 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   void _internal_set_light_turn_on_behavior(::MQTTManagerSettings_turn_on_behavior value);
 
   public:
+  // int32 mqtt_wait_time = 18;
+  void clear_mqtt_wait_time() ;
+  ::int32_t mqtt_wait_time() const;
+  void set_mqtt_wait_time(::int32_t value);
+
+  private:
+  ::int32_t _internal_mqtt_wait_time() const;
+  void _internal_set_mqtt_wait_time(::int32_t value);
+
+  public:
   // bool is_home_assistant_addon = 17;
   void clear_is_home_assistant_addon() ;
   bool is_home_assistant_addon() const;
@@ -1425,12 +1437,22 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   void _internal_set_is_home_assistant_addon(bool value);
 
   public:
+  // bool optimistic_mode = 19;
+  void clear_optimistic_mode() ;
+  bool optimistic_mode() const;
+  void set_optimistic_mode(bool value);
+
+  private:
+  bool _internal_optimistic_mode() const;
+  void _internal_set_optimistic_mode(bool value);
+
+  public:
   // @@protoc_insertion_point(class_scope:MQTTManagerSettings)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 17, 0,
+      5, 19, 0,
       178, 2>
       _table_;
 
@@ -1467,7 +1489,9 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
     ::int32_t max_log_buffer_size_;
     ::int32_t manager_port_;
     int light_turn_on_behavior_;
+    ::int32_t mqtt_wait_time_;
     bool is_home_assistant_addon_;
+    bool optimistic_mode_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -4154,6 +4178,50 @@ inline bool MQTTManagerSettings::_internal_is_home_assistant_addon() const {
 inline void MQTTManagerSettings::_internal_set_is_home_assistant_addon(bool value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.is_home_assistant_addon_ = value;
+}
+
+// int32 mqtt_wait_time = 18;
+inline void MQTTManagerSettings::clear_mqtt_wait_time() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.mqtt_wait_time_ = 0;
+}
+inline ::int32_t MQTTManagerSettings::mqtt_wait_time() const {
+  // @@protoc_insertion_point(field_get:MQTTManagerSettings.mqtt_wait_time)
+  return _internal_mqtt_wait_time();
+}
+inline void MQTTManagerSettings::set_mqtt_wait_time(::int32_t value) {
+  _internal_set_mqtt_wait_time(value);
+  // @@protoc_insertion_point(field_set:MQTTManagerSettings.mqtt_wait_time)
+}
+inline ::int32_t MQTTManagerSettings::_internal_mqtt_wait_time() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.mqtt_wait_time_;
+}
+inline void MQTTManagerSettings::_internal_set_mqtt_wait_time(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.mqtt_wait_time_ = value;
+}
+
+// bool optimistic_mode = 19;
+inline void MQTTManagerSettings::clear_optimistic_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.optimistic_mode_ = false;
+}
+inline bool MQTTManagerSettings::optimistic_mode() const {
+  // @@protoc_insertion_point(field_get:MQTTManagerSettings.optimistic_mode)
+  return _internal_optimistic_mode();
+}
+inline void MQTTManagerSettings::set_optimistic_mode(bool value) {
+  _internal_set_optimistic_mode(value);
+  // @@protoc_insertion_point(field_set:MQTTManagerSettings.optimistic_mode)
+}
+inline bool MQTTManagerSettings::_internal_optimistic_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.optimistic_mode_;
+}
+inline void MQTTManagerSettings::_internal_set_optimistic_mode(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.optimistic_mode_ = value;
 }
 
 // -------------------------------------------------------------------

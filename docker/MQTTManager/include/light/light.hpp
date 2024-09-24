@@ -5,6 +5,7 @@
 #include "protobuf_nspanel.pb.h"
 #include "room/room.hpp"
 #include <boost/signals2.hpp>
+#include <chrono>
 #include <cstdint>
 #include <entity/entity.hpp>
 #include <nlohmann/json.hpp>
@@ -165,8 +166,8 @@ public:
   void reset_requests();
 
   /**
-  * Callback for NSPanelMQTTManagerCommand protobuf received from MQTT
-  */
+   * Callback for NSPanelMQTTManagerCommand protobuf received from MQTT
+   */
   void command_callback(NSPanelMQTTManagerCommand &command);
 
   MQTT_MANAGER_ENTITY_TYPE get_type();
@@ -206,6 +207,8 @@ protected:
   std::string _mqtt_saturation_topic;
 
   boost::signals2::signal<void(Light *)> _light_destroyed_callbacks;
+
+  std::chrono::time_point<std::chrono::system_clock> _last_update;
 };
 
 #endif // !MQTT_MANAGER_LIGHT

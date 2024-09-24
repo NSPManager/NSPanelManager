@@ -6,11 +6,14 @@
 #include "protobuf_general.pb.h"
 #include <boost/bind.hpp>
 #include <boost/exception/diagnostic_information.hpp>
+#include <chrono>
 #include <cstdint>
 #include <home_assistant_manager/home_assistant_manager.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <ratio>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <system_error>
 
 HomeAssistantLight::HomeAssistantLight(LightSettings &config) : Light(config) {
   // Process Home Assistant specific details. General light data is loaded in the "Light" constructor.
@@ -47,36 +50,71 @@ void HomeAssistantLight::send_state_update_to_controller() {
     service_data["domain"] = "light";
     if (this->_requested_state) {
       service_data["service"] = "turn_on";
+      if (MqttManagerConfig::get_settings().optimistic_mode()) {
+        this->_current_state = true;
+      }
 
       if (this->_requested_brightness != this->_current_brightness) {
         service_data["service_data"]["brightness_pct"] = this->_requested_brightness;
+        if (MqttManagerConfig::get_settings().optimistic_mode()) {
+          this->_current_brightness = this->_requested_brightness;
+        }
       }
 
       // This is a turn on event and it currently off. Send kelvin if turn on behavior is to use color temp.
       if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT || (!this->_current_state && MqttManagerConfig::get_settings().light_turn_on_behavior() == MQTTManagerSettings_turn_on_behavior_color_temperature)) {
         service_data["service_data"]["kelvin"] = this->_requested_color_temperature;
+        if (MqttManagerConfig::get_settings().optimistic_mode()) {
+          this->_current_color_temperature = this->_requested_color_temperature;
+        }
       }
 
       if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT && this->_requested_color_temperature != this->_current_color_temperature) {
         service_data["service_data"]["kelvin"] = this->_requested_color_temperature;
+        if (MqttManagerConfig::get_settings().optimistic_mode()) {
+          this->_current_color_temperature = this->_requested_color_temperature;
+        }
       } else if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::RGB && this->_requested_hue != this->_current_hue || this->_requested_saturation != this->_current_saturation) {
         service_data["service_data"]["hs_color"] = {this->_requested_hue, this->_requested_saturation};
+        if (MqttManagerConfig::get_settings().optimistic_mode()) {
+          this->_current_hue = this->_requested_hue;
+          this->_current_saturation = this->_requested_saturation;
+        }
       }
     } else {
       service_data["service"] = "turn_off";
+      if (MqttManagerConfig::get_settings().optimistic_mode()) {
+        this->_current_state = false;
+      }
     }
   } else if (this->_home_assistant_light_type == MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TYPE::TYPE_SWITCH) {
     service_data["domain"] = "switch";
     if (this->_requested_state) {
       service_data["service"] = "switch_on";
+      if (MqttManagerConfig::get_settings().optimistic_mode()) {
+        this->_current_state = true;
+      }
     } else {
       service_data["service"] = "switch_off";
+      if (MqttManagerConfig::get_settings().optimistic_mode()) {
+        this->_current_state = false;
+      }
     }
   }
+  this->_last_update = std::chrono::system_clock::now();
   HomeAssistantManager::send_json(service_data);
 }
 
 void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
+  if (MqttManagerConfig::get_settings().optimistic_mode()) {
+    auto time_diff = std::chrono::system_clock::now() - this->_last_update;
+    auto ms_diff = std::chrono::duration_cast<std::chrono::milliseconds>(time_diff).count();
+    if (ms_diff < MqttManagerConfig::get_settings().mqtt_wait_time()) {
+      SPDLOG_TRACE("Milliseconds diff for state update for light {}::{} is {}, which is lower than {}, will now register new data.", this->_id, this->_name, ms_diff, MqttManagerConfig::get_settings().mqtt_wait_time());
+      return;
+    }
+  }
+
   if (std::string(data["event"]["event_type"]).compare("state_changed") == 0) {
     if (std::string(data["event"]["data"]["entity_id"]).compare(this->_home_assistant_name) == 0) {
       SPDLOG_TRACE("Got event update for HA light {}::{}.", this->_id, this->_name);

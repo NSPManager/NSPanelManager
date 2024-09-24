@@ -35,16 +35,14 @@ void RoomManager::loadAllRooms(int32_t *room_ids, uint32_t n_room_ids) {
       room_status_topic.append("/room/");
       room_status_topic.append(std::to_string(room_ids[i]));
       room_status_topic.append("/status");
-      LOG_DEBUG("Will load room config from topic: ", room_status_topic.c_str());
       MqttManager::subscribeToTopic(room_status_topic.c_str(), &RoomManager::handleNSPanelRoomStatusUpdate);
       if (ulTaskNotifyTake(pdTRUE, 5000 / portTICK_PERIOD_MS) == pdTRUE) {
-        LOG_DEBUG("Received notification of successful load of room ", room_ids[i]);
         vTaskDelay(50 / portTICK_PERIOD_MS); // Wait 50ms for other tasks to compute
       } else {
         LOG_ERROR("Failed to load room ", room_ids[i], " within 5 seconds. Will continue to next room.");
       }
     } else {
-      LOG_DEBUG("Room already exists, do not load via loadAllRooms. Updated are handled separately.");
+      LOG_DEBUG("Room already exists, do not load via loadAllRooms. Updates are handled separately.");
     }
   }
   LOG_INFO("All rooms loaded.");
@@ -59,6 +57,22 @@ void RoomManager::handleNSPanelRoomStatusUpdate(char *topic, byte *payload, unsi
       return status.id == room_status->id;
     });
     bool update_current_room = RoomManager::currentRoom == existing_room; // Check if currently selected room is the same as the one to be removed/updated.
+
+    // if (existing_room == RoomManager::rooms.end()) {
+    //   // Room does not exist, simply push to end of list
+    //   RoomManager::rooms.push_back(*room_status);
+    // } else {
+    //   // Room already exists, merge all changes
+    //   (*existing_room).average_color_temperature = room_status->average_color_temperature;
+    //   (*existing_room).ceiling_lights_dim_level = room_status->ceiling_lights_dim_level;
+    //   (*existing_room).table_lights_dim_level = room_status->table_lights_dim_level;
+    //   (*existing_room).average_color_temperature = room_status->average_color_temperature;
+    //   (*existing_room).ceiling_lights_color_temperature_value = room_status->ceiling_lights_color_temperature_value;
+    //   (*existing_room).table_lights_color_temperature_value = room_status->table_lights_color_temperature_value;
+
+    //   RoomManager::_callRoomChangeCallbacks();
+    // }
+
     RoomManager::rooms.push_back(*room_status);
     if (existing_room != RoomManager::rooms.end()) {
       RoomManager::rooms.erase(existing_room);

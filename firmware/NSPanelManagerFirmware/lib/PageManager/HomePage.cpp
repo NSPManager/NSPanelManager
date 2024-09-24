@@ -177,19 +177,31 @@ void HomePage::updateColorTempValueCache() {
 }
 
 void HomePage::setCeilingBrightnessLabelText(uint8_t value) {
-  NSPanel::instance->setComponentVal(HOME_LABEL_CEILING_BRIGHTNESS, value);
+  if (value != this->_ceiling_lights_display_value) {
+    NSPanel::instance->setComponentVal(HOME_LABEL_CEILING_BRIGHTNESS, value);
+    this->_ceiling_lights_display_value = value;
+  }
 }
 
 void HomePage::setTableBrightnessLabelText(uint8_t value) {
-  NSPanel::instance->setComponentVal(HOME_LABEL_TABLE_BRIGHTNESS, value);
+  if (value != this->_table_lights_display_value) {
+    NSPanel::instance->setComponentVal(HOME_LABEL_TABLE_BRIGHTNESS, value);
+    this->_table_lights_display_value = value;
+  }
 }
 
 void HomePage::setCeilingLightsState(bool state) {
-  NSPanel::instance->setComponentVal(HOME_BUTTON_CEILING_NAME, state ? 1 : 0);
+  if (state != this->_ceiling_lights_state) {
+    NSPanel::instance->setComponentVal(HOME_BUTTON_CEILING_NAME, state ? 1 : 0);
+    this->_ceiling_lights_state = state;
+  }
 }
 
 void HomePage::setTableLightsState(bool state) {
-  NSPanel::instance->setComponentVal(HOME_BUTTON_TABLE_NAME, state ? 1 : 0);
+  if (state != this->_table_lights_state) {
+    NSPanel::instance->setComponentVal(HOME_BUTTON_TABLE_NAME, state ? 1 : 0);
+    this->_table_lights_state = state;
+  }
 }
 
 void HomePage::setSliderLightLevelColor(uint color) {
@@ -213,7 +225,10 @@ void HomePage::setScreensaverTimeout(uint16_t timeout) {
 }
 
 void HomePage::setRoomText(const char *text) {
-  NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, text);
+  if (this->_room_name_value.compare(text) != 0) {
+    NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, text);
+    this->_room_name_value = text;
+  }
 }
 
 void HomePage::setModeText(const char *text) {

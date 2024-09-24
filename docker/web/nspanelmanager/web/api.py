@@ -16,24 +16,9 @@ import environ
 import os
 import logging
 
+from .apps import restart_mqtt_manager_process
 from .models import NSPanel, Room, Light, LightState, Scene, RelayGroup
-from .apps import start_mqtt_manager
 from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default, set_setting_value
-
-
-def restart_mqtt_manager_process():
-    for proc in psutil.process_iter():
-        if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
-            logging.info("Killing running MQTTManager")
-            proc.kill()
-    start_mqtt_manager()
-
-
-def send_mqttmanager_reload_command():
-    for proc in psutil.process_iter():
-        if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
-            logging.info("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
-            os.kill(proc.pid, signal.SIGUSR1)
 
 
 def get_file_md5sum(filename):

@@ -71,9 +71,10 @@ def index(request):
     for nspanel in NSPanel.objects.filter(denied=False):
         panel_info = {}
         panel_info["data"] = nspanel
-        panel_status = send_ipc_request(F"nspanel/{nspanel.id}/status", {"command": "get"})
-        panel_info["status"] = panel_status
-        panel_info["status"]["warnings"] = []
+        print(F"Checking status for panel {nspanel.id}")
+        panel_info["status"] = send_ipc_request(F"nspanel/{nspanel.id}/status", {"command": "get"})
+        print(F"Got status for panel {nspanel.id}")
+        panel_info["status"]["warnings"] = [] # TODO: Check if already array, then don't clear existin warnings
         for panel in NSPanel.objects.filter(denied=False):
             if panel == nspanel:
                 continue

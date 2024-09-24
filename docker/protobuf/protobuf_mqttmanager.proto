@@ -115,6 +115,9 @@ message MQTTManagerSettings {
     }
     turn_on_behavior light_turn_on_behavior = 16;
     bool is_home_assistant_addon = 17;
+
+    int32 mqtt_wait_time = 18;
+    bool optimistic_mode = 19;
 }
 
 
