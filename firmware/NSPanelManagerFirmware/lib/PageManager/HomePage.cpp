@@ -259,34 +259,9 @@ void HomePage::setEditLightMode(editLightMode new_mode) {
 }
 
 void HomePage::_updateLightsWithNewBrightness(uint8_t brightness) {
+  uint64_t ms_start = millis();
   // TODO: Handle global
   if (RoomManager::hasValidCurrentRoom()) {
-    if (InterfaceConfig::optimistic_mode) {
-      bool update_both = (RoomManager::currentRoom->table_lights_dim_level == 0 && RoomManager::currentRoom->ceiling_lights_dim_level == 0) || (RoomManager::currentRoom->table_lights_dim_level > 0 && RoomManager::currentRoom->ceiling_lights_dim_level > 0);
-      if (!update_both && RoomManager::currentRoom->table_lights_dim_level > 0) {
-        RoomManager::currentRoom->table_lights_dim_level = brightness;
-        if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-          RoomManager::currentRoom->average_dim_level = brightness;
-        }
-      } else if (!update_both && RoomManager::currentRoom->ceiling_lights_dim_level > 0) {
-        RoomManager::currentRoom->ceiling_lights_dim_level = brightness;
-        if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-          RoomManager::currentRoom->average_dim_level = brightness;
-        }
-      } else if (update_both) {
-        if (RoomManager::currentRoom->has_ceiling_lights) {
-          RoomManager::currentRoom->ceiling_lights_dim_level = brightness;
-        }
-        if (RoomManager::currentRoom->has_table_lights) {
-          RoomManager::currentRoom->table_lights_dim_level = brightness;
-        }
-        if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-          RoomManager::currentRoom->average_dim_level = brightness;
-        }
-      }
-      this->updateLightStatus(true, false);
-    }
-
     NSPanelMQTTManagerCommand__FirstPageTurnLightOn light_command = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_ON__INIT;
     light_command.brightness_slider_value = brightness;
     light_command.kelvin_slider_value = 0;
@@ -313,6 +288,34 @@ void HomePage::_updateLightsWithNewBrightness(uint8_t brightness) {
 
     std::string full_buffer = std::string(buffer, buffer + pack_size);
     MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, false);
+
+    // Command has now been published. Should we wait for response from manager or do we
+    // go for optimistic mode as per user settings and assume updated values.
+    if (InterfaceConfig::optimistic_mode) {
+      bool update_both = (RoomManager::currentRoom->table_lights_dim_level == 0 && RoomManager::currentRoom->ceiling_lights_dim_level == 0) || (RoomManager::currentRoom->table_lights_dim_level > 0 && RoomManager::currentRoom->ceiling_lights_dim_level > 0);
+      if (!update_both && RoomManager::currentRoom->table_lights_dim_level > 0) {
+        RoomManager::currentRoom->table_lights_dim_level = brightness;
+        if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
+          RoomManager::currentRoom->average_dim_level = brightness;
+        }
+      } else if (!update_both && RoomManager::currentRoom->ceiling_lights_dim_level > 0) {
+        RoomManager::currentRoom->ceiling_lights_dim_level = brightness;
+        if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
+          RoomManager::currentRoom->average_dim_level = brightness;
+        }
+      } else if (update_both) {
+        if (RoomManager::currentRoom->has_ceiling_lights) {
+          RoomManager::currentRoom->ceiling_lights_dim_level = brightness;
+        }
+        if (RoomManager::currentRoom->has_table_lights) {
+          RoomManager::currentRoom->table_lights_dim_level = brightness;
+        }
+        if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
+          RoomManager::currentRoom->average_dim_level = brightness;
+        }
+      }
+      this->updateLightStatus(true, false);
+    }
   }
 }
 

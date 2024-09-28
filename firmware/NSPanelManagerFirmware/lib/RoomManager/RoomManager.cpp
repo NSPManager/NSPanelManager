@@ -49,9 +49,9 @@ void RoomManager::loadAllRooms(int32_t *room_ids, uint32_t n_room_ids) {
   RoomManager::_notify_task_room_load_complete = nullptr;
 }
 
-void RoomManager::handleNSPanelRoomStatusUpdate(char *topic, byte *payload, unsigned int length) {
+void RoomManager::handleNSPanelRoomStatusUpdate(MQTTMessage *message) {
   try {
-    NSPanelRoomStatus *room_status = nspanel_room_status__unpack(NULL, length, payload);
+    NSPanelRoomStatus *room_status = nspanel_room_status__unpack(NULL, message->data.size(), (const uint8_t *)message->data.c_str());
     LOG_DEBUG("Successfully decoded room status for room ", room_status->id, "::", room_status->name);
 
     bool found_and_replaced_existing_room = false;

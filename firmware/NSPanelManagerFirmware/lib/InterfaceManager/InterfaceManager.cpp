@@ -97,9 +97,6 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
     vTaskDelay(250 / portTICK_PERIOD_MS);
   }
 
-  // Start task for MQTT processing
-  xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskProcessMqttMessages", 5000, NULL, 1, &InterfaceManager::_taskHandleProcessMqttMessages, CONFIG_ARDUINO_RUNNING_CORE);
-
   if (NSPanel::instance->ready()) {
     PageManager::GetNSPanelManagerPage()->setText("Loading config...");
     while (!InterfaceManager::instance->_config_loaded) {
@@ -142,54 +139,9 @@ void InterfaceManager::showDefaultPage() {
   }
 }
 
-void InterfaceManager::_taskProcessMqttMessages(void *param) {
-  LOG_INFO("Started _taskProcessMqttMessages.");
-  vTaskDelay(100 / portTICK_PERIOD_MS);
-  for (;;) {
-    // Wait for notification that we need to process messages.
-    if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY)) {
-      // Process all the messages
-      while (InterfaceManager::_mqttMessages.size() > 0) {
-        mqttMessage msg = InterfaceManager::_mqttMessages.front();
-        try {
-          if (InterfaceManager::instance->_processMqttMessages) {
-            if (msg.topic.compare(NSPMConfig::instance->mqtt_screen_cmd_topic) == 0) {
-              if (msg.payload.compare("1") == 0) {
-                InterfaceManager::showDefaultPage();
-                MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1"); // Send out state information that panel woke from sleep
-              } else if (msg.payload.compare("0") == 0) {
-                PageManager::GetScreensaverPage()->show();
-              } else {
-                LOG_ERROR("Invalid payload for screen cmd. Valid payload: 1 or 0");
-              }
-            }
-          }
-        } catch (...) {
-          LOG_ERROR("Error processing MQTT message on topic ", msg.topic.c_str());
-        }
-        InterfaceManager::_mqttMessages.pop_front();
-        vTaskDelay(10 / portTICK_PERIOD_MS); // Wait 10ms between processing each event to allow for other tasks, ie. more MQTT messages to arrive.
-      }
-    }
-  }
-}
-
-void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int length) {
-  mqttMessage msg;
-  msg.topic = topic;
-  msg.payload = std::string((char *)payload, length);
-  InterfaceManager::_mqttMessages.push_back(msg);
-  if (InterfaceManager::_taskHandleProcessMqttMessages) {
-    // Notify task that a new message needs processing
-    vTaskNotifyGiveFromISR(InterfaceManager::_taskHandleProcessMqttMessages, NULL);
-    portYIELD_FROM_ISR();
-  }
-}
-
-void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned int length) {
-  std::string payload_str = std::string((char *)payload, length);
+void InterfaceManager::handleNSPanelCommand(MQTTMessage *message) {
   JsonDocument json;
-  DeserializationError error = deserializeJson(json, payload_str);
+  DeserializationError error = deserializeJson(json, message->data);
   if (error) {
     LOG_ERROR("Failed to serialize NSPanel command.");
     return;
@@ -230,9 +182,8 @@ void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned
   }
 }
 
-void InterfaceManager::handleNSPanelScreenBrightnessCommand(char *topic, byte *payload, unsigned int length) {
-  std::string payload_str = std::string((char *)payload, length);
-  int new_brightness = std::stoi(payload_str);
+void InterfaceManager::handleNSPanelScreenBrightnessCommand(MQTTMessage *message) {
+  int new_brightness = std::stoi(message->data);
   if (new_brightness < 1) {
     new_brightness = 1;
   } else if (new_brightness > 100) {
@@ -244,9 +195,8 @@ void InterfaceManager::handleNSPanelScreenBrightnessCommand(char *topic, byte *p
   }
 }
 
-void InterfaceManager::handleNSPanelScreensaverBrightnessCommand(char *topic, byte *payload, unsigned int length) {
-  std::string payload_str = std::string((char *)payload, length);
-  int new_brightness = std::stoi(payload_str);
+void InterfaceManager::handleNSPanelScreensaverBrightnessCommand(MQTTMessage *message) {
+  int new_brightness = std::stoi(message->data);
   if (new_brightness < 0) {
     new_brightness = 0;
   } else if (new_brightness > 100) {
@@ -258,9 +208,9 @@ void InterfaceManager::handleNSPanelScreensaverBrightnessCommand(char *topic, by
   }
 }
 
-void InterfaceManager::handleNSPanelConfigUpdate(char *topic, byte *payload, unsigned int length) {
+void InterfaceManager::handleNSPanelConfigUpdate(MQTTMessage *message) {
   try {
-    NSPanelConfig *config = nspanel_config__unpack(NULL, length, payload);
+    NSPanelConfig *config = nspanel_config__unpack(NULL, message->data.size(), (const uint8_t *)message->data.c_str());
     InterfaceManager::_new_config = *config;
     LOG_INFO("Received new config and successfully parsed it into protobuf. Will start _taskHandleConfigData.");
     xTaskCreatePinnedToCore(&InterfaceManager::_taskHandleConfigData, "handle_config", 5000, NULL, 1, NULL, ARDUINO_RUNNING_CORE);
@@ -364,10 +314,21 @@ void InterfaceManager::_taskHandleConfigData(void *param) {
 void InterfaceManager::subscribeToMqttTopics() {
   // Subscribe to command to wake/put to sleep the display
   vTaskDelay(100 / portTICK_PERIOD_MS);
-  MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_screen_cmd_topic.c_str(), &InterfaceManager::mqttCallback);
+  MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_screen_cmd_topic.c_str(), &InterfaceManager::handleNSPanelScreenCommand);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_cmd_topic.c_str(), &InterfaceManager::handleNSPanelCommand);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_screen_brightness_topic.c_str(), &InterfaceManager::handleNSPanelScreenBrightnessCommand);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_screensaver_brightness.c_str(), &InterfaceManager::handleNSPanelScreensaverBrightnessCommand);
+}
+
+void InterfaceManager::handleNSPanelScreenCommand(MQTTMessage *message) {
+  if (message->data.compare("1") == 0) {
+    InterfaceManager::showDefaultPage();
+    MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1"); // Send out state information that panel woke from sleep
+  } else if (message->data.compare("0") == 0) {
+    PageManager::GetScreensaverPage()->show();
+  } else {
+    LOG_ERROR("Invalid payload for screen cmd. Valid payload: 1 or 0");
+  }
 }
 
 void InterfaceManager::processWakeEvent() {

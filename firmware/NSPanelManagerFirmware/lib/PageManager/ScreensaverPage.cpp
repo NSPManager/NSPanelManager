@@ -123,25 +123,24 @@ void ScreensaverPage::unshow() {
   MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1");
 }
 
-void ScreensaverPage::screensaverModeCallback(char *topic, byte *payload, unsigned int length) {
+void ScreensaverPage::screensaverModeCallback(MQTTMessage *message) {
   if (ScreensaverPage::_stopped) {
     return;
   }
 
-  std::string screensaver_mode = std::string((char *)payload, length);
-  LOG_INFO("Received command to change screensaver mode to: ", screensaver_mode.c_str());
-  if (screensaver_mode.compare("with_background")) {
+  LOG_INFO("Received command to change screensaver mode to: ", message->data.c_str());
+  if (message->data.compare("with_background")) {
     InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND;
-  } else if (screensaver_mode.compare("without_background")) {
+  } else if (message->data.compare("without_background")) {
     InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITHOUT_BACKGROUND;
-  } else if (screensaver_mode.compare("datetime_with_background")) {
+  } else if (message->data.compare("datetime_with_background")) {
     InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITH_BACKGROUND;
-  } else if (screensaver_mode.compare("datetime_without_background")) {
+  } else if (message->data.compare("datetime_without_background")) {
     InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITHOUT_BACKGROUND;
-  } else if (screensaver_mode.compare("no_screensaver")) {
+  } else if (message->data.compare("no_screensaver")) {
     InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__NO_SCREENSAVER;
   } else {
-    LOG_ERROR("Received unknown screensaver mode: ", screensaver_mode.c_str());
+    LOG_ERROR("Received unknown screensaver mode: ", message->data.c_str());
   }
 
   PageManager::GetScreensaverPage()->init(); // Reload all internal variables
@@ -151,29 +150,26 @@ void ScreensaverPage::screensaverModeCallback(char *topic, byte *payload, unsign
   }
 }
 
-void ScreensaverPage::clockMqttCallback(char *topic, byte *payload, unsigned int length) {
-  std::string clock_string = std::string((char *)payload, length);
-  NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_TIME_TEXT_NAME, clock_string.c_str());
-  NSPanel::instance->setComponentText(SCREENSAVER_MINIMAL_PAGE_NAME "." SCREENSAVER_CURRENT_TIME_TEXT_NAME, clock_string.c_str());
+void ScreensaverPage::clockMqttCallback(MQTTMessage *message) {
+  NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_TIME_TEXT_NAME, message->data.c_str());
+  NSPanel::instance->setComponentText(SCREENSAVER_MINIMAL_PAGE_NAME "." SCREENSAVER_CURRENT_TIME_TEXT_NAME, message->data.c_str());
 }
 
-void ScreensaverPage::ampmMqttCallback(char *topic, byte *payload, unsigned int length) {
-  std::string ampm_string = std::string((char *)payload, length);
-  NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_AMPM_TEXT_NAME, ampm_string.c_str());
-  NSPanel::instance->setComponentText(SCREENSAVER_MINIMAL_PAGE_NAME "." SCREENSAVER_CURRENT_AMPM_TEXT_NAME, ampm_string.c_str());
+void ScreensaverPage::ampmMqttCallback(MQTTMessage *message) {
+  NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_AMPM_TEXT_NAME, message->data.c_str());
+  NSPanel::instance->setComponentText(SCREENSAVER_MINIMAL_PAGE_NAME "." SCREENSAVER_CURRENT_AMPM_TEXT_NAME, message->data.c_str());
 }
 
-void ScreensaverPage::dateMqttCallback(char *topic, byte *payload, unsigned int length) {
-  std::string date_string = std::string((char *)payload, length);
-  NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_DAY_TEXT_NAME, date_string.c_str());
-  NSPanel::instance->setComponentText(SCREENSAVER_MINIMAL_PAGE_NAME "." SCREENSAVER_CURRENT_DAY_TEXT_NAME, date_string.c_str());
+void ScreensaverPage::dateMqttCallback(MQTTMessage *message) {
+  NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_DAY_TEXT_NAME, message->data.c_str());
+  NSPanel::instance->setComponentText(SCREENSAVER_MINIMAL_PAGE_NAME "." SCREENSAVER_CURRENT_DAY_TEXT_NAME, message->data.c_str());
 }
 
-void ScreensaverPage::weatherMqttCallback(char *topic, byte *payload, unsigned int length) {
+void ScreensaverPage::weatherMqttCallback(MQTTMessage *message) {
   LOG_DEBUG("Received new weather data.");
 
   try {
-    NSPanelWeatherUpdate *update = nspanel_weather_update__unpack(NULL, length, payload);
+    NSPanelWeatherUpdate *update = nspanel_weather_update__unpack(NULL, message->data.size(), (const uint8_t *)message->data.c_str());
     NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_WEATHER_ICON_TEXT_NAME, update->current_weather_icon);
     NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_TEMP_TEXT_NAME, update->current_temperature_string);
     NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_WIND_TEXT_NAME, update->current_wind_string);

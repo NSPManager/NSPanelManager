@@ -41,16 +41,22 @@ void IRAM_ATTR ButtonManager::button2_state_change() {
   vTaskNotifyGiveFromISR(ButtonManager::_loop_task_handle, NULL);
 }
 
-void ButtonManager::mqttCallback(char *topic, byte *payload, unsigned int length) {
+void ButtonManager::mqttCallback(MQTTMessage *message) {
   uint8_t relay = 0;
-  if (std::string(topic).compare(NSPMConfig::instance->mqtt_relay1_cmd_topic) == 0) {
+  if (message->topic.compare(NSPMConfig::instance->mqtt_relay1_cmd_topic) == 0) {
     relay = 1;
-  } else if (std::string(topic).compare(NSPMConfig::instance->mqtt_relay2_cmd_topic) == 0) {
+  } else if (message->topic.compare(NSPMConfig::instance->mqtt_relay2_cmd_topic) == 0) {
     relay = 2;
   }
 
   if (relay > 0) {
-    ButtonManager::setRelayState(relay, (*payload) == '1');
+    if (message->data.compare("0") == 0) {
+      ButtonManager::setRelayState(relay, false);
+    } else if (message->data.compare("1") == 0) {
+      ButtonManager::setRelayState(relay, true);
+    } else if (message->data.compare("2") == 0) {
+      ButtonManager::setRelayState(relay, !ButtonManager::getRelayState(relay));
+    }
   }
 }
 
@@ -68,6 +74,21 @@ void ButtonManager::setRelayState(uint8_t relay, bool state) {
   } else {
     digitalWrite(BUTTON_MANAGER_RELAY2_PIN, state);
     MqttManager::publish(NSPMConfig::instance->mqtt_relay2_state_topic, state ? "1" : "0");
+  }
+}
+
+bool ButtonManager::getRelayState(uint8_t relay) {
+  if (NSPMConfig::instance->reverse_relays) {
+    if (relay == 1) {
+      relay = 2;
+    } else if (relay == 2) {
+      relay = 1;
+    }
+  }
+  if (relay == 1) {
+    return digitalRead(BUTTON_MANAGER_RELAY1_PIN);
+  } else {
+    return digitalRead(BUTTON_MANAGER_RELAY2_PIN);
   }
 }
 

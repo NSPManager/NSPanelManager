@@ -21,7 +21,7 @@ public:
   static bool hasValidCurrentRoom();
   static void attachRoomChangeCallback(RoomManagerObserver *observer);
   static void detachRoomChangeCallback(RoomManagerObserver *observer);
-  static void handleNSPanelRoomStatusUpdate(char *topic, byte *payload, unsigned int length);
+  static void handleNSPanelRoomStatusUpdate(MQTTMessage *message);
   static NSPanelRoomStatus *getRoomById(uint16_t room_id);
 
 private:

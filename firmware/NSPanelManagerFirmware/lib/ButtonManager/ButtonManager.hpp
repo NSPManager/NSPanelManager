@@ -8,16 +8,17 @@
 #define BUTTON_MANAGER_RELAY2_PIN 19
 
 #include <Arduino.h>
-// #include <Light.hpp>
-class Light;
+#include <MqttManager.hpp>
+class Light; // TODO: Remove and use lights as defined by protobuf instead.
 
 class ButtonManager {
 public:
   static void init();
-  static void mqttCallback(char *topic, byte *payload, unsigned int length);
+  static void mqttCallback(MQTTMessage *message);
   static inline Light *button1_detached_mode_light;
   static inline Light *button2_detached_mode_light;
   static void setRelayState(uint8_t relay, bool state);
+  static bool getRelayState(uint8_t relay);
 
 private:
   static void _loop(void *param);
