@@ -50,6 +50,12 @@ public:
   static inline roomMode currentRoomMode;
   static inline editLightMode currentEditLightMode;
   static inline editLightMode _triggerSpecialLightMode;
+
+  /// @brief What room IDs to load and in what order are they to be displayed.
+  static inline std::vector<int32_t> room_ids;
+
+  /// @brief Are the panel to run as optimistic mode or are we to wait for answers from manager?
+  static inline bool optimistic_mode;
 };
 
 #endif

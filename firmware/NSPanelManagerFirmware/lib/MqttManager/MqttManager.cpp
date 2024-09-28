@@ -24,7 +24,7 @@ void MqttManager::start() {
     MqttManager::_mqttClient = new PubSubClient(*MqttManager::_wifiClient); // Create MQTT Client used to communicate with MQTT
     MqttManager::_mqttClient->setBufferSize(5000);
     MqttManager::_mqttClient->setCallback(&MqttManager::_mqttClientCallback);
-    xTaskCreatePinnedToCore(MqttManager::_taskMqttRunTask, "taskRunMQTT", 50000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+    xTaskCreatePinnedToCore(MqttManager::_taskMqttRunTask, "taskRunMQTT", 50000, NULL, 2, NULL, CONFIG_ARDUINO_RUNNING_CORE);
   }
 }
 
@@ -134,7 +134,7 @@ void MqttManager::_subscribeToTopic(SubscribeTopic &topic) {
 void MqttManager::_subscribeToAllRegisteredTopics() {
   for (SubscribeTopic &topic : MqttManager::_subscribeTopics) {
     MqttManager::_subscribeToTopic(topic);
-    vTaskDelay(50 / portTICK_PERIOD_MS); // Wait 50ms between each subscribe to allow for processing of any retained message in the topic
+    vTaskDelay(200 / portTICK_PERIOD_MS); // Wait 50ms between each subscribe to allow for processing of any retained message in the topic
   }
 }
 

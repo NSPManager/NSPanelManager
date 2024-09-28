@@ -282,6 +282,7 @@ void InterfaceManager::_taskHandleConfigData(void *param) {
   InterfaceConfig::screensaver_mode = InterfaceManager::_new_config.screensaver_mode;
   InterfaceConfig::clock_us_style = InterfaceManager::_new_config.clock_us_style;
   InterfaceConfig::lock_to_default_room = false; // TODO: Remove as only "allowed" rooms are loaded.
+  InterfaceConfig::optimistic_mode = InterfaceManager::_new_config.optimistic_mode;
 
   LOG_DEBUG("Loaded screensaver mode: ", InterfaceConfig::screensaver_mode);
   LOG_DEBUG("Screensaver activation timeout: ", InterfaceConfig::screensaver_activation_timeout);
@@ -340,9 +341,19 @@ void InterfaceManager::_taskHandleConfigData(void *param) {
   }
   LOG_INFO("Loaded ", InterfaceConfig::global_scenes.size(), " global scenes.");
 
+  InterfaceConfig::room_ids.clear();
+  InterfaceConfig::room_ids.insert(InterfaceConfig::room_ids.end(), InterfaceManager::_new_config.room_ids, InterfaceManager::_new_config.room_ids + InterfaceManager::_new_config.n_room_ids);
   RoomManager::loadAllRooms(InterfaceManager::_new_config.room_ids, InterfaceManager::_new_config.n_room_ids);
   if (!RoomManager::hasValidCurrentRoom()) {
-    RoomManager::goToRoomId(InterfaceConfig::homeScreen);
+    LOG_DEBUG("Config loaded, will go to default room ID: ", InterfaceConfig::homeScreen);
+    if (!RoomManager::goToRoomId(InterfaceConfig::homeScreen)) {
+      LOG_ERROR("Failed to go to default room. Will go to first valid room in list.");
+      if (RoomManager::rooms.size() > 0) {
+        RoomManager::goToRoomId(RoomManager::rooms[0].id);
+      } else {
+        LOG_ERROR("No rooms loaded!");
+      }
+    }
   }
 
   InterfaceManager::instance->_config_loaded = true;

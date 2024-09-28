@@ -5,12 +5,14 @@
 #include <RoomManagerObserver.hpp>
 #include <list>
 #include <protobuf_nspanel.pb-c.h>
+#include <vector>
 
 class RoomManager {
 public:
   static void init();
-  static inline std::list<NSPanelRoomStatus> rooms;
-  static inline std::list<NSPanelRoomStatus>::iterator currentRoom;
+  static inline std::vector<NSPanelRoomStatus> rooms;
+  static inline NSPanelRoomStatus *currentRoom;
+  static uint16_t selected_entity_id;
   static void loadAllRooms(int32_t *room_ids, uint32_t n_room_ids);
   // static void loadRoom(uint16_t roomId, bool is_update);
   static void goToNextRoom();

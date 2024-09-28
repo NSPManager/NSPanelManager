@@ -259,7 +259,34 @@ void HomePage::setEditLightMode(editLightMode new_mode) {
 }
 
 void HomePage::_updateLightsWithNewBrightness(uint8_t brightness) {
+  // TODO: Handle global
   if (RoomManager::hasValidCurrentRoom()) {
+    if (InterfaceConfig::optimistic_mode) {
+      bool update_both = (RoomManager::currentRoom->table_lights_dim_level == 0 && RoomManager::currentRoom->ceiling_lights_dim_level == 0) || (RoomManager::currentRoom->table_lights_dim_level > 0 && RoomManager::currentRoom->ceiling_lights_dim_level > 0);
+      if (!update_both && RoomManager::currentRoom->table_lights_dim_level > 0) {
+        RoomManager::currentRoom->table_lights_dim_level = brightness;
+        if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
+          RoomManager::currentRoom->average_dim_level = brightness;
+        }
+      } else if (!update_both && RoomManager::currentRoom->ceiling_lights_dim_level > 0) {
+        RoomManager::currentRoom->ceiling_lights_dim_level = brightness;
+        if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
+          RoomManager::currentRoom->average_dim_level = brightness;
+        }
+      } else if (update_both) {
+        if (RoomManager::currentRoom->has_ceiling_lights) {
+          RoomManager::currentRoom->ceiling_lights_dim_level = brightness;
+        }
+        if (RoomManager::currentRoom->has_table_lights) {
+          RoomManager::currentRoom->table_lights_dim_level = brightness;
+        }
+        if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
+          RoomManager::currentRoom->average_dim_level = brightness;
+        }
+      }
+      this->updateLightStatus(true, false);
+    }
+
     NSPanelMQTTManagerCommand__FirstPageTurnLightOn light_command = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_ON__INIT;
     light_command.brightness_slider_value = brightness;
     light_command.kelvin_slider_value = 0;
@@ -352,7 +379,8 @@ void HomePage::_stopSpecialMode() {
 
 void HomePage::_ceilingMasterButtonEvent() {
   // TODO: Handle case when a light is on/off
-  if (RoomManager::hasValidCurrentRoom()) {
+  // TODO: Handle global
+  if (RoomManager::hasValidCurrentRoom() && RoomManager::currentRoom->has_ceiling_lights) {
     NSPanelMQTTManagerCommand__FirstPageTurnLightOn light_command = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_ON__INIT;
     light_command.brightness_slider_value = this->getDimmingValue();
     uint16_t sendKelvin = this->getColorTempValue() * ((InterfaceConfig::colorTempMax - InterfaceConfig::colorTempMin) / 100);
@@ -384,7 +412,8 @@ void HomePage::_ceilingMasterButtonEvent() {
 
 void HomePage::_tableMasterButtonEvent() {
   // TODO: Handle case when a light is on/off
-  if (RoomManager::hasValidCurrentRoom()) {
+  // TODO: Handle global
+  if (RoomManager::hasValidCurrentRoom() && RoomManager::currentRoom->has_table_lights) {
     NSPanelMQTTManagerCommand__FirstPageTurnLightOn light_command = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_ON__INIT;
     light_command.brightness_slider_value = this->getDimmingValue();
     uint16_t sendKelvin = this->getColorTempValue() * ((InterfaceConfig::colorTempMax - InterfaceConfig::colorTempMin) / 100);
@@ -492,18 +521,33 @@ void HomePage::setCurrentMode(roomMode mode) {
 void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperature) {
   if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
     if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-      PageManager::GetHomePage()->setCeilingLightsState((*RoomManager::currentRoom).ceiling_lights_dim_level > 0);
-      PageManager::GetHomePage()->setCeilingBrightnessLabelText((*RoomManager::currentRoom).ceiling_lights_dim_level);
-      PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom).table_lights_dim_level > 0);
-      PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom).table_lights_dim_level);
+      if (RoomManager::currentRoom->has_ceiling_lights) {
+        PageManager::GetHomePage()->setCeilingLightsState((*RoomManager::currentRoom).ceiling_lights_dim_level > 0);
+        PageManager::GetHomePage()->setCeilingBrightnessLabelText((*RoomManager::currentRoom).ceiling_lights_dim_level);
+      } else {
+        PageManager::GetHomePage()->setCeilingLightsState(false);
+        PageManager::GetHomePage()->setCeilingBrightnessLabelText(0);
+      }
+      if (RoomManager::currentRoom->has_table_lights) {
+        PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom).table_lights_dim_level > 0);
+        PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom).table_lights_dim_level);
+      } else {
+        PageManager::GetHomePage()->setTableLightsState(false);
+        PageManager::GetHomePage()->setTableBrightnessLabelText(0);
+      }
       // Only update light level slider if the new value is greater than 0.
       if ((*RoomManager::currentRoom).average_dim_level > 0) {
         PageManager::GetHomePage()->setDimmingValue((*RoomManager::currentRoom).average_dim_level);
       }
       PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom).average_color_temperature);
     } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
-      PageManager::GetHomePage()->setCeilingLightsState((*RoomManager::currentRoom).ceiling_lights_dim_level > 0);
-      PageManager::GetHomePage()->setCeilingBrightnessLabelText((*RoomManager::currentRoom).ceiling_lights_dim_level);
+      if (RoomManager::currentRoom->has_ceiling_lights) {
+        PageManager::GetHomePage()->setCeilingLightsState((*RoomManager::currentRoom).ceiling_lights_dim_level > 0);
+        PageManager::GetHomePage()->setCeilingBrightnessLabelText((*RoomManager::currentRoom).ceiling_lights_dim_level);
+      } else {
+        PageManager::GetHomePage()->setCeilingLightsState(false);
+        PageManager::GetHomePage()->setCeilingBrightnessLabelText(0);
+      }
       PageManager::GetHomePage()->setTableLightsState(false);
       PageManager::GetHomePage()->setTableBrightnessLabelText(0);
       // Only update light level slider if the new value is greater than 0.
@@ -512,8 +556,13 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
       }
       PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom).ceiling_lights_color_temperature_value);
     } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
-      PageManager::GetHomePage()->setCeilingLightsState(false);
-      PageManager::GetHomePage()->setCeilingBrightnessLabelText(0);
+      if (RoomManager::currentRoom->has_table_lights) {
+        PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom).table_lights_dim_level > 0);
+        PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom).table_lights_dim_level);
+      } else {
+        PageManager::GetHomePage()->setTableLightsState(false);
+        PageManager::GetHomePage()->setTableBrightnessLabelText(0);
+      }
       PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom).table_lights_dim_level > 0);
       PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom).table_lights_dim_level);
       // Only update light level slider if the new value is greater than 0.
@@ -525,120 +574,6 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
       LOG_ERROR("Unknown editLightMode!");
     }
   }
-
-  // uint totalBrightness = 0;
-  // uint totalBrightnessLights = 0;
-  // uint totalKelvinLightsCeiling = 0;
-  // unsigned long totalKelvinValueCeilingLights = 0;
-  // bool anyLightsOn = false;
-  // std::list<Light *> ceilingLights;
-  // std::list<Light *> tableLights;
-
-  // if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
-  //   if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-  //     anyLightsOn = (*RoomManager::currentRoom)->anyLightsOn();
-
-  //   } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
-  //     anyLightsOn = (*RoomManager::currentRoom)->anyCeilingLightsOn();
-  //   } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
-  //     anyLightsOn = (*RoomManager::currentRoom)->anyTableLightsOn();
-  //   }
-  //   for (auto lightPair : (*RoomManager::currentRoom)->ceilingLights) {
-  //     ceilingLights.push_back(lightPair.second);
-  //   }
-  //   for (auto lightPair : (*RoomManager::currentRoom)->tableLights) {
-  //     tableLights.push_back(lightPair.second);
-  //   }
-  // } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
-  //   if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-  //     anyLightsOn = LightManager::anyLightsOn();
-  //   } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
-  //     anyLightsOn = LightManager::anyCeilingLightsOn();
-  //   } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
-  //     anyLightsOn = LightManager::anyTableLightsOn();
-  //   }
-  //   ceilingLights = LightManager::getAllCeilingLights();
-  //   tableLights = LightManager::getAllTableLights();
-  // }
-
-  // // Calculate average for ceiling lights
-  // if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights || InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
-  //   for (Light *light : ceilingLights) {
-  //     if (light->getLightLevel() > 0 || !anyLightsOn) {
-  //       totalBrightnessLights++;
-  //       totalBrightness += light->getLightLevel();
-  //       if (light->canTemperature()) {
-  //         totalKelvinLightsCeiling++;
-  //         totalKelvinValueCeilingLights += light->getColorTemperature();
-  //       }
-  //     }
-  //   }
-  // }
-
-  // uint8_t averageCeilingBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
-  // uint8_t averageCeilingKelvin = totalKelvinLightsCeiling == 0 ? 0 : totalKelvinValueCeilingLights / totalKelvinLightsCeiling;
-  // if (updateLightLevel) {
-  //   PageManager::GetHomePage()->setCeilingLightsState(averageCeilingBrightness > 0);
-  //   PageManager::GetHomePage()->setCeilingBrightnessLabelText(averageCeilingBrightness);
-  // }
-
-  // // Calculate average for table lights
-  // totalBrightness = 0;
-  // totalBrightnessLights = 0;
-  // uint8_t totalKelvinLightsTable = 0;
-  // unsigned long totalKelvinValueTableLights = 0;
-  // if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights || InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
-  //   for (Light *light : tableLights) {
-  //     if (light->getLightLevel() > 0 || !anyLightsOn) {
-  //       totalBrightnessLights++;
-  //       totalBrightness += light->getLightLevel();
-  //       if (light->canTemperature()) {
-  //         totalKelvinLightsTable++;
-  //         totalKelvinValueTableLights += light->getColorTemperature();
-  //       }
-  //     }
-  //   }
-  // }
-
-  // uint8_t averageTableBrightness = totalBrightnessLights == 0 ? 0 : totalBrightness / totalBrightnessLights;
-  // uint8_t averageTableKelvin = totalKelvinLightsTable == 0 ? 0 : totalKelvinValueTableLights / totalKelvinLightsTable;
-  // if (updateLightLevel) {
-  //   PageManager::GetHomePage()->setTableLightsState(averageTableBrightness > 0);
-  //   PageManager::GetHomePage()->setTableBrightnessLabelText(averageTableBrightness);
-  // }
-
-  // uint8_t totalAverageBrightness;
-  // if (averageCeilingBrightness > 0 && averageTableBrightness > 0) {
-  //   totalAverageBrightness = (averageCeilingBrightness + averageTableBrightness) / 2;
-  // } else if (averageCeilingBrightness > 0) {
-  //   totalAverageBrightness = averageCeilingBrightness;
-  // } else if (averageTableBrightness > 0) {
-  //   totalAverageBrightness = averageTableBrightness;
-  // } else {
-  //   totalAverageBrightness = 0;
-  // }
-
-  // // Only set a new value if any lights are on.
-  // // This value will be used as the next "on" value.
-  // if (updateLightLevel && totalAverageBrightness > 0 && totalAverageBrightness != PageManager::GetHomePage()->getDimmingValue()) {
-  //   PageManager::GetHomePage()->setDimmingValue(totalAverageBrightness);
-  // }
-
-  // uint8_t totalAverageKelvin;
-  // if (totalKelvinLightsCeiling > 0 && totalKelvinLightsTable > 0) {
-  //   totalAverageKelvin = (averageCeilingKelvin + averageTableKelvin) / 2;
-  // } else if (totalKelvinLightsCeiling > 0) {
-  //   totalAverageKelvin = averageCeilingKelvin;
-  // } else if (totalKelvinLightsTable > 0) {
-  //   totalAverageKelvin = averageTableKelvin;
-  // } else {
-  //   totalAverageKelvin = 0;
-  // }
-
-  // // Only set a new value if it is not the same as already set and a new value was discovered (ie, > 0).
-  // if (updateColorTemperature && totalAverageKelvin != PageManager::GetHomePage()->getColorTempValue()) {
-  //   PageManager::GetHomePage()->setColorTempValue(totalAverageKelvin);
-  // }
 }
 
 void HomePage::updateRoomInfo() {

@@ -489,7 +489,7 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_screensaver_mode__descript
   nspanel_config__nspanel_screensaver_mode__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[28] =
+static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[29] =
 {
   {
     "name",
@@ -827,6 +827,18 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[28] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "optimistic_mode",
+    29,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, optimistic_mode),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_config__field_indices_by_name[] = {
   25,   /* field[25] = button1_detached_light_id */
@@ -845,6 +857,7 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
   13,   /* field[13] = is_us_panel */
   4,   /* field[4] = min_button_push_time */
   0,   /* field[0] = name */
+  28,   /* field[28] = optimistic_mode */
   16,   /* field[16] = relay1_default_mode */
   17,   /* field[17] = relay2_default_mode */
   15,   /* field[15] = reverse_relays */
@@ -861,7 +874,7 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
 static const ProtobufCIntRange nspanel_config__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 28 }
+  { 0, 29 }
 };
 const ProtobufCMessageDescriptor nspanel_config__descriptor =
 {
@@ -871,7 +884,7 @@ const ProtobufCMessageDescriptor nspanel_config__descriptor =
   "NSPanelConfig",
   "",
   sizeof(NSPanelConfig),
-  28,
+  29,
   nspanel_config__field_descriptors,
   nspanel_config__field_indices_by_name,
   1,  nspanel_config__number_ranges,
@@ -1247,7 +1260,7 @@ const ProtobufCMessageDescriptor nspanel_light_status__descriptor =
   (ProtobufCMessageInit) nspanel_light_status__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor nspanel_room_status__field_descriptors[10] =
+static const ProtobufCFieldDescriptor nspanel_room_status__field_descriptors[12] =
 {
   {
     "id",
@@ -1369,12 +1382,38 @@ static const ProtobufCFieldDescriptor nspanel_room_status__field_descriptors[10]
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "has_ceiling_lights",
+    11,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomStatus, has_ceiling_lights),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "has_table_lights",
+    12,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomStatus, has_table_lights),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_room_status__field_indices_by_name[] = {
   5,   /* field[5] = average_color_temperature */
   2,   /* field[2] = average_dim_level */
   6,   /* field[6] = ceiling_lights_color_temperature_value */
   3,   /* field[3] = ceiling_lights_dim_level */
+  10,   /* field[10] = has_ceiling_lights */
+  11,   /* field[11] = has_table_lights */
   0,   /* field[0] = id */
   8,   /* field[8] = lights */
   1,   /* field[1] = name */
@@ -1385,7 +1424,7 @@ static const unsigned nspanel_room_status__field_indices_by_name[] = {
 static const ProtobufCIntRange nspanel_room_status__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 10 }
+  { 0, 12 }
 };
 const ProtobufCMessageDescriptor nspanel_room_status__descriptor =
 {
@@ -1395,7 +1434,7 @@ const ProtobufCMessageDescriptor nspanel_room_status__descriptor =
   "NSPanelRoomStatus",
   "",
   sizeof(NSPanelRoomStatus),
-  10,
+  12,
   nspanel_room_status__field_descriptors,
   nspanel_room_status__field_indices_by_name,
   1,  nspanel_room_status__number_ranges,

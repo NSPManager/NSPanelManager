@@ -116,10 +116,11 @@ struct  NSPanelConfig
   int32_t button2_detached_light_id;
   size_t n_global_scenes;
   NSPanelScene **global_scenes;
+  protobuf_c_boolean optimistic_mode;
 };
 #define NSPANEL_CONFIG__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
-    , (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0,NULL, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0,NULL }
+    , (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0,NULL, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0,NULL, 0 }
 
 
 struct  NSPanelWarning
@@ -185,10 +186,12 @@ struct  NSPanelRoomStatus
   NSPanelLightStatus **lights;
   size_t n_scenes;
   NSPanelScene **scenes;
+  protobuf_c_boolean has_ceiling_lights;
+  protobuf_c_boolean has_table_lights;
 };
 #define NSPANEL_ROOM_STATUS__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_room_status__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0,NULL, 0,NULL }
+    , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0,NULL, 0,NULL, 0, 0 }
 
 
 struct  NSPanelWeatherUpdate__ForecastItem
