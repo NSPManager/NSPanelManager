@@ -12,9 +12,6 @@ mqttmanager_process = None
 
 def start_mqtt_manager():
     from .settings_helper import get_setting_with_default
-    for proc in psutil.process_iter():
-        if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
-            return None  # MQTT Manager already running
 
     print("Did not find a running MQTTManager, starting MQTTManager...")
     # Restart the process
@@ -46,10 +43,11 @@ def restart_mqtt_manager_process():
         mqttmanager_process.poll()
         if mqttmanager_process.returncode != 0:
             if mqttmanager_process.returncode > 0:
-                logging.error(F"MQTTManager binary has exited unexpectadly. Return code: {mqttmanager_process.returncode}")
+                logging.error(F"MQTTManager binary has exited unexpectedly. Return code: {mqttmanager_process.returncode}")
             else:
-                logging.error(F"MQTTManager binary has exited unexpectadly. Killed by signal: {mqttmanager_process.returncode}")
+                logging.error(F"MQTTManager binary has exited unexpectedly. Killed by signal: {mqttmanager_process.returncode}")
             logging.error(F"stderr: {mqttmanager_process.stderr}")
+            mqttmanager_process.kill()
 
     for proc in psutil.process_iter():
         if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
@@ -92,7 +90,7 @@ class WebConfig(AppConfig):
                             "home_assistant_token", environment("SUPERVISOR_TOKEN"))
                     # from .models import Settings
                     # objects = Settings.objects.filter(name=name)
-            start_mqtt_manager()
+            restart_mqtt_manager_process()
         except:
             logging.exception(
                 "Failed to populate Home Assistant addon settings.")

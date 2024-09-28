@@ -46,7 +46,7 @@ default_settings = {
     "weather_wind_speed_format": "kmh",
     "temperature_unit": "celsius",
     "mqtt_wait_time": 1000,
-    "optimistic_mode": False,
+    "optimistic_mode": True,
 }
 
 def get_setting_with_default(name) -> str:
