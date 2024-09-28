@@ -90,6 +90,13 @@ void Room::_publish_protobuf_status() {
   NSPanelRoomStatus status;
   status.set_id(this->_id);
   status.set_name(this->_name);
+  // TODO: Calculate if room has table/ceiling lights during load of room and not during status updates.
+  status.set_has_ceiling_lights(std::find_if(this->_entities.begin(), this->_entities.end(), [](MqttManagerEntity *e) {
+                                  return e->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT && ((Light *)e)->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING;
+                                }) != this->_entities.end());
+  status.set_has_table_lights(std::find_if(this->_entities.begin(), this->_entities.end(), [](MqttManagerEntity *e) {
+                                return e->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT && ((Light *)e)->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE;
+                              }) != this->_entities.end());
 
   // Calculate average light level
   uint64_t total_light_level_all = 0;

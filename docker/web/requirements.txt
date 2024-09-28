@@ -6,6 +6,7 @@ conan==2.7.0
 distro==1.8.0
 Django==5.1.1
 django-environ==0.11.2
+django-iconify==0.4
 django_components==0.95
 fasteners==0.19
 idna==3.8

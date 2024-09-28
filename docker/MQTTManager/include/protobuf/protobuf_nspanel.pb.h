@@ -2607,6 +2607,8 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
     kAverageColorTemperatureFieldNumber = 6,
     kCeilingLightsColorTemperatureValueFieldNumber = 7,
     kTableLightsColorTemperatureValueFieldNumber = 8,
+    kHasCeilingLightsFieldNumber = 11,
+    kHasTableLightsFieldNumber = 12,
   };
   // repeated .NSPanelLightStatus lights = 9;
   int lights_size() const;
@@ -2728,12 +2730,32 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
   void _internal_set_table_lights_color_temperature_value(::int32_t value);
 
   public:
+  // bool has_ceiling_lights = 11;
+  void clear_has_ceiling_lights() ;
+  bool has_ceiling_lights() const;
+  void set_has_ceiling_lights(bool value);
+
+  private:
+  bool _internal_has_ceiling_lights() const;
+  void _internal_set_has_ceiling_lights(bool value);
+
+  public:
+  // bool has_table_lights = 12;
+  void clear_has_table_lights() ;
+  bool has_table_lights() const;
+  void set_has_table_lights(bool value);
+
+  private:
+  bool _internal_has_table_lights() const;
+  void _internal_set_has_table_lights(bool value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelRoomStatus)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 10, 2,
+      4, 12, 2,
       38, 2>
       _table_;
 
@@ -2764,6 +2786,8 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
     ::int32_t average_color_temperature_;
     ::int32_t ceiling_lights_color_temperature_value_;
     ::int32_t table_lights_color_temperature_value_;
+    bool has_ceiling_lights_;
+    bool has_table_lights_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -3202,10 +3226,11 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kUseFahrenheitFieldNumber = 13,
     kIsUsPanelFieldNumber = 14,
     kReverseRelaysFieldNumber = 16,
-    kRelay1DefaultModeFieldNumber = 17,
-    kRelay2DefaultModeFieldNumber = 18,
     kTemperatureCalibrationFieldNumber = 19,
     kButton1ModeFieldNumber = 20,
+    kRelay1DefaultModeFieldNumber = 17,
+    kRelay2DefaultModeFieldNumber = 18,
+    kOptimisticModeFieldNumber = 29,
     kButton2ModeFieldNumber = 23,
     kButton1DetachedLightIdFieldNumber = 26,
     kButton2DetachedLightIdFieldNumber = 27,
@@ -3465,6 +3490,26 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_reverse_relays(bool value);
 
   public:
+  // float temperature_calibration = 19;
+  void clear_temperature_calibration() ;
+  float temperature_calibration() const;
+  void set_temperature_calibration(float value);
+
+  private:
+  float _internal_temperature_calibration() const;
+  void _internal_set_temperature_calibration(float value);
+
+  public:
+  // int32 button1_mode = 20;
+  void clear_button1_mode() ;
+  ::int32_t button1_mode() const;
+  void set_button1_mode(::int32_t value);
+
+  private:
+  ::int32_t _internal_button1_mode() const;
+  void _internal_set_button1_mode(::int32_t value);
+
+  public:
   // bool relay1_default_mode = 17;
   void clear_relay1_default_mode() ;
   bool relay1_default_mode() const;
@@ -3485,24 +3530,14 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_relay2_default_mode(bool value);
 
   public:
-  // float temperature_calibration = 19;
-  void clear_temperature_calibration() ;
-  float temperature_calibration() const;
-  void set_temperature_calibration(float value);
+  // bool optimistic_mode = 29;
+  void clear_optimistic_mode() ;
+  bool optimistic_mode() const;
+  void set_optimistic_mode(bool value);
 
   private:
-  float _internal_temperature_calibration() const;
-  void _internal_set_temperature_calibration(float value);
-
-  public:
-  // int32 button1_mode = 20;
-  void clear_button1_mode() ;
-  ::int32_t button1_mode() const;
-  void set_button1_mode(::int32_t value);
-
-  private:
-  ::int32_t _internal_button1_mode() const;
-  void _internal_set_button1_mode(::int32_t value);
+  bool _internal_optimistic_mode() const;
+  void _internal_set_optimistic_mode(bool value);
 
   public:
   // int32 button2_mode = 23;
@@ -3540,7 +3575,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 28, 1,
+      5, 29, 1,
       126, 2>
       _table_;
 
@@ -3583,10 +3618,11 @@ class NSPanelConfig final : public ::google::protobuf::Message
     bool use_fahrenheit_;
     bool is_us_panel_;
     bool reverse_relays_;
-    bool relay1_default_mode_;
-    bool relay2_default_mode_;
     float temperature_calibration_;
     ::int32_t button1_mode_;
+    bool relay1_default_mode_;
+    bool relay2_default_mode_;
+    bool optimistic_mode_;
     ::int32_t button2_mode_;
     ::int32_t button1_detached_light_id_;
     ::int32_t button2_detached_light_id_;
@@ -4517,6 +4553,28 @@ NSPanelConfig::_internal_mutable_global_scenes() {
   return &_impl_.global_scenes_;
 }
 
+// bool optimistic_mode = 29;
+inline void NSPanelConfig::clear_optimistic_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.optimistic_mode_ = false;
+}
+inline bool NSPanelConfig::optimistic_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.optimistic_mode)
+  return _internal_optimistic_mode();
+}
+inline void NSPanelConfig::set_optimistic_mode(bool value) {
+  _internal_set_optimistic_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.optimistic_mode)
+}
+inline bool NSPanelConfig::_internal_optimistic_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.optimistic_mode_;
+}
+inline void NSPanelConfig::_internal_set_optimistic_mode(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.optimistic_mode_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // NSPanelWarning
@@ -5440,6 +5498,50 @@ inline ::google::protobuf::RepeatedPtrField<::NSPanelScene>*
 NSPanelRoomStatus::_internal_mutable_scenes() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.scenes_;
+}
+
+// bool has_ceiling_lights = 11;
+inline void NSPanelRoomStatus::clear_has_ceiling_lights() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_ceiling_lights_ = false;
+}
+inline bool NSPanelRoomStatus::has_ceiling_lights() const {
+  // @@protoc_insertion_point(field_get:NSPanelRoomStatus.has_ceiling_lights)
+  return _internal_has_ceiling_lights();
+}
+inline void NSPanelRoomStatus::set_has_ceiling_lights(bool value) {
+  _internal_set_has_ceiling_lights(value);
+  // @@protoc_insertion_point(field_set:NSPanelRoomStatus.has_ceiling_lights)
+}
+inline bool NSPanelRoomStatus::_internal_has_ceiling_lights() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_ceiling_lights_;
+}
+inline void NSPanelRoomStatus::_internal_set_has_ceiling_lights(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_ceiling_lights_ = value;
+}
+
+// bool has_table_lights = 12;
+inline void NSPanelRoomStatus::clear_has_table_lights() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_table_lights_ = false;
+}
+inline bool NSPanelRoomStatus::has_table_lights() const {
+  // @@protoc_insertion_point(field_get:NSPanelRoomStatus.has_table_lights)
+  return _internal_has_table_lights();
+}
+inline void NSPanelRoomStatus::set_has_table_lights(bool value) {
+  _internal_set_has_table_lights(value);
+  // @@protoc_insertion_point(field_set:NSPanelRoomStatus.has_table_lights)
+}
+inline bool NSPanelRoomStatus::_internal_has_table_lights() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_table_lights_;
+}
+inline void NSPanelRoomStatus::_internal_set_has_table_lights(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_table_lights_ = value;
 }
 
 // -------------------------------------------------------------------

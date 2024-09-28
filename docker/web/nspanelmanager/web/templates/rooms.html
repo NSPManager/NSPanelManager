@@ -16,7 +16,7 @@
         </thead>
         <tbody>
             {% for room in rooms %}
-            <tr>
+            <tr class="hover">
                 <th class="">
                     <a href="{% url 'edit_room' room_id=room.id %}"
                         >{{ room.friendly_name }}</a
