@@ -578,6 +578,7 @@ def settings_page(request):
     data["is_home_assistant_addon"] = ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
     data["manager_address"] = get_setting_with_default("manager_address")
     data["manager_port"] = get_setting_with_default("manager_port")
+    data["optimistic_mode"] = get_setting_with_default("optimistic_mode")
     return render(request, 'settings.html', data)
 
 
@@ -641,6 +642,7 @@ def save_settings(request):
     set_setting_value(name="manager_address",
                       value=request.POST["manager_address"])
     set_setting_value(name="manager_port", value=request.POST["manager_port"])
+    set_setting_value(name="optimistic_mode", value=request.POST["optimistic_mode"] == "optimistic")
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()
     return redirect('settings')

@@ -28,7 +28,7 @@
             <div class="flex flex-row-reverse">
                 <button type="button" class="button bg-info text-info-content p-2 border border-l-0 rounded-e-md border-neutral text-sm" onclick="$('#manager_address').val(location.hostname);">Load from URL</button>
                 <input class="rounded-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
-                type="text" class="input" id="manager_address" name="manager_address" value="{{ manager_address }}">
+                type="text" class="input" id="manager_address" name="manager_address" value="{{ manager_address }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
                     <span class="iconify w-5 h-5" data-icon="mdi-house"></span>
                 </span>
@@ -41,7 +41,7 @@
             <div class="flex flex-row-reverse">
                 <button type="button" class="button bg-info text-info-content p-2 border border-l-0 rounded-e-md border-neutral text-sm" onclick="$('#manager_port').val(location.port);">Load from URL</button>
                 <input class="rounded-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
-                type="text" class="input" id="manager_port" name="manager_port" value="{{ manager_port }}">
+                type="text" class="input" id="manager_port" name="manager_port" value="{{ manager_port }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
                     <span class="iconify w-5 h-5" data-icon="mdi-numeric"></span>
                 </span>
@@ -66,7 +66,7 @@
         <div class="mb-2">
           <label for="mqttmanager_log_level" class="block mb-1 text-sm font-medium">MQTTManager log level</label>
           <div class="flex flex-row-reverse">
-            <select name="mqttmanager_log_level" id="mqttmanager_log_level" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id">
+            <select name="mqttmanager_log_level" id="mqttmanager_log_level" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id" required>
                 <option value="error" {% if mqttmanager_log_level == "error" %}selected{% endif %}>Error</option>
                 <option value="warning" {% if mqttmanager_log_level == "warning" %}selected{% endif %}>Warning</option>
                 <option value="info" {% if mqttmanager_log_level == "info" %}selected{% endif %}>Info</option>
@@ -84,7 +84,7 @@
             <label for="max_live_log_messages" class="block mb-1 text-sm font-medium">Number of message to display on live log</label>
             <div class="flex flex-row-reverse">
                 <input class="rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-md focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
-                type="number" class="input" name="max_live_log_message" value="{{ max_live_log_messages }}">
+                type="number" class="input" name="max_live_log_messages" value="{{ max_live_log_messages }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
                     <span class="iconify w-5 h-5" data-icon="mdi-message-alert"></span>
                 </span>
@@ -96,7 +96,7 @@
             <label for="max_log_buffer_size" class="block mb-1 text-sm font-medium">Number of message in buffer</label>
             <div class="flex flex-row-reverse">
                 <input class="rounded-none rounded-e-md bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
-                type="number" class="input" name="max_log_buffer_size" value="{{ max_log_buffer_size }}">
+                type="number" class="input" name="max_log_buffer_size" value="{{ max_log_buffer_size }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
                     <span class="iconify w-5 h-5" data-icon="mdi-message-alert"></span>
                 </span>
@@ -113,63 +113,47 @@
         <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
           <!-- Minimum color temperature-->
           <div class="mb-2 w-full md:me-1">
-            <label for="color_temp_min" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Minimum color temperature</label>
-            <div class="flex">
-              <span
-                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
-                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <title>Minimum color temperature</title>
-                  <path
-                    d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
-                </svg>
-              </span>
-              <input
-                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-                type="number" name="color_temp_min" id="color_temp_min" placeholder="8000"  value="{{ color_temp_min }}" required />
+            <label for="color_temp_min" class="block mb-1 text-sm font-medium">Minimum color temperature</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="text" class="input" name="color_temp_min" value="{{ color_temp_min }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                    <span class="iconify w-5 h-5" data-icon="mdi-sun-thermometer-outline"></span>
+                </span>
             </div>
           </div>
 
           <!-- Maximum color temperature -->
           <div class="mb-2 w-full md:ms-1">
-            <label for="color_temp_max" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Maximum color temperature</label>
-            <div class="flex">
-              <span
-                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
-                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <title>Maximum color temperature</title>
-                  <path
-                    d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
-                </svg>
-              </span>
-              <input
-                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-                type="number" name="color_temp_max" id="color_temp_max" placeholder="8000"  value="{{ color_temp_max }}" required />
-            </div>
+              <label for="color_temp_max" class="block mb-1 text-sm font-medium">Maximum color temperature</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="color_temp_max" value="{{ color_temp_max }}" required>
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                      <span class="iconify w-5 h-5" data-icon="mdi-sun-thermometer-outline"></span>
+                  </span>
+              </div>
           </div>
         </div>
 
         <!-- Reverse color temperature slider-->
         <div class="flex-auto mb-2">
-          <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Reverse color temperature slider</h3>
+          <h3 class="block mb-2 text-sm font-medium">Reverse color temperature slider</h3>
           <ul
-            class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex">
-            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+            class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
+            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
               <div class="flex items-center ps-3">
-                <input id="keep_color_temp_slider" type="radio" name="reverse_color_temp" value="False"
-                {% if reverse_color_temp != "True" %}checked{% endif %}
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                <input id="keep_color_temp_slider" type="radio" name="reverse_color_temp" value="False" {% if reverse_color_temp != "True" %}checked{% endif %}
+                  class="w-4 h-4 radio radio-accent">
                 <label for="keep_color_temp_slider"
-                  class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Keep default</label>
+                  class="w-full py-3 ms-2 text-sm font-medium">Keep default</label>
               </div>
             </li>
-            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
               <div class="flex items-center ps-3">
-                <input id="reverse_color_temp_slider" type="radio" name="reverse_color_temp" value="True"
-                {% if reverse_color_temp == "True" %}checked{% endif %}
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-                <label for="reverse_color_temp_slider" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Reverse</label>
+                <input id="reverse_color_temp_slider" type="radio" name="reverse_color_temp" value="True" {% if reverse_color_temp == "True" %}checked{% endif %}
+                  class="w-4 h-4 radio radio-accent">
+                <label for="reverse_color_temp_slider" class="w-full py-3 ms-2 text-sm font-medium">Reverse</label>
               </div>
             </li>
           </ul>
@@ -177,24 +161,22 @@
 
         <!-- Turn on behavior-->
         <div class="flex-auto mb-2">
-          <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Turn on behavior</h3>
+          <h3 class="block mb-2 text-sm font-medium">Turn on behavior</h3>
           <ul
-            class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex">
-            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+            class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
+            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
               <div class="flex items-center ps-3">
-                <input id="turn_on_color_temp" type="radio" name="turn_on_behavior" value="color_temp"
-                {% if turn_on_behavior == "color_temp" %}checked{% endif %}
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+                <input id="turn_on_color_temp" type="radio" name="turn_on_behavior" value="color_temp" {% if turn_on_behavior == "color_temp" %}checked{% endif %}
+                  class="w-4 h-4 radio radio-accent">
                 <label for="turn_on_color_temp"
-                  class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Color temperature</label>
+                  class="w-full py-3 ms-2 text-sm font-medium">Color temperature</label>
               </div>
             </li>
-            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
               <div class="flex items-center ps-3">
-                <input id="turn_on_restore" type="radio" name="turn_on_behavior" value="restore"
-                {% if turn_on_behavior == "restore" %}checked{% endif %}
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-                <label for="turn_on_restore" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Restore</label>
+                <input id="turn_on_restore" type="radio" name="turn_on_behavior" value="True" {% if turn_on_behavior == "restore" %}checked{% endif %}
+                  class="w-4 h-4 radio radio-accent">
+                <label for="turn_on_restore" class="w-full py-3 ms-2 text-sm font-medium">Restore</label>
               </div>
             </li>
           </ul>
@@ -202,274 +184,219 @@
 
         <!-- Raise lights to 100% light level above slider threshold -->
         <div class="mb-2">
-          <label for="raise_to_100_light_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Raise lights to 100% threshold</label>
-          <div class="flex">
-            <span
-              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
-              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <title>Number of messages to display on live log</title>
-                <path
-                  d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
-              </svg>
-            </span>
-            <input
-              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="number" name="raise_to_100_light_level" id="raise_to_100_light_level" placeholder="95"  value="{{ raise_to_100_light_level }}" required />
-          </div>
+            <label for="raise_to_100_light_level" class="block mb-1 text-sm font-medium">Raise lights to 100% threshold</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-md focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="number" class="input" name="raise_to_100_light_level" value="{{ raise_to_100_light_level }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                <span class="iconify w-5 h-5" data-icon="mdi-brightness-percent"></span>
+                </span>
+            </div>
         </div>
 
+        <!-- Button threshold times -->
         <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
-          <!-- Minimum button push time-->
-          <div class="mb-2 w-full md:me-1">
-            <label for="min_button_push_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Minimum button push time (ms)</label>
-            <div class="flex">
-              <span
-                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
-                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <title>Minimum button push time</title>
-                  <path
-                    d="M12 20C16.4 20 20 16.4 20 12S16.4 4 12 4 4 7.6 4 12 7.6 20 12 20M12 2C17.5 2 22 6.5 22 12S17.5 22 12 22C6.5 22 2 17.5 2 12C2 6.5 6.5 2 12 2M17 13.9L16.3 15.2L11 12.3V7H12.5V11.4L17 13.9Z" />
-                </svg>
-              </span>
-              <input
-                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-                type="number" name="min_button_push_time" id="min_button_push_time" placeholder="30"  value="{{ min_button_push_time }}" required />
+            <!-- Minimum button push time -->
+            <div class="mb-2 w-full md:me-1">
+              <label for="min_button_push_time" class="block mb-1 text-sm font-medium">Minimum button push time (ms)</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="min_button_push_time" value="{{ min_button_push_time }}" required>
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                      <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                  </span>
+              </div>
             </div>
-          </div>
 
-          <!-- Minimum long press time -->
-          <div class="mb-2 w-full md:ms-1">
-            <label for="button_long_press_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Minimum long press time (ms)</label>
-            <div class="flex">
-              <span
-                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
-                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <title>Minimum long press time</title>
-                  <path
-                    d="M12 20C16.4 20 20 16.4 20 12S16.4 4 12 4 4 7.6 4 12 7.6 20 12 20M12 2C17.5 2 22 6.5 22 12S17.5 22 12 22C6.5 22 2 17.5 2 12C2 6.5 6.5 2 12 2M17 13.9L16.3 15.2L11 12.3V7H12.5V11.4L17 13.9Z" />
-                </svg>
-              </span>
-              <input
-                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-                type="number" name="button_long_press_time" id="button_long_press_time" placeholder="600"  value="{{ button_long_press_time }}" required />
+            <!-- Minimum long press time -->
+            <div class="mb-2 w-full md:me-1">
+              <label for="button_long_press_time" class="block mb-1 text-sm font-medium">Minimum long press time (ms)</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="button_long_press_time" value="{{ button_long_press_time }}" required>
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                      <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                  </span>
+              </div>
             </div>
-          </div>
         </div>
 
-        <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
-          <!-- Special mode activation time -->
-          <div class="mb-2 w-full md:me-1">
-            <label for="special_mode_trigger_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Special mode activation time (ms)</label>
-            <div class="flex">
-              <span
-                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
-                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <title>Special mode activation time </title>
-                  <path
-                    d="M12 20C16.4 20 20 16.4 20 12S16.4 4 12 4 4 7.6 4 12 7.6 20 12 20M12 2C17.5 2 22 6.5 22 12S17.5 22 12 22C6.5 22 2 17.5 2 12C2 6.5 6.5 2 12 2M17 13.9L16.3 15.2L11 12.3V7H12.5V11.4L17 13.9Z" />
-                </svg>
-              </span>
-              <input
-                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-                type="number" name="special_mode_trigger_time" id="special_mode_trigger_time" placeholder="Trigger time (ms)"  value="{{ special_mode_trigger_time }}" required />
-            </div>
-          </div>
 
-          <!-- Special mode timeout -->
-          <div class="mb-2 w-full md:ms-1">
-            <label for="special_mode_release_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Special mode timeout (ms)</label>
-            <div class="flex">
-              <span
-                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
-                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <title>Special mode timeout</title>
-                  <path
-                    d="M12 20C16.4 20 20 16.4 20 12S16.4 4 12 4 4 7.6 4 12 7.6 20 12 20M12 2C17.5 2 22 6.5 22 12S17.5 22 12 22C6.5 22 2 17.5 2 12C2 6.5 6.5 2 12 2M17 13.9L16.3 15.2L11 12.3V7H12.5V11.4L17 13.9Z" />
-                </svg>
-              </span>
-              <input
-                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-                type="number" name="special_mode_release_time" id="special_mode_release_time" placeholder="Trigger time (ms)"  value="{{ special_mode_release_time }}" required />
+        <!-- Special mode trigger and timeout times -->
+        <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
+            <!-- Minimum button push time -->
+            <div class="mb-2 w-full md:me-1">
+              <label for="special_mode_trigger_time" class="block mb-1 text-sm font-medium">Special mode activation time (ms)</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="special_mode_trigger_time" value="{{ special_mode_trigger_time }}" required>
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                      <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                  </span>
+              </div>
             </div>
-          </div>
+
+            <!-- Minimum long press time -->
+            <div class="mb-2 w-full md:me-1">
+              <label for="special_mode_release_time" class="block mb-1 text-sm font-medium">Special mode timeout (ms)</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="special_mode_release_time" value="{{ special_mode_release_time }}" required>
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                      <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                  </span>
+              </div>
+            </div>
         </div>
 
-        <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
-          <!-- Screen brightness -->
-          <div class="mb-2 w-full md:me-1">
-            <label for="screen_dim_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screen brightness (%)</label>
-            <div class="flex">
-              <span
-                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
-                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <title>Screen brightness </title>
-                  <path
-                    d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
-                </svg>
-              </span>
-              <input
-                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-                type="number" name="screen_dim_level" min=1 max=100 id="screen_dim_level" placeholder="100%"  value="{{ screen_dim_level }}" required />
-            </div>
-          </div>
 
-          <!-- Screensaver brightness -->
-          <div class="mb-2 w-full md:ms-1">
-            <label for="screensaver_dim_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screensaver brightness (%)</label>
-            <div class="flex">
-              <span
-                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
-                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <title>Screensaver brightness</title>
-                  <path
-                    d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
-                </svg>
-              </span>
-              <input
-                class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-                type="number" name="screensaver_dim_level" id="screensaver_dim_level" placeholder="5%" min=0 max=100  value="{{ screensaver_dim_level }}" required />
+        <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
+            <!-- Screen brightness -->
+            <div class="mb-2 w-full md:me-1">
+              <label for="screen_dim_level" class="block mb-1 text-sm font-medium">Screen brightness</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="screen_dim_level" value="{{ screen_dim_level }}" required min="1" max="100">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                      <span class="iconify w-5 h-5" data-icon="mdi-brightness-percent"></span>
+                  </span>
+              </div>
             </div>
-          </div>
+
+            <!-- Screensaver brightness -->
+            <div class="mb-2 w-full md:me-1">
+              <label for="screensaver_dim_level" class="block mb-1 text-sm font-medium">Screensaver brightness</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="screensaver_dim_level" value="{{ screensaver_dim_level }}" required min="0" max="100">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                      <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                  </span>
+              </div>
+            </div>
         </div>
 
         <!-- Screensaver activation timeout-->
         <div class="mb-2">
-          <label for="screensaver_activation_timeout" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screensaver activation timeout (ms)</label>
-          <div class="flex">
-            <span
-              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
-              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <title>Screensaver activation timeout (ms)</title>
-                <path
-                  d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
-              </svg>
-            </span>
-            <input
-              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="number" min="1000" max="65535" name="screensaver_activation_timeout" id="screensaver_activation_timeout" value="{{ screensaver_activation_timeout }}" required />
-          </div>
+            <label for="raise_to_100_light_level" class="block mb-1 text-sm font-medium">Screensaver activation timeout (ms)</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-md focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="number" class="input" name="screensaver_activation_timeout" value="{{ screensaver_activation_timeout }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                </span>
+            </div>
         </div>
 
         <!-- Screensaver mode -->
         <div class="mb-2">
-          <label for="screensaver_mode" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Screensaver mode</label>
-          <div class="flex">
-            <span
-              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <title>Default page</title>
-                <path
-                  d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
-              </svg>
-            </span>
-            <select name="screensaver_mode" id="screensaver_mode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-              <option value="with_background" {% if screensaver_mode == "with_background" %}selected{% endif %}>Show with background (clock, date and weather)</option>
-              <option value="without_background" {% if screensaver_mode == "without_background" %}selected{% endif %}>Show without background (clock, date and weather)</option>
-              <option value="datetime_with_background" {% if screensaver_mode == "datetime_with_background" %}selected{% endif %}>Show with background (no weather)</option>
-              <option value="datetime_without_background" {% if screensaver_mode == "datetime_without_background" %}selected{% endif %}>Show without background (no weather)</option>
-              <option value="no_screensaver" {% if screensaver_mode == "no_screensaver" %}selected{% endif %}>No screensaver (turn off screen)</option>
+          <label for="screensaver_mode" class="block mb-1 text-sm font-medium">Screensaver mode</label>
+          <div class="flex flex-row-reverse">
+            <select name="screensaver_mode" id="screensaver_mode" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id" required>
+                <option value="with_background" {% if screensaver_mode == "with_background" %}selected{% endif %}>Show with background (clock, date and weather)</option>
+                <option value="without_background" {% if screensaver_mode == "without_background" %}selected{% endif %}>Show without background (clock, date and weather)</option>
+                <option value="datetime_with_background" {% if screensaver_mode == "datetime_with_background" %}selected{% endif %}>Show with background (no weather)</option>
+                <option value="datetime_without_background" {% if screensaver_mode == "datetime_without_background" %}selected{% endif %}>Show without background (no weather)</option>
+                <option value="no_screensaver" {% if screensaver_mode == "no_screensaver" %}selected{% endif %}>No screensaver (turn off screen)</option>
             </select>
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/room_id:border-accent">
+              <span class="iconify w-5 h-5" data-icon="mdi-house-outline"></span>
+            </span>
           </div>
         </div>
 
         <!-- MQTT ignore time-->
         <div class="mb-2">
-          <label for="mqtt_ignore_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">MQTT ignore time (ms)</label>
-          <div class="flex">
-            <span
-              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
-              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <title>MQTT ignore time (ms)</title>
-                <path
-                  d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
-              </svg>
-            </span>
-            <input
-              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="number" name="mqtt_ignore_time" id="mqtt_ignore_time" value="{{ mqtt_ignore_time }}" required />
-          </div>
+            <label for="mqtt_ignore_time" class="block mb-1 text-sm font-medium">MQTT ignore time (ms)</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-md focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="number" class="input" name="mqtt_ignore_time" value="{{ mqtt_ignore_time }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Entity update mode -->
+        <div class="flex-auto mb-2">
+          <h3 class="block mb-2 text-sm font-medium">Entity update mode</h3>
+          <ul
+            class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
+                <!-- Optimistic mode -->
+                <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+              <div class="flex items-center ps-3">
+                <input id="entity_update_mode_optimistic" type="radio" name="optimistic_mode" value="optimistic" {% if optimistic_mode == "True" %}checked{% endif %}
+                  class="w-4 h-4 radio radio-accent">
+                <label for="entity_update_mode_optmistic" class="w-full py-3 ms-2 text-sm font-medium">Optimistic</label>
+              </div>
+            </li>
+
+            <!-- Wait mode -->
+            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+              <div class="flex items-center ps-3">
+                <input id="entity_update_mode_wait" type="radio" name="optimistic_mode" value="wait" {% if optimistic_mode == "False" %}checked{% endif %}
+                  class="w-4 h-4 radio radio-accent">
+                <label for="entity_update_mode_wait"
+                  class="w-full py-3 ms-2 text-sm font-medium">Wait</label>
+              </div>
+            </li>
+          </ul>
         </div>
 
         <!-- New section-->
       </div>
     </div>
     <div class="md:flex md:justify-between md:items-start mt-2">
-      <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
-        <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">MQTT</span>
+      <div class="p-4 rounded-md shadow-lg w-full bg-base-100">
+        <span class="block mb-2 text-xl">MQTT</span>
 
         <!-- MQTT address -->
         <div class="mb-2">
-          <label for="mqtt_server" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">MQTT address</label>
-          <div class="flex">
-            <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <title>MQTT address</title>
-                <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
-              </svg>
-            </span>
-            <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-            type="text" class="input" name="mqtt_server" id="mqtt_server" placeholder="192.168.1.5" value="{{ mqtt_server }}" required>
-          </div>
+            <label for="mqtt_server" class="block mb-1 text-sm font-medium">MQTT server</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="text" class="input" id="mqtt_server" name="mqtt_server" value="{{ mqtt_server }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                    <span class="iconify w-5 h-5" data-icon="mdi-house-outline"></span>
+                </span>
+            </div>
         </div>
 
         <!-- MQTT port -->
         <div class="mb-2">
-          <label for="mqtt_port" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">MQTT port</label>
-          <div class="flex">
-            <span
-              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md ">
-              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <title>MQTT port</title>
-                <path
-                  d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
-              </svg>
-            </span>
-            <input
-              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="number" name="mqtt_port" id="mqtt_port" placeholder="1883" value="{{ mqtt_port }}" required />
-          </div>
+            <label for="mqtt_port" class="block mb-1 text-sm font-medium">MQTT port</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="number" class="input" id="mqtt_port" name="mqtt_port" value="{{ mqtt_port }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                    <span class="iconify w-5 h-5" data-icon="mdi-numeric"></span>
+                </span>
+            </div>
         </div>
 
         <div class="flex flex-wrap md:flex-nowrap justify-between items-center">
           <!-- MQTT username -->
-          <div class="mb-2 w-full md:me-1">
-            <label for="mqtt_username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">MQTT username</label>
-            <div class="flex">
-              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>MQTT username</title>
-                  <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
-                </svg>
-              </span>
-              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="text" class="input" name="mqtt_username" id="mqtt_username" placeholder="Username (if required)" value="{{ mqtt_username }}">
-            </div>
+          <div class="mb-2 w-full me-1">
+              <label for="mqtt_username" class="block mb-1 text-sm font-medium">MQTT username</label>
+              <div class="flex flex-row-reverse w-full">
+                  <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" id="mqtt_username" name="mqtt_username" value="{{ mqtt_username }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                      <span class="iconify w-5 h-5" data-icon="mdi-account"></span>
+                  </span>
+              </div>
           </div>
 
           <!-- MQTT password -->
-          <div class="mb-2 w-full md:ms-1">
-            <label for="mqtt_password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">MQTT password</label>
-            <div class="flex">
-              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>MQTT password</title>
-                  <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
-                </svg>
-              </span>
-              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="password" class="input" name="mqtt_password" id="mqtt_password" placeholder="Password (if required)" value="{{ mqtt_password }}">
-            </div>
+          <div class="mb-2 w-full">
+              <label for="mqtt_password" class="block mb-1 text-sm font-medium">MQTT password</label>
+              <div class="flex flex-row-reverse w-full">
+                  <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="password" class="input" id="mqtt_password" name="mqtt_password" value="{{ mqtt_password }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                      <span class="iconify w-5 h-5" data-icon="mdi-account-key"></span>
+                  </span>
+              </div>
           </div>
         </div>
 
@@ -478,88 +405,73 @@
         </div>
       </div>
       <div class="md:flex md:justify-between md:items-start mt-2">
-        <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
-          <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">Home Assistant API</span>
+        <div class="p-4 rounded-md shadow-lg w-full bg-base-100">
+          <span class="block mb-2 text-xl">Home Assistant API</span>
 
           {% if is_home_assistant_addon %}
-          <div class="p-4 mb-2 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50" role="alert">
-            <span class="font-medium">Info.</span> You are running NSPanel Manager as a Home Assistant addon. These settings are managed by Home Assistant for you and are therefore locked.
-          </div>
+          {% component "alert" level="info" message="You are running NSPanel Manager as a Home Assistant addon. These settings are managed by Home Assistant for you and are therefore locked." %}{% endcomponent %}
           {% endif %}
 
 
           <!-- Home Assistant address -->
-          <div class="mb-2">
-            <label for="home_assistant_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Home Assistant address</label>
-            <div class="flex">
-              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>Home Assistant address</title>
-                  <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
-                </svg>
-              </span>
-              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="text" class="input" name="home_assistant_address" id="home_assistant_address" placeholder="http://192.168.1.5:8123" value="{{ home_assistant_address }}" {% if is_home_assistant_addon %}disabled{% endif %}>
-            </div>
+          <div class="mb-2 w-full">
+              <label for="home_assistant_address" class="block mb-1 text-sm font-medium">Home Assistant address</label>
+              <div class="flex flex-row-reverse w-full">
+                  <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" id="home_assistant_address" name="home_assistant_address" value="{{ home_assistant_address }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent" {% if is_home_assistant_addon %}disabled{% endif %}>
+                      <span class="iconify w-5 h-5" data-icon="mdi-web"></span>
+                  </span>
+              </div>
           </div>
 
           <!-- Access Token -->
-          <div class="mb-2">
-            <label for="home_assistant_token" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Access Token</label>
-            <div class="flex">
-              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>Access Token</title>
-                  <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
-                </svg>
-              </span>
-              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="password" class="input" name="home_assistant_token" id="home_assistant_token" placeholder="ey..." value="{{ home_assistant_token }}" {% if is_home_assistant_addon %}disabled{% endif %}>
-            </div>
+          <div class="mb-2 w-full">
+              <label for="home_assistant_token" class="block mb-1 text-sm font-medium">Home Assistant token</label>
+              <div class="flex flex-row-reverse w-full">
+                  <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="password" class="input" id="home_assistant_token" name="home_assistant_token" value="{{ home_assistant_token }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent" {% if is_home_assistant_addon %}disabled{% endif %}>
+                      <span class="iconify w-5 h-5" data-icon="mdi-web"></span>
+                  </span>
+              </div>
           </div>
 
           <!-- New section-->
         </div>
       </div>
       <div class="md:flex md:justify-between md:items-start mt-2">
-        <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
-          <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">OpenHAB API</span>
+        <div class="p-4 rounded-md shadow-lg w-full bg-base-100">
+          <span class="block mb-2 text-xl">OpenHAB API</span>
 
           <!-- OpenHAB address -->
-          <div class="mb-2">
-            <label for="openhab_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">OpenHAB address</label>
-            <div class="flex">
-              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>OpenHAB address</title>
-                  <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
-                </svg>
-              </span>
-              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="text" class="input" name="openhab_address" id="openhab_address" placeholder="http://192.168.1.5:8000" value="{{ openhab_address }}">
-            </div>
+          <div class="mb-2 w-full">
+              <label for="openhab_address" class="block mb-1 text-sm font-medium">OpenHAB address</label>
+              <div class="flex flex-row-reverse w-full">
+                  <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" id="openhab_address" name="openhab_address" value="{{ openhab_address }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                      <span class="iconify w-5 h-5" data-icon="mdi-web"></span>
+                  </span>
+              </div>
           </div>
 
           <!-- Access Token -->
-          <div class="mb-2">
-            <label for="openhab_token" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Access Token</label>
-            <div class="flex">
-              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>Access Token</title>
-                  <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
-                </svg>
-              </span>
-              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="password" class="input" name="openhab_token" id="openhab_token" placeholder="ey..." value="{{ openhab_token }}">
-            </div>
+          <div class="mb-2 w-full">
+              <label for="openhab_token" class="block mb-1 text-sm font-medium">OpenHAB token</label>
+              <div class="flex flex-row-reverse w-full">
+                  <input class="rounded-e-md bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="password" class="input" id="openhab_token" name="openhab_token" value="{{ openhab_token }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                      <span class="iconify w-5 h-5" data-icon="mdi-web"></span>
+                  </span>
+              </div>
           </div>
       </div>
     </div>
 
     <div class="text-right mt-4 mb-4">
-      <button type="submit"
-        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Save</button>
+      <button type="submit" class="btn btn-success">Save</button>
     </div>
 </form>
 {% endblock %}

@@ -467,6 +467,7 @@
         \item \textbf{No screensaver (turn off screen)} - Make the screen completely black when not in use.
       \end{itemize}
       \item \textbf{MQTT ignore time (ms)} - Time to wait (in milliseconds) after sending a command over MQTT before allowing new values to update the screen. This can be raised or lowered to minimize flickering of sliders on the NSPanel.
+      \item \textbf{Entity update mode} - When changing an entity state on the NSPanel itself, should the panel and assume that the new state we be set correctly (optimistic) or should the panel and manager wait for a state update from the entity before displaying the new state (wait).
     \end{itemize}
 
     \subsubsection{MQTT}

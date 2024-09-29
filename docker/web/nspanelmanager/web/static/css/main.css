@@ -4592,6 +4592,10 @@ input.tab:checked + .tab-content,
   margin-inline-start: calc(var(--border-btn) * -1);
 }
 
+.join-item:focus {
+  isolation: isolate;
+}
+
 .link:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
