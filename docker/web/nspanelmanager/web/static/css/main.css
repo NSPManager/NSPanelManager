@@ -6399,6 +6399,10 @@ input.tab:checked + .tab-content,
   border-radius: 0.125rem;
 }
 
+.rounded-btn {
+  border-radius: var(--rounded-btn, 0.5rem);
+}
+
 .rounded-b {
   border-bottom-right-radius: 0.25rem;
   border-bottom-left-radius: 0.25rem;
@@ -6444,6 +6448,16 @@ input.tab:checked + .tab-content,
   border-top-right-radius: 0.375rem;
 }
 
+.rounded-e-btn {
+  border-start-end-radius: var(--rounded-btn, 0.5rem);
+  border-end-end-radius: var(--rounded-btn, 0.5rem);
+}
+
+.rounded-s-btn {
+  border-start-start-radius: var(--rounded-btn, 0.5rem);
+  border-end-start-radius: var(--rounded-btn, 0.5rem);
+}
+
 .border {
   border-width: 1px;
 }
@@ -6466,6 +6480,10 @@ input.tab:checked + .tab-content,
 
 .border-t {
   border-top-width: 1px;
+}
+
+.border-e-0 {
+  border-inline-end-width: 0px;
 }
 
 .border-solid {
