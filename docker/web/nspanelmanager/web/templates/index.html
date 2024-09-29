@@ -22,7 +22,7 @@
   </div>
   <div>
     <button data-dropdown-toggle="actionsMenuDropdown"
-      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+      class="btn btn-neutral btn-outline">
       Actions
       <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
         viewBox="0 0 10 6">
@@ -31,22 +31,22 @@
     </button>
     <!-- Dropdown menu -->
     <div id="actionsMenuDropdown"
-      class="hidden z-10 font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600 md:absolute inset-x-auto">
-      <ul class="py-2 text-sm text-gray-700 dark:text-gray-400" aria-labelledby="dropdownLargeButton">
+      class="hidden z-10 font-normal bg-neutral divide-y divide-neutral-content rounded-box shadow w-44 md:absolute inset-x-auto">
+      <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
         <li>
-          <a onclick="rebootNSPanelAll();" class="block px-4 py-2 hover:bg-gray-600 hover:text-white"><span
+          <a onclick="rebootNSPanelAll();" class="block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
               class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot all panels</a>
         </li>
         <li>
-          <a onclick="restart_mqtt_manager();" class="block px-4 py-2 hover:bg-gray-600 hover:text-white"><span
+          <a onclick="restart_mqtt_manager();" class="block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
               class="mdi mdi-restart pr-2 has-text-primary"></span>Restart MQTTManager</a>
         </li>
         <li>
-          <a onclick="startNSPanelOtaUpdateAll();" class="block px-4 py-2 hover:bg-gray-600 hover:text-white"><span
+          <a onclick="startNSPanelOtaUpdateAll();" class="block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
               class="mdi mdi-upload pr-2 has-text-info"></span>Update firmware on all panels</a>
         </li>
         <li>
-          <a onclick="startNSPanelTftUpdateAll();" class="block px-4 py-2 hover:bg-gray-600 hover:text-white"><span
+          <a onclick="startNSPanelTftUpdateAll();" class="block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
               class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update GUI on all panels</a>
         </li>
       </ul>

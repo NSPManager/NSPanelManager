@@ -1,6 +1,6 @@
 <div id="nspanel_container-{{ nspanel.data.id }}">
-    <div class="text-base-content rounded-md nspanel-box bg-base-100 shadow-xl" id="panel_status_box-{{ nspanel.data.id }}">
-        <div class="">
+    <div class="text-base-content rounded-b-box rounded-t-btn overflow-hidden nspanel-box bg-base-100 shadow-xl" id="panel_status_box-{{ nspanel.data.id }}">
+    <div class="">
         {% component "nspanel_status_header" id=nspanel.data.id state=nspanel.status.state update_progress=nspanel.status.progress %}{% endcomponent %}
     </div>
     <div class="p-2">
@@ -17,8 +17,8 @@
             </div>
             <div class="flex w-full items-center justify-center pt-2 pb-4">
                 <div>
-                <button class="btn btn-error m-1 rounded-md" hx-post="{% url 'htmx_nspanel_deny_register_request' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}">Deny</button>
-                <button class="btn btn-info m-1 rounded-md" hx-post="{% url 'htmx_nspanel_accept_register_request' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}">Accept</button>
+                <button class="btn btn-error m-1 rounded-btn" hx-post="{% url 'htmx_nspanel_deny_register_request' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}">Deny</button>
+                <button class="btn btn-info m-1 rounded-btn" hx-post="{% url 'htmx_nspanel_accept_register_request' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}">Accept</button>
                 </div>
             </div>
         </div>
@@ -71,36 +71,36 @@
             </button>
             <!-- Dropdown menu -->
             <div id="nspanelActionsMenuDropdown-{{ nspanel.data.id }}"
-                class="hidden dropdown z-10 font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600 md:absolute inset-x-auto">
-                <ul class="py-2 text-sm text-gray-700 dark:text-gray-400" aria-labelledby="dropdownLargeButton">
+                class="hidden dropdown z-10 font-normal bg-neutral text-neutral-content divide-y divide-neutral-content rounded-box shadow w-44 md:absolute inset-x-auto overflow-hidden">
+                <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
                 <li>
                     {% component "nspanel_reboot_button" id=nspanel.data.id state=nspanel.status.state %}{% endcomponent %}
                 </li>
                 <li>
-                    <a class="nspanel-settings-link block px-4 py-2 hover:bg-gray-600 hover:text-white"><span
+                    <a class="nspanel-settings-link block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
                         class="mdi mdi-cog pr-2"></span>Settings</a>
                 </li>
                 <li>
                     {% component 'nspanel_visit_link' id=nspanel.data.id state=nspanel.status.state address=nspanel.status.ip_address %}{% endcomponent %}
                 </li>
                 </ul>
-                <ul class="py-2 text-sm text-gray-700 dark:text-gray-400" aria-labelledby="dropdownLargeButton">
+                <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
                 <li>
                     <a hx-post="{% url 'htmx_nspanel_update_firmware' nspanel.data.id %}" id="firmware-update-{{ nspanel.data.id }}" hx-trigger="click, {% if nspanel.status.state != 'offline' %}firmware-update-all-nspanels from:body{% endif %}" hx-swap="none"
-                    class="block px-4 py-2 hover:bg-gray-600 hover:text-white cursor-pointer"><span
+                    class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer"><span
                         class="mdi mdi-upload pr-2"></span>Update firmware
                     </a>
                 </li>
                 <li>
                     <a hx-post="{% url 'htmx_nspanel_update_screen' nspanel.data.id %}" id="screen-update-{{ nspanel.data.id }}" hx-trigger="click, {% if nspanel.status.state != 'offline' %}screen-update-all-nspanels from:body{% endif %}" hx-swap="none"
-                    class="block px-4 py-2 hover:bg-gray-600 hover:text-white cursor-pointer"><span
+                    class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer"><span
                         class="mdi mdi-table-arrow-up pr-2"></span>Update GUI
                     </a>
                 </li>
                 </ul>
-                <ul class="py-2 text-sm text-gray-700 dark:text-gray-400" aria-labelledby="dropdownLargeButton">
+                <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
                 <li>
-                    <a hx-delete="{% url 'htmx_nspanel_delete' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}" class="block px-4 py-2 hover:bg-gray-600 hover:text-white cursor-pointer">
+                    <a hx-delete="{% url 'htmx_nspanel_delete' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}" class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer">
                         <span class="mdi mdi-minus-circle pr-2"></span>Delete
                     </a>
                 </li>
