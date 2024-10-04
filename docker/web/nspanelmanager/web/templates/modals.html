@@ -1,61 +1,41 @@
-<form method="POST" action="{% url 'save_new_room' %}">
-  {% csrf_token %}
-  <div id="modal-new-room" tabindex="-1" aria-hidden="true"
-    class="hidden modal overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full max-h-full p-4 max-w- mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">
-    <div class="w-full h-full fixed bg-black/80 backdrop-blur-sm" onclick="close_modals();"></div>
-    <div class="relative p-4 w-full max-w-2xl max-h-full">
-      <!-- Modal content -->
-      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-        <!-- Modal header -->
-        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-            Create new room
-          </h3>
-          <button type="button" onclick="close_modals();"
-            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-            data-modal-hide="default-modal">
-            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-            </svg>
-            <span class="sr-only">Close wifi select dialog</span>
-          </button>
-        </div>
-        <!-- Modal content -->
-        <div class="p-4 md:p-5 space-y-4">
-          <div class="">
-            <label for="friendly_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Name</label>
-            <div class="flex">
-              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>Friendly name</title>
-                  <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
-                    4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
-                    7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
-                </svg>
-              </span>
-              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5" 
-              type="text" class="input" name="friendly_name" placeholder="Office">
+  <dialog id="create_new_room_modal" class="modal">
+    <div class="modal-box">
+        <!-- Upper right close button -->
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        <form method="POST" action="{% url 'save_new_room' %}">
+            {% csrf_token %}
+            <!-- Modal header -->
+            <h3 class="text-lg font-semibold mb-2">Create new room</h3>
+
+            <div class="my-2">
+                <label for="friendly_name" class="block mb-1 text-sm font-medium">Name</label>
+                <div class="flex flex-row-reverse">
+                    <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                    type="text" class="input" id="friendly_name" name="friendly_name" placeholder="Office" required>
+                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                        <span class="iconify w-5 h-5" data-icon="mdi-house"></span>
+                    </span>
+                </div>
             </div>
-          </div>
-        </div>
-        <!-- Modal footer -->
-        <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-          <button data-modal-hide="static-modal" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >Create room</button>
-          <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-          onclick="close_modals();">Close</button>
-        </div>
-      </div>
+
+            <div class="flex justify-end">
+                <button class="btn btn-info">Save</button>
+            </div>
+        </form>
     </div>
-  </div>
-</form>
+    <!-- Modal backdrop -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
 
 <!-- Save new firmware modal -->
 <form method="POST" action="{% url 'save_new_firmware' %}" enctype="multipart/form-data">
   {% csrf_token %}
-  <div id="modal-upload-firmware" tabindex="-1" aria-hidden="true"
-    class="hidden modal overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full max-h-full p-4 max-w- mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">
+  <dialog id="upload_firmware_modal" class="modal">
     <div class="w-full h-full fixed bg-black/80 backdrop-blur-sm" onclick="close_modals();"></div>
     <div class="relative p-4 w-full max-w-2xl max-h-full">
       <!-- Modal content -->
@@ -88,7 +68,7 @@
                 </div>
                 <input id="firmware" name="firmware" type="file" accept=".bin" class="hidden" />
             </label>
-          </div> 
+          </div>
         </div>
         <!-- Modal footer -->
         <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
@@ -99,14 +79,13 @@
         </div>
       </div>
     </div>
-  </div>
+  </dialog>
 </form>
 
 <!-- Data file upload modal -->
 <form method="POST" action="{% url 'save_new_data_file' %}" enctype="multipart/form-data">
   {% csrf_token %}
-  <div id="modal-upload-data-file" tabindex="-1" aria-hidden="true"
-    class="hidden modal overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full max-h-full p-4 max-w- mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">
+  <dialog id="update_data_file_modal" class="modal">
     <div class="w-full h-full fixed bg-black/80 backdrop-blur-sm" onclick="close_modals();"></div>
     <div class="relative p-4 w-full max-w-2xl max-h-full">
       <!-- Modal content -->
@@ -139,7 +118,7 @@
                 </div>
                 <input id="data_upload_file_name" name="data_upload_file_name" type="file" accept=".bin" class="hidden" />
             </label>
-          </div> 
+          </div>
         </div>
         <!-- Modal footer -->
         <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
@@ -150,13 +129,13 @@
         </div>
       </div>
     </div>
-  </div>
+  </dialog>
 </form>
 
 <!-- TFT Upload modal -->
 <form method="POST" action="{% url 'save_new_tft_file' %}" enctype="multipart/form-data">
   {% csrf_token %}
-  <div id="modal-upload-tft-file" tabindex="-1" aria-hidden="true"
+  <dialog id="update_tft_file_modal" class="modal">
     class="hidden modal overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full max-h-full p-4 max-w- mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">
     <div class="w-full h-full fixed bg-black/80 backdrop-blur-sm" onclick="close_modals();"></div>
     <div class="relative p-4 w-full max-w-2xl max-h-full">
@@ -209,7 +188,7 @@
                 </div>
                 <input id="tft_file" name="tft_file" type="file" accept=".tft" class="hidden" />
             </label>
-          </div> 
+          </div>
         </div>
         <!-- Modal footer -->
         <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
@@ -220,5 +199,5 @@
         </div>
       </div>
     </div>
-  </div>
+  </dialog>
 </form>
