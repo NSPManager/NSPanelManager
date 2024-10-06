@@ -130,7 +130,21 @@ def index(request):
 
 def rooms(request):
     data = get_base_data(request)
-    data["rooms"] = Room.objects.all().order_by("displayOrder")
+    data["rooms"] = []
+    # Build dict of online and accepted NSPanels for each room
+    for room in Room.objects.all().order_by("displayOrder"):
+        nspanels = list()
+        for nspanel in room.nspanel_set.filter(accepted=True, denied=False):
+           nspanels.append({
+               "nspanel": nspanel,
+               "status": send_ipc_request(F"nspanel/{nspanel.id}/status", {"command": "get"}),
+           })
+        data["rooms"].append({
+            "room": room,
+            "nspanels": nspanels
+        })
+
+    print(data)
     return render(request, 'rooms.html', data)
 
 
