@@ -11,8 +11,6 @@
   <link rel="stylesheet" href="{{ ingress_path }}{% static 'css/main.css' %}"> <!-- Compiled version of Tailwind CSS -->
   <script src="{{ ingress_path }}{% static 'jquery.min.js' %}"></script>
   <script src="{{ ingress_path }}{% static 'base.js' %}?refresh={% now 'U' %}"></script>
-  <script src="{{ ingress_path }}{% url 'config.js' %}"></script>
-  <script src="{{ ingress_path }}{% static 'iconify-icon.min.js' %}"></script>
   <script src="https://unpkg.com/htmx.org@2.0.1"></script> <!-- TODO: Download and store as static file -->
   <script src="{{ ingress_path }}{% static 'htmx_ws.js' %}"></script>
   <link rel="stylesheet" href="{{ ingress_path }}{% static 'mdi/css/materialdesignicons.min.css' %}">
@@ -22,7 +20,6 @@
   <script>
   // Configure HTMX
   htmx.config.globalViewTransitions = true;
-  //htmx.config.defaultSettleDelay = 500;
   </script>
 
   <script src="{{ ingress_path }}{% static 'mqttmanager_ws.js' %}?refresh={% now 'U' %}"></script>

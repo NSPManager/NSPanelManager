@@ -49,7 +49,6 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 INSTALLED_APPS = [
     'web',
-    'dj_iconify.apps.DjIconifyConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -172,8 +171,3 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
-
-# Set Iconify json collections path
-ICONIFY_JSON_ROOT = os.path.join(BASE_DIR, "iconify/json_collections")
-# Configured collections allowed to be used by Iconify
-ICONIFY_COLLECTIONS_ALLOWED = ["mdi"]

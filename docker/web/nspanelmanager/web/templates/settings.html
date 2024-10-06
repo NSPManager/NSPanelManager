@@ -30,7 +30,7 @@
                 <input class="rounded-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                 type="text" class="input" id="manager_address" name="manager_address" value="{{ manager_address }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                    <span class="iconify w-5 h-5" data-icon="mdi-house"></span>
+                    <span class="mdi mdi-home"></span>
                 </span>
             </div>
         </div>
@@ -43,7 +43,7 @@
                 <input class="rounded-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                 type="text" class="input" id="manager_port" name="manager_port" value="{{ manager_port }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                    <span class="iconify w-5 h-5" data-icon="mdi-numeric"></span>
+                    <span class="mdi mdi-numeric"></span>
                 </span>
             </div>
         </div>
@@ -57,7 +57,7 @@
         <div class="flex items-center justify-between">
           <span class="block mb-2 text-xl">Logging options</span>
           <a href="{% url 'download_mqttmanager_log' %}" title="Download MQTTManager log" class="btn btn-outline btn-info">
-            <span class="iconify w-5 h-5" data-icon="mdi-download"></span>
+            <span class="mdi mdi-download"></span>
             Download
           </a>
         </div>
@@ -74,7 +74,7 @@
                 <option value="trace" {% if mqttmanager_log_level == "trace" %}selected{% endif %}>Trace</option>
             </select>
             <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/room_id:border-accent">
-              <span class="iconify w-5 h-5" data-icon="mdi-message-alert"></span>
+              <span class="mdi mdi-message-alert"></span>
             </span>
           </div>
         </div>
@@ -86,7 +86,7 @@
                 <input class="rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-btn focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                 type="number" class="input" name="max_live_log_messages" value="{{ max_live_log_messages }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                    <span class="iconify w-5 h-5" data-icon="mdi-message-alert"></span>
+                    <span class="mdi mdi-message-alert"></span>
                 </span>
             </div>
         </div>
@@ -98,7 +98,7 @@
                 <input class="rounded-none rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                 type="number" class="input" name="max_log_buffer_size" value="{{ max_log_buffer_size }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                    <span class="iconify w-5 h-5" data-icon="mdi-message-alert"></span>
+                    <span class="mdi mdi-message-alert"></span>
                 </span>
             </div>
         </div>
@@ -118,7 +118,7 @@
                 <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                 type="text" class="input" name="color_temp_min" value="{{ color_temp_min }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                    <span class="iconify w-5 h-5" data-icon="mdi-sun-thermometer-outline"></span>
+                    <span class="mdi mdi-sun-thermometer-outline"></span>
                 </span>
             </div>
           </div>
@@ -130,7 +130,7 @@
                   <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="text" class="input" name="color_temp_max" value="{{ color_temp_max }}" required>
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                      <span class="iconify w-5 h-5" data-icon="mdi-sun-thermometer-outline"></span>
+                      <span class="mdi mdi-sun-thermometer-outline"></span>
                   </span>
               </div>
           </div>
@@ -189,7 +189,7 @@
                 <input class="rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-btn focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                 type="number" class="input" name="raise_to_100_light_level" value="{{ raise_to_100_light_level }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                <span class="iconify w-5 h-5" data-icon="mdi-brightness-percent"></span>
+                <span class="mdi mdi-brightness-percent"></span>
                 </span>
             </div>
         </div>
@@ -203,7 +203,7 @@
                   <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="text" class="input" name="min_button_push_time" value="{{ min_button_push_time }}" required>
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                      <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                      <span class="mdi mdi-clock-outline"></span>
                   </span>
               </div>
             </div>
@@ -215,7 +215,7 @@
                   <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="text" class="input" name="button_long_press_time" value="{{ button_long_press_time }}" required>
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                      <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                      <span class="mdi mdi-clock-outline"></span>
                   </span>
               </div>
             </div>
@@ -231,7 +231,7 @@
                   <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="text" class="input" name="special_mode_trigger_time" value="{{ special_mode_trigger_time }}" required>
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                      <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                      <span class="mdi mdi-clock-outline"></span>
                   </span>
               </div>
             </div>
@@ -243,7 +243,7 @@
                   <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="text" class="input" name="special_mode_release_time" value="{{ special_mode_release_time }}" required>
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                      <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                      <span class="mdi mdi-clock-outline"></span>
                   </span>
               </div>
             </div>
@@ -258,7 +258,7 @@
                   <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="text" class="input" name="screen_dim_level" value="{{ screen_dim_level }}" required min="1" max="100">
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                      <span class="iconify w-5 h-5" data-icon="mdi-brightness-percent"></span>
+                      <span class="mdi mdi-brightness-percent"></span>
                   </span>
               </div>
             </div>
@@ -270,7 +270,7 @@
                   <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="text" class="input" name="screensaver_dim_level" value="{{ screensaver_dim_level }}" required min="0" max="100">
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                      <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                      <span class="mdi mdi-brightness-percent"></span>
                   </span>
               </div>
             </div>
@@ -283,7 +283,7 @@
                 <input class="rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-btn focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                 type="number" class="input" name="screensaver_activation_timeout" value="{{ screensaver_activation_timeout }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                <span class="mdi mdi-clock-outline"></span>
                 </span>
             </div>
         </div>
@@ -300,7 +300,7 @@
                 <option value="no_screensaver" {% if screensaver_mode == "no_screensaver" %}selected{% endif %}>No screensaver (turn off screen)</option>
             </select>
             <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/room_id:border-accent">
-              <span class="iconify w-5 h-5" data-icon="mdi-house-outline"></span>
+              <span class="mdi mdi-home"></span>
             </span>
           </div>
         </div>
@@ -312,7 +312,7 @@
                 <input class="rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-btn focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                 type="number" class="input" name="mqtt_ignore_time" value="{{ mqtt_ignore_time }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                <span class="iconify w-5 h-5" data-icon="mdi-clock-outline"></span>
+                <span class="mdi mdi-clock-outline"></span>
                 </span>
             </div>
         </div>
@@ -357,7 +357,7 @@
                 <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                 type="text" class="input" id="mqtt_server" name="mqtt_server" value="{{ mqtt_server }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                    <span class="iconify w-5 h-5" data-icon="mdi-house-outline"></span>
+                    <span class="mdi mdi-home"></span>
                 </span>
             </div>
         </div>
@@ -369,7 +369,7 @@
                 <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                 type="number" class="input" id="mqtt_port" name="mqtt_port" value="{{ mqtt_port }}" required>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                    <span class="iconify w-5 h-5" data-icon="mdi-numeric"></span>
+                    <span class="mdi mdi-numeric"></span>
                 </span>
             </div>
         </div>
@@ -382,7 +382,7 @@
                   <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="text" class="input" id="mqtt_username" name="mqtt_username" value="{{ mqtt_username }}">
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                      <span class="iconify w-5 h-5" data-icon="mdi-account"></span>
+                      <span class="mdi mdi-account"></span>
                   </span>
               </div>
           </div>
@@ -394,7 +394,7 @@
                   <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="password" class="input" id="mqtt_password" name="mqtt_password" value="{{ mqtt_password }}">
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                      <span class="iconify w-5 h-5" data-icon="mdi-account-key"></span>
+                      <span class="mdi mdi-account-key"></span>
                   </span>
               </div>
           </div>
@@ -420,7 +420,7 @@
                   <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="text" class="input" id="home_assistant_address" name="home_assistant_address" value="{{ home_assistant_address }}">
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent" {% if is_home_assistant_addon %}disabled{% endif %}>
-                      <span class="iconify w-5 h-5" data-icon="mdi-web"></span>
+                      <span class="mdi mdi-web"></span>
                   </span>
               </div>
           </div>
@@ -432,7 +432,7 @@
                   <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="password" class="input" id="home_assistant_token" name="home_assistant_token" value="{{ home_assistant_token }}">
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent" {% if is_home_assistant_addon %}disabled{% endif %}>
-                      <span class="iconify w-5 h-5" data-icon="mdi-web"></span>
+                      <span class="mdi mdi-web"></span>
                   </span>
               </div>
           </div>
@@ -451,7 +451,7 @@
                   <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="text" class="input" id="openhab_address" name="openhab_address" value="{{ openhab_address }}">
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                      <span class="iconify w-5 h-5" data-icon="mdi-web"></span>
+                      <span class="mdi mdi-web"></span>
                   </span>
               </div>
           </div>
@@ -463,7 +463,7 @@
                   <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="password" class="input" id="openhab_token" name="openhab_token" value="{{ openhab_token }}">
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
-                      <span class="iconify w-5 h-5" data-icon="mdi-web"></span>
+                      <span class="mdi mdi-web"></span>
                   </span>
               </div>
           </div>
