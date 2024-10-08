@@ -154,15 +154,15 @@
             class="z-10 font-normal hidden bg-neutral divide-y devide-neutral-content rounded-lg shadow md:absolute inset-x-auto w-full md:w-44 overflow-hidden">
             <ul class="py-2 text-sm text-neutral-content" aria-labelledby="dropdownLargeButton">
               <li>
-                <a onclick="$('#modal-upload-firmware').removeClass('hidden');"
+                <a onclick="upload_firmware_modal.showModal();"
                   class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover:">Upload firmware</a>
               </li>
               <li>
-                <a onclick="$('#modal-upload-data-file').removeClass('hidden');"
+                <a onclick="upload_data_file_modal.showModal();"
                   class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover:">Upload data file</a>
               </li>
               <li>
-                <a onclick="$('#modal-upload-tft-file').removeClass('hidden');"
+                <a onclick="upload_tft_modal.showModal();"
                   class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover:">Upload TFT file</a>
               </li>
             </ul>

@@ -193,7 +193,7 @@ function create_nspanel_from_template(data) {
 
 function update_nspanel_status(data) {
   if ("mac_address" in data) {
-    
+
     if($("#nspanel_mac_container_" + data.mac_address).length == 0) {
       create_nspanel_from_template(data);
       return;
@@ -476,9 +476,9 @@ $(document).ready(function () {
     $("#firmware_upload_file_name").html(fileName);
   });
 
-  $("#data_upload_file_input").change(function () {
+  $("#data_file").change(function () {
     var fileName = $(this).val().replace("C:\\fakepath\\", "");
-    $("#data_upload_file_name").html(fileName);
+    $("#data_file").html(fileName);
   });
 
   $("#tft_upload_file_input").change(function () {

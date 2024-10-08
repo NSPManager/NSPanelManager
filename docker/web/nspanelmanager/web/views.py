@@ -724,7 +724,7 @@ def save_new_firmware(request):
 @csrf_exempt
 def save_new_data_file(request):
     if request.method == 'POST':
-        uploaded_file = request.FILES['data_upload_file_name']
+        uploaded_file = request.FILES['data_file']
         fs = FileSystemStorage()
         fs.delete("data_file.bin")
         fs.save("data_file.bin", uploaded_file)
@@ -754,7 +754,7 @@ def get_client_ip(request):
 @csrf_exempt
 def save_new_tft_file(request):
     if request.method == 'POST':
-        if request.POST["file_version"] == "Europe":
+        if request.POST["tft_file_type"] == "eu":
             filename = "gui.tft"
         else:
             filename = "gui_us.tft"
