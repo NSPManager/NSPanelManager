@@ -153,7 +153,3 @@ function toggle_theme() {
   };
   $.post("/api/save_theme", data, (data) => {});
 }
-
-function close_modals() {
-  $(".modal").addClass("hidden");
-}
