@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+    .htmx-request {
+        @apply modal-open;
+        background-color: #0006;
+        animation: modal-pop 0.2s ease-out;
+    }
+}

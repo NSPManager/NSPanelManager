@@ -1,53 +1,18 @@
-<!-- Modal: Select new entity -->
-<dialog id="modal_select_entity" tabindex="-1" aria-hidden="true"
-  class="modal">
-  <!-- Backdrop -->
-  <!-- <div class="w-full h-screen fixed bg-black/80 backdrop-blur-sm" onclick="close_modals();"></div> -->
+<div id="modal"></div>
 
+<dialog id="modal_loading" tabindex="-1" aria-hidden="true" class="modal">
   <!-- Modal content -->
-  <div class="modal-box">
-    <form method="dialog">
-        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-    </form>
-    <!-- Modal header -->
-    <h3 class="text-lg font-semibold mb-2">Choose an entity</h3>
-    <!-- Search -->
-    <div class="">
-        <div class="flex flex-row-reverse">
-        <input class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
-        type="text" class="input" name="add_new_entity_search" id="add_new_entity_search">
-        <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/search_text:border-accent">
-            <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <title>Search</title>
-            <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"></path>
-            </svg>
-        </span>
+    <div class="modal-box">
+        <!-- Modal header -->
+        <h3 class="text-lg font-semibold mb-2">Loading</h3>
+
+        <!-- Loader-->
+        <div class="flex items-center justify-center">
+            <span id="add_new_entity_loader" class="loading loading-ring loading-lg by-2"></span>
         </div>
+
     </div>
-
-    <!-- Tabs-->
-    <div role="tablist" id="add_new_entity_tabs" class="tabs tabs-bordered mb-2">
-        <a role="tab" class="tab tab-active" id="filter_for_all" onclick="add_new_entities_filter_for_type('all');">All</a>
-        <a role="tab" class="tab" id="filter_for_home_assistant" onclick="add_new_entities_filter_for_type('home_assistant');">Home Assistant</a>
-        <a role="tab" class="tab" id="filter_for_openhab" onclick="add_new_entities_filter_for_type('openhab');">OpenHAB</a>
-        <!-- <a role="tab" class="tab" id="filter_for_manual" onclick="add_new_entities_filter_for_type('manual');">Manual</a> -->
-    </div>
-
-    <!-- Holder for any potential errors -->
-    <div id="add_new_entity_errors" class=""></div>
-
-    <!-- Loader-->
-    <div class="flex items-center justify-center">
-        <span id="add_new_entity_loader" class="loading loading-ring loading-lg by-2"></span>
-    </div>
-
-    <!-- Entities -->
-    <table id="add_new_entity_options" class="table max-h-96 overflow-y-auto">
-    </table>
-  </div>
-
-
-  <form method="dialog" class="modal-backdrop">
-      <button>close</button>
-  </form>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
 </dialog>

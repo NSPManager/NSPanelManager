@@ -6,6 +6,7 @@ from django.http import JsonResponse
 
 from .components.nspanel_status_header.nspanel_status_header import NSPanelHeader
 
+from .api import get_all_available_entities
 import hashlib
 import psutil
 import subprocess
@@ -152,3 +153,57 @@ def interface_theme(request):
     new_theme = request.POST.get('theme-dropdown')
     set_setting_value("theme", new_theme)
     return JsonResponse({"status": "OK"}, status=200)
+
+
+def partial_select_new_entity_item_list(request, room_id):
+    # TODO: Move "get_all_available_entities" from api.py to seperate files
+    data = {
+        "entities": get_all_available_entities(request),
+        "room": Room.objects.get(id=room_id)
+    }
+    return render(request, 'partial/select_entity/entity_list.html', data)
+
+def partial_entity_add_light_to_room(request, room_id):
+    # TODO: Move "get_all_available_entities" from api.py to seperate files
+    data = {
+        "room": Room.objects.get(id=room_id),
+        "entity": json.loads(request.GET["entity"]),
+        "control_mode": "",
+        "can_color_temperature": "false",
+        "can_color": "false",
+        "openhab_channel_brightness": "",
+        "openhab_channel_color_temperature": "",
+        "openhab_channel_color": ""
+    }
+
+    # Check Home Assistant capabilites
+    if data["entity"]["type"] == "home_assistant":
+        if data["entity"]["raw_data"]["entity_id"].startswith("light."):
+            data["control_mode"] = "dimmable"
+        elif data["entity"]["raw_data"]["entity_id"].startswith("switch."):
+            data["control_mode"] = "switch"
+
+        if "supported_color_modes" in data["entity"]["raw_data"]["attributes"]:
+            if "color_temp" in data["entity"]["raw_data"]["attributes"]["supported_color_modes"]:
+                data["can_color_temperature"] = "true"
+        if "rgb_color" in data["entity"]["raw_data"]["attributes"]:
+            data["can_color"] = "true"
+
+    # Check OpenHAB capabilites
+    elif data["entity"]["type"] == "openhab":
+        for item in data["entity"]["items"]:
+            if "brightness" in item.lower() or "level" in item.lower():
+                data["openhab_channel_brightness"] = item
+            elif "temp" in item.lower():
+                data["can_color_temperature"] = "true"
+                data["openhab_channel_color_temperature"] = item
+            elif "color" in item.lower() and "temp" not in item.lower():
+                data["can_color"] = "true"
+                data["openhab_channel_color"] = item
+
+        if "dim" in data["entity"]["label"].lower() or data["can_color"] == "true" or data["can_color_temperature"] == "true":
+            data["control_mode"] = "dimmable"
+        elif "switch" in data["entity"]["label"].lower():
+            data["control_mode"] = "switch"
+
+    return render(request, 'partial/select_entity/entity_add_light_to_room.html', data)

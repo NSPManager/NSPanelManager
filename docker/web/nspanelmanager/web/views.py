@@ -359,7 +359,7 @@ def remove_light_from_room(request, room_id: int, light_id: int):
 
 def add_light_to_room(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
-    if int(request.POST["edit_light_id"]) >= 0:
+    if request.POST["edit_light_id"] != "" and int(request.POST["edit_light_id"]) >= 0:
         newLight = Light.objects.get(id=int(request.POST["edit_light_id"]))
     else:
         newLight = Light()
@@ -372,9 +372,9 @@ def add_light_to_room(request, room_id: int):
         newLight.is_ceiling_light = False
 
     if newLight.type == "home_assistant":
-        newLight.home_assistant_name = request.POST["home_assistant_name"]
+        newLight.home_assistant_name = request.POST["entity_id"]
     elif newLight.type == "openhab":
-        newLight.openhab_name = request.POST["openhab_name"]
+        newLight.openhab_name = request.POST["entity_id"]
 
     if request.POST["light_control_mode"] == "dimmer":
         newLight.can_dim = True

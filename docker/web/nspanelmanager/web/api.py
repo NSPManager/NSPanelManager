@@ -190,21 +190,20 @@ def get_nspanels_warnings(request):
 def get_all_available_entities(request):
     # TODO: Implement manually entered entities
     home_assistant_type_filter = []
-    if "home_assistant_type_filter" in request.GET:
-        home_assistant_type_filter = json.loads(
-            request.GET["home_assistant_type_filter"])
-
     openhab_type_filter = []
-    if "openhab_type_filter" in request.GET:
-        openhab_type_filter = json.loads(
-            request.GET["openhab_type_filter"])
+    if "filter" in request.GET:
+        filter_data = json.loads(request.GET["filter"])
+        if "home_assistant_type_filter" in filter_data:
+            home_assistant_type_filter = filter_data["home_assistant_type_filter"]
+
+        if "openhab_type_filter" in filter_data:
+            openhab_type_filter = filter_data["openhab_type_filter"]
 
     # Get Home Assistant lights
-    return_json = {}
-    return_json["home_assistant_entities"] = []
-    return_json["openhab_entities"] = []
-    return_json["manual_entities"] = []
-    return_json["errors"] = []
+    return_json = {
+        "entities": [],
+        "errors": []
+    }
 
     # Home Assistant
     if get_setting_with_default("home_assistant_token") != "" and get_setting_with_default("home_assistant_address") != "":
@@ -227,14 +226,15 @@ def get_all_available_entities(request):
                     entity_type = entity["entity_id"].split(".")[0]
                     if (len(home_assistant_type_filter) > 0 and entity_type in home_assistant_type_filter) or len(home_assistant_type_filter) == 0:
                         data = {
+                            "type": "home_assistant",
                             "label": entity["entity_id"],
                             "entity_id": entity["entity_id"],
-                            "items": []
+                            "raw_data": entity,
                         }
                         if "friendly_name" in entity["attributes"]:
                             data["label"] = entity["attributes"]["friendly_name"]
 
-                        return_json["home_assistant_entities"].append(data)
+                        return_json["entities"].append(data)
             else:
                 return_json["errors"].append(
                     "Failed to get Home Assistant lights, got return code: " + str(home_assistant_response.status_code))
@@ -277,10 +277,13 @@ def get_all_available_entities(request):
                                             items.append(linkedItem)
                             if add_entity:
                                 # return_json["openhab_lights"].append(entity["label"])
-                                return_json["openhab_entities"].append({
+                                return_json["entities"].append({
+                                    "type": "openhab",
+                                    "openhab_type": "thing",
                                     "label": entity["label"],
                                     "entity_id": entity["label"],
-                                    "items": items
+                                    "items": items,
+                                    "raw_data": entity,
                                 })
                 else:
                     return_json["errors"].append(
@@ -294,9 +297,12 @@ def get_all_available_entities(request):
                 if openhab_response.status_code == 200:
                     for entity in openhab_response.json():
                         if "name" in entity:
-                            return_json["openhab_entities"].append({
+                            return_json["entities"].append({
+                                "type": "openhab",
+                                "openhab_type": "rule",
                                 "label": entity["name"],
                                 "entity_id": entity["uid"],
+                                "raw_data": entity,
                                 "items": []
                             })
                 else:
@@ -311,7 +317,7 @@ def get_all_available_entities(request):
     else:
         print("No OpenHAB configuration values. Will not gather OpenHAB entities.")
 
-    return JsonResponse(return_json)
+    return return_json
 
 
 def get_client_ip(request):
