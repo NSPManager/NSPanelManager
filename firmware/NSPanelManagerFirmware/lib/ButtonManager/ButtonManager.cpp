@@ -52,7 +52,13 @@ void ButtonManager::mqttCallback(char *topic, byte *payload, unsigned int length
   }
 
   if (relay > 0) {
-    ButtonManager::setRelayState(relay, (*payload) == '1');
+    if ((*payload) == '0') {
+      ButtonManager::setRelayState(relay, false);
+    } else if ((*payload) == '1') {
+      ButtonManager::setRelayState(relay, true);
+    } else if ((*payload) == '2') {
+      ButtonManager::setRelayState(relay, !ButtonManager::getRelayState(relay));
+    }
   }
 }
 
@@ -70,6 +76,21 @@ void ButtonManager::setRelayState(uint8_t relay, bool state) {
   } else {
     digitalWrite(BUTTON_MANAGER_RELAY2_PIN, state);
     MqttManager::publish(NSPMConfig::instance->mqtt_relay2_state_topic, state ? "1" : "0");
+  }
+}
+
+bool ButtonManager::getRelayState(uint8_t relay) {
+  if (NSPMConfig::instance->reverse_relays) {
+    if (relay == 1) {
+      relay = 2;
+    } else if (relay == 2) {
+      relay = 1;
+    }
+  }
+  if (relay == 1) {
+    return digitalRead(BUTTON_MANAGER_RELAY1_PIN);
+  } else {
+    return digitalRead(BUTTON_MANAGER_RELAY2_PIN);
   }
 }
 

@@ -18,6 +18,7 @@ public:
   static inline Light *button1_detached_mode_light;
   static inline Light *button2_detached_mode_light;
   static void setRelayState(uint8_t relay, bool state);
+  static bool getRelayState(uint8_t relay);
 
 private:
   static void _loop(void *param);
