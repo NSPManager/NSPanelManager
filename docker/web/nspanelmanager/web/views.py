@@ -2,6 +2,7 @@ from requests import delete
 from django.shortcuts import render, redirect, HttpResponse, Http404
 from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
+from django.forms.models import model_to_dict
 
 import hashlib
 import psutil
@@ -166,7 +167,11 @@ def save_new_room(request):
     new_room = Room()
     new_room.friendly_name = request.POST['friendly_name']
     new_room.save()
-    send_mqttmanager_reload_command()
+    command_data = {
+        "data": new_room.get_protobuf_object().SerializeToString().decode()
+    }
+    send_ipc_request("entity_manager/add_room", command_data)
+    #send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=new_room.id)
 
 
@@ -418,7 +423,11 @@ def add_light_to_room(request, room_id: int):
                     break
 
     newLight.save()
-    send_mqttmanager_reload_command()
+    #send_mqttmanager_reload_command()
+    command_data = {
+        "data": newLight.get_protobuf_object().SerializeToString().decode()
+    }
+    send_ipc_request("entity_manager/add_light", command_data)
     return redirect('edit_room', room_id=room_id)
 
 

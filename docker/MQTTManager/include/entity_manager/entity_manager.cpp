@@ -1,4 +1,5 @@
 #include "entity/entity.hpp"
+#include "ipc_handler/ipc_handler.hpp"
 #include "light/home_assistant_light.hpp"
 #include "light/openhab_light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
@@ -44,6 +45,9 @@ void EntityManager::init() {
   MqttManagerConfig::attach_config_loaded_listener(EntityManager::post_init_entities);
   MQTT_Manager::subscribe("nspanel/mqttmanager/command", &EntityManager::mqtt_topic_callback);
   MQTT_Manager::subscribe("nspanel/+/status", &EntityManager::mqtt_topic_callback);
+
+  IPCHandler::attach_callback("entity_manager/add_room", &EntityManager::ipc_callback_add_room);
+  IPCHandler::attach_callback("entity_manager/add_light", &EntityManager::ipc_callback_add_light);
 }
 
 void EntityManager::attach_entity_added_listener(void (*listener)(MqttManagerEntity *)) {
@@ -52,6 +56,38 @@ void EntityManager::attach_entity_added_listener(void (*listener)(MqttManagerEnt
 
 void EntityManager::detach_entity_added_listener(void (*listener)(MqttManagerEntity *)) {
   EntityManager::_entity_added_signal.disconnect(listener);
+}
+
+void EntityManager::add_room(RoomSettings &config) {
+    Room *room = nullptr;
+    try{
+        room = new Room(config);
+        SPDLOG_INFO("Created room {}::{}.", room->get_id(), room->get_name());
+        EntityManager::_entities.push_back(room);
+    } catch (std::exception &e) {
+        if(room != nullptr) {
+            delete room;
+        }
+        SPDLOG_ERROR("Caught exception: {}", e.what());
+        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+    }
+}
+
+bool EntityManager::ipc_callback_add_room(nlohmann::json message, nlohmann::json *response) {
+    try{
+        SPDLOG_DEBUG("Received IPC callback for new room, creating new room.");
+        RoomSettings setting;
+        setting.ParseFromString(std::string(message["data"]));
+        EntityManager::add_room(setting);
+        // TODO: Send update to panels about new room
+        (*response)["status"] = "ok";
+        return true;
+    } catch(std::exception &e) {
+        SPDLOG_ERROR("Caught exception: {}", e.what());
+        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+        (*response)["status"] = "error";
+        return true;
+    }
 }
 
 void EntityManager::add_light(LightSettings &config) {
@@ -74,6 +110,24 @@ void EntityManager::add_light(LightSettings &config) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
     SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
   }
+}
+
+
+bool EntityManager::ipc_callback_add_light(nlohmann::json message, nlohmann::json *response) {
+    try{
+        SPDLOG_DEBUG("Received IPC callback for new light, creating new light.");
+        LightSettings setting;
+        setting.ParseFromString(std::string(message["data"]));
+        EntityManager::add_light(setting);
+        // TODO: Send update to panels about new light
+        (*response)["status"] = "ok";
+        return true;
+    } catch(std::exception &e) {
+        SPDLOG_ERROR("Caught exception: {}", e.what());
+        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+        (*response)["status"] = "error";
+        return true;
+    }
 }
 
 void EntityManager::add_scene(nlohmann::json &config) {
@@ -218,17 +272,13 @@ void EntityManager::post_init_entities() {
     std::list<int> room_ids;
     for (RoomSettings &config : MqttManagerConfig::room_configs) {
       room_ids.push_back(config.id());
-      SPDLOG_DEBUG("Trying to get room by id.");
       Room *room = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, config.id());
-      SPDLOG_DEBUG("Got result. Trying to get mutex.");
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-      SPDLOG_DEBUG("Got mutex.");
       if (room != nullptr) {
         SPDLOG_DEBUG("Found existing room {}::{}, will update.", room->get_id(), room->get_name());
         room->update_config(config);
       } else {
-        room = new Room(config);
-        EntityManager::_entities.push_back(room);
+          EntityManager::add_room(config);
       }
     }
     SPDLOG_DEBUG("Existing rooms updated.");

@@ -43,9 +43,24 @@ public:
   static void remove_entity(MqttManagerEntity *entity);
 
   /**
+  Create and add a room to the manager
+  */
+  static void add_room(RoomSettings &config);
+
+  /**
+  Create room protobuf from JSON and send to add_room, simply a callback for IPCHandler for partial updates.
+  */
+  static bool ipc_callback_add_room(nlohmann::json data, nlohmann::json *response);
+
+  /**
    * Create and add a light to the manager
    */
   static void add_light(LightSettings &config);
+
+  /**
+  Create light protobuf from JSON and send to add_light, simply a callback for IPCHandler for partial updates.
+  */
+  static bool ipc_callback_add_light(nlohmann::json data, nlohmann::json *response);
 
   /**
    * Create and add a nspanel to the manager

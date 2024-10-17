@@ -36,6 +36,19 @@ class Room(models.Model):
     def __str__(self) -> str:
         return self.friendly_name
 
+    """Get a protobuf_general_pb2.RoomSettings object populated with settings"""
+    def get_protobuf_object(self):
+        from web.protobuf import protobuf_formats_pb2, protobuf_general_pb2, protobuf_mqttmanager_pb2
+        room = protobuf_general_pb2.RoomSettings()
+        room.id = self.id
+        room.name = self.friendly_name
+        for light in self.light_set.all():
+            room.light_ids.append(light.id)
+        for scene in self.scene_set.all():
+            room.scene_ids.append(scene.id)
+        return room
+
+
 class NSPanel(models.Model):
     mac_address = models.CharField(max_length=17)
     friendly_name = models.CharField(max_length=100)
@@ -95,6 +108,31 @@ class Light(models.Model):
 
     def __str__(self) -> str:
         return F"{self.room.friendly_name} -> {self.friendly_name}"
+
+    """Get a protobuf_general_pb2.LightSettings object populated with settings."""
+    def get_protobuf_object(self):
+        from web.protobuf import protobuf_formats_pb2, protobuf_general_pb2, protobuf_mqttmanager_pb2
+        proto_light = protobuf_general_pb2.LightSettings()
+        proto_light.id = self.id
+        proto_light.room_id = self.room.id
+        proto_light.name = self.friendly_name
+        proto_light.type = self.type
+        proto_light.is_ceiling_light = self.is_ceiling_light
+        proto_light.can_dim = self.can_dim
+        proto_light.can_color_temperature = self.can_color_temperature
+        proto_light.can_rgb = self.can_rgb
+
+        if proto_light.type == "home_assistant":
+            proto_light.home_assistant_name = self.home_assistant_name
+        elif proto_light.type == "openhab":
+            proto_light.openhab_name = self.openhab_name
+            proto_light.openhab_control_mode = self.openhab_control_mode
+            proto_light.openhab_item_switch = self.openhab_item_switch
+            proto_light.openhab_item_dimmer = self.openhab_item_dimmer
+            proto_light.openhab_item_color_temp = self.openhab_item_color_temp
+            proto_light.openhab_item_rgb = self.openhab_item_rgb
+
+        return proto_light
 
 
 class Scene(models.Model):
