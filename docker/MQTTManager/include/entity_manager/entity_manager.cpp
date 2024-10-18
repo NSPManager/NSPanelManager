@@ -119,6 +119,14 @@ bool EntityManager::ipc_callback_add_light(nlohmann::json message, nlohmann::jso
         LightSettings setting;
         setting.ParseFromString(std::string(message["data"]));
         EntityManager::add_light(setting);
+        // Everything else is already initialized, post_init light directly after adding it.
+        auto light =EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, setting.id());
+        if(light != nullptr) {
+            light->post_init();
+        } else {
+            SPDLOG_ERROR("Failed to find light with id {}. Will not post_init()!", setting.id());
+        }
+
         // TODO: Send update to panels about new light
         (*response)["status"] = "ok";
         return true;

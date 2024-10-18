@@ -67,6 +67,36 @@
 <script>
 // Open dialog using Javascript as to make it possible to close again
 modal.showModal();
+document.getElementById('add_new_entity_search').focus();
+document.getElementById('add_new_entity_search').select();
+
+$("#add_new_entity_search").on('input', () => {
+  if($("#add_new_entity_search").val() == "") {
+    $(".entity-item").each((index, item) => {
+      if($("#filter_for_all").hasClass('tab-active')) {
+        $(item).show();
+      } else if ($("#filter_for_home_assistant").hasClass('tab-active') && $(item).data('entity-source') == "home_assistant") {
+        $(item).show();
+      } else if ($("#filter_for_openhab").hasClass('tab-active') && $(item).data('entity-source') == "openhab") {
+        $(item).show();
+      }
+    });
+  } else {
+    $(".entity-item").each((index, item) => {
+      if($(item).data("entity-name").includes($("#add_new_entity_search").val())) {
+        if($("#filter_for_all").hasClass('tab-active')) {
+          $(item).show();
+        } else if ($("#filter_for_home_assistant").hasClass('tab-active') && $(item).data('entity-source') == "home_assistant") {
+          $(item).show();
+        } else if ($("#filter_for_openhab").hasClass('tab-active') && $(item).data('entity-source') == "openhab") {
+          $(item).show();
+        }
+      } else {
+        $(item).hide();
+      }
+    });
+  }
+});
 
 function show_all_entities() {
   $("#filter_for_all").addClass("tab-active");

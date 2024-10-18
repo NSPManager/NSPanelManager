@@ -1,7 +1,41 @@
 {% extends 'base.html' %} {% block content %}
+<dialog id="create_new_room_modal" class="modal">
+    <div class="modal-box">
+        <!-- Upper right close button -->
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        <form method="POST" action="{% url 'save_new_room' %}">
+            {% csrf_token %}
+            <!-- Modal header -->
+            <h3 class="text-lg font-semibold mb-2">Create new room</h3>
+
+            <div class="my-2">
+                <label for="friendly_name" class="block mb-1 text-sm font-medium">Name</label>
+                <div class="flex flex-row-reverse">
+                    <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                    type="text" class="input" id="friendly_name" name="friendly_name" placeholder="Office" required>
+                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                        <span class="mdi mdi-home"></span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button class="btn btn-info">Save</button>
+            </div>
+        </form>
+    </div>
+    <!-- Modal backdrop -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
 <div class="md:flex md:flex-wrap md:justify-between items-center mb-4">
     <h2 class="font-medium text-2xl" id="nspanel_name">Rooms</h2>
-    <button type="button" class="btn btn-info" onclick="create_new_room_modal.showModal();">
+    <button type="button" class="btn btn-info" onclick="create_new_room_modal.showModal(); document.getElementById('friendly_name').focus(); document.getElementById('friendly_name').select();">
         Add new room
     </button>
 </div>
