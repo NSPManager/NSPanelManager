@@ -1,0 +1,11 @@
+.centeredContent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Space around the centered content */
+    text-align: center; /* Ensures text aligns centrally */
+    width: fit-content; /* Automatically adjusts to the size of the content */
+    height: fit-content; /* Automatically adjusts to the size of the content */
+    /* Center horizontally on the page */
+    margin: 20px auto;
+}
