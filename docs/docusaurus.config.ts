@@ -46,7 +46,7 @@ const config: Config = {
           // Remove this to remove the "edit this page" links.
           editUrl:
             // TODO: change branch back to `main` after merge of beta branch
-            'https://github.com/NSPManager/NSPanelManager/docs/edit/beta/',
+            'https://github.com/NSPManager/NSPanelManager/edit/beta/docs',
         },
         theme: {
           customCss: './src/css/custom.css',
