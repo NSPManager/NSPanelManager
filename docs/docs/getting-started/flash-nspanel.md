@@ -54,14 +54,14 @@ You should end up with two parts:
 You can flash straight away without detaching the screen from the PCB and remove PCB completely from housing.
 Important is that you insert the cables and tilt them abit (like in GIF below) so the pins does not come in contact with the metall behind the PCB (risk of short circuiting the USB to TTL). Hold tilted during entire flashing.
 
-![gif](https://github.com/user-attachments/assets/8d2b93c9-9378-44d5-87f4-331c91b2ce76)
+<CenteredImage src="/images/doc/flash/tiltpanel.gif" alt="Tilting the PCB to prevent short circuit" figureNumber="5" />
 
 **2. Complicated way (detaching screen from PCB and removing PCB from housing):**
 :::danger
 This operation has to be done very smoothly.
 :::
 
-<CenteredImage src="/images/doc/flash/step3.png" alt="The PCB connected to the screen via FFC cable" figureNumber="4" />
+<CenteredImage src="/images/doc/flash/step3.png" alt="The PCB connected to the screen via FFC cable" figureNumber="6" />
 
 1. Push slightly from left to right the black part of the connector (2mm)
 2. same as point 1.
@@ -75,11 +75,11 @@ The black part of the FFC cable do not contains any electronic nor conductive fe
 
 In order to get the ESP32 enter in flash mode, `GPIO0`, noted `IO0` on the PCB has to be connected to `GND`. 
 Either connect a cable between `IO0` and `GND` (2) as in picture below:
-<CenteredImage src="/images/doc/flash/step4.png" alt="The PCB connected to the screen via FFC cable" figureNumber="5" />
+<CenteredImage src="/images/doc/flash/step4.png" alt="The PCB connected to the screen via FFC cable" figureNumber="7" />
 
 or add an extra cable to Ground pin on USB to TTL as in picture below (white cable):
 
-![extraground](https://github.com/user-attachments/assets/29a60b29-a741-403f-9c77-2b5cc5f39e1a)
+<CenteredImage src="/images/doc/flash/extraground.JPG" alt="Extra ground cable" figureNumber="8" />
 
 ### Connect your USB to UART (TTL) converter
 
@@ -117,8 +117,8 @@ Then, flash the firmware with your tool of choice:
       5. Choose .bin file to flash
       6. Press Install
       7. Wait for flashing to complete
-
-      ![esphome](https://github.com/user-attachments/assets/99a624e2-1e83-4dda-8a92-44beb4fc0b17)
+      
+      <CenteredImage src="/images/doc/esphomeweb.jpg"/>
       
     </TabItem>  
     
