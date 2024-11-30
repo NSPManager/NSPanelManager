@@ -1,0 +1,10 @@
+{
+  "name": "NSPanelManager NSPanel Firmware",
+  "version": "beta",
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [{ "path": "../firmwares/beta/merged_flash.bin", "offset": 0 }]
+    }
+  ]
+}
