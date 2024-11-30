@@ -11,16 +11,10 @@ import TabItem from '@theme/TabItem';
 
 ## Video guide through
 
-:::note
-**Only the first 3 chapters of the video are relevant here**. Do not flash it with ESPHome, this is another firmware that will not work with NSPanelManager.
-
-Instead, follow the below documentation to learn how to [flash the NSPanelManager firmware on your NSPanel](#flash-nspanel-with-nspanelmanager-custom-firmware).
-:::
-
 <YouTubePlayer
-    videoId="p-AK4o5jOSI"
-    author="Mark Watt Tech"
-    description="Flash Sonoff NSPanel with ESPHome"
+    videoId="VvbQcUzaS94"
+    author="Cables & Coffee"
+    description="Flash Sonoff NSPanel with our custom firmware"
 />
 
 ## Detailed guide
