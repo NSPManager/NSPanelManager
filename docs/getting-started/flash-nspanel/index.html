@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.6.3">
 <title data-rh="true">Flash Sonoff NSPanel | NSPanel Manager</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://nspanelmanager.com/images/nspanelmanager-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://nspanelmanager.com/images/nspanelmanager-social-card.jpg"><meta data-rh="true" property="og:url" content="https://nspanelmanager.com/docs/getting-started/flash-nspanel"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Flash Sonoff NSPanel | NSPanel Manager"><meta data-rh="true" name="description" content="Video guide through"><meta data-rh="true" property="og:description" content="Video guide through"><link data-rh="true" rel="icon" href="/images/favicon.ico"><link data-rh="true" rel="canonical" href="https://nspanelmanager.com/docs/getting-started/flash-nspanel"><link data-rh="true" rel="alternate" href="https://nspanelmanager.com/docs/getting-started/flash-nspanel" hreflang="en"><link data-rh="true" rel="alternate" href="https://nspanelmanager.com/docs/getting-started/flash-nspanel" hreflang="x-default"><link rel="stylesheet" href="/assets/css/styles.4312a3ca.css">
-<script src="/assets/js/runtime~main.56fc1bb8.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.1c131e2a.js" defer="defer"></script>
 <script src="/assets/js/main.0c3ff92d.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -35,10 +35,10 @@ It has to be oriented so you can read the text naturally. Doing it this way redu
 <p><strong>1. Lazy way:</strong></p>
 <p>You can flash straight away without detaching the screen from the PCB and remove PCB completely from housing.
 Important is that you insert the cables and tilt them abit (like in GIF below) so the pins does not come in contact with the metall behind the PCB (risk of short circuiting the USB to TTL). Hold tilted during entire flashing.</p>
-<p><img decoding="async" loading="lazy" src="https://github.com/user-attachments/assets/8d2b93c9-9378-44d5-87f4-331c91b2ce76" alt="gif" class="img_ev3q"></p>
+<figure class="centeredImageContainer_LZL8"><img src="/images/doc/flash/tiltpanel.gif" alt="Tilting the PCB to prevent short circuit" style="width:auto;height:auto"><figcaption class="caption_TNGg">Figure <!-- -->5<!-- -->: <!-- -->Tilting the PCB to prevent short circuit</figcaption></figure>
 <p><strong>2. Complicated way (detaching screen from PCB and removing PCB from housing):</strong></p>
 <div class="theme-admonition theme-admonition-danger admonition_xJq3 alert alert--danger"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 12 16"><path fill-rule="evenodd" d="M5.05.31c.81 2.17.41 3.38-.52 4.31C3.55 5.67 1.98 6.45.9 7.98c-1.45 2.05-1.7 6.53 3.53 7.7-2.2-1.16-2.67-4.52-.3-6.61-.61 2.03.53 3.33 1.94 2.86 1.39-.47 2.3.53 2.27 1.67-.02.78-.31 1.44-1.13 1.81 3.42-.59 4.78-3.42 4.78-5.56 0-2.84-2.53-3.22-1.25-5.61-1.52.13-2.03 1.13-1.89 2.75.09 1.08-1.02 1.8-1.86 1.33-.67-.41-.66-1.19-.06-1.78C8.18 5.31 8.68 2.45 5.05.32L5.03.3l.02.01z"></path></svg></span>danger</div><div class="admonitionContent_BuS1"><p>This operation has to be done very smoothly.</p></div></div>
-<figure class="centeredImageContainer_LZL8"><img src="/images/doc/flash/step3.png" alt="The PCB connected to the screen via FFC cable" style="width:auto;height:auto"><figcaption class="caption_TNGg">Figure <!-- -->4<!-- -->: <!-- -->The PCB connected to the screen via FFC cable</figcaption></figure>
+<figure class="centeredImageContainer_LZL8"><img src="/images/doc/flash/step3.png" alt="The PCB connected to the screen via FFC cable" style="width:auto;height:auto"><figcaption class="caption_TNGg">Figure <!-- -->6<!-- -->: <!-- -->The PCB connected to the screen via FFC cable</figcaption></figure>
 <ol>
 <li>Push slightly from left to right the black part of the connector (2mm)</li>
 <li>same as point 1.</li>
@@ -48,9 +48,9 @@ Important is that you insert the cables and tilt them abit (like in GIF below) s
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="prepare-for-flashing">Prepare for flashing<a href="#prepare-for-flashing" class="hash-link" aria-label="Direct link to Prepare for flashing" title="Direct link to Prepare for flashing">​</a></h4>
 <p>In order to get the ESP32 enter in flash mode, <code>GPIO0</code>, noted <code>IO0</code> on the PCB has to be connected to <code>GND</code>.
 Either connect a cable between <code>IO0</code> and <code>GND</code> (2) as in picture below:</p>
-<figure class="centeredImageContainer_LZL8"><img src="/images/doc/flash/step4.png" alt="The PCB connected to the screen via FFC cable" style="width:auto;height:auto"><figcaption class="caption_TNGg">Figure <!-- -->5<!-- -->: <!-- -->The PCB connected to the screen via FFC cable</figcaption></figure>
+<figure class="centeredImageContainer_LZL8"><img src="/images/doc/flash/step4.png" alt="The PCB connected to the screen via FFC cable" style="width:auto;height:auto"><figcaption class="caption_TNGg">Figure <!-- -->7<!-- -->: <!-- -->The PCB connected to the screen via FFC cable</figcaption></figure>
 <p>or add an extra cable to Ground pin on USB to TTL as in picture below (white cable):</p>
-<p><img decoding="async" loading="lazy" src="https://github.com/user-attachments/assets/29a60b29-a741-403f-9c77-2b5cc5f39e1a" alt="extraground" class="img_ev3q"></p>
+<figure class="centeredImageContainer_LZL8"><img src="/images/doc/flash/extraground.JPG" alt="Extra ground cable" style="width:auto;height:auto"><figcaption class="caption_TNGg">Figure <!-- -->8<!-- -->: <!-- -->Extra ground cable</figcaption></figure>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="connect-your-usb-to-uart-ttl-converter">Connect your USB to UART (TTL) converter<a href="#connect-your-usb-to-uart-ttl-converter" class="hash-link" aria-label="Direct link to Connect your USB to UART (TTL) converter" title="Direct link to Connect your USB to UART (TTL) converter">​</a></h3>
 <div class="theme-admonition theme-admonition-danger admonition_xJq3 alert alert--danger"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 12 16"><path fill-rule="evenodd" d="M5.05.31c.81 2.17.41 3.38-.52 4.31C3.55 5.67 1.98 6.45.9 7.98c-1.45 2.05-1.7 6.53 3.53 7.7-2.2-1.16-2.67-4.52-.3-6.61-.61 2.03.53 3.33 1.94 2.86 1.39-.47 2.3.53 2.27 1.67-.02.78-.31 1.44-1.13 1.81 3.42-.59 4.78-3.42 4.78-5.56 0-2.84-2.53-3.22-1.25-5.61-1.52.13-2.03 1.13-1.89 2.75.09 1.08-1.02 1.8-1.86 1.33-.67-.41-.66-1.19-.06-1.78C8.18 5.31 8.68 2.45 5.05.32L5.03.3l.02.01z"></path></svg></span>danger</div><div class="admonitionContent_BuS1"><p>Make sure to use the 3v3 (not 5V), this can generally be configured with a Jumper up on the USB to UART converter.</p></div></div>
 <ol>
@@ -70,7 +70,7 @@ Either connect a cable between <code>IO0</code> and <code>GND</code> (2) as in p
 <li>Choose .bin file to flash</li>
 <li>Press Install</li>
 <li>Wait for flashing to complete</li>
-</ol><p><img decoding="async" loading="lazy" src="https://github.com/user-attachments/assets/99a624e2-1e83-4dda-8a92-44beb4fc0b17" alt="esphome" class="img_ev3q"></p></div><div role="tabpanel" class="tabItem_Ymn6" hidden=""><ol>
+</ol><figure class="centeredImageContainer_LZL8"><img src="/images/doc/esphomeweb.jpg" style="width:auto;height:auto"></figure></div><div role="tabpanel" class="tabItem_Ymn6" hidden=""><ol>
 <li>
 <p>Download Espressif tool from here: <a href="https://www.espressif.com/en/support/download/other-tools" target="_blank" rel="noopener noreferrer">https://www.espressif.com/en/support/download/other-tools</a></p>
 </li>
