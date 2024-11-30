@@ -51,14 +51,12 @@ You should end up with two parts:
 #### Now you have two choices, the Lazy way or the Complicated way:
 **1. Lazy way:**
 
-You can flash straight away without dettaching the screen from the PCB and remove PCB completely from cover.
-Important is that you insert the cables and tilt them abit (like in GIF below) so the pins does not come in contact with the metall behind the PCB.
-Then hold tilted during entire flashing.
+You can flash straight away without detaching the screen from the PCB and remove PCB completely from housing.
+Important is that you insert the cables and tilt them abit (like in GIF below) so the pins does not come in contact with the metall behind the PCB (risk of short circuiting the USB to TTL). Hold tilted during entire flashing.
 
 ![gif](https://github.com/user-attachments/assets/8d2b93c9-9378-44d5-87f4-331c91b2ce76)
 
-**2. Complicated way (dettaching screen from PCB and removing PCB from housing):**
-
+**2. Complicated way (detaching screen from PCB and removing PCB from housing):**
 :::danger
 This operation has to be done very smoothly.
 :::
@@ -115,21 +113,23 @@ Then, flash the firmware with your tool of choice:
       2. Connect USB to TTL to computer
       3. Press Connect (choose correct USB device)
       4. Press Install
-      5. Choose file...
+      5. Press Choose file...
       5. Choose .bin file to flash
       6. Press Install
       7. Wait for flashing to complete
+
+      ![esphome](https://github.com/user-attachments/assets/99a624e2-1e83-4dda-8a92-44beb4fc0b17)
       
     </TabItem>  
     
     <TabItem value="Espressif" label="Espressif tool (Windows)">
-
-        2. Download Espressif tool from here: https://www.espressif.com/en/support/download/other-tools
-           3. Open the tool and choose to flash an `ESP32 chip`.
-           4. Click on the `...` button and select the firmware you downloaded at step 1 called `merged-flash.bin`.
-           5. enter `0x0` as the upload address.
-           6. Check the first checkbox next to the firmware file
-           7. Click the `START` button and wait until it writes `FINISH`.
+    
+        1. Download Espressif tool from here: https://www.espressif.com/en/support/download/other-tools
+        2. Open the tool and choose to flash an `ESP32 chip`.
+        3. Click on the `...` button and select the firmware you downloaded at step 1 called `merged-flash.bin`.
+        4. enter `0x0` as the upload address.
+        5. Check the first checkbox next to the firmware file
+        6. Click the `START` button and wait until it writes `FINISH`.
 
             <CenteredImage src="/images//doc/esp_flash_download_tool.png"/>
 
