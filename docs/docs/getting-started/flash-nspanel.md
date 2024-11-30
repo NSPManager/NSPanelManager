@@ -45,9 +45,19 @@ You should end up with two parts:
 
 1. Unscrew it with a cross screwdriver
 2. Unscrew it with a cross screwdriver
-3. After than you can detach the plastic cover from the PCB
+3. After that you can detach the plastic cover from the PCB
 
-#### Detach the screen from the PCB
+
+#### Now you have two choices, the Lazy way or the Complicated way:
+**1. Lazy way:**
+
+You can flash straight away without dettaching the screen from the PCB and remove PCB completely from cover.
+Important is that you insert the cables and tilt them abit (like in GIF below) so the pins does not come in contact with the metall behind the PCB.
+Then hold tilted during entire flashing.
+
+![gif](https://github.com/user-attachments/assets/8d2b93c9-9378-44d5-87f4-331c91b2ce76)
+
+**2. Complicated way (dettaching screen from PCB and removing PCB from housing):**
 
 :::danger
 This operation has to be done very smoothly.
@@ -65,16 +75,13 @@ The black part of the FFC cable do not contains any electronic nor conductive fe
 
 #### Prepare for flashing
 
-In order to get the ESP32 enter in flash mode, `GPIO0`, noted `IO0` on the PCB has to be connected to `GND`:
-
+In order to get the ESP32 enter in flash mode, `GPIO0`, noted `IO0` on the PCB has to be connected to `GND`. 
+Either connect a cable between `IO0` and `GND` (2) as in picture below:
 <CenteredImage src="/images/doc/flash/step4.png" alt="The PCB connected to the screen via FFC cable" figureNumber="5" />
 
-1. Connect (or solder temporarily) a cable between `IO0` and `GND` (2).
+or add an extra cable to Ground pin on USB to TTL as in picture below (white cable):
 
-:::info
-Here is the pinout documented by Blackadder more in details [here](https://blakadder.com/nspanel-teardown/):
-<CenteredImage src="/images/doc/flash/step4-pinout.png" alt="NSPanel pinout" figureNumber="6" />
-:::
+![extraground](https://github.com/user-attachments/assets/29a60b29-a741-403f-9c77-2b5cc5f39e1a)
 
 ### Connect your USB to UART (TTL) converter
 
@@ -102,7 +109,20 @@ First, download the latest firmware `merged-flash.bin` from [here](https://githu
 Then, flash the firmware with your tool of choice:
 
 <Tabs groupId="flashing-tool" queryString>
-  <TabItem value="Espressif" label="Espressif tool (Windows)">
+    
+    <TabItem value="ESPHOMEWEB" label="ESP Home Web (Chrome or Edge)">
+      1. Go to https://web.esphome.io/ (not supported in Firefox)
+      2. Connect USB to TTL to computer
+      3. Press Connect (choose correct USB device)
+      4. Press Install
+      5. Choose file...
+      5. Choose .bin file to flash
+      6. Press Install
+      7. Wait for flashing to complete
+      
+    </TabItem>  
+    
+    <TabItem value="Espressif" label="Espressif tool (Windows)">
 
         2. Download Espressif tool from here: https://www.espressif.com/en/support/download/other-tools
            3. Open the tool and choose to flash an `ESP32 chip`.
