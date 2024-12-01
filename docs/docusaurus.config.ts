@@ -82,6 +82,11 @@ const config: Config = {
           to: '/demo',
         },
         {
+          position: 'right',
+          label: 'Flash Firmware',
+          href: 'https://nspanelmanager.com/flashing-tool.html', // `flashing-tool.html` returns a page not found
+        },
+        {
           href: 'https://github.com/NSPManager/NSPanelManager',
           label: 'GitHub',
           position: 'right',
