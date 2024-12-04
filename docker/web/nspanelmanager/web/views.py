@@ -168,6 +168,7 @@ def save_new_room(request):
     new_room.friendly_name = request.POST['friendly_name']
     new_room.save()
     command_data = {
+        # TODO: Base64 Encode data.
         "data": new_room.get_protobuf_object().SerializeToString().decode()
     }
     send_ipc_request("entity_manager/add_room", command_data)
@@ -425,6 +426,7 @@ def add_light_to_room(request, room_id: int):
     newLight.save()
     #send_mqttmanager_reload_command()
     command_data = {
+        # TODO: Base64 Encode data.
         "data": newLight.get_protobuf_object().SerializeToString().decode()
     }
     send_ipc_request("entity_manager/add_light", command_data)

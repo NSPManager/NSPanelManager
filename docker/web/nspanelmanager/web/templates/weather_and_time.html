@@ -284,9 +284,7 @@
           </span>
           <input class="rounded-none bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
           type="text" class="input" name="outside_temp_sensor" id="outside_temp_sensor" readonly value="{{ outside_temp_sensor }}">
-          <button type="button" onclick="select_new_outside_temp_sensor();" class="inline-flex items-center px-3 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-e-0 rounded-e-md">
-            Select
-          </button>
+          <button type="button" hx-get='{% url "htmx_partial_select_new_outside_temperature_sensor" %}?filter={"home_assistant_type_filter": ["sensor"], "openhab_type_filter": ["things"]}' hx-target="#modal" hx-swap="outerHTML" hx-indicator="#modal_loading" class="btn btn-info btn-outline">Select</button>
         </div>
       </div>
       <div class="p-4 mb-4 mt-2 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50" role="alert">

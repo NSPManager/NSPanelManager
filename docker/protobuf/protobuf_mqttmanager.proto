@@ -18,9 +18,6 @@ message NSPanelSettings {
     NSPanelDefaultPage default_page = 5;
 
     int32 raise_to_100_light_level = 6;
-    int32 color_temp_min = 7;
-    int32 color_temp_max = 8;
-    bool reverse_color_temp = 9;
     int32 min_button_push_time = 10;
     int32 button_long_press_time = 11;
     int32 special_mode_trigger_time = 12;
@@ -95,29 +92,30 @@ message MQTTManagerPrivateSettings {
 message MQTTManagerSettings {
     uint32 color_temp_min = 1;
     uint32 color_temp_max = 2;
-    string date_format = 3;
-    string outside_temp_sensor_provider = 4;
-    string outside_temp_sensor_entity_id = 5;
-    string weather_location_latitude = 6;
-    string weather_location_longitude = 7;
-    wind_speed_format weather_wind_speed_format = 8;
-    precipitation_format weather_precipitation_unit = 9;
-    int32 weather_update_interval_minutes = 10;
-    time_format clock_format = 11;
-    temperature_format temperature_unit = 12;
-    int32 max_log_buffer_size = 13;
-    int32 manager_port = 14;
-    string manager_address = 15;
+    bool reverse_color_temperature_slider = 3;
+    string date_format = 4;
+    string outside_temp_sensor_provider = 5;
+    string outside_temp_sensor_entity_id = 6;
+    string weather_location_latitude = 7;
+    string weather_location_longitude = 8;
+    wind_speed_format weather_wind_speed_format = 9;
+    precipitation_format weather_precipitation_unit = 10;
+    int32 weather_update_interval_minutes = 11;
+    time_format clock_format = 12;
+    temperature_format temperature_unit = 13;
+    int32 max_log_buffer_size = 14;
+    int32 manager_port = 15;
+    string manager_address = 16;
 
     enum turn_on_behavior {
         color_temperature = 0;
         restore = 1;
     }
-    turn_on_behavior light_turn_on_behavior = 16;
-    bool is_home_assistant_addon = 17;
+    turn_on_behavior light_turn_on_behavior = 17;
+    bool is_home_assistant_addon = 18;
 
-    int32 mqtt_wait_time = 18;
-    bool optimistic_mode = 19;
+    int32 mqtt_wait_time = 19;
+    bool optimistic_mode = 20;
 }
 
 

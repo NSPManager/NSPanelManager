@@ -1,10 +1,12 @@
 #include <MqttLog.hpp>
+#include <PubSubClient.h>
 
-void MqttLog::init(std::string *mqttLogTopic) {
+void MqttLog::init(std::string *mqtt_log_topic, PubSubClient **mqtt_client) {
   MqttLog::instance = this;
-  this->_mqttLogTopic = mqttLogTopic;
+  this->_mqttLogTopic = mqtt_log_topic;
   this->_messageBuild = "";
   this->_messageBuilderMutex = xSemaphoreCreateMutex();
+  this->_mqtt_client = mqtt_client;
 
   Serial.println("MqttLog initialized.");
 }

@@ -41,10 +41,9 @@ default_settings = {
     "special_mode_release_time": 5000,
     "special_mode_trigger_time": 300,
     "turn_on_behavior": "color_temp",
-    "use_fahrenheit": False,
+    "use_fahrenheit": "False",
     "weather_update_interval": 10,
     "weather_wind_speed_format": "kmh",
-    "temperature_unit": "celsius",
     "mqtt_wait_time": 1000,
     "optimistic_mode": True,
 }

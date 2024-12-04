@@ -159,6 +159,7 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5); // Wait max 5 seconds for an answer
+  curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 10000000);
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);

@@ -20,7 +20,6 @@ RUN if [ "$IS_DEVEL" != "yes" ]; then conan profile detect --force && echo 'core
 
 RUN if [ -z "$no_mqttmanager_build" ]; then /bin/bash /MQTTManager/compile_mqttmanager.sh --target-platform "$TARGETPLATFORM" --strip; else echo "Not building MQTTManager."; fi
 
-
 FROM python:3.12.5-bookworm
 ARG no_mqttmanager_build
 ARG IS_DEVEL

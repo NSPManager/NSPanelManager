@@ -23,7 +23,7 @@ private:
   void _updateDisplay();
   void _setRoomLabelText(const char *text);
   static inline bool _doSceneSaveProgress;
-  static inline NSPanelScene *_sceneToSave;
+  static inline PROTOBUF_NSPANEL_SCENE *_sceneToSave;
 };
 
 #endif

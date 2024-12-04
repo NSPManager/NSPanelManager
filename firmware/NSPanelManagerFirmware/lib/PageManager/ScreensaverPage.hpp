@@ -2,6 +2,7 @@
 #define SCREENSAVER_PAGE_HPP
 
 #include <Arduino.h>
+#include <MqttManager.hpp>
 #include <PageBase.hpp>
 // #include <pb.h>
 
@@ -29,6 +30,7 @@ private:
   static inline uint8_t _screensaver_brightness;
   static inline bool _show_weather;
   static inline bool _stopped;
+  static inline PROTOBUF_NSPANEL_WEATHER_UPDATE *_weather_update;
 };
 
 #endif

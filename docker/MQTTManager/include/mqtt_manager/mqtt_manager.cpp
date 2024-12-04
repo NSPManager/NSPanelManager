@@ -236,7 +236,7 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
 
 void MQTT_Manager::clear_retain(const std::string &topic) {
   if (topic.empty()) {
-    SPDLOG_ERROR("Topic is emptly, will not clear retian.");
+    SPDLOG_ERROR("Topic is empty, will not clear retian.");
     return;
   }
 

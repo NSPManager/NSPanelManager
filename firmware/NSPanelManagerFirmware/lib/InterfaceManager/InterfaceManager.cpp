@@ -6,8 +6,10 @@
 #include <InterfaceManager.hpp>
 #include <LightPage.hpp>
 #include <MqttLog.hpp>
+#include <MqttManager.hpp>
 #include <NSPanel.hpp>
 #include <PageManager.hpp>
+#include <ReadBufferFixedSize.h>
 #include <RoomManager.hpp>
 #include <TftDefines.h>
 #include <WebManager.hpp>
@@ -19,9 +21,10 @@ void InterfaceManager::init() {
   this->instance = this;
   this->_processMqttMessages = true;
   this->_config_loaded = false;
+  this->_new_config = new PROTOBUF_NSPANEL_CONFIG;
   RoomManager::init();
   MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1");
-  xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+  xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 10000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 }
 
 void InterfaceManager::stop() {
@@ -99,9 +102,11 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
 
   if (NSPanel::instance->ready()) {
     PageManager::GetNSPanelManagerPage()->setText("Loading config...");
+    uint64_t start = esp_timer_get_time();
     while (!InterfaceManager::instance->_config_loaded) {
       vTaskDelay(100 / portTICK_PERIOD_MS);
     }
+    LOG_DEBUG("Config loaded, will now continue with interface. Loading config took ", esp_timer_get_time() - start, "us");
 
     // Update Home page cache
     PageManager::GetHomePage()->updateDimmerValueCache();
@@ -136,6 +141,8 @@ void InterfaceManager::showDefaultPage() {
     PageManager::GetScenePage()->show();
   } else if (InterfaceConfig::default_page == DEFAULT_PAGE::ROOM_PAGE) {
     PageManager::GetRoomPage()->show();
+  } else {
+    LOG_ERROR("Unknown default page ", (uint32_t)InterfaceConfig::default_page);
   }
 }
 
@@ -210,63 +217,66 @@ void InterfaceManager::handleNSPanelScreensaverBrightnessCommand(MQTTMessage *me
 
 void InterfaceManager::handleNSPanelConfigUpdate(MQTTMessage *message) {
   try {
-    NSPanelConfig *config = nspanel_config__unpack(NULL, message->data.size(), (const uint8_t *)message->data.c_str());
-    InterfaceManager::_new_config = *config;
-    LOG_INFO("Received new config and successfully parsed it into protobuf. Will start _taskHandleConfigData.");
-    xTaskCreatePinnedToCore(&InterfaceManager::_taskHandleConfigData, "handle_config", 5000, NULL, 1, NULL, ARDUINO_RUNNING_CORE);
+    if (message->get_protobuf_obj<PROTOBUF_NSPANEL_CONFIG>(InterfaceManager::_new_config)) {
+      message->clear(); // We no longer need raw data stored in message.
+      LOG_INFO("Received new config and successfully parsed it into protobuf. Will start _taskHandleConfigData.");
+      xTaskCreatePinnedToCore(&InterfaceManager::_taskHandleConfigData, "handle_config", 20000, NULL, 1, NULL, ARDUINO_RUNNING_CORE);
+    } else {
+      LOG_ERROR("Failed to decode new config!");
+    }
   } catch (const std::exception &e) {
     LOG_ERROR("Caught error while processing protobuf object on config topic.");
   }
 }
 
 void InterfaceManager::_taskHandleConfigData(void *param) {
-  InterfaceConfig::homeScreen = InterfaceManager::_new_config.default_room;
-  InterfaceConfig::default_page = static_cast<DEFAULT_PAGE>(InterfaceManager::_new_config.default_page);
-  InterfaceConfig::button_min_press_time = InterfaceManager::_new_config.min_button_push_time;
-  InterfaceConfig::button_long_press_time = InterfaceManager::_new_config.button_long_press_time;
-  InterfaceConfig::special_mode_trigger_time = InterfaceManager::_new_config.special_mode_trigger_time;
-  InterfaceConfig::special_mode_release_time = InterfaceManager::_new_config.special_mode_release_time;
-  InterfaceConfig::screen_dim_level = InterfaceManager::_new_config.screen_dim_level;
-  InterfaceConfig::screensaver_dim_level = InterfaceManager::_new_config.screensaver_dim_level;
-  InterfaceConfig::screensaver_activation_timeout = InterfaceManager::_new_config.screensaver_activation_timeout;
-  InterfaceConfig::screensaver_mode = InterfaceManager::_new_config.screensaver_mode;
-  InterfaceConfig::clock_us_style = InterfaceManager::_new_config.clock_us_style;
+  InterfaceConfig::homeScreen = InterfaceManager::_new_config->default_room();
+  InterfaceConfig::default_page = static_cast<DEFAULT_PAGE>(InterfaceManager::_new_config->default_page());
+  InterfaceConfig::button_min_press_time = InterfaceManager::_new_config->min_button_push_time();
+  InterfaceConfig::button_long_press_time = InterfaceManager::_new_config->button_long_press_time();
+  InterfaceConfig::special_mode_trigger_time = InterfaceManager::_new_config->special_mode_trigger_time();
+  InterfaceConfig::special_mode_release_time = InterfaceManager::_new_config->special_mode_release_time();
+  InterfaceConfig::screen_dim_level = InterfaceManager::_new_config->screen_dim_level();
+  InterfaceConfig::screensaver_dim_level = InterfaceManager::_new_config->screensaver_dim_level();
+  InterfaceConfig::screensaver_activation_timeout = InterfaceManager::_new_config->screensaver_activation_timeout();
+  InterfaceConfig::screensaver_mode = InterfaceManager::_new_config->screensaver_mode();
+  InterfaceConfig::clock_us_style = InterfaceManager::_new_config->clock_us_style();
   InterfaceConfig::lock_to_default_room = false; // TODO: Remove as only "allowed" rooms are loaded.
-  InterfaceConfig::optimistic_mode = InterfaceManager::_new_config.optimistic_mode;
+  InterfaceConfig::optimistic_mode = InterfaceManager::_new_config->optimistic_mode();
 
-  LOG_DEBUG("Loaded screensaver mode: ", InterfaceConfig::screensaver_mode);
+  LOG_DEBUG("Loaded screensaver mode: ", (uint32_t)InterfaceConfig::screensaver_mode);
   LOG_DEBUG("Screensaver activation timeout: ", InterfaceConfig::screensaver_activation_timeout);
 
-  NSPMConfig::instance->is_us_panel = InterfaceManager::_new_config.is_us_panel;
-  NSPMConfig::instance->use_fahrenheit = InterfaceManager::_new_config.use_fahrenheit;
-  NSPMConfig::instance->temperature_calibration = InterfaceManager::_new_config.temperature_calibration;
-  NSPMConfig::instance->reverse_relays = InterfaceManager::_new_config.reverse_relays;
-  NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>(InterfaceManager::_new_config.button1_mode);
-  NSPMConfig::instance->button1_mqtt_topic = InterfaceManager::_new_config.button1_mqtt_topic;
-  NSPMConfig::instance->button1_mqtt_payload = InterfaceManager::_new_config.button1_mqtt_payload;
-  NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>(InterfaceManager::_new_config.button2_mode);
-  NSPMConfig::instance->button2_mqtt_topic = InterfaceManager::_new_config.button2_mqtt_topic;
-  NSPMConfig::instance->button2_mqtt_payload = InterfaceManager::_new_config.button2_mqtt_payload;
+  NSPMConfig::instance->is_us_panel = InterfaceManager::_new_config->is_us_panel();
+  NSPMConfig::instance->use_fahrenheit = InterfaceManager::_new_config->use_fahrenheit();
+  NSPMConfig::instance->temperature_calibration = InterfaceManager::_new_config->temperature_calibration();
+  NSPMConfig::instance->reverse_relays = InterfaceManager::_new_config->reverse_relays();
+  NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>(InterfaceManager::_new_config->button1_mode());
+  NSPMConfig::instance->button1_mqtt_topic = InterfaceManager::_new_config->button1_mqtt_topic();
+  NSPMConfig::instance->button1_mqtt_payload = InterfaceManager::_new_config->button1_mqtt_payload();
+  NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>(InterfaceManager::_new_config->button2_mode());
+  NSPMConfig::instance->button2_mqtt_topic = InterfaceManager::_new_config->button2_mqtt_topic();
+  NSPMConfig::instance->button2_mqtt_payload = InterfaceManager::_new_config->button2_mqtt_payload();
 
   bool save_new_config_to_littlefs_at_end = false;
   bool reboot_after_config_saved = false;
 
-  if (NSPMConfig::instance->relay1_default_mode != InterfaceManager::_new_config.relay1_default_mode) {
-    LOG_INFO("Saving new relay 1 default mode: ", InterfaceManager::_new_config.relay1_default_mode ? "ON" : "OFF");
-    NSPMConfig::instance->relay1_default_mode = InterfaceManager::_new_config.relay1_default_mode;
+  if (NSPMConfig::instance->relay1_default_mode != InterfaceManager::_new_config->relay1_default_mode()) {
+    LOG_INFO("Saving new relay 1 default mode: ", InterfaceManager::_new_config->relay1_default_mode() ? "ON" : "OFF");
+    NSPMConfig::instance->relay1_default_mode = InterfaceManager::_new_config->relay1_default_mode();
     save_new_config_to_littlefs_at_end = true;
   }
 
-  if (NSPMConfig::instance->relay2_default_mode != InterfaceManager::_new_config.relay2_default_mode) {
-    LOG_INFO("Saving new relay 2 default mode: ", InterfaceManager::_new_config.relay2_default_mode ? "ON" : "OFF");
-    NSPMConfig::instance->relay2_default_mode = InterfaceManager::_new_config.relay2_default_mode;
+  if (NSPMConfig::instance->relay2_default_mode != InterfaceManager::_new_config->relay2_default_mode()) {
+    LOG_INFO("Saving new relay 2 default mode: ", InterfaceManager::_new_config->relay2_default_mode() ? "ON" : "OFF");
+    NSPMConfig::instance->relay2_default_mode = InterfaceManager::_new_config->relay2_default_mode();
     save_new_config_to_littlefs_at_end = true;
   }
 
-  if (NSPMConfig::instance->wifi_hostname.compare(InterfaceManager::_new_config.name) != 0) {
+  if (NSPMConfig::instance->wifi_hostname.compare(InterfaceManager::_new_config->name()) != 0) {
     save_new_config_to_littlefs_at_end = true;
     reboot_after_config_saved = true;
-    NSPMConfig::instance->wifi_hostname = InterfaceManager::_new_config.name;
+    NSPMConfig::instance->wifi_hostname = InterfaceManager::_new_config->name();
     LOG_INFO("Name has changed. Restarting.");
   }
 
@@ -282,24 +292,20 @@ void InterfaceManager::_taskHandleConfigData(void *param) {
     }
   }
 
-  // Start loading scenes and rooms
-  LOG_DEBUG("Loading global scenes.");
-  InterfaceConfig::global_scenes.clear();
-  for (int i = 0; i < InterfaceManager::_new_config.n_global_scenes; i++) {
-    InterfaceConfig::global_scenes.push_back(*InterfaceManager::_new_config.global_scenes[i]);
-    LOG_DEBUG("Loaded global scene ", InterfaceManager::_new_config.global_scenes[i]->name);
-  }
-  LOG_INFO("Loaded ", InterfaceConfig::global_scenes.size(), " global scenes.");
-
+  LOG_DEBUG("Loading ", InterfaceManager::_new_config->room_ids().get_length(), " rooms from config.");
   InterfaceConfig::room_ids.clear();
-  InterfaceConfig::room_ids.insert(InterfaceConfig::room_ids.end(), InterfaceManager::_new_config.room_ids, InterfaceManager::_new_config.room_ids + InterfaceManager::_new_config.n_room_ids);
-  RoomManager::loadAllRooms(InterfaceManager::_new_config.room_ids, InterfaceManager::_new_config.n_room_ids);
+  InterfaceConfig::room_ids.resize(InterfaceManager::_new_config->room_ids().get_length());
+  for (int i = 0; i < InterfaceManager::_new_config->room_ids().get_length(); i++) {
+    InterfaceConfig::room_ids[i] = InterfaceManager::_new_config->room_ids()[i];
+  }
+
+  RoomManager::loadAllRooms();
   if (!RoomManager::hasValidCurrentRoom()) {
     LOG_DEBUG("Config loaded, will go to default room ID: ", InterfaceConfig::homeScreen);
     if (!RoomManager::goToRoomId(InterfaceConfig::homeScreen)) {
       LOG_ERROR("Failed to go to default room. Will go to first valid room in list.");
       if (RoomManager::rooms.size() > 0) {
-        RoomManager::goToRoomId(RoomManager::rooms[0].id);
+        RoomManager::goToRoomId((*RoomManager::rooms.begin())->id());
       } else {
         LOG_ERROR("No rooms loaded!");
       }

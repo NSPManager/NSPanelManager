@@ -90,13 +90,10 @@ void Room::_publish_protobuf_status() {
   NSPanelRoomStatus status;
   status.set_id(this->_id);
   status.set_name(this->_name);
-  // TODO: Calculate if room has table/ceiling lights during load of room and not during status updates.
-  status.set_has_ceiling_lights(std::find_if(this->_entities.begin(), this->_entities.end(), [](MqttManagerEntity *e) {
-                                  return e->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT && ((Light *)e)->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING;
-                                }) != this->_entities.end());
-  status.set_has_table_lights(std::find_if(this->_entities.begin(), this->_entities.end(), [](MqttManagerEntity *e) {
-                                return e->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT && ((Light *)e)->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE;
-                              }) != this->_entities.end());
+  status.set_number_of_ceiling_lights(0); // These are calculated below, set 0 as default
+  status.set_number_of_table_lights(0); // These are calculated below, set 0 as default
+  status.set_number_of_ceiling_lights_on(0); // These are calculated below, set 0 as default
+  status.set_number_of_table_lights_on(0); // These are calculated below, set 0 as default
 
   // Calculate average light level
   uint64_t total_light_level_all = 0;
@@ -107,7 +104,9 @@ void Room::_publish_protobuf_status() {
   uint64_t total_kelvin_table = 0;
   uint16_t num_lights_total = 0;
   uint16_t num_lights_ceiling = 0;
+  uint16_t num_lights_ceiling_on = 0;
   uint16_t num_lights_table = 0;
+  uint16_t num_lights_table_on = 0;
 
   bool any_light_entity_on = std::find_if(this->_entities.begin(), this->_entities.end(), [](MqttManagerEntity *e) {
                                return e->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT && ((Light *)e)->get_state();
@@ -124,18 +123,20 @@ void Room::_publish_protobuf_status() {
       switch (light->get_light_type()) {
       case MQTT_MANAGER_LIGHT_TYPE::TABLE:
         SPDLOG_TRACE("Found table light {}::{}, state: {}", light->get_id(), light->get_name(), light->get_state() ? "ON" : "OFF");
+        num_lights_table++;
         if (light->get_state()) {
           total_light_level_table += light->get_brightness();
           total_kelvin_table += light->get_color_temperature();
-          num_lights_table++;
+          num_lights_table_on++;
         }
         break;
       case MQTT_MANAGER_LIGHT_TYPE::CEILING:
         SPDLOG_TRACE("Found ceiling light {}::{}, state: {}", light->get_id(), light->get_name(), light->get_state() ? "ON" : "OFF");
+        num_lights_ceiling++;
         if (light->get_state()) {
           total_light_level_ceiling += light->get_brightness();
           total_kelvin_ceiling += light->get_color_temperature();
-          num_lights_ceiling++;
+          num_lights_ceiling_on++;
         }
         break;
       }
@@ -160,10 +161,19 @@ void Room::_publish_protobuf_status() {
     }
   }
 
+  // Set updates values
+  status.set_number_of_ceiling_lights(num_lights_ceiling);
+  status.set_number_of_ceiling_lights_on(num_lights_ceiling_on);
+  status.set_number_of_table_lights(num_lights_table);
+  status.set_number_of_table_lights_on(num_lights_table_on);
+
   if (num_lights_total > 0) {
     float average_kelvin = total_kelvin_level_all / num_lights_total;
     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+    if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+        kelvin_pct = 100 - kelvin_pct;
+    }
 
     status.set_average_dim_level(total_light_level_all / num_lights_total);
     status.set_average_color_temperature(kelvin_pct);
@@ -171,25 +181,31 @@ void Room::_publish_protobuf_status() {
     status.set_average_dim_level(0);
     status.set_average_color_temperature(0);
   }
-  if (num_lights_table > 0) {
-    float average_kelvin = total_kelvin_table / num_lights_table;
+  if (num_lights_table_on > 0) {
+    float average_kelvin = total_kelvin_table / num_lights_table_on;
     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+    if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+        kelvin_pct = 100 - kelvin_pct;
+    }
 
-    status.set_table_lights_dim_level(total_light_level_table / num_lights_table);
+    status.set_table_lights_dim_level(total_light_level_table / num_lights_table_on);
     status.set_table_lights_color_temperature_value(kelvin_pct);
   } else {
     SPDLOG_TRACE("No table lights found, setting value to 0.");
     status.set_table_lights_dim_level(0);
     status.set_table_lights_color_temperature_value(0);
   }
-  if (num_lights_ceiling > 0) {
-    float average_kelvin = total_kelvin_ceiling / num_lights_ceiling;
+  if (num_lights_ceiling_on > 0) {
+    float average_kelvin = total_kelvin_ceiling / num_lights_ceiling_on;
     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+    if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+        kelvin_pct = 100 - kelvin_pct;
+    }
 
-    status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling);
-    status.set_ceiling_lights_color_temperature_value(total_kelvin_ceiling / num_lights_ceiling);
+    status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling_on);
+    status.set_ceiling_lights_color_temperature_value(kelvin_pct);
   } else {
     SPDLOG_TRACE("No ceiling lights found, setting value to 0.");
     status.set_ceiling_lights_dim_level(0);
@@ -222,6 +238,7 @@ void Room::command_callback(NSPanelMQTTManagerCommand &command) {
     });
     if (lights_list.size() == 0) {
       // No lights that were on were found, get all lights in room.
+      SPDLOG_DEBUG("No lights were on in room {}::{}. Will affect all lights in room instead.", this->_id, this->_name);
       std::copy_if(this->_entities.begin(), this->_entities.end(), std::back_inserter(lights_list), [command](MqttManagerEntity *e) {
         return e->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT &&
                (command.first_page_turn_on().affect_lights() == NSPanelMQTTManagerCommand_AffectLightsOptions::NSPanelMQTTManagerCommand_AffectLightsOptions_ALL ||

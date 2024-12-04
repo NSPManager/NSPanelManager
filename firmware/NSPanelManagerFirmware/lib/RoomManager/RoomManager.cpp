@@ -3,43 +3,51 @@
 #include <ButtonManager.hpp>
 #include <HttpLib.hpp>
 #include <InterfaceConfig.hpp>
+#include <InterfaceManager.hpp>
 #include <MqttLog.hpp>
 #include <MqttManager.hpp>
 #include <NSPMConfig.h>
+#include <ReadBufferFixedSize.h>
 #include <RoomManager.hpp>
 #include <WiFi.h>
 #include <map>
+#include <protobuf_defines.h>
 #include <string>
 
 void RoomManager::init() {
   RoomManager::currentRoom = nullptr;
   RoomManager::_lastReloadCommand = millis();
   RoomManager::_notify_task_room_load_complete = nullptr;
+  RoomManager::_room_status_decode_buffer_mutex = xSemaphoreCreateMutex();
 }
 
-void RoomManager::loadAllRooms(int32_t *room_ids, uint32_t n_room_ids) {
+void RoomManager::loadAllRooms() {
   RoomManager::_notify_task_room_load_complete = xTaskGetCurrentTaskHandle();
-  for (int i = 0; i < n_room_ids; i++) {
+  for (int i = 0; i < InterfaceConfig::room_ids.size(); i++) {
     while (!MqttManager::connected()) {
       vTaskDelay(50 / portTICK_PERIOD_MS); // Wait for MQTT to be connected before continuing.
     }
 
-    uint32_t room_id = room_ids[i];
-    auto existing_room = std::find_if(RoomManager::rooms.begin(), RoomManager::rooms.end(), [room_id](NSPanelRoomStatus status) {
-      return status.id == room_id;
-    });
+    auto existing_room = RoomManager::rooms.cend();
+    uint32_t room_id = InterfaceConfig::room_ids[i];
+    for (auto it = RoomManager::rooms.cbegin(); it != RoomManager::rooms.cend(); it++) {
+      if ((*it)->id() == room_id) {
+        existing_room = it;
+        break;
+      }
+    }
 
     if (existing_room == RoomManager::rooms.end()) {
       std::string room_status_topic = "nspanel/mqttmanager_";
       room_status_topic.append(NSPMConfig::instance->manager_address);
       room_status_topic.append("/room/");
-      room_status_topic.append(std::to_string(room_ids[i]));
+      room_status_topic.append(std::to_string(InterfaceConfig::room_ids[i]));
       room_status_topic.append("/status");
       MqttManager::subscribeToTopic(room_status_topic.c_str(), &RoomManager::handleNSPanelRoomStatusUpdate);
       if (ulTaskNotifyTake(pdTRUE, 5000 / portTICK_PERIOD_MS) == pdTRUE) {
-        vTaskDelay(50 / portTICK_PERIOD_MS); // Wait 50ms for other tasks to compute
+        vTaskDelay(100 / portTICK_PERIOD_MS); // Wait 50ms for other tasks to compute
       } else {
-        LOG_ERROR("Failed to load room ", room_ids[i], " within 5 seconds. Will continue to next room.");
+        LOG_ERROR("Failed to load room ", InterfaceConfig::room_ids[i], " within 5 seconds. Will continue to next room.");
       }
     } else {
       LOG_DEBUG("Room already exists, do not load via loadAllRooms. Updates are handled separately.");
@@ -51,39 +59,56 @@ void RoomManager::loadAllRooms(int32_t *room_ids, uint32_t n_room_ids) {
 
 void RoomManager::handleNSPanelRoomStatusUpdate(MQTTMessage *message) {
   try {
-    NSPanelRoomStatus *room_status = nspanel_room_status__unpack(NULL, message->data.size(), (const uint8_t *)message->data.c_str());
-    LOG_DEBUG("Successfully decoded room status for room ", room_status->id, "::", room_status->name);
-
-    bool found_and_replaced_existing_room = false;
-    for (int i = 0; i < RoomManager::rooms.size(); i++) {
-      if (RoomManager::rooms[i].id == room_status->id) {
-        bool update_current_room = RoomManager::currentRoom != nullptr && RoomManager::currentRoom->id == room_status->id;
-        RoomManager::rooms[i] = (*room_status);
-        found_and_replaced_existing_room = true;
-        if (update_current_room) {
-          RoomManager::currentRoom = &RoomManager::rooms[i];
-          RoomManager::_callRoomChangeCallbacks();
-        }
-        break;
+    if (xSemaphoreTake(RoomManager::_room_status_decode_buffer_mutex, 1000 / portTICK_PERIOD_MS) == pdTRUE) {
+      uint64_t start = esp_timer_get_time();
+      if (message->get_protobuf_obj<PROTOBUF_NSPANEL_ROOM_STATUS>(&RoomManager::_room_status_decode_buffer)) {
+        message->clear(); // We no longer need raw data stored in the message.
+      } else {
+        LOG_ERROR("Failed to deserialize protobuf!");
+        return;
       }
-    }
+      LOG_DEBUG("Deserialization of room ", RoomManager::_room_status_decode_buffer.id(), " took ", esp_timer_get_time() - start, "us.");
 
-    if (!found_and_replaced_existing_room) {
-      RoomManager::rooms.push_back((*room_status));
-    }
+      LOG_DEBUG("Successfully decoded room status for room ", RoomManager::_room_status_decode_buffer.id(), "::", RoomManager::_room_status_decode_buffer.name());
+      bool found_and_replaced_existing_room = false;
+      for (auto it = RoomManager::rooms.cbegin(); it != RoomManager::rooms.cend(); it++) {
+        if ((*it)->id() == RoomManager::_room_status_decode_buffer.id()) {
+          bool update_current_room = RoomManager::currentRoom != nullptr && RoomManager::currentRoom->id() == RoomManager::_room_status_decode_buffer.id();
+          *(*it) = RoomManager::_room_status_decode_buffer;
+          found_and_replaced_existing_room = true;
+          if (update_current_room) {
+            RoomManager::currentRoom = (*it);
+            LOG_DEBUG("Current room updated, calling room change callbacks.");
+            RoomManager::_callRoomChangeCallbacks();
+          }
+          break;
+        }
+      }
 
-    if (RoomManager::_notify_task_room_load_complete != nullptr) {
-      xTaskNotifyGive(RoomManager::_notify_task_room_load_complete);
+      if (!found_and_replaced_existing_room) {
+        LOG_INFO("Adding room ", RoomManager::_room_status_decode_buffer.id(), "::", RoomManager::_room_status_decode_buffer.name(), ".");
+        RoomManager::rooms.push_back(new PROTOBUF_NSPANEL_ROOM_STATUS(RoomManager::_room_status_decode_buffer));
+      } else {
+        LOG_INFO("Updated existing room ", RoomManager::_room_status_decode_buffer.id(), "::", RoomManager::_room_status_decode_buffer.name(), ".");
+      }
+
+      xSemaphoreGive(RoomManager::_room_status_decode_buffer_mutex); // Give back Mutex
+      if (RoomManager::_notify_task_room_load_complete != nullptr) {
+        xTaskNotifyGive(RoomManager::_notify_task_room_load_complete);
+      }
+    } else {
+      LOG_ERROR("Failed to take mutex to decode room status!");
     }
   } catch (std::exception &ex) {
     LOG_ERROR("Caught exception while processing room status update. Exception: ", ex.what());
+    xSemaphoreGive(RoomManager::_room_status_decode_buffer_mutex);
   }
 }
 
 void RoomManager::goToNextRoom() {
   if (RoomManager::currentRoom != nullptr) {
     auto room_id_it = std::find_if(InterfaceConfig::room_ids.begin(), InterfaceConfig::room_ids.end(), [](int32_t id) {
-      return RoomManager::currentRoom->id == id;
+      return RoomManager::currentRoom->id() == id;
     });
     room_id_it++;
     if (room_id_it == InterfaceConfig::room_ids.end()) {
@@ -91,9 +116,10 @@ void RoomManager::goToNextRoom() {
       room_id_it = InterfaceConfig::room_ids.begin();
     }
 
-    for (int i = 0; i < RoomManager::rooms.size(); i++) {
-      if (RoomManager::rooms[i].id == (*room_id_it)) {
-        RoomManager::currentRoom = &RoomManager::rooms[i];
+    // Find room instance
+    for (auto it = RoomManager::rooms.begin(); it != RoomManager::rooms.end(); it++) {
+      if ((*it)->id() == (*room_id_it)) {
+        RoomManager::currentRoom = (*it);
         break;
       }
     }
@@ -106,16 +132,17 @@ void RoomManager::goToNextRoom() {
 void RoomManager::goToPreviousRoom() {
   if (RoomManager::currentRoom != nullptr) {
     auto room_id_it = std::find_if(InterfaceConfig::room_ids.begin(), InterfaceConfig::room_ids.end(), [](int32_t id) {
-      return RoomManager::currentRoom->id == id;
+      return RoomManager::currentRoom->id() == id;
     });
     if (room_id_it == InterfaceConfig::room_ids.begin()) {
       // We are at the first room in the order, go to the last room.
       room_id_it = InterfaceConfig::room_ids.end()--;
     }
 
-    for (int i = 0; i < RoomManager::rooms.size(); i++) {
-      if (RoomManager::rooms[i].id == (*room_id_it)) {
-        RoomManager::currentRoom = &RoomManager::rooms[i];
+    // Find room instance
+    for (auto it = RoomManager::rooms.begin(); it != RoomManager::rooms.end(); it++) {
+      if ((*it)->id() == (*room_id_it)) {
+        RoomManager::currentRoom = (*it);
         break;
       }
     }
@@ -126,10 +153,10 @@ void RoomManager::goToPreviousRoom() {
 }
 
 bool RoomManager::goToRoomId(uint16_t roomId) {
-  for (int i = 0; i < RoomManager::rooms.size(); i++) {
-    if (RoomManager::rooms[i].id == roomId) {
-      RoomManager::currentRoom = &RoomManager::rooms[i];
-      RoomManager::_callRoomChangeCallbacks();
+  // Find room instance
+  for (auto it = RoomManager::rooms.begin(); it != RoomManager::rooms.end(); it++) {
+    if ((*it)->id() == roomId) {
+      RoomManager::currentRoom = (*it);
       return true;
     }
   }
@@ -138,10 +165,10 @@ bool RoomManager::goToRoomId(uint16_t roomId) {
   return false;
 }
 
-NSPanelRoomStatus *RoomManager::getRoomById(uint16_t roomId) {
-  for (int i = 0; i < RoomManager::rooms.size(); i++) {
-    if (RoomManager::rooms[i].id == roomId) {
-      return &RoomManager::rooms[i];
+PROTOBUF_NSPANEL_ROOM_STATUS *RoomManager::getRoomById(uint16_t roomId) {
+  for (auto it = RoomManager::rooms.begin(); it != RoomManager::rooms.end(); it++) {
+    if ((*it)->id() == roomId) {
+      return (*it);
     }
   }
 

@@ -57,7 +57,7 @@ void ScenePage::doSceneSaveProgress(void *param) {
   }
 
   if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
-    PageManager::GetScenePage()->_setRoomLabelText((*RoomManager::currentRoom).name);
+    PageManager::GetScenePage()->_setRoomLabelText(RoomManager::currentRoom->name());
   } else {
     PageManager::GetScenePage()->_setRoomLabelText("Global Scenes");
   }
@@ -66,14 +66,14 @@ void ScenePage::doSceneSaveProgress(void *param) {
 }
 
 void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
-  std::vector<NSPanelScene *> scenes;
+  std::vector<PROTOBUF_NSPANEL_SCENE *> scenes;
   if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
-    for (int i = 0; i < (*RoomManager::currentRoom).n_scenes; i++) {
-      scenes.push_back((*RoomManager::currentRoom).scenes[i]);
+    for (int i = 0; i < RoomManager::currentRoom->scenes().get_length(); i++) {
+      scenes.push_back(&(RoomManager::currentRoom->mutable_scenes()[i]));
     }
   } else {
     for (int i = 0; i < InterfaceConfig::global_scenes.size(); i++) {
-      scenes.push_back(&InterfaceConfig::global_scenes[i]);
+      scenes.push_back(InterfaceConfig::global_scenes[i]);
     }
   }
 
@@ -178,14 +178,14 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
   case SCENES_PAGE_PREVIOUS_SCENES_BUTTON_ID: {
     if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
       RoomManager::goToPreviousRoom();
-      ScenePage::_setRoomLabelText((*RoomManager::currentRoom).name);
+      ScenePage::_setRoomLabelText(RoomManager::currentRoom->name());
     }
     break;
   }
   case SCENES_PAGE_NEXT_SCENES_BUTTON_ID: {
     if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
       RoomManager::goToNextRoom();
-      ScenePage::_setRoomLabelText((*RoomManager::currentRoom).name);
+      ScenePage::_setRoomLabelText(RoomManager::currentRoom->name());
     }
     break;
   }
@@ -195,14 +195,14 @@ void ScenePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed)
 }
 
 void ScenePage::_updateDisplay() {
-  std::vector<NSPanelScene *> scenes;
+  std::vector<PROTOBUF_NSPANEL_SCENE *> scenes;
   if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
-    for (int i = 0; i < (*RoomManager::currentRoom).n_scenes; i++) {
-      scenes.push_back((*RoomManager::currentRoom).scenes[i]);
+    for (int i = 0; i < RoomManager::currentRoom->scenes().get_size(); i++) {
+      scenes.push_back(&(RoomManager::currentRoom->mutable_scenes()[i]));
     }
   } else {
     for (int i = 0; i < InterfaceConfig::global_scenes.size(); i++) {
-      scenes.push_back(&InterfaceConfig::global_scenes[i]);
+      scenes.push_back(InterfaceConfig::global_scenes[i]);
     }
   }
 
@@ -211,10 +211,10 @@ void ScenePage::_updateDisplay() {
     case 0: {
       if (scenes.size() >= 1) {
         std::string scene_name = "   ";
-        scene_name.append(scenes[0]->name);
+        scene_name.append(scenes[0]->name());
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE1_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_LABEL_NAME, true);
-        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, scenes[0]->can_save);
+        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, scenes[0]->can_save());
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE1_SAVE_BUTTON_NAME, false);
@@ -224,10 +224,10 @@ void ScenePage::_updateDisplay() {
     case 1: {
       if (scenes.size() >= 2) {
         std::string scene_name = "   ";
-        scene_name.append(scenes[1]->name);
+        scene_name.append(scenes[1]->name());
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE2_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, true);
-        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, scenes[1]->can_save);
+        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, scenes[1]->can_save());
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE2_SAVE_BUTTON_NAME, false);
@@ -237,10 +237,10 @@ void ScenePage::_updateDisplay() {
     case 2: {
       if (scenes.size() >= 3) {
         std::string scene_name = "   ";
-        scene_name.append(scenes[2]->name);
+        scene_name.append(scenes[2]->name());
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE3_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, true);
-        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, scenes[2]->can_save);
+        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, scenes[2]->can_save());
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE3_SAVE_BUTTON_NAME, false);
@@ -250,10 +250,10 @@ void ScenePage::_updateDisplay() {
     case 3: {
       if (scenes.size() >= 4) {
         std::string scene_name = "   ";
-        scene_name.append(scenes[3]->name);
+        scene_name.append(scenes[3]->name());
         NSPanel::instance->setComponentText(SCENES_PAGE_SCENE4_LABEL_NAME, scene_name.c_str());
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, true);
-        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, scenes[3]->can_save);
+        NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, scenes[3]->can_save());
       } else {
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_LABEL_NAME, false);
         NSPanel::instance->setComponentVisible(SCENES_PAGE_SCENE4_SAVE_BUTTON_NAME, false);

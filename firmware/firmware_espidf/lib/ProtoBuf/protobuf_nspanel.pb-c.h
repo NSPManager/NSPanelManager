@@ -186,12 +186,14 @@ struct  NSPanelRoomStatus
   NSPanelLightStatus **lights;
   size_t n_scenes;
   NSPanelScene **scenes;
-  protobuf_c_boolean has_ceiling_lights;
-  protobuf_c_boolean has_table_lights;
+  int32_t number_of_ceiling_lights;
+  int32_t number_of_table_lights;
+  int32_t number_of_ceiling_lights_on;
+  int32_t number_of_table_lights_on;
 };
 #define NSPANEL_ROOM_STATUS__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_room_status__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0,NULL, 0,NULL, 0, 0 }
+    , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, 0, 0 }
 
 
 struct  NSPanelWeatherUpdate__ForecastItem

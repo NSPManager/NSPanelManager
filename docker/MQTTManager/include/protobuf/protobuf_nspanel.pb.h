@@ -2607,8 +2607,10 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
     kAverageColorTemperatureFieldNumber = 6,
     kCeilingLightsColorTemperatureValueFieldNumber = 7,
     kTableLightsColorTemperatureValueFieldNumber = 8,
-    kHasCeilingLightsFieldNumber = 11,
-    kHasTableLightsFieldNumber = 12,
+    kNumberOfCeilingLightsFieldNumber = 11,
+    kNumberOfTableLightsFieldNumber = 12,
+    kNumberOfCeilingLightsOnFieldNumber = 13,
+    kNumberOfTableLightsOnFieldNumber = 14,
   };
   // repeated .NSPanelLightStatus lights = 9;
   int lights_size() const;
@@ -2730,24 +2732,44 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
   void _internal_set_table_lights_color_temperature_value(::int32_t value);
 
   public:
-  // bool has_ceiling_lights = 11;
-  void clear_has_ceiling_lights() ;
-  bool has_ceiling_lights() const;
-  void set_has_ceiling_lights(bool value);
+  // int32 number_of_ceiling_lights = 11;
+  void clear_number_of_ceiling_lights() ;
+  ::int32_t number_of_ceiling_lights() const;
+  void set_number_of_ceiling_lights(::int32_t value);
 
   private:
-  bool _internal_has_ceiling_lights() const;
-  void _internal_set_has_ceiling_lights(bool value);
+  ::int32_t _internal_number_of_ceiling_lights() const;
+  void _internal_set_number_of_ceiling_lights(::int32_t value);
 
   public:
-  // bool has_table_lights = 12;
-  void clear_has_table_lights() ;
-  bool has_table_lights() const;
-  void set_has_table_lights(bool value);
+  // int32 number_of_table_lights = 12;
+  void clear_number_of_table_lights() ;
+  ::int32_t number_of_table_lights() const;
+  void set_number_of_table_lights(::int32_t value);
 
   private:
-  bool _internal_has_table_lights() const;
-  void _internal_set_has_table_lights(bool value);
+  ::int32_t _internal_number_of_table_lights() const;
+  void _internal_set_number_of_table_lights(::int32_t value);
+
+  public:
+  // int32 number_of_ceiling_lights_on = 13;
+  void clear_number_of_ceiling_lights_on() ;
+  ::int32_t number_of_ceiling_lights_on() const;
+  void set_number_of_ceiling_lights_on(::int32_t value);
+
+  private:
+  ::int32_t _internal_number_of_ceiling_lights_on() const;
+  void _internal_set_number_of_ceiling_lights_on(::int32_t value);
+
+  public:
+  // int32 number_of_table_lights_on = 14;
+  void clear_number_of_table_lights_on() ;
+  ::int32_t number_of_table_lights_on() const;
+  void set_number_of_table_lights_on(::int32_t value);
+
+  private:
+  ::int32_t _internal_number_of_table_lights_on() const;
+  void _internal_set_number_of_table_lights_on(::int32_t value);
 
   public:
   // @@protoc_insertion_point(class_scope:NSPanelRoomStatus)
@@ -2755,7 +2777,7 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 12, 2,
+      4, 14, 2,
       38, 2>
       _table_;
 
@@ -2786,8 +2808,10 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
     ::int32_t average_color_temperature_;
     ::int32_t ceiling_lights_color_temperature_value_;
     ::int32_t table_lights_color_temperature_value_;
-    bool has_ceiling_lights_;
-    bool has_table_lights_;
+    ::int32_t number_of_ceiling_lights_;
+    ::int32_t number_of_table_lights_;
+    ::int32_t number_of_ceiling_lights_on_;
+    ::int32_t number_of_table_lights_on_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -5500,48 +5524,92 @@ NSPanelRoomStatus::_internal_mutable_scenes() {
   return &_impl_.scenes_;
 }
 
-// bool has_ceiling_lights = 11;
-inline void NSPanelRoomStatus::clear_has_ceiling_lights() {
+// int32 number_of_ceiling_lights = 11;
+inline void NSPanelRoomStatus::clear_number_of_ceiling_lights() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_ceiling_lights_ = false;
+  _impl_.number_of_ceiling_lights_ = 0;
 }
-inline bool NSPanelRoomStatus::has_ceiling_lights() const {
-  // @@protoc_insertion_point(field_get:NSPanelRoomStatus.has_ceiling_lights)
-  return _internal_has_ceiling_lights();
+inline ::int32_t NSPanelRoomStatus::number_of_ceiling_lights() const {
+  // @@protoc_insertion_point(field_get:NSPanelRoomStatus.number_of_ceiling_lights)
+  return _internal_number_of_ceiling_lights();
 }
-inline void NSPanelRoomStatus::set_has_ceiling_lights(bool value) {
-  _internal_set_has_ceiling_lights(value);
-  // @@protoc_insertion_point(field_set:NSPanelRoomStatus.has_ceiling_lights)
+inline void NSPanelRoomStatus::set_number_of_ceiling_lights(::int32_t value) {
+  _internal_set_number_of_ceiling_lights(value);
+  // @@protoc_insertion_point(field_set:NSPanelRoomStatus.number_of_ceiling_lights)
 }
-inline bool NSPanelRoomStatus::_internal_has_ceiling_lights() const {
+inline ::int32_t NSPanelRoomStatus::_internal_number_of_ceiling_lights() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.has_ceiling_lights_;
+  return _impl_.number_of_ceiling_lights_;
 }
-inline void NSPanelRoomStatus::_internal_set_has_ceiling_lights(bool value) {
+inline void NSPanelRoomStatus::_internal_set_number_of_ceiling_lights(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_ceiling_lights_ = value;
+  _impl_.number_of_ceiling_lights_ = value;
 }
 
-// bool has_table_lights = 12;
-inline void NSPanelRoomStatus::clear_has_table_lights() {
+// int32 number_of_table_lights = 12;
+inline void NSPanelRoomStatus::clear_number_of_table_lights() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_table_lights_ = false;
+  _impl_.number_of_table_lights_ = 0;
 }
-inline bool NSPanelRoomStatus::has_table_lights() const {
-  // @@protoc_insertion_point(field_get:NSPanelRoomStatus.has_table_lights)
-  return _internal_has_table_lights();
+inline ::int32_t NSPanelRoomStatus::number_of_table_lights() const {
+  // @@protoc_insertion_point(field_get:NSPanelRoomStatus.number_of_table_lights)
+  return _internal_number_of_table_lights();
 }
-inline void NSPanelRoomStatus::set_has_table_lights(bool value) {
-  _internal_set_has_table_lights(value);
-  // @@protoc_insertion_point(field_set:NSPanelRoomStatus.has_table_lights)
+inline void NSPanelRoomStatus::set_number_of_table_lights(::int32_t value) {
+  _internal_set_number_of_table_lights(value);
+  // @@protoc_insertion_point(field_set:NSPanelRoomStatus.number_of_table_lights)
 }
-inline bool NSPanelRoomStatus::_internal_has_table_lights() const {
+inline ::int32_t NSPanelRoomStatus::_internal_number_of_table_lights() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.has_table_lights_;
+  return _impl_.number_of_table_lights_;
 }
-inline void NSPanelRoomStatus::_internal_set_has_table_lights(bool value) {
+inline void NSPanelRoomStatus::_internal_set_number_of_table_lights(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_table_lights_ = value;
+  _impl_.number_of_table_lights_ = value;
+}
+
+// int32 number_of_ceiling_lights_on = 13;
+inline void NSPanelRoomStatus::clear_number_of_ceiling_lights_on() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.number_of_ceiling_lights_on_ = 0;
+}
+inline ::int32_t NSPanelRoomStatus::number_of_ceiling_lights_on() const {
+  // @@protoc_insertion_point(field_get:NSPanelRoomStatus.number_of_ceiling_lights_on)
+  return _internal_number_of_ceiling_lights_on();
+}
+inline void NSPanelRoomStatus::set_number_of_ceiling_lights_on(::int32_t value) {
+  _internal_set_number_of_ceiling_lights_on(value);
+  // @@protoc_insertion_point(field_set:NSPanelRoomStatus.number_of_ceiling_lights_on)
+}
+inline ::int32_t NSPanelRoomStatus::_internal_number_of_ceiling_lights_on() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.number_of_ceiling_lights_on_;
+}
+inline void NSPanelRoomStatus::_internal_set_number_of_ceiling_lights_on(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.number_of_ceiling_lights_on_ = value;
+}
+
+// int32 number_of_table_lights_on = 14;
+inline void NSPanelRoomStatus::clear_number_of_table_lights_on() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.number_of_table_lights_on_ = 0;
+}
+inline ::int32_t NSPanelRoomStatus::number_of_table_lights_on() const {
+  // @@protoc_insertion_point(field_get:NSPanelRoomStatus.number_of_table_lights_on)
+  return _internal_number_of_table_lights_on();
+}
+inline void NSPanelRoomStatus::set_number_of_table_lights_on(::int32_t value) {
+  _internal_set_number_of_table_lights_on(value);
+  // @@protoc_insertion_point(field_set:NSPanelRoomStatus.number_of_table_lights_on)
+}
+inline ::int32_t NSPanelRoomStatus::_internal_number_of_table_lights_on() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.number_of_table_lights_on_;
+}
+inline void NSPanelRoomStatus::_internal_set_number_of_table_lights_on(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.number_of_table_lights_on_ = value;
 }
 
 // -------------------------------------------------------------------

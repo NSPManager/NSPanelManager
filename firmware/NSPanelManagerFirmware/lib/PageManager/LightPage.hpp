@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <DeviceEntity.hpp>
 #include <PageBase.hpp>
-#include <protobuf_nspanel.pb-c.h>
+#include <protobuf_defines.h>
 
 enum LIGHT_PAGE_MODE {
   COLOR_TEMP,
@@ -21,7 +21,7 @@ public:
   uint8_t getBrightnessValue();
   uint8_t getKelvinSatValue();
   uint16_t getHueValue();
-  NSPanelLightStatus *selectedLight;
+  PROTOBUF_NSPANEL_LIGHT_STATUS *selectedLight;
   LIGHT_PAGE_MODE getCurrentMode();
   void switchMode();
 

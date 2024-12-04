@@ -7,13 +7,11 @@
 #include <NSPMConfig.h>
 #include <NSPanel.hpp>
 #include <PageManager.hpp>
+#include <ReadBufferFixedSize.h>
 #include <RoomManager.hpp>
 #include <ScreensaverPage.hpp>
 #include <TftDefines.h>
-// #include <pb_decode.h>
-// #include <protobuf_helpers.hpp>
-// #include <protobuf_nspanel.pb.h>
-#include <protobuf_nspanel.pb-c.h>
+#include <protobuf_nspanel.h>
 
 void ScreensaverPage::attachMqttCallback() {
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_screensaver_mode.c_str(), &ScreensaverPage::screensaverModeCallback);
@@ -33,34 +31,35 @@ void ScreensaverPage::attachMqttCallback() {
 
 void ScreensaverPage::init() {
   this->_stopped = false;
+  this->_weather_update = new PROTOBUF_NSPANEL_WEATHER_UPDATE;
 
   bool show_background = false;
   switch (InterfaceConfig::screensaver_mode) {
-  case _NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND:
+  case PROTOBUF_NSPANEL_CONFIG::NSPanelScreensaverMode::WEATHER_WITH_BACKGROUND:
     this->_screensaver_page_name = SCREENSAVER_PAGE_NAME;
     this->_show_weather = true;
     show_background = true;
     this->_screensaver_brightness = InterfaceConfig::screensaver_dim_level;
     break;
-  case _NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITHOUT_BACKGROUND:
+  case PROTOBUF_NSPANEL_CONFIG::NSPanelScreensaverMode::WEATHER_WITHOUT_BACKGROUND:
     this->_screensaver_page_name = SCREENSAVER_PAGE_NAME;
     this->_show_weather = true;
     show_background = false;
     this->_screensaver_brightness = InterfaceConfig::screensaver_dim_level;
     break;
-  case _NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITH_BACKGROUND:
+  case PROTOBUF_NSPANEL_CONFIG::NSPanelScreensaverMode::DATETIME_WITH_BACKGROUND:
     this->_screensaver_page_name = SCREENSAVER_MINIMAL_PAGE_NAME;
     this->_show_weather = false;
     show_background = true;
     this->_screensaver_brightness = InterfaceConfig::screensaver_dim_level;
     break;
-  case _NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITHOUT_BACKGROUND:
+  case PROTOBUF_NSPANEL_CONFIG::NSPanelScreensaverMode::DATETIME_WITHOUT_BACKGROUND:
     this->_screensaver_page_name = SCREENSAVER_MINIMAL_PAGE_NAME;
     this->_show_weather = false;
     show_background = false;
     this->_screensaver_brightness = InterfaceConfig::screensaver_dim_level;
     break;
-  case _NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__NO_SCREENSAVER:
+  case PROTOBUF_NSPANEL_CONFIG::NSPanelScreensaverMode::NO_SCREENSAVER:
     this->_screensaver_page_name = SCREENSAVER_PAGE_NAME;
     this->_show_weather = false;
     show_background = false;
@@ -130,15 +129,15 @@ void ScreensaverPage::screensaverModeCallback(MQTTMessage *message) {
 
   LOG_INFO("Received command to change screensaver mode to: ", message->data.c_str());
   if (message->data.compare("with_background")) {
-    InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND;
+    InterfaceConfig::screensaver_mode = PROTOBUF_NSPANEL_CONFIG::NSPanelScreensaverMode::WEATHER_WITH_BACKGROUND;
   } else if (message->data.compare("without_background")) {
-    InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITHOUT_BACKGROUND;
+    InterfaceConfig::screensaver_mode = PROTOBUF_NSPANEL_CONFIG::NSPanelScreensaverMode::WEATHER_WITHOUT_BACKGROUND;
   } else if (message->data.compare("datetime_with_background")) {
-    InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITH_BACKGROUND;
+    InterfaceConfig::screensaver_mode = PROTOBUF_NSPANEL_CONFIG::NSPanelScreensaverMode::DATETIME_WITH_BACKGROUND;
   } else if (message->data.compare("datetime_without_background")) {
-    InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__DATETIME_WITHOUT_BACKGROUND;
+    InterfaceConfig::screensaver_mode = PROTOBUF_NSPANEL_CONFIG::NSPanelScreensaverMode::DATETIME_WITHOUT_BACKGROUND;
   } else if (message->data.compare("no_screensaver")) {
-    InterfaceConfig::screensaver_mode = NSPanelConfig__NSPanelScreensaverMode::NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__NO_SCREENSAVER;
+    InterfaceConfig::screensaver_mode = PROTOBUF_NSPANEL_CONFIG::NSPanelScreensaverMode::NO_SCREENSAVER;
   } else {
     LOG_ERROR("Received unknown screensaver mode: ", message->data.c_str());
   }
@@ -169,53 +168,59 @@ void ScreensaverPage::weatherMqttCallback(MQTTMessage *message) {
   LOG_DEBUG("Received new weather data.");
 
   try {
-    NSPanelWeatherUpdate *update = nspanel_weather_update__unpack(NULL, message->data.size(), (const uint8_t *)message->data.c_str());
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_WEATHER_ICON_TEXT_NAME, update->current_weather_icon);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_TEMP_TEXT_NAME, update->current_temperature_string);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_WIND_TEXT_NAME, update->current_wind_string);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_SUNRISE_TEXT_NAME, update->sunrise_string);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_SUNSET_TEXT_NAME, update->sunset_string);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_MAXMIN_TEXT_NAME, update->current_maxmin_temperature);
-    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_RAIN_TEXT_NAME, update->current_precipitation_string);
-
-    if (update->n_forecast_items >= 1) {
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY1_TEXT_NAME, update->forecast_items[0]->display_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON1_TEXT_NAME, update->forecast_items[0]->weather_icon);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN1_TEXT_NAME, update->forecast_items[0]->temperature_maxmin_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN1_TEXT_NAME, update->forecast_items[0]->precipitation_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND1_TEXT_NAME, update->forecast_items[0]->wind_string);
+    if (message->get_protobuf_obj<PROTOBUF_NSPANEL_WEATHER_UPDATE>(ScreensaverPage::_weather_update)) {
+      message->clear(); // We no longer need the data in the message.
+    } else {
+      LOG_ERROR("Failed to deserialize weather update. Will cancel operation!");
+      return;
     }
 
-    if (update->n_forecast_items >= 2) {
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY2_TEXT_NAME, update->forecast_items[1]->display_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON2_TEXT_NAME, update->forecast_items[1]->weather_icon);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN2_TEXT_NAME, update->forecast_items[1]->temperature_maxmin_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN2_TEXT_NAME, update->forecast_items[1]->precipitation_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND2_TEXT_NAME, update->forecast_items[1]->wind_string);
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_WEATHER_ICON_TEXT_NAME, _weather_update->current_weather_icon());
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_TEMP_TEXT_NAME, _weather_update->current_temperature_string());
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_WIND_TEXT_NAME, _weather_update->current_wind_string());
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_SUNRISE_TEXT_NAME, _weather_update->sunrise_string());
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_SUNSET_TEXT_NAME, _weather_update->sunset_string());
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_MAXMIN_TEXT_NAME, _weather_update->current_maxmin_temperature());
+    NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_CURRENT_RAIN_TEXT_NAME, _weather_update->current_precipitation_string());
+
+    if (_weather_update->forecast_items().get_size() >= 1) {
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY1_TEXT_NAME, _weather_update->forecast_items()[0].display_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON1_TEXT_NAME, _weather_update->forecast_items()[0].weather_icon());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN1_TEXT_NAME, _weather_update->forecast_items()[0].temperature_maxmin_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN1_TEXT_NAME, _weather_update->forecast_items()[0].precipitation_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND1_TEXT_NAME, _weather_update->forecast_items()[0].wind_string());
     }
 
-    if (update->n_forecast_items >= 3) {
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY3_TEXT_NAME, update->forecast_items[2]->display_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON3_TEXT_NAME, update->forecast_items[2]->weather_icon);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN3_TEXT_NAME, update->forecast_items[2]->temperature_maxmin_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN3_TEXT_NAME, update->forecast_items[2]->precipitation_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND3_TEXT_NAME, update->forecast_items[2]->wind_string);
+    if (_weather_update->forecast_items().get_size() >= 2) {
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY2_TEXT_NAME, _weather_update->forecast_items()[1].display_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON2_TEXT_NAME, _weather_update->forecast_items()[1].weather_icon());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN2_TEXT_NAME, _weather_update->forecast_items()[1].temperature_maxmin_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN2_TEXT_NAME, _weather_update->forecast_items()[1].precipitation_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND2_TEXT_NAME, _weather_update->forecast_items()[1].wind_string());
     }
 
-    if (update->n_forecast_items >= 4) {
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY4_TEXT_NAME, update->forecast_items[3]->display_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON4_TEXT_NAME, update->forecast_items[3]->weather_icon);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN4_TEXT_NAME, update->forecast_items[3]->temperature_maxmin_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN4_TEXT_NAME, update->forecast_items[3]->precipitation_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND4_TEXT_NAME, update->forecast_items[3]->wind_string);
+    if (_weather_update->forecast_items().get_size() >= 3) {
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY3_TEXT_NAME, _weather_update->forecast_items()[2].display_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON3_TEXT_NAME, _weather_update->forecast_items()[2].weather_icon());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN3_TEXT_NAME, _weather_update->forecast_items()[2].temperature_maxmin_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN3_TEXT_NAME, _weather_update->forecast_items()[2].precipitation_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND3_TEXT_NAME, _weather_update->forecast_items()[2].wind_string());
     }
 
-    if (update->n_forecast_items >= 5) {
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY5_TEXT_NAME, update->forecast_items[4]->display_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON5_TEXT_NAME, update->forecast_items[4]->weather_icon);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN5_TEXT_NAME, update->forecast_items[4]->temperature_maxmin_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN5_TEXT_NAME, update->forecast_items[4]->precipitation_string);
-      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND5_TEXT_NAME, update->forecast_items[4]->wind_string);
+    if (_weather_update->forecast_items().get_size() >= 4) {
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY4_TEXT_NAME, _weather_update->forecast_items()[3].display_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON4_TEXT_NAME, _weather_update->forecast_items()[3].weather_icon());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN4_TEXT_NAME, _weather_update->forecast_items()[3].temperature_maxmin_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN4_TEXT_NAME, _weather_update->forecast_items()[3].precipitation_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND4_TEXT_NAME, _weather_update->forecast_items()[3].wind_string());
+    }
+
+    if (_weather_update->forecast_items().get_size() >= 5) {
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_DAY5_TEXT_NAME, _weather_update->forecast_items()[4].display_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_ICON5_TEXT_NAME, _weather_update->forecast_items()[4].weather_icon());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_MAXMIN5_TEXT_NAME, _weather_update->forecast_items()[4].temperature_maxmin_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_RAIN5_TEXT_NAME, _weather_update->forecast_items()[4].precipitation_string());
+      NSPanel::instance->setComponentText(SCREENSAVER_PAGE_NAME "." SCREENSAVER_FORECAST_WIND5_TEXT_NAME, _weather_update->forecast_items()[4].wind_string());
     }
 
   } catch (...) {

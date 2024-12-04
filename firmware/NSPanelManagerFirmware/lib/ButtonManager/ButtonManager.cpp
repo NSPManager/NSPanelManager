@@ -6,7 +6,6 @@
 #include <PageManager.hpp>
 
 void ButtonManager::init() {
-  // TODO: Read button state via interupts instead of polling
   // Setup pins for input/output
   pinMode(BUTTON_MANAGER_BUTTON1_PIN, INPUT);
   pinMode(BUTTON_MANAGER_BUTTON2_PIN, INPUT);
@@ -23,7 +22,7 @@ void ButtonManager::init() {
   LOG_DEBUG("Setting relay 2 to default state: ", NSPMConfig::instance->relay2_default_mode ? "ON" : "OFF");
   ButtonManager::setRelayState(2, NSPMConfig::instance->relay2_default_mode);
 
-  xTaskCreatePinnedToCore(ButtonManager::_loop, "_taskButtonManagerLoop", 5000, NULL, 0, &ButtonManager::_loop_task_handle, CONFIG_ARDUINO_RUNNING_CORE);
+  xTaskCreatePinnedToCore(ButtonManager::_loop, "_taskButtonManagerLoop", 5000, NULL, 1, &ButtonManager::_loop_task_handle, CONFIG_ARDUINO_RUNNING_CORE);
 
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_relay1_cmd_topic.c_str(), &ButtonManager::mqttCallback);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_relay2_cmd_topic.c_str(), &ButtonManager::mqttCallback);
@@ -182,6 +181,7 @@ void ButtonManager::_loop(void *param) {
             break; // Exit inner loop and start waiting for state change again.
           }
         }
+        Serial.println("BTN");
         vTaskDelay(BUTTON_MANAGER_BUTTON_DEBOUNCE_MS / portTICK_PERIOD_MS);
       }
     }

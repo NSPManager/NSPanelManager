@@ -56,8 +56,6 @@ inline constexpr NSPanelSettings::Impl_::Impl_(
         home_{0},
         default_page_{static_cast< ::NSPanelSettings_NSPanelDefaultPage >(0)},
         raise_to_100_light_level_{0},
-        color_temp_min_{0},
-        color_temp_max_{0},
         min_button_push_time_{0},
         button_long_press_time_{0},
         special_mode_trigger_time_{0},
@@ -67,18 +65,17 @@ inline constexpr NSPanelSettings::Impl_::Impl_(
         screensaver_dim_level_{0},
         screensaver_activation_timeout_{0},
         screensaver_mode_{static_cast< ::NSPanelSettings_NSPanelScreensaverMode >(0)},
-        reverse_color_temp_{false},
+        clock_format_{static_cast< ::time_format >(0)},
+        temperature_unit_{static_cast< ::temperature_format >(0)},
         is_us_panel_{false},
         lock_to_default_room_{false},
         reverse_relays_{false},
-        clock_format_{static_cast< ::time_format >(0)},
-        temperature_unit_{static_cast< ::temperature_format >(0)},
+        relay1_default_mode_{false},
         temperature_calibration_{0},
         button1_mode_{static_cast< ::NSPanelSettings_NSPanelButtonMode >(0)},
         button2_mode_{static_cast< ::NSPanelSettings_NSPanelButtonMode >(0)},
         button1_detached_light_id_{0},
         button2_detached_light_id_{0},
-        relay1_default_mode_{false},
         relay2_default_mode_{false},
         denied_{false},
         accepted_{false},
@@ -127,12 +124,13 @@ inline constexpr MQTTManagerSettings::Impl_::Impl_(
         weather_update_interval_minutes_{0},
         clock_format_{static_cast< ::time_format >(0)},
         temperature_unit_{static_cast< ::temperature_format >(0)},
+        reverse_color_temperature_slider_{false},
+        is_home_assistant_addon_{false},
+        optimistic_mode_{false},
         max_log_buffer_size_{0},
         manager_port_{0},
         light_turn_on_behavior_{static_cast< ::MQTTManagerSettings_turn_on_behavior >(0)},
         mqtt_wait_time_{0},
-        is_home_assistant_addon_{false},
-        optimistic_mode_{false},
         _cached_size_{0} {}
 
 template <typename>
@@ -227,9 +225,6 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.home_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.default_page_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.raise_to_100_light_level_),
-        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.color_temp_min_),
-        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.color_temp_max_),
-        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.reverse_color_temp_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.min_button_push_time_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button_long_press_time_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.special_mode_trigger_time_),
@@ -264,9 +259,6 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.relay2_register_type_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.default_room_),
         4,
-        ~0u,
-        ~0u,
-        ~0u,
         ~0u,
         ~0u,
         ~0u,
@@ -331,6 +323,7 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::MQTTManagerSettings, _impl_.color_temp_min_),
         PROTOBUF_FIELD_OFFSET(::MQTTManagerSettings, _impl_.color_temp_max_),
+        PROTOBUF_FIELD_OFFSET(::MQTTManagerSettings, _impl_.reverse_color_temperature_slider_),
         PROTOBUF_FIELD_OFFSET(::MQTTManagerSettings, _impl_.date_format_),
         PROTOBUF_FIELD_OFFSET(::MQTTManagerSettings, _impl_.outside_temp_sensor_provider_),
         PROTOBUF_FIELD_OFFSET(::MQTTManagerSettings, _impl_.outside_temp_sensor_entity_id_),
@@ -361,10 +354,10 @@ const ::uint32_t
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, 50, -1, sizeof(::NSPanelSettings)},
-        {92, -1, -1, sizeof(::MQTTManagerPrivateSettings)},
-        {108, -1, -1, sizeof(::MQTTManagerSettings)},
-        {135, -1, -1, sizeof(::MultipleNSPanelsSettings)},
+        {0, 47, -1, sizeof(::NSPanelSettings)},
+        {86, -1, -1, sizeof(::MQTTManagerPrivateSettings)},
+        {102, -1, -1, sizeof(::MQTTManagerSettings)},
+        {130, -1, -1, sizeof(::MultipleNSPanelsSettings)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelSettings_default_instance_._instance,
@@ -375,82 +368,81 @@ static const ::_pb::Message* const file_default_instances[] = {
 const char descriptor_table_protodef_protobuf_5fmqttmanager_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\032protobuf_mqttmanager.proto\032\026protobuf_f"
-    "ormats.proto\"\214\017\n\017NSPanelSettings\022\017\n\002id\030\001"
+    "ormats.proto\"\300\016\n\017NSPanelSettings\022\017\n\002id\030\001"
     " \001(\005H\000\210\001\001\022\023\n\013mac_address\030\002 \001(\t\022\014\n\004name\030\003"
     " \001(\t\022\014\n\004home\030\004 \001(\005\0229\n\014default_page\030\005 \001(\016"
     "2#.NSPanelSettings.NSPanelDefaultPage\022 \n"
-    "\030raise_to_100_light_level\030\006 \001(\005\022\026\n\016color"
-    "_temp_min\030\007 \001(\005\022\026\n\016color_temp_max\030\010 \001(\005\022"
-    "\032\n\022reverse_color_temp\030\t \001(\010\022\034\n\024min_butto"
-    "n_push_time\030\n \001(\005\022\036\n\026button_long_press_t"
-    "ime\030\013 \001(\005\022!\n\031special_mode_trigger_time\030\014"
-    " \001(\005\022!\n\031special_mode_release_time\030\r \001(\005\022"
-    "\030\n\020mqtt_ignore_time\030\016 \001(\005\022\030\n\020screen_dim_"
-    "level\030\017 \001(\005\022\035\n\025screensaver_dim_level\030\020 \001"
-    "(\005\022&\n\036screensaver_activation_timeout\030\021 \001"
-    "(\005\022A\n\020screensaver_mode\030\022 \001(\0162\'.NSPanelSe"
-    "ttings.NSPanelScreensaverMode\022\"\n\014clock_f"
-    "ormat\030\023 \001(\0162\014.time_format\022-\n\020temperature"
-    "_unit\030\024 \001(\0162\023.temperature_format\022\023\n\013is_u"
-    "s_panel\030\025 \001(\010\022\034\n\024lock_to_default_room\030\026 "
-    "\001(\010\022\026\n\016reverse_relays\030\027 \001(\010\022\033\n\023relay1_de"
-    "fault_mode\030\030 \001(\010\022\033\n\023relay2_default_mode\030"
-    "\031 \001(\010\022\037\n\027temperature_calibration\030\032 \001(\005\0228"
-    "\n\014button1_mode\030\033 \001(\0162\".NSPanelSettings.N"
-    "SPanelButtonMode\0228\n\014button2_mode\030\034 \001(\0162\""
-    ".NSPanelSettings.NSPanelButtonMode\022\037\n\022bu"
-    "tton1_mqtt_topic\030\035 \001(\tH\001\210\001\001\022\037\n\022button2_m"
-    "qtt_topic\030\036 \001(\tH\002\210\001\001\022!\n\024button1_mqtt_pay"
-    "load\030\037 \001(\tH\003\210\001\001\022!\n\024button2_mqtt_payload\030"
-    "  \001(\tH\004\210\001\001\022&\n\031button1_detached_light_id\030"
-    "! \001(\005H\005\210\001\001\022&\n\031button2_detached_light_id\030"
-    "\" \001(\005H\006\210\001\001\022\016\n\006denied\030- \001(\010\022\020\n\010accepted\030."
-    " \001(\010\022\r\n\005rooms\030/ \003(\005\022\016\n\006scenes\0300 \003(\005\022\022\n\ni"
-    "p_address\0301 \001(\t\022@\n\024relay1_register_type\030"
-    "2 \001(\0162\".NSPanelSettings.RelayRegisterTyp"
-    "e\022@\n\024relay2_register_type\0303 \001(\0162\".NSPane"
-    "lSettings.RelayRegisterType\022\024\n\014default_r"
-    "oom\0304 \001(\005\"C\n\022NSPanelDefaultPage\022\r\n\tMAIN_"
-    "PAGE\020\000\022\017\n\013SCENES_PAGE\020\001\022\r\n\tROOM_PAGE\020\002\"\250"
-    "\001\n\026NSPanelScreensaverMode\022\033\n\027WEATHER_WIT"
-    "H_BACKGROUND\020\000\022\036\n\032WEATHER_WITHOUT_BACKGR"
-    "OUND\020\001\022\034\n\030DATETIME_WITH_BACKGROUND\020\003\022\037\n\033"
-    "DATETIME_WITHOUT_BACKGROUND\020\004\022\022\n\016NO_SCRE"
-    "ENSAVER\020\005\"Y\n\021NSPanelButtonMode\022\017\n\013DIRECT"
-    "_MODE\020\000\022\021\n\rDETACHED_MODE\020\001\022\017\n\013CUSTOM_MQT"
-    "T\020\002\022\017\n\013FOLLOW_MODE\020\003\"*\n\021RelayRegisterTyp"
-    "e\022\n\n\006SWITCH\020\000\022\t\n\005LIGHT\020\001B\005\n\003_idB\025\n\023_butt"
-    "on1_mqtt_topicB\025\n\023_button2_mqtt_topicB\027\n"
-    "\025_button1_mqtt_payloadB\027\n\025_button2_mqtt_"
-    "payloadB\034\n\032_button1_detached_light_idB\034\n"
-    "\032_button2_detached_light_id\"\347\001\n\032MQTTMana"
-    "gerPrivateSettings\022\036\n\026home_assistant_add"
-    "ress\030\001 \001(\t\022\034\n\024home_assistant_token\030\002 \001(\t"
-    "\022\027\n\017openhab_address\030\003 \001(\t\022\025\n\ropenhab_tok"
-    "en\030\004 \001(\t\022\023\n\013mqtt_server\030\005 \001(\t\022\030\n\020mqtt_se"
-    "rver_port\030\006 \001(\005\022\025\n\rmqtt_username\030\007 \001(\t\022\025"
-    "\n\rmqtt_password\030\010 \001(\t\"\371\005\n\023MQTTManagerSet"
-    "tings\022\026\n\016color_temp_min\030\001 \001(\r\022\026\n\016color_t"
-    "emp_max\030\002 \001(\r\022\023\n\013date_format\030\003 \001(\t\022$\n\034ou"
-    "tside_temp_sensor_provider\030\004 \001(\t\022%\n\035outs"
-    "ide_temp_sensor_entity_id\030\005 \001(\t\022!\n\031weath"
-    "er_location_latitude\030\006 \001(\t\022\"\n\032weather_lo"
-    "cation_longitude\030\007 \001(\t\0225\n\031weather_wind_s"
-    "peed_format\030\010 \001(\0162\022.wind_speed_format\0229\n"
-    "\032weather_precipitation_unit\030\t \001(\0162\025.prec"
-    "ipitation_format\022\'\n\037weather_update_inter"
-    "val_minutes\030\n \001(\005\022\"\n\014clock_format\030\013 \001(\0162"
-    "\014.time_format\022-\n\020temperature_unit\030\014 \001(\0162"
-    "\023.temperature_format\022\033\n\023max_log_buffer_s"
-    "ize\030\r \001(\005\022\024\n\014manager_port\030\016 \001(\005\022\027\n\017manag"
-    "er_address\030\017 \001(\t\022E\n\026light_turn_on_behavi"
-    "or\030\020 \001(\0162%.MQTTManagerSettings.turn_on_b"
-    "ehavior\022\037\n\027is_home_assistant_addon\030\021 \001(\010"
-    "\022\026\n\016mqtt_wait_time\030\022 \001(\005\022\027\n\017optimistic_m"
-    "ode\030\023 \001(\010\"6\n\020turn_on_behavior\022\025\n\021color_t"
-    "emperature\020\000\022\013\n\007restore\020\001\">\n\030MultipleNSP"
-    "anelsSettings\022\"\n\010nspanels\030\001 \003(\0132\020.NSPane"
-    "lSettingsb\006proto3"
+    "\030raise_to_100_light_level\030\006 \001(\005\022\034\n\024min_b"
+    "utton_push_time\030\n \001(\005\022\036\n\026button_long_pre"
+    "ss_time\030\013 \001(\005\022!\n\031special_mode_trigger_ti"
+    "me\030\014 \001(\005\022!\n\031special_mode_release_time\030\r "
+    "\001(\005\022\030\n\020mqtt_ignore_time\030\016 \001(\005\022\030\n\020screen_"
+    "dim_level\030\017 \001(\005\022\035\n\025screensaver_dim_level"
+    "\030\020 \001(\005\022&\n\036screensaver_activation_timeout"
+    "\030\021 \001(\005\022A\n\020screensaver_mode\030\022 \001(\0162\'.NSPan"
+    "elSettings.NSPanelScreensaverMode\022\"\n\014clo"
+    "ck_format\030\023 \001(\0162\014.time_format\022-\n\020tempera"
+    "ture_unit\030\024 \001(\0162\023.temperature_format\022\023\n\013"
+    "is_us_panel\030\025 \001(\010\022\034\n\024lock_to_default_roo"
+    "m\030\026 \001(\010\022\026\n\016reverse_relays\030\027 \001(\010\022\033\n\023relay"
+    "1_default_mode\030\030 \001(\010\022\033\n\023relay2_default_m"
+    "ode\030\031 \001(\010\022\037\n\027temperature_calibration\030\032 \001"
+    "(\005\0228\n\014button1_mode\030\033 \001(\0162\".NSPanelSettin"
+    "gs.NSPanelButtonMode\0228\n\014button2_mode\030\034 \001"
+    "(\0162\".NSPanelSettings.NSPanelButtonMode\022\037"
+    "\n\022button1_mqtt_topic\030\035 \001(\tH\001\210\001\001\022\037\n\022butto"
+    "n2_mqtt_topic\030\036 \001(\tH\002\210\001\001\022!\n\024button1_mqtt"
+    "_payload\030\037 \001(\tH\003\210\001\001\022!\n\024button2_mqtt_payl"
+    "oad\030  \001(\tH\004\210\001\001\022&\n\031button1_detached_light"
+    "_id\030! \001(\005H\005\210\001\001\022&\n\031button2_detached_light"
+    "_id\030\" \001(\005H\006\210\001\001\022\016\n\006denied\030- \001(\010\022\020\n\010accept"
+    "ed\030. \001(\010\022\r\n\005rooms\030/ \003(\005\022\016\n\006scenes\0300 \003(\005\022"
+    "\022\n\nip_address\0301 \001(\t\022@\n\024relay1_register_t"
+    "ype\0302 \001(\0162\".NSPanelSettings.RelayRegiste"
+    "rType\022@\n\024relay2_register_type\0303 \001(\0162\".NS"
+    "PanelSettings.RelayRegisterType\022\024\n\014defau"
+    "lt_room\0304 \001(\005\"C\n\022NSPanelDefaultPage\022\r\n\tM"
+    "AIN_PAGE\020\000\022\017\n\013SCENES_PAGE\020\001\022\r\n\tROOM_PAGE"
+    "\020\002\"\250\001\n\026NSPanelScreensaverMode\022\033\n\027WEATHER"
+    "_WITH_BACKGROUND\020\000\022\036\n\032WEATHER_WITHOUT_BA"
+    "CKGROUND\020\001\022\034\n\030DATETIME_WITH_BACKGROUND\020\003"
+    "\022\037\n\033DATETIME_WITHOUT_BACKGROUND\020\004\022\022\n\016NO_"
+    "SCREENSAVER\020\005\"Y\n\021NSPanelButtonMode\022\017\n\013DI"
+    "RECT_MODE\020\000\022\021\n\rDETACHED_MODE\020\001\022\017\n\013CUSTOM"
+    "_MQTT\020\002\022\017\n\013FOLLOW_MODE\020\003\"*\n\021RelayRegiste"
+    "rType\022\n\n\006SWITCH\020\000\022\t\n\005LIGHT\020\001B\005\n\003_idB\025\n\023_"
+    "button1_mqtt_topicB\025\n\023_button2_mqtt_topi"
+    "cB\027\n\025_button1_mqtt_payloadB\027\n\025_button2_m"
+    "qtt_payloadB\034\n\032_button1_detached_light_i"
+    "dB\034\n\032_button2_detached_light_id\"\347\001\n\032MQTT"
+    "ManagerPrivateSettings\022\036\n\026home_assistant"
+    "_address\030\001 \001(\t\022\034\n\024home_assistant_token\030\002"
+    " \001(\t\022\027\n\017openhab_address\030\003 \001(\t\022\025\n\ropenhab"
+    "_token\030\004 \001(\t\022\023\n\013mqtt_server\030\005 \001(\t\022\030\n\020mqt"
+    "t_server_port\030\006 \001(\005\022\025\n\rmqtt_username\030\007 \001"
+    "(\t\022\025\n\rmqtt_password\030\010 \001(\t\"\243\006\n\023MQTTManage"
+    "rSettings\022\026\n\016color_temp_min\030\001 \001(\r\022\026\n\016col"
+    "or_temp_max\030\002 \001(\r\022(\n reverse_color_tempe"
+    "rature_slider\030\003 \001(\010\022\023\n\013date_format\030\004 \001(\t"
+    "\022$\n\034outside_temp_sensor_provider\030\005 \001(\t\022%"
+    "\n\035outside_temp_sensor_entity_id\030\006 \001(\t\022!\n"
+    "\031weather_location_latitude\030\007 \001(\t\022\"\n\032weat"
+    "her_location_longitude\030\010 \001(\t\0225\n\031weather_"
+    "wind_speed_format\030\t \001(\0162\022.wind_speed_for"
+    "mat\0229\n\032weather_precipitation_unit\030\n \001(\0162"
+    "\025.precipitation_format\022\'\n\037weather_update"
+    "_interval_minutes\030\013 \001(\005\022\"\n\014clock_format\030"
+    "\014 \001(\0162\014.time_format\022-\n\020temperature_unit\030"
+    "\r \001(\0162\023.temperature_format\022\033\n\023max_log_bu"
+    "ffer_size\030\016 \001(\005\022\024\n\014manager_port\030\017 \001(\005\022\027\n"
+    "\017manager_address\030\020 \001(\t\022E\n\026light_turn_on_"
+    "behavior\030\021 \001(\0162%.MQTTManagerSettings.tur"
+    "n_on_behavior\022\037\n\027is_home_assistant_addon"
+    "\030\022 \001(\010\022\026\n\016mqtt_wait_time\030\023 \001(\005\022\027\n\017optimi"
+    "stic_mode\030\024 \001(\010\"6\n\020turn_on_behavior\022\025\n\021c"
+    "olor_temperature\020\000\022\013\n\007restore\020\001\">\n\030Multi"
+    "pleNSPanelsSettings\022\"\n\010nspanels\030\001 \003(\0132\020."
+    "NSPanelSettingsb\006proto3"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_protobuf_5fmqttmanager_2eproto_deps[1] =
     {
@@ -460,7 +452,7 @@ static ::absl::once_flag descriptor_table_protobuf_5fmqttmanager_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fmqttmanager_2eproto = {
     false,
     false,
-    3057,
+    3023,
     descriptor_table_protodef_protobuf_5fmqttmanager_2eproto,
     "protobuf_mqttmanager.proto",
     &descriptor_table_protobuf_5fmqttmanager_2eproto_once,
@@ -693,15 +685,15 @@ NSPanelSettings::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<5, 42, 0, 165, 9> NSPanelSettings::_table_ = {
+const ::_pbi::TcParseTable<5, 39, 0, 157, 9> NSPanelSettings::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_._has_bits_),
     0, // no _extensions_
     52, 248,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    0,  // skipmap
+    448,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    42,  // num_field_entries
+    39,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_NSPanelSettings_default_instance_._instance,
@@ -730,15 +722,9 @@ const ::_pbi::TcParseTable<5, 42, 0, 165, 9> NSPanelSettings::_table_ = {
     // int32 raise_to_100_light_level = 6;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelSettings, _impl_.raise_to_100_light_level_), 63>(),
      {48, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.raise_to_100_light_level_)}},
-    // int32 color_temp_min = 7;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelSettings, _impl_.color_temp_min_), 63>(),
-     {56, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.color_temp_min_)}},
-    // int32 color_temp_max = 8;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelSettings, _impl_.color_temp_max_), 63>(),
-     {64, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.color_temp_max_)}},
-    // bool reverse_color_temp = 9;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelSettings, _impl_.reverse_color_temp_), 63>(),
-     {72, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.reverse_color_temp_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
     // int32 min_button_push_time = 10;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelSettings, _impl_.min_button_push_time_), 63>(),
      {80, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.min_button_push_time_)}},
@@ -807,7 +793,7 @@ const ::_pbi::TcParseTable<5, 42, 0, 165, 9> NSPanelSettings::_table_ = {
      {506, 2, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_mqtt_payload_)}},
   }}, {{
     33, 0, 2,
-    4092, 32, 65520, 38,
+    4092, 29, 65520, 35,
     65535, 65535
   }}, {{
     // optional int32 id = 1;
@@ -828,15 +814,6 @@ const ::_pbi::TcParseTable<5, 42, 0, 165, 9> NSPanelSettings::_table_ = {
     // int32 raise_to_100_light_level = 6;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.raise_to_100_light_level_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // int32 color_temp_min = 7;
-    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.color_temp_min_), -1, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // int32 color_temp_max = 8;
-    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.color_temp_max_), -1, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // bool reverse_color_temp = 9;
-    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.reverse_color_temp_), -1, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
     // int32 min_button_push_time = 10;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.min_button_push_time_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
@@ -939,7 +916,7 @@ const ::_pbi::TcParseTable<5, 42, 0, 165, 9> NSPanelSettings::_table_ = {
   }},
   // no aux_entries
   {{
-    "\17\0\13\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\22\22\24\24\0\0\0\0\0\0\12\0\0\0\0\0\0\0\0"
+    "\17\0\13\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\22\22\24\24\0\0\0\0\0\0\12\0\0\0"
     "NSPanelSettings"
     "mac_address"
     "name"
@@ -987,9 +964,9 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
         reinterpret_cast<char*>(&_impl_.button2_detached_light_id_) -
         reinterpret_cast<char*>(&_impl_.button1_detached_light_id_)) + sizeof(_impl_.button2_detached_light_id_));
   }
-  ::memset(&_impl_.relay1_default_mode_, 0, static_cast<::size_t>(
+  ::memset(&_impl_.relay2_default_mode_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.default_room_) -
-      reinterpret_cast<char*>(&_impl_.relay1_default_mode_)) + sizeof(_impl_.default_room_));
+      reinterpret_cast<char*>(&_impl_.relay2_default_mode_)) + sizeof(_impl_.default_room_));
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -1044,27 +1021,6 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
     target = ::google::protobuf::internal::WireFormatLite::
         WriteInt32ToArrayWithField<6>(
             stream, this->_internal_raise_to_100_light_level(), target);
-  }
-
-  // int32 color_temp_min = 7;
-  if (this->_internal_color_temp_min() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<7>(
-            stream, this->_internal_color_temp_min(), target);
-  }
-
-  // int32 color_temp_max = 8;
-  if (this->_internal_color_temp_max() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<8>(
-            stream, this->_internal_color_temp_max(), target);
-  }
-
-  // bool reverse_color_temp = 9;
-  if (this->_internal_reverse_color_temp() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        9, this->_internal_reverse_color_temp(), target);
   }
 
   // int32 min_button_push_time = 10;
@@ -1420,18 +1376,6 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
         this->_internal_raise_to_100_light_level());
   }
 
-  // int32 color_temp_min = 7;
-  if (this->_internal_color_temp_min() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_color_temp_min());
-  }
-
-  // int32 color_temp_max = 8;
-  if (this->_internal_color_temp_max() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_color_temp_max());
-  }
-
   // int32 min_button_push_time = 10;
   if (this->_internal_min_button_push_time() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
@@ -1486,9 +1430,16 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_screensaver_mode());
   }
 
-  // bool reverse_color_temp = 9;
-  if (this->_internal_reverse_color_temp() != 0) {
-    total_size += 2;
+  // .time_format clock_format = 19;
+  if (this->_internal_clock_format() != 0) {
+    total_size += 2 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_clock_format());
+  }
+
+  // .temperature_format temperature_unit = 20;
+  if (this->_internal_temperature_unit() != 0) {
+    total_size += 2 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_temperature_unit());
   }
 
   // bool is_us_panel = 21;
@@ -1506,16 +1457,9 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
     total_size += 3;
   }
 
-  // .time_format clock_format = 19;
-  if (this->_internal_clock_format() != 0) {
-    total_size += 2 +
-                  ::_pbi::WireFormatLite::EnumSize(this->_internal_clock_format());
-  }
-
-  // .temperature_format temperature_unit = 20;
-  if (this->_internal_temperature_unit() != 0) {
-    total_size += 2 +
-                  ::_pbi::WireFormatLite::EnumSize(this->_internal_temperature_unit());
+  // bool relay1_default_mode = 24;
+  if (this->_internal_relay1_default_mode() != 0) {
+    total_size += 3;
   }
 
   // int32 temperature_calibration = 26;
@@ -1550,11 +1494,6 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
     }
 
   }
-  // bool relay1_default_mode = 24;
-  if (this->_internal_relay1_default_mode() != 0) {
-    total_size += 3;
-  }
-
   // bool relay2_default_mode = 25;
   if (this->_internal_relay2_default_mode() != 0) {
     total_size += 3;
@@ -1638,12 +1577,6 @@ void NSPanelSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const :
   if (from._internal_raise_to_100_light_level() != 0) {
     _this->_impl_.raise_to_100_light_level_ = from._impl_.raise_to_100_light_level_;
   }
-  if (from._internal_color_temp_min() != 0) {
-    _this->_impl_.color_temp_min_ = from._impl_.color_temp_min_;
-  }
-  if (from._internal_color_temp_max() != 0) {
-    _this->_impl_.color_temp_max_ = from._impl_.color_temp_max_;
-  }
   if (from._internal_min_button_push_time() != 0) {
     _this->_impl_.min_button_push_time_ = from._impl_.min_button_push_time_;
   }
@@ -1671,8 +1604,11 @@ void NSPanelSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const :
   if (from._internal_screensaver_mode() != 0) {
     _this->_impl_.screensaver_mode_ = from._impl_.screensaver_mode_;
   }
-  if (from._internal_reverse_color_temp() != 0) {
-    _this->_impl_.reverse_color_temp_ = from._impl_.reverse_color_temp_;
+  if (from._internal_clock_format() != 0) {
+    _this->_impl_.clock_format_ = from._impl_.clock_format_;
+  }
+  if (from._internal_temperature_unit() != 0) {
+    _this->_impl_.temperature_unit_ = from._impl_.temperature_unit_;
   }
   if (from._internal_is_us_panel() != 0) {
     _this->_impl_.is_us_panel_ = from._impl_.is_us_panel_;
@@ -1683,11 +1619,8 @@ void NSPanelSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const :
   if (from._internal_reverse_relays() != 0) {
     _this->_impl_.reverse_relays_ = from._impl_.reverse_relays_;
   }
-  if (from._internal_clock_format() != 0) {
-    _this->_impl_.clock_format_ = from._impl_.clock_format_;
-  }
-  if (from._internal_temperature_unit() != 0) {
-    _this->_impl_.temperature_unit_ = from._impl_.temperature_unit_;
+  if (from._internal_relay1_default_mode() != 0) {
+    _this->_impl_.relay1_default_mode_ = from._impl_.relay1_default_mode_;
   }
   if (from._internal_temperature_calibration() != 0) {
     _this->_impl_.temperature_calibration_ = from._impl_.temperature_calibration_;
@@ -1705,9 +1638,6 @@ void NSPanelSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const :
     if (cached_has_bits & 0x00000040u) {
       _this->_impl_.button2_detached_light_id_ = from._impl_.button2_detached_light_id_;
     }
-  }
-  if (from._internal_relay1_default_mode() != 0) {
-    _this->_impl_.relay1_default_mode_ = from._impl_.relay1_default_mode_;
   }
   if (from._internal_relay2_default_mode() != 0) {
     _this->_impl_.relay2_default_mode_ = from._impl_.relay2_default_mode_;
@@ -2193,9 +2123,9 @@ MQTTManagerSettings::MQTTManagerSettings(
                offsetof(Impl_, color_temp_min_),
            reinterpret_cast<const char *>(&from._impl_) +
                offsetof(Impl_, color_temp_min_),
-           offsetof(Impl_, optimistic_mode_) -
+           offsetof(Impl_, mqtt_wait_time_) -
                offsetof(Impl_, color_temp_min_) +
-               sizeof(Impl_::optimistic_mode_));
+               sizeof(Impl_::mqtt_wait_time_));
 
   // @@protoc_insertion_point(copy_constructor:MQTTManagerSettings)
 }
@@ -2215,9 +2145,9 @@ inline void MQTTManagerSettings::SharedCtor(::_pb::Arena* arena) {
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, color_temp_min_),
            0,
-           offsetof(Impl_, optimistic_mode_) -
+           offsetof(Impl_, mqtt_wait_time_) -
                offsetof(Impl_, color_temp_min_) +
-               sizeof(Impl_::optimistic_mode_));
+               sizeof(Impl_::mqtt_wait_time_));
 }
 MQTTManagerSettings::~MQTTManagerSettings() {
   // @@protoc_insertion_point(destructor:MQTTManagerSettings)
@@ -2256,15 +2186,15 @@ MQTTManagerSettings::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<5, 19, 0, 178, 2> MQTTManagerSettings::_table_ = {
+const ::_pbi::TcParseTable<5, 20, 0, 178, 2> MQTTManagerSettings::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    19, 248,  // max_field_number, fast_idx_mask
+    20, 248,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294443008,  // skipmap
+    4293918720,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    19,  // num_field_entries
+    20,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_MQTTManagerSettings_default_instance_._instance,
@@ -2281,58 +2211,60 @@ const ::_pbi::TcParseTable<5, 19, 0, 178, 2> MQTTManagerSettings::_table_ = {
     // uint32 color_temp_max = 2;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MQTTManagerSettings, _impl_.color_temp_max_), 63>(),
      {16, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.color_temp_max_)}},
-    // string date_format = 3;
+    // bool reverse_color_temperature_slider = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(MQTTManagerSettings, _impl_.reverse_color_temperature_slider_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.reverse_color_temperature_slider_)}},
+    // string date_format = 4;
     {::_pbi::TcParser::FastUS1,
-     {26, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.date_format_)}},
-    // string outside_temp_sensor_provider = 4;
+     {34, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.date_format_)}},
+    // string outside_temp_sensor_provider = 5;
     {::_pbi::TcParser::FastUS1,
-     {34, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.outside_temp_sensor_provider_)}},
-    // string outside_temp_sensor_entity_id = 5;
+     {42, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.outside_temp_sensor_provider_)}},
+    // string outside_temp_sensor_entity_id = 6;
     {::_pbi::TcParser::FastUS1,
-     {42, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.outside_temp_sensor_entity_id_)}},
-    // string weather_location_latitude = 6;
+     {50, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.outside_temp_sensor_entity_id_)}},
+    // string weather_location_latitude = 7;
     {::_pbi::TcParser::FastUS1,
-     {50, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_location_latitude_)}},
-    // string weather_location_longitude = 7;
+     {58, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_location_latitude_)}},
+    // string weather_location_longitude = 8;
     {::_pbi::TcParser::FastUS1,
-     {58, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_location_longitude_)}},
-    // .wind_speed_format weather_wind_speed_format = 8;
+     {66, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_location_longitude_)}},
+    // .wind_speed_format weather_wind_speed_format = 9;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MQTTManagerSettings, _impl_.weather_wind_speed_format_), 63>(),
-     {64, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_wind_speed_format_)}},
-    // .precipitation_format weather_precipitation_unit = 9;
+     {72, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_wind_speed_format_)}},
+    // .precipitation_format weather_precipitation_unit = 10;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MQTTManagerSettings, _impl_.weather_precipitation_unit_), 63>(),
-     {72, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_precipitation_unit_)}},
-    // int32 weather_update_interval_minutes = 10;
+     {80, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_precipitation_unit_)}},
+    // int32 weather_update_interval_minutes = 11;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MQTTManagerSettings, _impl_.weather_update_interval_minutes_), 63>(),
-     {80, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_update_interval_minutes_)}},
-    // .time_format clock_format = 11;
+     {88, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_update_interval_minutes_)}},
+    // .time_format clock_format = 12;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MQTTManagerSettings, _impl_.clock_format_), 63>(),
-     {88, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.clock_format_)}},
-    // .temperature_format temperature_unit = 12;
+     {96, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.clock_format_)}},
+    // .temperature_format temperature_unit = 13;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MQTTManagerSettings, _impl_.temperature_unit_), 63>(),
-     {96, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.temperature_unit_)}},
-    // int32 max_log_buffer_size = 13;
+     {104, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.temperature_unit_)}},
+    // int32 max_log_buffer_size = 14;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MQTTManagerSettings, _impl_.max_log_buffer_size_), 63>(),
-     {104, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.max_log_buffer_size_)}},
-    // int32 manager_port = 14;
+     {112, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.max_log_buffer_size_)}},
+    // int32 manager_port = 15;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MQTTManagerSettings, _impl_.manager_port_), 63>(),
-     {112, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.manager_port_)}},
-    // string manager_address = 15;
-    {::_pbi::TcParser::FastUS1,
-     {122, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.manager_address_)}},
-    // .MQTTManagerSettings.turn_on_behavior light_turn_on_behavior = 16;
+     {120, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.manager_port_)}},
+    // string manager_address = 16;
+    {::_pbi::TcParser::FastUS2,
+     {386, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.manager_address_)}},
+    // .MQTTManagerSettings.turn_on_behavior light_turn_on_behavior = 17;
     {::_pbi::TcParser::FastV32S2,
-     {384, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.light_turn_on_behavior_)}},
-    // bool is_home_assistant_addon = 17;
+     {392, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.light_turn_on_behavior_)}},
+    // bool is_home_assistant_addon = 18;
     {::_pbi::TcParser::FastV8S2,
-     {392, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.is_home_assistant_addon_)}},
-    // int32 mqtt_wait_time = 18;
+     {400, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.is_home_assistant_addon_)}},
+    // int32 mqtt_wait_time = 19;
     {::_pbi::TcParser::FastV32S2,
-     {400, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.mqtt_wait_time_)}},
-    // bool optimistic_mode = 19;
+     {408, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.mqtt_wait_time_)}},
+    // bool optimistic_mode = 20;
     {::_pbi::TcParser::FastV8S2,
-     {408, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.optimistic_mode_)}},
-    {::_pbi::TcParser::MiniParse, {}},
+     {416, 63, 0, PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.optimistic_mode_)}},
     {::_pbi::TcParser::MiniParse, {}},
     {::_pbi::TcParser::MiniParse, {}},
     {::_pbi::TcParser::MiniParse, {}},
@@ -2353,61 +2285,64 @@ const ::_pbi::TcParseTable<5, 19, 0, 178, 2> MQTTManagerSettings::_table_ = {
     // uint32 color_temp_max = 2;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.color_temp_max_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUInt32)},
-    // string date_format = 3;
+    // bool reverse_color_temperature_slider = 3;
+    {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.reverse_color_temperature_slider_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // string date_format = 4;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.date_format_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string outside_temp_sensor_provider = 4;
+    // string outside_temp_sensor_provider = 5;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.outside_temp_sensor_provider_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string outside_temp_sensor_entity_id = 5;
+    // string outside_temp_sensor_entity_id = 6;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.outside_temp_sensor_entity_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string weather_location_latitude = 6;
+    // string weather_location_latitude = 7;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_location_latitude_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string weather_location_longitude = 7;
+    // string weather_location_longitude = 8;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_location_longitude_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // .wind_speed_format weather_wind_speed_format = 8;
+    // .wind_speed_format weather_wind_speed_format = 9;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_wind_speed_format_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
-    // .precipitation_format weather_precipitation_unit = 9;
+    // .precipitation_format weather_precipitation_unit = 10;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_precipitation_unit_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
-    // int32 weather_update_interval_minutes = 10;
+    // int32 weather_update_interval_minutes = 11;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.weather_update_interval_minutes_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // .time_format clock_format = 11;
+    // .time_format clock_format = 12;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.clock_format_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
-    // .temperature_format temperature_unit = 12;
+    // .temperature_format temperature_unit = 13;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.temperature_unit_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
-    // int32 max_log_buffer_size = 13;
+    // int32 max_log_buffer_size = 14;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.max_log_buffer_size_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // int32 manager_port = 14;
+    // int32 manager_port = 15;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.manager_port_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // string manager_address = 15;
+    // string manager_address = 16;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.manager_address_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // .MQTTManagerSettings.turn_on_behavior light_turn_on_behavior = 16;
+    // .MQTTManagerSettings.turn_on_behavior light_turn_on_behavior = 17;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.light_turn_on_behavior_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
-    // bool is_home_assistant_addon = 17;
+    // bool is_home_assistant_addon = 18;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.is_home_assistant_addon_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // int32 mqtt_wait_time = 18;
+    // int32 mqtt_wait_time = 19;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.mqtt_wait_time_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // bool optimistic_mode = 19;
+    // bool optimistic_mode = 20;
     {PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.optimistic_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
   }},
   // no aux_entries
   {{
-    "\23\0\0\13\34\35\31\32\0\0\0\0\0\0\0\17\0\0\0\0\0\0\0\0"
+    "\23\0\0\0\13\34\35\31\32\0\0\0\0\0\0\0\17\0\0\0\0\0\0\0"
     "MQTTManagerSettings"
     "date_format"
     "outside_temp_sensor_provider"
@@ -2432,8 +2367,8 @@ PROTOBUF_NOINLINE void MQTTManagerSettings::Clear() {
   _impl_.weather_location_longitude_.ClearToEmpty();
   _impl_.manager_address_.ClearToEmpty();
   ::memset(&_impl_.color_temp_min_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.optimistic_mode_) -
-      reinterpret_cast<char*>(&_impl_.color_temp_min_)) + sizeof(_impl_.optimistic_mode_));
+      reinterpret_cast<char*>(&_impl_.mqtt_wait_time_) -
+      reinterpret_cast<char*>(&_impl_.color_temp_min_)) + sizeof(_impl_.mqtt_wait_time_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -2458,129 +2393,136 @@ PROTOBUF_NOINLINE void MQTTManagerSettings::Clear() {
         2, this->_internal_color_temp_max(), target);
   }
 
-  // string date_format = 3;
+  // bool reverse_color_temperature_slider = 3;
+  if (this->_internal_reverse_color_temperature_slider() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        3, this->_internal_reverse_color_temperature_slider(), target);
+  }
+
+  // string date_format = 4;
   if (!this->_internal_date_format().empty()) {
     const std::string& _s = this->_internal_date_format();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MQTTManagerSettings.date_format");
-    target = stream->WriteStringMaybeAliased(3, _s, target);
+    target = stream->WriteStringMaybeAliased(4, _s, target);
   }
 
-  // string outside_temp_sensor_provider = 4;
+  // string outside_temp_sensor_provider = 5;
   if (!this->_internal_outside_temp_sensor_provider().empty()) {
     const std::string& _s = this->_internal_outside_temp_sensor_provider();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MQTTManagerSettings.outside_temp_sensor_provider");
-    target = stream->WriteStringMaybeAliased(4, _s, target);
+    target = stream->WriteStringMaybeAliased(5, _s, target);
   }
 
-  // string outside_temp_sensor_entity_id = 5;
+  // string outside_temp_sensor_entity_id = 6;
   if (!this->_internal_outside_temp_sensor_entity_id().empty()) {
     const std::string& _s = this->_internal_outside_temp_sensor_entity_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MQTTManagerSettings.outside_temp_sensor_entity_id");
-    target = stream->WriteStringMaybeAliased(5, _s, target);
+    target = stream->WriteStringMaybeAliased(6, _s, target);
   }
 
-  // string weather_location_latitude = 6;
+  // string weather_location_latitude = 7;
   if (!this->_internal_weather_location_latitude().empty()) {
     const std::string& _s = this->_internal_weather_location_latitude();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MQTTManagerSettings.weather_location_latitude");
-    target = stream->WriteStringMaybeAliased(6, _s, target);
+    target = stream->WriteStringMaybeAliased(7, _s, target);
   }
 
-  // string weather_location_longitude = 7;
+  // string weather_location_longitude = 8;
   if (!this->_internal_weather_location_longitude().empty()) {
     const std::string& _s = this->_internal_weather_location_longitude();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MQTTManagerSettings.weather_location_longitude");
-    target = stream->WriteStringMaybeAliased(7, _s, target);
+    target = stream->WriteStringMaybeAliased(8, _s, target);
   }
 
-  // .wind_speed_format weather_wind_speed_format = 8;
+  // .wind_speed_format weather_wind_speed_format = 9;
   if (this->_internal_weather_wind_speed_format() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-        8, this->_internal_weather_wind_speed_format(), target);
+        9, this->_internal_weather_wind_speed_format(), target);
   }
 
-  // .precipitation_format weather_precipitation_unit = 9;
+  // .precipitation_format weather_precipitation_unit = 10;
   if (this->_internal_weather_precipitation_unit() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-        9, this->_internal_weather_precipitation_unit(), target);
+        10, this->_internal_weather_precipitation_unit(), target);
   }
 
-  // int32 weather_update_interval_minutes = 10;
+  // int32 weather_update_interval_minutes = 11;
   if (this->_internal_weather_update_interval_minutes() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<10>(
+        WriteInt32ToArrayWithField<11>(
             stream, this->_internal_weather_update_interval_minutes(), target);
   }
 
-  // .time_format clock_format = 11;
+  // .time_format clock_format = 12;
   if (this->_internal_clock_format() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-        11, this->_internal_clock_format(), target);
+        12, this->_internal_clock_format(), target);
   }
 
-  // .temperature_format temperature_unit = 12;
+  // .temperature_format temperature_unit = 13;
   if (this->_internal_temperature_unit() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-        12, this->_internal_temperature_unit(), target);
+        13, this->_internal_temperature_unit(), target);
   }
 
-  // int32 max_log_buffer_size = 13;
+  // int32 max_log_buffer_size = 14;
   if (this->_internal_max_log_buffer_size() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<13>(
+        WriteInt32ToArrayWithField<14>(
             stream, this->_internal_max_log_buffer_size(), target);
   }
 
-  // int32 manager_port = 14;
+  // int32 manager_port = 15;
   if (this->_internal_manager_port() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<14>(
+        WriteInt32ToArrayWithField<15>(
             stream, this->_internal_manager_port(), target);
   }
 
-  // string manager_address = 15;
+  // string manager_address = 16;
   if (!this->_internal_manager_address().empty()) {
     const std::string& _s = this->_internal_manager_address();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MQTTManagerSettings.manager_address");
-    target = stream->WriteStringMaybeAliased(15, _s, target);
+    target = stream->WriteStringMaybeAliased(16, _s, target);
   }
 
-  // .MQTTManagerSettings.turn_on_behavior light_turn_on_behavior = 16;
+  // .MQTTManagerSettings.turn_on_behavior light_turn_on_behavior = 17;
   if (this->_internal_light_turn_on_behavior() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-        16, this->_internal_light_turn_on_behavior(), target);
+        17, this->_internal_light_turn_on_behavior(), target);
   }
 
-  // bool is_home_assistant_addon = 17;
+  // bool is_home_assistant_addon = 18;
   if (this->_internal_is_home_assistant_addon() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        17, this->_internal_is_home_assistant_addon(), target);
+        18, this->_internal_is_home_assistant_addon(), target);
   }
 
-  // int32 mqtt_wait_time = 18;
+  // int32 mqtt_wait_time = 19;
   if (this->_internal_mqtt_wait_time() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteInt32ToArray(
-        18, this->_internal_mqtt_wait_time(), target);
+        19, this->_internal_mqtt_wait_time(), target);
   }
 
-  // bool optimistic_mode = 19;
+  // bool optimistic_mode = 20;
   if (this->_internal_optimistic_mode() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        19, this->_internal_optimistic_mode(), target);
+        20, this->_internal_optimistic_mode(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2601,39 +2543,39 @@ PROTOBUF_NOINLINE void MQTTManagerSettings::Clear() {
   (void) cached_has_bits;
 
   ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
-  // string date_format = 3;
+  // string date_format = 4;
   if (!this->_internal_date_format().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_date_format());
   }
 
-  // string outside_temp_sensor_provider = 4;
+  // string outside_temp_sensor_provider = 5;
   if (!this->_internal_outside_temp_sensor_provider().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_outside_temp_sensor_provider());
   }
 
-  // string outside_temp_sensor_entity_id = 5;
+  // string outside_temp_sensor_entity_id = 6;
   if (!this->_internal_outside_temp_sensor_entity_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_outside_temp_sensor_entity_id());
   }
 
-  // string weather_location_latitude = 6;
+  // string weather_location_latitude = 7;
   if (!this->_internal_weather_location_latitude().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_weather_location_latitude());
   }
 
-  // string weather_location_longitude = 7;
+  // string weather_location_longitude = 8;
   if (!this->_internal_weather_location_longitude().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_weather_location_longitude());
   }
 
-  // string manager_address = 15;
+  // string manager_address = 16;
   if (!this->_internal_manager_address().empty()) {
-    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+    total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_manager_address());
   }
 
@@ -2649,68 +2591,73 @@ PROTOBUF_NOINLINE void MQTTManagerSettings::Clear() {
         this->_internal_color_temp_max());
   }
 
-  // .wind_speed_format weather_wind_speed_format = 8;
+  // .wind_speed_format weather_wind_speed_format = 9;
   if (this->_internal_weather_wind_speed_format() != 0) {
     total_size += 1 +
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_weather_wind_speed_format());
   }
 
-  // .precipitation_format weather_precipitation_unit = 9;
+  // .precipitation_format weather_precipitation_unit = 10;
   if (this->_internal_weather_precipitation_unit() != 0) {
     total_size += 1 +
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_weather_precipitation_unit());
   }
 
-  // int32 weather_update_interval_minutes = 10;
+  // int32 weather_update_interval_minutes = 11;
   if (this->_internal_weather_update_interval_minutes() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
         this->_internal_weather_update_interval_minutes());
   }
 
-  // .time_format clock_format = 11;
+  // .time_format clock_format = 12;
   if (this->_internal_clock_format() != 0) {
     total_size += 1 +
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_clock_format());
   }
 
-  // .temperature_format temperature_unit = 12;
+  // .temperature_format temperature_unit = 13;
   if (this->_internal_temperature_unit() != 0) {
     total_size += 1 +
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_temperature_unit());
   }
 
-  // int32 max_log_buffer_size = 13;
+  // bool reverse_color_temperature_slider = 3;
+  if (this->_internal_reverse_color_temperature_slider() != 0) {
+    total_size += 2;
+  }
+
+  // bool is_home_assistant_addon = 18;
+  if (this->_internal_is_home_assistant_addon() != 0) {
+    total_size += 3;
+  }
+
+  // bool optimistic_mode = 20;
+  if (this->_internal_optimistic_mode() != 0) {
+    total_size += 3;
+  }
+
+  // int32 max_log_buffer_size = 14;
   if (this->_internal_max_log_buffer_size() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
         this->_internal_max_log_buffer_size());
   }
 
-  // int32 manager_port = 14;
+  // int32 manager_port = 15;
   if (this->_internal_manager_port() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
         this->_internal_manager_port());
   }
 
-  // .MQTTManagerSettings.turn_on_behavior light_turn_on_behavior = 16;
+  // .MQTTManagerSettings.turn_on_behavior light_turn_on_behavior = 17;
   if (this->_internal_light_turn_on_behavior() != 0) {
     total_size += 2 +
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_light_turn_on_behavior());
   }
 
-  // int32 mqtt_wait_time = 18;
+  // int32 mqtt_wait_time = 19;
   if (this->_internal_mqtt_wait_time() != 0) {
     total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
                                     this->_internal_mqtt_wait_time());
-  }
-
-  // bool is_home_assistant_addon = 17;
-  if (this->_internal_is_home_assistant_addon() != 0) {
-    total_size += 3;
-  }
-
-  // bool optimistic_mode = 19;
-  if (this->_internal_optimistic_mode() != 0) {
-    total_size += 3;
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -2764,6 +2711,15 @@ void MQTTManagerSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, con
   if (from._internal_temperature_unit() != 0) {
     _this->_impl_.temperature_unit_ = from._impl_.temperature_unit_;
   }
+  if (from._internal_reverse_color_temperature_slider() != 0) {
+    _this->_impl_.reverse_color_temperature_slider_ = from._impl_.reverse_color_temperature_slider_;
+  }
+  if (from._internal_is_home_assistant_addon() != 0) {
+    _this->_impl_.is_home_assistant_addon_ = from._impl_.is_home_assistant_addon_;
+  }
+  if (from._internal_optimistic_mode() != 0) {
+    _this->_impl_.optimistic_mode_ = from._impl_.optimistic_mode_;
+  }
   if (from._internal_max_log_buffer_size() != 0) {
     _this->_impl_.max_log_buffer_size_ = from._impl_.max_log_buffer_size_;
   }
@@ -2775,12 +2731,6 @@ void MQTTManagerSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, con
   }
   if (from._internal_mqtt_wait_time() != 0) {
     _this->_impl_.mqtt_wait_time_ = from._impl_.mqtt_wait_time_;
-  }
-  if (from._internal_is_home_assistant_addon() != 0) {
-    _this->_impl_.is_home_assistant_addon_ = from._impl_.is_home_assistant_addon_;
-  }
-  if (from._internal_optimistic_mode() != 0) {
-    _this->_impl_.optimistic_mode_ = from._impl_.optimistic_mode_;
   }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -2805,8 +2755,8 @@ void MQTTManagerSettings::InternalSwap(MQTTManagerSettings* PROTOBUF_RESTRICT ot
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.weather_location_longitude_, &other->_impl_.weather_location_longitude_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.manager_address_, &other->_impl_.manager_address_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.optimistic_mode_)
-      + sizeof(MQTTManagerSettings::_impl_.optimistic_mode_)
+      PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.mqtt_wait_time_)
+      + sizeof(MQTTManagerSettings::_impl_.mqtt_wait_time_)
       - PROTOBUF_FIELD_OFFSET(MQTTManagerSettings, _impl_.color_temp_min_)>(
           reinterpret_cast<char*>(&_impl_.color_temp_min_),
           reinterpret_cast<char*>(&other->_impl_.color_temp_min_));

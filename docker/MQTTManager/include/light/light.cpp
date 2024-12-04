@@ -1,6 +1,7 @@
 #include "light.hpp"
 #include "command_manager/command_manager.hpp"
 #include "entity_manager/entity_manager.hpp"
+#include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
 #include <boost/bind.hpp>
@@ -249,10 +250,24 @@ void Light::command_callback(NSPanelMQTTManagerCommand &command) {
       NSPanelMQTTManagerCommand_LightCommand cmd = command.light_command();
       if (cmd.has_brightness()) {
         this->set_brightness(cmd.brightness(), false);
-        this->turn_on(false);
+        if(cmd.brightness() > 0) {
+            this->turn_on(false);
+        } else {
+            this->turn_off(false);
+        }
       }
       if (cmd.has_color_temperature()) {
-        this->set_color_temperature(cmd.color_temperature(), false);
+        // Convert color temperature (0-100) to actual color temperature in kelvin.
+        SPDLOG_DEBUG("Got color temperature {} from panel.", cmd.color_temperature());
+        SPDLOG_DEBUG("Color temp min: {}", MqttManagerConfig::get_settings().color_temp_min());
+        SPDLOG_DEBUG("Color temp max: {}", MqttManagerConfig::get_settings().color_temp_max());
+        uint32_t color_temperature_kelvin = cmd.color_temperature() * ((MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())/100);
+        if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+            color_temperature_kelvin = MqttManagerConfig::get_settings().color_temp_max() - color_temperature_kelvin;
+        } else {
+            color_temperature_kelvin += MqttManagerConfig::get_settings().color_temp_min();
+        }
+        this->set_color_temperature(color_temperature_kelvin, false);
       }
       if (cmd.has_hue()) {
         this->set_hue(cmd.hue(), false);

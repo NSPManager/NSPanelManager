@@ -294,6 +294,8 @@ void NSPanel::send_config() {
 
     std::string config_str = config.SerializeAsString();
     MQTT_Manager::publish(this->_mqtt_config_topic, config_str, true);
+
+    SPDLOG_DEBUG("Sent updated NSPanelConfig to panel {}::{} over MQTT.", this->_id, this->_name);
   } else {
     SPDLOG_WARN("Requested sending config for panel {}::{} over MQTT but no such panel exists in MqttManagerConfig.", this->_id, this->_name);
   }

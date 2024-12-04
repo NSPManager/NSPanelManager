@@ -147,6 +147,7 @@ urlpatterns = [
     #######################
     path('htmx/partial/nspanel_index_view/<int:nspanel_id>', htmx.partial_nspanel_index_view, name="htmx_partial_nspanel_index_view"),
     path('htmx/partial/select_new_entity_item_list/<int:room_id>', htmx.partial_select_new_entity_item_list, name='htmx_partial_select_new_entity_item_list'),
+    path('htmx/partial/select_new_outside_temperature_sensor', htmx.partial_select_new_outside_temperature_sensor, name='htmx_partial_select_new_outside_temperature_sensor'),
     path('htmx/partial/add_light_entity_to_room/<int:room_id>', htmx.partial_entity_add_light_to_room, name='htmx_partial_add_light_entity_to_room'),
     path('htmx/nspanels/<int:nspanel_id>/reboot', htmx.nspanel_reboot, name='htmx_nspanel_reboot'),
     path('htmx/nspanels/<int:nspanel_id>/update_screen', htmx.nspanel_update_screen, name='htmx_nspanel_update_screen'),

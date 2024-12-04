@@ -464,8 +464,6 @@ class NSPanelSettings final : public ::google::protobuf::Message
     kHomeFieldNumber = 4,
     kDefaultPageFieldNumber = 5,
     kRaiseTo100LightLevelFieldNumber = 6,
-    kColorTempMinFieldNumber = 7,
-    kColorTempMaxFieldNumber = 8,
     kMinButtonPushTimeFieldNumber = 10,
     kButtonLongPressTimeFieldNumber = 11,
     kSpecialModeTriggerTimeFieldNumber = 12,
@@ -475,18 +473,17 @@ class NSPanelSettings final : public ::google::protobuf::Message
     kScreensaverDimLevelFieldNumber = 16,
     kScreensaverActivationTimeoutFieldNumber = 17,
     kScreensaverModeFieldNumber = 18,
-    kReverseColorTempFieldNumber = 9,
+    kClockFormatFieldNumber = 19,
+    kTemperatureUnitFieldNumber = 20,
     kIsUsPanelFieldNumber = 21,
     kLockToDefaultRoomFieldNumber = 22,
     kReverseRelaysFieldNumber = 23,
-    kClockFormatFieldNumber = 19,
-    kTemperatureUnitFieldNumber = 20,
+    kRelay1DefaultModeFieldNumber = 24,
     kTemperatureCalibrationFieldNumber = 26,
     kButton1ModeFieldNumber = 27,
     kButton2ModeFieldNumber = 28,
     kButton1DetachedLightIdFieldNumber = 33,
     kButton2DetachedLightIdFieldNumber = 34,
-    kRelay1DefaultModeFieldNumber = 24,
     kRelay2DefaultModeFieldNumber = 25,
     kDeniedFieldNumber = 45,
     kAcceptedFieldNumber = 46,
@@ -687,26 +684,6 @@ class NSPanelSettings final : public ::google::protobuf::Message
   void _internal_set_raise_to_100_light_level(::int32_t value);
 
   public:
-  // int32 color_temp_min = 7;
-  void clear_color_temp_min() ;
-  ::int32_t color_temp_min() const;
-  void set_color_temp_min(::int32_t value);
-
-  private:
-  ::int32_t _internal_color_temp_min() const;
-  void _internal_set_color_temp_min(::int32_t value);
-
-  public:
-  // int32 color_temp_max = 8;
-  void clear_color_temp_max() ;
-  ::int32_t color_temp_max() const;
-  void set_color_temp_max(::int32_t value);
-
-  private:
-  ::int32_t _internal_color_temp_max() const;
-  void _internal_set_color_temp_max(::int32_t value);
-
-  public:
   // int32 min_button_push_time = 10;
   void clear_min_button_push_time() ;
   ::int32_t min_button_push_time() const;
@@ -797,14 +774,24 @@ class NSPanelSettings final : public ::google::protobuf::Message
   void _internal_set_screensaver_mode(::NSPanelSettings_NSPanelScreensaverMode value);
 
   public:
-  // bool reverse_color_temp = 9;
-  void clear_reverse_color_temp() ;
-  bool reverse_color_temp() const;
-  void set_reverse_color_temp(bool value);
+  // .time_format clock_format = 19;
+  void clear_clock_format() ;
+  ::time_format clock_format() const;
+  void set_clock_format(::time_format value);
 
   private:
-  bool _internal_reverse_color_temp() const;
-  void _internal_set_reverse_color_temp(bool value);
+  ::time_format _internal_clock_format() const;
+  void _internal_set_clock_format(::time_format value);
+
+  public:
+  // .temperature_format temperature_unit = 20;
+  void clear_temperature_unit() ;
+  ::temperature_format temperature_unit() const;
+  void set_temperature_unit(::temperature_format value);
+
+  private:
+  ::temperature_format _internal_temperature_unit() const;
+  void _internal_set_temperature_unit(::temperature_format value);
 
   public:
   // bool is_us_panel = 21;
@@ -837,24 +824,14 @@ class NSPanelSettings final : public ::google::protobuf::Message
   void _internal_set_reverse_relays(bool value);
 
   public:
-  // .time_format clock_format = 19;
-  void clear_clock_format() ;
-  ::time_format clock_format() const;
-  void set_clock_format(::time_format value);
+  // bool relay1_default_mode = 24;
+  void clear_relay1_default_mode() ;
+  bool relay1_default_mode() const;
+  void set_relay1_default_mode(bool value);
 
   private:
-  ::time_format _internal_clock_format() const;
-  void _internal_set_clock_format(::time_format value);
-
-  public:
-  // .temperature_format temperature_unit = 20;
-  void clear_temperature_unit() ;
-  ::temperature_format temperature_unit() const;
-  void set_temperature_unit(::temperature_format value);
-
-  private:
-  ::temperature_format _internal_temperature_unit() const;
-  void _internal_set_temperature_unit(::temperature_format value);
+  bool _internal_relay1_default_mode() const;
+  void _internal_set_relay1_default_mode(bool value);
 
   public:
   // int32 temperature_calibration = 26;
@@ -907,16 +884,6 @@ class NSPanelSettings final : public ::google::protobuf::Message
   private:
   ::int32_t _internal_button2_detached_light_id() const;
   void _internal_set_button2_detached_light_id(::int32_t value);
-
-  public:
-  // bool relay1_default_mode = 24;
-  void clear_relay1_default_mode() ;
-  bool relay1_default_mode() const;
-  void set_relay1_default_mode(bool value);
-
-  private:
-  bool _internal_relay1_default_mode() const;
-  void _internal_set_relay1_default_mode(bool value);
 
   public:
   // bool relay2_default_mode = 25;
@@ -984,8 +951,8 @@ class NSPanelSettings final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 42, 0,
-      165, 9>
+      5, 39, 0,
+      157, 9>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -1022,8 +989,6 @@ class NSPanelSettings final : public ::google::protobuf::Message
     ::int32_t home_;
     int default_page_;
     ::int32_t raise_to_100_light_level_;
-    ::int32_t color_temp_min_;
-    ::int32_t color_temp_max_;
     ::int32_t min_button_push_time_;
     ::int32_t button_long_press_time_;
     ::int32_t special_mode_trigger_time_;
@@ -1033,18 +998,17 @@ class NSPanelSettings final : public ::google::protobuf::Message
     ::int32_t screensaver_dim_level_;
     ::int32_t screensaver_activation_timeout_;
     int screensaver_mode_;
-    bool reverse_color_temp_;
+    int clock_format_;
+    int temperature_unit_;
     bool is_us_panel_;
     bool lock_to_default_room_;
     bool reverse_relays_;
-    int clock_format_;
-    int temperature_unit_;
+    bool relay1_default_mode_;
     ::int32_t temperature_calibration_;
     int button1_mode_;
     int button2_mode_;
     ::int32_t button1_detached_light_id_;
     ::int32_t button2_detached_light_id_;
-    bool relay1_default_mode_;
     bool relay2_default_mode_;
     bool denied_;
     bool accepted_;
@@ -1201,27 +1165,28 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kDateFormatFieldNumber = 3,
-    kOutsideTempSensorProviderFieldNumber = 4,
-    kOutsideTempSensorEntityIdFieldNumber = 5,
-    kWeatherLocationLatitudeFieldNumber = 6,
-    kWeatherLocationLongitudeFieldNumber = 7,
-    kManagerAddressFieldNumber = 15,
+    kDateFormatFieldNumber = 4,
+    kOutsideTempSensorProviderFieldNumber = 5,
+    kOutsideTempSensorEntityIdFieldNumber = 6,
+    kWeatherLocationLatitudeFieldNumber = 7,
+    kWeatherLocationLongitudeFieldNumber = 8,
+    kManagerAddressFieldNumber = 16,
     kColorTempMinFieldNumber = 1,
     kColorTempMaxFieldNumber = 2,
-    kWeatherWindSpeedFormatFieldNumber = 8,
-    kWeatherPrecipitationUnitFieldNumber = 9,
-    kWeatherUpdateIntervalMinutesFieldNumber = 10,
-    kClockFormatFieldNumber = 11,
-    kTemperatureUnitFieldNumber = 12,
-    kMaxLogBufferSizeFieldNumber = 13,
-    kManagerPortFieldNumber = 14,
-    kLightTurnOnBehaviorFieldNumber = 16,
-    kMqttWaitTimeFieldNumber = 18,
-    kIsHomeAssistantAddonFieldNumber = 17,
-    kOptimisticModeFieldNumber = 19,
+    kWeatherWindSpeedFormatFieldNumber = 9,
+    kWeatherPrecipitationUnitFieldNumber = 10,
+    kWeatherUpdateIntervalMinutesFieldNumber = 11,
+    kClockFormatFieldNumber = 12,
+    kTemperatureUnitFieldNumber = 13,
+    kReverseColorTemperatureSliderFieldNumber = 3,
+    kIsHomeAssistantAddonFieldNumber = 18,
+    kOptimisticModeFieldNumber = 20,
+    kMaxLogBufferSizeFieldNumber = 14,
+    kManagerPortFieldNumber = 15,
+    kLightTurnOnBehaviorFieldNumber = 17,
+    kMqttWaitTimeFieldNumber = 19,
   };
-  // string date_format = 3;
+  // string date_format = 4;
   void clear_date_format() ;
   const std::string& date_format() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1237,7 +1202,7 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   std::string* _internal_mutable_date_format();
 
   public:
-  // string outside_temp_sensor_provider = 4;
+  // string outside_temp_sensor_provider = 5;
   void clear_outside_temp_sensor_provider() ;
   const std::string& outside_temp_sensor_provider() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1253,7 +1218,7 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   std::string* _internal_mutable_outside_temp_sensor_provider();
 
   public:
-  // string outside_temp_sensor_entity_id = 5;
+  // string outside_temp_sensor_entity_id = 6;
   void clear_outside_temp_sensor_entity_id() ;
   const std::string& outside_temp_sensor_entity_id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1269,7 +1234,7 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   std::string* _internal_mutable_outside_temp_sensor_entity_id();
 
   public:
-  // string weather_location_latitude = 6;
+  // string weather_location_latitude = 7;
   void clear_weather_location_latitude() ;
   const std::string& weather_location_latitude() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1285,7 +1250,7 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   std::string* _internal_mutable_weather_location_latitude();
 
   public:
-  // string weather_location_longitude = 7;
+  // string weather_location_longitude = 8;
   void clear_weather_location_longitude() ;
   const std::string& weather_location_longitude() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1301,7 +1266,7 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   std::string* _internal_mutable_weather_location_longitude();
 
   public:
-  // string manager_address = 15;
+  // string manager_address = 16;
   void clear_manager_address() ;
   const std::string& manager_address() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1337,7 +1302,7 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   void _internal_set_color_temp_max(::uint32_t value);
 
   public:
-  // .wind_speed_format weather_wind_speed_format = 8;
+  // .wind_speed_format weather_wind_speed_format = 9;
   void clear_weather_wind_speed_format() ;
   ::wind_speed_format weather_wind_speed_format() const;
   void set_weather_wind_speed_format(::wind_speed_format value);
@@ -1347,7 +1312,7 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   void _internal_set_weather_wind_speed_format(::wind_speed_format value);
 
   public:
-  // .precipitation_format weather_precipitation_unit = 9;
+  // .precipitation_format weather_precipitation_unit = 10;
   void clear_weather_precipitation_unit() ;
   ::precipitation_format weather_precipitation_unit() const;
   void set_weather_precipitation_unit(::precipitation_format value);
@@ -1357,7 +1322,7 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   void _internal_set_weather_precipitation_unit(::precipitation_format value);
 
   public:
-  // int32 weather_update_interval_minutes = 10;
+  // int32 weather_update_interval_minutes = 11;
   void clear_weather_update_interval_minutes() ;
   ::int32_t weather_update_interval_minutes() const;
   void set_weather_update_interval_minutes(::int32_t value);
@@ -1367,7 +1332,7 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   void _internal_set_weather_update_interval_minutes(::int32_t value);
 
   public:
-  // .time_format clock_format = 11;
+  // .time_format clock_format = 12;
   void clear_clock_format() ;
   ::time_format clock_format() const;
   void set_clock_format(::time_format value);
@@ -1377,7 +1342,7 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   void _internal_set_clock_format(::time_format value);
 
   public:
-  // .temperature_format temperature_unit = 12;
+  // .temperature_format temperature_unit = 13;
   void clear_temperature_unit() ;
   ::temperature_format temperature_unit() const;
   void set_temperature_unit(::temperature_format value);
@@ -1387,47 +1352,17 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   void _internal_set_temperature_unit(::temperature_format value);
 
   public:
-  // int32 max_log_buffer_size = 13;
-  void clear_max_log_buffer_size() ;
-  ::int32_t max_log_buffer_size() const;
-  void set_max_log_buffer_size(::int32_t value);
+  // bool reverse_color_temperature_slider = 3;
+  void clear_reverse_color_temperature_slider() ;
+  bool reverse_color_temperature_slider() const;
+  void set_reverse_color_temperature_slider(bool value);
 
   private:
-  ::int32_t _internal_max_log_buffer_size() const;
-  void _internal_set_max_log_buffer_size(::int32_t value);
+  bool _internal_reverse_color_temperature_slider() const;
+  void _internal_set_reverse_color_temperature_slider(bool value);
 
   public:
-  // int32 manager_port = 14;
-  void clear_manager_port() ;
-  ::int32_t manager_port() const;
-  void set_manager_port(::int32_t value);
-
-  private:
-  ::int32_t _internal_manager_port() const;
-  void _internal_set_manager_port(::int32_t value);
-
-  public:
-  // .MQTTManagerSettings.turn_on_behavior light_turn_on_behavior = 16;
-  void clear_light_turn_on_behavior() ;
-  ::MQTTManagerSettings_turn_on_behavior light_turn_on_behavior() const;
-  void set_light_turn_on_behavior(::MQTTManagerSettings_turn_on_behavior value);
-
-  private:
-  ::MQTTManagerSettings_turn_on_behavior _internal_light_turn_on_behavior() const;
-  void _internal_set_light_turn_on_behavior(::MQTTManagerSettings_turn_on_behavior value);
-
-  public:
-  // int32 mqtt_wait_time = 18;
-  void clear_mqtt_wait_time() ;
-  ::int32_t mqtt_wait_time() const;
-  void set_mqtt_wait_time(::int32_t value);
-
-  private:
-  ::int32_t _internal_mqtt_wait_time() const;
-  void _internal_set_mqtt_wait_time(::int32_t value);
-
-  public:
-  // bool is_home_assistant_addon = 17;
+  // bool is_home_assistant_addon = 18;
   void clear_is_home_assistant_addon() ;
   bool is_home_assistant_addon() const;
   void set_is_home_assistant_addon(bool value);
@@ -1437,7 +1372,7 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   void _internal_set_is_home_assistant_addon(bool value);
 
   public:
-  // bool optimistic_mode = 19;
+  // bool optimistic_mode = 20;
   void clear_optimistic_mode() ;
   bool optimistic_mode() const;
   void set_optimistic_mode(bool value);
@@ -1447,12 +1382,52 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
   void _internal_set_optimistic_mode(bool value);
 
   public:
+  // int32 max_log_buffer_size = 14;
+  void clear_max_log_buffer_size() ;
+  ::int32_t max_log_buffer_size() const;
+  void set_max_log_buffer_size(::int32_t value);
+
+  private:
+  ::int32_t _internal_max_log_buffer_size() const;
+  void _internal_set_max_log_buffer_size(::int32_t value);
+
+  public:
+  // int32 manager_port = 15;
+  void clear_manager_port() ;
+  ::int32_t manager_port() const;
+  void set_manager_port(::int32_t value);
+
+  private:
+  ::int32_t _internal_manager_port() const;
+  void _internal_set_manager_port(::int32_t value);
+
+  public:
+  // .MQTTManagerSettings.turn_on_behavior light_turn_on_behavior = 17;
+  void clear_light_turn_on_behavior() ;
+  ::MQTTManagerSettings_turn_on_behavior light_turn_on_behavior() const;
+  void set_light_turn_on_behavior(::MQTTManagerSettings_turn_on_behavior value);
+
+  private:
+  ::MQTTManagerSettings_turn_on_behavior _internal_light_turn_on_behavior() const;
+  void _internal_set_light_turn_on_behavior(::MQTTManagerSettings_turn_on_behavior value);
+
+  public:
+  // int32 mqtt_wait_time = 19;
+  void clear_mqtt_wait_time() ;
+  ::int32_t mqtt_wait_time() const;
+  void set_mqtt_wait_time(::int32_t value);
+
+  private:
+  ::int32_t _internal_mqtt_wait_time() const;
+  void _internal_set_mqtt_wait_time(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:MQTTManagerSettings)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 19, 0,
+      5, 20, 0,
       178, 2>
       _table_;
 
@@ -1486,12 +1461,13 @@ class MQTTManagerSettings final : public ::google::protobuf::Message
     ::int32_t weather_update_interval_minutes_;
     int clock_format_;
     int temperature_unit_;
+    bool reverse_color_temperature_slider_;
+    bool is_home_assistant_addon_;
+    bool optimistic_mode_;
     ::int32_t max_log_buffer_size_;
     ::int32_t manager_port_;
     int light_turn_on_behavior_;
     ::int32_t mqtt_wait_time_;
-    bool is_home_assistant_addon_;
-    bool optimistic_mode_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -2182,72 +2158,6 @@ inline ::int32_t NSPanelSettings::_internal_raise_to_100_light_level() const {
 inline void NSPanelSettings::_internal_set_raise_to_100_light_level(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.raise_to_100_light_level_ = value;
-}
-
-// int32 color_temp_min = 7;
-inline void NSPanelSettings::clear_color_temp_min() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.color_temp_min_ = 0;
-}
-inline ::int32_t NSPanelSettings::color_temp_min() const {
-  // @@protoc_insertion_point(field_get:NSPanelSettings.color_temp_min)
-  return _internal_color_temp_min();
-}
-inline void NSPanelSettings::set_color_temp_min(::int32_t value) {
-  _internal_set_color_temp_min(value);
-  // @@protoc_insertion_point(field_set:NSPanelSettings.color_temp_min)
-}
-inline ::int32_t NSPanelSettings::_internal_color_temp_min() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.color_temp_min_;
-}
-inline void NSPanelSettings::_internal_set_color_temp_min(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.color_temp_min_ = value;
-}
-
-// int32 color_temp_max = 8;
-inline void NSPanelSettings::clear_color_temp_max() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.color_temp_max_ = 0;
-}
-inline ::int32_t NSPanelSettings::color_temp_max() const {
-  // @@protoc_insertion_point(field_get:NSPanelSettings.color_temp_max)
-  return _internal_color_temp_max();
-}
-inline void NSPanelSettings::set_color_temp_max(::int32_t value) {
-  _internal_set_color_temp_max(value);
-  // @@protoc_insertion_point(field_set:NSPanelSettings.color_temp_max)
-}
-inline ::int32_t NSPanelSettings::_internal_color_temp_max() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.color_temp_max_;
-}
-inline void NSPanelSettings::_internal_set_color_temp_max(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.color_temp_max_ = value;
-}
-
-// bool reverse_color_temp = 9;
-inline void NSPanelSettings::clear_reverse_color_temp() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.reverse_color_temp_ = false;
-}
-inline bool NSPanelSettings::reverse_color_temp() const {
-  // @@protoc_insertion_point(field_get:NSPanelSettings.reverse_color_temp)
-  return _internal_reverse_color_temp();
-}
-inline void NSPanelSettings::set_reverse_color_temp(bool value) {
-  _internal_set_reverse_color_temp(value);
-  // @@protoc_insertion_point(field_set:NSPanelSettings.reverse_color_temp)
-}
-inline bool NSPanelSettings::_internal_reverse_color_temp() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.reverse_color_temp_;
-}
-inline void NSPanelSettings::_internal_set_reverse_color_temp(bool value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.reverse_color_temp_ = value;
 }
 
 // int32 min_button_push_time = 10;
@@ -3682,7 +3592,29 @@ inline void MQTTManagerSettings::_internal_set_color_temp_max(::uint32_t value) 
   _impl_.color_temp_max_ = value;
 }
 
-// string date_format = 3;
+// bool reverse_color_temperature_slider = 3;
+inline void MQTTManagerSettings::clear_reverse_color_temperature_slider() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.reverse_color_temperature_slider_ = false;
+}
+inline bool MQTTManagerSettings::reverse_color_temperature_slider() const {
+  // @@protoc_insertion_point(field_get:MQTTManagerSettings.reverse_color_temperature_slider)
+  return _internal_reverse_color_temperature_slider();
+}
+inline void MQTTManagerSettings::set_reverse_color_temperature_slider(bool value) {
+  _internal_set_reverse_color_temperature_slider(value);
+  // @@protoc_insertion_point(field_set:MQTTManagerSettings.reverse_color_temperature_slider)
+}
+inline bool MQTTManagerSettings::_internal_reverse_color_temperature_slider() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.reverse_color_temperature_slider_;
+}
+inline void MQTTManagerSettings::_internal_set_reverse_color_temperature_slider(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.reverse_color_temperature_slider_ = value;
+}
+
+// string date_format = 4;
 inline void MQTTManagerSettings::clear_date_format() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.date_format_.ClearToEmpty();
@@ -3732,7 +3664,7 @@ inline void MQTTManagerSettings::set_allocated_date_format(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:MQTTManagerSettings.date_format)
 }
 
-// string outside_temp_sensor_provider = 4;
+// string outside_temp_sensor_provider = 5;
 inline void MQTTManagerSettings::clear_outside_temp_sensor_provider() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.outside_temp_sensor_provider_.ClearToEmpty();
@@ -3782,7 +3714,7 @@ inline void MQTTManagerSettings::set_allocated_outside_temp_sensor_provider(std:
   // @@protoc_insertion_point(field_set_allocated:MQTTManagerSettings.outside_temp_sensor_provider)
 }
 
-// string outside_temp_sensor_entity_id = 5;
+// string outside_temp_sensor_entity_id = 6;
 inline void MQTTManagerSettings::clear_outside_temp_sensor_entity_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.outside_temp_sensor_entity_id_.ClearToEmpty();
@@ -3832,7 +3764,7 @@ inline void MQTTManagerSettings::set_allocated_outside_temp_sensor_entity_id(std
   // @@protoc_insertion_point(field_set_allocated:MQTTManagerSettings.outside_temp_sensor_entity_id)
 }
 
-// string weather_location_latitude = 6;
+// string weather_location_latitude = 7;
 inline void MQTTManagerSettings::clear_weather_location_latitude() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.weather_location_latitude_.ClearToEmpty();
@@ -3882,7 +3814,7 @@ inline void MQTTManagerSettings::set_allocated_weather_location_latitude(std::st
   // @@protoc_insertion_point(field_set_allocated:MQTTManagerSettings.weather_location_latitude)
 }
 
-// string weather_location_longitude = 7;
+// string weather_location_longitude = 8;
 inline void MQTTManagerSettings::clear_weather_location_longitude() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.weather_location_longitude_.ClearToEmpty();
@@ -3932,7 +3864,7 @@ inline void MQTTManagerSettings::set_allocated_weather_location_longitude(std::s
   // @@protoc_insertion_point(field_set_allocated:MQTTManagerSettings.weather_location_longitude)
 }
 
-// .wind_speed_format weather_wind_speed_format = 8;
+// .wind_speed_format weather_wind_speed_format = 9;
 inline void MQTTManagerSettings::clear_weather_wind_speed_format() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.weather_wind_speed_format_ = 0;
@@ -3954,7 +3886,7 @@ inline void MQTTManagerSettings::_internal_set_weather_wind_speed_format(::wind_
   _impl_.weather_wind_speed_format_ = value;
 }
 
-// .precipitation_format weather_precipitation_unit = 9;
+// .precipitation_format weather_precipitation_unit = 10;
 inline void MQTTManagerSettings::clear_weather_precipitation_unit() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.weather_precipitation_unit_ = 0;
@@ -3976,7 +3908,7 @@ inline void MQTTManagerSettings::_internal_set_weather_precipitation_unit(::prec
   _impl_.weather_precipitation_unit_ = value;
 }
 
-// int32 weather_update_interval_minutes = 10;
+// int32 weather_update_interval_minutes = 11;
 inline void MQTTManagerSettings::clear_weather_update_interval_minutes() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.weather_update_interval_minutes_ = 0;
@@ -3998,7 +3930,7 @@ inline void MQTTManagerSettings::_internal_set_weather_update_interval_minutes(:
   _impl_.weather_update_interval_minutes_ = value;
 }
 
-// .time_format clock_format = 11;
+// .time_format clock_format = 12;
 inline void MQTTManagerSettings::clear_clock_format() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.clock_format_ = 0;
@@ -4020,7 +3952,7 @@ inline void MQTTManagerSettings::_internal_set_clock_format(::time_format value)
   _impl_.clock_format_ = value;
 }
 
-// .temperature_format temperature_unit = 12;
+// .temperature_format temperature_unit = 13;
 inline void MQTTManagerSettings::clear_temperature_unit() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.temperature_unit_ = 0;
@@ -4042,7 +3974,7 @@ inline void MQTTManagerSettings::_internal_set_temperature_unit(::temperature_fo
   _impl_.temperature_unit_ = value;
 }
 
-// int32 max_log_buffer_size = 13;
+// int32 max_log_buffer_size = 14;
 inline void MQTTManagerSettings::clear_max_log_buffer_size() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.max_log_buffer_size_ = 0;
@@ -4064,7 +3996,7 @@ inline void MQTTManagerSettings::_internal_set_max_log_buffer_size(::int32_t val
   _impl_.max_log_buffer_size_ = value;
 }
 
-// int32 manager_port = 14;
+// int32 manager_port = 15;
 inline void MQTTManagerSettings::clear_manager_port() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.manager_port_ = 0;
@@ -4086,7 +4018,7 @@ inline void MQTTManagerSettings::_internal_set_manager_port(::int32_t value) {
   _impl_.manager_port_ = value;
 }
 
-// string manager_address = 15;
+// string manager_address = 16;
 inline void MQTTManagerSettings::clear_manager_address() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.manager_address_.ClearToEmpty();
@@ -4136,7 +4068,7 @@ inline void MQTTManagerSettings::set_allocated_manager_address(std::string* valu
   // @@protoc_insertion_point(field_set_allocated:MQTTManagerSettings.manager_address)
 }
 
-// .MQTTManagerSettings.turn_on_behavior light_turn_on_behavior = 16;
+// .MQTTManagerSettings.turn_on_behavior light_turn_on_behavior = 17;
 inline void MQTTManagerSettings::clear_light_turn_on_behavior() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.light_turn_on_behavior_ = 0;
@@ -4158,7 +4090,7 @@ inline void MQTTManagerSettings::_internal_set_light_turn_on_behavior(::MQTTMana
   _impl_.light_turn_on_behavior_ = value;
 }
 
-// bool is_home_assistant_addon = 17;
+// bool is_home_assistant_addon = 18;
 inline void MQTTManagerSettings::clear_is_home_assistant_addon() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.is_home_assistant_addon_ = false;
@@ -4180,7 +4112,7 @@ inline void MQTTManagerSettings::_internal_set_is_home_assistant_addon(bool valu
   _impl_.is_home_assistant_addon_ = value;
 }
 
-// int32 mqtt_wait_time = 18;
+// int32 mqtt_wait_time = 19;
 inline void MQTTManagerSettings::clear_mqtt_wait_time() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.mqtt_wait_time_ = 0;
@@ -4202,7 +4134,7 @@ inline void MQTTManagerSettings::_internal_set_mqtt_wait_time(::int32_t value) {
   _impl_.mqtt_wait_time_ = value;
 }
 
-// bool optimistic_mode = 19;
+// bool optimistic_mode = 20;
 inline void MQTTManagerSettings::clear_optimistic_mode() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.optimistic_mode_ = false;

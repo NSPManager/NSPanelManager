@@ -1,9 +1,9 @@
 #include <InterfaceConfig.hpp>
 
-NSPanelScene *InterfaceConfig::getSceneById(uint16_t id) {
-  for (NSPanelScene scene : InterfaceConfig::global_scenes) {
-    if (scene.scene_id == id) {
-      return &scene;
+PROTOBUF_NSPANEL_SCENE *InterfaceConfig::getSceneById(uint16_t id) {
+  for (PROTOBUF_NSPANEL_SCENE *scene : InterfaceConfig::global_scenes) {
+    if (scene->scene_id() == id) {
+      return scene;
     }
   }
   return nullptr;

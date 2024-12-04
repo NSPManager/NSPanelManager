@@ -1,0 +1,9 @@
+[submodule "docker/EmbeddedProto"]
+	path = docker/EmbeddedProto
+	url = https://github.com/Embedded-AMS/EmbeddedProto.git
+[submodule "docker/protobuf/--force"]
+	path = docker/protobuf/--force
+	url = https://github.com/Embedded-AMS/EmbeddedProto.git
+[submodule "docker/protobuf/EmbeddedProto"]
+	path = docker/protobuf/EmbeddedProto
+	url = https://github.com/Embedded-AMS/EmbeddedProto.git

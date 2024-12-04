@@ -40,6 +40,7 @@ def mqttmanager_get_all_settings(request):
             proto = protobuf_mqttmanager_pb2.MQTTManagerSettings()
             proto.color_temp_min = int(get_setting_with_default("color_temp_min"))
             proto.color_temp_max = int(get_setting_with_default("color_temp_max"))
+            proto.reverse_color_temperature_slider = get_setting_with_default("reverse_color_temp") == "True"
             proto.date_format = get_setting_with_default("date_format")
             proto.outside_temp_sensor_provider = get_setting_with_default("outside_temp_sensor_provider")
             proto.outside_temp_sensor_entity_id = get_setting_with_default("outside_temp_sensor_entity_id")
@@ -75,7 +76,7 @@ def mqttmanager_get_all_settings(request):
             else:
                 proto.clock_format = protobuf_formats_pb2.time_format.FULL
 
-            if get_setting_with_default("temperature_format") == "True":
+            if get_setting_with_default("use_fahrenheit") == "True":
                 proto.temperature_unit = protobuf_formats_pb2.temperature_format.FAHRENHEIT
             else:
                 proto.temperature_unit = protobuf_formats_pb2.temperature_format.CELCIUS
@@ -100,9 +101,6 @@ def mqttmanager_get_all_nspanels(request):
                 proto_panel.home = nspanel.room.id
                 proto_panel.default_page = int(get_nspanel_setting_with_default(nspanel.id, "default_page", 0))
                 proto_panel.raise_to_100_light_level = int(get_nspanel_setting_with_default(nspanel.id, "raise_to_100_light_level", 0))
-                proto_panel.color_temp_min = int(get_setting_with_default("color_temp_min"))
-                proto_panel.color_temp_max = int(get_setting_with_default("color_temp_max"))
-                proto_panel.reverse_color_temp = bool(get_setting_with_default("reverse_color_temp"))
                 proto_panel.min_button_push_time = int(get_setting_with_default("min_button_push_time"))
                 proto_panel.button_long_press_time = int(get_setting_with_default("button_long_press_time"))
                 proto_panel.special_mode_trigger_time = int(get_setting_with_default("special_mode_trigger_time"))

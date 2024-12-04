@@ -5,6 +5,7 @@
 #include <PageManager.hpp>
 #include <RoomManager.hpp>
 #include <TftDefines.h>
+#include <WriteBufferFixedSize.h>
 
 void HomePage::init() {
   InterfaceConfig::currentEditLightMode = editLightMode::all_lights;
@@ -50,14 +51,11 @@ void HomePage::entityUpdateCallback(DeviceEntity *entity) {
   HomePage::_lastDeviceEntityUpdate = millis();
   if (HomePage::_taskHandleUpdateDisplay == NULL) {
     xTaskCreatePinnedToCore(_taskUpdateDisplay, "taskUpdateDisplay", 5000, NULL, 1, &HomePage::_taskHandleUpdateDisplay, CONFIG_ARDUINO_RUNNING_CORE);
-    vTaskDelay(50 / portTICK_PERIOD_MS);
   }
 }
 
 void HomePage::_taskUpdateDisplay(void *param) {
-  while (millis() < HomePage::_lastDeviceEntityUpdate + 250) {
-    vTaskDelay(25 / portTICK_PERIOD_MS);
-  }
+  vTaskDelay(HomePage::_lastDeviceEntityUpdate + 250 - millis());
 
   PageManager::GetHomePage()->updateLightStatus(true, true);
   HomePage::_taskHandleUpdateDisplay = NULL;
@@ -74,6 +72,7 @@ void HomePage::entityDeconstructCallback(DeviceEntity *entity) {
 }
 
 void HomePage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
+  uint64_t start = esp_timer_get_time();
   LOG_DEBUG("Got event, component ", page, ".", component, " ", pressed ? "pressed" : "released");
 
   HomePage::_isFingerOnDisplay = pressed;
@@ -259,59 +258,60 @@ void HomePage::setEditLightMode(editLightMode new_mode) {
 }
 
 void HomePage::_updateLightsWithNewBrightness(uint8_t brightness) {
-  uint64_t ms_start = millis();
+  uint64_t ms_start = esp_timer_get_time();
   // TODO: Handle global
   if (RoomManager::hasValidCurrentRoom()) {
-    NSPanelMQTTManagerCommand__FirstPageTurnLightOn light_command = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_ON__INIT;
-    light_command.brightness_slider_value = brightness;
-    light_command.kelvin_slider_value = 0;
-    light_command.selected_room = (*RoomManager::currentRoom).id;
-    light_command.global = InterfaceConfig::currentRoomMode == roomMode::house;
-    light_command.has_brightness_value = true;
-    light_command.has_kelvin_value = false;
+    LOG_DEBUG("Has valid room? in ", esp_timer_get_time() - ms_start, "us.");
+    PROTOBUF_MQTTMANAGER_CMD::FirstPageTurnLightOn light_command;
+    LOG_DEBUG("Built buffer in ", esp_timer_get_time() - ms_start, "us.");
+    light_command.set_brightness_slider_value(brightness);
+    light_command.set_kelvin_slider_value(0);
+    light_command.set_selected_room((*RoomManager::currentRoom).id());
+    light_command.set_global(InterfaceConfig::currentRoomMode == roomMode::house);
+    light_command.set_has_brightness_value(true);
+    light_command.set_has_kelvin_value(false);
+    LOG_DEBUG("Set values in ", esp_timer_get_time() - ms_start, "us.");
     if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-      light_command.affect_lights = _NSPanelMQTTManagerCommand__AffectLightsOptions::NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL;
+      light_command.set_affect_lights(PROTOBUF_MQTTMANAGER_CMD::AffectLightsOptions::ALL);
     } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
-      light_command.affect_lights = _NSPanelMQTTManagerCommand__AffectLightsOptions::NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__CEILING_LIGHTS;
+      light_command.set_affect_lights(PROTOBUF_MQTTMANAGER_CMD::AffectLightsOptions::CEILING_LIGHTS);
     } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
-      light_command.affect_lights = _NSPanelMQTTManagerCommand__AffectLightsOptions::NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__TABLE_LIGHTS;
+      light_command.set_affect_lights(PROTOBUF_MQTTMANAGER_CMD::AffectLightsOptions::TABLE_LIGHTS);
     }
+    LOG_DEBUG("Built command in ", esp_timer_get_time() - ms_start, "us.");
 
-    NSPanelMQTTManagerCommand command;
-    nspanel_mqttmanager_command__init(&command);
-    command.command_data_case = NSPanelMQTTManagerCommand__CommandDataCase::NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON;
-    command.first_page_turn_on = &light_command;
-
-    size_t pack_length = nspanel_mqttmanager_command__get_packed_size(&command);
-    uint8_t buffer[pack_length];
-    size_t pack_size = nspanel_mqttmanager_command__pack(&command, buffer);
-
-    std::string full_buffer = std::string(buffer, buffer + pack_size);
-    MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, false);
+    PROTOBUF_MQTTMANAGER_CMD command;
+    command.set_first_page_turn_on(light_command);
+    EmbeddedProto::WriteBufferFixedSize<PROTOBUF_MQTTMANAGER_CMD_MAX_SIZE> write_buffer;
+    if (command.serialize(write_buffer) != EmbeddedProto::Error::NO_ERRORS) {
+      LOG_ERROR("Error while serializing first page light command. Will cancel!");
+      return;
+    }
+    MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, (char *)write_buffer.get_data(), false);
 
     // Command has now been published. Should we wait for response from manager or do we
     // go for optimistic mode as per user settings and assume updated values.
     if (InterfaceConfig::optimistic_mode) {
-      bool update_both = (RoomManager::currentRoom->table_lights_dim_level == 0 && RoomManager::currentRoom->ceiling_lights_dim_level == 0) || (RoomManager::currentRoom->table_lights_dim_level > 0 && RoomManager::currentRoom->ceiling_lights_dim_level > 0);
-      if (!update_both && RoomManager::currentRoom->table_lights_dim_level > 0) {
-        RoomManager::currentRoom->table_lights_dim_level = brightness;
+      bool update_both = (RoomManager::currentRoom->table_lights_dim_level() == 0 && RoomManager::currentRoom->ceiling_lights_dim_level() == 0) || (RoomManager::currentRoom->table_lights_dim_level() > 0 && RoomManager::currentRoom->ceiling_lights_dim_level() > 0);
+      if (!update_both && RoomManager::currentRoom->table_lights_dim_level() > 0) {
+        RoomManager::currentRoom->set_table_lights_dim_level(brightness);
         if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-          RoomManager::currentRoom->average_dim_level = brightness;
+          RoomManager::currentRoom->set_average_dim_level(brightness);
         }
-      } else if (!update_both && RoomManager::currentRoom->ceiling_lights_dim_level > 0) {
-        RoomManager::currentRoom->ceiling_lights_dim_level = brightness;
+      } else if (!update_both && RoomManager::currentRoom->ceiling_lights_dim_level() > 0) {
+        RoomManager::currentRoom->set_ceiling_lights_dim_level(brightness);
         if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-          RoomManager::currentRoom->average_dim_level = brightness;
+          RoomManager::currentRoom->set_average_dim_level(brightness);
         }
       } else if (update_both) {
-        if (RoomManager::currentRoom->has_ceiling_lights) {
-          RoomManager::currentRoom->ceiling_lights_dim_level = brightness;
+        if (RoomManager::currentRoom->has_ceiling_lights()) {
+          RoomManager::currentRoom->set_ceiling_lights_dim_level(brightness);
         }
-        if (RoomManager::currentRoom->has_table_lights) {
-          RoomManager::currentRoom->table_lights_dim_level = brightness;
+        if (RoomManager::currentRoom->has_table_lights()) {
+          RoomManager::currentRoom->set_table_lights_dim_level(brightness);
         }
         if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-          RoomManager::currentRoom->average_dim_level = brightness;
+          RoomManager::currentRoom->set_average_dim_level(brightness);
         }
       }
       this->updateLightStatus(true, false);
@@ -382,129 +382,99 @@ void HomePage::_stopSpecialMode() {
 
 void HomePage::_ceilingMasterButtonEvent() {
   // TODO: Handle case when a light is on/off
-  // TODO: Handle global
-  if (RoomManager::hasValidCurrentRoom() && RoomManager::currentRoom->has_ceiling_lights) {
-    NSPanelMQTTManagerCommand__FirstPageTurnLightOn light_command = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_ON__INIT;
-    light_command.brightness_slider_value = this->getDimmingValue();
+  if (RoomManager::hasValidCurrentRoom() && RoomManager::currentRoom->has_ceiling_lights()) {
+    uint8_t new_brightness = RoomManager::currentRoom->get_ceiling_lights_dim_level() > 0 ? 0 : this->getDimmingValue();
+
+    PROTOBUF_MQTTMANAGER_CMD::FirstPageTurnLightOn light_command;
+    light_command.set_brightness_slider_value(this->getDimmingValue());
     uint16_t sendKelvin = this->getColorTempValue() * ((InterfaceConfig::colorTempMax - InterfaceConfig::colorTempMin) / 100);
     // TODO: Move "reverse color temp slider" behavior and option to be managed in MQTTManager.
-    if (InterfaceConfig::reverseColorTempSlider) {
-      light_command.kelvin_slider_value = InterfaceConfig::colorTempMax - sendKelvin;
-    } else {
-      light_command.kelvin_slider_value = InterfaceConfig::colorTempMin + sendKelvin;
+    light_command.set_has_brightness_value(true);
+    light_command.set_brightness_slider_value(new_brightness);
+    light_command.set_selected_room((*RoomManager::currentRoom).id());
+    light_command.set_global(InterfaceConfig::currentRoomMode == roomMode::house);
+    light_command.set_has_kelvin_value(true);
+    light_command.set_kelvin_slider_value(this->getColorTempValue());
+    light_command.set_affect_lights(PROTOBUF_MQTTMANAGER_CMD::AffectLightsOptions::CEILING_LIGHTS);
+
+    PROTOBUF_MQTTMANAGER_CMD command;
+    command.set_first_page_turn_on(light_command);
+    EmbeddedProto::WriteBufferFixedSize<PROTOBUF_MQTTMANAGER_CMD_MAX_SIZE> write_buffer;
+    if (command.serialize(write_buffer) != EmbeddedProto::Error::NO_ERRORS) {
+      LOG_ERROR("Error while serializing first page light command. Will cancel!");
+      return;
     }
-    light_command.selected_room = (*RoomManager::currentRoom).id;
-    light_command.global = InterfaceConfig::currentRoomMode == roomMode::house;
-    light_command.has_brightness_value = true;
-    light_command.has_kelvin_value = true;
-    light_command.affect_lights = _NSPanelMQTTManagerCommand__AffectLightsOptions::NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__CEILING_LIGHTS;
-
-    NSPanelMQTTManagerCommand command;
-    nspanel_mqttmanager_command__init(&command);
-    command.command_data_case = NSPanelMQTTManagerCommand__CommandDataCase::NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON;
-    command.first_page_turn_on = &light_command;
-
-    size_t pack_length = nspanel_mqttmanager_command__get_packed_size(&command);
-    uint8_t buffer[pack_length];
-    size_t pack_size = nspanel_mqttmanager_command__pack(&command, buffer);
-
-    std::string full_buffer = std::string(buffer, buffer + pack_size);
-    MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, false);
+    if (MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, (char *)write_buffer.get_data(), false) && InterfaceConfig::optimistic_mode) {
+      RoomManager::currentRoom->set_ceiling_lights_dim_level(new_brightness);
+      this->setCeilingLightsState(new_brightness > 0);
+      this->setCeilingBrightnessLabelText(new_brightness);
+    }
   }
 }
 
 void HomePage::_tableMasterButtonEvent() {
   // TODO: Handle case when a light is on/off
-  // TODO: Handle global
-  if (RoomManager::hasValidCurrentRoom() && RoomManager::currentRoom->has_table_lights) {
-    NSPanelMQTTManagerCommand__FirstPageTurnLightOn light_command = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_ON__INIT;
-    light_command.brightness_slider_value = this->getDimmingValue();
+  if (RoomManager::hasValidCurrentRoom() && RoomManager::currentRoom->has_table_lights()) {
+    uint8_t new_brightness = RoomManager::currentRoom->get_table_lights_dim_level() > 0 ? 0 : this->getDimmingValue();
+
+    PROTOBUF_MQTTMANAGER_CMD::FirstPageTurnLightOn light_command;
+    light_command.set_brightness_slider_value(this->getDimmingValue());
     uint16_t sendKelvin = this->getColorTempValue() * ((InterfaceConfig::colorTempMax - InterfaceConfig::colorTempMin) / 100);
     // TODO: Move "reverse color temp slider" behavior and option to be managed in MQTTManager.
-    if (InterfaceConfig::reverseColorTempSlider) {
-      light_command.kelvin_slider_value = InterfaceConfig::colorTempMax - sendKelvin;
-    } else {
-      light_command.kelvin_slider_value = InterfaceConfig::colorTempMin + sendKelvin;
+    light_command.set_has_brightness_value(true);
+    light_command.set_brightness_slider_value(new_brightness);
+    light_command.set_selected_room((*RoomManager::currentRoom).id());
+    light_command.set_global(InterfaceConfig::currentRoomMode == roomMode::house);
+    light_command.set_has_kelvin_value(true);
+    light_command.set_kelvin_slider_value(this->getColorTempValue());
+    light_command.set_affect_lights(PROTOBUF_MQTTMANAGER_CMD::AffectLightsOptions::TABLE_LIGHTS);
+
+    PROTOBUF_MQTTMANAGER_CMD command;
+    command.set_first_page_turn_on(light_command);
+    EmbeddedProto::WriteBufferFixedSize<PROTOBUF_MQTTMANAGER_CMD_MAX_SIZE> write_buffer;
+    if (command.serialize(write_buffer) != EmbeddedProto::Error::NO_ERRORS) {
+      LOG_ERROR("Error while serializing first page light command. Will cancel!");
+      return;
     }
-    light_command.selected_room = (*RoomManager::currentRoom).id;
-    light_command.global = InterfaceConfig::currentRoomMode == roomMode::house;
-    light_command.has_brightness_value = true;
-    light_command.has_kelvin_value = true;
-    light_command.affect_lights = _NSPanelMQTTManagerCommand__AffectLightsOptions::NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__TABLE_LIGHTS;
-
-    NSPanelMQTTManagerCommand command;
-    nspanel_mqttmanager_command__init(&command);
-    command.command_data_case = NSPanelMQTTManagerCommand__CommandDataCase::NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON;
-    command.first_page_turn_on = &light_command;
-
-    size_t pack_length = nspanel_mqttmanager_command__get_packed_size(&command);
-    uint8_t buffer[pack_length];
-    size_t pack_size = nspanel_mqttmanager_command__pack(&command, buffer);
-
-    std::string full_buffer = std::string(buffer, buffer + pack_size);
-    MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, false);
+    if (MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, (char *)write_buffer.get_data(), false) && InterfaceConfig::optimistic_mode) {
+      RoomManager::currentRoom->set_table_lights_dim_level(new_brightness);
+      this->setTableLightsState(new_brightness > 0);
+      this->setTableBrightnessLabelText(new_brightness);
+    }
   }
 }
 
 void HomePage::_updateLightsColorTempAccordingToSlider() {
   if (RoomManager::hasValidCurrentRoom()) {
-    NSPanelMQTTManagerCommand__FirstPageTurnLightOn light_command = NSPANEL_MQTTMANAGER_COMMAND__FIRST_PAGE_TURN_LIGHT_ON__INIT;
-    light_command.brightness_slider_value = 0;
+    PROTOBUF_MQTTMANAGER_CMD::FirstPageTurnLightOn light_command;
+    light_command.set_selected_room((*RoomManager::currentRoom).id());
+    light_command.set_global(InterfaceConfig::currentRoomMode == roomMode::house);
+    light_command.set_has_brightness_value(false);
+    light_command.set_brightness_slider_value(0);
+    light_command.set_has_kelvin_value(false);
     uint16_t sendKelvin = this->getColorTempValue() * ((InterfaceConfig::colorTempMax - InterfaceConfig::colorTempMin) / 100);
-    // TODO: Move "reverse color temp slider" behavior and option to be managed in MQTTManager.
     if (InterfaceConfig::reverseColorTempSlider) {
-      light_command.kelvin_slider_value = InterfaceConfig::colorTempMax - sendKelvin;
+      light_command.set_kelvin_slider_value(InterfaceConfig::colorTempMax - sendKelvin);
     } else {
-      light_command.kelvin_slider_value = InterfaceConfig::colorTempMin + sendKelvin;
+      light_command.set_kelvin_slider_value(InterfaceConfig::colorTempMin + sendKelvin);
     }
-    light_command.selected_room = (*RoomManager::currentRoom).id;
-    light_command.global = InterfaceConfig::currentRoomMode == roomMode::house;
-    light_command.has_brightness_value = false;
-    light_command.has_kelvin_value = true;
     if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-      light_command.affect_lights = _NSPanelMQTTManagerCommand__AffectLightsOptions::NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL;
+      light_command.set_affect_lights(PROTOBUF_MQTTMANAGER_CMD::AffectLightsOptions::ALL);
     } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
-      light_command.affect_lights = _NSPanelMQTTManagerCommand__AffectLightsOptions::NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__CEILING_LIGHTS;
+      light_command.set_affect_lights(PROTOBUF_MQTTMANAGER_CMD::AffectLightsOptions::CEILING_LIGHTS);
     } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
-      light_command.affect_lights = _NSPanelMQTTManagerCommand__AffectLightsOptions::NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__TABLE_LIGHTS;
+      light_command.set_affect_lights(PROTOBUF_MQTTMANAGER_CMD::AffectLightsOptions::TABLE_LIGHTS);
     }
 
-    NSPanelMQTTManagerCommand command;
-    nspanel_mqttmanager_command__init(&command);
-    command.command_data_case = NSPanelMQTTManagerCommand__CommandDataCase::NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON;
-    command.first_page_turn_on = &light_command;
-
-    size_t pack_length = nspanel_mqttmanager_command__get_packed_size(&command);
-    uint8_t buffer[pack_length];
-    size_t pack_size = nspanel_mqttmanager_command__pack(&command, buffer);
-
-    std::string full_buffer = std::string(buffer, buffer + pack_size);
-    MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, full_buffer, false);
+    PROTOBUF_MQTTMANAGER_CMD command;
+    command.set_first_page_turn_on(light_command);
+    EmbeddedProto::WriteBufferFixedSize<PROTOBUF_MQTTMANAGER_CMD_MAX_SIZE> write_buffer;
+    if (command.serialize(write_buffer) != EmbeddedProto::Error::NO_ERRORS) {
+      LOG_ERROR("Error while serializing first page light command. Will cancel!");
+      return;
+    }
+    MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, (char *)write_buffer.get_data(), false);
   }
-
-  // TODO: Implement via protobuf
-  // std::list<Light *> lights;
-  // if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
-  //   if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-  //     lights = (*RoomManager::currentRoom)->getAllLights();
-  //   } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
-  //     lights = (*RoomManager::currentRoom)->getAllCeilingLights();
-  //   } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
-  //     lights = (*RoomManager::currentRoom)->getAllTableLights();
-  //   }
-  // } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
-  //   if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-  //     lights = LightManager::getAllLights();
-  //   } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
-  //     lights = LightManager::getAllCeilingLights();
-  //   } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
-  //     lights = LightManager::getAllTableLights();
-  //   }
-  // }
-
-  // LightManager::ChangeLightToColorTemperature(&lights, this->getColorTempValue());
-  // this->_ignoreMqttMessagesUntil = millis() + InterfaceConfig::mqtt_ignore_time;
-  // this->updateLightStatus(false, true);
 }
 
 void HomePage::goToNextMode() {
@@ -524,29 +494,29 @@ void HomePage::setCurrentMode(roomMode mode) {
 void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperature) {
   if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
     if (InterfaceConfig::currentEditLightMode == editLightMode::all_lights) {
-      if (RoomManager::currentRoom->has_ceiling_lights) {
-        PageManager::GetHomePage()->setCeilingLightsState((*RoomManager::currentRoom).ceiling_lights_dim_level > 0);
-        PageManager::GetHomePage()->setCeilingBrightnessLabelText((*RoomManager::currentRoom).ceiling_lights_dim_level);
+      if (RoomManager::currentRoom->has_ceiling_lights()) {
+        PageManager::GetHomePage()->setCeilingLightsState((*RoomManager::currentRoom).ceiling_lights_dim_level() > 0);
+        PageManager::GetHomePage()->setCeilingBrightnessLabelText((*RoomManager::currentRoom).ceiling_lights_dim_level());
       } else {
         PageManager::GetHomePage()->setCeilingLightsState(false);
         PageManager::GetHomePage()->setCeilingBrightnessLabelText(0);
       }
-      if (RoomManager::currentRoom->has_table_lights) {
-        PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom).table_lights_dim_level > 0);
-        PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom).table_lights_dim_level);
+      if (RoomManager::currentRoom->has_table_lights()) {
+        PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom).table_lights_dim_level() > 0);
+        PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom).table_lights_dim_level());
       } else {
         PageManager::GetHomePage()->setTableLightsState(false);
         PageManager::GetHomePage()->setTableBrightnessLabelText(0);
       }
       // Only update light level slider if the new value is greater than 0.
-      if ((*RoomManager::currentRoom).average_dim_level > 0) {
-        PageManager::GetHomePage()->setDimmingValue((*RoomManager::currentRoom).average_dim_level);
+      if ((*RoomManager::currentRoom).average_dim_level() > 0) {
+        PageManager::GetHomePage()->setDimmingValue((*RoomManager::currentRoom).average_dim_level());
       }
-      PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom).average_color_temperature);
+      PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom).average_color_temperature());
     } else if (InterfaceConfig::currentEditLightMode == editLightMode::ceiling_lights) {
-      if (RoomManager::currentRoom->has_ceiling_lights) {
-        PageManager::GetHomePage()->setCeilingLightsState((*RoomManager::currentRoom).ceiling_lights_dim_level > 0);
-        PageManager::GetHomePage()->setCeilingBrightnessLabelText((*RoomManager::currentRoom).ceiling_lights_dim_level);
+      if (RoomManager::currentRoom->has_ceiling_lights()) {
+        PageManager::GetHomePage()->setCeilingLightsState((*RoomManager::currentRoom).ceiling_lights_dim_level() > 0);
+        PageManager::GetHomePage()->setCeilingBrightnessLabelText((*RoomManager::currentRoom).ceiling_lights_dim_level());
       } else {
         PageManager::GetHomePage()->setCeilingLightsState(false);
         PageManager::GetHomePage()->setCeilingBrightnessLabelText(0);
@@ -554,25 +524,25 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
       PageManager::GetHomePage()->setTableLightsState(false);
       PageManager::GetHomePage()->setTableBrightnessLabelText(0);
       // Only update light level slider if the new value is greater than 0.
-      if ((*RoomManager::currentRoom).ceiling_lights_dim_level > 0) {
-        PageManager::GetHomePage()->setDimmingValue((*RoomManager::currentRoom).ceiling_lights_dim_level);
+      if ((*RoomManager::currentRoom).ceiling_lights_dim_level() > 0) {
+        PageManager::GetHomePage()->setDimmingValue((*RoomManager::currentRoom).ceiling_lights_dim_level());
       }
-      PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom).ceiling_lights_color_temperature_value);
+      PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom).ceiling_lights_color_temperature_value());
     } else if (InterfaceConfig::currentEditLightMode == editLightMode::table_lights) {
-      if (RoomManager::currentRoom->has_table_lights) {
-        PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom).table_lights_dim_level > 0);
-        PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom).table_lights_dim_level);
+      if (RoomManager::currentRoom->has_table_lights()) {
+        PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom).table_lights_dim_level() > 0);
+        PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom).table_lights_dim_level());
       } else {
         PageManager::GetHomePage()->setTableLightsState(false);
         PageManager::GetHomePage()->setTableBrightnessLabelText(0);
       }
-      PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom).table_lights_dim_level > 0);
-      PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom).table_lights_dim_level);
+      PageManager::GetHomePage()->setTableLightsState((*RoomManager::currentRoom).table_lights_dim_level() > 0);
+      PageManager::GetHomePage()->setTableBrightnessLabelText((*RoomManager::currentRoom).table_lights_dim_level());
       // Only update light level slider if the new value is greater than 0.
-      if ((*RoomManager::currentRoom).table_lights_dim_level > 0) {
-        PageManager::GetHomePage()->setDimmingValue((*RoomManager::currentRoom).table_lights_dim_level);
+      if ((*RoomManager::currentRoom).table_lights_dim_level() > 0) {
+        PageManager::GetHomePage()->setDimmingValue((*RoomManager::currentRoom).table_lights_dim_level());
       }
-      PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom).table_lights_color_temperature_value);
+      PageManager::GetHomePage()->setColorTempValue((*RoomManager::currentRoom).table_lights_color_temperature_value());
     } else {
       LOG_ERROR("Unknown editLightMode!");
     }
@@ -582,7 +552,7 @@ void HomePage::updateLightStatus(bool updateLightLevel, bool updateColorTemperat
 void HomePage::updateRoomInfo() {
   if (RoomManager::hasValidCurrentRoom()) {
     if (InterfaceConfig::currentRoomMode == roomMode::room && RoomManager::hasValidCurrentRoom()) {
-      NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, (*RoomManager::currentRoom).name);
+      NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, RoomManager::currentRoom->name());
     } else if (InterfaceConfig::currentRoomMode == roomMode::house) {
       NSPanel::instance->setComponentText(HOME_PAGE_ROOM_LABEL_NAME, "All");
     }

@@ -7,7 +7,7 @@ class NSPanel;
 class RoomManager;
 #include <MqttManager.hpp>
 #include <list>
-#include <protobuf_nspanel.pb-c.h>
+#include <protobuf_defines.h>
 #include <string>
 
 class InterfaceManager {
@@ -56,7 +56,7 @@ private:
 
   bool _processMqttMessages;
   bool _config_loaded;
-  static inline NSPanelConfig _new_config;
+  static inline PROTOBUF_NSPANEL_CONFIG *_new_config;
 };
 
 #endif
