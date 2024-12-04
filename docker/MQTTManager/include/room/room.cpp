@@ -168,7 +168,7 @@ void Room::_publish_protobuf_status() {
   status.set_number_of_table_lights_on(num_lights_table_on);
 
   if (num_lights_total > 0) {
-    float average_kelvin = total_kelvin_level_all / num_lights_total;
+    float average_kelvin = (float)total_kelvin_level_all / num_lights_total;
     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
@@ -182,7 +182,7 @@ void Room::_publish_protobuf_status() {
     status.set_average_color_temperature(0);
   }
   if (num_lights_table_on > 0) {
-    float average_kelvin = total_kelvin_table / num_lights_table_on;
+    float average_kelvin = (float)total_kelvin_table / num_lights_table_on;
     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
@@ -197,7 +197,7 @@ void Room::_publish_protobuf_status() {
     status.set_table_lights_color_temperature_value(0);
   }
   if (num_lights_ceiling_on > 0) {
-    float average_kelvin = total_kelvin_ceiling / num_lights_ceiling_on;
+    float average_kelvin = (float)total_kelvin_ceiling / num_lights_ceiling_on;
     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
