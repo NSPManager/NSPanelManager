@@ -141,6 +141,15 @@ const config: Config = {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
     },
+    algolia: {
+      appId: 'ORQYQLTO1S',
+      apiKey: '196785515dac5daeccbd1a5dce6125c2',
+      indexName: 'nspanelmanager',
+      contextualSearch: false,
+      searchParameters: {},
+      searchPagePath: 'search',
+      insights: false,
+    },
   } satisfies Preset.ThemeConfig,
 };
 
