@@ -152,9 +152,12 @@ Then, flash the firmware with your tool of choice:
         port will be something similar to `/dev/ttyUSB0`.
         :::
      </TabItem>
+
 </Tabs>
 
-
+:::warning
+After the flash of the firmware, you will not see any visible change on the NSPanel display this is normal at this stage.
+:::
 
 
 
