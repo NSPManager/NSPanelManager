@@ -489,7 +489,7 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_screensaver_mode__descript
   nspanel_config__nspanel_screensaver_mode__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[29] =
+static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[30] =
 {
   {
     "name",
@@ -839,6 +839,18 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[29] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "raise_light_level_to_100_above",
+    30,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, raise_light_level_to_100_above),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_config__field_indices_by_name[] = {
   25,   /* field[25] = button1_detached_light_id */
@@ -858,6 +870,7 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
   4,   /* field[4] = min_button_push_time */
   0,   /* field[0] = name */
   28,   /* field[28] = optimistic_mode */
+  29,   /* field[29] = raise_light_level_to_100_above */
   16,   /* field[16] = relay1_default_mode */
   17,   /* field[17] = relay2_default_mode */
   15,   /* field[15] = reverse_relays */
@@ -874,7 +887,7 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
 static const ProtobufCIntRange nspanel_config__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 29 }
+  { 0, 30 }
 };
 const ProtobufCMessageDescriptor nspanel_config__descriptor =
 {
@@ -884,7 +897,7 @@ const ProtobufCMessageDescriptor nspanel_config__descriptor =
   "NSPanelConfig",
   "",
   sizeof(NSPanelConfig),
-  29,
+  30,
   nspanel_config__field_descriptors,
   nspanel_config__field_indices_by_name,
   1,  nspanel_config__number_ranges,

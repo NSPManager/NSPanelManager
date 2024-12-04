@@ -283,6 +283,7 @@ void NSPanel::send_config() {
     config.set_button1_detached_light_id(settings.button1_detached_light_id());
     config.set_button2_detached_light_id(settings.button2_detached_light_id());
     config.set_optimistic_mode(MqttManagerConfig::get_settings().optimistic_mode());
+    config.set_raise_light_level_to_100_above(settings.raise_to_100_light_level());
 
     // Load rooms
     for (int i = 0; i < settings.rooms().size(); i++) {

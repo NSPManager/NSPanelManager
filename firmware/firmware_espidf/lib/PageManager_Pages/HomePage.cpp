@@ -427,9 +427,18 @@ void HomePage::_send_table_master_button_command_to_manager() {
 }
 
 void HomePage::_update_brightness_slider_cache() {
-  if (Nextion::get_component_integer_value(GUI_HOME_PAGE::dimmer_slider_name, &HomePage::_cache_brightness_slider, 1000, 250) != ESP_OK) {
+  if (Nextion::get_component_integer_value(GUI_HOME_PAGE::dimmer_slider_name, &HomePage::_cache_brightness_slider, 1000, 250) == ESP_OK) {
+    NSPanelConfig config;
+    if (NSPM_ConfigManager::get_config(&config) == ESP_OK) {
+      if (HomePage::_cache_brightness_slider >= config.raise_light_level_to_100_above) {
+        HomePage::_cache_brightness_slider = 100;
+
+        // In the case were we actually raise light level while reading it, update the slider to new value:
+        Nextion::set_component_value(GUI_HOME_PAGE::dimmer_slider_name, HomePage::_cache_brightness_slider, 250);
+      }
+    }
+  } else {
     ESP_LOGE("HomePage", "Failed to get current color temperature value to update cache!");
-    return;
   }
 }
 

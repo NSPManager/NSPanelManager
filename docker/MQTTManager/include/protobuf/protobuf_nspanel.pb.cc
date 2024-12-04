@@ -373,6 +373,7 @@ inline constexpr NSPanelConfig::Impl_::Impl_(
         button2_mode_{0},
         button1_detached_light_id_{0},
         button2_detached_light_id_{0},
+        raise_light_level_to_100_above_{0},
         _cached_size_{0} {}
 
 template <typename>
@@ -442,6 +443,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.button2_detached_light_id_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.global_scenes_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.optimistic_mode_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.raise_light_level_to_100_above_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelWarning, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -597,16 +599,16 @@ static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::NSPanelScene)},
         {11, -1, -1, sizeof(::NSPanelConfig)},
-        {48, -1, -1, sizeof(::NSPanelWarning)},
-        {58, -1, -1, sizeof(::NSPanelStatusReport)},
-        {74, -1, -1, sizeof(::NSPanelLightStatus)},
-        {92, -1, -1, sizeof(::NSPanelRoomStatus)},
-        {114, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
-        {127, -1, -1, sizeof(::NSPanelWeatherUpdate)},
-        {143, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
-        {158, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
-        {168, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
-        {185, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {49, -1, -1, sizeof(::NSPanelWarning)},
+        {59, -1, -1, sizeof(::NSPanelStatusReport)},
+        {75, -1, -1, sizeof(::NSPanelLightStatus)},
+        {93, -1, -1, sizeof(::NSPanelRoomStatus)},
+        {115, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
+        {128, -1, -1, sizeof(::NSPanelWeatherUpdate)},
+        {144, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
+        {159, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
+        {169, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
+        {186, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelScene_default_instance_._instance,
@@ -626,7 +628,7 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     protodesc_cold) = {
     "\n\026protobuf_nspanel.proto\"@\n\014NSPanelScene"
     "\022\020\n\010scene_id\030\001 \001(\005\022\020\n\010can_save\030\002 \001(\010\022\014\n\004"
-    "name\030\003 \001(\t\"\211\010\n\rNSPanelConfig\022\014\n\004name\030\001 \001"
+    "name\030\003 \001(\t\"\261\010\n\rNSPanelConfig\022\014\n\004name\030\001 \001"
     "(\t\022\024\n\014default_room\030\002 \001(\005\022\024\n\014default_page"
     "\030\003 \001(\005\022&\n\036screensaver_activation_timeout"
     "\030\004 \001(\005\022\034\n\024min_button_push_time\030\005 \001(\005\022\036\n\026"
@@ -647,7 +649,8 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "on2_mqtt_payload\030\031 \001(\t\022!\n\031button1_detach"
     "ed_light_id\030\032 \001(\005\022!\n\031button2_detached_li"
     "ght_id\030\033 \001(\005\022$\n\rglobal_scenes\030\034 \003(\0132\r.NS"
-    "PanelScene\022\027\n\017optimistic_mode\030\035 \001(\010\"\250\001\n\026"
+    "PanelScene\022\027\n\017optimistic_mode\030\035 \001(\010\022&\n\036r"
+    "aise_light_level_to_100_above\030\036 \001(\005\"\250\001\n\026"
     "NSPanelScreensaverMode\022\033\n\027WEATHER_WITH_B"
     "ACKGROUND\020\000\022\036\n\032WEATHER_WITHOUT_BACKGROUN"
     "D\020\001\022\034\n\030DATETIME_WITH_BACKGROUND\020\003\022\037\n\033DAT"
@@ -722,7 +725,7 @@ static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    3688,
+    3728,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
@@ -1107,9 +1110,9 @@ NSPanelConfig::NSPanelConfig(
                offsetof(Impl_, default_room_),
            reinterpret_cast<const char *>(&from._impl_) +
                offsetof(Impl_, default_room_),
-           offsetof(Impl_, button2_detached_light_id_) -
+           offsetof(Impl_, raise_light_level_to_100_above_) -
                offsetof(Impl_, default_room_) +
-               sizeof(Impl_::button2_detached_light_id_));
+               sizeof(Impl_::raise_light_level_to_100_above_));
 
   // @@protoc_insertion_point(copy_constructor:NSPanelConfig)
 }
@@ -1131,9 +1134,9 @@ inline void NSPanelConfig::SharedCtor(::_pb::Arena* arena) {
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, default_room_),
            0,
-           offsetof(Impl_, button2_detached_light_id_) -
+           offsetof(Impl_, raise_light_level_to_100_above_) -
                offsetof(Impl_, default_room_) +
-               sizeof(Impl_::button2_detached_light_id_));
+               sizeof(Impl_::raise_light_level_to_100_above_));
 }
 NSPanelConfig::~NSPanelConfig() {
   // @@protoc_insertion_point(destructor:NSPanelConfig)
@@ -1171,15 +1174,15 @@ NSPanelConfig::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<5, 29, 1, 126, 2> NSPanelConfig::_table_ = {
+const ::_pbi::TcParseTable<5, 30, 1, 126, 2> NSPanelConfig::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    29, 248,  // max_field_number, fast_idx_mask
+    30, 248,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    3758096384,  // skipmap
+    3221225472,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    29,  // num_field_entries
+    30,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelConfig_default_instance_._instance,
@@ -1277,7 +1280,9 @@ const ::_pbi::TcParseTable<5, 29, 1, 126, 2> NSPanelConfig::_table_ = {
     // bool optimistic_mode = 29;
     {::_pbi::TcParser::FastV8S2,
      {488, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.optimistic_mode_)}},
-    {::_pbi::TcParser::MiniParse, {}},
+    // int32 raise_light_level_to_100_above = 30;
+    {::_pbi::TcParser::FastV32S2,
+     {496, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.raise_light_level_to_100_above_)}},
     {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
@@ -1369,6 +1374,9 @@ const ::_pbi::TcParseTable<5, 29, 1, 126, 2> NSPanelConfig::_table_ = {
     // bool optimistic_mode = 29;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.optimistic_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // int32 raise_light_level_to_100_above = 30;
+    {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.raise_light_level_to_100_above_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
   }}, {{
     {::_pbi::TcParser::GetTable<::NSPanelScene>()},
   }}, {{
@@ -1397,8 +1405,8 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
   _impl_.button2_mqtt_topic_.ClearToEmpty();
   _impl_.button2_mqtt_payload_.ClearToEmpty();
   ::memset(&_impl_.default_room_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.button2_detached_light_id_) -
-      reinterpret_cast<char*>(&_impl_.default_room_)) + sizeof(_impl_.button2_detached_light_id_));
+      reinterpret_cast<char*>(&_impl_.raise_light_level_to_100_above_) -
+      reinterpret_cast<char*>(&_impl_.default_room_)) + sizeof(_impl_.raise_light_level_to_100_above_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -1628,6 +1636,13 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
         29, this->_internal_optimistic_mode(), target);
   }
 
+  // int32 raise_light_level_to_100_above = 30;
+  if (this->_internal_raise_light_level_to_100_above() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        30, this->_internal_raise_light_level_to_100_above(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -1823,6 +1838,12 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
                                     this->_internal_button2_detached_light_id());
   }
 
+  // int32 raise_light_level_to_100_above = 30;
+  if (this->_internal_raise_light_level_to_100_above() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_raise_light_level_to_100_above());
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -1924,6 +1945,9 @@ void NSPanelConfig::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::g
   if (from._internal_button2_detached_light_id() != 0) {
     _this->_impl_.button2_detached_light_id_ = from._impl_.button2_detached_light_id_;
   }
+  if (from._internal_raise_light_level_to_100_above() != 0) {
+    _this->_impl_.raise_light_level_to_100_above_ = from._impl_.raise_light_level_to_100_above_;
+  }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -1948,8 +1972,8 @@ void NSPanelConfig::InternalSwap(NSPanelConfig* PROTOBUF_RESTRICT other) {
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.button2_mqtt_topic_, &other->_impl_.button2_mqtt_topic_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.button2_mqtt_payload_, &other->_impl_.button2_mqtt_payload_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_detached_light_id_)
-      + sizeof(NSPanelConfig::_impl_.button2_detached_light_id_)
+      PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.raise_light_level_to_100_above_)
+      + sizeof(NSPanelConfig::_impl_.raise_light_level_to_100_above_)
       - PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.default_room_)>(
           reinterpret_cast<char*>(&_impl_.default_room_),
           reinterpret_cast<char*>(&other->_impl_.default_room_));

@@ -3258,6 +3258,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kButton2ModeFieldNumber = 23,
     kButton1DetachedLightIdFieldNumber = 26,
     kButton2DetachedLightIdFieldNumber = 27,
+    kRaiseLightLevelTo100AboveFieldNumber = 30,
   };
   // repeated int32 room_ids = 15;
   int room_ids_size() const;
@@ -3594,12 +3595,22 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_button2_detached_light_id(::int32_t value);
 
   public:
+  // int32 raise_light_level_to_100_above = 30;
+  void clear_raise_light_level_to_100_above() ;
+  ::int32_t raise_light_level_to_100_above() const;
+  void set_raise_light_level_to_100_above(::int32_t value);
+
+  private:
+  ::int32_t _internal_raise_light_level_to_100_above() const;
+  void _internal_set_raise_light_level_to_100_above(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelConfig)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 29, 1,
+      5, 30, 1,
       126, 2>
       _table_;
 
@@ -3650,6 +3661,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     ::int32_t button2_mode_;
     ::int32_t button1_detached_light_id_;
     ::int32_t button2_detached_light_id_;
+    ::int32_t raise_light_level_to_100_above_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -4597,6 +4609,28 @@ inline bool NSPanelConfig::_internal_optimistic_mode() const {
 inline void NSPanelConfig::_internal_set_optimistic_mode(bool value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.optimistic_mode_ = value;
+}
+
+// int32 raise_light_level_to_100_above = 30;
+inline void NSPanelConfig::clear_raise_light_level_to_100_above() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.raise_light_level_to_100_above_ = 0;
+}
+inline ::int32_t NSPanelConfig::raise_light_level_to_100_above() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.raise_light_level_to_100_above)
+  return _internal_raise_light_level_to_100_above();
+}
+inline void NSPanelConfig::set_raise_light_level_to_100_above(::int32_t value) {
+  _internal_set_raise_light_level_to_100_above(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.raise_light_level_to_100_above)
+}
+inline ::int32_t NSPanelConfig::_internal_raise_light_level_to_100_above() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.raise_light_level_to_100_above_;
+}
+inline void NSPanelConfig::_internal_set_raise_light_level_to_100_above(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.raise_light_level_to_100_above_ = value;
 }
 
 // -------------------------------------------------------------------

@@ -100,7 +100,7 @@ def mqttmanager_get_all_nspanels(request):
                 proto_panel.name = nspanel.friendly_name
                 proto_panel.home = nspanel.room.id
                 proto_panel.default_page = int(get_nspanel_setting_with_default(nspanel.id, "default_page", 0))
-                proto_panel.raise_to_100_light_level = int(get_nspanel_setting_with_default(nspanel.id, "raise_to_100_light_level", 0))
+                proto_panel.raise_to_100_light_level = int(get_setting_with_default("raise_to_100_light_level"))
                 proto_panel.min_button_push_time = int(get_setting_with_default("min_button_push_time"))
                 proto_panel.button_long_press_time = int(get_setting_with_default("button_long_press_time"))
                 proto_panel.special_mode_trigger_time = int(get_setting_with_default("special_mode_trigger_time"))

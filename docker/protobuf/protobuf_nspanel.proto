@@ -47,6 +47,7 @@ message NSPanelConfig {
     int32 button2_detached_light_id = 27;
     repeated NSPanelScene global_scenes = 28;
     bool optimistic_mode = 29;
+    int32 raise_light_level_to_100_above = 30;
 }
 
 enum NSPanelWarningLevel {
