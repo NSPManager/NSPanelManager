@@ -6,12 +6,9 @@ from django.forms.models import model_to_dict
 
 import hashlib
 import psutil
-import subprocess
-import logging
 import environ
 import os
 import signal
-from time import sleep
 
 #from nspanelmanager.web.mqttmanager_ipc import send_ipc_request
 from .mqttmanager_ipc import send_ipc_request
@@ -169,7 +166,7 @@ def save_new_room(request):
     new_room.save()
     command_data = {
         # TODO: Base64 Encode data.
-        "data": new_room.get_protobuf_object().SerializeToString().decode()
+        "data": new_room.get_protobuf_object().SerializeToString()
     }
     send_ipc_request("entity_manager/add_room", command_data)
     #send_mqttmanager_reload_command()
@@ -427,7 +424,7 @@ def add_light_to_room(request, room_id: int):
     #send_mqttmanager_reload_command()
     command_data = {
         # TODO: Base64 Encode data.
-        "data": newLight.get_protobuf_object().SerializeToString().decode()
+        "data": newLight.get_protobuf_object().SerializeToString()
     }
     send_ipc_request("entity_manager/add_light", command_data)
     return redirect('edit_room', room_id=room_id)

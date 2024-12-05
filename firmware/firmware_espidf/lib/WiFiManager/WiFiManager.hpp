@@ -13,6 +13,13 @@ public:
    */
   static void start_client(std::string *ssid, std::string *psk, std::string *hostname);
 
+  /**
+   * @brief Start the WiFi access point for initial configuration.
+   * @param ssid: The name of the WiFi to broadcast.
+   * @param psk: The password of the WiFi.
+   */
+  static void start_ap(std::string *ssid);
+
   // TODO: void start_ap();
 
   /**

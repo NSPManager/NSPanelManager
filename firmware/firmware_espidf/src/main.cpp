@@ -2,6 +2,7 @@
 #include <InterfaceManager.hpp>
 #include <LittleFS.hpp>
 #include <MqttManager.hpp>
+#include <NSPM_version.hpp>
 #include <Nextion.hpp>
 #include <PageManager.hpp>
 #include <RoomManager.hpp>
@@ -14,7 +15,7 @@ extern "C" void app_main() {
   // Set global log level initially. This is later set from saved config.
   esp_log_level_set("*", ESP_LOG_DEBUG);
 
-  ESP_LOGI("Main", "Starting NSPanel Manager firmware. Version TODO.");
+  ESP_LOGI("Main", "Starting NSPanel Manager firmware. Version " NSPM_VERSION ".");
 
   esp_event_loop_create_default();
 
@@ -32,21 +33,23 @@ extern "C" void app_main() {
       ESP_LOGE("Main", "Failed to save config to LittleFS, got error %s!", esp_err_to_name(config_save_result));
     }
   } else {
-    if (ConfigManager::wifi_hostname.empty()) {
-      ESP_LOGE("Main", "Successfully loaded config from LittleFS but the config is not valid. Empty WiFi hostname, will load default values.");
+    if (ConfigManager::wifi_ssid.empty()) {
+      ESP_LOGE("Main", "Successfully loaded config from LittleFS but the config is not valid. Empty WiFi SSID, will load default values and start Access Point.");
       ConfigManager::create_default();
+
+      WiFiManager::start_ap(&ConfigManager::wifi_hostname);
     } else {
       ESP_LOGI("Main", "Config loaded successfully. Starting NSPanel as '%s'.", ConfigManager::wifi_hostname.c_str());
       // Set global log level
       esp_log_level_set("*", static_cast<esp_log_level_t>(ConfigManager::log_level));
+
+      // Start task that handles WiFi connection
+      WiFiManager::start_client(&ConfigManager::wifi_ssid, &ConfigManager::wifi_psk, &ConfigManager::wifi_hostname);
     }
   }
 
   // Initialize PageManager memory
   PageManager::init();
-
-  // Start task that handles WiFi connection
-  WiFiManager::start_client(&ConfigManager::wifi_ssid, &ConfigManager::wifi_psk, &ConfigManager::wifi_hostname);
 
   // Start task that handles MQTT connection
   MqttManager::start(&ConfigManager::mqtt_server, &ConfigManager::mqtt_port, &ConfigManager::mqtt_username, &ConfigManager::mqtt_password);
