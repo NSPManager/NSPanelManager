@@ -212,7 +212,7 @@ void Room::_publish_protobuf_status() {
     status.set_ceiling_lights_color_temperature_value(0);
   }
 
-  SPDLOG_TRACE("Kelvin all: {}", status.average_color_temperature());
+  SPDLOG_TRACE("Kelvin all lights in room {}::{}: {}", this->_id, this->_name, status.average_color_temperature());
 
   // Format and send
   std::string data;
@@ -222,7 +222,7 @@ void Room::_publish_protobuf_status() {
 }
 
 void Room::command_callback(NSPanelMQTTManagerCommand &command) {
-  if (command.has_first_page_turn_on() && command.first_page_turn_on().selected_room() == this->_id && !command.first_page_turn_on().global()) {
+  if (command.has_first_page_turn_on() && (command.first_page_turn_on().selected_room() == this->_id || command.first_page_turn_on().global())) {
     if (MqttManagerConfig::get_settings().optimistic_mode()) {
       this->_send_status_updates = false;
     }

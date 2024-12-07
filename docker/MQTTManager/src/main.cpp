@@ -66,14 +66,17 @@ void publish_time_and_date() {
     }
 
     if (time_str.compare(last_time_published) != 0) {
-      MQTT_Manager::publish("nspanel/status/time", time_buffer, true);
-      MQTT_Manager::publish("nspanel/status/ampm", ampm_buffer, true);
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/time", MqttManagerConfig::get_settings().manager_address()), time_buffer, true);
+      if (MqttManagerConfig::get_settings().clock_format() == time_format::AM_PM) {
+        MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_settings().manager_address()), ampm_buffer, true);
+      } else {
+        MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_settings().manager_address()), "", true);
+      }
       last_time_published = time_buffer;
     }
 
     if (date_str.compare(last_date_published) != 0) {
-      MQTT_Manager::publish("nspanel/status/date", date_buffer, true);
-      MQTT_Manager::publish("nspanel/status/ampm", "", true);
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/date", MqttManagerConfig::get_settings().manager_address()), date_buffer, true);
       last_date_published = date_buffer;
     }
 

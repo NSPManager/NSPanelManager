@@ -258,9 +258,6 @@ void Light::command_callback(NSPanelMQTTManagerCommand &command) {
       }
       if (cmd.has_color_temperature()) {
         // Convert color temperature (0-100) to actual color temperature in kelvin.
-        SPDLOG_DEBUG("Got color temperature {} from panel.", cmd.color_temperature());
-        SPDLOG_DEBUG("Color temp min: {}", MqttManagerConfig::get_settings().color_temp_min());
-        SPDLOG_DEBUG("Color temp max: {}", MqttManagerConfig::get_settings().color_temp_max());
         uint32_t color_temperature_kelvin = cmd.color_temperature() * ((MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())/100);
         if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
             color_temperature_kelvin = MqttManagerConfig::get_settings().color_temp_max() - color_temperature_kelvin;

@@ -12,14 +12,12 @@ public:
 
   template <typename CALLBACK_BIND>
   static void attach_callback(CALLBACK_BIND callback) {
-    SPDLOG_TRACE("Attaching command callback.");
     CommandManager::_callbacks.disconnect(callback);
     CommandManager::_callbacks.connect(callback);
   }
 
   template <typename CALLBACK_BIND>
   static void detach_callback(CALLBACK_BIND callback) {
-    SPDLOG_TRACE("Detaching command callback");
     CommandManager::_callbacks.disconnect(callback);
   }
 
