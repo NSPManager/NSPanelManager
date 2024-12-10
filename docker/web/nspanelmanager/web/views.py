@@ -297,7 +297,7 @@ def save_panel_settings(request, panel_id: int):
     else:
         panel.button2_detached_mode_light = None
 
-    if request.POST["button1_mode"] == "2":  # Custom MQTT Mode
+    if request.POST["button2_mode"] == "2":  # Custom MQTT Mode
         set_nspanel_setting_value(
             panel_id, "button2_mqtt_topic", request.POST["button2_custom_mqtt_topic"])
         set_nspanel_setting_value(

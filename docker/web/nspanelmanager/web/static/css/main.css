@@ -7105,29 +7105,6 @@ input.tab:checked + .tab-content,
   transition-timing-function: linear;
 }
 
-.htmx-request {
-  pointer-events: auto;
-  visibility: visible;
-  opacity: 1;
-}
-
-:root:has(:is(.htmx-request, .modal:target, .modal-toggle:checked + .modal, .modal[open])) {
-  overflow: hidden;
-  scrollbar-gutter: stable;
-}
-
-.htmx-request .modal-box {
-  --tw-translate-y: 0px;
-  --tw-scale-x: 1;
-  --tw-scale-y: 1;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.htmx-request {
-  background-color: #0006;
-  animation: modal-pop 0.2s ease-out;
-}
-
 .after\:inline-block::after {
   content: var(--tw-content);
   display: inline-block;

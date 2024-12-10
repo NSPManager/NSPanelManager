@@ -194,7 +194,7 @@ void NSPanel::update_config(NSPanelSettings &settings) {
 
     this->_mqtt_config_topic = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/config", MqttManagerConfig::get_settings().manager_address(), this->_name);
     this->_mqtt_log_topic = fmt::format("nspanel/{}/log", this->_name);
-    this->_mqtt_command_topic = fmt::format("nspanel/{}/command", this->_name);
+    this->_mqtt_command_topic = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/command", MqttManagerConfig::get_settings().manager_address(), this->_name);
     this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
     this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
     this->_mqtt_light_relay1_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay1/config", mqtt_register_mac);
