@@ -1,0 +1,10 @@
+<span hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_ram_usage' view='index' nspanel_id=id %}" class="icon-text" id="nspanel_ram_usage_container-{{ id }}">
+    <span class="icon me-1">
+    <i class="mdi mdi-memory"></i>
+    </span>
+    {% if state == "offline" or state == "unknown" %}
+    <span id="heap_used-{{ id }}" class="text-sm">?%</span>
+    {% else %}
+    <span id="heap_used-{{ id }}" class="text-sm">{{ ram_usage }}%</span>
+    {% endif %}
+</span>

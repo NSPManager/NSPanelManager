@@ -2,131 +2,60 @@
 
 {% block head %}
 {% load static %}
-<script src="{% static 'index.js' %}?refresh={% now 'U' %}"></script>
-<link rel="stylesheet" type="text/css" href="{% static 'index.css' %}?refresh={% now 'U' %}">
+<script src="{{ ingress_path }}{{ ingress_path }}{% static 'index.js' %}?refresh={% now 'U' %}"></script>
+<link rel="stylesheet" type="text/css" href="{{ ingress_path }}{{ ingress_path }}{% static 'index.css' %}?refresh={% now 'U' %}">
+{% if manager_address == "" %}<script src="{{ingress_path}}{{ ingress_path }}{% static 'initial_setup.js' %}?refresh={% now 'U' %}"></script>{% endif %}
 {% endblock %}
 
 {% block content %}
-<span class="is-hidden" id="temperature_unit">{{ temperature_unit }}</span>
-{% load mathfilters %}
-<div class="level">
-  <div class="level-left">
-    <div class="level-item">
-      <h2 class="title is-4">Panels</h2>
+{% if manager_address == "" %}{% include 'modal-initial-setup.html' %}{% endif %}
+
+<span class="hidden" id="temperature_unit">{{ temperature_unit }}</span>
+<div class="flex flex-wrap justify-between items-center">
+  <div class="flex justify-between items-center">
+    <!-- Spinner -->
+    <span class="font-medium text-2xl me-2">NSPanels</span>
+    <div role="status" class="transition-all ease-linear duration-300 hidden" id="loading-panels-spinner">
+      <svg aria-hidden="true" class="w-6 h-6 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
+      <span class="sr-only">Loading...</span>
     </div>
   </div>
-  <div class="level-right">
-    <div class="level-item">
-      <div class="dropdown">
-        <div class="dropdown-trigger">
-          <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu">
-            <span><span class="mdi mdi-cog pr-2"></span>Actions</span>
-            <span class="icon is-small">
-              <i class="mdi mdi-menu-down" aria-hidden="true"></i>
-            </span>
-          </button>
-        </div>
-        <div class="dropdown-menu" id="dropdown-menu" role="menu">
-          <div class="dropdown-content">
-            <a class="dropdown-item"
-              onclick="rebootNSPanelAll();">
-              <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot all panels
-            </a>
-            <hr class="dropdown-divider">
-            <a class="dropdown-item" onclick="startNSPanelOtaUpdateAll();">
-              <span class="mdi mdi-upload pr-2 has-text-info"></span>Update firmware on all panels
-            </a>
-            <a class="dropdown-item" onclick="startNSPanelTftUpdateAll();">
-              <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update screen on all panels
-            </a>
-          </div>
-        </div>
-      </div>
+  <div>
+    <button data-dropdown-toggle="actionsMenuDropdown"
+      class="btn btn-neutral btn-outline">
+      Actions
+      <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+        viewBox="0 0 10 6">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
+      </svg>
+    </button>
+    <!-- Dropdown menu -->
+    <div id="actionsMenuDropdown"
+      class="hidden z-10 font-normal bg-neutral divide-y divide-neutral-content rounded-box shadow w-44 md:absolute inset-x-auto">
+      <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
+        <li>
+          <a onclick="rebootNSPanelAll();" class="block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
+              class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot all panels</a>
+        </li>
+        <li>
+          <a onclick="restart_mqtt_manager();" class="block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
+              class="mdi mdi-restart pr-2 has-text-primary"></span>Restart MQTTManager</a>
+        </li>
+        <li>
+          <a onclick="startNSPanelOtaUpdateAll();" class="block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
+              class="mdi mdi-upload pr-2 has-text-info"></span>Update firmware on all panels</a>
+        </li>
+        <li>
+          <a onclick="startNSPanelTftUpdateAll();" class="block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
+              class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update GUI on all panels</a>
+        </li>
+      </ul>
     </div>
   </div>
 </div>
-<div class="is-flex flex-wrap" style="flex-wrap: wrap;">
-    {% for panel_info in nspanels %}
-    <div class="box nspanel-box m-2" id="panel_status_box_{{ panel_info.nspanel.mac_address }}">
-      <span id="nspanel_id_{{ panel_info.nspanel.mac_address }}" class="is-hidden nspanel_id_container">{{ panel_info.nspanel.id }}</span>
-      <span class="is-hidden nspanel_mac_container">{{ panel_info.nspanel.mac_address }}</span>
-      <div class="nspanel-status-header">
-        <div class="has-background-grey nspanel-status-header-await" id="panel_header_{{ panel_info.nspanel.mac_address }}"></div>
-      </div>
-      <div class="nspanel-status-content-box">
-        <div class="level">
-          <div class="level-left">
-            <div class="level-item">
-              <div class="is-pulled-left">
-                <span class="has-text-weight-bold"><a href="{% url 'edit_nspanel' panel_id=panel_info.nspanel.id %}" class="has-text-dark">{{ panel_info.nspanel.friendly_name }}</a></span>
-              </div>
-            </div>
-          </div>
-          <div class="level-right">
-            <span class="has-text-weight-light is-italic is-size-7" id="panel_header_text_{{ panel_info.nspanel.mac_address }}">Unknown status</span>
-          </div>
-        </div>
-
-
-        <div class="info-item">
-          <span class="icon-text">
-            <span class="icon">
-              <i class="mdi mdi-help" id="wifi_signal_strength_{{ panel_info.nspanel.mac_address }}"></i>
-            </span>
-            <span id="wifi_signal_strength_text_{{ panel_info.nspanel.mac_address }}" class="is-size-7">-</span>
-          </span>
-        </div>
-        <div class="info-item">
-          <span class="icon-text">
-            <span class="icon">
-              <i class="mdi mdi-thermometer"></i>
-            </span>
-            <span id="temperature_{{ panel_info.nspanel.mac_address }}" class="nspanel-status-temperature is-size-7">-</span>
-          </span>
-        </div>
-        <div class="info-item">
-          <span class="icon-text">
-            <span class="icon">
-              <i class="mdi mdi-memory"></i>
-            </span>
-            <span class="is-size-7" id="heap_used_{{ panel_info.nspanel.mac_address }}">-</span>
-          </span>
-        </div>
-
-      </div>
-      <div class="nspanel-status-footer">
-          <span data-tooltip="" class="icon is-small has-tooltipl-multiline has-tooltip-warning pl-3 is-hidden" id="nspanel_{{ panel_info.nspanel.mac_address}}_warnings">
-            <span class="mdi mdi-alert-circle has-text-warning mdi-24px"></span>
-          </span>
-          <div class="dropdown nspanel-actions-button">
-            <div class="dropdown-trigger">
-              <span class="mdi mdi-cog pr-2"></span>
-            </div>
-            <div class="dropdown-menu" id="dropdown-menu" role="menu">
-              <div class="dropdown-content">
-                <a class="dropdown-item"
-                  onclick="rebootNSPanel('{{ panel_info.nspanel.mac_address }}');">
-                  <span class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot
-                </a>
-                <a class="dropdown-item" href="http://{{ panel_info.nspanel.ip_address }}" target="_blank">
-                  <span class="mdi mdi-web pr-2 has-text-primary"></span>Visit panel page
-                </a>
-                <hr class="dropdown-divider">
-                <a class="dropdown-item" onclick="startNSPanelOtaUpdate('{{ panel_info.nspanel.mac_address }}');">
-                  <span class="mdi mdi-upload pr-2 has-text-info"></span>Update firmware
-                </a>
-                <a class="dropdown-item" onclick="startNSPanelTftUpdate('{{ panel_info.nspanel.mac_address }}');">
-                  <span class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update screen
-                </a>
-                <hr class="dropdown-divider">
-                <a href="{% url 'delete_nspanel' panel_id=panel_info.nspanel.id %}" class="dropdown-item has-text-danger">
-                  <span class="mdi mdi-minus-circle pr-2"></span>Delete
-                </a>
-              </div>
-            </div>
-          </div>
-      </div>
-    </div>
-    {% endfor %}
+<div>
+  <div class="grid md:grid-cols-3 gap-4 mt-4 items-start" id="nspanels_container">
+    {% include 'partial/nspanel_index_view.html' %}
+  </div>
 </div>
 {% endblock %}

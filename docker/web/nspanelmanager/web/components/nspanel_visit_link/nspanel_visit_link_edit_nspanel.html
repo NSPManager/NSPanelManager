@@ -1,0 +1,5 @@
+<a hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_visit_link' view='edit_nspanel' nspanel_id=id %}" href="http://{{ address }}" target="_blank" id="nspanel_visit_link-{{ id }}" title="{% if state == 'offline' %}No address available.{% else %}Visit NSPanel setup page.{% endif %}">
+    <div class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
+      <span class="mdi mdi-web me-2"></span><span class="{% if state == 'offline' %}line-through{% endif %}">Visit</span>
+    </div>
+</a>

@@ -1,363 +1,474 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>NSPanel: %wifi_hostname%</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta charset="utf-8" />
-    <script src="/static/jquery.min.js"></script>
-    <script src="/static/index.js"></script>
-    <link rel="stylesheet" href="/static/bulma.min.css" />
-    <link rel="stylesheet" href="/static/index.css" />
 
-    <script>
-      $("document").ready(function () {
-        $("#log_level").val("%log_level%").change();
-        $("#upload_buad_rate").val("%tft_upload_baud%").change();
-      });
-    </script>
-  </head>
+<head>
+  <title>NSPanel: %wifi_hostname%</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="static/main.css" />
+  <script>
+    function close_wifi_select_modal() {
+      var select_wifi_modal = document.getElementById("select_wifi_modal");
+      select_wifi_modal.classList.add("hidden");
+      doConnectionCheck = true;
+    }
 
-  <body>
-    <!-- Modal to show that connected to the device has been lost -->
-    <div class="modal" id="not_connected_modal">
-      <div class="modal-background"></div>
-      <div class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title">Connection lost</p>
-        </header>
-        <section class="modal-card-body">
-          <center>
-            <div class="lds-dual-ring"></div>
-            <br />
-            Please wait, you will be automatically reconnected (if the address
-            is still the same).
-          </center>
-        </section>
-        <footer class="modal-card-foot"></footer>
+    function showWifiSelectModal() {
+      var available_wifi_networks = document.getElementById("available_wifi_networks");
+      var wifi_failed_to_get_networks = document.getElementById("wifi_failed_to_get_networks");
+      var wifi_no_networks_found = document.getElementById("wifi_no_networks_found");
+      var wifi_wait_div = document.getElementById("wifi_wait_div");
+      var select_wifi_modal = document.getElementById("select_wifi_modal");
+
+      available_wifi_networks.classList.add("hidden");
+      wifi_failed_to_get_networks.classList.add("hidden");
+      wifi_no_networks_found.classList.add("hidden");
+      wifi_wait_div.classList.remove("hidden");
+      select_wifi_modal.classList.remove("hidden");
+      getAvailableNetworks();
+    }
+
+    function getAvailableNetworks() {
+      doConnectionCheck = false;
+      // Make http request and get the available networks:
+      const request = new XMLHttpRequest();
+      request.onreadystatechange = () => {
+        if (request.readyState === XMLHttpRequest.DONE && request.status === 200) {
+          let data = JSON.parse(request.responseText);
+          if (data.length > 0) {
+            populateModalWithWiFiNetworks(data);
+          } else {
+            // Got no networks back, try once more the first request usally returnes an empty list.
+            console.log("Got empty list back from ESP32. Will try once more.");
+            getAvailableNetworks();
+          }
+        } else if (request.readyState === XMLHttpRequest.DONE && request.status != 200) {
+          var wifi_wait_div = document.getElementById("wifi_wait_div");
+          var wifi_failed_to_get_networks = document.getElementById("wifi_failed_to_get_networks");
+          wifi_wait_div.classList.add("hidden");
+          wifi_failed_to_get_networks.classList.remove("hidden");
+        }
+      };
+      request.open("GET", "/available_wifi_networks");
+      request.send();
+    }
+
+    function populateModalWithWiFiNetworks(networks) {
+      var table_body_html = "";
+      for (let i = 0; i < networks.length; i++) {
+        let network = networks[i];
+        table_body_html += "<tr class='bg-white border-b'>";
+
+        table_body_html += '<th class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap cursor-pointer">';
+        table_body_html += `<a onclick="selectNetwork('${network.ssid}');">${network.ssid}</a>`;
+        table_body_html += "</th>";
+
+        table_body_html += "<td class='px-6 py-3'>";
+        table_body_html += network.rssi;
+        table_body_html += "</td>";
+
+        table_body_html += "<td class='px-6 py-3'>";
+        table_body_html += network.channel;
+        table_body_html += "</td>";
+
+        table_body_html += "<td class='px-6 py-3'>";
+        table_body_html += network.security;
+        table_body_html += "</td>";
+
+        table_body_html += "</tr>";
+      }
+
+      var wifi_wait_div = document.getElementById("wifi_wait_div");
+      var available_wifi_networks = document.getElementById("available_wifi_networks");
+      var available_wifi_networks_tbody = document.getElementById("available_wifi_networks_tbody");
+
+      available_wifi_networks_tbody.innerHTML = table_body_html;
+      wifi_wait_div.classList.add("hidden");
+      available_wifi_networks.classList.remove("hidden");
+    }
+
+    function selectNetwork(network) {
+      var wifi_ssid = document.getElementById("wifi_ssid");
+      var select_wifi_modal = document.getElementById("select_wifi_modal");
+      var wifi_psk = document.getElementById("wifi_psk");
+
+      select_wifi_modal.classList.add("hidden");
+      wifi_ssid.value = network;
+      wifi_psk.select();
+      wifi_psk.focus();
+      doConnectionCheck = true;
+    }
+
+    // About the same as $(document).ready(....)
+    document.addEventListener("DOMContentLoaded", () => {
+      var log_level_select = document.getElementById("log_level");
+      var upload_buad_rate_select = document.getElementById("upload_buad_rate");
+
+      log_level_select.value = "%log_level%";
+      upload_buad_rate_select.value = "%tft_upload_baud%";
+    });
+  </script>
+</head>
+
+<body class="container mx-auto pt-4 bg-gray-800">
+  <!-- Modal to show that connection to the device has been lost -->
+  <div id="popup-modal" tabindex="-1" class="fixed left-0 top-0 hidden" id="not_connected_modal">
+    <div class="w-full h-full fixed bg-black opacity-90"></div>
+    <div class="p-4 max-w-md mx-auto my-auto sm:w-3/4 md:w-2/4 fixed inset-0 flex items-center">
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+        <div class="p-4 md:p-5 text-center">
+          <svg class="animate-spin mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
+          </svg>
+          <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Connection lost. You will be
+            automatically reconnect if the NSPanel is still reachable on the same address.</h3>
+        </div>
       </div>
     </div>
-    <!-- Select WiFi SSID modal -->
-    <div class="modal" id="select_wifi_modal">
-      <div
-        class="modal-background"
-        id="select_wifi_modal_close_background"
-      ></div>
-      <div class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title">Select network</p>
-          <button
-            class="delete"
-            aria-label="close"
-            id="select_wifi_modal_close_button"
-          ></button>
-        </header>
-        <section class="modal-card-body">
-          <div id="wifi_wait_div">
-            <center>
-              <div class="lds-dual-ring"></div>
-              <br />
-              Please wait, while fetching available Wifi networks.
-            </center>
-          </div>
-          <div id="wifi_failed_to_get_networks">
-            <div class="notification is-danger">
-              Failed to get a list of available networks!
-            </div>
-          </div>
-          <div id="wifi_no_networks_found">
-            <div class="notification is-danger">No networks found.</div>
-          </div>
-          <div id="available_wifi_networks">
-            <table class="table is-fullwidth">
-              <thead>
-                <tr>
-                  <th>SSID</th>
-                  <th>RSSI</th>
-                  <th>Channel</th>
-                  <th>Security</th>
-                </tr>
-              </thead>
-              <tbody id="available_wifi_networks_tbody">
-                <tr>
-                  <th>1</th>
-                  <td>2</td>
-                  <td>3</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-        <footer class="modal-card-foot">
-          <button class="button" id="select_wifi_modal_cancel_button">
-            Cancel
+  </div>
+
+  <div id="select_wifi_modal" tabindex="-1" aria-hidden="true"
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full max-h-full p-4 max-w- mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">
+    <div class="w-full h-full fixed bg-black opacity-90" onclick="close_wifi_select_modal();"></div>
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+      <!-- Modal content -->
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Select WiFi
+          </h3>
+          <button type="button" onclick="close_wifi_select_modal();"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+            data-modal-hide="default-modal">
+            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+            </svg>
+            <span class="sr-only">Close wifi select dialog</span>
           </button>
-        </footer>
+        </div>
+        <!-- Spinner while fetching wifi networks -->
+        <div id="wifi_wait_div" class="p-4">
+          <center>
+            <svg class="animate-spin mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
+            </svg>
+            <br />
+            Please wait while fetching available Wifi networks.
+          </center>
+        </div>
+        <!-- Error in case of error when fetching wifi networks -->
+        <div id="wifi_failed_to_get_networks">
+          <div class="bg-red-600 text-white p-4">
+            Failed to get a list of available networks!
+          </div>
+        </div>
+        <!-- Show no networks were found -->
+        <div id="wifi_no_networks_found">
+          <div class="bg-yellow-600 text-white p-4">
+            No networks found.
+          </div>
+        </div>
+        <!-- Show table of available networks -->
+        <div id="available_wifi_networks" class="pb-1">
+          <table class="w-full text-left rtl:text-right rounded-b-md">
+            <thead class="text-gray-700 uppercase bg-gray-50">
+              <tr>
+                <th class="px-6 py-3">SSID</th>
+                <th class="px-6 py-3">RSSI</th>
+                <th class="px-6 py-3">Channel</th>
+                <th class="px-6 py-3">Security</th>
+              </tr>
+            </thead>
+            <tbody id="available_wifi_networks_tbody">
+              <tr class="bg-white border-b">
+                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap cursor-pointer">1</th>
+                <td class="px-6 py-4">2</td>
+                <td class="px-6 py-4">3</td>
+                <td class="px-6 py-4">WPA2</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
+  </div>
 
-    <!-- Modal to confirm factory reset -->
-    <!-- <div class="modal" id="factory_reset_modal">
-        <div class="modal-background" id="factory_reset_modal_background"></div>
-        <div class="modal-card">
-            <header class="modal-card-head">
-                <p class="modal-card-title">Factory Reset</p>
-            </header>
-            <section class="modal-card-body">
-                <p>Are you sure you want to factory reset the device?</p>
-            </section>
-            <footer class="modal-card-foot">
-                <a class="button is-danger" href="/do_factory_reset">Factory Reset</a>
-                <button class="button" onclick="cancelFactoryReset();">Cancel</button>
-            </footer>
-        </div>
-    </div> -->
-
-    <section class="section">
-      <div class="container">
-        <h1 class="title" id="page-title">NSPanelManager</h1>
-        <h2 class="subtitle" id="page-subtitle">Version %version%</h2>
-      </div>
-    </section>
-
+  <section class="section">
     <div class="container">
-      <form method="POST" action="/save_config" id="config">
-        <div class="box">
-          <div class="field">
-            <h5 class="title is-5">General</h5>
-            <label class="label">Friendly name</label>
-            <div class="control">
-              <input
-                class="input"
-                type="text"
-                name="wifi_hostname"
-                id="wifi_hostname"
-                placeholder="Device name"
-                value="%wifi_hostname%"
-                required
-              />
-            </div>
-            <div class="notification is-warning mt-4">
-              The "Friendly name" on this page is only used when first
-              registring to the NSPanel Manager container. If you wish to change
-              name after it is already registered, do this on the panel page
-              setting on the NSPanel Manager container.
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">Manager address</label>
-            <div class="control">
-              <input
-                class="input"
-                type="text"
-                name="manager_address"
-                id="manager_address"
-                placeholder="192.168.1.5"
-                value="%manager_address%"
-                required
-              />
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">Manager port</label>
-            <div class="control">
-              <input
-                class="input"
-                type="number"
-                name="manager_port"
-                id="manager_port"
-                placeholder="8000"
-                value="%manager_port%"
-                required
-              />
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">Log level</label>
-            <div class="control">
-              <div class="select">
-                <select name="log_level" id="log_level">
-                  <option value="0">None</option>
-                  <option value="1">Error</option>
-                  <option value="2">Warning</option>
-                  <option value="3">Info</option>
-                  <option value="4">Debug</option>
-                  <option value="5">Trace</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="box">
-          <div class="field">
-            <h5 class="title is-5">WiFi</h5>
-          </div>
-          <div class="field">
-            <label class="label">Connect to WiFi</label>
-          </div>
-          <div class="field has-addons">
-            <div class="control is-expanded">
-              <input
-                class="input"
-                type="text"
-                name="wifi_ssid"
-                id="wifi_ssid"
-                placeholder="SSID"
-                value="%wifi_ssid%"
-                required
-              />
-            </div>
-            <div class="control">
-              <a class="button is-info" onclick="showWifiSelectModal();"
-                >List</a
-              >
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">WiFi Password</label>
-            <div class="control">
-              <input
-                class="input"
-                type="password"
-                name="wifi_psk"
-                id="wifi_psk"
-                placeholder="Password"
-                value="%wifi_psk%"
-                required
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="box">
-          <div class="field">
-            <h5 class="title is-5">MQTT</h5>
-          </div>
-          <div class="field">
-            <label class="label">MQTT Server</label>
-            <div class="control">
-              <input
-                class="input"
-                type="text"
-                name="mqtt_server"
-                id="mqtt_server"
-                placeholder="MQTT Server"
-                value="%mqtt_server%"
-                required
-              />
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">MQTT Port</label>
-            <div class="control">
-              <input
-                class="input"
-                type="number"
-                name="mqtt_port"
-                id="mqtt_port"
-                placeholder="MQTT Port"
-                value="%mqtt_port%"
-                required
-              />
-            </div>
-          </div>
-          <div class="field" id="mqtt_username_field">
-            <label class="label">MQTT Username</label>
-            <div class="control">
-              <input
-                class="input"
-                type="text"
-                name="mqtt_username"
-                id="mqtt_username"
-                value="%mqtt_username%"
-                placeholder="MQTT Username"
-              />
-            </div>
-          </div>
-          <div class="field" id="mqtt_psk_field">
-            <label class="label">MQTT Password</label>
-            <div class="control">
-              <input
-                class="input"
-                type="password"
-                name="mqtt_psk"
-                id="mqtt_psk"
-                placeholder="MQTT Password"
-                value="%mqtt_psk%"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="box">
-          <div class="field">
-            <h5 class="title is-5">NSPanel TFT upload</h5>
-          </div>
-          <div class="field">
-            <label class="label">Protocol</label>
-            <div class="control">
-              <label class="radio">
-                <input
-                  type="radio"
-                  name="upload_protocol"
-                  value="latest"
-                  %upload_proto_latest_checked%
-                />
-                Latest ("v1.2")
-              </label>
-              <label class="radio">
-                <input
-                  type="radio"
-                  name="upload_protocol"
-                  value="legacy"
-                  %upload_proto_legacy_checked%
-                />
-                Legacy (v1.0)
-              </label>
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">Upload baud rate</label>
-            <div class="notification is-warning">
-              The upload baud rate that this specific NSPanel can can not be
-              calculated. This is something you will have to experiment with if
-              you wish to have different value than default. Chaning this from
-              default may cause the NSPanel to fail to update the screen TFT.
-            </div>
-            <div class="control">
-              <div class="select">
-                <select name="upload_buad_rate" id="upload_buad_rate">
-                  <option value="2400">2400</option>
-                  <option value="4800">4800</option>
-                  <option value="9600">9600</option>
-                  <option value="19200">19200</option>
-                  <option value="38400">38400</option>
-                  <option value="57600">57600</option>
-                  <option value="115200">115200 (default)</option>
-                  <option value="230400">230400</option>
-                  <option value="460800">460800</option>
-                  <option value="576000">576000</option>
-                  <option value="921600">921600</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Add 1rem of padding to bottom to prevent a white bar appering on the bottom of the page -->
-        <div class="level" style="padding-bottom: 1rem">
-          <div class="level-left">
-            <div class="buttons is-right"></div>
-          </div>
-          <div class="level-right">
-            <div class="buttons">
-              <button class="button is-success" type="submit" id="save_button">
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      </form>
+      <h1 class="text-4xl font-medium text-gray-50" id="page-title">NSPanelManager</h1>
+      <h2 class="text-xl text-gray-50" id="page-subtitle">Version %version%</h2>
     </div>
-  </body>
+  </section>
+
+  <div class="container pt-4">
+    <form method="POST" action="/save_config" id="config">
+      <div class="bg-gray-50 rounded-md p-4">
+        <h5 class="text-xl">General</h5>
+
+        <div class="mt-4">
+          <label for="wifi_hostname" class="block mb-2 text-sm font-medium text-gray-900">Friendly name</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>Friendly name</title>
+                <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
+                  4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
+                  7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="text" name="wifi_hostname" id="wifi_hostname" placeholder="Device name" value="%wifi_hostname%"
+              required />
+          </div>
+        </div>
+
+        <div class="bg-yellow-300 rounded-md p-4 is-warning mt-2">
+          <div class="text-lg font-medium">Warning!</div>
+          The "Friendly name" on this page is only used when first
+          registring to the NSPanel Manager container. If you wish to change
+          name after it is already registered, do this on the panel page
+          setting on the NSPanel Manager container.
+        </div>
+
+        <div class="mt-4">
+          <label for="log_level" class="block mb-2 text-sm font-medium text-gray-900">Log level</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>Log level</title>
+                <path
+                  d="M13 11H11V5H13M13 15H11V13H13M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z" />
+              </svg>
+            </span>
+
+            <select name="log_level" id="log_level" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5>
+                <option value=" 0">None</option>
+              <option value="1">Error</option>
+              <option value="2">Warning</option>
+              <option value="3">Info</option>
+              <option value="4">Debug</option>
+              <option value="5">Trace</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gray-50 rounded-md p-4 mt-4">
+        <h5 class="text-xl">WiFi</h5>
+
+        <div class="mt-4">
+          <label for="wifi_ssid" class="block mb-2 text-sm font-medium text-gray-900">Connect to WiFi</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>WiFi</title>
+                <path
+                  d="M12,21L15.6,16.2C14.6,15.45 13.35,15 12,15C10.65,15 9.4,15.45 8.4,16.2L12,21M12,3C7.95,3 4.21,4.34 1.2,6.6L3,9C5.5,7.12 8.62,6 12,6C15.38,6 18.5,7.12 21,9L22.8,6.6C19.79,4.34 16.05,3 12,3M12,9C9.3,9 6.81,9.89 4.8,11.4L6.6,13.8C8.1,12.67 9.97,12 12,12C14.03,12 15.9,12.67 17.4,13.8L19.2,11.4C17.19,9.89 14.7,9 12,9Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="text" name="wifi_ssid" id="wifi_ssid" placeholder="SSID" value="%wifi_ssid%" required />
+            <a class="inline-flex items-center px-3 text-sm text-white bg-blue-700 hover:bg-blue-80 border rounded-e-0 border-blue-800 rounded-e-md cursor-pointer"
+              onclick="showWifiSelectModal();">Select from list</a>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label for="wifi_psk" class="block mb-2 text-sm font-medium text-gray-900">Wifi password</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>WiFi password</title>
+                <path
+                  d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="password" name="wifi_psk" id="wifi_psk" placeholder="Password" value="%wifi_psk%" required />
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gray-50 rounded-md p-4 mt-4">
+        <h5 class="text-xl">MQTT</h5>
+
+        <div class="mt-4">
+          <label for="mqtt_server" class="block mb-2 text-sm font-medium text-gray-900">MQTT Server</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md   ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>MQTT Server</title>
+                <path
+                  d="M17,11H15V9H17M13,11H11V9H13M9,11H7V9H9M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4C22,2.89 21.1,2 20,2Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="text" name="mqtt_server" id="mqtt_server" placeholder="MQTT Server" value="%mqtt_server%"
+              required />
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label for="mqtt_port" class="block mb-2 text-sm font-medium text-gray-900">MQTT port</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md   ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>MQTT Port</title>
+                <path
+                  d="M17,11H15V9H17M13,11H11V9H13M9,11H7V9H9M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4C22,2.89 21.1,2 20,2Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              type="number" name="mqtt_port" id="mqtt_port" placeholder="MQTT Port" value="%mqtt_port%" required />
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label for="mqtt_username" class="block mb-2 text-sm font-medium text-gray-900">MQTT username</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>MQTT Username</title>
+                <path
+                  d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
+              class="input" type="text" name="mqtt_username" id="mqtt_username" value="%mqtt_username%"
+              placeholder="MQTT Username" />
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label for="mqtt_psk" class="block mb-2 text-sm font-medium text-gray-900">MQTT password</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md   ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>WiFi password</title>
+                <path
+                  d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
+              </svg>
+            </span>
+            <input
+              class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5      "
+              type="password" name="mqtt_psk" id="mqtt_psk" placeholder="MQTT Password" value="%mqtt_psk%" />
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gray-50 rounded-md p-4 mt-4">
+        <h5 class="text-xl">TFT upload</h5>
+
+
+        <div class="mt-4">
+          <h3 class="block mb-2 text-sm font-medium">Protocol</h3>
+          <ul
+            class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
+            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+              <div class="flex items-center ps-3">
+                <input id="horizontal-list-radio-license" type="radio" value="" name="upload_protocol" value="legacy"
+                  %upload_proto_legacy_checked%
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500    focus:ring-2  ">
+                <label for="horizontal-list-radio-license"
+                  class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Legacy upload protocol
+                  (v1.0)</label>
+              </div>
+            </li>
+            <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+              <div class="flex items-center ps-3">
+                <input id="horizontal-list-radio-id" type="radio" name="upload_protocol" value="latest"
+                  %upload_proto_latest_checked%
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500    focus:ring-2  ">
+                <label for="horizontal-list-radio-id" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Latest
+                  upload protocol
+                  (v1.2)</label>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="bg-blue-300 rounded-md p-4 is-warning mt-2">
+          <div class="text-lg font-medium">Info.</div>
+          Upload protocol v1.2 is prefered but some early Nextion TFT models do not support version 1.2. The
+          overwhelming majority of panels seem to be able to use v1.2.
+          Version 1.0 is supported as a fallback option in case v1.2 doesn't work.
+        </div>
+
+        <div class="mt-4">
+          <label for="upload_buad_rate" class="block mb-2 text-sm font-medium text-gray-900">Upload baud rate</label>
+          <div class="flex">
+            <span
+              class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md   ">
+              <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>Upload buad rate</title>
+                <path
+                  d="M12,16A3,3 0 0,1 9,13C9,11.88 9.61,10.9 10.5,10.39L20.21,4.77L14.68,14.35C14.18,15.33 13.17,16 12,16M12,3C13.81,3 15.5,3.5 16.97,4.32L14.87,5.53C14,5.19 13,5 12,5A8,8 0 0,0 4,13C4,15.21 4.89,17.21 6.34,18.65H6.35C6.74,19.04 6.74,19.67 6.35,20.06C5.96,20.45 5.32,20.45 4.93,20.07V20.07C3.12,18.26 2,15.76 2,13A10,10 0 0,1 12,3M22,13C22,15.76 20.88,18.26 19.07,20.07V20.07C18.68,20.45 18.05,20.45 17.66,20.06C17.27,19.67 17.27,19.04 17.66,18.65V18.65C19.11,17.2 20,15.21 20,13C20,12 19.81,11 19.46,10.1L20.67,8C21.5,9.5 22,11.18 22,13Z" />
+              </svg>
+            </span>
+
+            <select name="upload_buad_rate" id="upload_buad_rate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500
+                focus:border-blue-500 block w-full p-2.5   
+                 ">
+              <option value="2400">2400</option>
+              <option value="4800">4800</option>
+              <option value="9600">9600 (Nextion default)</option>
+              <option value="19200">19200</option>
+              <option value="31250">31250</option>
+              <option value="38400">38400</option>
+              <option value="57600">57600</option>
+              <option value="115200">115200 (Sonoff default)</option>
+              <option value="250000">250000</option>
+              <option value="260000">260000</option>
+              <option value="512000">512000</option>
+              <option value="921600">921600</option>
+            </select>
+          </div>
+
+          <div class="bg-blue-300 rounded-md p-4 is-warning mt-2">
+            <div class="text-lg font-medium">Info.</div>
+            The upload baud rate that each specific NSPanel is able to handle can not be
+            calculated. This is something you will have to experiment with if
+            you wish to have different value than default. Changing this from
+            default may cause the NSPanel to fail to update the screen TFT. If you are having problems starting the
+            upload try changing to the Sonoff default or the Nextion default.
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-4 text-right">
+        <button type="submit"
+          class="mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ">Save</button>
+      </div>
+    </form>
+  </div>
+</body>
+
 </html>

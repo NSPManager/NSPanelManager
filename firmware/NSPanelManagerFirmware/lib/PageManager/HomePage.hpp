@@ -64,8 +64,7 @@ private:
   void _ceilingMasterButtonEvent();
   void _tableMasterButtonEvent();
 
-  void _updateLightsThatAreOnWithNewBrightness(uint8_t brightness);
-  void _updateAllLightsWithNewBrightness(uint8_t brightness);
+  void _updateLightsWithNewBrightness(uint8_t brightness);
   void _updateLightsColorTempAccordingToSlider();
   void _startSpecialModeTriggerTask(editLightMode mode);
   void _startSpecialModeTimerTask();
@@ -77,6 +76,15 @@ private:
   static inline unsigned long _lastDeviceEntityUpdate;
   static inline TaskHandle_t _taskHandleUpdateDisplay = NULL;
   static void _taskUpdateDisplay(void *param);
+
+  // Cache values
+  uint8_t _brightness_slider_value;
+  uint8_t _kelvin_slider_value;
+  uint8_t _table_lights_display_value;
+  uint8_t _ceiling_lights_display_value;
+  std::string _room_name_value;
+  bool _table_lights_state;
+  bool _ceiling_lights_state;
 };
 
 #endif

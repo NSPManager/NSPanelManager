@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 #include <InterfaceConfigEnums.hpp>
+#include <protobuf_defines.h>
+#include <string>
 #include <vector>
 
 enum DEFAULT_PAGE {
@@ -10,8 +12,6 @@ enum DEFAULT_PAGE {
   SCENES_PAGE,
   ROOM_PAGE
 };
-
-class Scene;
 
 class InterfaceConfig {
 public:
@@ -41,15 +41,22 @@ public:
   /// @brief Time before screensaver is activated. Time in milliseconds.
   static inline unsigned long screensaver_activation_timeout = 30000;
   /// @brief Wether or not to show clock on screensaver.
-  static inline bool show_screensaver_clock = false;
+  static inline PROTOBUF_NSPANEL_CONFIG::NSPanelScreensaverMode screensaver_mode;
   /// @brief Show clock in US style. AM/PM?
   static inline bool clock_us_style = false;
   /// @brief All the global scenes.
-  static inline std::vector<Scene *> global_scenes;
-  static Scene *getSceneById(uint16_t id);
+  static inline std::vector<PROTOBUF_NSPANEL_SCENE *> global_scenes;
+
+  static PROTOBUF_NSPANEL_SCENE *getSceneById(uint16_t id);
   static inline roomMode currentRoomMode;
   static inline editLightMode currentEditLightMode;
   static inline editLightMode _triggerSpecialLightMode;
+
+  /// @brief What room IDs to load and in what order are they to be displayed.
+  static inline std::vector<int32_t> room_ids;
+
+  /// @brief Are the panel to run as optimistic mode or are we to wait for answers from manager?
+  static inline bool optimistic_mode;
 };
 
 #endif

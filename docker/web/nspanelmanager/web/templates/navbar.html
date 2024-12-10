@@ -1,75 +1,156 @@
 {% load static %}
-<nav class="navbar is-black" role="navigation" aria-label="main navigation">
-  <div class="navbar-brand">
-    <a class="navbar-item" href="/">
-      <!-- h1 class="title is-4 has-text-white">NSPanel Manager</h1> -->
-      <img src="{% static 'logo.svg' %}" alt="Logo">
+
+<nav class="bg-base-100 w-full z-20 top-0 start-0">
+  <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+    <a href="/" class=" flex items-center space-x-3 rtl:space-x-reverse">
+        <div class="bg-neutral p-2 rounded-btn">
+            <img src="{{ ingress_path }}{% static 'logo.svg' %}" alt="Logo" class="h-8">
+        </div>
     </a>
+    <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+      <div class="flex items-center">
+          <div class="dropdown">
+            <div tabindex="0" role="button" class="btn btn-sm m-1">
+              Themes
+              <svg
+                width="12px"
+                height="12px"
+                class="inline-block h-2 w-2 fill-current opacity-60"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 2048 2048">
+                <path d="M1799 349l242 241-1017 1017L7 590l242-241 775 775 775-775z"></path>
+              </svg>
+            </div>
+            <ul tabindex="0" class="dropdown-content bg-base-300 text-base-content rounded-box z-[1] w-56 p-2 shadow-2xl">
+              {% with 'default light dark cupcake bumblebee emerald corporate synthwave retro cyberpunk valentine halloween garden forest aqua lofi pastel fantasy wireframe black luxury dracula cmyk autumn business acid lemonade night coffee winter dim nord sunset' as theme_list %}
+                  {% for theme_option in theme_list.split %}
+                  <li>
+                      <div class="bg-base-100 rounded-lg my-1" data-theme="{{ theme_option }}">
+                          <label class="label">
+                              <input
+                                  type="radio"
+                                  name="theme-dropdown"
+                                  class="theme-controller radio radio-xs checked:bg-success ml-2"
+                                  value="{{ theme_option }}"
+                                  hx-post="{% url 'htmx_interface_theme' %}" hx-swap="none"
+                                  {% if theme_option == theme %}checked{% endif %}
+                              />
 
-    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-    </a>
-  </div>
+                              <span class="label-text justify-start w-full ml-2">{{ theme_option|title }}</span>
+                          <div class="flex">
+                              <div class="badge badge-primary badge-xs ms-1"></div>
+                              <div class="badge badge-accent badge-xs ms-1"></div>
+                              <div class="badge badge-success badge-xs ms-1"></div>
+                              <div class="badge badge-info badge-xs ms-1"></div>
+                              <div class="badge badge-error badge-xs ms-1"></div>
+                          </div>
+                          </label>
+                      </div>
+                  </li>
+                  {% endfor %}
+              {% endwith %}
+            </ul>
+          </div>
 
-  <div id="navbar" class="navbar-menu">
-    <div class="navbar-start">
-      <a class="navbar-item" href="/">
-        NSPanels
-      </a>
-
-      <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link" href="/rooms">
-          Rooms
+        <a href="{% url 'manual' %}" target="_blank"
+          class="btn btn-sm m-1">
+          <svg class="w-5 h-5 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+            viewBox="0 0 24 24">
+            <path
+              d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3M9.5 11.5C9.5 12.3 8.8 13 8 13H7V15H5.5V9H8C8.8 9 9.5 9.7 9.5 10.5V11.5M14.5 13.5C14.5 14.3 13.8 15 13 15H10.5V9H13C13.8 9 14.5 9.7 14.5 10.5V13.5M18.5 10.5H17V11.5H18.5V13H17V15H15.5V9H18.5V10.5M12 10.5H13V13.5H12V10.5M7 10.5H8V11.5H7V10.5Z" />
+          </svg>
+          Manual
         </a>
-        <div class="navbar-dropdown">
-          <a class="navbar-item" href="/rooms">
+      </div>
+      <button data-collapse-toggle="navbar" type="button"
+        class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark: hover:bg-accent dark:focus:ring-gray-600"
+        aria-controls="navbar" aria-expanded="false">
+        <span class="sr-only">Open main menu</span>
+        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M1 1h15M1 7h15M1 13h15" />
+        </svg>
+      </button>
+    </div>
+    <div class="items-center justify-between max-md:hidden md:visible md:flex md:flex-wrap w-full md:w-auto md:order-1"
+      id="navbar">
+      <ul
+        class="flex flex-col p-4 md:p-0 mt-4 font-medium border rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0">
+        <li>
+          <a href="/" data-active="{% if request.path == '/' %}true{% endif %}"
+            class="block py-2 px-3  rounded md:bg-transparent data-[active=true]:text-accent md:p-0 ">NSPanels</a>
+        </li>
+        <li>
+          <a href="{% url 'rooms' %}" data-active="{% if request.path == '/rooms' %}true{% endif %}"
+            class="flex items-center justify-between w-full py-2 px-3 rounded md:border-0 md:p-0 md:w-auto  md:hover:text-accent focus: border-gray-700 hover:bg-accent md:hover:bg-transparent data-[active=true]:text-accent ">
             Rooms
           </a>
-          <a class="navbar-item" href="{% url 'rooms_order' %}">
-            Change order
-          </a>
-          <a class="navbar-item" onclick="$('#modal-new-room').addClass('is-active');">
-            New room
-          </a>
-        </div>
-      </div>
-
-      <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link">
-          Upload
-        </a>
-        <div class="navbar-dropdown">
-          <a class="navbar-item" onclick="$('#modal-upload-firmware').addClass('is-active');">
-            Upload new firmware
-          </a>
-          <a class="navbar-item" onclick="$('#modal-upload-data-file').addClass('is-active');">
-            Upload new data file
-          </a>
-          <a class="navbar-item" onclick="$('#modal-upload-tft-file').addClass('is-active');">
-            Upload new .tft file
-          </a>
-          <!-- <hr class="dropdown-divider">
-          <a class="navbar-item" onclick="$('#modal-upload-tft-file').addClass('is-active');">
-            Flash firmware to NSPanel
-          </a> -->
-        </div>
-      </div>
-
-      <a class="navbar-item" href="{% url 'settings' %}">
-        Settings
-      </a>
-    </div>
-    <div class="navbar-end">
-      <a class="navbar-item" href="/manual">
-        <span class="icon is-small pr-1">
-          <span class="mdi mdi-file-pdf-box"></span>
-        </span>
-        <span>
-          Manual
-        </span>
-      </a>
+        </li>
+        <li>
+          <button data-dropdown-toggle="entitiesMenuDropdown" data-active="{% if request.path == '/entities/relay_groups' %}true{% elif request.path == '/entities/global_scenes' %}true{% elif request.path == '/entities/weather_and_time' %}true{% elif request.path == '/denied_nspanels' %}true{% endif %}"
+            class="flex items-center justify-between w-full py-2 px-3 rounded md:border-0 md:p-0 md:w-auto  md:hover:text-accent focus: border-gray-700  hover:bg-accent md:hover:bg-transparent data-[active=true]:text-accent ">
+            Entities
+            <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 10 6">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="m1 1 4 4 4-4" />
+            </svg>
+          </button>
+          <!-- Dropdown menu -->
+          <div id="entitiesMenuDropdown"
+            class="z-10 font-normal hidden bg-neutral divide-y devide-neutral-content rounded-lg shadow md:absolute inset-x-auto w-full md:w-44 overflow-hidden">
+            <ul class="py-2 text-sm text-neutral-content" aria-labelledby="dropdownLargeButton">
+              <li>
+                <a href="{% url 'relay_groups' %}" data-active="{% if request.path == '/entities/relay_groups' %}true{% endif %}"
+                  class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover: data-[active=true]:text-accent ">Relay/Light groups</a>
+              </li>
+              <li>
+                <a href="{% url 'global_scenes' %}" data-active="{% if request.path == '/entities/global_scenes' %}true{% endif %}" class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover: data-[active=true]:text-accent ">
+                  Global scenes</a>
+              </li>
+              <li>
+                <a href="{% url 'weather_and_time' %}" data-active="{% if request.path == '/entities/weather_and_time' %}true{% endif %}"
+                  class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover: data-[active=true]:text-accent ">Weather & Time</a>
+              </li>
+            </ul>
+            <div class="py-1 text-sm text-neutral-content">
+              <a href="{% url 'denied_nspanels' %}" data-active="{% if request.path == '/denied_nspanels' %}true{% endif %}" class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover: data-[active=true]:text-accent ">Denied NSPanels</a>
+            </div>
+          </div>
+        <li>
+          <button data-dropdown-toggle="uploadMenuDropdown"
+            class="flex items-center justify-between w-full py-2 px-3 rounded md:border-0 md:p-0 md:w-auto  md:hover:text-accent focus: border-gray-700  hover:bg-accent md:hover:bg-transparent">
+            Upload
+            <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 10 6">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="m1 1 4 4 4-4" />
+            </svg>
+          </button>
+          <!-- Dropdown menu -->
+          <div id="uploadMenuDropdown"
+            class="z-10 font-normal hidden bg-neutral divide-y devide-neutral-content rounded-lg shadow md:absolute inset-x-auto w-full md:w-44 overflow-hidden">
+            <ul class="py-2 text-sm text-neutral-content" aria-labelledby="dropdownLargeButton">
+              <li>
+                <a onclick="upload_firmware_modal.showModal();"
+                  class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover:">Upload firmware</a>
+              </li>
+              <li>
+                <a onclick="upload_data_file_modal.showModal();"
+                  class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover:">Upload data file</a>
+              </li>
+              <li>
+                <a onclick="upload_tft_modal.showModal();"
+                  class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover:">Upload TFT file</a>
+              </li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <a href="{% url 'settings' %}" data-active="{% if request.path == '/settings' %}true{% endif %}"
+            class="block py-2 px-3 rounded md:p-0 md:hover:text-accent   hover:bg-accent hover: md:hover:bg-transparent border-gray-700 data-[active=true]:text-accent ">Settings</a>
+        </li>
+      </ul>
     </div>
   </div>
 </nav>

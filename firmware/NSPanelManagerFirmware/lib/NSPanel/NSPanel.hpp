@@ -36,16 +36,14 @@ public:
   static void attachTouchEventCallback(void (*callback)(uint8_t, uint8_t, bool));
   static void attachSleepCallback(void (*callback)());
   static void attachWakeCallback(void (*callback)());
-  /// @brief Return a string of any warnings to show in the warning tooltip in the manager web interface.
-  static std::string getWarnings();
   bool ready();
   bool init();
-  void startOTAUpdate();
+  bool startOTAUpdate();
   void goToPage(const char *page);
   void setDimLevel(uint8_t dimLevel);
   void setSleep(bool sleep);
   void setComponentText(const char *componentId, const char *text);
-  void setComponentVal(const char *componentId, uint8_t value);
+  void setComponentVal(const char *componentId, int16_t value);
   void setTimerTimeout(const char *componentId, uint16_t timeout);
   void setComponentPic(const char *componentId, uint8_t value);
   void setComponentPic1(const char *componentId, uint8_t value);
@@ -58,10 +56,9 @@ public:
 
 private:
   // Tasks
-  TaskHandle_t _taskHandleSendCommandQueue;
+  static inline TaskHandle_t _taskHandleSendCommandQueue;
   static void _taskSendCommandQueue(void *param);
-  TaskHandle_t _taskHandleReadNSPanelData;
-  static void _taskReadNSPanelData(void *param);
+  static void _onSerialData(void);
   static void _taskUpdateTFTConfigOTA(void *param);
   /// @brief Download a chunk of data from given addres, to the buffer at the given offset
   /// @param buffer The buffer to store data into
@@ -69,6 +66,7 @@ private:
   /// @param offset Offset to request data from (bytes)
   /// @param size Maximum download chunk size
   /// @return The number of bytes downloaded
+  static bool _initTFTUpdate(int communication_baud_rate);
   static bool _updateTFTOTA();
   std::queue<std::vector<char>> _processQueue;
   TaskHandle_t _taskHandleProcessPanelOutput;
@@ -92,8 +90,8 @@ private:
   /// @brief Call reigstered callback when a touch event occured
   static inline void (*_touchEventCallback)(uint8_t, uint8_t, bool);
   /// @brief Call registered callback when screen goes to sleep
-  static inline void (*_sleepCallback)();
-  static inline void (*_wakeCallback)();
+  static inline void (*_sleepCallback)() = nullptr;
+  static inline void (*_wakeCallback)() = nullptr;
   static void _clearSerialBuffer(NSPanelCommand *cmd);
   static void _clearSerialBuffer();
   static inline bool _writeCommandsToSerial;

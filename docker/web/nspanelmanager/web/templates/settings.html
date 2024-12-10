@@ -2,411 +2,476 @@
 
 {% block head %}
 {% load static %}
-  <script src="{% static 'question.js' %}?refresh={% now 'U' %}"></script>
-  <script src="{% static 'settings.js' %}?refresh={% now 'U' %}"></script>
+  <script src="{{ ingress_path }}{% static 'question.js' %}?refresh={% now 'U' %}"></script>
+  <script src="{{ ingress_path }}{% static 'settings.js' %}?refresh={% now 'U' %}"></script>
 {% endblock head %}
 
 {% block content %}
 
-<form method="POST" action="{% url 'add_new_scene_to_global' %}">
-  {% csrf_token %}
-  <input type="hidden" id="edit_scene_id" name="edit_scene_id">
-  <div class="modal" id="add_new_scene_to_room_modal">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-      <header class="modal-card-head">
-        <p class="modal-card-title">Create new global scene</p>
-        <button type="button" class="delete" aria-label="close"></button>
-      </header>
-      <section class="modal-card-body">
-        <div class="field">
-          <div class="control">
-            <input class="input" type="text" placeholder="Scene name" name="scene_name" id="scene_name">
-          </div>
-        </div>
-      </section>
-      <footer class="modal-card-foot">
-        <button type="submit" class="button is-success">Save changes</button>
-        <button type="button" class="button modal-cancel-button">Cancel</button>
-      </footer>
-    </div>
-  </div>
-</form>
 
-<div class="box">
-  <h2 class="title is-4">{{ room.friendly_name }} scenes</h2>
-  <button type="button" class="button is-primary" onclick="add_new_scene();">Add new scene</button>
-  <table class="table is-fullwidth is-hoverable">
-    <thead>
-      <tr>
-        <th>Scene name</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for scene in global_scenes %}
-      <tr>
-        <th>{{ scene.friendly_name }}</th>
-        <td>
-          <button onclick="edit_scene({{ scene.id }}, '{{ scene.friendly_name }}');" class="button is-small is-primary">Edit</button>
-          <a href='{% url "delete_global_scene" scene.id %}' class="button is-small is-danger">Delete</a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
 <form method="POST" action="{% url 'save_settings' %}" id="config">
     {% csrf_token %}
-    <div class="box">
-        <div class="field">
-            <h5 class="title is-5">NSPanel Manager settings</h5>
-        </div>
-        <div class="field">
-            <label class="label">Number of messages to display on live log<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                The number of messages to display in the live log view on the settings page for individual NSPanels.
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="max_live_log_messages" id="max_live_log_messages" placeholder="10" value="{{ max_live_log_messages }}" required>
-            </div>
-        </div>
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="font-medium text-2xl">Settings</h2>
+      <a href="{% url 'manual' %}#sec:global_settings" class="btn btn-outline btn-info">
+          Help
+        </a>
     </div>
-    <div class="box">
-        <div class="field">
-            <h5 class="title is-5">Global NSPanel settings</h5>
-        </div>
-        <div class="notification is-info is-light">
-          Changes to NSPanel settings on this page requires a reboot of each panel to take effect.
-        </div>
-        <div class="field">
-            <label class="label">Color temperature min & max <span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                The min and max color temperature of your lights.
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="color_temp_min" id="color_temp_min" placeholder="Min" value="{{ color_temp_min }}" required>
-            </div>
-            <div class="control">
-                <input class="input" type="number" name="color_temp_max" id="color_temp_max" placeholder="Max" value="{{ color_temp_max }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="checkbox">
-                {% if reverse_color_temp == "True" %}
-                    <input type="checkbox" name="reverse_color_temp" checked>
-                {% else %}
-                    <input type="checkbox" name="reverse_color_temp">
-                {% endif %}
-                Reverse color temperature slider
-                <span class="question">
-                  <span class="icon question_icon">
-                    <i class="mdi mdi-information has-text-info"></i>
-                  </span>
-                  <div class="question_help_text notification is-info is-light">
-                    Reverse the color temp slider? <br>Unchecked: warm temperature at the bottom, cool temperature at the top.<br>Checked: warm temperature at the top, cool temperature at the bottom.
-                  </div>
+    {% component "alert" level="info" text="Changes to NSPanel settigns on this page requires a reboot of all NSPanels to take effect." %}{% endcomponent %}
+    <div class="md:flex md:justify-between md:items-start mt-2">
+      <div class="p-4 bg-base-100 rounded-box shadow-lg w-full">
+        <span class="block mb-2 text-xl">NSPanel Manager settings</span>
+
+        <!-- Manager address -->
+        <div class="mb-2">
+            <label for="manager_address" class="block mb-1 text-sm font-medium">Manager address</label>
+            <div class="flex flex-row-reverse">
+                <button type="button" class="button bg-info text-info-content p-2 border border-l-0 rounded-e-btn border-neutral text-sm" onclick="$('#manager_address').val(location.hostname);">Load from URL</button>
+                <input class="rounded-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="text" class="input" id="manager_address" name="manager_address" value="{{ manager_address }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                    <span class="mdi mdi-home"></span>
                 </span>
-            </label>
-        </div>
-        <div class="field">
-            <label class="label">Turn on behavior<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                If a light is off, turning it back on should:<br>
-                Color temperature: The light will be set to the current value of the color temperature slider.<br>
-                Restore: The light will we set to the current value of the color temperature slider IF the light was in color temperature mode when it was turned off. Otherwise, it will turn on the last powered on state.
-              </div>
-            </span>
-          </label>
-          <div class="control">
-            <div class="select">
-              <select name="turn_on_behavior">
-                <option value="color_temp" {% if turn_on_behavior == "color_temp" %}selected{% endif %}>Color temperature</option>
-                <option value="restore" {% if turn_on_behavior == "restore" %}selected{% endif %}>Restore</option>
-              </select>
             </div>
+        </div>
+
+        <!-- Manager port -->
+        <div class="mb-2">
+            <label for="manager_port" class="block mb-1 text-sm font-medium">Manager port</label>
+            <div class="flex flex-row-reverse">
+                <button type="button" class="button bg-info text-info-content p-2 border border-l-0 rounded-e-btn border-neutral text-sm" onclick="$('#manager_port').val(location.port);">Load from URL</button>
+                <input class="rounded-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="text" class="input" id="manager_port" name="manager_port" value="{{ manager_port }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                    <span class="mdi mdi-numeric"></span>
+                </span>
+            </div>
+        </div>
+
+        <!-- New section-->
+      </div>
+    </div>
+    <div class="md:flex md:justify-between md:items-start mt-2">
+      <div class="p-4 bg-base-100 w-full rounded-box shadow-lg">
+
+        <div class="flex items-center justify-between">
+          <span class="block mb-2 text-xl">Logging options</span>
+          <a href="{% url 'download_mqttmanager_log' %}" title="Download MQTTManager log" class="btn btn-outline btn-info">
+            <span class="mdi mdi-download"></span>
+            Download
+          </a>
+        </div>
+
+        <!-- MQTTManager log level -->
+        <div class="mb-2">
+          <label for="mqttmanager_log_level" class="block mb-1 text-sm font-medium">MQTTManager log level</label>
+          <div class="flex flex-row-reverse">
+            <select name="mqttmanager_log_level" id="mqttmanager_log_level" class="rounded-none bg-base-300 border-neutral rounded-e-btn border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id" required>
+                <option value="error" {% if mqttmanager_log_level == "error" %}selected{% endif %}>Error</option>
+                <option value="warning" {% if mqttmanager_log_level == "warning" %}selected{% endif %}>Warning</option>
+                <option value="info" {% if mqttmanager_log_level == "info" %}selected{% endif %}>Info</option>
+                <option value="debug" {% if mqttmanager_log_level == "debug" %}selected{% endif %}>Debug</option>
+                <option value="trace" {% if mqttmanager_log_level == "trace" %}selected{% endif %}>Trace</option>
+            </select>
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/room_id:border-accent">
+              <span class="mdi mdi-message-alert"></span>
+            </span>
           </div>
         </div>
-        <div class="field">
-            <label class="label">Set lights level to 100% above<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                When setting the light level slider is set to this many percent or above, consider it to be 100%.
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="raise_to_100_light_level" id="raise_to_100_light_level" placeholder="95" value="{{ raise_to_100_light_level }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Button min push time & time for long press<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                These times are used to decide wether or not it was a short press or a long press. A short press is when the button has been pressed anywhere between "min push time" and "long press time". Anything longer than "long press time" is considered a long press.
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="min_button_push_time" id="min_button_push_time" placeholder="Press time" value="{{ min_button_push_time }}" required>
-            </div>
-            <div class="control">
-                <input class="input" type="number" name="button_long_press_time" id="button_long_press_time" placeholder="Long press time" value="{{ button_long_press_time }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Special mode trigger & release time <span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                These times are used to trigger the special mode (long pressing the ceiling / table lights button). The first value is of how long to press to trigger the mode, the second value is the timeout to exit the "special mode".
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="special_mode_trigger_time" id="special_mode_trigger_time" placeholder="Trigger time" value="{{ special_mode_trigger_time }}" required>
-            </div>
-            <div class="control">
-                <input class="input" type="number" name="special_mode_release_time" id="special_mode_release_time" placeholder="Release time" value="{{ special_mode_release_time }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">MQTT ignore time(ms)<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                When a command is sent from the NSPanel over MQTT, this item decides for how many milliseconds the NSPanel should ignore events from MQTT. This is done to prevent flickering of controls on the NSPanel when changing values. Setting this value to 0 disables the ignore function.
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="mqtt_ignore_time" id="mqtt_ignore_time" placeholder="Trigger time" value="{{ mqtt_ignore_time }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Screen brightness<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                Brightness when the panel is on. 1-100%.
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="screen_dim_level" id="screen_dim_level" placeholder="Screen brightness" min=1 max=100 value="{{ screen_dim_level }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Screensaver brightness<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                Brightness level during screensaver. 0-100%.
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="screensaver_dim_level" id="screensaver_dim_level" placeholder="Screensaver brightness" min=0 max=100 value="{{ screensaver_dim_level }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Screensaver activation timeout(ms)<span class="question">
-              <span class="icon question_icon">
-                <i class="mdi mdi-information has-text-info"></i>
-              </span>
-              <div class="question_help_text notification is-info is-light">
-                The amount of time before the screensaver is activated. Time is in milliseconds. Default: 30000 (30 seconds).
-              </div>
-            </span>
-          </label>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <input class="input" type="number" name="screensaver_activation_timeout" id="screensaver_activation_timeout" placeholder="Screensaver activaion timeout" value="{{ screensaver_activation_timeout }}" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="checkbox">
-                {% if show_screensaver_clock == "True" %}
-                    <input type="checkbox" name="show_screensaver_clock" checked>
-                {% else %}
-                    <input type="checkbox" name="show_screensaver_clock">
-                {% endif %}
-                Show clock on screensaver
-                <span class="question">
-                  <span class="icon question_icon">
-                    <i class="mdi mdi-information has-text-info"></i>
-                  </span>
-                  <div class="question_help_text notification is-info is-light">
-                    Wether or not to show a clock on the screensaver. For this to show up the screensaver brightness has to be larger than 0.
-                  </div>
+
+        <!-- Number of messages to display on live log -->
+        <div class="mb-2">
+            <label for="max_live_log_messages" class="block mb-1 text-sm font-medium">Number of message to display on live log</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-btn focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="number" class="input" name="max_live_log_messages" value="{{ max_live_log_messages }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                    <span class="mdi mdi-message-alert"></span>
                 </span>
-            </label>
+            </div>
         </div>
-        <div class="field">
-            <label class="checkbox">
-                {% if clock_us_style == "True" %}
-                    <input type="checkbox" name="clock_us_style" checked>
-                {% else %}
-                    <input type="checkbox" name="clock_us_style">
-                {% endif %}
-                Show the time with AM/PM
-                <span class="question">
-                  <span class="icon question_icon">
-                    <i class="mdi mdi-information has-text-info"></i>
-                  </span>
-                  <div class="question_help_text notification is-info is-light">
-                    Wether or not to use 24 or 12 hour clock. Enabling this will show the clock with AM and PM.
-                  </div>
+
+        <!-- Number of messages in buffer -->
+        <div class="mb-2">
+            <label for="max_log_buffer_size" class="block mb-1 text-sm font-medium">Number of message in buffer</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-none rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="number" class="input" name="max_log_buffer_size" value="{{ max_log_buffer_size }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                    <span class="mdi mdi-message-alert"></span>
                 </span>
-            </label>
+            </div>
         </div>
-        <div class="field">
-            <label class="checkbox">
-                {% if use_farenheit == "True" %}
-                    <input type="checkbox" name="use_farenheit" checked>
-                {% else %}
-                    <input type="checkbox" name="use_farenheit">
-                {% endif %}
-                Use farenheit
-                <span class="question">
-                  <span class="icon question_icon">
-                    <i class="mdi mdi-information has-text-info"></i>
-                  </span>
-                  <div class="question_help_text notification is-info is-light">
-                    Wether to report temperature in farenheit. Default: Unchecked = report in celcius.
-                  </div>
-                </span>
-            </label>
-        </div>
+
+        <!-- New section-->
+      </div>
     </div>
-    <div class="box">
-        <div class="field">
-            <h5 class="title is-5">MQTT</h5>
+    <div class="md:flex md:justify-between md:items-start mt-2">
+      <div class="p-4 bg-base-100 rounded-box shadow-lg w-full">
+        <span class="block mb-2 text-xl">Global NSPanel settings</span>
+
+        <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
+          <!-- Minimum color temperature-->
+          <div class="mb-2 w-full md:me-1">
+            <label for="color_temp_min" class="block mb-1 text-sm font-medium">Minimum color temperature</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="text" class="input" name="color_temp_min" value="{{ color_temp_min }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                    <span class="mdi mdi-sun-thermometer-outline"></span>
+                </span>
+            </div>
+          </div>
+
+          <!-- Maximum color temperature -->
+          <div class="mb-2 w-full md:ms-1">
+              <label for="color_temp_max" class="block mb-1 text-sm font-medium">Maximum color temperature</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="color_temp_max" value="{{ color_temp_max }}" required>
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                      <span class="mdi mdi-sun-thermometer-outline"></span>
+                  </span>
+              </div>
+          </div>
         </div>
-        <div class="field">
-            <label class="label">MQTT Server</label>
-            <div class="control">
-                <input class="input" type="text" name="mqtt_server" id="mqtt_server" placeholder="MQTT Server"
-                    value="{{ mqtt_server }}" required>
+
+        <!-- Reverse color temperature slider-->
+        <div class="flex-auto mb-2">
+          <h3 class="block mb-2 text-sm font-medium">Reverse color temperature slider</h3>
+          <ul
+            class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
+            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+              <div class="flex items-center ps-3">
+                <input id="keep_color_temp_slider" type="radio" name="reverse_color_temp" value="False" {% if reverse_color_temp != "True" %}checked{% endif %}
+                  class="w-4 h-4 radio radio-accent">
+                <label for="keep_color_temp_slider"
+                  class="w-full py-3 ms-2 text-sm font-medium">Keep default</label>
+              </div>
+            </li>
+            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+              <div class="flex items-center ps-3">
+                <input id="reverse_color_temp_slider" type="radio" name="reverse_color_temp" value="True" {% if reverse_color_temp == "True" %}checked{% endif %}
+                  class="w-4 h-4 radio radio-accent">
+                <label for="reverse_color_temp_slider" class="w-full py-3 ms-2 text-sm font-medium">Reverse</label>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Turn on behavior-->
+        <div class="flex-auto mb-2">
+          <h3 class="block mb-2 text-sm font-medium">Turn on behavior</h3>
+          <ul
+            class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
+            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+              <div class="flex items-center ps-3">
+                <input id="turn_on_color_temp" type="radio" name="turn_on_behavior" value="color_temp" {% if turn_on_behavior == "color_temp" %}checked{% endif %}
+                  class="w-4 h-4 radio radio-accent">
+                <label for="turn_on_color_temp"
+                  class="w-full py-3 ms-2 text-sm font-medium">Color temperature</label>
+              </div>
+            </li>
+            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+              <div class="flex items-center ps-3">
+                <input id="turn_on_restore" type="radio" name="turn_on_behavior" value="True" {% if turn_on_behavior == "restore" %}checked{% endif %}
+                  class="w-4 h-4 radio radio-accent">
+                <label for="turn_on_restore" class="w-full py-3 ms-2 text-sm font-medium">Restore</label>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Raise lights to 100% light level above slider threshold -->
+        <div class="mb-2">
+            <label for="raise_to_100_light_level" class="block mb-1 text-sm font-medium">Raise lights to 100% threshold</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-btn focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="number" class="input" name="raise_to_100_light_level" value="{{ raise_to_100_light_level }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                <span class="mdi mdi-brightness-percent"></span>
+                </span>
             </div>
         </div>
-        <div class="field">
-            <label class="label">MQTT Port</label>
-            <div class="control">
-                <input class="input" type="number" name="mqtt_port" id="mqtt_port" placeholder="MQTT Port"
-                    value="{{ mqtt_port }}" required>
+
+        <!-- Button threshold times -->
+        <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
+            <!-- Minimum button push time -->
+            <div class="mb-2 w-full md:me-1">
+              <label for="min_button_push_time" class="block mb-1 text-sm font-medium">Minimum button push time (ms)</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="min_button_push_time" value="{{ min_button_push_time }}" required>
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                      <span class="mdi mdi-clock-outline"></span>
+                  </span>
+              </div>
+            </div>
+
+            <!-- Minimum long press time -->
+            <div class="mb-2 w-full md:me-1">
+              <label for="button_long_press_time" class="block mb-1 text-sm font-medium">Minimum long press time (ms)</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="button_long_press_time" value="{{ button_long_press_time }}" required>
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                      <span class="mdi mdi-clock-outline"></span>
+                  </span>
+              </div>
             </div>
         </div>
-        <div class="field">
-            <label class="label">MQTT Username</label>
-            <div class="control">
-                <input class="input" type="text" name="mqtt_username" id="mqtt_username" value="{{ mqtt_username }}"
-                    placeholder="MQTT Username">
+
+
+        <!-- Special mode trigger and timeout times -->
+        <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
+            <!-- Minimum button push time -->
+            <div class="mb-2 w-full md:me-1">
+              <label for="special_mode_trigger_time" class="block mb-1 text-sm font-medium">Special mode activation time (ms)</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="special_mode_trigger_time" value="{{ special_mode_trigger_time }}" required>
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                      <span class="mdi mdi-clock-outline"></span>
+                  </span>
+              </div>
+            </div>
+
+            <!-- Minimum long press time -->
+            <div class="mb-2 w-full md:me-1">
+              <label for="special_mode_release_time" class="block mb-1 text-sm font-medium">Special mode timeout (ms)</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="special_mode_release_time" value="{{ special_mode_release_time }}" required>
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                      <span class="mdi mdi-clock-outline"></span>
+                  </span>
+              </div>
             </div>
         </div>
-        <div class="field">
-            <label class="label">MQTT Password</label>
-            <div class="control">
-                <input class="input" type="password" name="mqtt_password" id="mqtt_password" placeholder="MQTT Password"
-                    value="{{ mqtt_password }}">
+
+
+        <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
+            <!-- Screen brightness -->
+            <div class="mb-2 w-full md:me-1">
+              <label for="screen_dim_level" class="block mb-1 text-sm font-medium">Screen brightness</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="screen_dim_level" value="{{ screen_dim_level }}" required min="1" max="100">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                      <span class="mdi mdi-brightness-percent"></span>
+                  </span>
+              </div>
+            </div>
+
+            <!-- Screensaver brightness -->
+            <div class="mb-2 w-full md:me-1">
+              <label for="screensaver_dim_level" class="block mb-1 text-sm font-medium">Screensaver brightness</label>
+              <div class="flex flex-row-reverse">
+                  <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="screensaver_dim_level" value="{{ screensaver_dim_level }}" required min="0" max="100">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                      <span class="mdi mdi-brightness-percent"></span>
+                  </span>
+              </div>
             </div>
         </div>
+
+        <!-- Screensaver activation timeout-->
+        <div class="mb-2">
+            <label for="raise_to_100_light_level" class="block mb-1 text-sm font-medium">Screensaver activation timeout (ms)</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-btn focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="number" class="input" name="screensaver_activation_timeout" value="{{ screensaver_activation_timeout }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                <span class="mdi mdi-clock-outline"></span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Screensaver mode -->
+        <div class="mb-2">
+          <label for="screensaver_mode" class="block mb-1 text-sm font-medium">Screensaver mode</label>
+          <div class="flex flex-row-reverse">
+            <select name="screensaver_mode" id="screensaver_mode" class="rounded-none bg-base-300 border-neutral rounded-e-btn border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id" required>
+                <option value="with_background" {% if screensaver_mode == "with_background" %}selected{% endif %}>Show with background (clock, date and weather)</option>
+                <option value="without_background" {% if screensaver_mode == "without_background" %}selected{% endif %}>Show without background (clock, date and weather)</option>
+                <option value="datetime_with_background" {% if screensaver_mode == "datetime_with_background" %}selected{% endif %}>Show with background (no weather)</option>
+                <option value="datetime_without_background" {% if screensaver_mode == "datetime_without_background" %}selected{% endif %}>Show without background (no weather)</option>
+                <option value="no_screensaver" {% if screensaver_mode == "no_screensaver" %}selected{% endif %}>No screensaver (turn off screen)</option>
+            </select>
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/room_id:border-accent">
+              <span class="mdi mdi-home"></span>
+            </span>
+          </div>
+        </div>
+
+        <!-- MQTT ignore time-->
+        <div class="mb-2">
+            <label for="mqtt_ignore_time" class="block mb-1 text-sm font-medium">MQTT ignore time (ms)</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-btn focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="number" class="input" name="mqtt_ignore_time" value="{{ mqtt_ignore_time }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                <span class="mdi mdi-clock-outline"></span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Entity update mode -->
+        <div class="flex-auto mb-2">
+          <h3 class="block mb-2 text-sm font-medium">Entity update mode</h3>
+          <ul
+            class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
+                <!-- Optimistic mode -->
+                <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+              <div class="flex items-center ps-3">
+                <input id="entity_update_mode_optimistic" type="radio" name="optimistic_mode" value="optimistic" {% if optimistic_mode == "True" %}checked{% endif %}
+                  class="w-4 h-4 radio radio-accent">
+                <label for="entity_update_mode_optmistic" class="w-full py-3 ms-2 text-sm font-medium">Optimistic</label>
+              </div>
+            </li>
+
+            <!-- Wait mode -->
+            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+              <div class="flex items-center ps-3">
+                <input id="entity_update_mode_wait" type="radio" name="optimistic_mode" value="wait" {% if optimistic_mode == "False" %}checked{% endif %}
+                  class="w-4 h-4 radio radio-accent">
+                <label for="entity_update_mode_wait"
+                  class="w-full py-3 ms-2 text-sm font-medium">Wait</label>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- New section-->
+      </div>
+    </div>
+    <div class="md:flex md:justify-between md:items-start mt-2">
+      <div class="p-4 rounded-box shadow-lg w-full bg-base-100">
+        <span class="block mb-2 text-xl">MQTT</span>
+
+        <!-- MQTT address -->
+        <div class="mb-2">
+            <label for="mqtt_server" class="block mb-1 text-sm font-medium">MQTT server</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="text" class="input" id="mqtt_server" name="mqtt_server" value="{{ mqtt_server }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                    <span class="mdi mdi-home"></span>
+                </span>
+            </div>
+        </div>
+
+        <!-- MQTT port -->
+        <div class="mb-2">
+            <label for="mqtt_port" class="block mb-1 text-sm font-medium">MQTT port</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="number" class="input" id="mqtt_port" name="mqtt_port" value="{{ mqtt_port }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                    <span class="mdi mdi-numeric"></span>
+                </span>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap md:flex-nowrap justify-between items-center">
+          <!-- MQTT username -->
+          <div class="mb-2 w-full me-1">
+              <label for="mqtt_username" class="block mb-1 text-sm font-medium">MQTT username</label>
+              <div class="flex flex-row-reverse w-full">
+                  <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" id="mqtt_username" name="mqtt_username" value="{{ mqtt_username }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                      <span class="mdi mdi-account"></span>
+                  </span>
+              </div>
+          </div>
+
+          <!-- MQTT password -->
+          <div class="mb-2 w-full">
+              <label for="mqtt_password" class="block mb-1 text-sm font-medium">MQTT password</label>
+              <div class="flex flex-row-reverse w-full">
+                  <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="password" class="input" id="mqtt_password" name="mqtt_password" value="{{ mqtt_password }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                      <span class="mdi mdi-account-key"></span>
+                  </span>
+              </div>
+          </div>
+        </div>
+
+
+        <!-- New section-->
+        </div>
+      </div>
+      <div class="md:flex md:justify-between md:items-start mt-2">
+        <div class="p-4 rounded-box shadow-lg w-full bg-base-100">
+          <span class="block mb-2 text-xl">Home Assistant API</span>
+
+          {% if is_home_assistant_addon %}
+          {% component "alert" level="info" message="You are running NSPanel Manager as a Home Assistant addon. These settings are managed by Home Assistant for you and are therefore locked." %}{% endcomponent %}
+          {% endif %}
+
+
+          <!-- Home Assistant address -->
+          <div class="mb-2 w-full">
+              <label for="home_assistant_address" class="block mb-1 text-sm font-medium">Home Assistant address</label>
+              <div class="flex flex-row-reverse w-full">
+                  <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" id="home_assistant_address" name="home_assistant_address" value="{{ home_assistant_address }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent" {% if is_home_assistant_addon %}disabled{% endif %}>
+                      <span class="mdi mdi-web"></span>
+                  </span>
+              </div>
+          </div>
+
+          <!-- Access Token -->
+          <div class="mb-2 w-full">
+              <label for="home_assistant_token" class="block mb-1 text-sm font-medium">Home Assistant token</label>
+              <div class="flex flex-row-reverse w-full">
+                  <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="password" class="input" id="home_assistant_token" name="home_assistant_token" value="{{ home_assistant_token }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent" {% if is_home_assistant_addon %}disabled{% endif %}>
+                      <span class="mdi mdi-web"></span>
+                  </span>
+              </div>
+          </div>
+
+          <!-- New section-->
+        </div>
+      </div>
+      <div class="md:flex md:justify-between md:items-start mt-2">
+        <div class="p-4 rounded-box shadow-lg w-full bg-base-100">
+          <span class="block mb-2 text-xl">OpenHAB API</span>
+
+          <!-- OpenHAB address -->
+          <div class="mb-2 w-full">
+              <label for="openhab_address" class="block mb-1 text-sm font-medium">OpenHAB address</label>
+              <div class="flex flex-row-reverse w-full">
+                  <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" id="openhab_address" name="openhab_address" value="{{ openhab_address }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                      <span class="mdi mdi-web"></span>
+                  </span>
+              </div>
+          </div>
+
+          <!-- Access Token -->
+          <div class="mb-2 w-full">
+              <label for="openhab_token" class="block mb-1 text-sm font-medium">OpenHAB token</label>
+              <div class="flex flex-row-reverse w-full">
+                  <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="password" class="input" id="openhab_token" name="openhab_token" value="{{ openhab_token }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                      <span class="mdi mdi-web"></span>
+                  </span>
+              </div>
+          </div>
+      </div>
     </div>
 
-    <div class="box">
-        <div class="field">
-            <h5 class="title is-5">Home Assistant API</h5>
-        </div>
-        {% if is_home_assistant_addon %}
-            <div class="notification is-info is-light">
-              You are running NSPanel Manager as a Home Assistant addon. These settings are managed by Home Assistant for you.
-            </div>
-        {% endif %}
-        <div class="field">
-            <label class="label">Address</label>
-            <div class="control">
-                <input class="input" type="text" name="home_assistant_address" id="home_assistant_address"
-                    placeholder="http://192.168.1.5:8123" value="{{ home_assistant_address }}" {% if is_home_assistant_addon %}disabled{% endif %}>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Access token</label>
-            <div class="control">
-                <input class="input" type="password" name="home_assistant_token" id="home_assistant_token"
-                    value="{{ home_assistant_token }}" placeholder="ey..." {% if is_home_assistant_addon %}disabled{% endif %}>
-            </div>
-        </div>
-    </div>
-
-    <div class="box">
-        <div class="field">
-            <h5 class="title is-5">OpenHAB API</h5>
-        </div>
-        <div class="field">
-            <label class="label">Address</label>
-            <div class="control">
-                <input class="input" type="text" name="openhab_address" id="openhab_address"
-                    placeholder="http://192.168.1.5:8123" value="{{ openhab_address }}">
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Access token</label>
-            <div class="control">
-                <input class="input" type="password" name="openhab_token" id="openhab_token" value="{{ openhab_token }}"
-                    placeholder="ey...">
-            </div>
-        </div>
-    </div>
-
-    <!-- Add 1rem of padding to bottom to prevent a white bar appering on the bottom of the page -->
-    <div class="level" style="padding-bottom: 1rem;">
-        <div class="level-left">
-            <div class="buttons is-right">
-            </div>
-        </div>
-        <div class="level-right">
-            <div class="buttons">
-                <button class="button is-success" type="submit" id="save_button">Save</button>
-            </div>
-        </div>
+    <div class="text-right mt-4 mb-4">
+      <button type="submit" class="btn btn-success">Save</button>
     </div>
 </form>
 {% endblock %}

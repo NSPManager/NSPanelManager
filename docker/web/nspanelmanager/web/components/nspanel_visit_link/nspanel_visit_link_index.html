@@ -1,0 +1,9 @@
+{% if state == "offline" %}
+<span hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_visit_link' view='index' nspanel_id=id %}" id="nspanel_visit_link-{{ id }}" title="No address available." class="block px-4 py-2 hover:bg-accent hover:text-accent-content line-through">
+    <span class="mdi mdi-web pr-2"></span>Visit
+</span>
+{% else %}
+<a hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_visit_link' view='index' nspanel_id=id %}" href="http://{{ address }}" id="nspanel_visit_link-{{ id }}" target="_blank" class="nspanel-visit-link block px-4 py-2 hover:bg-accent hover:text-accent-content">
+    <span class="mdi mdi-web pr-2"></span>Visit
+</a>
+{% endif %}

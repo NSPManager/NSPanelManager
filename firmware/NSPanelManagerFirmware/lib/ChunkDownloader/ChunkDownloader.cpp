@@ -39,8 +39,12 @@ bool ChunkDownloader::_downloadChunks() {
   uint read_chunks = 0;
   while (read_chunks < this->_download_chunks) {
     if (!httpClient.getStreamPtr()->available()) { // No data avilable from WiFi, wait 1000ms and try again
-      vTaskDelay(1000 / portTICK_PERIOD_MS);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
       num_failed_reads++;
+
+      if (num_failed_reads >= 10) {
+        return false;
+      }
       continue;
     }
 
@@ -58,7 +62,7 @@ bool ChunkDownloader::_downloadChunks() {
     uint16_t num_read_bytes = 0;
     while (num_read_bytes < next_read_chunk_size) {
       while (httpClient.getStreamPtr()->available() <= 0) {
-        vTaskDelay(250 / portTICK_PERIOD_MS);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
         num_failed_reads++;
         if (num_failed_reads >= 10) {
           // We have had 10 failed reads in a row for a total of 2.5 seconds, cancel this request and try again.

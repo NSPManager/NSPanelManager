@@ -1,37 +1,109 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en" style="min-height: 100%;">
+<html lang="en" class="min-h-screen bg-base-200">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="{% static 'jquery.min.js' %}"></script>
-    <script src="{% static 'base.js' %}?refresh={% now 'U' %}"></script>
-    <link rel="stylesheet" href="{% static 'bulma/css/bulma.min.css' %}">
-    <link rel="stylesheet" href="{% static 'bulma_extentions/bulma_tooltips.min.css' %}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css">
-    <link rel="stylesheet" href="{% static 'loader.css' %}?refresh={% now 'U' %}">
-    <link rel="stylesheet" href="{% static 'base.css' %}?refresh={% now 'U' %}">
-    <script src="{% static 'mqttmanager_ws.js' %}?refresh={% now 'U' %}"></script>
-    <!-- <script type="module" src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"></script> -->
-    {% block head %}
-    {% endblock %}
-    <title>NSPanelManager</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" type="image/png" href="{{ ingress_path }}{% static 'favicon.png' %}"/> <!-- Favicon-->
+  <link rel="stylesheet" href="{{ ingress_path }}{% static 'css/main.css' %}"> <!-- Compiled version of Tailwind CSS -->
+  <script src="{{ ingress_path }}{% static 'jquery.min.js' %}"></script>
+  <script src="{{ ingress_path }}{% static 'base.js' %}?refresh={% now 'U' %}"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.1"></script> <!-- TODO: Download and store as static file -->
+  <script src="{{ ingress_path }}{% static 'htmx_ws.js' %}"></script>
+  <link rel="stylesheet" href="{{ ingress_path }}{% static 'mdi/css/materialdesignicons.min.css' %}">
+  <link rel="stylesheet" href="{{ ingress_path }}{% static 'loader.css' %}?refresh={% now 'U' %}">
+  <link rel="stylesheet" href="{{ ingress_path }}{% static 'base.css' %}?refresh={% now 'U' %}">
+
+  <script>
+  // Configure HTMX
+  htmx.config.globalViewTransitions = true;
+  htmx.config.defaultSettleDelay = 50;
+  </script>
+
+  <script src="{{ ingress_path }}{% static 'mqttmanager_ws.js' %}?refresh={% now 'U' %}"></script>
+  <!-- <script type="module" src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"></script> -->
+  {% block head %}
+  {% endblock %}
+  <title>NSPanelManager</title>
 </head>
 
-<body style="min-height: 100%;">
-    {% include 'modals.html' %}
-    {% include 'navbar.html' %}
+<body class="min-h-screen">
+  {% include 'modals.html' %}
+  {% include 'navbar.html' %}
 
-    <div class="container mt-4 is-fullheight">
-        <div id="notification_holder" class="pb-4"></div> <!-- Displays any warnings or errors -->
+  <div class="w-full flex flex-wrap justify-center mx-auto">
+    <div class="w-screen max-w-screen-xl">
+      <!-- Displays any warnings or errors -->
+      <div  class="mt-4 mb-4">
+        <div id="ws_connection_in_progress_notification" role="alert" class="alert alert-info hidden">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-6 w-6 shrink-0"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z" /></svg>
+          <span class="flex items-center">
+              <span class="pr-2">Connecting to MQTTManager.</span>
+              <!-- By Sam Herbert (@sherb), for everyone. More @ http://goo.gl/7AJzbL -->
+              <svg class="h-5 w-5" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" stroke="#fff">
+                  <g fill="none" fill-rule="evenodd" stroke-width="2">
+                      <circle cx="22" cy="22" r="1">
+                          <animate attributeName="r"
+                              begin="0s" dur="1.8s"
+                              values="1; 20"
+                              calcMode="spline"
+                              keyTimes="0; 1"
+                              keySplines="0.165, 0.84, 0.44, 1"
+                              repeatCount="indefinite" />
+                          <animate attributeName="stroke-opacity"
+                              begin="0s" dur="1.8s"
+                              values="1; 0"
+                              calcMode="spline"
+                              keyTimes="0; 1"
+                              keySplines="0.3, 0.61, 0.355, 1"
+                              repeatCount="indefinite" />
+                      </circle>
+                      <circle cx="22" cy="22" r="1">
+                          <animate attributeName="r"
+                              begin="-0.9s" dur="1.8s"
+                              values="1; 20"
+                              calcMode="spline"
+                              keyTimes="0; 1"
+                              keySplines="0.165, 0.84, 0.44, 1"
+                              repeatCount="indefinite" />
+                          <animate attributeName="stroke-opacity"
+                              begin="-0.9s" dur="1.8s"
+                              values="1; 0"
+                              calcMode="spline"
+                              keyTimes="0; 1"
+                              keySplines="0.3, 0.61, 0.355, 1"
+                              repeatCount="indefinite" />
+                      </circle>
+                  </g>
+              </svg>
+          </span>
+          <div>
+              <button hx-post="{% url 'restart_mqtt_manager' %}" hx-swap="none" class="btn btn-sm btn-primary">Restart MQTTManager</button>
+          </div>
+        </div>
+        {% for notification in notifications %}
+        {% if notification.class == "error" %}
+        <div class="p-4 mt-2 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-700 dark:text-white">{{ notification.text }}</div>
+        {% elif notification.class == "warning" %}
+        <div class="p-4 mt-2 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-300 dark:text-gray-800">{{ notification.text }}</div>
+        {% elif notification.class == "info" %}
+        <div class="p-4 mb-2 mt-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50">{{ notification.text }}</div>
+        {% else  %}
+        <div class="p-4 mb-2 mt-4 text-sm text-pink-800 rounded-lg bg-pink-50-50 dark:bg-pink-50-700 dark:text-gray-50">UNKNOWN NOTIFICATION CLASS: {{ notification.class }}</div>
+        {% endif %}
+        {% endfor %}
+      </div>
+      <div class="mt-4 px-2">
         {% block content %}
         {% endblock %}
+      </div>
     </div>
+  </div>
 
-    {% include 'footer.html' %}
+  {% include 'footer.html' %}
 </body>
 
 </html>

@@ -1,0 +1,19 @@
+<span hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_text' view='index' nspanel_id=id %}" class="flex items-end justify-end text-right italic font-light text-sm" id="panel_header_text-{{ id }}">
+    {% if state == "online" %}
+        <!-- Display nothing, panel is online and a green bar is shown -->
+    {% elif state == "offline" %}
+        Offline
+    {% elif state == "awaiting_accept" %}
+        Awaiting accept
+    {% elif state == "waiting" %}
+        Waiting
+    {% elif state == "updating_fw" %}
+        Updating firmware, {{ progress }}%
+    {% elif state == "updating_fs" %}
+        Updating LittleFS, {{ progress }}%
+    {% elif state == "updating_tft" %}
+        Updating GUI, {{ progress }}%
+    {% else %}
+        Unknown
+    {% endif %}
+</span>

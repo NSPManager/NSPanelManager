@@ -5,6 +5,7 @@ class MQTTManager_WS {
   on_connect_function = null;
   on_close_function = null;
   websocket = null;
+  connected = false;
 
   process_message(message) {
     if ("cmd_id" in message && message["cmd_id"] in this.commands_sent_queue) {
@@ -17,6 +18,10 @@ class MQTTManager_WS {
         "ERROR! Got message but has not callback to handle said message."
       );
     }
+  }
+
+  is_connected() {
+    return this.connected;
   }
 
   send_command(command, args, handler) {
@@ -51,22 +56,43 @@ class MQTTManager_WS {
   }
 
   connect() {
-    this.websocket = new WebSocket("ws://" + location.hostname + ":8001");
+    var websocket_address = "";
+    if(location.protocol === "https:") {
+      websocket_address = "wss://";
+    } else {
+      websocket_address = "ws://";
+    }
+    
+    websocket_address += location.hostname + ":" + location.port + "/websocket";
+    console.log("Connecting to " + websocket_address);
+    this.websocket = new WebSocket(websocket_address);
 
     this.websocket.onopen = (event) => {
+      this.connected = true;
       if (this.on_connect_function != null) {
         this.on_connect_function();
       }
     };
 
     this.websocket.onmessage = (event) => {
-      var json_message = JSON.parse(event.data);
-      this.process_message(json_message);
+      try {
+        if(event.data.length > 0) {
+          var json_message = JSON.parse(event.data);
+          this.process_message(json_message);
+        }
+      }catch (error) {
+        console.log("Received error while processing message " + event.data);
+        console.log(error);
+      }
+    };
+
+    this.websocket.onerror = () => {
+      this.websocket.close();
     };
 
     this.websocket.onclose = (event) => {
-      if (event.code != 1001) {
-        // Ignore when browser is leaving page.
+      this.connected = false;
+      if (event.code != 1001) { // Ignore when browser is leaving page.
         if (this.on_close_function != null) {
           this.on_close_function();
         }

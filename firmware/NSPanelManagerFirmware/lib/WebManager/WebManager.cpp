@@ -16,6 +16,10 @@
 WebManager *WebManager::instance;
 
 void WebManager::init(const char *nspmFirmwareVersion) {
+  if (this->_has_already_been_started) {
+    LOG_ERROR("Trying to start WebManager while it has already been started.");
+    return;
+  }
   this->instance = this;
   this->_nspmFirmwareVersion = nspmFirmwareVersion;
   this->_state = WebManagerState::ONLINE;
@@ -35,6 +39,7 @@ void WebManager::init(const char *nspmFirmwareVersion) {
 
   this->_server.serveStatic("/static", LittleFS, "/static");
   this->_server.begin();
+  this->_has_already_been_started = true;
 }
 
 String WebManager::processIndexTemplate(const String &templateVar) {
@@ -46,10 +51,6 @@ String WebManager::processIndexTemplate(const String &templateVar) {
     return NSPMConfig::instance->wifi_ssid.c_str();
   } else if (templateVar == "wifi_psk") {
     return NSPMConfig::instance->wifi_psk.c_str();
-  } else if (templateVar == "manager_address") {
-    return NSPMConfig::instance->manager_address.c_str();
-  } else if (templateVar == "manager_port") {
-    return String(NSPMConfig::instance->manager_port);
   } else if (templateVar == "mqtt_server") {
     return NSPMConfig::instance->mqtt_server.c_str();
   } else if (templateVar == "mqtt_port") {
@@ -72,14 +73,11 @@ String WebManager::processIndexTemplate(const String &templateVar) {
 }
 
 void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request) {
-  StaticJsonDocument<2048> config_json;
+  JsonDocument config_json;
 
   NSPMConfig::instance->wifi_hostname = request->arg("wifi_hostname").c_str();
   NSPMConfig::instance->wifi_ssid = request->arg("wifi_ssid").c_str();
   NSPMConfig::instance->wifi_psk = request->arg("wifi_psk").c_str();
-
-  NSPMConfig::instance->manager_address = request->arg("manager_address").c_str();
-  NSPMConfig::instance->manager_port = request->arg("manager_port").toInt();
 
   NSPMConfig::instance->logging_level = request->arg("log_level").toInt();
 
@@ -91,7 +89,7 @@ void WebManager::saveConfigFromWeb(AsyncWebServerRequest *request) {
   NSPMConfig::instance->tft_upload_baud = request->arg("upload_buad_rate").toInt();
   NSPMConfig::instance->use_new_upload_protocol = request->arg("upload_protocol") == "latest";
 
-  if (!NSPMConfig::instance->saveToLittleFS()) {
+  if (!NSPMConfig::instance->saveToLittleFS(false)) {
     LOG_ERROR("Failed to save new configuration!");
   }
 
@@ -165,7 +163,11 @@ void WebManager::respondAvailableWiFiNetworks(AsyncWebServerRequest *request) {
 }
 
 void WebManager::startOTAUpdate() {
-  xTaskCreatePinnedToCore(WebManager::_taskPerformOTAUpdate, "taskPerformOTAUpdate", 20000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE); // TODO: Move function to InterfaceManager
+  // TODO: Move function to InterfaceManager
+  BaseType_t result = xTaskCreatePinnedToCore(WebManager::_taskPerformOTAUpdate, "taskPerformOTAUpdate", 10000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+  if (result != pdPASS) {
+    LOG_ERROR("Failed to create task to perform OTA update. Error: ", result);
+  }
 }
 
 void WebManager::_taskPerformOTAUpdate(void *param) {
@@ -186,8 +188,10 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
   }
   LOG_DEBUG("Got firmware MD5 ", checksum_holder);
   LOG_DEBUG("Stored firmware MD5 ", NSPMConfig::instance->md5_firmware.c_str());
+
   bool hasAnythingUpdated = false;
   bool firmwareUpdateSuccessful = true;
+  yield();
   vTaskDelay(250 / portTICK_PERIOD_MS); // Wait for other tasks.
   if (NSPMConfig::instance->md5_firmware.compare(checksum_holder) != 0) {
     do {
@@ -201,7 +205,6 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
       LOG_INFO("Successfully updated firmware.");
       // Save new firmware checksum
       NSPMConfig::instance->md5_firmware = checksum_holder;
-      NSPMConfig::instance->saveToLittleFS();
       hasAnythingUpdated = true;
     } else {
       LOG_ERROR("Something went wrong during firmware upgrade.");
@@ -228,6 +231,8 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
     LOG_DEBUG("Stored LittleFS MD5 ", NSPMConfig::instance->md5_data_file.c_str());
     vTaskDelay(250 / portTICK_PERIOD_MS); // Wait for other tasks.
     if (NSPMConfig::instance->md5_data_file.compare(checksum_holder) != 0) {
+      LOG_INFO("Will update LittleFS.");
+      vTaskDelay(250 / portTICK_PERIOD_MS);
       bool littleFSUpdateSuccessful = false;
       do {
         littleFSUpdateSuccessful = WebManager::_update(U_SPIFFS, "/download_data_file");
@@ -240,7 +245,6 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
         LOG_INFO("Successfully updated LittleFS.");
         // Save new LittleFS checksum
         NSPMConfig::instance->md5_data_file = checksum_holder;
-        NSPMConfig::instance->saveToLittleFS();
         hasAnythingUpdated = true;
       } else {
         LOG_ERROR("Something went wrong during LittleFS upgrade.");
@@ -254,8 +258,17 @@ void WebManager::_taskPerformOTAUpdate(void *param) {
   PageManager::GetNSPanelManagerPage()->setText("Restarting...");
   LOG_INFO("Will restart in 5 seconds.");
   vTaskDelay(5000 / portTICK_PERIOD_MS);
-  NSPMConfig::instance->saveToLittleFS();
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  if (hasAnythingUpdated) {
+    bool successfully_saved = false;
+    do {
+      successfully_saved = NSPMConfig::instance->saveToLittleFS(true);
+      if (!successfully_saved) {
+        LOG_ERROR("Failed to save config, will try again in 1 second.");
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+      }
+    } while (!successfully_saved);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+  }
   ESP.restart();
 
   vTaskDelete(NULL); // Task complete. Delete FreeRTOS task
@@ -271,6 +284,9 @@ uint8_t WebManager::getUpdateProgress() {
 
 bool WebManager::_update(uint8_t type, const char *url) {
   LOG_INFO("Starting ", type == U_FLASH ? "Firmware" : "LittleFS", " OTA update...");
+  vTaskDelay(250 / portTICK_PERIOD_MS);
+  InterfaceManager::stop();
+  PageManager::GetScreensaverPage()->stop();
   WebManager::_update_progress = 0;
   std::string downloadUrl = "http://";
   downloadUrl.append(NSPMConfig::instance->manager_address);
@@ -292,36 +308,19 @@ bool WebManager::_update(uint8_t type, const char *url) {
   LOG_INFO("Size of remote file '", downloadUrl.c_str(), "' is ", totalSize, " bytes.");
 
   LOG_INFO("Starting update.");
+  Update.onProgress(WebManager::_onProgress);
   bool canBegin = Update.begin(totalSize, type);
   if (!canBegin) {
     LOG_ERROR("Could not start update!");
     return false;
   }
 
-  size_t writtenSize = 0;
-  uint8_t buffer[8192];
-  while (writtenSize < totalSize) {
-    size_t downloadSize = totalSize - writtenSize;
-    if (downloadSize > sizeof(buffer)) {
-      downloadSize = sizeof(buffer);
-    }
-    size_t downloadedBytes = HttpLib::DownloadChunk(buffer, downloadUrl.c_str(), writtenSize, downloadSize);
-    writtenSize += Update.write(buffer, downloadedBytes);
-
-    // Update percent update completed
-    WebManager::_update_progress = (uint8_t)(((float)writtenSize / (float)totalSize) * 100);
-    if (type == U_FLASH) {
-      std::string update_string = "Updating FW ";
-      update_string.append(std::to_string(WebManager::_update_progress));
-      update_string.append("%");
-      PageManager::GetNSPanelManagerPage()->setText(update_string);
-    } else {
-      std::string update_string = "Updating FS ";
-      update_string.append(std::to_string(WebManager::_update_progress));
-      update_string.append("%");
-      PageManager::GetNSPanelManagerPage()->setText(update_string);
-    }
-    vTaskDelay(50 / portTICK_PERIOD_MS);
+  HTTPClient http;
+  http.begin(downloadUrl.c_str());
+  int http_code = http.GET();
+  if (http_code == 200) {
+    LOG_INFO("Established download stream for firmware update.");
+    Update.writeStream(http.getStream());
   }
 
   if (!Update.end()) {
@@ -338,4 +337,20 @@ bool WebManager::_update(uint8_t type, const char *url) {
     LOG_ERROR("OTA Not finished. Something went wrong!");
     return false;
   }
+}
+
+void WebManager::_onProgress(size_t progress, size_t total) {
+  WebManager::_update_progress = (progress / (total / 100));
+  if (WebManager::_state == WebManagerState::UPDATING_FIRMWARE && WebManager::_last_displayed_update_progress != WebManager::_update_progress) {
+    std::string update_string = "Updating FW ";
+    update_string.append(std::to_string(WebManager::_update_progress));
+    update_string.append("%");
+    PageManager::GetNSPanelManagerPage()->setText(update_string);
+  } else if (WebManager::_state == WebManagerState::UPDATING_LITTLEFS && WebManager::_last_displayed_update_progress != WebManager::_update_progress) {
+    std::string update_string = "Updating FS ";
+    update_string.append(std::to_string(WebManager::_update_progress));
+    update_string.append("%");
+    PageManager::GetNSPanelManagerPage()->setText(update_string);
+  }
+  WebManager::_last_displayed_update_progress = progress;
 }

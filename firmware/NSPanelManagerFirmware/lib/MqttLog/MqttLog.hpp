@@ -1,10 +1,9 @@
 #ifndef MqttLog_H
 #define MqttLog_H
 
-#define LOG_TO_SERIAL 0 // Set to 1 to enable
+#define LOG_TO_SERIAL 1 // Set to 1 to enable
 
 #include <Arduino.h>
-#include <MqttManager.hpp>
 #include <PubSubClient.h>
 #include <WiFi.h>
 #include <string>
@@ -43,7 +42,7 @@ class MqttLog {
 public:
   inline static MqttLog *instance;
   /// @brief Will initialize the library
-  void init(std::string *mqttLogTopic);
+  void init(std::string *mqtt_log_topic, PubSubClient **mqtt_client);
   /// @brief Set the highest log level to log
   /// @param logLevel The highest log level to send to mqtt server
   void setLogLevel(const MqttLogLevel logLevel);
@@ -52,6 +51,10 @@ public:
   template <typename... Args>
   void logToMqtt(const MqttLogLevel logLevel, const char *filename, int lineNumber, const char *functionName, Args &&...args) {
     if (logLevel > this->_logLevel || this->_mqttLogTopic->empty()) {
+      return;
+    }
+    if (this->_messageBuilderMutex == NULL) {
+      Serial.println("Tried to send message without a messageBuilderMutex. Message:");
       return;
     }
 
@@ -102,7 +105,7 @@ public:
 #endif
 
     // Queue log message for sending
-    MqttManager::publish(this->_mqttLogTopic->c_str(), mqttLogMessage);
+    (*this->_mqtt_client)->publish(this->_mqttLogTopic->c_str(), mqttLogMessage.c_str());
   }
 
   template <typename LogMessageT, typename... Args>
@@ -123,6 +126,7 @@ private:
   std::string *_mqttLogTopic;
   MqttLogLevel _logLevel{MqttLogLevel::Info};
   String _messageBuild;
+  PubSubClient **_mqtt_client;
   SemaphoreHandle_t _messageBuilderMutex = NULL; // Lock usage of message building argument to one call at the time.
 };
 

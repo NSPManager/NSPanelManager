@@ -1,6 +1,7 @@
 #include <HTTPClient.h>
 #include <HttpLib.hpp>
 #include <MqttLog.hpp>
+#include <cstdint>
 
 size_t HttpLib::GetFileSize(const char *url) {
   HTTPClient httpClient;
@@ -11,6 +12,7 @@ size_t HttpLib::GetFileSize(const char *url) {
 
   if (httpReturnCode != 200) {
     LOG_ERROR("Failed to retrive file size for URL '", url, "'. Got return code: ", httpReturnCode);
+    httpClient.end();
     return 0;
   }
 
@@ -45,14 +47,8 @@ size_t HttpLib::DownloadChunk(uint8_t *buffer, const char *address, size_t offse
   }
 
   size_t sizeReceived = 0;
-  while (sizeReceived < size) {
-    if (!httpClient.getStreamPtr()->available()) { // No data avilable from WiFi, wait 100ms and try again
-      vTaskDelay(500 / portTICK_PERIOD_MS);
-      LOG_DEBUG("Still waiting for data from address '", address, "'.");
-      continue;
-    }
-    sizeReceived += httpClient.getStreamPtr()->readBytes(&buffer[sizeReceived], httpClient.getStreamPtr()->available() >= size - sizeReceived ? size - sizeReceived : httpClient.getStreamPtr()->available());
-  }
+  uint8_t num_retries = 0;
+  sizeReceived += httpClient.getStream().readBytes(&buffer[sizeReceived], httpClient.getStreamPtr()->available() >= size - sizeReceived ? size - sizeReceived : httpClient.getStreamPtr()->available());
   httpClient.end();
 
   return sizeReceived;

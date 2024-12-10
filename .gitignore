@@ -2,8 +2,10 @@
 *.pyc
 docker/web/db.sqlite3
 docker/data/
+docker/test-beta/data*
 docker/web/nspanelmanager/db.sqlite3
 docker/web/nspanelmanager/secret.key
+docker/web/node_modules/
 firmware/NSPanelManagerFirmware/data/config.json
 firmware/NSPanelManagerFirmware/.pio
 firmware/NSPanelManagerFirmware/littlefs.md5
@@ -14,7 +16,15 @@ firmware/NSPanelManagerFirmware/nspanels_to_ota.txt
 firmware/NSPanelManagerFirmware/.cache
 firmware/NSPanelManagerFirmware/.ccls
 firmware/NSPanelManagerFirmware/.ccls-cache
-MQTTManager-RUST/
+firmware/NSPanelManagerFirmware/node_modules
+firmware/firmware_espidf/node_modules
+docker/MQTTManager/conan_cache/
+docker/MQTTManager/build/
+docker/MQTTManager/.cache/
+docker/MQTTManager/CMakeFiles/
+docker/MQTTManager/lib/
+docker/MQTTManager/env.sh
+docker/MQTTManager/compile_commands.json
 
 # User/computer specific files that is user depandant
 firmware/NSPanelManagerFirmware/src/CMakeLists.txt

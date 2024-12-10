@@ -3,15 +3,15 @@
 
 #include <Arduino.h>
 #include <DeviceEntity.hpp>
-class Light;
 #include <PageBase.hpp>
+#include <protobuf_defines.h>
 
 enum LIGHT_PAGE_MODE {
   COLOR_TEMP,
   COLOR_RGB
 };
 
-class LightPage : public PageBase, DeviceEntityObserver {
+class LightPage : public PageBase {
 public:
   void update();
   void updateValues();
@@ -21,16 +21,15 @@ public:
   uint8_t getBrightnessValue();
   uint8_t getKelvinSatValue();
   uint16_t getHueValue();
-  Light *selectedLight;
+  PROTOBUF_NSPANEL_LIGHT_STATUS *selectedLight;
   LIGHT_PAGE_MODE getCurrentMode();
   void switchMode();
-  void lightDeconstructCallback(Light *);
-
-  void entityDeconstructCallback(DeviceEntity *);
-  void entityUpdateCallback(DeviceEntity *);
 
 private:
   LIGHT_PAGE_MODE _currentMode;
+  uint8_t _last_brightness = 0;
+  uint8_t _last_kelvin_saturation = 0;
+  uint16_t _last_hue = 0;
 };
 
 #endif

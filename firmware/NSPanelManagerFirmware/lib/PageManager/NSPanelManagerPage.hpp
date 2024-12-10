@@ -13,6 +13,8 @@ public:
 
   void setText(const char *text);
   void setText(std::string &text);
+  void setSecondaryText(const char *text);
+  void setSecondaryText(std::string &text);
 };
 
 #endif

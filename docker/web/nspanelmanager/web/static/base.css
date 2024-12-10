@@ -1,9 +1,41 @@
 .has-tooltip-warning {
-  border-bottom: none !important; /* Remove dashed underline from warning symbols */
+    border-bottom: none !important; /* Remove dashed underline from warning symbols */
 }
 
 [data-tooltip]:not(.is-disabled).has-tooltip-warning::before,
 [data-tooltip]:not(.is-loading).has-tooltip-warning::before,
 [data-tooltip]:not([disabled]).has-tooltip-warning::before {
-  width: 10rem !important;
+    width: 10rem !important;
+}
+
+/* Modal fade animation on modal shown */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.question_help_text {
+    display: none; /* Default is hidden */
+}
+
+.ani-spin {
+    animation: ani-spin 1.2s linear infinite;
+}
+
+@keyframes ani-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.modal-card > .panel {
+    overflow: scroll;
 }
