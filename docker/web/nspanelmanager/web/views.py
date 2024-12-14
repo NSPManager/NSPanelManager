@@ -726,13 +726,18 @@ def save_new_tft_file(request):
 def download_firmware(request):
     fs = FileSystemStorage()
     if "Range" in request.headers and request.headers["Range"].startswith("bytes="):
-        parts = request.headers["Range"][6:].split('-')
-        range_start = int(parts[0])
-        range_end = int(parts[1])
-        if range_end == 255:  # Workaround for copy-paste error in firmware
-            return HttpResponse(fs.open("firmware.bin").read(), content_type="application/octet-stream")
         data = fs.open("firmware.bin").read()
-        return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
+        parts = request.headers["Range"][6:].split('-')
+
+        if parts[1] == "":
+            range_start = int(parts[0])
+            return HttpResponse(data[range_start:], content_type="application/octet-stream")
+        else:
+            range_start = int(parts[0])
+            range_end = int(parts[1])
+            return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
+
+
     else:
         return HttpResponse(fs.open("firmware.bin").read(), content_type="application/octet-stream")
 
