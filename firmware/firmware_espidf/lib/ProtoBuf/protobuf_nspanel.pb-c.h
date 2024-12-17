@@ -143,14 +143,14 @@ struct  NSPanelStatusReport
   int32_t rssi;
   int32_t heap_used_pct;
   char *mac_address;
-  char *temperature;
+  float temperature;
   char *ip_address;
   size_t n_warnings;
   NSPanelWarning **warnings;
 };
 #define NSPANEL_STATUS_REPORT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_status_report__descriptor) \
-    , NSPANEL_STATUS_REPORT__STATE__ONLINE, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL }
+    , NSPANEL_STATUS_REPORT__STATE__ONLINE, 0, 0, 0, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, 0,NULL }
 
 
 struct  NSPanelLightStatus
