@@ -26,7 +26,6 @@
 #include <exception>
 #include <fmt/chrono.h>
 #include <fmt/core.h>
-#include <fstream>
 #include <iomanip>
 #include <list>
 #include <nlohmann/json.hpp>
@@ -204,31 +203,13 @@ void NSPanel::update_config(NSPanelSettings &settings) {
     this->_mqtt_number_screen_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screen_brightness/config", mqtt_register_mac);
     this->_mqtt_number_screensaver_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screensaver_brightness/config", mqtt_register_mac);
     this->_mqtt_select_screensaver_topic = fmt::format("homeassistant/select/nspanelmanager/{}_screensaver_select/config", mqtt_register_mac);
-    this->_mqtt_relay1_command_topic = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/r1_cmd", MqttManagerConfig::get_settings().manager_address(), this->_name);
-    this->_mqtt_relay1_state_topic = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/r1_state", MqttManagerConfig::get_settings().manager_address(), this->_name);
-    this->_mqtt_relay2_command_topic = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/r2_cmd", MqttManagerConfig::get_settings().manager_address(), this->_name);
-    this->_mqtt_relay2_state_topic = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/r2_state", MqttManagerConfig::get_settings().manager_address(), this->_name);
-    this->_mqtt_status_topic = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/status", MqttManagerConfig::get_settings().manager_address(), this->_name);
-    this->_mqtt_status_report_topic = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/status_report", MqttManagerConfig::get_settings().manager_address(), this->_name);
-
-    SPDLOG_TRACE("_mqtt_config_topic: {}", _mqtt_config_topic);
-    SPDLOG_TRACE("_mqtt_log_topic: {}", _mqtt_log_topic);
-    SPDLOG_TRACE("_mqtt_command_topic: {}", _mqtt_command_topic);
-    SPDLOG_TRACE("_mqtt_sensor_temperature_topic: {}", _mqtt_sensor_temperature_topic);
-    SPDLOG_TRACE("_mqtt_switch_relay1_topic: {}", _mqtt_switch_relay1_topic);
-    SPDLOG_TRACE("_mqtt_light_relay1_topic: {}", _mqtt_light_relay1_topic);
-    SPDLOG_TRACE("_mqtt_switch_relay2_topic: {}", _mqtt_switch_relay2_topic);
-    SPDLOG_TRACE("_mqtt_light_relay2_topic: {}", _mqtt_light_relay2_topic);
-    SPDLOG_TRACE("_mqtt_switch_screen_topic: {}", _mqtt_switch_screen_topic);
-    SPDLOG_TRACE("_mqtt_number_screen_brightness_topic: {}", _mqtt_number_screen_brightness_topic);
-    SPDLOG_TRACE("_mqtt_number_screensaver_brightness_topic: {}", _mqtt_number_screensaver_brightness_topic);
-    SPDLOG_TRACE("_mqtt_select_screensaver_topic: {}", _mqtt_select_screensaver_topic);
-    SPDLOG_TRACE("_mqtt_relay1_command_topic: {}", _mqtt_relay1_command_topic);
-    SPDLOG_TRACE("_mqtt_relay1_state_topic: {}", _mqtt_relay1_state_topic);
-    SPDLOG_TRACE("_mqtt_relay2_command_topic: {}", _mqtt_relay2_command_topic);
-    SPDLOG_TRACE("_mqtt_relay2_state_topic: {}", _mqtt_relay2_state_topic);
-    SPDLOG_TRACE("_mqtt_status_topic: {}", _mqtt_status_topic);
-    SPDLOG_TRACE("_mqtt_status_report_topic: {}", _mqtt_status_report_topic);
+    this->_mqtt_relay1_command_topic = fmt::format("nspanel/{}/r1_cmd", this->_mac);
+    this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/r1_state", this->_mac);
+    this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/r2_cmd", this->_mac);
+    this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/r2_state", this->_mac);
+    this->_mqtt_status_topic = fmt::format("nspanel/{}/state", this->_mac);
+    this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_mac);
+    this->_mqtt_temperature_topic = fmt::format("nspanel/{}/temperature", this->_mac);
   }
 
   if (this->_has_registered_to_manager && !this->_is_register_denied && this->_is_register_accepted) {
@@ -528,15 +509,6 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       if (!report.ParseFromString(payload)) {
         SPDLOG_ERROR("Failed to parse NSPanelStatusReport from string as protobuf.");
         SPDLOG_TRACE("Payload: {}", payload);
-        boost::filesystem::path file_path(fmt::format("nspanel_status_report_{}.bin", this->_id));
-        std::ofstream output_file(file_path.string(), std::ios::out);
-
-        if (output_file.is_open()) {
-          output_file << payload;
-          output_file.close();
-          SPDLOG_TRACE("Wrote payload to {}.", file_path.string());
-        }
-
         return;
       } else {
         // TODO: Remove log.
@@ -546,13 +518,13 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       this->_ip_address = report.ip_address();
       this->_rssi = report.rssi();
       this->_heap_used_pct = report.heap_used_pct();
-      this->_temperature = atof(report.temperature().c_str());
+      this->_temperature = report.temperature();
       switch (report.nspanel_state()) {
       case NSPanelStatusReport_state::NSPanelStatusReport_state_ONLINE:
         this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
         break;
       case NSPanelStatusReport_state_OFFLINE:
-        this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE; // This should never happen, offline state is handled in "/status" and not "/status_report"
+        this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE; // This should never happen, offline state is handled in "/state" and not "/status_report"
         break;
       case NSPanelStatusReport_state_UPDATING_TFT:
         this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT;
@@ -599,6 +571,9 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         }
         this->_nspanel_warnings.push_back(ws_warn);
       }
+
+      // Received new temperature from status report, send out on temperature topic:
+      MQTT_Manager::publish(this->_mqtt_temperature_topic, std::to_string(std::round(this->_temperature*100.0f)/100.0f));
 
       // SPDLOG_TRACE("MAC: {}", report.mac_address());
       // SPDLOG_TRACE("IP : {}", report.ip_address());
@@ -847,7 +822,7 @@ void NSPanel::register_to_home_assistant() {
     temperature_sensor_data["unit_of_measurement"] = "°C";
   }
   temperature_sensor_data["name"] = "Temperature";
-  temperature_sensor_data["state_topic"] = fmt::format("nspanel/{}/temperature_state", this->_name);
+  temperature_sensor_data["state_topic"] = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/temperature", MqttManagerConfig::get_settings().manager_address(), this->_name);
   temperature_sensor_data["unique_id"] = fmt::format("{}_temperature", this->_name);
   std::string temperature_sensor_data_str = temperature_sensor_data.dump();
   SPDLOG_DEBUG("Registring temp sensor for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);

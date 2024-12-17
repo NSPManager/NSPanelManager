@@ -2319,12 +2319,12 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
   enum : int {
     kWarningsFieldNumber = 8,
     kMacAddressFieldNumber = 5,
-    kTemperatureFieldNumber = 6,
     kIpAddressFieldNumber = 7,
     kNspanelStateFieldNumber = 1,
     kUpdateProgressFieldNumber = 2,
     kRssiFieldNumber = 3,
     kHeapUsedPctFieldNumber = 4,
+    kTemperatureFieldNumber = 6,
   };
   // repeated .NSPanelWarning warnings = 8;
   int warnings_size() const;
@@ -2357,22 +2357,6 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
   inline PROTOBUF_ALWAYS_INLINE void _internal_set_mac_address(
       const std::string& value);
   std::string* _internal_mutable_mac_address();
-
-  public:
-  // string temperature = 6;
-  void clear_temperature() ;
-  const std::string& temperature() const;
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_temperature(Arg_&& arg, Args_... args);
-  std::string* mutable_temperature();
-  PROTOBUF_NODISCARD std::string* release_temperature();
-  void set_allocated_temperature(std::string* value);
-
-  private:
-  const std::string& _internal_temperature() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_temperature(
-      const std::string& value);
-  std::string* _internal_mutable_temperature();
 
   public:
   // string ip_address = 7;
@@ -2431,13 +2415,23 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
   void _internal_set_heap_used_pct(::int32_t value);
 
   public:
+  // float temperature = 6;
+  void clear_temperature() ;
+  float temperature() const;
+  void set_temperature(float value);
+
+  private:
+  float _internal_temperature() const;
+  void _internal_set_temperature(float value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelStatusReport)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
       3, 8, 1,
-      68, 2>
+      57, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -2459,12 +2453,12 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
                           const NSPanelStatusReport& from_msg);
     ::google::protobuf::RepeatedPtrField< ::NSPanelWarning > warnings_;
     ::google::protobuf::internal::ArenaStringPtr mac_address_;
-    ::google::protobuf::internal::ArenaStringPtr temperature_;
     ::google::protobuf::internal::ArenaStringPtr ip_address_;
     int nspanel_state_;
     ::int32_t update_progress_;
     ::int32_t rssi_;
     ::int32_t heap_used_pct_;
+    float temperature_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -4851,54 +4845,26 @@ inline void NSPanelStatusReport::set_allocated_mac_address(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:NSPanelStatusReport.mac_address)
 }
 
-// string temperature = 6;
+// float temperature = 6;
 inline void NSPanelStatusReport::clear_temperature() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.temperature_.ClearToEmpty();
+  _impl_.temperature_ = 0;
 }
-inline const std::string& NSPanelStatusReport::temperature() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+inline float NSPanelStatusReport::temperature() const {
   // @@protoc_insertion_point(field_get:NSPanelStatusReport.temperature)
   return _internal_temperature();
 }
-template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void NSPanelStatusReport::set_temperature(Arg_&& arg,
-                                                     Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.temperature_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+inline void NSPanelStatusReport::set_temperature(float value) {
+  _internal_set_temperature(value);
   // @@protoc_insertion_point(field_set:NSPanelStatusReport.temperature)
 }
-inline std::string* NSPanelStatusReport::mutable_temperature() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_temperature();
-  // @@protoc_insertion_point(field_mutable:NSPanelStatusReport.temperature)
-  return _s;
-}
-inline const std::string& NSPanelStatusReport::_internal_temperature() const {
+inline float NSPanelStatusReport::_internal_temperature() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.temperature_.Get();
+  return _impl_.temperature_;
 }
-inline void NSPanelStatusReport::_internal_set_temperature(const std::string& value) {
+inline void NSPanelStatusReport::_internal_set_temperature(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.temperature_.Set(value, GetArena());
-}
-inline std::string* NSPanelStatusReport::_internal_mutable_temperature() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.temperature_.Mutable( GetArena());
-}
-inline std::string* NSPanelStatusReport::release_temperature() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:NSPanelStatusReport.temperature)
-  return _impl_.temperature_.Release();
-}
-inline void NSPanelStatusReport::set_allocated_temperature(std::string* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.temperature_.SetAllocated(value, GetArena());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-        if (_impl_.temperature_.IsDefault()) {
-          _impl_.temperature_.Set("", GetArena());
-        }
-  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:NSPanelStatusReport.temperature)
+  _impl_.temperature_ = value;
 }
 
 // string ip_address = 7;

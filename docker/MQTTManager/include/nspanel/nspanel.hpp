@@ -206,6 +206,10 @@ private:
   // The topic to capture status reports from MQTT
   std::string _mqtt_status_report_topic;
   // The topic to send commands to panel to via MQTT
+
+  // The topic to send out temperature in raw format instead of encoded in protobuf status report
+  std::string _mqtt_temperature_topic;
+
   std::string _mqtt_command_topic;
   // Home Assistant MQTT registration topics:
   std::string _mqtt_config_topic;

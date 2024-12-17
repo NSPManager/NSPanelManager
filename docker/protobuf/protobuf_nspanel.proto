@@ -77,7 +77,7 @@ message NSPanelStatusReport {
     int32 rssi = 3;
     int32 heap_used_pct = 4;
     string mac_address = 5;
-    string temperature = 6;
+    float temperature = 6;
     string ip_address = 7;
 
     repeated NSPanelWarning warnings = 8;
