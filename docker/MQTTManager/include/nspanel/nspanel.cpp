@@ -175,9 +175,9 @@ void NSPanel::update_config(NSPanelSettings &settings) {
   }
 
   if (settings.has_id()) {
-    SPDLOG_DEBUG("Loaded NSPanel {}::{}.", this->_id, this->_name);
+    SPDLOG_DEBUG("Loaded NSPanel {}::{}, type: {}.", this->_id, this->_name, this->_is_us_panel ? "US" : "EU");
   } else {
-    SPDLOG_DEBUG("Loaded NSPanel {} with no ID.", this->_name);
+    SPDLOG_DEBUG("Loaded NSPanel {} with no ID. Type: {}.", this->_name, this->_is_us_panel ? "US" : "EU");
   }
 
   if (rebuilt_mqtt) {

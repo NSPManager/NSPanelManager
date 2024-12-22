@@ -76,7 +76,7 @@ def mqttmanager_get_all_settings(request):
             else:
                 proto.clock_format = protobuf_formats_pb2.time_format.FULL
 
-            if get_setting_with_default("use_fahrenheit") == "True":
+            if str(get_setting_with_default("use_fahrenheit")) == "True":
                 proto.temperature_unit = protobuf_formats_pb2.temperature_format.FAHRENHEIT
             else:
                 proto.temperature_unit = protobuf_formats_pb2.temperature_format.CELCIUS
@@ -108,7 +108,14 @@ def mqttmanager_get_all_nspanels(request):
                 proto_panel.mqtt_ignore_time = int(get_nspanel_setting_with_default(nspanel.id, "mqtt_ignore_time", 3000))
                 proto_panel.screen_dim_level = int(get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level")))
                 proto_panel.screensaver_dim_level = int(get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level")))
-                proto_panel.is_us_panel = bool(get_nspanel_setting_with_default(nspanel.id, "is_us_panel", False))
+
+                # Handle special case for when setting is str.
+                is_us_panel = get_nspanel_setting_with_default(nspanel.id, "is_us_panel", False)
+                if type(is_us_panel) is bool:
+                    proto_panel.is_us_panel = is_us_panel
+                else:
+                    proto_panel.is_us_panel = is_us_panel == "True"
+
                 proto_panel.lock_to_default_room = bool(get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", False))
                 proto_panel.reverse_relays = bool(get_nspanel_setting_with_default(nspanel.id, "reverse_relays", False))
                 proto_panel.relay1_default_mode = bool(get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", False))

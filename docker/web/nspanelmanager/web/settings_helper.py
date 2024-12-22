@@ -68,6 +68,7 @@ def set_setting_value(name, value):
     })
 
 
+# TODO: Convert so that it ALWAYS return str so that it's easy to handle the same everywhere
 def get_nspanel_setting_with_default(nspanel_id, name, default):
     panel = NSPanel.objects.filter(id=nspanel_id)
     if panel.count() > 0:
