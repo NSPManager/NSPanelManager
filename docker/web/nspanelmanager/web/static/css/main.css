@@ -5721,6 +5721,23 @@ input.tab:checked + .tab-content,
   margin-top: 0px;
 }
 
+.menu-lg :where(li:not(.menu-title) > *:not(ul, details, .menu-title)), .menu-lg :where(li:not(.menu-title) > details > summary:not(.menu-title)) {
+  border-radius: var(--rounded-btn, 0.5rem);
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.menu-lg .menu-title {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
 .modal-top :where(.modal-box) {
   width: 100%;
   max-width: none;
@@ -6253,6 +6270,15 @@ input.tab:checked + .tab-content,
   width: 100vw;
 }
 
+.w-min {
+  width: -moz-min-content;
+  width: min-content;
+}
+
+.w-72 {
+  width: 18rem;
+}
+
 .min-w-0 {
   min-width: 0px;
 }
@@ -6263,6 +6289,10 @@ input.tab:checked + .tab-content,
 
 .max-w-screen-xl {
   max-width: 1280px;
+}
+
+.max-w-72 {
+  max-width: 18rem;
 }
 
 .flex-1 {
@@ -6307,6 +6337,10 @@ input.tab:checked + .tab-content,
 
 .resize {
   resize: both;
+}
+
+.flex-row {
+  flex-direction: row;
 }
 
 .flex-row-reverse {
@@ -6900,6 +6934,10 @@ input.tab:checked + .tab-content,
   font-weight: 100;
 }
 
+.font-bold {
+  font-weight: 700;
+}
+
 .uppercase {
   text-transform: uppercase;
 }
@@ -7119,6 +7157,29 @@ input.tab:checked + .tab-content,
 
 .ease-linear {
   transition-timing-function: linear;
+}
+
+.htmx-request {
+  pointer-events: auto;
+  visibility: visible;
+  opacity: 1;
+}
+
+:root:has(:is(.htmx-request, .modal:target, .modal-toggle:checked + .modal, .modal[open])) {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
+.htmx-request .modal-box {
+  --tw-translate-y: 0px;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.htmx-request {
+  background-color: #0006;
+  animation: modal-pop 0.2s ease-out;
 }
 
 .after\:inline-block::after {

@@ -201,3 +201,24 @@
     </div>
   </dialog>
 </form>
+
+
+
+<!-- Modal to indicate that we are loading something --->
+<!-- This dialog will have the class htmx-request added to it when it's "active" --->
+<dialog id="modal_loading" tabindex="-1" aria-hidden="true" class="modal">
+  <!-- Modal content -->
+    <div class="modal-box">
+        <!-- Modal header -->
+        <h3 class="text-lg font-semibold mb-2">Loading</h3>
+
+        <!-- Loader-->
+        <div class="flex items-center justify-center">
+            <span id="add_new_entity_loader" class="loading loading-ring loading-lg by-2"></span>
+        </div>
+
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>

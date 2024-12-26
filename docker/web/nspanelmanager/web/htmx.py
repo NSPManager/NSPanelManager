@@ -208,6 +208,12 @@ def partial_entity_add_light_to_room(request, room_id):
 
     return render(request, 'partial/select_entity/entity_add_light_to_room.html', data)
 
+def partial_add_entities_page_to_room(request, room_id):
+    data = {
+        "room_id": room_id
+    }
+    return render(request, 'partial/add_entities_page_to_room.html', data)
+
 
 def partial_select_new_outside_temperature_sensor(request):
     # TODO: Move "get_all_available_entities" from api.py to seperate files
