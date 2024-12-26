@@ -115,6 +115,7 @@ NSPanel::NSPanel(NSPanelSettings &init_data) {
   IPCHandler::attach_callback(fmt::format("nspanel/{}/update_firmware", this->_id), boost::bind(&NSPanel::handle_ipc_request_update_firmware, this, _1, _2));
   IPCHandler::attach_callback(fmt::format("nspanel/{}/accept_register_request", this->_id), boost::bind(&NSPanel::handle_ipc_request_accept_register_request, this, _1, _2));
   IPCHandler::attach_callback(fmt::format("nspanel/{}/deny_register_request", this->_id), boost::bind(&NSPanel::handle_ipc_request_deny_register_request, this, _1, _2));
+  IPCHandler::attach_callback(fmt::format("nspanel/{}/logs", this->_id), boost::bind(&NSPanel::handle_ipc_request_get_logs, this, _1, _2));
 }
 
 void NSPanel::update_config(NSPanelSettings &settings) {
@@ -177,7 +178,7 @@ void NSPanel::update_config(NSPanelSettings &settings) {
   if (settings.has_id()) {
     SPDLOG_DEBUG("Loaded NSPanel {}::{}, type: {}.", this->_id, this->_name, this->_is_us_panel ? "US" : "EU");
   } else {
-    SPDLOG_DEBUG("Loaded NSPanel {} with no ID. Type: {}.", this->_name, this->_is_us_panel ? "US" : "EU");
+    SPDLOG_DEBUG("Loaded NSPanel {} with no ID.", this->_name, this->_is_us_panel ? "US" : "EU");
   }
 
   if (rebuilt_mqtt) {
@@ -192,7 +193,7 @@ void NSPanel::update_config(NSPanelSettings &settings) {
     this->_mqtt_register_mac = mqtt_register_mac;
 
     this->_mqtt_config_topic = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/config", MqttManagerConfig::get_settings().manager_address(), this->_name);
-    this->_mqtt_log_topic = fmt::format("nspanel/{}/log", this->_name);
+    this->_mqtt_log_topic = fmt::format("nspanel/{}/log", this->_name); // TODO: Remove as this is the old log topic. Use the new based on MAC-address instead.
     this->_mqtt_command_topic = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/command", MqttManagerConfig::get_settings().manager_address(), this->_name);
     this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
     this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
@@ -217,7 +218,8 @@ void NSPanel::update_config(NSPanelSettings &settings) {
     SPDLOG_INFO("Subscribing to NSPanel MQTT topics.");
     MQTT_Manager::subscribe(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
-    MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+    MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2)); // TODO: Remove me and use only topic based on MAC-address instead
+    MQTT_Manager::subscribe(fmt::format("nspanel/{}/log", this->_mac), boost::bind(&NSPanel::mqtt_log_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     MqttManagerConfig::attach_config_loaded_listener(boost::bind(&NSPanel::send_config, this));
@@ -521,6 +523,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       this->_temperature = report.temperature();
       switch (report.nspanel_state()) {
       case NSPanelStatusReport_state::NSPanelStatusReport_state_ONLINE:
+        this->_update_progress = 0;
         this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
         break;
       case NSPanelStatusReport_state_OFFLINE:
@@ -583,6 +586,66 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       this->send_websocket_update();
     }
   }
+}
+
+void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
+    size_t trim_start_pos = payload.find_first_not_of(" \n\r\t");
+    if(trim_start_pos == std::string::npos) {
+        return; // Message contains no valid chars, only spaces
+    }
+
+    size_t trim_end_pos = payload.find_last_not_of(" \n\r\t");
+    if(trim_start_pos == std::string::npos) {
+        return; // Message contains no valid chars, only spaces
+    }
+    payload = payload.substr(trim_start_pos, trim_end_pos+1 - 4); // Trim spaces and such but also the first 7 chars that is the color coding for the message
+    if(payload[0] == 0x1B) { // Message formated with color. Remove color
+        payload = payload.substr(7);
+    }
+
+    std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::tm tm = *std::localtime(&now);
+    std::stringstream buffer;
+    if (MqttManagerConfig::get_settings().clock_format() == time_format::FULL) {
+      buffer << std::put_time(&tm, "%H:%M:%S");
+    } else {
+      buffer << std::put_time(&tm, "%I:%M:%S %p");
+    }
+
+    nlohmann::json log_data;
+    log_data["type"] = "log";
+    log_data["time"] = buffer.str();
+    log_data["panel"] = this->_name;
+    log_data["mac_address"] = this->_mac;
+
+    if(payload[0] == 'E') {
+        log_data["level"] = "ERROR";
+    } else if(payload[0] == 'W') {
+        log_data["level"] = "WARNING";
+    } else if(payload[0] == 'I') {
+        log_data["level"] = "INFO";
+    } else if(payload[0] == 'D') {
+        log_data["level"] = "DEBUG";
+    } else {
+        SPDLOG_ERROR("Received log message from NSPanel but could not determin level, will not store/forward log message to web interface! Level: {}, Message: {}", payload[0], payload);
+        return;
+    }
+
+    // Remove first char that indicates log level. This is store separately
+    payload = payload.substr(1);
+    log_data["message"] = payload; // TODO: Clean up message before sending it out
+    WebsocketServer::broadcast_json(log_data);
+
+    // Save log message in backtrace for when (if) the log interface requests it.
+    NSPanelLogMessage message;
+    message.time = buffer.str();
+    message.level = log_data["level"];
+    message.message = payload;
+    this->_log_messages.push_front(message);
+    // Remove older messages from backtrace.
+    while (this->_log_messages.size() > MqttManagerConfig::get_settings().max_log_buffer_size()) {
+      this->_log_messages.pop_back();
+    }
 }
 
 void NSPanel::send_websocket_update() {
@@ -1037,6 +1100,22 @@ bool NSPanel::handle_ipc_request_accept_register_request(nlohmann::json request,
 bool NSPanel::handle_ipc_request_deny_register_request(nlohmann::json request, nlohmann::json *response_buffer) {
   this->deny_register_request();
   nlohmann::json data = {{"status", "ok"}};
+  (*response_buffer) = data;
+  return true;
+}
+
+bool NSPanel::handle_ipc_request_get_logs(nlohmann::json request, nlohmann::json *response_buffer) {
+  nlohmann::json data = {{"status", "ok"}};
+  data["messages"] = nlohmann::json::array();
+  for(auto it = this->_log_messages.cbegin(); it != this->_log_messages.end(); it++) {
+      nlohmann::json log = {
+          {"time", it->time},
+          {"level", it->level},
+          {"message", it->message}
+      };
+      data["messages"].push_back(log);
+  }
+
   (*response_buffer) = data;
   return true;
 }

@@ -132,9 +132,9 @@ $(document).ready(function () {
       if(e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length) {
         e.preventDefault();
         e.stopPropagation();
-        $("#save_new_tft_file_modal_subtext").prop("files", e.originalEvent.dataTransfer.files);
+        $("#tft_file").prop("files", e.originalEvent.dataTransfer.files);
         var filename = $('#tft_file').val().replace(/C:\\fakepath\\/i, '')
-        $("#save_new_tft_file_modal_subtext").html("Selected file: '" + filename + "'.");
+        $("#tft_file").html("Selected file: '" + filename + "'.");
         $("#tft_upload_submit_button").removeClass("btn-disabled");
       }
     });

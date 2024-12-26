@@ -80,6 +80,11 @@ public:
   void mqtt_callback(std::string topic, std::string payload);
 
   /**
+  * Handle log messages sent over MQTT from panel
+  */
+  void mqtt_log_callback(std::string topic, std::string payload);
+
+  /**
    * Dump JSON as string and send to NSPanel command topic.
    */
   void send_command(nlohmann::json &command);
@@ -163,6 +168,7 @@ public:
   bool handle_ipc_request_update_screen(nlohmann::json message, nlohmann::json *response_buffer);
   bool handle_ipc_request_accept_register_request(nlohmann::json message, nlohmann::json *response_buffer);
   bool handle_ipc_request_deny_register_request(nlohmann::json message, nlohmann::json *response_buffer);
+  bool handle_ipc_request_get_logs(nlohmann::json message, nlohmann::json *response_buffer);
 
 private:
   uint _id;

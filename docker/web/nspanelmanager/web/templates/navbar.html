@@ -77,8 +77,8 @@
       <ul
         class="flex flex-col p-4 md:p-0 mt-4 font-medium border rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0">
         <li>
-          <a href="/" data-active="{% if request.path == '/' %}true{% endif %}"
-            class="block py-2 px-3  rounded md:bg-transparent data-[active=true]:text-accent md:p-0 ">NSPanels</a>
+          <a href="{% url 'index' %}" data-active="{% if request.path == '/' %}true{% endif %}"
+            class="block py-2 px-3 rounded md:p-0 md:hover:text-accent hover:bg-accent hover: md:hover:bg-transparent border-gray-700 data-[active=true]:text-accent ">NSPanels</a>
         </li>
         <li>
           <a href="{% url 'rooms' %}" data-active="{% if request.path == '/rooms' %}true{% endif %}"

@@ -257,6 +257,10 @@ def edit_nspanel(request, panel_id: int):
             "text": "GUI update available."
         })
 
+    panel_logs = send_ipc_request(F"nspanel/{nspanel.id}/logs", {"command": "get"})
+    if len(panel_logs) > int(get_setting_with_default("max_live_log_messages")):
+        panel_logs = panel_logs[0:int(get_setting_with_default("max_live_log_messages"))]
+
     data = get_base_data(request)
     data = data|{
         'panel_info': panel_info,
@@ -265,6 +269,7 @@ def edit_nspanel(request, panel_id: int):
         "temperature_unit": temperature_unit,
         "multiple": [1, 2, 3, 4],
         "max_live_log_messages": get_setting_with_default("max_live_log_messages"),
+        "logs": panel_logs
     }
 
     return render(request, 'edit_nspanel.html', data)
@@ -728,6 +733,7 @@ def download_firmware(request):
     if "Range" in request.headers and request.headers["Range"].startswith("bytes="):
         data = fs.open("firmware.bin").read()
         parts = request.headers["Range"][6:].split('-')
+        print(F"Received request for partial firmware download. Parts: {parts}")
 
         if parts[1] == "":
             range_start = int(parts[0])
@@ -748,6 +754,7 @@ def download_data_file(request):
         parts = request.headers["Range"][6:].split('-')
         range_start = int(parts[0])
         range_end = int(parts[1])
+        print(F"Received request for partial LittleFS download. Start: {range_start}, end: {range_end}")
         data = fs.open("data_file.bin").read()
         return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
     else:
@@ -761,6 +768,7 @@ def download_tft_eu(request):
         parts = request.headers["Range"][6:].split('-')
         range_start = int(parts[0])
         range_end = int(parts[1])
+        print(F"Received request for partial EU TFT download. Start: {range_start}, end: {range_end}")
         data = fs.open(filename).read()
         return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
     else:
@@ -774,6 +782,7 @@ def download_tft_us(request):
         parts = request.headers["Range"][6:].split('-')
         range_start = int(parts[0])
         range_end = int(parts[1])
+        print(F"Received request for partial US TFT download. Start: {range_start}, end: {range_end}")
         data = fs.open(filename).read()
         return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
     else:

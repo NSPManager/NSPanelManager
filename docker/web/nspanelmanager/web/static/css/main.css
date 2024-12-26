@@ -5804,6 +5804,18 @@ input.tab:checked + .tab-content,
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
+.table-xs :not(thead):not(tfoot) tr {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.table-xs :where(th, td) {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
 .tooltip {
   position: relative;
   display: inline-block;
@@ -5963,6 +5975,14 @@ input.tab:checked + .tab-content,
 
 .top-7 {
   top: 1.75rem;
+}
+
+.right-4 {
+  right: 1rem;
+}
+
+.right-1 {
+  right: 0.25rem;
 }
 
 .z-10 {
@@ -7007,6 +7027,11 @@ input.tab:checked + .tab-content,
   color: rgb(133 77 14 / var(--tw-text-opacity));
 }
 
+.text-warning {
+  --tw-text-opacity: 1;
+  color: var(--fallback-wa,oklch(var(--wa)/var(--tw-text-opacity)));
+}
+
 .line-through {
   text-decoration-line: line-through;
 }
@@ -7431,10 +7456,6 @@ input.tab:checked + .tab-content,
 
   .md\:border-0 {
     border-width: 0px;
-  }
-
-  .md\:bg-transparent {
-    background-color: transparent;
   }
 
   .md\:p-0 {

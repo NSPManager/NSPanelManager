@@ -1,8 +1,7 @@
 syntax = "proto3";
 import "protobuf_formats.proto";
 
-// Protobufs defined in this .proto file are used to communicate with the MQTTManager
-
+// Protobufs defined in this .proto file are used to communicate between the MQTTManager and Django
 
 message NSPanelSettings {
     optional int32 id = 1;

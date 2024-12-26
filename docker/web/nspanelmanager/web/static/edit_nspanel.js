@@ -2,23 +2,23 @@ const ws = new MQTTManager_WS();
 var mac_address;
 var nspanel_id;
 
-function requests_log_backtrace() {
+function request_log_backtrace() {
   ws.send_command("get_nspanels_logs", { nspanels: [nspanel_id] }, null);
 }
 
 function push_log_message_to_view(data) {
-  var add_html = "<tr class='hover:bg-base-300'><td class='py-1'>";
+  var add_html = "<tr class='hover'><td class='py-1'>";
   add_html += data.time;
   add_html += "</td><td class='py-1'>";
   if (data.level == "ERROR") {
-    add_html += '<span class="dark:text-red-400 text-red-600">ERROR</span>';
+    add_html += '<span class="text-error">ERROR</span>';
   } else if (data.level == "WARNING") {
     add_html +=
-      '<span class="dark:text-yellow-400 text-yellow-600">WARNING</span>';
+      '<span class="text-warning">WARNING</span>';
   } else if (data.level == "INFO") {
-    add_html += '<span class="dark:text-blue-400 text-blue-600">INFO</span>';
+    add_html += '<span class="text-info">INFO</span>';
   } else if (data.level == "DEBUG") {
-    add_html += '<span class="dark:text-black text-black">DEBUG</span>';
+    add_html += '<span class="">DEBUG</span>';
   } else if (data.level == "TRACE") {
     add_html += '<span class="dark:text-gray-400 text-gray-800">TRACE</span>';
   } else {
@@ -85,6 +85,23 @@ function update_shown_elements() {
 }
 
 $(document).ready(() => {
+
+  document.querySelectorAll('[hx-ext="ws"]').forEach((element) => {
+    element.addEventListener("htmx:wsBeforeMessage", (event) => {
+      if (event.detail.message.startsWith('{')) {
+        try {
+          var data = JSON.parse(event.detail.message);
+          if (data.level && data.message) {
+            push_log_message_to_view(data);
+          }
+        } catch (error) {
+          console.error(error)
+          // We couldn't parse to json. Just let HTMX continue.
+        }
+      }
+    });
+  });
+
   document.querySelectorAll('.nspanel_settings_container').forEach((element) => {
     // On message from manager on websocket.
     element.addEventListener("htmx:afterRequest", (event) => {

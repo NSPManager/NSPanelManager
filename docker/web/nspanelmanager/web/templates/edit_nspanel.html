@@ -23,7 +23,6 @@
 </div>
 <div class="md:flex md:justify-between md:items-start mt-2 mb-6">
   <div class="w-full mr-4">
-    {% component "alert" level="info" text="Changes to NSPanel settings on this page requires a reboot of the NSPanel to take effect." %}{% endcomponent %}
     <form method="POST" class="mt-2" action="{% url 'save_panel_settings' panel_id=panel_info.data.id %}">
       {% csrf_token %}
 
@@ -573,8 +572,8 @@
 <div class="p-4 mb-6 rounded-md shadow-lg bg-base-100 w-full">
   <span class="block mb-2 text-xl">Logs</span>
 
-  <table class="w-full text-left rtl:text-right">
-    <thead class="uppercase border-solid border-b-2 border-base-300">
+  <table class="table table-xs">
+    <thead>
       <tr>
         <th class="px-3 py-1">Time</th>
         <th class="px-3 py-1">Level</th>
@@ -582,6 +581,29 @@
       </tr>
     </thead>
     <tbody id="log_body" class="">
+        {% for message in logs.messages %}
+        <tr class="hover">
+            <td class="py-1">
+                {{ message.time }}
+            </td>
+            <td class="py-1">
+                {% if message.level == "ERROR" %}
+                    <span class="text-error">ERROR</span>
+                {% elif message.level == "WARNING" %}
+                    <span class="text-warning">ERROR</span>
+                {% elif message.level == "INFO" %}
+                    <span class="text-info">INFO</span>
+                {% elif message.level == "DEBUG" %}
+                    <span class="">DEBUG</span>
+                {% elif message.level == "TRACE" %}
+                    <span class="">TRACE</span>
+                {% else %}
+                    <span class="text-primary">UNKNOWN LOG LEVEL: {{ message.level }}</span>
+                {% endif %}
+            </td>
+            <td class="py-1">{{ message.message }}</td>
+        </tr>
+        {% endfor %}
     </tbody>
   </table>
 </div>
