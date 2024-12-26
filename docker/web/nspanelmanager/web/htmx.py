@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect, HttpResponse
 from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.urls import reverse
 
 from .components.nspanel_status_header.nspanel_status_header import NSPanelHeader
 
@@ -19,7 +20,7 @@ from time import sleep
 #from nspanelmanager.web.mqttmanager_ipc import send_ipc_request
 from .mqttmanager_ipc import send_ipc_request
 
-from .models import NSPanel, Room, Light, Settings, Scene, RelayGroup, RelayGroupBinding
+from .models import NSPanel, Room, Light, RoomEntitiesPage, Settings, Scene, RelayGroup, RelayGroupBinding
 from .apps import start_mqtt_manager
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
 
@@ -214,6 +215,24 @@ def partial_add_entities_page_to_room(request, room_id):
     }
     return render(request, 'partial/add_entities_page_to_room.html', data)
 
+def create_entities_page_in_room(self, room_id, page_type):
+    room = Room.objects.get(id=room_id)
+    entity_page = RoomEntitiesPage()
+    entity_page.room = room
+    entity_page.display_order = RoomEntitiesPage.objects.filter(room=room).count() + 1
+    if page_type == 4:
+        entity_page.page_type = 4
+        entity_page.save()
+    elif page_type == 8:
+        entity_page.page_type = 8
+        entity_page.save()
+    elif page_type == 12:
+        entity_page.page_type = 12
+        entity_page.save()
+    else:
+        print(F"ERROR! Unknown page type {page_type}")
+    # TODO: Return HTMX data to append to entities view instead of reloading page.
+    return redirect("edit_room", room_id=room_id)
 
 def partial_select_new_outside_temperature_sensor(request):
     # TODO: Move "get_all_available_entities" from api.py to seperate files

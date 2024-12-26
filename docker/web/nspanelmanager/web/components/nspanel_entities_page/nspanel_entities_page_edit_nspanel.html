@@ -1,0 +1,18 @@
+{% load dict_lookup %}
+
+<div class="bg-base-200 rounded-box p-3 grid grid-cols-2 gap-4 w-[24rem] h-[24rem] indicator">
+    {% for i in range %}
+    <div class="rounded-box border-neutral border-opacity-50 border-dashed border-2 flex items-center justify-center indicator w-full h-full">
+        {% if entities|dict_lookup:i %}
+            {% with entity=entities|dict_lookup:i %}
+            <span class="indicator-item badge badge-error w-6 h-6 flex items-center justify-center" title="Remove entity from page/room">✕</span>
+                {{ entity.friendly_name }}
+            {% endwith %}
+        {% else %}
+        <span class="font-thin italic">No entitiy set</span>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <span class="indicator-item indicator-bottom indicator-end badge badge-error w-6 h-6 flex items-center justify-center" title="Delete page">✕</span>
+</div>

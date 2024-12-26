@@ -48,6 +48,14 @@ class Room(models.Model):
             room.scene_ids.append(scene.id)
         return room
 
+class RoomEntitiesPage(models.Model):
+    def get_disp_order():
+        return 0
+
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    display_order = models.IntegerField()
+    page_type = models.IntegerField() # Is this page displaying 4, 8 or 12 entities?
+
 
 class NSPanel(models.Model):
     mac_address = models.CharField(max_length=17)
@@ -82,8 +90,7 @@ class RelayGroup(models.Model):
 
 
 class RelayGroupBinding(models.Model):
-    relay_group = models.ForeignKey(
-        RelayGroup, on_delete=models.CASCADE, null=True, default=None)
+    relay_group = models.ForeignKey(RelayGroup, on_delete=models.CASCADE, null=True, default=None)
     nspanel = models.ForeignKey(NSPanel, on_delete=models.CASCADE)
     relay_num = models.IntegerField(default=1)
 
@@ -104,7 +111,8 @@ class Light(models.Model):
     openhab_item_dimmer = models.CharField(max_length=255, default="")
     openhab_item_color_temp = models.CharField(max_length=255, default="")
     openhab_item_rgb = models.CharField(max_length=255, default="")
-    room_view_position = models.IntegerField(default=0)
+    room_view_position = models.IntegerField(null=True)
+    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE, null=True)
 
     def __str__(self) -> str:
         return F"{self.room.friendly_name} -> {self.friendly_name}"

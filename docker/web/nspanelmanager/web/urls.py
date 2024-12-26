@@ -150,6 +150,7 @@ urlpatterns = [
     path('htmx/partial/select_new_outside_temperature_sensor', htmx.partial_select_new_outside_temperature_sensor, name='htmx_partial_select_new_outside_temperature_sensor'),
     path('htmx/partial/add_light_entity_to_room/<int:room_id>', htmx.partial_entity_add_light_to_room, name='htmx_partial_add_light_entity_to_room'),
     path('htmx/partial/add_entities_page_to_room/<int:room_id>', htmx.partial_add_entities_page_to_room, name='htmx_partial_add_entities_page_to_room'),
+    path('htmx/partial/create_entities_page_in_room/<int:room_id>/<int:page_type>', htmx.create_entities_page_in_room, name='htmx_create_entities_page_in_room'),
     path('htmx/nspanels/<int:nspanel_id>/reboot', htmx.nspanel_reboot, name='htmx_nspanel_reboot'),
     path('htmx/nspanels/<int:nspanel_id>/update_screen', htmx.nspanel_update_screen, name='htmx_nspanel_update_screen'),
     path('htmx/nspanels/<int:nspanel_id>/update_firmware', htmx.nspanel_update_firmware, name='htmx_nspanel_update_firmware'),

@@ -13,7 +13,7 @@ import signal
 #from nspanelmanager.web.mqttmanager_ipc import send_ipc_request
 from .mqttmanager_ipc import send_ipc_request
 
-from .models import NSPanel, Room, Light, Settings, Scene, RelayGroup, RelayGroupBinding
+from .models import NSPanel, Room, Light, Settings, Scene, RelayGroup, RelayGroupBinding, RoomEntitiesPage
 from .apps import start_mqtt_manager
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
 
@@ -147,16 +147,16 @@ def rooms(request):
 
 
 def edit_room(request, room_id: int):
-    total_num_rooms = Room.objects.all().count()
     room = Room.objects.filter(id=room_id).first()
     data = get_base_data(request)
-    data["room"] = room
-    data["total_num_rooms"] = total_num_rooms
+    data.update({
+        "room": room,
+        "lights": Light.objects.filter(room=room, room_view_position__gte=1, room_view_position__lte=12),
+        "entity_pages": RoomEntitiesPage.objects.filter(room=room)
+    })
 
-    lights = Light.objects.filter(
-        room=room, room_view_position__gte=1, room_view_position__lte=12)
-    for light in lights:
-        data["light" + str(light.room_view_position)] = light
+    #for light in lights:
+    #    data["light" + str(light.room_view_position)] = light
     return render(request, 'edit_room.html', data)
 
 
