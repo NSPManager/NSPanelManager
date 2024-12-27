@@ -217,10 +217,8 @@ def get_all_available_entities(request):
                 home_assistant_api_address = get_setting_with_default("home_assistant_address") + "/core/api/states"
             else:
                 home_assistant_api_address = get_setting_with_default("home_assistant_address") + "/api/states"
-            logging.debug("Trying to get Home Assistant entities via api address: " +
-                  home_assistant_api_address)
-            home_assistant_response = requests.get(
-                home_assistant_api_address, headers=home_assistant_request_headers, timeout=5, verify=False)
+            logging.debug("Trying to get Home Assistant entities via api address: " + home_assistant_api_address)
+            home_assistant_response = requests.get(home_assistant_api_address, headers=home_assistant_request_headers, timeout=5, verify=False)
             if home_assistant_response.status_code == 200:
                 for entity in home_assistant_response.json():
                     entity_type = entity["entity_id"].split(".")[0]
@@ -233,6 +231,13 @@ def get_all_available_entities(request):
                         }
                         if "friendly_name" in entity["attributes"]:
                             data["label"] = entity["attributes"]["friendly_name"]
+
+                        if data["entity_id"].startswith("light."):
+                            data["entity_type"] = "light"
+                        elif data["entity_id"].startswith("switch."):
+                            data["entity_type"] = "switch"
+                        else:
+                            logging.warn("Unknown entity type for entity: " + data["entity_id"])
 
                         return_json["entities"].append(data)
             else:

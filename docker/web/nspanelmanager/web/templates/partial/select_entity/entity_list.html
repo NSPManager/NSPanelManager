@@ -1,4 +1,5 @@
 {% load jsonify %}
+{% load base64 %}
 
 <dialog id="modal" tabindex="-1" aria-hidden="true" class="modal">
   <!-- Backdrop -->
@@ -39,21 +40,25 @@
     <!-- Entities -->
     <table id="add_new_entity_options" class="table max-h-96 overflow-y-auto">
         {% for entity in entities.entities %}
-            <tr class="hover cursor-pointer entity-item" data-entity-source="{{ entity.type }}" data-entity-name="{{ entity.label }}" hx-trigger="click" hx-get='{% url "htmx_partial_add_light_entity_to_room" room_id=room.id %}?entity={{ entity|jsonify }}' hx-target="#modal" hx-swap="outerHTML">
-                <td>
-                    <!-- ICON -->
-                    {% if entity.entity_id|first in "light." %}
-                        <span class="mdi mdi-lightbulb"></span>
-                    {% elif entity.entity_id|first in "switch." %}
-                        <span class="mdi mdi-lightning-bolt"></span>
-                    {% else %}
-                        <span class="mdi mdi-help"></span>
-                    {% endif %}
-                </td>
-                <td>
-                    {{ entity.label }}
-                </td>
-            </tr>
+            {% comment %}<!-- <tr class="hover cursor-pointer entity-item" data-entity-source="{{ entity.type }}" data-entity-name="{{ entity.label }}" hx-trigger="click" hx-get='{% url "htmx_partial_add_light_entity_to_room" room_id=room.id %}?entity={{ entity|jsonify }}' hx-target="#modal" hx-swap="outerHTML"> -->{% endcomment %}
+            {% with entity_json=entity|jsonify|base64_encode %}
+                <tr class="hover cursor-pointer entity-item" data-entity-source="{{ entity.type }}" data-entity-name="{{ entity.label }}" hx-trigger="click" hx-get='{% url "htmx_handle_entity_modal_entity_selected" entity=entity_json %}' hx-target="#modal" hx-swap="outerHTML">
+                    <td>
+                        <span class="mdi {{ entity_icon }}"></span>
+                        <!-- ICON -->
+                        {% if entity.entity_type == "light" %}
+                            <span class="mdi mdi-lightbulb"></span>
+                        {% elif entity.entity_type == "switch" %}
+                            <span class="mdi mdi-lightning-bolt"></span>
+                        {% else %}
+                            <span class="mdi mdi-help"></span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ entity.label }}
+                    </td>
+                </tr>
+            {% endwith %}
         {% endfor %}
     </table>
   </div>
@@ -83,7 +88,7 @@ $("#add_new_entity_search").on('input', () => {
     });
   } else {
     $(".entity-item").each((index, item) => {
-      if($(item).data("entity-name").includes($("#add_new_entity_search").val())) {
+      if($(item).data("entity-name").toLowerCase().includes($("#add_new_entity_search").val().toLowerCase())) {
         if($("#filter_for_all").hasClass('tab-active')) {
           $(item).show();
         } else if ($("#filter_for_home_assistant").hasClass('tab-active') && $(item).data('entity-source') == "home_assistant") {

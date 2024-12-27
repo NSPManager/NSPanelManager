@@ -96,7 +96,7 @@ class RelayGroupBinding(models.Model):
 
 
 class Light(models.Model):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
     friendly_name = models.CharField(max_length=255, default="")
     # "home_assistant", "openhab" or "manual"
     type = models.CharField(max_length=16, default="manual")
@@ -115,14 +115,20 @@ class Light(models.Model):
     entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE, null=True)
 
     def __str__(self) -> str:
-        return F"{self.room.friendly_name} -> {self.friendly_name}"
+        if self.room:
+            return F"{self.room.friendly_name} -> {self.friendly_name}"
+        else:
+            return F"??? -> {self.friendly_name}"
 
     """Get a protobuf_general_pb2.LightSettings object populated with settings."""
     def get_protobuf_object(self):
         from web.protobuf import protobuf_formats_pb2, protobuf_general_pb2, protobuf_mqttmanager_pb2
         proto_light = protobuf_general_pb2.LightSettings()
         proto_light.id = self.id
-        proto_light.room_id = self.room.id
+        if self.room:
+            proto_light.room_id = self.room.id
+        else:
+            proto_light.room_id = -1
         proto_light.name = self.friendly_name
         proto_light.type = self.type
         proto_light.is_ceiling_light = self.is_ceiling_light

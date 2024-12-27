@@ -202,8 +202,6 @@
   </dialog>
 </form>
 
-
-
 <!-- Modal to indicate that we are loading something --->
 <!-- This dialog will have the class htmx-request added to it when it's "active" --->
 <dialog id="modal_loading" tabindex="-1" aria-hidden="true" class="modal">
@@ -214,7 +212,30 @@
 
         <!-- Loader-->
         <div class="flex items-center justify-center">
-            <span id="add_new_entity_loader" class="loading loading-ring loading-lg by-2"></span>
+            <span class="loading loading-ring loading-lg by-2"></span>
+        </div>
+
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+<!-- Modal to confirm an action via HTMX -->
+<dialog id="modal_confirm" tabindex="-1" aria-hidden="true" class="modal">
+  <!-- Modal content -->
+    <div class="modal-box">
+        <!-- Modal header -->
+        <h3 class="text-lg font-semibold mb-2">Confirm</h3>
+
+        <!-- Loader-->
+        <div class="">
+            <span id="modal_confirm_text" class="">This is a sample confirm text?</span>
+        </div>
+
+        <div class="flex items-end justify-end gap-4">
+            <button id="modal_confirm_button" class="btn btn-success">OK</button>
+            <button id="modal_confirm_cancel_button" class="btn btn-error">Cancel</button>
         </div>
 
     </div>

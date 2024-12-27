@@ -1,0 +1,29 @@
+<template id="error_toast_template">
+    <div class="alert alert-error">
+        <span class="mdi mdi-alert-circle-outline text-2xl"></span>
+        <span class="error-toast-text">Failed to perform request!</span>
+    </div>
+</template>
+
+<div id="error_toast_container" class="toast toast-top toast-end z-10">
+</div>
+
+<!-- Javascript needed to create and otherwise handle error toasts -->
+<script>
+
+let _error_toast_counter = 0;
+function show_error_toast(error_text) {
+  _error_toast_counter++;
+  var error_toast_id = `error-toast-${_error_toast_counter}`;
+
+  const new_toast = document.getElementById("error_toast_template").content.cloneNode(true);
+  new_toast.querySelector('.alert').id = error_toast_id;
+  new_toast.querySelector('.error-toast-text').innerHTML = error_text;
+  document.getElementById("error_toast_container").appendChild(new_toast);
+
+  setTimeout(() => {
+    document.getElementById(error_toast_id).remove();
+    //document.getElementById("error_toast_container").removeChild(new_toast);
+  }, 2000);
+}
+</script>

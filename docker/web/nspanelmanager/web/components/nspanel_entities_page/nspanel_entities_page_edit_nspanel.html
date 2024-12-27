@@ -1,18 +1,26 @@
 {% load dict_lookup %}
+{% load jsonify %}
+{% load concat %}
 
-<div class="bg-base-200 rounded-box p-3 grid grid-cols-2 gap-4 w-[24rem] h-[24rem] indicator">
+<div id="nspanel_entities_page_{{ page.id }}" hx-confirm="Do you want to delete this entity page?" class="bg-base-200 rounded-box p-3 grid grid-cols-2 gap-4 w-[24rem] h-[24rem] indicator">
     {% for i in range %}
     <div class="rounded-box border-neutral border-opacity-50 border-dashed border-2 flex items-center justify-center indicator w-full h-full">
         {% if entities|dict_lookup:i %}
             {% with entity=entities|dict_lookup:i %}
-            <span class="indicator-item badge badge-error w-6 h-6 flex items-center justify-center" title="Remove entity from page/room">✕</span>
-                {{ entity.friendly_name }}
+            <button class="indicator-item badge badge-neutral hover:badge-error w-6 h-6 flex items-center justify-center" title="Remove entity from page/room" hx-confirm="Do you wish to remove this entity?" hx-swap="none" hx-get="{% url 'htmx_partial_remove_entity_from_page_slot' page_id=page.id slot_id=i %}"><span class="mdi mdi-close"></span></button>
+            <span class="text-sm m-2">{{ entity.friendly_name }}</span>
+            <button class="ms-2 badge badge-info w-6 h-6 flex items-center justify-center" title="Edit entity"><span class="mdi mdi-pencil"></span></button>
             {% endwith %}
         {% else %}
+
         <span class="font-thin italic">No entitiy set</span>
-        {% endif %}
+        {% concat_all '{"page_id": ' page.id ', "page_slot": ' i ', "room_id": ' page.room.id '}' as action_args %}
+        <button class="btn btn-neutral hover:btn-success btn-xs btn-circle ms-2" title="Add entitiy" hx-confirm="unset" hx-get='{% url "htmx_partial_select_new_entity_item_list" action="ADD_ENTITY_TO_NSPANEL_ENTITY_PAGE" action_args=action_args %}?filter={"home_assistant_type_filter": ["light", "switch"], "openhab_type_filter": ["things"]}' hx-target="#modal" hx-swap="outerHTML" hx-indicator="#modal_loading">
+            <span class="mdi mdi-plus"></span>
+        </button>
+    {% endif %}
     </div>
     {% endfor %}
 
-    <span class="indicator-item indicator-bottom indicator-end badge badge-error w-6 h-6 flex items-center justify-center" title="Delete page">✕</span>
+    <button class="indicator-item indicator-bottom indicator-end badge badge-neutral hover:badge-error w-6 h-6 flex items-center justify-center" hx-swap="outerHTML" hx-target="#nspanel_entities_page_{{ page.id }}" title="Delete page" hx-delete="{% url 'htmx_partial_delete_entities_page' page_id=page.id %}">✕</button>
 </div>

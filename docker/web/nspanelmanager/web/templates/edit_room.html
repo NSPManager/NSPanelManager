@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+{% load jsonify %}
+{% load set_var %}
+{% load concat %}
 
 {% block head %}
 {% load static %}
@@ -229,63 +232,72 @@
 <div class="md:flex md:justify-between md:items-start mt-2">
   <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
     <div class="md:flex md:flex-wrap md:justify-between items-center">
-      <span class="block mb-2 text-xl">{{ room.friendly_name }} lights</span>
-      <button type="button" hx-get='{% url "htmx_partial_select_new_entity_item_list" room_id=room.id %}?filter={"home_assistant_type_filter": ["light", "switch"], "openhab_type_filter": ["things"]}' hx-target="#modal" hx-swap="outerHTML" hx-indicator="#modal_loading" class="btn btn-info btn-outline">Add light</button>
+      <span class="block mb-2 text-xl">Main page lights</span>
+      {% concat_all '{"room_id": ' room.id "}" as action_args %}
+        <button type="button" hx-get='{% url "htmx_partial_select_new_entity_item_list" action="ADD_LIGHT_TO_ROOM" action_args=action_args %}?filter={"home_assistant_type_filter": ["light", "switch"], "openhab_type_filter": ["things"]}' hx-target="#modal" hx-swap="outerHTML" hx-indicator="#modal_loading" class="btn btn-info btn-outline">Add light</button>
     </div>
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th class="px-3 py-1">Name</th>
-          <th class="px-3 py-1">Source</th>
-          <th class="px-3 py-1">Type</th>
-          <th class="px-3 py-1">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for light in room.light_set.all %}
-        <tr class="hover">
-          <th class="px-3 py-3">{{ light.friendly_name }}</th>
-          <td>
-            {% if light.type == "home_assistant" %}
-            <span class="badge badge-info badge-outline">Home Assistant</span>
-            {% elif light.type == "openhab" %}
-            <span class="badge badge-warning badge-outline">OpenHAB</span>
-            {% elif light.type == "manual" %}
-            <span class="badge badge-neutral badge-outline">Manual</span>
+    {% if room.light_set.all|length > 0 %}
+        <table class="table">
+        <thead>
+            <tr>
+            <th class="px-3 py-1">Name</th>
+            <th class="px-3 py-1">Source</th>
+            <th class="px-3 py-1">Type</th>
+            <th class="px-3 py-1">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for light in room.light_set.all %}
+            <tr class="hover">
+            <th class="px-3 py-3">{{ light.friendly_name }}</th>
+            <td>
+                {% if light.type == "home_assistant" %}
+                <span class="badge badge-info badge-outline">Home Assistant</span>
+                {% elif light.type == "openhab" %}
+                <span class="badge badge-warning badge-outline">OpenHAB</span>
+                {% elif light.type == "manual" %}
+                <span class="badge badge-neutral badge-outline">Manual</span>
+                {% else %}
+                <span class="badge badge-error">Unknown: {{ light.type }}</span>
+                {% endif %}
+            </td>
+            {% if light.is_ceiling_light %}
+            <td>Ceiling</td>
             {% else %}
-            <span class="badge badge-error">Unknown: {{ light.type }}</span>
+            <td>Table</td>
             {% endif %}
-          </td>
-          {% if light.is_ceiling_light %}
-          <td>Ceiling</td>
-          {% else %}
-          <td>Table</td>
-          {% endif %}
-          <td class="px-3 py-3">
-            <button type="button" onclick="edit_light({{ light.id }});" class="btn btn-info btn-outline">Edit</button>
-            <a href='{% url "remove_light_from_room" room.id light.id %}' class="btn btn-outline btn-error">Remove</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            <td class="px-3 py-3">
+                <button type="button" onclick="edit_light({{ light.id }});" class="btn btn-info btn-outline">Edit</button>
+                <a href='{% url "remove_light_from_room" room.id light.id %}' class="btn btn-outline btn-error">Remove</a>
+            </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    {% else %}
+        <span class="flex items-center justify-center italic">No lights added yet.</span>
+    {% endif %}
   </div>
 </div>
 
 
-<div class="md:flex md:justify-between md:items-start mt-2">
+<div class="md:flex md:justify-between md:items-start mt-2 mb-4">
   <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
     <div class="md:flex md:flex-wrap md:justify-between items-center">
         <span class="block mb-2 text-xl">Entities</span>
         <button type="button" hx-get='{% url "htmx_partial_add_entities_page_to_room" room_id=room.id %}' hx-target="#modal" hx-swap="outerHTML" hx-indicator="#modal_loading" class="btn btn-info btn-outline">Add page</button>
     </div>
 
-    <div class="mt-4 grid grid-cols-3 gap-12">
-        {% for entity_page in entity_pages %}
-            {% component "nspanel_entities_page" id=entity_page.id page=entity_page %}{% endcomponent %}
-        {% endfor %}
-    </div>
+    {% if entity_pages|length > 0 %}
+        <div class="mt-4 grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+            {% for entity_page in entity_pages %}
+                {% component "nspanel_entities_page" id=entity_page.id page=entity_page %}{% endcomponent %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <span class="flex items-center justify-center italic">No entity pages added yet.</span>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

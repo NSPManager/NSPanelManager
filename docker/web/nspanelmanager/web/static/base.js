@@ -41,6 +41,59 @@ $(document).ready(function () {
       });
     });
 
+    // Something went wrong while sending/processing AJAX request via HTMX. Show error toast.
+    document.addEventListener("htmx:responseError", (event) => {
+      console.log("Got error: ");
+      console.log(event.detail);
+
+      try {
+        const obj = JSON.parse(event.detail.xhr.response);
+        if ("status" in obj) {
+          if(obj.status == "error") {
+            if ("text" in obj) {
+              show_error_toast(obj["text"]);
+            } else {
+              show_error_toast("Request error but no message specified.");
+            }
+          } else {
+            show_error_toast("Unknown request error.");
+          }
+        } else {
+          show_error_toast("Unknown request error.");
+        }
+      } catch(error) {
+        show_error_toast("Error while processing error response from server.");
+      }
+
+    });
+
+    // Use custom confirm modal with HTMX
+    document.addEventListener("htmx:confirm", function (e) {
+      // The event is triggered on every trigger for a request, so we need to check if the element
+      // that triggered the request has a hx-confirm attribute, if not we can return early and let
+      // the default behavior happen
+      if (!e.detail.target.hasAttribute('hx-confirm')) return;
+
+      e.preventDefault();
+
+      dialog = document.getElementById("modal_confirm");
+      document.getElementById("modal_confirm_button").addEventListener('click', function handle_confirm_click(event) {
+        // Remove this event listener so that it doesn't trigger multiple times
+        event.currentTarget.removeEventListener('click', handle_confirm_click);
+        console.log("Sending request");
+        document.getElementById("modal_confirm").close();
+        e.detail.issueRequest(true);
+      });
+
+      document.getElementById("modal_confirm_cancel_button").addEventListener('click', function handle_confirm_cancel_click(event) {
+        event.currentTarget.removeEventListener('click', handle_confirm_cancel_click);
+        document.getElementById("modal_confirm").close();
+      });
+
+      document.getElementById("modal_confirm_text").innerHTML = e.detail.question;
+      dialog.showModal();
+    });
+
     $('.modal-background').click(function () {
         $('.modal').removeClass('is-active');
     });

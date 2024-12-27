@@ -146,10 +146,14 @@ urlpatterns = [
     ### HTMX "API" URLs ###
     #######################
     path('htmx/partial/nspanel_index_view/<int:nspanel_id>', htmx.partial_nspanel_index_view, name="htmx_partial_nspanel_index_view"),
-    path('htmx/partial/select_new_entity_item_list/<int:room_id>', htmx.partial_select_new_entity_item_list, name='htmx_partial_select_new_entity_item_list'),
+    path('htmx/partial/handle_entity_modal_result', htmx.handle_entity_modal_result, name='htmx_handle_entity_modal_result'),
+    path('htmx/partial/handle_entity_modal_entity_selected/<str:entity>', htmx.handle_entity_modal_entity_selected, name='htmx_handle_entity_modal_entity_selected'),
+    path('htmx/partial/select_new_entity_item_list/<str:action>/<str:action_args>', htmx.partial_select_new_entity_item_list, name='htmx_partial_select_new_entity_item_list'),
     path('htmx/partial/select_new_outside_temperature_sensor', htmx.partial_select_new_outside_temperature_sensor, name='htmx_partial_select_new_outside_temperature_sensor'),
-    path('htmx/partial/add_light_entity_to_room/<int:room_id>', htmx.partial_entity_add_light_to_room, name='htmx_partial_add_light_entity_to_room'),
+    path('htmx/partial/add_light_entity_to_room/<int:room_id>', htmx.partial_entity_add_light_entity, name='htmx_partial_add_light_entity'),
+    path('htmx/partial/remove_entity_from_page_slot/<int:page_id>/<int:slot_id>', htmx.partial_remove_entity_from_page_slot, name='htmx_partial_remove_entity_from_page_slot'),
     path('htmx/partial/add_entities_page_to_room/<int:room_id>', htmx.partial_add_entities_page_to_room, name='htmx_partial_add_entities_page_to_room'),
+    path('htmx/partial/delete_entities_page/<int:page_id>', htmx.partial_delete_entities_page, name='htmx_partial_delete_entities_page'),
     path('htmx/partial/create_entities_page_in_room/<int:room_id>/<int:page_type>', htmx.create_entities_page_in_room, name='htmx_create_entities_page_in_room'),
     path('htmx/nspanels/<int:nspanel_id>/reboot', htmx.nspanel_reboot, name='htmx_nspanel_reboot'),
     path('htmx/nspanels/<int:nspanel_id>/update_screen', htmx.nspanel_update_screen, name='htmx_nspanel_update_screen'),
