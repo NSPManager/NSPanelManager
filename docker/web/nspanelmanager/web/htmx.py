@@ -190,7 +190,6 @@ def partial_select_new_entity_item_list(request, action, action_args):
     # "add function" so that it get added to the correct room, page and so on.
     request.session["action"] = action
     request.session["action_args"] = action_args
-
     # TODO: Move "get_all_available_entities" from api.py to seperate files
     data = {
         "entities": get_all_available_entities(request)
@@ -274,6 +273,15 @@ def partial_add_entities_page_to_room(request, room_id):
         "room_id": room_id
     }
     return render(request, 'partial/add_entities_page_to_room.html', data)
+
+
+@csrf_exempt
+def partial_add_entity_to_entities_page_select_entity_type(request, action, action_args):
+    data = {
+        "action": action,
+        "action_args": action_args
+    }
+    return render(request, 'partial/add_entity_to_entities_page_select_entity_type.html', data)
 
 
 @csrf_exempt

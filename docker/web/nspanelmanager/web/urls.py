@@ -149,6 +149,7 @@ urlpatterns = [
     path('htmx/partial/nspanel_index_view/<int:nspanel_id>', htmx.partial_nspanel_index_view, name="htmx_partial_nspanel_index_view"),
     path('htmx/partial/handle_entity_modal_result', htmx.handle_entity_modal_result, name='htmx_handle_entity_modal_result'),
     path('htmx/partial/handle_entity_modal_entity_selected/<str:entity>', htmx.handle_entity_modal_entity_selected, name='htmx_handle_entity_modal_entity_selected'),
+    path('htmx/partial/select_new_entity_type/<str:action>/<str:action_args>', htmx.partial_add_entity_to_entities_page_select_entity_type, name='htmx_partial_select_new_entity_type'),
     path('htmx/partial/select_new_entity_item_list/<str:action>/<str:action_args>', htmx.partial_select_new_entity_item_list, name='htmx_partial_select_new_entity_item_list'),
     path('htmx/partial/select_new_outside_temperature_sensor', htmx.partial_select_new_outside_temperature_sensor, name='htmx_partial_select_new_outside_temperature_sensor'),
     path('htmx/partial/add_light_entity_to_room/<int:room_id>', htmx.partial_entity_add_light_entity, name='htmx_partial_add_light_entity'),
