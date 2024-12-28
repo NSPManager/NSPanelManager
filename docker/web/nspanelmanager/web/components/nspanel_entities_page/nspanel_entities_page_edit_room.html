@@ -2,14 +2,14 @@
 {% load jsonify %}
 {% load concat %}
 
-<div id="nspanel_entities_page_{{ page.id }}" hx-confirm="Do you want to delete this entity page?" class="bg-base-200 rounded-box p-3 grid grid-cols-2 gap-4 w-[24rem] h-[24rem] indicator">
+<div id="nspanel_entities_page_{{ page.id }}" hx-swap-oob="true" hx-confirm="Do you want to delete this entity page?" class="bg-base-200 rounded-box p-3 grid grid-cols-2 gap-4 w-[24rem] h-[24rem] indicator">
     {% for i in range %}
     <div class="rounded-box border-neutral border-opacity-50 border-dashed border-2 flex items-center justify-center indicator w-full h-full">
         {% if entities|dict_lookup:i %}
             {% with entity=entities|dict_lookup:i %}
+            <button class="indicator-item badge badge-info me-8 hover:badge-error w-6 h-6 flex items-center justify-center" title="Edit entity" hx-swap="none" hx-get="#TODO"><span class="mdi mdi-pencil"></span></button>
             <button class="indicator-item badge badge-neutral hover:badge-error w-6 h-6 flex items-center justify-center" title="Remove entity from page/room" hx-confirm="Do you wish to remove this entity?" hx-swap="none" hx-get="{% url 'htmx_partial_remove_entity_from_page_slot' page_id=page.id slot_id=i %}"><span class="mdi mdi-close"></span></button>
             <span class="text-sm m-2">{{ entity.friendly_name }}</span>
-            <button class="ms-2 badge badge-info w-6 h-6 flex items-center justify-center" title="Edit entity"><span class="mdi mdi-pencil"></span></button>
             {% endwith %}
         {% else %}
 

@@ -1,0 +1,11 @@
+<div id="room_{{ room.id }}_entities_pages" hx-swap-oob="true">
+    {% if entity_pages|length > 0 %}
+        <div class="mt-4 grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+            {% for entity_page in entity_pages %}
+                {% component "nspanel_entities_page" id=entity_page.id page=entity_page %}{% endcomponent %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <span class="flex items-center justify-center italic">No entity pages added yet.</span>
+    {% endif %}
+</div>

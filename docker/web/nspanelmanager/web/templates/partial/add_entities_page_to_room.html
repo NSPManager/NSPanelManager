@@ -1,8 +1,8 @@
 <dialog id="modal" class="modal">
     <ul class="modal-box menu menu-lg bg-base-200 rounded-box w-72">
-      <li class="flex-row"><a href="{% url 'htmx_create_entities_page_in_room' room_id=room_id page_type=4 %}">Page for <span class="font-bold">4</span> entities</a></li>
-      <li class="flex-row"><a href="{% url 'htmx_create_entities_page_in_room' room_id=room_id page_type=8 %}">Page for <span class="font-bold">8</span> entities</a></li>
-      <li class="flex-row"><a href="{% url 'htmx_create_entities_page_in_room' room_id=room_id page_type=12 %}">Page for <span class="font-bold">12</span> entities</a></li>
+      <li class="flex-row"><button hx-get="{% url 'htmx_create_entities_page_in_room' room_id=room_id page_type=4 %}" onclick="modal.close();">Page for <span class="font-bold">4</span> entities</button></li>
+      <li class="flex-row"><button hx-get="{% url 'htmx_create_entities_page_in_room' room_id=room_id page_type=8 %}" onclick="modal.close();">Page for <span class="font-bold">8</span> entities</button></li>
+      <li class="flex-row"><button hx-get="{% url 'htmx_create_entities_page_in_room' room_id=room_id page_type=12 %}" onclick="modal.close();">Page for <span class="font-bold">12</span> entities</button></li>
     </ul>
 
 

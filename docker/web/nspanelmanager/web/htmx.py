@@ -4,8 +4,7 @@ from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.urls import reverse
-
-from .components.nspanel_status_header.nspanel_status_header import NSPanelHeader
+from django.template import RequestContext
 
 from .api import get_all_available_entities
 import hashlib
@@ -20,6 +19,8 @@ from time import sleep
 
 #from nspanelmanager.web.mqttmanager_ipc import send_ipc_request
 from .mqttmanager_ipc import send_ipc_request
+
+from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages import NSPanelRoomEntitiesPages
 
 from .models import NSPanel, Room, Light, RoomEntitiesPage, Settings, Scene, RelayGroup, RelayGroupBinding
 from .apps import start_mqtt_manager
@@ -264,9 +265,8 @@ def partial_remove_entity_from_page_slot(request, page_id, slot_id):
     if lights.count() > 0:
         lights.delete();
 
-    response = HttpResponse("", status=200)
-    response["HX-Refresh"] = "true" # Tell client to refresh whole page
-    return response
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(request=request, view="edit_room", room_id=page.room.id)
 
 @csrf_exempt
 def partial_add_entities_page_to_room(request, room_id):
@@ -278,12 +278,13 @@ def partial_add_entities_page_to_room(request, room_id):
 
 @csrf_exempt
 def partial_delete_entities_page(request, page_id):
-    RoomEntitiesPage.objects.get(id=page_id).delete()
-    response = HttpResponse("", status=200)
-    response["HX-Refresh"] = "true" # Tell client to refresh whole page
-    return response
+    page = RoomEntitiesPage.objects.get(id=page_id)
+    room_id = page.room.id
+    page.delete()
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(request=request, view="edit_room", room_id=page.room.id)
 
-def create_entities_page_in_room(self, room_id, page_type):
+def create_entities_page_in_room(request, room_id, page_type):
     room = Room.objects.get(id=room_id)
     entity_page = RoomEntitiesPage()
     entity_page.room = room
@@ -300,7 +301,8 @@ def create_entities_page_in_room(self, room_id, page_type):
     else:
         print(F"ERROR! Unknown page type {page_type}")
     # TODO: Return HTMX data to append to entities view instead of reloading page.
-    return redirect("edit_room", room_id=room_id)
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(request=request, view="edit_room", room_id=room_id)
 
 def partial_select_new_outside_temperature_sensor(request):
     # TODO: Move "get_all_available_entities" from api.py to seperate files
@@ -333,6 +335,7 @@ def create_or_update_light_entity(request):
             newLight.is_ceiling_light = False
     elif request.session["action"] == "ADD_ENTITY_TO_NSPANEL_ENTITY_PAGE":
         entity_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+        room = entity_page.room
         newLight.entities_page = entity_page
         newLight.room_view_position = int(action_args["page_slot"])
     else:
@@ -384,4 +387,6 @@ def create_or_update_light_entity(request):
         "data": newLight.get_protobuf_object().SerializeToString()
     }
     send_ipc_request("entity_manager/add_light", command_data)
-    return redirect('edit_room', room_id=action_args["room_id"])
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(request=request, view="edit_room", room_id=room.id)
+    #return redirect('edit_room', room_id=action_args["room_id"])

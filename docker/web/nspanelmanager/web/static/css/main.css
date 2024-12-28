@@ -6135,6 +6135,10 @@ input.tab:checked + .tab-content,
   right: 0px;
 }
 
+.right-12 {
+  right: 3rem;
+}
+
 .right-2 {
   right: 0.5rem;
 }
@@ -6181,10 +6185,6 @@ input.tab:checked + .tab-content,
 
 .m-2 {
   margin: 0.5rem;
-}
-
-.m-6 {
-  margin: 1.5rem;
 }
 
 .mx-2 {
@@ -6286,6 +6286,14 @@ input.tab:checked + .tab-content,
 
 .mt-4 {
   margin-top: 1rem;
+}
+
+.me-4 {
+  margin-inline-end: 1rem;
+}
+
+.me-8 {
+  margin-inline-end: 2rem;
 }
 
 .block {
@@ -6612,10 +6620,6 @@ input.tab:checked + .tab-content,
 
 .overflow-y-scroll {
   overflow-y: scroll;
-}
-
-.text-pretty {
-  text-wrap: pretty;
 }
 
 .rounded {

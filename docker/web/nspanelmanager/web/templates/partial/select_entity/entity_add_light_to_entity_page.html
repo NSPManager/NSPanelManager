@@ -4,7 +4,7 @@
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
 
-        <form method="POST" action="{% url 'htmx_handle_entity_modal_result' %}">
+        <form hx-post="{% url 'htmx_handle_entity_modal_result' %}">
             {% csrf_token %}
             <input class="input" type="hidden" id="add_new_light_type" name="add_new_light_type" value="{{ entity.type }}">
             <input class="input" type="hidden" id="entity_id" name="entity_id" value="{{ entity.entity_id }}">
@@ -154,7 +154,7 @@
                 </div>
                 <!-- Modal footer -->
                 <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                    <button type="submit" class="btn btn-info">Save</button>
+                    <button type="submit" class="btn btn-info" onclick="modal.close();">Save</button>
                 </div>
             </div>
         </div>

@@ -9,6 +9,7 @@ from .components.nspanel_update_progress.nspanel_update_progress import NSPanelU
 from .components.nspanel_visit_link.nspanel_visit_link import NSPanelVisitLink
 from .components.nspanel_reboot_button.nspanel_reboot_button import NSPanelRebootButton
 from .components.nspanel_warnings.nspanel_warnings import NSPanelWarnings
+from .components.nspanel_room_entities_pages.nspanel_room_entities_pages import NSPanelRoomEntitiesPages
 from . import views, api, rest, htmx, protobuf_api
 
 urlpatterns = [
@@ -173,4 +174,5 @@ urlpatterns = [
     path('htmx/component/nspanel_visit_link/<str:view>/<int:nspanel_id>', NSPanelVisitLink.as_view(), name="nspanel_visit_link"),
     path('htmx/component/nspanel_reboot_button/<str:view>/<int:nspanel_id>', NSPanelRebootButton.as_view(), name="nspanel_reboot_button"),
     path('htmx/component/nspanel_warnings/<str:view>/<int:nspanel_id>', NSPanelWarnings.as_view(), name="nspanel_warnings"),
+    path('htmx/component/room_entities_pages_view/<str:view>/<int:room_id>', NSPanelRoomEntitiesPages.as_view(), name="nspanel_room_entities_pages"),
 ]
