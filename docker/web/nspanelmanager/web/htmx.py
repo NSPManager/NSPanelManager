@@ -159,7 +159,7 @@ def interface_theme(request):
 
 @csrf_exempt
 def handle_entity_modal_result(request):
-    if request.session["action"] == "ADD_LIGHT_TO_ROOM" or request.session["action"] == "ADD_ENTITY_TO_NSPANEL_ENTITY_PAGE":
+    if request.session["action"] == "ADD_LIGHT_TO_ROOM":
         return create_or_update_light_entity(request)
     else:
         return JsonResponse({
@@ -238,16 +238,10 @@ def partial_entity_add_light_entity(request, entity):
         elif "switch" in data["entity"]["label"].lower():
             data["control_mode"] = "switch"
 
-    if request.session["action"] == "ADD_LIGHT_TO_ROOM":
-        return render(request, 'partial/select_entity/entity_add_light_to_room.html', data)
-    elif request.session["action"] == "ADD_ENTITY_TO_NSPANEL_ENTITY_PAGE":
-        return render(request, 'partial/select_entity/entity_add_light_to_entity_page.html', data)
-    else:
-        return JsonResponse({
-            "status": "error",
-            "text": "Unknown 'action' for light! Action: " + request.session["action"]
-        }, status=500)
+    return render(request, 'partial/select_entity/entity_add_light_to_room.html', data)
 
+def partial_edit_light_entity(request, light_id):
+    pass
 
 def partial_entity_add_switch_entity(request, entity):
     data = {
@@ -323,8 +317,6 @@ def partial_select_new_outside_temperature_sensor(request):
 # When creating a new or updating an existing light entity this will take care of the actual creation/updating of the model
 # in the database.
 def create_or_update_light_entity(request):
-    room = None
-    entity_page = None
     action_args = json.loads(request.session["action_args"]) # Loads arguments set when first starting process of adding/updating entity
 
     if "light_id" in request.session and int(request.session["light_id"]) >= 0:
@@ -332,25 +324,16 @@ def create_or_update_light_entity(request):
     else:
         newLight = Light()
 
-    if request.session["action"] == "ADD_LIGHT_TO_ROOM":
-        room = Room.objects.get(id=int(action_args["room_id"]))
-        newLight.room = room
+    newLight.room = Room.objects.get(id=int(action_args["room_id"]))
+    newLight.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+    newLight.room_view_position = int(action_args["page_slot"])
 
-        # This is only applicable when adding light to main page. Not as a stand alone entity
-        if request.POST["light_type"] == "ceiling":
-            newLight.is_ceiling_light = True
-        else:
-            newLight.is_ceiling_light = False
-    elif request.session["action"] == "ADD_ENTITY_TO_NSPANEL_ENTITY_PAGE":
-        entity_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
-        room = entity_page.room
-        newLight.entities_page = entity_page
-        newLight.room_view_position = int(action_args["page_slot"])
+
+    # This is only applicable when adding light to main page. Not as a stand alone entity
+    if request.POST["light_type"] == "ceiling":
+        newLight.is_ceiling_light = True
     else:
-        return JsonResponse({
-            "status": "error",
-            "text": "Unknown action mode! Action: " + request.session["action"]
-        }, status=500)
+        newLight.is_ceiling_light = False
 
 
     newLight.type = request.POST["add_new_light_type"]
@@ -396,5 +379,5 @@ def create_or_update_light_entity(request):
     }
     send_ipc_request("entity_manager/add_light", command_data)
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=room.id)
+    return entities_pages.get(request=request, view="edit_room", room_id=newLight.room.id)
     #return redirect('edit_room', room_id=action_args["room_id"])

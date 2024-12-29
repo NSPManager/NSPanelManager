@@ -50,10 +50,5 @@ class Migration(migrations.Migration):
             name='entities_page',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='web.roomentitiespage'),
         ),
-        migrations.AlterField(
-            model_name='light',
-            name='room_view_position',
-            field=models.IntegerField(null=True),
-        ),
         migrations.RunPython(transfer_lights_to_entities_pages),
     ]

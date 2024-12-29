@@ -153,6 +153,7 @@ urlpatterns = [
     path('htmx/partial/select_new_entity_item_list/<str:action>/<str:action_args>', htmx.partial_select_new_entity_item_list, name='htmx_partial_select_new_entity_item_list'),
     path('htmx/partial/select_new_outside_temperature_sensor', htmx.partial_select_new_outside_temperature_sensor, name='htmx_partial_select_new_outside_temperature_sensor'),
     path('htmx/partial/add_light_entity_to_room/<int:room_id>', htmx.partial_entity_add_light_entity, name='htmx_partial_add_light_entity'),
+    path('htmx/partial/edit_light_entity/<int:light_id>', htmx.partial_edit_light_entity, name='htmx_partial_edit_light_entity'),
     path('htmx/partial/remove_entity_from_page_slot/<int:page_id>/<int:slot_id>', htmx.partial_remove_entity_from_page_slot, name='htmx_partial_remove_entity_from_page_slot'),
     path('htmx/partial/add_entities_page_to_room/<int:room_id>', htmx.partial_add_entities_page_to_room, name='htmx_partial_add_entities_page_to_room'),
     path('htmx/partial/delete_entities_page/<int:page_id>', htmx.partial_delete_entities_page, name='htmx_partial_delete_entities_page'),

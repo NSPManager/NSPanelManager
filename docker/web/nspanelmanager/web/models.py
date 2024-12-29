@@ -49,9 +49,6 @@ class Room(models.Model):
         return room
 
 class RoomEntitiesPage(models.Model):
-    def get_disp_order():
-        return 0
-
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     display_order = models.IntegerField()
     page_type = models.IntegerField() # Is this page displaying 4, 8 or 12 entities?
@@ -96,11 +93,12 @@ class RelayGroupBinding(models.Model):
 
 
 class Light(models.Model):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
     friendly_name = models.CharField(max_length=255, default="")
-    # "home_assistant", "openhab" or "manual"
+    # "home_assistant", "openhab" or "manual":
     type = models.CharField(max_length=16, default="manual")
     is_ceiling_light = models.BooleanField(default=False)
+    controlled_by_nspanel_main_page = models.BooleanField(default=True)
     can_dim = models.BooleanField(default=False)
     can_rgb = models.BooleanField(default=False)
     can_color_temperature = models.BooleanField(default=False)
@@ -111,8 +109,8 @@ class Light(models.Model):
     openhab_item_dimmer = models.CharField(max_length=255, default="")
     openhab_item_color_temp = models.CharField(max_length=255, default="")
     openhab_item_rgb = models.CharField(max_length=255, default="")
-    room_view_position = models.IntegerField(null=True)
-    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE, null=True)
+    room_view_position = models.IntegerField()
+    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         if self.room:

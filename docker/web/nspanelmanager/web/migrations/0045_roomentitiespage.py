@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name='RoomEntitiesPage',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('display_order', models.IntegerField(default=web.models.RoomEntitiesPage.get_disp_order)),
+                ('display_order', models.IntegerField()),
                 ('page_type', models.IntegerField()),
                 ('room', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='web.room')),
             ],
