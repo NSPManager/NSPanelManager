@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from .components.nspanel_status_wifi_signal_strength.nspanel_status_wifi_signal_strength import NSPanelStatusWifiSignalStrength
 from .components.nspanel_status_text.nspanel_status_text import NSPanelStatusText
+from .components.nspanel_status_badge.nspanel_status_badge import NSPanelStatusBadge
 from .components.nspanel_status_header.nspanel_status_header import NSPanelHeader
 from .components.nspanel_status_ram_usage.nspanel_status_ram_usage import NSPanelStatusRamUsage
 from .components.nspanel_status_temperature.nspanel_status_temperature import NSPanelStatusTemperature
@@ -178,6 +179,6 @@ urlpatterns = [
     path('htmx/component/nspanel_visit_link/<str:view>/<int:nspanel_id>', NSPanelVisitLink.as_view(), name="nspanel_visit_link"),
     path('htmx/component/nspanel_reboot_button/<str:view>/<int:nspanel_id>', NSPanelRebootButton.as_view(), name="nspanel_reboot_button"),
     path('htmx/component/nspanel_warnings/<str:view>/<int:nspanel_id>', NSPanelWarnings.as_view(), name="nspanel_warnings"),
-    # TODO: Implement NSPanel status badge to show on "edit room" page and also on list of rooms page.
+    path('htmx/component/nspanel_status_badge/<str:view>/<int:nspanel_id>', NSPanelStatusBadge.as_view(), name="nspanel_status_badge"),
     path('htmx/component/room_entities_pages_view/<str:view>/<int:room_id>', NSPanelRoomEntitiesPages.as_view(), name="nspanel_room_entities_pages"),
 ]

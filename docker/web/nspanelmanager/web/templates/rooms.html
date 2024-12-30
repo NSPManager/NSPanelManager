@@ -40,7 +40,7 @@
     </button>
 </div>
 
-<div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
+<div class="p-4 bg-base-100 rounded-md shadow-lg w-full" hx-ext="ws" ws-connect="/websocket">
     <table class="table">
         <thead class="">
             <tr>
@@ -56,14 +56,9 @@
                 </th>
                 <td>
                     {% for nspanel in room.nspanels %}
-                    <a href="{% url 'edit_nspanel' panel_id=nspanel.nspanel.id %}">
-                    {% if nspanel.status.state == "online" %}
-                        <span class="badge badge-success">{{ nspanel.nspanel.friendly_name }}</span>
-                    {% elif nspanel.status.state == "offline" %}
-                        <span class="badge badge-error">{{ nspanel.nspanel.friendly_name }}</span>
-                    {% else %}
-                        <span class="badge badge-neutral">{{ nspanel.nspanel.friendly_name }}</span>
-                    {% endif %}
+                    <a href="{% url 'edit_nspanel' panel_id=nspanel.id %}">
+                        {{ nspanel.status }}
+                        {% component "nspanel_status_badge" id=nspanel.id %}{% endcomponent %}
                     </a>
                     {% endfor %}
                 </td>

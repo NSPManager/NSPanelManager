@@ -3769,6 +3769,69 @@ html {
   background-color: var(--fallback-bc,oklch(var(--bc)/0.2));
 }
 
+.radial-progress {
+  position: relative;
+  display: inline-grid;
+  height: var(--size);
+  width: var(--size);
+  place-content: center;
+  border-radius: 9999px;
+  background-color: transparent;
+  vertical-align: middle;
+  box-sizing: content-box;
+  --value: 0;
+  --size: 5rem;
+  --thickness: calc(var(--size) / 10);
+}
+
+.radial-progress::-moz-progress-bar {
+  -moz-appearance: none;
+       appearance: none;
+  background-color: transparent;
+}
+
+.radial-progress::-webkit-progress-value {
+  -webkit-appearance: none;
+          appearance: none;
+  background-color: transparent;
+}
+
+.radial-progress::-webkit-progress-bar {
+  -webkit-appearance: none;
+          appearance: none;
+  background-color: transparent;
+}
+
+.radial-progress:before,
+.radial-progress:after {
+  position: absolute;
+  border-radius: 9999px;
+  content: "";
+}
+
+.radial-progress:before {
+  inset: 0px;
+  background: radial-gradient(farthest-side, currentColor 98%, #0000) top/var(--thickness) var(--thickness)
+      no-repeat,
+    conic-gradient(currentColor calc(var(--value) * 1%), #0000 0);
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    #0000 calc(99% - var(--thickness)),
+    #000 calc(100% - var(--thickness))
+  );
+  mask: radial-gradient(
+    farthest-side,
+    #0000 calc(99% - var(--thickness)),
+    #000 calc(100% - var(--thickness))
+  );
+}
+
+.radial-progress:after {
+  inset: calc(50% - var(--thickness) / 2);
+  transform: rotate(calc(var(--value) * 3.6deg - 90deg)) translate(calc(var(--size) / 2 - 50%));
+  background-color: currentColor;
+}
+
 .radio {
   flex-shrink: 0;
   --chkbg: var(--bc);

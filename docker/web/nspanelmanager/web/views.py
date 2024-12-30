@@ -134,15 +134,9 @@ def rooms(request):
     data["rooms"] = []
     # Build dict of online and accepted NSPanels for each room
     for room in Room.objects.all().order_by("displayOrder"):
-        nspanels = list()
-        for nspanel in room.nspanel_set.filter(accepted=True, denied=False):
-           nspanels.append({
-               "nspanel": nspanel,
-               "status": send_ipc_request(F"nspanel/{nspanel.id}/status", {"command": "get"}),
-           })
         data["rooms"].append({
             "room": room,
-            "nspanels": nspanels
+            "nspanels": room.nspanel_set.filter(accepted=True, denied=False),
         })
 
     print(data)
