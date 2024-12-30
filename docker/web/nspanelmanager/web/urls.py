@@ -153,7 +153,9 @@ urlpatterns = [
     path('htmx/partial/select_new_entity_item_list/<str:action>/<str:action_args>', htmx.partial_select_new_entity_item_list, name='htmx_partial_select_new_entity_item_list'),
     path('htmx/partial/select_new_outside_temperature_sensor', htmx.partial_select_new_outside_temperature_sensor, name='htmx_partial_select_new_outside_temperature_sensor'),
     path('htmx/partial/add_light_entity_to_room/<int:room_id>', htmx.partial_entity_add_light_entity, name='htmx_partial_add_light_entity'),
-    path('htmx/partial/edit_light_entity/<int:light_id>', htmx.partial_edit_light_entity, name='htmx_partial_edit_light_entity'),
+    path('htmx/partial/edit_light_entity_in_room/<int:light_id>', htmx.partial_entity_edit_light_entity, name='htmx_partial_edit_light_entity'),
+    path('htmx/partial/add_switch_entity_to_room/<int:room_id>', htmx.partial_entity_add_switch_entity, name='htmx_partial_add_switch_entity'),
+    path('htmx/partial/edit_switch_entity_in_room/<int:switch_id>', htmx.partial_entity_edit_switch_entity, name='htmx_partial_edit_switch_entity'),
     path('htmx/partial/remove_entity_from_page_slot/<int:page_id>/<int:slot_id>', htmx.partial_remove_entity_from_page_slot, name='htmx_partial_remove_entity_from_page_slot'),
     path('htmx/partial/add_entities_page_to_room/<int:room_id>', htmx.partial_add_entities_page_to_room, name='htmx_partial_add_entities_page_to_room'),
     path('htmx/partial/delete_entities_page/<int:page_id>', htmx.partial_delete_entities_page, name='htmx_partial_delete_entities_page'),
@@ -176,5 +178,6 @@ urlpatterns = [
     path('htmx/component/nspanel_visit_link/<str:view>/<int:nspanel_id>', NSPanelVisitLink.as_view(), name="nspanel_visit_link"),
     path('htmx/component/nspanel_reboot_button/<str:view>/<int:nspanel_id>', NSPanelRebootButton.as_view(), name="nspanel_reboot_button"),
     path('htmx/component/nspanel_warnings/<str:view>/<int:nspanel_id>', NSPanelWarnings.as_view(), name="nspanel_warnings"),
+    # TODO: Implement NSPanel status badge to show on "edit room" page and also on list of rooms page.
     path('htmx/component/room_entities_pages_view/<str:view>/<int:room_id>', NSPanelRoomEntitiesPages.as_view(), name="nspanel_room_entities_pages"),
 ]

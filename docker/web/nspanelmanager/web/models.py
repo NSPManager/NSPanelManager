@@ -146,6 +146,19 @@ class Light(models.Model):
 
         return proto_light
 
+class Switch(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE)
+    room_view_position = models.IntegerField()
+    friendly_name= models.CharField(max_length=32)
+
+    # "home_assistant", "openhab" or "manual":
+    type = models.CharField(max_length=16, default="manual")
+    home_assistant_name = models.CharField(max_length=128, default="")
+    openhab_name = models.CharField(max_length=255, default="")
+    openhab_item_switch = models.CharField(max_length=255, default="")
+
+
 
 class Scene(models.Model):
     friendly_name = models.CharField(max_length=32)

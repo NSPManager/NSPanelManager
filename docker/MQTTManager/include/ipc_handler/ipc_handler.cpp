@@ -13,7 +13,7 @@ void IPCHandler::_listen() {
     SPDLOG_INFO("Starting ZMQ IPCHandler.");
     zmq::context_t zmq_context{1};                            // Number of ZMQ threads
     zmq::socket_t socket{zmq_context, zmq::socket_type::rep}; // Create reply socket with above context
-    socket.bind("ipc:///tmp/mqttmanager_ipc");
+    socket.bind("tcp://*:7999");
 
     nlohmann::json response_data;
     while (true) {

@@ -3498,6 +3498,11 @@ html {
   }
 }
 
+.form-control {
+  display: flex;
+  flex-direction: column;
+}
+
 .label {
   display: flex;
   -webkit-user-select: none;
@@ -5608,6 +5613,16 @@ input.tab:checked + .tab-content,
   padding: 0px;
 }
 
+[type="checkbox"].checkbox-xs {
+  height: 1rem;
+  width: 1rem;
+}
+
+[type="checkbox"].checkbox-sm {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
 .indicator :where(.indicator-item) {
   bottom: auto;
   inset-inline-end: 0px;
@@ -6392,10 +6407,6 @@ input.tab:checked + .tab-content,
   height: 2rem;
 }
 
-.h-\[24rem\] {
-  height: 24rem;
-}
-
 .h-full {
   height: 100%;
 }
@@ -6410,10 +6421,6 @@ input.tab:checked + .tab-content,
 
 .max-h-full {
   max-height: 100%;
-}
-
-.max-h-\[24rem\] {
-  max-height: 24rem;
 }
 
 .min-h-1 {
@@ -6472,8 +6479,8 @@ input.tab:checked + .tab-content,
   width: 2rem;
 }
 
-.w-\[24rem\] {
-  width: 24rem;
+.w-80 {
+  width: 20rem;
 }
 
 .w-full {
@@ -6484,10 +6491,6 @@ input.tab:checked + .tab-content,
   width: 100vw;
 }
 
-.w-80 {
-  width: 20rem;
-}
-
 .min-w-0 {
   min-width: 0px;
 }
@@ -6496,12 +6499,12 @@ input.tab:checked + .tab-content,
   max-width: 42rem;
 }
 
-.max-w-screen-xl {
-  max-width: 1280px;
-}
-
 .max-w-\[24rem\] {
   max-width: 24rem;
+}
+
+.max-w-screen-xl {
+  max-width: 1280px;
 }
 
 .flex-1 {

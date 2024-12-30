@@ -22,7 +22,7 @@ from .mqttmanager_ipc import send_ipc_request
 
 from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages import NSPanelRoomEntitiesPages
 
-from .models import NSPanel, Room, Light, RoomEntitiesPage, Settings, Scene, RelayGroup, RelayGroupBinding
+from .models import NSPanel, Room, Light, RoomEntitiesPage, Settings, Scene, RelayGroup, RelayGroupBinding, Switch
 from .apps import start_mqtt_manager
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
 
@@ -161,6 +161,8 @@ def interface_theme(request):
 def handle_entity_modal_result(request):
     if request.session["action"] == "ADD_LIGHT_TO_ROOM":
         return create_or_update_light_entity(request)
+    elif request.session["action"] == "ADD_SWITCH_TO_ROOM":
+        return create_or_update_switch_entity(request)
     else:
         return JsonResponse({
             "status": "error",
@@ -173,15 +175,7 @@ def handle_entity_modal_entity_selected(request, entity):
     if entity_data["entity_type"] == "light":
         return partial_entity_add_light_entity(request, json.dumps(entity_data))
     elif entity_data["entity_type"] == "switch":
-        if request.session["action"] == "ADD_LIGHT_TO_ROOM":
-            return partial_entity_add_light_entity(request, json.dumps(entity_data))
-        elif request.session["action"] == "ADD_ENTITY_TO_NSPANEL_ENTITY_PAGE":
-            return partial_entity_add_switch_entity(request, json.dumps(entity_data))
-        else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Unknown 'action' for light! Action: " + request.session["action"]
-            }, status=500)
+        return partial_entity_add_switch_entity(request, json.dumps(entity_data))
     else:
         return JsonResponse({"status": "error", "text": "Unknown entity type! Type: " + entity_data["entity_type"]}, status=500)
 
@@ -201,11 +195,12 @@ def partial_entity_add_light_entity(request, entity):
     data = {
         "entity": json.loads(entity),
         "control_mode": "",
-        "can_color_temperature": "false",
-        "can_color": "false",
+        "can_color_temperature": False,
+        "can_color": False,
         "openhab_channel_brightness": "",
         "openhab_channel_color_temperature": "",
         "openhab_channel_color": "",
+        "controlled_by_nspanel_main_page": True, # By default when adding a light. Make it controlled by the NSPanel main page.
     }
 
     # Check Home Assistant capabilites
@@ -217,9 +212,9 @@ def partial_entity_add_light_entity(request, entity):
 
         if "supported_color_modes" in data["entity"]["raw_data"]["attributes"]:
             if "color_temp" in data["entity"]["raw_data"]["attributes"]["supported_color_modes"]:
-                data["can_color_temperature"] = "true"
+                data["can_color_temperature"] = True
         if "rgb_color" in data["entity"]["raw_data"]["attributes"]:
-            data["can_color"] = "true"
+            data["can_color"] = True
 
     # Check OpenHAB capabilites
     elif data["entity"]["type"] == "openhab":
@@ -227,36 +222,90 @@ def partial_entity_add_light_entity(request, entity):
             if "brightness" in item.lower() or "level" in item.lower():
                 data["openhab_channel_brightness"] = item
             elif "temp" in item.lower():
-                data["can_color_temperature"] = "true"
+                data["can_color_temperature"] = True
                 data["openhab_channel_color_temperature"] = item
             elif "color" in item.lower() and "temp" not in item.lower():
-                data["can_color"] = "true"
+                data["can_color"] = True
                 data["openhab_channel_color"] = item
 
-        if "dim" in data["entity"]["label"].lower() or data["can_color"] == "true" or data["can_color_temperature"] == "true":
+        if "dim" in data["entity"]["label"].lower() or data["can_color"] or data["can_color_temperature"]:
             data["control_mode"] = "dimmable"
         elif "switch" in data["entity"]["label"].lower():
             data["control_mode"] = "switch"
 
-    return render(request, 'partial/select_entity/entity_add_light_to_room.html', data)
+    return render(request, 'partial/select_entity/entity_add_or_edit_light_to_room.html', data)
 
-def partial_edit_light_entity(request, light_id):
-    pass
+def partial_entity_edit_light_entity(request, light_id):
+    light = Light.objects.get(id=light_id)
+
+    request.session["action"] = "ADD_LIGHT_TO_ROOM"
+    request.session["action_args"] = json.dumps({
+        "entity_id": light_id,
+        "room_id": light.room.id,
+        "page_id": light.entities_page.id,
+        "page_slot": light.room_view_position,
+    })
+
+    data = {
+        "light": light,
+        "edit_light_id": light_id,
+        "controlled_by_nspanel_main_page": light.controlled_by_nspanel_main_page,
+        "entity": {
+            "label": light.friendly_name,
+            "entity_id": light.home_assistant_name,
+        },
+        "can_color_temperature": light.can_color_temperature,
+        "can_rgb": light.can_rgb,
+    }
+    if light.can_dim:
+        data["control_mode"] = "dimmable"
+    else:
+        data["control_mode"] = "switch"
+
+    return render(request, 'partial/select_entity/entity_add_or_edit_light_to_room.html', data)
 
 def partial_entity_add_switch_entity(request, entity):
     data = {
         "entity": json.loads(entity),
     }
-    return render(request, "partial/select_entity/entity_add_switch_to_entity_page.html", data)
+    return render(request, "partial/select_entity/entity_add_or_edit_switch_to_room.html", data)
+
+
+def partial_entity_edit_switch_entity(request, switch_id):
+    switch = Switch.objects.get(id=switch_id)
+
+    request.session["action"] = "ADD_SWITCH_TO_ROOM"
+    request.session["action_args"] = json.dumps({
+        "entity_id": switch_id,
+        "room_id": switch.room.id,
+        "page_id": switch.entities_page.id,
+        "page_slot": switch.room_view_position,
+    })
+
+    data = {
+        "light": switch,
+        "edit_light_id": switch_id,
+        "entity": {
+            "label": switch.friendly_name,
+            "entity_id": switch.home_assistant_name,
+        },
+    }
+    return render(request, "partial/select_entity/entity_add_or_edit_switch_to_room.html", data)
+
 
 @csrf_exempt
 def partial_remove_entity_from_page_slot(request, page_id, slot_id):
     page = RoomEntitiesPage.objects.get(id=page_id)
 
     # Check for light in given slot
-    lights = page.light_set.filter(room_view_position=slot_id).all()
-    if lights.count() > 0:
-        lights.delete();
+    entities = page.light_set.filter(room_view_position=slot_id).all()
+    if entities.count() > 0:
+        entities.delete();
+
+
+    entities = page.switch_set.filter(room_view_position=slot_id).all()
+    if entities.count() > 0:
+        entities.delete();
 
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(request=request, view="edit_room", room_id=page.room.id)
@@ -285,6 +334,7 @@ def partial_delete_entities_page(request, page_id):
     page.delete()
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(request=request, view="edit_room", room_id=page.room.id)
+
 
 def create_entities_page_in_room(request, room_id, page_type):
     room = Room.objects.get(id=room_id)
@@ -319,30 +369,25 @@ def partial_select_new_outside_temperature_sensor(request):
 def create_or_update_light_entity(request):
     action_args = json.loads(request.session["action_args"]) # Loads arguments set when first starting process of adding/updating entity
 
-    if "light_id" in request.session and int(request.session["light_id"]) >= 0:
-        newLight = Light.objects.get(id=int(request.session["light_id"]))
+    if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
+        newLight = Light.objects.get(id=int(action_args["entity_id"]))
     else:
         newLight = Light()
+        # Only set once, when first created:
+        newLight.type = request.POST["add_new_light_type"]
+        if newLight.type == "home_assistant":
+            newLight.home_assistant_name = request.POST["entity_id"]
+        elif newLight.type == "openhab":
+            newLight.openhab_name = request.POST["entity_id"]
 
     newLight.room = Room.objects.get(id=int(action_args["room_id"]))
     newLight.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
     newLight.room_view_position = int(action_args["page_slot"])
 
-
-    # This is only applicable when adding light to main page. Not as a stand alone entity
-    if request.POST["light_type"] == "ceiling":
-        newLight.is_ceiling_light = True
-    else:
-        newLight.is_ceiling_light = False
-
-
-    newLight.type = request.POST["add_new_light_type"]
+    newLight.controlled_by_nspanel_main_page = "controlled_by_nspanel_main_page" in request.POST
+    newLight.is_ceiling_light = request.POST["light_type"] == "ceiling"
     newLight.friendly_name = request.POST["add_new_light_name"]
 
-    if newLight.type == "home_assistant":
-        newLight.home_assistant_name = request.POST["entity_id"]
-    elif newLight.type == "openhab":
-        newLight.openhab_name = request.POST["entity_id"]
 
     if request.POST["light_control_mode"] == "dimmer":
         newLight.can_dim = True
@@ -375,9 +420,42 @@ def create_or_update_light_entity(request):
     #send_mqttmanager_reload_command()
     command_data = {
         # TODO: Base64 Encode data.
-        "data": newLight.get_protobuf_object().SerializeToString()
+        #"data": newLight.get_protobuf_object().SerializeToString()
     }
-    send_ipc_request("entity_manager/add_light", command_data)
+    #send_ipc_request("entity_manager/add_light", command_data)
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(request=request, view="edit_room", room_id=newLight.room.id)
+    #return redirect('edit_room', room_id=action_args["room_id"])
+
+
+def create_or_update_switch_entity(request):
+    action_args = json.loads(request.session["action_args"]) # Loads arguments set when first starting process of adding/updating entity
+
+    if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
+        new_switch = Switch.objects.get(id=int(action_args["entity_id"]))
+    else:
+        new_switch = Switch()
+        # Only set once, during initial creation:
+        new_switch.room = Room.objects.get(id=int(action_args["room_id"]))
+        new_switch.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+        new_switch.room_view_position = int(action_args["page_slot"])
+        new_switch.type = request.POST["entity_type"]
+        if new_switch.type == "home_assistant":
+            new_switch.home_assistant_name = request.POST["entity_id"]
+        elif new_switch.type == "openhab":
+            new_switch.openhab_name = request.POST["entity_id"]
+            new_switch.openhab_item_switch = request.POST["openhab_switch_channel_name"]
+
+    new_switch.friendly_name = request.POST["add_new_light_name"]
+
+
+    new_switch.save()
+    #send_mqttmanager_reload_command()
+    # command_data = {
+    #     # TODO: Base64 Encode data.
+    #     "data": new_switch.get_protobuf_object().SerializeToString()
+    # }
+    #send_ipc_request("entity_manager/add_light", command_data)
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(request=request, view="edit_room", room_id=new_switch.room.id)
     #return redirect('edit_room', room_id=action_args["room_id"])

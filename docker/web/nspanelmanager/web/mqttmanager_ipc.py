@@ -18,7 +18,7 @@ def send_ipc_request(topic: str, data: dict) -> dict:
     socket = context.socket(zmq.REQ)
     socket.setsockopt(zmq.RCVTIMEO, 100) # Allow 100ms before timeout
     socket.setsockopt(zmq.LINGER, 0) # Allow 50ms before timeout
-    socket.connect("ipc:///tmp/mqttmanager_ipc")
+    socket.connect("tcp://127.0.0.1:7999")
 
     try:
         json_data = json.dumps(data).encode()

@@ -1,4 +1,4 @@
-<dialog id="modal" class="modal">
+<dialog id="modal" class="modal" hx-swap-oob="true">
     <ul class="modal-box menu menu-lg bg-base-200 rounded-box w-72">
       <li class="flex-row"><button class="w-full" hx-target="#modal" hx-indicator="#modal_loading" onclick="modal.close();" hx-get='{% url "htmx_partial_select_new_entity_item_list" action="ADD_LIGHT_TO_ROOM" action_args=action_args %}?filter={"home_assistant_type_filter": ["light"], "openhab_type_filter": ["things"]}'>Add <span class="font-bold">light</span></button></li>
       <li class="flex-row"><button class="w-full" hx-target="#modal" hx-indicator="#modal_loading" onclick="modal.close();" hx-get='{% url "htmx_partial_select_new_entity_item_list" action="ADD_SWITCH_TO_ROOM" action_args=action_args %}?filter={"home_assistant_type_filter": ["switch"], "openhab_type_filter": ["things"]}'>Add <span class="font-bold">switch</span></button></li>

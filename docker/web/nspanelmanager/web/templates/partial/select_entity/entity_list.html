@@ -42,7 +42,7 @@
         {% for entity in entities.entities %}
             {% comment %}<!-- <tr class="hover cursor-pointer entity-item" data-entity-source="{{ entity.type }}" data-entity-name="{{ entity.label }}" hx-trigger="click" hx-get='{% url "htmx_partial_add_light_entity_to_room" room_id=room.id %}?entity={{ entity|jsonify }}' hx-target="#modal" hx-swap="outerHTML"> -->{% endcomment %}
             {% with entity_json=entity|jsonify|base64_encode %}
-                <tr class="hover cursor-pointer entity-item" data-entity-source="{{ entity.type }}" data-entity-name="{{ entity.label }}" hx-trigger="click" hx-get='{% url "htmx_handle_entity_modal_entity_selected" entity=entity_json %}' hx-target="#modal" hx-swap="outerHTML">
+                <tr class="hover cursor-pointer entity-item" data-entity-source="{{ entity.type }}" data-entity-name="{{ entity.label }}" hx-trigger="click" hx-get='{% url "htmx_handle_entity_modal_entity_selected" entity=entity_json %}' hx-swap="none" hx-indicator="#modal_loading">
                     <td>
                         <span class="mdi {{ entity_icon }}"></span>
                         <!-- ICON -->

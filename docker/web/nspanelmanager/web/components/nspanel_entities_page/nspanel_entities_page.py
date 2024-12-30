@@ -16,6 +16,10 @@ class NSPanelEntitiesPage(component.Component):
 
         for entity in page.light_set.all():
             data["entities"][entity.room_view_position] = entity
+            data["entities"][entity.room_view_position].type = entity.__class__.__name__
+        for entity in page.switch_set.all():
+            data["entities"][entity.room_view_position] = entity
+            data["entities"][entity.room_view_position].type = entity.__class__.__name__
         return data
 
     def get_template_name(self, context: Context):
