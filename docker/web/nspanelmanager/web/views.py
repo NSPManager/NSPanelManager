@@ -148,6 +148,7 @@ def edit_room(request, room_id: int):
     data = get_base_data(request)
     data.update({
         "room": room,
+        "nspanels": room.nspanel_set.filter(accepted=True, denied=False),
         "lights": Light.objects.filter(room=room, room_view_position__gte=1, room_view_position__lte=12),
         "entity_pages": RoomEntitiesPage.objects.filter(room=room)
     })

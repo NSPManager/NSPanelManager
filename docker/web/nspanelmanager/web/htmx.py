@@ -172,9 +172,9 @@ def handle_entity_modal_result(request):
 def handle_entity_modal_entity_selected(request, entity):
     entity_data = json.loads(base64.b64decode(entity).decode('utf-8'))
 
-    if entity_data["entity_type"] == "light":
+    if request.session["action"] == "ADD_LIGHT_TO_ROOM":
         return partial_entity_add_light_entity(request, json.dumps(entity_data))
-    elif entity_data["entity_type"] == "switch":
+    elif request.session["action"] == "ADD_SWITCH_TO_ROOM":
         return partial_entity_add_switch_entity(request, json.dumps(entity_data))
     else:
         return JsonResponse({"status": "error", "text": "Unknown entity type! Type: " + entity_data["entity_type"]}, status=500)
@@ -251,16 +251,32 @@ def partial_entity_edit_light_entity(request, light_id):
         "edit_light_id": light_id,
         "controlled_by_nspanel_main_page": light.controlled_by_nspanel_main_page,
         "entity": {
+            "type": light.type,
             "label": light.friendly_name,
-            "entity_id": light.home_assistant_name,
+            # TODO: Fetch channels for given OpenHAB item uppon loading light for edit:
+            "items": [
+                light.openhab_item_switch,
+                light.openhab_item_dimmer,
+                light.openhab_item_color_temp,
+                light.openhab_item_rgb,
+            ],
         },
         "can_color_temperature": light.can_color_temperature,
         "can_rgb": light.can_rgb,
+        "openhab_channel_color_temperature": light.openhab_item_color_temp,
+        "openhab_channel_color": light.openhab_item_rgb,
     }
+    if data["entity"]["type"] == "home_assistant":
+       data["entity"]["entity_id"] = light.home_assistant_name
+    elif data["entity"]["type"] == "openhab":
+       data["entity"]["entity_id"] = light.openhab_name
+
     if light.can_dim:
         data["control_mode"] = "dimmable"
+        data["openhab_channel_brightness"] = light.openhab_item_dimmer
     else:
         data["control_mode"] = "switch"
+        data["openhab_channel_brightness"] = light.openhab_item_switch
 
     return render(request, 'partial/select_entity/entity_add_or_edit_light_to_room.html', data)
 

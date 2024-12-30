@@ -1,0 +1,37 @@
+{% load static %}
+
+<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_badge' view='rooms' nspanel_id=id %}" id="state_badge_nspanel_{{ id }}">
+        {% if state == "online" %}
+        <span class="badge badge-success">{{ friendly_name }}</span>
+        {% elif state == "offline" %}
+            <span class="badge badge-error">{{ friendly_name }}</span>
+        {% elif state == "waiting" %}
+            <span class="badge badge-info transition-all ease-linear duration-300 animate-pulse">{{ friendly_name }}</span>
+        {% elif state == "updating_fw" %}
+            <span class="badge badge-info transition-all ease-linear duration-300">{{ friendly_name }}
+                <div
+                class="radial-progress ms-2"
+                style="--value:{{ update_progress }}; --size:1rem; --thickness: 2px;"
+                role="progressbar">
+                </div>
+            </span>
+        {% elif state == "updating_fs" %}
+            <span class="badge badge-info transition-all ease-linear duration-300">{{ friendly_name }}
+                <div
+                class="radial-progress ms-2"
+                style="--value:{{ update_progress }}; --size:1rem; --thickness: 2px;"
+                role="progressbar">
+                </div>
+            </span>
+        {% elif state == "updating_tft" %}
+            <span class="badge badge-info transition-all ease-linear duration-300">{{ friendly_name }}
+                <div
+                class="radial-progress ms-2"
+                style="--value:{{ update_progress }}; --size:1rem; --thickness: 2px;"
+                role="progressbar">
+                </div>
+            </span>
+        {% else %}
+            <span class="badge badge-info transition-all ease-linear duration-300">{{ friendly_name }} UNKNOWN STATE: {{ state }}</span>
+        {% endif %}
+</div>

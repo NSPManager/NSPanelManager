@@ -151,6 +151,12 @@
   <div class="flex items-center justify-between" id="nspanel_settings_container" hx-ext="ws" ws-connect="/websocket">
     <div>
       <h2 class="font-medium text-2xl" id="nspanel_name">Settings for room '{{ room.friendly_name }}'</h2>
+      {% for nspanel in nspanels %}
+          <a href="{% url 'edit_nspanel' panel_id=nspanel.id %}">
+          {{ nspanel.status }}
+          {% component "nspanel_status_badge" id=nspanel.id %}{% endcomponent %}
+          </a>
+      {% endfor %}
     </div>
     <a href="{% url 'manual' %}#sec:room_page" class="btn btn-outline btn-info">
         Help
