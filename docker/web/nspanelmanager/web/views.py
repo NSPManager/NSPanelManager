@@ -4,6 +4,8 @@ from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 
+from web.openhab_api import get_all_openhab_items
+
 import hashlib
 import psutil
 import environ
@@ -149,12 +151,9 @@ def edit_room(request, room_id: int):
     data.update({
         "room": room,
         "nspanels": room.nspanel_set.filter(accepted=True, denied=False),
-        "lights": Light.objects.filter(room=room, room_view_position__gte=1, room_view_position__lte=12),
         "entity_pages": RoomEntitiesPage.objects.filter(room=room)
     })
 
-    #for light in lights:
-    #    data["light" + str(light.room_view_position)] = light
     return render(request, 'edit_room.html', data)
 
 

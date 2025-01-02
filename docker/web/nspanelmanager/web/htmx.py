@@ -7,6 +7,8 @@ from django.urls import reverse
 from django.template import RequestContext
 
 from .api import get_all_available_entities
+import web.openhab_api
+import web.home_assistant_api
 import hashlib
 import psutil
 import subprocess
@@ -190,48 +192,42 @@ def partial_select_new_entity_item_list(request, action, action_args):
     }
     return render(request, 'partial/select_entity/entity_list.html', data)
 
-def partial_entity_add_light_entity(request, entity):
+def partial_entity_add_light_entity(request):
     # TODO: Move "get_all_available_entities" from api.py to seperate files
     data = {
-        "entity": json.loads(entity),
+        "entity_source": request.session["entity_source"],
         "control_mode": "",
         "can_color_temperature": False,
         "can_color": False,
-        "openhab_channel_brightness": "",
-        "openhab_channel_color_temperature": "",
-        "openhab_channel_color": "",
+        "openhab_item_brightness": "",
+        "openhab_item_color_temperature": "",
+        "openhab_item_color": "",
+        "home_assistant_item": "",
         "controlled_by_nspanel_main_page": True, # By default when adding a light. Make it controlled by the NSPanel main page.
+        "openhab_items": [],
+        "home_assistant_items": [],
     }
 
-    # Check Home Assistant capabilites
-    if data["entity"]["type"] == "home_assistant":
-        if data["entity"]["raw_data"]["entity_id"].startswith("light."):
-            data["control_mode"] = "dimmable"
-        elif data["entity"]["raw_data"]["entity_id"].startswith("switch."):
-            data["control_mode"] = "switch"
-
-        if "supported_color_modes" in data["entity"]["raw_data"]["attributes"]:
-            if "color_temp" in data["entity"]["raw_data"]["attributes"]["supported_color_modes"]:
-                data["can_color_temperature"] = True
-        if "rgb_color" in data["entity"]["raw_data"]["attributes"]:
-            data["can_color"] = True
-
-    # Check OpenHAB capabilites
-    elif data["entity"]["type"] == "openhab":
-        for item in data["entity"]["items"]:
-            if "brightness" in item.lower() or "level" in item.lower():
-                data["openhab_channel_brightness"] = item
-            elif "temp" in item.lower():
-                data["can_color_temperature"] = True
-                data["openhab_channel_color_temperature"] = item
-            elif "color" in item.lower() and "temp" not in item.lower():
-                data["can_color"] = True
-                data["openhab_channel_color"] = item
-
-        if "dim" in data["entity"]["label"].lower() or data["can_color"] or data["can_color_temperature"]:
-            data["control_mode"] = "dimmable"
-        elif "switch" in data["entity"]["label"].lower():
-            data["control_mode"] = "switch"
+    if data["entity_source"] == "home_assistant":
+        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["light", "switch"]})
+        if len(ha_items["errors"]) == 0:
+            data["home_assistant_items"] = ha_items["items"]
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "Failed to get items from Home Assistant!"
+            }, status=500)
+    elif data["entity_source"] == "openhab":
+        openhab_items = web.openhab_api.get_all_openhab_items()
+        if len(openhab_items["errors"]) == 0:
+            data["openhab_items"] = openhab_items["items"]
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "Failed to get items from OpenHAB!"
+            }, status=500)
+    else:
+        logging.error("Unknown entity source! Source: " + data["entity_source"])
 
     return render(request, 'partial/select_entity/entity_add_or_edit_light_to_room.html', data)
 
@@ -248,35 +244,44 @@ def partial_entity_edit_light_entity(request, light_id):
 
     data = {
         "light": light,
-        "edit_light_id": light_id,
+        "entity_source": light.type,
+        "entity_name": light.friendly_name,
         "controlled_by_nspanel_main_page": light.controlled_by_nspanel_main_page,
-        "entity": {
-            "type": light.type,
-            "label": light.friendly_name,
-            # TODO: Fetch channels for given OpenHAB item uppon loading light for edit:
-            "items": [
-                light.openhab_item_switch,
-                light.openhab_item_dimmer,
-                light.openhab_item_color_temp,
-                light.openhab_item_rgb,
-            ],
-        },
         "can_color_temperature": light.can_color_temperature,
         "can_rgb": light.can_rgb,
-        "openhab_channel_color_temperature": light.openhab_item_color_temp,
-        "openhab_channel_color": light.openhab_item_rgb,
+        "home_assistant_item": light.home_assistant_name,
+        "openhab_brightness_item": "", # Set below
+        "openhab_color_temperature_item": light.openhab_item_color_temp,
+        "openhab_rgb_item": light.openhab_item_rgb,
+        "openhab_items": [],
+        "home_assistant_items": [],
     }
-    if data["entity"]["type"] == "home_assistant":
-       data["entity"]["entity_id"] = light.home_assistant_name
-    elif data["entity"]["type"] == "openhab":
-       data["entity"]["entity_id"] = light.openhab_name
 
     if light.can_dim:
         data["control_mode"] = "dimmable"
-        data["openhab_channel_brightness"] = light.openhab_item_dimmer
+        data["openhab_brightness_item"] = light.openhab_item_dimmer
     else:
         data["control_mode"] = "switch"
-        data["openhab_channel_brightness"] = light.openhab_item_switch
+        data["openhab_brightness_item"] = light.openhab_item_switch
+
+    if data["entity_source"] == "home_assistant":
+        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["light", "switch"]})
+        if len(ha_items["errors"]) == 0:
+            data["home_assistant_items"] = ha_items["items"]
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "Failed to get items from Home Assistant!"
+            }, status=500)
+    elif data["entity_source"] == "openhab":
+        openhab_items = web.openhab_api.get_all_openhab_items()
+        if len(openhab_items["errors"]) > 0:
+            return JsonResponse({
+                "status": "error",
+                "text": "Failed to fetch OpenHAB items. Check logs for more information."
+            }, status=500)
+        else:
+            data["openhab_items"] = openhab_items["items"]
 
     return render(request, 'partial/select_entity/entity_add_or_edit_light_to_room.html', data)
 
@@ -344,6 +349,43 @@ def partial_add_entity_to_entities_page_select_entity_type(request, action, acti
 
 
 @csrf_exempt
+def partial_add_entity_to_entities_page_select_entity_source(request, action, action_args):
+    data = {
+        "action": action,
+        "action_args": action_args
+    }
+    request.session["action"] = action
+    request.session["action_args"] = action_args
+    if (get_setting_with_default("home_assistant_address") == "" or get_setting_with_default("home_assistant_token") == "") and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
+        # OpenHAB connection configured but not Home Assistant. Skip selecting source:
+        return redirect('htmx_partial_select_new_entity_config_modal', entity_source="openhab")
+    elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and (get_setting_with_default("openhab_address") == "" or get_setting_with_default("openhab_token") == ""):
+        # OpenHAB connection configured but not Home Assistant. Skip selecting source:
+        return redirect('htmx_partial_select_new_entity_config_modal', entity_source="home_assistant")
+    elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
+        return render(request, 'partial/add_entity_to_entities_page_select_entity_source.html', data)
+    else:
+        return JsonResponse({
+            "status": "error",
+            "text": "Unknown sources configured. Check configuration for Home Assistant and/or OpenHAB in settings."
+        }, status=500)
+
+
+@csrf_exempt
+def partial_add_entity_to_entities_page_config_modal(request, entity_source):
+    request.session["entity_source"] = entity_source
+    if request.session["action"] == "ADD_LIGHT_TO_ROOM":
+        return partial_entity_add_light_entity(request)
+    elif request.session["action"] == "ADD_SWITCH_TO_ROOM":
+        return create_or_update_switch_entity(request)
+    else:
+        return JsonResponse({
+            "status": "error",
+            "text": "Unknown action! Action: " + request.session["action"]
+        }, status=500)
+
+
+@csrf_exempt
 def partial_delete_entities_page(request, page_id):
     page = RoomEntitiesPage.objects.get(id=page_id)
     room_id = page.room.id
@@ -384,17 +426,16 @@ def partial_select_new_outside_temperature_sensor(request):
 # in the database.
 def create_or_update_light_entity(request):
     action_args = json.loads(request.session["action_args"]) # Loads arguments set when first starting process of adding/updating entity
+    entity_source = request.session["entity_source"]
 
     if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
         newLight = Light.objects.get(id=int(action_args["entity_id"]))
     else:
         newLight = Light()
         # Only set once, when first created:
-        newLight.type = request.POST["add_new_light_type"]
+        newLight.type = request.session["entity_source"]
         if newLight.type == "home_assistant":
-            newLight.home_assistant_name = request.POST["entity_id"]
-        elif newLight.type == "openhab":
-            newLight.openhab_name = request.POST["entity_id"]
+            newLight.home_assistant_name = request.POST["home_assistant_item"]
 
     newLight.room = Room.objects.get(id=int(action_args["room_id"]))
     newLight.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
@@ -409,17 +450,17 @@ def create_or_update_light_entity(request):
         newLight.can_dim = True
         newLight.openhab_control_mode = "dimmer"
         if newLight.type == "openhab":
-            newLight.openhab_item_dimmer = request.POST["openhab_dimming_channel_name"]
+            newLight.openhab_item_dimmer = request.POST["openhab_dimming_item"]
     else:
         newLight.openhab_control_mode = "switch"
         newLight.can_dim = False
         if newLight.type == "openhab":
-            newLight.openhab_item_switch = request.POST["openhab_switch_channel_name"]
+            newLight.openhab_item_switch = request.POST["openhab_dimming_item"]
 
     if "color_temperature" in request.POST:
         newLight.can_color_temperature = True
         if newLight.type == "openhab":
-            newLight.openhab_item_color_temp = request.POST["openhab_color_temperature_channel_name"]
+            newLight.openhab_item_color_temp = request.POST["openhab_color_temperature_item"]
     else:
         newLight.can_color_temperature = False
         newLight.openhab_item_color_temp = ""
@@ -427,13 +468,12 @@ def create_or_update_light_entity(request):
     if "rgb" in request.POST:
         newLight.can_rgb = True
         if newLight.type == "openhab":
-            newLight.openhab_item_rgb = request.POST["openhab_RGB_channel_name"]
+            newLight.openhab_item_rgb = request.POST["openhab_rgb_item"]
     else:
         newLight.can_rgb = False
         newLight.openhab_item_rgb = ""
 
     newLight.save()
-    #send_mqttmanager_reload_command()
     command_data = {
         # TODO: Base64 Encode data.
         #"data": newLight.get_protobuf_object().SerializeToString()
