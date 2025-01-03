@@ -11,7 +11,7 @@ class NSPanelRoomEntitiesPages(component.Component):
         room = Room.objects.get(id=room_id)
         data = {
             "room": room,
-            "entity_pages": RoomEntitiesPage.objects.filter(room=room)
+            "entity_pages": RoomEntitiesPage.objects.filter(room=room).order_by('display_order')
         }
         return data
 

@@ -13,8 +13,8 @@
         </div>
 
         <ul class="menu menu-lg bg-base-200 rounded-box w-full">
-          <li class="flex-row"><button class="w-full" hx-target="#modal" hx-indicator="#modal_loading" onclick="modal.close();" hx-get='{% url "htmx_partial_select_new_entity_source" action="ADD_LIGHT_TO_ROOM" action_args=action_args %}'>Add <span class="font-bold">light</span></button></li>
-          <li class="flex-row"><button class="w-full" hx-target="#modal" hx-indicator="#modal_loading" onclick="modal.close();" hx-get='{% url "htmx_partial_select_new_entity_source" action="ADD_SWITCH_TO_ROOM" action_args=action_args %}'>Add <span class="font-bold">switch</span></button></li>
+          <li class="flex-row"><button class="w-full" hx-indicator="#modal_loading" hx-get='{% url "htmx_partial_select_new_entity_source" action="ADD_LIGHT_TO_ROOM" action_args=action_args %}'>Add <span class="font-bold">light</span></button></li>
+          <li class="flex-row"><button class="w-full" hx-indicator="#modal_loading" hx-get='{% url "htmx_partial_select_new_entity_source" action="ADD_SWITCH_TO_ROOM" action_args=action_args %}'>Add <span class="font-bold">switch</span></button></li>
         </ul>
     </div>
 

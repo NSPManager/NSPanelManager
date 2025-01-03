@@ -338,6 +338,80 @@ def partial_add_entities_page_to_room(request, room_id):
     }
     return render(request, 'partial/add_entities_page_to_room.html', data)
 
+def get_entity_in_page_slot(page_id, slot_id):
+    page = RoomEntitiesPage.objects.get(id=page_id)
+    entities = Light.objects.filter(entities_page=page, room_view_position=slot_id)
+    if entities.count() > 0:
+        return entities[0]
+
+    entities = Switch.objects.filter(entities_page=page, room_view_position=slot_id)
+    if entities.count() > 0:
+        return entities[0]
+
+    return None
+
+@csrf_exempt
+def partial_move_entity(request):
+    existing_entity_in_slot = get_entity_in_page_slot(request.POST["page_id"], request.POST["slot_id"])
+    new_entity_in_slot = None
+    if request.POST["new_entity_type"] == "Light":
+        new_entity_in_slot = Light.objects.get(id=request.POST["new_entity_id"])
+    elif request.POST["new_entity_type"] == "Switch":
+        new_entity_in_slot = Switch.objects.get(id=request.POST["new_entity_id"])
+    else:
+        return JsonResponse({
+            "status": "error",
+            "text": "Did not find existing entity to move!"
+        })
+
+    move_from_page = None
+    move_from_slot = None
+    return_html = ""
+    if existing_entity_in_slot:
+        # Swap the existing entity place with the new entity to be put on that slot
+        existing_entity_in_slot.entities_page = new_entity_in_slot.entities_page
+        existing_entity_in_slot.room_view_position = new_entity_in_slot.room_view_position
+        existing_entity_in_slot.save()
+
+    new_entity_in_slot.entities_page = RoomEntitiesPage.objects.get(id=request.POST["page_id"])
+    new_entity_in_slot.room_view_position = request.POST["slot_id"]
+    new_entity_in_slot.save()
+
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(request, view='edit_room', room_id=new_entity_in_slot.room.id)
+
+
+@csrf_exempt
+def partial_move_entities_pages(request):
+    print(request.POST)
+    if "htmx_form_save_entities_pages_order_field" in request.POST:
+        json_data = json.loads(request.POST["htmx_form_save_entities_pages_order_field"])
+        if "pages" in json_data:
+            if len(json_data["pages"]) > 0:
+                room_id = RoomEntitiesPage.objects.get(id=json_data["pages"][0]).room.id
+                for index, page_id in enumerate(json_data["pages"]):
+                    page = RoomEntitiesPage.objects.get(id=page_id)
+                    page.display_order = index
+                    page.save()
+                entities_pages = NSPanelRoomEntitiesPages()
+                return entities_pages.get(request, view='edit_room', room_id=room_id)
+            else:
+                return JsonResponse({
+                    "status": "error",
+                    "text": "'pages' field empty in request POST-data."
+                }, status=500)
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "'pages' field not available in JSON-data."
+            }, status=500)
+    else:
+        return JsonResponse({
+            "status": "error",
+            "text": "'htmx_form_save_entities_pages_order_field' field not available in request POST-data."
+        }, status=500)
+
+
 
 @csrf_exempt
 def partial_add_entity_to_entities_page_select_entity_type(request, action, action_args):
