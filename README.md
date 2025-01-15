@@ -1,3 +1,5 @@
+[![Discord](https://img.shields.io/discord/1128437478261530675?logo=Discord&logoColor=%235865F2&label=Discord)](https://discord.gg/RwXvAH56fE)
+
 # NSPanelManager
 Standardised Smart Home control for Home Assistant and Openhab users using the original Sonoff NSPanel.
 
