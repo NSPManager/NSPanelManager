@@ -21,11 +21,7 @@ https://github.com/user-attachments/assets/a0bf2858-8384-4e67-b25e-44e3d41ccfa6
 https://github.com/user-attachments/assets/18ea4fe1-7b48-4b8e-a950-67c87f76b6e9
 
 # More information
-All information about this project on how it works and how to use it is available in the User & Technical reference 
-manual available [here](docs/tex/manual.pdf).
-
-**Note:** For the best experience, download the PDF. It has helpful links (any text in blue) that doesn't work in the 
-GitHub PDF viewer. Also, the GitHub PDF viewer only shows a few pages at the time.
+All information about this project on how it works and how to use it is available at https://nspanelmanager.com
 
 # Further questions or discussion?
 Head over to our [Discord](https://discord.gg/RwXvAH56fE)!
