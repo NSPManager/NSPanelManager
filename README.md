@@ -1,3 +1,4 @@
+[![GitHub Release](https://img.shields.io/github/v/release/NSPManager/NSPanelManager?sort=semver)](https://github.com/NSPManager/NSPanelManager/releases)
 [![Discord](https://img.shields.io/discord/1128437478261530675?logo=Discord&logoColor=%235865F2&label=Discord)](https://discord.gg/RwXvAH56fE)
 
 # NSPanelManager
