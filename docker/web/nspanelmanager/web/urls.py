@@ -141,7 +141,10 @@ urlpatterns = [
     path('protobuf/mqttmanager/all_settings', protobuf_api.mqttmanager_get_all_settings, name="protobuf_mqttmanager_get_all_settings"),
     path('protobuf/mqttmanager/all_nspanels', protobuf_api.mqttmanager_get_all_nspanels, name="protobuf_mqttmanager_get_all_nspanels"),
     path('protobuf/mqttmanager/all_lights', protobuf_api.mqttmanager_get_all_lights, name="protobuf_mqttmanager_get_all_lights"),
+    path('protobuf/mqttmanager/lights/<int:light_id>', protobuf_api.mqttmanager_get_light),
     path('protobuf/mqttmanager/all_rooms', protobuf_api.mqttmanager_get_all_rooms, name="protobuf_mqttmanager_get_all_rooms"),
+    path('protobuf/mqttmanager/get_room_entities_page/<int:page_id>', protobuf_api.mqttmanager_get_room_entities_page),
+    path('protobuf/mqttmanager/get_room_entities_page/<int:page_id>/entity_in_slot/<int:room_view_position>', protobuf_api.mqttmanager_get_entity_at_room_entities_page_position),
 
 
     #######################
@@ -160,11 +163,11 @@ urlpatterns = [
     path('htmx/partial/add_switch_entity_to_room/<int:room_id>', htmx.partial_entity_add_switch_entity, name='htmx_partial_add_switch_entity'),
     path('htmx/partial/edit_switch_entity_in_room/<int:switch_id>', htmx.partial_entity_edit_switch_entity, name='htmx_partial_edit_switch_entity'),
     path('htmx/partial/remove_entity_from_page_slot/<int:page_id>/<int:slot_id>', htmx.partial_remove_entity_from_page_slot, name='htmx_partial_remove_entity_from_page_slot'),
-    path('htmx/partial/add_entities_page_to_room/<int:room_id>', htmx.partial_add_entities_page_to_room, name='htmx_partial_add_entities_page_to_room'),
+    path('htmx/partial/add_entities_page_to_room/<int:room_id>/<str:is_scenes_page>', htmx.partial_add_entities_page_to_room, name='htmx_partial_add_entities_page_to_room'),
     path('htmx/partial/move_entity', htmx.partial_move_entity, name='htmx_partial_move_entity'),
     path('htmx/partial/reorder_entity_pages', htmx.partial_move_entities_pages, name='htmx_partial_move_entities_pages'),
     path('htmx/partial/delete_entities_page/<int:page_id>', htmx.partial_delete_entities_page, name='htmx_partial_delete_entities_page'),
-    path('htmx/partial/create_entities_page_in_room/<int:room_id>/<int:page_type>', htmx.create_entities_page_in_room, name='htmx_create_entities_page_in_room'),
+    path('htmx/partial/create_entities_page_in_room/<int:room_id>/<int:page_type>/<str:is_scenes_page>', htmx.create_entities_page_in_room, name='htmx_create_entities_page_in_room'),
     path('htmx/nspanels/<int:nspanel_id>/reboot', htmx.nspanel_reboot, name='htmx_nspanel_reboot'),
     path('htmx/nspanels/<int:nspanel_id>/update_screen', htmx.nspanel_update_screen, name='htmx_nspanel_update_screen'),
     path('htmx/nspanels/<int:nspanel_id>/update_firmware', htmx.nspanel_update_firmware, name='htmx_nspanel_update_firmware'),

@@ -4,7 +4,6 @@
 #include "light/openhab_light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "protobuf_general.pb.h"
-#include "protobuf_nspanel.pb.h"
 #include "room/room.hpp"
 #include "scenes/home_assistant_scene.hpp"
 #include "scenes/nspm_scene.hpp"
@@ -22,6 +21,7 @@
 #include <entity_manager/entity_manager.hpp>
 #include <exception>
 #include <ixwebsocket/IXWebSocket.h>
+#include <memory>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <mutex>
 #include <nlohmann/json.hpp>
@@ -31,6 +31,7 @@
 #include <spdlog/spdlog.h>
 #include <string>
 #include <sys/types.h>
+#include <vector>
 
 #define ITEM_IN_LIST(list, item) (std::find(list.cbegin(), list.cend(), item) != list.end());
 
@@ -50,24 +51,58 @@ void EntityManager::init() {
   IPCHandler::attach_callback("entity_manager/add_light", &EntityManager::ipc_callback_add_light);
 }
 
-void EntityManager::attach_entity_added_listener(void (*listener)(MqttManagerEntity *)) {
+void EntityManager::attach_entity_added_listener(void (*listener)(std::shared_ptr<MqttManagerEntity>)) {
   EntityManager::_entity_added_signal.connect(listener);
 }
 
-void EntityManager::detach_entity_added_listener(void (*listener)(MqttManagerEntity *)) {
+void EntityManager::detach_entity_added_listener(void (*listener)(std::shared_ptr<MqttManagerEntity>)) {
   EntityManager::_entity_added_signal.disconnect(listener);
 }
 
 void EntityManager::add_room(RoomSettings &config) {
-    Room *room = nullptr;
+    std::shared_ptr<Room> room = nullptr;
     try{
-        room = new Room(config);
+        room = std::shared_ptr<Room>(new Room(config));
         SPDLOG_INFO("Created room {}::{}.", room->get_id(), room->get_name());
-        EntityManager::_entities.push_back(room);
+        std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+        EntityManager::_rooms.push_back(room);
     } catch (std::exception &e) {
-        if(room != nullptr) {
-            delete room;
+        SPDLOG_ERROR("Caught exception: {}", e.what());
+        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+    }
+}
+
+std::shared_ptr<Room> EntityManager::get_room(uint32_t room_id) {
+    try{
+        std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+        for(auto room = EntityManager::_rooms.begin(); room != EntityManager::_rooms.end(); room++) {
+            if((*room)->get_id() == room_id) {
+                return std::shared_ptr<Room>((*room));
+            }
         }
+    } catch (std::exception &e) {
+        SPDLOG_ERROR("Caught exception: {}", e.what());
+        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+    }
+    return nullptr;
+}
+
+std::vector<std::shared_ptr<Room>> EntityManager::get_all_rooms() {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+    return EntityManager::_rooms;
+}
+
+void EntityManager::remove_room(uint32_t room_id) {
+    try{
+        std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+        for(auto room = EntityManager::_rooms.begin(); room != EntityManager::_rooms.end(); room++) {
+            if((*room)->get_id() == room_id) {
+                SPDLOG_INFO("Removing room room {}::{}", (*room)->get_id(), (*room)->get_name());
+                EntityManager::_rooms.erase(room);
+                break;
+            }
+        }
+    } catch (std::exception &e) {
         SPDLOG_ERROR("Caught exception: {}", e.what());
         SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
     }
@@ -95,10 +130,10 @@ void EntityManager::add_light(LightSettings &config) {
     if (EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config.id()) == nullptr) {
       std::string light_type = config.type();
       if (light_type.compare("home_assistant") == 0) {
-        HomeAssistantLight *light = new HomeAssistantLight(config);
+        std::shared_ptr<HomeAssistantLight> light = std::shared_ptr<HomeAssistantLight>(new HomeAssistantLight(config));
         EntityManager::_entities.push_back(light);
       } else if (light_type.compare("openhab") == 0) {
-        OpenhabLight *light = new OpenhabLight(config);
+        std::shared_ptr<OpenhabLight> light = std::shared_ptr<OpenhabLight>(new OpenhabLight(config));
         EntityManager::_entities.push_back(light);
       } else {
         SPDLOG_ERROR("Unknown light type '{}'. Will ignore entity.", light_type);
@@ -140,17 +175,17 @@ bool EntityManager::ipc_callback_add_light(nlohmann::json message, nlohmann::jso
 
 void EntityManager::add_scene(nlohmann::json &config) {
   try {
-    Scene *scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, config.at("scene_id"));
+    std::shared_ptr<Scene> scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, config.at("scene_id"));
     if (scene == nullptr) {
       std::string scene_type = config["scene_type"];
       if (scene_type.compare("nspm_scene") == 0) {
-        Scene *scene = new NSPMScene(config);
+        std::shared_ptr<Scene> scene = std::shared_ptr<Scene>(new NSPMScene(config));
         EntityManager::_entities.push_back(scene);
       } else if (scene_type.compare("home_assistant") == 0) {
-        Scene *scene = new HomeAssistantScene(config);
+        std::shared_ptr<Scene> scene = std::shared_ptr<Scene>(new HomeAssistantScene(config));
         EntityManager::_entities.push_back(scene);
       } else if (scene_type.compare("openhab") == 0) {
-        Scene *scene = new OpenhabScene(config);
+        std::shared_ptr<Scene> scene = std::shared_ptr<Scene>(new OpenhabScene(config));
         EntityManager::_entities.push_back(scene);
       }
     } else {
@@ -163,18 +198,40 @@ void EntityManager::add_scene(nlohmann::json &config) {
 }
 
 void EntityManager::add_nspanel_relay_group(nlohmann::json &config) {
-  try {
-    NSPanelRelayGroup *rg = EntityManager::get_entity_by_id<NSPanelRelayGroup>(MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP, config.at("relay_group_id"));
-    if (rg == nullptr) {
-      rg = new NSPanelRelayGroup(config);
-      EntityManager::_entities.push_back(rg);
-    } else {
-      rg->update_config(config);
+    if(!config.contains("id") || !config.at("id").is_number()) {
+        SPDLOG_ERROR("Tried to create NSPanel relay group but 'id' was not present in config!");
+        return;
     }
+
+    try {
+      std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
+      for(auto relay_group = EntityManager::_nspanel_relay_groups.begin(); relay_group != EntityManager::_nspanel_relay_groups.end(); relay_group++) {
+          if((*relay_group)->get_id() == config.at("id")) {
+              (*relay_group)->update_config(config);
+              return;
+          }
+      }
+
+      EntityManager::_nspanel_relay_groups.push_back(std::shared_ptr<NSPanelRelayGroup>(new NSPanelRelayGroup(config)));
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
     SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
   }
+}
+
+std::shared_ptr<NSPanelRelayGroup> EntityManager::get_relay_group(uint32_t relay_group_id) {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
+    for(auto relay_group = EntityManager::_nspanel_relay_groups.begin(); relay_group != EntityManager::_nspanel_relay_groups.end(); relay_group++) {
+        if((*relay_group)->get_id() == relay_group_id) {
+            return (*relay_group);
+        }
+    }
+    return nullptr;
+}
+
+std::vector<std::shared_ptr<NSPanelRelayGroup>> EntityManager::get_all_relay_groups() {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
+    return EntityManager::_nspanel_relay_groups;
 }
 
 void EntityManager::add_nspanel(NSPanelSettings &config) {
@@ -205,6 +262,82 @@ void EntityManager::post_init_entities() {
   EntityManager::_weather_manager.update_config();
 
   {
+    // Process any loaded lights
+    SPDLOG_DEBUG("Updating lights.");
+    std::list<int> light_ids;
+    for (LightSettings &config : MqttManagerConfig::light_configs) {
+      light_ids.push_back(config.id());
+      std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config.id());
+      if (light != nullptr) {
+        light->update_config(config);
+      } else {
+        EntityManager::add_light(config);
+      }
+    }
+    SPDLOG_DEBUG("Existing lights updated.");
+
+    // Check for any removed lights
+    SPDLOG_DEBUG("Checking for removed lights.");
+    for (int i = 0; i < EntityManager::_entities.size(); i++) {
+      auto rit = EntityManager::_entities[i];
+      if (rit->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
+        bool exists = false;
+        for (int light_id : light_ids) {
+          if (light_id == rit->get_id()) {
+            exists = true;
+            break;
+          }
+        }
+
+        if (!exists) {
+          std::shared_ptr<Light> light = std::static_pointer_cast<Light>(rit);
+          SPDLOG_DEBUG("Removing Light {}::{} as it doesn't exist in config anymore.", light->get_id(), light->get_name());
+          EntityManager::_entities.erase(EntityManager::_entities.begin() + i);
+          SPDLOG_DEBUG("Light removed successfully.");
+        }
+      }
+    }
+  }
+
+  {
+    // Process any loaded rooms
+    SPDLOG_DEBUG("Updating rooms.");
+    std::list<int> room_ids;
+    for (RoomSettings &config : MqttManagerConfig::room_configs) {
+      room_ids.push_back(config.id());
+      std::shared_ptr<Room> room = EntityManager::get_room(config.id());
+      if (room != nullptr) {
+        SPDLOG_DEBUG("Found existing room {}::{}, will update.", room->get_id(), room->get_name());
+        room->update_config(config);
+      } else {
+        EntityManager::add_room(config);
+      }
+    }
+    SPDLOG_DEBUG("Existing rooms updated.");
+
+    // Check for any removed rooms
+    SPDLOG_DEBUG("Checking for removed rooms.");
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+    for (int i = 0; i < EntityManager::_rooms.size(); i++) {
+      auto rit = EntityManager::_rooms[i];
+      bool exists = false;
+      for (int room_id : room_ids) {
+          if (room_id == rit->get_id()) {
+            exists = true;
+            break;
+          }
+      }
+
+      if (!exists) {
+          SPDLOG_DEBUG("Removing room with id {} as it doesn't exist in config anymore.", rit->get_id());
+          //MqttManagerEntity *room = rit;
+          EntityManager::_rooms.erase(EntityManager::_rooms.begin() + i);
+          SPDLOG_DEBUG("Room removed successfully.");
+      }
+    }
+  }
+
+  {
     // Process any loaded NSPanels
     SPDLOG_DEBUG("Updating NSPanels.");
     std::list<int> nspanel_ids;
@@ -232,95 +365,6 @@ void EntityManager::post_init_entities() {
   }
 
   {
-    // Process any loaded lights
-    SPDLOG_DEBUG("Updating lights.");
-    std::list<int> light_ids;
-    for (LightSettings &config : MqttManagerConfig::light_configs) {
-      light_ids.push_back(config.id());
-      Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config.id());
-      if (light != nullptr) {
-        light->update_config(config);
-      } else {
-        EntityManager::add_light(config);
-      }
-    }
-    SPDLOG_DEBUG("Existing lights updated.");
-
-    // Check for any removed lights
-    SPDLOG_DEBUG("Checking for removed lights.");
-    for (int i = 0; i < EntityManager::_entities.size(); i++) {
-      auto rit = EntityManager::_entities[i];
-      if (rit->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
-        bool exists = false;
-        for (int light_id : light_ids) {
-          if (light_id == rit->get_id()) {
-            exists = true;
-            break;
-          }
-        }
-
-        if (!exists) {
-          Light *light = (Light *)rit;
-          SPDLOG_DEBUG("Removing Light {}::{} as it doesn't exist in config anymore.", light->get_id(), light->get_name());
-          EntityManager::_entities.erase(EntityManager::_entities.begin() + i);
-          delete light;
-          SPDLOG_DEBUG("Light removed successfully.");
-        } else {
-          ++rit;
-        }
-      } else {
-        ++rit;
-      }
-    }
-  }
-
-  {
-    // Process any loaded rooms
-    SPDLOG_DEBUG("Updating rooms.");
-    std::list<int> room_ids;
-    for (RoomSettings &config : MqttManagerConfig::room_configs) {
-      room_ids.push_back(config.id());
-      Room *room = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, config.id());
-      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-      if (room != nullptr) {
-        SPDLOG_DEBUG("Found existing room {}::{}, will update.", room->get_id(), room->get_name());
-        room->update_config(config);
-      } else {
-          EntityManager::add_room(config);
-      }
-    }
-    SPDLOG_DEBUG("Existing rooms updated.");
-
-    // Check for any removed rooms
-    SPDLOG_DEBUG("Checking for removed rooms.");
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-    for (int i = 0; i < EntityManager::_entities.size(); i++) {
-      auto rit = EntityManager::_entities[i];
-      if (rit->get_type() == MQTT_MANAGER_ENTITY_TYPE::ROOM) {
-        bool exists = false;
-        for (int room_id : room_ids) {
-          if (room_id == rit->get_id()) {
-            exists = true;
-            break;
-          }
-        }
-
-        if (!exists) {
-          SPDLOG_DEBUG("Removing room with id {} as it doesn't exist in config anymore.", rit->get_id());
-          MqttManagerEntity *room = rit;
-          EntityManager::_entities.erase(EntityManager::_entities.begin() + i);
-          delete room;
-          SPDLOG_DEBUG("Room removed successfully.");
-        } else {
-          ++rit;
-        }
-      } else {
-        ++rit;
-      }
-    }
-  }
-
-  {
     // Process any loaded NSPanel Relay Groups
     SPDLOG_DEBUG("Updating NSPanel relay groups.");
     std::list<int> relay_group_ids;
@@ -331,30 +375,24 @@ void EntityManager::post_init_entities() {
     SPDLOG_DEBUG("Existing relay groups updated.");
 
     // Check for any removed lights
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
     SPDLOG_DEBUG("Checking for removed relay groups.");
-    for (int i = 0; i < EntityManager::_entities.size(); i++) {
-      auto rit = EntityManager::_entities[i];
-      if (rit->get_type() == MQTT_MANAGER_ENTITY_TYPE::NSPANEL_RELAY_GROUP) {
-        bool exists = false;
-        for (int rg_id : relay_group_ids) {
+    for (int i = 0; i < EntityManager::_nspanel_relay_groups.size(); i++) {
+      auto rit = EntityManager::_nspanel_relay_groups[i];
+      bool exists = false;
+      for (int rg_id : relay_group_ids) {
           if (rg_id == rit->get_id()) {
-            exists = true;
-            break;
+          exists = true;
+          break;
           }
-        }
+      }
 
-        if (!exists) {
+      if (!exists) {
           SPDLOG_DEBUG("Removing relay group with id {} as it doesn't exist in config anymore.", rit->get_id());
-          MqttManagerEntity *rg = rit;
-          EntityManager::_entities.erase(EntityManager::_entities.begin() + i);
-          delete rg;
+          // MqttManagerEntity *rg = rit;
+          EntityManager::_nspanel_relay_groups.erase(EntityManager::_nspanel_relay_groups.begin() + i);
+          // delete rg;
           SPDLOG_DEBUG("Relay group removed successfully.");
-        } else {
-          ++rit;
-        }
-      } else {
-        ++rit;
       }
     }
   }
@@ -385,39 +423,42 @@ void EntityManager::post_init_entities() {
 
         if (!exists) {
           SPDLOG_DEBUG("Removing scene with id {} as it doesn't exist in config anymore.", rit->get_id());
-          MqttManagerEntity *scene = rit;
           EntityManager::_entities.erase(EntityManager::_entities.begin() + i);
-          delete scene;
           SPDLOG_DEBUG("Relay group removed successfully.");
-        } else {
-          ++rit;
         }
-      } else {
-        ++rit;
       }
     }
   }
 
-  SPDLOG_INFO("Performing post init on {} entities.", EntityManager::_entities.size());
-  for (MqttManagerEntity *entity : EntityManager::_entities) {
-    SPDLOG_DEBUG("Performing PostInit on entity type {} with id {}", static_cast<int>(entity->get_type()), entity->get_id());
-    entity->post_init();
+  {
+    SPDLOG_INFO("Performing post init on {} entities.", EntityManager::_entities.size());
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+    for (auto entity : EntityManager::_entities) {
+        SPDLOG_DEBUG("Performing PostInit on entity type {} with id {}", static_cast<int>(entity->get_type()), entity->get_id());
+        entity->post_init();
+    }
+  }
+
+  {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+    for (auto room : EntityManager::_rooms) {
+        SPDLOG_DEBUG("Performing PostInit on Room {}::{}", room->get_id(), room->get_name());
+        room->post_init();
+    }
   }
 
   SPDLOG_INFO("Total loaded NSPanels: {}", EntityManager::_nspanels.size());
+  SPDLOG_INFO("Total loaded Rooms: {}", EntityManager::_rooms.size());
   SPDLOG_INFO("Total loaded Entities: {}", EntityManager::_entities.size());
 }
 
-void EntityManager::remove_entity(MqttManagerEntity *entity) {
+void EntityManager::remove_entity(std::shared_ptr<MqttManagerEntity> entity) {
   SPDLOG_DEBUG("Removing entity with ID {}.", entity->get_id());
   {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     EntityManager::_entities.erase(std::find(EntityManager::_entities.cbegin(), EntityManager::_entities.cend(), entity));
   }
-  EntityManager::_entity_removed_signal(entity);
-
-  std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-  delete entity;
+  EntityManager::_entity_removed_signal(std::static_pointer_cast<MqttManagerEntity>(entity));
 }
 
 void EntityManager::mqtt_topic_callback(const std::string &topic, const std::string &payload) {
@@ -463,7 +504,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             std::vector<uint> entity_ids = data["entity_ids"];
             uint8_t new_brightness = data["brightness"];
             for (uint entity_id : entity_ids) {
-              Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
+              std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
               if (light != nullptr) {
                 if (new_brightness != 0) {
                   light->set_brightness(new_brightness, false);
@@ -477,7 +518,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             std::vector<uint> entity_ids = data["entity_ids"];
             uint16_t new_kelvin = data["kelvin"];
             for (uint entity_id : entity_ids) {
-              Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
+              std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
               if (light != nullptr) {
                 light->set_color_temperature(new_kelvin, true);
               }
@@ -486,7 +527,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             std::vector<uint> entity_ids = data["entity_ids"];
             uint16_t new_hue = data["hue"];
             for (uint entity_id : entity_ids) {
-              Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
+              std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
               if (light != nullptr) {
                 light->set_hue(new_hue, true);
               }
@@ -495,7 +536,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
             std::vector<uint> entity_ids = data["entity_ids"];
             uint8_t new_saturation = data["saturation"];
             for (uint entity_id : entity_ids) {
-              Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
+              std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
               if (light != nullptr) {
                 light->set_saturation(new_saturation, true);
               }
@@ -512,7 +553,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
           EntityManager::_handle_register_request(data);
         } else if (command.compare("activate_scene") == 0) {
           int scene_id = data["scene_id"];
-          Scene *scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
+          std::shared_ptr<Scene> scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
           if (scene != nullptr) {
             scene->activate();
           } else {
@@ -520,7 +561,7 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
           }
         } else if (command.compare("save_scene") == 0) {
           int scene_id = data["scene_id"];
-          Scene *scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
+          std::shared_ptr<Scene> scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
           if (scene != nullptr) {
             scene->save();
           } else {

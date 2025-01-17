@@ -120,6 +120,21 @@ public:
   std::string get_name();
 
   /**
+  * Is this light controlled from the NSPanel main page?
+  */
+  bool get_controlled_from_main_page();
+
+  /**
+  * Get the ID of the entity page this entity is placed on.
+  */
+  uint32_t get_entity_page_id();
+
+  /**
+  * Get the slot in which this entity is placed on the given entity page.
+  */
+  uint8_t get_entity_page_slot();
+
+  /**
    * Go through the requested states and compare them with the current states.
    * If there is any difference, send the updated values to the controller.
    */
@@ -181,6 +196,9 @@ protected:
   uint16_t _room_id;
   Room *_room;
   MQTT_MANAGER_ENTITY_CONTROLLER _controller;
+  bool _controlled_from_main_page;
+  uint32_t _entity_page_id;
+  uint8_t _entity_page_slot;
 
   bool _can_dim;
   bool _can_color_temperature;
@@ -207,8 +225,6 @@ protected:
   std::string _mqtt_saturation_topic;
 
   boost::signals2::signal<void(Light *)> _light_destroyed_callbacks;
-
-  std::chrono::time_point<std::chrono::system_clock> _last_update;
 };
 
 #endif // !MQTT_MANAGER_LIGHT

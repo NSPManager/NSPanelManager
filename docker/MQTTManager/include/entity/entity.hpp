@@ -3,11 +3,10 @@
 
 #include <boost/signals2/signal.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <spdlog/spdlog.h>
 enum MQTT_MANAGER_ENTITY_TYPE {
   LIGHT,
   SCENE,
-  NSPANEL_RELAY_GROUP,
-  ROOM
 };
 
 enum MQTT_MANAGER_ENTITY_CONTROLLER {
@@ -39,10 +38,20 @@ public:
   virtual void post_init() = 0;
 
   /**
+  * Get the ID of the entity page this entity is located on.
+  */
+  virtual uint32_t get_entity_page_id() = 0;
+
+  /**
+  * Get the viewed slot (room view position) of this entity as to where on the page it should be shown.
+  */
+  virtual uint8_t get_entity_page_slot() = 0;
+
+  /**
    * Register a entity_changed callback listener.
    */
   void attach_entity_changed_callback(void (*callback)(MqttManagerEntity *)) {
-    this->_entity_changed_callbacks.connect(callback);
+      this->_entity_changed_callbacks.connect(callback);
   }
 
   /**
@@ -50,14 +59,7 @@ public:
    */
   template <typename CALLBACK_BIND>
   void attach_entity_changed_callback(CALLBACK_BIND callback) {
-    this->_entity_changed_callbacks.connect(callback);
-  }
-
-  /**
-   * Detach a entity_changed callback listener.
-   */
-  void register_entity_changed_callback(void (*callback)(MqttManagerEntity *)) {
-    this->_entity_changed_callbacks.disconnect(callback);
+      this->_entity_changed_callbacks.connect(callback);
   }
 
   /**

@@ -28,6 +28,7 @@ bool WebHelper::perform_get_request(std::string *url, std::string *response_data
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5); // Wait max 5 seconds for an answer
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_error_buffer);
+    curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 10000000); // Set max buffer
     // During cross-compilation the default path for CA certificates is not set and therefore any
     // request to an https endpoint (for example OpenMetoe weather service) fails.
     curl_easy_setopt(curl, CURLOPT_CAINFO, "/etc/ssl/certs/ca-certificates.crt");
@@ -100,6 +101,7 @@ bool WebHelper::perform_post_request(std::string *url, std::string *response_dat
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5); // Wait max 5 seconds for an answer
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_error_buffer);
+    curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 10000000); // Set max buffer
     // During cross-compilation the default path for CA certificates is not set and therefore any
     // request to an https endpoint (for example OpenMetoe weather service) fails.
     curl_easy_setopt(curl, CURLOPT_CAINFO, "/etc/ssl/certs/ca-certificates.crt");

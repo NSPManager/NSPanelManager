@@ -323,7 +323,6 @@ def partial_remove_entity_from_page_slot(request, page_id, slot_id):
     if entities.count() > 0:
         entities.delete();
 
-
     entities = page.switch_set.filter(room_view_position=slot_id).all()
     if entities.count() > 0:
         entities.delete();
@@ -332,9 +331,10 @@ def partial_remove_entity_from_page_slot(request, page_id, slot_id):
     return entities_pages.get(request=request, view="edit_room", room_id=page.room.id)
 
 @csrf_exempt
-def partial_add_entities_page_to_room(request, room_id):
+def partial_add_entities_page_to_room(request, room_id, is_scenes_page):
     data = {
-        "room_id": room_id
+        "room_id": room_id,
+        "is_scenes_page": is_scenes_page,
     }
     return render(request, 'partial/add_entities_page_to_room.html', data)
 
@@ -468,11 +468,12 @@ def partial_delete_entities_page(request, page_id):
     return entities_pages.get(request=request, view="edit_room", room_id=page.room.id)
 
 
-def create_entities_page_in_room(request, room_id, page_type):
+def create_entities_page_in_room(request, room_id, page_type, is_scenes_page):
     room = Room.objects.get(id=room_id)
     entity_page = RoomEntitiesPage()
     entity_page.room = room
     entity_page.display_order = RoomEntitiesPage.objects.filter(room=room).count() + 1
+    entity_page.is_scenes_page = is_scenes_page == "True"
     if page_type == 4:
         entity_page.page_type = 4
         entity_page.save()
@@ -484,9 +485,10 @@ def create_entities_page_in_room(request, room_id, page_type):
         entity_page.save()
     else:
         print(F"ERROR! Unknown page type {page_type}")
-    # TODO: Return HTMX data to append to entities view instead of reloading page.
+    # Return new partial HTMX update of all entities pages in this room
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(request=request, view="edit_room", room_id=room_id)
+
 
 def partial_select_new_outside_temperature_sensor(request):
     # TODO: Move "get_all_available_entities" from api.py to seperate files

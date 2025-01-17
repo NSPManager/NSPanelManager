@@ -30,6 +30,8 @@ inline constexpr RoomSettings::Impl_::Impl_(
         _light_ids_cached_byte_size_{0},
         scene_ids_{},
         _scene_ids_cached_byte_size_{0},
+        entity_page_ids_{},
+        _entity_page_ids_cached_byte_size_{0},
         name_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
@@ -49,6 +51,52 @@ struct RoomSettingsDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoomSettingsDefaultTypeInternal _RoomSettings_default_instance_;
+
+inline constexpr RoomEntityWrapper_SwitchEntity::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        id_{0},
+        room_view_position_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR RoomEntityWrapper_SwitchEntity::RoomEntityWrapper_SwitchEntity(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct RoomEntityWrapper_SwitchEntityDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RoomEntityWrapper_SwitchEntityDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RoomEntityWrapper_SwitchEntityDefaultTypeInternal() {}
+  union {
+    RoomEntityWrapper_SwitchEntity _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoomEntityWrapper_SwitchEntityDefaultTypeInternal _RoomEntityWrapper_SwitchEntity_default_instance_;
+
+inline constexpr RoomEntityWrapper_LightEntity::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        id_{0},
+        room_view_position_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR RoomEntityWrapper_LightEntity::RoomEntityWrapper_LightEntity(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct RoomEntityWrapper_LightEntityDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RoomEntityWrapper_LightEntityDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RoomEntityWrapper_LightEntityDefaultTypeInternal() {}
+  union {
+    RoomEntityWrapper_LightEntity _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoomEntityWrapper_LightEntityDefaultTypeInternal _RoomEntityWrapper_LightEntity_default_instance_;
 
 inline constexpr LightSettings::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -85,7 +133,10 @@ inline constexpr LightSettings::Impl_::Impl_(
         is_ceiling_light_{false},
         can_dim_{false},
         can_color_temperature_{false},
-        can_rgb_{false} {}
+        can_rgb_{false},
+        entities_page_id_{0},
+        entities_page_room_view_position_{0},
+        controlled_from_main_page_{false} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR LightSettings::LightSettings(::_pbi::ConstantInitialized)
@@ -100,6 +151,26 @@ struct LightSettingsDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 LightSettingsDefaultTypeInternal _LightSettings_default_instance_;
+
+inline constexpr RoomEntityWrapper::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : entity_{},
+        _cached_size_{0},
+        _oneof_case_{} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR RoomEntityWrapper::RoomEntityWrapper(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct RoomEntityWrapperDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RoomEntityWrapperDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RoomEntityWrapperDefaultTypeInternal() {}
+  union {
+    RoomEntityWrapper _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoomEntityWrapperDefaultTypeInternal _RoomEntityWrapper_default_instance_;
 
 inline constexpr MultipleRoomsSettings::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -138,6 +209,30 @@ struct MultipleLightsSettingsDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MultipleLightsSettingsDefaultTypeInternal _MultipleLightsSettings_default_instance_;
+
+inline constexpr RoomEntitiesPageSettings::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : entities_{},
+        id_{0},
+        page_type_{0},
+        display_order_{0},
+        room_id_{0},
+        is_scenes_page_{false},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR RoomEntitiesPageSettings::RoomEntitiesPageSettings(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct RoomEntitiesPageSettingsDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RoomEntitiesPageSettingsDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RoomEntitiesPageSettingsDefaultTypeInternal() {}
+  union {
+    RoomEntitiesPageSettings _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoomEntitiesPageSettingsDefaultTypeInternal _RoomEntitiesPageSettings_default_instance_;
 static constexpr const ::_pb::EnumDescriptor**
     file_level_enum_descriptors_protobuf_5fgeneral_2eproto = nullptr;
 static constexpr const ::_pb::ServiceDescriptor**
@@ -145,6 +240,53 @@ static constexpr const ::_pb::ServiceDescriptor**
 const ::uint32_t
     TableStruct_protobuf_5fgeneral_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::RoomEntityWrapper_LightEntity, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::RoomEntityWrapper_LightEntity, _impl_.id_),
+        PROTOBUF_FIELD_OFFSET(::RoomEntityWrapper_LightEntity, _impl_.name_),
+        PROTOBUF_FIELD_OFFSET(::RoomEntityWrapper_LightEntity, _impl_.room_view_position_),
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::RoomEntityWrapper_SwitchEntity, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::RoomEntityWrapper_SwitchEntity, _impl_.id_),
+        PROTOBUF_FIELD_OFFSET(::RoomEntityWrapper_SwitchEntity, _impl_.name_),
+        PROTOBUF_FIELD_OFFSET(::RoomEntityWrapper_SwitchEntity, _impl_.room_view_position_),
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::RoomEntityWrapper, _internal_metadata_),
+        ~0u,  // no _extensions_
+        PROTOBUF_FIELD_OFFSET(::RoomEntityWrapper, _impl_._oneof_case_[0]),
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        ::_pbi::kInvalidFieldOffsetTag,
+        ::_pbi::kInvalidFieldOffsetTag,
+        PROTOBUF_FIELD_OFFSET(::RoomEntityWrapper, _impl_.entity_),
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::RoomEntitiesPageSettings, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::RoomEntitiesPageSettings, _impl_.id_),
+        PROTOBUF_FIELD_OFFSET(::RoomEntitiesPageSettings, _impl_.page_type_),
+        PROTOBUF_FIELD_OFFSET(::RoomEntitiesPageSettings, _impl_.display_order_),
+        PROTOBUF_FIELD_OFFSET(::RoomEntitiesPageSettings, _impl_.room_id_),
+        PROTOBUF_FIELD_OFFSET(::RoomEntitiesPageSettings, _impl_.is_scenes_page_),
+        PROTOBUF_FIELD_OFFSET(::RoomEntitiesPageSettings, _impl_.entities_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::RoomSettings, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -157,6 +299,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::RoomSettings, _impl_.name_),
         PROTOBUF_FIELD_OFFSET(::RoomSettings, _impl_.light_ids_),
         PROTOBUF_FIELD_OFFSET(::RoomSettings, _impl_.scene_ids_),
+        PROTOBUF_FIELD_OFFSET(::RoomSettings, _impl_.entity_page_ids_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::MultipleRoomsSettings, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -189,6 +332,9 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.openhab_item_dimmer_),
         PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.openhab_item_color_temp_),
         PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.openhab_item_rgb_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.entities_page_id_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.entities_page_room_view_position_),
+        PROTOBUF_FIELD_OFFSET(::LightSettings, _impl_.controlled_from_main_page_),
         ~0u,
         ~0u,
         ~0u,
@@ -204,6 +350,9 @@ const ::uint32_t
         4,
         5,
         6,
+        ~0u,
+        ~0u,
+        ~0u,
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::MultipleLightsSettings, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -217,12 +366,20 @@ const ::uint32_t
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, -1, -1, sizeof(::RoomSettings)},
-        {12, -1, -1, sizeof(::MultipleRoomsSettings)},
-        {21, 44, -1, sizeof(::LightSettings)},
-        {59, -1, -1, sizeof(::MultipleLightsSettings)},
+        {0, -1, -1, sizeof(::RoomEntityWrapper_LightEntity)},
+        {11, -1, -1, sizeof(::RoomEntityWrapper_SwitchEntity)},
+        {22, -1, -1, sizeof(::RoomEntityWrapper)},
+        {33, -1, -1, sizeof(::RoomEntitiesPageSettings)},
+        {47, -1, -1, sizeof(::RoomSettings)},
+        {60, -1, -1, sizeof(::MultipleRoomsSettings)},
+        {69, 95, -1, sizeof(::LightSettings)},
+        {113, -1, -1, sizeof(::MultipleLightsSettings)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
+    &::_RoomEntityWrapper_LightEntity_default_instance_._instance,
+    &::_RoomEntityWrapper_SwitchEntity_default_instance_._instance,
+    &::_RoomEntityWrapper_default_instance_._instance,
+    &::_RoomEntitiesPageSettings_default_instance_._instance,
     &::_RoomSettings_default_instance_._instance,
     &::_MultipleRoomsSettings_default_instance_._instance,
     &::_LightSettings_default_instance_._instance,
@@ -230,44 +387,1207 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 const char descriptor_table_protodef_protobuf_5fgeneral_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\026protobuf_general.proto\"N\n\014RoomSettings"
-    "\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\021\n\tlight_ids\030"
-    "\003 \003(\005\022\021\n\tscene_ids\030\004 \003(\005\"5\n\025MultipleRoom"
-    "sSettings\022\034\n\005rooms\030\001 \003(\0132\r.RoomSettings\""
-    "\257\004\n\rLightSettings\022\n\n\002id\030\001 \001(\005\022\017\n\007room_id"
-    "\030\002 \001(\005\022\014\n\004name\030\003 \001(\t\022\014\n\004type\030\004 \001(\t\022\030\n\020is"
-    "_ceiling_light\030\005 \001(\010\022\017\n\007can_dim\030\006 \001(\010\022\035\n"
-    "\025can_color_temperature\030\007 \001(\010\022\017\n\007can_rgb\030"
-    "\010 \001(\010\022 \n\023home_assistant_name\030\t \001(\tH\000\210\001\001\022"
-    "\031\n\014openhab_name\030\n \001(\tH\001\210\001\001\022!\n\024openhab_co"
-    "ntrol_mode\030\013 \001(\tH\002\210\001\001\022 \n\023openhab_item_sw"
-    "itch\030\014 \001(\tH\003\210\001\001\022 \n\023openhab_item_dimmer\030\r"
-    " \001(\tH\004\210\001\001\022$\n\027openhab_item_color_temp\030\016 \001"
-    "(\tH\005\210\001\001\022\035\n\020openhab_item_rgb\030\017 \001(\tH\006\210\001\001B\026"
-    "\n\024_home_assistant_nameB\017\n\r_openhab_nameB"
-    "\027\n\025_openhab_control_modeB\026\n\024_openhab_ite"
-    "m_switchB\026\n\024_openhab_item_dimmerB\032\n\030_ope"
-    "nhab_item_color_tempB\023\n\021_openhab_item_rg"
-    "b\"8\n\026MultipleLightsSettings\022\036\n\006lights\030\001 "
-    "\003(\0132\016.LightSettingsb\006proto3"
+    "\n\026protobuf_general.proto\"\214\002\n\021RoomEntityW"
+    "rapper\022/\n\005light\030\001 \001(\0132\036.RoomEntityWrappe"
+    "r.LightEntityH\000\0221\n\006switch\030\002 \001(\0132\037.RoomEn"
+    "tityWrapper.SwitchEntityH\000\032C\n\013LightEntit"
+    "y\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\032\n\022room_view"
+    "_position\030\003 \001(\005\032D\n\014SwitchEntity\022\n\n\002id\030\001 "
+    "\001(\005\022\014\n\004name\030\002 \001(\t\022\032\n\022room_view_position\030"
+    "\003 \001(\005B\010\n\006entity\"\237\001\n\030RoomEntitiesPageSett"
+    "ings\022\n\n\002id\030\001 \001(\005\022\021\n\tpage_type\030\002 \001(\005\022\025\n\rd"
+    "isplay_order\030\003 \001(\005\022\017\n\007room_id\030\004 \001(\005\022\026\n\016i"
+    "s_scenes_page\030\005 \001(\010\022$\n\010entities\030\006 \003(\0132\022."
+    "RoomEntityWrapper\"g\n\014RoomSettings\022\n\n\002id\030"
+    "\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\021\n\tlight_ids\030\003 \003(\005\022\021"
+    "\n\tscene_ids\030\004 \003(\005\022\027\n\017entity_page_ids\030\005 \003"
+    "(\005\"5\n\025MultipleRoomsSettings\022\034\n\005rooms\030\001 \003"
+    "(\0132\r.RoomSettings\"\226\005\n\rLightSettings\022\n\n\002i"
+    "d\030\001 \001(\005\022\017\n\007room_id\030\002 \001(\005\022\014\n\004name\030\003 \001(\t\022\014"
+    "\n\004type\030\004 \001(\t\022\030\n\020is_ceiling_light\030\005 \001(\010\022\017"
+    "\n\007can_dim\030\006 \001(\010\022\035\n\025can_color_temperature"
+    "\030\007 \001(\010\022\017\n\007can_rgb\030\010 \001(\010\022 \n\023home_assistan"
+    "t_name\030\t \001(\tH\000\210\001\001\022\031\n\014openhab_name\030\n \001(\tH"
+    "\001\210\001\001\022!\n\024openhab_control_mode\030\013 \001(\tH\002\210\001\001\022"
+    " \n\023openhab_item_switch\030\014 \001(\tH\003\210\001\001\022 \n\023ope"
+    "nhab_item_dimmer\030\r \001(\tH\004\210\001\001\022$\n\027openhab_i"
+    "tem_color_temp\030\016 \001(\tH\005\210\001\001\022\035\n\020openhab_ite"
+    "m_rgb\030\017 \001(\tH\006\210\001\001\022\030\n\020entities_page_id\030\020 \001"
+    "(\005\022(\n entities_page_room_view_position\030\021"
+    " \001(\005\022!\n\031controlled_from_main_page\030\022 \001(\010B"
+    "\026\n\024_home_assistant_nameB\017\n\r_openhab_name"
+    "B\027\n\025_openhab_control_modeB\026\n\024_openhab_it"
+    "em_switchB\026\n\024_openhab_item_dimmerB\032\n\030_op"
+    "enhab_item_color_tempB\023\n\021_openhab_item_r"
+    "gb\"8\n\026MultipleLightsSettings\022\036\n\006lights\030\001"
+    " \003(\0132\016.LightSettingsb\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fgeneral_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fgeneral_2eproto = {
     false,
     false,
-    787,
+    1348,
     descriptor_table_protodef_protobuf_5fgeneral_2eproto,
     "protobuf_general.proto",
     &descriptor_table_protobuf_5fgeneral_2eproto_once,
     nullptr,
     0,
-    4,
+    8,
     schemas,
     file_default_instances,
     TableStruct_protobuf_5fgeneral_2eproto::offsets,
     file_level_enum_descriptors_protobuf_5fgeneral_2eproto,
     file_level_service_descriptors_protobuf_5fgeneral_2eproto,
 };
+// ===================================================================
+
+class RoomEntityWrapper_LightEntity::_Internal {
+ public:
+};
+
+RoomEntityWrapper_LightEntity::RoomEntityWrapper_LightEntity(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:RoomEntityWrapper.LightEntity)
+}
+inline PROTOBUF_NDEBUG_INLINE RoomEntityWrapper_LightEntity::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::RoomEntityWrapper_LightEntity& from_msg)
+      : name_(arena, from.name_),
+        _cached_size_{0} {}
+
+RoomEntityWrapper_LightEntity::RoomEntityWrapper_LightEntity(
+    ::google::protobuf::Arena* arena,
+    const RoomEntityWrapper_LightEntity& from)
+    : ::google::protobuf::Message(arena) {
+  RoomEntityWrapper_LightEntity* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, id_),
+           offsetof(Impl_, room_view_position_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::room_view_position_));
+
+  // @@protoc_insertion_point(copy_constructor:RoomEntityWrapper.LightEntity)
+}
+inline PROTOBUF_NDEBUG_INLINE RoomEntityWrapper_LightEntity::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : name_(arena),
+        _cached_size_{0} {}
+
+inline void RoomEntityWrapper_LightEntity::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           0,
+           offsetof(Impl_, room_view_position_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::room_view_position_));
+}
+RoomEntityWrapper_LightEntity::~RoomEntityWrapper_LightEntity() {
+  // @@protoc_insertion_point(destructor:RoomEntityWrapper.LightEntity)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void RoomEntityWrapper_LightEntity::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.name_.Destroy();
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+RoomEntityWrapper_LightEntity::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_LightEntity, _impl_._cached_size_),
+              false,
+          },
+          &RoomEntityWrapper_LightEntity::MergeImpl,
+          &RoomEntityWrapper_LightEntity::kDescriptorMethods,
+          &descriptor_table_protobuf_5fgeneral_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 3, 0, 42, 2> RoomEntityWrapper_LightEntity::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    3, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967288,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    3,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_RoomEntityWrapper_LightEntity_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::RoomEntityWrapper_LightEntity>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int32 id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RoomEntityWrapper_LightEntity, _impl_.id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_LightEntity, _impl_.id_)}},
+    // string name = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_LightEntity, _impl_.name_)}},
+    // int32 room_view_position = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RoomEntityWrapper_LightEntity, _impl_.room_view_position_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_LightEntity, _impl_.room_view_position_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 id = 1;
+    {PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_LightEntity, _impl_.id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // string name = 2;
+    {PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_LightEntity, _impl_.name_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int32 room_view_position = 3;
+    {PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_LightEntity, _impl_.room_view_position_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+  }},
+  // no aux_entries
+  {{
+    "\35\0\4\0\0\0\0\0"
+    "RoomEntityWrapper.LightEntity"
+    "name"
+  }},
+};
+
+PROTOBUF_NOINLINE void RoomEntityWrapper_LightEntity::Clear() {
+// @@protoc_insertion_point(message_clear_start:RoomEntityWrapper.LightEntity)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.name_.ClearToEmpty();
+  ::memset(&_impl_.id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.room_view_position_) -
+      reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.room_view_position_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* RoomEntityWrapper_LightEntity::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:RoomEntityWrapper.LightEntity)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<1>(
+            stream, this->_internal_id(), target);
+  }
+
+  // string name = 2;
+  if (!this->_internal_name().empty()) {
+    const std::string& _s = this->_internal_name();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "RoomEntityWrapper.LightEntity.name");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
+  }
+
+  // int32 room_view_position = 3;
+  if (this->_internal_room_view_position() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<3>(
+            stream, this->_internal_room_view_position(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:RoomEntityWrapper.LightEntity)
+  return target;
+}
+
+::size_t RoomEntityWrapper_LightEntity::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:RoomEntityWrapper.LightEntity)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // string name = 2;
+  if (!this->_internal_name().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_name());
+  }
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_id());
+  }
+
+  // int32 room_view_position = 3;
+  if (this->_internal_room_view_position() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_room_view_position());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void RoomEntityWrapper_LightEntity::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<RoomEntityWrapper_LightEntity*>(&to_msg);
+  auto& from = static_cast<const RoomEntityWrapper_LightEntity&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:RoomEntityWrapper.LightEntity)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_name().empty()) {
+    _this->_internal_set_name(from._internal_name());
+  }
+  if (from._internal_id() != 0) {
+    _this->_impl_.id_ = from._impl_.id_;
+  }
+  if (from._internal_room_view_position() != 0) {
+    _this->_impl_.room_view_position_ = from._impl_.room_view_position_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void RoomEntityWrapper_LightEntity::CopyFrom(const RoomEntityWrapper_LightEntity& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:RoomEntityWrapper.LightEntity)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void RoomEntityWrapper_LightEntity::InternalSwap(RoomEntityWrapper_LightEntity* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_LightEntity, _impl_.room_view_position_)
+      + sizeof(RoomEntityWrapper_LightEntity::_impl_.room_view_position_)
+      - PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_LightEntity, _impl_.id_)>(
+          reinterpret_cast<char*>(&_impl_.id_),
+          reinterpret_cast<char*>(&other->_impl_.id_));
+}
+
+::google::protobuf::Metadata RoomEntityWrapper_LightEntity::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class RoomEntityWrapper_SwitchEntity::_Internal {
+ public:
+};
+
+RoomEntityWrapper_SwitchEntity::RoomEntityWrapper_SwitchEntity(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:RoomEntityWrapper.SwitchEntity)
+}
+inline PROTOBUF_NDEBUG_INLINE RoomEntityWrapper_SwitchEntity::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::RoomEntityWrapper_SwitchEntity& from_msg)
+      : name_(arena, from.name_),
+        _cached_size_{0} {}
+
+RoomEntityWrapper_SwitchEntity::RoomEntityWrapper_SwitchEntity(
+    ::google::protobuf::Arena* arena,
+    const RoomEntityWrapper_SwitchEntity& from)
+    : ::google::protobuf::Message(arena) {
+  RoomEntityWrapper_SwitchEntity* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, id_),
+           offsetof(Impl_, room_view_position_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::room_view_position_));
+
+  // @@protoc_insertion_point(copy_constructor:RoomEntityWrapper.SwitchEntity)
+}
+inline PROTOBUF_NDEBUG_INLINE RoomEntityWrapper_SwitchEntity::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : name_(arena),
+        _cached_size_{0} {}
+
+inline void RoomEntityWrapper_SwitchEntity::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           0,
+           offsetof(Impl_, room_view_position_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::room_view_position_));
+}
+RoomEntityWrapper_SwitchEntity::~RoomEntityWrapper_SwitchEntity() {
+  // @@protoc_insertion_point(destructor:RoomEntityWrapper.SwitchEntity)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void RoomEntityWrapper_SwitchEntity::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.name_.Destroy();
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+RoomEntityWrapper_SwitchEntity::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_SwitchEntity, _impl_._cached_size_),
+              false,
+          },
+          &RoomEntityWrapper_SwitchEntity::MergeImpl,
+          &RoomEntityWrapper_SwitchEntity::kDescriptorMethods,
+          &descriptor_table_protobuf_5fgeneral_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 3, 0, 43, 2> RoomEntityWrapper_SwitchEntity::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    3, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967288,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    3,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_RoomEntityWrapper_SwitchEntity_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::RoomEntityWrapper_SwitchEntity>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int32 id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RoomEntityWrapper_SwitchEntity, _impl_.id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_SwitchEntity, _impl_.id_)}},
+    // string name = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_SwitchEntity, _impl_.name_)}},
+    // int32 room_view_position = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RoomEntityWrapper_SwitchEntity, _impl_.room_view_position_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_SwitchEntity, _impl_.room_view_position_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 id = 1;
+    {PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_SwitchEntity, _impl_.id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // string name = 2;
+    {PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_SwitchEntity, _impl_.name_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int32 room_view_position = 3;
+    {PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_SwitchEntity, _impl_.room_view_position_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+  }},
+  // no aux_entries
+  {{
+    "\36\0\4\0\0\0\0\0"
+    "RoomEntityWrapper.SwitchEntity"
+    "name"
+  }},
+};
+
+PROTOBUF_NOINLINE void RoomEntityWrapper_SwitchEntity::Clear() {
+// @@protoc_insertion_point(message_clear_start:RoomEntityWrapper.SwitchEntity)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.name_.ClearToEmpty();
+  ::memset(&_impl_.id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.room_view_position_) -
+      reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.room_view_position_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* RoomEntityWrapper_SwitchEntity::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:RoomEntityWrapper.SwitchEntity)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<1>(
+            stream, this->_internal_id(), target);
+  }
+
+  // string name = 2;
+  if (!this->_internal_name().empty()) {
+    const std::string& _s = this->_internal_name();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "RoomEntityWrapper.SwitchEntity.name");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
+  }
+
+  // int32 room_view_position = 3;
+  if (this->_internal_room_view_position() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<3>(
+            stream, this->_internal_room_view_position(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:RoomEntityWrapper.SwitchEntity)
+  return target;
+}
+
+::size_t RoomEntityWrapper_SwitchEntity::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:RoomEntityWrapper.SwitchEntity)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // string name = 2;
+  if (!this->_internal_name().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_name());
+  }
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_id());
+  }
+
+  // int32 room_view_position = 3;
+  if (this->_internal_room_view_position() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_room_view_position());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void RoomEntityWrapper_SwitchEntity::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<RoomEntityWrapper_SwitchEntity*>(&to_msg);
+  auto& from = static_cast<const RoomEntityWrapper_SwitchEntity&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:RoomEntityWrapper.SwitchEntity)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_name().empty()) {
+    _this->_internal_set_name(from._internal_name());
+  }
+  if (from._internal_id() != 0) {
+    _this->_impl_.id_ = from._impl_.id_;
+  }
+  if (from._internal_room_view_position() != 0) {
+    _this->_impl_.room_view_position_ = from._impl_.room_view_position_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void RoomEntityWrapper_SwitchEntity::CopyFrom(const RoomEntityWrapper_SwitchEntity& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:RoomEntityWrapper.SwitchEntity)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void RoomEntityWrapper_SwitchEntity::InternalSwap(RoomEntityWrapper_SwitchEntity* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_SwitchEntity, _impl_.room_view_position_)
+      + sizeof(RoomEntityWrapper_SwitchEntity::_impl_.room_view_position_)
+      - PROTOBUF_FIELD_OFFSET(RoomEntityWrapper_SwitchEntity, _impl_.id_)>(
+          reinterpret_cast<char*>(&_impl_.id_),
+          reinterpret_cast<char*>(&other->_impl_.id_));
+}
+
+::google::protobuf::Metadata RoomEntityWrapper_SwitchEntity::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class RoomEntityWrapper::_Internal {
+ public:
+  static constexpr ::int32_t kOneofCaseOffset =
+      PROTOBUF_FIELD_OFFSET(::RoomEntityWrapper, _impl_._oneof_case_);
+};
+
+void RoomEntityWrapper::set_allocated_light(::RoomEntityWrapper_LightEntity* light) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_entity();
+  if (light) {
+    ::google::protobuf::Arena* submessage_arena = light->GetArena();
+    if (message_arena != submessage_arena) {
+      light = ::google::protobuf::internal::GetOwnedMessage(message_arena, light, submessage_arena);
+    }
+    set_has_light();
+    _impl_.entity_.light_ = light;
+  }
+  // @@protoc_insertion_point(field_set_allocated:RoomEntityWrapper.light)
+}
+void RoomEntityWrapper::set_allocated_switch_(::RoomEntityWrapper_SwitchEntity* switch_) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_entity();
+  if (switch_) {
+    ::google::protobuf::Arena* submessage_arena = switch_->GetArena();
+    if (message_arena != submessage_arena) {
+      switch_ = ::google::protobuf::internal::GetOwnedMessage(message_arena, switch_, submessage_arena);
+    }
+    set_has_switch_();
+    _impl_.entity_.switch__ = switch_;
+  }
+  // @@protoc_insertion_point(field_set_allocated:RoomEntityWrapper.switch)
+}
+RoomEntityWrapper::RoomEntityWrapper(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:RoomEntityWrapper)
+}
+inline PROTOBUF_NDEBUG_INLINE RoomEntityWrapper::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::RoomEntityWrapper& from_msg)
+      : entity_{},
+        _cached_size_{0},
+        _oneof_case_{from._oneof_case_[0]} {}
+
+RoomEntityWrapper::RoomEntityWrapper(
+    ::google::protobuf::Arena* arena,
+    const RoomEntityWrapper& from)
+    : ::google::protobuf::Message(arena) {
+  RoomEntityWrapper* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  switch (entity_case()) {
+    case ENTITY_NOT_SET:
+      break;
+      case kLight:
+        _impl_.entity_.light_ = ::google::protobuf::Message::CopyConstruct<::RoomEntityWrapper_LightEntity>(arena, *from._impl_.entity_.light_);
+        break;
+      case kSwitch:
+        _impl_.entity_.switch__ = ::google::protobuf::Message::CopyConstruct<::RoomEntityWrapper_SwitchEntity>(arena, *from._impl_.entity_.switch__);
+        break;
+  }
+
+  // @@protoc_insertion_point(copy_constructor:RoomEntityWrapper)
+}
+inline PROTOBUF_NDEBUG_INLINE RoomEntityWrapper::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : entity_{},
+        _cached_size_{0},
+        _oneof_case_{} {}
+
+inline void RoomEntityWrapper::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+RoomEntityWrapper::~RoomEntityWrapper() {
+  // @@protoc_insertion_point(destructor:RoomEntityWrapper)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void RoomEntityWrapper::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  if (has_entity()) {
+    clear_entity();
+  }
+  _impl_.~Impl_();
+}
+
+void RoomEntityWrapper::clear_entity() {
+// @@protoc_insertion_point(one_of_clear_start:RoomEntityWrapper)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  switch (entity_case()) {
+    case kLight: {
+      if (GetArena() == nullptr) {
+        delete _impl_.entity_.light_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.entity_.light_);
+      }
+      break;
+    }
+    case kSwitch: {
+      if (GetArena() == nullptr) {
+        delete _impl_.entity_.switch__;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.entity_.switch__);
+      }
+      break;
+    }
+    case ENTITY_NOT_SET: {
+      break;
+    }
+  }
+  _impl_._oneof_case_[0] = ENTITY_NOT_SET;
+}
+
+
+const ::google::protobuf::MessageLite::ClassData*
+RoomEntityWrapper::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(RoomEntityWrapper, _impl_._cached_size_),
+              false,
+          },
+          &RoomEntityWrapper::MergeImpl,
+          &RoomEntityWrapper::kDescriptorMethods,
+          &descriptor_table_protobuf_5fgeneral_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 2, 2, 0, 2> RoomEntityWrapper::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    2, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    2,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_RoomEntityWrapper_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::RoomEntityWrapper>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // .RoomEntityWrapper.LightEntity light = 1;
+    {PROTOBUF_FIELD_OFFSET(RoomEntityWrapper, _impl_.entity_.light_), _Internal::kOneofCaseOffset + 0, 0,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .RoomEntityWrapper.SwitchEntity switch = 2;
+    {PROTOBUF_FIELD_OFFSET(RoomEntityWrapper, _impl_.entity_.switch__), _Internal::kOneofCaseOffset + 0, 1,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::RoomEntityWrapper_LightEntity>()},
+    {::_pbi::TcParser::GetTable<::RoomEntityWrapper_SwitchEntity>()},
+  }}, {{
+  }},
+};
+
+PROTOBUF_NOINLINE void RoomEntityWrapper::Clear() {
+// @@protoc_insertion_point(message_clear_start:RoomEntityWrapper)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  clear_entity();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* RoomEntityWrapper::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:RoomEntityWrapper)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  switch (entity_case()) {
+    case kLight: {
+      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+          1, *_impl_.entity_.light_, _impl_.entity_.light_->GetCachedSize(), target, stream);
+      break;
+    }
+    case kSwitch: {
+      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+          2, *_impl_.entity_.switch__, _impl_.entity_.switch__->GetCachedSize(), target, stream);
+      break;
+    }
+    default:
+      break;
+  }
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:RoomEntityWrapper)
+  return target;
+}
+
+::size_t RoomEntityWrapper::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:RoomEntityWrapper)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  switch (entity_case()) {
+    // .RoomEntityWrapper.LightEntity light = 1;
+    case kLight: {
+      total_size +=
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.entity_.light_);
+      break;
+    }
+    // .RoomEntityWrapper.SwitchEntity switch = 2;
+    case kSwitch: {
+      total_size +=
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.entity_.switch__);
+      break;
+    }
+    case ENTITY_NOT_SET: {
+      break;
+    }
+  }
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void RoomEntityWrapper::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<RoomEntityWrapper*>(&to_msg);
+  auto& from = static_cast<const RoomEntityWrapper&>(from_msg);
+  ::google::protobuf::Arena* arena = _this->GetArena();
+  // @@protoc_insertion_point(class_specific_merge_from_start:RoomEntityWrapper)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (const uint32_t oneof_from_case = from._impl_._oneof_case_[0]) {
+    const uint32_t oneof_to_case = _this->_impl_._oneof_case_[0];
+    const bool oneof_needs_init = oneof_to_case != oneof_from_case;
+    if (oneof_needs_init) {
+      if (oneof_to_case != 0) {
+        _this->clear_entity();
+      }
+      _this->_impl_._oneof_case_[0] = oneof_from_case;
+    }
+
+    switch (oneof_from_case) {
+      case kLight: {
+        if (oneof_needs_init) {
+          _this->_impl_.entity_.light_ =
+              ::google::protobuf::Message::CopyConstruct<::RoomEntityWrapper_LightEntity>(arena, *from._impl_.entity_.light_);
+        } else {
+          _this->_impl_.entity_.light_->MergeFrom(from._internal_light());
+        }
+        break;
+      }
+      case kSwitch: {
+        if (oneof_needs_init) {
+          _this->_impl_.entity_.switch__ =
+              ::google::protobuf::Message::CopyConstruct<::RoomEntityWrapper_SwitchEntity>(arena, *from._impl_.entity_.switch__);
+        } else {
+          _this->_impl_.entity_.switch__->MergeFrom(from._internal_switch_());
+        }
+        break;
+      }
+      case ENTITY_NOT_SET:
+        break;
+    }
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void RoomEntityWrapper::CopyFrom(const RoomEntityWrapper& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:RoomEntityWrapper)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void RoomEntityWrapper::InternalSwap(RoomEntityWrapper* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_.entity_, other->_impl_.entity_);
+  swap(_impl_._oneof_case_[0], other->_impl_._oneof_case_[0]);
+}
+
+::google::protobuf::Metadata RoomEntityWrapper::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class RoomEntitiesPageSettings::_Internal {
+ public:
+};
+
+RoomEntitiesPageSettings::RoomEntitiesPageSettings(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:RoomEntitiesPageSettings)
+}
+inline PROTOBUF_NDEBUG_INLINE RoomEntitiesPageSettings::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::RoomEntitiesPageSettings& from_msg)
+      : entities_{visibility, arena, from.entities_},
+        _cached_size_{0} {}
+
+RoomEntitiesPageSettings::RoomEntitiesPageSettings(
+    ::google::protobuf::Arena* arena,
+    const RoomEntitiesPageSettings& from)
+    : ::google::protobuf::Message(arena) {
+  RoomEntitiesPageSettings* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, id_),
+           offsetof(Impl_, is_scenes_page_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::is_scenes_page_));
+
+  // @@protoc_insertion_point(copy_constructor:RoomEntitiesPageSettings)
+}
+inline PROTOBUF_NDEBUG_INLINE RoomEntitiesPageSettings::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : entities_{visibility, arena},
+        _cached_size_{0} {}
+
+inline void RoomEntitiesPageSettings::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           0,
+           offsetof(Impl_, is_scenes_page_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::is_scenes_page_));
+}
+RoomEntitiesPageSettings::~RoomEntitiesPageSettings() {
+  // @@protoc_insertion_point(destructor:RoomEntitiesPageSettings)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void RoomEntitiesPageSettings::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+RoomEntitiesPageSettings::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_._cached_size_),
+              false,
+          },
+          &RoomEntitiesPageSettings::MergeImpl,
+          &RoomEntitiesPageSettings::kDescriptorMethods,
+          &descriptor_table_protobuf_5fgeneral_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<3, 6, 1, 0, 2> RoomEntitiesPageSettings::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    6, 56,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967232,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    6,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_RoomEntitiesPageSettings_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::RoomEntitiesPageSettings>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int32 id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RoomEntitiesPageSettings, _impl_.id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.id_)}},
+    // int32 page_type = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RoomEntitiesPageSettings, _impl_.page_type_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.page_type_)}},
+    // int32 display_order = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RoomEntitiesPageSettings, _impl_.display_order_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.display_order_)}},
+    // int32 room_id = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RoomEntitiesPageSettings, _impl_.room_id_), 63>(),
+     {32, 63, 0, PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.room_id_)}},
+    // bool is_scenes_page = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(RoomEntitiesPageSettings, _impl_.is_scenes_page_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.is_scenes_page_)}},
+    // repeated .RoomEntityWrapper entities = 6;
+    {::_pbi::TcParser::FastMtR1,
+     {50, 63, 0, PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.entities_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 id = 1;
+    {PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 page_type = 2;
+    {PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.page_type_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 display_order = 3;
+    {PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.display_order_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 room_id = 4;
+    {PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.room_id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // bool is_scenes_page = 5;
+    {PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.is_scenes_page_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // repeated .RoomEntityWrapper entities = 6;
+    {PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.entities_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::RoomEntityWrapper>()},
+  }}, {{
+  }},
+};
+
+PROTOBUF_NOINLINE void RoomEntitiesPageSettings::Clear() {
+// @@protoc_insertion_point(message_clear_start:RoomEntitiesPageSettings)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.entities_.Clear();
+  ::memset(&_impl_.id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.is_scenes_page_) -
+      reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.is_scenes_page_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* RoomEntitiesPageSettings::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:RoomEntitiesPageSettings)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<1>(
+            stream, this->_internal_id(), target);
+  }
+
+  // int32 page_type = 2;
+  if (this->_internal_page_type() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<2>(
+            stream, this->_internal_page_type(), target);
+  }
+
+  // int32 display_order = 3;
+  if (this->_internal_display_order() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<3>(
+            stream, this->_internal_display_order(), target);
+  }
+
+  // int32 room_id = 4;
+  if (this->_internal_room_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<4>(
+            stream, this->_internal_room_id(), target);
+  }
+
+  // bool is_scenes_page = 5;
+  if (this->_internal_is_scenes_page() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        5, this->_internal_is_scenes_page(), target);
+  }
+
+  // repeated .RoomEntityWrapper entities = 6;
+  for (unsigned i = 0, n = static_cast<unsigned>(
+                           this->_internal_entities_size());
+       i < n; i++) {
+    const auto& repfield = this->_internal_entities().Get(i);
+    target =
+        ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+            6, repfield, repfield.GetCachedSize(),
+            target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:RoomEntitiesPageSettings)
+  return target;
+}
+
+::size_t RoomEntitiesPageSettings::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:RoomEntitiesPageSettings)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // repeated .RoomEntityWrapper entities = 6;
+  total_size += 1UL * this->_internal_entities_size();
+  for (const auto& msg : this->_internal_entities()) {
+    total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+  }
+  // int32 id = 1;
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_id());
+  }
+
+  // int32 page_type = 2;
+  if (this->_internal_page_type() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_page_type());
+  }
+
+  // int32 display_order = 3;
+  if (this->_internal_display_order() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_display_order());
+  }
+
+  // int32 room_id = 4;
+  if (this->_internal_room_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_room_id());
+  }
+
+  // bool is_scenes_page = 5;
+  if (this->_internal_is_scenes_page() != 0) {
+    total_size += 2;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void RoomEntitiesPageSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<RoomEntitiesPageSettings*>(&to_msg);
+  auto& from = static_cast<const RoomEntitiesPageSettings&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:RoomEntitiesPageSettings)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_internal_mutable_entities()->MergeFrom(
+      from._internal_entities());
+  if (from._internal_id() != 0) {
+    _this->_impl_.id_ = from._impl_.id_;
+  }
+  if (from._internal_page_type() != 0) {
+    _this->_impl_.page_type_ = from._impl_.page_type_;
+  }
+  if (from._internal_display_order() != 0) {
+    _this->_impl_.display_order_ = from._impl_.display_order_;
+  }
+  if (from._internal_room_id() != 0) {
+    _this->_impl_.room_id_ = from._impl_.room_id_;
+  }
+  if (from._internal_is_scenes_page() != 0) {
+    _this->_impl_.is_scenes_page_ = from._impl_.is_scenes_page_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void RoomEntitiesPageSettings::CopyFrom(const RoomEntitiesPageSettings& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:RoomEntitiesPageSettings)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void RoomEntitiesPageSettings::InternalSwap(RoomEntitiesPageSettings* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.entities_.InternalSwap(&other->_impl_.entities_);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.is_scenes_page_)
+      + sizeof(RoomEntitiesPageSettings::_impl_.is_scenes_page_)
+      - PROTOBUF_FIELD_OFFSET(RoomEntitiesPageSettings, _impl_.id_)>(
+          reinterpret_cast<char*>(&_impl_.id_),
+          reinterpret_cast<char*>(&other->_impl_.id_));
+}
+
+::google::protobuf::Metadata RoomEntitiesPageSettings::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
 // ===================================================================
 
 class RoomSettings::_Internal {
@@ -286,6 +1606,8 @@ inline PROTOBUF_NDEBUG_INLINE RoomSettings::Impl_::Impl_(
         _light_ids_cached_byte_size_{0},
         scene_ids_{visibility, arena, from.scene_ids_},
         _scene_ids_cached_byte_size_{0},
+        entity_page_ids_{visibility, arena, from.entity_page_ids_},
+        _entity_page_ids_cached_byte_size_{0},
         name_(arena, from.name_),
         _cached_size_{0} {}
 
@@ -309,6 +1631,8 @@ inline PROTOBUF_NDEBUG_INLINE RoomSettings::Impl_::Impl_(
         _light_ids_cached_byte_size_{0},
         scene_ids_{visibility, arena},
         _scene_ids_cached_byte_size_{0},
+        entity_page_ids_{visibility, arena},
+        _entity_page_ids_cached_byte_size_{0},
         name_(arena),
         _cached_size_{0} {}
 
@@ -348,15 +1672,15 @@ RoomSettings::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 4, 0, 25, 2> RoomSettings::_table_ = {
+const ::_pbi::TcParseTable<3, 5, 0, 25, 2> RoomSettings::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    4, 24,  // max_field_number, fast_idx_mask
+    5, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967280,  // skipmap
+    4294967264,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    4,  // num_field_entries
+    5,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_RoomSettings_default_instance_._instance,
@@ -366,9 +1690,7 @@ const ::_pbi::TcParseTable<2, 4, 0, 25, 2> RoomSettings::_table_ = {
     ::_pbi::TcParser::GetTable<::RoomSettings>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // repeated int32 scene_ids = 4;
-    {::_pbi::TcParser::FastV32P1,
-     {34, 63, 0, PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.scene_ids_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // int32 id = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(RoomSettings, _impl_.id_), 63>(),
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.id_)}},
@@ -378,6 +1700,14 @@ const ::_pbi::TcParseTable<2, 4, 0, 25, 2> RoomSettings::_table_ = {
     // repeated int32 light_ids = 3;
     {::_pbi::TcParser::FastV32P1,
      {26, 63, 0, PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.light_ids_)}},
+    // repeated int32 scene_ids = 4;
+    {::_pbi::TcParser::FastV32P1,
+     {34, 63, 0, PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.scene_ids_)}},
+    // repeated int32 entity_page_ids = 5;
+    {::_pbi::TcParser::FastV32P1,
+     {42, 63, 0, PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.entity_page_ids_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -392,6 +1722,9 @@ const ::_pbi::TcParseTable<2, 4, 0, 25, 2> RoomSettings::_table_ = {
     (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
     // repeated int32 scene_ids = 4;
     {PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.scene_ids_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
+    // repeated int32 entity_page_ids = 5;
+    {PROTOBUF_FIELD_OFFSET(RoomSettings, _impl_.entity_page_ids_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
   }},
   // no aux_entries
@@ -411,6 +1744,7 @@ PROTOBUF_NOINLINE void RoomSettings::Clear() {
 
   _impl_.light_ids_.Clear();
   _impl_.scene_ids_.Clear();
+  _impl_.entity_page_ids_.Clear();
   _impl_.name_.ClearToEmpty();
   _impl_.id_ = 0;
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -453,6 +1787,15 @@ PROTOBUF_NOINLINE void RoomSettings::Clear() {
     if (byte_size > 0) {
       target = stream->WriteInt32Packed(
           4, _internal_scene_ids(), byte_size, target);
+    }
+  }
+
+  // repeated int32 entity_page_ids = 5;
+  {
+    int byte_size = _impl_._entity_page_ids_cached_byte_size_.Get();
+    if (byte_size > 0) {
+      target = stream->WriteInt32Packed(
+          5, _internal_entity_page_ids(), byte_size, target);
     }
   }
 
@@ -500,6 +1843,19 @@ PROTOBUF_NOINLINE void RoomSettings::Clear() {
     ;
     total_size += tag_size + data_size;
   }
+  // repeated int32 entity_page_ids = 5;
+  {
+    std::size_t data_size = ::_pbi::WireFormatLite::Int32Size(
+        this->_internal_entity_page_ids())
+    ;
+    _impl_._entity_page_ids_cached_byte_size_.Set(::_pbi::ToCachedSize(data_size));
+    std::size_t tag_size = data_size == 0
+        ? 0
+        : 1 + ::_pbi::WireFormatLite::Int32Size(
+                            static_cast<int32_t>(data_size))
+    ;
+    total_size += tag_size + data_size;
+  }
   // string name = 2;
   if (!this->_internal_name().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -526,6 +1882,7 @@ void RoomSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::go
 
   _this->_internal_mutable_light_ids()->MergeFrom(from._internal_light_ids());
   _this->_internal_mutable_scene_ids()->MergeFrom(from._internal_scene_ids());
+  _this->_internal_mutable_entity_page_ids()->MergeFrom(from._internal_entity_page_ids());
   if (!from._internal_name().empty()) {
     _this->_internal_set_name(from._internal_name());
   }
@@ -550,6 +1907,7 @@ void RoomSettings::InternalSwap(RoomSettings* PROTOBUF_RESTRICT other) {
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   _impl_.light_ids_.InternalSwap(&other->_impl_.light_ids_);
   _impl_.scene_ids_.InternalSwap(&other->_impl_.scene_ids_);
+  _impl_.entity_page_ids_.InternalSwap(&other->_impl_.entity_page_ids_);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
         swap(_impl_.id_, other->_impl_.id_);
 }
@@ -788,9 +2146,9 @@ LightSettings::LightSettings(
                offsetof(Impl_, id_),
            reinterpret_cast<const char *>(&from._impl_) +
                offsetof(Impl_, id_),
-           offsetof(Impl_, can_rgb_) -
+           offsetof(Impl_, controlled_from_main_page_) -
                offsetof(Impl_, id_) +
-               sizeof(Impl_::can_rgb_));
+               sizeof(Impl_::controlled_from_main_page_));
 
   // @@protoc_insertion_point(copy_constructor:LightSettings)
 }
@@ -813,9 +2171,9 @@ inline void LightSettings::SharedCtor(::_pb::Arena* arena) {
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, id_),
            0,
-           offsetof(Impl_, can_rgb_) -
+           offsetof(Impl_, controlled_from_main_page_) -
                offsetof(Impl_, id_) +
-               sizeof(Impl_::can_rgb_));
+               sizeof(Impl_::controlled_from_main_page_));
 }
 LightSettings::~LightSettings() {
   // @@protoc_insertion_point(destructor:LightSettings)
@@ -857,15 +2215,15 @@ LightSettings::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<4, 15, 0, 166, 2> LightSettings::_table_ = {
+const ::_pbi::TcParseTable<5, 18, 0, 174, 2> LightSettings::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(LightSettings, _impl_._has_bits_),
     0, // no _extensions_
-    15, 120,  // max_field_number, fast_idx_mask
+    18, 248,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294934528,  // skipmap
+    4294705152,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    15,  // num_field_entries
+    18,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_LightSettings_default_instance_._instance,
@@ -921,6 +2279,28 @@ const ::_pbi::TcParseTable<4, 15, 0, 166, 2> LightSettings::_table_ = {
     // optional string openhab_item_rgb = 15;
     {::_pbi::TcParser::FastUS1,
      {122, 6, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_item_rgb_)}},
+    // int32 entities_page_id = 16;
+    {::_pbi::TcParser::FastV32S2,
+     {384, 63, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.entities_page_id_)}},
+    // int32 entities_page_room_view_position = 17;
+    {::_pbi::TcParser::FastV32S2,
+     {392, 63, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.entities_page_room_view_position_)}},
+    // bool controlled_from_main_page = 18;
+    {::_pbi::TcParser::FastV8S2,
+     {400, 63, 0, PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.controlled_from_main_page_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -969,10 +2349,19 @@ const ::_pbi::TcParseTable<4, 15, 0, 166, 2> LightSettings::_table_ = {
     // optional string openhab_item_rgb = 15;
     {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.openhab_item_rgb_), _Internal::kHasBitsOffset + 6, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int32 entities_page_id = 16;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.entities_page_id_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 entities_page_room_view_position = 17;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.entities_page_room_view_position_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // bool controlled_from_main_page = 18;
+    {PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.controlled_from_main_page_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
   }},
   // no aux_entries
   {{
-    "\15\0\0\4\4\0\0\0\0\23\14\24\23\23\27\20"
+    "\15\0\0\4\4\0\0\0\0\23\14\24\23\23\27\20\0\0\0\0\0\0\0\0"
     "LightSettings"
     "name"
     "type"
@@ -1020,8 +2409,8 @@ PROTOBUF_NOINLINE void LightSettings::Clear() {
     }
   }
   ::memset(&_impl_.id_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.can_rgb_) -
-      reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.can_rgb_));
+      reinterpret_cast<char*>(&_impl_.controlled_from_main_page_) -
+      reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.controlled_from_main_page_));
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -1148,6 +2537,27 @@ PROTOBUF_NOINLINE void LightSettings::Clear() {
     target = stream->WriteStringMaybeAliased(15, _s, target);
   }
 
+  // int32 entities_page_id = 16;
+  if (this->_internal_entities_page_id() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        16, this->_internal_entities_page_id(), target);
+  }
+
+  // int32 entities_page_room_view_position = 17;
+  if (this->_internal_entities_page_room_view_position() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        17, this->_internal_entities_page_room_view_position(), target);
+  }
+
+  // bool controlled_from_main_page = 18;
+  if (this->_internal_controlled_from_main_page() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        18, this->_internal_controlled_from_main_page(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -1255,6 +2665,23 @@ PROTOBUF_NOINLINE void LightSettings::Clear() {
     total_size += 2;
   }
 
+  // int32 entities_page_id = 16;
+  if (this->_internal_entities_page_id() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_entities_page_id());
+  }
+
+  // int32 entities_page_room_view_position = 17;
+  if (this->_internal_entities_page_room_view_position() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_entities_page_room_view_position());
+  }
+
+  // bool controlled_from_main_page = 18;
+  if (this->_internal_controlled_from_main_page() != 0) {
+    total_size += 3;
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -1315,6 +2742,15 @@ void LightSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::g
   if (from._internal_can_rgb() != 0) {
     _this->_impl_.can_rgb_ = from._impl_.can_rgb_;
   }
+  if (from._internal_entities_page_id() != 0) {
+    _this->_impl_.entities_page_id_ = from._impl_.entities_page_id_;
+  }
+  if (from._internal_entities_page_room_view_position() != 0) {
+    _this->_impl_.entities_page_room_view_position_ = from._impl_.entities_page_room_view_position_;
+  }
+  if (from._internal_controlled_from_main_page() != 0) {
+    _this->_impl_.controlled_from_main_page_ = from._impl_.controlled_from_main_page_;
+  }
   _this->_impl_._has_bits_[0] |= cached_has_bits;
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -1343,8 +2779,8 @@ void LightSettings::InternalSwap(LightSettings* PROTOBUF_RESTRICT other) {
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.openhab_item_color_temp_, &other->_impl_.openhab_item_color_temp_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.openhab_item_rgb_, &other->_impl_.openhab_item_rgb_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.can_rgb_)
-      + sizeof(LightSettings::_impl_.can_rgb_)
+      PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.controlled_from_main_page_)
+      + sizeof(LightSettings::_impl_.controlled_from_main_page_)
       - PROTOBUF_FIELD_OFFSET(LightSettings, _impl_.id_)>(
           reinterpret_cast<char*>(&_impl_.id_),
           reinterpret_cast<char*>(&other->_impl_.id_));

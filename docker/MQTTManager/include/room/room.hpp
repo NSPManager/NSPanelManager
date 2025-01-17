@@ -3,12 +3,15 @@
 
 #include "entity/entity.hpp"
 #include "protobuf_nspanel.pb.h"
+#include "room/room_entities_page.hpp"
 #include <chrono>
-#include <list>
+#include <vector>
+#include <memory>
+#include <mutex>
 #include <nlohmann/json_fwd.hpp>
 #include <protobuf/protobuf_general.pb.h>
 #include <string>
-class Room : public MqttManagerEntity {
+class Room {
 public:
   /**
    * Initalize a room and load room settings from given JSON
@@ -32,45 +35,51 @@ public:
   std::string get_name();
 
   /**
-   * Get entity type.
-   */
-  MQTT_MANAGER_ENTITY_TYPE get_type();
-
-  /**
-   * Get controller for this entity.
-   */
-  MQTT_MANAGER_ENTITY_CONTROLLER get_controller();
-
-  /**
    * Post init room.
    */
   void post_init();
 
   /**
-   * Attach an entity to this room.
-   */
-  void attach_entity(MqttManagerEntity *entity);
-
-  /**
-   * Detach an entity from this room.
-   */
-  void detach_entity(MqttManagerEntity *entity);
+  * Get all entities in the room.
+  * Return a std::vector of std::shared_ptr to all entities in room.
+  */
+  std::vector<std::shared_ptr<MqttManagerEntity>> get_all_entities();
 
   /**
    * Get all entities matching the specified type that has the specified ID.
-   * Return std::list of pointers to entities.
+   * Return std::vector of pointers to entities.
    */
   template <class EntityClass>
-  std::list<EntityClass *> get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE type) {
-    std::list<EntityClass *> entities;
-    for (MqttManagerEntity *entity : this->_entities) {
-      if (entity->get_type() == type) {
-        entities.push_back(static_cast<EntityClass *>(entity));
+  std::vector<std::shared_ptr<EntityClass>> get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE type) {
+    std::lock_guard<std::mutex> mutex_guard(this->_entities_pages_mutex);
+    std::vector<std::shared_ptr<EntityClass>> entities;
+    for (std::shared_ptr<RoomEntitiesPage> &page : this->_entity_pages) {
+        std::vector<std::shared_ptr<EntityClass>> page_entities = page->get_entities_by_type<EntityClass>(type);
+        entities.insert(entities.end(), page_entities.begin(), page_entities.end());
       }
-    }
     return entities;
   }
 
+  /**
+  * Get a NSPanelRoomStatus protobuf object with relevant data.
+  * Return true if successful, otherwise false.
+  */
+  bool get_protobuf_room_status(NSPanelRoomStatus *result);
+
+  /**
+  * Get the total number of entity pages in this room.
+  */
+  uint16_t get_number_of_entity_pages();
+
+  /**
+  * Get a filled in NSPanelRoomEntitiesPage protobuf object and store it in @param result.
+  * Return true if successful, otherwise false.
+  */
+  bool get_protobuf_room_entity_page(uint16_t page_index, NSPanelRoomEntitiesPage *result);
+
+  /**
+  * Callback when that gets run when an entitiy has changed state
+  */
   void entity_changed_callback(MqttManagerEntity *entity);
 
   /**
@@ -78,16 +87,42 @@ public:
    */
   void command_callback(NSPanelMQTTManagerCommand &command);
 
+  /**
+   * Register a room changed callback listener.
+   */
+  template <typename CALLBACK_BIND>
+  void attach_room_changed_callback(CALLBACK_BIND callback) {
+    this->_room_changed_callbacks.connect(callback);
+  }
+
+  /**
+   * Unregister a room changed callback listener.
+   */
+  template <typename CALLBACK_BIND>
+  void detach_room_changed_callback(CALLBACK_BIND callback) {
+    this->_room_changed_callbacks.disconnect(callback);
+  }
+
+
 private:
   uint16_t _id;
   std::string _name;
   std::string _mqtt_status_topic;
-  std::list<MqttManagerEntity *> _entities;
-  void _publish_protobuf_status();
+
+  // All pages with entities for this room
+  std::vector<std::shared_ptr<RoomEntitiesPage>> _entity_pages;
+
+  // Mutex to only allow one task at the time to access the entity_pages
+  std::mutex _entities_pages_mutex;
+
   // If set to true, automatic status updates over MQTT when entities changes are disabled.
   bool _send_status_updates;
+
   // When was the last status update sent.
   std::chrono::time_point<std::chrono::system_clock> _last_status_update;
+
+  // List of callback to call when this room is changed.
+  boost::signals2::signal<void(Room *)> _room_changed_callbacks;
 };
 
 #endif // !MQTT_MANAGER_ROOM_H

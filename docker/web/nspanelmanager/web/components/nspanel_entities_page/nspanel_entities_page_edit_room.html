@@ -117,9 +117,12 @@
           $(".draggable-entity-item-target-slot").each((index, element) => {
             if($(element).data('slot-id') == jq_max_overlap_element.data('slot-id') && $(element).data('page-id') == jq_max_overlap_element.data('page-id')) {
               jq_max_overlap_element.children('div').addClass("border-info");
+              jq_max_overlap_element.children('div').removeClass("border-neutral");
             } else if($(element).data('slot-id') == $(this).parent().data('slot-id') && $(element).data('page-id') == $(this).parent().data('page-id')) {
               jq_max_overlap_element.children('div').addClass("border-info");
+              jq_max_overlap_element.children('div').removeClass("border-neutral");
             } else {
+              $(element).children('div').addClass("border-neutral");
               $(element).children('div').removeClass("border-info");
             }
           });

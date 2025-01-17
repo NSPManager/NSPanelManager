@@ -1,8 +1,10 @@
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "light/light.hpp"
+#include "room/room.hpp"
 #include "web_helper/WebHelper.hpp"
 #include <curl/curl.h>
+#include <memory>
 #include <nlohmann/detail/value_t.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <scenes/nspm_scene.hpp>
@@ -70,13 +72,17 @@ void NSPMScene::save() {
   SPDLOG_DEBUG("Saving scene {}::{}.", this->_id, this->_name);
   this->_light_states.clear(); // Clear current light states
   std::list<nlohmann::json> json_light_states;
-  std::list<Light *> lights;
+  std::vector<std::shared_ptr<Light>> lights;
+  // TODO: Only add light to scene if it is "controllable from main page"
   if (this->_is_global_scene) {
-    lights = EntityManager::get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+    for(std::shared_ptr<Room> room : EntityManager::get_all_rooms()) {
+        std::vector<std::shared_ptr<Light>> room_lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+        lights.insert(lights.end(), room_lights.begin(), room_lights.end());
+    }
   } else {
     lights = this->_room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
   }
-  for (Light *light : lights) {
+  for (std::shared_ptr<Light> light : lights) {
     SPDLOG_TRACE("Saving light {}::{}", light->get_id(), light->get_name());
     nlohmann::json light_state_json;
     LightState new_light_state;
@@ -149,7 +155,7 @@ MQTT_MANAGER_ENTITY_CONTROLLER NSPMScene::get_controller() {
 
 void NSPMScene::post_init() {
   if (!this->_is_global_scene) {
-    Room *room_entity = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, this->_room_id);
+    std::shared_ptr<Room> room_entity = EntityManager::get_room(this->_room_id);
     if (room_entity != nullptr) {
       this->_room = room_entity;
     } else {
@@ -158,14 +164,24 @@ void NSPMScene::post_init() {
     }
 
     for (LightState &state : this->_light_states) {
-      Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, state.light_id);
-      if (light != nullptr) {
-        SPDLOG_DEBUG("Attaching light {}::{} to light state attached to scene {}::{}.", light->get_id(), light->get_name(), this->_id, this->_name);
-        state._light = light;
-        light->attach_delete_callback(this->light_destroyed_callback);
-      } else {
-        SPDLOG_ERROR("Did not find any light matching a light state for scene {}::{}.", this->_id, this->_name);
-      }
+        bool found_light = false;
+        for(std::shared_ptr<Room> room : EntityManager::get_all_rooms()) {
+            for(std::shared_ptr<Light> light : room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT)) {
+                if(light->get_id() == state.light_id) {
+                    SPDLOG_DEBUG("Attaching light {}::{} to light state attached to scene {}::{}.", light->get_id(), light->get_name(), this->_id, this->_name);
+                    state._light = light;
+                    light->attach_delete_callback(this->light_destroyed_callback);
+                    found_light = true;
+                    break;
+                }
+            }
+            if(found_light) {
+                break;
+            }
+        }
+        if(!found_light) {
+            SPDLOG_ERROR("Did not find any light matching a light state for scene {}::{}.", this->_id, this->_name);
+        }
     }
   }
 }
@@ -183,12 +199,12 @@ void NSPMScene::remove_light(Light *light) {
 }
 
 void NSPMScene::light_destroyed_callback(Light *light) {
-  std::list<Scene *> all_nspm_scenes = EntityManager::get_all_entities_by_type<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE);
-  for (MqttManagerEntity *entity : all_nspm_scenes) {
-    NSPMScene *scene = dynamic_cast<NSPMScene *>(entity);
-    if (scene != nullptr) {
-      scene->remove_light(light);
-    }
+  std::vector<std::shared_ptr<Scene>> all_scene_entities = EntityManager::get_all_entities_by_type<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE);
+  for (auto entity : all_scene_entities) {
+      if(entity->get_controller() == MQTT_MANAGER_ENTITY_CONTROLLER::NSPM) {
+          std::shared_ptr<NSPMScene> scene = std::static_pointer_cast<NSPMScene>(entity);
+          scene->remove_light(light);
+      }
   }
 }
 

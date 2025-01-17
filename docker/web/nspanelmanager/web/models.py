@@ -46,12 +46,32 @@ class Room(models.Model):
             room.light_ids.append(light.id)
         for scene in self.scene_set.all():
             room.scene_ids.append(scene.id)
+        for page in self.roomentitiespage_set.all():
+            room.entity_page_ids.append(page.id)
         return room
 
 class RoomEntitiesPage(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     display_order = models.IntegerField()
     page_type = models.IntegerField() # Is this page displaying 4, 8 or 12 entities?
+    is_scenes_page = models.BooleanField(default=False)
+
+    def get_protobuf_object(self):
+        from web.protobuf import protobuf_formats_pb2, protobuf_general_pb2, protobuf_mqttmanager_pb2
+        ret_buf = protobuf_general_pb2.RoomEntitiesPageSettings()
+        ret_buf.id = self.id
+        ret_buf.page_type = self.page_type
+        ret_buf.display_order = self.display_order
+        ret_buf.room_id = self.room.id
+        ret_buf.is_scenes_page = self.is_scenes_page
+
+        # Add assigned lights
+        for light in self.light_set.all():
+            wrapper = ret_buf.entities.add()
+            wrapper.light.id = light.id
+            wrapper.light.name = light.friendly_name
+            wrapper.light.room_view_position = light.room_view_position
+        return ret_buf
 
 
 class NSPanel(models.Model):
@@ -133,6 +153,9 @@ class Light(models.Model):
         proto_light.can_dim = self.can_dim
         proto_light.can_color_temperature = self.can_color_temperature
         proto_light.can_rgb = self.can_rgb
+        proto_light.entities_page_id = self.entities_page.id
+        proto_light.entities_page_room_view_position = self.room_view_position
+        proto_light.controlled_from_main_page = self.controlled_by_nspanel_main_page
 
         if proto_light.type == "home_assistant":
             proto_light.home_assistant_name = self.home_assistant_name

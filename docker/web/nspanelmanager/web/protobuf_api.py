@@ -11,7 +11,7 @@ from .mqttmanager_ipc import send_ipc_request
 
 from web.protobuf import protobuf_formats_pb2, protobuf_general_pb2, protobuf_mqttmanager_pb2
 
-from .models import NSPanel, Room, Light, LightState, Scene, RelayGroup
+from .models import NSPanel, Room, Light, LightState, RoomEntitiesPage, Scene, RelayGroup
 from .apps import start_mqtt_manager
 from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default, set_setting_value
 
@@ -194,6 +194,19 @@ def mqttmanager_get_all_lights(request):
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
 
+
+def mqttmanager_get_light(request, light_id):
+    try:
+        if request.method == "GET":
+            proto = Light.objects.get(id=light_id).get_protobuf_object()
+            return HttpResponse(proto.SerializeToString(), status=200)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
 def mqttmanager_get_all_rooms(request):
     try:
         if request.method == "GET":
@@ -202,6 +215,46 @@ def mqttmanager_get_all_rooms(request):
                 proto.rooms.extend([room.get_protobuf_object()])
 
             return HttpResponse(proto.SerializeToString(), status=200)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+def mqttmanager_get_room_entities_page(request, page_id):
+    try:
+        if request.method == "GET":
+            proto = RoomEntitiesPage.objects.get(id=page_id).get_protobuf_object()
+            return HttpResponse(proto.SerializeToString(), status=200)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+def mqttmanager_get_entity_at_room_entities_page_position(request, page_id, room_view_position):
+    try:
+        if request.method == "GET":
+            page = RoomEntitiesPage.objects.get(id=page_id)
+            proto = protobuf_general_pb2.RoomEntityWrapper()
+
+            entities = page.light_set.filter(room_view_position=room_view_position).all()
+            if entities.count() > 0:
+                proto.light.id = entities.first().id
+                proto.light.name = entities.first().friendly_name
+                proto.light.room_view_position = room_view_position
+                return HttpResponse(proto.SerializeToString(), status=200)
+
+            entities = page.switch_set.filter(room_view_position=room_view_position).all()
+            if entities.count() > 0:
+                proto.switch.id = entities.first().id
+                proto.switch.name = entities.first().friendly_name
+                proto.switch.room_view_position = room_view_position
+                return HttpResponse(proto.SerializeToString(), status=200)
+
+            return JsonResponse({"status": "error", "text": "No entity allocated."}, status=500)
         else:
             return JsonResponse({"status": "error"}, status=405)
     except Exception as ex:

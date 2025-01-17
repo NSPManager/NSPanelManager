@@ -9,8 +9,15 @@ public:
   virtual void remove() = 0;
   virtual void update_config(nlohmann::json &config) = 0;
 
+  uint32_t get_entity_page_id();
+  uint8_t get_entity_page_slot();
+
   virtual std::string get_name() = 0;
   virtual bool can_save() = 0;
+
+private:
+    uint32_t _page_id;
+    uint8_t _page_slot;
 };
 
 #endif // !MQTT_MANAGER_SCENE_BASE_H

@@ -24,19 +24,27 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16protobuf_general.proto\"N\n\x0cRoomSettings\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tlight_ids\x18\x03 \x03(\x05\x12\x11\n\tscene_ids\x18\x04 \x03(\x05\"5\n\x15MultipleRoomsSettings\x12\x1c\n\x05rooms\x18\x01 \x03(\x0b\x32\r.RoomSettings\"\xaf\x04\n\rLightSettings\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0f\n\x07room_id\x18\x02 \x01(\x05\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0c\n\x04type\x18\x04 \x01(\t\x12\x18\n\x10is_ceiling_light\x18\x05 \x01(\x08\x12\x0f\n\x07\x63\x61n_dim\x18\x06 \x01(\x08\x12\x1d\n\x15\x63\x61n_color_temperature\x18\x07 \x01(\x08\x12\x0f\n\x07\x63\x61n_rgb\x18\x08 \x01(\x08\x12 \n\x13home_assistant_name\x18\t \x01(\tH\x00\x88\x01\x01\x12\x19\n\x0copenhab_name\x18\n \x01(\tH\x01\x88\x01\x01\x12!\n\x14openhab_control_mode\x18\x0b \x01(\tH\x02\x88\x01\x01\x12 \n\x13openhab_item_switch\x18\x0c \x01(\tH\x03\x88\x01\x01\x12 \n\x13openhab_item_dimmer\x18\r \x01(\tH\x04\x88\x01\x01\x12$\n\x17openhab_item_color_temp\x18\x0e \x01(\tH\x05\x88\x01\x01\x12\x1d\n\x10openhab_item_rgb\x18\x0f \x01(\tH\x06\x88\x01\x01\x42\x16\n\x14_home_assistant_nameB\x0f\n\r_openhab_nameB\x17\n\x15_openhab_control_modeB\x16\n\x14_openhab_item_switchB\x16\n\x14_openhab_item_dimmerB\x1a\n\x18_openhab_item_color_tempB\x13\n\x11_openhab_item_rgb\"8\n\x16MultipleLightsSettings\x12\x1e\n\x06lights\x18\x01 \x03(\x0b\x32\x0e.LightSettingsb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16protobuf_general.proto\"\x8c\x02\n\x11RoomEntityWrapper\x12/\n\x05light\x18\x01 \x01(\x0b\x32\x1e.RoomEntityWrapper.LightEntityH\x00\x12\x31\n\x06switch\x18\x02 \x01(\x0b\x32\x1f.RoomEntityWrapper.SwitchEntityH\x00\x1a\x43\n\x0bLightEntity\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x1a\n\x12room_view_position\x18\x03 \x01(\x05\x1a\x44\n\x0cSwitchEntity\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x1a\n\x12room_view_position\x18\x03 \x01(\x05\x42\x08\n\x06\x65ntity\"\x9f\x01\n\x18RoomEntitiesPageSettings\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x11\n\tpage_type\x18\x02 \x01(\x05\x12\x15\n\rdisplay_order\x18\x03 \x01(\x05\x12\x0f\n\x07room_id\x18\x04 \x01(\x05\x12\x16\n\x0eis_scenes_page\x18\x05 \x01(\x08\x12$\n\x08\x65ntities\x18\x06 \x03(\x0b\x32\x12.RoomEntityWrapper\"g\n\x0cRoomSettings\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tlight_ids\x18\x03 \x03(\x05\x12\x11\n\tscene_ids\x18\x04 \x03(\x05\x12\x17\n\x0f\x65ntity_page_ids\x18\x05 \x03(\x05\"5\n\x15MultipleRoomsSettings\x12\x1c\n\x05rooms\x18\x01 \x03(\x0b\x32\r.RoomSettings\"\x96\x05\n\rLightSettings\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0f\n\x07room_id\x18\x02 \x01(\x05\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0c\n\x04type\x18\x04 \x01(\t\x12\x18\n\x10is_ceiling_light\x18\x05 \x01(\x08\x12\x0f\n\x07\x63\x61n_dim\x18\x06 \x01(\x08\x12\x1d\n\x15\x63\x61n_color_temperature\x18\x07 \x01(\x08\x12\x0f\n\x07\x63\x61n_rgb\x18\x08 \x01(\x08\x12 \n\x13home_assistant_name\x18\t \x01(\tH\x00\x88\x01\x01\x12\x19\n\x0copenhab_name\x18\n \x01(\tH\x01\x88\x01\x01\x12!\n\x14openhab_control_mode\x18\x0b \x01(\tH\x02\x88\x01\x01\x12 \n\x13openhab_item_switch\x18\x0c \x01(\tH\x03\x88\x01\x01\x12 \n\x13openhab_item_dimmer\x18\r \x01(\tH\x04\x88\x01\x01\x12$\n\x17openhab_item_color_temp\x18\x0e \x01(\tH\x05\x88\x01\x01\x12\x1d\n\x10openhab_item_rgb\x18\x0f \x01(\tH\x06\x88\x01\x01\x12\x18\n\x10\x65ntities_page_id\x18\x10 \x01(\x05\x12(\n entities_page_room_view_position\x18\x11 \x01(\x05\x12!\n\x19\x63ontrolled_from_main_page\x18\x12 \x01(\x08\x42\x16\n\x14_home_assistant_nameB\x0f\n\r_openhab_nameB\x17\n\x15_openhab_control_modeB\x16\n\x14_openhab_item_switchB\x16\n\x14_openhab_item_dimmerB\x1a\n\x18_openhab_item_color_tempB\x13\n\x11_openhab_item_rgb\"8\n\x16MultipleLightsSettings\x12\x1e\n\x06lights\x18\x01 \x03(\x0b\x32\x0e.LightSettingsb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'protobuf_general_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_ROOMSETTINGS']._serialized_start=26
-  _globals['_ROOMSETTINGS']._serialized_end=104
-  _globals['_MULTIPLEROOMSSETTINGS']._serialized_start=106
-  _globals['_MULTIPLEROOMSSETTINGS']._serialized_end=159
-  _globals['_LIGHTSETTINGS']._serialized_start=162
-  _globals['_LIGHTSETTINGS']._serialized_end=721
-  _globals['_MULTIPLELIGHTSSETTINGS']._serialized_start=723
-  _globals['_MULTIPLELIGHTSSETTINGS']._serialized_end=779
+  _globals['_ROOMENTITYWRAPPER']._serialized_start=27
+  _globals['_ROOMENTITYWRAPPER']._serialized_end=295
+  _globals['_ROOMENTITYWRAPPER_LIGHTENTITY']._serialized_start=148
+  _globals['_ROOMENTITYWRAPPER_LIGHTENTITY']._serialized_end=215
+  _globals['_ROOMENTITYWRAPPER_SWITCHENTITY']._serialized_start=217
+  _globals['_ROOMENTITYWRAPPER_SWITCHENTITY']._serialized_end=285
+  _globals['_ROOMENTITIESPAGESETTINGS']._serialized_start=298
+  _globals['_ROOMENTITIESPAGESETTINGS']._serialized_end=457
+  _globals['_ROOMSETTINGS']._serialized_start=459
+  _globals['_ROOMSETTINGS']._serialized_end=562
+  _globals['_MULTIPLEROOMSSETTINGS']._serialized_start=564
+  _globals['_MULTIPLEROOMSSETTINGS']._serialized_end=617
+  _globals['_LIGHTSETTINGS']._serialized_start=620
+  _globals['_LIGHTSETTINGS']._serialized_end=1282
+  _globals['_MULTIPLELIGHTSSETTINGS']._serialized_start=1284
+  _globals['_MULTIPLELIGHTSSETTINGS']._serialized_end=1340
 # @@protoc_insertion_point(module_scope)

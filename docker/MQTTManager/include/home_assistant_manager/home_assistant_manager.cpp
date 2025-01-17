@@ -158,7 +158,9 @@ void HomeAssistantManager::_process_home_assistant_event(nlohmann::json &event_d
     if (event_data["event"].contains("event_type") && !event_data["event"]["event_type"].is_null()) {
       if (std::string(event_data["event"]["event_type"]).compare("state_changed") == 0) {
         std::string home_assistant_entity_name = event_data["event"]["data"]["entity_id"];
-        HomeAssistantManager::_home_assistant_observers[home_assistant_entity_name](event_data);
+        if(HomeAssistantManager::_home_assistant_observers.find(home_assistant_entity_name) != HomeAssistantManager::_home_assistant_observers.end()) {
+            HomeAssistantManager::_home_assistant_observers.at(home_assistant_entity_name)(event_data);
+        }
       }
     }
   }

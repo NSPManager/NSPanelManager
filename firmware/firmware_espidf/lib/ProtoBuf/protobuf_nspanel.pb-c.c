@@ -232,6 +232,57 @@ void   nspanel_light_status__free_unpacked
   assert(message->base.descriptor == &nspanel_light_status__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
+void   nspanel_room_entities_page__entity_slot__init
+                     (NSPanelRoomEntitiesPage__EntitySlot         *message)
+{
+  static const NSPanelRoomEntitiesPage__EntitySlot init_value = NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__INIT;
+  *message = init_value;
+}
+void   nspanel_room_entities_page__init
+                     (NSPanelRoomEntitiesPage         *message)
+{
+  static const NSPanelRoomEntitiesPage init_value = NSPANEL_ROOM_ENTITIES_PAGE__INIT;
+  *message = init_value;
+}
+size_t nspanel_room_entities_page__get_packed_size
+                     (const NSPanelRoomEntitiesPage *message)
+{
+  assert(message->base.descriptor == &nspanel_room_entities_page__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t nspanel_room_entities_page__pack
+                     (const NSPanelRoomEntitiesPage *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &nspanel_room_entities_page__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t nspanel_room_entities_page__pack_to_buffer
+                     (const NSPanelRoomEntitiesPage *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &nspanel_room_entities_page__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+NSPanelRoomEntitiesPage *
+       nspanel_room_entities_page__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (NSPanelRoomEntitiesPage *)
+     protobuf_c_message_unpack (&nspanel_room_entities_page__descriptor,
+                                allocator, len, data);
+}
+void   nspanel_room_entities_page__free_unpacked
+                     (NSPanelRoomEntitiesPage *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &nspanel_room_entities_page__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
 void   nspanel_room_status__init
                      (NSPanelRoomStatus         *message)
 {
@@ -344,6 +395,36 @@ void   nspanel_mqttmanager_command__light_command__init
                      (NSPanelMQTTManagerCommand__LightCommand         *message)
 {
   static const NSPanelMQTTManagerCommand__LightCommand init_value = NSPANEL_MQTTMANAGER_COMMAND__LIGHT_COMMAND__INIT;
+  *message = init_value;
+}
+void   nspanel_mqttmanager_command__next_room__init
+                     (NSPanelMQTTManagerCommand__NextRoom         *message)
+{
+  static const NSPanelMQTTManagerCommand__NextRoom init_value = NSPANEL_MQTTMANAGER_COMMAND__NEXT_ROOM__INIT;
+  *message = init_value;
+}
+void   nspanel_mqttmanager_command__previous_room__init
+                     (NSPanelMQTTManagerCommand__PreviousRoom         *message)
+{
+  static const NSPanelMQTTManagerCommand__PreviousRoom init_value = NSPANEL_MQTTMANAGER_COMMAND__PREVIOUS_ROOM__INIT;
+  *message = init_value;
+}
+void   nspanel_mqttmanager_command__next_entities_page__init
+                     (NSPanelMQTTManagerCommand__NextEntitiesPage         *message)
+{
+  static const NSPanelMQTTManagerCommand__NextEntitiesPage init_value = NSPANEL_MQTTMANAGER_COMMAND__NEXT_ENTITIES_PAGE__INIT;
+  *message = init_value;
+}
+void   nspanel_mqttmanager_command__previous_entities_page__init
+                     (NSPanelMQTTManagerCommand__PreviousEntitiesPage         *message)
+{
+  static const NSPanelMQTTManagerCommand__PreviousEntitiesPage init_value = NSPANEL_MQTTMANAGER_COMMAND__PREVIOUS_ENTITIES_PAGE__INIT;
+  *message = init_value;
+}
+void   nspanel_mqttmanager_command__toggle_entity_from_entities_page__init
+                     (NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage         *message)
+{
+  static const NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage init_value = NSPANEL_MQTTMANAGER_COMMAND__TOGGLE_ENTITY_FROM_ENTITIES_PAGE__INIT;
   *message = init_value;
 }
 void   nspanel_mqttmanager_command__init
@@ -489,7 +570,7 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_screensaver_mode__descript
   nspanel_config__nspanel_screensaver_mode__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[30] =
+static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[31] =
 {
   {
     "name",
@@ -851,6 +932,18 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[30] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "nspanel_id",
+    31,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, nspanel_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_config__field_indices_by_name[] = {
   25,   /* field[25] = button1_detached_light_id */
@@ -869,6 +962,7 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
   13,   /* field[13] = is_us_panel */
   4,   /* field[4] = min_button_push_time */
   0,   /* field[0] = name */
+  30,   /* field[30] = nspanel_id */
   28,   /* field[28] = optimistic_mode */
   29,   /* field[29] = raise_light_level_to_100_above */
   16,   /* field[16] = relay1_default_mode */
@@ -887,7 +981,7 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
 static const ProtobufCIntRange nspanel_config__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 30 }
+  { 0, 31 }
 };
 const ProtobufCMessageDescriptor nspanel_config__descriptor =
 {
@@ -897,7 +991,7 @@ const ProtobufCMessageDescriptor nspanel_config__descriptor =
   "NSPanelConfig",
   "",
   sizeof(NSPanelConfig),
-  30,
+  31,
   nspanel_config__field_descriptors,
   nspanel_config__field_indices_by_name,
   1,  nspanel_config__number_ranges,
@@ -1273,7 +1367,174 @@ const ProtobufCMessageDescriptor nspanel_light_status__descriptor =
   (ProtobufCMessageInit) nspanel_light_status__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor nspanel_room_status__field_descriptors[14] =
+static const ProtobufCFieldDescriptor nspanel_room_entities_page__entity_slot__field_descriptors[5] =
+{
+  {
+    "room_view_position",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomEntitiesPage__EntitySlot, room_view_position),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "name",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomEntitiesPage__EntitySlot, name),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "icon",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomEntitiesPage__EntitySlot, icon),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "pco",
+    4,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomEntitiesPage__EntitySlot, pco),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "pco2",
+    5,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomEntitiesPage__EntitySlot, pco2),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_room_entities_page__entity_slot__field_indices_by_name[] = {
+  2,   /* field[2] = icon */
+  1,   /* field[1] = name */
+  3,   /* field[3] = pco */
+  4,   /* field[4] = pco2 */
+  0,   /* field[0] = room_view_position */
+};
+static const ProtobufCIntRange nspanel_room_entities_page__entity_slot__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 5 }
+};
+const ProtobufCMessageDescriptor nspanel_room_entities_page__entity_slot__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelRoomEntitiesPage.EntitySlot",
+  "EntitySlot",
+  "NSPanelRoomEntitiesPage__EntitySlot",
+  "",
+  sizeof(NSPanelRoomEntitiesPage__EntitySlot),
+  5,
+  nspanel_room_entities_page__entity_slot__field_descriptors,
+  nspanel_room_entities_page__entity_slot__field_indices_by_name,
+  1,  nspanel_room_entities_page__entity_slot__number_ranges,
+  (ProtobufCMessageInit) nspanel_room_entities_page__entity_slot__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor nspanel_room_entities_page__field_descriptors[4] =
+{
+  {
+    "id",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomEntitiesPage, id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "page_type",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomEntitiesPage, page_type),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "header_text",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomEntitiesPage, header_text),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "entities",
+    4,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(NSPanelRoomEntitiesPage, n_entities),
+    offsetof(NSPanelRoomEntitiesPage, entities),
+    &nspanel_room_entities_page__entity_slot__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_room_entities_page__field_indices_by_name[] = {
+  3,   /* field[3] = entities */
+  2,   /* field[2] = header_text */
+  0,   /* field[0] = id */
+  1,   /* field[1] = page_type */
+};
+static const ProtobufCIntRange nspanel_room_entities_page__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 4 }
+};
+const ProtobufCMessageDescriptor nspanel_room_entities_page__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelRoomEntitiesPage",
+  "NSPanelRoomEntitiesPage",
+  "NSPanelRoomEntitiesPage",
+  "",
+  sizeof(NSPanelRoomEntitiesPage),
+  4,
+  nspanel_room_entities_page__field_descriptors,
+  nspanel_room_entities_page__field_indices_by_name,
+  1,  nspanel_room_entities_page__number_ranges,
+  (ProtobufCMessageInit) nspanel_room_entities_page__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor nspanel_room_status__field_descriptors[12] =
 {
   {
     "id",
@@ -1372,72 +1633,48 @@ static const ProtobufCFieldDescriptor nspanel_room_status__field_descriptors[14]
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "lights",
+    "num_ceiling_lights",
     9,
-    PROTOBUF_C_LABEL_REPEATED,
-    PROTOBUF_C_TYPE_MESSAGE,
-    offsetof(NSPanelRoomStatus, n_lights),
-    offsetof(NSPanelRoomStatus, lights),
-    &nspanel_light_status__descriptor,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomStatus, num_ceiling_lights),
+    NULL,
     NULL,
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "scenes",
+    "num_table_lights",
     10,
-    PROTOBUF_C_LABEL_REPEATED,
-    PROTOBUF_C_TYPE_MESSAGE,
-    offsetof(NSPanelRoomStatus, n_scenes),
-    offsetof(NSPanelRoomStatus, scenes),
-    &nspanel_scene__descriptor,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomStatus, num_table_lights),
+    NULL,
     NULL,
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "number_of_ceiling_lights",
+    "num_ceiling_lights_on",
     11,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
-    offsetof(NSPanelRoomStatus, number_of_ceiling_lights),
+    offsetof(NSPanelRoomStatus, num_ceiling_lights_on),
     NULL,
     NULL,
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "number_of_table_lights",
+    "num_table_lights_on",
     12,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
-    offsetof(NSPanelRoomStatus, number_of_table_lights),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "number_of_ceiling_lights_on",
-    13,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_INT32,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelRoomStatus, number_of_ceiling_lights_on),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "number_of_table_lights_on",
-    14,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_INT32,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelRoomStatus, number_of_table_lights_on),
+    offsetof(NSPanelRoomStatus, num_table_lights_on),
     NULL,
     NULL,
     0,             /* flags */
@@ -1450,20 +1687,18 @@ static const unsigned nspanel_room_status__field_indices_by_name[] = {
   6,   /* field[6] = ceiling_lights_color_temperature_value */
   3,   /* field[3] = ceiling_lights_dim_level */
   0,   /* field[0] = id */
-  8,   /* field[8] = lights */
   1,   /* field[1] = name */
-  10,   /* field[10] = number_of_ceiling_lights */
-  12,   /* field[12] = number_of_ceiling_lights_on */
-  11,   /* field[11] = number_of_table_lights */
-  13,   /* field[13] = number_of_table_lights_on */
-  9,   /* field[9] = scenes */
+  8,   /* field[8] = num_ceiling_lights */
+  10,   /* field[10] = num_ceiling_lights_on */
+  9,   /* field[9] = num_table_lights */
+  11,   /* field[11] = num_table_lights_on */
   7,   /* field[7] = table_lights_color_temperature_value */
   4,   /* field[4] = table_lights_dim_level */
 };
 static const ProtobufCIntRange nspanel_room_status__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 14 }
+  { 0, 12 }
 };
 const ProtobufCMessageDescriptor nspanel_room_status__descriptor =
 {
@@ -1473,7 +1708,7 @@ const ProtobufCMessageDescriptor nspanel_room_status__descriptor =
   "NSPanelRoomStatus",
   "",
   sizeof(NSPanelRoomStatus),
-  14,
+  12,
   nspanel_room_status__field_descriptors,
   nspanel_room_status__field_indices_by_name,
   1,  nspanel_room_status__number_ranges,
@@ -2008,6 +2243,209 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__light_command__des
   (ProtobufCMessageInit) nspanel_mqttmanager_command__light_command__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__next_room__field_descriptors[1] =
+{
+  {
+    "nspanel_id",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__NextRoom, nspanel_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_mqttmanager_command__next_room__field_indices_by_name[] = {
+  0,   /* field[0] = nspanel_id */
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__next_room__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor nspanel_mqttmanager_command__next_room__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand.NextRoom",
+  "NextRoom",
+  "NSPanelMQTTManagerCommand__NextRoom",
+  "",
+  sizeof(NSPanelMQTTManagerCommand__NextRoom),
+  1,
+  nspanel_mqttmanager_command__next_room__field_descriptors,
+  nspanel_mqttmanager_command__next_room__field_indices_by_name,
+  1,  nspanel_mqttmanager_command__next_room__number_ranges,
+  (ProtobufCMessageInit) nspanel_mqttmanager_command__next_room__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__previous_room__field_descriptors[1] =
+{
+  {
+    "nspanel_id",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__PreviousRoom, nspanel_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_mqttmanager_command__previous_room__field_indices_by_name[] = {
+  0,   /* field[0] = nspanel_id */
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__previous_room__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor nspanel_mqttmanager_command__previous_room__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand.PreviousRoom",
+  "PreviousRoom",
+  "NSPanelMQTTManagerCommand__PreviousRoom",
+  "",
+  sizeof(NSPanelMQTTManagerCommand__PreviousRoom),
+  1,
+  nspanel_mqttmanager_command__previous_room__field_descriptors,
+  nspanel_mqttmanager_command__previous_room__field_indices_by_name,
+  1,  nspanel_mqttmanager_command__previous_room__number_ranges,
+  (ProtobufCMessageInit) nspanel_mqttmanager_command__previous_room__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__next_entities_page__field_descriptors[1] =
+{
+  {
+    "nspanel_id",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__NextEntitiesPage, nspanel_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_mqttmanager_command__next_entities_page__field_indices_by_name[] = {
+  0,   /* field[0] = nspanel_id */
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__next_entities_page__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor nspanel_mqttmanager_command__next_entities_page__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand.NextEntitiesPage",
+  "NextEntitiesPage",
+  "NSPanelMQTTManagerCommand__NextEntitiesPage",
+  "",
+  sizeof(NSPanelMQTTManagerCommand__NextEntitiesPage),
+  1,
+  nspanel_mqttmanager_command__next_entities_page__field_descriptors,
+  nspanel_mqttmanager_command__next_entities_page__field_indices_by_name,
+  1,  nspanel_mqttmanager_command__next_entities_page__number_ranges,
+  (ProtobufCMessageInit) nspanel_mqttmanager_command__next_entities_page__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__previous_entities_page__field_descriptors[1] =
+{
+  {
+    "nspanel_id",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__PreviousEntitiesPage, nspanel_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_mqttmanager_command__previous_entities_page__field_indices_by_name[] = {
+  0,   /* field[0] = nspanel_id */
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__previous_entities_page__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor nspanel_mqttmanager_command__previous_entities_page__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand.PreviousEntitiesPage",
+  "PreviousEntitiesPage",
+  "NSPanelMQTTManagerCommand__PreviousEntitiesPage",
+  "",
+  sizeof(NSPanelMQTTManagerCommand__PreviousEntitiesPage),
+  1,
+  nspanel_mqttmanager_command__previous_entities_page__field_descriptors,
+  nspanel_mqttmanager_command__previous_entities_page__field_indices_by_name,
+  1,  nspanel_mqttmanager_command__previous_entities_page__number_ranges,
+  (ProtobufCMessageInit) nspanel_mqttmanager_command__previous_entities_page__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__toggle_entity_from_entities_page__field_descriptors[2] =
+{
+  {
+    "entity_page_id",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage, entity_page_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "entity_slot",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage, entity_slot),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_mqttmanager_command__toggle_entity_from_entities_page__field_indices_by_name[] = {
+  0,   /* field[0] = entity_page_id */
+  1,   /* field[1] = entity_slot */
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__toggle_entity_from_entities_page__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 2 }
+};
+const ProtobufCMessageDescriptor nspanel_mqttmanager_command__toggle_entity_from_entities_page__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand.ToggleEntityFromEntitiesPage",
+  "ToggleEntityFromEntitiesPage",
+  "NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage",
+  "",
+  sizeof(NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage),
+  2,
+  nspanel_mqttmanager_command__toggle_entity_from_entities_page__field_descriptors,
+  nspanel_mqttmanager_command__toggle_entity_from_entities_page__field_indices_by_name,
+  1,  nspanel_mqttmanager_command__toggle_entity_from_entities_page__number_ranges,
+  (ProtobufCMessageInit) nspanel_mqttmanager_command__toggle_entity_from_entities_page__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
 static const ProtobufCEnumValue nspanel_mqttmanager_command__affect_lights_options__enum_values_by_number[3] =
 {
   { "ALL", "NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL", 0 },
@@ -2038,7 +2476,7 @@ const ProtobufCEnumDescriptor nspanel_mqttmanager_command__affect_lights_options
   nspanel_mqttmanager_command__affect_lights_options__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[3] =
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[7] =
 {
   {
     "first_page_turn_on",
@@ -2076,16 +2514,68 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descrip
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "next_room",
+    4,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(NSPanelMQTTManagerCommand, command_data_case),
+    offsetof(NSPanelMQTTManagerCommand, next_room),
+    &nspanel_mqttmanager_command__next_room__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "previous_room",
+    5,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(NSPanelMQTTManagerCommand, command_data_case),
+    offsetof(NSPanelMQTTManagerCommand, previous_room),
+    &nspanel_mqttmanager_command__previous_room__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "next_entities_page",
+    6,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(NSPanelMQTTManagerCommand, command_data_case),
+    offsetof(NSPanelMQTTManagerCommand, next_entities_page),
+    &nspanel_mqttmanager_command__next_entities_page__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "previous_entities_page",
+    7,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(NSPanelMQTTManagerCommand, command_data_case),
+    offsetof(NSPanelMQTTManagerCommand, previous_entities_page),
+    &nspanel_mqttmanager_command__previous_entities_page__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_mqttmanager_command__field_indices_by_name[] = {
   1,   /* field[1] = first_page_turn_off */
   0,   /* field[0] = first_page_turn_on */
   2,   /* field[2] = light_command */
+  5,   /* field[5] = next_entities_page */
+  3,   /* field[3] = next_room */
+  6,   /* field[6] = previous_entities_page */
+  4,   /* field[4] = previous_room */
 };
 static const ProtobufCIntRange nspanel_mqttmanager_command__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 3 }
+  { 0, 7 }
 };
 const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
 {
@@ -2095,7 +2585,7 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
   "NSPanelMQTTManagerCommand",
   "",
   sizeof(NSPanelMQTTManagerCommand),
-  3,
+  7,
   nspanel_mqttmanager_command__field_descriptors,
   nspanel_mqttmanager_command__field_indices_by_name,
   1,  nspanel_mqttmanager_command__number_ranges,

@@ -15,6 +15,7 @@
 Light::Light(LightSettings &config) {
   this->_id = config.id();
   this->_room_id = config.room_id();
+  this->_controlled_from_main_page = config.controlled_from_main_page();
   if (config.is_ceiling_light()) {
     this->_light_type = MQTT_MANAGER_LIGHT_TYPE::CEILING;
   } else {
@@ -48,7 +49,7 @@ Light::Light(LightSettings &config) {
   CommandManager::attach_callback(boost::bind(&Light::command_callback, this, _1));
 
   this->update_config(config);
-  SPDLOG_DEBUG("Light {}::{} base loaded, can dim: {}, can color temp: {}, can_rgb: {}.", this->_id, this->_name, this->_can_dim ? "yes" : "no", this->_can_color_temperature ? "yes" : "no", this->_can_rgb ? "yes" : "no");
+  SPDLOG_DEBUG("Light {}::{} base loaded, can dim: {}, can color temp: {}, can_rgb: {}. Controlled from main page? {}.", this->_id, this->_name, this->_can_dim ? "yes" : "no", this->_can_color_temperature ? "yes" : "no", this->_can_rgb ? "yes" : "no", this->_controlled_from_main_page ? "Yes" : "No");
 }
 
 MQTT_MANAGER_LIGHT_TYPE Light::get_light_type() {
@@ -59,6 +60,9 @@ void Light::update_config(LightSettings &config) {
   if (this->_name.compare(config.name()) != 0) {
     this->_name = config.name();
     SPDLOG_DEBUG("Loading light {}::{}.", this->_id, this->_name);
+
+    this->_entity_page_id = config.entities_page_id();
+    this->_entity_page_slot = config.entities_page_room_view_position();
 
     if (std::string(config.type()).compare("home_assistant") == 0) {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
@@ -100,6 +104,18 @@ uint16_t Light::get_id() {
 
 std::string Light::get_name() {
   return this->_name;
+}
+
+bool Light::get_controlled_from_main_page() {
+    return this->_controlled_from_main_page;
+}
+
+uint32_t Light::get_entity_page_id() {
+    return this->_entity_page_id;
+}
+
+uint8_t Light::get_entity_page_slot() {
+    return this->_entity_page_slot;
 }
 
 MQTT_MANAGER_LIGHT_MODE Light::get_mode() {
@@ -194,14 +210,6 @@ void Light::set_hsb(uint16_t hue, uint8_t saturation, uint8_t brightness, bool s
 }
 
 void Light::post_init() {
-  Room *room_entity = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, this->_room_id);
-  if (room_entity != nullptr) {
-    this->_room = room_entity;
-    this->_room->attach_entity(this);
-    SPDLOG_INFO("Attaching light {}::{} to room {}::{}", this->_id, this->_name, this->_room->get_id(), this->_room->get_name());
-  } else {
-    SPDLOG_ERROR("Found no room with ID: {}", this->_room_id);
-  }
 }
 
 void Light::attach_delete_callback(void (*callback)(Light *)) {

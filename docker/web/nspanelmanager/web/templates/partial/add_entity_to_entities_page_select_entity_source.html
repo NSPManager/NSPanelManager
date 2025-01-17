@@ -14,8 +14,8 @@
 
         <div class="flex justify-center">
             <div class="join">
-                <button class="join-item btn btn-xl btn-info" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="home_assistant" %}' hx-swap="none">Home Assistant</button>
-                <button class="join-item btn btn-xl btn-warning" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="openhab" %}' hx-swap="none">OpenHAB</button>
+                <button class="join-item btn btn-xl btn-info" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="home_assistant" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">Home Assistant</button>
+                <button class="join-item btn btn-xl btn-warning" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="openhab" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">OpenHAB</button>
             </div>
         </div>
     </div>
@@ -24,7 +24,6 @@
     <form method="dialog" class="modal-backdrop">
         <button>close</button>
     </form>
-
 
     <script>
       modal.showModal(); // Show the modal when loaded.

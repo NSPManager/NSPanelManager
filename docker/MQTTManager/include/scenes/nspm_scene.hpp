@@ -10,7 +10,7 @@
 #include <string>
 
 struct LightState {
-  Light *_light;
+  std::shared_ptr<Light> _light;
   uint16_t light_id;
   uint8_t brightness;
   uint16_t color_temperature;
@@ -41,7 +41,7 @@ private:
   uint16_t _id;
   std::string _name;
   uint16_t _room_id;
-  Room *_room;
+  std::shared_ptr<Room> _room;
   std::list<LightState> _light_states;
 };
 

@@ -96,16 +96,20 @@ target_link_libraries(MQTTManager_Light MQTTManager_HomeAssistantManager spdlog:
 add_library(MQTTManager_NSPanel SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.hpp)
 set_target_properties(MQTTManager_NSPanel PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/light.hpp)
 target_include_directories(MQTTManager_NSPanel PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_WebsocketServer tz::tz Boost::boost MQTTManager_Config MQTTManager_IPCHandler Protobuf_MQTTManager)
+target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_Room MQTTManager_WebsocketServer tz::tz Boost::boost MQTTManager_Config MQTTManager_IPCHandler Protobuf_MQTTManager)
 
-add_library(MQTTManager_Scene SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.cpp)
+add_library(MQTTManager_Scene SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.cpp)
 # set_target_properties(MQTTManager_Scene PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/nspm_scene.hpp)
 target_include_directories(MQTTManager_Scene PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTTManager_Scene spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_Entity MQTTManager_Light MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager)
 
+add_library(MQTTManager_RoomEntitiesPage SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room_entities_page.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room_entities_page.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room_entities_page.cpp)
+target_include_directories(MQTTManager_RoomEntitiesPage PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_link_libraries(MQTTManager_RoomEntitiesPage spdlog::spdlog nlohmann_json::nlohmann_json Protobuf_MQTTManager MQTTManager_WebHelper MQTTManager_Light)
+
 add_library(MQTTManager_Room SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room.cpp)
 target_include_directories(MQTTManager_Room PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Room spdlog::spdlog nlohmann_json::nlohmann_json MQTTManager_Entity MQTTManager_Light Protobuf_MQTTManager MQTT_Manager)
+target_link_libraries(MQTTManager_Room MQTTManager_RoomEntitiesPage spdlog::spdlog nlohmann_json::nlohmann_json MQTTManager_Entity MQTTManager_Light Protobuf_MQTTManager MQTT_Manager)
 
 add_library(MQTTManager_EntityManager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)
 set_target_properties(MQTTManager_EntityManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)

@@ -1,4 +1,4 @@
-<span hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_temperature' view='index' nspanel_id=id %}" class="icon-text" id="temperature_container-{{ id }}">
+<span hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_temperature' view='index' nspanel_id=id %}" class="icon-text transition-transform ease-linear duration-75" id="temperature_container-{{ id }}">
     <span class="icon me-1">
     <i class="mdi mdi-thermometer"></i>
     </span>

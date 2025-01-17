@@ -86,7 +86,6 @@ void OpenhabLight::send_state_update_to_controller() {
     OpenhabManager::send_json(service_data);
     if (MqttManagerConfig::get_settings().optimistic_mode()) {
       this->_current_state = this->_requested_state;
-      this->_last_update = std::chrono::system_clock::now();
     }
     return; // The light is a switch, it can't do anything more than ON/OFF. Exit function early.
   }
@@ -106,7 +105,6 @@ void OpenhabLight::send_state_update_to_controller() {
       OpenhabManager::send_json(service_data);
       if (MqttManagerConfig::get_settings().optimistic_mode()) {
         this->_current_state = false;
-        this->_last_update = std::chrono::system_clock::now();
       }
     } else {
       SPDLOG_DEBUG("Light {}::{} is already off. Will not send update to openhab.", this->_id, this->_name);
@@ -119,7 +117,6 @@ void OpenhabLight::send_state_update_to_controller() {
       OpenhabManager::send_json(service_data);
       if (MqttManagerConfig::get_settings().optimistic_mode()) {
         this->_current_brightness = this->_requested_brightness;
-        this->_last_update = std::chrono::system_clock::now();
       }
     }
 
@@ -142,7 +139,6 @@ void OpenhabLight::send_state_update_to_controller() {
       OpenhabManager::send_json(service_data);
       if (MqttManagerConfig::get_settings().optimistic_mode()) {
         this->_current_color_temperature = this->_requested_color_temperature;
-        this->_last_update = std::chrono::system_clock::now();
       }
     }
   } else if (this->_can_rgb && this->_requested_state && this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::RGB) {
@@ -157,8 +153,11 @@ void OpenhabLight::send_state_update_to_controller() {
       this->_current_hue = this->_requested_hue;
       this->_current_saturation = this->_requested_saturation;
       this->_current_brightness = this->_requested_brightness;
-      this->_last_update = std::chrono::system_clock::now();
     }
+  }
+
+  if(MqttManagerConfig::get_settings().optimistic_mode()) {
+    this->_entity_changed_callbacks(this);
   }
 }
 
@@ -184,15 +183,6 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
     std::string topic_item = topic_parts[2];
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_on_off_item) == 0) {
-      if (MqttManagerConfig::get_settings().optimistic_mode()) {
-        auto time_diff = std::chrono::system_clock::now() - this->_last_update;
-        auto ms_diff = std::chrono::duration_cast<std::chrono::milliseconds>(time_diff).count();
-        if (ms_diff < MqttManagerConfig::get_settings().mqtt_wait_time()) {
-          SPDLOG_TRACE("Milliseconds diff for state update for light {}::{} is {}, which is lower than {}, will now register new data.", this->_id, this->_name, ms_diff, MqttManagerConfig::get_settings().mqtt_wait_time());
-          return;
-        }
-      }
-
       // We only care about the first event from Openhab, ignore the rest but still indicate that event was handled so the manager stops looping over all entities.
       if (CurrentTimeMilliseconds() >= this->_last_brightness_change + 1000) {
         double brightness = 0;
@@ -230,15 +220,6 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
       this->_signal_entity_changed();
       return;
     } else if (topic_item.compare(this->_openhab_item_color_temperature) == 0 && (this->_current_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT || CurrentTimeMilliseconds() >= this->_last_light_mode_change + 1000)) {
-      if (MqttManagerConfig::get_settings().optimistic_mode()) {
-        auto time_diff = std::chrono::system_clock::now() - this->_last_update;
-        auto ms_diff = std::chrono::duration_cast<std::chrono::milliseconds>(time_diff).count();
-        if (ms_diff < MqttManagerConfig::get_settings().mqtt_wait_time()) {
-          SPDLOG_TRACE("Milliseconds diff for state update for light {}::{} is {}, which is lower than {}, will now register new data.", this->_id, this->_name, ms_diff, MqttManagerConfig::get_settings().mqtt_wait_time());
-          return;
-        }
-      }
-
       // We only care about the first event from Openhab, ignore the rest but still indicate that event was handled so the manager stops looping over all entities.
       if (CurrentTimeMilliseconds() >= this->_last_color_temp_change + 1000) {
         double color_temperature = 100 - atof(std::string(payload["value"]).c_str());
@@ -264,15 +245,6 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
       this->_signal_entity_changed();
       return;
     } else if (topic_item.compare(this->_openhab_item_rgb) == 0 && (this->_current_mode == MQTT_MANAGER_LIGHT_MODE::RGB || CurrentTimeMilliseconds() >= this->_last_light_mode_change + 1000)) {
-      if (MqttManagerConfig::get_settings().optimistic_mode()) {
-        auto time_diff = std::chrono::system_clock::now() - this->_last_update;
-        auto ms_diff = std::chrono::duration_cast<std::chrono::milliseconds>(time_diff).count();
-        if (ms_diff < MqttManagerConfig::get_settings().mqtt_wait_time()) {
-          SPDLOG_TRACE("Milliseconds diff for state update for light {}::{} is {}, which is lower than {}, will now register new data.", this->_id, this->_name, ms_diff, MqttManagerConfig::get_settings().mqtt_wait_time());
-          return;
-        }
-      }
-
       // We only care about the first event from Openhab, ignore the rest but still indicate that event was handled so the manager stops looping over all entities.
       if (CurrentTimeMilliseconds() >= this->_last_brightness_change + 1000 && CurrentTimeMilliseconds() >= this->_last_rgb_change + 1000) {
         std::string values = payload["value"];

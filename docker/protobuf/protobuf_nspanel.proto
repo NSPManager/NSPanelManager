@@ -48,6 +48,7 @@ message NSPanelConfig {
     repeated NSPanelScene global_scenes = 28;
     bool optimistic_mode = 29;
     int32 raise_light_level_to_100_above = 30;
+    int32 nspanel_id = 31;
 }
 
 enum NSPanelWarningLevel {
@@ -96,6 +97,26 @@ message NSPanelLightStatus {
     int32 room_view_position = 10;
 }
 
+// Container of data shown on the "Entities page".
+// When pressing the next or previous button on the panel it will request a new NSPanelRoomEnititesPage from the manager.
+message NSPanelRoomEntitiesPage {
+    int32 id = 1;
+    int32 page_type = 2; // 12, 8 or 4 entities shown?
+    string header_text = 3;
+
+    message EntitySlot {
+        int32 room_view_position = 1;
+        string name = 2;
+        string icon = 3;
+        int32 pco = 4;
+        int32 pco2 = 5;
+    }
+
+    repeated EntitySlot entities = 4;
+}
+
+// Data showed on the main page.
+// When pressing "next room" it will request a new NSPanelRoomStatus from the manager.
 message NSPanelRoomStatus {
     int32 id = 1;
     string name = 2;
@@ -105,12 +126,10 @@ message NSPanelRoomStatus {
     int32 average_color_temperature = 6;
     int32 ceiling_lights_color_temperature_value = 7;
     int32 table_lights_color_temperature_value = 8;
-    repeated NSPanelLightStatus lights = 9;
-    repeated NSPanelScene scenes = 10;
-    int32 number_of_ceiling_lights = 11;
-    int32 number_of_table_lights = 12;
-    int32 number_of_ceiling_lights_on = 13;
-    int32 number_of_table_lights_on = 14;
+    int32 num_ceiling_lights = 9;
+    int32 num_table_lights = 10;
+    int32 num_ceiling_lights_on = 11;
+    int32 num_table_lights_on = 12;
 }
 
 
@@ -166,9 +185,34 @@ message NSPanelMQTTManagerCommand {
         int32 saturation = 9;
     }
 
+    message NextRoom {
+        int32 nspanel_id = 1;
+    }
+
+    message PreviousRoom {
+        int32 nspanel_id = 1;
+    }
+
+    message NextEntitiesPage {
+        int32 nspanel_id = 1;
+    }
+
+    message PreviousEntitiesPage {
+        int32 nspanel_id = 1;
+    }
+
+    message ToggleEntityFromEntitiesPage {
+        int32 entity_page_id = 1;
+        int32 entity_slot = 2;
+    }
+
     oneof CommandData {
         FirstPageTurnLightOn first_page_turn_on = 1;
         FirstPageTurnLightOff first_page_turn_off = 2;
         LightCommand light_command = 3;
+        NextRoom next_room = 4;
+        PreviousRoom previous_room = 5;
+        NextEntitiesPage next_entities_page = 6;
+        PreviousEntitiesPage previous_entities_page = 7;
     }
 }

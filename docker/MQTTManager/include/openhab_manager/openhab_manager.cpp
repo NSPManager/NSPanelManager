@@ -203,7 +203,9 @@ void OpenhabManager::_process_openhab_event(nlohmann::json &event_data) {
     boost::split(topic_parts, topic, boost::is_any_of("/"));
     if (topic_parts.size() >= 3) {
       std::string topic_item = topic_parts[2];
-      OpenhabManager::_openhab_item_observers[topic_item](event_data);
+      if(OpenhabManager::_openhab_item_observers.find(topic_item) != OpenhabManager::_openhab_item_observers.end()) {
+          OpenhabManager::_openhab_item_observers.at(topic_item)(event_data);
+      }
     }
   }
 }

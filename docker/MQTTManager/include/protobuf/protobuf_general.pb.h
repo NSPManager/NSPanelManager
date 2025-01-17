@@ -58,6 +58,18 @@ extern MultipleLightsSettingsDefaultTypeInternal _MultipleLightsSettings_default
 class MultipleRoomsSettings;
 struct MultipleRoomsSettingsDefaultTypeInternal;
 extern MultipleRoomsSettingsDefaultTypeInternal _MultipleRoomsSettings_default_instance_;
+class RoomEntitiesPageSettings;
+struct RoomEntitiesPageSettingsDefaultTypeInternal;
+extern RoomEntitiesPageSettingsDefaultTypeInternal _RoomEntitiesPageSettings_default_instance_;
+class RoomEntityWrapper;
+struct RoomEntityWrapperDefaultTypeInternal;
+extern RoomEntityWrapperDefaultTypeInternal _RoomEntityWrapper_default_instance_;
+class RoomEntityWrapper_LightEntity;
+struct RoomEntityWrapper_LightEntityDefaultTypeInternal;
+extern RoomEntityWrapper_LightEntityDefaultTypeInternal _RoomEntityWrapper_LightEntity_default_instance_;
+class RoomEntityWrapper_SwitchEntity;
+struct RoomEntityWrapper_SwitchEntityDefaultTypeInternal;
+extern RoomEntityWrapper_SwitchEntityDefaultTypeInternal _RoomEntityWrapper_SwitchEntity_default_instance_;
 class RoomSettings;
 struct RoomSettingsDefaultTypeInternal;
 extern RoomSettingsDefaultTypeInternal _RoomSettings_default_instance_;
@@ -127,7 +139,7 @@ class RoomSettings final : public ::google::protobuf::Message
     return reinterpret_cast<const RoomSettings*>(
         &_RoomSettings_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 0;
+  static constexpr int kIndexInFileMessages = 4;
   friend void swap(RoomSettings& a, RoomSettings& b) { a.Swap(&b); }
   inline void Swap(RoomSettings* other) {
     if (other == this) return;
@@ -198,6 +210,7 @@ class RoomSettings final : public ::google::protobuf::Message
   enum : int {
     kLightIdsFieldNumber = 3,
     kSceneIdsFieldNumber = 4,
+    kEntityPageIdsFieldNumber = 5,
     kNameFieldNumber = 2,
     kIdFieldNumber = 1,
   };
@@ -237,6 +250,24 @@ class RoomSettings final : public ::google::protobuf::Message
   ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_scene_ids();
 
   public:
+  // repeated int32 entity_page_ids = 5;
+  int entity_page_ids_size() const;
+  private:
+  int _internal_entity_page_ids_size() const;
+
+  public:
+  void clear_entity_page_ids() ;
+  ::int32_t entity_page_ids(int index) const;
+  void set_entity_page_ids(int index, ::int32_t value);
+  void add_entity_page_ids(::int32_t value);
+  const ::google::protobuf::RepeatedField<::int32_t>& entity_page_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* mutable_entity_page_ids();
+
+  private:
+  const ::google::protobuf::RepeatedField<::int32_t>& _internal_entity_page_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_entity_page_ids();
+
+  public:
   // string name = 2;
   void clear_name() ;
   const std::string& name() const;
@@ -268,7 +299,7 @@ class RoomSettings final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      2, 4, 0,
+      3, 5, 0,
       25, 2>
       _table_;
 
@@ -293,8 +324,412 @@ class RoomSettings final : public ::google::protobuf::Message
     mutable ::google::protobuf::internal::CachedSize _light_ids_cached_byte_size_;
     ::google::protobuf::RepeatedField<::int32_t> scene_ids_;
     mutable ::google::protobuf::internal::CachedSize _scene_ids_cached_byte_size_;
+    ::google::protobuf::RepeatedField<::int32_t> entity_page_ids_;
+    mutable ::google::protobuf::internal::CachedSize _entity_page_ids_cached_byte_size_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::int32_t id_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_protobuf_5fgeneral_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RoomEntityWrapper_SwitchEntity final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:RoomEntityWrapper.SwitchEntity) */ {
+ public:
+  inline RoomEntityWrapper_SwitchEntity() : RoomEntityWrapper_SwitchEntity(nullptr) {}
+  ~RoomEntityWrapper_SwitchEntity() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR RoomEntityWrapper_SwitchEntity(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline RoomEntityWrapper_SwitchEntity(const RoomEntityWrapper_SwitchEntity& from) : RoomEntityWrapper_SwitchEntity(nullptr, from) {}
+  inline RoomEntityWrapper_SwitchEntity(RoomEntityWrapper_SwitchEntity&& from) noexcept
+      : RoomEntityWrapper_SwitchEntity(nullptr, std::move(from)) {}
+  inline RoomEntityWrapper_SwitchEntity& operator=(const RoomEntityWrapper_SwitchEntity& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RoomEntityWrapper_SwitchEntity& operator=(RoomEntityWrapper_SwitchEntity&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RoomEntityWrapper_SwitchEntity& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RoomEntityWrapper_SwitchEntity* internal_default_instance() {
+    return reinterpret_cast<const RoomEntityWrapper_SwitchEntity*>(
+        &_RoomEntityWrapper_SwitchEntity_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 1;
+  friend void swap(RoomEntityWrapper_SwitchEntity& a, RoomEntityWrapper_SwitchEntity& b) { a.Swap(&b); }
+  inline void Swap(RoomEntityWrapper_SwitchEntity* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RoomEntityWrapper_SwitchEntity* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RoomEntityWrapper_SwitchEntity* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<RoomEntityWrapper_SwitchEntity>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const RoomEntityWrapper_SwitchEntity& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const RoomEntityWrapper_SwitchEntity& from) { RoomEntityWrapper_SwitchEntity::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(RoomEntityWrapper_SwitchEntity* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "RoomEntityWrapper.SwitchEntity"; }
+
+ protected:
+  explicit RoomEntityWrapper_SwitchEntity(::google::protobuf::Arena* arena);
+  RoomEntityWrapper_SwitchEntity(::google::protobuf::Arena* arena, const RoomEntityWrapper_SwitchEntity& from);
+  RoomEntityWrapper_SwitchEntity(::google::protobuf::Arena* arena, RoomEntityWrapper_SwitchEntity&& from) noexcept
+      : RoomEntityWrapper_SwitchEntity(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNameFieldNumber = 2,
+    kIdFieldNumber = 1,
+    kRoomViewPositionFieldNumber = 3,
+  };
+  // string name = 2;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  PROTOBUF_NODISCARD std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_name(
+      const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
+  // int32 id = 1;
+  void clear_id() ;
+  ::int32_t id() const;
+  void set_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_id() const;
+  void _internal_set_id(::int32_t value);
+
+  public:
+  // int32 room_view_position = 3;
+  void clear_room_view_position() ;
+  ::int32_t room_view_position() const;
+  void set_room_view_position(::int32_t value);
+
+  private:
+  ::int32_t _internal_room_view_position() const;
+  void _internal_set_room_view_position(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:RoomEntityWrapper.SwitchEntity)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      2, 3, 0,
+      43, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_RoomEntityWrapper_SwitchEntity_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const RoomEntityWrapper_SwitchEntity& from_msg);
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    ::int32_t id_;
+    ::int32_t room_view_position_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_protobuf_5fgeneral_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RoomEntityWrapper_LightEntity final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:RoomEntityWrapper.LightEntity) */ {
+ public:
+  inline RoomEntityWrapper_LightEntity() : RoomEntityWrapper_LightEntity(nullptr) {}
+  ~RoomEntityWrapper_LightEntity() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR RoomEntityWrapper_LightEntity(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline RoomEntityWrapper_LightEntity(const RoomEntityWrapper_LightEntity& from) : RoomEntityWrapper_LightEntity(nullptr, from) {}
+  inline RoomEntityWrapper_LightEntity(RoomEntityWrapper_LightEntity&& from) noexcept
+      : RoomEntityWrapper_LightEntity(nullptr, std::move(from)) {}
+  inline RoomEntityWrapper_LightEntity& operator=(const RoomEntityWrapper_LightEntity& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RoomEntityWrapper_LightEntity& operator=(RoomEntityWrapper_LightEntity&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RoomEntityWrapper_LightEntity& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RoomEntityWrapper_LightEntity* internal_default_instance() {
+    return reinterpret_cast<const RoomEntityWrapper_LightEntity*>(
+        &_RoomEntityWrapper_LightEntity_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 0;
+  friend void swap(RoomEntityWrapper_LightEntity& a, RoomEntityWrapper_LightEntity& b) { a.Swap(&b); }
+  inline void Swap(RoomEntityWrapper_LightEntity* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RoomEntityWrapper_LightEntity* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RoomEntityWrapper_LightEntity* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<RoomEntityWrapper_LightEntity>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const RoomEntityWrapper_LightEntity& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const RoomEntityWrapper_LightEntity& from) { RoomEntityWrapper_LightEntity::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(RoomEntityWrapper_LightEntity* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "RoomEntityWrapper.LightEntity"; }
+
+ protected:
+  explicit RoomEntityWrapper_LightEntity(::google::protobuf::Arena* arena);
+  RoomEntityWrapper_LightEntity(::google::protobuf::Arena* arena, const RoomEntityWrapper_LightEntity& from);
+  RoomEntityWrapper_LightEntity(::google::protobuf::Arena* arena, RoomEntityWrapper_LightEntity&& from) noexcept
+      : RoomEntityWrapper_LightEntity(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNameFieldNumber = 2,
+    kIdFieldNumber = 1,
+    kRoomViewPositionFieldNumber = 3,
+  };
+  // string name = 2;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  PROTOBUF_NODISCARD std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_name(
+      const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
+  // int32 id = 1;
+  void clear_id() ;
+  ::int32_t id() const;
+  void set_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_id() const;
+  void _internal_set_id(::int32_t value);
+
+  public:
+  // int32 room_view_position = 3;
+  void clear_room_view_position() ;
+  ::int32_t room_view_position() const;
+  void set_room_view_position(::int32_t value);
+
+  private:
+  ::int32_t _internal_room_view_position() const;
+  void _internal_set_room_view_position(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:RoomEntityWrapper.LightEntity)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      2, 3, 0,
+      42, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_RoomEntityWrapper_LightEntity_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const RoomEntityWrapper_LightEntity& from_msg);
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    ::int32_t id_;
+    ::int32_t room_view_position_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -358,7 +793,7 @@ class LightSettings final : public ::google::protobuf::Message
     return reinterpret_cast<const LightSettings*>(
         &_LightSettings_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 2;
+  static constexpr int kIndexInFileMessages = 6;
   friend void swap(LightSettings& a, LightSettings& b) { a.Swap(&b); }
   inline void Swap(LightSettings* other) {
     if (other == this) return;
@@ -442,6 +877,9 @@ class LightSettings final : public ::google::protobuf::Message
     kCanDimFieldNumber = 6,
     kCanColorTemperatureFieldNumber = 7,
     kCanRgbFieldNumber = 8,
+    kEntitiesPageIdFieldNumber = 16,
+    kEntitiesPageRoomViewPositionFieldNumber = 17,
+    kControlledFromMainPageFieldNumber = 18,
   };
   // string name = 3;
   void clear_name() ;
@@ -654,13 +1092,43 @@ class LightSettings final : public ::google::protobuf::Message
   void _internal_set_can_rgb(bool value);
 
   public:
+  // int32 entities_page_id = 16;
+  void clear_entities_page_id() ;
+  ::int32_t entities_page_id() const;
+  void set_entities_page_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_entities_page_id() const;
+  void _internal_set_entities_page_id(::int32_t value);
+
+  public:
+  // int32 entities_page_room_view_position = 17;
+  void clear_entities_page_room_view_position() ;
+  ::int32_t entities_page_room_view_position() const;
+  void set_entities_page_room_view_position(::int32_t value);
+
+  private:
+  ::int32_t _internal_entities_page_room_view_position() const;
+  void _internal_set_entities_page_room_view_position(::int32_t value);
+
+  public:
+  // bool controlled_from_main_page = 18;
+  void clear_controlled_from_main_page() ;
+  bool controlled_from_main_page() const;
+  void set_controlled_from_main_page(bool value);
+
+  private:
+  bool _internal_controlled_from_main_page() const;
+  void _internal_set_controlled_from_main_page(bool value);
+
+  public:
   // @@protoc_insertion_point(class_scope:LightSettings)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 15, 0,
-      166, 2>
+      5, 18, 0,
+      174, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -697,6 +1165,228 @@ class LightSettings final : public ::google::protobuf::Message
     bool can_dim_;
     bool can_color_temperature_;
     bool can_rgb_;
+    ::int32_t entities_page_id_;
+    ::int32_t entities_page_room_view_position_;
+    bool controlled_from_main_page_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_protobuf_5fgeneral_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RoomEntityWrapper final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:RoomEntityWrapper) */ {
+ public:
+  inline RoomEntityWrapper() : RoomEntityWrapper(nullptr) {}
+  ~RoomEntityWrapper() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR RoomEntityWrapper(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline RoomEntityWrapper(const RoomEntityWrapper& from) : RoomEntityWrapper(nullptr, from) {}
+  inline RoomEntityWrapper(RoomEntityWrapper&& from) noexcept
+      : RoomEntityWrapper(nullptr, std::move(from)) {}
+  inline RoomEntityWrapper& operator=(const RoomEntityWrapper& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RoomEntityWrapper& operator=(RoomEntityWrapper&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RoomEntityWrapper& default_instance() {
+    return *internal_default_instance();
+  }
+  enum EntityCase {
+    kLight = 1,
+    kSwitch = 2,
+    ENTITY_NOT_SET = 0,
+  };
+  static inline const RoomEntityWrapper* internal_default_instance() {
+    return reinterpret_cast<const RoomEntityWrapper*>(
+        &_RoomEntityWrapper_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 2;
+  friend void swap(RoomEntityWrapper& a, RoomEntityWrapper& b) { a.Swap(&b); }
+  inline void Swap(RoomEntityWrapper* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RoomEntityWrapper* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RoomEntityWrapper* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<RoomEntityWrapper>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const RoomEntityWrapper& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const RoomEntityWrapper& from) { RoomEntityWrapper::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(RoomEntityWrapper* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "RoomEntityWrapper"; }
+
+ protected:
+  explicit RoomEntityWrapper(::google::protobuf::Arena* arena);
+  RoomEntityWrapper(::google::protobuf::Arena* arena, const RoomEntityWrapper& from);
+  RoomEntityWrapper(::google::protobuf::Arena* arena, RoomEntityWrapper&& from) noexcept
+      : RoomEntityWrapper(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+  using LightEntity = RoomEntityWrapper_LightEntity;
+  using SwitchEntity = RoomEntityWrapper_SwitchEntity;
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kLightFieldNumber = 1,
+    kSwitchFieldNumber = 2,
+  };
+  // .RoomEntityWrapper.LightEntity light = 1;
+  bool has_light() const;
+  private:
+  bool _internal_has_light() const;
+
+  public:
+  void clear_light() ;
+  const ::RoomEntityWrapper_LightEntity& light() const;
+  PROTOBUF_NODISCARD ::RoomEntityWrapper_LightEntity* release_light();
+  ::RoomEntityWrapper_LightEntity* mutable_light();
+  void set_allocated_light(::RoomEntityWrapper_LightEntity* value);
+  void unsafe_arena_set_allocated_light(::RoomEntityWrapper_LightEntity* value);
+  ::RoomEntityWrapper_LightEntity* unsafe_arena_release_light();
+
+  private:
+  const ::RoomEntityWrapper_LightEntity& _internal_light() const;
+  ::RoomEntityWrapper_LightEntity* _internal_mutable_light();
+
+  public:
+  // .RoomEntityWrapper.SwitchEntity switch = 2;
+  bool has_switch_() const;
+  private:
+  bool _internal_has_switch_() const;
+
+  public:
+  void clear_switch_() ;
+  const ::RoomEntityWrapper_SwitchEntity& switch_() const;
+  PROTOBUF_NODISCARD ::RoomEntityWrapper_SwitchEntity* release_switch_();
+  ::RoomEntityWrapper_SwitchEntity* mutable_switch_();
+  void set_allocated_switch_(::RoomEntityWrapper_SwitchEntity* value);
+  void unsafe_arena_set_allocated_switch_(::RoomEntityWrapper_SwitchEntity* value);
+  ::RoomEntityWrapper_SwitchEntity* unsafe_arena_release_switch_();
+
+  private:
+  const ::RoomEntityWrapper_SwitchEntity& _internal_switch_() const;
+  ::RoomEntityWrapper_SwitchEntity* _internal_mutable_switch_();
+
+  public:
+  void clear_entity();
+  EntityCase entity_case() const;
+  // @@protoc_insertion_point(class_scope:RoomEntityWrapper)
+ private:
+  class _Internal;
+  void set_has_light();
+  void set_has_switch_();
+  inline bool has_entity() const;
+  inline void clear_has_entity();
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 2, 2,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_RoomEntityWrapper_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const RoomEntityWrapper& from_msg);
+    union EntityUnion {
+      constexpr EntityUnion() : _constinit_{} {}
+      ::google::protobuf::internal::ConstantInitialized _constinit_;
+      ::RoomEntityWrapper_LightEntity* light_;
+      ::RoomEntityWrapper_SwitchEntity* switch__;
+    } entity_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    ::uint32_t _oneof_case_[1];
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -759,7 +1449,7 @@ class MultipleRoomsSettings final : public ::google::protobuf::Message
     return reinterpret_cast<const MultipleRoomsSettings*>(
         &_MultipleRoomsSettings_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 5;
   friend void swap(MultipleRoomsSettings& a, MultipleRoomsSettings& b) { a.Swap(&b); }
   inline void Swap(MultipleRoomsSettings* other) {
     if (other == this) return;
@@ -937,7 +1627,7 @@ class MultipleLightsSettings final : public ::google::protobuf::Message
     return reinterpret_cast<const MultipleLightsSettings*>(
         &_MultipleLightsSettings_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 3;
+  static constexpr int kIndexInFileMessages = 7;
   friend void swap(MultipleLightsSettings& a, MultipleLightsSettings& b) { a.Swap(&b); }
   inline void Swap(MultipleLightsSettings* other) {
     if (other == this) return;
@@ -1058,6 +1748,244 @@ class MultipleLightsSettings final : public ::google::protobuf::Message
   union { Impl_ _impl_; };
   friend struct ::TableStruct_protobuf_5fgeneral_2eproto;
 };
+// -------------------------------------------------------------------
+
+class RoomEntitiesPageSettings final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:RoomEntitiesPageSettings) */ {
+ public:
+  inline RoomEntitiesPageSettings() : RoomEntitiesPageSettings(nullptr) {}
+  ~RoomEntitiesPageSettings() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR RoomEntitiesPageSettings(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline RoomEntitiesPageSettings(const RoomEntitiesPageSettings& from) : RoomEntitiesPageSettings(nullptr, from) {}
+  inline RoomEntitiesPageSettings(RoomEntitiesPageSettings&& from) noexcept
+      : RoomEntitiesPageSettings(nullptr, std::move(from)) {}
+  inline RoomEntitiesPageSettings& operator=(const RoomEntitiesPageSettings& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RoomEntitiesPageSettings& operator=(RoomEntitiesPageSettings&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RoomEntitiesPageSettings& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RoomEntitiesPageSettings* internal_default_instance() {
+    return reinterpret_cast<const RoomEntitiesPageSettings*>(
+        &_RoomEntitiesPageSettings_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 3;
+  friend void swap(RoomEntitiesPageSettings& a, RoomEntitiesPageSettings& b) { a.Swap(&b); }
+  inline void Swap(RoomEntitiesPageSettings* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RoomEntitiesPageSettings* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RoomEntitiesPageSettings* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<RoomEntitiesPageSettings>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const RoomEntitiesPageSettings& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const RoomEntitiesPageSettings& from) { RoomEntitiesPageSettings::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(RoomEntitiesPageSettings* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "RoomEntitiesPageSettings"; }
+
+ protected:
+  explicit RoomEntitiesPageSettings(::google::protobuf::Arena* arena);
+  RoomEntitiesPageSettings(::google::protobuf::Arena* arena, const RoomEntitiesPageSettings& from);
+  RoomEntitiesPageSettings(::google::protobuf::Arena* arena, RoomEntitiesPageSettings&& from) noexcept
+      : RoomEntitiesPageSettings(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kEntitiesFieldNumber = 6,
+    kIdFieldNumber = 1,
+    kPageTypeFieldNumber = 2,
+    kDisplayOrderFieldNumber = 3,
+    kRoomIdFieldNumber = 4,
+    kIsScenesPageFieldNumber = 5,
+  };
+  // repeated .RoomEntityWrapper entities = 6;
+  int entities_size() const;
+  private:
+  int _internal_entities_size() const;
+
+  public:
+  void clear_entities() ;
+  ::RoomEntityWrapper* mutable_entities(int index);
+  ::google::protobuf::RepeatedPtrField<::RoomEntityWrapper>* mutable_entities();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::RoomEntityWrapper>& _internal_entities() const;
+  ::google::protobuf::RepeatedPtrField<::RoomEntityWrapper>* _internal_mutable_entities();
+  public:
+  const ::RoomEntityWrapper& entities(int index) const;
+  ::RoomEntityWrapper* add_entities();
+  const ::google::protobuf::RepeatedPtrField<::RoomEntityWrapper>& entities() const;
+  // int32 id = 1;
+  void clear_id() ;
+  ::int32_t id() const;
+  void set_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_id() const;
+  void _internal_set_id(::int32_t value);
+
+  public:
+  // int32 page_type = 2;
+  void clear_page_type() ;
+  ::int32_t page_type() const;
+  void set_page_type(::int32_t value);
+
+  private:
+  ::int32_t _internal_page_type() const;
+  void _internal_set_page_type(::int32_t value);
+
+  public:
+  // int32 display_order = 3;
+  void clear_display_order() ;
+  ::int32_t display_order() const;
+  void set_display_order(::int32_t value);
+
+  private:
+  ::int32_t _internal_display_order() const;
+  void _internal_set_display_order(::int32_t value);
+
+  public:
+  // int32 room_id = 4;
+  void clear_room_id() ;
+  ::int32_t room_id() const;
+  void set_room_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_room_id() const;
+  void _internal_set_room_id(::int32_t value);
+
+  public:
+  // bool is_scenes_page = 5;
+  void clear_is_scenes_page() ;
+  bool is_scenes_page() const;
+  void set_is_scenes_page(bool value);
+
+  private:
+  bool _internal_is_scenes_page() const;
+  void _internal_set_is_scenes_page(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:RoomEntitiesPageSettings)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      3, 6, 1,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_RoomEntitiesPageSettings_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const RoomEntitiesPageSettings& from_msg);
+    ::google::protobuf::RepeatedPtrField< ::RoomEntityWrapper > entities_;
+    ::int32_t id_;
+    ::int32_t page_type_;
+    ::int32_t display_order_;
+    ::int32_t room_id_;
+    bool is_scenes_page_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_protobuf_5fgeneral_2eproto;
+};
 
 // ===================================================================
 
@@ -1071,6 +1999,536 @@ class MultipleLightsSettings final : public ::google::protobuf::Message
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// RoomEntityWrapper_LightEntity
+
+// int32 id = 1;
+inline void RoomEntityWrapper_LightEntity::clear_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_ = 0;
+}
+inline ::int32_t RoomEntityWrapper_LightEntity::id() const {
+  // @@protoc_insertion_point(field_get:RoomEntityWrapper.LightEntity.id)
+  return _internal_id();
+}
+inline void RoomEntityWrapper_LightEntity::set_id(::int32_t value) {
+  _internal_set_id(value);
+  // @@protoc_insertion_point(field_set:RoomEntityWrapper.LightEntity.id)
+}
+inline ::int32_t RoomEntityWrapper_LightEntity::_internal_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.id_;
+}
+inline void RoomEntityWrapper_LightEntity::_internal_set_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_ = value;
+}
+
+// string name = 2;
+inline void RoomEntityWrapper_LightEntity::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+}
+inline const std::string& RoomEntityWrapper_LightEntity::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:RoomEntityWrapper.LightEntity.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void RoomEntityWrapper_LightEntity::set_name(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:RoomEntityWrapper.LightEntity.name)
+}
+inline std::string* RoomEntityWrapper_LightEntity::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:RoomEntityWrapper.LightEntity.name)
+  return _s;
+}
+inline const std::string& RoomEntityWrapper_LightEntity::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void RoomEntityWrapper_LightEntity::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* RoomEntityWrapper_LightEntity::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* RoomEntityWrapper_LightEntity::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:RoomEntityWrapper.LightEntity.name)
+  return _impl_.name_.Release();
+}
+inline void RoomEntityWrapper_LightEntity::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.name_.IsDefault()) {
+          _impl_.name_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:RoomEntityWrapper.LightEntity.name)
+}
+
+// int32 room_view_position = 3;
+inline void RoomEntityWrapper_LightEntity::clear_room_view_position() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.room_view_position_ = 0;
+}
+inline ::int32_t RoomEntityWrapper_LightEntity::room_view_position() const {
+  // @@protoc_insertion_point(field_get:RoomEntityWrapper.LightEntity.room_view_position)
+  return _internal_room_view_position();
+}
+inline void RoomEntityWrapper_LightEntity::set_room_view_position(::int32_t value) {
+  _internal_set_room_view_position(value);
+  // @@protoc_insertion_point(field_set:RoomEntityWrapper.LightEntity.room_view_position)
+}
+inline ::int32_t RoomEntityWrapper_LightEntity::_internal_room_view_position() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.room_view_position_;
+}
+inline void RoomEntityWrapper_LightEntity::_internal_set_room_view_position(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.room_view_position_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// RoomEntityWrapper_SwitchEntity
+
+// int32 id = 1;
+inline void RoomEntityWrapper_SwitchEntity::clear_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_ = 0;
+}
+inline ::int32_t RoomEntityWrapper_SwitchEntity::id() const {
+  // @@protoc_insertion_point(field_get:RoomEntityWrapper.SwitchEntity.id)
+  return _internal_id();
+}
+inline void RoomEntityWrapper_SwitchEntity::set_id(::int32_t value) {
+  _internal_set_id(value);
+  // @@protoc_insertion_point(field_set:RoomEntityWrapper.SwitchEntity.id)
+}
+inline ::int32_t RoomEntityWrapper_SwitchEntity::_internal_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.id_;
+}
+inline void RoomEntityWrapper_SwitchEntity::_internal_set_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_ = value;
+}
+
+// string name = 2;
+inline void RoomEntityWrapper_SwitchEntity::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+}
+inline const std::string& RoomEntityWrapper_SwitchEntity::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:RoomEntityWrapper.SwitchEntity.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void RoomEntityWrapper_SwitchEntity::set_name(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:RoomEntityWrapper.SwitchEntity.name)
+}
+inline std::string* RoomEntityWrapper_SwitchEntity::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:RoomEntityWrapper.SwitchEntity.name)
+  return _s;
+}
+inline const std::string& RoomEntityWrapper_SwitchEntity::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void RoomEntityWrapper_SwitchEntity::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* RoomEntityWrapper_SwitchEntity::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* RoomEntityWrapper_SwitchEntity::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:RoomEntityWrapper.SwitchEntity.name)
+  return _impl_.name_.Release();
+}
+inline void RoomEntityWrapper_SwitchEntity::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.name_.IsDefault()) {
+          _impl_.name_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:RoomEntityWrapper.SwitchEntity.name)
+}
+
+// int32 room_view_position = 3;
+inline void RoomEntityWrapper_SwitchEntity::clear_room_view_position() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.room_view_position_ = 0;
+}
+inline ::int32_t RoomEntityWrapper_SwitchEntity::room_view_position() const {
+  // @@protoc_insertion_point(field_get:RoomEntityWrapper.SwitchEntity.room_view_position)
+  return _internal_room_view_position();
+}
+inline void RoomEntityWrapper_SwitchEntity::set_room_view_position(::int32_t value) {
+  _internal_set_room_view_position(value);
+  // @@protoc_insertion_point(field_set:RoomEntityWrapper.SwitchEntity.room_view_position)
+}
+inline ::int32_t RoomEntityWrapper_SwitchEntity::_internal_room_view_position() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.room_view_position_;
+}
+inline void RoomEntityWrapper_SwitchEntity::_internal_set_room_view_position(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.room_view_position_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// RoomEntityWrapper
+
+// .RoomEntityWrapper.LightEntity light = 1;
+inline bool RoomEntityWrapper::has_light() const {
+  return entity_case() == kLight;
+}
+inline bool RoomEntityWrapper::_internal_has_light() const {
+  return entity_case() == kLight;
+}
+inline void RoomEntityWrapper::set_has_light() {
+  _impl_._oneof_case_[0] = kLight;
+}
+inline void RoomEntityWrapper::clear_light() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (entity_case() == kLight) {
+    if (GetArena() == nullptr) {
+      delete _impl_.entity_.light_;
+    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.entity_.light_);
+    }
+    clear_has_entity();
+  }
+}
+inline ::RoomEntityWrapper_LightEntity* RoomEntityWrapper::release_light() {
+  // @@protoc_insertion_point(field_release:RoomEntityWrapper.light)
+  if (entity_case() == kLight) {
+    clear_has_entity();
+    auto* temp = _impl_.entity_.light_;
+    if (GetArena() != nullptr) {
+      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.entity_.light_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::RoomEntityWrapper_LightEntity& RoomEntityWrapper::_internal_light() const {
+  return entity_case() == kLight ? *_impl_.entity_.light_ : reinterpret_cast<::RoomEntityWrapper_LightEntity&>(::_RoomEntityWrapper_LightEntity_default_instance_);
+}
+inline const ::RoomEntityWrapper_LightEntity& RoomEntityWrapper::light() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:RoomEntityWrapper.light)
+  return _internal_light();
+}
+inline ::RoomEntityWrapper_LightEntity* RoomEntityWrapper::unsafe_arena_release_light() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:RoomEntityWrapper.light)
+  if (entity_case() == kLight) {
+    clear_has_entity();
+    auto* temp = _impl_.entity_.light_;
+    _impl_.entity_.light_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void RoomEntityWrapper::unsafe_arena_set_allocated_light(::RoomEntityWrapper_LightEntity* value) {
+  // We rely on the oneof clear method to free the earlier contents
+  // of this oneof. We can directly use the pointer we're given to
+  // set the new value.
+  clear_entity();
+  if (value) {
+    set_has_light();
+    _impl_.entity_.light_ = value;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:RoomEntityWrapper.light)
+}
+inline ::RoomEntityWrapper_LightEntity* RoomEntityWrapper::_internal_mutable_light() {
+  if (entity_case() != kLight) {
+    clear_entity();
+    set_has_light();
+    _impl_.entity_.light_ =
+        ::google::protobuf::Message::DefaultConstruct<::RoomEntityWrapper_LightEntity>(GetArena());
+  }
+  return _impl_.entity_.light_;
+}
+inline ::RoomEntityWrapper_LightEntity* RoomEntityWrapper::mutable_light() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::RoomEntityWrapper_LightEntity* _msg = _internal_mutable_light();
+  // @@protoc_insertion_point(field_mutable:RoomEntityWrapper.light)
+  return _msg;
+}
+
+// .RoomEntityWrapper.SwitchEntity switch = 2;
+inline bool RoomEntityWrapper::has_switch_() const {
+  return entity_case() == kSwitch;
+}
+inline bool RoomEntityWrapper::_internal_has_switch_() const {
+  return entity_case() == kSwitch;
+}
+inline void RoomEntityWrapper::set_has_switch_() {
+  _impl_._oneof_case_[0] = kSwitch;
+}
+inline void RoomEntityWrapper::clear_switch_() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (entity_case() == kSwitch) {
+    if (GetArena() == nullptr) {
+      delete _impl_.entity_.switch__;
+    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.entity_.switch__);
+    }
+    clear_has_entity();
+  }
+}
+inline ::RoomEntityWrapper_SwitchEntity* RoomEntityWrapper::release_switch_() {
+  // @@protoc_insertion_point(field_release:RoomEntityWrapper.switch)
+  if (entity_case() == kSwitch) {
+    clear_has_entity();
+    auto* temp = _impl_.entity_.switch__;
+    if (GetArena() != nullptr) {
+      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.entity_.switch__ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::RoomEntityWrapper_SwitchEntity& RoomEntityWrapper::_internal_switch_() const {
+  return entity_case() == kSwitch ? *_impl_.entity_.switch__ : reinterpret_cast<::RoomEntityWrapper_SwitchEntity&>(::_RoomEntityWrapper_SwitchEntity_default_instance_);
+}
+inline const ::RoomEntityWrapper_SwitchEntity& RoomEntityWrapper::switch_() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:RoomEntityWrapper.switch)
+  return _internal_switch_();
+}
+inline ::RoomEntityWrapper_SwitchEntity* RoomEntityWrapper::unsafe_arena_release_switch_() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:RoomEntityWrapper.switch)
+  if (entity_case() == kSwitch) {
+    clear_has_entity();
+    auto* temp = _impl_.entity_.switch__;
+    _impl_.entity_.switch__ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void RoomEntityWrapper::unsafe_arena_set_allocated_switch_(::RoomEntityWrapper_SwitchEntity* value) {
+  // We rely on the oneof clear method to free the earlier contents
+  // of this oneof. We can directly use the pointer we're given to
+  // set the new value.
+  clear_entity();
+  if (value) {
+    set_has_switch_();
+    _impl_.entity_.switch__ = value;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:RoomEntityWrapper.switch)
+}
+inline ::RoomEntityWrapper_SwitchEntity* RoomEntityWrapper::_internal_mutable_switch_() {
+  if (entity_case() != kSwitch) {
+    clear_entity();
+    set_has_switch_();
+    _impl_.entity_.switch__ =
+        ::google::protobuf::Message::DefaultConstruct<::RoomEntityWrapper_SwitchEntity>(GetArena());
+  }
+  return _impl_.entity_.switch__;
+}
+inline ::RoomEntityWrapper_SwitchEntity* RoomEntityWrapper::mutable_switch_() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::RoomEntityWrapper_SwitchEntity* _msg = _internal_mutable_switch_();
+  // @@protoc_insertion_point(field_mutable:RoomEntityWrapper.switch)
+  return _msg;
+}
+
+inline bool RoomEntityWrapper::has_entity() const {
+  return entity_case() != ENTITY_NOT_SET;
+}
+inline void RoomEntityWrapper::clear_has_entity() {
+  _impl_._oneof_case_[0] = ENTITY_NOT_SET;
+}
+inline RoomEntityWrapper::EntityCase RoomEntityWrapper::entity_case() const {
+  return RoomEntityWrapper::EntityCase(_impl_._oneof_case_[0]);
+}
+// -------------------------------------------------------------------
+
+// RoomEntitiesPageSettings
+
+// int32 id = 1;
+inline void RoomEntitiesPageSettings::clear_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_ = 0;
+}
+inline ::int32_t RoomEntitiesPageSettings::id() const {
+  // @@protoc_insertion_point(field_get:RoomEntitiesPageSettings.id)
+  return _internal_id();
+}
+inline void RoomEntitiesPageSettings::set_id(::int32_t value) {
+  _internal_set_id(value);
+  // @@protoc_insertion_point(field_set:RoomEntitiesPageSettings.id)
+}
+inline ::int32_t RoomEntitiesPageSettings::_internal_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.id_;
+}
+inline void RoomEntitiesPageSettings::_internal_set_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_ = value;
+}
+
+// int32 page_type = 2;
+inline void RoomEntitiesPageSettings::clear_page_type() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.page_type_ = 0;
+}
+inline ::int32_t RoomEntitiesPageSettings::page_type() const {
+  // @@protoc_insertion_point(field_get:RoomEntitiesPageSettings.page_type)
+  return _internal_page_type();
+}
+inline void RoomEntitiesPageSettings::set_page_type(::int32_t value) {
+  _internal_set_page_type(value);
+  // @@protoc_insertion_point(field_set:RoomEntitiesPageSettings.page_type)
+}
+inline ::int32_t RoomEntitiesPageSettings::_internal_page_type() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.page_type_;
+}
+inline void RoomEntitiesPageSettings::_internal_set_page_type(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.page_type_ = value;
+}
+
+// int32 display_order = 3;
+inline void RoomEntitiesPageSettings::clear_display_order() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.display_order_ = 0;
+}
+inline ::int32_t RoomEntitiesPageSettings::display_order() const {
+  // @@protoc_insertion_point(field_get:RoomEntitiesPageSettings.display_order)
+  return _internal_display_order();
+}
+inline void RoomEntitiesPageSettings::set_display_order(::int32_t value) {
+  _internal_set_display_order(value);
+  // @@protoc_insertion_point(field_set:RoomEntitiesPageSettings.display_order)
+}
+inline ::int32_t RoomEntitiesPageSettings::_internal_display_order() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.display_order_;
+}
+inline void RoomEntitiesPageSettings::_internal_set_display_order(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.display_order_ = value;
+}
+
+// int32 room_id = 4;
+inline void RoomEntitiesPageSettings::clear_room_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.room_id_ = 0;
+}
+inline ::int32_t RoomEntitiesPageSettings::room_id() const {
+  // @@protoc_insertion_point(field_get:RoomEntitiesPageSettings.room_id)
+  return _internal_room_id();
+}
+inline void RoomEntitiesPageSettings::set_room_id(::int32_t value) {
+  _internal_set_room_id(value);
+  // @@protoc_insertion_point(field_set:RoomEntitiesPageSettings.room_id)
+}
+inline ::int32_t RoomEntitiesPageSettings::_internal_room_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.room_id_;
+}
+inline void RoomEntitiesPageSettings::_internal_set_room_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.room_id_ = value;
+}
+
+// bool is_scenes_page = 5;
+inline void RoomEntitiesPageSettings::clear_is_scenes_page() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_scenes_page_ = false;
+}
+inline bool RoomEntitiesPageSettings::is_scenes_page() const {
+  // @@protoc_insertion_point(field_get:RoomEntitiesPageSettings.is_scenes_page)
+  return _internal_is_scenes_page();
+}
+inline void RoomEntitiesPageSettings::set_is_scenes_page(bool value) {
+  _internal_set_is_scenes_page(value);
+  // @@protoc_insertion_point(field_set:RoomEntitiesPageSettings.is_scenes_page)
+}
+inline bool RoomEntitiesPageSettings::_internal_is_scenes_page() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.is_scenes_page_;
+}
+inline void RoomEntitiesPageSettings::_internal_set_is_scenes_page(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_scenes_page_ = value;
+}
+
+// repeated .RoomEntityWrapper entities = 6;
+inline int RoomEntitiesPageSettings::_internal_entities_size() const {
+  return _internal_entities().size();
+}
+inline int RoomEntitiesPageSettings::entities_size() const {
+  return _internal_entities_size();
+}
+inline void RoomEntitiesPageSettings::clear_entities() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.entities_.Clear();
+}
+inline ::RoomEntityWrapper* RoomEntitiesPageSettings::mutable_entities(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:RoomEntitiesPageSettings.entities)
+  return _internal_mutable_entities()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::RoomEntityWrapper>* RoomEntitiesPageSettings::mutable_entities()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:RoomEntitiesPageSettings.entities)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_entities();
+}
+inline const ::RoomEntityWrapper& RoomEntitiesPageSettings::entities(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:RoomEntitiesPageSettings.entities)
+  return _internal_entities().Get(index);
+}
+inline ::RoomEntityWrapper* RoomEntitiesPageSettings::add_entities() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::RoomEntityWrapper* _add = _internal_mutable_entities()->Add();
+  // @@protoc_insertion_point(field_add:RoomEntitiesPageSettings.entities)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::RoomEntityWrapper>& RoomEntitiesPageSettings::entities() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:RoomEntitiesPageSettings.entities)
+  return _internal_entities();
+}
+inline const ::google::protobuf::RepeatedPtrField<::RoomEntityWrapper>&
+RoomEntitiesPageSettings::_internal_entities() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.entities_;
+}
+inline ::google::protobuf::RepeatedPtrField<::RoomEntityWrapper>*
+RoomEntitiesPageSettings::_internal_mutable_entities() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.entities_;
+}
+
 // -------------------------------------------------------------------
 
 // RoomSettings
@@ -1235,6 +2693,51 @@ RoomSettings::_internal_scene_ids() const {
 inline ::google::protobuf::RepeatedField<::int32_t>* RoomSettings::_internal_mutable_scene_ids() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.scene_ids_;
+}
+
+// repeated int32 entity_page_ids = 5;
+inline int RoomSettings::_internal_entity_page_ids_size() const {
+  return _internal_entity_page_ids().size();
+}
+inline int RoomSettings::entity_page_ids_size() const {
+  return _internal_entity_page_ids_size();
+}
+inline void RoomSettings::clear_entity_page_ids() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.entity_page_ids_.Clear();
+}
+inline ::int32_t RoomSettings::entity_page_ids(int index) const {
+  // @@protoc_insertion_point(field_get:RoomSettings.entity_page_ids)
+  return _internal_entity_page_ids().Get(index);
+}
+inline void RoomSettings::set_entity_page_ids(int index, ::int32_t value) {
+  _internal_mutable_entity_page_ids()->Set(index, value);
+  // @@protoc_insertion_point(field_set:RoomSettings.entity_page_ids)
+}
+inline void RoomSettings::add_entity_page_ids(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_entity_page_ids()->Add(value);
+  // @@protoc_insertion_point(field_add:RoomSettings.entity_page_ids)
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>& RoomSettings::entity_page_ids() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:RoomSettings.entity_page_ids)
+  return _internal_entity_page_ids();
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* RoomSettings::mutable_entity_page_ids()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:RoomSettings.entity_page_ids)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_entity_page_ids();
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>&
+RoomSettings::_internal_entity_page_ids() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.entity_page_ids_;
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* RoomSettings::_internal_mutable_entity_page_ids() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.entity_page_ids_;
 }
 
 // -------------------------------------------------------------------
@@ -2021,6 +3524,72 @@ inline void LightSettings::set_allocated_openhab_item_rgb(std::string* value) {
         }
   #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:LightSettings.openhab_item_rgb)
+}
+
+// int32 entities_page_id = 16;
+inline void LightSettings::clear_entities_page_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.entities_page_id_ = 0;
+}
+inline ::int32_t LightSettings::entities_page_id() const {
+  // @@protoc_insertion_point(field_get:LightSettings.entities_page_id)
+  return _internal_entities_page_id();
+}
+inline void LightSettings::set_entities_page_id(::int32_t value) {
+  _internal_set_entities_page_id(value);
+  // @@protoc_insertion_point(field_set:LightSettings.entities_page_id)
+}
+inline ::int32_t LightSettings::_internal_entities_page_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.entities_page_id_;
+}
+inline void LightSettings::_internal_set_entities_page_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.entities_page_id_ = value;
+}
+
+// int32 entities_page_room_view_position = 17;
+inline void LightSettings::clear_entities_page_room_view_position() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.entities_page_room_view_position_ = 0;
+}
+inline ::int32_t LightSettings::entities_page_room_view_position() const {
+  // @@protoc_insertion_point(field_get:LightSettings.entities_page_room_view_position)
+  return _internal_entities_page_room_view_position();
+}
+inline void LightSettings::set_entities_page_room_view_position(::int32_t value) {
+  _internal_set_entities_page_room_view_position(value);
+  // @@protoc_insertion_point(field_set:LightSettings.entities_page_room_view_position)
+}
+inline ::int32_t LightSettings::_internal_entities_page_room_view_position() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.entities_page_room_view_position_;
+}
+inline void LightSettings::_internal_set_entities_page_room_view_position(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.entities_page_room_view_position_ = value;
+}
+
+// bool controlled_from_main_page = 18;
+inline void LightSettings::clear_controlled_from_main_page() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.controlled_from_main_page_ = false;
+}
+inline bool LightSettings::controlled_from_main_page() const {
+  // @@protoc_insertion_point(field_get:LightSettings.controlled_from_main_page)
+  return _internal_controlled_from_main_page();
+}
+inline void LightSettings::set_controlled_from_main_page(bool value) {
+  _internal_set_controlled_from_main_page(value);
+  // @@protoc_insertion_point(field_set:LightSettings.controlled_from_main_page)
+}
+inline bool LightSettings::_internal_controlled_from_main_page() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.controlled_from_main_page_;
+}
+inline void LightSettings::_internal_set_controlled_from_main_page(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.controlled_from_main_page_ = value;
 }
 
 // -------------------------------------------------------------------

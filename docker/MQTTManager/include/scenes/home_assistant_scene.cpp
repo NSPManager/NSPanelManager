@@ -55,7 +55,7 @@ MQTT_MANAGER_ENTITY_CONTROLLER HomeAssistantScene::get_controller() {
 
 void HomeAssistantScene::post_init() {
   if (!this->_is_global_scene) {
-    Room *room_entity = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, this->_room_id);
+    std::shared_ptr<Room> room_entity = EntityManager::get_room(this->_room_id);
     if (room_entity != nullptr) {
       this->_room = room_entity;
     } else {
