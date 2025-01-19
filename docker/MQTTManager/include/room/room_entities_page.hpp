@@ -5,12 +5,19 @@
 #include <protobuf/protobuf_general.pb.h>
 #include <memory>
 
+class Room; // Forward declare room as to not create circular dependencies
+
 class RoomEntitiesPage {
 public:
     /**
     * Create an instance that will pull it's own config from Djano on creation
     */
-    RoomEntitiesPage(uint32_t page_id);
+    RoomEntitiesPage(uint32_t page_id, Room *room);
+
+    /*
+    * Redownload config from manager and reload this page.
+    */
+    void reload_config();
 
     /**
     * Get the ID of this RoomEntitiesPage
@@ -33,11 +40,6 @@ public:
     std::vector<std::shared_ptr<MqttManagerEntity>> get_entities();
 
     /**
-    * Get an NSPanelRoomEntitiesPage status object for this page to send to NSPanel.
-    */
-    void populate_nspanel_room_entities_page_with_entities(NSPanelRoomEntitiesPage *page);
-
-    /**
     * Get all entities registered to this page with a specific type.
     */
     template <class EntityClass>
@@ -52,18 +54,54 @@ public:
         return entities;
     }
 
+    /**
+     * Register a callback for when the state of this entity page changes.
+     */
+    template <typename CALLBACK_BIND>
+    void attach_state_change_callback(CALLBACK_BIND callback) {
+        this->_state_changed_callbacks.connect(callback);
+    }
+
+    /**
+     * Unregister a callback for when the state of this entity page changes.
+     */
+    template <typename CALLBACK_BIND>
+    void detach_state_change_callback(CALLBACK_BIND callback) {
+        this->_state_changed_callbacks.disconnect(callback);
+    }
+
 private:
     /**
     * Pull updated config from Django.
     */
     void _update();
 
+    /*
+    * When a state changes in one of the underlaying entities, recalculate
+    * entity page state.
+    */
+    void _entity_changed_callback(MqttManagerEntity *entity);
+
+    /*
+    * Will create a new protobuf state object and publish to _mqtt_state_topic.
+    */
+    void _send_mqtt_state_update();
+
+    // MQTT topic where the state for this entities page is sent.
+    std::string _mqtt_state_topic;
+
     // Vars:
     // The ID of this "NSPanelRoomEntitiesPage" in the Django database
     int32_t _id;
 
+    // The room object that this entity page is attached to.
+    Room* _room;
+
     // Settings for this page
     RoomEntitiesPageSettings _page_settings;
+
+    // Callbacks for when the state of this entity page changes.
+    boost::signals2::signal<void(RoomEntitiesPage*)> _state_changed_callbacks;
 
     // Entities registered to this page
     std::mutex _entities_mutex;

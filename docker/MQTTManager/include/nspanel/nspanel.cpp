@@ -1185,162 +1185,162 @@ bool NSPanel::handle_ipc_request_get_logs(nlohmann::json request, nlohmann::json
 }
 
 void NSPanel::_send_home_page_update() {
-    if(this->_selected_room != nullptr) {
-        NSPanelRoomStatus proto;
-        // Update default room topic
-        if(this->_selected_room->get_protobuf_room_status(&proto)) {
-            std::string serialized_result = proto.SerializeAsString();
-            if(serialized_result.size() > 0) {
-                MQTT_Manager::publish(this->_mqtt_topic_home_page_status, serialized_result, true);
-            }
-        } else {
-            SPDLOG_ERROR("Failed to send out room status update for room {}::{} for panel {}::{}.", this->_selected_room->get_id(), this->_selected_room->get_name(), this->_id, this->_name);
-        }
-    } else {
-        SPDLOG_ERROR("Tried to send out room state update for NSPanel {}::{} but no room has been selected.", this->_id, this->_name);
-    }
+    // if(this->_selected_room != nullptr) {
+    //     NSPanelRoomStatus proto;
+    //     // Update default room topic
+    //     if(this->_selected_room->get_protobuf_room_status(&proto)) {
+    //         std::string serialized_result = proto.SerializeAsString();
+    //         if(serialized_result.size() > 0) {
+    //             MQTT_Manager::publish(this->_mqtt_topic_home_page_status, serialized_result, true);
+    //         }
+    //     } else {
+    //         SPDLOG_ERROR("Failed to send out room status update for room {}::{} for panel {}::{}.", this->_selected_room->get_id(), this->_selected_room->get_name(), this->_id, this->_name);
+    //     }
+    // } else {
+    //     SPDLOG_ERROR("Tried to send out room state update for NSPanel {}::{} but no room has been selected.", this->_id, this->_name);
+    // }
 
-    // Update all rooms topics:
-    NSPanelRoomStatus all_status;
-    all_status.set_id(-1);
-    all_status.set_name("ALL");
+    // // Update all rooms topics:
+    // NSPanelRoomStatus all_status;
+    // all_status.set_id(-1);
+    // all_status.set_name("ALL");
 
-    std::vector<std::shared_ptr<Light>> lights = EntityManager::get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
-    // Remove any light not controlled by main page.
-    // TODO: Merge this algorithm with the one from room.cpp (get_protobuf_room_status)
-    lights.erase(std::remove_if(lights.begin(), lights.end(), [](std::shared_ptr<Light> light) {
-        return !light->get_controlled_from_main_page();
-    }), lights.end());
+    // std::vector<std::shared_ptr<Light>> lights = EntityManager::get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+    // // Remove any light not controlled by main page.
+    // // TODO: Merge this algorithm with the one from room.cpp (get_protobuf_room_status)
+    // lights.erase(std::remove_if(lights.begin(), lights.end(), [](std::shared_ptr<Light> light) {
+    //     return !light->get_controlled_from_main_page();
+    // }), lights.end());
 
-    bool any_lights_on = false;
-    // Find if any light is on
-    for(auto &light : lights) {
-        if(light->get_state()) {
-            any_lights_on = true;
-            break;
-        }
-    }
+    // bool any_lights_on = false;
+    // // Find if any light is on
+    // for(auto &light : lights) {
+    //     if(light->get_state()) {
+    //         any_lights_on = true;
+    //         break;
+    //     }
+    // }
 
-    if(any_lights_on) {
-        // Remove any light that is off
-        lights.erase(std::remove_if(lights.begin(), lights.end(), [](std::shared_ptr<Light> light) {
-            return !light->get_state();
-        }), lights.end());
-    }
+    // if(any_lights_on) {
+    //     // Remove any light that is off
+    //     lights.erase(std::remove_if(lights.begin(), lights.end(), [](std::shared_ptr<Light> light) {
+    //         return !light->get_state();
+    //     }), lights.end());
+    // }
 
-    // Calculate average light level
-    uint64_t total_light_level_all = 0;
-    uint64_t total_light_level_ceiling = 0;
-    uint64_t total_light_level_table = 0;
-    uint64_t total_kelvin_level_all = 0;
-    uint64_t total_kelvin_ceiling = 0;
-    uint64_t total_kelvin_table = 0;
-    uint16_t num_lights_total = 0;
-    uint16_t num_lights_ceiling = 0;
-    uint16_t num_lights_ceiling_on = 0;
-    uint16_t num_lights_table = 0;
-    uint16_t num_lights_table_on = 0;
+    // // Calculate average light level
+    // uint64_t total_light_level_all = 0;
+    // uint64_t total_light_level_ceiling = 0;
+    // uint64_t total_light_level_table = 0;
+    // uint64_t total_kelvin_level_all = 0;
+    // uint64_t total_kelvin_ceiling = 0;
+    // uint64_t total_kelvin_table = 0;
+    // uint16_t num_lights_total = 0;
+    // uint16_t num_lights_ceiling = 0;
+    // uint16_t num_lights_ceiling_on = 0;
+    // uint16_t num_lights_table = 0;
+    // uint16_t num_lights_table_on = 0;
 
-    for(auto &light : lights) {
-        if ((any_lights_on && light->get_state()) || !any_lights_on) {
-            total_light_level_all += light->get_brightness();
-            total_kelvin_level_all += light->get_color_temperature();
-            num_lights_total++;
-        }
+    // for(auto &light : lights) {
+    //     if ((any_lights_on && light->get_state()) || !any_lights_on) {
+    //         total_light_level_all += light->get_brightness();
+    //         total_kelvin_level_all += light->get_color_temperature();
+    //         num_lights_total++;
+    //     }
 
-        if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE) {
-            num_lights_table++;
-            if (light->get_state()) {
-                total_light_level_table += light->get_brightness();
-                total_kelvin_table += light->get_color_temperature();
-                num_lights_table_on++;
-            }
-        } else if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING) {
-            num_lights_ceiling++;
-            if (light->get_state()) {
-                total_light_level_ceiling += light->get_brightness();
-                total_kelvin_ceiling += light->get_color_temperature();
-                num_lights_ceiling_on++;
-            }
-        }
-    }
+    //     if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE) {
+    //         num_lights_table++;
+    //         if (light->get_state()) {
+    //             total_light_level_table += light->get_brightness();
+    //             total_kelvin_table += light->get_color_temperature();
+    //             num_lights_table_on++;
+    //         }
+    //     } else if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING) {
+    //         num_lights_ceiling++;
+    //         if (light->get_state()) {
+    //             total_light_level_ceiling += light->get_brightness();
+    //             total_kelvin_ceiling += light->get_color_temperature();
+    //             num_lights_ceiling_on++;
+    //         }
+    //     }
+    // }
 
-    // Update result if a ceiling or table light is found.
-    all_status.set_num_table_lights(num_lights_table);
-    all_status.set_num_ceiling_lights(num_lights_ceiling);
-    all_status.set_num_table_lights_on(num_lights_table_on);
-    all_status.set_num_ceiling_lights_on(num_lights_ceiling_on);
+    // // Update result if a ceiling or table light is found.
+    // all_status.set_num_table_lights(num_lights_table);
+    // all_status.set_num_ceiling_lights(num_lights_ceiling);
+    // all_status.set_num_table_lights_on(num_lights_table_on);
+    // all_status.set_num_ceiling_lights_on(num_lights_ceiling_on);
 
-    if (num_lights_total > 0) {
-        float average_kelvin = (float)total_kelvin_level_all / num_lights_total;
-        average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-        if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
-            kelvin_pct = 100 - kelvin_pct;
-        }
+    // if (num_lights_total > 0) {
+    //     float average_kelvin = (float)total_kelvin_level_all / num_lights_total;
+    //     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
+    //     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+    //     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+    //         kelvin_pct = 100 - kelvin_pct;
+    //     }
 
-        all_status.set_average_dim_level(total_light_level_all / num_lights_total);
-        all_status.set_average_color_temperature(kelvin_pct);
-    } else {
-        all_status.set_average_dim_level(0);
-        all_status.set_average_color_temperature(0);
-    }
+    //     all_status.set_average_dim_level(total_light_level_all / num_lights_total);
+    //     all_status.set_average_color_temperature(kelvin_pct);
+    // } else {
+    //     all_status.set_average_dim_level(0);
+    //     all_status.set_average_color_temperature(0);
+    // }
 
-    if (num_lights_table_on > 0) {
-        float average_kelvin = (float)total_kelvin_table / num_lights_table_on;
-        average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-        if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
-            kelvin_pct = 100 - kelvin_pct;
-        }
+    // if (num_lights_table_on > 0) {
+    //     float average_kelvin = (float)total_kelvin_table / num_lights_table_on;
+    //     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
+    //     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+    //     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+    //         kelvin_pct = 100 - kelvin_pct;
+    //     }
 
-        all_status.set_table_lights_dim_level(total_light_level_table / num_lights_table_on);
-        all_status.set_table_lights_color_temperature_value(kelvin_pct);
-    } else {
-        SPDLOG_TRACE("No table lights found, setting value to 0.");
-        all_status.set_table_lights_dim_level(0);
-        all_status.set_table_lights_color_temperature_value(0);
-    }
+    //     all_status.set_table_lights_dim_level(total_light_level_table / num_lights_table_on);
+    //     all_status.set_table_lights_color_temperature_value(kelvin_pct);
+    // } else {
+    //     SPDLOG_TRACE("No table lights found, setting value to 0.");
+    //     all_status.set_table_lights_dim_level(0);
+    //     all_status.set_table_lights_color_temperature_value(0);
+    // }
 
-    if (num_lights_ceiling_on > 0) {
-        float average_kelvin = (float)total_kelvin_ceiling / num_lights_ceiling_on;
-        average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-        if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
-            kelvin_pct = 100 - kelvin_pct;
-        }
+    // if (num_lights_ceiling_on > 0) {
+    //     float average_kelvin = (float)total_kelvin_ceiling / num_lights_ceiling_on;
+    //     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
+    //     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+    //     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+    //         kelvin_pct = 100 - kelvin_pct;
+    //     }
 
-        all_status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling_on);
-        all_status.set_ceiling_lights_color_temperature_value(kelvin_pct);
-    } else {
-        SPDLOG_TRACE("No ceiling lights found, setting value to 0.");
-        all_status.set_ceiling_lights_dim_level(0);
-        all_status.set_ceiling_lights_color_temperature_value(0);
-    }
+    //     all_status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling_on);
+    //     all_status.set_ceiling_lights_color_temperature_value(kelvin_pct);
+    // } else {
+    //     SPDLOG_TRACE("No ceiling lights found, setting value to 0.");
+    //     all_status.set_ceiling_lights_dim_level(0);
+    //     all_status.set_ceiling_lights_color_temperature_value(0);
+    // }
 
-    std::string serialized_result = all_status.SerializeAsString();
-    if(serialized_result.size() > 0) {
-        MQTT_Manager::publish(this->_mqtt_topic_home_page_all_rooms_status, serialized_result, true);
-    } else {
-        SPDLOG_ERROR("Tried to send out all_rooms state update to NSPanel {}::{} but failed to serialize the result.");
-    }
+    // std::string serialized_result = all_status.SerializeAsString();
+    // if(serialized_result.size() > 0) {
+    //     MQTT_Manager::publish(this->_mqtt_topic_home_page_all_rooms_status, serialized_result, true);
+    // } else {
+    //     SPDLOG_ERROR("Tried to send out all_rooms state update to NSPanel {}::{} but failed to serialize the result.");
+    // }
 }
 
 void NSPanel::_send_entities_page_update() {
-    if(this->_selected_room != nullptr) {
-        SPDLOG_DEBUG("NSPanel {}::{}, sending out new entities page for pagge index: {}", this->_id, this->_name, this->_selected_entity_page_index);
-        NSPanelRoomEntitiesPage proto;
-        if(this->_selected_room->get_protobuf_room_entity_page(this->_selected_entity_page_index, &proto)) {
-            std::string serialized_result = proto.SerializeAsString();
-            if(serialized_result.size() > 0) {
-                MQTT_Manager::publish(this->_mqtt_topic_room_entities_page_status, serialized_result, true);
-            }
-        } else {
-            SPDLOG_ERROR("Failed to send out room status update for room {}::{} for panel {}::{}.", this->_selected_room->get_id(), this->_selected_room->get_name(), this->_id, this->_name);
-        }
-    } else {
-        SPDLOG_ERROR("Tried to send out room state update for NSPanel {}::{} but no room has been selected.", this->_id, this->_name);
-    }
+    // if(this->_selected_room != nullptr) {
+    //     SPDLOG_DEBUG("NSPanel {}::{}, sending out new entities page for pagge index: {}", this->_id, this->_name, this->_selected_entity_page_index);
+    //     NSPanelRoomEntitiesPage proto;
+    //     if(this->_selected_room->get_protobuf_room_entity_page(this->_selected_entity_page_index, &proto)) {
+    //         std::string serialized_result = proto.SerializeAsString();
+    //         if(serialized_result.size() > 0) {
+    //             MQTT_Manager::publish(this->_mqtt_topic_room_entities_page_status, serialized_result, true);
+    //         }
+    //     } else {
+    //         SPDLOG_ERROR("Failed to send out room status update for room {}::{} for panel {}::{}.", this->_selected_room->get_id(), this->_selected_room->get_name(), this->_id, this->_name);
+    //     }
+    // } else {
+    //     SPDLOG_ERROR("Tried to send out room state update for NSPanel {}::{} but no room has been selected.", this->_id, this->_name);
+    // }
 }
 
 void NSPanel::_go_to_next_room() {

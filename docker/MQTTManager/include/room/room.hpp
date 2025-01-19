@@ -61,26 +61,14 @@ public:
   }
 
   /**
-  * Get a NSPanelRoomStatus protobuf object with relevant data.
-  * Return true if successful, otherwise false.
-  */
-  bool get_protobuf_room_status(NSPanelRoomStatus *result);
-
-  /**
   * Get the total number of entity pages in this room.
   */
   uint16_t get_number_of_entity_pages();
 
   /**
-  * Get a filled in NSPanelRoomEntitiesPage protobuf object and store it in @param result.
-  * Return true if successful, otherwise false.
-  */
-  bool get_protobuf_room_entity_page(uint16_t page_index, NSPanelRoomEntitiesPage *result);
-
-  /**
   * Callback when that gets run when an entitiy has changed state
   */
-  void entity_changed_callback(MqttManagerEntity *entity);
+  void page_changed_callback(RoomEntitiesPage *page);
 
   /**
    * Callback for NSPanelMQTTManagerCommands sent over MQTT
@@ -105,9 +93,14 @@ public:
 
 
 private:
+  /*
+  * Create a protobuf room state object and send out to _mqtt_state_topic.
+  */
+  void _send_room_state_update();
+
   uint16_t _id;
   std::string _name;
-  std::string _mqtt_status_topic;
+  std::string _mqtt_state_topic;
 
   // All pages with entities for this room
   std::vector<std::shared_ptr<RoomEntitiesPage>> _entity_pages;

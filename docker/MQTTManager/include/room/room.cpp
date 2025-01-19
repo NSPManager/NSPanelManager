@@ -13,6 +13,7 @@
 #include <chrono>
 #include <cstdint>
 #include <memory>
+#include <netdb.h>
 #include <nlohmann/json.hpp>
 #include <room/room.hpp>
 #include <spdlog/spdlog.h>
@@ -31,14 +32,14 @@ Room::~Room() {
 void Room::update_config(RoomSettings &config) {
   this->_id = config.id();
   this->_name = config.name();
-  this->_mqtt_status_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/status", MqttManagerConfig::get_settings().manager_address(), this->_id);
+  this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/status", MqttManagerConfig::get_settings().manager_address(), this->_id);
 
-  SPDLOG_TRACE("Room {}::{} initialized with status topic '{}'.", this->_id, this->_name, this->_mqtt_status_topic);
+  SPDLOG_TRACE("Room {}::{} initialized with status topic '{}'.", this->_id, this->_name, this->_mqtt_state_topic);
 
   {
     std::lock_guard<std::mutex> mutex_guard(this->_entities_pages_mutex);
     for(uint32_t entity_page_id : config.entity_page_ids()) {
-        this->_entity_pages.push_back(std::shared_ptr<RoomEntitiesPage>(new RoomEntitiesPage(entity_page_id)));
+        this->_entity_pages.push_back(std::shared_ptr<RoomEntitiesPage>(new RoomEntitiesPage(entity_page_id, this)));
     }
     SPDLOG_DEBUG("Created {} RoomEntitiesPages for room {}::{}.", this->_entity_pages.size(), this->_id, this->_name);
   }
@@ -57,13 +58,7 @@ void Room::post_init() {
         std::lock_guard<std::mutex> mutex_guard(this->_entities_pages_mutex);
         for(std::shared_ptr<RoomEntitiesPage> &page : this->_entity_pages) {
             page->post_init();
-
-            for(std::shared_ptr<MqttManagerEntity> &entity : page->get_entities()) {
-                if(entity != nullptr) {
-                    SPDLOG_DEBUG("Attaching entity change callback on entity {} of type {}.", entity->get_id(), (int)entity->get_type());
-                    entity->attach_entity_changed_callback(boost::bind(&Room::entity_changed_callback, this, _1));
-                }
-            }
+            page->attach_state_change_callback(boost::bind(&Room::page_changed_callback, this, _1));
             SPDLOG_DEBUG("Attached callbacks for all entities in RoomEntitiesPage {}.", page->get_id());
         }
     }
@@ -84,159 +79,14 @@ std::vector<std::shared_ptr<MqttManagerEntity>> Room::get_all_entities() {
     return entities;
 }
 
-bool Room::get_protobuf_room_status(NSPanelRoomStatus *result) {
-    result->set_id(this->_id);
-    result->set_name(this->_name);
-
-    // Calculate average light level
-    uint64_t total_light_level_all = 0;
-    uint64_t total_light_level_ceiling = 0;
-    uint64_t total_light_level_table = 0;
-    uint64_t total_kelvin_level_all = 0;
-    uint64_t total_kelvin_ceiling = 0;
-    uint64_t total_kelvin_table = 0;
-    uint16_t num_lights_total = 0;
-    uint16_t num_lights_ceiling = 0;
-    uint16_t num_lights_ceiling_on = 0;
-    uint16_t num_lights_table = 0;
-    uint16_t num_lights_table_on = 0;
-
-    bool any_light_entity_on = false;
-    std::lock_guard<std::mutex> mutex_guard(this->_entities_pages_mutex);
-    for(std::shared_ptr<RoomEntitiesPage> &entity_page : this->_entity_pages) {
-        std::vector<std::shared_ptr<Light>> entities = entity_page->get_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
-        for(auto light : entities) {
-            if(light->get_state() && light->get_controlled_from_main_page()) {
-                any_light_entity_on = true;
-                break;
-            }
-        }
-        // Found a light entity that was on, no need to check any more.
-        if(any_light_entity_on) {
-            break;
-        }
-    }
-
-    for (std::shared_ptr<RoomEntitiesPage> &entities_page : this->_entity_pages) {
-      for (auto &light : entities_page->get_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT)) {
-          // Light is not controlled from main page, exclude it from calculations.
-          if(!light->get_controlled_from_main_page()) {
-              continue;
-          }
-
-          if ((any_light_entity_on && light->get_state()) || !any_light_entity_on) {
-              total_light_level_all += light->get_brightness();
-              total_kelvin_level_all += light->get_color_temperature();
-              num_lights_total++;
-          }
-          if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE) {
-              SPDLOG_TRACE("Room {}::{} found table light {}::{}, state: {}", this->_id, this->_name, light->get_id(), light->get_name(), light->get_state() ? "ON" : "OFF");
-              num_lights_table++;
-              if (light->get_state()) {
-                  total_light_level_table += light->get_brightness();
-                  total_kelvin_table += light->get_color_temperature();
-                  num_lights_table_on++;
-              }
-          } else if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING) {
-              SPDLOG_TRACE("Room {}::{} found ceiling light {}::{}, state: {}", this->_id, this->_name, light->get_id(), light->get_name(), light->get_state() ? "ON" : "OFF");
-              num_lights_ceiling++;
-              if (light->get_state()) {
-                  total_light_level_ceiling += light->get_brightness();
-                  total_kelvin_ceiling += light->get_color_temperature();
-                  num_lights_ceiling_on++;
-              }
-          }
-      }
-    }
-
-    // Update result if a ceiling or table light is found.
-    result->set_num_table_lights(num_lights_table);
-    result->set_num_ceiling_lights(num_lights_ceiling);
-    result->set_num_table_lights_on(num_lights_table_on);
-    result->set_num_ceiling_lights_on(num_lights_ceiling_on);
-
-    if (num_lights_total > 0) {
-      float average_kelvin = (float)total_kelvin_level_all / num_lights_total;
-      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-      if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
-          kelvin_pct = 100 - kelvin_pct;
-      }
-
-      result->set_average_dim_level(total_light_level_all / num_lights_total);
-      result->set_average_color_temperature(kelvin_pct);
-    } else {
-      result->set_average_dim_level(0);
-      result->set_average_color_temperature(0);
-    }
-
-    SPDLOG_DEBUG("Room {}::{} average dim level: {}, average color temperature: {}.", this->_id, this->_name, result->average_dim_level(), result->average_color_temperature());
-
-    if (num_lights_table_on > 0) {
-      float average_kelvin = (float)total_kelvin_table / num_lights_table_on;
-      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-      if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
-          kelvin_pct = 100 - kelvin_pct;
-      }
-
-      result->set_table_lights_dim_level(total_light_level_table / num_lights_table_on);
-      result->set_table_lights_color_temperature_value(kelvin_pct);
-    } else {
-      SPDLOG_TRACE("No table lights found, setting value to 0.");
-      result->set_table_lights_dim_level(0);
-      result->set_table_lights_color_temperature_value(0);
-    }
-
-    if (num_lights_ceiling_on > 0) {
-      float average_kelvin = (float)total_kelvin_ceiling / num_lights_ceiling_on;
-      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-      if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
-          kelvin_pct = 100 - kelvin_pct;
-      }
-
-      result->set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling_on);
-      result->set_ceiling_lights_color_temperature_value(kelvin_pct);
-    } else {
-      SPDLOG_TRACE("No ceiling lights found, setting value to 0.");
-      result->set_ceiling_lights_dim_level(0);
-      result->set_ceiling_lights_color_temperature_value(0);
-    }
-
-    SPDLOG_TRACE("Kelvin all lights in room {}::{}: {}", this->_id, this->_name, result->average_color_temperature());
-    return true;
-}
-
 uint16_t Room::get_number_of_entity_pages() {
     return this->_entity_pages.size();
 }
 
-bool Room::get_protobuf_room_entity_page(uint16_t page_index, NSPanelRoomEntitiesPage *result) {
-    result->set_id(this->_entity_pages[page_index]->get_id());
-    result->set_page_type(this->_entity_pages[page_index]->get_type());
-    result->set_header_text(fmt::format("{} 0/0", this->_name));
-    // If an entity page actually exists, populate entities.
-    if(page_index >= 0 && page_index < this->_entity_pages.size()) {
-        result->set_header_text(fmt::format("{} {}/{}", this->_name, page_index+1, this->_entity_pages.size()));
-        this->_entity_pages[page_index]->populate_nspanel_room_entities_page_with_entities(result);
-        return true;
-    }
-    return false;
-}
-
-void Room::entity_changed_callback(MqttManagerEntity *entity) {
-  SPDLOG_TRACE("Entity with ID {} changed in room {}::{}, resending protobuf status.", entity->get_id(), this->_id, this->_name);
-  // if (this->_send_status_updates) {
-  //   switch (entity->get_type()) {
-  //       case LIGHT:
-  //           this->_publish_protobuf_status();
-  //           break;
-  //       case SCENE:
-  //           this->_publish_protobuf_status();
-  //           break;
-  //   }
-  // }
+void Room::page_changed_callback(RoomEntitiesPage *page) {
+  if (this->_send_status_updates) {
+      this->_send_room_state_update();
+  }
 }
 
 void Room::command_callback(NSPanelMQTTManagerCommand &command) {
@@ -291,7 +141,8 @@ void Room::command_callback(NSPanelMQTTManagerCommand &command) {
     }
 
     if (MqttManagerConfig::get_settings().optimistic_mode()) {
-      this->_send_status_updates = true;
+        this->_send_room_state_update();
+        this->_send_status_updates = true;
     }
   } else if (command.has_first_page_turn_off()) {
     SPDLOG_DEBUG("Room {}:{} got command to turn lights off from first page.", this->_id, this->_name);
@@ -307,4 +158,131 @@ void Room::command_callback(NSPanelMQTTManagerCommand &command) {
         }
     }
   }
+}
+
+void Room::_send_room_state_update() {
+    NSPanelRoomStatus status;
+    status.set_id(this->_id);
+    status.set_name(this->_name);
+
+    // Calculate average light level
+    uint64_t total_light_level_all = 0;
+    uint64_t total_light_level_ceiling = 0;
+    uint64_t total_light_level_table = 0;
+    uint64_t total_kelvin_level_all = 0;
+    uint64_t total_kelvin_ceiling = 0;
+    uint64_t total_kelvin_table = 0;
+    uint16_t num_lights_total = 0;
+    uint16_t num_lights_ceiling = 0;
+    uint16_t num_lights_ceiling_on = 0;
+    uint16_t num_lights_table = 0;
+    uint16_t num_lights_table_on = 0;
+
+    bool any_light_entity_on = false;
+    std::lock_guard<std::mutex> mutex_guard(this->_entities_pages_mutex);
+    for(std::shared_ptr<RoomEntitiesPage> &entity_page : this->_entity_pages) {
+        std::vector<std::shared_ptr<Light>> entities = entity_page->get_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+        for(auto light : entities) {
+            if(light->get_state() && light->get_controlled_from_main_page()) {
+                any_light_entity_on = true;
+                break;
+            }
+        }
+    }
+
+    for (std::shared_ptr<RoomEntitiesPage> &entities_page : this->_entity_pages) {
+      for (auto &light : entities_page->get_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT)) {
+          // Light is not controlled from main page, exclude it from calculations.
+          if(!light->get_controlled_from_main_page()) {
+              continue;
+          }
+
+          if ((any_light_entity_on && light->get_state()) || !any_light_entity_on) {
+              total_light_level_all += light->get_brightness();
+              total_kelvin_level_all += light->get_color_temperature();
+              num_lights_total++;
+          }
+          if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE) {
+              SPDLOG_TRACE("Room {}::{} found table light {}::{}, state: {}", this->_id, this->_name, light->get_id(), light->get_name(), light->get_state() ? "ON" : "OFF");
+              num_lights_table++;
+              if (light->get_state()) {
+                  total_light_level_table += light->get_brightness();
+                  total_kelvin_table += light->get_color_temperature();
+                  num_lights_table_on++;
+              }
+          } else if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING) {
+              SPDLOG_TRACE("Room {}::{} found ceiling light {}::{}, state: {}", this->_id, this->_name, light->get_id(), light->get_name(), light->get_state() ? "ON" : "OFF");
+              num_lights_ceiling++;
+              if (light->get_state()) {
+                  total_light_level_ceiling += light->get_brightness();
+                  total_kelvin_ceiling += light->get_color_temperature();
+                  num_lights_ceiling_on++;
+              }
+          }
+      }
+    }
+
+    // Update result if a ceiling or table light is found.
+    status.set_num_table_lights(num_lights_table);
+    status.set_num_ceiling_lights(num_lights_ceiling);
+    status.set_num_table_lights_on(num_lights_table_on);
+    status.set_num_ceiling_lights_on(num_lights_ceiling_on);
+
+    if (num_lights_total > 0) {
+      float average_kelvin = (float)total_kelvin_level_all / num_lights_total;
+      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
+      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+      if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+          kelvin_pct = 100 - kelvin_pct;
+      }
+
+      status.set_average_dim_level(total_light_level_all / num_lights_total);
+      status.set_average_color_temperature(kelvin_pct);
+    } else {
+      status.set_average_dim_level(0);
+      status.set_average_color_temperature(0);
+    }
+
+    SPDLOG_DEBUG("Room {}::{} average dim level: {}, average color temperature: {}.", this->_id, this->_name, status.average_dim_level(), status.average_color_temperature());
+
+    if (num_lights_table_on > 0) {
+      float average_kelvin = (float)total_kelvin_table / num_lights_table_on;
+      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
+      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+      if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+          kelvin_pct = 100 - kelvin_pct;
+      }
+
+      status.set_table_lights_dim_level(total_light_level_table / num_lights_table_on);
+      status.set_table_lights_color_temperature_value(kelvin_pct);
+    } else {
+      SPDLOG_TRACE("No table lights found, setting value to 0.");
+      status.set_table_lights_dim_level(0);
+      status.set_table_lights_color_temperature_value(0);
+    }
+
+    if (num_lights_ceiling_on > 0) {
+      float average_kelvin = (float)total_kelvin_ceiling / num_lights_ceiling_on;
+      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
+      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+      if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+          kelvin_pct = 100 - kelvin_pct;
+      }
+
+      status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling_on);
+      status.set_ceiling_lights_color_temperature_value(kelvin_pct);
+    } else {
+      SPDLOG_TRACE("No ceiling lights found, setting value to 0.");
+      status.set_ceiling_lights_dim_level(0);
+      status.set_ceiling_lights_color_temperature_value(0);
+    }
+
+    SPDLOG_TRACE("Kelvin all lights in room {}::{}: {}", this->_id, this->_name, status.average_color_temperature());
+
+    std::string protobuf_str_buffer;
+    if(status.SerializeToString(&protobuf_str_buffer)) {
+        MQTT_Manager::publish(this->_mqtt_state_topic, protobuf_str_buffer, true);
+    } else {
+        SPDLOG_ERROR("Failed to serialize room {}::{} protobuf state object. Will not publish.", this->_id, this->_name);
+    }
 }
