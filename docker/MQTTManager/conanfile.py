@@ -19,6 +19,8 @@ class CompressorRecipe(ConanFile):
         self.requires("boost/1.84.0")
         self.requires("cppzmq/4.10.0")
         self.requires("protobuf/5.27.0")
+        self.requires("sqlite_orm/1.9")
+        self.requires("sqlite3/3.48.0", override=True)
 
     # def build_requirements(self):
     #     self.tool_requires("cmake/3.28.1")

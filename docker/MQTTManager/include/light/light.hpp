@@ -3,7 +3,6 @@
 
 #include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
-#include "room/room.hpp"
 #include <boost/signals2.hpp>
 #include <chrono>
 #include <cstdint>
@@ -120,18 +119,18 @@ public:
   std::string get_name();
 
   /**
-  * Is this light controlled from the NSPanel main page?
-  */
+   * Is this light controlled from the NSPanel main page?
+   */
   bool get_controlled_from_main_page();
 
   /**
-  * Get the ID of the entity page this entity is placed on.
-  */
+   * Get the ID of the entity page this entity is placed on.
+   */
   uint32_t get_entity_page_id();
 
   /**
-  * Get the slot in which this entity is placed on the given entity page.
-  */
+   * Get the slot in which this entity is placed on the given entity page.
+   */
   uint8_t get_entity_page_slot();
 
   /**
@@ -194,7 +193,6 @@ protected:
   uint _id;
   std::string _name;
   uint16_t _room_id;
-  Room *_room;
   MQTT_MANAGER_ENTITY_CONTROLLER _controller;
   bool _controlled_from_main_page;
   uint32_t _entity_page_id;

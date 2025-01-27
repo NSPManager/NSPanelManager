@@ -64,17 +64,17 @@ void MQTT_Manager::connect() {
     SPDLOG_INFO("Will connect to MQTT with Client name {}", mqtt_client_name);
 
     std::string connection_url = "tcp://";
-    connection_url.append(MqttManagerConfig::get_private_settings().mqtt_server());
+    connection_url.append(MqttManagerConfig::get_private_settings().mqtt_server);
     connection_url.append(":");
-    connection_url.append(std::to_string(MqttManagerConfig::get_private_settings().mqtt_server_port()));
+    connection_url.append(std::to_string(MqttManagerConfig::get_private_settings().mqtt_server_port));
     SPDLOG_INFO("Will connect to MQTT via {} as client {}", connection_url, mqtt_client_name);
 
     MQTT_Manager::_mqtt_client = new mqtt::client(connection_url, mqtt_client_name.c_str());
   }
 
   auto connOpts = mqtt::connect_options_builder()
-                      .user_name(MqttManagerConfig::get_private_settings().mqtt_username())
-                      .password(MqttManagerConfig::get_private_settings().mqtt_password())
+                      .user_name(MqttManagerConfig::get_private_settings().mqtt_username)
+                      .password(MqttManagerConfig::get_private_settings().mqtt_password)
                       .keep_alive_interval(std::chrono::seconds(30))
                       .automatic_reconnect(std::chrono::seconds(2), std::chrono::seconds(10))
                       .clean_session(false)

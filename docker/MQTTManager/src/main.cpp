@@ -1,9 +1,11 @@
 #include "command_manager/command_manager.hpp"
+#include "database_manager/database_manager.hpp"
 #include "openhab_manager/openhab_manager.hpp"
 #include "spdlog/sinks/ansicolor_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "websocket_server/websocket_server.hpp"
 #include <boost/algorithm/minmax.hpp>
+#include <cassert>
 #include <chrono>
 #include <cstddef>
 #include <cstdlib>
@@ -18,6 +20,7 @@
 #include <signal.h>
 #include <spdlog/common.h>
 #include <spdlog/spdlog.h>
+#include <sqlite_orm/sqlite_orm.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -85,6 +88,20 @@ void publish_time_and_date() {
 }
 
 int main(void) {
+  // Open database forever
+  // database_manager::init();
+
+  // Load config from environment/manager
+  // EntityManager::init();
+
+  // auto room = database_manager::get_by_id<database_manager::Room>(2);
+  // if (room != nullptr) {
+  //   SPDLOG_DEBUG("Got room {}::{}.", room->id, room->friendly_name);
+  // } else {
+  //   SPDLOG_DEBUG("No room with ID 2 exists.");
+  // }
+  MqttManagerConfig::load();
+
   SPDLOG_INFO("Starting MQTTManager.");
 
   std::filesystem::path log_partition_path = "/dev/shm/";
@@ -114,17 +131,18 @@ int main(void) {
   spdlog::set_default_logger(combined_logger);
   spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%s:%#] [%t] %v");
 
-  std::string log_level = std::getenv("LOG_LEVEL");
-  if (log_level.size()) {
-    if (log_level.compare("error") == 0) {
+  char *log_level = std::getenv("LOG_LEVEL");
+  if (log_level != NULL) {
+    std::string log_level_str = log_level;
+    if (log_level_str.compare("error") == 0) {
       spdlog::set_level(spdlog::level::err);
-    } else if (log_level.compare("warning") == 0) {
+    } else if (log_level_str.compare("warning") == 0) {
       spdlog::set_level(spdlog::level::warn);
-    } else if (log_level.compare("info") == 0) {
+    } else if (log_level_str.compare("info") == 0) {
       spdlog::set_level(spdlog::level::info);
-    } else if (log_level.compare("debug") == 0) {
+    } else if (log_level_str.compare("debug") == 0) {
       spdlog::set_level(spdlog::level::debug);
-    } else if (log_level.compare("trace") == 0) {
+    } else if (log_level_str.compare("trace") == 0) {
       spdlog::set_level(spdlog::level::trace);
     } else {
       SPDLOG_INFO("No log level was set by 'LOG_LEVEL' environment variable. Will assume level debug.");
@@ -144,7 +162,13 @@ int main(void) {
   sigUsr1Handler.sa_flags = 0;
   sigaction(SIGUSR1, &sigUsr1Handler, NULL);
 
-  IPCHandler::start();
+  if (sqlite3_threadsafe() == 0) {
+    SPDLOG_WARN("SQLite3 compiled NOT threadsafe, ie. without mutexes!");
+  } else {
+    SPDLOG_INFO("SQLite3 seems to be compiled with threadsafe mutexes. Setting: {}", sqlite3_threadsafe());
+  }
+
+  // IPCHandler::start();
 
   std::thread mqtt_manager_thread;
   std::thread home_assistant_manager_thread;
@@ -152,14 +176,10 @@ int main(void) {
   std::thread websocket_server_thread;
   std::thread time_and_date_thread;
 
-  // Load config from environment/manager
-  EntityManager::init();
-  MqttManagerConfig::load();
-
   SPDLOG_INFO("Starting Websocket Server on port 8002.");
   websocket_server_thread = std::thread(WebsocketServer::start);
 
-  if (MqttManagerConfig::get_private_settings().mqtt_server().empty() || MqttManagerConfig::get_private_settings().mqtt_server_port() == 0) {
+  if (MqttManagerConfig::get_private_settings().mqtt_server.empty() || MqttManagerConfig::get_private_settings().mqtt_server_port == 0) {
     SPDLOG_CRITICAL("No MQTT server or port configured! Will exit with code 1.");
     return 1;
   } else if (MqttManagerConfig::get_settings().manager_address().empty()) {
@@ -179,14 +199,14 @@ int main(void) {
   }
 
   time_and_date_thread = std::thread(publish_time_and_date);
-  if (!MqttManagerConfig::get_private_settings().home_assistant_address().empty() && !MqttManagerConfig::get_private_settings().home_assistant_token().empty()) {
+  if (!MqttManagerConfig::get_private_settings().home_assistant_address.empty() && !MqttManagerConfig::get_private_settings().home_assistant_token.empty()) {
     SPDLOG_INFO("Home Assistant address and access token configured. Starting Home Assistant component.");
     home_assistant_manager_thread = std::thread(HomeAssistantManager::connect);
   } else {
     SPDLOG_WARN("Home Assistant address and/or token missing. Won't start Home Assistant component.");
   }
 
-  if (!MqttManagerConfig::get_private_settings().openhab_address().empty() && !MqttManagerConfig::get_private_settings().openhab_token().empty()) {
+  if (!MqttManagerConfig::get_private_settings().openhab_address.empty() && !MqttManagerConfig::get_private_settings().openhab_token.empty()) {
     SPDLOG_INFO("Openhab address and access token configured. Starting Openhab component.");
     openhab_manager_thread = std::thread(OpenhabManager::connect);
   } else {

@@ -23,7 +23,7 @@ void OpenhabManager::connect() {
     OpenhabManager::_websocket = new ix::WebSocket();
   }
 
-  std::string openhab_websocket_url = MqttManagerConfig::get_private_settings().openhab_address();
+  std::string openhab_websocket_url = MqttManagerConfig::get_private_settings().openhab_address;
   openhab_websocket_url.append("/ws");
 
   boost::algorithm::replace_first(openhab_websocket_url, "https://", "wss://");
@@ -39,7 +39,7 @@ void OpenhabManager::connect() {
   SPDLOG_INFO("Will connect to Openhab websocket at {}", openhab_websocket_url);
   SPDLOG_DEBUG("Appending Openhab access token to url.");
   openhab_websocket_url.append("?accessToken=");
-  openhab_websocket_url.append(MqttManagerConfig::get_private_settings().openhab_token());
+  openhab_websocket_url.append(MqttManagerConfig::get_private_settings().openhab_token);
   OpenhabManager::_websocket->setUrl(openhab_websocket_url);
   OpenhabManager::_websocket->setOnMessageCallback(&OpenhabManager::_websocket_message_callback);
   OpenhabManager::_websocket->setPingInterval(10);
@@ -130,12 +130,12 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
   }
 
   std::string response_data;
-  std::string request_url = MqttManagerConfig::get_private_settings().openhab_address();
+  std::string request_url = MqttManagerConfig::get_private_settings().openhab_address;
   request_url.append("/rest/items/");
   request_url.append(item);
 
   std::string bearer_token = "Authorization: Bearer ";
-  bearer_token.append(MqttManagerConfig::get_private_settings().openhab_token());
+  bearer_token.append(MqttManagerConfig::get_private_settings().openhab_token);
 
   struct curl_slist *headers = NULL;
   headers = curl_slist_append(headers, bearer_token.c_str());
@@ -203,8 +203,8 @@ void OpenhabManager::_process_openhab_event(nlohmann::json &event_data) {
     boost::split(topic_parts, topic, boost::is_any_of("/"));
     if (topic_parts.size() >= 3) {
       std::string topic_item = topic_parts[2];
-      if(OpenhabManager::_openhab_item_observers.find(topic_item) != OpenhabManager::_openhab_item_observers.end()) {
-          OpenhabManager::_openhab_item_observers.at(topic_item)(event_data);
+      if (OpenhabManager::_openhab_item_observers.find(topic_item) != OpenhabManager::_openhab_item_observers.end()) {
+        OpenhabManager::_openhab_item_observers.at(topic_item)(event_data);
       }
     }
   }

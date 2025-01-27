@@ -35,7 +35,7 @@ void HomeAssistantManager::connect() {
         HomeAssistantManager::_websocket->setPingInterval(30);
       }
 
-      std::string home_assistant_websocket_url = MqttManagerConfig::get_private_settings().home_assistant_address();
+      std::string home_assistant_websocket_url = MqttManagerConfig::get_private_settings().home_assistant_address;
       if (MqttManagerConfig::get_settings().is_home_assistant_addon()) {
         home_assistant_websocket_url.append("/core/websocket");
       } else {
@@ -133,7 +133,7 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
 void HomeAssistantManager::_send_auth() {
   nlohmann::json auth_data;
   auth_data["type"] = "auth";
-  auth_data["access_token"] = MqttManagerConfig::get_private_settings().home_assistant_token();
+  auth_data["access_token"] = MqttManagerConfig::get_private_settings().home_assistant_token;
   std::string buffer = auth_data.dump();
 
   HomeAssistantManager::_send_string(buffer);
@@ -158,8 +158,8 @@ void HomeAssistantManager::_process_home_assistant_event(nlohmann::json &event_d
     if (event_data["event"].contains("event_type") && !event_data["event"]["event_type"].is_null()) {
       if (std::string(event_data["event"]["event_type"]).compare("state_changed") == 0) {
         std::string home_assistant_entity_name = event_data["event"]["data"]["entity_id"];
-        if(HomeAssistantManager::_home_assistant_observers.find(home_assistant_entity_name) != HomeAssistantManager::_home_assistant_observers.end()) {
-            HomeAssistantManager::_home_assistant_observers.at(home_assistant_entity_name)(event_data);
+        if (HomeAssistantManager::_home_assistant_observers.find(home_assistant_entity_name) != HomeAssistantManager::_home_assistant_observers.end()) {
+          HomeAssistantManager::_home_assistant_observers.at(home_assistant_entity_name)(event_data);
         }
       }
     }

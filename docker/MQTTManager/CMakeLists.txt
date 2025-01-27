@@ -3,13 +3,17 @@ project(nspm_mqttmanager)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
-  set(CMAKE_CXX17_STANDARD_COMPILE_OPTION "-std=c++17")
-  set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std=gnu++17")
+    set(CMAKE_CXX17_STANDARD_COMPILE_OPTION "-std=c++17")
+    set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std=gnu++17")
 
 elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
-  set(CMAKE_CXX17_STANDARD_COMPILE_OPTION "-std=c++1z")
-  set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std=gnu++1z")
+    set(CMAKE_CXX17_STANDARD_COMPILE_OPTION "-std=c++1z")
+    set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std=gnu++1z")
 endif()
+
+set(CMAKE_CXX_STANDARD 17)
+set(SQLITE_ORM_ENABLE_CXX_17 ON)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_INCLUDE_SRC_DIRECTORY /MQTTManager/include)
 set(PROTOBUF_SRC_DIRECTORY /MQTTManager/include/protobuf)
@@ -22,8 +26,9 @@ set(PROTOBUF_SRC_DIRECTORY /MQTTManager/include/protobuf)
 #   MESSAGE("Will add debug symbols to binaries.")
 # ENDIF()
 
-add_compile_options(-rdynamic -g)
-add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE BOOST_STACKTRACE_USE_BACKTRACE BOOST_BIND_GLOBAL_PLACEHOLDERS)
+add_compile_options(-rdynamic -g -fsanitize=address)
+add_link_options(-fsanitize=address)
+add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE BOOST_STACKTRACE_USE_BACKTRACE BOOST_BIND_GLOBAL_PLACEHOLDERS SQLITE_DEBUG=1)
 
 find_package(PahoMqttCpp REQUIRED)
 find_package(spdlog REQUIRED)
@@ -33,6 +38,7 @@ find_package(ixwebsocket REQUIRED)
 find_package(tz REQUIRED)
 find_package(cppzmq REQUIRED)
 find_package(protobuf REQUIRED)
+find_package(SqliteOrm REQUIRED)
 # find_package(inja REQUIRED)
 find_package(Boost REQUIRED COMPONENTS signals2 stacktrace_backtrace)
 
@@ -52,6 +58,11 @@ add_library(MQTTManager_WebHelper SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/web_help
 set_target_properties(MQTTManager_WebHelper PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/WebHelper/web_helper.hpp)
 target_include_directories(MQTTManager_WebHelper PUBLIC ${CURL_INCLUDE_DIR} ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTTManager_WebHelper ${CURL_LIBRARIES} spdlog::spdlog Boost::boost)
+
+add_library(MQTTManager_DatabaseManager INTERFACE ${CMAKE_INCLUDE_SRC_DIRECTORY}/database_manager/database_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/database_manager/database_manager.hpp)
+# set_target_properties(MQTTManager_DatabaseManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/database_manager/database_manager.hpp)
+target_include_directories(MQTTManager_DatabaseManager INTERFACE ${CURL_INCLUDE_DIR} ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_link_libraries(MQTTManager_DatabaseManager INTERFACE spdlog::spdlog sqlite_orm::sqlite_orm)
 
 add_library(MQTTManager_Entity SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.hpp)
 set_target_properties(MQTTManager_Entity PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.hpp)
@@ -101,15 +112,15 @@ target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann
 add_library(MQTTManager_Scene SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.cpp)
 # set_target_properties(MQTTManager_Scene PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/nspm_scene.hpp)
 target_include_directories(MQTTManager_Scene PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Scene spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_Entity MQTTManager_Light MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager)
+target_link_libraries(MQTTManager_Scene spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_Room MQTTManager_Entity MQTTManager_Light MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager)
 
 add_library(MQTTManager_RoomEntitiesPage SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room_entities_page.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room_entities_page.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room_entities_page.cpp)
 target_include_directories(MQTTManager_RoomEntitiesPage PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_RoomEntitiesPage Boost::boost spdlog::spdlog nlohmann_json::nlohmann_json Protobuf_MQTTManager MQTTManager_WebHelper MQTTManager_Light)
+target_link_libraries(MQTTManager_RoomEntitiesPage Boost::boost spdlog::spdlog nlohmann_json::nlohmann_json Protobuf_MQTTManager MQTTManager_WebHelper MQTTManager_Light MQTTManager_DatabaseManager)
 
 add_library(MQTTManager_Room SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room.cpp)
 target_include_directories(MQTTManager_Room PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Room MQTTManager_RoomEntitiesPage spdlog::spdlog nlohmann_json::nlohmann_json MQTTManager_Entity MQTTManager_Light Protobuf_MQTTManager MQTT_Manager)
+target_link_libraries(MQTTManager_Room MQTTManager_RoomEntitiesPage spdlog::spdlog nlohmann_json::nlohmann_json MQTTManager_Entity MQTTManager_Light Protobuf_MQTTManager MQTT_Manager MQTTManager_DatabaseManager)
 
 add_library(MQTTManager_EntityManager SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)
 set_target_properties(MQTTManager_EntityManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)
@@ -117,11 +128,11 @@ target_include_directories(MQTTManager_EntityManager PUBLIC MQTTManager_WebHelpe
 target_link_libraries(MQTTManager_EntityManager MQTTManager_WebHelper spdlog::spdlog MQTT_Manager MQTTManager_NSPanel MQTTManager_Light MQTTManager_WebsocketServer Boost::boost Boost::stacktrace_backtrace dl MQTTManager_Weather)
 
 add_library(MQTTManager_Config SHARED ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.hpp)
-set_target_properties(MQTTManager_Config PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.hpp)
+# set_target_properties(MQTTManager_Config PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.hpp)
 target_include_directories(MQTTManager_Config PUBLIC MQTTManager_WebHelper ${CMAKE_INCLUDE_SRC_DIRECTORY} ${PROTOBUF_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Config spdlog::spdlog MQTTManager_WebHelper nlohmann_json::nlohmann_json Boost::boost Protobuf_MQTTManager)
+target_link_libraries(MQTTManager_Config spdlog::spdlog MQTTManager_WebHelper nlohmann_json::nlohmann_json Boost::boost Protobuf_MQTTManager MQTTManager_DatabaseManager)
 
 
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_IPCHandler MQTTManager_CommandManager)
+target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_IPCHandler MQTTManager_CommandManager MQTTManager_DatabaseManager)

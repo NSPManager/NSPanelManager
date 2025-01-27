@@ -11,6 +11,7 @@
 #include <cstring>
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <database_manager/database_manager.hpp>
 #include <exception>
 #include <fmt/core.h>
 #include <fstream>
@@ -23,6 +24,7 @@
 #include <protobuf_general.pb.h>
 #include <spdlog/common.h>
 #include <spdlog/spdlog.h>
+#include <sqlite_orm/sqlite_orm.h>
 #include <string>
 
 #define ITEM_IN_LIST(list, item) (std::find(list.begin(), list.end(), item) != list.end());
@@ -31,11 +33,19 @@ MQTTManagerSettings MqttManagerConfig::get_settings() {
   return MqttManagerConfig::_settings;
 }
 
-MQTTManagerPrivateSettings MqttManagerConfig::get_private_settings() {
+MqttManagerSettingsHolder MqttManagerConfig::get_private_settings() {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_private_settings_mutex);
   return MqttManagerConfig::_private_settings;
 }
 
 void MqttManagerConfig::load() {
+  auto room = database_manager::get_by_id<database_manager::Room>(2);
+  if (room != nullptr) {
+    SPDLOG_DEBUG("Got room {}::{}.", room->id, room->friendly_name);
+  } else {
+    SPDLOG_DEBUG("No room with ID 2 exists.");
+  }
+
   {
     std::lock_guard<std::mutex> mutex_guard(MqttManagerConfig::_config_load_mutex);
 
@@ -50,10 +60,27 @@ void MqttManagerConfig::load() {
     MqttManagerConfig::timezone = timezone_str;
     SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
 
-    // Load sensitive variables from environment and not via http get request to manager.
-    SPDLOG_TRACE("Loading sensitive settings from environment variables.");
-    const char *settings = std::getenv("SETTINGS");
-    MqttManagerConfig::_private_settings.ParseFromString(settings);
+    {
+      SPDLOG_INFO("Loading MQTT Manager settings.");
+      std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_private_settings_mutex);
+
+      MqttManagerConfig::_private_settings.home_assistant_address = database_manager::get_setting_with_default("home_assistant_address", "");
+      MqttManagerConfig::_private_settings.home_assistant_token = database_manager::get_setting_with_default("home_assistant_token", "");
+      MqttManagerConfig::_private_settings.openhab_address = database_manager::get_setting_with_default("openhab_address", "");
+      MqttManagerConfig::_private_settings.openhab_token = database_manager::get_setting_with_default("openhab_token", "");
+
+      // Load MQTT settings
+      MqttManagerConfig::_private_settings.mqtt_server = database_manager::get_setting_with_default("mqtt_server", "");
+      std::string mqtt_server = database_manager::get_setting_with_default("mqtt_server", "1883");
+      if (mqtt_server.length() > 0) {
+        MqttManagerConfig::_private_settings.mqtt_server_port = std::stoi(mqtt_server);
+      } else {
+        SPDLOG_ERROR("Failed to get a valid MQTT server port while loading settings.");
+      }
+
+      MqttManagerConfig::_private_settings.mqtt_username = database_manager::get_setting_with_default("mqtt_username", "");
+      MqttManagerConfig::_private_settings.mqtt_password = database_manager::get_setting_with_default("mqtt_password", "");
+    }
 
     // Load icon mapping
     std::ifstream icon_mapping_stream("/usr/src/app/nspanelmanager/icon_mapping.json");

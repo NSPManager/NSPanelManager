@@ -18,6 +18,7 @@
 #include <boost/stacktrace/stacktrace_fwd.hpp>
 #include <cstdint>
 #include <cstdlib>
+#include <database_manager/database_manager.hpp>
 #include <entity_manager/entity_manager.hpp>
 #include <exception>
 #include <ixwebsocket/IXWebSocket.h>
@@ -60,69 +61,69 @@ void EntityManager::detach_entity_added_listener(void (*listener)(std::shared_pt
 }
 
 void EntityManager::add_room(RoomSettings &config) {
-    std::shared_ptr<Room> room = nullptr;
-    try{
-        room = std::shared_ptr<Room>(new Room(config));
-        SPDLOG_INFO("Created room {}::{}.", room->get_id(), room->get_name());
-        std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
-        EntityManager::_rooms.push_back(room);
-    } catch (std::exception &e) {
-        SPDLOG_ERROR("Caught exception: {}", e.what());
-        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
-    }
+  std::shared_ptr<Room> room = nullptr;
+  try {
+    room = std::shared_ptr<Room>(new Room(config.id()));
+    SPDLOG_INFO("Created room {}::{}.", room->get_id(), room->get_name());
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+    EntityManager::_rooms.push_back(room);
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+  }
 }
 
 std::shared_ptr<Room> EntityManager::get_room(uint32_t room_id) {
-    try{
-        std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
-        for(auto room = EntityManager::_rooms.begin(); room != EntityManager::_rooms.end(); room++) {
-            if((*room)->get_id() == room_id) {
-                return std::shared_ptr<Room>((*room));
-            }
-        }
-    } catch (std::exception &e) {
-        SPDLOG_ERROR("Caught exception: {}", e.what());
-        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+  try {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+    for (auto room = EntityManager::_rooms.begin(); room != EntityManager::_rooms.end(); room++) {
+      if ((*room)->get_id() == room_id) {
+        return std::shared_ptr<Room>((*room));
+      }
     }
-    return nullptr;
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+  }
+  return nullptr;
 }
 
 std::vector<std::shared_ptr<Room>> EntityManager::get_all_rooms() {
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
-    return EntityManager::_rooms;
+  std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+  return EntityManager::_rooms;
 }
 
 void EntityManager::remove_room(uint32_t room_id) {
-    try{
-        std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
-        for(auto room = EntityManager::_rooms.begin(); room != EntityManager::_rooms.end(); room++) {
-            if((*room)->get_id() == room_id) {
-                SPDLOG_INFO("Removing room room {}::{}", (*room)->get_id(), (*room)->get_name());
-                EntityManager::_rooms.erase(room);
-                break;
-            }
-        }
-    } catch (std::exception &e) {
-        SPDLOG_ERROR("Caught exception: {}", e.what());
-        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+  try {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+    for (auto room = EntityManager::_rooms.begin(); room != EntityManager::_rooms.end(); room++) {
+      if ((*room)->get_id() == room_id) {
+        SPDLOG_INFO("Removing room room {}::{}", (*room)->get_id(), (*room)->get_name());
+        EntityManager::_rooms.erase(room);
+        break;
+      }
     }
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+  }
 }
 
 bool EntityManager::ipc_callback_add_room(nlohmann::json message, nlohmann::json *response) {
-    try{
-        SPDLOG_DEBUG("Received IPC callback for new room, creating new room.");
-        RoomSettings setting;
-        setting.ParseFromString(std::string(message["data"]));
-        EntityManager::add_room(setting);
-        // TODO: Send update to panels about new room
-        (*response)["status"] = "ok";
-        return true;
-    } catch(std::exception &e) {
-        SPDLOG_ERROR("Caught exception: {}", e.what());
-        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
-        (*response)["status"] = "error";
-        return true;
-    }
+  try {
+    SPDLOG_DEBUG("Received IPC callback for new room, creating new room.");
+    RoomSettings setting;
+    setting.ParseFromString(std::string(message["data"]));
+    EntityManager::add_room(setting);
+    // TODO: Send update to panels about new room
+    (*response)["status"] = "ok";
+    return true;
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+    (*response)["status"] = "error";
+    return true;
+  }
 }
 
 void EntityManager::add_light(LightSettings &config) {
@@ -147,30 +148,29 @@ void EntityManager::add_light(LightSettings &config) {
   }
 }
 
-
 bool EntityManager::ipc_callback_add_light(nlohmann::json message, nlohmann::json *response) {
-    try{
-        SPDLOG_DEBUG("Received IPC callback for new light, creating new light.");
-        LightSettings setting;
-        setting.ParseFromString(std::string(message["data"]));
-        EntityManager::add_light(setting);
-        // Everything else is already initialized, post_init light directly after adding it.
-        auto light =EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, setting.id());
-        if(light != nullptr) {
-            light->post_init();
-        } else {
-            SPDLOG_ERROR("Failed to find light with id {}. Will not post_init()!", setting.id());
-        }
-
-        // TODO: Send update to panels about new light
-        (*response)["status"] = "ok";
-        return true;
-    } catch(std::exception &e) {
-        SPDLOG_ERROR("Caught exception: {}", e.what());
-        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
-        (*response)["status"] = "error";
-        return true;
+  try {
+    SPDLOG_DEBUG("Received IPC callback for new light, creating new light.");
+    LightSettings setting;
+    setting.ParseFromString(std::string(message["data"]));
+    EntityManager::add_light(setting);
+    // Everything else is already initialized, post_init light directly after adding it.
+    auto light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, setting.id());
+    if (light != nullptr) {
+      light->post_init();
+    } else {
+      SPDLOG_ERROR("Failed to find light with id {}. Will not post_init()!", setting.id());
     }
+
+    // TODO: Send update to panels about new light
+    (*response)["status"] = "ok";
+    return true;
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+    (*response)["status"] = "error";
+    return true;
+  }
 }
 
 void EntityManager::add_scene(nlohmann::json &config) {
@@ -198,21 +198,21 @@ void EntityManager::add_scene(nlohmann::json &config) {
 }
 
 void EntityManager::add_nspanel_relay_group(nlohmann::json &config) {
-    if(!config.contains("id") || !config.at("id").is_number()) {
-        SPDLOG_ERROR("Tried to create NSPanel relay group but 'id' was not present in config!");
+  if (!config.contains("id") || !config.at("id").is_number()) {
+    SPDLOG_ERROR("Tried to create NSPanel relay group but 'id' was not present in config!");
+    return;
+  }
+
+  try {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
+    for (auto relay_group = EntityManager::_nspanel_relay_groups.begin(); relay_group != EntityManager::_nspanel_relay_groups.end(); relay_group++) {
+      if ((*relay_group)->get_id() == config.at("id")) {
+        (*relay_group)->update_config(config);
         return;
+      }
     }
 
-    try {
-      std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
-      for(auto relay_group = EntityManager::_nspanel_relay_groups.begin(); relay_group != EntityManager::_nspanel_relay_groups.end(); relay_group++) {
-          if((*relay_group)->get_id() == config.at("id")) {
-              (*relay_group)->update_config(config);
-              return;
-          }
-      }
-
-      EntityManager::_nspanel_relay_groups.push_back(std::shared_ptr<NSPanelRelayGroup>(new NSPanelRelayGroup(config)));
+    EntityManager::_nspanel_relay_groups.push_back(std::shared_ptr<NSPanelRelayGroup>(new NSPanelRelayGroup(config)));
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
     SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
@@ -220,18 +220,18 @@ void EntityManager::add_nspanel_relay_group(nlohmann::json &config) {
 }
 
 std::shared_ptr<NSPanelRelayGroup> EntityManager::get_relay_group(uint32_t relay_group_id) {
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
-    for(auto relay_group = EntityManager::_nspanel_relay_groups.begin(); relay_group != EntityManager::_nspanel_relay_groups.end(); relay_group++) {
-        if((*relay_group)->get_id() == relay_group_id) {
-            return (*relay_group);
-        }
+  std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
+  for (auto relay_group = EntityManager::_nspanel_relay_groups.begin(); relay_group != EntityManager::_nspanel_relay_groups.end(); relay_group++) {
+    if ((*relay_group)->get_id() == relay_group_id) {
+      return (*relay_group);
     }
-    return nullptr;
+  }
+  return nullptr;
 }
 
 std::vector<std::shared_ptr<NSPanelRelayGroup>> EntityManager::get_all_relay_groups() {
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
-    return EntityManager::_nspanel_relay_groups;
+  std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
+  return EntityManager::_nspanel_relay_groups;
 }
 
 void EntityManager::add_nspanel(NSPanelSettings &config) {
@@ -308,7 +308,7 @@ void EntityManager::post_init_entities() {
       std::shared_ptr<Room> room = EntityManager::get_room(config.id());
       if (room != nullptr) {
         SPDLOG_DEBUG("Found existing room {}::{}, will update.", room->get_id(), room->get_name());
-        room->update_config(config);
+        room->reload_config();
       } else {
         EntityManager::add_room(config);
       }
@@ -322,17 +322,17 @@ void EntityManager::post_init_entities() {
       auto rit = EntityManager::_rooms[i];
       bool exists = false;
       for (int room_id : room_ids) {
-          if (room_id == rit->get_id()) {
-            exists = true;
-            break;
-          }
+        if (room_id == rit->get_id()) {
+          exists = true;
+          break;
+        }
       }
 
       if (!exists) {
-          SPDLOG_DEBUG("Removing room with id {} as it doesn't exist in config anymore.", rit->get_id());
-          //MqttManagerEntity *room = rit;
-          EntityManager::_rooms.erase(EntityManager::_rooms.begin() + i);
-          SPDLOG_DEBUG("Room removed successfully.");
+        SPDLOG_DEBUG("Removing room with id {} as it doesn't exist in config anymore.", rit->get_id());
+        // MqttManagerEntity *room = rit;
+        EntityManager::_rooms.erase(EntityManager::_rooms.begin() + i);
+        SPDLOG_DEBUG("Room removed successfully.");
       }
     }
   }
@@ -381,18 +381,18 @@ void EntityManager::post_init_entities() {
       auto rit = EntityManager::_nspanel_relay_groups[i];
       bool exists = false;
       for (int rg_id : relay_group_ids) {
-          if (rg_id == rit->get_id()) {
+        if (rg_id == rit->get_id()) {
           exists = true;
           break;
-          }
+        }
       }
 
       if (!exists) {
-          SPDLOG_DEBUG("Removing relay group with id {} as it doesn't exist in config anymore.", rit->get_id());
-          // MqttManagerEntity *rg = rit;
-          EntityManager::_nspanel_relay_groups.erase(EntityManager::_nspanel_relay_groups.begin() + i);
-          // delete rg;
-          SPDLOG_DEBUG("Relay group removed successfully.");
+        SPDLOG_DEBUG("Removing relay group with id {} as it doesn't exist in config anymore.", rit->get_id());
+        // MqttManagerEntity *rg = rit;
+        EntityManager::_nspanel_relay_groups.erase(EntityManager::_nspanel_relay_groups.begin() + i);
+        // delete rg;
+        SPDLOG_DEBUG("Relay group removed successfully.");
       }
     }
   }
@@ -434,16 +434,16 @@ void EntityManager::post_init_entities() {
     SPDLOG_INFO("Performing post init on {} entities.", EntityManager::_entities.size());
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     for (auto entity : EntityManager::_entities) {
-        SPDLOG_DEBUG("Performing PostInit on entity type {} with id {}", static_cast<int>(entity->get_type()), entity->get_id());
-        entity->post_init();
+      SPDLOG_DEBUG("Performing PostInit on entity type {} with id {}", static_cast<int>(entity->get_type()), entity->get_id());
+      entity->post_init();
     }
   }
 
   {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
     for (auto room : EntityManager::_rooms) {
-        SPDLOG_DEBUG("Performing PostInit on Room {}::{}", room->get_id(), room->get_name());
-        room->post_init();
+      SPDLOG_DEBUG("Performing PostInit on Room {}::{}", room->get_id(), room->get_name());
+      room->post_init();
     }
   }
 

@@ -13,11 +13,22 @@
 #define MANAGER_ADDRESS "127.0.0.1"
 #define MANAGER_PORT "8000"
 
+struct MqttManagerSettingsHolder {
+  std::string home_assistant_address = "";
+  std::string home_assistant_token = "";
+  std::string openhab_address = "";
+  std::string openhab_token = "";
+  std::string mqtt_server = "";
+  uint16_t mqtt_server_port = 1883;
+  std::string mqtt_username = "";
+  std::string mqtt_password = "";
+};
+
 class MqttManagerConfig {
 public:
   static void load();
   static MQTTManagerSettings get_settings();
-  static MQTTManagerPrivateSettings get_private_settings();
+  static MqttManagerSettingsHolder get_private_settings();
   static inline std::string timezone;
 
   static inline nlohmann::json icon_mapping;
@@ -27,7 +38,7 @@ public:
   static inline std::list<nlohmann::json> nspanel_relay_group_configs;
   static inline std::list<RoomSettings> room_configs;
 
-  /**
+  /*
    * Attach a callback to be called when a new configuration has been added
    */
   template <typename CALLBACK_BIND>
@@ -85,7 +96,9 @@ private:
   static inline boost::signals2::signal<void()> _config_loaded_listeners;
 
   static inline MQTTManagerSettings _settings;
-  static inline MQTTManagerPrivateSettings _private_settings;
+
+  static inline std::mutex _private_settings_mutex;
+  static inline MqttManagerSettingsHolder _private_settings;
 };
 
 #endif // !MQTTMANAGER_CONFIG_HPP

@@ -1,5 +1,4 @@
 #include "nspanel.hpp"
-#include <command_manager/command_manager.hpp>
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "ipc_handler/ipc_handler.hpp"
@@ -8,6 +7,7 @@
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
+#include "room/room_entities_page.hpp"
 #include "web_helper/WebHelper.hpp"
 #include <algorithm>
 #include <boost/algorithm/string/classification.hpp>
@@ -22,6 +22,7 @@
 #include <boost/iostreams/write.hpp>
 #include <chrono>
 #include <cmath>
+#include <command_manager/command_manager.hpp>
 #include <cstdint>
 #include <ctime>
 #include <curl/curl.h>
@@ -33,6 +34,7 @@
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <room/room.hpp>
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
@@ -233,19 +235,19 @@ void NSPanel::update_config(NSPanelSettings &settings) {
 
   this->_go_to_default_room();
 
-  if(this->_selected_room != nullptr) {
-      this->_selected_room->attach_room_changed_callback(boost::bind(&NSPanel::_room_change_callback, this, _1));
-      // Manually trigger entity subscription as room is already fully loaded.
-      this->_room_change_callback(this->_selected_room.get());
+  if (this->_selected_room != nullptr) {
+    this->_selected_room->attach_room_changed_callback(boost::bind(&NSPanel::_room_change_callback, this, _1));
+    // Manually trigger entity subscription as room is already fully loaded.
+    this->_room_change_callback(this->_selected_room.get());
 
-      // Manually trigger update of MQTT states
-      {
-        std::lock_guard<std::mutex> lock_guard(this->_last_state_update_mutex);
-        this->_last_state_update = std::chrono::system_clock::now();
-        std::thread(&NSPanel::_check_and_send_new_status_update, this).detach();
-      }
+    // Manually trigger update of MQTT states
+    {
+      std::lock_guard<std::mutex> lock_guard(this->_last_state_update_mutex);
+      this->_last_state_update = std::chrono::system_clock::now();
+      std::thread(&NSPanel::_check_and_send_new_status_update, this).detach();
+    }
   } else {
-      SPDLOG_ERROR("NSPanel {}::{} failed to find default room, not attaching room change callback.", this->_id, this->_name);
+    SPDLOG_ERROR("NSPanel {}::{} failed to find default room, not attaching room change callback.", this->_id, this->_name);
   }
 
   // Config changed, send "reload" command to web interface
@@ -292,7 +294,15 @@ void NSPanel::send_config() {
 
     // Load rooms
     for (int i = 0; i < settings.rooms().size(); i++) {
-      config.add_room_ids(settings.rooms().Get(i));
+      std::shared_ptr<Room> room = EntityManager::get_room(settings.rooms().Get(i));
+      if (room != nullptr) {
+        NSPanelConfig_RoomInfo *room_info = config.add_room_infos();
+        room_info->set_room_id(room->get_id());
+        // Get all entity pages attached to room and add those IDs to list of availabe entity pages for that room
+        for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_entities_pages()) {
+          room_info->add_entity_page_ids(page->get_id());
+        }
+      }
     }
 
     // TODO: Set scenes
@@ -594,7 +604,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       }
 
       // Received new temperature from status report, send out on temperature topic:
-      MQTT_Manager::publish(this->_mqtt_temperature_topic, std::to_string(std::round(this->_temperature*100.0f)/100.0f));
+      MQTT_Manager::publish(this->_mqtt_temperature_topic, std::to_string(std::round(this->_temperature * 100.0f) / 100.0f));
 
       // SPDLOG_TRACE("MAC: {}", report.mac_address());
       // SPDLOG_TRACE("IP : {}", report.ip_address());
@@ -607,63 +617,63 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
 }
 
 void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
-    size_t trim_start_pos = payload.find_first_not_of(" \n\r\t");
-    if(trim_start_pos == std::string::npos) {
-        return; // Message contains no valid chars, only spaces
-    }
+  size_t trim_start_pos = payload.find_first_not_of(" \n\r\t");
+  if (trim_start_pos == std::string::npos) {
+    return; // Message contains no valid chars, only spaces
+  }
 
-    size_t trim_end_pos = payload.find_last_not_of(" \n\r\t");
-    if(trim_start_pos == std::string::npos) {
-        return; // Message contains no valid chars, only spaces
-    }
-    payload = payload.substr(trim_start_pos, trim_end_pos+1 - 4); // Trim spaces and such but also the first 7 chars that is the color coding for the message
-    if(payload[0] == 0x1B) { // Message formated with color. Remove color
-        payload = payload.substr(7);
-    }
+  size_t trim_end_pos = payload.find_last_not_of(" \n\r\t");
+  if (trim_start_pos == std::string::npos) {
+    return; // Message contains no valid chars, only spaces
+  }
+  payload = payload.substr(trim_start_pos, trim_end_pos + 1 - 4); // Trim spaces and such but also the first 7 chars that is the color coding for the message
+  if (payload[0] == 0x1B) {                                       // Message formated with color. Remove color
+    payload = payload.substr(7);
+  }
 
-    std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    std::tm tm = *std::localtime(&now);
-    std::stringstream buffer;
-    if (MqttManagerConfig::get_settings().clock_format() == time_format::FULL) {
-      buffer << std::put_time(&tm, "%H:%M:%S");
-    } else {
-      buffer << std::put_time(&tm, "%I:%M:%S %p");
-    }
+  std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  std::tm tm = *std::localtime(&now);
+  std::stringstream buffer;
+  if (MqttManagerConfig::get_settings().clock_format() == time_format::FULL) {
+    buffer << std::put_time(&tm, "%H:%M:%S");
+  } else {
+    buffer << std::put_time(&tm, "%I:%M:%S %p");
+  }
 
-    nlohmann::json log_data;
-    log_data["type"] = "log";
-    log_data["time"] = buffer.str();
-    log_data["panel"] = this->_name;
-    log_data["mac_address"] = this->_mac;
+  nlohmann::json log_data;
+  log_data["type"] = "log";
+  log_data["time"] = buffer.str();
+  log_data["panel"] = this->_name;
+  log_data["mac_address"] = this->_mac;
 
-    if(payload[0] == 'E') {
-        log_data["level"] = "ERROR";
-    } else if(payload[0] == 'W') {
-        log_data["level"] = "WARNING";
-    } else if(payload[0] == 'I') {
-        log_data["level"] = "INFO";
-    } else if(payload[0] == 'D') {
-        log_data["level"] = "DEBUG";
-    } else {
-        SPDLOG_ERROR("Received log message from NSPanel but could not determin level, will not store/forward log message to web interface! Level: {}, Message: {}", payload[0], payload);
-        return;
-    }
+  if (payload[0] == 'E') {
+    log_data["level"] = "ERROR";
+  } else if (payload[0] == 'W') {
+    log_data["level"] = "WARNING";
+  } else if (payload[0] == 'I') {
+    log_data["level"] = "INFO";
+  } else if (payload[0] == 'D') {
+    log_data["level"] = "DEBUG";
+  } else {
+    SPDLOG_ERROR("Received log message from NSPanel but could not determin level, will not store/forward log message to web interface! Level: {}, Message: {}", payload[0], payload);
+    return;
+  }
 
-    // Remove first char that indicates log level. This is store separately
-    payload = payload.substr(1);
-    log_data["message"] = payload; // TODO: Clean up message before sending it out
-    WebsocketServer::broadcast_json(log_data);
+  // Remove first char that indicates log level. This is store separately
+  payload = payload.substr(1);
+  log_data["message"] = payload; // TODO: Clean up message before sending it out
+  WebsocketServer::broadcast_json(log_data);
 
-    // Save log message in backtrace for when (if) the log interface requests it.
-    NSPanelLogMessage message;
-    message.time = buffer.str();
-    message.level = log_data["level"];
-    message.message = payload;
-    this->_log_messages.push_front(message);
-    // Remove older messages from backtrace.
-    while (this->_log_messages.size() > MqttManagerConfig::get_settings().max_log_buffer_size()) {
-      this->_log_messages.pop_back();
-    }
+  // Save log message in backtrace for when (if) the log interface requests it.
+  NSPanelLogMessage message;
+  message.time = buffer.str();
+  message.level = log_data["level"];
+  message.message = payload;
+  this->_log_messages.push_front(message);
+  // Remove older messages from backtrace.
+  while (this->_log_messages.size() > MqttManagerConfig::get_settings().max_log_buffer_size()) {
+    this->_log_messages.pop_back();
+  }
 }
 
 void NSPanel::send_websocket_update() {
@@ -1036,49 +1046,49 @@ void NSPanel::set_relay_state(uint8_t relay, bool state) {
 }
 
 void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
-    if(command.has_next_entities_page()) {
-        SPDLOG_DEBUG("NSPanel {}::{} going to next entities page.", this->_id, this->_name);
-        if(command.next_entities_page().nspanel_id() != this->_id) {
-            return;
-        }
-
-        if(this->_selected_entity_page_index + 1 < this->_selected_room->get_number_of_entity_pages()) {
-            this->_selected_entity_page_index++;
-        } else {
-            // Try to find the next room that has available entity page(s). If found, break loop.
-            for(int i = 0; i < UINT16_MAX; i++) {
-                this->_go_to_next_room();
-                if(this->_selected_room != nullptr) {
-                    if(this->_selected_room->get_number_of_entity_pages() > 0) {
-                        this->_selected_entity_page_index = 0; // Start from beginning of pages as we went to next room and not previous.
-                        break;
-                    }
-                }
-            }
-        }
-        this->_send_entities_page_update();
-    } else if (command.has_previous_entities_page()) {
-        SPDLOG_DEBUG("NSPanel {}::{} going to previous entities page.", this->_id, this->_name);
-        if(command.previous_entities_page().nspanel_id() != this->_id) {
-            return;
-        }
-
-        if(this->_selected_entity_page_index > 0) {
-            this->_selected_entity_page_index--;
-        } else {
-            // We are at index 0 and want to go to previos, go to previos room and start at the last index.
-            for(int i = 0; i < UINT16_MAX; i++) {
-                this->_go_to_previous_room();
-                if(this->_selected_room != nullptr) {
-                    if(this->_selected_room->get_number_of_entity_pages() > 0) {
-                        this->_selected_entity_page_index = this->_selected_room->get_number_of_entity_pages() - 1; // Start from beginning of pages as we went to next room and not previous.
-                        break;
-                    }
-                }
-            }
-        }
-        this->_send_entities_page_update();
+  if (command.has_next_entities_page()) {
+    SPDLOG_DEBUG("NSPanel {}::{} going to next entities page.", this->_id, this->_name);
+    if (command.next_entities_page().nspanel_id() != this->_id) {
+      return;
     }
+
+    if (this->_selected_entity_page_index + 1 < this->_selected_room->get_number_of_entity_pages()) {
+      this->_selected_entity_page_index++;
+    } else {
+      // Try to find the next room that has available entity page(s). If found, break loop.
+      for (int i = 0; i < UINT16_MAX; i++) {
+        this->_go_to_next_room();
+        if (this->_selected_room != nullptr) {
+          if (this->_selected_room->get_number_of_entity_pages() > 0) {
+            this->_selected_entity_page_index = 0; // Start from beginning of pages as we went to next room and not previous.
+            break;
+          }
+        }
+      }
+    }
+    this->_send_entities_page_update();
+  } else if (command.has_previous_entities_page()) {
+    SPDLOG_DEBUG("NSPanel {}::{} going to previous entities page.", this->_id, this->_name);
+    if (command.previous_entities_page().nspanel_id() != this->_id) {
+      return;
+    }
+
+    if (this->_selected_entity_page_index > 0) {
+      this->_selected_entity_page_index--;
+    } else {
+      // We are at index 0 and want to go to previos, go to previos room and start at the last index.
+      for (int i = 0; i < UINT16_MAX; i++) {
+        this->_go_to_previous_room();
+        if (this->_selected_room != nullptr) {
+          if (this->_selected_room->get_number_of_entity_pages() > 0) {
+            this->_selected_entity_page_index = this->_selected_room->get_number_of_entity_pages() - 1; // Start from beginning of pages as we went to next room and not previous.
+            break;
+          }
+        }
+      }
+    }
+    this->_send_entities_page_update();
+  }
 }
 
 bool NSPanel::handle_ipc_request_status(nlohmann::json request, nlohmann::json *response_buffer) {
@@ -1171,13 +1181,12 @@ bool NSPanel::handle_ipc_request_deny_register_request(nlohmann::json request, n
 bool NSPanel::handle_ipc_request_get_logs(nlohmann::json request, nlohmann::json *response_buffer) {
   nlohmann::json data = {{"status", "ok"}};
   data["messages"] = nlohmann::json::array();
-  for(auto it = this->_log_messages.cbegin(); it != this->_log_messages.end(); it++) {
-      nlohmann::json log = {
-          {"time", it->time},
-          {"level", it->level},
-          {"message", it->message}
-      };
-      data["messages"].push_back(log);
+  for (auto it = this->_log_messages.cbegin(); it != this->_log_messages.end(); it++) {
+    nlohmann::json log = {
+        {"time", it->time},
+        {"level", it->level},
+        {"message", it->message}};
+    data["messages"].push_back(log);
   }
 
   (*response_buffer) = data;
@@ -1185,271 +1194,270 @@ bool NSPanel::handle_ipc_request_get_logs(nlohmann::json request, nlohmann::json
 }
 
 void NSPanel::_send_home_page_update() {
-    // if(this->_selected_room != nullptr) {
-    //     NSPanelRoomStatus proto;
-    //     // Update default room topic
-    //     if(this->_selected_room->get_protobuf_room_status(&proto)) {
-    //         std::string serialized_result = proto.SerializeAsString();
-    //         if(serialized_result.size() > 0) {
-    //             MQTT_Manager::publish(this->_mqtt_topic_home_page_status, serialized_result, true);
-    //         }
-    //     } else {
-    //         SPDLOG_ERROR("Failed to send out room status update for room {}::{} for panel {}::{}.", this->_selected_room->get_id(), this->_selected_room->get_name(), this->_id, this->_name);
-    //     }
-    // } else {
-    //     SPDLOG_ERROR("Tried to send out room state update for NSPanel {}::{} but no room has been selected.", this->_id, this->_name);
-    // }
+  // if(this->_selected_room != nullptr) {
+  //     NSPanelRoomStatus proto;
+  //     // Update default room topic
+  //     if(this->_selected_room->get_protobuf_room_status(&proto)) {
+  //         std::string serialized_result = proto.SerializeAsString();
+  //         if(serialized_result.size() > 0) {
+  //             MQTT_Manager::publish(this->_mqtt_topic_home_page_status, serialized_result, true);
+  //         }
+  //     } else {
+  //         SPDLOG_ERROR("Failed to send out room status update for room {}::{} for panel {}::{}.", this->_selected_room->get_id(), this->_selected_room->get_name(), this->_id, this->_name);
+  //     }
+  // } else {
+  //     SPDLOG_ERROR("Tried to send out room state update for NSPanel {}::{} but no room has been selected.", this->_id, this->_name);
+  // }
 
-    // // Update all rooms topics:
-    // NSPanelRoomStatus all_status;
-    // all_status.set_id(-1);
-    // all_status.set_name("ALL");
+  // // Update all rooms topics:
+  // NSPanelRoomStatus all_status;
+  // all_status.set_id(-1);
+  // all_status.set_name("ALL");
 
-    // std::vector<std::shared_ptr<Light>> lights = EntityManager::get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
-    // // Remove any light not controlled by main page.
-    // // TODO: Merge this algorithm with the one from room.cpp (get_protobuf_room_status)
-    // lights.erase(std::remove_if(lights.begin(), lights.end(), [](std::shared_ptr<Light> light) {
-    //     return !light->get_controlled_from_main_page();
-    // }), lights.end());
+  // std::vector<std::shared_ptr<Light>> lights = EntityManager::get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+  // // Remove any light not controlled by main page.
+  // // TODO: Merge this algorithm with the one from room.cpp (get_protobuf_room_status)
+  // lights.erase(std::remove_if(lights.begin(), lights.end(), [](std::shared_ptr<Light> light) {
+  //     return !light->get_controlled_from_main_page();
+  // }), lights.end());
 
-    // bool any_lights_on = false;
-    // // Find if any light is on
-    // for(auto &light : lights) {
-    //     if(light->get_state()) {
-    //         any_lights_on = true;
-    //         break;
-    //     }
-    // }
+  // bool any_lights_on = false;
+  // // Find if any light is on
+  // for(auto &light : lights) {
+  //     if(light->get_state()) {
+  //         any_lights_on = true;
+  //         break;
+  //     }
+  // }
 
-    // if(any_lights_on) {
-    //     // Remove any light that is off
-    //     lights.erase(std::remove_if(lights.begin(), lights.end(), [](std::shared_ptr<Light> light) {
-    //         return !light->get_state();
-    //     }), lights.end());
-    // }
+  // if(any_lights_on) {
+  //     // Remove any light that is off
+  //     lights.erase(std::remove_if(lights.begin(), lights.end(), [](std::shared_ptr<Light> light) {
+  //         return !light->get_state();
+  //     }), lights.end());
+  // }
 
-    // // Calculate average light level
-    // uint64_t total_light_level_all = 0;
-    // uint64_t total_light_level_ceiling = 0;
-    // uint64_t total_light_level_table = 0;
-    // uint64_t total_kelvin_level_all = 0;
-    // uint64_t total_kelvin_ceiling = 0;
-    // uint64_t total_kelvin_table = 0;
-    // uint16_t num_lights_total = 0;
-    // uint16_t num_lights_ceiling = 0;
-    // uint16_t num_lights_ceiling_on = 0;
-    // uint16_t num_lights_table = 0;
-    // uint16_t num_lights_table_on = 0;
+  // // Calculate average light level
+  // uint64_t total_light_level_all = 0;
+  // uint64_t total_light_level_ceiling = 0;
+  // uint64_t total_light_level_table = 0;
+  // uint64_t total_kelvin_level_all = 0;
+  // uint64_t total_kelvin_ceiling = 0;
+  // uint64_t total_kelvin_table = 0;
+  // uint16_t num_lights_total = 0;
+  // uint16_t num_lights_ceiling = 0;
+  // uint16_t num_lights_ceiling_on = 0;
+  // uint16_t num_lights_table = 0;
+  // uint16_t num_lights_table_on = 0;
 
-    // for(auto &light : lights) {
-    //     if ((any_lights_on && light->get_state()) || !any_lights_on) {
-    //         total_light_level_all += light->get_brightness();
-    //         total_kelvin_level_all += light->get_color_temperature();
-    //         num_lights_total++;
-    //     }
+  // for(auto &light : lights) {
+  //     if ((any_lights_on && light->get_state()) || !any_lights_on) {
+  //         total_light_level_all += light->get_brightness();
+  //         total_kelvin_level_all += light->get_color_temperature();
+  //         num_lights_total++;
+  //     }
 
-    //     if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE) {
-    //         num_lights_table++;
-    //         if (light->get_state()) {
-    //             total_light_level_table += light->get_brightness();
-    //             total_kelvin_table += light->get_color_temperature();
-    //             num_lights_table_on++;
-    //         }
-    //     } else if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING) {
-    //         num_lights_ceiling++;
-    //         if (light->get_state()) {
-    //             total_light_level_ceiling += light->get_brightness();
-    //             total_kelvin_ceiling += light->get_color_temperature();
-    //             num_lights_ceiling_on++;
-    //         }
-    //     }
-    // }
+  //     if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE) {
+  //         num_lights_table++;
+  //         if (light->get_state()) {
+  //             total_light_level_table += light->get_brightness();
+  //             total_kelvin_table += light->get_color_temperature();
+  //             num_lights_table_on++;
+  //         }
+  //     } else if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING) {
+  //         num_lights_ceiling++;
+  //         if (light->get_state()) {
+  //             total_light_level_ceiling += light->get_brightness();
+  //             total_kelvin_ceiling += light->get_color_temperature();
+  //             num_lights_ceiling_on++;
+  //         }
+  //     }
+  // }
 
-    // // Update result if a ceiling or table light is found.
-    // all_status.set_num_table_lights(num_lights_table);
-    // all_status.set_num_ceiling_lights(num_lights_ceiling);
-    // all_status.set_num_table_lights_on(num_lights_table_on);
-    // all_status.set_num_ceiling_lights_on(num_lights_ceiling_on);
+  // // Update result if a ceiling or table light is found.
+  // all_status.set_num_table_lights(num_lights_table);
+  // all_status.set_num_ceiling_lights(num_lights_ceiling);
+  // all_status.set_num_table_lights_on(num_lights_table_on);
+  // all_status.set_num_ceiling_lights_on(num_lights_ceiling_on);
 
-    // if (num_lights_total > 0) {
-    //     float average_kelvin = (float)total_kelvin_level_all / num_lights_total;
-    //     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-    //     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-    //     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
-    //         kelvin_pct = 100 - kelvin_pct;
-    //     }
+  // if (num_lights_total > 0) {
+  //     float average_kelvin = (float)total_kelvin_level_all / num_lights_total;
+  //     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
+  //     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+  //     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+  //         kelvin_pct = 100 - kelvin_pct;
+  //     }
 
-    //     all_status.set_average_dim_level(total_light_level_all / num_lights_total);
-    //     all_status.set_average_color_temperature(kelvin_pct);
-    // } else {
-    //     all_status.set_average_dim_level(0);
-    //     all_status.set_average_color_temperature(0);
-    // }
+  //     all_status.set_average_dim_level(total_light_level_all / num_lights_total);
+  //     all_status.set_average_color_temperature(kelvin_pct);
+  // } else {
+  //     all_status.set_average_dim_level(0);
+  //     all_status.set_average_color_temperature(0);
+  // }
 
-    // if (num_lights_table_on > 0) {
-    //     float average_kelvin = (float)total_kelvin_table / num_lights_table_on;
-    //     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-    //     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-    //     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
-    //         kelvin_pct = 100 - kelvin_pct;
-    //     }
+  // if (num_lights_table_on > 0) {
+  //     float average_kelvin = (float)total_kelvin_table / num_lights_table_on;
+  //     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
+  //     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+  //     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+  //         kelvin_pct = 100 - kelvin_pct;
+  //     }
 
-    //     all_status.set_table_lights_dim_level(total_light_level_table / num_lights_table_on);
-    //     all_status.set_table_lights_color_temperature_value(kelvin_pct);
-    // } else {
-    //     SPDLOG_TRACE("No table lights found, setting value to 0.");
-    //     all_status.set_table_lights_dim_level(0);
-    //     all_status.set_table_lights_color_temperature_value(0);
-    // }
+  //     all_status.set_table_lights_dim_level(total_light_level_table / num_lights_table_on);
+  //     all_status.set_table_lights_color_temperature_value(kelvin_pct);
+  // } else {
+  //     SPDLOG_TRACE("No table lights found, setting value to 0.");
+  //     all_status.set_table_lights_dim_level(0);
+  //     all_status.set_table_lights_color_temperature_value(0);
+  // }
 
-    // if (num_lights_ceiling_on > 0) {
-    //     float average_kelvin = (float)total_kelvin_ceiling / num_lights_ceiling_on;
-    //     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-    //     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-    //     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
-    //         kelvin_pct = 100 - kelvin_pct;
-    //     }
+  // if (num_lights_ceiling_on > 0) {
+  //     float average_kelvin = (float)total_kelvin_ceiling / num_lights_ceiling_on;
+  //     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
+  //     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
+  //     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+  //         kelvin_pct = 100 - kelvin_pct;
+  //     }
 
-    //     all_status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling_on);
-    //     all_status.set_ceiling_lights_color_temperature_value(kelvin_pct);
-    // } else {
-    //     SPDLOG_TRACE("No ceiling lights found, setting value to 0.");
-    //     all_status.set_ceiling_lights_dim_level(0);
-    //     all_status.set_ceiling_lights_color_temperature_value(0);
-    // }
+  //     all_status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling_on);
+  //     all_status.set_ceiling_lights_color_temperature_value(kelvin_pct);
+  // } else {
+  //     SPDLOG_TRACE("No ceiling lights found, setting value to 0.");
+  //     all_status.set_ceiling_lights_dim_level(0);
+  //     all_status.set_ceiling_lights_color_temperature_value(0);
+  // }
 
-    // std::string serialized_result = all_status.SerializeAsString();
-    // if(serialized_result.size() > 0) {
-    //     MQTT_Manager::publish(this->_mqtt_topic_home_page_all_rooms_status, serialized_result, true);
-    // } else {
-    //     SPDLOG_ERROR("Tried to send out all_rooms state update to NSPanel {}::{} but failed to serialize the result.");
-    // }
+  // std::string serialized_result = all_status.SerializeAsString();
+  // if(serialized_result.size() > 0) {
+  //     MQTT_Manager::publish(this->_mqtt_topic_home_page_all_rooms_status, serialized_result, true);
+  // } else {
+  //     SPDLOG_ERROR("Tried to send out all_rooms state update to NSPanel {}::{} but failed to serialize the result.");
+  // }
 }
 
 void NSPanel::_send_entities_page_update() {
-    // if(this->_selected_room != nullptr) {
-    //     SPDLOG_DEBUG("NSPanel {}::{}, sending out new entities page for pagge index: {}", this->_id, this->_name, this->_selected_entity_page_index);
-    //     NSPanelRoomEntitiesPage proto;
-    //     if(this->_selected_room->get_protobuf_room_entity_page(this->_selected_entity_page_index, &proto)) {
-    //         std::string serialized_result = proto.SerializeAsString();
-    //         if(serialized_result.size() > 0) {
-    //             MQTT_Manager::publish(this->_mqtt_topic_room_entities_page_status, serialized_result, true);
-    //         }
-    //     } else {
-    //         SPDLOG_ERROR("Failed to send out room status update for room {}::{} for panel {}::{}.", this->_selected_room->get_id(), this->_selected_room->get_name(), this->_id, this->_name);
-    //     }
-    // } else {
-    //     SPDLOG_ERROR("Tried to send out room state update for NSPanel {}::{} but no room has been selected.", this->_id, this->_name);
-    // }
+  // if(this->_selected_room != nullptr) {
+  //     SPDLOG_DEBUG("NSPanel {}::{}, sending out new entities page for pagge index: {}", this->_id, this->_name, this->_selected_entity_page_index);
+  //     NSPanelRoomEntitiesPage proto;
+  //     if(this->_selected_room->get_protobuf_room_entity_page(this->_selected_entity_page_index, &proto)) {
+  //         std::string serialized_result = proto.SerializeAsString();
+  //         if(serialized_result.size() > 0) {
+  //             MQTT_Manager::publish(this->_mqtt_topic_room_entities_page_status, serialized_result, true);
+  //         }
+  //     } else {
+  //         SPDLOG_ERROR("Failed to send out room status update for room {}::{} for panel {}::{}.", this->_selected_room->get_id(), this->_selected_room->get_name(), this->_id, this->_name);
+  //     }
+  // } else {
+  //     SPDLOG_ERROR("Tried to send out room state update for NSPanel {}::{} but no room has been selected.", this->_id, this->_name);
+  // }
 }
 
 void NSPanel::_go_to_next_room() {
-    std::vector<std::shared_ptr<Room>> all_rooms = EntityManager::get_all_rooms();
-    auto room_it = std::find_if(all_rooms.begin(), all_rooms.end(), [this](std::shared_ptr<Room> room) {
-        return this->_selected_room->get_id() == room->get_id();
-    });
+  std::vector<std::shared_ptr<Room>> all_rooms = EntityManager::get_all_rooms();
+  auto room_it = std::find_if(all_rooms.begin(), all_rooms.end(), [this](std::shared_ptr<Room> room) {
+    return this->_selected_room->get_id() == room->get_id();
+  });
 
-    if(room_it == all_rooms.end()) {
-        // Selected room not found, go to default room.
-        this->_go_to_default_room();
+  if (room_it == all_rooms.end()) {
+    // Selected room not found, go to default room.
+    this->_go_to_default_room();
+  } else [[likely]] {
+    room_it++;
+    if (room_it == all_rooms.end()) {
+      // Reached end of list of rooms, start from beginning.
+      this->_selected_room = all_rooms[0];
     } else [[likely]] {
-        room_it++;
-        if(room_it == all_rooms.end()) {
-            // Reached end of list of rooms, start from beginning.
-            this->_selected_room = all_rooms[0];
-        } else [[likely]] {
-            this->_selected_room = (*room_it);
-        }
+      this->_selected_room = (*room_it);
     }
+  }
 }
 
 void NSPanel::_go_to_previous_room() {
-    std::vector<std::shared_ptr<Room>> all_rooms = EntityManager::get_all_rooms();
-    auto room_it = std::find_if(all_rooms.begin(), all_rooms.end(), [this](std::shared_ptr<Room> room) {
-        return this->_selected_room->get_id() == room->get_id();
-    });
+  std::vector<std::shared_ptr<Room>> all_rooms = EntityManager::get_all_rooms();
+  auto room_it = std::find_if(all_rooms.begin(), all_rooms.end(), [this](std::shared_ptr<Room> room) {
+    return this->_selected_room->get_id() == room->get_id();
+  });
 
-    if(room_it == all_rooms.end()) {
-        // Selected room not found, go to default room.
-        this->_go_to_default_room();
+  if (room_it == all_rooms.end()) {
+    // Selected room not found, go to default room.
+    this->_go_to_default_room();
+  } else [[likely]] {
+    if (room_it == all_rooms.begin()) {
+      // Reached end of list of rooms, start from beginning.
+      this->_selected_room = all_rooms[all_rooms.size() - 1];
     } else [[likely]] {
-        if(room_it == all_rooms.begin()) {
-            // Reached end of list of rooms, start from beginning.
-            this->_selected_room = all_rooms[all_rooms.size()-1];
-        } else [[likely]] {
-            room_it--;
-            this->_selected_room = (*room_it);
-        }
+      room_it--;
+      this->_selected_room = (*room_it);
     }
+  }
 }
 
 void NSPanel::_go_to_default_room() {
-    auto settings_it = std::find_if(MqttManagerConfig::nspanel_configs.begin(), MqttManagerConfig::nspanel_configs.end(), [this](NSPanelSettings s) {
-      return s.id() == this->_id;
+  auto settings_it = std::find_if(MqttManagerConfig::nspanel_configs.begin(), MqttManagerConfig::nspanel_configs.end(), [this](NSPanelSettings s) {
+    return s.id() == this->_id;
+  });
+  if (settings_it != MqttManagerConfig::nspanel_configs.end()) {
+    uint32_t default_room_id = settings_it->default_room();
+    SPDLOG_DEBUG("NSPanel {}::{} trying to navigate to default room ID {}.", this->_id, this->_name, default_room_id);
+
+    std::vector<std::shared_ptr<Room>> all_rooms = EntityManager::get_all_rooms();
+    auto room_it = std::find_if(all_rooms.begin(), all_rooms.end(), [default_room_id](std::shared_ptr<Room> room) {
+      return room->get_id() == default_room_id;
     });
-    if(settings_it != MqttManagerConfig::nspanel_configs.end()) {
-        uint32_t default_room_id = settings_it->default_room();
-        SPDLOG_DEBUG("NSPanel {}::{} trying to navigate to default room ID {}.", this->_id, this->_name, default_room_id);
 
-        std::vector<std::shared_ptr<Room>> all_rooms = EntityManager::get_all_rooms();
-        auto room_it = std::find_if(all_rooms.begin(), all_rooms.end(), [default_room_id](std::shared_ptr<Room> room) {
-            return room->get_id() == default_room_id;
-        });
-
-        if(room_it == all_rooms.end()) {
-            // Selected room not found, go to default room.
-            SPDLOG_ERROR("Couldn't find default room with ID {} for NSPanel {}::{}. Will go to first room in list.", default_room_id, this->_id, this->_name);
-            if(all_rooms.size() > 0) [[likely]] {
-                this->_selected_room = (*room_it);
-            } else {
-                SPDLOG_ERROR("No rooms loaded! Setting nullptr!");
-                this->_selected_room = nullptr;
-            }
-        } else [[likely]] {
-            this->_selected_room = (*room_it);
-        }
-    } else {
-        SPDLOG_ERROR("Couldn't find config for NSPanel {}::{}.", this->_id, this->_name);
+    if (room_it == all_rooms.end()) {
+      // Selected room not found, go to default room.
+      SPDLOG_ERROR("Couldn't find default room with ID {} for NSPanel {}::{}. Will go to first room in list.", default_room_id, this->_id, this->_name);
+      if (all_rooms.size() > 0) [[likely]] {
+        this->_selected_room = (*room_it);
+      } else {
+        SPDLOG_ERROR("No rooms loaded! Setting nullptr!");
+        this->_selected_room = nullptr;
+      }
+    } else [[likely]] {
+      this->_selected_room = (*room_it);
     }
+  } else {
+    SPDLOG_ERROR("Couldn't find config for NSPanel {}::{}.", this->_id, this->_name);
+  }
 }
 
-
-void NSPanel::_room_change_callback(Room* room) {
-    std::vector<std::shared_ptr<MqttManagerEntity>> entities = this->_selected_room->get_all_entities();
-    SPDLOG_DEBUG("Attaching entity change callback to all ({}) entities in currently selected room.", entities.size());
-    for(auto &entity : entities) {
-        SPDLOG_DEBUG("NSPanel {}::{} attaching change callback to entity with ID {}, type: {}.", this->_id, this->_name, entity->get_id(), (int)entity->get_type());
-        entity->attach_entity_changed_callback(boost::bind(&NSPanel::_entity_change_callback, this, _1));
-    }
+void NSPanel::_room_change_callback(Room *room) {
+  std::vector<std::shared_ptr<MqttManagerEntity>> entities = this->_selected_room->get_all_entities();
+  SPDLOG_DEBUG("Attaching entity change callback to all ({}) entities in currently selected room.", entities.size());
+  for (auto &entity : entities) {
+    SPDLOG_DEBUG("NSPanel {}::{} attaching change callback to entity with ID {}, type: {}.", this->_id, this->_name, entity->get_id(), (int)entity->get_type());
+    entity->attach_entity_changed_callback(boost::bind(&NSPanel::_entity_change_callback, this, _1));
+  }
 }
 
 void NSPanel::_entity_change_callback(MqttManagerEntity *entity) {
-    // TODO: Is Mutex needed?
-    {
-        std::lock_guard<std::mutex> lock_guard(this->_last_state_update_mutex);
-        NSPanel::_last_state_update = std::chrono::system_clock::now();
-        if(this->_last_state_update_sent) {
-            // Thread is not running, start it.
-            SPDLOG_DEBUG("NSPanel send state update thread is not running, starting it.");
-            this->_last_state_update_sent = false;
-            std::thread(&NSPanel::_check_and_send_new_status_update, this).detach();
-        }
+  // TODO: Is Mutex needed?
+  {
+    std::lock_guard<std::mutex> lock_guard(this->_last_state_update_mutex);
+    NSPanel::_last_state_update = std::chrono::system_clock::now();
+    if (this->_last_state_update_sent) {
+      // Thread is not running, start it.
+      SPDLOG_DEBUG("NSPanel send state update thread is not running, starting it.");
+      this->_last_state_update_sent = false;
+      std::thread(&NSPanel::_check_and_send_new_status_update, this).detach();
     }
+  }
 }
 
 void NSPanel::_check_and_send_new_status_update() {
-    while(true) {
-        {
-            std::lock_guard<std::mutex> lock_guard(this->_last_state_update_mutex);
-            std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-            if(now >= this->_last_state_update + std::chrono::milliseconds(100)) {
-                SPDLOG_DEBUG("NSPanel {}::{} past update timeout threshold, sending new protobuf state.", this->_id, this->_name);
-                this->_send_home_page_update();
-                this->_send_entities_page_update();
-                this->_last_state_update_sent = true;
-                break; // We have sent state update, exit this thread.
-            }
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+  while (true) {
+    {
+      std::lock_guard<std::mutex> lock_guard(this->_last_state_update_mutex);
+      std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
+      if (now >= this->_last_state_update + std::chrono::milliseconds(100)) {
+        SPDLOG_DEBUG("NSPanel {}::{} past update timeout threshold, sending new protobuf state.", this->_id, this->_name);
+        this->_send_home_page_update();
+        this->_send_entities_page_update();
+        this->_last_state_update_sent = true;
+        break; // We have sent state update, exit this thread.
+      }
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+  }
 }

@@ -2,11 +2,9 @@
 #define MQTT_MANAGER_ENTITY_MANAGER
 
 #include "protobuf_general.pb.h"
-#include "room/room.hpp"
 #include <algorithm>
 #include <boost/signals2.hpp>
 #include <entity/entity.hpp>
-#include <light/light.hpp>
 #include <list>
 #include <memory>
 #include <mqtt_manager/mqtt_manager.hpp>
@@ -17,6 +15,10 @@
 #include <spdlog/spdlog.h>
 #include <vector>
 #include <weather/weather.hpp>
+
+// Forward declare entities:
+class Room;
+class Light;
 
 class EntityManager {
 public:
@@ -46,23 +48,23 @@ public:
   static void remove_entity(std::shared_ptr<MqttManagerEntity> entity);
 
   /**
-  * Create and add a room to the manager
-  */
+   * Create and add a room to the manager
+   */
   static void add_room(RoomSettings &config);
 
   /**
-  * Get a room with the given ID if it existing. Otherwise returns nullptr.
-  */
+   * Get a room with the given ID if it existing. Otherwise returns nullptr.
+   */
   static std::shared_ptr<Room> get_room(uint32_t room_id);
 
   /**
-  * Get all currently registered rooms
-  */
+   * Get all currently registered rooms
+   */
   static std::vector<std::shared_ptr<Room>> get_all_rooms();
 
   /**
-  * Remove a room with the given ID if found.
-  */
+   * Remove a room with the given ID if found.
+   */
   static void remove_room(uint32_t room_id);
 
   /**
@@ -96,13 +98,13 @@ public:
   static void add_nspanel_relay_group(nlohmann::json &config);
 
   /**
-  * Get an NSPanel Relay Group if a group with the given id exists. Otherwise, return nullptr.
-  */
+   * Get an NSPanel Relay Group if a group with the given id exists. Otherwise, return nullptr.
+   */
   static std::shared_ptr<NSPanelRelayGroup> get_relay_group(uint32_t relay_group_id);
 
   /**
-  * Get all currently register NSPanel relay groups.
-  */
+   * Get all currently register NSPanel relay groups.
+   */
   static std::vector<std::shared_ptr<NSPanelRelayGroup>> get_all_relay_groups();
 
   /**
@@ -124,20 +126,20 @@ public:
   }
 
   /**
-  * Get an MqttManagerEntity that is placed in the given slot on the given page.
-  * Returns shared_ptr to MqttManagerEntity object if found, otherwise nullptr.
-  */
+   * Get an MqttManagerEntity that is placed in the given slot on the given page.
+   * Returns shared_ptr to MqttManagerEntity object if found, otherwise nullptr.
+   */
   static std::shared_ptr<MqttManagerEntity> get_entity_by_page_id_and_slot(uint32_t page_id, uint8_t page_slot) {
-      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-      auto rit = EntityManager::_entities.cbegin();
-      while (rit != EntityManager::_entities.cend()) {
-        if ((*rit)->get_entity_page_id() == page_id && (*rit)->get_entity_page_slot() == page_slot) {
-          return (*rit);
-        } else {
-          ++rit;
-        }
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+    auto rit = EntityManager::_entities.cbegin();
+    while (rit != EntityManager::_entities.cend()) {
+      if ((*rit)->get_entity_page_id() == page_id && (*rit)->get_entity_page_slot() == page_slot) {
+        return (*rit);
+      } else {
+        ++rit;
       }
-      return nullptr;
+    }
+    return nullptr;
   }
 
   /**
@@ -149,10 +151,10 @@ public:
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     std::vector<std::shared_ptr<EntityClass>> entities;
 
-    for(auto entity : EntityManager::_entities) {
-        if(entity->get_type() == type) {
-            entities.push_back(std::static_pointer_cast<EntityClass>(entity));
-        }
+    for (auto entity : EntityManager::_entities) {
+      if (entity->get_type() == type) {
+        entities.push_back(std::static_pointer_cast<EntityClass>(entity));
+      }
     }
 
     return entities;

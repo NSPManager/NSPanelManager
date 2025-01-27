@@ -1,136 +1,132 @@
 #include "entity/entity.hpp"
-#include <boost/bind.hpp>
 #include "entity_manager/entity_manager.hpp"
 #include "light/light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_nspanel.pb.h"
 #include <algorithm>
+#include <boost/bind.hpp>
+#include <boost/stacktrace/stacktrace.hpp>
+#include <database_manager/database_manager.hpp>
 #include <exception>
+#include <fmt/format.h>
 #include <memory>
 #include <mutex>
-#include <room/room_entities_page.hpp>
 #include <protobuf/protobuf_general.pb.h>
+#include <room/room.hpp>
+#include <room/room_entities_page.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <thread>
 #include <unistd.h>
 #include <vector>
 #include <web_helper/WebHelper.hpp>
-#include <fmt/format.h>
-#include <boost/stacktrace/stacktrace.hpp>
 
-RoomEntitiesPage::RoomEntitiesPage(uint32_t page_id, Room* room) {
-    this->_id = page_id;
-    this->_room = room;
-    this->_update();
-    SPDLOG_DEBUG("Created RoomEntitiesPage with ID {}. Page will display {}", this->_id, this->_page_settings.is_scenes_page() ? "scenes." : "entities.");
+RoomEntitiesPage::RoomEntitiesPage(uint32_t page_id, Room *room) {
+  this->_id = page_id;
+  this->_room = room;
+  this->reload_config();
+  SPDLOG_DEBUG("Created RoomEntitiesPage with ID {}. Page will display {}", this->_id, this->_page_settings.is_scenes_page ? "scenes." : "entities.");
 }
 
 void RoomEntitiesPage::reload_config() {
-    this->_update();
+  try {
+    SPDLOG_DEBUG("Loading RoomEntitiesPage {}, trying to get settings from DB.", this->_id);
+    // auto db_room = database_manager::database.get<database_manager::RoomEntitiesPage>(this->_id);
+
+    std::lock_guard<std::mutex> mutex_guard(this->_page_settings_mutex);
+    // this->_page_settings = db_room;
+
+    this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/state", MqttManagerConfig::get_settings().manager_address(), this->_id);
+    this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/entity_pages/{}/state", MqttManagerConfig::get_settings().manager_address(), this->_room->get_id(), this->_id);
+    SPDLOG_DEBUG("RoomEntitiesPage {} loaded successfully.", this->_id);
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception: {}", e.what());
+    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+  }
 }
 
 uint32_t RoomEntitiesPage::get_id() {
-    return this->_id;
+  return this->_id;
 }
 
 uint8_t RoomEntitiesPage::get_type() {
-    return this->_page_settings.page_type();
+  std::lock_guard<std::mutex> mutex_guard(this->_page_settings_mutex);
+  return this->_page_settings.page_type;
 }
 
 void RoomEntitiesPage::post_init() {
-    this->_entities.resize(this->_page_settings.page_type());
-    uint8_t entities_attached = 0;
-    for(int i = 0; i < this->_page_settings.page_type(); i++) {
-        this->_entities[i] = EntityManager::get_entity_by_page_id_and_slot(this->_id, i);
-        if(this->_entities[i] != nullptr) {
-            entities_attached++;
-            SPDLOG_DEBUG("Attached entity type {} with ID {} to RoomEntitiesPage ID {} page slot {}.", (int)this->_entities[i]->get_type(), this->_entities[i]->get_id(), this->_id, i);
+  std::lock_guard<std::mutex> mutex_guard(this->_page_settings_mutex);
+  this->_entities.resize(this->_page_settings.page_type);
+  uint8_t entities_attached = 0;
+  for (int i = 0; i < this->_page_settings.page_type; i++) {
+    this->_entities[i] = EntityManager::get_entity_by_page_id_and_slot(this->_id, i);
+    if (this->_entities[i] != nullptr) {
+      entities_attached++;
+      SPDLOG_DEBUG("Attached entity type {} with ID {} to RoomEntitiesPage ID {} page slot {}.", (int)this->_entities[i]->get_type(), this->_entities[i]->get_id(), this->_id, i);
 
-            this->_entities[i]->attach_entity_changed_callback(boost::bind(&RoomEntitiesPage::_entity_changed_callback, this, _1));
-        }
+      this->_entities[i]->attach_entity_changed_callback(boost::bind(&RoomEntitiesPage::_entity_changed_callback, this, _1));
     }
-    SPDLOG_DEBUG("Attached {} entities to RoomEntitiesPage {}. this->_entities size: {}", entities_attached, this->_id, this->_entities.size());
+  }
+  SPDLOG_DEBUG("Attached {} entities to RoomEntitiesPage {}. this->_entities size: {}", entities_attached, this->_id, this->_entities.size());
 }
 
 std::vector<std::shared_ptr<MqttManagerEntity>> RoomEntitiesPage::get_entities() {
-    std::vector<std::shared_ptr<MqttManagerEntity>> entities;
-    // The _entities vector is built on index = page slot, that means that some
-    // indicies are nullptr if no entity is assigned to that slot.
-    // Filter out nullptrs from list of entities on this page:
-    std::copy_if(this->_entities.begin(), this->_entities.end(), std::back_inserter(entities), [](std::shared_ptr<MqttManagerEntity> entity) {
-        return entity != nullptr;
-    });
-    return entities;
-}
-
-void RoomEntitiesPage::_update() {
-    std::string config_url = fmt::format("http://127.0.0.1:8000/protobuf/mqttmanager/get_room_entities_page/{}", this->_id);
-    std::string data;
-    SPDLOG_DEBUG("Fetching config for RoomEntitiesPage ID {}.", this->_id);
-    while(!WebHelper::perform_get_request(&config_url, &data, nullptr)) {
-        SPDLOG_ERROR("Failed to get config for RoomEntitiesPage with ID {}, will try again in 500ms", this->_id);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    }
-
-    try {
-        SPDLOG_DEBUG("Got config data for RoomEntitiesPage with ID {}.", this->_id);
-        if(!this->_page_settings.ParseFromString(data)) {
-            SPDLOG_ERROR("Failed to parse RoomEntitiesPageSettings from Django while processing config for RoomEntitiesPage with ID {}.", this->_id);
-            return;
-        }
-    } catch(std::exception &ex) {
-        SPDLOG_ERROR("Error while processing settings for RoomEntitiesPage with ID {}. Stacktrace: {}", this->_id, boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
-    }
-
-    this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/entity_pages/{}/state", MqttManagerConfig::get_settings().manager_address(), this->_room->get_id(), this->_id);
+  std::vector<std::shared_ptr<MqttManagerEntity>> entities;
+  // The _entities vector is built on index = page slot, that means that some
+  // indicies are nullptr if no entity is assigned to that slot.
+  // Filter out nullptrs from list of entities on this page:
+  std::copy_if(this->_entities.begin(), this->_entities.end(), std::back_inserter(entities), [](std::shared_ptr<MqttManagerEntity> entity) {
+    return entity != nullptr;
+  });
+  return entities;
 }
 
 void RoomEntitiesPage::_entity_changed_callback(MqttManagerEntity *entity) {
-    this->_send_mqtt_state_update();
-    this->_state_changed_callbacks(this);
+  this->_send_mqtt_state_update();
+  this->_state_changed_callbacks(this);
 }
 
 void RoomEntitiesPage::_send_mqtt_state_update() {
-    SPDLOG_DEBUG("Entity page {} sending state update to MQTT topic: {}", this->_id, this->_mqtt_state_topic);
-    NSPanelRoomEntitiesPage proto_state;
-    proto_state.set_id(this->_id);
-    proto_state.set_page_type(this->_page_settings.page_type());
-    proto_state.set_header_text(fmt::format("{} {}/{}", this->_room->get_name(), this->_page_settings.display_order(), this->_room->get_number_of_entity_pages()));
+  SPDLOG_DEBUG("Entity page {} sending state update to MQTT topic: {}", this->_id, this->_mqtt_state_topic);
+  std::lock_guard<std::mutex> mutex_guard(this->_page_settings_mutex);
 
-    std::lock_guard<std::mutex> lock_guard(this->_entities_mutex);
-    for(RoomEntityWrapper wrapper : RoomEntitiesPage::_page_settings.entities()) {
-        if(wrapper.has_light()) {
-            std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, wrapper.light().id());
-            if(light != nullptr) {
-                NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();
-                entity_slot->set_name(light->get_name());
-                entity_slot->set_room_view_position(wrapper.light().room_view_position());
-                // TODO: Move state icons for panel from GUI_DATA to manager and convert this!
-                entity_slot->set_icon(light->get_state() ? "s" : "t");
-                if(light->get_state()) {
-                    entity_slot->set_pco(65024);
-                    entity_slot->set_pco2(65024);
-                } else {
-                    entity_slot->set_pco(65535);
-                    entity_slot->set_pco2(65535);
-                }
-                SPDLOG_DEBUG("Added Light {}::{} to RoomEntityWrapper {}.", light->get_id(), light->get_name(), this->_id);
-            } else {
-                SPDLOG_ERROR("Light entity at room view position {} was not found among loaded entities for page {}!", wrapper.light().id(), this->_id);
-            }
-        } else if (wrapper.has_switch_()) {
-            SPDLOG_ERROR("Switch entity not implemented!");
-        } else {
-            SPDLOG_ERROR("Unknown entity type while processing EntityWrapper while building NSPanelRoomEntitiesPage protobuf object.");
-        }
+  NSPanelRoomEntitiesPage proto_state;
+  proto_state.set_id(this->_id);
+  proto_state.set_page_type(this->_page_settings.page_type);
+  proto_state.set_header_text(fmt::format("{} {}/{}", this->_room->get_name(), this->_page_settings.display_order, this->_room->get_number_of_entity_pages()));
+
+  std::lock_guard<std::mutex> lock_guard(this->_entities_mutex);
+  for (int i = 0; i < this->_page_settings.page_type; i++) {
+    std::shared_ptr<MqttManagerEntity> entity = EntityManager::get_entity_by_page_id_and_slot(this->_id, i);
+    if (entity == nullptr) {
+      continue; // No entity assigned in slot, move to next slot.
     }
 
-    std::string protobuf_buffer;
-    if(proto_state.SerializeToString(&protobuf_buffer)) {
-        MQTT_Manager::publish(this->_mqtt_state_topic, protobuf_buffer, true);
+    if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
+      std::shared_ptr<Light> light = std::static_pointer_cast<Light>(entity);
+      NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();
+      entity_slot->set_name(light->get_name());
+      entity_slot->set_room_view_position(i);
+      // TODO: Move state icons for panel from GUI_DATA to manager and convert this!
+      entity_slot->set_icon(light->get_state() ? "s" : "t");
+      if (light->get_state()) {
+        entity_slot->set_pco(65024);
+        entity_slot->set_pco2(65024);
+      } else {
+        entity_slot->set_pco(65535);
+        entity_slot->set_pco2(65535);
+        SPDLOG_DEBUG("Added Light {}::{} to RoomEntityWrapper {}.", light->get_id(), light->get_name(), this->_id);
+      }
     } else {
-        SPDLOG_ERROR("Failed to serialize protobuf for entity page {} state.", this->_id);
+      SPDLOG_ERROR("Unknown entity type {} while processing EntityWrapper while building NSPanelRoomEntitiesPage protobuf object.", (int)entity->get_type());
     }
+  }
+
+  std::string protobuf_buffer;
+  if (proto_state.SerializeToString(&protobuf_buffer)) {
+    MQTT_Manager::publish(this->_mqtt_state_topic, protobuf_buffer, true);
+  } else {
+    SPDLOG_ERROR("Failed to serialize protobuf for entity page {} state.", this->_id);
+  }
 }

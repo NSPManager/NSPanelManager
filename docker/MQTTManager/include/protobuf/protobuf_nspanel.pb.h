@@ -53,6 +53,9 @@ extern const ::google::protobuf::internal::DescriptorTable
 class NSPanelConfig;
 struct NSPanelConfigDefaultTypeInternal;
 extern NSPanelConfigDefaultTypeInternal _NSPanelConfig_default_instance_;
+class NSPanelConfig_RoomInfo;
+struct NSPanelConfig_RoomInfoDefaultTypeInternal;
+extern NSPanelConfig_RoomInfoDefaultTypeInternal _NSPanelConfig_RoomInfo_default_instance_;
 class NSPanelLightStatus;
 struct NSPanelLightStatusDefaultTypeInternal;
 extern NSPanelLightStatusDefaultTypeInternal _NSPanelLightStatus_default_instance_;
@@ -316,7 +319,7 @@ class NSPanelWeatherUpdate_ForecastItem final : public ::google::protobuf::Messa
     return reinterpret_cast<const NSPanelWeatherUpdate_ForecastItem*>(
         &_NSPanelWeatherUpdate_ForecastItem_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 8;
+  static constexpr int kIndexInFileMessages = 9;
   friend void swap(NSPanelWeatherUpdate_ForecastItem& a, NSPanelWeatherUpdate_ForecastItem& b) { a.Swap(&b); }
   inline void Swap(NSPanelWeatherUpdate_ForecastItem* other) {
     if (other == this) return;
@@ -565,7 +568,7 @@ class NSPanelWarning final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelWarning*>(
         &_NSPanelWarning_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 2;
+  static constexpr int kIndexInFileMessages = 3;
   friend void swap(NSPanelWarning& a, NSPanelWarning& b) { a.Swap(&b); }
   inline void Swap(NSPanelWarning* other) {
     if (other == this) return;
@@ -955,7 +958,7 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelRoomStatus*>(
         &_NSPanelRoomStatus_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 7;
+  static constexpr int kIndexInFileMessages = 8;
   friend void swap(NSPanelRoomStatus& a, NSPanelRoomStatus& b) { a.Swap(&b); }
   inline void Swap(NSPanelRoomStatus* other) {
     if (other == this) return;
@@ -1024,6 +1027,7 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
+    kEntityPageIdsFieldNumber = 13,
     kNameFieldNumber = 2,
     kIdFieldNumber = 1,
     kAverageDimLevelFieldNumber = 3,
@@ -1037,6 +1041,24 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
     kNumCeilingLightsOnFieldNumber = 11,
     kNumTableLightsOnFieldNumber = 12,
   };
+  // repeated int32 entity_page_ids = 13;
+  int entity_page_ids_size() const;
+  private:
+  int _internal_entity_page_ids_size() const;
+
+  public:
+  void clear_entity_page_ids() ;
+  ::int32_t entity_page_ids(int index) const;
+  void set_entity_page_ids(int index, ::int32_t value);
+  void add_entity_page_ids(::int32_t value);
+  const ::google::protobuf::RepeatedField<::int32_t>& entity_page_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* mutable_entity_page_ids();
+
+  private:
+  const ::google::protobuf::RepeatedField<::int32_t>& _internal_entity_page_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_entity_page_ids();
+
+  public:
   // string name = 2;
   void clear_name() ;
   const std::string& name() const;
@@ -1168,7 +1190,7 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 12, 0,
+      4, 13, 0,
       38, 2>
       _table_;
 
@@ -1189,6 +1211,8 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const NSPanelRoomStatus& from_msg);
+    ::google::protobuf::RepeatedField<::int32_t> entity_page_ids_;
+    mutable ::google::protobuf::internal::CachedSize _entity_page_ids_cached_byte_size_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::int32_t id_;
     ::int32_t average_dim_level_;
@@ -1264,7 +1288,7 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
     return reinterpret_cast<const NSPanelRoomEntitiesPage_EntitySlot*>(
         &_NSPanelRoomEntitiesPage_EntitySlot_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 5;
+  static constexpr int kIndexInFileMessages = 6;
   friend void swap(NSPanelRoomEntitiesPage_EntitySlot& a, NSPanelRoomEntitiesPage_EntitySlot& b) { a.Swap(&b); }
   inline void Swap(NSPanelRoomEntitiesPage_EntitySlot* other) {
     if (other == this) return;
@@ -1495,7 +1519,7 @@ class NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage final : public ::go
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage*>(
         &_NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 17;
+  static constexpr int kIndexInFileMessages = 18;
   friend void swap(NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& a, NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* other) {
     if (other == this) return;
@@ -1678,7 +1702,7 @@ class NSPanelMQTTManagerCommand_PreviousRoom final : public ::google::protobuf::
     return reinterpret_cast<const NSPanelMQTTManagerCommand_PreviousRoom*>(
         &_NSPanelMQTTManagerCommand_PreviousRoom_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 14;
+  static constexpr int kIndexInFileMessages = 15;
   friend void swap(NSPanelMQTTManagerCommand_PreviousRoom& a, NSPanelMQTTManagerCommand_PreviousRoom& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_PreviousRoom* other) {
     if (other == this) return;
@@ -1849,7 +1873,7 @@ class NSPanelMQTTManagerCommand_PreviousEntitiesPage final : public ::google::pr
     return reinterpret_cast<const NSPanelMQTTManagerCommand_PreviousEntitiesPage*>(
         &_NSPanelMQTTManagerCommand_PreviousEntitiesPage_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 16;
+  static constexpr int kIndexInFileMessages = 17;
   friend void swap(NSPanelMQTTManagerCommand_PreviousEntitiesPage& a, NSPanelMQTTManagerCommand_PreviousEntitiesPage& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_PreviousEntitiesPage* other) {
     if (other == this) return;
@@ -2020,7 +2044,7 @@ class NSPanelMQTTManagerCommand_NextRoom final : public ::google::protobuf::Mess
     return reinterpret_cast<const NSPanelMQTTManagerCommand_NextRoom*>(
         &_NSPanelMQTTManagerCommand_NextRoom_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 13;
+  static constexpr int kIndexInFileMessages = 14;
   friend void swap(NSPanelMQTTManagerCommand_NextRoom& a, NSPanelMQTTManagerCommand_NextRoom& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_NextRoom* other) {
     if (other == this) return;
@@ -2191,7 +2215,7 @@ class NSPanelMQTTManagerCommand_NextEntitiesPage final : public ::google::protob
     return reinterpret_cast<const NSPanelMQTTManagerCommand_NextEntitiesPage*>(
         &_NSPanelMQTTManagerCommand_NextEntitiesPage_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 15;
+  static constexpr int kIndexInFileMessages = 16;
   friend void swap(NSPanelMQTTManagerCommand_NextEntitiesPage& a, NSPanelMQTTManagerCommand_NextEntitiesPage& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_NextEntitiesPage* other) {
     if (other == this) return;
@@ -2362,7 +2386,7 @@ class NSPanelMQTTManagerCommand_LightCommand final : public ::google::protobuf::
     return reinterpret_cast<const NSPanelMQTTManagerCommand_LightCommand*>(
         &_NSPanelMQTTManagerCommand_LightCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 12;
+  static constexpr int kIndexInFileMessages = 13;
   friend void swap(NSPanelMQTTManagerCommand_LightCommand& a, NSPanelMQTTManagerCommand_LightCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_LightCommand* other) {
     if (other == this) return;
@@ -2638,7 +2662,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOn final : public ::google::pr
     return reinterpret_cast<const NSPanelMQTTManagerCommand_FirstPageTurnLightOn*>(
         &_NSPanelMQTTManagerCommand_FirstPageTurnLightOn_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 10;
+  static constexpr int kIndexInFileMessages = 11;
   friend void swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOn& a, NSPanelMQTTManagerCommand_FirstPageTurnLightOn& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOn* other) {
     if (other == this) return;
@@ -2881,7 +2905,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOff final : public ::google::p
     return reinterpret_cast<const NSPanelMQTTManagerCommand_FirstPageTurnLightOff*>(
         &_NSPanelMQTTManagerCommand_FirstPageTurnLightOff_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 11;
+  static constexpr int kIndexInFileMessages = 12;
   friend void swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOff& a, NSPanelMQTTManagerCommand_FirstPageTurnLightOff& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOff* other) {
     if (other == this) return;
@@ -3064,7 +3088,7 @@ class NSPanelLightStatus final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelLightStatus*>(
         &_NSPanelLightStatus_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 4;
+  static constexpr int kIndexInFileMessages = 5;
   friend void swap(NSPanelLightStatus& a, NSPanelLightStatus& b) { a.Swap(&b); }
   inline void Swap(NSPanelLightStatus* other) {
     if (other == this) return;
@@ -3294,6 +3318,198 @@ class NSPanelLightStatus final : public ::google::protobuf::Message
 };
 // -------------------------------------------------------------------
 
+class NSPanelConfig_RoomInfo final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:NSPanelConfig.RoomInfo) */ {
+ public:
+  inline NSPanelConfig_RoomInfo() : NSPanelConfig_RoomInfo(nullptr) {}
+  ~NSPanelConfig_RoomInfo() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR NSPanelConfig_RoomInfo(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline NSPanelConfig_RoomInfo(const NSPanelConfig_RoomInfo& from) : NSPanelConfig_RoomInfo(nullptr, from) {}
+  inline NSPanelConfig_RoomInfo(NSPanelConfig_RoomInfo&& from) noexcept
+      : NSPanelConfig_RoomInfo(nullptr, std::move(from)) {}
+  inline NSPanelConfig_RoomInfo& operator=(const NSPanelConfig_RoomInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline NSPanelConfig_RoomInfo& operator=(NSPanelConfig_RoomInfo&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const NSPanelConfig_RoomInfo& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const NSPanelConfig_RoomInfo* internal_default_instance() {
+    return reinterpret_cast<const NSPanelConfig_RoomInfo*>(
+        &_NSPanelConfig_RoomInfo_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 1;
+  friend void swap(NSPanelConfig_RoomInfo& a, NSPanelConfig_RoomInfo& b) { a.Swap(&b); }
+  inline void Swap(NSPanelConfig_RoomInfo* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(NSPanelConfig_RoomInfo* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  NSPanelConfig_RoomInfo* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<NSPanelConfig_RoomInfo>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const NSPanelConfig_RoomInfo& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const NSPanelConfig_RoomInfo& from) { NSPanelConfig_RoomInfo::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(NSPanelConfig_RoomInfo* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "NSPanelConfig.RoomInfo"; }
+
+ protected:
+  explicit NSPanelConfig_RoomInfo(::google::protobuf::Arena* arena);
+  NSPanelConfig_RoomInfo(::google::protobuf::Arena* arena, const NSPanelConfig_RoomInfo& from);
+  NSPanelConfig_RoomInfo(::google::protobuf::Arena* arena, NSPanelConfig_RoomInfo&& from) noexcept
+      : NSPanelConfig_RoomInfo(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kEntityPageIdsFieldNumber = 2,
+    kRoomIdFieldNumber = 1,
+  };
+  // repeated int32 entity_page_ids = 2;
+  int entity_page_ids_size() const;
+  private:
+  int _internal_entity_page_ids_size() const;
+
+  public:
+  void clear_entity_page_ids() ;
+  ::int32_t entity_page_ids(int index) const;
+  void set_entity_page_ids(int index, ::int32_t value);
+  void add_entity_page_ids(::int32_t value);
+  const ::google::protobuf::RepeatedField<::int32_t>& entity_page_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* mutable_entity_page_ids();
+
+  private:
+  const ::google::protobuf::RepeatedField<::int32_t>& _internal_entity_page_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_entity_page_ids();
+
+  public:
+  // int32 room_id = 1;
+  void clear_room_id() ;
+  ::int32_t room_id() const;
+  void set_room_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_room_id() const;
+  void _internal_set_room_id(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:NSPanelConfig.RoomInfo)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      1, 2, 0,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_NSPanelConfig_RoomInfo_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const NSPanelConfig_RoomInfo& from_msg);
+    ::google::protobuf::RepeatedField<::int32_t> entity_page_ids_;
+    mutable ::google::protobuf::internal::CachedSize _entity_page_ids_cached_byte_size_;
+    ::int32_t room_id_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
+};
+// -------------------------------------------------------------------
+
 class NSPanelWeatherUpdate final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:NSPanelWeatherUpdate) */ {
  public:
@@ -3349,7 +3565,7 @@ class NSPanelWeatherUpdate final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelWeatherUpdate*>(
         &_NSPanelWeatherUpdate_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 9;
+  static constexpr int kIndexInFileMessages = 10;
   friend void swap(NSPanelWeatherUpdate& a, NSPanelWeatherUpdate& b) { a.Swap(&b); }
   inline void Swap(NSPanelWeatherUpdate* other) {
     if (other == this) return;
@@ -3654,7 +3870,7 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelStatusReport*>(
         &_NSPanelStatusReport_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 3;
+  static constexpr int kIndexInFileMessages = 4;
   friend void swap(NSPanelStatusReport& a, NSPanelStatusReport& b) { a.Swap(&b); }
   inline void Swap(NSPanelStatusReport* other) {
     if (other == this) return;
@@ -3950,7 +4166,7 @@ class NSPanelRoomEntitiesPage final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelRoomEntitiesPage*>(
         &_NSPanelRoomEntitiesPage_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 6;
+  static constexpr int kIndexInFileMessages = 7;
   friend void swap(NSPanelRoomEntitiesPage& a, NSPanelRoomEntitiesPage& b) { a.Swap(&b); }
   inline void Swap(NSPanelRoomEntitiesPage* other) {
     if (other == this) return;
@@ -4181,7 +4397,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelMQTTManagerCommand*>(
         &_NSPanelMQTTManagerCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 18;
+  static constexpr int kIndexInFileMessages = 19;
   friend void swap(NSPanelMQTTManagerCommand& a, NSPanelMQTTManagerCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand* other) {
     if (other == this) return;
@@ -4531,7 +4747,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelConfig*>(
         &_NSPanelConfig_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 2;
   friend void swap(NSPanelConfig& a, NSPanelConfig& b) { a.Swap(&b); }
   inline void Swap(NSPanelConfig* other) {
     if (other == this) return;
@@ -4597,6 +4813,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
  public:
   ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
+  using RoomInfo = NSPanelConfig_RoomInfo;
   using NSPanelScreensaverMode = NSPanelConfig_NSPanelScreensaverMode;
   static constexpr NSPanelScreensaverMode WEATHER_WITH_BACKGROUND = NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND;
   static constexpr NSPanelScreensaverMode WEATHER_WITHOUT_BACKGROUND = NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITHOUT_BACKGROUND;
@@ -4622,7 +4839,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kRoomIdsFieldNumber = 15,
+    kRoomInfosFieldNumber = 15,
     kGlobalScenesFieldNumber = 28,
     kNameFieldNumber = 1,
     kButton1MqttTopicFieldNumber = 21,
@@ -4654,24 +4871,23 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kRaiseLightLevelTo100AboveFieldNumber = 30,
     kNspanelIdFieldNumber = 31,
   };
-  // repeated int32 room_ids = 15;
-  int room_ids_size() const;
+  // repeated .NSPanelConfig.RoomInfo room_infos = 15;
+  int room_infos_size() const;
   private:
-  int _internal_room_ids_size() const;
+  int _internal_room_infos_size() const;
 
   public:
-  void clear_room_ids() ;
-  ::int32_t room_ids(int index) const;
-  void set_room_ids(int index, ::int32_t value);
-  void add_room_ids(::int32_t value);
-  const ::google::protobuf::RepeatedField<::int32_t>& room_ids() const;
-  ::google::protobuf::RepeatedField<::int32_t>* mutable_room_ids();
+  void clear_room_infos() ;
+  ::NSPanelConfig_RoomInfo* mutable_room_infos(int index);
+  ::google::protobuf::RepeatedPtrField<::NSPanelConfig_RoomInfo>* mutable_room_infos();
 
   private:
-  const ::google::protobuf::RepeatedField<::int32_t>& _internal_room_ids() const;
-  ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_room_ids();
-
+  const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_RoomInfo>& _internal_room_infos() const;
+  ::google::protobuf::RepeatedPtrField<::NSPanelConfig_RoomInfo>* _internal_mutable_room_infos();
   public:
+  const ::NSPanelConfig_RoomInfo& room_infos(int index) const;
+  ::NSPanelConfig_RoomInfo* add_room_infos();
+  const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_RoomInfo>& room_infos() const;
   // repeated .NSPanelScene global_scenes = 28;
   int global_scenes_size() const;
   private:
@@ -5014,7 +5230,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 31, 1,
+      5, 31, 2,
       126, 2>
       _table_;
 
@@ -5035,8 +5251,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const NSPanelConfig& from_msg);
-    ::google::protobuf::RepeatedField<::int32_t> room_ids_;
-    mutable ::google::protobuf::internal::CachedSize _room_ids_cached_byte_size_;
+    ::google::protobuf::RepeatedPtrField< ::NSPanelConfig_RoomInfo > room_infos_;
     ::google::protobuf::RepeatedPtrField< ::NSPanelScene > global_scenes_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::google::protobuf::internal::ArenaStringPtr button1_mqtt_topic_;
@@ -5182,6 +5397,77 @@ inline void NSPanelScene::set_allocated_name(std::string* value) {
         }
   #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:NSPanelScene.name)
+}
+
+// -------------------------------------------------------------------
+
+// NSPanelConfig_RoomInfo
+
+// int32 room_id = 1;
+inline void NSPanelConfig_RoomInfo::clear_room_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.room_id_ = 0;
+}
+inline ::int32_t NSPanelConfig_RoomInfo::room_id() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.RoomInfo.room_id)
+  return _internal_room_id();
+}
+inline void NSPanelConfig_RoomInfo::set_room_id(::int32_t value) {
+  _internal_set_room_id(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.RoomInfo.room_id)
+}
+inline ::int32_t NSPanelConfig_RoomInfo::_internal_room_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.room_id_;
+}
+inline void NSPanelConfig_RoomInfo::_internal_set_room_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.room_id_ = value;
+}
+
+// repeated int32 entity_page_ids = 2;
+inline int NSPanelConfig_RoomInfo::_internal_entity_page_ids_size() const {
+  return _internal_entity_page_ids().size();
+}
+inline int NSPanelConfig_RoomInfo::entity_page_ids_size() const {
+  return _internal_entity_page_ids_size();
+}
+inline void NSPanelConfig_RoomInfo::clear_entity_page_ids() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.entity_page_ids_.Clear();
+}
+inline ::int32_t NSPanelConfig_RoomInfo::entity_page_ids(int index) const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.RoomInfo.entity_page_ids)
+  return _internal_entity_page_ids().Get(index);
+}
+inline void NSPanelConfig_RoomInfo::set_entity_page_ids(int index, ::int32_t value) {
+  _internal_mutable_entity_page_ids()->Set(index, value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.RoomInfo.entity_page_ids)
+}
+inline void NSPanelConfig_RoomInfo::add_entity_page_ids(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_entity_page_ids()->Add(value);
+  // @@protoc_insertion_point(field_add:NSPanelConfig.RoomInfo.entity_page_ids)
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>& NSPanelConfig_RoomInfo::entity_page_ids() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelConfig.RoomInfo.entity_page_ids)
+  return _internal_entity_page_ids();
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig_RoomInfo::mutable_entity_page_ids()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelConfig.RoomInfo.entity_page_ids)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_entity_page_ids();
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>&
+NSPanelConfig_RoomInfo::_internal_entity_page_ids() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.entity_page_ids_;
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig_RoomInfo::_internal_mutable_entity_page_ids() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.entity_page_ids_;
 }
 
 // -------------------------------------------------------------------
@@ -5524,49 +5810,53 @@ inline void NSPanelConfig::_internal_set_is_us_panel(bool value) {
   _impl_.is_us_panel_ = value;
 }
 
-// repeated int32 room_ids = 15;
-inline int NSPanelConfig::_internal_room_ids_size() const {
-  return _internal_room_ids().size();
+// repeated .NSPanelConfig.RoomInfo room_infos = 15;
+inline int NSPanelConfig::_internal_room_infos_size() const {
+  return _internal_room_infos().size();
 }
-inline int NSPanelConfig::room_ids_size() const {
-  return _internal_room_ids_size();
+inline int NSPanelConfig::room_infos_size() const {
+  return _internal_room_infos_size();
 }
-inline void NSPanelConfig::clear_room_ids() {
+inline void NSPanelConfig::clear_room_infos() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.room_ids_.Clear();
+  _impl_.room_infos_.Clear();
 }
-inline ::int32_t NSPanelConfig::room_ids(int index) const {
-  // @@protoc_insertion_point(field_get:NSPanelConfig.room_ids)
-  return _internal_room_ids().Get(index);
-}
-inline void NSPanelConfig::set_room_ids(int index, ::int32_t value) {
-  _internal_mutable_room_ids()->Set(index, value);
-  // @@protoc_insertion_point(field_set:NSPanelConfig.room_ids)
-}
-inline void NSPanelConfig::add_room_ids(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _internal_mutable_room_ids()->Add(value);
-  // @@protoc_insertion_point(field_add:NSPanelConfig.room_ids)
-}
-inline const ::google::protobuf::RepeatedField<::int32_t>& NSPanelConfig::room_ids() const
+inline ::NSPanelConfig_RoomInfo* NSPanelConfig::mutable_room_infos(int index)
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_list:NSPanelConfig.room_ids)
-  return _internal_room_ids();
+  // @@protoc_insertion_point(field_mutable:NSPanelConfig.room_infos)
+  return _internal_mutable_room_infos()->Mutable(index);
 }
-inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig::mutable_room_ids()
+inline ::google::protobuf::RepeatedPtrField<::NSPanelConfig_RoomInfo>* NSPanelConfig::mutable_room_infos()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_mutable_list:NSPanelConfig.room_ids)
+  // @@protoc_insertion_point(field_mutable_list:NSPanelConfig.room_infos)
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _internal_mutable_room_ids();
+  return _internal_mutable_room_infos();
 }
-inline const ::google::protobuf::RepeatedField<::int32_t>&
-NSPanelConfig::_internal_room_ids() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.room_ids_;
+inline const ::NSPanelConfig_RoomInfo& NSPanelConfig::room_infos(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.room_infos)
+  return _internal_room_infos().Get(index);
 }
-inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig::_internal_mutable_room_ids() {
+inline ::NSPanelConfig_RoomInfo* NSPanelConfig::add_room_infos() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::NSPanelConfig_RoomInfo* _add = _internal_mutable_room_infos()->Add();
+  // @@protoc_insertion_point(field_add:NSPanelConfig.room_infos)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_RoomInfo>& NSPanelConfig::room_infos() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelConfig.room_infos)
+  return _internal_room_infos();
+}
+inline const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_RoomInfo>&
+NSPanelConfig::_internal_room_infos() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return &_impl_.room_ids_;
+  return _impl_.room_infos_;
+}
+inline ::google::protobuf::RepeatedPtrField<::NSPanelConfig_RoomInfo>*
+NSPanelConfig::_internal_mutable_room_infos() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.room_infos_;
 }
 
 // bool reverse_relays = 16;
@@ -7262,6 +7552,51 @@ inline ::int32_t NSPanelRoomStatus::_internal_num_table_lights_on() const {
 inline void NSPanelRoomStatus::_internal_set_num_table_lights_on(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.num_table_lights_on_ = value;
+}
+
+// repeated int32 entity_page_ids = 13;
+inline int NSPanelRoomStatus::_internal_entity_page_ids_size() const {
+  return _internal_entity_page_ids().size();
+}
+inline int NSPanelRoomStatus::entity_page_ids_size() const {
+  return _internal_entity_page_ids_size();
+}
+inline void NSPanelRoomStatus::clear_entity_page_ids() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.entity_page_ids_.Clear();
+}
+inline ::int32_t NSPanelRoomStatus::entity_page_ids(int index) const {
+  // @@protoc_insertion_point(field_get:NSPanelRoomStatus.entity_page_ids)
+  return _internal_entity_page_ids().Get(index);
+}
+inline void NSPanelRoomStatus::set_entity_page_ids(int index, ::int32_t value) {
+  _internal_mutable_entity_page_ids()->Set(index, value);
+  // @@protoc_insertion_point(field_set:NSPanelRoomStatus.entity_page_ids)
+}
+inline void NSPanelRoomStatus::add_entity_page_ids(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_entity_page_ids()->Add(value);
+  // @@protoc_insertion_point(field_add:NSPanelRoomStatus.entity_page_ids)
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>& NSPanelRoomStatus::entity_page_ids() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelRoomStatus.entity_page_ids)
+  return _internal_entity_page_ids();
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelRoomStatus::mutable_entity_page_ids()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelRoomStatus.entity_page_ids)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_entity_page_ids();
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>&
+NSPanelRoomStatus::_internal_entity_page_ids() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.entity_page_ids_;
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelRoomStatus::_internal_mutable_entity_page_ids() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.entity_page_ids_;
 }
 
 // -------------------------------------------------------------------

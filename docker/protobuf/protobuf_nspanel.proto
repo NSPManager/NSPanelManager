@@ -32,7 +32,13 @@ message NSPanelConfig {
     bool clock_us_style = 12;
     bool use_fahrenheit = 13;
     bool is_us_panel = 14;
-    repeated int32 room_ids = 15; // Allowed rooms
+
+    message RoomInfo {
+        int32 room_id = 1;
+        repeated int32 entity_page_ids = 2;
+    }
+    repeated RoomInfo room_infos = 15; // Allowed rooms
+
     bool reverse_relays = 16;
     bool relay1_default_mode = 17;
     bool relay2_default_mode = 18;
@@ -130,6 +136,8 @@ message NSPanelRoomStatus {
     int32 num_table_lights = 10;
     int32 num_ceiling_lights_on = 11;
     int32 num_table_lights_on = 12;
+
+    repeated int32 entity_page_ids = 13;
 }
 
 
