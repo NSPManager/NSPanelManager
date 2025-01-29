@@ -47,10 +47,10 @@ public:
    */
   static void remove_entity(std::shared_ptr<MqttManagerEntity> entity);
 
-  /**
-   * Create and add a room to the manager
+  /*
+   * Load all rooms from the DB and remove any existing room that no longer exist.
    */
-  static void add_room(RoomSettings &config);
+  static void load_rooms();
 
   /**
    * Get a room with the given ID if it existing. Otherwise returns nullptr.
@@ -66,11 +66,6 @@ public:
    * Remove a room with the given ID if found.
    */
   static void remove_room(uint32_t room_id);
-
-  /**
-  Create room protobuf from JSON and send to add_room, simply a callback for IPCHandler for partial updates.
-  */
-  static bool ipc_callback_add_room(nlohmann::json data, nlohmann::json *response);
 
   /**
    * Create and add a light to the manager

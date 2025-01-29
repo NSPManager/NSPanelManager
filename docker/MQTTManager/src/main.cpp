@@ -88,20 +88,6 @@ void publish_time_and_date() {
 }
 
 int main(void) {
-  // Open database forever
-  // database_manager::init();
-
-  // Load config from environment/manager
-  // EntityManager::init();
-
-  // auto room = database_manager::get_by_id<database_manager::Room>(2);
-  // if (room != nullptr) {
-  //   SPDLOG_DEBUG("Got room {}::{}.", room->id, room->friendly_name);
-  // } else {
-  //   SPDLOG_DEBUG("No room with ID 2 exists.");
-  // }
-  MqttManagerConfig::load();
-
   SPDLOG_INFO("Starting MQTTManager.");
 
   std::filesystem::path log_partition_path = "/dev/shm/";
@@ -167,6 +153,18 @@ int main(void) {
   } else {
     SPDLOG_INFO("SQLite3 seems to be compiled with threadsafe mutexes. Setting: {}", sqlite3_threadsafe());
   }
+  database_manager::init();
+
+  // Load config from environment/manager
+  EntityManager::init();
+
+  // auto room = database_manager::get_by_id<database_manager::Room>(2);
+  // if (room != nullptr) {
+  //   SPDLOG_DEBUG("Got room {}::{}.", room->id, room->friendly_name);
+  // } else {
+  //   SPDLOG_DEBUG("No room with ID 2 exists.");
+  // }
+  MqttManagerConfig::load();
 
   // IPCHandler::start();
 

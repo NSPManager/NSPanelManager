@@ -11,6 +11,7 @@
 #include "scenes/scene.hpp"
 #include "web_helper/WebHelper.hpp"
 #include "websocket_server/websocket_server.hpp"
+#include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/stacktrace.hpp>
@@ -30,6 +31,7 @@
 #include <nspanel/nspanel.hpp>
 #include <spdlog/common.h>
 #include <spdlog/spdlog.h>
+#include <sqlite_orm/sqlite_orm.h>
 #include <string>
 #include <sys/types.h>
 #include <vector>
@@ -48,8 +50,9 @@ void EntityManager::init() {
   MQTT_Manager::subscribe("nspanel/mqttmanager/command", &EntityManager::mqtt_topic_callback);
   MQTT_Manager::subscribe("nspanel/+/status", &EntityManager::mqtt_topic_callback);
 
-  IPCHandler::attach_callback("entity_manager/add_room", &EntityManager::ipc_callback_add_room);
   IPCHandler::attach_callback("entity_manager/add_light", &EntityManager::ipc_callback_add_light);
+
+  EntityManager::load_rooms();
 }
 
 void EntityManager::attach_entity_added_listener(void (*listener)(std::shared_ptr<MqttManagerEntity>)) {
@@ -60,16 +63,36 @@ void EntityManager::detach_entity_added_listener(void (*listener)(std::shared_pt
   EntityManager::_entity_added_signal.disconnect(listener);
 }
 
-void EntityManager::add_room(RoomSettings &config) {
-  std::shared_ptr<Room> room = nullptr;
-  try {
-    room = std::shared_ptr<Room>(new Room(config.id()));
-    SPDLOG_INFO("Created room {}::{}.", room->get_id(), room->get_name());
+void EntityManager::load_rooms() {
+  auto room_ids = database_manager::database.select(&database_manager::Room::id, sqlite_orm::from<database_manager::Room>());
+  SPDLOG_INFO("Loading {} rooms.", room_ids.size());
+
+  // Check if any existing room has been removed.
+  {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
-    EntityManager::_rooms.push_back(room);
-  } catch (std::exception &e) {
-    SPDLOG_ERROR("Caught exception: {}", e.what());
-    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+    for (auto it = EntityManager::_rooms.begin(); it != EntityManager::_rooms.end(); it++) {
+      auto room_id_slot = std::find_if(room_ids.begin(), room_ids.end(), [&it](auto id) {
+        return (*it)->get_id() == id;
+      });
+      if (room_id_slot == room_ids.end()) {
+        // Room was not found in list of IDs in the DB, remove the loaded room.
+        SPDLOG_INFO("Room {}::{} was found in config but not in database. Removing room.", (*it)->get_id(), (*it)->get_name());
+        EntityManager::_rooms.erase(it);
+      }
+    }
+  }
+
+  // Cause existing room to reload config or add a new room if it does not exist.
+  for (auto &room_id : room_ids) {
+    auto existing_room = EntityManager::get_room(room_id);
+    if (existing_room != nullptr) [[likely]] {
+      existing_room->reload_config();
+    } else {
+      std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+      auto room = std::shared_ptr<Room>(new Room(room_id));
+      SPDLOG_INFO("Room {}::{} was found in database but not in config. Creating room.", room->get_id(), room->get_name());
+      EntityManager::_rooms.push_back(room);
+    }
   }
 }
 
@@ -106,23 +129,6 @@ void EntityManager::remove_room(uint32_t room_id) {
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
     SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
-  }
-}
-
-bool EntityManager::ipc_callback_add_room(nlohmann::json message, nlohmann::json *response) {
-  try {
-    SPDLOG_DEBUG("Received IPC callback for new room, creating new room.");
-    RoomSettings setting;
-    setting.ParseFromString(std::string(message["data"]));
-    EntityManager::add_room(setting);
-    // TODO: Send update to panels about new room
-    (*response)["status"] = "ok";
-    return true;
-  } catch (std::exception &e) {
-    SPDLOG_ERROR("Caught exception: {}", e.what());
-    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
-    (*response)["status"] = "error";
-    return true;
   }
 }
 
@@ -295,44 +301,6 @@ void EntityManager::post_init_entities() {
           EntityManager::_entities.erase(EntityManager::_entities.begin() + i);
           SPDLOG_DEBUG("Light removed successfully.");
         }
-      }
-    }
-  }
-
-  {
-    // Process any loaded rooms
-    SPDLOG_DEBUG("Updating rooms.");
-    std::list<int> room_ids;
-    for (RoomSettings &config : MqttManagerConfig::room_configs) {
-      room_ids.push_back(config.id());
-      std::shared_ptr<Room> room = EntityManager::get_room(config.id());
-      if (room != nullptr) {
-        SPDLOG_DEBUG("Found existing room {}::{}, will update.", room->get_id(), room->get_name());
-        room->reload_config();
-      } else {
-        EntityManager::add_room(config);
-      }
-    }
-    SPDLOG_DEBUG("Existing rooms updated.");
-
-    // Check for any removed rooms
-    SPDLOG_DEBUG("Checking for removed rooms.");
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
-    for (int i = 0; i < EntityManager::_rooms.size(); i++) {
-      auto rit = EntityManager::_rooms[i];
-      bool exists = false;
-      for (int room_id : room_ids) {
-        if (room_id == rit->get_id()) {
-          exists = true;
-          break;
-        }
-      }
-
-      if (!exists) {
-        SPDLOG_DEBUG("Removing room with id {} as it doesn't exist in config anymore.", rit->get_id());
-        // MqttManagerEntity *room = rit;
-        EntityManager::_rooms.erase(EntityManager::_rooms.begin() + i);
-        SPDLOG_DEBUG("Room removed successfully.");
       }
     }
   }

@@ -38,14 +38,20 @@ MqttManagerSettingsHolder MqttManagerConfig::get_private_settings() {
   return MqttManagerConfig::_private_settings;
 }
 
-void MqttManagerConfig::load() {
-  auto room = database_manager::get_by_id<database_manager::Room>(2);
-  if (room != nullptr) {
-    SPDLOG_DEBUG("Got room {}::{}.", room->id, room->friendly_name);
-  } else {
-    SPDLOG_DEBUG("No room with ID 2 exists.");
+std::string MqttManagerConfig::get_setting_with_default(std::string key, std::string default_value) {
+  try {
+    auto result = database_manager::database.get_all<database_manager::SettingHolder>(sqlite_orm::where(sqlite_orm::c(&database_manager::SettingHolder::name) == key));
+    if (result.size() > 0) [[likely]] {
+      return result[0].value;
+    } else {
+      return default_value;
+    }
+  } catch (std::exception &ex) {
   }
+  return default_value;
+}
 
+void MqttManagerConfig::load() {
   {
     std::lock_guard<std::mutex> mutex_guard(MqttManagerConfig::_config_load_mutex);
 
@@ -64,22 +70,22 @@ void MqttManagerConfig::load() {
       SPDLOG_INFO("Loading MQTT Manager settings.");
       std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_private_settings_mutex);
 
-      MqttManagerConfig::_private_settings.home_assistant_address = database_manager::get_setting_with_default("home_assistant_address", "");
-      MqttManagerConfig::_private_settings.home_assistant_token = database_manager::get_setting_with_default("home_assistant_token", "");
-      MqttManagerConfig::_private_settings.openhab_address = database_manager::get_setting_with_default("openhab_address", "");
-      MqttManagerConfig::_private_settings.openhab_token = database_manager::get_setting_with_default("openhab_token", "");
+      MqttManagerConfig::_private_settings.home_assistant_address = MqttManagerConfig::get_setting_with_default("home_assistant_address", "");
+      MqttManagerConfig::_private_settings.home_assistant_token = MqttManagerConfig::get_setting_with_default("home_assistant_token", "");
+      MqttManagerConfig::_private_settings.openhab_address = MqttManagerConfig::get_setting_with_default("openhab_address", "");
+      MqttManagerConfig::_private_settings.openhab_token = MqttManagerConfig::get_setting_with_default("openhab_token", "");
 
       // Load MQTT settings
-      MqttManagerConfig::_private_settings.mqtt_server = database_manager::get_setting_with_default("mqtt_server", "");
-      std::string mqtt_server = database_manager::get_setting_with_default("mqtt_server", "1883");
+      MqttManagerConfig::_private_settings.mqtt_server = MqttManagerConfig::get_setting_with_default("mqtt_server", "");
+      std::string mqtt_server = MqttManagerConfig::get_setting_with_default("mqtt_server", "1883");
       if (mqtt_server.length() > 0) {
         MqttManagerConfig::_private_settings.mqtt_server_port = std::stoi(mqtt_server);
       } else {
         SPDLOG_ERROR("Failed to get a valid MQTT server port while loading settings.");
       }
 
-      MqttManagerConfig::_private_settings.mqtt_username = database_manager::get_setting_with_default("mqtt_username", "");
-      MqttManagerConfig::_private_settings.mqtt_password = database_manager::get_setting_with_default("mqtt_password", "");
+      MqttManagerConfig::_private_settings.mqtt_username = MqttManagerConfig::get_setting_with_default("mqtt_username", "");
+      MqttManagerConfig::_private_settings.mqtt_password = MqttManagerConfig::get_setting_with_default("mqtt_password", "");
     }
 
     // Load icon mapping

@@ -28,6 +28,7 @@ class CompressorRecipe(ConanFile):
     def configure(self):
         self.options["boost"].without_stacktrace = False
         self.options["boost"].with_stacktrace_backtrace = True
+        self.options["sqlite_orm"].SQLITE_ORM_ENABLE_CXX_17 = True
         # self.options["boost"].without_context = True
         # self.options["boost"].without_coroutine = True
         # self.options["boost"].without_fiber = True

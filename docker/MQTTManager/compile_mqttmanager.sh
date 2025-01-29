@@ -111,8 +111,7 @@ sed -i "s/arch=.*/arch=${conan_target_arch}/g" /root/.conan2/profiles/host
 echo "Conan profile: "
 cat /root/.conan2/profiles/default
 
-export CXXFLAGS="-DSQLITE_DEBUG -UNDEBUG"
-conan install . --build=sqlite* -pr:b default -pr:h host
+conan install . --build=missing -pr:b default -pr:h host
 echo "--> Conan install complete."
 cd build
 source $BUILD_TYPE/generators/conanbuild.sh

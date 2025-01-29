@@ -38,6 +38,8 @@ public:
   static inline std::list<nlohmann::json> nspanel_relay_group_configs;
   static inline std::list<RoomSettings> room_configs;
 
+  static std::string get_setting_with_default(std::string key, std::string default_value);
+
   /*
    * Attach a callback to be called when a new configuration has been added
    */
