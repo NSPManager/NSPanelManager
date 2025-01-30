@@ -52,6 +52,11 @@ public:
    */
   static void load_rooms();
 
+  /*
+   * Load all NSPanels from the DB and remove any existing panel that no longer exist.
+   */
+  static void load_nspanels();
+
   /**
    * Get a room with the given ID if it existing. Otherwise returns nullptr.
    */
@@ -76,11 +81,6 @@ public:
   Create light protobuf from JSON and send to add_light, simply a callback for IPCHandler for partial updates.
   */
   static bool ipc_callback_add_light(nlohmann::json data, nlohmann::json *response);
-
-  /**
-   * Create and add a nspanel to the manager
-   */
-  static void add_nspanel(NSPanelSettings &config);
 
   /**
    * Create and add a scene to the manager
@@ -170,8 +170,8 @@ public:
    */
   static bool websocket_callback(std::string &message, std::string *response_buffer);
 
-  static NSPanel *get_nspanel_by_id(uint id);
-  static NSPanel *get_nspanel_by_mac(std::string mac);
+  static std::shared_ptr<NSPanel> get_nspanel_by_id(uint id);
+  static std::shared_ptr<NSPanel> get_nspanel_by_mac(std::string mac);
 
 private:
   static inline std::vector<std::shared_ptr<MqttManagerEntity>> _entities;
@@ -180,7 +180,7 @@ private:
   static inline std::vector<std::shared_ptr<Room>> _rooms;
   static inline std::mutex _rooms_mutex;
 
-  static inline std::vector<NSPanel *> _nspanels;
+  static inline std::vector<std::shared_ptr<NSPanel>> _nspanels;
   static inline std::mutex _nspanels_mutex;
 
   static inline std::vector<std::shared_ptr<NSPanelRelayGroup>> _nspanel_relay_groups;

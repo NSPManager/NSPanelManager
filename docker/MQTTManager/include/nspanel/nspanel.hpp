@@ -1,10 +1,11 @@
 #ifndef MQTT_MANAGER_NSPANEL
 #define MQTT_MANAGER_NSPANEL
 #include "entity/entity.hpp"
-#include <chrono>
-#include <command_manager/command_manager.hpp>
 #include "protobuf_mqttmanager.pb.h"
+#include <atomic>
+#include <command_manager/command_manager.hpp>
 #include <cstdint>
+#include <database_manager/database_manager.hpp>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <mutex>
 #include <nlohmann/json.hpp>
@@ -61,8 +62,8 @@ private:
 
 class NSPanel {
 public:
-  NSPanel(NSPanelSettings &init_data);
-  void update_config(NSPanelSettings &init_data);
+  NSPanel(uint32_t panel_id);
+  void reload_config();
   ~NSPanel();
   void reset_mqtt_topics();
   /**
@@ -165,8 +166,8 @@ public:
   void set_relay_state(uint8_t relay, bool state);
 
   /**
-  * Handle command from NSPanel
-  */
+   * Handle command from NSPanel
+   */
   void command_callback(NSPanelMQTTManagerCommand &command);
 
   /**
@@ -181,57 +182,15 @@ public:
   bool handle_ipc_request_get_logs(nlohmann::json message, nlohmann::json *response_buffer);
 
 private:
-  /*
-   * When the users changes page or state of the home page changes (entity changes state or such)
-   * this will be called to send out new values to display on the home page of the panel.
-   */
-  void _send_home_page_update();
-
-  /*
-  * When the users changes page or entities page this will be called to send out new values
-  * to be displayed on the entities page.
-  */
-  void _send_entities_page_update();
-
-  /*
-  * Go to the next available room
-  */
-  void _go_to_next_room();
-
-  /*
-  * Go to the previos available room
-  */
-  void _go_to_previous_room();
-
-  /*
-  * Go to the default room of this NSPanel
-  */
-  void _go_to_default_room();
-
-  /*
-  * When a room changes, for example a new entity page is added
-  * call this callback function.
-  */
-  void _room_change_callback(Room *room);
-
-  /*
-  * When a monitored entity is changed, call this function.
-  */
-  void _entity_change_callback(MqttManagerEntity* entity);
-
-  /*
-  * Function to check if it's time to send status update to panel yet
-  * and if so, send the new status update.
-  */
-  void _check_and_send_new_status_update();
+  std::string _get_nspanel_setting_with_default(std::string key, std::string default_value);
 
   // Vars:
-  uint16_t _id;
+  uint32_t _id;
+  database_manager::NSPanel _settings; // Settings loaded from database
+  std::mutex _settings_mutex;          // Mutex to only allow access to _settings for one thread at the time
   std::string _mac;
   std::string _name;
   bool _is_us_panel;
-  bool _is_register_accepted;
-  bool _is_register_denied;
   bool _has_registered_to_manager;
   std::string _ip_address;
   int16_t _rssi;
@@ -243,24 +202,9 @@ private:
   std::string _nspanel_warnings_from_manager;
   std::string _mqtt_register_mac;
 
-  // Pointer to the currently selected room on the panel.
-  std::shared_ptr<Room> _selected_room;
-
-  // What is the index of the currently selected RoomEntitiesPage in the currently _selected_room.
-  uint16_t _selected_entity_page_index = 0;
-
-  // When was the panel last updated with new state data?
-  std::chrono::time_point<std::chrono::system_clock> _last_state_update;
-
-  // Mutex to allow only one thread at the time to access _last_state_update
-  std::mutex _last_state_update_mutex;
-
-  // Indicate wether _last_state_update thread has finished or not. True = finished.
-  std::atomic<bool> _last_state_update_sent;
-
   // MQTT Stuff:
   // Wether or not relay1 should be registered to Home Assistant as a switch or light.
-  NSPanelSettings::RelayRegisterType _relay1_register_type;
+  bool _register_relay1_as_light;
   // The topic to send commands to the relay1
   std::string _mqtt_relay1_command_topic;
   // The topic where relay1 state is published
@@ -268,7 +212,7 @@ private:
   // Wether or not relay1 is on
   bool _relay1_state;
   // Wether or not relay2 should be registered to Home Assistant as a switch or light.
-  NSPanelSettings::RelayRegisterType _relay2_register_type;
+  bool _register_relay2_as_light;
   // The topic to send commands to the relay2
   std::string _mqtt_relay2_command_topic;
   // The topic where relay2 state is published

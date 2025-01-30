@@ -1,4 +1,5 @@
 #include "nspanel.hpp"
+#include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "ipc_handler/ipc_handler.hpp"
@@ -80,7 +81,7 @@ bool NSPanelRelayGroup::contains(int nspanel_id, int relay_num) {
 void NSPanelRelayGroup::turn_on() {
   SPDLOG_DEBUG("Turning on NSPanelRelayGroup {}::{}", this->_id, this->_name);
   for (auto pair : this->_nspanel_relays) {
-    NSPanel *panel = EntityManager::get_nspanel_by_id(pair.first);
+    auto panel = EntityManager::get_nspanel_by_id(pair.first);
     if (panel != nullptr) {
       panel->set_relay_state(pair.second, true);
     } else {
@@ -92,7 +93,7 @@ void NSPanelRelayGroup::turn_on() {
 void NSPanelRelayGroup::turn_off() {
   SPDLOG_DEBUG("Turning off NSPanelRelayGroup {}::{}", this->_id, this->_name);
   for (auto pair : this->_nspanel_relays) {
-    NSPanel *panel = EntityManager::get_nspanel_by_id(pair.first);
+    auto panel = EntityManager::get_nspanel_by_id(pair.first);
     if (panel != nullptr) {
       panel->set_relay_state(pair.second, false);
     } else {
@@ -101,13 +102,13 @@ void NSPanelRelayGroup::turn_off() {
   }
 }
 
-NSPanel::NSPanel(NSPanelSettings &init_data) {
+NSPanel::NSPanel(uint32_t id) {
   // Assume panel to be offline until proven otherwise
   this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE;
-  this->_last_state_update_sent = true;
   // If this panel is just a panel in waiting (ie. not accepted the request yet) it won't have an id.
   this->_has_registered_to_manager = false;
-  this->update_config(init_data);
+  this->_id = id;
+  this->reload_config();
 
   CommandManager::attach_callback(boost::bind(&NSPanel::command_callback, this, _1));
 
@@ -120,135 +121,112 @@ NSPanel::NSPanel(NSPanelSettings &init_data) {
   IPCHandler::attach_callback(fmt::format("nspanel/{}/logs", this->_id), boost::bind(&NSPanel::handle_ipc_request_get_logs, this, _1, _2));
 }
 
-void NSPanel::update_config(NSPanelSettings &settings) {
-  SPDLOG_TRACE("NSPanel {}::{} received config update.", this->_id, this->_name);
+void NSPanel::reload_config() {
+  try {
+    auto panel_settings = database_manager::database.get<database_manager::NSPanel>(this->_id);
+    std::lock_guard<std::mutex> lock_guard(this->_settings_mutex);
 
-  // TODO: Remove all "if mac or mac_address" (and similar) and decide on ONE name for all things.
-  if (settings.has_id()) {
-    this->_id = settings.id();
-    this->_has_registered_to_manager = true; // Data contained an ID which it got from the manager config.
-  } else {
-    this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
-  }
+    bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
 
-  bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
-  if (this->_name.compare(settings.name()) != 0) {
-    rebuilt_mqtt = true;
-    if (this->_name.size() > 0) {
-      this->reboot();
+    this->_has_registered_to_manager = true; // We managed to get the object in above statement and did not throw, ie. has been registered in manager and has an ID in DB.
+    this->_mac = panel_settings.mac_address;
+    this->_is_us_panel = this->_get_nspanel_setting_with_default("is_us_panel", "False").compare("True") == 0;
+
+    if (this->_name.compare(panel_settings.friendly_name) != 0) {
+      this->_name = panel_settings.friendly_name;
+      rebuilt_mqtt = true;
     }
-    this->_name = settings.name();
-  }
+    if (this->_register_relay1_as_light != panel_settings.register_relay1_as_light) {
+      rebuilt_mqtt = true;
+      this->_register_relay1_as_light = panel_settings.register_relay1_as_light;
+    }
+    if (this->_register_relay2_as_light != panel_settings.register_relay2_as_light) {
+      rebuilt_mqtt = true;
+      this->_register_relay2_as_light = panel_settings.register_relay2_as_light;
+    }
 
-  this->_mac = settings.mac_address();
-  this->_ip_address = settings.ip_address();
-  this->_is_us_panel = settings.is_us_panel();
-  this->_relay1_register_type = settings.relay1_register_type();
-  this->_relay2_register_type = settings.relay2_register_type();
+    if (this->_state == MQTT_MANAGER_NSPANEL_STATE::OFFLINE || this->_state == MQTT_MANAGER_NSPANEL_STATE::UNKNOWN) {
+      this->_rssi = 0;
+      this->_heap_used_pct = 0;
+      this->_nspanel_warnings.clear();
+      this->_temperature = 0;
+      this->_update_progress = 0;
+    }
 
-  if (this->_state == MQTT_MANAGER_NSPANEL_STATE::OFFLINE || this->_state == MQTT_MANAGER_NSPANEL_STATE::UNKNOWN) {
-    this->_rssi = 0;
-    this->_heap_used_pct = 0;
-    this->_nspanel_warnings.clear();
-    this->_temperature = 0;
-    this->_update_progress = 0;
-  }
+    // Last thing to do, check if the panel as actually accepted into our manager.
+    if (panel_settings.denied) {
+      SPDLOG_INFO("Loaded denied NSPanel {}::{}.", this->_id, this->_name);
+      this->_state = MQTT_MANAGER_NSPANEL_STATE::DENIED;
+      rebuilt_mqtt = false;
+    }
 
-  // Last thing to do, check if the panel as actually accepted into our manager.
-  if (settings.denied()) {
-    SPDLOG_INFO("Loaded denied NSPanel {}::{}.", this->_id, this->_name);
-    this->_is_register_denied = true;
-    this->_is_register_accepted = false;
-    this->_state = MQTT_MANAGER_NSPANEL_STATE::DENIED;
-    rebuilt_mqtt = false;
-  }
+    if (panel_settings.accepted) {
+      SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
+      this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+      rebuilt_mqtt = true;
+    }
 
-  if (settings.accepted() == true) {
-    SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
-    this->_is_register_denied = false;
-    this->_is_register_accepted = true;
-    this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
-    rebuilt_mqtt = true;
-  }
+    if (!panel_settings.denied && !panel_settings.accepted) {
+      // No decission has been made on wether ot accept or deny panel. It is therefore awaiting_accept
+      this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
+      rebuilt_mqtt = true;
+    }
 
-  if (!this->_is_register_denied && !this->_is_register_accepted) {
-    // No decission has been made on wether ot accept or deny panel. It is therefore awaiting_accept
-    this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
-    rebuilt_mqtt = true;
-  }
+    if (rebuilt_mqtt) {
+      SPDLOG_DEBUG("Building MQTT topics for NSPanel {}::{}", this->_id, this->_name);
+      this->reset_mqtt_topics();
+      // Convert stored MAC to MAC used in MQTT, ex. AA:AA:AA:BB:BB:BB to aa_aa_aa_bb_bb_bb
+      std::string mqtt_register_mac = this->_mac;
+      std::replace(mqtt_register_mac.begin(), mqtt_register_mac.end(), ':', '_');
+      std::transform(mqtt_register_mac.begin(), mqtt_register_mac.end(), mqtt_register_mac.begin(), [](unsigned char c) {
+        return std::tolower(c);
+      });
+      this->_mqtt_register_mac = mqtt_register_mac;
 
-  if (settings.has_id()) {
+      this->_mqtt_config_topic = fmt::format("nspanel/{}/config", this->_mac);
+      this->_mqtt_log_topic = fmt::format("nspanel/{}/log", this->_name); // TODO: Remove as this is the old log topic. Use the new based on MAC-address instead.
+      this->_mqtt_command_topic = fmt::format("nspanel/{}/command", this->_mac);
+      this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
+      this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
+      this->_mqtt_light_relay1_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay1/config", mqtt_register_mac);
+      this->_mqtt_switch_relay2_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay2/config", mqtt_register_mac);
+      this->_mqtt_light_relay2_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay2/config", mqtt_register_mac);
+      this->_mqtt_switch_screen_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_screen/config", mqtt_register_mac);
+      this->_mqtt_number_screen_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screen_brightness/config", mqtt_register_mac);
+      this->_mqtt_number_screensaver_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screensaver_brightness/config", mqtt_register_mac);
+      this->_mqtt_select_screensaver_topic = fmt::format("homeassistant/select/nspanelmanager/{}_screensaver_select/config", mqtt_register_mac);
+      this->_mqtt_relay1_command_topic = fmt::format("nspanel/{}/r1_cmd", this->_mac);
+      this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/r1_state", this->_mac);
+      this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/r2_cmd", this->_mac);
+      this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/r2_state", this->_mac);
+      this->_mqtt_status_topic = fmt::format("nspanel/{}/state", this->_mac);
+      this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_mac);
+      this->_mqtt_temperature_topic = fmt::format("nspanel/{}/temperature", this->_mac);
+
+      this->_mqtt_topic_home_page_status = fmt::format("nspanel/{}/home_page", this->_mac);
+      this->_mqtt_topic_home_page_all_rooms_status = fmt::format("nspanel/{}/home_page_all", this->_mac);
+      this->_mqtt_topic_room_entities_page_status = fmt::format("nspanel/{}/entities_page", this->_mac);
+    }
+
+    if (this->_has_registered_to_manager && !panel_settings.denied && panel_settings.accepted) {
+      // If this NSPanel is registered to manager, listen to state topics.
+      SPDLOG_INFO("Subscribing to NSPanel MQTT topics.");
+      MQTT_Manager::subscribe(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+      MQTT_Manager::subscribe(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+      MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2)); // TODO: Remove me and use only topic based on MAC-address instead
+      MQTT_Manager::subscribe(fmt::format("nspanel/{}/log", this->_mac), boost::bind(&NSPanel::mqtt_log_callback, this, _1, _2));
+      MQTT_Manager::subscribe(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+      MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+      MqttManagerConfig::attach_config_loaded_listener(boost::bind(&NSPanel::send_config, this));
+      this->register_to_home_assistant();
+      this->send_config();
+    }
+
     SPDLOG_DEBUG("Loaded NSPanel {}::{}, type: {}.", this->_id, this->_name, this->_is_us_panel ? "US" : "EU");
-  } else {
-    SPDLOG_DEBUG("Loaded NSPanel {} with no ID.", this->_name, this->_is_us_panel ? "US" : "EU");
+  } catch (std::system_error &ex) {
+    SPDLOG_ERROR("Failed to get config for NSPanel {} from database.", this->_id);
   }
-
-  if (rebuilt_mqtt) {
-    SPDLOG_DEBUG("Building MQTT topics for NSPanel {}::{}", this->_id, this->_name);
-    this->reset_mqtt_topics();
-    // Convert stored MAC to MAC used in MQTT, ex. AA:AA:AA:BB:BB:BB to aa_aa_aa_bb_bb_bb
-    std::string mqtt_register_mac = this->_mac;
-    std::replace(mqtt_register_mac.begin(), mqtt_register_mac.end(), ':', '_');
-    std::transform(mqtt_register_mac.begin(), mqtt_register_mac.end(), mqtt_register_mac.begin(), [](unsigned char c) {
-      return std::tolower(c);
-    });
-    this->_mqtt_register_mac = mqtt_register_mac;
-
-    this->_mqtt_config_topic = fmt::format("nspanel/{}/config", this->_mac);
-    this->_mqtt_log_topic = fmt::format("nspanel/{}/log", this->_name); // TODO: Remove as this is the old log topic. Use the new based on MAC-address instead.
-    this->_mqtt_command_topic = fmt::format("nspanel/{}/command", this->_mac);
-    this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
-    this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
-    this->_mqtt_light_relay1_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay1/config", mqtt_register_mac);
-    this->_mqtt_switch_relay2_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay2/config", mqtt_register_mac);
-    this->_mqtt_light_relay2_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay2/config", mqtt_register_mac);
-    this->_mqtt_switch_screen_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_screen/config", mqtt_register_mac);
-    this->_mqtt_number_screen_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screen_brightness/config", mqtt_register_mac);
-    this->_mqtt_number_screensaver_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screensaver_brightness/config", mqtt_register_mac);
-    this->_mqtt_select_screensaver_topic = fmt::format("homeassistant/select/nspanelmanager/{}_screensaver_select/config", mqtt_register_mac);
-    this->_mqtt_relay1_command_topic = fmt::format("nspanel/{}/r1_cmd", this->_mac);
-    this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/r1_state", this->_mac);
-    this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/r2_cmd", this->_mac);
-    this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/r2_state", this->_mac);
-    this->_mqtt_status_topic = fmt::format("nspanel/{}/state", this->_mac);
-    this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_mac);
-    this->_mqtt_temperature_topic = fmt::format("nspanel/{}/temperature", this->_mac);
-
-    this->_mqtt_topic_home_page_status = fmt::format("nspanel/{}/home_page", this->_mac);
-    this->_mqtt_topic_home_page_all_rooms_status = fmt::format("nspanel/{}/home_page_all", this->_mac);
-    this->_mqtt_topic_room_entities_page_status = fmt::format("nspanel/{}/entities_page", this->_mac);
-  }
-
-  if (this->_has_registered_to_manager && !this->_is_register_denied && this->_is_register_accepted) {
-    // If this NSPanel is registered to manager, listen to state topics.
-    SPDLOG_INFO("Subscribing to NSPanel MQTT topics.");
-    MQTT_Manager::subscribe(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
-    MQTT_Manager::subscribe(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
-    MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2)); // TODO: Remove me and use only topic based on MAC-address instead
-    MQTT_Manager::subscribe(fmt::format("nspanel/{}/log", this->_mac), boost::bind(&NSPanel::mqtt_log_callback, this, _1, _2));
-    MQTT_Manager::subscribe(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
-    MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
-    MqttManagerConfig::attach_config_loaded_listener(boost::bind(&NSPanel::send_config, this));
-    this->register_to_home_assistant();
-    this->send_config();
-  }
-
-  this->_go_to_default_room();
-
-  if (this->_selected_room != nullptr) {
-    this->_selected_room->attach_room_changed_callback(boost::bind(&NSPanel::_room_change_callback, this, _1));
-    // Manually trigger entity subscription as room is already fully loaded.
-    this->_room_change_callback(this->_selected_room.get());
-
-    // Manually trigger update of MQTT states
-    {
-      std::lock_guard<std::mutex> lock_guard(this->_last_state_update_mutex);
-      this->_last_state_update = std::chrono::system_clock::now();
-      std::thread(&NSPanel::_check_and_send_new_status_update, this).detach();
-    }
-  } else {
-    SPDLOG_ERROR("NSPanel {}::{} failed to find default room, not attaching room change callback.", this->_id, this->_name);
-  }
+  SPDLOG_TRACE("NSPanel {}::{} received config update.", this->_id, this->_name);
 
   // Config changed, send "reload" command to web interface
   this->send_websocket_update();
@@ -817,14 +795,12 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 }
 
 void NSPanel::accept_register_request() {
-  this->_is_register_accepted = true;
-  this->_is_register_denied = false;
+  this->reload_config();
   this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
 }
 
 void NSPanel::deny_register_request() {
-  this->_is_register_accepted = false;
-  this->_is_register_denied = true;
+  this->reload_config();
   this->_state = MQTT_MANAGER_NSPANEL_STATE::DENIED;
 
   nlohmann::json data;
@@ -846,39 +822,21 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
     std::string payload_data = register_request_payload.dump();
     if (WebHelper::perform_post_request(&url, &response_data, nullptr, &payload_data)) {
       SPDLOG_INFO("Panel registration OK. Updating internal data.");
-      this->_has_registered_to_manager = true;
+      this->reload_config();
+      // Everything was successfull, send registration accept to panel:
+      nlohmann::json response;
+      response["command"] = "register_accept";
+      response["address"] = MqttManagerConfig::get_settings().manager_address();
+      response["port"] = MqttManagerConfig::get_settings().manager_port();
+      response["config_topic"] = this->_mqtt_config_topic;
+      std::string reply_topic = fmt::format("nspanel/{}/command", std::string(register_request_payload.at("friendly_name")));
+      MQTT_Manager::publish(reply_topic, response.dump());
+
+      SPDLOG_TRACE("Sending websocket update for NSPanel {}::{} state change.", this->_id, this->_name);
+      this->send_websocket_update();
       nlohmann::json data = nlohmann::json::parse(response_data);
-      if (data.contains("denied") && data.at("denied") == false && data.contains("accepted") && data.at("accepted") == true) {
-        this->_is_register_denied = false;
-        this->_is_register_accepted = true;
-        // this->update_config(data); // Returned data from registration request is the same as data from the global /api/get_mqtt_manager_config
-        this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
-        this->_id = data["nspanel_id"];
-        if (this->_name.size() == 0) {
-          this->_name = register_request_payload["friendly_name"];
-          this->_mac = register_request_payload["mac_origin"];
-        }
-        this->register_to_home_assistant();
-        SPDLOG_INFO("Panel registration completed. Sending accept command to panel.");
 
-        // Everything was successfull, send registration accept to panel:
-        nlohmann::json response;
-        response["command"] = "register_accept";
-        response["address"] = MqttManagerConfig::get_settings().manager_address();
-        response["port"] = MqttManagerConfig::get_settings().manager_port();
-        response["config_topic"] = this->_mqtt_config_topic;
-        std::string reply_topic = fmt::format("nspanel/{}/command", std::string(register_request_payload.at("friendly_name")));
-        MQTT_Manager::publish(reply_topic, response.dump());
-
-        SPDLOG_TRACE("Sending websocket update for NSPanel {}::{} state change.", this->_id, this->_name);
-        this->send_websocket_update();
-        return true;
-      } else {
-        SPDLOG_ERROR("Malformed register request data. Missing 'friendly_name'.");
-      }
     } else {
-      this->_is_register_denied = true;
-      this->_is_register_accepted = false;
       SPDLOG_INFO("NSPanel {}::{} has yet to be accepted. Will not answer request.", this->_id, this->_name);
     }
   } catch (const std::exception &e) {
@@ -920,7 +878,7 @@ void NSPanel::register_to_home_assistant() {
   MQTT_Manager::publish(this->_mqtt_sensor_temperature_topic, temperature_sensor_data_str, true);
 
   // Register relay1
-  if (this->_relay1_register_type == NSPanelSettings::RelayRegisterType::NSPanelSettings_RelayRegisterType_SWITCH) {
+  if (this->_register_relay1_as_light == NSPanelSettings::RelayRegisterType::NSPanelSettings_RelayRegisterType_SWITCH) {
     nlohmann::json relay1_data = nlohmann::json(base_json);
     relay1_data["device_class"] = "switch";
     relay1_data["name"] = "Relay 1";
@@ -952,7 +910,7 @@ void NSPanel::register_to_home_assistant() {
   }
 
   // Register relay2
-  if (this->_relay2_register_type == NSPanelSettings::RelayRegisterType::NSPanelSettings_RelayRegisterType_SWITCH) {
+  if (this->_register_relay2_as_light == NSPanelSettings::RelayRegisterType::NSPanelSettings_RelayRegisterType_SWITCH) {
     nlohmann::json relay2_data = nlohmann::json(base_json);
     relay2_data["device_class"] = "switch";
     relay2_data["name"] = "Relay 2";
@@ -1046,49 +1004,6 @@ void NSPanel::set_relay_state(uint8_t relay, bool state) {
 }
 
 void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
-  if (command.has_next_entities_page()) {
-    SPDLOG_DEBUG("NSPanel {}::{} going to next entities page.", this->_id, this->_name);
-    if (command.next_entities_page().nspanel_id() != this->_id) {
-      return;
-    }
-
-    if (this->_selected_entity_page_index + 1 < this->_selected_room->get_number_of_entity_pages()) {
-      this->_selected_entity_page_index++;
-    } else {
-      // Try to find the next room that has available entity page(s). If found, break loop.
-      for (int i = 0; i < UINT16_MAX; i++) {
-        this->_go_to_next_room();
-        if (this->_selected_room != nullptr) {
-          if (this->_selected_room->get_number_of_entity_pages() > 0) {
-            this->_selected_entity_page_index = 0; // Start from beginning of pages as we went to next room and not previous.
-            break;
-          }
-        }
-      }
-    }
-    this->_send_entities_page_update();
-  } else if (command.has_previous_entities_page()) {
-    SPDLOG_DEBUG("NSPanel {}::{} going to previous entities page.", this->_id, this->_name);
-    if (command.previous_entities_page().nspanel_id() != this->_id) {
-      return;
-    }
-
-    if (this->_selected_entity_page_index > 0) {
-      this->_selected_entity_page_index--;
-    } else {
-      // We are at index 0 and want to go to previos, go to previos room and start at the last index.
-      for (int i = 0; i < UINT16_MAX; i++) {
-        this->_go_to_previous_room();
-        if (this->_selected_room != nullptr) {
-          if (this->_selected_room->get_number_of_entity_pages() > 0) {
-            this->_selected_entity_page_index = this->_selected_room->get_number_of_entity_pages() - 1; // Start from beginning of pages as we went to next room and not previous.
-            break;
-          }
-        }
-      }
-    }
-    this->_send_entities_page_update();
-  }
 }
 
 bool NSPanel::handle_ipc_request_status(nlohmann::json request, nlohmann::json *response_buffer) {
@@ -1193,271 +1108,15 @@ bool NSPanel::handle_ipc_request_get_logs(nlohmann::json request, nlohmann::json
   return true;
 }
 
-void NSPanel::_send_home_page_update() {
-  // if(this->_selected_room != nullptr) {
-  //     NSPanelRoomStatus proto;
-  //     // Update default room topic
-  //     if(this->_selected_room->get_protobuf_room_status(&proto)) {
-  //         std::string serialized_result = proto.SerializeAsString();
-  //         if(serialized_result.size() > 0) {
-  //             MQTT_Manager::publish(this->_mqtt_topic_home_page_status, serialized_result, true);
-  //         }
-  //     } else {
-  //         SPDLOG_ERROR("Failed to send out room status update for room {}::{} for panel {}::{}.", this->_selected_room->get_id(), this->_selected_room->get_name(), this->_id, this->_name);
-  //     }
-  // } else {
-  //     SPDLOG_ERROR("Tried to send out room state update for NSPanel {}::{} but no room has been selected.", this->_id, this->_name);
-  // }
-
-  // // Update all rooms topics:
-  // NSPanelRoomStatus all_status;
-  // all_status.set_id(-1);
-  // all_status.set_name("ALL");
-
-  // std::vector<std::shared_ptr<Light>> lights = EntityManager::get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
-  // // Remove any light not controlled by main page.
-  // // TODO: Merge this algorithm with the one from room.cpp (get_protobuf_room_status)
-  // lights.erase(std::remove_if(lights.begin(), lights.end(), [](std::shared_ptr<Light> light) {
-  //     return !light->get_controlled_from_main_page();
-  // }), lights.end());
-
-  // bool any_lights_on = false;
-  // // Find if any light is on
-  // for(auto &light : lights) {
-  //     if(light->get_state()) {
-  //         any_lights_on = true;
-  //         break;
-  //     }
-  // }
-
-  // if(any_lights_on) {
-  //     // Remove any light that is off
-  //     lights.erase(std::remove_if(lights.begin(), lights.end(), [](std::shared_ptr<Light> light) {
-  //         return !light->get_state();
-  //     }), lights.end());
-  // }
-
-  // // Calculate average light level
-  // uint64_t total_light_level_all = 0;
-  // uint64_t total_light_level_ceiling = 0;
-  // uint64_t total_light_level_table = 0;
-  // uint64_t total_kelvin_level_all = 0;
-  // uint64_t total_kelvin_ceiling = 0;
-  // uint64_t total_kelvin_table = 0;
-  // uint16_t num_lights_total = 0;
-  // uint16_t num_lights_ceiling = 0;
-  // uint16_t num_lights_ceiling_on = 0;
-  // uint16_t num_lights_table = 0;
-  // uint16_t num_lights_table_on = 0;
-
-  // for(auto &light : lights) {
-  //     if ((any_lights_on && light->get_state()) || !any_lights_on) {
-  //         total_light_level_all += light->get_brightness();
-  //         total_kelvin_level_all += light->get_color_temperature();
-  //         num_lights_total++;
-  //     }
-
-  //     if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE) {
-  //         num_lights_table++;
-  //         if (light->get_state()) {
-  //             total_light_level_table += light->get_brightness();
-  //             total_kelvin_table += light->get_color_temperature();
-  //             num_lights_table_on++;
-  //         }
-  //     } else if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING) {
-  //         num_lights_ceiling++;
-  //         if (light->get_state()) {
-  //             total_light_level_ceiling += light->get_brightness();
-  //             total_kelvin_ceiling += light->get_color_temperature();
-  //             num_lights_ceiling_on++;
-  //         }
-  //     }
-  // }
-
-  // // Update result if a ceiling or table light is found.
-  // all_status.set_num_table_lights(num_lights_table);
-  // all_status.set_num_ceiling_lights(num_lights_ceiling);
-  // all_status.set_num_table_lights_on(num_lights_table_on);
-  // all_status.set_num_ceiling_lights_on(num_lights_ceiling_on);
-
-  // if (num_lights_total > 0) {
-  //     float average_kelvin = (float)total_kelvin_level_all / num_lights_total;
-  //     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-  //     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-  //     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
-  //         kelvin_pct = 100 - kelvin_pct;
-  //     }
-
-  //     all_status.set_average_dim_level(total_light_level_all / num_lights_total);
-  //     all_status.set_average_color_temperature(kelvin_pct);
-  // } else {
-  //     all_status.set_average_dim_level(0);
-  //     all_status.set_average_color_temperature(0);
-  // }
-
-  // if (num_lights_table_on > 0) {
-  //     float average_kelvin = (float)total_kelvin_table / num_lights_table_on;
-  //     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-  //     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-  //     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
-  //         kelvin_pct = 100 - kelvin_pct;
-  //     }
-
-  //     all_status.set_table_lights_dim_level(total_light_level_table / num_lights_table_on);
-  //     all_status.set_table_lights_color_temperature_value(kelvin_pct);
-  // } else {
-  //     SPDLOG_TRACE("No table lights found, setting value to 0.");
-  //     all_status.set_table_lights_dim_level(0);
-  //     all_status.set_table_lights_color_temperature_value(0);
-  // }
-
-  // if (num_lights_ceiling_on > 0) {
-  //     float average_kelvin = (float)total_kelvin_ceiling / num_lights_ceiling_on;
-  //     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-  //     uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-  //     if(MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
-  //         kelvin_pct = 100 - kelvin_pct;
-  //     }
-
-  //     all_status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling_on);
-  //     all_status.set_ceiling_lights_color_temperature_value(kelvin_pct);
-  // } else {
-  //     SPDLOG_TRACE("No ceiling lights found, setting value to 0.");
-  //     all_status.set_ceiling_lights_dim_level(0);
-  //     all_status.set_ceiling_lights_color_temperature_value(0);
-  // }
-
-  // std::string serialized_result = all_status.SerializeAsString();
-  // if(serialized_result.size() > 0) {
-  //     MQTT_Manager::publish(this->_mqtt_topic_home_page_all_rooms_status, serialized_result, true);
-  // } else {
-  //     SPDLOG_ERROR("Tried to send out all_rooms state update to NSPanel {}::{} but failed to serialize the result.");
-  // }
-}
-
-void NSPanel::_send_entities_page_update() {
-  // if(this->_selected_room != nullptr) {
-  //     SPDLOG_DEBUG("NSPanel {}::{}, sending out new entities page for pagge index: {}", this->_id, this->_name, this->_selected_entity_page_index);
-  //     NSPanelRoomEntitiesPage proto;
-  //     if(this->_selected_room->get_protobuf_room_entity_page(this->_selected_entity_page_index, &proto)) {
-  //         std::string serialized_result = proto.SerializeAsString();
-  //         if(serialized_result.size() > 0) {
-  //             MQTT_Manager::publish(this->_mqtt_topic_room_entities_page_status, serialized_result, true);
-  //         }
-  //     } else {
-  //         SPDLOG_ERROR("Failed to send out room status update for room {}::{} for panel {}::{}.", this->_selected_room->get_id(), this->_selected_room->get_name(), this->_id, this->_name);
-  //     }
-  // } else {
-  //     SPDLOG_ERROR("Tried to send out room state update for NSPanel {}::{} but no room has been selected.", this->_id, this->_name);
-  // }
-}
-
-void NSPanel::_go_to_next_room() {
-  std::vector<std::shared_ptr<Room>> all_rooms = EntityManager::get_all_rooms();
-  auto room_it = std::find_if(all_rooms.begin(), all_rooms.end(), [this](std::shared_ptr<Room> room) {
-    return this->_selected_room->get_id() == room->get_id();
-  });
-
-  if (room_it == all_rooms.end()) {
-    // Selected room not found, go to default room.
-    this->_go_to_default_room();
-  } else [[likely]] {
-    room_it++;
-    if (room_it == all_rooms.end()) {
-      // Reached end of list of rooms, start from beginning.
-      this->_selected_room = all_rooms[0];
-    } else [[likely]] {
-      this->_selected_room = (*room_it);
+std::string NSPanel::_get_nspanel_setting_with_default(std::string key, std::string default_value) {
+  try {
+    auto result = database_manager::database.get_all<database_manager::NSPanelSettingHolder>(sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelSettingHolder::name) == key) and sqlite_orm::c(&database_manager::NSPanelSettingHolder::nspanel_id) == this->_id);
+    if (result.size() > 0) [[likely]] {
+      return result[0].value;
+    } else {
+      return default_value;
     }
+  } catch (std::exception &ex) {
   }
-}
-
-void NSPanel::_go_to_previous_room() {
-  std::vector<std::shared_ptr<Room>> all_rooms = EntityManager::get_all_rooms();
-  auto room_it = std::find_if(all_rooms.begin(), all_rooms.end(), [this](std::shared_ptr<Room> room) {
-    return this->_selected_room->get_id() == room->get_id();
-  });
-
-  if (room_it == all_rooms.end()) {
-    // Selected room not found, go to default room.
-    this->_go_to_default_room();
-  } else [[likely]] {
-    if (room_it == all_rooms.begin()) {
-      // Reached end of list of rooms, start from beginning.
-      this->_selected_room = all_rooms[all_rooms.size() - 1];
-    } else [[likely]] {
-      room_it--;
-      this->_selected_room = (*room_it);
-    }
-  }
-}
-
-void NSPanel::_go_to_default_room() {
-  auto settings_it = std::find_if(MqttManagerConfig::nspanel_configs.begin(), MqttManagerConfig::nspanel_configs.end(), [this](NSPanelSettings s) {
-    return s.id() == this->_id;
-  });
-  if (settings_it != MqttManagerConfig::nspanel_configs.end()) {
-    uint32_t default_room_id = settings_it->default_room();
-    SPDLOG_DEBUG("NSPanel {}::{} trying to navigate to default room ID {}.", this->_id, this->_name, default_room_id);
-
-    std::vector<std::shared_ptr<Room>> all_rooms = EntityManager::get_all_rooms();
-    auto room_it = std::find_if(all_rooms.begin(), all_rooms.end(), [default_room_id](std::shared_ptr<Room> room) {
-      return room->get_id() == default_room_id;
-    });
-
-    if (room_it == all_rooms.end()) {
-      // Selected room not found, go to default room.
-      SPDLOG_ERROR("Couldn't find default room with ID {} for NSPanel {}::{}. Will go to first room in list.", default_room_id, this->_id, this->_name);
-      if (all_rooms.size() > 0) [[likely]] {
-        this->_selected_room = (*room_it);
-      } else {
-        SPDLOG_ERROR("No rooms loaded! Setting nullptr!");
-        this->_selected_room = nullptr;
-      }
-    } else [[likely]] {
-      this->_selected_room = (*room_it);
-    }
-  } else {
-    SPDLOG_ERROR("Couldn't find config for NSPanel {}::{}.", this->_id, this->_name);
-  }
-}
-
-void NSPanel::_room_change_callback(Room *room) {
-  std::vector<std::shared_ptr<MqttManagerEntity>> entities = this->_selected_room->get_all_entities();
-  SPDLOG_DEBUG("Attaching entity change callback to all ({}) entities in currently selected room.", entities.size());
-  for (auto &entity : entities) {
-    SPDLOG_DEBUG("NSPanel {}::{} attaching change callback to entity with ID {}, type: {}.", this->_id, this->_name, entity->get_id(), (int)entity->get_type());
-    entity->attach_entity_changed_callback(boost::bind(&NSPanel::_entity_change_callback, this, _1));
-  }
-}
-
-void NSPanel::_entity_change_callback(MqttManagerEntity *entity) {
-  // TODO: Is Mutex needed?
-  {
-    std::lock_guard<std::mutex> lock_guard(this->_last_state_update_mutex);
-    NSPanel::_last_state_update = std::chrono::system_clock::now();
-    if (this->_last_state_update_sent) {
-      // Thread is not running, start it.
-      SPDLOG_DEBUG("NSPanel send state update thread is not running, starting it.");
-      this->_last_state_update_sent = false;
-      std::thread(&NSPanel::_check_and_send_new_status_update, this).detach();
-    }
-  }
-}
-
-void NSPanel::_check_and_send_new_status_update() {
-  while (true) {
-    {
-      std::lock_guard<std::mutex> lock_guard(this->_last_state_update_mutex);
-      std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-      if (now >= this->_last_state_update + std::chrono::milliseconds(100)) {
-        SPDLOG_DEBUG("NSPanel {}::{} past update timeout threshold, sending new protobuf state.", this->_id, this->_name);
-        this->_send_home_page_update();
-        this->_send_entities_page_update();
-        this->_last_state_update_sent = true;
-        break; // We have sent state update, exit this thread.
-      }
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
-  }
+  return default_value;
 }
