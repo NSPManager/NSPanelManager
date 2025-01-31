@@ -23,12 +23,12 @@ enum MQTT_MANAGER_LIGHT_TYPE {
 
 class Light : public MqttManagerEntity {
 public:
-  Light(LightSettings &config);
+  Light(uint32_t light_id);
 
   /**
-   * Update the config of the light to reflect the new settings
+   * Update the config of the light from DB.
    */
-  void update_config(LightSettings &config);
+  void reload_config();
 
   /**
    * Get light type (ceiling or table)

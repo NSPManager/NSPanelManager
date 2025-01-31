@@ -57,6 +57,11 @@ public:
    */
   static void load_nspanels();
 
+  /*
+   * Load all lights from the DB and remove any existing light that no longer exist.
+   */
+  static void load_lights();
+
   /**
    * Get a room with the given ID if it existing. Otherwise returns nullptr.
    */
@@ -66,21 +71,6 @@ public:
    * Get all currently registered rooms
    */
   static std::vector<std::shared_ptr<Room>> get_all_rooms();
-
-  /**
-   * Remove a room with the given ID if found.
-   */
-  static void remove_room(uint32_t room_id);
-
-  /**
-   * Create and add a light to the manager
-   */
-  static void add_light(LightSettings &config);
-
-  /**
-  Create light protobuf from JSON and send to add_light, simply a callback for IPCHandler for partial updates.
-  */
-  static bool ipc_callback_add_light(nlohmann::json data, nlohmann::json *response);
 
   /**
    * Create and add a scene to the manager

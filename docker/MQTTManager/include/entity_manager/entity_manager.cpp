@@ -1,6 +1,7 @@
 #include "entity/entity.hpp"
 #include "ipc_handler/ipc_handler.hpp"
 #include "light/home_assistant_light.hpp"
+#include "light/light.hpp"
 #include "light/openhab_light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "protobuf_general.pb.h"
@@ -50,10 +51,9 @@ void EntityManager::init() {
   MQTT_Manager::subscribe("nspanel/mqttmanager/command", &EntityManager::mqtt_topic_callback);
   MQTT_Manager::subscribe("nspanel/+/status", &EntityManager::mqtt_topic_callback);
 
-  IPCHandler::attach_callback("entity_manager/add_light", &EntityManager::ipc_callback_add_light);
-
   EntityManager::load_rooms();
   EntityManager::load_nspanels();
+  EntityManager::load_lights();
 }
 
 void EntityManager::attach_entity_added_listener(void (*listener)(std::shared_ptr<MqttManagerEntity>)) {
@@ -130,6 +130,54 @@ void EntityManager::load_nspanels() {
   }
 }
 
+void EntityManager::load_lights() {
+  auto light_ids = database_manager::database.select(&database_manager::Light::id, sqlite_orm::from<database_manager::Light>());
+  SPDLOG_INFO("Loading {} lights.", light_ids.size());
+
+  // Check if any existing NSPanel has been removed.
+  {
+    auto existing_lights = EntityManager::get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+    for (auto it = existing_lights.begin(); it != existing_lights.end(); it++) {
+      auto room_id_slot = std::find_if(light_ids.begin(), light_ids.end(), [&it](auto id) {
+        return (*it)->get_id() == id;
+      });
+      if (room_id_slot == light_ids.end()) {
+        // Room was not found in list of IDs in the DB, remove the loaded room.
+        SPDLOG_INFO("Light {}::{} was found in config but not in database. Removing light.", (*it)->get_id(), (*it)->get_name());
+        EntityManager::remove_entity((*it));
+      }
+    }
+  }
+
+  // Cause existing NSPanel to reload config or add a new NSPanel if it does not exist.
+  for (auto &light_id : light_ids) {
+    auto existing_light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, light_id);
+    if (existing_light != nullptr) [[likely]] {
+      existing_light->reload_config();
+    } else {
+      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+
+      try {
+        auto light_settings = database_manager::database.get<database_manager::Light>(light_id);
+        if (light_settings.type.compare("home_assistant") == 0) {
+          std::shared_ptr<HomeAssistantLight> light = std::shared_ptr<HomeAssistantLight>(new HomeAssistantLight(light_settings.id));
+          SPDLOG_INFO("Light {}::{} was found in database but not in config. Creating light.", light->get_id(), light->get_name());
+          EntityManager::_entities.push_back(light);
+        } else if (light_settings.type.compare("openhab") == 0) {
+          std::shared_ptr<OpenhabLight> light = std::shared_ptr<OpenhabLight>(new OpenhabLight(light_settings.id));
+          SPDLOG_INFO("Light {}::{} was found in database but not in config. Creating light.", light->get_id(), light->get_name());
+          EntityManager::_entities.push_back(light);
+        } else {
+          SPDLOG_ERROR("Unknown light type '{}'. Will ignore entity.", light_settings.type);
+        }
+      } catch (std::exception &e) {
+        SPDLOG_ERROR("Caught exception: {}", e.what());
+        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+      }
+    }
+  }
+}
+
 std::shared_ptr<Room> EntityManager::get_room(uint32_t room_id) {
   try {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
@@ -148,69 +196,6 @@ std::shared_ptr<Room> EntityManager::get_room(uint32_t room_id) {
 std::vector<std::shared_ptr<Room>> EntityManager::get_all_rooms() {
   std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
   return EntityManager::_rooms;
-}
-
-void EntityManager::remove_room(uint32_t room_id) {
-  try {
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
-    for (auto room = EntityManager::_rooms.begin(); room != EntityManager::_rooms.end(); room++) {
-      if ((*room)->get_id() == room_id) {
-        SPDLOG_INFO("Removing room room {}::{}", (*room)->get_id(), (*room)->get_name());
-        EntityManager::_rooms.erase(room);
-        break;
-      }
-    }
-  } catch (std::exception &e) {
-    SPDLOG_ERROR("Caught exception: {}", e.what());
-    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
-  }
-}
-
-void EntityManager::add_light(LightSettings &config) {
-  try {
-    if (EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config.id()) == nullptr) {
-      std::string light_type = config.type();
-      if (light_type.compare("home_assistant") == 0) {
-        std::shared_ptr<HomeAssistantLight> light = std::shared_ptr<HomeAssistantLight>(new HomeAssistantLight(config));
-        EntityManager::_entities.push_back(light);
-      } else if (light_type.compare("openhab") == 0) {
-        std::shared_ptr<OpenhabLight> light = std::shared_ptr<OpenhabLight>(new OpenhabLight(config));
-        EntityManager::_entities.push_back(light);
-      } else {
-        SPDLOG_ERROR("Unknown light type '{}'. Will ignore entity.", light_type);
-      }
-    } else {
-      SPDLOG_ERROR("A light with ID {} already exists.", config.id());
-    }
-  } catch (std::exception &e) {
-    SPDLOG_ERROR("Caught exception: {}", e.what());
-    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
-  }
-}
-
-bool EntityManager::ipc_callback_add_light(nlohmann::json message, nlohmann::json *response) {
-  try {
-    SPDLOG_DEBUG("Received IPC callback for new light, creating new light.");
-    LightSettings setting;
-    setting.ParseFromString(std::string(message["data"]));
-    EntityManager::add_light(setting);
-    // Everything else is already initialized, post_init light directly after adding it.
-    auto light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, setting.id());
-    if (light != nullptr) {
-      light->post_init();
-    } else {
-      SPDLOG_ERROR("Failed to find light with id {}. Will not post_init()!", setting.id());
-    }
-
-    // TODO: Send update to panels about new light
-    (*response)["status"] = "ok";
-    return true;
-  } catch (std::exception &e) {
-    SPDLOG_ERROR("Caught exception: {}", e.what());
-    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
-    (*response)["status"] = "error";
-    return true;
-  }
 }
 
 void EntityManager::add_scene(nlohmann::json &config) {
@@ -277,44 +262,6 @@ std::vector<std::shared_ptr<NSPanelRelayGroup>> EntityManager::get_all_relay_gro
 void EntityManager::post_init_entities() {
   SPDLOG_INFO("New config loaded, processing changes.");
   EntityManager::_weather_manager.update_config();
-
-  {
-    // Process any loaded lights
-    SPDLOG_DEBUG("Updating lights.");
-    std::list<int> light_ids;
-    for (LightSettings &config : MqttManagerConfig::light_configs) {
-      light_ids.push_back(config.id());
-      std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, config.id());
-      if (light != nullptr) {
-        light->update_config(config);
-      } else {
-        EntityManager::add_light(config);
-      }
-    }
-    SPDLOG_DEBUG("Existing lights updated.");
-
-    // Check for any removed lights
-    SPDLOG_DEBUG("Checking for removed lights.");
-    for (int i = 0; i < EntityManager::_entities.size(); i++) {
-      auto rit = EntityManager::_entities[i];
-      if (rit->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
-        bool exists = false;
-        for (int light_id : light_ids) {
-          if (light_id == rit->get_id()) {
-            exists = true;
-            break;
-          }
-        }
-
-        if (!exists) {
-          std::shared_ptr<Light> light = std::static_pointer_cast<Light>(rit);
-          SPDLOG_DEBUG("Removing Light {}::{} as it doesn't exist in config anymore.", light->get_id(), light->get_name());
-          EntityManager::_entities.erase(EntityManager::_entities.begin() + i);
-          SPDLOG_DEBUG("Light removed successfully.");
-        }
-      }
-    }
-  }
 
   {
     // Process any loaded NSPanel Relay Groups

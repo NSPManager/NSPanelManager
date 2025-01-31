@@ -1,4 +1,5 @@
 #include "home_assistant_light.hpp"
+#include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "light/light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
@@ -13,7 +14,7 @@
 #include <spdlog/spdlog.h>
 #include <string>
 
-HomeAssistantLight::HomeAssistantLight(LightSettings &config) : Light(config) {
+HomeAssistantLight::HomeAssistantLight(uint32_t light_id) : Light(light_id) {
   // Process Home Assistant specific details. General light data is loaded in the "Light" constructor.
 
   if (this->_controller != MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT) {
@@ -21,7 +22,8 @@ HomeAssistantLight::HomeAssistantLight(LightSettings &config) : Light(config) {
     return;
   }
 
-  this->_home_assistant_name = config.home_assistant_name();
+  auto light = database_manager::database.get<database_manager::Light>(this->_id);
+  this->_home_assistant_name = light.home_assistant_name;
   SPDLOG_DEBUG("Loaded light {}::{}, home assistant entity ID: {}", this->_id, this->_name, this->_home_assistant_name);
   HomeAssistantManager::attach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantLight::home_assistant_event_callback, this, _1));
 
@@ -103,7 +105,7 @@ void HomeAssistantLight::send_state_update_to_controller() {
   }
   HomeAssistantManager::send_json(service_data);
 
-  if(MqttManagerConfig::get_settings().optimistic_mode()) {
+  if (MqttManagerConfig::get_settings().optimistic_mode()) {
     this->_entity_changed_callbacks(this);
   }
 }
@@ -120,7 +122,7 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
         try {
           std::string new_state = new_state_data["state"];
           if (new_state.compare("on") == 0) {
-            if(!this->_current_state) {
+            if (!this->_current_state) {
               changed_attribute = true; // Something changed from what was assumed to be the current state. Flag to trigger "entity changed" callbacks.
             }
             this->_current_state = true;
@@ -132,7 +134,7 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
                   new_brightness = new_state_attributes["brightness"];
                 }
                 new_brightness = ((float)new_brightness / 255.0) * 100; // Home assistant sends brightness as 0 to 255. We want percentage (0-100)
-                if(new_brightness != this->_current_brightness) {
+                if (new_brightness != this->_current_brightness) {
                   changed_attribute = true; // Something changed from what was assumed to be the current state. Flag to trigger "entity changed" callbacks.
                 }
                 this->_current_brightness = new_brightness;
@@ -141,7 +143,7 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
               } else {
                 // Light can dim but no brightness was given in update. Fallback to 100%.
                 SPDLOG_ERROR("Got new event data for light {}::{}. Light is configured for brightness (dimmable) but no 'brightness' value was available in entity payload.", this->_id, this->_name);
-                if(this->_current_brightness != 100) {
+                if (this->_current_brightness != 100) {
                   changed_attribute = true; // Something changed from what was assumed to be the current state. Flag to trigger "entity changed" callbacks.
                 }
                 changed_attribute = true; // Something changed from what was assumed to be the current state. Flag to trigger "entity changed" callbacks.
@@ -151,7 +153,7 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
               }
             } else {
               // We will never get a state_changed event from HA that the requested brightness has been set as this is a switch.
-              if(this->_current_state) {
+              if (this->_current_state) {
                 changed_attribute = true; // Something changed from what was assumed to be the current state. Flag to trigger "entity changed" callbacks.
               }
               this->_current_brightness = 100;
@@ -159,7 +161,7 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
               MQTT_Manager::publish(this->_mqtt_brightness_topic, "100", true);
             }
           } else if (new_state.compare("off") == 0) {
-            if(this->_current_state) {
+            if (this->_current_state) {
               changed_attribute = true; // Something changed from what was assumed to be the current state. Flag to trigger "entity changed" callbacks.
             }
             this->_current_state = false;
@@ -172,7 +174,6 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
         } catch (std::exception &e) {
           SPDLOG_ERROR("Caught exception when trying to update state for light {}::{} message: {}. Working data: {}", this->_id, this->_name, boost::diagnostic_information(e, true), new_state_attributes.dump());
         }
-
       }
 
       if (new_state_attributes.contains("color_mode") && !new_state_attributes["color_mode"].is_null()) {
@@ -182,7 +183,7 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
             this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
             this->_requested_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
             if (new_state_attributes.contains("color_temp_kelvin") && !new_state_attributes["color_temp_kelvin"].is_null()) {
-              if(new_state_attributes["color_temp_kelvin"] != this->_current_color_temperature) {
+              if (new_state_attributes["color_temp_kelvin"] != this->_current_color_temperature) {
                 changed_attribute = true; // Something changed from what was assumed to be the current state. Flag to trigger "entity changed" callbacks.
               }
               this->_current_color_temperature = new_state_attributes["color_temp_kelvin"];
@@ -197,7 +198,7 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
             if (new_state_attributes.contains("hs_color") && !new_state_attributes["hs_color"].is_null()) {
               std::vector<float> hs_color = new_state_attributes["hs_color"];
 
-              if((uint16_t)hs_color[0] != this->_current_hue || (uint8_t)hs_color[1]) {
+              if ((uint16_t)hs_color[0] != this->_current_hue || (uint8_t)hs_color[1]) {
                 changed_attribute = true; // Something changed from what was assumed to be the current state. Flag to trigger "entity changed" callbacks.
               }
 
@@ -214,7 +215,7 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
         }
       }
 
-      if(changed_attribute) {
+      if (changed_attribute) {
         this->_signal_entity_changed();
       }
     }

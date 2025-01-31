@@ -11,7 +11,7 @@ enum MQTT_MANAGER_OPENHAB_CONTROL_MODE {
 
 class OpenhabLight : public Light {
 public:
-  OpenhabLight(LightSettings &config);
+  OpenhabLight(uint32_t light_id);
 
   /**
    * Go through the requested states and compare them with the current states.
