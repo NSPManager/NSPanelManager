@@ -77,47 +77,6 @@ message NSPanelSettings {
     int32 default_room = 52;
 }
 
-message MQTTManagerPrivateSettings {
-    string home_assistant_address = 1;
-    string home_assistant_token = 2;
-    string openhab_address = 3;
-    string openhab_token = 4;
-    string mqtt_server = 5;
-    int32 mqtt_server_port = 6;
-    string mqtt_username = 7;
-    string mqtt_password = 8;
-}
-
-message MQTTManagerSettings {
-    uint32 color_temp_min = 1;
-    uint32 color_temp_max = 2;
-    bool reverse_color_temperature_slider = 3;
-    string date_format = 4;
-    string outside_temp_sensor_provider = 5;
-    string outside_temp_sensor_entity_id = 6;
-    string weather_location_latitude = 7;
-    string weather_location_longitude = 8;
-    wind_speed_format weather_wind_speed_format = 9;
-    precipitation_format weather_precipitation_unit = 10;
-    int32 weather_update_interval_minutes = 11;
-    time_format clock_format = 12;
-    temperature_format temperature_unit = 13;
-    int32 max_log_buffer_size = 14;
-    int32 manager_port = 15;
-    string manager_address = 16;
-
-    enum turn_on_behavior {
-        color_temperature = 0;
-        restore = 1;
-    }
-    turn_on_behavior light_turn_on_behavior = 17;
-    bool is_home_assistant_addon = 18;
-
-    int32 mqtt_wait_time = 19;
-    bool optimistic_mode = 20;
-}
-
-
 message MultipleNSPanelsSettings {
     repeated NSPanelSettings nspanels = 1;
 }

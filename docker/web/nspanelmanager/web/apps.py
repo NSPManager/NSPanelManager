@@ -16,18 +16,8 @@ def start_mqtt_manager():
     print("Did not find a running MQTTManager, starting MQTTManager...")
     # Restart the process
     logging.info("Starting a new mqtt_manager")
-    settings = protobuf_mqttmanager_pb2.MQTTManagerPrivateSettings()
-    settings.home_assistant_address = get_setting_with_default("home_assistant_address")
-    settings.home_assistant_token = get_setting_with_default("home_assistant_token")
-    settings.openhab_address = get_setting_with_default("openhab_address")
-    settings.openhab_token = get_setting_with_default("openhab_token")
-    settings.mqtt_server = get_setting_with_default("mqtt_server")
-    settings.mqtt_server_port = int(get_setting_with_default("mqtt_port"))
-    settings.mqtt_username = get_setting_with_default("mqtt_username")
-    settings.mqtt_password = get_setting_with_default("mqtt_password")
 
     mqttmanager_env = os.environ.copy()
-    mqttmanager_env["SETTINGS"] = settings.SerializeToString()
     mqttmanager_env["LOG_LEVEL"] = get_setting_with_default("mqttmanager_log_level")
 
     global mqttmanager_process

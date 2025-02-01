@@ -87,7 +87,12 @@ void NSPMScene::save() {
         lights.insert(lights.end(), room_lights.begin(), room_lights.end());
       }
     } else {
-      lights = this->_room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+      auto room = EntityManager::get_room(this->_room_id);
+      if (room != nullptr) [[likely]] {
+        lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+      } else {
+        SPDLOG_ERROR("Failed to get room for scene {}::{} when saving light states.", this->_id, this->_name);
+      }
     }
 
     // Remove lights not controlled from main page.

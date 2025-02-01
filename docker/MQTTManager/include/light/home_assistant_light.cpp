@@ -52,40 +52,40 @@ void HomeAssistantLight::send_state_update_to_controller() {
     service_data["domain"] = "light";
     if (this->_requested_state) {
       service_data["service"] = "turn_on";
-      if (MqttManagerConfig::get_settings().optimistic_mode()) {
+      if (MqttManagerConfig::get_settings().optimistic_mode) {
         this->_current_state = true;
       }
 
       if (this->_requested_brightness != this->_current_brightness) {
         service_data["service_data"]["brightness_pct"] = this->_requested_brightness;
-        if (MqttManagerConfig::get_settings().optimistic_mode()) {
+        if (MqttManagerConfig::get_settings().optimistic_mode) {
           this->_current_brightness = this->_requested_brightness;
         }
       }
 
       // This is a turn on event and it currently off. Send kelvin if turn on behavior is to use color temp.
-      if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT || (!this->_current_state && MqttManagerConfig::get_settings().light_turn_on_behavior() == MQTTManagerSettings_turn_on_behavior_color_temperature)) {
+      if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT || (!this->_current_state && MqttManagerConfig::get_settings().light_turn_on_behaviour == LightTurnOnBehaviour::COLOR_TEMPERATURE)) {
         service_data["service_data"]["kelvin"] = this->_requested_color_temperature;
-        if (MqttManagerConfig::get_settings().optimistic_mode()) {
+        if (MqttManagerConfig::get_settings().optimistic_mode) {
           this->_current_color_temperature = this->_requested_color_temperature;
         }
       }
 
       if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT && this->_requested_color_temperature != this->_current_color_temperature) {
         service_data["service_data"]["kelvin"] = this->_requested_color_temperature;
-        if (MqttManagerConfig::get_settings().optimistic_mode()) {
+        if (MqttManagerConfig::get_settings().optimistic_mode) {
           this->_current_color_temperature = this->_requested_color_temperature;
         }
       } else if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::RGB && this->_requested_hue != this->_current_hue || this->_requested_saturation != this->_current_saturation) {
         service_data["service_data"]["hs_color"] = {this->_requested_hue, this->_requested_saturation};
-        if (MqttManagerConfig::get_settings().optimistic_mode()) {
+        if (MqttManagerConfig::get_settings().optimistic_mode) {
           this->_current_hue = this->_requested_hue;
           this->_current_saturation = this->_requested_saturation;
         }
       }
     } else {
       service_data["service"] = "turn_off";
-      if (MqttManagerConfig::get_settings().optimistic_mode()) {
+      if (MqttManagerConfig::get_settings().optimistic_mode) {
         this->_current_state = false;
       }
     }
@@ -93,19 +93,19 @@ void HomeAssistantLight::send_state_update_to_controller() {
     service_data["domain"] = "switch";
     if (this->_requested_state) {
       service_data["service"] = "switch_on";
-      if (MqttManagerConfig::get_settings().optimistic_mode()) {
+      if (MqttManagerConfig::get_settings().optimistic_mode) {
         this->_current_state = true;
       }
     } else {
       service_data["service"] = "switch_off";
-      if (MqttManagerConfig::get_settings().optimistic_mode()) {
+      if (MqttManagerConfig::get_settings().optimistic_mode) {
         this->_current_state = false;
       }
     }
   }
   HomeAssistantManager::send_json(service_data);
 
-  if (MqttManagerConfig::get_settings().optimistic_mode()) {
+  if (MqttManagerConfig::get_settings().optimistic_mode) {
     this->_entity_changed_callbacks(this);
   }
 }

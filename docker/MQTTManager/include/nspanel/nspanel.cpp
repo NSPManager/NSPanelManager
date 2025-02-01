@@ -75,6 +75,7 @@ void NSPanel::reload_config() {
 
     bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
 
+    this->_settings = panel_settings;
     this->_has_registered_to_manager = true; // We managed to get the object in above statement and did not throw, ie. has been registered in manager and has an ID in DB.
     this->_mac = panel_settings.mac_address;
     this->_is_us_panel = this->_get_nspanel_setting_with_default("is_us_panel", "False").compare("True") == 0;
@@ -180,98 +181,109 @@ void NSPanel::reload_config() {
 }
 
 void NSPanel::send_config() {
-  auto settings_it = std::find_if(MqttManagerConfig::nspanel_configs.begin(), MqttManagerConfig::nspanel_configs.end(), [this](NSPanelSettings s) {
-    return s.id() == this->_id;
-  });
-  if (settings_it != MqttManagerConfig::nspanel_configs.end()) {
-    SPDLOG_INFO("Sending config over MQTT for panel {}::{}", this->_id, this->_name);
-    NSPanelSettings settings = (*settings_it);
-    NSPanelConfig config;
-    config.set_nspanel_id(this->_id);
-    config.set_name(this->_name);
-    config.set_default_room(settings.default_room());
-    config.set_default_page(settings.default_page());
-    config.set_min_button_push_time(settings.min_button_push_time());
-    config.set_button_long_press_time(settings.button_long_press_time());
-    config.set_special_mode_trigger_time(settings.special_mode_trigger_time());
-    config.set_special_mode_release_time(settings.special_mode_release_time());
-    config.set_screen_dim_level(settings.screen_dim_level());
-    config.set_screensaver_dim_level(settings.screensaver_dim_level());
-    config.set_screensaver_mode(static_cast<NSPanelConfig_NSPanelScreensaverMode>(settings.screensaver_mode()));
-    config.set_screensaver_activation_timeout(settings.screensaver_activation_timeout());
-    config.set_clock_us_style(settings.clock_format() == time_format::AM_PM);
-    config.set_use_fahrenheit(settings.temperature_unit() == temperature_format::FAHRENHEIT);
-    config.set_is_us_panel(settings.is_us_panel());
-    config.set_reverse_relays(settings.reverse_relays());
-    config.set_relay1_default_mode(settings.relay1_default_mode());
-    config.set_relay2_default_mode(settings.relay2_default_mode());
-    config.set_temperature_calibration(settings.temperature_calibration());
-    config.set_button1_mode(settings.button1_mode());
-    config.set_button2_mode(settings.button2_mode());
-    config.set_button1_mqtt_topic(settings.button1_mqtt_topic());
-    config.set_button2_mqtt_topic(settings.button2_mqtt_topic());
-    config.set_button1_mqtt_payload(settings.button1_mqtt_payload());
-    config.set_button2_mqtt_payload(settings.button2_mqtt_payload());
-    config.set_button1_detached_light_id(settings.button1_detached_light_id());
-    config.set_button2_detached_light_id(settings.button2_detached_light_id());
-    config.set_optimistic_mode(MqttManagerConfig::get_settings().optimistic_mode());
-    config.set_raise_light_level_to_100_above(settings.raise_to_100_light_level());
+  SPDLOG_INFO("Sending config over MQTT for panel {}::{}", this->_id, this->_name);
+  NSPanelConfig config;
+  MqttManagerSettingsHolder global_setting = MqttManagerConfig::get_settings();
 
-    try {
-      auto relay_group_binding = database_manager::database.get_all<database_manager::NSPanelRelayGroupBinding>(
-          sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::relay_num) == 1) and sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::nspanel_id) == this->_id);
-      if (relay_group_binding.size() > 0) [[likely]] {
-        config.set_relay1_is_in_relay_group(true);
-        config.set_relay1_relay_group(relay_group_binding[0].relay_group_id);
-      } else {
-        config.set_relay1_is_in_relay_group(false);
-        config.set_relay1_relay_group(0);
-      }
-    } catch (std::system_error) {
+  config.set_nspanel_id(this->_id);
+  config.set_name(this->_name);
+  config.set_default_room(this->_settings.room_id);
+  config.set_default_page(std::stoi(this->_get_nspanel_setting_with_default("default_page", "0")));
+  config.set_min_button_push_time(std::stoi(MqttManagerConfig::get_setting_with_default("min_button_push_time", "50")));
+  config.set_button_long_press_time(std::stoi(MqttManagerConfig::get_setting_with_default("button_long_press_time", "5000")));
+  config.set_special_mode_trigger_time(std::stoi(MqttManagerConfig::get_setting_with_default("special_mode_trigger_time", "300")));
+  config.set_special_mode_release_time(std::stoi(MqttManagerConfig::get_setting_with_default("special_mode_release_time", "5000")));
+  config.set_screen_dim_level(std::stoi(this->_get_nspanel_setting_with_default("screen_dim_level", MqttManagerConfig::get_setting_with_default("screen_dim_level", "100"))));
+  config.set_screensaver_dim_level(std::stoi(this->_get_nspanel_setting_with_default("screensaver_dim_level", MqttManagerConfig::get_setting_with_default("screensaver_dim_level", "1"))));
+  config.set_screensaver_activation_timeout(std::stoi(this->_get_nspanel_setting_with_default("screensaver_activation_timeout", MqttManagerConfig::get_setting_with_default("screensaver_activation_timeout", "30000"))));
+  config.set_clock_us_style(!global_setting.clock_24_hour_format);
+  config.set_use_fahrenheit(MqttManagerConfig::get_setting_with_default("use_fahrenheit", "False").compare("True") == 0);
+  config.set_is_us_panel(this->_get_nspanel_setting_with_default("is_us_panel", "False").compare("True") == 0);
+  config.set_reverse_relays(this->_get_nspanel_setting_with_default("reverse_relays", "False").compare("True") == 0);
+  config.set_relay1_default_mode(this->_get_nspanel_setting_with_default("relay1_default_mode", "False").compare("True") == 0);
+  config.set_relay2_default_mode(this->_get_nspanel_setting_with_default("relay2_default_mode", "False").compare("True") == 0);
+  config.set_temperature_calibration(std::stof(this->_get_nspanel_setting_with_default("temperature_calibration", "0")));
+  config.set_button1_mode(this->_settings.button1_mode);
+  config.set_button2_mode(this->_settings.button2_mode);
+  config.set_button1_mqtt_topic(this->_get_nspanel_setting_with_default("button1_mqtt_topic", ""));
+  config.set_button2_mqtt_topic(this->_get_nspanel_setting_with_default("button2_mqtt_topic", ""));
+  config.set_button1_mqtt_payload(this->_get_nspanel_setting_with_default("button1_mqtt_payload", ""));
+  config.set_button2_mqtt_payload(this->_get_nspanel_setting_with_default("button2_mqtt_payload", ""));
+  config.set_button1_detached_light_id(this->_settings.button1_detached_mode_light_id); // TODO: Move detached mode light to manager so that panel only sends a "Hey, trigger detached light on button 1" command
+  config.set_button2_detached_light_id(this->_settings.button2_detached_mode_light_id);
+  config.set_optimistic_mode(global_setting.optimistic_mode);
+  config.set_raise_light_level_to_100_above(std::stoi(MqttManagerConfig::get_setting_with_default("raise_to_100_light_level", "96")));
+
+  std::string screensaver_mode = this->_get_nspanel_setting_with_default("screensaver_mode", MqttManagerConfig::get_setting_with_default("screensaver_mode", "with_background"));
+  if (screensaver_mode.compare("with_background") == 0) {
+    config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND);
+  } else if (screensaver_mode.compare("without_background") == 0) {
+    config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITHOUT_BACKGROUND);
+  } else if (screensaver_mode.compare("datetime_with_background") == 0) {
+    config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_DATETIME_WITH_BACKGROUND);
+  } else if (screensaver_mode.compare("datetime_without_background") == 0) {
+    config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_DATETIME_WITHOUT_BACKGROUND);
+  } else if (screensaver_mode.compare("no_screensaver") == 0) {
+    config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_NO_SCREENSAVER);
+  } else {
+    SPDLOG_ERROR("Unknown screensaver mode '{}' for NSPanel {}::{}, assuming weather with background.", screensaver_mode, this->_id, this->_name);
+    config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND);
+  }
+
+  try {
+    auto relay_group_binding = database_manager::database.get_all<database_manager::NSPanelRelayGroupBinding>(
+        sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::relay_num) == 1) and sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::nspanel_id) == this->_id);
+    if (relay_group_binding.size() > 0) [[likely]] {
+      config.set_relay1_is_in_relay_group(true);
+      config.set_relay1_relay_group(relay_group_binding[0].relay_group_id);
+    } else {
       config.set_relay1_is_in_relay_group(false);
       config.set_relay1_relay_group(0);
-      // Did not find matching relay group binind, relay is not bound.
     }
+  } catch (std::system_error) {
+    config.set_relay1_is_in_relay_group(false);
+    config.set_relay1_relay_group(0);
+    // Did not find matching relay group binind, relay is not bound.
+  }
 
-    try {
-      auto relay_group_binding = database_manager::database.get_all<database_manager::NSPanelRelayGroupBinding>(
-          sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::relay_num) == 2) and sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::nspanel_id) == this->_id);
-      if (relay_group_binding.size() > 0) [[likely]] {
-        config.set_relay2_is_in_relay_group(true);
-        config.set_relay2_relay_group(relay_group_binding[0].relay_group_id);
-      } else {
-        config.set_relay2_is_in_relay_group(false);
-        config.set_relay2_relay_group(0);
-      }
-    } catch (std::system_error) {
+  try {
+    auto relay_group_binding = database_manager::database.get_all<database_manager::NSPanelRelayGroupBinding>(
+        sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::relay_num) == 2) and sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::nspanel_id) == this->_id);
+    if (relay_group_binding.size() > 0) [[likely]] {
+      config.set_relay2_is_in_relay_group(true);
+      config.set_relay2_relay_group(relay_group_binding[0].relay_group_id);
+    } else {
       config.set_relay2_is_in_relay_group(false);
       config.set_relay2_relay_group(0);
-      // Did not find matching relay group binind, relay is not bound.
     }
+  } catch (std::system_error) {
+    config.set_relay2_is_in_relay_group(false);
+    config.set_relay2_relay_group(0);
+    // Did not find matching relay group binind, relay is not bound.
+  }
 
-    // Load rooms
-    for (int i = 0; i < settings.rooms().size(); i++) {
-      std::shared_ptr<Room> room = EntityManager::get_room(settings.rooms().Get(i));
-      if (room != nullptr) {
-        NSPanelConfig_RoomInfo *room_info = config.add_room_infos();
-        room_info->set_room_id(room->get_id());
-        // Get all entity pages attached to room and add those IDs to list of availabe entity pages for that room
-        for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_entities_pages()) {
-          room_info->add_entity_page_ids(page->get_id());
-        }
+  // Load rooms
+  // TODO: Only add rooms on the "allowed" list for this room.
+  // for (int i = 0; i < settings.rooms().size(); i++) {
+  //  std::shared_ptr<Room> room = EntityManager::get_room(settings.rooms().Get(i));
+  for (auto &room : EntityManager::get_all_rooms()) {
+    if (room != nullptr) {
+      NSPanelConfig_RoomInfo *room_info = config.add_room_infos();
+      room_info->set_room_id(room->get_id());
+      // Get all entity pages attached to room and add those IDs to list of availabe entity pages for that room
+      for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_entities_pages()) {
+        room_info->add_entity_page_ids(page->get_id());
       }
     }
-
-    // TODO: Set scenes
-    config.clear_global_scenes();
-
-    std::string config_str = config.SerializeAsString();
-    MQTT_Manager::publish(this->_mqtt_config_topic, config_str, true);
-
-    SPDLOG_DEBUG("Sent updated NSPanelConfig to panel {}::{} over MQTT.", this->_id, this->_name);
-  } else {
-    SPDLOG_WARN("Requested sending config for panel {}::{} over MQTT but no such panel exists in MqttManagerConfig.", this->_id, this->_name);
   }
+
+  // TODO: Set scenes
+  config.clear_global_scenes();
+
+  std::string config_str = config.SerializeAsString();
+  MQTT_Manager::publish(this->_mqtt_config_topic, config_str, true);
+
+  SPDLOG_DEBUG("Sent updated NSPanelConfig to panel {}::{} over MQTT.", this->_id, this->_name);
 }
 
 NSPanel::~NSPanel() {
@@ -345,7 +357,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         std::tm tm = *std::localtime(&now);
         std::stringstream buffer;
-        if (MqttManagerConfig::get_settings().clock_format() == time_format::FULL) {
+        if (MqttManagerConfig::get_settings().clock_24_hour_format) {
           buffer << std::put_time(&tm, "%H:%M:%S");
         } else {
           buffer << std::put_time(&tm, "%I:%M:%S %p");
@@ -370,7 +382,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         message.message = message_parts[2];
         this->_log_messages.push_front(message);
         // Remove older messages from backtrace.
-        while (this->_log_messages.size() > MqttManagerConfig::get_settings().max_log_buffer_size()) {
+        while (this->_log_messages.size() > MqttManagerConfig::get_settings().max_log_buffer_size) {
           this->_log_messages.pop_back();
         }
       } else {
@@ -567,7 +579,7 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   std::tm tm = *std::localtime(&now);
   std::stringstream buffer;
-  if (MqttManagerConfig::get_settings().clock_format() == time_format::FULL) {
+  if (MqttManagerConfig::get_settings().clock_24_hour_format) {
     buffer << std::put_time(&tm, "%H:%M:%S");
   } else {
     buffer << std::put_time(&tm, "%I:%M:%S %p");
@@ -604,7 +616,7 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   message.message = payload;
   this->_log_messages.push_front(message);
   // Remove older messages from backtrace.
-  while (this->_log_messages.size() > MqttManagerConfig::get_settings().max_log_buffer_size()) {
+  while (this->_log_messages.size() > MqttManagerConfig::get_settings().max_log_buffer_size) {
     this->_log_messages.pop_back();
   }
 }
@@ -781,8 +793,8 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
       // Everything was successfull, send registration accept to panel:
       nlohmann::json response;
       response["command"] = "register_accept";
-      response["address"] = MqttManagerConfig::get_settings().manager_address();
-      response["port"] = MqttManagerConfig::get_settings().manager_port();
+      response["address"] = MqttManagerConfig::get_settings().manager_address;
+      response["port"] = MqttManagerConfig::get_settings().manager_port;
       response["config_topic"] = this->_mqtt_config_topic;
       std::string reply_topic = fmt::format("nspanel/{}/command", std::string(register_request_payload.at("friendly_name")));
       MQTT_Manager::publish(reply_topic, response.dump());
@@ -820,13 +832,13 @@ void NSPanel::register_to_home_assistant() {
   // Register temperature sensor
   nlohmann::json temperature_sensor_data = nlohmann::json(base_json);
   temperature_sensor_data["device_class"] = "temperature";
-  if (MqttManagerConfig::get_settings().temperature_unit() == temperature_format::FAHRENHEIT) {
+  if (MqttManagerConfig::get_setting_with_default("use_fahrenheit", "False").compare("True") == 0) {
     temperature_sensor_data["unit_of_measurement"] = "°F";
   } else {
     temperature_sensor_data["unit_of_measurement"] = "°C";
   }
   temperature_sensor_data["name"] = "Temperature";
-  temperature_sensor_data["state_topic"] = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/temperature", MqttManagerConfig::get_settings().manager_address(), this->_name);
+  temperature_sensor_data["state_topic"] = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/temperature", MqttManagerConfig::get_settings().manager_address, this->_name);
   temperature_sensor_data["unique_id"] = fmt::format("{}_temperature", this->_name);
   std::string temperature_sensor_data_str = temperature_sensor_data.dump();
   SPDLOG_DEBUG("Registring temp sensor for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);

@@ -27,15 +27,9 @@
 #include <sqlite_orm/sqlite_orm.h>
 #include <string>
 
-#define ITEM_IN_LIST(list, item) (std::find(list.begin(), list.end(), item) != list.end());
-
-MQTTManagerSettings MqttManagerConfig::get_settings() {
+MqttManagerSettingsHolder MqttManagerConfig::get_settings() {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_settings_mutex);
   return MqttManagerConfig::_settings;
-}
-
-MqttManagerSettingsHolder MqttManagerConfig::get_private_settings() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_private_settings_mutex);
-  return MqttManagerConfig::_private_settings;
 }
 
 std::string MqttManagerConfig::get_setting_with_default(std::string key, std::string default_value) {
@@ -52,226 +46,49 @@ std::string MqttManagerConfig::get_setting_with_default(std::string key, std::st
 }
 
 void MqttManagerConfig::load() {
+
+  SPDLOG_TRACE("Loading timezone from /etc/timezone.");
+  // Begin by loading timezone
+  std::ifstream f("/etc/timezone", std::ios::in | std::ios::binary);
+  const size_t file_size = std::filesystem::file_size("/etc/timezone");
+  std::string timezone_str(file_size, '\0');
+  f.read(timezone_str.data(), file_size);
+  f.close();
+  boost::algorithm::trim(timezone_str);
+  MqttManagerConfig::timezone = timezone_str;
+  SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
+
   {
-    std::lock_guard<std::mutex> mutex_guard(MqttManagerConfig::_config_load_mutex);
+    SPDLOG_INFO("Loading MQTT Manager settings.");
+    std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_settings_mutex);
 
-    SPDLOG_TRACE("Loading timezone from /etc/timezone.");
-    // Begin by loading timezone
-    std::ifstream f("/etc/timezone", std::ios::in | std::ios::binary);
-    const size_t file_size = std::filesystem::file_size("/etc/timezone");
-    std::string timezone_str(file_size, '\0');
-    f.read(timezone_str.data(), file_size);
-    f.close();
-    boost::algorithm::trim(timezone_str);
-    MqttManagerConfig::timezone = timezone_str;
-    SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
+    MqttManagerConfig::_settings.manager_address = MqttManagerConfig::get_setting_with_default("manager_address", "");
+    MqttManagerConfig::_settings.manager_port = std::stoi(MqttManagerConfig::get_setting_with_default("manager_port", "8000"));
+    MqttManagerConfig::_settings.color_temp_min = std::stoi(MqttManagerConfig::get_setting_with_default("color_temp_min", "2000"));
+    MqttManagerConfig::_settings.color_temp_max = std::stoi(MqttManagerConfig::get_setting_with_default("color_temp_min", "6000"));
+    MqttManagerConfig::_settings.reverse_color_temperature_slider = MqttManagerConfig::get_setting_with_default("reverse_color_temp", "False").compare("True") == 0;
+    MqttManagerConfig::_settings.date_format = MqttManagerConfig::get_setting_with_default("date_format", "%a %d/%m/ %Y");
+    MqttManagerConfig::_settings.clock_24_hour_format = MqttManagerConfig::get_setting_with_default("clock_us_style", "False").compare("False") == 0;
+    MqttManagerConfig::_settings.optimistic_mode = MqttManagerConfig::get_setting_with_default("optimistic_mode", "True").compare("True") == 0;
+    MqttManagerConfig::_settings.mqtt_wait_time = std::stoi(MqttManagerConfig::get_setting_with_default("mqtt_wait_time", "1000"));
+    MqttManagerConfig::_settings.is_home_assistant_addon = false; // TODO: Is this an HA addon?
 
-    {
-      SPDLOG_INFO("Loading MQTT Manager settings.");
-      std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_private_settings_mutex);
-
-      MqttManagerConfig::_private_settings.home_assistant_address = MqttManagerConfig::get_setting_with_default("home_assistant_address", "");
-      MqttManagerConfig::_private_settings.home_assistant_token = MqttManagerConfig::get_setting_with_default("home_assistant_token", "");
-      MqttManagerConfig::_private_settings.openhab_address = MqttManagerConfig::get_setting_with_default("openhab_address", "");
-      MqttManagerConfig::_private_settings.openhab_token = MqttManagerConfig::get_setting_with_default("openhab_token", "");
-
-      // Load MQTT settings
-      MqttManagerConfig::_private_settings.mqtt_server = MqttManagerConfig::get_setting_with_default("mqtt_server", "");
-      std::string mqtt_server = MqttManagerConfig::get_setting_with_default("mqtt_server", "1883");
-      if (mqtt_server.length() > 0) {
-        MqttManagerConfig::_private_settings.mqtt_server_port = std::stoi(mqtt_server);
-      } else {
-        SPDLOG_ERROR("Failed to get a valid MQTT server port while loading settings.");
-      }
-
-      MqttManagerConfig::_private_settings.mqtt_username = MqttManagerConfig::get_setting_with_default("mqtt_username", "");
-      MqttManagerConfig::_private_settings.mqtt_password = MqttManagerConfig::get_setting_with_default("mqtt_password", "");
-    }
-
-    // Load icon mapping
-    std::ifstream icon_mapping_stream("/usr/src/app/nspanelmanager/icon_mapping.json");
-    MqttManagerConfig::icon_mapping = nlohmann::json::parse(icon_mapping_stream);
-    icon_mapping_stream.close();
-
-    // Load all other non-sensitive config via HTTP GET to manager.
-    // TODO: Load via protobuf instead and simplify the checking of removed entities.
-    CURL *curl;
-    CURLcode res;
-
-    SPDLOG_INFO("Gathering config from web manager.");
-    while (true) {
-      std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/protobuf/mqttmanager/all_settings";
-      std::string response_data;
-      if (WebHelper::perform_post_request(&url, &response_data, nullptr, nullptr)) {
-        SPDLOG_DEBUG("Got config data. Processing config.");
-        MqttManagerConfig::_settings.ParseFromString(response_data);
-        if (MqttManagerConfig::_settings.manager_address().empty()) {
-          SPDLOG_CRITICAL("No manager address is configured!");
-        }
-        if (MqttManagerConfig::_settings.manager_port() == 0) {
-          SPDLOG_CRITICAL("No manager port is configured!");
-        }
-        break; // We successfully gather settings from DB. Exit loop.
-      } else {
-        SPDLOG_ERROR("Failed to get config. Will try again.");
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-      }
-    }
-
-    SPDLOG_DEBUG("Loading Rooms...");
-    std::list<RoomSettings> loaded_room_configs;
-    std::string rooms_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/protobuf/mqttmanager/all_rooms";
-    std::string rooms_string;
-    if (WebHelper::perform_get_request(&rooms_url, &rooms_string, nullptr)) {
-      SPDLOG_TRACE("Got Room configs: {}", rooms_string);
-      MqttManagerConfig::room_configs.clear();
-      MultipleRoomsSettings rooms_settings;
-      rooms_settings.ParseFromString(rooms_string);
-      for (RoomSettings room_config : rooms_settings.rooms()) {
-        loaded_room_configs.push_back(room_config); // Build light list for next step.
-        MqttManagerConfig::room_configs.push_back(room_config);
-        // TODO: Remove need for a "config added" listener and only use "config loaded" listener for when all configs has been loaded.
-        // MqttManagerConfig::_config_added_listener(&MqttManagerConfig::room_configs.back());
-      }
+    std::string turn_on_bevaiour = MqttManagerConfig::get_setting_with_default("turn_on_behaviour", "color_temp");
+    if (turn_on_bevaiour.compare("color_temp") == 0) {
+      MqttManagerConfig::_settings.light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
+    } else if (turn_on_bevaiour.compare("restore") == 0) {
+      MqttManagerConfig::_settings.light_turn_on_behaviour = LightTurnOnBehaviour::RESTORE_PREVIOUS;
     } else {
-      SPDLOG_ERROR("Failed to get room configs!");
-    }
-
-    SPDLOG_DEBUG("Loading NSPanels...");
-    std::string nspanels_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/protobuf/mqttmanager/all_nspanels";
-    std::string nspanels_string;
-    if (WebHelper::perform_get_request(&nspanels_url, &nspanels_string, nullptr)) {
-      MqttManagerConfig::nspanel_configs.clear();
-      MultipleNSPanelsSettings panels_settings;
-      panels_settings.ParseFromString(nspanels_string);
-      for (NSPanelSettings nspanel_config : panels_settings.nspanels()) {
-        MqttManagerConfig::nspanel_configs.push_back(nspanel_config);
-      }
-    } else {
-      SPDLOG_ERROR("Failed to get NSPanel configs!");
+      SPDLOG_WARN("Failed to determine turn on bevaiour for lights, assuming color temp. Value set: {}", turn_on_bevaiour);
+      MqttManagerConfig::_settings.light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
     }
   }
 
-  SPDLOG_DEBUG("Loading lights...");
-  std::string lights_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/protobuf/mqttmanager/all_lights";
-  std::string lights_string;
-  if (WebHelper::perform_get_request(&lights_url, &lights_string, nullptr)) {
-    MqttManagerConfig::light_configs.clear();
-    SPDLOG_TRACE("Got lights config: {}", lights_string);
-    MultipleLightsSettings lights_settings;
-    lights_settings.ParseFromString(lights_string);
-    for (LightSettings light_config : lights_settings.lights()) {
-      MqttManagerConfig::light_configs.push_back(light_config);
-    }
-  } else {
-    SPDLOG_ERROR("Failed to get lights config!");
-  }
+  // Load icon mapping
+  std::ifstream icon_mapping_stream("/usr/src/app/nspanelmanager/icon_mapping.json");
+  MqttManagerConfig::icon_mapping = nlohmann::json::parse(icon_mapping_stream);
+  icon_mapping_stream.close();
 
   // Notify all listeners that the config has been loaded
   MqttManagerConfig::_config_loaded_listeners();
-}
-
-void MqttManagerConfig::populate_settings_from_config(nlohmann::json &data) {
-  try {
-    SPDLOG_INFO("Got config from web manager, will process and load values.");
-
-    SPDLOG_DEBUG("Loading Scenes...");
-    std::list<nlohmann::json> json_scenes;
-    std::string scenes_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/scenes";
-    std::string scenes_string;
-    if (WebHelper::perform_get_request(&scenes_url, &scenes_string, nullptr)) {
-      SPDLOG_TRACE("Got Scene configs: {}", scenes_string);
-      nlohmann::json scenes_json = nlohmann::json::parse(scenes_string);
-      for (nlohmann::json scene_config : scenes_json.at("scenes")) {
-        json_scenes.push_back(scene_config); // Build light list for next step.
-        bool already_exists = ITEM_IN_LIST(MqttManagerConfig::scenes_configs, scene_config);
-        if (!already_exists) {
-          MqttManagerConfig::scenes_configs.push_back(scene_config);
-          MqttManagerConfig::_config_added_listener(&MqttManagerConfig::scenes_configs.back());
-        }
-      }
-    } else {
-      SPDLOG_ERROR("Failed to get Scene configs!");
-    }
-
-    try {
-      SPDLOG_DEBUG("Checking for removed scenes.");
-      auto sit = MqttManagerConfig::scenes_configs.begin();
-      while (sit != MqttManagerConfig::scenes_configs.end()) {
-        bool exists = ITEM_IN_LIST(json_scenes, (*sit));
-        if (!exists) {
-          SPDLOG_DEBUG("Removing scene config as it doesn't exist in config anymore.");
-          MqttManagerConfig::_config_removed_listener(&(*sit));
-          MqttManagerConfig::scenes_configs.erase(sit++);
-        } else {
-          ++sit;
-        }
-      }
-    } catch (std::exception &e) {
-      SPDLOG_ERROR("Chaught exception when checking for any removed scenes. Exception: {}", e.what());
-    }
-
-    // try {
-    //   SPDLOG_DEBUG("Checking for removed rooms.");
-    //   auto rit = MqttManagerConfig::room_configs.begin();
-    //   while (rit != MqttManagerConfig::room_configs.end()) {
-    //     bool exists = ITEM_IN_LIST(loaded_room_configs, (*rit));
-    //     if (!exists) {
-    //       SPDLOG_DEBUG("Removing room config as it doesn't exist in config anymore.");
-    //       MqttManagerConfig::_config_removed_listener(&(*rit));
-    //       MqttManagerConfig::room_configs.erase(rit++);
-    //     } else {
-    //       ++rit;
-    //     }
-    //   }
-    // } catch (std::exception &e) {
-    //   SPDLOG_ERROR("Chaught exception when checking for any removed rooms. Exception: {}", e.what());
-    // }
-
-    // std::list<nlohmann::json> json_rgs;
-    // try {
-    //   SPDLOG_DEBUG("Loading relay groups...");
-    //   std::string relay_groups_url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/relay_groups";
-    //   std::string relay_groups_string;
-    //   if (WebHelper::perform_get_request(&relay_groups_url, &relay_groups_string, nullptr)) {
-    //     nlohmann::json relay_groups_json = nlohmann::json::parse(relay_groups_string);
-    //     SPDLOG_TRACE("Got Relay Group configs: {}", rooms_string);
-    //     for (nlohmann::json rg_config : relay_groups_json.at("relay_groups")) {
-    //       json_rgs.push_back(rg_config); // Build light list for next step.
-    //       bool already_exists = ITEM_IN_LIST(MqttManagerConfig::nspanel_relay_group_configs, rg_config);
-    //       if (!already_exists) {
-    //         MqttManagerConfig::nspanel_relay_group_configs.push_back(rg_config);
-    //         MqttManagerConfig::_config_added_listener(&MqttManagerConfig::nspanel_relay_group_configs.back());
-    //       }
-    //     }
-    //   } else {
-    //     SPDLOG_ERROR("Failed to get Relay Group configs!");
-    //   }
-    // } catch (std::exception &e) {
-    //   SPDLOG_ERROR("Chaught exception when loading relay groups. Exception: {}", e.what());
-    // }
-
-    // try {
-    //   SPDLOG_DEBUG("Checking for removed relay groups.");
-    //   auto rit = MqttManagerConfig::nspanel_relay_group_configs.begin();
-    //   while (rit != MqttManagerConfig::nspanel_relay_group_configs.end()) {
-    //     bool exists = ITEM_IN_LIST(json_rgs, (*rit));
-    //     if (!exists) {
-    //       SPDLOG_DEBUG("Removing scene config as it doesn't exist in config anymore.");
-    //       MqttManagerConfig::_config_removed_listener(&(*rit));
-    //       MqttManagerConfig::nspanel_relay_group_configs.erase(rit++);
-    //     } else {
-    //       ++rit;
-    //     }
-    //   }
-    // } catch (std::exception &e) {
-    //   SPDLOG_ERROR("Chaught exception when checking for any removed NSPanel relay groups. Exception: {}", e.what());
-    // }
-
-    SPDLOG_DEBUG("Config loaded. Calling listeners.");
-    MqttManagerConfig::_config_loaded_listeners();
-  } catch (const std::exception &e) {
-    SPDLOG_ERROR("Caught exception when trying to process config Django: {}", boost::diagnostic_information(e, true));
-    exit(1);
-  }
 }

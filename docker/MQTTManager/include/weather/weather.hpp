@@ -15,7 +15,7 @@ public:
   /**
    * Load new values from config.
    */
-  static void update_config();
+  static void reload_config();
 
   /**
    * Trigger for events from Home Assistant.
@@ -72,7 +72,6 @@ private:
 
   static inline std::vector<weather_info> _forecast_weather_info;
   static inline std::string _windspeed_unit;
-  static inline std::string _precipitation_unit;
   static inline std::string _current_condition;
   static inline std::tm _current_weather_time;
   static inline int _next_sunrise_hour;
@@ -84,6 +83,16 @@ private:
   static inline float _current_min_temperature;
   static inline float _current_wind_speed;
   static inline float _current_precipitation_probability;
+
+  static inline std::string _outside_temperature_sensor_provider;
+  static inline std::string _outside_temperature_sensor_entity_id;
+  static inline std::string _location_latitude;
+  static inline std::string _location_longitude;
+  static inline std::string _wind_speed_format;
+  static inline std::string _precipitation_unit;
+  static inline uint32_t _update_interval_minutes;
+  static inline std::string _clock_format;
+  static inline std::string _temperature_unit;
 };
 
 #endif // !MQTT_MANAGER_WEATHER

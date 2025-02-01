@@ -32,13 +32,13 @@ RoomEntitiesPage::RoomEntitiesPage(uint32_t page_id, Room *room) {
 void RoomEntitiesPage::reload_config() {
   try {
     SPDLOG_DEBUG("Loading RoomEntitiesPage {}, trying to get settings from DB.", this->_id);
-    // auto db_room = database_manager::database.get<database_manager::RoomEntitiesPage>(this->_id);
+    auto db_room = database_manager::database.get<database_manager::RoomEntitiesPage>(this->_id);
 
     std::lock_guard<std::mutex> mutex_guard(this->_page_settings_mutex);
-    // this->_page_settings = db_room;
+    this->_page_settings = db_room;
 
-    this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/state", MqttManagerConfig::get_settings().manager_address(), this->_id);
-    this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/entity_pages/{}/state", MqttManagerConfig::get_settings().manager_address(), this->_room->get_id(), this->_id);
+    this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/state", MqttManagerConfig::get_settings().manager_address, this->_id);
+    this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/entity_pages/{}/state", MqttManagerConfig::get_settings().manager_address, this->_room->get_id(), this->_id);
     SPDLOG_DEBUG("RoomEntitiesPage {} loaded successfully.", this->_id);
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());

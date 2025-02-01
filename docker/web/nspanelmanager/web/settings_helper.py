@@ -36,7 +36,7 @@ default_settings = {
     "reverse_color_temp": False,
     "screen_dim_level": 100,
     "screensaver_activation_timeout": 30000,
-    "screensaver_dim_level": 0,
+    "screensaver_dim_level": 1,
     "screensaver_mode": "with_background",
     "special_mode_release_time": 5000,
     "special_mode_trigger_time": 300,

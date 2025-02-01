@@ -11,7 +11,15 @@
 
 class HomeAssistantManager {
 public:
+  static void init(); // Start a new thread and connect to HA.
+
   static void connect();
+
+  /*
+   * Reload config from DB and if needed, reconnect.
+   */
+  static void reload_config();
+
   static void send_json(nlohmann::json &data); // Helper to convert from JSON to std::string and then send
 
   /**
@@ -62,6 +70,10 @@ private:
   static inline bool _authenticated = false;
   static inline long _next_message_id = 1;
   static inline long _all_statues_request_message_id;
+
+  static inline std::mutex _settings_mutex;
+  static inline std::string _home_assistant_address;
+  static inline std::string _home_assistant_token;
 };
 
 #endif // !MQTT_MANAGER_HOME_ASSISTANT_MANAGER_HPP

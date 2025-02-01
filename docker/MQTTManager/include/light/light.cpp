@@ -18,17 +18,11 @@ Light::Light(uint32_t light_id) {
   this->reload_config();
 
   // Build MQTT Topics
-  std::string mqtt_base_topic = "nspanel/entities/light/";
-  mqtt_base_topic.append(std::to_string(this->_id));
-  mqtt_base_topic.append("/");
-  this->_mqtt_brightness_topic = std::string(mqtt_base_topic);
-  this->_mqtt_brightness_topic.append("state_brightness_pct");
-  this->_mqtt_kelvin_topic = std::string(mqtt_base_topic);
-  this->_mqtt_kelvin_topic.append("state_kelvin");
-  this->_mqtt_hue_topic = std::string(mqtt_base_topic);
-  this->_mqtt_hue_topic.append("state_hue");
-  this->_mqtt_saturation_topic = std::string(mqtt_base_topic);
-  this->_mqtt_saturation_topic.append("state_sat");
+  std::string mqtt_base_topic = fmt::format("nspanel/entities/light/{}/", this->_id);
+  this->_mqtt_brightness_topic = fmt::format("{}/state_brightness_pct", mqtt_base_topic);
+  this->_mqtt_kelvin_topic = fmt::format("{}/state_kelvin", mqtt_base_topic);
+  this->_mqtt_hue_topic = fmt::format("{}/state_hue", mqtt_base_topic);
+  this->_mqtt_saturation_topic = fmt::format("{}/state_sat", mqtt_base_topic);
 
   this->_current_state = false;
   this->_current_brightness = 50;
@@ -43,7 +37,7 @@ Light::Light(uint32_t light_id) {
   this->_requested_hue = 50;
   CommandManager::attach_callback(boost::bind(&Light::command_callback, this, _1));
 
-  SPDLOG_DEBUG("Light {}::{} base loaded, can dim: {}, can color temp: {}, can_rgb: {}. Controlled from main page? {}.", this->_id, this->_name, this->_can_dim ? "yes" : "no", this->_can_color_temperature ? "yes" : "no", this->_can_rgb ? "yes" : "no", this->_controlled_from_main_page ? "Yes" : "No");
+  SPDLOG_DEBUG("Light {}::{} base loaded, can dim: {}, can color temp: {}, can_rgb: {}. Controlled from main page? {}. Entities page ID {} in slot {}.", this->_id, this->_name, this->_can_dim ? "yes" : "no", this->_can_color_temperature ? "yes" : "no", this->_can_rgb ? "yes" : "no", this->_controlled_from_main_page ? "Yes" : "No", this->_entity_page_id, this->_entity_page_slot);
 }
 
 MQTT_MANAGER_LIGHT_TYPE Light::get_light_type() {
@@ -264,11 +258,11 @@ void Light::command_callback(NSPanelMQTTManagerCommand &command) {
       }
       if (cmd.has_color_temperature()) {
         // Convert color temperature (0-100) to actual color temperature in kelvin.
-        uint32_t color_temperature_kelvin = cmd.color_temperature() * ((MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min()) / 100);
-        if (MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
-          color_temperature_kelvin = MqttManagerConfig::get_settings().color_temp_max() - color_temperature_kelvin;
+        uint32_t color_temperature_kelvin = cmd.color_temperature() * ((MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min) / 100);
+        if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+          color_temperature_kelvin = MqttManagerConfig::get_settings().color_temp_max - color_temperature_kelvin;
         } else {
-          color_temperature_kelvin += MqttManagerConfig::get_settings().color_temp_min();
+          color_temperature_kelvin += MqttManagerConfig::get_settings().color_temp_min;
         }
         this->set_color_temperature(color_temperature_kelvin, false);
       }

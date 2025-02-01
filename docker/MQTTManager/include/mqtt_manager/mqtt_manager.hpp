@@ -22,7 +22,15 @@ struct MQTTMessage {
 
 class MQTT_Manager {
 public:
+  static void init(); // Load config and connect to MQTT
+
   static void connect();
+
+  /*
+   * Reload config from DB and reconnect if needed.
+   */
+  static void reload_config();
+
   static bool is_connected();
 
   template <typename CALLBACK_BIND>
@@ -97,16 +105,21 @@ private:
   static inline std::mutex _mqtt_client_mutex;
   static inline std::mutex _mqtt_message_mutex;
   static inline std::list<mqtt::message_ptr> _mqtt_messages_buffer;
-  static const std::vector<std::string> _get_subscribe_topics();
-  static const std::vector<int> _get_subscribe_topics_qos();
 
-  static void _resubscribe();
+  static void _reconnect_mqtt_client();
 
   static inline boost::ptr_map<std::string, boost::signals2::signal<void(std::string, std::string)>> _mqtt_callbacks;
   static inline std::unordered_map<std::string, int> _subscribed_topics;
 
   static void _process_mqtt_messages();
   static void _process_mqtt_command(nlohmann::json &data);
+
+  static inline std::atomic<bool> _reconnect_on_disconnect = true;
+  static inline std::mutex _settings_mutex;
+  static inline std::string _mqtt_address;
+  static inline uint16_t _mqtt_port;
+  static inline std::string _mqtt_username;
+  static inline std::string _mqtt_password;
 };
 
 #endif // !MQTT_MANAGER_HPP

@@ -14,6 +14,12 @@
 class OpenhabManager {
 public:
   static void connect();
+
+  /*
+   * Reload config values from database.
+   */
+  static void reload_config();
+
   static void send_json(nlohmann::json &data); // Helper to convert from JSON to std::string and then send
 
   /**
@@ -72,6 +78,12 @@ private:
   static void _process_websocket_message(const std::string &data);
 
   static inline bool _authenticated = false;
+
+  static inline std::mutex _setting_values_mutex; // Mutex to prevent simultaneous access to settings
+  static inline std::string _openhab_address;     // Address of OpenHAB server
+  static inline std::string _openhab_token;       // Access token to authenticate to OpenHAB
+
+  static inline std::atomic<bool> _send_keepalive_messages; // Bool to be able to gracefully shutdown keepalive thread.
 };
 
 #endif // !MQTT_MANAGER_HOME_ASSISTANT_MANAGER_HPP

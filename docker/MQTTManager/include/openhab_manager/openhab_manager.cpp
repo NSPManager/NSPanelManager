@@ -13,17 +13,25 @@
 #include <nlohmann/detail/json_pointer.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
+#include <sys/socket.h>
 #include <thread>
 
 void OpenhabManager::connect() {
   SPDLOG_DEBUG("Initializing Openhab Manager component.");
   ix::initNetSystem();
+  OpenhabManager::reload_config();
 
   if (OpenhabManager::_websocket == nullptr) {
     OpenhabManager::_websocket = new ix::WebSocket();
   }
 
-  std::string openhab_websocket_url = MqttManagerConfig::get_private_settings().openhab_address;
+  std::lock_guard<std::mutex> lock_guard(OpenhabManager::_setting_values_mutex);
+  std::string openhab_websocket_url = OpenhabManager::_openhab_address;
+  if (openhab_websocket_url.empty()) {
+    SPDLOG_ERROR("No OpenHAB address configured, will not continue to load OpenHAB component.");
+    return;
+  }
+
   openhab_websocket_url.append("/ws");
 
   boost::algorithm::replace_first(openhab_websocket_url, "https://", "wss://");
@@ -39,7 +47,7 @@ void OpenhabManager::connect() {
   SPDLOG_INFO("Will connect to Openhab websocket at {}", openhab_websocket_url);
   SPDLOG_DEBUG("Appending Openhab access token to url.");
   openhab_websocket_url.append("?accessToken=");
-  openhab_websocket_url.append(MqttManagerConfig::get_private_settings().openhab_token);
+  openhab_websocket_url.append(OpenhabManager::_openhab_token);
   OpenhabManager::_websocket->setUrl(openhab_websocket_url);
   OpenhabManager::_websocket->setOnMessageCallback(&OpenhabManager::_websocket_message_callback);
   OpenhabManager::_websocket->setPingInterval(10);
@@ -54,6 +62,37 @@ void OpenhabManager::connect() {
   filter["topic"] = "openhab/websocket/filter/type";
   filter["payload"] = "[\"ItemStateEvent\", \"ItemStateChangedEvent\", \"ItemStateUpdatedEvent\"]";
   OpenhabManager::send_json(filter);
+}
+
+void OpenhabManager::reload_config() {
+  bool reconnect = false;
+  {
+    std::lock_guard<std::mutex> lock_guard(OpenhabManager::_setting_values_mutex);
+    std::string address = MqttManagerConfig::get_setting_with_default("openhab_address", "");
+    std::string token = MqttManagerConfig::get_setting_with_default("openhab_token", "");
+
+    if (OpenhabManager::_openhab_address.compare(address) != 0 || OpenhabManager::_openhab_token.compare(token) != 0) {
+      OpenhabManager::_openhab_address = address;
+      OpenhabManager::_openhab_token = token;
+      reconnect = true;
+    }
+  }
+
+  if (reconnect) {
+    SPDLOG_INFO("Will connect to OpenHAB with new settings. Server address: {}", OpenhabManager::_openhab_address);
+    OpenhabManager::_send_keepalive_messages = false;
+    while (OpenhabManager::_keepalive_thread.joinable()) {
+      SPDLOG_DEBUG("Waiting 500ms and checking if keepalive thread is still alive.");
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+    OpenhabManager::_send_keepalive_messages = true; // Re-enable function once thread has exited.
+    SPDLOG_DEBUG("Keepalive thread exited, start new connection.");
+    // Thread has exited, start new connection.
+    if (OpenhabManager::_websocket != nullptr) {
+      OpenhabManager::_websocket->close();
+      OpenhabManager::connect();
+    }
+  }
 }
 
 void OpenhabManager::_websocket_message_callback(const ix::WebSocketMessagePtr &msg) {
@@ -129,13 +168,14 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
     return "";
   }
 
+  std::lock_guard<std::mutex> lock_guard(OpenhabManager::_setting_values_mutex);
   std::string response_data;
-  std::string request_url = MqttManagerConfig::get_private_settings().openhab_address;
+  std::string request_url = OpenhabManager::_openhab_address;
   request_url.append("/rest/items/");
   request_url.append(item);
 
   std::string bearer_token = "Authorization: Bearer ";
-  bearer_token.append(MqttManagerConfig::get_private_settings().openhab_token);
+  bearer_token.append(OpenhabManager::_openhab_token);
 
   struct curl_slist *headers = NULL;
   headers = curl_slist_append(headers, bearer_token.c_str());

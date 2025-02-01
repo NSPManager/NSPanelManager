@@ -1,4 +1,5 @@
 #include "home_assistant_manager.hpp"
+#include "light/home_assistant_light.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -27,16 +28,24 @@ void HomeAssistantManager::connect() {
   SPDLOG_DEBUG("Initializing Home Assistant Manager component.");
   ix::initNetSystem();
 
+  HomeAssistantManager::reload_config();
+
   bool init_success = false;
   while (!init_success) {
     try {
+      std::lock_guard<std::mutex> lock_guard(HomeAssistantManager::_settings_mutex);
       if (HomeAssistantManager::_websocket == nullptr) {
         HomeAssistantManager::_websocket = new ix::WebSocket();
         HomeAssistantManager::_websocket->setPingInterval(30);
       }
 
-      std::string home_assistant_websocket_url = MqttManagerConfig::get_private_settings().home_assistant_address;
-      if (MqttManagerConfig::get_settings().is_home_assistant_addon()) {
+      std::string home_assistant_websocket_url = HomeAssistantManager::_home_assistant_address;
+      if (home_assistant_websocket_url.empty()) {
+        SPDLOG_ERROR("No Home Assistant address configured. Will not continue to load Home Assistant component.");
+        return;
+      }
+
+      if (MqttManagerConfig::get_settings().is_home_assistant_addon) {
         home_assistant_websocket_url.append("/core/websocket");
       } else {
         home_assistant_websocket_url.append("/api/websocket");
@@ -44,7 +53,7 @@ void HomeAssistantManager::connect() {
       boost::algorithm::replace_first(home_assistant_websocket_url, "https://", "wss://");
       boost::algorithm::replace_first(home_assistant_websocket_url, "http://", "ws://");
       if (boost::algorithm::starts_with(home_assistant_websocket_url, "wss://")) {
-        SPDLOG_DEBUG("Settings TLS options");
+        SPDLOG_DEBUG("Setting TLS options");
         ix::SocketTLSOptions tls_options;
         tls_options.tls = true;
         tls_options.caFile = "NONE";
@@ -60,6 +69,29 @@ void HomeAssistantManager::connect() {
     } catch (std::exception &e) {
       SPDLOG_ERROR("Caught exception: {}", e.what());
       SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+    }
+  }
+}
+
+void HomeAssistantManager::reload_config() {
+  bool reconnect = false;
+  {
+    std::lock_guard<std::mutex> lock_guard(HomeAssistantManager::_settings_mutex);
+    std::string address = MqttManagerConfig::get_setting_with_default("home_assistant_address", "");
+    std::string token = MqttManagerConfig::get_setting_with_default("home_assistant_token", "");
+
+    if (HomeAssistantManager::_home_assistant_address.compare(address) != 0 || HomeAssistantManager::_home_assistant_token.compare(token) != 0) {
+      HomeAssistantManager::_home_assistant_address = address;
+      HomeAssistantManager::_home_assistant_token = token;
+      reconnect = true;
+    }
+  }
+
+  if (reconnect) {
+    SPDLOG_INFO("Will connect to Home Assistant with new settings. Server address: {}", HomeAssistantManager::_home_assistant_address);
+    if (HomeAssistantManager::_websocket != nullptr) {
+      HomeAssistantManager::_websocket->close();
+      HomeAssistantManager::connect();
     }
   }
 }
@@ -131,9 +163,10 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
 }
 
 void HomeAssistantManager::_send_auth() {
+  std::lock_guard<std::mutex> lock_guard(HomeAssistantManager::_settings_mutex);
   nlohmann::json auth_data;
   auth_data["type"] = "auth";
-  auth_data["access_token"] = MqttManagerConfig::get_private_settings().home_assistant_token;
+  auth_data["access_token"] = HomeAssistantManager::_home_assistant_token;
   std::string buffer = auth_data.dump();
 
   HomeAssistantManager::_send_string(buffer);

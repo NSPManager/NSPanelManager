@@ -42,14 +42,14 @@ void Room::reload_config() {
     try {
       auto db_room = database_manager::database.get<database_manager::Room>(this->_id);
       this->_name = db_room.friendly_name;
-      this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/state", MqttManagerConfig::get_settings().manager_address(), this->_id);
+      this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/state", MqttManagerConfig::get_settings().manager_address, this->_id);
 
       std::lock_guard<std::mutex> mutex_guard(this->_entities_pages_mutex);
       SPDLOG_DEBUG("Loaded config for room {}::{}, loading room entity pages.", this->_id, this->_name);
-      // auto room_entities_pages = database_manager::database.get_all<database_manager::RoomEntitiesPage>(sqlite_orm::where(sqlite_orm::c(&database_manager::RoomEntitiesPage::room_id) == this->_id));
-      // for (auto &entity_page : room_entities_pages) {
-      //   this->_entity_pages.push_back(std::shared_ptr<RoomEntitiesPage>(new RoomEntitiesPage(entity_page.id, this)));
-      // }
+      auto room_entities_pages = database_manager::database.get_all<database_manager::RoomEntitiesPage>(sqlite_orm::where(sqlite_orm::c(&database_manager::RoomEntitiesPage::room_id) == this->_id));
+      for (auto &entity_page : room_entities_pages) {
+        this->_entity_pages.push_back(std::shared_ptr<RoomEntitiesPage>(new RoomEntitiesPage(entity_page.id, this)));
+      }
       SPDLOG_DEBUG("Created {} RoomEntitiesPages for room {}::{}.", this->_entity_pages.size(), this->_id, this->_name);
 
       SPDLOG_TRACE("Room {}::{} initialized with status topic '{}'.", this->_id, this->_name, this->_mqtt_state_topic);
@@ -113,7 +113,7 @@ void Room::page_changed_callback(RoomEntitiesPage *page) {
 
 void Room::command_callback(NSPanelMQTTManagerCommand &command) {
   if (command.has_first_page_turn_on() && (command.first_page_turn_on().selected_room() == this->_id || command.first_page_turn_on().global())) {
-    if (MqttManagerConfig::get_settings().optimistic_mode()) {
+    if (MqttManagerConfig::get_settings().optimistic_mode) {
       this->_send_status_updates = false;
     }
 
@@ -162,7 +162,7 @@ void Room::command_callback(NSPanelMQTTManagerCommand &command) {
       lights_list[i]->command_callback(cmd);
     }
 
-    if (MqttManagerConfig::get_settings().optimistic_mode()) {
+    if (MqttManagerConfig::get_settings().optimistic_mode) {
       this->_send_room_state_update();
       this->_send_status_updates = true;
     }
@@ -260,9 +260,9 @@ void Room::_send_room_state_update() {
 
   if (num_lights_total > 0) {
     float average_kelvin = (float)total_kelvin_level_all / num_lights_total;
-    average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-    uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-    if (MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+    average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
+    uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
+    if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
       kelvin_pct = 100 - kelvin_pct;
     }
 
@@ -277,9 +277,9 @@ void Room::_send_room_state_update() {
 
   if (num_lights_table_on > 0) {
     float average_kelvin = (float)total_kelvin_table / num_lights_table_on;
-    average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-    uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-    if (MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+    average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
+    uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
+    if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
       kelvin_pct = 100 - kelvin_pct;
     }
 
@@ -293,9 +293,9 @@ void Room::_send_room_state_update() {
 
   if (num_lights_ceiling_on > 0) {
     float average_kelvin = (float)total_kelvin_ceiling / num_lights_ceiling_on;
-    average_kelvin -= MqttManagerConfig::get_settings().color_temp_min();
-    uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min())) * 100;
-    if (MqttManagerConfig::get_settings().reverse_color_temperature_slider()) {
+    average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
+    uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
+    if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
       kelvin_pct = 100 - kelvin_pct;
     }
 

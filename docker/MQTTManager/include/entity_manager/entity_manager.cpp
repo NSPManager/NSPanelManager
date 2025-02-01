@@ -55,12 +55,12 @@ void EntityManager::init() {
 
 void EntityManager::load_entities() {
   SPDLOG_INFO("Loading config...");
-  EntityManager::_weather_manager.update_config();
+  EntityManager::_weather_manager.reload_config();
 
-  EntityManager::load_rooms();
   EntityManager::load_scenes();
-  EntityManager::load_nspanels();
   EntityManager::load_lights();
+  EntityManager::load_nspanels();
+  EntityManager::load_rooms(); // Rooms are loaded last as to make all room components be able to find entities of other types.
 
   SPDLOG_INFO("Total loaded NSPanels: {}", EntityManager::_nspanels.size());
   SPDLOG_INFO("Total loaded Rooms: {}", EntityManager::_rooms.size());
@@ -99,10 +99,12 @@ void EntityManager::load_rooms() {
     auto existing_room = EntityManager::get_room(room_id);
     if (existing_room != nullptr) [[likely]] {
       existing_room->reload_config();
+      existing_room->post_init();
     } else {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
       auto room = std::shared_ptr<Room>(new Room(room_id));
       SPDLOG_INFO("Room {}::{} was found in database but not in config. Creating room.", room->get_id(), room->get_name());
+      room->post_init();
       EntityManager::_rooms.push_back(room);
     }
   }
@@ -290,7 +292,7 @@ bool EntityManager::mqtt_callback(const std::string &topic, const std::string &p
 bool EntityManager::_process_message(const std::string &topic, const std::string &payload) {
   try {
     if (topic.compare("nspanel/mqttmanager/command") == 0) {
-      SPDLOG_TRACE("Received command payload: {}", payload);
+      SPDLOG_DEBUG("Received command payload: {}", payload);
       nlohmann::json data = nlohmann::json::parse(payload);
       if (!data.contains("mac_origin")) {
         SPDLOG_ERROR("Command payload did not contain a 'mac_origin' attribute. Will cancel processing.");

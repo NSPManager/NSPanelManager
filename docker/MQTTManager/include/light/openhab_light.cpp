@@ -87,7 +87,7 @@ void OpenhabLight::send_state_update_to_controller() {
     payload_data["value"] = this->_requested_state ? "ON" : "OFF";
     service_data["payload"] = payload_data.dump();
     OpenhabManager::send_json(service_data);
-    if (MqttManagerConfig::get_settings().optimistic_mode()) {
+    if (MqttManagerConfig::get_settings().optimistic_mode) {
       this->_current_state = this->_requested_state;
     }
     return; // The light is a switch, it can't do anything more than ON/OFF. Exit function early.
@@ -95,7 +95,7 @@ void OpenhabLight::send_state_update_to_controller() {
 
   // If the light is off but in RGB mode and the user has configured the lights to turn on in "color temp" mode, force it back to color temp mode.
   bool force_send_kelvin = false;
-  if (this->_requested_state && !this->_current_state && MqttManagerConfig::get_settings().light_turn_on_behavior() == MQTTManagerSettings_turn_on_behavior_color_temperature && this->_can_color_temperature && (this->_requested_mode != this->_current_mode && this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT)) {
+  if (this->_requested_state && !this->_current_state && MqttManagerConfig::get_settings().light_turn_on_behaviour == LightTurnOnBehaviour::COLOR_TEMPERATURE && this->_can_color_temperature && (this->_requested_mode != this->_current_mode && this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT)) {
     this->_requested_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
     force_send_kelvin = true;
   }
@@ -106,7 +106,7 @@ void OpenhabLight::send_state_update_to_controller() {
       payload_data["value"] = 0;
       service_data["payload"] = payload_data.dump();
       OpenhabManager::send_json(service_data);
-      if (MqttManagerConfig::get_settings().optimistic_mode()) {
+      if (MqttManagerConfig::get_settings().optimistic_mode) {
         this->_current_state = false;
       }
     } else {
@@ -118,15 +118,15 @@ void OpenhabLight::send_state_update_to_controller() {
       payload_data["value"] = this->_requested_brightness;
       service_data["payload"] = payload_data.dump();
       OpenhabManager::send_json(service_data);
-      if (MqttManagerConfig::get_settings().optimistic_mode()) {
+      if (MqttManagerConfig::get_settings().optimistic_mode) {
         this->_current_brightness = this->_requested_brightness;
       }
     }
 
     if ((this->_can_color_temperature && this->_requested_color_temperature != this->_current_color_temperature) || force_send_kelvin) {
       // Calculate color temp percentage
-      uint16_t kelvin_max_floored = MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min();
-      uint16_t kelvin_floored = this->_requested_color_temperature - MqttManagerConfig::get_settings().color_temp_min();
+      uint16_t kelvin_max_floored = MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min;
+      uint16_t kelvin_floored = this->_requested_color_temperature - MqttManagerConfig::get_settings().color_temp_min;
       uint8_t color_temp_percentage = 100 - int(((float)kelvin_floored / (float)kelvin_max_floored) * 100);
       if (color_temp_percentage > 100) {
         color_temp_percentage = 100;
@@ -140,7 +140,7 @@ void OpenhabLight::send_state_update_to_controller() {
       service_data["payload"] = payload_data.dump();
       this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
       OpenhabManager::send_json(service_data);
-      if (MqttManagerConfig::get_settings().optimistic_mode()) {
+      if (MqttManagerConfig::get_settings().optimistic_mode) {
         this->_current_color_temperature = this->_requested_color_temperature;
       }
     }
@@ -152,14 +152,14 @@ void OpenhabLight::send_state_update_to_controller() {
     service_data["payload"] = payload_data.dump();
     this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
     OpenhabManager::send_json(service_data);
-    if (MqttManagerConfig::get_settings().optimistic_mode()) {
+    if (MqttManagerConfig::get_settings().optimistic_mode) {
       this->_current_hue = this->_requested_hue;
       this->_current_saturation = this->_requested_saturation;
       this->_current_brightness = this->_requested_brightness;
     }
   }
 
-  if (MqttManagerConfig::get_settings().optimistic_mode()) {
+  if (MqttManagerConfig::get_settings().optimistic_mode) {
     this->_entity_changed_callbacks(this);
   }
 }
@@ -232,8 +232,8 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
           color_temperature = 100;
         }
         // Convert from percentage to actual color temp.
-        unsigned long kelvin_max_floored = MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min();
-        uint16_t kelvin = MqttManagerConfig::get_settings().color_temp_min() + int((color_temperature / (double)100) * kelvin_max_floored);
+        unsigned long kelvin_max_floored = MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min;
+        uint16_t kelvin = MqttManagerConfig::get_settings().color_temp_min + int((color_temperature / (double)100) * kelvin_max_floored);
 
         this->_current_color_temperature = std::round(kelvin);
         this->_requested_color_temperature = this->_current_color_temperature;
@@ -331,8 +331,8 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         color_temperature = 100;
       }
       // Convert from percentage to actual color temp.
-      unsigned long kelvin_max_floored = MqttManagerConfig::get_settings().color_temp_max() - MqttManagerConfig::get_settings().color_temp_min();
-      uint16_t kelvin = MqttManagerConfig::get_settings().color_temp_min() + int((color_temperature / (double)100) * kelvin_max_floored);
+      unsigned long kelvin_max_floored = MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min;
+      uint16_t kelvin = MqttManagerConfig::get_settings().color_temp_min + int((color_temperature / (double)100) * kelvin_max_floored);
 
       this->_current_color_temperature = kelvin;
       this->_requested_color_temperature = this->_current_color_temperature;
