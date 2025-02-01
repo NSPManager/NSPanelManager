@@ -33,11 +33,6 @@ public:
   static void load_entities();
 
   /**
-   * Call post-initialized on all entities.
-   */
-  static void post_init_entities();
-
-  /**
    * Attach callback for when a new entity is added
    */
   static void attach_entity_added_listener(void (*listener)(std::shared_ptr<MqttManagerEntity>));
@@ -67,6 +62,11 @@ public:
    */
   static void load_lights();
 
+  /*
+   * Load all scenes from the DB and remove any existing scene that no longer exist.
+   */
+  static void load_scenes();
+
   /**
    * Get a room with the given ID if it existing. Otherwise returns nullptr.
    */
@@ -76,11 +76,6 @@ public:
    * Get all currently registered rooms
    */
   static std::vector<std::shared_ptr<Room>> get_all_rooms();
-
-  /**
-   * Create and add a scene to the manager
-   */
-  static void add_scene(nlohmann::json &config);
 
   /**
    * Get an item by the specified type that has the specified ID.

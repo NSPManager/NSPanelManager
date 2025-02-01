@@ -160,11 +160,6 @@ public:
   bool can_rgb();
 
   /**
-   * Post init, attach to room.
-   */
-  void post_init();
-
-  /**
    * Attach a callback for when the light is destroyed
    */
   void attach_delete_callback(void (*callback)(Light *light));

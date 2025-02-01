@@ -45,7 +45,8 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 void EntityManager::init() {
   // MQTT_Manager::attach_observer(EntityManager::mqtt_callback);
   WebsocketServer::attach_message_callback(EntityManager::websocket_callback);
-  MqttManagerConfig::attach_config_loaded_listener(EntityManager::post_init_entities);
+  // TODO: On 'reload config signal', reload the config.
+  // MqttManagerConfig::attach_config_loaded_listener(EntityManager::post_init_entities);
   MQTT_Manager::subscribe("nspanel/mqttmanager/command", &EntityManager::mqtt_topic_callback);
   MQTT_Manager::subscribe("nspanel/+/status", &EntityManager::mqtt_topic_callback);
 
@@ -53,7 +54,11 @@ void EntityManager::init() {
 }
 
 void EntityManager::load_entities() {
+  SPDLOG_INFO("Loading config...");
+  EntityManager::_weather_manager.update_config();
+
   EntityManager::load_rooms();
+  EntityManager::load_scenes();
   EntityManager::load_nspanels();
   EntityManager::load_lights();
 
@@ -140,7 +145,7 @@ void EntityManager::load_lights() {
   auto light_ids = database_manager::database.select(&database_manager::Light::id, sqlite_orm::from<database_manager::Light>());
   SPDLOG_INFO("Loading {} lights.", light_ids.size());
 
-  // Check if any existing NSPanel has been removed.
+  // Check if any existing light has been removed.
   {
     auto existing_lights = EntityManager::get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
     for (auto it = existing_lights.begin(); it != existing_lights.end(); it++) {
@@ -155,7 +160,7 @@ void EntityManager::load_lights() {
     }
   }
 
-  // Cause existing NSPanel to reload config or add a new NSPanel if it does not exist.
+  // Cause existing lights to reload config or add a new light if it does not exist.
   for (auto &light_id : light_ids) {
     auto existing_light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, light_id);
     if (existing_light != nullptr) [[likely]] {
@@ -184,6 +189,58 @@ void EntityManager::load_lights() {
   }
 }
 
+void EntityManager::load_scenes() {
+  auto scene_ids = database_manager::database.select(&database_manager::Scene::id, sqlite_orm::from<database_manager::Scene>());
+  SPDLOG_INFO("Loading {} scenes.", scene_ids.size());
+
+  // Check if any existing scene has been removed.
+  {
+    auto existing_scenes = EntityManager::get_all_entities_by_type<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE);
+    for (auto it = existing_scenes.begin(); it != existing_scenes.end(); it++) {
+      auto scene_id_slot = std::find_if(scene_ids.begin(), scene_ids.end(), [&it](auto id) {
+        return (*it)->get_id() == id;
+      });
+      if (scene_id_slot == scene_ids.end()) {
+        // Room was not found in list of IDs in the DB, remove the loaded room.
+        SPDLOG_INFO("Scene {}::{} was found in config but not in database. Removing scene.", (*it)->get_id(), (*it)->get_name());
+        EntityManager::remove_entity((*it));
+      }
+    }
+  }
+
+  // Cause existing NSPanel to reload config or add a new NSPanel if it does not exist.
+  for (auto &scene_id : scene_ids) {
+    auto existing_scene = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, scene_id);
+    if (existing_scene != nullptr) [[likely]] {
+      existing_scene->reload_config();
+    } else {
+      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+
+      try {
+        auto scene_settings = database_manager::database.get<database_manager::Scene>(scene_id);
+        if (scene_settings.scene_type.compare("home_assistant") == 0) {
+          std::shared_ptr<HomeAssistantScene> scene = std::shared_ptr<HomeAssistantScene>(new HomeAssistantScene(scene_settings.id));
+          SPDLOG_INFO("Scene {}::{} was found in database but not in config. Creating scene.", scene->get_id(), scene->get_name());
+          EntityManager::_entities.push_back(scene);
+        } else if (scene_settings.scene_type.compare("openhab") == 0) {
+          std::shared_ptr<OpenhabScene> scene = std::shared_ptr<OpenhabScene>(new OpenhabScene(scene_settings.id));
+          SPDLOG_INFO("Scene {}::{} was found in database but not in config. Creating scene.", scene->get_id(), scene->get_name());
+          EntityManager::_entities.push_back(scene);
+        } else if (scene_settings.scene_type.compare("nspm_scene") == 0) {
+          std::shared_ptr<NSPMScene> scene = std::shared_ptr<NSPMScene>(new NSPMScene(scene_settings.id));
+          SPDLOG_INFO("Scene {}::{} was found in database but not in config. Creating scene.", scene->get_id(), scene->get_name());
+          EntityManager::_entities.push_back(scene);
+        } else {
+          SPDLOG_ERROR("Unknown scene type '{}'. Will ignore entity.", scene_settings.scene_type);
+        }
+      } catch (std::exception &e) {
+        SPDLOG_ERROR("Caught exception: {}", e.what());
+        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+      }
+    }
+  }
+}
+
 std::shared_ptr<Room> EntityManager::get_room(uint32_t room_id) {
   try {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
@@ -202,77 +259,6 @@ std::shared_ptr<Room> EntityManager::get_room(uint32_t room_id) {
 std::vector<std::shared_ptr<Room>> EntityManager::get_all_rooms() {
   std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
   return EntityManager::_rooms;
-}
-
-void EntityManager::add_scene(nlohmann::json &config) {
-  try {
-    std::shared_ptr<Scene> scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, config.at("scene_id"));
-    if (scene == nullptr) {
-      std::string scene_type = config["scene_type"];
-      if (scene_type.compare("nspm_scene") == 0) {
-        std::shared_ptr<Scene> scene = std::shared_ptr<Scene>(new NSPMScene(config));
-        EntityManager::_entities.push_back(scene);
-      } else if (scene_type.compare("home_assistant") == 0) {
-        std::shared_ptr<Scene> scene = std::shared_ptr<Scene>(new HomeAssistantScene(config));
-        EntityManager::_entities.push_back(scene);
-      } else if (scene_type.compare("openhab") == 0) {
-        std::shared_ptr<Scene> scene = std::shared_ptr<Scene>(new OpenhabScene(config));
-        EntityManager::_entities.push_back(scene);
-      }
-    } else {
-      scene->update_config(config);
-    }
-  } catch (std::exception &e) {
-    SPDLOG_ERROR("Caught exception: {}", e.what());
-    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
-  }
-}
-
-void EntityManager::post_init_entities() {
-  SPDLOG_INFO("New config loaded, processing changes.");
-  EntityManager::_weather_manager.update_config();
-
-  {
-    // Process any loaded Scenes
-    SPDLOG_DEBUG("Updating scenes.");
-    std::list<int> scene_ids;
-    for (nlohmann::json &config : MqttManagerConfig::scenes_configs) {
-      EntityManager::add_scene(config);
-      scene_ids.push_back(config["scene_id"]);
-    }
-    SPDLOG_DEBUG("Existing scenes updated.");
-
-    // Check for any removed lights
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-    SPDLOG_DEBUG("Checking for removed scenes.");
-    for (int i = 0; i < EntityManager::_entities.size(); i++) {
-      auto rit = EntityManager::_entities[i];
-      if (rit->get_type() == MQTT_MANAGER_ENTITY_TYPE::SCENE) {
-        bool exists = false;
-        for (int scene_id : scene_ids) {
-          if (scene_id == rit->get_id()) {
-            exists = true;
-            break;
-          }
-        }
-
-        if (!exists) {
-          SPDLOG_DEBUG("Removing scene with id {} as it doesn't exist in config anymore.", rit->get_id());
-          EntityManager::_entities.erase(EntityManager::_entities.begin() + i);
-          SPDLOG_DEBUG("Relay group removed successfully.");
-        }
-      }
-    }
-  }
-
-  {
-    SPDLOG_INFO("Performing post init on {} entities.", EntityManager::_entities.size());
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-    for (auto entity : EntityManager::_entities) {
-      SPDLOG_DEBUG("Performing PostInit on entity type {} with id {}", static_cast<int>(entity->get_type()), entity->get_id());
-      entity->post_init();
-    }
-  }
 }
 
 void EntityManager::remove_entity(std::shared_ptr<MqttManagerEntity> entity) {

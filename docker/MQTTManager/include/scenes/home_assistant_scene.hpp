@@ -5,8 +5,8 @@
 
 class HomeAssistantScene : public Scene {
 public:
-  HomeAssistantScene(nlohmann::json &data);
-  void update_config(nlohmann::json &config);
+  HomeAssistantScene(uint32_t id);
+  void reload_config();
   void activate();
   void save();
   void remove();

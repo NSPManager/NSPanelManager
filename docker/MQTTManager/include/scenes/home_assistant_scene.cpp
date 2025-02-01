@@ -1,3 +1,4 @@
+#include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include <curl/curl.h>
@@ -6,22 +7,28 @@
 #include <nlohmann/json_fwd.hpp>
 #include <scenes/home_assistant_scene.hpp>
 #include <spdlog/spdlog.h>
+#include <system_error>
 
-HomeAssistantScene::HomeAssistantScene(nlohmann::json &data) {
-  this->_id = data["scene_id"];
-  this->update_config(data);
+HomeAssistantScene::HomeAssistantScene(uint32_t id) {
+  this->_id = id;
+  this->reload_config();
 }
 
-void HomeAssistantScene::update_config(nlohmann::json &data) {
-  this->_name = data["scene_name"];
-  if (!data["room_id"].is_null()) {
-    this->_is_global_scene = false;
-    this->_room_id = data["room_id"];
-  } else {
-    this->_is_global_scene = true;
+void HomeAssistantScene::reload_config() {
+  try {
+    auto scene_config = database_manager::database.get<database_manager::Scene>(this->_id);
+    this->_name = scene_config.friendly_name;
+    this->_entity_id = scene_config.backend_name;
+    if (scene_config.room_id == nullptr) {
+      this->_is_global_scene = true;
+    } else {
+      this->_is_global_scene = false;
+      this->_room_id = *scene_config.room_id;
+    }
+    SPDLOG_DEBUG("Loaded Home Assistant scene {}::{}.", this->_id, this->_name);
+  } catch (std::system_error &ex) {
+    SPDLOG_ERROR("Failed to reload config for scene {}::{}.", this->_id, this->_name);
   }
-  this->_entity_id = data["entity_name"];
-  SPDLOG_DEBUG("Loaded Home Assistant scene {}::{}.", this->_id, this->_name);
 }
 
 void HomeAssistantScene::activate() {

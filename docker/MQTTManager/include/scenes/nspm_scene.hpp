@@ -21,8 +21,8 @@ struct LightState {
 
 class NSPMScene : public Scene {
 public:
-  NSPMScene(nlohmann::json &data);
-  void update_config(nlohmann::json &config);
+  NSPMScene(uint32_t id);
+  void reload_config();
   void activate();
   void save();
   void remove();

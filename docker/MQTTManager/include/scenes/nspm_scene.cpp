@@ -1,3 +1,4 @@
+#include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "light/light.hpp"
@@ -10,33 +11,39 @@
 #include <scenes/nspm_scene.hpp>
 #include <spdlog/spdlog.h>
 
-NSPMScene::NSPMScene(nlohmann::json &data) {
-  this->_id = data["scene_id"];
-  this->update_config(data);
+NSPMScene::NSPMScene(uint32_t id) {
+  this->_id = id;
+  this->reload_config();
 }
 
-void NSPMScene::update_config(nlohmann::json &data) {
-  this->_name = data["scene_name"];
-  if (!data["room_id"].is_null()) {
-    this->_is_global_scene = false;
-    this->_room_id = data["room_id"];
-  } else {
-    this->_is_global_scene = true;
+void NSPMScene::reload_config() {
+  try {
+    auto scene_config = database_manager::database.get<database_manager::Scene>(this->_id);
+    this->_name = scene_config.friendly_name;
+    if (scene_config.room_id == nullptr) {
+      this->_is_global_scene = true;
+    } else {
+      this->_is_global_scene = false;
+      this->_room_id = *scene_config.room_id;
+    }
+
+    this->_light_states.clear();
+    // TODO: Load light states for NSPM Scene from DB
+    // for (nlohmann::json light_data : data["light_states"]) {
+    //   LightState state;
+    //   state._light = nullptr;
+    //   state.light_id = light_data["light_id"];
+    //   state.color_mode = light_data["color_mode"];
+    //   state.brightness = light_data["light_level"];
+    //   state.color_temperature = light_data["color_temp"];
+    //   state.hue = light_data["hue"];
+    //   state.saturation = light_data["saturation"];
+    //   this->_light_states.push_back(state);
+    // }
+    SPDLOG_DEBUG("Loading NSPM scene {}::{}.", this->_id, this->_name);
+  } catch (std::system_error &ex) {
+    SPDLOG_DEBUG("Failed to update config for scene {}::{}.", this->_id, this->_name);
   }
-  SPDLOG_DEBUG("Loading NSPM scene {}::{}.", this->_id, this->_name);
-  this->_light_states.clear();
-  for (nlohmann::json light_data : data["light_states"]) {
-    LightState state;
-    state._light = nullptr;
-    state.light_id = light_data["light_id"];
-    state.color_mode = light_data["color_mode"];
-    state.brightness = light_data["light_level"];
-    state.color_temperature = light_data["color_temp"];
-    state.hue = light_data["hue"];
-    state.saturation = light_data["saturation"];
-    this->_light_states.push_back(state);
-  }
-  SPDLOG_DEBUG("Loaded scene {}::{}.", this->_id, this->_name);
 }
 
 void NSPMScene::activate() {
@@ -75,9 +82,9 @@ void NSPMScene::save() {
   std::vector<std::shared_ptr<Light>> lights;
   // TODO: Only add light to scene if it is "controllable from main page"
   if (this->_is_global_scene) {
-    for(std::shared_ptr<Room> room : EntityManager::get_all_rooms()) {
-        std::vector<std::shared_ptr<Light>> room_lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
-        lights.insert(lights.end(), room_lights.begin(), room_lights.end());
+    for (std::shared_ptr<Room> room : EntityManager::get_all_rooms()) {
+      std::vector<std::shared_ptr<Light>> room_lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+      lights.insert(lights.end(), room_lights.begin(), room_lights.end());
     }
   } else {
     lights = this->_room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
@@ -164,24 +171,24 @@ void NSPMScene::post_init() {
     }
 
     for (LightState &state : this->_light_states) {
-        bool found_light = false;
-        for(std::shared_ptr<Room> room : EntityManager::get_all_rooms()) {
-            for(std::shared_ptr<Light> light : room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT)) {
-                if(light->get_id() == state.light_id) {
-                    SPDLOG_DEBUG("Attaching light {}::{} to light state attached to scene {}::{}.", light->get_id(), light->get_name(), this->_id, this->_name);
-                    state._light = light;
-                    light->attach_delete_callback(this->light_destroyed_callback);
-                    found_light = true;
-                    break;
-                }
-            }
-            if(found_light) {
-                break;
-            }
+      bool found_light = false;
+      for (std::shared_ptr<Room> room : EntityManager::get_all_rooms()) {
+        for (std::shared_ptr<Light> light : room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT)) {
+          if (light->get_id() == state.light_id) {
+            SPDLOG_DEBUG("Attaching light {}::{} to light state attached to scene {}::{}.", light->get_id(), light->get_name(), this->_id, this->_name);
+            state._light = light;
+            light->attach_delete_callback(this->light_destroyed_callback);
+            found_light = true;
+            break;
+          }
         }
-        if(!found_light) {
-            SPDLOG_ERROR("Did not find any light matching a light state for scene {}::{}.", this->_id, this->_name);
+        if (found_light) {
+          break;
         }
+      }
+      if (!found_light) {
+        SPDLOG_ERROR("Did not find any light matching a light state for scene {}::{}.", this->_id, this->_name);
+      }
     }
   }
 }
@@ -201,10 +208,10 @@ void NSPMScene::remove_light(Light *light) {
 void NSPMScene::light_destroyed_callback(Light *light) {
   std::vector<std::shared_ptr<Scene>> all_scene_entities = EntityManager::get_all_entities_by_type<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE);
   for (auto entity : all_scene_entities) {
-      if(entity->get_controller() == MQTT_MANAGER_ENTITY_CONTROLLER::NSPM) {
-          std::shared_ptr<NSPMScene> scene = std::static_pointer_cast<NSPMScene>(entity);
-          scene->remove_light(light);
-      }
+    if (entity->get_controller() == MQTT_MANAGER_ENTITY_CONTROLLER::NSPM) {
+      std::shared_ptr<NSPMScene> scene = std::static_pointer_cast<NSPMScene>(entity);
+      scene->remove_light(light);
+    }
   }
 }
 

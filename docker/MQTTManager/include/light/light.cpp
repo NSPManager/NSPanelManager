@@ -210,9 +210,6 @@ void Light::set_hsb(uint16_t hue, uint8_t saturation, uint8_t brightness, bool s
   }
 }
 
-void Light::post_init() {
-}
-
 void Light::attach_delete_callback(void (*callback)(Light *)) {
   this->_light_destroyed_callbacks.connect(callback);
 }

@@ -33,25 +33,20 @@ public:
   virtual MQTT_MANAGER_ENTITY_CONTROLLER get_controller() = 0;
 
   /**
-   * All entities and config has been loaded, do post-processing tasks.
+   * Get the ID of the entity page this entity is located on.
    */
-  virtual void post_init() = 0;
-
-  /**
-  * Get the ID of the entity page this entity is located on.
-  */
   virtual uint32_t get_entity_page_id() = 0;
 
   /**
-  * Get the viewed slot (room view position) of this entity as to where on the page it should be shown.
-  */
+   * Get the viewed slot (room view position) of this entity as to where on the page it should be shown.
+   */
   virtual uint8_t get_entity_page_slot() = 0;
 
   /**
    * Register a entity_changed callback listener.
    */
   void attach_entity_changed_callback(void (*callback)(MqttManagerEntity *)) {
-      this->_entity_changed_callbacks.connect(callback);
+    this->_entity_changed_callbacks.connect(callback);
   }
 
   /**
@@ -59,7 +54,7 @@ public:
    */
   template <typename CALLBACK_BIND>
   void attach_entity_changed_callback(CALLBACK_BIND callback) {
-      this->_entity_changed_callbacks.connect(callback);
+    this->_entity_changed_callbacks.connect(callback);
   }
 
   /**

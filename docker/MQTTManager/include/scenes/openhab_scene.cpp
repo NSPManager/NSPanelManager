@@ -1,3 +1,4 @@
+#include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
@@ -8,22 +9,28 @@
 #include <openhab_manager/openhab_manager.hpp>
 #include <scenes/openhab_scene.hpp>
 #include <spdlog/spdlog.h>
+#include <system_error>
 
-OpenhabScene::OpenhabScene(nlohmann::json &data) {
-  this->_id = data["scene_id"];
-  this->update_config(data);
+OpenhabScene::OpenhabScene(uint32_t id) {
+  this->_id = id;
+  this->reload_config();
 }
 
-void OpenhabScene::update_config(nlohmann::json &data) {
-  this->_name = data["scene_name"];
-  if (!data["room_id"].is_null()) {
-    this->_is_global_scene = false;
-    this->_room_id = data["room_id"];
-  } else {
-    this->_is_global_scene = true;
+void OpenhabScene::reload_config() {
+  try {
+    auto scene_config = database_manager::database.get<database_manager::Scene>(this->_id);
+    this->_name = scene_config.friendly_name;
+    this->_entity_id = scene_config.backend_name;
+    if (scene_config.room_id == nullptr) {
+      this->_is_global_scene = true;
+    } else {
+      this->_is_global_scene = false;
+      this->_room_id = *scene_config.room_id;
+    }
+    SPDLOG_DEBUG("Loaded OpenHAB scene {}::{}.", this->_id, this->_name);
+  } catch (std::system_error &ex) {
+    SPDLOG_ERROR("Failed to update config for scene {}::{}.", this->_id, this->_name);
   }
-  this->_entity_id = data["entity_name"];
-  SPDLOG_DEBUG("Loaded OpenHAB scene {}::{}.", this->_id, this->_name);
 }
 
 void OpenhabScene::activate() {
@@ -60,18 +67,6 @@ MQTT_MANAGER_ENTITY_TYPE OpenhabScene::get_type() {
 
 MQTT_MANAGER_ENTITY_CONTROLLER OpenhabScene::get_controller() {
   return MQTT_MANAGER_ENTITY_CONTROLLER::NSPM;
-}
-
-void OpenhabScene::post_init() {
-  if (!this->_is_global_scene) {
-    std::shared_ptr<Room> room_entity = EntityManager::get_room(this->_room_id);
-    if (room_entity != nullptr) {
-      this->_room = room_entity;
-    } else {
-      SPDLOG_ERROR("Did not find any room with room ID: {}. Will not continue loading.", this->_room_id);
-      return;
-    }
-  }
 }
 
 std::string OpenhabScene::get_name() {

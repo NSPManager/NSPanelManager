@@ -55,6 +55,14 @@ struct Room {
   int display_order = 0;
 };
 
+struct Scene {
+  int id = 0;
+  std::unique_ptr<int> room_id = 0;
+  std::string friendly_name;
+  std::string scene_type;
+  std::string backend_name;
+};
+
 // A Room Entities Page as presented in the database
 struct RoomEntitiesPage {
   int id = 0;
@@ -130,6 +138,12 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("id", &Room::id, sqlite_orm::primary_key()),
                                                                               sqlite_orm::make_column("friendly_name", &Room::friendly_name),
                                                                               sqlite_orm::make_column("displayOrder", &Room::display_order)),
+                                                       sqlite_orm::make_table("web_scene",
+                                                                              sqlite_orm::make_column("id", &Scene::id, sqlite_orm::primary_key()),
+                                                                              sqlite_orm::make_column("room_id", &Scene::room_id),
+                                                                              sqlite_orm::make_column("friendly_name", &Scene::friendly_name),
+                                                                              sqlite_orm::make_column("scene_type", &Scene::scene_type),
+                                                                              sqlite_orm::make_column("backend_name", &Scene::backend_name)),
                                                        sqlite_orm::make_table("web_light",
                                                                               sqlite_orm::make_column("id", &Light::id, sqlite_orm::primary_key()),
                                                                               sqlite_orm::make_column("can_dim", &Light::can_dim),
