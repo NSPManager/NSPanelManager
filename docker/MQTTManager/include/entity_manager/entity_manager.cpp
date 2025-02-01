@@ -22,8 +22,6 @@
 #include <cstdlib>
 #include <database_manager/database_manager.hpp>
 #include <entity_manager/entity_manager.hpp>
-#include <exception>
-#include <ixwebsocket/IXWebSocket.h>
 #include <memory>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <mutex>
@@ -51,9 +49,17 @@ void EntityManager::init() {
   MQTT_Manager::subscribe("nspanel/mqttmanager/command", &EntityManager::mqtt_topic_callback);
   MQTT_Manager::subscribe("nspanel/+/status", &EntityManager::mqtt_topic_callback);
 
+  EntityManager::load_entities();
+}
+
+void EntityManager::load_entities() {
   EntityManager::load_rooms();
   EntityManager::load_nspanels();
   EntityManager::load_lights();
+
+  SPDLOG_INFO("Total loaded NSPanels: {}", EntityManager::_nspanels.size());
+  SPDLOG_INFO("Total loaded Rooms: {}", EntityManager::_rooms.size());
+  SPDLOG_INFO("Total loaded Entities: {}", EntityManager::_entities.size());
 }
 
 void EntityManager::attach_entity_added_listener(void (*listener)(std::shared_ptr<MqttManagerEntity>)) {
@@ -222,79 +228,9 @@ void EntityManager::add_scene(nlohmann::json &config) {
   }
 }
 
-void EntityManager::add_nspanel_relay_group(nlohmann::json &config) {
-  if (!config.contains("id") || !config.at("id").is_number()) {
-    SPDLOG_ERROR("Tried to create NSPanel relay group but 'id' was not present in config!");
-    return;
-  }
-
-  try {
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
-    for (auto relay_group = EntityManager::_nspanel_relay_groups.begin(); relay_group != EntityManager::_nspanel_relay_groups.end(); relay_group++) {
-      if ((*relay_group)->get_id() == config.at("id")) {
-        (*relay_group)->update_config(config);
-        return;
-      }
-    }
-
-    EntityManager::_nspanel_relay_groups.push_back(std::shared_ptr<NSPanelRelayGroup>(new NSPanelRelayGroup(config)));
-  } catch (std::exception &e) {
-    SPDLOG_ERROR("Caught exception: {}", e.what());
-    SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
-  }
-}
-
-std::shared_ptr<NSPanelRelayGroup> EntityManager::get_relay_group(uint32_t relay_group_id) {
-  std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
-  for (auto relay_group = EntityManager::_nspanel_relay_groups.begin(); relay_group != EntityManager::_nspanel_relay_groups.end(); relay_group++) {
-    if ((*relay_group)->get_id() == relay_group_id) {
-      return (*relay_group);
-    }
-  }
-  return nullptr;
-}
-
-std::vector<std::shared_ptr<NSPanelRelayGroup>> EntityManager::get_all_relay_groups() {
-  std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
-  return EntityManager::_nspanel_relay_groups;
-}
-
 void EntityManager::post_init_entities() {
   SPDLOG_INFO("New config loaded, processing changes.");
   EntityManager::_weather_manager.update_config();
-
-  {
-    // Process any loaded NSPanel Relay Groups
-    SPDLOG_DEBUG("Updating NSPanel relay groups.");
-    std::list<int> relay_group_ids;
-    for (nlohmann::json &config : MqttManagerConfig::nspanel_relay_group_configs) {
-      EntityManager::add_nspanel_relay_group(config);
-      relay_group_ids.push_back(config["relay_group_id"]);
-    }
-    SPDLOG_DEBUG("Existing relay groups updated.");
-
-    // Check for any removed lights
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanel_relay_groups_mutex);
-    SPDLOG_DEBUG("Checking for removed relay groups.");
-    for (int i = 0; i < EntityManager::_nspanel_relay_groups.size(); i++) {
-      auto rit = EntityManager::_nspanel_relay_groups[i];
-      bool exists = false;
-      for (int rg_id : relay_group_ids) {
-        if (rg_id == rit->get_id()) {
-          exists = true;
-          break;
-        }
-      }
-
-      if (!exists) {
-        SPDLOG_DEBUG("Removing relay group with id {} as it doesn't exist in config anymore.", rit->get_id());
-        // MqttManagerEntity *rg = rit;
-        EntityManager::_nspanel_relay_groups.erase(EntityManager::_nspanel_relay_groups.begin() + i);
-        // delete rg;
-        SPDLOG_DEBUG("Relay group removed successfully.");
-      }
-    }
-  }
 
   {
     // Process any loaded Scenes
@@ -337,18 +273,6 @@ void EntityManager::post_init_entities() {
       entity->post_init();
     }
   }
-
-  {
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
-    for (auto room : EntityManager::_rooms) {
-      SPDLOG_DEBUG("Performing PostInit on Room {}::{}", room->get_id(), room->get_name());
-      room->post_init();
-    }
-  }
-
-  SPDLOG_INFO("Total loaded NSPanels: {}", EntityManager::_nspanels.size());
-  SPDLOG_INFO("Total loaded Rooms: {}", EntityManager::_rooms.size());
-  SPDLOG_INFO("Total loaded Entities: {}", EntityManager::_entities.size());
 }
 
 void EntityManager::remove_entity(std::shared_ptr<MqttManagerEntity> entity) {

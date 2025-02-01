@@ -4862,14 +4862,18 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kReverseRelaysFieldNumber = 16,
     kTemperatureCalibrationFieldNumber = 19,
     kButton1ModeFieldNumber = 20,
+    kButton2ModeFieldNumber = 23,
     kRelay1DefaultModeFieldNumber = 17,
     kRelay2DefaultModeFieldNumber = 18,
     kOptimisticModeFieldNumber = 29,
-    kButton2ModeFieldNumber = 23,
+    kRelay1IsInRelayGroupFieldNumber = 32,
     kButton1DetachedLightIdFieldNumber = 26,
     kButton2DetachedLightIdFieldNumber = 27,
     kRaiseLightLevelTo100AboveFieldNumber = 30,
     kNspanelIdFieldNumber = 31,
+    kRelay1RelayGroupFieldNumber = 33,
+    kRelay2IsInRelayGroupFieldNumber = 34,
+    kRelay2RelayGroupFieldNumber = 35,
   };
   // repeated .NSPanelConfig.RoomInfo room_infos = 15;
   int room_infos_size() const;
@@ -5145,6 +5149,16 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_button1_mode(::int32_t value);
 
   public:
+  // int32 button2_mode = 23;
+  void clear_button2_mode() ;
+  ::int32_t button2_mode() const;
+  void set_button2_mode(::int32_t value);
+
+  private:
+  ::int32_t _internal_button2_mode() const;
+  void _internal_set_button2_mode(::int32_t value);
+
+  public:
   // bool relay1_default_mode = 17;
   void clear_relay1_default_mode() ;
   bool relay1_default_mode() const;
@@ -5175,14 +5189,14 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_optimistic_mode(bool value);
 
   public:
-  // int32 button2_mode = 23;
-  void clear_button2_mode() ;
-  ::int32_t button2_mode() const;
-  void set_button2_mode(::int32_t value);
+  // bool relay1_is_in_relay_group = 32;
+  void clear_relay1_is_in_relay_group() ;
+  bool relay1_is_in_relay_group() const;
+  void set_relay1_is_in_relay_group(bool value);
 
   private:
-  ::int32_t _internal_button2_mode() const;
-  void _internal_set_button2_mode(::int32_t value);
+  bool _internal_relay1_is_in_relay_group() const;
+  void _internal_set_relay1_is_in_relay_group(bool value);
 
   public:
   // int32 button1_detached_light_id = 26;
@@ -5225,13 +5239,43 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_nspanel_id(::int32_t value);
 
   public:
+  // int32 relay1_relay_group = 33;
+  void clear_relay1_relay_group() ;
+  ::int32_t relay1_relay_group() const;
+  void set_relay1_relay_group(::int32_t value);
+
+  private:
+  ::int32_t _internal_relay1_relay_group() const;
+  void _internal_set_relay1_relay_group(::int32_t value);
+
+  public:
+  // bool relay2_is_in_relay_group = 34;
+  void clear_relay2_is_in_relay_group() ;
+  bool relay2_is_in_relay_group() const;
+  void set_relay2_is_in_relay_group(bool value);
+
+  private:
+  bool _internal_relay2_is_in_relay_group() const;
+  void _internal_set_relay2_is_in_relay_group(bool value);
+
+  public:
+  // int32 relay2_relay_group = 35;
+  void clear_relay2_relay_group() ;
+  ::int32_t relay2_relay_group() const;
+  void set_relay2_relay_group(::int32_t value);
+
+  private:
+  ::int32_t _internal_relay2_relay_group() const;
+  void _internal_set_relay2_relay_group(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelConfig)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 31, 2,
-      126, 2>
+      5, 35, 2,
+      134, 7>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -5274,14 +5318,18 @@ class NSPanelConfig final : public ::google::protobuf::Message
     bool reverse_relays_;
     float temperature_calibration_;
     ::int32_t button1_mode_;
+    ::int32_t button2_mode_;
     bool relay1_default_mode_;
     bool relay2_default_mode_;
     bool optimistic_mode_;
-    ::int32_t button2_mode_;
+    bool relay1_is_in_relay_group_;
     ::int32_t button1_detached_light_id_;
     ::int32_t button2_detached_light_id_;
     ::int32_t raise_light_level_to_100_above_;
     ::int32_t nspanel_id_;
+    ::int32_t relay1_relay_group_;
+    bool relay2_is_in_relay_group_;
+    ::int32_t relay2_relay_group_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -6348,6 +6396,94 @@ inline ::int32_t NSPanelConfig::_internal_nspanel_id() const {
 inline void NSPanelConfig::_internal_set_nspanel_id(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.nspanel_id_ = value;
+}
+
+// bool relay1_is_in_relay_group = 32;
+inline void NSPanelConfig::clear_relay1_is_in_relay_group() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.relay1_is_in_relay_group_ = false;
+}
+inline bool NSPanelConfig::relay1_is_in_relay_group() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.relay1_is_in_relay_group)
+  return _internal_relay1_is_in_relay_group();
+}
+inline void NSPanelConfig::set_relay1_is_in_relay_group(bool value) {
+  _internal_set_relay1_is_in_relay_group(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.relay1_is_in_relay_group)
+}
+inline bool NSPanelConfig::_internal_relay1_is_in_relay_group() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.relay1_is_in_relay_group_;
+}
+inline void NSPanelConfig::_internal_set_relay1_is_in_relay_group(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.relay1_is_in_relay_group_ = value;
+}
+
+// int32 relay1_relay_group = 33;
+inline void NSPanelConfig::clear_relay1_relay_group() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.relay1_relay_group_ = 0;
+}
+inline ::int32_t NSPanelConfig::relay1_relay_group() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.relay1_relay_group)
+  return _internal_relay1_relay_group();
+}
+inline void NSPanelConfig::set_relay1_relay_group(::int32_t value) {
+  _internal_set_relay1_relay_group(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.relay1_relay_group)
+}
+inline ::int32_t NSPanelConfig::_internal_relay1_relay_group() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.relay1_relay_group_;
+}
+inline void NSPanelConfig::_internal_set_relay1_relay_group(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.relay1_relay_group_ = value;
+}
+
+// bool relay2_is_in_relay_group = 34;
+inline void NSPanelConfig::clear_relay2_is_in_relay_group() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.relay2_is_in_relay_group_ = false;
+}
+inline bool NSPanelConfig::relay2_is_in_relay_group() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.relay2_is_in_relay_group)
+  return _internal_relay2_is_in_relay_group();
+}
+inline void NSPanelConfig::set_relay2_is_in_relay_group(bool value) {
+  _internal_set_relay2_is_in_relay_group(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.relay2_is_in_relay_group)
+}
+inline bool NSPanelConfig::_internal_relay2_is_in_relay_group() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.relay2_is_in_relay_group_;
+}
+inline void NSPanelConfig::_internal_set_relay2_is_in_relay_group(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.relay2_is_in_relay_group_ = value;
+}
+
+// int32 relay2_relay_group = 35;
+inline void NSPanelConfig::clear_relay2_relay_group() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.relay2_relay_group_ = 0;
+}
+inline ::int32_t NSPanelConfig::relay2_relay_group() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.relay2_relay_group)
+  return _internal_relay2_relay_group();
+}
+inline void NSPanelConfig::set_relay2_relay_group(::int32_t value) {
+  _internal_set_relay2_relay_group(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.relay2_relay_group)
+}
+inline ::int32_t NSPanelConfig::_internal_relay2_relay_group() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.relay2_relay_group_;
+}
+inline void NSPanelConfig::_internal_set_relay2_relay_group(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.relay2_relay_group_ = value;
 }
 
 // -------------------------------------------------------------------

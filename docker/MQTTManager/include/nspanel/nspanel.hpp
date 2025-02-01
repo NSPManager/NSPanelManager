@@ -38,28 +38,6 @@ public:
   std::string message;
 };
 
-class NSPanelRelayGroup {
-public:
-  NSPanelRelayGroup(nlohmann::json &config);
-  ~NSPanelRelayGroup();
-
-  void update_config(nlohmann::json &config);
-  bool contains(int nspanel_id, int relay_num);
-  void turn_on();
-  void turn_off();
-
-  uint16_t get_id();
-  MQTT_MANAGER_ENTITY_TYPE get_type();
-  MQTT_MANAGER_ENTITY_CONTROLLER get_controller();
-  void post_init();
-
-private:
-  int _id;
-  std::string _name;
-  // Map of NSPanelID:relayID of relays in this group.
-  std::unordered_map<int, int> _nspanel_relays;
-};
-
 class NSPanel {
 public:
   NSPanel(uint32_t panel_id);

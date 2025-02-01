@@ -27,6 +27,11 @@ public:
    */
   static void init();
 
+  /*
+   * Load entities from database, update any already loaded entities.
+   */
+  static void load_entities();
+
   /**
    * Call post-initialized on all entities.
    */
@@ -76,21 +81,6 @@ public:
    * Create and add a scene to the manager
    */
   static void add_scene(nlohmann::json &config);
-
-  /**
-   * Create and add a NSPanel relay group to the manager
-   */
-  static void add_nspanel_relay_group(nlohmann::json &config);
-
-  /**
-   * Get an NSPanel Relay Group if a group with the given id exists. Otherwise, return nullptr.
-   */
-  static std::shared_ptr<NSPanelRelayGroup> get_relay_group(uint32_t relay_group_id);
-
-  /**
-   * Get all currently register NSPanel relay groups.
-   */
-  static std::vector<std::shared_ptr<NSPanelRelayGroup>> get_all_relay_groups();
 
   /**
    * Get an item by the specified type that has the specified ID.
@@ -172,9 +162,6 @@ private:
 
   static inline std::vector<std::shared_ptr<NSPanel>> _nspanels;
   static inline std::mutex _nspanels_mutex;
-
-  static inline std::vector<std::shared_ptr<NSPanelRelayGroup>> _nspanel_relay_groups;
-  static inline std::mutex _nspanel_relay_groups_mutex;
 
   static bool _process_message(const std::string &topic, const std::string &payload);
   static void _handle_register_request(const nlohmann::json &data);

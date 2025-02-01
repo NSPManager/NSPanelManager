@@ -55,6 +55,11 @@ message NSPanelConfig {
     bool optimistic_mode = 29;
     int32 raise_light_level_to_100_above = 30;
     int32 nspanel_id = 31;
+
+    bool relay1_is_in_relay_group = 32;
+    int32 relay1_relay_group = 33;
+    bool relay2_is_in_relay_group = 34;
+    int32 relay2_relay_group = 35;
 }
 
 enum NSPanelWarningLevel {

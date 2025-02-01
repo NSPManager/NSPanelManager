@@ -24,6 +24,7 @@
 #include <chrono>
 #include <cmath>
 #include <command_manager/command_manager.hpp>
+#include <cstddef>
 #include <cstdint>
 #include <ctime>
 #include <curl/curl.h>
@@ -37,70 +38,16 @@
 #include <nlohmann/json_fwd.hpp>
 #include <room/room.hpp>
 #include <spdlog/spdlog.h>
+#include <sqlite3.h>
+#include <sqlite_orm/sqlite_orm.h>
 #include <sstream>
 #include <string>
 #include <sys/stat.h>
+#include <system_error>
 #include <thread>
 #include <unordered_map>
 #include <vector>
 #include <websocket_server/websocket_server.hpp>
-
-NSPanelRelayGroup::NSPanelRelayGroup(nlohmann::json &config) {
-  this->update_config(config);
-}
-
-void NSPanelRelayGroup::update_config(nlohmann::json &config) {
-  this->_id = config["relay_group_id"];
-  this->_name = config["name"];
-
-  this->_nspanel_relays.clear();
-  for (nlohmann::json nspanel_relay : config["relays"]) {
-    this->_nspanel_relays.insert(std::make_pair<int, int>(int(nspanel_relay["nspanel_id"]), int(nspanel_relay["relay_num"])));
-  }
-}
-
-NSPanelRelayGroup::~NSPanelRelayGroup() {
-}
-
-uint16_t NSPanelRelayGroup::get_id() {
-  return this->_id;
-}
-
-void NSPanelRelayGroup::post_init() {
-}
-
-bool NSPanelRelayGroup::contains(int nspanel_id, int relay_num) {
-  for (auto pair : this->_nspanel_relays) {
-    if (pair.first == nspanel_id && pair.second == relay_num) {
-      return true;
-    }
-  }
-  return false;
-}
-
-void NSPanelRelayGroup::turn_on() {
-  SPDLOG_DEBUG("Turning on NSPanelRelayGroup {}::{}", this->_id, this->_name);
-  for (auto pair : this->_nspanel_relays) {
-    auto panel = EntityManager::get_nspanel_by_id(pair.first);
-    if (panel != nullptr) {
-      panel->set_relay_state(pair.second, true);
-    } else {
-      SPDLOG_ERROR("Did not find NSPanel with ID {}.", pair.first);
-    }
-  }
-}
-
-void NSPanelRelayGroup::turn_off() {
-  SPDLOG_DEBUG("Turning off NSPanelRelayGroup {}::{}", this->_id, this->_name);
-  for (auto pair : this->_nspanel_relays) {
-    auto panel = EntityManager::get_nspanel_by_id(pair.first);
-    if (panel != nullptr) {
-      panel->set_relay_state(pair.second, false);
-    } else {
-      SPDLOG_ERROR("Did not find NSPanel with ID {}.", pair.first);
-    }
-  }
-}
 
 NSPanel::NSPanel(uint32_t id) {
   // Assume panel to be offline until proven otherwise
@@ -269,6 +216,38 @@ void NSPanel::send_config() {
     config.set_button2_detached_light_id(settings.button2_detached_light_id());
     config.set_optimistic_mode(MqttManagerConfig::get_settings().optimistic_mode());
     config.set_raise_light_level_to_100_above(settings.raise_to_100_light_level());
+
+    try {
+      auto relay_group_binding = database_manager::database.get_all<database_manager::NSPanelRelayGroupBinding>(
+          sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::relay_num) == 1) and sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::nspanel_id) == this->_id);
+      if (relay_group_binding.size() > 0) [[likely]] {
+        config.set_relay1_is_in_relay_group(true);
+        config.set_relay1_relay_group(relay_group_binding[0].relay_group_id);
+      } else {
+        config.set_relay1_is_in_relay_group(false);
+        config.set_relay1_relay_group(0);
+      }
+    } catch (std::system_error) {
+      config.set_relay1_is_in_relay_group(false);
+      config.set_relay1_relay_group(0);
+      // Did not find matching relay group binind, relay is not bound.
+    }
+
+    try {
+      auto relay_group_binding = database_manager::database.get_all<database_manager::NSPanelRelayGroupBinding>(
+          sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::relay_num) == 2) and sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::nspanel_id) == this->_id);
+      if (relay_group_binding.size() > 0) [[likely]] {
+        config.set_relay2_is_in_relay_group(true);
+        config.set_relay2_relay_group(relay_group_binding[0].relay_group_id);
+      } else {
+        config.set_relay2_is_in_relay_group(false);
+        config.set_relay2_relay_group(0);
+      }
+    } catch (std::system_error) {
+      config.set_relay2_is_in_relay_group(false);
+      config.set_relay2_relay_group(0);
+      // Did not find matching relay group binind, relay is not bound.
+    }
 
     // Load rooms
     for (int i = 0; i < settings.rooms().size(); i++) {
@@ -479,30 +458,6 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         }
 
         this->send_websocket_status_update();
-      }
-    } else if (topic.compare(this->_mqtt_relay1_state_topic) == 0) {
-      this->_relay1_state = (payload.compare("1") == 0);
-      std::vector<std::shared_ptr<NSPanelRelayGroup>> relay_groups = EntityManager::get_all_relay_groups();
-      for (auto relay_group : relay_groups) {
-        if (relay_group->contains(this->_id, 1)) {
-          if (payload.compare("1") == 0) {
-            relay_group->turn_on();
-          } else {
-            relay_group->turn_off();
-          }
-        }
-      }
-    } else if (topic.compare(this->_mqtt_relay2_state_topic) == 0) {
-      this->_relay2_state = (payload.compare("1") == 0);
-      std::vector<std::shared_ptr<NSPanelRelayGroup>> relay_groups = EntityManager::get_all_relay_groups();
-      for (auto relay_group : relay_groups) {
-        if (relay_group->contains(this->_id, 2)) {
-          if (payload.compare("1") == 0) {
-            relay_group->turn_on();
-          } else {
-            relay_group->turn_off();
-          }
-        }
       }
     }
   } catch (std::exception &e) {

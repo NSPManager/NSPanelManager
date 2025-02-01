@@ -41,6 +41,13 @@ struct NSPanel {
   bool accepted;
 };
 
+struct NSPanelRelayGroupBinding {
+  int id = 0;
+  int relay_num = 0;
+  int nspanel_id = 0;
+  int relay_group_id = 0;
+};
+
 // A room as presented in the database
 struct Room {
   int id = 0;
@@ -114,6 +121,11 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("register_relay2_as_light", &NSPanel::register_relay2_as_light),
                                                                               sqlite_orm::make_column("denied", &NSPanel::denied),
                                                                               sqlite_orm::make_column("accepted", &NSPanel::accepted)),
+                                                       sqlite_orm::make_table("web_relaygroupbinding",
+                                                                              sqlite_orm::make_column("id", &NSPanelRelayGroupBinding::id, sqlite_orm::primary_key()),
+                                                                              sqlite_orm::make_column("relay_num", &NSPanelRelayGroupBinding::relay_num),
+                                                                              sqlite_orm::make_column("nspanel_id", &NSPanelRelayGroupBinding::nspanel_id),
+                                                                              sqlite_orm::make_column("relay_group_id", &NSPanelRelayGroupBinding::relay_group_id)),
                                                        sqlite_orm::make_table("web_room",
                                                                               sqlite_orm::make_column("id", &Room::id, sqlite_orm::primary_key()),
                                                                               sqlite_orm::make_column("friendly_name", &Room::friendly_name),
