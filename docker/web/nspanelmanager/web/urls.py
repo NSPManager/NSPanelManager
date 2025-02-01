@@ -108,7 +108,6 @@ urlpatterns = [
          api.set_panel_status, name='set_panel_status'),
     path('api/set_panel_online_status/<str:panel_mac>/',
          api.set_panel_online_status, name='set_panel_online_status'),
-    path('api/save_scene', api.save_scene, name='save_scene'),
     path('api/get_scenes', api.get_scenes, name='get_scenes'),
     path('api/restart_mqtt_manager', api.restart_mqtt_manager,
          name='restart_mqtt_manager'),

@@ -63,6 +63,17 @@ struct Scene {
   std::string backend_name;
 };
 
+struct SceneLightState {
+  int id = 0;
+  int light_level;
+  std::string color_mode;
+  int color_temperature;
+  int hue;
+  int saturation;
+  int light_id;
+  int scene_id;
+};
+
 // A Room Entities Page as presented in the database
 struct RoomEntitiesPage {
   int id = 0;
@@ -144,6 +155,15 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("friendly_name", &Scene::friendly_name),
                                                                               sqlite_orm::make_column("scene_type", &Scene::scene_type),
                                                                               sqlite_orm::make_column("backend_name", &Scene::backend_name)),
+                                                       sqlite_orm::make_table("web_lightstate",
+                                                                              sqlite_orm::make_column("id", &SceneLightState::id, sqlite_orm::primary_key()),
+                                                                              sqlite_orm::make_column("scene_id", &SceneLightState::scene_id),
+                                                                              sqlite_orm::make_column("light_id", &SceneLightState::light_id),
+                                                                              sqlite_orm::make_column("light_level", &SceneLightState::light_level),
+                                                                              sqlite_orm::make_column("color_mode", &SceneLightState::color_mode),
+                                                                              sqlite_orm::make_column("color_temperature", &SceneLightState::color_temperature),
+                                                                              sqlite_orm::make_column("hue", &SceneLightState::hue),
+                                                                              sqlite_orm::make_column("saturation", &SceneLightState::saturation)),
                                                        sqlite_orm::make_table("web_light",
                                                                               sqlite_orm::make_column("id", &Light::id, sqlite_orm::primary_key()),
                                                                               sqlite_orm::make_column("can_dim", &Light::can_dim),

@@ -589,36 +589,6 @@ def get_scenes(request):
 
 
 @csrf_exempt
-def save_scene(request):
-    data = json.loads(request.body)
-    scene = Scene.objects.filter(id=data["scene_id"]).first()
-    if scene:
-        scene.lightstate_set.all().delete()  # Remove all old states
-        for light_state in data["light_states"]:
-            light = Light.objects.filter(id=light_state["light_id"]).first()
-            if light:
-                new_state = LightState()
-                new_state.light = light
-                new_state.scene = scene
-                if light_state["mode"] == "dimmer":
-                    new_state.color_mode = "dimmer"
-                    new_state.light_level = light_state["level"]
-                    new_state.color_temperature = light_state["color_temp"]
-                elif light_state["mode"] == "color":
-                    new_state.color_mode = "color"
-                    new_state.light_level = light_state["level"]
-                    new_state.hue = light_state["hue"]
-                    new_state.saturation = light_state["saturation"]
-                new_state.save()
-            else:
-                logging.error("ERROR: Couldn't find a light with ID " +
-                              light_state["light_id"] + ". Will skip light!")
-        return HttpResponse("OK", status=200)
-    else:
-        return HttpResponse("Scene does not exist!", status=500)
-
-
-@csrf_exempt
 def restart_mqtt_manager(request):
     restart_mqtt_manager_process()
     return JsonResponse({"result": "OK"})
