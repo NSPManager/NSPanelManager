@@ -68,7 +68,7 @@ void RoomEntitiesPage::post_init() {
       this->_entities[i]->attach_entity_changed_callback(boost::bind(&RoomEntitiesPage::_entity_changed_callback, this, _1));
     }
   }
-  SPDLOG_DEBUG("Attached {} entities to RoomEntitiesPage {}. this->_entities size: {}", entities_attached, this->_id, this->_entities.size());
+  SPDLOG_DEBUG("Attached {} entities to RoomEntitiesPage {}.", entities_attached, this->_id);
 }
 
 std::vector<std::shared_ptr<MqttManagerEntity>> RoomEntitiesPage::get_entities() {

@@ -29,22 +29,7 @@ public:
   static void attach_event_observer(std::string item, CALLBACK_BIND callback) {
     HomeAssistantManager::_home_assistant_observers[item].disconnect(callback); // Disconnect first in case it was already connected, otherwise multiple signals will be sent.
     HomeAssistantManager::_home_assistant_observers[item].connect(callback);
-
-    // TODO: Auto-fetch new state when attaching an observer
-    // try {
-    //   std::string data = OpenhabManager::_fetch_item_state_via_rest(item);
-    //   if (data.length() > 0) {
-    //     nlohmann::json update_data;
-    //     update_data["type"] = "ItemStateFetched";
-    //     update_data["payload"] = nlohmann::json::parse(data);
-    //     OpenhabManager::_openhab_item_observers[item](update_data);
-    //   } else {
-    //     SPDLOG_ERROR("Failed to get current state for item '{}' via OpenHAB REST API.", item);
-    //   }
-    // } catch (std::exception &e) {
-    //   SPDLOG_ERROR("Caught exception: {}", e.what());
-    //   SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
-    // }
+    HomeAssistantManager::_request_all_states();
   }
 
   /**
@@ -56,6 +41,9 @@ public:
   }
 
 private:
+  // Request all states that Home Assistant has as there is no way to only request state of one object.
+  static void _request_all_states();
+
   static inline boost::ptr_map<std::string, boost::signals2::signal<void(nlohmann::json data)>> _home_assistant_observers;
   static void _process_home_assistant_event(nlohmann::json &event_data);
 

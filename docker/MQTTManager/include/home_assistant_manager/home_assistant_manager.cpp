@@ -127,11 +127,7 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
       subscribe_command["event_type"] = "state_changed";
       HomeAssistantManager::send_json(subscribe_command);
 
-      // Request all current states in HA
-      HomeAssistantManager::_all_statues_request_message_id = HomeAssistantManager::_next_message_id;
-      nlohmann::json all_states_request_command;
-      all_states_request_command["type"] = "get_states";
-      HomeAssistantManager::send_json(all_states_request_command);
+      HomeAssistantManager::_request_all_states();
     } else if (type.compare("result") == 0) {
       bool success = data["success"];
       if (!success) {
@@ -184,6 +180,14 @@ void HomeAssistantManager::_send_string(std::string &data) {
     SPDLOG_TRACE("[HA WS] Sending data: {}", data);
     HomeAssistantManager::_websocket->send(data);
   }
+}
+
+void HomeAssistantManager::_request_all_states() {
+  // Request all current states in HA
+  HomeAssistantManager::_all_statues_request_message_id = HomeAssistantManager::_next_message_id;
+  nlohmann::json all_states_request_command;
+  all_states_request_command["type"] = "get_states";
+  HomeAssistantManager::send_json(all_states_request_command);
 }
 
 void HomeAssistantManager::_process_home_assistant_event(nlohmann::json &event_data) {

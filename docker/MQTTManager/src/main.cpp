@@ -1,5 +1,6 @@
 #include "command_manager/command_manager.hpp"
 #include "database_manager/database_manager.hpp"
+#include "entity/entity.hpp"
 #include "openhab_manager/openhab_manager.hpp"
 #include "spdlog/sinks/ansicolor_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
@@ -37,6 +38,8 @@ void sigusr1_handler(int signal) {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     MqttManagerConfig::load();
+    EntityManager::load_entities();
+
     MQTT_Manager::publish("nspanel/config/reload", "1");
     SPDLOG_INFO("Reload signal processing completed.");
   }

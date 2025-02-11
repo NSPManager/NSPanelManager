@@ -80,7 +80,6 @@ void NSPMScene::save() {
 
   try {
     std::vector<std::shared_ptr<Light>> lights;
-    // TODO: Only add light to scene if it is "controllable from main page"
     if (this->_is_global_scene) {
       for (std::shared_ptr<Room> room : EntityManager::get_all_rooms()) {
         std::vector<std::shared_ptr<Light>> room_lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);

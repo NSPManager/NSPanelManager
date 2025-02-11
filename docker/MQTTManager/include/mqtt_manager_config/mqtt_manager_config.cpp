@@ -65,7 +65,7 @@ void MqttManagerConfig::load() {
     MqttManagerConfig::_settings.manager_address = MqttManagerConfig::get_setting_with_default("manager_address", "");
     MqttManagerConfig::_settings.manager_port = std::stoi(MqttManagerConfig::get_setting_with_default("manager_port", "8000"));
     MqttManagerConfig::_settings.color_temp_min = std::stoi(MqttManagerConfig::get_setting_with_default("color_temp_min", "2000"));
-    MqttManagerConfig::_settings.color_temp_max = std::stoi(MqttManagerConfig::get_setting_with_default("color_temp_min", "6000"));
+    MqttManagerConfig::_settings.color_temp_max = std::stoi(MqttManagerConfig::get_setting_with_default("color_temp_max", "6000"));
     MqttManagerConfig::_settings.reverse_color_temperature_slider = MqttManagerConfig::get_setting_with_default("reverse_color_temp", "False").compare("True") == 0;
     MqttManagerConfig::_settings.date_format = MqttManagerConfig::get_setting_with_default("date_format", "%a %d/%m/ %Y");
     MqttManagerConfig::_settings.clock_24_hour_format = MqttManagerConfig::get_setting_with_default("clock_us_style", "False").compare("False") == 0;

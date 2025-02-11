@@ -604,7 +604,7 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
     return;
   }
 
-  // Remove first char that indicates log level. This is store separately
+  // Remove first char that indicates log level. This is stored separately
   payload = payload.substr(1);
   log_data["message"] = payload; // TODO: Clean up message before sending it out
   WebsocketServer::broadcast_json(log_data);
