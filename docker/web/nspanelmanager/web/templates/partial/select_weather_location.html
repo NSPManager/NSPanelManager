@@ -1,0 +1,84 @@
+<dialog id="modal" class="modal" hx-swap-oob="true">
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        <span class="text-xl mb-4">Select location</span>
+
+        <!-- Search -->
+        <div class="my-2">
+            <div class="flex flex-row-reverse">
+                <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="text" id="search_location" name="search_location" placeholder="Search">
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                    <span class="mdi mdi-magnify"></span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Template for a single location -->
+        <template id="location_template">
+          <!-- <button type="button" onclick="choose_location(this);" class="relative w-full px-4 py-2 text-sm font-medium border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white"> -->
+            <button type="button" onclick="choose_location(this);" class="relative w-full font-medium text-sm border-b border-base-300 px-4 py-2 hover:bg-accent hover:text-accent-content">
+            <div class="w-full items-center justify-start flex">
+              <div class="me-2">
+                <img class="location_flag w-5 h-5" aria-hidden="true" src="https://open-meteo.com/images/country-flags/se.svg">
+              </div>
+              <p class="location_text text-lg">Stockholm, Sweden</p>
+            </div>
+            <div class="location_cords w-full flex items-center justify-start text-xs font-thin pt-1">
+              <span class="latitude"></span>E, <span class="longitude"></span>N
+            </div>
+          </button>
+        </template>
+
+        <div class="max-h-96 overflow-y-scroll p-4">
+          <div id="locations_list" class="w-full rounded-lg border border-base-300"></div>
+          </div>
+        </div>
+    </div>
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+
+    <script>
+      modal.showModal(); // Show the modal when loaded.
+
+      function search_location() {
+        var location_string = $("#search_location").val();
+
+        if (location_string == "") {
+          $("#locations_list").html("");
+          return;
+        }
+
+        $.get("https://geocoding-api.open-meteo.com/v1/search?name=" + location_string, (data) => {
+          $("#locations_list").html("");
+          if("results" in data) {
+            data.results.forEach((location) => {
+              var location_template = $($("#location_template").html());
+              location_template.find(".location_flag").attr("src", "https://open-meteo.com/images/country-flags/" + location.country_code.toLowerCase() + ".svg");
+              location_template.find(".location_text").html(location.name + ", " + location.country);
+              location_template.find(".latitude").html(location.latitude);
+              location_template.find(".longitude").html(location.longitude);
+              $("#locations_list").append(location_template);
+            });
+          }
+        });
+      }
+
+      function choose_location(item) {
+        var lat = $(item).find(".latitude").html();
+        var long = $(item).find(".longitude").html();
+
+        $("#location_latitude").val(lat);
+        $("#location_longitude").val(long);
+        modal.close();
+      }
+      $("#search_location").on('input', search_location);
+    </script>
+</dialog>

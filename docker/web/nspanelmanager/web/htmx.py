@@ -153,6 +153,56 @@ def nspanel_delete(request, nspanel_id):
         return JsonResponse({"status": "error"}, status=500)
 
 
+def select_weather_location(request):
+    return render(request, 'partial/select_weather_location.html')
+
+def select_weather_outside_temperature_sensor(request):
+    return render(request, 'partial/select_weather_outside_temperature_sensor.html')
+
+def select_weather_outside_temperature_sensor_provider(request):
+    if (get_setting_with_default("home_assistant_address") == "" or get_setting_with_default("home_assistant_token") == "") and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
+        # OpenHAB connection configured but not Home Assistant. Skip selecting source:
+        return redirect('htmx_partial_select_weather_outside_temperature_sensor_from_list', entity_source="openhab")
+    elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and (get_setting_with_default("openhab_address") == "" or get_setting_with_default("openhab_token") == ""):
+        # OpenHAB connection configured but not Home Assistant. Skip selecting source:
+        return redirect('htmx_partial_select_weather_outside_temperature_sensor_from_list', entity_source="home_assistant")
+    elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
+        return render(request, 'partial/select_weather_outside_temperature_sensor_provider.html')
+    else:
+        return JsonResponse({
+            "status": "error",
+            "text": "Unknown sources configured. Check configuration for Home Assistant and/or OpenHAB in settings."
+        }, status=500)
+
+def select_weather_outside_temperature_sensor_from_list(request, entity_source):
+    data = {
+        "entity_source": entity_source,
+        "entities": [],
+    }
+
+    if data["entity_source"] == "home_assistant":
+        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["sensor"]})
+        if len(ha_items["errors"]) == 0:
+            data["entities"] = ha_items["items"]
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "Failed to get items from Home Assistant!"
+            }, status=500)
+    elif data["entity_source"] == "openhab":
+        openhab_items = web.openhab_api.get_all_openhab_items()
+        if len(openhab_items["errors"]) == 0:
+            data["entities"] = openhab_items["items"]
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "Failed to get items from OpenHAB!"
+            }, status=500)
+    else:
+        logging.error("Unknown entity source! Source: " + data["entity_source"])
+
+    return render(request, "partial/select_weather_outside_temperature_sensor.html", data)
+
 @csrf_exempt
 def interface_theme(request):
     new_theme = request.POST.get('theme-dropdown')
