@@ -6636,6 +6636,11 @@ details.collapse summary::-webkit-details-marker {
   margin-bottom: auto;
 }
 
+.my-4 {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
 .mb-1 {
   margin-bottom: 0.25rem;
 }
@@ -6828,6 +6833,14 @@ details.collapse summary::-webkit-details-marker {
   height: 100vh;
 }
 
+.h-12 {
+  height: 3rem;
+}
+
+.h-11 {
+  height: 2.75rem;
+}
+
 .max-h-0 {
   max-height: 0px;
 }
@@ -6918,6 +6931,10 @@ details.collapse summary::-webkit-details-marker {
 
 .max-w-screen-xl {
   max-width: 1280px;
+}
+
+.max-w-96 {
+  max-width: 24rem;
 }
 
 .flex-1 {

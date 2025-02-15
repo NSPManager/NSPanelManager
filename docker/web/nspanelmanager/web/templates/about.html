@@ -1,0 +1,27 @@
+{% load static %}
+<dialog id="about_modal" class="modal" hx-swap-oob="true">
+    <div class="modal-box menu menu-lg bg-base-200 rounded-box max-w-96">
+        <div class="flex items-center justify-center space-x-3 rtl:space-x-reverse">
+            <div class="bg-neutral p-2 rounded-btn">
+                <img src="{{ ingress_path }}{% static 'logo.svg' %}" alt="Logo" class="h-12">
+            </div>
+        </div>
+        <span class="text-center mt-1">
+            Version:
+            0.1.43-public_beta_h3
+        </span>
+
+        <span class="mt-2 text-center">NSPanel Manager is a software for easy management and intuitive use for all family member for the whole house.</span>
+        <span class="mb-2 text-center font-bold">Thank you for your support!</span>
+
+        <div class="flex items-center justify-center">
+            <a href="https://www.buymeacoffee.com/nspanelmanager" class="mt-4" target="_blank" rel="nofollow"><img src="https://camo.githubusercontent.com/67f1b859c85032255c81e5f861a5f572fa25813c2ea5e7623b7efa91c395e37f/68747470733a2f2f63646e2e6275796d6561636f666665652e636f6d2f627574746f6e732f64656661756c742d6f72616e67652e706e67" alt="Buy Us A Coffee" height="41" width="174" data-canonical-src="https://cdn.buymeacoffee.com/buttons/default-orange.png" style="max-width: 100%;"></a>
+        </div>
+
+    </div>
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>

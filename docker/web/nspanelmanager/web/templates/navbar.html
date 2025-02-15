@@ -148,7 +148,11 @@
         </li>
         <li>
           <a href="{% url 'settings' %}" data-active="{% if request.path == '/settings' %}true{% endif %}"
-            class="block py-2 px-3 rounded md:p-0 md:hover:text-accent   hover:bg-accent hover: md:hover:bg-transparent border-gray-700 data-[active=true]:text-accent ">Settings</a>
+            class="block py-2 px-3 rounded md:p-0 md:hover:text-accent hover:bg-accent md:hover:bg-transparent border-gray-700 data-[active=true]:text-accent ">Settings</a>
+        </li>
+        <li>
+          <a onclick="about_modal.showModal();"
+            class="block py-2 px-3 rounded md:p-0 md:hover:text-accent hover:bg-accent cursor-pointer md:hover:bg-transparent border-gray-700 data-[active=true]:text-accent ">About</a>
         </li>
       </ul>
     </div>
