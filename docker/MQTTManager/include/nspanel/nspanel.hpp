@@ -6,6 +6,7 @@
 #include <command_manager/command_manager.hpp>
 #include <cstdint>
 #include <database_manager/database_manager.hpp>
+#include <memory>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <mutex>
 #include <nlohmann/json.hpp>
@@ -41,9 +42,25 @@ public:
 class NSPanel {
 public:
   NSPanel(uint32_t panel_id);
+
+  /*
+   * Build a new NSPanel object from a discovery request and add it to the database as pending.
+   * Returns a shared_ptr to the new NSPanel object if successful, otherwill nullptr.
+   */
+  static std::shared_ptr<NSPanel> create_from_discovery_request(nlohmann::json request_data);
+
+  /*
+   * Reload configuration from database
+   */
   void reload_config();
+
   ~NSPanel();
+
+  /*
+  Rebuild all MQTT topics from new settings.
+  */
   void reset_mqtt_topics();
+
   /**
    * Reset MQTT topics used to register entities to HA.
    */

@@ -18,10 +18,10 @@ class NSPanelRebootButton(component.Component):
             url_name = self.template_view
         else:
             url_name = context.request.resolver_match.url_name
-        if url_name == "index":
+        if url_name == "htmx_partial_index_nspanels_section" or url_name == "index":
             return "nspanel_reboot_button/nspanel_reboot_button_index.html"
         elif url_name == "edit_nspanel":
-                return "nspanel_reboot_button/nspanel_reboot_button_edit_nspanel.html"
+            return "nspanel_reboot_button/nspanel_reboot_button_edit_nspanel.html"
 
     def get(self, request, view, nspanel_id):
         self.template_view = view

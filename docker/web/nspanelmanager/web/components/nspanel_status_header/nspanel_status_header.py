@@ -19,7 +19,7 @@ class NSPanelHeader(component.Component):
             url_name = self.template_view
         else:
             url_name = context.request.resolver_match.url_name
-        if url_name == "index":
+        if url_name == "htmx_partial_index_nspanels_section" or url_name == "index":
             return "nspanel_status_header/nspanel_status_header_index.html"
 
     def get(self, request, view, nspanel_id):

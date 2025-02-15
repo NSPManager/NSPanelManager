@@ -34,8 +34,10 @@
 #include <iomanip>
 #include <list>
 #include <mutex>
+#include <netinet/in.h>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <optional>
 #include <room/room.hpp>
 #include <spdlog/spdlog.h>
 #include <sqlite3.h>
@@ -66,6 +68,39 @@ NSPanel::NSPanel(uint32_t id) {
   IPCHandler::attach_callback(fmt::format("nspanel/{}/accept_register_request", this->_id), boost::bind(&NSPanel::handle_ipc_request_accept_register_request, this, _1, _2));
   IPCHandler::attach_callback(fmt::format("nspanel/{}/deny_register_request", this->_id), boost::bind(&NSPanel::handle_ipc_request_deny_register_request, this, _1, _2));
   IPCHandler::attach_callback(fmt::format("nspanel/{}/logs", this->_id), boost::bind(&NSPanel::handle_ipc_request_get_logs, this, _1, _2));
+}
+
+std::shared_ptr<NSPanel> NSPanel::create_from_discovery_request(nlohmann::json request_data) {
+  auto db_room = database_manager::database.get_all<database_manager::Room>();
+  if (db_room.size() > 0) {
+    SPDLOG_INFO("Will create new NSPanel in DB from discovery request. Will set default room to {}::{}.", db_room[0].id, db_room[0].friendly_name);
+    database_manager::NSPanel panel_data;
+    panel_data.mac_address = request_data.at("mac_origin").get<std::string>();
+    panel_data.friendly_name = request_data.at("friendly_name").get<std::string>();
+    panel_data.room_id = db_room[0].id;
+    panel_data.version = request_data.at("version").get<std::string>();
+    panel_data.button1_detached_mode_light_id = std::nullopt;
+    panel_data.button1_mode = 0;
+    panel_data.button2_detached_mode_light_id = std::nullopt;
+    panel_data.button2_mode = 0;
+    panel_data.md5_data_file = request_data.at("md5_data_file").get<std::string>();
+    panel_data.md5_firmware = request_data.at("md5_firmware").get<std::string>();
+    panel_data.md5_tft_file = request_data.at("md5_tft_file").get<std::string>();
+    panel_data.register_relay1_as_light = false;
+    panel_data.register_relay2_as_light = false;
+    panel_data.denied = false;
+    panel_data.accepted = false;
+    try {
+      int new_nspanel_id = database_manager::database.insert(panel_data);
+      return std::shared_ptr<NSPanel>(new NSPanel(new_nspanel_id));
+    } catch (std::system_error &ex) {
+      SPDLOG_ERROR("Failed to create new NSPanel {} in database. What: {}.", request_data.at("mac_origin").get<std::string>(), ex.what());
+      return nullptr;
+    }
+  } else {
+    SPDLOG_ERROR("No rooms found when trying to create a new NSPanel from discovery request. Cannot set default room ID. Will cancel.");
+    return nullptr;
+  }
 }
 
 void NSPanel::reload_config() {
@@ -209,8 +244,17 @@ void NSPanel::send_config() {
   config.set_button2_mqtt_topic(this->_get_nspanel_setting_with_default("button2_mqtt_topic", ""));
   config.set_button1_mqtt_payload(this->_get_nspanel_setting_with_default("button1_mqtt_payload", ""));
   config.set_button2_mqtt_payload(this->_get_nspanel_setting_with_default("button2_mqtt_payload", ""));
-  config.set_button1_detached_light_id(this->_settings.button1_detached_mode_light_id); // TODO: Move detached mode light to manager so that panel only sends a "Hey, trigger detached light on button 1" command
-  config.set_button2_detached_light_id(this->_settings.button2_detached_mode_light_id);
+  // TODO: Move detached mode light to manager so that panel only sends a "Hey, trigger detached light on button 1" command
+  if (this->_settings.button1_detached_mode_light_id.has_value()) {
+    config.set_button1_detached_light_id(this->_settings.button1_detached_mode_light_id.value());
+  } else {
+    config.set_button1_detached_light_id(0);
+  }
+  if (this->_settings.button2_detached_mode_light_id.has_value()) {
+    config.set_button2_detached_light_id(this->_settings.button2_detached_mode_light_id.value());
+  } else {
+    config.set_button2_detached_light_id(0);
+  }
   config.set_optimistic_mode(global_setting.optimistic_mode);
   config.set_raise_light_level_to_100_above(std::stoi(MqttManagerConfig::get_setting_with_default("raise_to_100_light_level", "96")));
 

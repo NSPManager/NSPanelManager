@@ -27,6 +27,60 @@ from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages impo
 from .models import NSPanel, Room, Light, RoomEntitiesPage, Settings, Scene, RelayGroup, RelayGroupBinding, Switch
 from .apps import start_mqtt_manager
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
+from web.views import get_file_md5sum
+
+def partial_index_nspanels_section(request):
+    md5_firmware = get_file_md5sum("firmware.bin")
+    md5_data_file = get_file_md5sum("data_file.bin")
+    md5_tft_file = get_file_md5sum("gui.tft")
+    md5_us_tft_file = get_file_md5sum("gui_us.tft")
+
+    if get_setting_with_default("use_fahrenheit") == "True":
+        temperature_unit = "°F"
+    else:
+        temperature_unit = "°C"
+
+    nspanels = []
+    for nspanel in NSPanel.objects.filter(denied=False):
+        panel_info = {}
+        panel_info["data"] = nspanel
+        print(F"Checking status for panel {nspanel.id}")
+        panel_info["status"] = send_ipc_request(F"nspanel/{nspanel.id}/status", {"command": "get"})
+        print(F"Got status for panel {nspanel.id}")
+        panel_info["status"]["warnings"] = [] # TODO: Check if already array, then don't clear existin warnings
+        for panel in NSPanel.objects.filter(denied=False):
+            if panel == nspanel:
+                continue
+            elif panel.friendly_name == nspanel.friendly_name:
+                panel_info["status"]["warnings"].append({
+                    "level": "error",
+                    "text": "Two or more panels exists with the same name. This may have unintended consequences"
+                })
+                break
+        if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
+            panel_info["status"]["warnings"].append({
+                "level": "info",
+                "text": "Firmware update available."
+            })
+        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "False" and nspanel.md5_tft_file != md5_tft_file:
+            panel_info["status"]["warnings"].append({
+                "level": "info",
+                "text": "GUI update available."
+            })
+        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True" and nspanel.md5_tft_file != md5_us_tft_file:
+            panel_info["status"]["warnings"].append({
+                "level": "info",
+                "text": "GUI update available."
+            })
+        # TODO: Load warnings from MQTTManager.
+        nspanels.append(panel_info)
+
+    data = {
+        'nspanels': nspanels,
+        'temperature_unit': temperature_unit,
+    }
+
+    return render(request, 'index_htmx_nspanels_section.html', data)
 
 def partial_nspanel_index_view(request, nspanel_id):
     try:
@@ -43,6 +97,19 @@ def partial_nspanel_index_view(request, nspanel_id):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
+
+
+@csrf_exempt
+def unblock_nspanel(request, nspanel_id):
+    if request.method == "DELETE":
+        nspanel = NSPanel.objects.get(id=nspanel_id)
+        nspanel.delete()
+
+        # Successful, refresh page
+        response = HttpResponse("")
+        response["HX-Refresh"] = "true"
+        return response
+
 
 @csrf_exempt
 def nspanel_reboot(request, nspanel_id):

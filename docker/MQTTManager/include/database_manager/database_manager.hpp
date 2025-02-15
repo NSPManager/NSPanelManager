@@ -2,6 +2,7 @@
 #include <csignal>
 #include <cstdlib>
 #include <spdlog/spdlog.h>
+#include <sqlite3.h>
 #include <sqlite_orm/sqlite_orm.h>
 #include <string>
 
@@ -28,9 +29,9 @@ struct NSPanel {
   std::string friendly_name;
   int room_id = 0;
   std::string version;
-  uint64_t button1_detached_mode_light_id = 0;
+  std::optional<uint64_t> button1_detached_mode_light_id = 0;
   int button1_mode = 0;
-  uint64_t button2_detached_mode_light_id = 0;
+  std::optional<uint64_t> button2_detached_mode_light_id = 0;
   int button2_mode = 0;
   std::string md5_data_file;
   std::string md5_firmware;
@@ -108,22 +109,22 @@ struct Light {
 
 static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.sqlite3",
                                                        sqlite_orm::make_table("web_roomentitiespage",
-                                                                              sqlite_orm::make_column("id", &RoomEntitiesPage::id, sqlite_orm::primary_key()),
+                                                                              sqlite_orm::make_column("id", &RoomEntitiesPage::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("display_order", &RoomEntitiesPage::display_order),
                                                                               sqlite_orm::make_column("page_type", &RoomEntitiesPage::page_type),
                                                                               sqlite_orm::make_column("is_scenes_page", &RoomEntitiesPage::is_scenes_page),
                                                                               sqlite_orm::make_column("room_id", &RoomEntitiesPage::room_id)),
                                                        sqlite_orm::make_table("web_settings",
-                                                                              sqlite_orm::make_column("id", &SettingHolder::id, sqlite_orm::primary_key()),
+                                                                              sqlite_orm::make_column("id", &SettingHolder::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("name", &SettingHolder::name),
                                                                               sqlite_orm::make_column("value", &SettingHolder::value)),
                                                        sqlite_orm::make_table("web_nspanelsettings",
-                                                                              sqlite_orm::make_column("id", &NSPanelSettingHolder::id, sqlite_orm::primary_key()),
+                                                                              sqlite_orm::make_column("id", &NSPanelSettingHolder::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("name", &NSPanelSettingHolder::name),
                                                                               sqlite_orm::make_column("value", &NSPanelSettingHolder::value),
                                                                               sqlite_orm::make_column("nspanel_id", &NSPanelSettingHolder::nspanel_id)),
                                                        sqlite_orm::make_table("web_nspanel",
-                                                                              sqlite_orm::make_column("id", &NSPanel::id, sqlite_orm::primary_key()),
+                                                                              sqlite_orm::make_column("id", &NSPanel::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("friendly_name", &NSPanel::friendly_name),
                                                                               sqlite_orm::make_column("mac_address", &NSPanel::mac_address),
                                                                               sqlite_orm::make_column("room_id", &NSPanel::room_id),
@@ -140,22 +141,22 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("denied", &NSPanel::denied),
                                                                               sqlite_orm::make_column("accepted", &NSPanel::accepted)),
                                                        sqlite_orm::make_table("web_relaygroupbinding",
-                                                                              sqlite_orm::make_column("id", &NSPanelRelayGroupBinding::id, sqlite_orm::primary_key()),
+                                                                              sqlite_orm::make_column("id", &NSPanelRelayGroupBinding::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("relay_num", &NSPanelRelayGroupBinding::relay_num),
                                                                               sqlite_orm::make_column("nspanel_id", &NSPanelRelayGroupBinding::nspanel_id),
                                                                               sqlite_orm::make_column("relay_group_id", &NSPanelRelayGroupBinding::relay_group_id)),
                                                        sqlite_orm::make_table("web_room",
-                                                                              sqlite_orm::make_column("id", &Room::id, sqlite_orm::primary_key()),
+                                                                              sqlite_orm::make_column("id", &Room::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("friendly_name", &Room::friendly_name),
                                                                               sqlite_orm::make_column("displayOrder", &Room::display_order)),
                                                        sqlite_orm::make_table("web_scene",
-                                                                              sqlite_orm::make_column("id", &Scene::id, sqlite_orm::primary_key()),
+                                                                              sqlite_orm::make_column("id", &Scene::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("room_id", &Scene::room_id),
                                                                               sqlite_orm::make_column("friendly_name", &Scene::friendly_name),
                                                                               sqlite_orm::make_column("scene_type", &Scene::scene_type),
                                                                               sqlite_orm::make_column("backend_name", &Scene::backend_name)),
                                                        sqlite_orm::make_table("web_lightstate",
-                                                                              sqlite_orm::make_column("id", &SceneLightState::id, sqlite_orm::primary_key()),
+                                                                              sqlite_orm::make_column("id", &SceneLightState::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("scene_id", &SceneLightState::scene_id),
                                                                               sqlite_orm::make_column("light_id", &SceneLightState::light_id),
                                                                               sqlite_orm::make_column("light_level", &SceneLightState::light_level),
@@ -164,7 +165,7 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("hue", &SceneLightState::hue),
                                                                               sqlite_orm::make_column("saturation", &SceneLightState::saturation)),
                                                        sqlite_orm::make_table("web_light",
-                                                                              sqlite_orm::make_column("id", &Light::id, sqlite_orm::primary_key()),
+                                                                              sqlite_orm::make_column("id", &Light::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("can_dim", &Light::can_dim),
                                                                               sqlite_orm::make_column("can_rgb", &Light::can_rgb),
                                                                               sqlite_orm::make_column("can_color_temperature", &Light::can_color_temperature),

@@ -19,7 +19,7 @@ class NSPanelStatusRamUsage(component.Component):
                 url_name = self.template_view
             else:
                 url_name = context.request.resolver_match.url_name
-            if url_name == "index":
+            if url_name == "htmx_partial_index_nspanels_section" or url_name == "index":
                 return "nspanel_status_ram_usage/nspanel_status_ram_usage_index.html"
             elif url_name == "edit_nspanel":
                 return "nspanel_status_ram_usage/nspanel_status_ram_usage_edit_nspanel.html"

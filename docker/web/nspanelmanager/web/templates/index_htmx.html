@@ -49,16 +49,6 @@
   </div>
 </div>
 <div>
-      {% if nspanels|length > 0 %}
-          <div class="grid md:grid-cols-3 gap-4 mt-4 items-start" id="nspanels_container" hx-ext="ws" ws-connect="/websocket">
-            {% for nspanel in nspanels %}
-                {% include 'partial/nspanel_index_view_htmx.html' %}
-            {% endfor %}
-          </div>
-      {% else %}
-      <div class="grid md:grid-cols-3 gap-4 mt-4 items-start" id="nspanels_container" hx-ext="ws" ws-connect="/websocket">
-          <div class="col-span-3 w-full text-center text-xl text-black dark:text-white mt-16">No NSPanel added to the manager. Getting started? <a href="{% url 'manual' %}#sec:nspanel_flashing" class="text-blue-500">Read the manual.</a></span>
-      </div>
-      {% endif %}
+    <div hx-trigger="load" hx-get="{% url 'htmx_partial_index_nspanels_section' %}"></div>
 </div>
 {% endblock %}

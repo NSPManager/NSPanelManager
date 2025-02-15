@@ -77,7 +77,6 @@ class RoomEntitiesPage(models.Model):
 class NSPanel(models.Model):
     mac_address = models.CharField(max_length=17)
     friendly_name = models.CharField(max_length=100)
-    ip_address = models.CharField(max_length=15, default="")
     version = models.CharField(max_length=15, default="")
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     button1_mode = models.IntegerField(default=0)

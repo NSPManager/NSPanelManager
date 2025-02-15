@@ -22,7 +22,7 @@ class NSPanelWarnings(component.Component):
             url_name = self.template_view
         else:
             url_name = context.request.resolver_match.url_name
-        if url_name == "index":
+        if url_name == "htmx_partial_index_nspanels_section" or url_name == "index":
             return "nspanel_warnings/nspanel_warnings_index.html"
 
     # TODO: Move md5 checksum to DB instead of always calculating them on reqest.

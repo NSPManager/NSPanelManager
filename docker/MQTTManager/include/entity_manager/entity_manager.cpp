@@ -18,6 +18,7 @@
 #include <boost/stacktrace.hpp>
 #include <boost/stacktrace/frame.hpp>
 #include <boost/stacktrace/stacktrace_fwd.hpp>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <database_manager/database_manager.hpp>
@@ -417,30 +418,15 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
     nlohmann::json init_data = data;
     SPDLOG_INFO("Panel is not registered to manager, adding panel but as 'pending accept' status.");
 
-    // TODO: Convert JSON to NSPanelSettings object
-    NSPanelSettings settings;
-    settings.set_accepted(false);
-    settings.set_denied(false);
-    if (data.contains("mac")) {
-      settings.set_mac_address(data.at("mac"));
-    } else if (data.contains("mac_origin")) {
-      settings.set_mac_address(data.at("mac_origin"));
+    std::shared_ptr<NSPanel> new_panel = NSPanel::create_from_discovery_request(init_data);
+    if (new_panel != nullptr) {
+      std::lock_guard<std::mutex> lock_guard(EntityManager::_nspanels_mutex);
+      EntityManager::_nspanels.push_back(new_panel);
+      nlohmann::json data = {
+          {"event_type", "register_request"},
+          {"nspanel_id", new_panel->get_id()}};
+      WebsocketServer::broadcast_json(data);
     }
-    if (data.contains("address")) {
-      settings.set_ip_address(data.at("address"));
-    } else if (data.contains("ip_address")) {
-      settings.set_ip_address(data.at("ip_address"));
-    }
-    if (data.contains("name")) {
-      settings.set_name(data.at("name"));
-    } else if (data.contains("friendly_name")) {
-      settings.set_name(data.at("friendly_name"));
-    }
-
-    // TODO: Handle register request
-    // NSPanel *new_nspanel = new NSPanel(settings);
-    // EntityManager::_nspanels.push_back(new_nspanel);
-    // new_nspanel->register_to_manager(data);
   }
 }
 
