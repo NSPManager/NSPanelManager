@@ -6641,6 +6641,11 @@ details.collapse summary::-webkit-details-marker {
   margin-bottom: 1rem;
 }
 
+.mx-1 {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
 .mb-1 {
   margin-bottom: 0.25rem;
 }
@@ -6917,6 +6922,10 @@ details.collapse summary::-webkit-details-marker {
   width: 100vw;
 }
 
+.w-96 {
+  width: 24rem;
+}
+
 .min-w-0 {
   min-width: 0px;
 }
@@ -6935,6 +6944,30 @@ details.collapse summary::-webkit-details-marker {
 
 .max-w-96 {
   max-width: 24rem;
+}
+
+.max-w-72 {
+  max-width: 18rem;
+}
+
+.max-w-44 {
+  max-width: 11rem;
+}
+
+.max-w-40 {
+  max-width: 10rem;
+}
+
+.max-w-52 {
+  max-width: 13rem;
+}
+
+.max-w-32 {
+  max-width: 8rem;
+}
+
+.max-w-36 {
+  max-width: 9rem;
 }
 
 .flex-1 {
@@ -6981,8 +7014,16 @@ details.collapse summary::-webkit-details-marker {
   resize: both;
 }
 
+.list-inside {
+  list-style-position: inside;
+}
+
 .list-none {
   list-style-type: none;
+}
+
+.list-disc {
+  list-style-type: disc;
 }
 
 .grid-cols-2 {
@@ -7069,6 +7110,12 @@ details.collapse summary::-webkit-details-marker {
   --tw-space-y-reverse: 0;
   margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+}
+
+.space-y-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.5rem * var(--tw-space-y-reverse));
 }
 
 .divide-y > :not([hidden]) ~ :not([hidden]) {
@@ -8008,6 +8055,39 @@ details.collapse summary::-webkit-details-marker {
 .hover\:btn-success:hover.btn-outline.btn-active {
   --tw-text-opacity: 1;
   color: var(--fallback-suc,oklch(var(--suc)/var(--tw-text-opacity)));
+}
+
+@media (min-width: 768px) {
+  .md\:join-horizontal.join {
+    flex-direction: row;
+  }
+
+  .md\:join-horizontal.join .join-item:first-child:not(:last-child),.md\:join-horizontal
+  .join *:first-child:not(:last-child) .join-item {
+    border-end-end-radius: 0;
+    border-start-end-radius: 0;
+    border-end-start-radius: inherit;
+    border-start-start-radius: inherit;
+  }
+
+  .md\:join-horizontal.join .join-item:last-child:not(:first-child),.md\:join-horizontal
+  .join *:last-child:not(:first-child) .join-item {
+    border-end-start-radius: 0;
+    border-start-start-radius: 0;
+    border-end-end-radius: inherit;
+    border-start-end-radius: inherit;
+  }
+
+  .md\:join-horizontal.join > :where(*:not(:first-child)) {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-inline-start: -1px;
+  }
+
+  .md\:join-horizontal.join > :where(*:not(:first-child)):is(.btn) {
+    margin-inline-start: calc(var(--border-btn) * -1);
+    margin-top: 0px;
+  }
 }
 
 .hover\:bg-accent:hover {

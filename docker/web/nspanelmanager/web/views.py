@@ -33,7 +33,7 @@ def send_mqttmanager_reload_command():
         try:
             if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
                 print("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
-                os.kill(proc.pid, signal.SIGUSR1)
+                os.kill(proc.pid, signal.SIGUSR1) # Send SIGUSR1 signal that is listened for in MQTTManager to reload config
                 break
         except Exception as ex:
             print(ex)

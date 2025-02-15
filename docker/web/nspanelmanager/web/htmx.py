@@ -20,6 +20,7 @@ import base64
 from time import sleep
 
 #from nspanelmanager.web.mqttmanager_ipc import send_ipc_request
+from .views import send_mqttmanager_reload_command
 from .mqttmanager_ipc import send_ipc_request
 
 from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages import NSPanelRoomEntitiesPages
@@ -27,7 +28,7 @@ from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages impo
 from .models import NSPanel, Room, Light, RoomEntitiesPage, Settings, Scene, RelayGroup, RelayGroupBinding, Switch
 from .apps import start_mqtt_manager
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
-from web.views import get_file_md5sum
+from web.views import get_file_md5sum, relay_groups
 
 def partial_index_nspanels_section(request):
     md5_firmware = get_file_md5sum("firmware.bin")
@@ -276,6 +277,81 @@ def interface_theme(request):
     set_setting_value("theme", new_theme)
     return JsonResponse({"status": "OK"}, status=200)
 
+
+def relay_group_create_new_modal(request):
+    return render(request, 'modals/relay_groups/create_or_edit_relay_group_modal.html')
+
+
+def relay_group_edit_modal(request, relay_group_id):
+    data = {
+        'relay_group': RelayGroup.objects.get(id=relay_group_id)
+    }
+    return render(request, 'modals/relay_groups/create_or_edit_relay_group_modal.html', data)
+
+def relay_group_save(request):
+    if request.method == "POST":
+        if "relay_group_id" in request.POST:
+            rg = RelayGroup.objects.get(id=request.POST['relay_group_id'])
+        else:
+            rg = RelayGroup()
+        rg.friendly_name = request.POST["name"]
+        rg.save()
+
+        response = HttpResponse()
+        response["HX-Refresh"] = "true"
+        return response
+
+
+@csrf_exempt
+def relay_group_delete(request, relay_group_id):
+    if request.method == "DELETE":
+        rg = RelayGroup.objects.get(id=relay_group_id)
+        rg.delete()
+
+        response = HttpResponse()
+        response["HX-Refresh"] = "true"
+        return response
+
+
+@csrf_exempt
+def relay_group_add_relay_modal(request, relay_group_id):
+    data = {
+        "nspanels": NSPanel.objects.filter(accepted=True, denied=False),
+        "relay_group_id": relay_group_id,
+    }
+    return render(request, 'modals/relay_groups/add_relay_modal.html', data)
+
+
+def relay_group_add_relay(request, relay_group_id):
+    if request.method == "POST":
+        rg = RelayGroup.objects.get(id=relay_group_id)
+        nspanel = NSPanel.objects.get(id=request.POST["nspanel_id"])
+        relay_num = request.POST["relay_selection"]
+
+        exists = RelayGroupBinding.objects.filter(nspanel=nspanel, relay_num=relay_num, relay_group=rg).count() > 0
+        if not exists:
+            binding = RelayGroupBinding()
+            binding.relay_group = rg
+            binding.nspanel = nspanel
+            binding.relay_num = relay_num
+            binding.save()
+            send_mqttmanager_reload_command()
+
+        response = HttpResponse()
+        response["HX-Refresh"] = "true"
+        return response
+
+
+@csrf_exempt
+def relay_group_remove_relay(request, relay_binding_id):
+    if request.method == "DELETE":
+        rgb = RelayGroupBinding.objects.get(id=relay_binding_id)
+        rgb.delete()
+        response = HttpResponse()
+        response["HX-Refresh"] = "true"
+        return response
+
+
 @csrf_exempt
 def handle_entity_modal_result(request):
     if request.session["action"] == "ADD_LIGHT_TO_ROOM":
@@ -287,6 +363,7 @@ def handle_entity_modal_result(request):
             "status": "error",
             "text": "Unknown action! Action: " + request.session["action"]
         }, status=500)
+
 
 def handle_entity_modal_entity_selected(request, entity):
     entity_data = json.loads(base64.b64decode(entity).decode('utf-8'))

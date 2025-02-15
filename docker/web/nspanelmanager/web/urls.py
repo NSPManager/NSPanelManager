@@ -181,6 +181,15 @@ urlpatterns = [
     path('htmx/partial/select_weather_outside_temperature_sensor_from_list/<str:entity_source>', htmx.select_weather_outside_temperature_sensor_from_list, name='htmx_partial_select_weather_outside_temperature_sensor_from_list'),
     path('htmx/interface/theme', htmx.interface_theme, name='htmx_interface_theme'),
 
+    # HTMX relay group URLs
+    path('htmx/relay_groups/create_new_modal', htmx.relay_group_create_new_modal, name='htmx_modal_create_new_relay_group'),
+    path('htmx/relay_groups/edit_modal/<int:relay_group_id>', htmx.relay_group_edit_modal, name='htmx_modal_edit_relay_group'),
+    path('htmx/relay_groups/save', htmx.relay_group_save, name='htmx_save_relay_group'),
+    path('htmx/relay_groups/delete/<int:relay_group_id>', htmx.relay_group_delete, name='htmx_delete_relay_group'),
+    path('htmx/relay_groups/add_relay_modal/<int:relay_group_id>', htmx.relay_group_add_relay_modal, name='htmx_modal_add_relay_to_relay_group'),
+    path('htmx/relay_groups/add_relay/<int:relay_group_id>', htmx.relay_group_add_relay, name='htmx_add_relay_to_relay_group'),
+    path('htmx/relay_groups/remove_relay_binding/<int:relay_binding_id>', htmx.relay_group_remove_relay, name='htmx_remove_relay_from_relay_group'),
+
     # Components
     path('htmx/component/nspanel_status_header/<str:view>/<int:nspanel_id>', NSPanelHeader.as_view(), name="nspanel_status_header"),
     path('htmx/component/nspanel_status_text/<str:view>/<int:nspanel_id>', NSPanelStatusText.as_view(), name="nspanel_status_text"),

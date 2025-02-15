@@ -1,0 +1,57 @@
+<dialog id="modal" class="modal" hx-swap-oob="true">
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        <span class="text-lg">
+            {% if relay_group %}
+                Edit relay group
+            {% else %}
+                Create new relay group
+            {% endif %}
+        </span>
+
+        <form hx-post="{% url 'htmx_save_relay_group' %}">
+            {% csrf_token %}
+            {% if relay_group %}
+                <input type="hidden" name="relay_group_id" value="{{ relay_group.id }}">
+            {% endif %}
+            <div class="mt-4">
+                <div class="flex flex-row-reverse">
+                    <input class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                    type="text" class="input" name="name" placeholder="Name" value="{{ relay_group.friendly_name }}">
+                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                    <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <title>Friendly name</title>
+                        <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
+                        4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
+                        7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
+                    </svg>
+                    </span>
+                </div>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="btn btn-success mt-2">
+                    {% if relay_group %}
+                        Save
+                    {% else %}
+                        Create
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+
+    <script>
+      console.log("TEST");
+      modal.showModal(); // Show the modal when loaded.
+    </script>
+</dialog>

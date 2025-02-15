@@ -12,7 +12,6 @@
 
 {% block content %}
 {% load static %}
-{% include 'modal-select-entity.html' %}
 
 <form method="POST" action="{% url 'add_new_scene_to_room' room.id %}">
   {% csrf_token %}
