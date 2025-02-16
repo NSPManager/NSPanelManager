@@ -71,18 +71,6 @@ extern NSPanelMQTTManagerCommand_FirstPageTurnLightOnDefaultTypeInternal _NSPane
 class NSPanelMQTTManagerCommand_LightCommand;
 struct NSPanelMQTTManagerCommand_LightCommandDefaultTypeInternal;
 extern NSPanelMQTTManagerCommand_LightCommandDefaultTypeInternal _NSPanelMQTTManagerCommand_LightCommand_default_instance_;
-class NSPanelMQTTManagerCommand_NextEntitiesPage;
-struct NSPanelMQTTManagerCommand_NextEntitiesPageDefaultTypeInternal;
-extern NSPanelMQTTManagerCommand_NextEntitiesPageDefaultTypeInternal _NSPanelMQTTManagerCommand_NextEntitiesPage_default_instance_;
-class NSPanelMQTTManagerCommand_NextRoom;
-struct NSPanelMQTTManagerCommand_NextRoomDefaultTypeInternal;
-extern NSPanelMQTTManagerCommand_NextRoomDefaultTypeInternal _NSPanelMQTTManagerCommand_NextRoom_default_instance_;
-class NSPanelMQTTManagerCommand_PreviousEntitiesPage;
-struct NSPanelMQTTManagerCommand_PreviousEntitiesPageDefaultTypeInternal;
-extern NSPanelMQTTManagerCommand_PreviousEntitiesPageDefaultTypeInternal _NSPanelMQTTManagerCommand_PreviousEntitiesPage_default_instance_;
-class NSPanelMQTTManagerCommand_PreviousRoom;
-struct NSPanelMQTTManagerCommand_PreviousRoomDefaultTypeInternal;
-extern NSPanelMQTTManagerCommand_PreviousRoomDefaultTypeInternal _NSPanelMQTTManagerCommand_PreviousRoom_default_instance_;
 class NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage;
 struct NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPageDefaultTypeInternal;
 extern NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPageDefaultTypeInternal _NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage_default_instance_;
@@ -1519,7 +1507,7 @@ class NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage final : public ::go
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage*>(
         &_NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 18;
+  static constexpr int kIndexInFileMessages = 14;
   friend void swap(NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& a, NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* other) {
     if (other == this) return;
@@ -1639,690 +1627,6 @@ class NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage final : public ::go
                           const NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& from_msg);
     ::int32_t entity_page_id_;
     ::int32_t entity_slot_;
-    mutable ::google::protobuf::internal::CachedSize _cached_size_;
-    PROTOBUF_TSAN_DECLARE_MEMBER
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
-};
-// -------------------------------------------------------------------
-
-class NSPanelMQTTManagerCommand_PreviousRoom final : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:NSPanelMQTTManagerCommand.PreviousRoom) */ {
- public:
-  inline NSPanelMQTTManagerCommand_PreviousRoom() : NSPanelMQTTManagerCommand_PreviousRoom(nullptr) {}
-  ~NSPanelMQTTManagerCommand_PreviousRoom() override;
-  template <typename = void>
-  explicit PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_PreviousRoom(
-      ::google::protobuf::internal::ConstantInitialized);
-
-  inline NSPanelMQTTManagerCommand_PreviousRoom(const NSPanelMQTTManagerCommand_PreviousRoom& from) : NSPanelMQTTManagerCommand_PreviousRoom(nullptr, from) {}
-  inline NSPanelMQTTManagerCommand_PreviousRoom(NSPanelMQTTManagerCommand_PreviousRoom&& from) noexcept
-      : NSPanelMQTTManagerCommand_PreviousRoom(nullptr, std::move(from)) {}
-  inline NSPanelMQTTManagerCommand_PreviousRoom& operator=(const NSPanelMQTTManagerCommand_PreviousRoom& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline NSPanelMQTTManagerCommand_PreviousRoom& operator=(NSPanelMQTTManagerCommand_PreviousRoom&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetArena() == from.GetArena()
-#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetArena() != nullptr
-#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
-  }
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::google::protobuf::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::google::protobuf::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const NSPanelMQTTManagerCommand_PreviousRoom& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const NSPanelMQTTManagerCommand_PreviousRoom* internal_default_instance() {
-    return reinterpret_cast<const NSPanelMQTTManagerCommand_PreviousRoom*>(
-        &_NSPanelMQTTManagerCommand_PreviousRoom_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages = 15;
-  friend void swap(NSPanelMQTTManagerCommand_PreviousRoom& a, NSPanelMQTTManagerCommand_PreviousRoom& b) { a.Swap(&b); }
-  inline void Swap(NSPanelMQTTManagerCommand_PreviousRoom* other) {
-    if (other == this) return;
-#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
-#else   // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() == other->GetArena()) {
-#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::google::protobuf::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(NSPanelMQTTManagerCommand_PreviousRoom* other) {
-    if (other == this) return;
-    ABSL_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  NSPanelMQTTManagerCommand_PreviousRoom* New(::google::protobuf::Arena* arena = nullptr) const final {
-    return ::google::protobuf::Message::DefaultConstruct<NSPanelMQTTManagerCommand_PreviousRoom>(arena);
-  }
-  using ::google::protobuf::Message::CopyFrom;
-  void CopyFrom(const NSPanelMQTTManagerCommand_PreviousRoom& from);
-  using ::google::protobuf::Message::MergeFrom;
-  void MergeFrom(const NSPanelMQTTManagerCommand_PreviousRoom& from) { NSPanelMQTTManagerCommand_PreviousRoom::MergeImpl(*this, from); }
-
-  private:
-  static void MergeImpl(
-      ::google::protobuf::MessageLite& to_msg,
-      const ::google::protobuf::MessageLite& from_msg);
-
-  public:
-  bool IsInitialized() const {
-    return true;
-  }
-  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
-  ::size_t ByteSizeLong() const final;
-  ::uint8_t* _InternalSerialize(
-      ::uint8_t* target,
-      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
-  void InternalSwap(NSPanelMQTTManagerCommand_PreviousRoom* other);
- private:
-  friend class ::google::protobuf::internal::AnyMetadata;
-  static ::absl::string_view FullMessageName() { return "NSPanelMQTTManagerCommand.PreviousRoom"; }
-
- protected:
-  explicit NSPanelMQTTManagerCommand_PreviousRoom(::google::protobuf::Arena* arena);
-  NSPanelMQTTManagerCommand_PreviousRoom(::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_PreviousRoom& from);
-  NSPanelMQTTManagerCommand_PreviousRoom(::google::protobuf::Arena* arena, NSPanelMQTTManagerCommand_PreviousRoom&& from) noexcept
-      : NSPanelMQTTManagerCommand_PreviousRoom(arena) {
-    *this = ::std::move(from);
-  }
-  const ::google::protobuf::Message::ClassData* GetClassData() const final;
-
- public:
-  ::google::protobuf::Metadata GetMetadata() const;
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-  enum : int {
-    kNspanelIdFieldNumber = 1,
-  };
-  // int32 nspanel_id = 1;
-  void clear_nspanel_id() ;
-  ::int32_t nspanel_id() const;
-  void set_nspanel_id(::int32_t value);
-
-  private:
-  ::int32_t _internal_nspanel_id() const;
-  void _internal_set_nspanel_id(::int32_t value);
-
-  public:
-  // @@protoc_insertion_point(class_scope:NSPanelMQTTManagerCommand.PreviousRoom)
- private:
-  class _Internal;
-  friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<
-      0, 1, 0,
-      0, 2>
-      _table_;
-
-  static constexpr const void* _raw_default_instance_ =
-      &_NSPanelMQTTManagerCommand_PreviousRoom_default_instance_;
-
-  friend class ::google::protobuf::MessageLite;
-  friend class ::google::protobuf::Arena;
-  template <typename T>
-  friend class ::google::protobuf::Arena::InternalHelper;
-  using InternalArenaConstructable_ = void;
-  using DestructorSkippable_ = void;
-  struct Impl_ {
-    inline explicit constexpr Impl_(
-        ::google::protobuf::internal::ConstantInitialized) noexcept;
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena);
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena, const Impl_& from,
-                          const NSPanelMQTTManagerCommand_PreviousRoom& from_msg);
-    ::int32_t nspanel_id_;
-    mutable ::google::protobuf::internal::CachedSize _cached_size_;
-    PROTOBUF_TSAN_DECLARE_MEMBER
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
-};
-// -------------------------------------------------------------------
-
-class NSPanelMQTTManagerCommand_PreviousEntitiesPage final : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:NSPanelMQTTManagerCommand.PreviousEntitiesPage) */ {
- public:
-  inline NSPanelMQTTManagerCommand_PreviousEntitiesPage() : NSPanelMQTTManagerCommand_PreviousEntitiesPage(nullptr) {}
-  ~NSPanelMQTTManagerCommand_PreviousEntitiesPage() override;
-  template <typename = void>
-  explicit PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_PreviousEntitiesPage(
-      ::google::protobuf::internal::ConstantInitialized);
-
-  inline NSPanelMQTTManagerCommand_PreviousEntitiesPage(const NSPanelMQTTManagerCommand_PreviousEntitiesPage& from) : NSPanelMQTTManagerCommand_PreviousEntitiesPage(nullptr, from) {}
-  inline NSPanelMQTTManagerCommand_PreviousEntitiesPage(NSPanelMQTTManagerCommand_PreviousEntitiesPage&& from) noexcept
-      : NSPanelMQTTManagerCommand_PreviousEntitiesPage(nullptr, std::move(from)) {}
-  inline NSPanelMQTTManagerCommand_PreviousEntitiesPage& operator=(const NSPanelMQTTManagerCommand_PreviousEntitiesPage& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline NSPanelMQTTManagerCommand_PreviousEntitiesPage& operator=(NSPanelMQTTManagerCommand_PreviousEntitiesPage&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetArena() == from.GetArena()
-#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetArena() != nullptr
-#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
-  }
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::google::protobuf::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::google::protobuf::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const NSPanelMQTTManagerCommand_PreviousEntitiesPage& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const NSPanelMQTTManagerCommand_PreviousEntitiesPage* internal_default_instance() {
-    return reinterpret_cast<const NSPanelMQTTManagerCommand_PreviousEntitiesPage*>(
-        &_NSPanelMQTTManagerCommand_PreviousEntitiesPage_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages = 17;
-  friend void swap(NSPanelMQTTManagerCommand_PreviousEntitiesPage& a, NSPanelMQTTManagerCommand_PreviousEntitiesPage& b) { a.Swap(&b); }
-  inline void Swap(NSPanelMQTTManagerCommand_PreviousEntitiesPage* other) {
-    if (other == this) return;
-#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
-#else   // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() == other->GetArena()) {
-#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::google::protobuf::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(NSPanelMQTTManagerCommand_PreviousEntitiesPage* other) {
-    if (other == this) return;
-    ABSL_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  NSPanelMQTTManagerCommand_PreviousEntitiesPage* New(::google::protobuf::Arena* arena = nullptr) const final {
-    return ::google::protobuf::Message::DefaultConstruct<NSPanelMQTTManagerCommand_PreviousEntitiesPage>(arena);
-  }
-  using ::google::protobuf::Message::CopyFrom;
-  void CopyFrom(const NSPanelMQTTManagerCommand_PreviousEntitiesPage& from);
-  using ::google::protobuf::Message::MergeFrom;
-  void MergeFrom(const NSPanelMQTTManagerCommand_PreviousEntitiesPage& from) { NSPanelMQTTManagerCommand_PreviousEntitiesPage::MergeImpl(*this, from); }
-
-  private:
-  static void MergeImpl(
-      ::google::protobuf::MessageLite& to_msg,
-      const ::google::protobuf::MessageLite& from_msg);
-
-  public:
-  bool IsInitialized() const {
-    return true;
-  }
-  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
-  ::size_t ByteSizeLong() const final;
-  ::uint8_t* _InternalSerialize(
-      ::uint8_t* target,
-      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
-  void InternalSwap(NSPanelMQTTManagerCommand_PreviousEntitiesPage* other);
- private:
-  friend class ::google::protobuf::internal::AnyMetadata;
-  static ::absl::string_view FullMessageName() { return "NSPanelMQTTManagerCommand.PreviousEntitiesPage"; }
-
- protected:
-  explicit NSPanelMQTTManagerCommand_PreviousEntitiesPage(::google::protobuf::Arena* arena);
-  NSPanelMQTTManagerCommand_PreviousEntitiesPage(::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_PreviousEntitiesPage& from);
-  NSPanelMQTTManagerCommand_PreviousEntitiesPage(::google::protobuf::Arena* arena, NSPanelMQTTManagerCommand_PreviousEntitiesPage&& from) noexcept
-      : NSPanelMQTTManagerCommand_PreviousEntitiesPage(arena) {
-    *this = ::std::move(from);
-  }
-  const ::google::protobuf::Message::ClassData* GetClassData() const final;
-
- public:
-  ::google::protobuf::Metadata GetMetadata() const;
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-  enum : int {
-    kNspanelIdFieldNumber = 1,
-  };
-  // int32 nspanel_id = 1;
-  void clear_nspanel_id() ;
-  ::int32_t nspanel_id() const;
-  void set_nspanel_id(::int32_t value);
-
-  private:
-  ::int32_t _internal_nspanel_id() const;
-  void _internal_set_nspanel_id(::int32_t value);
-
-  public:
-  // @@protoc_insertion_point(class_scope:NSPanelMQTTManagerCommand.PreviousEntitiesPage)
- private:
-  class _Internal;
-  friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<
-      0, 1, 0,
-      0, 2>
-      _table_;
-
-  static constexpr const void* _raw_default_instance_ =
-      &_NSPanelMQTTManagerCommand_PreviousEntitiesPage_default_instance_;
-
-  friend class ::google::protobuf::MessageLite;
-  friend class ::google::protobuf::Arena;
-  template <typename T>
-  friend class ::google::protobuf::Arena::InternalHelper;
-  using InternalArenaConstructable_ = void;
-  using DestructorSkippable_ = void;
-  struct Impl_ {
-    inline explicit constexpr Impl_(
-        ::google::protobuf::internal::ConstantInitialized) noexcept;
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena);
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena, const Impl_& from,
-                          const NSPanelMQTTManagerCommand_PreviousEntitiesPage& from_msg);
-    ::int32_t nspanel_id_;
-    mutable ::google::protobuf::internal::CachedSize _cached_size_;
-    PROTOBUF_TSAN_DECLARE_MEMBER
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
-};
-// -------------------------------------------------------------------
-
-class NSPanelMQTTManagerCommand_NextRoom final : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:NSPanelMQTTManagerCommand.NextRoom) */ {
- public:
-  inline NSPanelMQTTManagerCommand_NextRoom() : NSPanelMQTTManagerCommand_NextRoom(nullptr) {}
-  ~NSPanelMQTTManagerCommand_NextRoom() override;
-  template <typename = void>
-  explicit PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_NextRoom(
-      ::google::protobuf::internal::ConstantInitialized);
-
-  inline NSPanelMQTTManagerCommand_NextRoom(const NSPanelMQTTManagerCommand_NextRoom& from) : NSPanelMQTTManagerCommand_NextRoom(nullptr, from) {}
-  inline NSPanelMQTTManagerCommand_NextRoom(NSPanelMQTTManagerCommand_NextRoom&& from) noexcept
-      : NSPanelMQTTManagerCommand_NextRoom(nullptr, std::move(from)) {}
-  inline NSPanelMQTTManagerCommand_NextRoom& operator=(const NSPanelMQTTManagerCommand_NextRoom& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline NSPanelMQTTManagerCommand_NextRoom& operator=(NSPanelMQTTManagerCommand_NextRoom&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetArena() == from.GetArena()
-#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetArena() != nullptr
-#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
-  }
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::google::protobuf::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::google::protobuf::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const NSPanelMQTTManagerCommand_NextRoom& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const NSPanelMQTTManagerCommand_NextRoom* internal_default_instance() {
-    return reinterpret_cast<const NSPanelMQTTManagerCommand_NextRoom*>(
-        &_NSPanelMQTTManagerCommand_NextRoom_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages = 14;
-  friend void swap(NSPanelMQTTManagerCommand_NextRoom& a, NSPanelMQTTManagerCommand_NextRoom& b) { a.Swap(&b); }
-  inline void Swap(NSPanelMQTTManagerCommand_NextRoom* other) {
-    if (other == this) return;
-#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
-#else   // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() == other->GetArena()) {
-#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::google::protobuf::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(NSPanelMQTTManagerCommand_NextRoom* other) {
-    if (other == this) return;
-    ABSL_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  NSPanelMQTTManagerCommand_NextRoom* New(::google::protobuf::Arena* arena = nullptr) const final {
-    return ::google::protobuf::Message::DefaultConstruct<NSPanelMQTTManagerCommand_NextRoom>(arena);
-  }
-  using ::google::protobuf::Message::CopyFrom;
-  void CopyFrom(const NSPanelMQTTManagerCommand_NextRoom& from);
-  using ::google::protobuf::Message::MergeFrom;
-  void MergeFrom(const NSPanelMQTTManagerCommand_NextRoom& from) { NSPanelMQTTManagerCommand_NextRoom::MergeImpl(*this, from); }
-
-  private:
-  static void MergeImpl(
-      ::google::protobuf::MessageLite& to_msg,
-      const ::google::protobuf::MessageLite& from_msg);
-
-  public:
-  bool IsInitialized() const {
-    return true;
-  }
-  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
-  ::size_t ByteSizeLong() const final;
-  ::uint8_t* _InternalSerialize(
-      ::uint8_t* target,
-      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
-  void InternalSwap(NSPanelMQTTManagerCommand_NextRoom* other);
- private:
-  friend class ::google::protobuf::internal::AnyMetadata;
-  static ::absl::string_view FullMessageName() { return "NSPanelMQTTManagerCommand.NextRoom"; }
-
- protected:
-  explicit NSPanelMQTTManagerCommand_NextRoom(::google::protobuf::Arena* arena);
-  NSPanelMQTTManagerCommand_NextRoom(::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_NextRoom& from);
-  NSPanelMQTTManagerCommand_NextRoom(::google::protobuf::Arena* arena, NSPanelMQTTManagerCommand_NextRoom&& from) noexcept
-      : NSPanelMQTTManagerCommand_NextRoom(arena) {
-    *this = ::std::move(from);
-  }
-  const ::google::protobuf::Message::ClassData* GetClassData() const final;
-
- public:
-  ::google::protobuf::Metadata GetMetadata() const;
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-  enum : int {
-    kNspanelIdFieldNumber = 1,
-  };
-  // int32 nspanel_id = 1;
-  void clear_nspanel_id() ;
-  ::int32_t nspanel_id() const;
-  void set_nspanel_id(::int32_t value);
-
-  private:
-  ::int32_t _internal_nspanel_id() const;
-  void _internal_set_nspanel_id(::int32_t value);
-
-  public:
-  // @@protoc_insertion_point(class_scope:NSPanelMQTTManagerCommand.NextRoom)
- private:
-  class _Internal;
-  friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<
-      0, 1, 0,
-      0, 2>
-      _table_;
-
-  static constexpr const void* _raw_default_instance_ =
-      &_NSPanelMQTTManagerCommand_NextRoom_default_instance_;
-
-  friend class ::google::protobuf::MessageLite;
-  friend class ::google::protobuf::Arena;
-  template <typename T>
-  friend class ::google::protobuf::Arena::InternalHelper;
-  using InternalArenaConstructable_ = void;
-  using DestructorSkippable_ = void;
-  struct Impl_ {
-    inline explicit constexpr Impl_(
-        ::google::protobuf::internal::ConstantInitialized) noexcept;
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena);
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena, const Impl_& from,
-                          const NSPanelMQTTManagerCommand_NextRoom& from_msg);
-    ::int32_t nspanel_id_;
-    mutable ::google::protobuf::internal::CachedSize _cached_size_;
-    PROTOBUF_TSAN_DECLARE_MEMBER
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
-};
-// -------------------------------------------------------------------
-
-class NSPanelMQTTManagerCommand_NextEntitiesPage final : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:NSPanelMQTTManagerCommand.NextEntitiesPage) */ {
- public:
-  inline NSPanelMQTTManagerCommand_NextEntitiesPage() : NSPanelMQTTManagerCommand_NextEntitiesPage(nullptr) {}
-  ~NSPanelMQTTManagerCommand_NextEntitiesPage() override;
-  template <typename = void>
-  explicit PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_NextEntitiesPage(
-      ::google::protobuf::internal::ConstantInitialized);
-
-  inline NSPanelMQTTManagerCommand_NextEntitiesPage(const NSPanelMQTTManagerCommand_NextEntitiesPage& from) : NSPanelMQTTManagerCommand_NextEntitiesPage(nullptr, from) {}
-  inline NSPanelMQTTManagerCommand_NextEntitiesPage(NSPanelMQTTManagerCommand_NextEntitiesPage&& from) noexcept
-      : NSPanelMQTTManagerCommand_NextEntitiesPage(nullptr, std::move(from)) {}
-  inline NSPanelMQTTManagerCommand_NextEntitiesPage& operator=(const NSPanelMQTTManagerCommand_NextEntitiesPage& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline NSPanelMQTTManagerCommand_NextEntitiesPage& operator=(NSPanelMQTTManagerCommand_NextEntitiesPage&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetArena() == from.GetArena()
-#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetArena() != nullptr
-#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
-  }
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::google::protobuf::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::google::protobuf::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const NSPanelMQTTManagerCommand_NextEntitiesPage& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const NSPanelMQTTManagerCommand_NextEntitiesPage* internal_default_instance() {
-    return reinterpret_cast<const NSPanelMQTTManagerCommand_NextEntitiesPage*>(
-        &_NSPanelMQTTManagerCommand_NextEntitiesPage_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages = 16;
-  friend void swap(NSPanelMQTTManagerCommand_NextEntitiesPage& a, NSPanelMQTTManagerCommand_NextEntitiesPage& b) { a.Swap(&b); }
-  inline void Swap(NSPanelMQTTManagerCommand_NextEntitiesPage* other) {
-    if (other == this) return;
-#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
-#else   // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() == other->GetArena()) {
-#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::google::protobuf::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(NSPanelMQTTManagerCommand_NextEntitiesPage* other) {
-    if (other == this) return;
-    ABSL_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  NSPanelMQTTManagerCommand_NextEntitiesPage* New(::google::protobuf::Arena* arena = nullptr) const final {
-    return ::google::protobuf::Message::DefaultConstruct<NSPanelMQTTManagerCommand_NextEntitiesPage>(arena);
-  }
-  using ::google::protobuf::Message::CopyFrom;
-  void CopyFrom(const NSPanelMQTTManagerCommand_NextEntitiesPage& from);
-  using ::google::protobuf::Message::MergeFrom;
-  void MergeFrom(const NSPanelMQTTManagerCommand_NextEntitiesPage& from) { NSPanelMQTTManagerCommand_NextEntitiesPage::MergeImpl(*this, from); }
-
-  private:
-  static void MergeImpl(
-      ::google::protobuf::MessageLite& to_msg,
-      const ::google::protobuf::MessageLite& from_msg);
-
-  public:
-  bool IsInitialized() const {
-    return true;
-  }
-  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
-  ::size_t ByteSizeLong() const final;
-  ::uint8_t* _InternalSerialize(
-      ::uint8_t* target,
-      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
-  void InternalSwap(NSPanelMQTTManagerCommand_NextEntitiesPage* other);
- private:
-  friend class ::google::protobuf::internal::AnyMetadata;
-  static ::absl::string_view FullMessageName() { return "NSPanelMQTTManagerCommand.NextEntitiesPage"; }
-
- protected:
-  explicit NSPanelMQTTManagerCommand_NextEntitiesPage(::google::protobuf::Arena* arena);
-  NSPanelMQTTManagerCommand_NextEntitiesPage(::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_NextEntitiesPage& from);
-  NSPanelMQTTManagerCommand_NextEntitiesPage(::google::protobuf::Arena* arena, NSPanelMQTTManagerCommand_NextEntitiesPage&& from) noexcept
-      : NSPanelMQTTManagerCommand_NextEntitiesPage(arena) {
-    *this = ::std::move(from);
-  }
-  const ::google::protobuf::Message::ClassData* GetClassData() const final;
-
- public:
-  ::google::protobuf::Metadata GetMetadata() const;
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-  enum : int {
-    kNspanelIdFieldNumber = 1,
-  };
-  // int32 nspanel_id = 1;
-  void clear_nspanel_id() ;
-  ::int32_t nspanel_id() const;
-  void set_nspanel_id(::int32_t value);
-
-  private:
-  ::int32_t _internal_nspanel_id() const;
-  void _internal_set_nspanel_id(::int32_t value);
-
-  public:
-  // @@protoc_insertion_point(class_scope:NSPanelMQTTManagerCommand.NextEntitiesPage)
- private:
-  class _Internal;
-  friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<
-      0, 1, 0,
-      0, 2>
-      _table_;
-
-  static constexpr const void* _raw_default_instance_ =
-      &_NSPanelMQTTManagerCommand_NextEntitiesPage_default_instance_;
-
-  friend class ::google::protobuf::MessageLite;
-  friend class ::google::protobuf::Arena;
-  template <typename T>
-  friend class ::google::protobuf::Arena::InternalHelper;
-  using InternalArenaConstructable_ = void;
-  using DestructorSkippable_ = void;
-  struct Impl_ {
-    inline explicit constexpr Impl_(
-        ::google::protobuf::internal::ConstantInitialized) noexcept;
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena);
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena, const Impl_& from,
-                          const NSPanelMQTTManagerCommand_NextEntitiesPage& from_msg);
-    ::int32_t nspanel_id_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -4387,17 +3691,14 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
     kFirstPageTurnOn = 1,
     kFirstPageTurnOff = 2,
     kLightCommand = 3,
-    kNextRoom = 4,
-    kPreviousRoom = 5,
-    kNextEntitiesPage = 6,
-    kPreviousEntitiesPage = 7,
+    kToggleEntityFromEntitiesPage = 4,
     COMMANDDATA_NOT_SET = 0,
   };
   static inline const NSPanelMQTTManagerCommand* internal_default_instance() {
     return reinterpret_cast<const NSPanelMQTTManagerCommand*>(
         &_NSPanelMQTTManagerCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 19;
+  static constexpr int kIndexInFileMessages = 15;
   friend void swap(NSPanelMQTTManagerCommand& a, NSPanelMQTTManagerCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand* other) {
     if (other == this) return;
@@ -4466,10 +3767,6 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   using FirstPageTurnLightOn = NSPanelMQTTManagerCommand_FirstPageTurnLightOn;
   using FirstPageTurnLightOff = NSPanelMQTTManagerCommand_FirstPageTurnLightOff;
   using LightCommand = NSPanelMQTTManagerCommand_LightCommand;
-  using NextRoom = NSPanelMQTTManagerCommand_NextRoom;
-  using PreviousRoom = NSPanelMQTTManagerCommand_PreviousRoom;
-  using NextEntitiesPage = NSPanelMQTTManagerCommand_NextEntitiesPage;
-  using PreviousEntitiesPage = NSPanelMQTTManagerCommand_PreviousEntitiesPage;
   using ToggleEntityFromEntitiesPage = NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage;
   using AffectLightsOptions = NSPanelMQTTManagerCommand_AffectLightsOptions;
   static constexpr AffectLightsOptions ALL = NSPanelMQTTManagerCommand_AffectLightsOptions_ALL;
@@ -4497,10 +3794,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
     kFirstPageTurnOnFieldNumber = 1,
     kFirstPageTurnOffFieldNumber = 2,
     kLightCommandFieldNumber = 3,
-    kNextRoomFieldNumber = 4,
-    kPreviousRoomFieldNumber = 5,
-    kNextEntitiesPageFieldNumber = 6,
-    kPreviousEntitiesPageFieldNumber = 7,
+    kToggleEntityFromEntitiesPageFieldNumber = 4,
   };
   // .NSPanelMQTTManagerCommand.FirstPageTurnLightOn first_page_turn_on = 1;
   bool has_first_page_turn_on() const;
@@ -4559,80 +3853,23 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   ::NSPanelMQTTManagerCommand_LightCommand* _internal_mutable_light_command();
 
   public:
-  // .NSPanelMQTTManagerCommand.NextRoom next_room = 4;
-  bool has_next_room() const;
+  // .NSPanelMQTTManagerCommand.ToggleEntityFromEntitiesPage toggle_entity_from_entities_page = 4;
+  bool has_toggle_entity_from_entities_page() const;
   private:
-  bool _internal_has_next_room() const;
+  bool _internal_has_toggle_entity_from_entities_page() const;
 
   public:
-  void clear_next_room() ;
-  const ::NSPanelMQTTManagerCommand_NextRoom& next_room() const;
-  PROTOBUF_NODISCARD ::NSPanelMQTTManagerCommand_NextRoom* release_next_room();
-  ::NSPanelMQTTManagerCommand_NextRoom* mutable_next_room();
-  void set_allocated_next_room(::NSPanelMQTTManagerCommand_NextRoom* value);
-  void unsafe_arena_set_allocated_next_room(::NSPanelMQTTManagerCommand_NextRoom* value);
-  ::NSPanelMQTTManagerCommand_NextRoom* unsafe_arena_release_next_room();
+  void clear_toggle_entity_from_entities_page() ;
+  const ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& toggle_entity_from_entities_page() const;
+  PROTOBUF_NODISCARD ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* release_toggle_entity_from_entities_page();
+  ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* mutable_toggle_entity_from_entities_page();
+  void set_allocated_toggle_entity_from_entities_page(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* value);
+  void unsafe_arena_set_allocated_toggle_entity_from_entities_page(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* value);
+  ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* unsafe_arena_release_toggle_entity_from_entities_page();
 
   private:
-  const ::NSPanelMQTTManagerCommand_NextRoom& _internal_next_room() const;
-  ::NSPanelMQTTManagerCommand_NextRoom* _internal_mutable_next_room();
-
-  public:
-  // .NSPanelMQTTManagerCommand.PreviousRoom previous_room = 5;
-  bool has_previous_room() const;
-  private:
-  bool _internal_has_previous_room() const;
-
-  public:
-  void clear_previous_room() ;
-  const ::NSPanelMQTTManagerCommand_PreviousRoom& previous_room() const;
-  PROTOBUF_NODISCARD ::NSPanelMQTTManagerCommand_PreviousRoom* release_previous_room();
-  ::NSPanelMQTTManagerCommand_PreviousRoom* mutable_previous_room();
-  void set_allocated_previous_room(::NSPanelMQTTManagerCommand_PreviousRoom* value);
-  void unsafe_arena_set_allocated_previous_room(::NSPanelMQTTManagerCommand_PreviousRoom* value);
-  ::NSPanelMQTTManagerCommand_PreviousRoom* unsafe_arena_release_previous_room();
-
-  private:
-  const ::NSPanelMQTTManagerCommand_PreviousRoom& _internal_previous_room() const;
-  ::NSPanelMQTTManagerCommand_PreviousRoom* _internal_mutable_previous_room();
-
-  public:
-  // .NSPanelMQTTManagerCommand.NextEntitiesPage next_entities_page = 6;
-  bool has_next_entities_page() const;
-  private:
-  bool _internal_has_next_entities_page() const;
-
-  public:
-  void clear_next_entities_page() ;
-  const ::NSPanelMQTTManagerCommand_NextEntitiesPage& next_entities_page() const;
-  PROTOBUF_NODISCARD ::NSPanelMQTTManagerCommand_NextEntitiesPage* release_next_entities_page();
-  ::NSPanelMQTTManagerCommand_NextEntitiesPage* mutable_next_entities_page();
-  void set_allocated_next_entities_page(::NSPanelMQTTManagerCommand_NextEntitiesPage* value);
-  void unsafe_arena_set_allocated_next_entities_page(::NSPanelMQTTManagerCommand_NextEntitiesPage* value);
-  ::NSPanelMQTTManagerCommand_NextEntitiesPage* unsafe_arena_release_next_entities_page();
-
-  private:
-  const ::NSPanelMQTTManagerCommand_NextEntitiesPage& _internal_next_entities_page() const;
-  ::NSPanelMQTTManagerCommand_NextEntitiesPage* _internal_mutable_next_entities_page();
-
-  public:
-  // .NSPanelMQTTManagerCommand.PreviousEntitiesPage previous_entities_page = 7;
-  bool has_previous_entities_page() const;
-  private:
-  bool _internal_has_previous_entities_page() const;
-
-  public:
-  void clear_previous_entities_page() ;
-  const ::NSPanelMQTTManagerCommand_PreviousEntitiesPage& previous_entities_page() const;
-  PROTOBUF_NODISCARD ::NSPanelMQTTManagerCommand_PreviousEntitiesPage* release_previous_entities_page();
-  ::NSPanelMQTTManagerCommand_PreviousEntitiesPage* mutable_previous_entities_page();
-  void set_allocated_previous_entities_page(::NSPanelMQTTManagerCommand_PreviousEntitiesPage* value);
-  void unsafe_arena_set_allocated_previous_entities_page(::NSPanelMQTTManagerCommand_PreviousEntitiesPage* value);
-  ::NSPanelMQTTManagerCommand_PreviousEntitiesPage* unsafe_arena_release_previous_entities_page();
-
-  private:
-  const ::NSPanelMQTTManagerCommand_PreviousEntitiesPage& _internal_previous_entities_page() const;
-  ::NSPanelMQTTManagerCommand_PreviousEntitiesPage* _internal_mutable_previous_entities_page();
+  const ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& _internal_toggle_entity_from_entities_page() const;
+  ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* _internal_mutable_toggle_entity_from_entities_page();
 
   public:
   void clear_CommandData();
@@ -4643,15 +3880,12 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   void set_has_first_page_turn_on();
   void set_has_first_page_turn_off();
   void set_has_light_command();
-  void set_has_next_room();
-  void set_has_previous_room();
-  void set_has_next_entities_page();
-  void set_has_previous_entities_page();
+  void set_has_toggle_entity_from_entities_page();
   inline bool has_CommandData() const;
   inline void clear_has_CommandData();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 7, 7,
+      0, 4, 4,
       0, 2>
       _table_;
 
@@ -4678,10 +3912,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
       ::NSPanelMQTTManagerCommand_FirstPageTurnLightOn* first_page_turn_on_;
       ::NSPanelMQTTManagerCommand_FirstPageTurnLightOff* first_page_turn_off_;
       ::NSPanelMQTTManagerCommand_LightCommand* light_command_;
-      ::NSPanelMQTTManagerCommand_NextRoom* next_room_;
-      ::NSPanelMQTTManagerCommand_PreviousRoom* previous_room_;
-      ::NSPanelMQTTManagerCommand_NextEntitiesPage* next_entities_page_;
-      ::NSPanelMQTTManagerCommand_PreviousEntitiesPage* previous_entities_page_;
+      ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* toggle_entity_from_entities_page_;
     } CommandData_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
@@ -8825,110 +8056,6 @@ inline void NSPanelMQTTManagerCommand_LightCommand::_internal_set_saturation(::i
 
 // -------------------------------------------------------------------
 
-// NSPanelMQTTManagerCommand_NextRoom
-
-// int32 nspanel_id = 1;
-inline void NSPanelMQTTManagerCommand_NextRoom::clear_nspanel_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.nspanel_id_ = 0;
-}
-inline ::int32_t NSPanelMQTTManagerCommand_NextRoom::nspanel_id() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.NextRoom.nspanel_id)
-  return _internal_nspanel_id();
-}
-inline void NSPanelMQTTManagerCommand_NextRoom::set_nspanel_id(::int32_t value) {
-  _internal_set_nspanel_id(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.NextRoom.nspanel_id)
-}
-inline ::int32_t NSPanelMQTTManagerCommand_NextRoom::_internal_nspanel_id() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.nspanel_id_;
-}
-inline void NSPanelMQTTManagerCommand_NextRoom::_internal_set_nspanel_id(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.nspanel_id_ = value;
-}
-
-// -------------------------------------------------------------------
-
-// NSPanelMQTTManagerCommand_PreviousRoom
-
-// int32 nspanel_id = 1;
-inline void NSPanelMQTTManagerCommand_PreviousRoom::clear_nspanel_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.nspanel_id_ = 0;
-}
-inline ::int32_t NSPanelMQTTManagerCommand_PreviousRoom::nspanel_id() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.PreviousRoom.nspanel_id)
-  return _internal_nspanel_id();
-}
-inline void NSPanelMQTTManagerCommand_PreviousRoom::set_nspanel_id(::int32_t value) {
-  _internal_set_nspanel_id(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.PreviousRoom.nspanel_id)
-}
-inline ::int32_t NSPanelMQTTManagerCommand_PreviousRoom::_internal_nspanel_id() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.nspanel_id_;
-}
-inline void NSPanelMQTTManagerCommand_PreviousRoom::_internal_set_nspanel_id(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.nspanel_id_ = value;
-}
-
-// -------------------------------------------------------------------
-
-// NSPanelMQTTManagerCommand_NextEntitiesPage
-
-// int32 nspanel_id = 1;
-inline void NSPanelMQTTManagerCommand_NextEntitiesPage::clear_nspanel_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.nspanel_id_ = 0;
-}
-inline ::int32_t NSPanelMQTTManagerCommand_NextEntitiesPage::nspanel_id() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.NextEntitiesPage.nspanel_id)
-  return _internal_nspanel_id();
-}
-inline void NSPanelMQTTManagerCommand_NextEntitiesPage::set_nspanel_id(::int32_t value) {
-  _internal_set_nspanel_id(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.NextEntitiesPage.nspanel_id)
-}
-inline ::int32_t NSPanelMQTTManagerCommand_NextEntitiesPage::_internal_nspanel_id() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.nspanel_id_;
-}
-inline void NSPanelMQTTManagerCommand_NextEntitiesPage::_internal_set_nspanel_id(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.nspanel_id_ = value;
-}
-
-// -------------------------------------------------------------------
-
-// NSPanelMQTTManagerCommand_PreviousEntitiesPage
-
-// int32 nspanel_id = 1;
-inline void NSPanelMQTTManagerCommand_PreviousEntitiesPage::clear_nspanel_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.nspanel_id_ = 0;
-}
-inline ::int32_t NSPanelMQTTManagerCommand_PreviousEntitiesPage::nspanel_id() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.PreviousEntitiesPage.nspanel_id)
-  return _internal_nspanel_id();
-}
-inline void NSPanelMQTTManagerCommand_PreviousEntitiesPage::set_nspanel_id(::int32_t value) {
-  _internal_set_nspanel_id(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.PreviousEntitiesPage.nspanel_id)
-}
-inline ::int32_t NSPanelMQTTManagerCommand_PreviousEntitiesPage::_internal_nspanel_id() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.nspanel_id_;
-}
-inline void NSPanelMQTTManagerCommand_PreviousEntitiesPage::_internal_set_nspanel_id(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.nspanel_id_ = value;
-}
-
-// -------------------------------------------------------------------
-
 // NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage
 
 // int32 entity_page_id = 1;
@@ -9216,319 +8343,82 @@ inline ::NSPanelMQTTManagerCommand_LightCommand* NSPanelMQTTManagerCommand::muta
   return _msg;
 }
 
-// .NSPanelMQTTManagerCommand.NextRoom next_room = 4;
-inline bool NSPanelMQTTManagerCommand::has_next_room() const {
-  return CommandData_case() == kNextRoom;
+// .NSPanelMQTTManagerCommand.ToggleEntityFromEntitiesPage toggle_entity_from_entities_page = 4;
+inline bool NSPanelMQTTManagerCommand::has_toggle_entity_from_entities_page() const {
+  return CommandData_case() == kToggleEntityFromEntitiesPage;
 }
-inline bool NSPanelMQTTManagerCommand::_internal_has_next_room() const {
-  return CommandData_case() == kNextRoom;
+inline bool NSPanelMQTTManagerCommand::_internal_has_toggle_entity_from_entities_page() const {
+  return CommandData_case() == kToggleEntityFromEntitiesPage;
 }
-inline void NSPanelMQTTManagerCommand::set_has_next_room() {
-  _impl_._oneof_case_[0] = kNextRoom;
+inline void NSPanelMQTTManagerCommand::set_has_toggle_entity_from_entities_page() {
+  _impl_._oneof_case_[0] = kToggleEntityFromEntitiesPage;
 }
-inline void NSPanelMQTTManagerCommand::clear_next_room() {
+inline void NSPanelMQTTManagerCommand::clear_toggle_entity_from_entities_page() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (CommandData_case() == kNextRoom) {
+  if (CommandData_case() == kToggleEntityFromEntitiesPage) {
     if (GetArena() == nullptr) {
-      delete _impl_.CommandData_.next_room_;
+      delete _impl_.CommandData_.toggle_entity_from_entities_page_;
     } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
-      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.next_room_);
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.toggle_entity_from_entities_page_);
     }
     clear_has_CommandData();
   }
 }
-inline ::NSPanelMQTTManagerCommand_NextRoom* NSPanelMQTTManagerCommand::release_next_room() {
-  // @@protoc_insertion_point(field_release:NSPanelMQTTManagerCommand.next_room)
-  if (CommandData_case() == kNextRoom) {
+inline ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* NSPanelMQTTManagerCommand::release_toggle_entity_from_entities_page() {
+  // @@protoc_insertion_point(field_release:NSPanelMQTTManagerCommand.toggle_entity_from_entities_page)
+  if (CommandData_case() == kToggleEntityFromEntitiesPage) {
     clear_has_CommandData();
-    auto* temp = _impl_.CommandData_.next_room_;
+    auto* temp = _impl_.CommandData_.toggle_entity_from_entities_page_;
     if (GetArena() != nullptr) {
       temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
     }
-    _impl_.CommandData_.next_room_ = nullptr;
+    _impl_.CommandData_.toggle_entity_from_entities_page_ = nullptr;
     return temp;
   } else {
     return nullptr;
   }
 }
-inline const ::NSPanelMQTTManagerCommand_NextRoom& NSPanelMQTTManagerCommand::_internal_next_room() const {
-  return CommandData_case() == kNextRoom ? *_impl_.CommandData_.next_room_ : reinterpret_cast<::NSPanelMQTTManagerCommand_NextRoom&>(::_NSPanelMQTTManagerCommand_NextRoom_default_instance_);
+inline const ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& NSPanelMQTTManagerCommand::_internal_toggle_entity_from_entities_page() const {
+  return CommandData_case() == kToggleEntityFromEntitiesPage ? *_impl_.CommandData_.toggle_entity_from_entities_page_ : reinterpret_cast<::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage&>(::_NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage_default_instance_);
 }
-inline const ::NSPanelMQTTManagerCommand_NextRoom& NSPanelMQTTManagerCommand::next_room() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.next_room)
-  return _internal_next_room();
+inline const ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& NSPanelMQTTManagerCommand::toggle_entity_from_entities_page() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.toggle_entity_from_entities_page)
+  return _internal_toggle_entity_from_entities_page();
 }
-inline ::NSPanelMQTTManagerCommand_NextRoom* NSPanelMQTTManagerCommand::unsafe_arena_release_next_room() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:NSPanelMQTTManagerCommand.next_room)
-  if (CommandData_case() == kNextRoom) {
+inline ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* NSPanelMQTTManagerCommand::unsafe_arena_release_toggle_entity_from_entities_page() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:NSPanelMQTTManagerCommand.toggle_entity_from_entities_page)
+  if (CommandData_case() == kToggleEntityFromEntitiesPage) {
     clear_has_CommandData();
-    auto* temp = _impl_.CommandData_.next_room_;
-    _impl_.CommandData_.next_room_ = nullptr;
+    auto* temp = _impl_.CommandData_.toggle_entity_from_entities_page_;
+    _impl_.CommandData_.toggle_entity_from_entities_page_ = nullptr;
     return temp;
   } else {
     return nullptr;
   }
 }
-inline void NSPanelMQTTManagerCommand::unsafe_arena_set_allocated_next_room(::NSPanelMQTTManagerCommand_NextRoom* value) {
+inline void NSPanelMQTTManagerCommand::unsafe_arena_set_allocated_toggle_entity_from_entities_page(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* value) {
   // We rely on the oneof clear method to free the earlier contents
   // of this oneof. We can directly use the pointer we're given to
   // set the new value.
   clear_CommandData();
   if (value) {
-    set_has_next_room();
-    _impl_.CommandData_.next_room_ = value;
+    set_has_toggle_entity_from_entities_page();
+    _impl_.CommandData_.toggle_entity_from_entities_page_ = value;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:NSPanelMQTTManagerCommand.next_room)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:NSPanelMQTTManagerCommand.toggle_entity_from_entities_page)
 }
-inline ::NSPanelMQTTManagerCommand_NextRoom* NSPanelMQTTManagerCommand::_internal_mutable_next_room() {
-  if (CommandData_case() != kNextRoom) {
+inline ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* NSPanelMQTTManagerCommand::_internal_mutable_toggle_entity_from_entities_page() {
+  if (CommandData_case() != kToggleEntityFromEntitiesPage) {
     clear_CommandData();
-    set_has_next_room();
-    _impl_.CommandData_.next_room_ =
-        ::google::protobuf::Message::DefaultConstruct<::NSPanelMQTTManagerCommand_NextRoom>(GetArena());
+    set_has_toggle_entity_from_entities_page();
+    _impl_.CommandData_.toggle_entity_from_entities_page_ =
+        ::google::protobuf::Message::DefaultConstruct<::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage>(GetArena());
   }
-  return _impl_.CommandData_.next_room_;
+  return _impl_.CommandData_.toggle_entity_from_entities_page_;
 }
-inline ::NSPanelMQTTManagerCommand_NextRoom* NSPanelMQTTManagerCommand::mutable_next_room() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  ::NSPanelMQTTManagerCommand_NextRoom* _msg = _internal_mutable_next_room();
-  // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.next_room)
-  return _msg;
-}
-
-// .NSPanelMQTTManagerCommand.PreviousRoom previous_room = 5;
-inline bool NSPanelMQTTManagerCommand::has_previous_room() const {
-  return CommandData_case() == kPreviousRoom;
-}
-inline bool NSPanelMQTTManagerCommand::_internal_has_previous_room() const {
-  return CommandData_case() == kPreviousRoom;
-}
-inline void NSPanelMQTTManagerCommand::set_has_previous_room() {
-  _impl_._oneof_case_[0] = kPreviousRoom;
-}
-inline void NSPanelMQTTManagerCommand::clear_previous_room() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (CommandData_case() == kPreviousRoom) {
-    if (GetArena() == nullptr) {
-      delete _impl_.CommandData_.previous_room_;
-    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
-      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.previous_room_);
-    }
-    clear_has_CommandData();
-  }
-}
-inline ::NSPanelMQTTManagerCommand_PreviousRoom* NSPanelMQTTManagerCommand::release_previous_room() {
-  // @@protoc_insertion_point(field_release:NSPanelMQTTManagerCommand.previous_room)
-  if (CommandData_case() == kPreviousRoom) {
-    clear_has_CommandData();
-    auto* temp = _impl_.CommandData_.previous_room_;
-    if (GetArena() != nullptr) {
-      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
-    }
-    _impl_.CommandData_.previous_room_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline const ::NSPanelMQTTManagerCommand_PreviousRoom& NSPanelMQTTManagerCommand::_internal_previous_room() const {
-  return CommandData_case() == kPreviousRoom ? *_impl_.CommandData_.previous_room_ : reinterpret_cast<::NSPanelMQTTManagerCommand_PreviousRoom&>(::_NSPanelMQTTManagerCommand_PreviousRoom_default_instance_);
-}
-inline const ::NSPanelMQTTManagerCommand_PreviousRoom& NSPanelMQTTManagerCommand::previous_room() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.previous_room)
-  return _internal_previous_room();
-}
-inline ::NSPanelMQTTManagerCommand_PreviousRoom* NSPanelMQTTManagerCommand::unsafe_arena_release_previous_room() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:NSPanelMQTTManagerCommand.previous_room)
-  if (CommandData_case() == kPreviousRoom) {
-    clear_has_CommandData();
-    auto* temp = _impl_.CommandData_.previous_room_;
-    _impl_.CommandData_.previous_room_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline void NSPanelMQTTManagerCommand::unsafe_arena_set_allocated_previous_room(::NSPanelMQTTManagerCommand_PreviousRoom* value) {
-  // We rely on the oneof clear method to free the earlier contents
-  // of this oneof. We can directly use the pointer we're given to
-  // set the new value.
-  clear_CommandData();
-  if (value) {
-    set_has_previous_room();
-    _impl_.CommandData_.previous_room_ = value;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:NSPanelMQTTManagerCommand.previous_room)
-}
-inline ::NSPanelMQTTManagerCommand_PreviousRoom* NSPanelMQTTManagerCommand::_internal_mutable_previous_room() {
-  if (CommandData_case() != kPreviousRoom) {
-    clear_CommandData();
-    set_has_previous_room();
-    _impl_.CommandData_.previous_room_ =
-        ::google::protobuf::Message::DefaultConstruct<::NSPanelMQTTManagerCommand_PreviousRoom>(GetArena());
-  }
-  return _impl_.CommandData_.previous_room_;
-}
-inline ::NSPanelMQTTManagerCommand_PreviousRoom* NSPanelMQTTManagerCommand::mutable_previous_room() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  ::NSPanelMQTTManagerCommand_PreviousRoom* _msg = _internal_mutable_previous_room();
-  // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.previous_room)
-  return _msg;
-}
-
-// .NSPanelMQTTManagerCommand.NextEntitiesPage next_entities_page = 6;
-inline bool NSPanelMQTTManagerCommand::has_next_entities_page() const {
-  return CommandData_case() == kNextEntitiesPage;
-}
-inline bool NSPanelMQTTManagerCommand::_internal_has_next_entities_page() const {
-  return CommandData_case() == kNextEntitiesPage;
-}
-inline void NSPanelMQTTManagerCommand::set_has_next_entities_page() {
-  _impl_._oneof_case_[0] = kNextEntitiesPage;
-}
-inline void NSPanelMQTTManagerCommand::clear_next_entities_page() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (CommandData_case() == kNextEntitiesPage) {
-    if (GetArena() == nullptr) {
-      delete _impl_.CommandData_.next_entities_page_;
-    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
-      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.next_entities_page_);
-    }
-    clear_has_CommandData();
-  }
-}
-inline ::NSPanelMQTTManagerCommand_NextEntitiesPage* NSPanelMQTTManagerCommand::release_next_entities_page() {
-  // @@protoc_insertion_point(field_release:NSPanelMQTTManagerCommand.next_entities_page)
-  if (CommandData_case() == kNextEntitiesPage) {
-    clear_has_CommandData();
-    auto* temp = _impl_.CommandData_.next_entities_page_;
-    if (GetArena() != nullptr) {
-      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
-    }
-    _impl_.CommandData_.next_entities_page_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline const ::NSPanelMQTTManagerCommand_NextEntitiesPage& NSPanelMQTTManagerCommand::_internal_next_entities_page() const {
-  return CommandData_case() == kNextEntitiesPage ? *_impl_.CommandData_.next_entities_page_ : reinterpret_cast<::NSPanelMQTTManagerCommand_NextEntitiesPage&>(::_NSPanelMQTTManagerCommand_NextEntitiesPage_default_instance_);
-}
-inline const ::NSPanelMQTTManagerCommand_NextEntitiesPage& NSPanelMQTTManagerCommand::next_entities_page() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.next_entities_page)
-  return _internal_next_entities_page();
-}
-inline ::NSPanelMQTTManagerCommand_NextEntitiesPage* NSPanelMQTTManagerCommand::unsafe_arena_release_next_entities_page() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:NSPanelMQTTManagerCommand.next_entities_page)
-  if (CommandData_case() == kNextEntitiesPage) {
-    clear_has_CommandData();
-    auto* temp = _impl_.CommandData_.next_entities_page_;
-    _impl_.CommandData_.next_entities_page_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline void NSPanelMQTTManagerCommand::unsafe_arena_set_allocated_next_entities_page(::NSPanelMQTTManagerCommand_NextEntitiesPage* value) {
-  // We rely on the oneof clear method to free the earlier contents
-  // of this oneof. We can directly use the pointer we're given to
-  // set the new value.
-  clear_CommandData();
-  if (value) {
-    set_has_next_entities_page();
-    _impl_.CommandData_.next_entities_page_ = value;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:NSPanelMQTTManagerCommand.next_entities_page)
-}
-inline ::NSPanelMQTTManagerCommand_NextEntitiesPage* NSPanelMQTTManagerCommand::_internal_mutable_next_entities_page() {
-  if (CommandData_case() != kNextEntitiesPage) {
-    clear_CommandData();
-    set_has_next_entities_page();
-    _impl_.CommandData_.next_entities_page_ =
-        ::google::protobuf::Message::DefaultConstruct<::NSPanelMQTTManagerCommand_NextEntitiesPage>(GetArena());
-  }
-  return _impl_.CommandData_.next_entities_page_;
-}
-inline ::NSPanelMQTTManagerCommand_NextEntitiesPage* NSPanelMQTTManagerCommand::mutable_next_entities_page() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  ::NSPanelMQTTManagerCommand_NextEntitiesPage* _msg = _internal_mutable_next_entities_page();
-  // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.next_entities_page)
-  return _msg;
-}
-
-// .NSPanelMQTTManagerCommand.PreviousEntitiesPage previous_entities_page = 7;
-inline bool NSPanelMQTTManagerCommand::has_previous_entities_page() const {
-  return CommandData_case() == kPreviousEntitiesPage;
-}
-inline bool NSPanelMQTTManagerCommand::_internal_has_previous_entities_page() const {
-  return CommandData_case() == kPreviousEntitiesPage;
-}
-inline void NSPanelMQTTManagerCommand::set_has_previous_entities_page() {
-  _impl_._oneof_case_[0] = kPreviousEntitiesPage;
-}
-inline void NSPanelMQTTManagerCommand::clear_previous_entities_page() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (CommandData_case() == kPreviousEntitiesPage) {
-    if (GetArena() == nullptr) {
-      delete _impl_.CommandData_.previous_entities_page_;
-    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
-      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.previous_entities_page_);
-    }
-    clear_has_CommandData();
-  }
-}
-inline ::NSPanelMQTTManagerCommand_PreviousEntitiesPage* NSPanelMQTTManagerCommand::release_previous_entities_page() {
-  // @@protoc_insertion_point(field_release:NSPanelMQTTManagerCommand.previous_entities_page)
-  if (CommandData_case() == kPreviousEntitiesPage) {
-    clear_has_CommandData();
-    auto* temp = _impl_.CommandData_.previous_entities_page_;
-    if (GetArena() != nullptr) {
-      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
-    }
-    _impl_.CommandData_.previous_entities_page_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline const ::NSPanelMQTTManagerCommand_PreviousEntitiesPage& NSPanelMQTTManagerCommand::_internal_previous_entities_page() const {
-  return CommandData_case() == kPreviousEntitiesPage ? *_impl_.CommandData_.previous_entities_page_ : reinterpret_cast<::NSPanelMQTTManagerCommand_PreviousEntitiesPage&>(::_NSPanelMQTTManagerCommand_PreviousEntitiesPage_default_instance_);
-}
-inline const ::NSPanelMQTTManagerCommand_PreviousEntitiesPage& NSPanelMQTTManagerCommand::previous_entities_page() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.previous_entities_page)
-  return _internal_previous_entities_page();
-}
-inline ::NSPanelMQTTManagerCommand_PreviousEntitiesPage* NSPanelMQTTManagerCommand::unsafe_arena_release_previous_entities_page() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:NSPanelMQTTManagerCommand.previous_entities_page)
-  if (CommandData_case() == kPreviousEntitiesPage) {
-    clear_has_CommandData();
-    auto* temp = _impl_.CommandData_.previous_entities_page_;
-    _impl_.CommandData_.previous_entities_page_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline void NSPanelMQTTManagerCommand::unsafe_arena_set_allocated_previous_entities_page(::NSPanelMQTTManagerCommand_PreviousEntitiesPage* value) {
-  // We rely on the oneof clear method to free the earlier contents
-  // of this oneof. We can directly use the pointer we're given to
-  // set the new value.
-  clear_CommandData();
-  if (value) {
-    set_has_previous_entities_page();
-    _impl_.CommandData_.previous_entities_page_ = value;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:NSPanelMQTTManagerCommand.previous_entities_page)
-}
-inline ::NSPanelMQTTManagerCommand_PreviousEntitiesPage* NSPanelMQTTManagerCommand::_internal_mutable_previous_entities_page() {
-  if (CommandData_case() != kPreviousEntitiesPage) {
-    clear_CommandData();
-    set_has_previous_entities_page();
-    _impl_.CommandData_.previous_entities_page_ =
-        ::google::protobuf::Message::DefaultConstruct<::NSPanelMQTTManagerCommand_PreviousEntitiesPage>(GetArena());
-  }
-  return _impl_.CommandData_.previous_entities_page_;
-}
-inline ::NSPanelMQTTManagerCommand_PreviousEntitiesPage* NSPanelMQTTManagerCommand::mutable_previous_entities_page() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  ::NSPanelMQTTManagerCommand_PreviousEntitiesPage* _msg = _internal_mutable_previous_entities_page();
-  // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.previous_entities_page)
+inline ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* NSPanelMQTTManagerCommand::mutable_toggle_entity_from_entities_page() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* _msg = _internal_mutable_toggle_entity_from_entities_page();
+  // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.toggle_entity_from_entities_page)
   return _msg;
 }
 

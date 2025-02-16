@@ -1,3 +1,4 @@
+#include "command_manager/command_manager.hpp"
 #include "entity/entity.hpp"
 #include "ipc_handler/ipc_handler.hpp"
 #include "light/home_assistant_light.hpp"
@@ -44,6 +45,8 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 }
 
 void EntityManager::init() {
+  CommandManager::attach_callback(&EntityManager::_command_callback);
+
   // MQTT_Manager::attach_observer(EntityManager::mqtt_callback);
   WebsocketServer::attach_message_callback(EntityManager::websocket_callback);
   // TODO: On 'reload config signal', reload the config.
@@ -262,6 +265,18 @@ std::shared_ptr<Room> EntityManager::get_room(uint32_t room_id) {
 std::vector<std::shared_ptr<Room>> EntityManager::get_all_rooms() {
   std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
   return EntityManager::_rooms;
+}
+
+void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
+  if (command.has_toggle_entity_from_entities_page()) {
+    auto entity = EntityManager::get_entity_by_page_id_and_slot(command.toggle_entity_from_entities_page().entity_page_id(), command.toggle_entity_from_entities_page().entity_slot());
+    if (entity && entity->can_toggle()) {
+      SPDLOG_DEBUG("Will toggle entity in slot {} in page with ID {}.", command.toggle_entity_from_entities_page().entity_slot(), command.toggle_entity_from_entities_page().entity_page_id());
+      entity->toggle();
+    } else {
+      SPDLOG_DEBUG("Received command to toggle entity in slot {} in page with ID {} bot did not find such an entity.", command.toggle_entity_from_entities_page().entity_slot(), command.toggle_entity_from_entities_page().entity_page_id());
+    }
+  }
 }
 
 void EntityManager::remove_entity(std::shared_ptr<MqttManagerEntity> entity) {

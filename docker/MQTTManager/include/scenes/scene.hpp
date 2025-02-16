@@ -12,6 +12,9 @@ public:
   uint32_t get_entity_page_id();
   uint8_t get_entity_page_slot();
 
+  bool can_toggle();
+  void toggle();
+
   virtual std::string get_name() = 0;
   virtual bool can_save() = 0;
 

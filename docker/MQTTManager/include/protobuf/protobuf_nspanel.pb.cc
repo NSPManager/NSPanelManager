@@ -183,82 +183,6 @@ struct NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPageDefaultTypeInternal
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPageDefaultTypeInternal _NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage_default_instance_;
 
-inline constexpr NSPanelMQTTManagerCommand_PreviousRoom::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : nspanel_id_{0},
-        _cached_size_{0} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_PreviousRoom::NSPanelMQTTManagerCommand_PreviousRoom(::_pbi::ConstantInitialized)
-    : _impl_(::_pbi::ConstantInitialized()) {}
-struct NSPanelMQTTManagerCommand_PreviousRoomDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_PreviousRoomDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~NSPanelMQTTManagerCommand_PreviousRoomDefaultTypeInternal() {}
-  union {
-    NSPanelMQTTManagerCommand_PreviousRoom _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelMQTTManagerCommand_PreviousRoomDefaultTypeInternal _NSPanelMQTTManagerCommand_PreviousRoom_default_instance_;
-
-inline constexpr NSPanelMQTTManagerCommand_PreviousEntitiesPage::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : nspanel_id_{0},
-        _cached_size_{0} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_PreviousEntitiesPage::NSPanelMQTTManagerCommand_PreviousEntitiesPage(::_pbi::ConstantInitialized)
-    : _impl_(::_pbi::ConstantInitialized()) {}
-struct NSPanelMQTTManagerCommand_PreviousEntitiesPageDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_PreviousEntitiesPageDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~NSPanelMQTTManagerCommand_PreviousEntitiesPageDefaultTypeInternal() {}
-  union {
-    NSPanelMQTTManagerCommand_PreviousEntitiesPage _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelMQTTManagerCommand_PreviousEntitiesPageDefaultTypeInternal _NSPanelMQTTManagerCommand_PreviousEntitiesPage_default_instance_;
-
-inline constexpr NSPanelMQTTManagerCommand_NextRoom::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : nspanel_id_{0},
-        _cached_size_{0} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_NextRoom::NSPanelMQTTManagerCommand_NextRoom(::_pbi::ConstantInitialized)
-    : _impl_(::_pbi::ConstantInitialized()) {}
-struct NSPanelMQTTManagerCommand_NextRoomDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_NextRoomDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~NSPanelMQTTManagerCommand_NextRoomDefaultTypeInternal() {}
-  union {
-    NSPanelMQTTManagerCommand_NextRoom _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelMQTTManagerCommand_NextRoomDefaultTypeInternal _NSPanelMQTTManagerCommand_NextRoom_default_instance_;
-
-inline constexpr NSPanelMQTTManagerCommand_NextEntitiesPage::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : nspanel_id_{0},
-        _cached_size_{0} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_NextEntitiesPage::NSPanelMQTTManagerCommand_NextEntitiesPage(::_pbi::ConstantInitialized)
-    : _impl_(::_pbi::ConstantInitialized()) {}
-struct NSPanelMQTTManagerCommand_NextEntitiesPageDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_NextEntitiesPageDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~NSPanelMQTTManagerCommand_NextEntitiesPageDefaultTypeInternal() {}
-  union {
-    NSPanelMQTTManagerCommand_NextEntitiesPage _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelMQTTManagerCommand_NextEntitiesPageDefaultTypeInternal _NSPanelMQTTManagerCommand_NextEntitiesPage_default_instance_;
-
 inline constexpr NSPanelMQTTManagerCommand_LightCommand::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : light_ids_{},
@@ -791,42 +715,6 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_LightCommand, _impl_.has_saturation_),
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_LightCommand, _impl_.saturation_),
         ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_NextRoom, _internal_metadata_),
-        ~0u,  // no _extensions_
-        ~0u,  // no _oneof_case_
-        ~0u,  // no _weak_field_map_
-        ~0u,  // no _inlined_string_donated_
-        ~0u,  // no _split_
-        ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_NextRoom, _impl_.nspanel_id_),
-        ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_PreviousRoom, _internal_metadata_),
-        ~0u,  // no _extensions_
-        ~0u,  // no _oneof_case_
-        ~0u,  // no _weak_field_map_
-        ~0u,  // no _inlined_string_donated_
-        ~0u,  // no _split_
-        ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_PreviousRoom, _impl_.nspanel_id_),
-        ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_NextEntitiesPage, _internal_metadata_),
-        ~0u,  // no _extensions_
-        ~0u,  // no _oneof_case_
-        ~0u,  // no _weak_field_map_
-        ~0u,  // no _inlined_string_donated_
-        ~0u,  // no _split_
-        ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_NextEntitiesPage, _impl_.nspanel_id_),
-        ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_PreviousEntitiesPage, _internal_metadata_),
-        ~0u,  // no _extensions_
-        ~0u,  // no _oneof_case_
-        ~0u,  // no _weak_field_map_
-        ~0u,  // no _inlined_string_donated_
-        ~0u,  // no _split_
-        ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_PreviousEntitiesPage, _impl_.nspanel_id_),
-        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage, _internal_metadata_),
         ~0u,  // no _extensions_
         ~0u,  // no _oneof_case_
@@ -844,9 +732,6 @@ const ::uint32_t
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
-        ::_pbi::kInvalidFieldOffsetTag,
-        ::_pbi::kInvalidFieldOffsetTag,
-        ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
@@ -870,12 +755,8 @@ static const ::_pbi::MigrationSchema
         {183, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
         {198, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
         {208, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
-        {225, -1, -1, sizeof(::NSPanelMQTTManagerCommand_NextRoom)},
-        {234, -1, -1, sizeof(::NSPanelMQTTManagerCommand_PreviousRoom)},
-        {243, -1, -1, sizeof(::NSPanelMQTTManagerCommand_NextEntitiesPage)},
-        {252, -1, -1, sizeof(::NSPanelMQTTManagerCommand_PreviousEntitiesPage)},
-        {261, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
-        {271, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {225, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
+        {235, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelScene_default_instance_._instance,
@@ -892,10 +773,6 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelMQTTManagerCommand_FirstPageTurnLightOn_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_FirstPageTurnLightOff_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_LightCommand_default_instance_._instance,
-    &::_NSPanelMQTTManagerCommand_NextRoom_default_instance_._instance,
-    &::_NSPanelMQTTManagerCommand_PreviousRoom_default_instance_._instance,
-    &::_NSPanelMQTTManagerCommand_NextEntitiesPage_default_instance_._instance,
-    &::_NSPanelMQTTManagerCommand_PreviousEntitiesPage_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_default_instance_._instance,
 };
@@ -978,57 +855,49 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "astItem\022\024\n\014weather_icon\030\001 \001(\t\022\034\n\024precipi"
     "tation_string\030\002 \001(\t\022!\n\031temperature_maxmi"
     "n_string\030\003 \001(\t\022\023\n\013wind_string\030\004 \001(\t\022\026\n\016d"
-    "isplay_string\030\005 \001(\t\"\222\013\n\031NSPanelMQTTManag"
+    "isplay_string\030\005 \001(\t\"\305\010\n\031NSPanelMQTTManag"
     "erCommand\022M\n\022first_page_turn_on\030\001 \001(\0132/."
     "NSPanelMQTTManagerCommand.FirstPageTurnL"
     "ightOnH\000\022O\n\023first_page_turn_off\030\002 \001(\01320."
     "NSPanelMQTTManagerCommand.FirstPageTurnL"
     "ightOffH\000\022@\n\rlight_command\030\003 \001(\0132\'.NSPan"
-    "elMQTTManagerCommand.LightCommandH\000\0228\n\tn"
-    "ext_room\030\004 \001(\0132#.NSPanelMQTTManagerComma"
-    "nd.NextRoomH\000\022@\n\rprevious_room\030\005 \001(\0132\'.N"
-    "SPanelMQTTManagerCommand.PreviousRoomH\000\022"
-    "I\n\022next_entities_page\030\006 \001(\0132+.NSPanelMQT"
-    "TManagerCommand.NextEntitiesPageH\000\022Q\n\026pr"
-    "evious_entities_page\030\007 \001(\0132/.NSPanelMQTT"
-    "ManagerCommand.PreviousEntitiesPageH\000\032\372\001"
-    "\n\024FirstPageTurnLightOn\022E\n\raffect_lights\030"
-    "\001 \001(\0162..NSPanelMQTTManagerCommand.Affect"
-    "LightsOptions\022\037\n\027brightness_slider_value"
-    "\030\002 \001(\005\022\033\n\023kelvin_slider_value\030\003 \001(\005\022\025\n\rs"
-    "elected_room\030\004 \001(\005\022\016\n\006global\030\005 \001(\010\022\034\n\024ha"
-    "s_brightness_value\030\006 \001(\010\022\030\n\020has_kelvin_v"
-    "alue\030\007 \001(\010\032n\n\025FirstPageTurnLightOff\022E\n\ra"
-    "ffect_lights\030\001 \001(\0162..NSPanelMQTTManagerC"
-    "ommand.AffectLightsOptions\022\016\n\006global\030\002 \001"
-    "(\010\032\321\001\n\014LightCommand\022\021\n\tlight_ids\030\001 \003(\005\022\026"
-    "\n\016has_brightness\030\002 \001(\010\022\022\n\nbrightness\030\003 \001"
-    "(\005\022\035\n\025has_color_temperature\030\004 \001(\010\022\031\n\021col"
-    "or_temperature\030\005 \001(\005\022\017\n\007has_hue\030\006 \001(\010\022\013\n"
-    "\003hue\030\007 \001(\005\022\026\n\016has_saturation\030\010 \001(\010\022\022\n\nsa"
-    "turation\030\t \001(\005\032\036\n\010NextRoom\022\022\n\nnspanel_id"
-    "\030\001 \001(\005\032\"\n\014PreviousRoom\022\022\n\nnspanel_id\030\001 \001"
-    "(\005\032&\n\020NextEntitiesPage\022\022\n\nnspanel_id\030\001 \001"
-    "(\005\032*\n\024PreviousEntitiesPage\022\022\n\nnspanel_id"
-    "\030\001 \001(\005\032K\n\034ToggleEntityFromEntitiesPage\022\026"
-    "\n\016entity_page_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 "
-    "\001(\005\"D\n\023AffectLightsOptions\022\007\n\003ALL\020\000\022\020\n\014T"
-    "ABLE_LIGHTS\020\001\022\022\n\016CEILING_LIGHTS\020\002B\r\n\013Com"
-    "mandData*[\n\023NSPanelWarningLevel\022\014\n\010CRITI"
-    "CAL\020\000\022\t\n\005ERROR\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022"
-    "\t\n\005DEBUG\020\004\022\t\n\005TRACE\020\005b\006proto3"
+    "elMQTTManagerCommand.LightCommandH\000\022c\n t"
+    "oggle_entity_from_entities_page\030\004 \001(\01327."
+    "NSPanelMQTTManagerCommand.ToggleEntityFr"
+    "omEntitiesPageH\000\032\372\001\n\024FirstPageTurnLightO"
+    "n\022E\n\raffect_lights\030\001 \001(\0162..NSPanelMQTTMa"
+    "nagerCommand.AffectLightsOptions\022\037\n\027brig"
+    "htness_slider_value\030\002 \001(\005\022\033\n\023kelvin_slid"
+    "er_value\030\003 \001(\005\022\025\n\rselected_room\030\004 \001(\005\022\016\n"
+    "\006global\030\005 \001(\010\022\034\n\024has_brightness_value\030\006 "
+    "\001(\010\022\030\n\020has_kelvin_value\030\007 \001(\010\032n\n\025FirstPa"
+    "geTurnLightOff\022E\n\raffect_lights\030\001 \001(\0162.."
+    "NSPanelMQTTManagerCommand.AffectLightsOp"
+    "tions\022\016\n\006global\030\002 \001(\010\032\321\001\n\014LightCommand\022\021"
+    "\n\tlight_ids\030\001 \003(\005\022\026\n\016has_brightness\030\002 \001("
+    "\010\022\022\n\nbrightness\030\003 \001(\005\022\035\n\025has_color_tempe"
+    "rature\030\004 \001(\010\022\031\n\021color_temperature\030\005 \001(\005\022"
+    "\017\n\007has_hue\030\006 \001(\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016has_sat"
+    "uration\030\010 \001(\010\022\022\n\nsaturation\030\t \001(\005\032K\n\034Tog"
+    "gleEntityFromEntitiesPage\022\026\n\016entity_page"
+    "_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001(\005\"D\n\023Affect"
+    "LightsOptions\022\007\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020\001"
+    "\022\022\n\016CEILING_LIGHTS\020\002B\r\n\013CommandData*[\n\023N"
+    "SPanelWarningLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ERRO"
+    "R\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n"
+    "\005TRACE\020\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    4629,
+    4296,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
     nullptr,
     0,
-    20,
+    16,
     schemas,
     file_default_instances,
     TableStruct_protobuf_5fnspanel_2eproto::offsets,
@@ -6343,694 +6212,6 @@ void NSPanelMQTTManagerCommand_LightCommand::InternalSwap(NSPanelMQTTManagerComm
 }
 // ===================================================================
 
-class NSPanelMQTTManagerCommand_NextRoom::_Internal {
- public:
-};
-
-NSPanelMQTTManagerCommand_NextRoom::NSPanelMQTTManagerCommand_NextRoom(::google::protobuf::Arena* arena)
-    : ::google::protobuf::Message(arena) {
-  SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:NSPanelMQTTManagerCommand.NextRoom)
-}
-NSPanelMQTTManagerCommand_NextRoom::NSPanelMQTTManagerCommand_NextRoom(
-    ::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_NextRoom& from)
-    : NSPanelMQTTManagerCommand_NextRoom(arena) {
-  MergeFrom(from);
-}
-inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_NextRoom::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility,
-    ::google::protobuf::Arena* arena)
-      : _cached_size_{0} {}
-
-inline void NSPanelMQTTManagerCommand_NextRoom::SharedCtor(::_pb::Arena* arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.nspanel_id_ = {};
-}
-NSPanelMQTTManagerCommand_NextRoom::~NSPanelMQTTManagerCommand_NextRoom() {
-  // @@protoc_insertion_point(destructor:NSPanelMQTTManagerCommand.NextRoom)
-  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
-  SharedDtor();
-}
-inline void NSPanelMQTTManagerCommand_NextRoom::SharedDtor() {
-  ABSL_DCHECK(GetArena() == nullptr);
-  _impl_.~Impl_();
-}
-
-const ::google::protobuf::MessageLite::ClassData*
-NSPanelMQTTManagerCommand_NextRoom::GetClassData() const {
-  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
-      ClassDataFull _data_ = {
-          {
-              &_table_.header,
-              nullptr,  // OnDemandRegisterArenaDtor
-              nullptr,  // IsInitialized
-              PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_NextRoom, _impl_._cached_size_),
-              false,
-          },
-          &NSPanelMQTTManagerCommand_NextRoom::MergeImpl,
-          &NSPanelMQTTManagerCommand_NextRoom::kDescriptorMethods,
-          &descriptor_table_protobuf_5fnspanel_2eproto,
-          nullptr,  // tracker
-      };
-  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
-  return _data_.base();
-}
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 1, 0, 0, 2> NSPanelMQTTManagerCommand_NextRoom::_table_ = {
-  {
-    0,  // no _has_bits_
-    0, // no _extensions_
-    1, 0,  // max_field_number, fast_idx_mask
-    offsetof(decltype(_table_), field_lookup_table),
-    4294967294,  // skipmap
-    offsetof(decltype(_table_), field_entries),
-    1,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
-    &_NSPanelMQTTManagerCommand_NextRoom_default_instance_._instance,
-    nullptr,  // post_loop_handler
-    ::_pbi::TcParser::GenericFallback,  // fallback
-    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_NextRoom>(),  // to_prefetch
-    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
-  }, {{
-    // int32 nspanel_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_NextRoom, _impl_.nspanel_id_), 63>(),
-     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_NextRoom, _impl_.nspanel_id_)}},
-  }}, {{
-    65535, 65535
-  }}, {{
-    // int32 nspanel_id = 1;
-    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_NextRoom, _impl_.nspanel_id_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-  }},
-  // no aux_entries
-  {{
-  }},
-};
-
-PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_NextRoom::Clear() {
-// @@protoc_insertion_point(message_clear_start:NSPanelMQTTManagerCommand.NextRoom)
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  _impl_.nspanel_id_ = 0;
-  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
-}
-
-::uint8_t* NSPanelMQTTManagerCommand_NextRoom::_InternalSerialize(
-    ::uint8_t* target,
-    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:NSPanelMQTTManagerCommand.NextRoom)
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
-
-  // int32 nspanel_id = 1;
-  if (this->_internal_nspanel_id() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<1>(
-            stream, this->_internal_nspanel_id(), target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target =
-        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:NSPanelMQTTManagerCommand.NextRoom)
-  return target;
-}
-
-::size_t NSPanelMQTTManagerCommand_NextRoom::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:NSPanelMQTTManagerCommand.NextRoom)
-  ::size_t total_size = 0;
-
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  // int32 nspanel_id = 1;
-  if (this->_internal_nspanel_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_nspanel_id());
-  }
-
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-
-void NSPanelMQTTManagerCommand_NextRoom::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
-  auto* const _this = static_cast<NSPanelMQTTManagerCommand_NextRoom*>(&to_msg);
-  auto& from = static_cast<const NSPanelMQTTManagerCommand_NextRoom&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelMQTTManagerCommand.NextRoom)
-  ABSL_DCHECK_NE(&from, _this);
-  ::uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (from._internal_nspanel_id() != 0) {
-    _this->_impl_.nspanel_id_ = from._impl_.nspanel_id_;
-  }
-  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void NSPanelMQTTManagerCommand_NextRoom::CopyFrom(const NSPanelMQTTManagerCommand_NextRoom& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelMQTTManagerCommand.NextRoom)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-
-void NSPanelMQTTManagerCommand_NextRoom::InternalSwap(NSPanelMQTTManagerCommand_NextRoom* PROTOBUF_RESTRICT other) {
-  using std::swap;
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-        swap(_impl_.nspanel_id_, other->_impl_.nspanel_id_);
-}
-
-::google::protobuf::Metadata NSPanelMQTTManagerCommand_NextRoom::GetMetadata() const {
-  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
-}
-// ===================================================================
-
-class NSPanelMQTTManagerCommand_PreviousRoom::_Internal {
- public:
-};
-
-NSPanelMQTTManagerCommand_PreviousRoom::NSPanelMQTTManagerCommand_PreviousRoom(::google::protobuf::Arena* arena)
-    : ::google::protobuf::Message(arena) {
-  SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:NSPanelMQTTManagerCommand.PreviousRoom)
-}
-NSPanelMQTTManagerCommand_PreviousRoom::NSPanelMQTTManagerCommand_PreviousRoom(
-    ::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_PreviousRoom& from)
-    : NSPanelMQTTManagerCommand_PreviousRoom(arena) {
-  MergeFrom(from);
-}
-inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_PreviousRoom::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility,
-    ::google::protobuf::Arena* arena)
-      : _cached_size_{0} {}
-
-inline void NSPanelMQTTManagerCommand_PreviousRoom::SharedCtor(::_pb::Arena* arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.nspanel_id_ = {};
-}
-NSPanelMQTTManagerCommand_PreviousRoom::~NSPanelMQTTManagerCommand_PreviousRoom() {
-  // @@protoc_insertion_point(destructor:NSPanelMQTTManagerCommand.PreviousRoom)
-  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
-  SharedDtor();
-}
-inline void NSPanelMQTTManagerCommand_PreviousRoom::SharedDtor() {
-  ABSL_DCHECK(GetArena() == nullptr);
-  _impl_.~Impl_();
-}
-
-const ::google::protobuf::MessageLite::ClassData*
-NSPanelMQTTManagerCommand_PreviousRoom::GetClassData() const {
-  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
-      ClassDataFull _data_ = {
-          {
-              &_table_.header,
-              nullptr,  // OnDemandRegisterArenaDtor
-              nullptr,  // IsInitialized
-              PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_PreviousRoom, _impl_._cached_size_),
-              false,
-          },
-          &NSPanelMQTTManagerCommand_PreviousRoom::MergeImpl,
-          &NSPanelMQTTManagerCommand_PreviousRoom::kDescriptorMethods,
-          &descriptor_table_protobuf_5fnspanel_2eproto,
-          nullptr,  // tracker
-      };
-  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
-  return _data_.base();
-}
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 1, 0, 0, 2> NSPanelMQTTManagerCommand_PreviousRoom::_table_ = {
-  {
-    0,  // no _has_bits_
-    0, // no _extensions_
-    1, 0,  // max_field_number, fast_idx_mask
-    offsetof(decltype(_table_), field_lookup_table),
-    4294967294,  // skipmap
-    offsetof(decltype(_table_), field_entries),
-    1,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
-    &_NSPanelMQTTManagerCommand_PreviousRoom_default_instance_._instance,
-    nullptr,  // post_loop_handler
-    ::_pbi::TcParser::GenericFallback,  // fallback
-    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_PreviousRoom>(),  // to_prefetch
-    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
-  }, {{
-    // int32 nspanel_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_PreviousRoom, _impl_.nspanel_id_), 63>(),
-     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_PreviousRoom, _impl_.nspanel_id_)}},
-  }}, {{
-    65535, 65535
-  }}, {{
-    // int32 nspanel_id = 1;
-    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_PreviousRoom, _impl_.nspanel_id_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-  }},
-  // no aux_entries
-  {{
-  }},
-};
-
-PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_PreviousRoom::Clear() {
-// @@protoc_insertion_point(message_clear_start:NSPanelMQTTManagerCommand.PreviousRoom)
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  _impl_.nspanel_id_ = 0;
-  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
-}
-
-::uint8_t* NSPanelMQTTManagerCommand_PreviousRoom::_InternalSerialize(
-    ::uint8_t* target,
-    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:NSPanelMQTTManagerCommand.PreviousRoom)
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
-
-  // int32 nspanel_id = 1;
-  if (this->_internal_nspanel_id() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<1>(
-            stream, this->_internal_nspanel_id(), target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target =
-        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:NSPanelMQTTManagerCommand.PreviousRoom)
-  return target;
-}
-
-::size_t NSPanelMQTTManagerCommand_PreviousRoom::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:NSPanelMQTTManagerCommand.PreviousRoom)
-  ::size_t total_size = 0;
-
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  // int32 nspanel_id = 1;
-  if (this->_internal_nspanel_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_nspanel_id());
-  }
-
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-
-void NSPanelMQTTManagerCommand_PreviousRoom::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
-  auto* const _this = static_cast<NSPanelMQTTManagerCommand_PreviousRoom*>(&to_msg);
-  auto& from = static_cast<const NSPanelMQTTManagerCommand_PreviousRoom&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelMQTTManagerCommand.PreviousRoom)
-  ABSL_DCHECK_NE(&from, _this);
-  ::uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (from._internal_nspanel_id() != 0) {
-    _this->_impl_.nspanel_id_ = from._impl_.nspanel_id_;
-  }
-  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void NSPanelMQTTManagerCommand_PreviousRoom::CopyFrom(const NSPanelMQTTManagerCommand_PreviousRoom& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelMQTTManagerCommand.PreviousRoom)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-
-void NSPanelMQTTManagerCommand_PreviousRoom::InternalSwap(NSPanelMQTTManagerCommand_PreviousRoom* PROTOBUF_RESTRICT other) {
-  using std::swap;
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-        swap(_impl_.nspanel_id_, other->_impl_.nspanel_id_);
-}
-
-::google::protobuf::Metadata NSPanelMQTTManagerCommand_PreviousRoom::GetMetadata() const {
-  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
-}
-// ===================================================================
-
-class NSPanelMQTTManagerCommand_NextEntitiesPage::_Internal {
- public:
-};
-
-NSPanelMQTTManagerCommand_NextEntitiesPage::NSPanelMQTTManagerCommand_NextEntitiesPage(::google::protobuf::Arena* arena)
-    : ::google::protobuf::Message(arena) {
-  SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:NSPanelMQTTManagerCommand.NextEntitiesPage)
-}
-NSPanelMQTTManagerCommand_NextEntitiesPage::NSPanelMQTTManagerCommand_NextEntitiesPage(
-    ::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_NextEntitiesPage& from)
-    : NSPanelMQTTManagerCommand_NextEntitiesPage(arena) {
-  MergeFrom(from);
-}
-inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_NextEntitiesPage::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility,
-    ::google::protobuf::Arena* arena)
-      : _cached_size_{0} {}
-
-inline void NSPanelMQTTManagerCommand_NextEntitiesPage::SharedCtor(::_pb::Arena* arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.nspanel_id_ = {};
-}
-NSPanelMQTTManagerCommand_NextEntitiesPage::~NSPanelMQTTManagerCommand_NextEntitiesPage() {
-  // @@protoc_insertion_point(destructor:NSPanelMQTTManagerCommand.NextEntitiesPage)
-  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
-  SharedDtor();
-}
-inline void NSPanelMQTTManagerCommand_NextEntitiesPage::SharedDtor() {
-  ABSL_DCHECK(GetArena() == nullptr);
-  _impl_.~Impl_();
-}
-
-const ::google::protobuf::MessageLite::ClassData*
-NSPanelMQTTManagerCommand_NextEntitiesPage::GetClassData() const {
-  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
-      ClassDataFull _data_ = {
-          {
-              &_table_.header,
-              nullptr,  // OnDemandRegisterArenaDtor
-              nullptr,  // IsInitialized
-              PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_NextEntitiesPage, _impl_._cached_size_),
-              false,
-          },
-          &NSPanelMQTTManagerCommand_NextEntitiesPage::MergeImpl,
-          &NSPanelMQTTManagerCommand_NextEntitiesPage::kDescriptorMethods,
-          &descriptor_table_protobuf_5fnspanel_2eproto,
-          nullptr,  // tracker
-      };
-  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
-  return _data_.base();
-}
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 1, 0, 0, 2> NSPanelMQTTManagerCommand_NextEntitiesPage::_table_ = {
-  {
-    0,  // no _has_bits_
-    0, // no _extensions_
-    1, 0,  // max_field_number, fast_idx_mask
-    offsetof(decltype(_table_), field_lookup_table),
-    4294967294,  // skipmap
-    offsetof(decltype(_table_), field_entries),
-    1,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
-    &_NSPanelMQTTManagerCommand_NextEntitiesPage_default_instance_._instance,
-    nullptr,  // post_loop_handler
-    ::_pbi::TcParser::GenericFallback,  // fallback
-    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_NextEntitiesPage>(),  // to_prefetch
-    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
-  }, {{
-    // int32 nspanel_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_NextEntitiesPage, _impl_.nspanel_id_), 63>(),
-     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_NextEntitiesPage, _impl_.nspanel_id_)}},
-  }}, {{
-    65535, 65535
-  }}, {{
-    // int32 nspanel_id = 1;
-    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_NextEntitiesPage, _impl_.nspanel_id_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-  }},
-  // no aux_entries
-  {{
-  }},
-};
-
-PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_NextEntitiesPage::Clear() {
-// @@protoc_insertion_point(message_clear_start:NSPanelMQTTManagerCommand.NextEntitiesPage)
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  _impl_.nspanel_id_ = 0;
-  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
-}
-
-::uint8_t* NSPanelMQTTManagerCommand_NextEntitiesPage::_InternalSerialize(
-    ::uint8_t* target,
-    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:NSPanelMQTTManagerCommand.NextEntitiesPage)
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
-
-  // int32 nspanel_id = 1;
-  if (this->_internal_nspanel_id() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<1>(
-            stream, this->_internal_nspanel_id(), target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target =
-        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:NSPanelMQTTManagerCommand.NextEntitiesPage)
-  return target;
-}
-
-::size_t NSPanelMQTTManagerCommand_NextEntitiesPage::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:NSPanelMQTTManagerCommand.NextEntitiesPage)
-  ::size_t total_size = 0;
-
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  // int32 nspanel_id = 1;
-  if (this->_internal_nspanel_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_nspanel_id());
-  }
-
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-
-void NSPanelMQTTManagerCommand_NextEntitiesPage::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
-  auto* const _this = static_cast<NSPanelMQTTManagerCommand_NextEntitiesPage*>(&to_msg);
-  auto& from = static_cast<const NSPanelMQTTManagerCommand_NextEntitiesPage&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelMQTTManagerCommand.NextEntitiesPage)
-  ABSL_DCHECK_NE(&from, _this);
-  ::uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (from._internal_nspanel_id() != 0) {
-    _this->_impl_.nspanel_id_ = from._impl_.nspanel_id_;
-  }
-  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void NSPanelMQTTManagerCommand_NextEntitiesPage::CopyFrom(const NSPanelMQTTManagerCommand_NextEntitiesPage& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelMQTTManagerCommand.NextEntitiesPage)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-
-void NSPanelMQTTManagerCommand_NextEntitiesPage::InternalSwap(NSPanelMQTTManagerCommand_NextEntitiesPage* PROTOBUF_RESTRICT other) {
-  using std::swap;
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-        swap(_impl_.nspanel_id_, other->_impl_.nspanel_id_);
-}
-
-::google::protobuf::Metadata NSPanelMQTTManagerCommand_NextEntitiesPage::GetMetadata() const {
-  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
-}
-// ===================================================================
-
-class NSPanelMQTTManagerCommand_PreviousEntitiesPage::_Internal {
- public:
-};
-
-NSPanelMQTTManagerCommand_PreviousEntitiesPage::NSPanelMQTTManagerCommand_PreviousEntitiesPage(::google::protobuf::Arena* arena)
-    : ::google::protobuf::Message(arena) {
-  SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:NSPanelMQTTManagerCommand.PreviousEntitiesPage)
-}
-NSPanelMQTTManagerCommand_PreviousEntitiesPage::NSPanelMQTTManagerCommand_PreviousEntitiesPage(
-    ::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_PreviousEntitiesPage& from)
-    : NSPanelMQTTManagerCommand_PreviousEntitiesPage(arena) {
-  MergeFrom(from);
-}
-inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_PreviousEntitiesPage::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility,
-    ::google::protobuf::Arena* arena)
-      : _cached_size_{0} {}
-
-inline void NSPanelMQTTManagerCommand_PreviousEntitiesPage::SharedCtor(::_pb::Arena* arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.nspanel_id_ = {};
-}
-NSPanelMQTTManagerCommand_PreviousEntitiesPage::~NSPanelMQTTManagerCommand_PreviousEntitiesPage() {
-  // @@protoc_insertion_point(destructor:NSPanelMQTTManagerCommand.PreviousEntitiesPage)
-  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
-  SharedDtor();
-}
-inline void NSPanelMQTTManagerCommand_PreviousEntitiesPage::SharedDtor() {
-  ABSL_DCHECK(GetArena() == nullptr);
-  _impl_.~Impl_();
-}
-
-const ::google::protobuf::MessageLite::ClassData*
-NSPanelMQTTManagerCommand_PreviousEntitiesPage::GetClassData() const {
-  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
-      ClassDataFull _data_ = {
-          {
-              &_table_.header,
-              nullptr,  // OnDemandRegisterArenaDtor
-              nullptr,  // IsInitialized
-              PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_PreviousEntitiesPage, _impl_._cached_size_),
-              false,
-          },
-          &NSPanelMQTTManagerCommand_PreviousEntitiesPage::MergeImpl,
-          &NSPanelMQTTManagerCommand_PreviousEntitiesPage::kDescriptorMethods,
-          &descriptor_table_protobuf_5fnspanel_2eproto,
-          nullptr,  // tracker
-      };
-  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
-  return _data_.base();
-}
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 1, 0, 0, 2> NSPanelMQTTManagerCommand_PreviousEntitiesPage::_table_ = {
-  {
-    0,  // no _has_bits_
-    0, // no _extensions_
-    1, 0,  // max_field_number, fast_idx_mask
-    offsetof(decltype(_table_), field_lookup_table),
-    4294967294,  // skipmap
-    offsetof(decltype(_table_), field_entries),
-    1,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
-    &_NSPanelMQTTManagerCommand_PreviousEntitiesPage_default_instance_._instance,
-    nullptr,  // post_loop_handler
-    ::_pbi::TcParser::GenericFallback,  // fallback
-    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_PreviousEntitiesPage>(),  // to_prefetch
-    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
-  }, {{
-    // int32 nspanel_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_PreviousEntitiesPage, _impl_.nspanel_id_), 63>(),
-     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_PreviousEntitiesPage, _impl_.nspanel_id_)}},
-  }}, {{
-    65535, 65535
-  }}, {{
-    // int32 nspanel_id = 1;
-    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_PreviousEntitiesPage, _impl_.nspanel_id_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-  }},
-  // no aux_entries
-  {{
-  }},
-};
-
-PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_PreviousEntitiesPage::Clear() {
-// @@protoc_insertion_point(message_clear_start:NSPanelMQTTManagerCommand.PreviousEntitiesPage)
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  _impl_.nspanel_id_ = 0;
-  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
-}
-
-::uint8_t* NSPanelMQTTManagerCommand_PreviousEntitiesPage::_InternalSerialize(
-    ::uint8_t* target,
-    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:NSPanelMQTTManagerCommand.PreviousEntitiesPage)
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
-
-  // int32 nspanel_id = 1;
-  if (this->_internal_nspanel_id() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<1>(
-            stream, this->_internal_nspanel_id(), target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target =
-        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:NSPanelMQTTManagerCommand.PreviousEntitiesPage)
-  return target;
-}
-
-::size_t NSPanelMQTTManagerCommand_PreviousEntitiesPage::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:NSPanelMQTTManagerCommand.PreviousEntitiesPage)
-  ::size_t total_size = 0;
-
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  // int32 nspanel_id = 1;
-  if (this->_internal_nspanel_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_nspanel_id());
-  }
-
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-
-void NSPanelMQTTManagerCommand_PreviousEntitiesPage::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
-  auto* const _this = static_cast<NSPanelMQTTManagerCommand_PreviousEntitiesPage*>(&to_msg);
-  auto& from = static_cast<const NSPanelMQTTManagerCommand_PreviousEntitiesPage&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelMQTTManagerCommand.PreviousEntitiesPage)
-  ABSL_DCHECK_NE(&from, _this);
-  ::uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (from._internal_nspanel_id() != 0) {
-    _this->_impl_.nspanel_id_ = from._impl_.nspanel_id_;
-  }
-  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void NSPanelMQTTManagerCommand_PreviousEntitiesPage::CopyFrom(const NSPanelMQTTManagerCommand_PreviousEntitiesPage& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelMQTTManagerCommand.PreviousEntitiesPage)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-
-void NSPanelMQTTManagerCommand_PreviousEntitiesPage::InternalSwap(NSPanelMQTTManagerCommand_PreviousEntitiesPage* PROTOBUF_RESTRICT other) {
-  using std::swap;
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-        swap(_impl_.nspanel_id_, other->_impl_.nspanel_id_);
-}
-
-::google::protobuf::Metadata NSPanelMQTTManagerCommand_PreviousEntitiesPage::GetMetadata() const {
-  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
-}
-// ===================================================================
-
 class NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage::_Internal {
  public:
 };
@@ -7283,57 +6464,18 @@ void NSPanelMQTTManagerCommand::set_allocated_light_command(::NSPanelMQTTManager
   }
   // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.light_command)
 }
-void NSPanelMQTTManagerCommand::set_allocated_next_room(::NSPanelMQTTManagerCommand_NextRoom* next_room) {
+void NSPanelMQTTManagerCommand::set_allocated_toggle_entity_from_entities_page(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* toggle_entity_from_entities_page) {
   ::google::protobuf::Arena* message_arena = GetArena();
   clear_CommandData();
-  if (next_room) {
-    ::google::protobuf::Arena* submessage_arena = next_room->GetArena();
+  if (toggle_entity_from_entities_page) {
+    ::google::protobuf::Arena* submessage_arena = toggle_entity_from_entities_page->GetArena();
     if (message_arena != submessage_arena) {
-      next_room = ::google::protobuf::internal::GetOwnedMessage(message_arena, next_room, submessage_arena);
+      toggle_entity_from_entities_page = ::google::protobuf::internal::GetOwnedMessage(message_arena, toggle_entity_from_entities_page, submessage_arena);
     }
-    set_has_next_room();
-    _impl_.CommandData_.next_room_ = next_room;
+    set_has_toggle_entity_from_entities_page();
+    _impl_.CommandData_.toggle_entity_from_entities_page_ = toggle_entity_from_entities_page;
   }
-  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.next_room)
-}
-void NSPanelMQTTManagerCommand::set_allocated_previous_room(::NSPanelMQTTManagerCommand_PreviousRoom* previous_room) {
-  ::google::protobuf::Arena* message_arena = GetArena();
-  clear_CommandData();
-  if (previous_room) {
-    ::google::protobuf::Arena* submessage_arena = previous_room->GetArena();
-    if (message_arena != submessage_arena) {
-      previous_room = ::google::protobuf::internal::GetOwnedMessage(message_arena, previous_room, submessage_arena);
-    }
-    set_has_previous_room();
-    _impl_.CommandData_.previous_room_ = previous_room;
-  }
-  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.previous_room)
-}
-void NSPanelMQTTManagerCommand::set_allocated_next_entities_page(::NSPanelMQTTManagerCommand_NextEntitiesPage* next_entities_page) {
-  ::google::protobuf::Arena* message_arena = GetArena();
-  clear_CommandData();
-  if (next_entities_page) {
-    ::google::protobuf::Arena* submessage_arena = next_entities_page->GetArena();
-    if (message_arena != submessage_arena) {
-      next_entities_page = ::google::protobuf::internal::GetOwnedMessage(message_arena, next_entities_page, submessage_arena);
-    }
-    set_has_next_entities_page();
-    _impl_.CommandData_.next_entities_page_ = next_entities_page;
-  }
-  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.next_entities_page)
-}
-void NSPanelMQTTManagerCommand::set_allocated_previous_entities_page(::NSPanelMQTTManagerCommand_PreviousEntitiesPage* previous_entities_page) {
-  ::google::protobuf::Arena* message_arena = GetArena();
-  clear_CommandData();
-  if (previous_entities_page) {
-    ::google::protobuf::Arena* submessage_arena = previous_entities_page->GetArena();
-    if (message_arena != submessage_arena) {
-      previous_entities_page = ::google::protobuf::internal::GetOwnedMessage(message_arena, previous_entities_page, submessage_arena);
-    }
-    set_has_previous_entities_page();
-    _impl_.CommandData_.previous_entities_page_ = previous_entities_page;
-  }
-  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.previous_entities_page)
+  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.toggle_entity_from_entities_page)
 }
 NSPanelMQTTManagerCommand::NSPanelMQTTManagerCommand(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
@@ -7368,17 +6510,8 @@ NSPanelMQTTManagerCommand::NSPanelMQTTManagerCommand(
       case kLightCommand:
         _impl_.CommandData_.light_command_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_LightCommand>(arena, *from._impl_.CommandData_.light_command_);
         break;
-      case kNextRoom:
-        _impl_.CommandData_.next_room_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_NextRoom>(arena, *from._impl_.CommandData_.next_room_);
-        break;
-      case kPreviousRoom:
-        _impl_.CommandData_.previous_room_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_PreviousRoom>(arena, *from._impl_.CommandData_.previous_room_);
-        break;
-      case kNextEntitiesPage:
-        _impl_.CommandData_.next_entities_page_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_NextEntitiesPage>(arena, *from._impl_.CommandData_.next_entities_page_);
-        break;
-      case kPreviousEntitiesPage:
-        _impl_.CommandData_.previous_entities_page_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_PreviousEntitiesPage>(arena, *from._impl_.CommandData_.previous_entities_page_);
+      case kToggleEntityFromEntitiesPage:
+        _impl_.CommandData_.toggle_entity_from_entities_page_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage>(arena, *from._impl_.CommandData_.toggle_entity_from_entities_page_);
         break;
   }
 
@@ -7435,35 +6568,11 @@ void NSPanelMQTTManagerCommand::clear_CommandData() {
       }
       break;
     }
-    case kNextRoom: {
+    case kToggleEntityFromEntitiesPage: {
       if (GetArena() == nullptr) {
-        delete _impl_.CommandData_.next_room_;
+        delete _impl_.CommandData_.toggle_entity_from_entities_page_;
       } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
-        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.next_room_);
-      }
-      break;
-    }
-    case kPreviousRoom: {
-      if (GetArena() == nullptr) {
-        delete _impl_.CommandData_.previous_room_;
-      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
-        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.previous_room_);
-      }
-      break;
-    }
-    case kNextEntitiesPage: {
-      if (GetArena() == nullptr) {
-        delete _impl_.CommandData_.next_entities_page_;
-      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
-        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.next_entities_page_);
-      }
-      break;
-    }
-    case kPreviousEntitiesPage: {
-      if (GetArena() == nullptr) {
-        delete _impl_.CommandData_.previous_entities_page_;
-      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
-        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.previous_entities_page_);
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.toggle_entity_from_entities_page_);
       }
       break;
     }
@@ -7496,16 +6605,16 @@ NSPanelMQTTManagerCommand::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 7, 7, 0, 2> NSPanelMQTTManagerCommand::_table_ = {
+const ::_pbi::TcParseTable<0, 4, 4, 0, 2> NSPanelMQTTManagerCommand::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    7, 0,  // max_field_number, fast_idx_mask
+    4, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967168,  // skipmap
+    4294967280,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    7,  // num_field_entries
-    7,  // num_aux_entries
+    4,  // num_field_entries
+    4,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelMQTTManagerCommand_default_instance_._instance,
     nullptr,  // post_loop_handler
@@ -7527,26 +6636,14 @@ const ::_pbi::TcParseTable<0, 7, 7, 0, 2> NSPanelMQTTManagerCommand::_table_ = {
     // .NSPanelMQTTManagerCommand.LightCommand light_command = 3;
     {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.light_command_), _Internal::kOneofCaseOffset + 0, 2,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
-    // .NSPanelMQTTManagerCommand.NextRoom next_room = 4;
-    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.next_room_), _Internal::kOneofCaseOffset + 0, 3,
-    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
-    // .NSPanelMQTTManagerCommand.PreviousRoom previous_room = 5;
-    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.previous_room_), _Internal::kOneofCaseOffset + 0, 4,
-    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
-    // .NSPanelMQTTManagerCommand.NextEntitiesPage next_entities_page = 6;
-    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.next_entities_page_), _Internal::kOneofCaseOffset + 0, 5,
-    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
-    // .NSPanelMQTTManagerCommand.PreviousEntitiesPage previous_entities_page = 7;
-    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.previous_entities_page_), _Internal::kOneofCaseOffset + 0, 6,
+    // .NSPanelMQTTManagerCommand.ToggleEntityFromEntitiesPage toggle_entity_from_entities_page = 4;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.toggle_entity_from_entities_page_), _Internal::kOneofCaseOffset + 0, 3,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_FirstPageTurnLightOn>()},
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_FirstPageTurnLightOff>()},
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_LightCommand>()},
-    {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_NextRoom>()},
-    {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_PreviousRoom>()},
-    {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_NextEntitiesPage>()},
-    {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_PreviousEntitiesPage>()},
+    {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage>()},
   }}, {{
   }},
 };
@@ -7585,24 +6682,9 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand::Clear() {
           3, *_impl_.CommandData_.light_command_, _impl_.CommandData_.light_command_->GetCachedSize(), target, stream);
       break;
     }
-    case kNextRoom: {
+    case kToggleEntityFromEntitiesPage: {
       target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-          4, *_impl_.CommandData_.next_room_, _impl_.CommandData_.next_room_->GetCachedSize(), target, stream);
-      break;
-    }
-    case kPreviousRoom: {
-      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-          5, *_impl_.CommandData_.previous_room_, _impl_.CommandData_.previous_room_->GetCachedSize(), target, stream);
-      break;
-    }
-    case kNextEntitiesPage: {
-      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-          6, *_impl_.CommandData_.next_entities_page_, _impl_.CommandData_.next_entities_page_->GetCachedSize(), target, stream);
-      break;
-    }
-    case kPreviousEntitiesPage: {
-      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-          7, *_impl_.CommandData_.previous_entities_page_, _impl_.CommandData_.previous_entities_page_->GetCachedSize(), target, stream);
+          4, *_impl_.CommandData_.toggle_entity_from_entities_page_, _impl_.CommandData_.toggle_entity_from_entities_page_->GetCachedSize(), target, stream);
       break;
     }
     default:
@@ -7644,28 +6726,10 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand::Clear() {
           1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.light_command_);
       break;
     }
-    // .NSPanelMQTTManagerCommand.NextRoom next_room = 4;
-    case kNextRoom: {
+    // .NSPanelMQTTManagerCommand.ToggleEntityFromEntitiesPage toggle_entity_from_entities_page = 4;
+    case kToggleEntityFromEntitiesPage: {
       total_size +=
-          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.next_room_);
-      break;
-    }
-    // .NSPanelMQTTManagerCommand.PreviousRoom previous_room = 5;
-    case kPreviousRoom: {
-      total_size +=
-          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.previous_room_);
-      break;
-    }
-    // .NSPanelMQTTManagerCommand.NextEntitiesPage next_entities_page = 6;
-    case kNextEntitiesPage: {
-      total_size +=
-          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.next_entities_page_);
-      break;
-    }
-    // .NSPanelMQTTManagerCommand.PreviousEntitiesPage previous_entities_page = 7;
-    case kPreviousEntitiesPage: {
-      total_size +=
-          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.previous_entities_page_);
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.toggle_entity_from_entities_page_);
       break;
     }
     case COMMANDDATA_NOT_SET: {
@@ -7723,39 +6787,12 @@ void NSPanelMQTTManagerCommand::MergeImpl(::google::protobuf::MessageLite& to_ms
         }
         break;
       }
-      case kNextRoom: {
+      case kToggleEntityFromEntitiesPage: {
         if (oneof_needs_init) {
-          _this->_impl_.CommandData_.next_room_ =
-              ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_NextRoom>(arena, *from._impl_.CommandData_.next_room_);
+          _this->_impl_.CommandData_.toggle_entity_from_entities_page_ =
+              ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage>(arena, *from._impl_.CommandData_.toggle_entity_from_entities_page_);
         } else {
-          _this->_impl_.CommandData_.next_room_->MergeFrom(from._internal_next_room());
-        }
-        break;
-      }
-      case kPreviousRoom: {
-        if (oneof_needs_init) {
-          _this->_impl_.CommandData_.previous_room_ =
-              ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_PreviousRoom>(arena, *from._impl_.CommandData_.previous_room_);
-        } else {
-          _this->_impl_.CommandData_.previous_room_->MergeFrom(from._internal_previous_room());
-        }
-        break;
-      }
-      case kNextEntitiesPage: {
-        if (oneof_needs_init) {
-          _this->_impl_.CommandData_.next_entities_page_ =
-              ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_NextEntitiesPage>(arena, *from._impl_.CommandData_.next_entities_page_);
-        } else {
-          _this->_impl_.CommandData_.next_entities_page_->MergeFrom(from._internal_next_entities_page());
-        }
-        break;
-      }
-      case kPreviousEntitiesPage: {
-        if (oneof_needs_init) {
-          _this->_impl_.CommandData_.previous_entities_page_ =
-              ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_PreviousEntitiesPage>(arena, *from._impl_.CommandData_.previous_entities_page_);
-        } else {
-          _this->_impl_.CommandData_.previous_entities_page_->MergeFrom(from._internal_previous_entities_page());
+          _this->_impl_.CommandData_.toggle_entity_from_entities_page_->MergeFrom(from._internal_toggle_entity_from_entities_page());
         }
         break;
       }

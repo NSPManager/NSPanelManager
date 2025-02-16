@@ -159,8 +159,8 @@ int main(void) {
   database_manager::init();
 
   // Load config from environment/manager
-  EntityManager::init();
   MqttManagerConfig::load();
+  EntityManager::init();
 
   IPCHandler::start();
 

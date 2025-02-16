@@ -276,3 +276,15 @@ void Light::command_callback(NSPanelMQTTManagerCommand &command) {
     }
   }
 }
+
+bool Light::can_toggle() {
+  return true;
+}
+
+void Light::toggle() {
+  if (this->_current_state) {
+    this->turn_off(true);
+  } else {
+    this->turn_on(true);
+  }
+}

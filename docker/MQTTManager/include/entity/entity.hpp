@@ -42,6 +42,16 @@ public:
    */
   virtual uint8_t get_entity_page_slot() = 0;
 
+  /*
+   * Can this entity be toggled?
+   */
+  virtual bool can_toggle() = 0;
+
+  /*
+   * Toggle the entity state.
+   */
+  virtual void toggle() = 0;
+
   /**
    * Register a entity_changed callback listener.
    */

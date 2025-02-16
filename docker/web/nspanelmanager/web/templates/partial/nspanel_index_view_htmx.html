@@ -77,8 +77,9 @@
                     {% component "nspanel_reboot_button" id=nspanel.data.id state=nspanel.status.state %}{% endcomponent %}
                 </li>
                 <li>
-                    <a class="nspanel-settings-link block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
-                        class="mdi mdi-cog pr-2"></span>Settings</a>
+                    <a class="nspanel-settings-link block px-4 py-2 hover:bg-accent hover:text-accent-content" href="{% url 'edit_nspanel' nspanel.data.id %}">
+                        <span class="mdi mdi-cog pr-2"></span>Settings
+                    </a>
                 </li>
                 <li>
                     {% component 'nspanel_visit_link' id=nspanel.data.id state=nspanel.status.state address=nspanel.status.ip_address %}{% endcomponent %}

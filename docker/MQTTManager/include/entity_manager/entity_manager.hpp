@@ -2,6 +2,7 @@
 #define MQTT_MANAGER_ENTITY_MANAGER
 
 #include "protobuf_general.pb.h"
+#include "protobuf_nspanel.pb.h"
 #include <algorithm>
 #include <boost/signals2.hpp>
 #include <entity/entity.hpp>
@@ -76,6 +77,12 @@ public:
    * Get all currently registered rooms
    */
   static std::vector<std::shared_ptr<Room>> get_all_rooms();
+
+  /*
+   * Handle commands that are sent to the MQTTManager but are not
+   * neccesarily handled by other entities directly.
+   */
+  static void _command_callback(NSPanelMQTTManagerCommand &command);
 
   /**
    * Get an item by the specified type that has the specified ID.
