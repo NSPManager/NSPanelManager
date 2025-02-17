@@ -516,10 +516,12 @@ def partial_remove_entity_from_page_slot(request, page_id, slot_id):
     entities = page.light_set.filter(room_view_position=slot_id).all()
     if entities.count() > 0:
         entities.delete();
+        send_mqttmanager_reload_command()
 
     entities = page.switch_set.filter(room_view_position=slot_id).all()
     if entities.count() > 0:
         entities.delete();
+        send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(request=request, view="edit_room", room_id=page.room.id)
@@ -570,6 +572,7 @@ def partial_move_entity(request):
     new_entity_in_slot.entities_page = RoomEntitiesPage.objects.get(id=request.POST["page_id"])
     new_entity_in_slot.room_view_position = request.POST["slot_id"]
     new_entity_in_slot.save()
+    send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(request, view='edit_room', room_id=new_entity_in_slot.room.id)
@@ -587,6 +590,7 @@ def partial_move_entities_pages(request):
                     page = RoomEntitiesPage.objects.get(id=page_id)
                     page.display_order = index
                     page.save()
+                send_mqttmanager_reload_command()
                 entities_pages = NSPanelRoomEntitiesPages()
                 return entities_pages.get(request, view='edit_room', room_id=room_id)
             else:
@@ -658,6 +662,8 @@ def partial_delete_entities_page(request, page_id):
     page = RoomEntitiesPage.objects.get(id=page_id)
     room_id = page.room.id
     page.delete()
+    send_mqttmanager_reload_command()
+
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(request=request, view="edit_room", room_id=page.room.id)
 
@@ -671,12 +677,15 @@ def create_entities_page_in_room(request, room_id, page_type, is_scenes_page):
     if page_type == 4:
         entity_page.page_type = 4
         entity_page.save()
+        send_mqttmanager_reload_command()
     elif page_type == 8:
         entity_page.page_type = 8
         entity_page.save()
+        send_mqttmanager_reload_command()
     elif page_type == 12:
         entity_page.page_type = 12
         entity_page.save()
+        send_mqttmanager_reload_command()
     else:
         print(F"ERROR! Unknown page type {page_type}")
     # Return new partial HTMX update of all entities pages in this room
@@ -744,14 +753,10 @@ def create_or_update_light_entity(request):
         newLight.openhab_item_rgb = ""
 
     newLight.save()
-    command_data = {
-        # TODO: Base64 Encode data.
-        #"data": newLight.get_protobuf_object().SerializeToString()
-    }
-    #send_ipc_request("entity_manager/add_light", command_data)
+    send_mqttmanager_reload_command()
+
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(request=request, view="edit_room", room_id=newLight.room.id)
-    #return redirect('edit_room', room_id=action_args["room_id"])
 
 
 def create_or_update_switch_entity(request):
@@ -773,15 +778,9 @@ def create_or_update_switch_entity(request):
             new_switch.openhab_item_switch = request.POST["openhab_switch_channel_name"]
 
     new_switch.friendly_name = request.POST["add_new_light_name"]
-
-
     new_switch.save()
-    #send_mqttmanager_reload_command()
-    # command_data = {
-    #     # TODO: Base64 Encode data.
-    #     "data": new_switch.get_protobuf_object().SerializeToString()
-    # }
-    #send_ipc_request("entity_manager/add_light", command_data)
+    send_mqttmanager_reload_command()
+
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(request=request, view="edit_room", room_id=new_switch.room.id)
     #return redirect('edit_room', room_id=action_args["room_id"])
