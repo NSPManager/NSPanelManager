@@ -776,6 +776,9 @@ void NSPanel::send_command(nlohmann::json &command) {
   if (!this->_mqtt_command_topic.empty()) {
     std::string buffer = command.dump();
     MQTT_Manager::publish(this->_mqtt_command_topic, buffer);
+
+    // Also publish command on old command topic so that it's possible to update from older versions
+    MQTT_Manager::publish(fmt::format("nspanel/{}/command", this->_name), buffer);
   } else {
     SPDLOG_ERROR("Failed to send message to NSPanel Command topic. No command topic was set!");
   }
