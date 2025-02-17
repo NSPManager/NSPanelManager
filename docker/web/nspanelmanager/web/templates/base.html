@@ -100,6 +100,8 @@
         {% endfor %}
       </div>
       <div class="mt-4 px-2">
+          <!-- If no manager address is set, show the initial setup guide. -->
+          {% if manager_address == "" %}{% include 'modals/initial_setup/welcome.html' %}{% endif %}
         {% block content %}
         {% endblock %}
       </div>

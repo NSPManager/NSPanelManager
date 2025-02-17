@@ -22,6 +22,8 @@
       <div class="p-4 bg-base-100 rounded-box shadow-lg w-full">
         <span class="block mb-2 text-xl">NSPanel Manager settings</span>
 
+        {% component "alert" level="warning" text="Manager address needs to be the IP address and not hostname of the manager." %}{% endcomponent %}
+
         <!-- Manager address -->
         <div class="mb-2">
             <label for="manager_address" class="block mb-1 text-sm font-medium">Manager address</label>

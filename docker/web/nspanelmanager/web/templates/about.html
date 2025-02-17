@@ -1,17 +1,24 @@
 {% load static %}
 <dialog id="about_modal" class="modal" hx-swap-oob="true">
     <div class="modal-box menu menu-lg bg-base-200 rounded-box max-w-96">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
         <div class="flex items-center justify-center space-x-3 rtl:space-x-reverse">
             <div class="bg-neutral p-2 rounded-btn">
                 <img src="{{ ingress_path }}{% static 'logo.svg' %}" alt="Logo" class="h-12">
             </div>
         </div>
-        <span class="text-center mt-1">Version: %version%</span>
+
+        <div class="mt-1 text-center">
+            <span class="text-center">Version: %version%</span>
+        </div>
 
         <span class="mt-2 text-center">NSPanel Manager is a software for easy management and intuitive use for all family member for the whole house.</span>
         <span class="my-2 text-center font-bold">Thank you for your support and trust!</span>
 
-        <div id="about_links" class="join join-vertical">
+        <div id="about_links" class="join join-vertical w-full">
             <a class="join-item btn btn-link" href="https://nspanelmanager.com" target="_blank">Documentation</a>
             <a class="join-item btn btn-link" href="https://github.com/NSPManager/NSPanelManager" target="_blank">GitHub</a>
             <a class="join-item btn btn-link" href="https://discord.gg/RwXvAH56fE" target="_blank">Discord</a>

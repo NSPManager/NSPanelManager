@@ -1,0 +1,66 @@
+{% load static %}
+<dialog id="welcome_modal" class="modal" hx-swap-oob="true">
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        <div class="flex justify-center mb-2">
+            <ul class="steps">
+                <li hx-get="{% url 'htmx_initial_setup_welcome' %}" hx-swap="none" class="step step-primary cursor-pointer">Welcome</li>
+                <li hx-get="{% url 'htmx_initial_setup_manager_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">Manager</li>
+                <li hx-get="{% url 'htmx_initial_setup_mqtt_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">MQTT</li>
+                <li hx-get="{% url 'htmx_initial_setup_home_assistant_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">Home Assistant</li>
+                <li hx-get="{% url 'htmx_initial_setup_openhab_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">OpenHAB</li>
+                <li hx-get="{% url 'htmx_initial_setup_finished' %}" hx-swap="none" class="step cursor-pointer">Finish</li>
+            </ul>
+        </div>
+
+        <hr class="w-full absolute left-0 border-base-content">
+
+        <span class="block mb-2 text-xl w-full text-center">OpenHAB <span class="font-thin italic">(optional)</span></span>
+
+        <form hx-post="{% url 'htmx_initial_setup_openhab_settings' %}">
+            {% csrf_token %}
+
+            <!-- OpenHAB address -->
+            <div class="mb-2 w-full">
+                <label for="openhab_address" class="block mb-1 text-sm font-medium">OpenHAB address</label>
+                <div class="flex flex-row-reverse w-full">
+                    <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                    type="text" class="input" id="openhab_address" name="openhab_address" value="{{ openhab_address }}">
+                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                        <span class="mdi mdi-web"></span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Access Token -->
+            <div class="mb-2 w-full">
+                <label for="openhab_token" class="block mb-1 text-sm font-medium">OpenHAB token</label>
+                <div class="flex flex-row-reverse w-full">
+                    <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                    type="password" class="input" id="openhab_token" name="openhab_token" value="{{ openhab_token }}">
+                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                        <span class="mdi mdi-web"></span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-4">
+                <button type="button" class="btn btn-neutral me-2" hx-get="{% url 'htmx_initial_setup_home_assistant_settings' %}">Back</button>
+                <button type="submit" class="btn btn-success">Next</button>
+            </div>
+        </form>
+
+    </div>
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+    <script>
+        welcome_modal.showModal();
+    </script>
+</dialog>

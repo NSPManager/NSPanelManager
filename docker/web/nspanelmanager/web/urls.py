@@ -16,15 +16,6 @@ from . import views, api, rest, htmx, protobuf_api
 urlpatterns = [
     # Web routes
     path('', views.index, name='index'),
-    # Initial setup:
-    path('initial_setup_manager_config', views.initial_setup_manager_config,
-         name='initial_setup_manager_config'),
-    path('initial_setup_mqtt_config', views.initial_setup_mqtt_config,
-         name='initial_setup_mqtt_config'),
-    path('initial_setup_home_assistant_config', views.initial_setup_home_assistant_config,
-         name='initial_setup_home_assistant_config'),
-    path('initial_setup_openhab_config', views.initial_setup_openhab_config,
-         name='initial_setup_openhab_config'),
     path('rooms', views.rooms, name='rooms'),
     path('rooms/<int:room_id>/', views.edit_room, name='edit_room'),
     path('save_room/<int:room_id>',
@@ -180,6 +171,14 @@ urlpatterns = [
     path('htmx/partial/select_weather_outside_temperature_sensor_provider', htmx.select_weather_outside_temperature_sensor_provider, name='htmx_partial_select_weather_outside_temperature_sensor_provider'),
     path('htmx/partial/select_weather_outside_temperature_sensor_from_list/<str:entity_source>', htmx.select_weather_outside_temperature_sensor_from_list, name='htmx_partial_select_weather_outside_temperature_sensor_from_list'),
     path('htmx/interface/theme', htmx.interface_theme, name='htmx_interface_theme'),
+
+    # HTMX initial setup URLs
+    path('htmx/initial_setup/welcome', htmx.initial_setup_welcome, name='htmx_initial_setup_welcome'),
+    path('htmx/initial_setup/manager_settings', htmx.initial_setup_manager_settings, name='htmx_initial_setup_manager_settings'),
+    path('htmx/initial_setup/mqtt_settings', htmx.initial_setup_mqtt_settings, name='htmx_initial_setup_mqtt_settings'),
+    path('htmx/initial_setup/home_assistant_settings', htmx.initial_setup_home_assistant_settings, name='htmx_initial_setup_home_assistant_settings'),
+    path('htmx/initial_setup/openhab_settings', htmx.initial_setup_openhab_settings, name='htmx_initial_setup_openhab_settings'),
+    path('htmx/initial_setup/finished', htmx.initial_setup_finished, name='htmx_initial_setup_finished'),
 
     # HTMX relay group URLs
     path('htmx/relay_groups/create_new_modal', htmx.relay_group_create_new_modal, name='htmx_modal_create_new_relay_group'),

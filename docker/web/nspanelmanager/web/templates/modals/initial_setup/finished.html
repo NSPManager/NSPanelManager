@@ -1,0 +1,57 @@
+{% load static %}
+<dialog id="welcome_modal" class="modal" hx-swap-oob="true">
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        <div class="flex justify-center mb-2">
+            <ul class="steps">
+                <li hx-get="{% url 'htmx_initial_setup_welcome' %}" hx-swap="none" class="step step-primary cursor-pointer">Welcome</li>
+                <li hx-get="{% url 'htmx_initial_setup_manager_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">Manager</li>
+                <li hx-get="{% url 'htmx_initial_setup_mqtt_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">MQTT</li>
+                <li hx-get="{% url 'htmx_initial_setup_home_assistant_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">Home Assistant</li>
+                <li hx-get="{% url 'htmx_initial_setup_openhab_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">OpenHAB</li>
+                <li hx-get="{% url 'htmx_initial_setup_finished' %}" hx-swap="none" class="step step-primary cursor-pointer">Finish</li>
+            </ul>
+        </div>
+
+        <div class="flex items-center justify-center space-x-3 rtl:space-x-reverse mt-4">
+            <div class="bg-neutral p-2 rounded-btn">
+                <img src="{{ ingress_path }}{% static 'logo.svg' %}" alt="Logo" class="h-14">
+            </div>
+        </div>
+
+        <div class="text-center mt-2">
+            <span class="mt-2 text-center">This initial setup guide is now finished. If you want to see more settings have a look in the <a class="link link-primary" href="{% url 'settings' %}">settings page</a>.</span>
+        </div>
+
+        <div class="text-center mt-4">
+            <p class="text-center">
+                If you want more help or simply read up on the documentation of behaviours and settings here are a few helpful resources.
+                We also invite you to join our community on Discord.
+                If you at any time need to access these links again then you can find them in the "About" section.
+            </p>
+        </div>
+
+        <div id="about_links" class="join join-vertical w-full">
+            <a class="join-item btn btn-link" href="https://nspanelmanager.com" target="_blank">Documentation</a>
+            <a class="join-item btn btn-link" href="https://github.com/NSPManager/NSPanelManager" target="_blank">GitHub</a>
+            <a class="join-item btn btn-link" href="https://discord.gg/RwXvAH56fE" target="_blank">Discord</a>
+        </div>
+
+        <div class="flex justify-end mt-4">
+            <button class="btn btn-success" onclick="welcome_modal.close();">Finish</button>
+        </div>
+
+    </div>
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+    <script>
+        welcome_modal.showModal();
+    </script>
+</dialog>

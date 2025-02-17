@@ -48,10 +48,17 @@ def get_file_md5sum(filename):
 
 def get_base_data(request):
     """Get data that is used on ALL rendered views."""
-    return {
+    data = {
         'ingress_path':  request.headers["X-Ingress-Path"] if "X-Ingress-Path" in request.headers else "",
         'theme': get_setting_with_default("theme"),
+        'manager_address': get_setting_with_default("manager_address"),
     }
+
+    if data["manager_address"] == "":
+        environment = environ.Env()
+        data["is_home_assistant_addon"] = ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
+
+    return data
 
 
 def index(request):
@@ -125,7 +132,6 @@ def index(request):
             "home_assistant_token": get_setting_with_default("home_assistant_token"),
             "openhab_address": get_setting_with_default("openhab_address"),
             "openhab_token": get_setting_with_default("openhab_token"),
-            "is_home_assistant_addon": ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
         }}
 
     return render(request, 'index_htmx.html', data)
@@ -619,54 +625,6 @@ def save_settings(request):
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()
     return redirect('settings')
-
-
-@csrf_exempt
-def initial_setup_manager_config(request):
-    set_setting_value(name="manager_address",
-                      value=request.POST["manager_address"])
-    set_setting_value(name="manager_port", value=request.POST["manager_port"])
-    restart_mqtt_manager()
-    return HttpResponse('OK', 200)
-
-
-@csrf_exempt
-def initial_setup_mqtt_config(request):
-    set_setting_value(name="mqtt_server", value=request.POST["mqtt_server"])
-    set_setting_value(name="mqtt_port", value=request.POST["mqtt_port"])
-    set_setting_value(name="mqtt_username",
-                      value=request.POST["mqtt_username"])
-    set_setting_value(name="mqtt_password",
-                      value=request.POST["mqtt_password"])
-    restart_mqtt_manager()
-    return HttpResponse('OK', 200)
-
-
-@csrf_exempt
-def initial_setup_home_assistant_config(request):
-    if "home_assistant_address" in request.POST:
-        home_assistant_address = request.POST["home_assistant_address"]
-        if home_assistant_address.endswith("/"):
-            home_assistant_address = home_assistant_address[:-1]
-        set_setting_value(name="home_assistant_address",
-                          value=home_assistant_address)
-    if "home_assistant_token" in request.POST:
-        set_setting_value(name="home_assistant_token",
-                          value=request.POST["home_assistant_token"])
-    restart_mqtt_manager()
-    return HttpResponse('OK', 200)
-
-
-@csrf_exempt
-def initial_setup_openhab_config(request):
-    openhab_address = request.POST["openhab_address"]
-    if openhab_address.endswith("/"):
-        openhab_address = openhab_address[:-1]
-    set_setting_value(name="openhab_address", value=openhab_address)
-    set_setting_value(name="openhab_token",
-                      value=request.POST["openhab_token"])
-    restart_mqtt_manager()
-    return HttpResponse('OK', 200)
 
 
 @csrf_exempt
