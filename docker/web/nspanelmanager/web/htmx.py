@@ -798,6 +798,8 @@ def initial_setup_manager_settings(request):
             set_setting_value("manager_address", request.POST["manager_address"])
         if "manager_port" in request.POST:
             set_setting_value("manager_port", request.POST["manager_port"])
+        send_mqttmanager_reload_command()
+
         # Save settings succesfully, return the next view in the setup guide. MQTT:
         data = {
             "mqtt_server": get_setting_with_default("mqtt_server"),
@@ -825,6 +827,7 @@ def initial_setup_mqtt_settings(request):
             set_setting_value("mqtt_username", request.POST["mqtt_username"])
         if "mqtt_password" in request.POST:
             set_setting_value("mqtt_password", request.POST["mqtt_password"])
+        send_mqttmanager_reload_command()
 
         # Save settings succesfully, return the next view in the setup guide. Home Assistant:
         data = {
@@ -849,6 +852,7 @@ def initial_setup_home_assistant_settings(request):
             set_setting_value("home_assistant_address", request.POST["home_assistant_address"])
         if "home_assistant_token" in request.POST:
             set_setting_value("home_assistant_token", request.POST["home_assistant_token"])
+        send_mqttmanager_reload_command()
 
         # Save settings succesfully, return the next view in the setup guide. OpenHAB:
         data = {
@@ -871,6 +875,7 @@ def initial_setup_openhab_settings(request):
             set_setting_value("openhab_address", request.POST["openhab_address"])
         if "openhab_token" in request.POST:
             set_setting_value("openhab_token", request.POST["openhab_token"])
+        send_mqttmanager_reload_command()
 
         # Save settings succesfully, return the next view in the setup guide. Finished:
         return render(request, 'modals/initial_setup/finished.html')

@@ -31,18 +31,22 @@ def restart_mqtt_manager_process():
     global mqttmanager_process
     if mqttmanager_process != None:
         mqttmanager_process.poll()
-        if mqttmanager_process.returncode != 0:
-            if mqttmanager_process.returncode > 0:
-                logging.error(F"MQTTManager binary has exited unexpectedly. Return code: {mqttmanager_process.returncode}")
-            else:
-                logging.error(F"MQTTManager binary has exited unexpectedly. Killed by signal: {mqttmanager_process.returncode}")
-            logging.error(F"stderr: {mqttmanager_process.stderr}")
-            mqttmanager_process.kill()
+        if mqttmanager_process.returncode is not None:
+            if mqttmanager_process.returncode != 0:
+                if mqttmanager_process.returncode > 0:
+                    logging.error(F"MQTTManager binary has exited unexpectedly. Return code: {mqttmanager_process.returncode}")
+                else:
+                    logging.error(F"MQTTManager binary has exited unexpectedly. Killed by signal: {mqttmanager_process.returncode}")
+                logging.error(F"stderr: {mqttmanager_process.stderr}")
+                mqttmanager_process.kill()
 
     for proc in psutil.process_iter():
-        if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
-            logging.info("Killing running MQTTManager")
-            os.kill(proc.pid, signal.SIGKILL)
+        if proc.status() == psutil.STATUS_ZOMBIE:
+            print("Found zombie MQTTManager process. Will not try to kill it as it's already dead.")
+        else:
+            if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
+                logging.info("Killing running MQTTManager")
+                os.kill(proc.pid, signal.SIGKILL)
     start_mqtt_manager()
 
 
