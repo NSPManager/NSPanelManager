@@ -73,7 +73,7 @@ void MQTTManagerWeather::_pull_new_weather_data() {
   std::string pull_weather_url = fmt::format("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&wind_speed_unit={}&timezone={}&precipitation_unit={}&temperature_unit={}",
                                              MQTTManagerWeather::_location_latitude,
                                              MQTTManagerWeather::_location_longitude,
-                                             MQTTManagerWeather::_windspeed_unit,
+                                             MQTTManagerWeather::_wind_speed_format,
                                              MqttManagerConfig::timezone,
                                              MQTTManagerWeather::_precipitation_unit,
                                              MQTTManagerWeather::_temperature_unit);

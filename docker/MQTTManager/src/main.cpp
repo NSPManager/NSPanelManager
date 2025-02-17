@@ -161,6 +161,7 @@ int main(void) {
   // Load config from environment/manager
   MqttManagerConfig::load();
   EntityManager::init();
+  MQTTManagerWeather::start();
 
   IPCHandler::start();
 
@@ -175,12 +176,6 @@ int main(void) {
   websocket_server_thread = std::thread(WebsocketServer::start);
 
   SPDLOG_INFO("Config loaded. Starting components.");
-  // mqtt_manager_thread = std::thread(MQTT_Manager::connect);
-
-  // while (!MQTT_Manager::is_connected()) {
-  //   SPDLOG_INFO("Waiting for MQTT to connect before proceeding.");
-  //   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  // }
 
   time_and_date_thread = std::thread(publish_time_and_date);
   home_assistant_manager_thread = std::thread(HomeAssistantManager::connect);

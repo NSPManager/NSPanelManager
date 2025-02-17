@@ -71,7 +71,7 @@ private:
   static inline std::mutex _weater_data_mutex;
 
   static inline std::vector<weather_info> _forecast_weather_info;
-  static inline std::string _windspeed_unit;
+  static inline std::string _windspeed_unit; // Unit of wind speed to show
   static inline std::string _current_condition;
   static inline std::tm _current_weather_time;
   static inline int _next_sunrise_hour;
@@ -88,7 +88,7 @@ private:
   static inline std::string _outside_temperature_sensor_entity_id;
   static inline std::string _location_latitude;
   static inline std::string _location_longitude;
-  static inline std::string _wind_speed_format;
+  static inline std::string _wind_speed_format; // Unit of wind speed to request, not necessary the exact same as the unit to show. For example "mm" in request but perhaps "Mm" to show.
   static inline std::string _precipitation_unit;
   static inline uint32_t _update_interval_minutes;
   static inline std::string _clock_format;
