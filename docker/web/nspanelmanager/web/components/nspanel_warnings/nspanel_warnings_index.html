@@ -1,4 +1,4 @@
-<div class="transition-all ease-linear duration-75" hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_warnings' view='index' nspanel_id=id %}" id="nspanel_warnings_container-{{ id }}">
+<div class="" hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_warnings' view='index' nspanel_id=id %}" id="nspanel_warnings_container-{{ id }}">
     <!-- Warning indicator -->
     {% if warnings|length > 0 %}
     <div class="badge badge-warning badge-xs mt-2 me-2 ms-1 tooltip" onmouseover="show_popover(this);" onmouseleave="hide_popover(this);" data-popover-target="nspanel_warning_popover_{{ id }}"></div>
