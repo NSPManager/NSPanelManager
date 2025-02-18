@@ -168,15 +168,11 @@ def nspanel_accept_register_request(request, nspanel_id):
             nspanel.denied = False
             nspanel.accepted = True
             nspanel.save()
+            send_mqttmanager_reload_command()
 
-            response = send_ipc_request(F"nspanel/{nspanel_id}/accept_register_request", {})
-            if response["status"] == "ok":
-                response = HttpResponse("", status=200)
-                response["HX-Redirect"] = "/"
-                return response
-            else:
-                return JsonResponse({"status": "error"}, status=500)
-            return HttpResponse("", status=200)
+            response = HttpResponse("", status=200)
+            response["HX-Refresh"] = "true"
+            return response
         else:
             return JsonResponse({"status": "error"}, status=405)
     except Exception as ex:
@@ -191,13 +187,12 @@ def nspanel_deny_register_request(request, nspanel_id):
             nspanel = NSPanel.objects.get(id=nspanel_id)
             nspanel.denied = True
             nspanel.save()
-            response = send_ipc_request(F"nspanel/{nspanel_id}/deny_register_request", {})
-            if response["status"] == "ok":
-                response = HttpResponse("", status=200)
-                response["HX-Redirect"] = "/"
-                return response
-            else:
-                return HttpResponse("", status=500)
+
+            send_mqttmanager_reload_command()
+
+            response = HttpResponse("", status=200)
+            response["HX-Refresh"] = "true"
+            return response
         else:
             return JsonResponse({"status": "error"}, status=405)
     except Exception as ex:

@@ -30,6 +30,8 @@ Room::Room(uint32_t room_id) {
   this->reload_config();
   this->_send_status_updates = true;
   CommandManager::attach_callback(boost::bind(&Room::command_callback, this, _1));
+
+  this->_send_room_state_update();
 }
 
 Room::~Room() {
