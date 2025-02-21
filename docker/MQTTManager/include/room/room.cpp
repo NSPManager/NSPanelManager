@@ -84,7 +84,7 @@ void Room::reload_config() {
 
         // Sort the room entities pages by display order and then resend config.
         std::sort(this->_entity_pages.begin(), this->_entity_pages.end(), [](const std::shared_ptr<RoomEntitiesPage> &a, const std::shared_ptr<RoomEntitiesPage> &b) {
-          return a->get_display_order() > b->get_display_order();
+          return a->get_display_order() < b->get_display_order();
         });
 
         // List of RoomEntitiesPages has now been pruned of removed rooms, new rooms added and sorted. Reload configs and send new state updates.

@@ -202,10 +202,10 @@ void NSPanel::reload_config() {
       MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MqttManagerConfig::attach_config_loaded_listener(boost::bind(&NSPanel::send_config, this));
       this->register_to_home_assistant();
-      this->send_config();
     }
 
     SPDLOG_DEBUG("Loaded NSPanel {}::{}, type: {}.", this->_id, this->_name, this->_is_us_panel ? "US" : "EU");
+    this->send_config();
   } catch (std::system_error &ex) {
     SPDLOG_ERROR("Failed to get config for NSPanel {} from database.", this->_id);
   }
