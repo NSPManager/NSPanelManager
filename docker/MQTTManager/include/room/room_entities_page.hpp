@@ -30,6 +30,11 @@ public:
    */
   uint8_t get_type();
 
+  /*
+   * Get display order
+   */
+  uint16_t get_display_order();
+
   /**
    * Perform post-init on this page. This will among other things look up and bind slots on the page to entities.
    */

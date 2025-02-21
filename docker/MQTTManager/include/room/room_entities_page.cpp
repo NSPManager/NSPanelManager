@@ -27,19 +27,27 @@ RoomEntitiesPage::RoomEntitiesPage(uint32_t page_id, Room *room) {
   this->_room = room;
   this->reload_config();
   SPDLOG_DEBUG("Created RoomEntitiesPage with ID {}. Page will display {}", this->_id, this->_page_settings.is_scenes_page ? "scenes." : "entities.");
+
+  // As this is object initialization we need to send out an MQTT status topic so that data exists that represents this page
+  this->_send_mqtt_state_update();
 }
 
 void RoomEntitiesPage::reload_config() {
   try {
-    SPDLOG_DEBUG("Loading RoomEntitiesPage {}, trying to get settings from DB.", this->_id);
-    auto db_room = database_manager::database.get<database_manager::RoomEntitiesPage>(this->_id);
+    // Update the page settings from the database
+    {
+      SPDLOG_DEBUG("Loading RoomEntitiesPage {}, trying to get settings from DB.", this->_id);
+      auto db_room = database_manager::database.get<database_manager::RoomEntitiesPage>(this->_id);
 
-    std::lock_guard<std::mutex> mutex_guard(this->_page_settings_mutex);
-    this->_page_settings = db_room;
+      std::lock_guard<std::mutex> mutex_guard(this->_page_settings_mutex);
+      this->_page_settings = db_room;
 
-    this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/state", MqttManagerConfig::get_settings().manager_address, this->_id);
-    this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/entity_pages/{}/state", MqttManagerConfig::get_settings().manager_address, this->_room->get_id(), this->_id);
+      this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/state", MqttManagerConfig::get_settings().manager_address, this->_id);
+      this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/entity_pages/{}/state", MqttManagerConfig::get_settings().manager_address, this->_room->get_id(), this->_id);
+    }
+
     SPDLOG_DEBUG("RoomEntitiesPage {} loaded successfully.", this->_id);
+    this->_send_mqtt_state_update();
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
     SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
@@ -53,6 +61,11 @@ uint32_t RoomEntitiesPage::get_id() {
 uint8_t RoomEntitiesPage::get_type() {
   std::lock_guard<std::mutex> mutex_guard(this->_page_settings_mutex);
   return this->_page_settings.page_type;
+}
+
+uint16_t RoomEntitiesPage::get_display_order() {
+  std::lock_guard<std::mutex> mutex_guard(this->_page_settings_mutex);
+  return this->_page_settings.display_order;
 }
 
 void RoomEntitiesPage::post_init() {
@@ -94,7 +107,7 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
   NSPanelRoomEntitiesPage proto_state;
   proto_state.set_id(this->_id);
   proto_state.set_page_type(this->_page_settings.page_type);
-  proto_state.set_header_text(fmt::format("{} {}/{}", this->_room->get_name(), this->_page_settings.display_order, this->_room->get_number_of_entity_pages()));
+  proto_state.set_header_text(fmt::format("{} {}/{}", this->_room->get_name(), this->_page_settings.display_order + 1, this->_room->get_number_of_entity_pages()));
 
   std::lock_guard<std::mutex> lock_guard(this->_entities_mutex);
   for (int i = 0; i < this->_page_settings.page_type; i++) {

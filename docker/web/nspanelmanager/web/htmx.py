@@ -575,7 +575,6 @@ def partial_move_entity(request):
 
 @csrf_exempt
 def partial_move_entities_pages(request):
-    print(request.POST)
     if "htmx_form_save_entities_pages_order_field" in request.POST:
         json_data = json.loads(request.POST["htmx_form_save_entities_pages_order_field"])
         if "pages" in json_data:

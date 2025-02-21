@@ -46,13 +46,52 @@ void Room::reload_config() {
       this->_name = db_room.friendly_name;
       this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/state", MqttManagerConfig::get_settings().manager_address, this->_id);
 
-      std::lock_guard<std::mutex> mutex_guard(this->_entities_pages_mutex);
-      SPDLOG_DEBUG("Loaded config for room {}::{}, loading room entity pages.", this->_id, this->_name);
-      auto room_entities_pages = database_manager::database.get_all<database_manager::RoomEntitiesPage>(sqlite_orm::where(sqlite_orm::c(&database_manager::RoomEntitiesPage::room_id) == this->_id));
-      for (auto &entity_page : room_entities_pages) {
-        this->_entity_pages.push_back(std::shared_ptr<RoomEntitiesPage>(new RoomEntitiesPage(entity_page.id, this)));
+      {
+        std::lock_guard<std::mutex> mutex_guard(this->_entities_pages_mutex);
+        SPDLOG_DEBUG("Loaded config for room {}::{}, loading room entity pages.", this->_id, this->_name);
+        auto room_entities_pages = database_manager::database.get_all<database_manager::RoomEntitiesPage>(sqlite_orm::where(sqlite_orm::c(&database_manager::RoomEntitiesPage::room_id) == this->_id), sqlite_orm::order_by(&database_manager::RoomEntitiesPage::display_order).asc().collate_nocase());
+        for (auto &entity_page : room_entities_pages) {
+          bool found = false;
+          for (auto &existing_entity_page : this->_entity_pages) {
+            if (existing_entity_page->get_id() == entity_page.id) {
+              found = true;
+              break;
+            }
+          }
+
+          if (!found) {
+            this->_entity_pages.push_back(std::shared_ptr<RoomEntitiesPage>(new RoomEntitiesPage(entity_page.id, this)));
+            SPDLOG_DEBUG("Created {} RoomEntitiesPages for room {}::{}.", this->_entity_pages.size(), this->_id, this->_name);
+          }
+        }
+
+        // Look for existing but removed RoomEntitiesPages and remove them from the list
+        for (auto it = this->_entity_pages.begin(); it != this->_entity_pages.end();) {
+          bool found = false;
+          for (auto &entity_page : room_entities_pages) {
+            if ((*it)->get_id() == entity_page.id) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            SPDLOG_DEBUG("Found RoomEntitiesPage with ID {} in existing pages but not in the database. Will remove it.", (*it)->get_id());
+            it = this->_entity_pages.erase(it);
+          } else {
+            ++it;
+          }
+        }
+
+        // Sort the room entities pages by display order and then resend config.
+        std::sort(this->_entity_pages.begin(), this->_entity_pages.end(), [](const std::shared_ptr<RoomEntitiesPage> &a, const std::shared_ptr<RoomEntitiesPage> &b) {
+          return a->get_display_order() > b->get_display_order();
+        });
+
+        // List of RoomEntitiesPages has now been pruned of removed rooms, new rooms added and sorted. Reload configs and send new state updates.
+        for (auto &entity_page : this->_entity_pages) {
+          entity_page->reload_config();
+        }
       }
-      SPDLOG_DEBUG("Created {} RoomEntitiesPages for room {}::{}.", this->_entity_pages.size(), this->_id, this->_name);
 
       SPDLOG_TRACE("Room {}::{} initialized with status topic '{}'.", this->_id, this->_name, this->_mqtt_state_topic);
     } catch (std::system_error &ex) {
