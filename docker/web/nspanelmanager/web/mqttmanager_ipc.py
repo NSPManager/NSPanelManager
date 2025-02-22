@@ -30,4 +30,4 @@ def send_ipc_request(topic: str, data: dict) -> dict:
     except Exception as ex:
         logging.error("Received exception while trying to communicate with MQTTManager. Will return Error dict: {'result': 'error'}. Exception:")
         logging.exception(ex)
-        return {"result": "error"}
+        return {"status": "error"}
