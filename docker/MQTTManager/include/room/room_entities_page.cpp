@@ -32,6 +32,11 @@ RoomEntitiesPage::RoomEntitiesPage(uint32_t page_id, Room *room) {
   this->_send_mqtt_state_update();
 }
 
+RoomEntitiesPage::~RoomEntitiesPage() {
+  MQTT_Manager::clear_retain(this->_mqtt_state_topic); // Clear old state topic.
+  SPDLOG_DEBUG("Destroyed RoomEntitiesPage with ID {}.", this->_id);
+}
+
 void RoomEntitiesPage::reload_config() {
   try {
     // Update the page settings from the database
@@ -42,7 +47,6 @@ void RoomEntitiesPage::reload_config() {
       std::lock_guard<std::mutex> mutex_guard(this->_page_settings_mutex);
       this->_page_settings = db_room;
 
-      this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/state", MqttManagerConfig::get_settings().manager_address, this->_id);
       this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/entity_pages/{}/state", MqttManagerConfig::get_settings().manager_address, this->_room->get_id(), this->_id);
     }
 
@@ -86,7 +90,7 @@ void RoomEntitiesPage::post_init() {
 
 std::vector<std::shared_ptr<MqttManagerEntity>> RoomEntitiesPage::get_entities() {
   std::vector<std::shared_ptr<MqttManagerEntity>> entities;
-  // The _entities vector is built on index = page slot, that means that some
+  // The _entities vector is built on index = page slot logic, that means that some
   // indicies are nullptr if no entity is assigned to that slot.
   // Filter out nullptrs from list of entities on this page:
   std::copy_if(this->_entities.begin(), this->_entities.end(), std::back_inserter(entities), [](std::shared_ptr<MqttManagerEntity> entity) {

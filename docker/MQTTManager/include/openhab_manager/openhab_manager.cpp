@@ -25,6 +25,7 @@ void OpenhabManager::connect() {
     OpenhabManager::_websocket = new ix::WebSocket();
   }
 
+  SPDLOG_DEBUG("MUTEX!");
   std::lock_guard<std::mutex> lock_guard(OpenhabManager::_setting_values_mutex);
   std::string openhab_websocket_url = OpenhabManager::_openhab_address;
   if (openhab_websocket_url.empty()) {
@@ -48,13 +49,15 @@ void OpenhabManager::connect() {
   SPDLOG_DEBUG("Appending Openhab access token to url.");
   openhab_websocket_url.append("?accessToken=");
   openhab_websocket_url.append(OpenhabManager::_openhab_token);
+
   OpenhabManager::_websocket->setUrl(openhab_websocket_url);
   OpenhabManager::_websocket->setOnMessageCallback(&OpenhabManager::_websocket_message_callback);
   OpenhabManager::_websocket->setPingInterval(10);
   OpenhabManager::_websocket->start();
 
+  OpenhabManager::_send_keepalive_messages = true; // Keep thread alive.
   OpenhabManager::_keepalive_thread = std::thread(OpenhabManager::_send_keepalive);
-  OpenhabManager::_keepalive_thread.join();
+  OpenhabManager::_keepalive_thread.detach();
 
   // Set openhab event filter
   nlohmann::json filter;
@@ -62,11 +65,14 @@ void OpenhabManager::connect() {
   filter["topic"] = "openhab/websocket/filter/type";
   filter["payload"] = "[\"ItemStateEvent\", \"ItemStateChangedEvent\", \"ItemStateUpdatedEvent\"]";
   OpenhabManager::send_json(filter);
+
+  SPDLOG_DEBUG("OpenHAB connect finished.");
 }
 
 void OpenhabManager::reload_config() {
   bool reconnect = false;
   {
+    SPDLOG_DEBUG("MUTEX!");
     std::lock_guard<std::mutex> lock_guard(OpenhabManager::_setting_values_mutex);
     std::string address = MqttManagerConfig::get_setting_with_default("openhab_address", "");
     std::string token = MqttManagerConfig::get_setting_with_default("openhab_token", "");
@@ -168,14 +174,18 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
     return "";
   }
 
-  std::lock_guard<std::mutex> lock_guard(OpenhabManager::_setting_values_mutex);
-  std::string response_data;
-  std::string request_url = OpenhabManager::_openhab_address;
-  request_url.append("/rest/items/");
-  request_url.append(item);
-
+  std::string request_url;
   std::string bearer_token = "Authorization: Bearer ";
-  bearer_token.append(OpenhabManager::_openhab_token);
+  std::string response_data;
+  {
+    SPDLOG_DEBUG("MUTEX!");
+    std::lock_guard<std::mutex> lock_guard(OpenhabManager::_setting_values_mutex);
+    request_url = OpenhabManager::_openhab_address;
+    request_url.append("/rest/items/");
+    request_url.append(item);
+
+    bearer_token.append(OpenhabManager::_openhab_token);
+  }
 
   struct curl_slist *headers = NULL;
   headers = curl_slist_append(headers, bearer_token.c_str());
@@ -198,7 +208,7 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5); // Wait max 5 seconds for an answer
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 2); // Wait max 2 seconds for an answer
   curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 10000000);
 
   /* Perform the request, res will get the return code */
@@ -216,20 +226,20 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
   /* always cleanup */
   curl_easy_cleanup(curl);
   curl_slist_free_all(headers);
+  SPDLOG_DEBUG("Got data for OpenHAB item {}.", item);
   return response_data;
 }
 
 void OpenhabManager::send_json(nlohmann::json &data) {
   data["source"] = "NSPanelManager::MqttManager";
   std::string buffer = data.dump();
-  SPDLOG_TRACE("Sending data: {}", buffer);
   OpenhabManager::_send_string(buffer);
 }
 
 void OpenhabManager::_send_string(std::string &data) {
   if (OpenhabManager::_websocket != nullptr) {
     std::lock_guard<std::mutex> mtex_lock(OpenhabManager::_mutex_websocket_write_access);
-    // spdlog::debug("[OH WS] Sending data: {}", data);
+    SPDLOG_TRACE("[OH WS] Sending data: {}", data);
     OpenhabManager::_websocket->send(data);
   }
 }
@@ -265,4 +275,6 @@ void OpenhabManager::_send_keepalive() {
       OpenhabManager::_websocket->send(keepalive_message.dump());
     }
   }
+
+  SPDLOG_WARN("OpenHAB keepalive thread exited!");
 }

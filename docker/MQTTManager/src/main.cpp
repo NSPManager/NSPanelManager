@@ -183,6 +183,7 @@ int main(void) {
   SPDLOG_INFO("Home Assistant and/or OpenHAB initialized. Will load entities.");
   EntityManager::init();
 
+  SPDLOG_INFO("Entities loaded, start listening for commands.");
   CommandManager::init();
 
   // Wait for threads to exit

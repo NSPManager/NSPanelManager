@@ -14,6 +14,7 @@ public:
    * Create an instance that will pull it's own config from Djano on creation
    */
   RoomEntitiesPage(uint32_t page_id, Room *room);
+  ~RoomEntitiesPage();
 
   /*
    * Redownload config from manager and reload this page.

@@ -17,6 +17,7 @@ PROTOBUF_C__BEGIN_DECLS
 
 typedef struct NSPanelScene NSPanelScene;
 typedef struct NSPanelConfig NSPanelConfig;
+typedef struct NSPanelConfig__RoomInfo NSPanelConfig__RoomInfo;
 typedef struct NSPanelWarning NSPanelWarning;
 typedef struct NSPanelStatusReport NSPanelStatusReport;
 typedef struct NSPanelLightStatus NSPanelLightStatus;
@@ -29,10 +30,6 @@ typedef struct NSPanelMQTTManagerCommand NSPanelMQTTManagerCommand;
 typedef struct NSPanelMQTTManagerCommand__FirstPageTurnLightOn NSPanelMQTTManagerCommand__FirstPageTurnLightOn;
 typedef struct NSPanelMQTTManagerCommand__FirstPageTurnLightOff NSPanelMQTTManagerCommand__FirstPageTurnLightOff;
 typedef struct NSPanelMQTTManagerCommand__LightCommand NSPanelMQTTManagerCommand__LightCommand;
-typedef struct NSPanelMQTTManagerCommand__NextRoom NSPanelMQTTManagerCommand__NextRoom;
-typedef struct NSPanelMQTTManagerCommand__PreviousRoom NSPanelMQTTManagerCommand__PreviousRoom;
-typedef struct NSPanelMQTTManagerCommand__NextEntitiesPage NSPanelMQTTManagerCommand__NextEntitiesPage;
-typedef struct NSPanelMQTTManagerCommand__PreviousEntitiesPage NSPanelMQTTManagerCommand__PreviousEntitiesPage;
 typedef struct NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage;
 
 
@@ -87,6 +84,18 @@ struct  NSPanelScene
     , 0, 0, (char *)protobuf_c_empty_string }
 
 
+struct  NSPanelConfig__RoomInfo
+{
+  ProtobufCMessage base;
+  int32_t room_id;
+  size_t n_entity_page_ids;
+  int32_t *entity_page_ids;
+};
+#define NSPANEL_CONFIG__ROOM_INFO__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__room_info__descriptor) \
+    , 0, 0,NULL }
+
+
 struct  NSPanelConfig
 {
   ProtobufCMessage base;
@@ -107,8 +116,8 @@ struct  NSPanelConfig
   /*
    * Allowed rooms
    */
-  size_t n_room_ids;
-  int32_t *room_ids;
+  size_t n_room_infos;
+  NSPanelConfig__RoomInfo **room_infos;
   protobuf_c_boolean reverse_relays;
   protobuf_c_boolean relay1_default_mode;
   protobuf_c_boolean relay2_default_mode;
@@ -126,10 +135,14 @@ struct  NSPanelConfig
   protobuf_c_boolean optimistic_mode;
   int32_t raise_light_level_to_100_above;
   int32_t nspanel_id;
+  protobuf_c_boolean relay1_is_in_relay_group;
+  int32_t relay1_relay_group;
+  protobuf_c_boolean relay2_is_in_relay_group;
+  int32_t relay2_relay_group;
 };
 #define NSPANEL_CONFIG__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
-    , (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0,NULL, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0,NULL, 0, 0, 0 }
+    , (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0,NULL, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0,NULL, 0, 0, 0, 0, 0, 0, 0 }
 
 
 struct  NSPanelWarning
@@ -234,10 +247,12 @@ struct  NSPanelRoomStatus
   int32_t num_table_lights;
   int32_t num_ceiling_lights_on;
   int32_t num_table_lights_on;
+  size_t n_entity_page_ids;
+  int32_t *entity_page_ids;
 };
 #define NSPANEL_ROOM_STATUS__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_room_status__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,NULL }
 
 
 struct  NSPanelWeatherUpdate__ForecastItem
@@ -322,46 +337,6 @@ struct  NSPanelMQTTManagerCommand__LightCommand
     , 0,NULL, 0, 0, 0, 0, 0, 0, 0, 0 }
 
 
-struct  NSPanelMQTTManagerCommand__NextRoom
-{
-  ProtobufCMessage base;
-  int32_t nspanel_id;
-};
-#define NSPANEL_MQTTMANAGER_COMMAND__NEXT_ROOM__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__next_room__descriptor) \
-    , 0 }
-
-
-struct  NSPanelMQTTManagerCommand__PreviousRoom
-{
-  ProtobufCMessage base;
-  int32_t nspanel_id;
-};
-#define NSPANEL_MQTTMANAGER_COMMAND__PREVIOUS_ROOM__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__previous_room__descriptor) \
-    , 0 }
-
-
-struct  NSPanelMQTTManagerCommand__NextEntitiesPage
-{
-  ProtobufCMessage base;
-  int32_t nspanel_id;
-};
-#define NSPANEL_MQTTMANAGER_COMMAND__NEXT_ENTITIES_PAGE__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__next_entities_page__descriptor) \
-    , 0 }
-
-
-struct  NSPanelMQTTManagerCommand__PreviousEntitiesPage
-{
-  ProtobufCMessage base;
-  int32_t nspanel_id;
-};
-#define NSPANEL_MQTTMANAGER_COMMAND__PREVIOUS_ENTITIES_PAGE__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__previous_entities_page__descriptor) \
-    , 0 }
-
-
 struct  NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage
 {
   ProtobufCMessage base;
@@ -378,10 +353,7 @@ typedef enum {
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON = 1,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_OFF = 2,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_LIGHT_COMMAND = 3,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_NEXT_ROOM = 4,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_PREVIOUS_ROOM = 5,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_NEXT_ENTITIES_PAGE = 6,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_PREVIOUS_ENTITIES_PAGE = 7
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_TOGGLE_ENTITY_FROM_ENTITIES_PAGE = 4
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__CASE)
 } NSPanelMQTTManagerCommand__CommandDataCase;
 
@@ -396,10 +368,7 @@ struct  NSPanelMQTTManagerCommand
     NSPanelMQTTManagerCommand__FirstPageTurnLightOn *first_page_turn_on;
     NSPanelMQTTManagerCommand__FirstPageTurnLightOff *first_page_turn_off;
     NSPanelMQTTManagerCommand__LightCommand *light_command;
-    NSPanelMQTTManagerCommand__NextRoom *next_room;
-    NSPanelMQTTManagerCommand__PreviousRoom *previous_room;
-    NSPanelMQTTManagerCommand__NextEntitiesPage *next_entities_page;
-    NSPanelMQTTManagerCommand__PreviousEntitiesPage *previous_entities_page;
+    NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage *toggle_entity_from_entities_page;
   };
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__INIT \
@@ -426,6 +395,9 @@ NSPanelScene *
 void   nspanel_scene__free_unpacked
                      (NSPanelScene *message,
                       ProtobufCAllocator *allocator);
+/* NSPanelConfig__RoomInfo methods */
+void   nspanel_config__room_info__init
+                     (NSPanelConfig__RoomInfo         *message);
 /* NSPanelConfig methods */
 void   nspanel_config__init
                      (NSPanelConfig         *message);
@@ -574,18 +546,6 @@ void   nspanel_mqttmanager_command__first_page_turn_light_off__init
 /* NSPanelMQTTManagerCommand__LightCommand methods */
 void   nspanel_mqttmanager_command__light_command__init
                      (NSPanelMQTTManagerCommand__LightCommand         *message);
-/* NSPanelMQTTManagerCommand__NextRoom methods */
-void   nspanel_mqttmanager_command__next_room__init
-                     (NSPanelMQTTManagerCommand__NextRoom         *message);
-/* NSPanelMQTTManagerCommand__PreviousRoom methods */
-void   nspanel_mqttmanager_command__previous_room__init
-                     (NSPanelMQTTManagerCommand__PreviousRoom         *message);
-/* NSPanelMQTTManagerCommand__NextEntitiesPage methods */
-void   nspanel_mqttmanager_command__next_entities_page__init
-                     (NSPanelMQTTManagerCommand__NextEntitiesPage         *message);
-/* NSPanelMQTTManagerCommand__PreviousEntitiesPage methods */
-void   nspanel_mqttmanager_command__previous_entities_page__init
-                     (NSPanelMQTTManagerCommand__PreviousEntitiesPage         *message);
 /* NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage methods */
 void   nspanel_mqttmanager_command__toggle_entity_from_entities_page__init
                      (NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage         *message);
@@ -612,6 +572,9 @@ void   nspanel_mqttmanager_command__free_unpacked
 
 typedef void (*NSPanelScene_Closure)
                  (const NSPanelScene *message,
+                  void *closure_data);
+typedef void (*NSPanelConfig__RoomInfo_Closure)
+                 (const NSPanelConfig__RoomInfo *message,
                   void *closure_data);
 typedef void (*NSPanelConfig_Closure)
                  (const NSPanelConfig *message,
@@ -649,18 +612,6 @@ typedef void (*NSPanelMQTTManagerCommand__FirstPageTurnLightOff_Closure)
 typedef void (*NSPanelMQTTManagerCommand__LightCommand_Closure)
                  (const NSPanelMQTTManagerCommand__LightCommand *message,
                   void *closure_data);
-typedef void (*NSPanelMQTTManagerCommand__NextRoom_Closure)
-                 (const NSPanelMQTTManagerCommand__NextRoom *message,
-                  void *closure_data);
-typedef void (*NSPanelMQTTManagerCommand__PreviousRoom_Closure)
-                 (const NSPanelMQTTManagerCommand__PreviousRoom *message,
-                  void *closure_data);
-typedef void (*NSPanelMQTTManagerCommand__NextEntitiesPage_Closure)
-                 (const NSPanelMQTTManagerCommand__NextEntitiesPage *message,
-                  void *closure_data);
-typedef void (*NSPanelMQTTManagerCommand__PreviousEntitiesPage_Closure)
-                 (const NSPanelMQTTManagerCommand__PreviousEntitiesPage *message,
-                  void *closure_data);
 typedef void (*NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage_Closure)
                  (const NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage *message,
                   void *closure_data);
@@ -676,6 +627,7 @@ typedef void (*NSPanelMQTTManagerCommand_Closure)
 extern const ProtobufCEnumDescriptor    nspanel_warning_level__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_scene__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_config__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_config__room_info__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_screensaver_mode__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_warning__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_status_report__descriptor;
@@ -690,10 +642,6 @@ extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_turn_light_on__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_turn_light_off__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__light_command__descriptor;
-extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__next_room__descriptor;
-extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__previous_room__descriptor;
-extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__next_entities_page__descriptor;
-extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__previous_entities_page__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__toggle_entity_from_entities_page__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_mqttmanager_command__affect_lights_options__descriptor;
 

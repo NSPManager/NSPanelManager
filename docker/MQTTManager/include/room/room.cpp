@@ -11,7 +11,6 @@
 #include <boost/bind.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/stacktrace.hpp>
-#include <chrono>
 #include <cstdint>
 #include <database_manager/database_manager.hpp>
 #include <memory>
@@ -36,6 +35,8 @@ Room::Room(uint32_t room_id) {
 
 Room::~Room() {
   CommandManager::detach_callback(boost::bind(&Room::command_callback, this, _1));
+  MQTT_Manager::clear_retain(this->_mqtt_state_topic); // Clear old state topic.
+  SPDLOG_INFO("Room {}::{} destroyed.", this->_id, this->_name);
 }
 
 void Room::reload_config() {
@@ -66,21 +67,12 @@ void Room::reload_config() {
         }
 
         // Look for existing but removed RoomEntitiesPages and remove them from the list
-        for (auto it = this->_entity_pages.begin(); it != this->_entity_pages.end();) {
-          bool found = false;
-          for (auto &entity_page : room_entities_pages) {
-            if ((*it)->get_id() == entity_page.id) {
-              found = true;
-              break;
-            }
-          }
-          if (!found) {
-            SPDLOG_DEBUG("Found RoomEntitiesPage with ID {} in existing pages but not in the database. Will remove it.", (*it)->get_id());
-            it = this->_entity_pages.erase(it);
-          } else {
-            ++it;
-          }
-        }
+        this->_entity_pages.erase(std::remove_if(this->_entity_pages.begin(), this->_entity_pages.end(), [&room_entities_pages](auto entity_page) {
+                                    return std::find_if(room_entities_pages.begin(), room_entities_pages.end(), [&entity_page](auto room_entity_page) {
+                                             return room_entity_page.id == entity_page->get_id();
+                                           }) == room_entities_pages.end();
+                                  }),
+                                  this->_entity_pages.end());
 
         // Sort the room entities pages by display order and then resend config.
         std::sort(this->_entity_pages.begin(), this->_entity_pages.end(), [](const std::shared_ptr<RoomEntitiesPage> &a, const std::shared_ptr<RoomEntitiesPage> &b) {

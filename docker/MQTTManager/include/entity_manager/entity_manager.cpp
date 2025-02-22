@@ -19,6 +19,7 @@
 #include <boost/stacktrace.hpp>
 #include <boost/stacktrace/frame.hpp>
 #include <boost/stacktrace/stacktrace_fwd.hpp>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -83,20 +84,11 @@ void EntityManager::load_rooms() {
   auto room_ids = database_manager::database.select(&database_manager::Room::id, sqlite_orm::from<database_manager::Room>());
   SPDLOG_INFO("Loading {} rooms.", room_ids.size());
 
-  // Check if any existing room has been removed.
-  {
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
-    for (auto it = EntityManager::_rooms.begin(); it != EntityManager::_rooms.end(); it++) {
-      auto room_id_slot = std::find_if(room_ids.begin(), room_ids.end(), [&it](auto id) {
-        return (*it)->get_id() == id;
-      });
-      if (room_id_slot == room_ids.end()) {
-        // Room was not found in list of IDs in the DB, remove the loaded room.
-        SPDLOG_INFO("Room {}::{} was found in config but not in database. Removing room.", (*it)->get_id(), (*it)->get_name());
-        EntityManager::_rooms.erase(it);
-      }
-    }
-  }
+  // Remove room if it does no longer exist
+  EntityManager::_rooms.erase(std::remove_if(EntityManager::_rooms.begin(), EntityManager::_rooms.end(), [&room_ids](auto room) {
+                                return std::find_if(room_ids.begin(), room_ids.end(), [&room](auto id) { return id == room->get_id(); }) == room_ids.end();
+                              }),
+                              EntityManager::_rooms.end());
 
   // Cause existing room to reload config or add a new room if it does not exist.
   for (auto &room_id : room_ids) {
@@ -119,19 +111,10 @@ void EntityManager::load_nspanels() {
   SPDLOG_INFO("Loading {} NSPanels.", nspanel_ids.size());
 
   // Check if any existing NSPanel has been removed.
-  {
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
-    for (auto it = EntityManager::_nspanels.begin(); it != EntityManager::_nspanels.end(); it++) {
-      auto room_id_slot = std::find_if(nspanel_ids.begin(), nspanel_ids.end(), [&it](auto id) {
-        return (*it)->get_id() == id;
-      });
-      if (room_id_slot == nspanel_ids.end()) {
-        // Room was not found in list of IDs in the DB, remove the loaded room.
-        SPDLOG_INFO("NSPanel {}::{} was found in config but not in database. Removing panel.", (*it)->get_id(), (*it)->get_name());
-        EntityManager::_nspanels.erase(it);
-      }
-    }
-  }
+  EntityManager::_nspanels.erase(std::remove_if(EntityManager::_nspanels.begin(), EntityManager::_nspanels.end(), [&nspanel_ids](auto nspanel) {
+                                   return std::find_if(nspanel_ids.begin(), nspanel_ids.end(), [&nspanel](auto id) { return id == nspanel->get_id(); }) == nspanel_ids.end();
+                                 }),
+                                 EntityManager::_nspanels.end());
 
   // Cause existing NSPanel to reload config or add a new NSPanel if it does not exist.
   for (auto &nspanel_id : nspanel_ids) {
@@ -152,19 +135,10 @@ void EntityManager::load_lights() {
   SPDLOG_INFO("Loading {} lights.", light_ids.size());
 
   // Check if any existing light has been removed.
-  {
-    auto existing_lights = EntityManager::get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
-    for (auto it = existing_lights.begin(); it != existing_lights.end(); it++) {
-      auto room_id_slot = std::find_if(light_ids.begin(), light_ids.end(), [&it](auto id) {
-        return (*it)->get_id() == id;
-      });
-      if (room_id_slot == light_ids.end()) {
-        // Room was not found in list of IDs in the DB, remove the loaded room.
-        SPDLOG_INFO("Light {}::{} was found in config but not in database. Removing light.", (*it)->get_id(), (*it)->get_name());
-        EntityManager::remove_entity((*it));
-      }
-    }
-  }
+  EntityManager::_entities.erase(std::remove_if(EntityManager::_entities.begin(), EntityManager::_entities.end(), [&light_ids](auto entity) {
+                                   return entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT && std::find_if(light_ids.begin(), light_ids.end(), [&entity](auto id) { return id == entity->get_id(); }) == light_ids.end();
+                                 }),
+                                 EntityManager::_entities.end());
 
   // Cause existing lights to reload config or add a new light if it does not exist.
   for (auto &light_id : light_ids) {
@@ -200,19 +174,10 @@ void EntityManager::load_scenes() {
   SPDLOG_INFO("Loading {} scenes.", scene_ids.size());
 
   // Check if any existing scene has been removed.
-  {
-    auto existing_scenes = EntityManager::get_all_entities_by_type<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE);
-    for (auto it = existing_scenes.begin(); it != existing_scenes.end(); it++) {
-      auto scene_id_slot = std::find_if(scene_ids.begin(), scene_ids.end(), [&it](auto id) {
-        return (*it)->get_id() == id;
-      });
-      if (scene_id_slot == scene_ids.end()) {
-        // Room was not found in list of IDs in the DB, remove the loaded room.
-        SPDLOG_INFO("Scene {}::{} was found in config but not in database. Removing scene.", (*it)->get_id(), (*it)->get_name());
-        EntityManager::remove_entity((*it));
-      }
-    }
-  }
+  EntityManager::_entities.erase(std::remove_if(EntityManager::_entities.begin(), EntityManager::_entities.end(), [&scene_ids](auto entity) {
+                                   return entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::SCENE && std::find_if(scene_ids.begin(), scene_ids.end(), [&entity](auto id) { return entity->get_id() == id; }) == scene_ids.end();
+                                 }),
+                                 EntityManager::_entities.end());
 
   // Cause existing NSPanel to reload config or add a new NSPanel if it does not exist.
   for (auto &scene_id : scene_ids) {
