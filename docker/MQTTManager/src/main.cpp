@@ -160,7 +160,6 @@ int main(void) {
 
   // Load config from environment/manager
   MqttManagerConfig::load();
-  EntityManager::init();
   MQTTManagerWeather::start();
 
   IPCHandler::start();
@@ -180,6 +179,9 @@ int main(void) {
   time_and_date_thread = std::thread(publish_time_and_date);
   home_assistant_manager_thread = std::thread(HomeAssistantManager::connect);
   openhab_manager_thread = std::thread(OpenhabManager::connect);
+
+  SPDLOG_INFO("Home Assistant and/or OpenHAB initialized. Will load entities.");
+  EntityManager::init();
 
   CommandManager::init();
 

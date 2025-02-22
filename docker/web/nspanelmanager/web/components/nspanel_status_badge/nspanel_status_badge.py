@@ -10,13 +10,22 @@ class NSPanelStatusBadge(component.Component):
 
     def get_context_data(self, id):
         panel = NSPanel.objects.get(id=id)
+        print(F"Sending status request for panel {id}")
         panel_status = send_ipc_request(F"nspanel/{id}/status", {"command": "get"})
-        return {
-            "id": id,
-            "friendly_name": panel.friendly_name,
-            "state": panel_status["state"],
-            "update_progress": panel_status["update_progress"],
-        }
+        if "status" not in panel_status or panel_status["status"] == "error":
+            return {
+                "id": id,
+                "friendly_name": panel.friendly_name,
+                "state": "error",
+                "update_progress": 0,
+            }
+        else:
+            return {
+                "id": id,
+                "friendly_name": panel.friendly_name,
+                "state": panel_status["state"],
+                "update_progress": panel_status["update_progress"],
+            }
 
     def get_template_name(self, context: Context):
             if self.template_view:
