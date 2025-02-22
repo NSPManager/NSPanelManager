@@ -22,6 +22,7 @@ def send_ipc_request(topic: str, data: dict) -> dict:
 
     try:
         json_data = json.dumps(data).encode()
+        # print(F"Sending IPC request data: {json_data}")
         socket.send(json_data)
         message = socket.recv().decode()
         logging.debug(F"Received IPC data: {message}")

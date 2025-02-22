@@ -10,9 +10,8 @@ class NSPanelStatusBadge(component.Component):
 
     def get_context_data(self, id):
         panel = NSPanel.objects.get(id=id)
-        print(F"Sending status request for panel {id}")
         panel_status = send_ipc_request(F"nspanel/{id}/status", {"command": "get"})
-        if "status" not in panel_status or panel_status["status"] == "error":
+        if "status" in panel_status and panel_status["status"] == "error":
             return {
                 "id": id,
                 "friendly_name": panel.friendly_name,
