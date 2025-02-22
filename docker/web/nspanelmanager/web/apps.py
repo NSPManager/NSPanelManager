@@ -41,12 +41,16 @@ def restart_mqtt_manager_process():
                 mqttmanager_process.kill()
 
     for proc in psutil.process_iter():
-        if proc.status() == psutil.STATUS_ZOMBIE:
-            print("Found zombie MQTTManager process. Will not try to kill it as it's already dead.")
-        else:
-            if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
-                logging.info("Killing running MQTTManager")
-                os.kill(proc.pid, signal.SIGKILL)
+        try:
+            if proc.status() == psutil.STATUS_ZOMBIE:
+                print("Found zombie MQTTManager process. Will not try to kill it as it's already dead.")
+            else:
+                if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
+                    logging.info("Killing running MQTTManager")
+                    os.kill(proc.pid, signal.SIGKILL)
+        except:
+            print("Warning! Failed to check state or kill existing MQTTManager process. Will continue anyway.")
+            continue
     start_mqtt_manager()
 
 
