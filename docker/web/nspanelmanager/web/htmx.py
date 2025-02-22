@@ -666,7 +666,7 @@ def create_entities_page_in_room(request, room_id, page_type, is_scenes_page):
     room = Room.objects.get(id=room_id)
     entity_page = RoomEntitiesPage()
     entity_page.room = room
-    entity_page.display_order = RoomEntitiesPage.objects.filter(room=room).count() + 1
+    entity_page.display_order = RoomEntitiesPage.objects.filter(room=room).count()
     entity_page.is_scenes_page = is_scenes_page == "True"
     if page_type == 4:
         entity_page.page_type = 4

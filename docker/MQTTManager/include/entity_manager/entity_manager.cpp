@@ -64,8 +64,8 @@ void EntityManager::load_entities() {
 
   EntityManager::load_scenes();
   EntityManager::load_lights();
-  EntityManager::load_nspanels();
   EntityManager::load_rooms(); // Rooms are loaded last as to make all room components be able to find entities of other types.
+  EntityManager::load_nspanels();
 
   SPDLOG_INFO("Total loaded NSPanels: {}", EntityManager::_nspanels.size());
   SPDLOG_INFO("Total loaded Rooms: {}", EntityManager::_rooms.size());
@@ -118,9 +118,9 @@ void EntityManager::load_nspanels() {
 
   // Cause existing NSPanel to reload config or add a new NSPanel if it does not exist.
   for (auto &nspanel_id : nspanel_ids) {
-    auto existing_room = EntityManager::get_room(nspanel_id);
-    if (existing_room != nullptr) [[likely]] {
-      existing_room->reload_config();
+    auto existing_nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
+    if (existing_nspanel != nullptr) [[likely]] {
+      existing_nspanel->reload_config();
     } else {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
       auto panel = std::shared_ptr<NSPanel>(new NSPanel(nspanel_id));

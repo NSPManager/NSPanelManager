@@ -17,7 +17,6 @@
 #include <room/room_entities_page.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
-#include <thread>
 #include <unistd.h>
 #include <vector>
 #include <web_helper/WebHelper.hpp>
@@ -25,7 +24,7 @@
 RoomEntitiesPage::RoomEntitiesPage(uint32_t page_id, Room *room) {
   this->_id = page_id;
   this->_room = room;
-  this->reload_config();
+  this->reload_config(false);
   SPDLOG_DEBUG("Created RoomEntitiesPage with ID {}. Page will display {}", this->_id, this->_page_settings.is_scenes_page ? "scenes." : "entities.");
 
   // As this is object initialization we need to send out an MQTT status topic so that data exists that represents this page
@@ -37,7 +36,7 @@ RoomEntitiesPage::~RoomEntitiesPage() {
   SPDLOG_DEBUG("Destroyed RoomEntitiesPage with ID {}.", this->_id);
 }
 
-void RoomEntitiesPage::reload_config() {
+void RoomEntitiesPage::reload_config(bool send_state_update) {
   try {
     // Update the page settings from the database
     {
@@ -51,7 +50,9 @@ void RoomEntitiesPage::reload_config() {
     }
 
     SPDLOG_DEBUG("RoomEntitiesPage {} loaded successfully.", this->_id);
-    this->_send_mqtt_state_update();
+    if (send_state_update) {
+      this->_send_mqtt_state_update();
+    }
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
     SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));

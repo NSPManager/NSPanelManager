@@ -51,6 +51,15 @@ void Room::reload_config() {
         std::lock_guard<std::mutex> mutex_guard(this->_entities_pages_mutex);
         SPDLOG_DEBUG("Loaded config for room {}::{}, loading room entity pages.", this->_id, this->_name);
         auto room_entities_pages = database_manager::database.get_all<database_manager::RoomEntitiesPage>(sqlite_orm::where(sqlite_orm::c(&database_manager::RoomEntitiesPage::room_id) == this->_id), sqlite_orm::order_by(&database_manager::RoomEntitiesPage::display_order).asc().collate_nocase());
+        // Look for existing but removed RoomEntitiesPages and remove them from the list
+        this->_entity_pages.erase(std::remove_if(this->_entity_pages.begin(), this->_entity_pages.end(), [&room_entities_pages](auto entity_page) {
+                                    return std::find_if(room_entities_pages.begin(), room_entities_pages.end(), [&entity_page](auto room_entity_page) {
+                                             return room_entity_page.id == entity_page->get_id();
+                                           }) == room_entities_pages.end();
+                                  }),
+                                  this->_entity_pages.end());
+
+        // Load new RoomEntitiesPages
         for (auto &entity_page : room_entities_pages) {
           bool found = false;
           for (auto &existing_entity_page : this->_entity_pages) {
@@ -66,14 +75,6 @@ void Room::reload_config() {
           }
         }
 
-        // Look for existing but removed RoomEntitiesPages and remove them from the list
-        this->_entity_pages.erase(std::remove_if(this->_entity_pages.begin(), this->_entity_pages.end(), [&room_entities_pages](auto entity_page) {
-                                    return std::find_if(room_entities_pages.begin(), room_entities_pages.end(), [&entity_page](auto room_entity_page) {
-                                             return room_entity_page.id == entity_page->get_id();
-                                           }) == room_entities_pages.end();
-                                  }),
-                                  this->_entity_pages.end());
-
         // Sort the room entities pages by display order and then resend config.
         std::sort(this->_entity_pages.begin(), this->_entity_pages.end(), [](const std::shared_ptr<RoomEntitiesPage> &a, const std::shared_ptr<RoomEntitiesPage> &b) {
           return a->get_display_order() < b->get_display_order();
@@ -81,11 +82,11 @@ void Room::reload_config() {
 
         // List of RoomEntitiesPages has now been pruned of removed rooms, new rooms added and sorted. Reload configs and send new state updates.
         for (auto &entity_page : this->_entity_pages) {
-          entity_page->reload_config();
+          entity_page->reload_config(true);
         }
       }
 
-      SPDLOG_TRACE("Room {}::{} initialized with status topic '{}'.", this->_id, this->_name, this->_mqtt_state_topic);
+      SPDLOG_TRACE("Room {}::{} initialized with status topic '{}'. Room has {} RoomEntitiesPages", this->_id, this->_name, this->_mqtt_state_topic, this->_entity_pages.size());
     } catch (std::system_error &ex) {
       SPDLOG_ERROR("Failed to get room with ID {} from database! Will cancel config reload.", this->_id);
       return;

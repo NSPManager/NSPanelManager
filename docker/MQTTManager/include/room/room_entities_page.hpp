@@ -18,8 +18,9 @@ public:
 
   /*
    * Redownload config from manager and reload this page.
+   * @param send_state_update: Whether to send a state update to the MQTT broker after reloading the config.
    */
-  void reload_config();
+  void reload_config(bool send_state_update);
 
   /**
    * Get the ID of this RoomEntitiesPage
