@@ -6,12 +6,28 @@ import subprocess
 import os
 import signal
 import time
+import signal
 from web.protobuf import protobuf_mqttmanager_pb2
 
 mqttmanager_process = None
 
+def sigchld_handler(signum, frame):
+    # Handle SIGCHLD from mqttmanager_process
+    pid, status = os.waitpid(-1, os.WNOHANG)
+    if pid > 0:
+        if os.WIFEXITED(status):
+            logging.error(F"MQTTManager binary has exited unexpectedly. Return code: {os.WEXITSTATUS(status)}")
+        elif os.WIFSIGNALED(status):
+            logging.error(F"MQTTManager binary has exited unexpectedly. Killed by signal: {os.WTERMSIG(status)}")
+            logging.error(F"stderr: {mqttmanager_process.stderr}")
+
+
 def start_mqtt_manager():
     from .settings_helper import get_setting_with_default
+    global mqttmanager_process
+
+    # Setup handler to catch SIGCHLD from mqttmanager_process
+    signal.signal(signal.SIGCHLD, sigchld_handler)
 
     print("Did not find a running MQTTManager, starting MQTTManager...")
     # Restart the process
@@ -19,27 +35,12 @@ def start_mqtt_manager():
 
     mqttmanager_env = os.environ.copy()
     mqttmanager_env["LOG_LEVEL"] = get_setting_with_default("mqttmanager_log_level")
-
-    global mqttmanager_process
     mqttmanager_process = subprocess.Popen(["/MQTTManager/build/nspm_mqttmanager"], cwd="/usr/src/app/", env=mqttmanager_env)
-
 
 """
 Restart the MQTT Manager process
 """
 def restart_mqtt_manager_process():
-    global mqttmanager_process
-    if mqttmanager_process != None:
-        mqttmanager_process.poll()
-        if mqttmanager_process.returncode is not None:
-            if mqttmanager_process.returncode != 0:
-                if mqttmanager_process.returncode > 0:
-                    logging.error(F"MQTTManager binary has exited unexpectedly. Return code: {mqttmanager_process.returncode}")
-                else:
-                    logging.error(F"MQTTManager binary has exited unexpectedly. Killed by signal: {mqttmanager_process.returncode}")
-                logging.error(F"stderr: {mqttmanager_process.stderr}")
-                mqttmanager_process.kill()
-
     for proc in psutil.process_iter():
         try:
             if proc.status() == psutil.STATUS_ZOMBIE:
@@ -62,7 +63,6 @@ def send_mqttmanager_reload_command():
         if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
             logging.info("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
             os.kill(proc.pid, signal.SIGUSR1)
-
 
 class WebConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'

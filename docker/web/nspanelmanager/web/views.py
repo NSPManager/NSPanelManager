@@ -32,8 +32,11 @@ def send_mqttmanager_reload_command():
     for proc in psutil.process_iter():
         try:
             if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
-                print("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
-                os.kill(proc.pid, signal.SIGUSR1) # Send SIGUSR1 signal that is listened for in MQTTManager to reload config
+                if proc.status() == psutil.STATUS_ZOMBIE:
+                    print("Found zombie MQTTManager process. Will continue looking for running MQTTManager.")
+                else:
+                    print("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
+                    os.kill(proc.pid, signal.SIGUSR1) # Send SIGUSR1 signal that is listened for in MQTTManager to reload config
                 break
         except Exception as ex:
             print(ex)
@@ -167,12 +170,7 @@ def save_new_room(request):
     new_room = Room()
     new_room.friendly_name = request.POST['friendly_name']
     new_room.save()
-    command_data = {
-        # TODO: Base64 Encode data.
-        "data": new_room.get_protobuf_object().SerializeToString()
-    }
-    send_ipc_request("entity_manager/add_room", command_data)
-    #send_mqttmanager_reload_command()
+    send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=new_room.id)
 
 

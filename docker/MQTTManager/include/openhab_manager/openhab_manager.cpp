@@ -25,7 +25,6 @@ void OpenhabManager::connect() {
     OpenhabManager::_websocket = new ix::WebSocket();
   }
 
-  SPDLOG_DEBUG("MUTEX!");
   std::lock_guard<std::mutex> lock_guard(OpenhabManager::_setting_values_mutex);
   std::string openhab_websocket_url = OpenhabManager::_openhab_address;
   if (openhab_websocket_url.empty()) {
@@ -72,7 +71,6 @@ void OpenhabManager::connect() {
 void OpenhabManager::reload_config() {
   bool reconnect = false;
   {
-    SPDLOG_DEBUG("MUTEX!");
     std::lock_guard<std::mutex> lock_guard(OpenhabManager::_setting_values_mutex);
     std::string address = MqttManagerConfig::get_setting_with_default("openhab_address", "");
     std::string token = MqttManagerConfig::get_setting_with_default("openhab_token", "");
@@ -178,7 +176,6 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
   std::string bearer_token = "Authorization: Bearer ";
   std::string response_data;
   {
-    SPDLOG_DEBUG("MUTEX!");
     std::lock_guard<std::mutex> lock_guard(OpenhabManager::_setting_values_mutex);
     request_url = OpenhabManager::_openhab_address;
     request_url.append("/rest/items/");
