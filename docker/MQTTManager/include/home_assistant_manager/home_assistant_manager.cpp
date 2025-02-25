@@ -196,7 +196,12 @@ void HomeAssistantManager::_process_home_assistant_event(nlohmann::json &event_d
       if (std::string(event_data["event"]["event_type"]).compare("state_changed") == 0) {
         std::string home_assistant_entity_name = event_data["event"]["data"]["entity_id"];
         if (HomeAssistantManager::_home_assistant_observers.find(home_assistant_entity_name) != HomeAssistantManager::_home_assistant_observers.end()) {
-          HomeAssistantManager::_home_assistant_observers.at(home_assistant_entity_name)(event_data);
+          try {
+            HomeAssistantManager::_home_assistant_observers.at(home_assistant_entity_name)(event_data);
+          } catch (const std::exception &e) {
+            SPDLOG_ERROR("Caught exception during processing of home assistant event. Diagnostic information: {}", boost::diagnostic_information(e, true));
+            SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+          }
         }
       }
     }

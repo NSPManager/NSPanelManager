@@ -165,7 +165,7 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 }
 
 std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
-  SPDLOG_DEBUG("Trying to fetch item state from OpenHAB for item '{}'.", item);
+  SPDLOG_TRACE("Trying to fetch item state from OpenHAB for item '{}'.", item);
   CURL *curl = curl_easy_init();
   CURLcode res;
 
@@ -226,7 +226,7 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
   /* always cleanup */
   curl_easy_cleanup(curl);
   curl_slist_free_all(headers);
-  SPDLOG_DEBUG("Got data for OpenHAB item {}.", item);
+  SPDLOG_TRACE("Got data for OpenHAB item {}.", item);
   return response_data;
 }
 

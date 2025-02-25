@@ -165,18 +165,11 @@ void OpenhabLight::send_state_update_to_controller() {
 }
 
 void OpenhabLight::openhab_event_callback(nlohmann::json data) {
-
   if (std::string(data["type"]).compare("ItemStateChangedEvent") == 0) {
     // Extract topic into multiple parts
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
-    size_t pos = 0;
-    std::string token;
-    while ((pos = topic.find("/")) != std::string::npos) {
-      token = topic.substr(0, pos);
-      topic_parts.push_back(token);
-      topic.erase(0, pos + 1); // Remove current part from beginning of topic string (including delimiter)
-    }
+    boost::split(topic_parts, topic, boost::is_any_of("/"));
 
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enought parts, topic: {}", std::string(data["topic"]));
@@ -296,66 +289,83 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
     }
     return;
   } else if (std::string(data["type"]).compare("ItemStateFetched") == 0) {
+    SPDLOG_TRACE("OpenHAB light {}::{} Got initial data from OpenHAB via custom ItemStateFetched event.", this->_id, this->_name);
     if (this->_openhab_on_off_item.compare(data["payload"]["name"]) == 0) {
       if (this->_openhab_control_mode == MQTT_MANAGER_OPENHAB_CONTROL_MODE::DIMMER) {
-        this->_current_brightness = atoi(std::string(data["payload"]["state"]).c_str());
-        if (this->_current_brightness > 100) {
-          this->_current_brightness = 100;
-        }
-        if (this->_current_brightness > 0) {
-          this->_current_state = true;
-        } else {
-          this->_current_state = false;
-        }
+        if (data["payload"]["state"].is_string()) { // OpenHAB always sends values as strings. We convert this to integer below.
+          this->_current_brightness = std::stoi(data["payload"]["state"].get<std::string>());
+          if (this->_current_brightness > 100) {
+            this->_current_brightness = 100;
+          }
+          if (this->_current_brightness > 0) {
+            this->_current_state = true;
+          } else {
+            this->_current_state = false;
+          }
 
-        this->_requested_state = this->_current_state;
-        this->_requested_brightness = this->_current_brightness;
-        MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
+          this->_requested_state = this->_current_state;
+          this->_requested_brightness = this->_current_brightness;
+          MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
+        } else {
+          SPDLOG_ERROR("Light {}::{} got OpenHAB data from OpenHAB via initial ItemStateFetched event for OpenHAB item {} though current state was not a number.", this->_id, this->_name, this->_openhab_on_off_item);
+        }
       } else if (this->_openhab_control_mode == MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH) {
-        this->_current_state = std::string(data["payload"]["state"]).compare("ON") == 0;
-        if (this->_current_state) {
-          this->_current_brightness = 100;
-        } else {
-          this->_current_brightness = 0;
-        }
+        if (data["payload"]["state"].is_string()) {
+          this->_current_state = std::string(data["payload"]["state"]).compare("ON") == 0;
+          if (this->_current_state) {
+            this->_current_brightness = 100;
+          } else {
+            this->_current_brightness = 0;
+          }
 
-        this->_requested_state = this->_current_state;
-        this->_requested_brightness = this->_current_brightness;
-        MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
+          this->_requested_state = this->_current_state;
+          this->_requested_brightness = this->_current_brightness;
+          MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
+        } else {
+          SPDLOG_ERROR("Light {}::{} got OpenHAB data from OpenHAB via initial ItemStateFetched event for OpenHAB item {} though current on/off state was neither on or off.", this->_id, this->_name, this->_openhab_on_off_item);
+        }
       }
     } else if (this->_openhab_item_color_temperature.compare(data["payload"]["name"]) == 0) {
-      double color_temperature = 100 - atof(std::string(data["payload"]["state"]).c_str());
-      if (color_temperature < 0) {
-        color_temperature = 0;
-      } else if (color_temperature > 100) {
-        color_temperature = 100;
-      }
-      // Convert from percentage to actual color temp.
-      unsigned long kelvin_max_floored = MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min;
-      uint16_t kelvin = MqttManagerConfig::get_settings().color_temp_min + int((color_temperature / (double)100) * kelvin_max_floored);
+      if (data["payload"]["state"].is_number()) {
+        double color_temperature = 100 - atof(std::string(data["payload"]["state"]).c_str());
+        if (color_temperature < 0) {
+          color_temperature = 0;
+        } else if (color_temperature > 100) {
+          color_temperature = 100;
+        }
+        // Convert from percentage to actual color temp.
+        unsigned long kelvin_max_floored = MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min;
+        uint16_t kelvin = MqttManagerConfig::get_settings().color_temp_min + int((color_temperature / (double)100) * kelvin_max_floored);
 
-      this->_current_color_temperature = kelvin;
-      this->_requested_color_temperature = this->_current_color_temperature;
-      MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature), true);
-    } else if (this->_openhab_item_rgb.compare(data["payload"]["name"]) == 0) {
-      std::vector<std::string> hsb_parts;
-      boost::split(hsb_parts, std::string(data["payload"]["state"]), boost::is_any_of(","));
-      if (hsb_parts.size() >= 3) {
-        this->_current_hue = atoi(hsb_parts[0].c_str());
-        this->_current_saturation = atoi(hsb_parts[1].c_str());
-        this->_requested_state = atoi(hsb_parts[2].c_str()) > 0;
-        this->_current_state = this->_requested_state;
-        // this->_current_brightness = atoi(hsb_parts[2].c_str());
-
-        this->_requested_hue = this->_current_hue;
-        this->_requested_saturation = this->_current_saturation;
-        // Don't set/send out brightness from HSB when initially loading the light state.
-        // this->_requested_brightness = this->_current_brightness;
-        // MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
-        MQTT_Manager::publish(this->_mqtt_hue_topic, std::to_string(this->_current_hue), true);
-        MQTT_Manager::publish(this->_mqtt_saturation_topic, std::to_string(this->_current_saturation), true);
+        this->_current_color_temperature = kelvin;
+        this->_requested_color_temperature = this->_current_color_temperature;
+        MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature), true);
       } else {
-        SPDLOG_ERROR("Failed to decode HSB value '{}' into 3 or more parts.", std::string(data["payload"]["state"]));
+        SPDLOG_ERROR("Light {}::{} got OpenHAB data from OpenHAB via initial ItemStateFetched event for OpenHAB item {} though current color temperature state was not a number.", this->_id, this->_name, this->_openhab_item_color_temperature);
+      }
+    } else if (this->_openhab_item_rgb.compare(data["payload"]["name"]) == 0) {
+      if (data["payload"]["state"].is_number()) {
+        std::vector<std::string> hsb_parts;
+        boost::split(hsb_parts, std::string(data["payload"]["state"]), boost::is_any_of(","));
+        if (hsb_parts.size() >= 3) {
+          this->_current_hue = atoi(hsb_parts[0].c_str());
+          this->_current_saturation = atoi(hsb_parts[1].c_str());
+          this->_requested_state = atoi(hsb_parts[2].c_str()) > 0;
+          this->_current_state = this->_requested_state;
+          // this->_current_brightness = atoi(hsb_parts[2].c_str());
+
+          this->_requested_hue = this->_current_hue;
+          this->_requested_saturation = this->_current_saturation;
+          // Don't set/send out brightness from HSB when initially loading the light state.
+          // this->_requested_brightness = this->_current_brightness;
+          // MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
+          MQTT_Manager::publish(this->_mqtt_hue_topic, std::to_string(this->_current_hue), true);
+          MQTT_Manager::publish(this->_mqtt_saturation_topic, std::to_string(this->_current_saturation), true);
+        } else {
+          SPDLOG_ERROR("Failed to decode HSB value '{}' into 3 or more parts.", std::string(data["payload"]["state"]));
+        }
+      } else {
+        SPDLOG_ERROR("Light {}::{} got OpenHAB data from OpenHAB via initial ItemStateFetched event for OpenHAB item {} though current color temperature state was not a number.", this->_id, this->_name, this->_openhab_item_color_temperature);
       }
     }
   } else {

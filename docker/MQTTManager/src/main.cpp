@@ -187,9 +187,6 @@ int main(void) {
   CommandManager::init();
 
   // Wait for threads to exit
-  // if (mqtt_manager_thread.joinable()) {
-  //   mqtt_manager_thread.join();
-  // }
   if (home_assistant_manager_thread.joinable()) {
     home_assistant_manager_thread.join();
   }

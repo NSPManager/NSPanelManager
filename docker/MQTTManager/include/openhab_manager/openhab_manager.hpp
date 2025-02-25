@@ -4,10 +4,14 @@
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/signals2.hpp>
+#include <boost/stacktrace.hpp>
+#include <boost/stacktrace/frame.hpp>
+#include <boost/stacktrace/stacktrace_fwd.hpp>
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXWebSocketMessage.h>
 #include <mutex>
 #include <nlohmann/json.hpp>
+#include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 #include <string>
 
@@ -27,22 +31,24 @@ public:
    */
   template <typename CALLBACK_BIND>
   static void attach_event_observer(std::string item, CALLBACK_BIND callback) {
+    SPDLOG_TRACE("Attaching observer for item '{}'", item);
     OpenhabManager::_openhab_item_observers[item].disconnect(callback); // Disconnect first in case it was already connected, otherwise multiple signals will be sent.
     OpenhabManager::_openhab_item_observers[item].connect(callback);
 
+    std::string data;
     try {
-      std::string data = OpenhabManager::_fetch_item_state_via_rest(item);
+      data = OpenhabManager::_fetch_item_state_via_rest(item);
       if (data.length() > 0) {
         nlohmann::json update_data;
         update_data["type"] = "ItemStateFetched";
         update_data["payload"] = nlohmann::json::parse(data);
         OpenhabManager::_openhab_item_observers[item](update_data);
       } else {
-        SPDLOG_ERROR("Failed to get current state for item '{}' via OpenHAB REST API.", item);
+        SPDLOG_WARN("Failed to get current state for item '{}' via OpenHAB REST API. Current state is not available and will only be updated on next openhab state chage event..", item);
       }
     } catch (std::exception &e) {
-      SPDLOG_ERROR("Caught exception: {}", e.what());
-      SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
+      SPDLOG_ERROR("Caught exception during processing of openhab event. Diagnostic information: {}", boost::diagnostic_information(e, true));
+      SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
     }
   }
 
