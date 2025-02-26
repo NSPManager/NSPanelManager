@@ -6827,6 +6827,10 @@ details.collapse summary::-webkit-details-marker {
   height: 3rem;
 }
 
+.h-14 {
+  height: 3.5rem;
+}
+
 .h-2 {
   height: 0.5rem;
 }
@@ -6869,10 +6873,6 @@ details.collapse summary::-webkit-details-marker {
 
 .h-screen {
   height: 100vh;
-}
-
-.h-14 {
-  height: 3.5rem;
 }
 
 .max-h-0 {
@@ -7293,6 +7293,11 @@ details.collapse summary::-webkit-details-marker {
   border-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-border-opacity, 1)));
 }
 
+.border-base-content {
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-bc,oklch(var(--bc)/var(--tw-border-opacity, 1)));
+}
+
 .border-black {
   --tw-border-opacity: 1;
   border-color: rgb(0 0 0 / var(--tw-border-opacity, 1));
@@ -7333,23 +7338,8 @@ details.collapse summary::-webkit-details-marker {
   border-color: var(--fallback-wa,oklch(var(--wa)/var(--tw-border-opacity, 1)));
 }
 
-.border-base-100 {
-  --tw-border-opacity: 1;
-  border-color: var(--fallback-b1,oklch(var(--b1)/var(--tw-border-opacity, 1)));
-}
-
-.border-base-content {
-  --tw-border-opacity: 1;
-  border-color: var(--fallback-bc,oklch(var(--bc)/var(--tw-border-opacity, 1)));
-}
-
 .border-opacity-50 {
   --tw-border-opacity: 0.5;
-}
-
-.bg-accent {
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-a,oklch(var(--a)/var(--tw-bg-opacity, 1)));
 }
 
 .bg-base-100 {
@@ -7605,10 +7595,6 @@ details.collapse summary::-webkit-details-marker {
   padding-top: 1.25rem;
 }
 
-.pb-2 {
-  padding-bottom: 0.5rem;
-}
-
 .text-left {
   text-align: left;
 }
@@ -7797,11 +7783,6 @@ details.collapse summary::-webkit-details-marker {
   color: rgb(133 77 14 / var(--tw-text-opacity, 1));
 }
 
-.text-base-100 {
-  --tw-text-opacity: 1;
-  color: var(--fallback-b1,oklch(var(--b1)/var(--tw-text-opacity, 1)));
-}
-
 .line-through {
   text-decoration-line: line-through;
 }
@@ -7920,14 +7901,6 @@ details.collapse summary::-webkit-details-marker {
 
 .duration-500 {
   transition-duration: 500ms;
-}
-
-.duration-75 {
-  transition-duration: 75ms;
-}
-
-.duration-1000 {
-  transition-duration: 1000ms;
 }
 
 .ease-in-out {
