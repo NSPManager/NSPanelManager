@@ -1,10 +1,40 @@
-<span hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_ram_usage' view='edit_nspanel' nspanel_id=id %}" class="icon-text transition-transform ease-linear duration-100" id="nspanel_ram_usage_container-{{ id }}">
-    <span class="icon me-1">
-        <i class="mdi mdi-memory"></i>
-    </span>
-    {% if state == "offline" or state == "unknown" %}
-    RAM: <span id="heap_used-{{ id }}">?%</span>
-    {% else %}
-    RAM: <span id="heap_used-{{ id }}">{{ ram_usage }}%</span>
-    {% endif %}
-</span>
+<script type="module">
+  import { define, html, store } from 'https://esm.sh/hybrids@^9';
+
+  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+    // Update relevant values for the status header from the bundled data in the status update event
+    var element = document.getElementById(`nspanel-ram-status-${event.detail.event_data.id}`);
+    element.state = event.detail.event_data.state;
+    element.temperature = Math.round(event.detail.event_data.temperature*10)/10;
+  });
+
+  define({
+    tag: "nspanel-ram-status",
+    nspanel_id: '',
+    state: '',
+    ram_usage: '',
+    render: ({id, state, ram_usage}) => {
+      if (state == "offline" || state == "unknown") {
+        return html`
+           <div class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-memory"></i>
+                </span>
+                RAM: <span id="ram-${nspanel_id}">?%</span>
+            </div>
+        `;
+      } else {
+        return html`
+            <div class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-memory"></i>
+                </span>
+                RAM: <span id="ram-${nspanel_id}">${ram_usage}%</span>
+            </div>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-ram-status id="nspanel-ram-status-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}" ram_usage="{{ ram_usage }}"></nspanel-ram-status>
