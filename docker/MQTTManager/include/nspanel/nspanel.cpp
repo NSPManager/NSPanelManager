@@ -1,12 +1,9 @@
 #include "nspanel.hpp"
 #include "database_manager/database_manager.hpp"
-#include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "ipc_handler/ipc_handler.hpp"
-#include "light/light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
-#include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
 #include "room/room_entities_page.hpp"
 #include "web_helper/WebHelper.hpp"
@@ -28,6 +25,7 @@
 #include <cstdint>
 #include <ctime>
 #include <curl/curl.h>
+#include <curl/easy.h>
 #include <exception>
 #include <fmt/chrono.h>
 #include <fmt/core.h>
@@ -671,9 +669,14 @@ void NSPanel::send_websocket_update() {
   } else {
     SPDLOG_TRACE("Sending websocket update for new NSPanel ??::{}", this->_name);
   }
+
+  nlohmann::json current_status_data;
+  this->handle_ipc_request_status(NULL, &current_status_data);
+
   // Send status over to web interface:
   nlohmann::json event_trigger_data;
   event_trigger_data["event_type"] = fmt::format("nspanel-{}-state-change", this->_id);
+  event_trigger_data["event_data"] = current_status_data;
   WebsocketServer::broadcast_json(event_trigger_data);
 }
 
@@ -1022,6 +1025,8 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
 
 bool NSPanel::handle_ipc_request_status(nlohmann::json request, nlohmann::json *response_buffer) {
   nlohmann::json data = {
+      {"id", this->_id},
+      {"name", this->_name},
       {"ip_address", this->_ip_address},
       {"rssi", this->_rssi},
       {"temperature", this->_temperature},
