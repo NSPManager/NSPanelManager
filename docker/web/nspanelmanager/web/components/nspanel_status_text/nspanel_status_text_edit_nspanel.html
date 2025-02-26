@@ -1,22 +1,64 @@
-<div hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_text' view='edit_nspanel' nspanel_id=id %}" id="state_text_nspanel_{{ id }}" class="transition-transform ease-linear duration-100">
-    <span class="mdi mdi-power-cycle me-2"></span>
-    State: <span  class="{% if state == 'online' %}text-success{% elif state == 'offline' %}text-error{% elif state == 'waiting' %}text-info{% endif %}">
-        {% if state == "online" %}
-            Online
-        {% elif state == "offline" %}
-            Offline
-        {% elif state == "awaiting_accept" %}
-            Awaiting accept
-        {% elif state == "waiting" %}
-            Waiting
-        {% elif state == "updating_fw" %}
-            Updating FW
-        {% elif state == "updating_fs" %}
-            Updating FS
-        {% elif state == "updating_tft" %}
-            Updating GUI
-        {% else %}
-            Unknown {{ state }}
-        {% endif %}
-    </span>
-</div>
+<script type="module">
+  import { define, html, store } from 'https://esm.sh/hybrids@^9';
+
+  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+    // Update relevant values for the status header from the bundled data in the status update event
+    var element = document.getElementById(`nspanel-status-text-${event.detail.event_data.id}`);
+    element.state = event.detail.event_data.state;
+  });
+
+  define({
+    tag: "nspanel-status-text",
+    nspanel_id: '',
+    name: '',
+    state: '',
+    update_progress: '',
+    render: ({id, name, state, update_progress}) => {
+      if (state == "online") {
+        return html`
+            <span class="mdi mdi-power-cycle me-2" title="Panel online">
+                State: <span class=text-success>Online</span>
+            </span>
+        `;
+      } else if (state == "offline") {
+        return html`
+            <span class="mdi mdi-power-cycle me-2" title="Panel offline">
+                State: <span class=text-error>Offline</span>
+            </span>
+        `;
+      } else if (state == "waiting") {
+        return html`
+            <span class="mdi mdi-power-cycle me-2" title="Waiting for panel status">
+                State: <span class=text-info>Waiting</span>
+            </span>
+        `;
+      } else if (state == "updating_fw") {
+        return html`
+            <span class="mdi mdi-power-cycle me-2" title="Waiting for panel status">
+                State: <span class=text-info>Updating FW</span>
+            </span>
+        `;
+      } else if (state == "updating_fs") {
+              return html`
+                  <span class="mdi mdi-power-cycle me-2" title="Waiting for panel status">
+                      State: <span class=text-info>Updating FS</span>
+                  </span>
+              `;
+      } else if (state == "updating_tft") {
+        return html`
+            <span class="mdi mdi-power-cycle me-2" title="Waiting for panel status">
+                State: <span class=text-info>Updating TFT</span>
+            </span>
+        `;
+      } else {
+        return html`
+            <span class="mdi mdi-power-cycle me-2" title="Waiting for panel status">
+              State: <span class=text-warning>Unknown state ${state}</span>
+            </span>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-status-text id="nspanel-status-text-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}"></nspanel-status-badge>

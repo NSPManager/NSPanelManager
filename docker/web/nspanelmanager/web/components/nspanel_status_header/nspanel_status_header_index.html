@@ -1,40 +1,43 @@
-<div
-    hx-swap="innerHTML"
-    hx-target="this"
-    hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body"
-    hx-get="{% url 'nspanel_status_header' view='index' nspanel_id=id %}"
->
-    {% if state == "online" %}
-    <div
-        class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-success"
-        id="panel_header-{{ id }}"
-    ></div>
-    {% elif state == "offline" %}
-    <div
-        class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-error"
-        id="panel_header-{{ id }}"
-    ></div>
-    {% elif state == "awaiting_accept" %}
-    <div
-        class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-info animate-pulse"
-        id="panel_header-{{ id }}"
-    ></div>
-    {% elif state == "waiting" %}
-    <div
-        class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-info animate-pulse"
-        id="panel_header-{{ id }}"
-    ></div>
-    {% elif state == "updating_fw" or state == "updating_fs" or state ==
-    "updating_tft" %}
-    <div
-        class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-info"
-        style="width: {{ progress }}%;"
-        id="panel_header-{{ id }}"
-    ></div>
-    {% else %}
-    <div
-        class="bg-accent min-h-1 overflow-hidden w-full animate-pulse transition-all duration-300"
-        id="panel_header-{{ id }}"
-    ></div>
-    {% endif %}
-</div>
+<script type="module">
+  import { define, html, store } from 'https://esm.sh/hybrids@^9';
+
+  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+    // Update relevant values for the status header from the bundled data in the status update event
+    var element = document.getElementById(`nspanel-status-header-${event.detail.event_data.id}`);
+    element.state = event.detail.event_data.state;
+    element.update_progress = event.detail.event_data.update_progress;
+  });
+
+  define({
+    tag: "nspanel-status-header",
+    nspanel_id: '',
+    name: '',
+    state: '',
+    update_progress: '',
+    render: ({id, name, state, update_progress}) => {
+      if (state == "online") {
+        return html`
+            <div class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-success" id="panel_header-${id}"></div>
+        `;
+      } else if (state == "offline") {
+        return html`
+            <div class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-error" id="panel_header-${id}"></div>
+        `;
+      } else if (state == "waiting") {
+        return html`
+          <div class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-info animate-pulse" id="panel_header-${id}"></div>
+        `;
+      } else if (state == "updating_fw" || state == "updating_fs" || state == "updating_tft") {
+        return html`
+            <div class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-info" style="width: ${update_progress}%" id="panel_header-${id}"></div>
+        `;
+      } else {
+        return html`
+          <span class="badge badge-warning transition-all ease-linear duration-300">${name} UNKNOWN STATE: ${state}</span>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-status-header id="nspanel-status-header-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}" update_progress="{{ progress }}"></nspanel-status-badge>
