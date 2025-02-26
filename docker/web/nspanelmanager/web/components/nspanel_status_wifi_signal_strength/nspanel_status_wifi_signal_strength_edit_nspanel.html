@@ -1,24 +1,76 @@
-<span hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body, nspanel-{{ id }}-status-change from:body" hx-get="{% url 'nspanel_status_wifi_signal_strength' view='edit_nspanel' nspanel_id=id %}" class="icon-text" id="wifi_signal_strength_container-{{ id }}">
-    <span class="icon me-1">
-        {% if state == "offline" %}
-            <i class="mdi mdi-wifi-strength-1-alert" id="wifi_signal_strength-{{ id }}"></i>
-        {% else %}
-            {% if signal_strength <= -90 %}
-                <i class="mdi mdi-wifi-strength-1-alert" id="wifi_signal_strength-{{ id }}"></i>
-            {% elif signal_strength <= -80 %}
-                <i class="mdi mdi-wifi-strength-1" id="wifi_signal_strength-{{ id }}"></i>
-            {% elif signal_strength <= -67 %}
-                <i class="mdi mdi-wifi-strength-2" id="wifi_signal_strength-{{ id }}"></i>
-            {% elif signal_strength <= -55 %}
-                <i class="mdi mdi-wifi-strength-3" id="wifi_signal_strength-{{ id }}"></i>
-            {% else %}
-                <i class="mdi mdi-wifi-strength-4" id="wifi_signal_strength-{{ id }}"></i>
-            {% endif %}
-        {% endif %}
-    </span>
-    {% if state == "offline" or state == "unknown" %}
-        WiFi: <span id="wifi_signal_strength_text-{{ id }}">? dBm</span>
-    {% else %}
-        WiFi: <span id="wifi_signal_strength_text-{{ id }}">{{ signal_strength }} dBm</span>
-    {% endif %}
-</span>
+<script type="module">
+  import { define, html, store } from 'https://esm.sh/hybrids@^9';
+
+  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+    // Update relevant values for the status header from the bundled data in the status update event
+    var element = document.getElementById(`nspanel-wifi-status-${event.detail.event_data.id}`);
+    element.state = event.detail.event_data.state;
+    element.update_progress = event.detail.event_data.progress;
+  });
+
+  define({
+    tag: "nspanel-wifi-status",
+    nspanel_id: '',
+    state: '',
+    signal_strength: '',
+    render: ({id, state, signal_strength}) => {
+      if (state == "offline" || state == "unknown") {
+        return html`
+            <span class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-wifi-strength-1-alert"></i>
+                </span>
+                WiFi: ? dBm
+            </span>
+        `; // Nothing should be displayed when online.
+      } else if (signal_strength <= -90) {
+            return html`
+                <span class="icon-text">
+                    <span class="icon me-1">
+                        <i class="mdi mdi-wifi-strength-1-alert"></i>
+                    </span>
+                    WiFi: ${signal_strength} dBm
+                </span>
+            `;
+      } else if (signal_strength <= -80) {
+        return html`
+            <span class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-wifi-strength-1-alert"></i>
+                </span>
+                WiFi: ${signal_strength} dBm
+            </span>
+        `;
+      } else if (signal_strength <= -67) {
+        return html`
+            <span class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-wifi-strength-2-alert"></i>
+                </span>
+                WiFi: ${signal_strength} dBm
+            </span>
+        `;
+      } else if (signal_strength <= -55) {
+        return html`
+            <span class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-wifi-strength-3"></i>
+                </span>
+                WiFi: ${signal_strength} dBm
+            </span>
+        `;
+      } else {
+        return html`
+            <span class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-wifi-strength-4"></i>
+                </span>
+                WiFi: ${signal_strength} dBm
+            </span>
+          `;
+      }
+    },
+  })
+</script>
+
+<nspanel-wifi-status id="nspanel-wifi-status-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}" signal_strength="{{ signal_strength }}"></nspanel-wifi-status>
