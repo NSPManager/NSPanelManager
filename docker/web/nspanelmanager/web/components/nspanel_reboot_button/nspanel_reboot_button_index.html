@@ -1,6 +1,34 @@
-<div id="nspanel-{{ id }}-reboot-button-holder" hx-get="{% url 'nspanel_reboot_button' view='index' nspanel_id=id %}" hx-trigger="nspanel-{{ id }}-state-change from:body">
-    <a hx-post="{% url 'htmx_nspanel_reboot' id %}" id="reboot-{{ id }}" hx-trigger="click, {% if state != 'offline' %}reboot-all-nspanels from:body{% endif %}" hx-swap="none"
-    class="block px-4 py-2 hover:bg-accent hover:text-accent-content">
-        <span class="mdi mdi-restart pr-2"></span>Reboot
-    </a>
-</div>
+<script type="module">
+  import { define, html, store } from 'https://esm.sh/hybrids@^9';
+
+  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+    // Update relevant values for the status header from the bundled data in the status update event
+    var element = document.getElementById(`nspanel-reboot-button-${event.detail.event_data.id}`);
+    element.state = event.detail.event_data.state;
+  });
+
+  define({
+    tag: "nspanel-reboot-button",
+    nspanel_id: '',
+    state: '',
+    render: ({nspanel_id, state}) => {
+      if (state == "offline" || state == "unknown") {
+        return html`
+            <a hx-post="/htmx/nspanels/${nspanel_id}/reboot" id="reboot-${nspanel_id}" hx-trigger="click" hx-swap="none"
+            class="block px-4 py-2 hover:bg-accent hover:text-accent-content">
+                <span class="mdi mdi-restart pr-2"></span>Reboot
+            </a>
+        `;
+      } else {
+        return html`
+          <a hx-post="/htmx/nspanels/${nspanel_id}/reboot" id="reboot-${nspanel_id}" hx-trigger="click, {% if state != 'offline' %}reboot-all-nspanels from:body{% endif %}" hx-swap="none"
+            class="block px-4 py-2 hover:bg-accent hover:text-accent-content">
+                <span class="mdi mdi-restart pr-2"></span>Reboot
+            </a>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-reboot-button id="nspanel-reboot-button-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}"></nspanel-reboot-button>
