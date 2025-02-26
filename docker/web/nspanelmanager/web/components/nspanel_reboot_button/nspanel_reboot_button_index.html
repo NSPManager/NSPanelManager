@@ -21,7 +21,7 @@
         `;
       } else {
         return html`
-          <a hx-post="/htmx/nspanels/${nspanel_id}/reboot" id="reboot-${nspanel_id}" hx-trigger="click, {% if state != 'offline' %}reboot-all-nspanels from:body{% endif %}" hx-swap="none"
+          <a hx-post="/htmx/nspanels/${nspanel_id}/reboot" id="reboot-${nspanel_id}" hx-trigger="click, reboot-all-nspanels from:body" hx-swap="none"
             class="block px-4 py-2 hover:bg-accent hover:text-accent-content">
                 <span class="mdi mdi-restart pr-2"></span>Reboot
             </a>
