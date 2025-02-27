@@ -307,7 +307,7 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
           this->_requested_brightness = this->_current_brightness;
           MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
         } else {
-          SPDLOG_ERROR("Light {}::{} got OpenHAB data from OpenHAB via initial ItemStateFetched event for OpenHAB item {} though current state was not a number.", this->_id, this->_name, this->_openhab_on_off_item);
+          SPDLOG_ERROR("Light {}::{} got OpenHAB data from OpenHAB via initial ItemStateFetched event for OpenHAB item {} though current state was not a string.", this->_id, this->_name, this->_openhab_on_off_item);
         }
       } else if (this->_openhab_control_mode == MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH) {
         if (data["payload"]["state"].is_string()) {
@@ -341,10 +341,10 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         this->_requested_color_temperature = this->_current_color_temperature;
         MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature), true);
       } else {
-        SPDLOG_ERROR("Light {}::{} got OpenHAB data from OpenHAB via initial ItemStateFetched event for OpenHAB item {} though current color temperature state was not a number.", this->_id, this->_name, this->_openhab_item_color_temperature);
+        SPDLOG_ERROR("Light {}::{} got OpenHAB data from OpenHAB via initial ItemStateFetched event for OpenHAB item {} though current color temperature state was not a string.", this->_id, this->_name, this->_openhab_item_color_temperature);
       }
     } else if (this->_openhab_item_rgb.compare(data["payload"]["name"]) == 0) {
-      if (data["payload"]["state"].is_number()) {
+      if (data["payload"]["state"].is_string()) {
         std::vector<std::string> hsb_parts;
         boost::split(hsb_parts, std::string(data["payload"]["state"]), boost::is_any_of(","));
         if (hsb_parts.size() >= 3) {
@@ -365,7 +365,7 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
           SPDLOG_ERROR("Failed to decode HSB value '{}' into 3 or more parts.", std::string(data["payload"]["state"]));
         }
       } else {
-        SPDLOG_ERROR("Light {}::{} got OpenHAB data from OpenHAB via initial ItemStateFetched event for OpenHAB item {} though current color temperature state was not a number.", this->_id, this->_name, this->_openhab_item_color_temperature);
+        SPDLOG_ERROR("Light {}::{} got OpenHAB data from OpenHAB via initial ItemStateFetched event for OpenHAB item {} though current color temperature state was not a string.", this->_id, this->_name, this->_openhab_item_color_temperature);
       }
     }
   } else {
