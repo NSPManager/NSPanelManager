@@ -1,5 +1,5 @@
 <script type="module">
-  import { define, html, store } from 'https://esm.sh/hybrids@^9';
+  import { define, html } from '{{ ingress_path }}/static/node_modules/hybrids/src/index.js';
 
   document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
     // Update relevant values for the status header from the bundled data in the status update event
@@ -7,24 +7,32 @@
     element.state = event.detail.event_data.state;
   });
 
+  function attachHtmxListeners(element) {
+    htmx.process(element);
+  }
+
+
   define({
     tag: "nspanel-reboot-button",
     nspanel_id: '',
     state: '',
     render: ({nspanel_id, state}) => {
+      console.log("Rendering reboot button");
       if (state == "offline" || state == "unknown") {
         return html`
-            <a hx-post="/htmx/nspanels/${nspanel_id}/reboot" id="reboot-${nspanel_id}" hx-trigger="click" hx-swap="none"
-            class="block px-4 py-2 hover:bg-accent hover:text-accent-content">
+            ${attachHtmxListeners}
+            <div hx-post="/htmx/nspanels/${nspanel_id}/reboot" id="reboot-${nspanel_id}" hx-trigger="click" hx-swap="none"
+            class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer">
                 <span class="mdi mdi-restart pr-2"></span>Reboot
-            </a>
+            </div>
         `;
       } else {
         return html`
-          <a hx-post="/htmx/nspanels/${nspanel_id}/reboot" id="reboot-${nspanel_id}" hx-trigger="click, reboot-all-nspanels from:body" hx-swap="none"
-            class="block px-4 py-2 hover:bg-accent hover:text-accent-content">
+            ${attachHtmxListeners}
+            <div hx-post="/htmx/nspanels/${nspanel_id}/reboot" id="reboot-${nspanel_id}" hx-trigger="click, reboot-all-nspanels from:body" hx-swap="none"
+            class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer">
                 <span class="mdi mdi-restart pr-2"></span>Reboot
-            </a>
+            </div>
         `;
       }
     },

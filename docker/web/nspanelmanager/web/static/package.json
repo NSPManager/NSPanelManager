@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "htmx.org": "^1.9.12",
+    "hybrids": "^9.1.14"
+  }
+}

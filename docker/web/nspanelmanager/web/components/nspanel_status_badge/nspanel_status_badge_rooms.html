@@ -1,7 +1,7 @@
 {% load static %}
 
 <script type="module">
-  import { define, html, store } from 'https://esm.sh/hybrids@^9';
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
 
   document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
     // Update relevant values for the status badge from the bundled data in the status update event

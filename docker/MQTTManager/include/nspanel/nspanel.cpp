@@ -306,8 +306,7 @@ void NSPanel::send_config() {
 
   // Load rooms
   // TODO: Only add rooms on the "allowed" list for this room.
-  // for (int i = 0; i < settings.rooms().size(); i++) {
-  //  std::shared_ptr<Room> room = EntityManager::get_room(settings.rooms().Get(i));
+  SPDLOG_DEBUG("NSPanel {}::{} loading available rooms.", this->_id, this->_name);
   for (auto &room : EntityManager::get_all_rooms()) {
     if (room != nullptr) {
       NSPanelConfig_RoomInfo *room_info = config.add_room_infos();
@@ -318,6 +317,7 @@ void NSPanel::send_config() {
       }
     }
   }
+  SPDLOG_DEBUG("NSPanel {}::{} loaded {} rooms.", this->_id, this->_name, config.room_infos_size());
 
   // TODO: Set scenes
   config.clear_global_scenes();
