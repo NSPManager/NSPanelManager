@@ -51,7 +51,7 @@ class Room(models.Model):
         return room
 
 class RoomEntitiesPage(models.Model):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
     display_order = models.IntegerField()
     page_type = models.IntegerField() # Is this page displaying 4, 8 or 12 entities?
     is_scenes_page = models.BooleanField(default=False)
@@ -137,36 +137,6 @@ class Light(models.Model):
         else:
             return F"??? -> {self.friendly_name}"
 
-    """Get a protobuf_general_pb2.LightSettings object populated with settings."""
-    def get_protobuf_object(self):
-        from web.protobuf import protobuf_formats_pb2, protobuf_general_pb2, protobuf_mqttmanager_pb2
-        proto_light = protobuf_general_pb2.LightSettings()
-        proto_light.id = self.id
-        if self.room:
-            proto_light.room_id = self.room.id
-        else:
-            proto_light.room_id = -1
-        proto_light.name = self.friendly_name
-        proto_light.type = self.type
-        proto_light.is_ceiling_light = self.is_ceiling_light
-        proto_light.can_dim = self.can_dim
-        proto_light.can_color_temperature = self.can_color_temperature
-        proto_light.can_rgb = self.can_rgb
-        proto_light.entities_page_id = self.entities_page.id
-        proto_light.entities_page_room_view_position = self.room_view_position
-        proto_light.controlled_from_main_page = self.controlled_by_nspanel_main_page
-
-        if proto_light.type == "home_assistant":
-            proto_light.home_assistant_name = self.home_assistant_name
-        elif proto_light.type == "openhab":
-            proto_light.openhab_name = self.openhab_name
-            proto_light.openhab_control_mode = self.openhab_control_mode
-            proto_light.openhab_item_switch = self.openhab_item_switch
-            proto_light.openhab_item_dimmer = self.openhab_item_dimmer
-            proto_light.openhab_item_color_temp = self.openhab_item_color_temp
-            proto_light.openhab_item_rgb = self.openhab_item_rgb
-
-        return proto_light
 
 class Switch(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
@@ -187,8 +157,9 @@ class Scene(models.Model):
     # The name of the scene in Home Assistant or OpenHAB
     backend_name = models.CharField(max_length=32, null=True, default=None)
     scene_type = models.CharField(max_length=64)
-    room = models.ForeignKey(
-        Room, null=True, blank=True, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, null=True, blank=True, on_delete=models.CASCADE)
+    room_view_position = models.IntegerField()
+    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE, null=True)
 
 
 class LightState(models.Model):

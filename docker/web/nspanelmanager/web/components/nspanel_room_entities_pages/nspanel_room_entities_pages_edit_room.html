@@ -1,4 +1,4 @@
-<div id="room_{{ room.id }}_entities_pages" hx-swap-oob="true">
+<div id="room_{{ room.id }}_entities_pages_is_scenes_{{ is_scenes_pages }}" hx-swap-oob="true">
     {% if entity_pages|length > 0 %}
         <!-- <ul class="mt-4 grid md:grid-cols-2 lg:grid-cols-3 gap-12 nspanel-entities-pages"> -->
         <form id="htmx_form_save_entities_pages_order" hx-post="{% url 'htmx_partial_move_entities_pages' %}" hx-swap="none" hx-indicator="#modal_loading" hx-trigger="reordered">

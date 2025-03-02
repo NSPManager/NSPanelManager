@@ -7,11 +7,16 @@ from web.models import RoomEntitiesPage, Room
 class NSPanelRoomEntitiesPages(component.Component):
     template_view = None
 
-    def get_context_data(self, room_id):
-        room = Room.objects.get(id=room_id)
+    def get_context_data(self, room_id, is_scenes_pages, is_global_scenes_page):
+        if is_global_scenes_page:
+            room = None
+        else:
+            room = Room.objects.get(id=room_id)
+
         data = {
             "room": room,
-            "entity_pages": RoomEntitiesPage.objects.filter(room=room).order_by('display_order')
+            "is_scenes_pages": is_scenes_pages,
+            "entity_pages": RoomEntitiesPage.objects.filter(room=room, is_scenes_page=is_scenes_pages).order_by('display_order'),
         }
         return data
 
@@ -28,10 +33,12 @@ class NSPanelRoomEntitiesPages(component.Component):
         else:
             print("ERROR! Could not determine URL name for component nspanel_entities_page. url_name: " + url_name)
 
-    def get(self, request, view, room_id):
+    def get(self, request, view, room_id, is_scenes_pages, is_global_scenes_page):
         self.template_view = view
         args = {
             "room_id": room_id,
+            "is_scenes_pages": is_scenes_pages,
+            "is_global_scenes_page": is_global_scenes_page,
         }
         context = RequestContext(request, {"view": view})
         return self.render_to_response(context=context, kwargs=args)

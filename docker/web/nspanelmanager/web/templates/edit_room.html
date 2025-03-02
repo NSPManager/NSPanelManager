@@ -129,40 +129,10 @@
   <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
     <div class="md:flex md:flex-wrap md:justify-between items-center mb-2">
       <span class="block mb-2 text-xl">{{ room.friendly_name }} scenes</span>
-      {% if room.scene_set.all|length < 4 %}
-      <div class="">
-        <button type="button" onclick="add_existing_scene();" class="btn btn-info btn-outline">Add scene</button>
-          <button type="button" onclick="add_new_scene();" class="btn btn-info btn-outline">New NSPM scene</button>
-      </div>
-      {% else %}
-      <div>
-          {% component "alert" level="info" text="Only 4 scenes can be assigned to a room." %}{% endcomponent %}
-      </div>
-      {% endif %}
+      <button type="button" hx-get="{% url 'htmx_create_entities_page_in_room' room_id=room.id page_type=4 is_scenes_page=True %}" class="btn btn-info btn-outline">Add scenes page</button>
     </div>
 
-    <table class="table">
-      <thead class="">
-        <tr>
-          <th class="px-3 py-1">Name</th>
-          <th class="px-3 py-1">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="log_body" class="">
-        {% for scene in room.scene_set.all %}
-        <tr class="hover">
-          <th>{{ scene.friendly_name }}</th>
-          <td>
-            <button type="button" onclick="edit_scene({{ scene.id }}, '{{ scene.friendly_name }}');"
-              class="btn btn-outline btn-info me-2">Edit</button>
-            <a href='{% url "delete_scene" scene.id %}'
-              class="btn btn-outline btn-error" {% if total_num_rooms == 1 %}disabled{% endif %}
-              >Delete</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    {% component "nspanel_room_entities_pages" room_id=room.id is_scenes_pages=True is_global_scenes_page=False %}{% endcomponent %}
   </div>
 </div>
 
@@ -173,7 +143,7 @@
         <button type="button" hx-get='{% url "htmx_partial_add_entities_page_to_room" room_id=room.id is_scenes_page=False %}' hx-swap="none" hx-indicator="#modal_loading" class="btn btn-info btn-outline">Add page</button>
     </div>
 
-    {% component "nspanel_room_entities_pages" room_id=room.id %}{% endcomponent %}
+    {% component "nspanel_room_entities_pages" room_id=room.id is_scenes_pages=False is_global_scenes_page=False %}{% endcomponent %}
   </div>
 </div>
 {% endblock %}

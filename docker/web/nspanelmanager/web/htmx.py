@@ -420,6 +420,7 @@ def partial_entity_add_light_entity(request):
 
     return render(request, 'partial/select_entity/entity_add_or_edit_light_to_room.html', data)
 
+
 def partial_entity_edit_light_entity(request, light_id):
     light = Light.objects.get(id=light_id)
 
@@ -474,6 +475,7 @@ def partial_entity_edit_light_entity(request, light_id):
 
     return render(request, 'partial/select_entity/entity_add_or_edit_light_to_room.html', data)
 
+
 def partial_entity_add_switch_entity(request, entity):
     data = {
         "entity": json.loads(entity),
@@ -519,7 +521,8 @@ def partial_remove_entity_from_page_slot(request, page_id, slot_id):
         send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=page.room.id)
+    return entities_pages.get(request=request, view="edit_room", room_id=page.room.id, is_scenes_pages=False, is_global_scenes_page=False)
+
 
 @csrf_exempt
 def partial_add_entities_page_to_room(request, room_id, is_scenes_page):
@@ -528,6 +531,7 @@ def partial_add_entities_page_to_room(request, room_id, is_scenes_page):
         "is_scenes_page": is_scenes_page,
     }
     return render(request, 'partial/add_entities_page_to_room.html', data)
+
 
 def get_entity_in_page_slot(page_id, slot_id):
     page = RoomEntitiesPage.objects.get(id=page_id)
@@ -539,7 +543,12 @@ def get_entity_in_page_slot(page_id, slot_id):
     if entities.count() > 0:
         return entities[0]
 
+    entities = Scene.objects.filter(entities_page=page, room_view_position=slot_id)
+    if entities.count() > 0:
+        return entities[0]
+
     return None
+
 
 @csrf_exempt
 def partial_move_entity(request):
@@ -549,6 +558,8 @@ def partial_move_entity(request):
         new_entity_in_slot = Light.objects.get(id=request.POST["new_entity_id"])
     elif request.POST["new_entity_type"] == "Switch":
         new_entity_in_slot = Switch.objects.get(id=request.POST["new_entity_id"])
+    elif request.POST["new_entity_type"] == "Scene":
+        new_entity_in_slot = Scene.objects.get(id=request.POST["new_entity_id"])
     else:
         return JsonResponse({
             "status": "error",
@@ -570,8 +581,7 @@ def partial_move_entity(request):
     send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request, view='edit_room', room_id=new_entity_in_slot.room.id)
-
+    return entities_pages.get(request, view='edit_room', room_id=new_entity_in_slot.room.id, is_scenes_pages=new_entity_in_slot.entities_page.is_scenes_page, is_global_scenes_page=(new_entity_in_slot.entities_page.room == None))
 
 @csrf_exempt
 def partial_move_entities_pages(request):
@@ -579,14 +589,15 @@ def partial_move_entities_pages(request):
         json_data = json.loads(request.POST["htmx_form_save_entities_pages_order_field"])
         if "pages" in json_data:
             if len(json_data["pages"]) > 0:
-                room_id = RoomEntitiesPage.objects.get(id=json_data["pages"][0]).room.id
+                entity_page = RoomEntitiesPage.objects.get(id=json_data["pages"][0])
+                room_id = entity_page.room.id
                 for index, page_id in enumerate(json_data["pages"]):
                     page = RoomEntitiesPage.objects.get(id=page_id)
                     page.display_order = index
                     page.save()
                 send_mqttmanager_reload_command()
                 entities_pages = NSPanelRoomEntitiesPages()
-                return entities_pages.get(request, view='edit_room', room_id=room_id)
+                return entities_pages.get(request, view='edit_room', room_id=room_id, is_scenes_pages=entity_page.is_scenes_page, is_global_scenes_page=False)
             else:
                 return JsonResponse({
                     "status": "error",
@@ -659,7 +670,7 @@ def partial_delete_entities_page(request, page_id):
     send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=page.room.id)
+    return entities_pages.get(request=request, view="edit_room", room_id=page.room.id, is_scenes_pages=page.is_scenes_page, is_global_scenes_page=False)
 
 
 def create_entities_page_in_room(request, room_id, page_type, is_scenes_page):
@@ -668,6 +679,7 @@ def create_entities_page_in_room(request, room_id, page_type, is_scenes_page):
     entity_page.room = room
     entity_page.display_order = RoomEntitiesPage.objects.filter(room=room).count()
     entity_page.is_scenes_page = is_scenes_page == "True"
+    entity_page.is_global_scenes_page = False
     if page_type == 4:
         entity_page.page_type = 4
         entity_page.save()
@@ -684,7 +696,7 @@ def create_entities_page_in_room(request, room_id, page_type, is_scenes_page):
         print(F"ERROR! Unknown page type {page_type}")
     # Return new partial HTMX update of all entities pages in this room
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=room_id)
+    return entities_pages.get(request=request, view="edit_room", room_id=room_id, is_scenes_pages=entity_page.is_scenes_page, is_global_scenes_page=(entity_page.room == None))
 
 
 def partial_select_new_outside_temperature_sensor(request):
@@ -750,7 +762,7 @@ def create_or_update_light_entity(request):
     send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=newLight.room.id)
+    return entities_pages.get(request=request, view="edit_room", room_id=newLight.room.id, is_scenes_pages=False, is_global_scenes_page=False)
 
 
 def create_or_update_switch_entity(request):
@@ -776,8 +788,7 @@ def create_or_update_switch_entity(request):
     send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=new_switch.room.id)
-    #return redirect('edit_room', room_id=action_args["room_id"])
+    return entities_pages.get(request=request, view="edit_room", room_id=new_switch.room.id, is_scenes_pages=False, is_global_scenes_page=False)
 
 
 def initial_setup_welcome(request):

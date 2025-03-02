@@ -20,8 +20,10 @@
                         {% url "htmx_partial_edit_light_entity" light_id=entity.id as edit_url %}
                     {% elif entity.type == "Switch" %}
                         {% url "htmx_partial_edit_switch_entity" switch_id=entity.id as edit_url %}
+                    {% elif entity.type == "Scene" %}
+                        {% url "htmx_partial_edit_scene" scene_id=entity.id as edit_url %}
                     {% else %}
-                    <span class="font-bold text-error">UNKNOWN ENTITY TYPE {{ entity.type }}</span>
+                        <span class="font-bold text-error">UNKNOWN ENTITY TYPE {{ entity.type }}</span>
                     {% endif %}
                     <button class="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center" title="Edit entity" hx-swap="none" hx-get="{{ edit_url }}"><span class="mdi mdi-pencil"></span></button>
                     <button class="indicator-item badge badge-warning hover:badge-error w-6 h-6 flex items-center justify-center" title="Remove entity from page/room" hx-confirm="Do you wish to remove '{{ entity.friendly_name }}' entity?" hx-swap="none" hx-get="{% url 'htmx_partial_remove_entity_from_page_slot' page_id=page.id slot_id=i %}"><span class="mdi mdi-close"></span></button>
