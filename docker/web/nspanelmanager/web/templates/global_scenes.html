@@ -74,40 +74,14 @@ function edit_scene(id, name) {
 </form>
 
 
-<div class="md:flex md:flex-wrap md:justify-between items-center">
-  <h2 class="font-medium text-2xl" id="nspanel_name">Global scenes</h2>
-  <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-  onclick="add_new_scene();">Create new scene</button>
-</div>
-<div class="md:flex md:justify-between md:items-start mt-2 mb-6">
-  <div class="w-full mr-4">
-    <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
-      <table class="w-full text-left rtl:text-right">
-        <thead class="uppercase bg-slate-200 dark:bg-slate-950 border-solid border-b-2 border-slate-600 dark:border-slate-800">
-          <tr>
-            <th class="px-3 py-1">Name</th>
-            <th class="px-3 py-1">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="log_body" class="bg-slate-100 dark:bg-slate-600 text-black dark:text-white">
-          {% for scene in global_scenes %}
-          <tr>
-            <th class="px-2 py-2">{{ scene.friendly_name }}</th>
-            <td class="px-2 py-2">
-              <div class="inline-flex rounded-md shadow-sm" role="group">
-                <button type="button" onclick="edit_scene({{ scene.id }}, '{{ scene.friendly_name }}');" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-                  Edit
-                </button>
-                <a href='{% url "delete_global_scene" scene.id %}' class="px-4 py-2 text-sm font-medium text-white bg-red-700 hover:bg-red-800 border border-gray-200 dark:border-gray-700 rounded-e-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
-                  Delete
-                </a>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+<div class="md:flex md:justify-between md:items-start mt-2">
+  <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
+    <div class="md:flex md:flex-wrap md:justify-between items-center mb-2">
+      <span class="block mb-2 text-xl">Global scenes</span>
+      <button type="button" hx-get="{% url 'htmx_partial_create_global_scenes_page' %}" class="btn btn-info btn-outline">Add scenes page</button>
     </div>
+
+    {% component "nspanel_room_entities_pages" room_id=room.id is_scenes_pages=True is_global_scenes_page=True %}{% endcomponent %}
   </div>
 </div>
 {% endblock %}

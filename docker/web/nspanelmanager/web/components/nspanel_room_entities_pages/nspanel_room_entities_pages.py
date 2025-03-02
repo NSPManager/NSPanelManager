@@ -8,6 +8,7 @@ class NSPanelRoomEntitiesPages(component.Component):
     template_view = None
 
     def get_context_data(self, room_id, is_scenes_pages, is_global_scenes_page):
+        print("Is global scenes page:", is_global_scenes_page)
         if is_global_scenes_page:
             room = None
         else:
@@ -21,17 +22,7 @@ class NSPanelRoomEntitiesPages(component.Component):
         return data
 
     def get_template_name(self, context: Context):
-        if "view" in context:
-            url_name = context["view"]
-        elif self.template_view:
-            url_name = self.template_view
-        else:
-            url_name = context.request.resolver_match.url_name
-
-        if url_name == "edit_room":
-            return "nspanel_room_entities_pages/nspanel_room_entities_pages_edit_room.html"
-        else:
-            print("ERROR! Could not determine URL name for component nspanel_entities_page. url_name: " + url_name)
+        return "nspanel_room_entities_pages/nspanel_room_entities_pages_edit_room.html"
 
     def get(self, request, view, room_id, is_scenes_pages, is_global_scenes_page):
         self.template_view = view

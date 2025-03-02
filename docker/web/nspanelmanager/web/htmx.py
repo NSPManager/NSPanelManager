@@ -525,6 +525,20 @@ def partial_remove_entity_from_page_slot(request, page_id, slot_id):
 
 
 @csrf_exempt
+def partial_create_global_scenes_page(request):
+    entity_page = RoomEntitiesPage()
+    entity_page.room = None
+    entity_page.display_order = RoomEntitiesPage.objects.filter(room=None).count()
+    entity_page.is_scenes_page = True
+    entity_page.is_global_scenes_page = True
+    entity_page.page_type = 4
+    entity_page.save()
+    # Return new partial HTMX update of all entities pages in this room
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(request=request, view="edit_room", room_id=0, is_scenes_pages=True, is_global_scenes_page=True)
+
+
+@csrf_exempt
 def partial_add_entities_page_to_room(request, room_id, is_scenes_page):
     data = {
         "room_id": room_id,
@@ -590,14 +604,19 @@ def partial_move_entities_pages(request):
         if "pages" in json_data:
             if len(json_data["pages"]) > 0:
                 entity_page = RoomEntitiesPage.objects.get(id=json_data["pages"][0])
-                room_id = entity_page.room.id
+                is_global_scenes_pages = False
+                if entity_page.room is None:
+                    room_id = 0
+                    is_global_scenes_pages = True
+                else:
+                    room_id = entity_page.room.id
                 for index, page_id in enumerate(json_data["pages"]):
                     page = RoomEntitiesPage.objects.get(id=page_id)
                     page.display_order = index
                     page.save()
                 send_mqttmanager_reload_command()
                 entities_pages = NSPanelRoomEntitiesPages()
-                return entities_pages.get(request, view='edit_room', room_id=room_id, is_scenes_pages=entity_page.is_scenes_page, is_global_scenes_page=False)
+                return entities_pages.get(request, view='edit_room', room_id=room_id, is_scenes_pages=entity_page.is_scenes_page, is_global_scenes_page=is_global_scenes_pages)
             else:
                 return JsonResponse({
                     "status": "error",
@@ -665,12 +684,17 @@ def partial_add_entity_to_entities_page_config_modal(request, entity_source):
 @csrf_exempt
 def partial_delete_entities_page(request, page_id):
     page = RoomEntitiesPage.objects.get(id=page_id)
-    room_id = page.room.id
+    if page.room is None:
+        is_global_scenes_page = True
+        room_id = 0
+    else:
+        is_global_scenes_page = False
+        room_id = page.room.id
     page.delete()
     send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=page.room.id, is_scenes_pages=page.is_scenes_page, is_global_scenes_page=False)
+    return entities_pages.get(request=request, view="edit_room", room_id=room_id, is_scenes_pages=page.is_scenes_page, is_global_scenes_page=is_global_scenes_page)
 
 
 def create_entities_page_in_room(request, room_id, page_type, is_scenes_page):

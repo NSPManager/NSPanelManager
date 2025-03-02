@@ -28,17 +28,7 @@ class NSPanelEntitiesPage(component.Component):
         return data
 
     def get_template_name(self, context: Context):
-        if "view" in context:
-            url_name = context["view"]
-        elif self.template_view:
-            url_name = self.template_view
-        else:
-            url_name = context.request.resolver_match.url_name
-
-        if url_name == "edit_room":
-            return "nspanel_entities_page/nspanel_entities_page_edit_room.html"
-        else:
-            print("ERROR! Could not determine URL name for component nspanel_entities_page")
+        return "nspanel_entities_page/nspanel_entities_page_edit_room.html"
 
     def get(self, request, view, id):
         self.template_view = view
