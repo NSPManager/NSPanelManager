@@ -33,7 +33,7 @@
             {% else %}
                 <div class="rounded-box border-neutral border-opacity-50 border-dashed border-2 flex items-center justify-center indicator w-full h-full">
                     <span class="font-thin italic">No entitiy set</span>
-                    {% if room_id %}
+                    {% if page.room %}
                         {% concat_all '{"page_id": ' page.id ', "page_slot": ' i ', "room_id": ' page.room.id ', "is_scenes_page": "' is_scenes_page '", "is_global_scenes_page": "' is_global_scenes_page '"}' as action_args %}
                     {% else %}
                         {% concat_all '{"page_id": ' page.id ', "page_slot": ' i ', "is_scenes_page": "' is_scenes_page '", "is_global_scenes_page": "' is_global_scenes_page '"}' as action_args %}

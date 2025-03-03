@@ -24,7 +24,7 @@
                         <label for="add_new_light_name" class="block mb-2 text-sm font-medium">Name</label>
                         <div class="flex flex-row-reverse">
                         <input class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
-                        type="text" class="input" name="add_new_light_name" id="add_new_light_name" value="{{ entity.label }}">
+                        type="text" class="input" name="light_name" id="light_name" value="{{ entity.name }}">
                         <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/search_text:border-accent">
                             <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <title>Name</title>
@@ -37,82 +37,18 @@
                         </div>
                     </div>
                 </div>
-                <!-- If this is an Home Assistant entity, show the entity ID in HA it is bound to -->
-                {% if entity.entity_id != "" %}
-                    <span class="text-xs italic">Backend entity ID: {{ entity.entity_id }}</span>
+
+                {% if entity_source == "home_assistant" %}
+                    <div class="mt-4">
+                        {% component "item_select" name="backend_name" label="Home Assistant item" items=home_assistant_items selected=backend_name %}{% endcomponent %}
+                    </div>
                 {% endif %}
 
-                {% if entity.type == "openhab" %}
-                <!-- OpenHAB Light options-->
-                <div id="openhab_light_options">
+                {% if entity_source == "openhab" %}
                     <!-- Brightness item selector -->
-                    <div class="mt-4" id="openhab_dimming_channel_selector">
-                    <label for="openhab_dimming_channel_name" class="block mb-2 text-sm font-medium">Brightness</label>
-                    <div class="flex flex-row-reverse">
-                        <select name="openhab_dimming_channel_name" id="openhab_dimming_channel_name" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id">
-                            {% for item in entity.items %}
-                            {% if item == openhab_channel_brightness %}
-                                <option selected>{{ item }}</option>
-                            {% else %}
-                                <option>{{ item }}</option>
-                            {% endif %}
-                            {% endfor %}
-                        </select>
-                        <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/room_id:border-accent">
-                        <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <title>Dimmer item</title>
-                            <path
-                                d="M13,9V3.5L18.5,9M6,2C4.89,2 4,2.89 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6Z" />
-                        </svg>
-                        </span>
+                    <div class="mt-4">
+                        {% component "item_select" name="backend_name" label="OpenHAB item" items=openhab_items selected=backend_name %}{% endcomponent %}
                     </div>
-                    </div>
-
-                    <!-- Color temperature item selector -->
-                    <div class="mt-4" id="openhab_color_temp_channel_selector">
-                        <label for="openhab_color_temperature_channel_name" class="block mb-2 text-sm font-medium">Color temperature</label>
-                        <div class="flex flex-row-reverse">
-                        <select name="openhab_color_temperature_channel_name" id="openhab_color_temperature_channel_name" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id">
-                            {% for item in entity.items %}
-                            {% if item == openhab_channel_color_temperature %}
-                                <option selected>{{ item }}</option>
-                            {% else %}
-                                <option>{{ item }}</option>
-                            {% endif %}
-                            {% endfor %}
-                        </select>
-                        <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/room_id:border-accent">
-                            <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <title>Color temperature item</title>
-                            <path
-                                d="M13,9V3.5L18.5,9M6,2C4.89,2 4,2.89 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6Z" />
-                            </svg>
-                        </span>
-                        </div>
-                    </div>
-                    <!-- Color (RGB) item selector -->
-                    <div class="mt-4" id="openhab_rgb_channel_selector">
-                        <label for="openhab_RGB_channel_name" class="block mb-2 text-sm font-medium">RGB</label>
-                        <div class="flex flex-row-reverse">
-                        <select name="openhab_RGB_channel_name" id="openhab_RGB_channel_name" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id">
-                            {% for item in entity.items %}
-                            {% if item == openhab_channel_color %}
-                                <option selected>{{ item }}</option>
-                            {% else %}
-                                <option>{{ item }}</option>
-                            {% endif %}
-                            {% endfor %}
-                        </select>
-                        <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/room_id:border-accent">
-                            <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <title>RGB item</title>
-                            <path
-                                d="M13,9V3.5L18.5,9M6,2C4.89,2 4,2.89 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6Z" />
-                            </svg>
-                        </span>
-                        </div>
-                    </div>
-                </div>
                 {% endif %}
 
                 </div>

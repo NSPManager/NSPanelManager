@@ -478,11 +478,38 @@ def partial_entity_edit_light_entity(request, light_id):
     return render(request, 'partial/select_entity/entity_add_or_edit_light_to_room.html', data)
 
 
-def partial_entity_add_switch_entity(request, entity):
+def partial_entity_add_switch_entity(request):
     data = {
-        "entity": json.loads(entity),
+        "entity_source": request.session["entity_source"],
+        "openhab_item": "",
+        "home_assistant_item": "",
+        "controlled_by_nspanel_main_page": True, # By default when adding a light. Make it controlled by the NSPanel main page.
+        "openhab_items": [],
+        "home_assistant_items": [],
     }
-    return render(request, "partial/select_entity/entity_add_or_edit_switch_to_room.html", data)
+
+    if data["entity_source"] == "home_assistant":
+        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["switch"]})
+        if len(ha_items["errors"]) == 0:
+            data["home_assistant_items"] = ha_items["items"]
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "Failed to get items from Home Assistant!"
+            }, status=500)
+    elif data["entity_source"] == "openhab":
+        openhab_items = web.openhab_api.get_all_openhab_items()
+        if len(openhab_items["errors"]) == 0:
+            data["openhab_items"] = openhab_items["items"]
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "Failed to get items from OpenHAB!"
+            }, status=500)
+    else:
+        logging.error("Unknown entity source! Source: " + data["entity_source"])
+
+    return render(request, 'partial/select_entity/entity_add_or_edit_switch_to_room.html', data)
 
 
 def partial_entity_edit_switch_entity(request, switch_id):
@@ -500,8 +527,7 @@ def partial_entity_edit_switch_entity(request, switch_id):
         "light": switch,
         "edit_light_id": switch_id,
         "entity": {
-            "label": switch.friendly_name,
-            "entity_id": switch.home_assistant_name,
+            "name": switch.friendly_name,
         },
     }
     return render(request, "partial/select_entity/entity_add_or_edit_switch_to_room.html", data)
@@ -866,32 +892,28 @@ def create_or_update_switch_entity(request):
     entity_source = request.session["entity_source"]
     is_global_scenes_page = "room_id" not in action_args
 
+    print("Action args:", action_args)
+
     if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
         new_switch = Switch.objects.get(id=int(action_args["entity_id"]))
     else:
         new_switch = Switch()
         # Only set once, during initial creation:
-        if "room_id" in action_args:
-            new_switch.room = Room.objects.get(id=int(action_args["room_id"]))
-        else:
-            new_switch.room = None
+        new_switch.room = Room.objects.get(id=int(action_args["room_id"]))
         new_switch.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
         new_switch.room_view_position = int(action_args["page_slot"])
-        print("Adding scene of type:", entity_source)
         new_switch.scene_type = entity_source
-        if new_switch.scene_type == "nspanelmanager":
-            pass # Do nothing, this is one of our own scenes.
         if new_switch.scene_type == "home_assistant":
-            new_switch.backend_name = request.POST["backend_name"]
+            new_switch.home_assistant_name = request.POST["backend_name"]
         elif new_switch.scene_type == "openhab":
-            new_switch.backend_name = request.POST["backend_name"]
+            new_switch.openhab_item_switch = request.POST["backend_name"]
 
-    new_switch.friendly_name = request.POST["scene_name"]
+    new_switch.friendly_name = request.POST["light_name"]
     new_switch.save()
     send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=new_switch.room.id, is_scenes_pages=True, is_global_scenes_page=is_global_scenes_page)
+    return entities_pages.get(request=request, view="edit_room", room_id=new_switch.room.id, is_scenes_pages=False, is_global_scenes_page=False)
 
 
 def create_or_update_scene_entity(request):
@@ -911,7 +933,7 @@ def create_or_update_scene_entity(request):
         new_scene.scene_type = request.session["entity_source"]
         if new_scene.scene_type == "nspanelmanager":
             pass # Do nothing, this is one of our own scenes.
-        if new_scene.scene_type == "home_assistant":
+        elif new_scene.scene_type == "home_assistant":
             new_scene.backend_name = request.POST["backend_name"]
         elif new_scene.scene_type == "openhab":
             new_scene.backend_name = request.POST["backend_name"]
