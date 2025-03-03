@@ -52,3 +52,41 @@ def get_all_openhab_items(filter = {}):
         print("No OpenHAB configuration values. Will not gather OpenHAB entities.")
 
     return return_json
+
+
+def get_all_openhab_scenes():
+    return_json = {
+        "items": [],
+        "errors": []
+    }
+
+    # OpenHAB
+    if get_setting_with_default("openhab_token") != "" and get_setting_with_default("openhab_address") != "":
+        item_type_filter = []
+
+        # TODO: Sort out how to map channels from items to the correct POST request when MQTT is received
+        openhab_request_headers = {
+            "Authorization": "Bearer " + get_setting_with_default("openhab_token"),
+            "content-type": "application/json",
+        }
+        try:
+            openhab_response = requests.get(get_setting_with_default("openhab_address") + "/rest/rules", headers=openhab_request_headers, verify=False)
+            if openhab_response.status_code == 200:
+                for item in openhab_response.json():
+                    return_json["items"].append({
+                        "type": "openhab",
+                        "openhab_type": "item",
+                        "label": item["name"],
+                        "item_id": item["uid"],
+                        "item": item,
+                        })
+            else:
+                return_json["errors"].append("Failed to get OpenHAB items, got return code: " + str(openhab_response.status_code))
+                print("ERROR! Got status code other than 200. Got code: " + str(openhab_response.status_code))
+        except Exception as e:
+            return_json["errors"].append("Failed to get OpenHAB items: " + str(traceback.format_exc()))
+            logging.exception("Failed to get OpenHAB items!")
+    else:
+        print("No OpenHAB configuration values. Will not gather OpenHAB entities.")
+
+    return return_json

@@ -129,7 +129,7 @@
   <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
     <div class="md:flex md:flex-wrap md:justify-between items-center mb-2">
       <span class="block mb-2 text-xl">{{ room.friendly_name }} scenes</span>
-      <button type="button" hx-get="{% url 'htmx_create_entities_page_in_room' room_id=room.id page_type=4 is_scenes_page=True %}" class="btn btn-info btn-outline">Add scenes page</button>
+      <button type="button" hx-get="{% url 'htmx_create_entities_page_in_room' room_id=room.id page_type=4 is_scenes_page=True %}" hx-swap="none" class="btn btn-info btn-outline">Add scenes page</button>
     </div>
 
     {% component "nspanel_room_entities_pages" room_id=room.id is_scenes_pages=True is_global_scenes_page=False %}{% endcomponent %}

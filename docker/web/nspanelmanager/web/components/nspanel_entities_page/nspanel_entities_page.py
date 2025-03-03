@@ -10,6 +10,8 @@ class NSPanelEntitiesPage(component.Component):
         data = {
             "id": id,
             "page": page,
+            "is_scenes_page": page.is_scenes_page,
+            "is_global_scenes_page": page.room == None,
             "range": range(0, page.page_type),
             "entities": {}
         }
