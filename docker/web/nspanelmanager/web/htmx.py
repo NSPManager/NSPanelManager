@@ -510,13 +510,17 @@ def partial_entity_edit_switch_entity(request, switch_id):
 def partial_entity_edit_scene_entity(request, scene_id):
     scene = Scene.objects.get(id=scene_id)
 
-    request.session["action"] = "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE"
-    request.session["action_args"] = json.dumps({
+    action_args = {
         "entity_id": scene.id,
-        "room_id": scene.room.id,
         "page_id": scene.entities_page.id,
         "page_slot": scene.room_view_position,
-    })
+    }
+    # If scene is not a global scene (ie. room is set) then also add room_id
+    if scene.room:
+        action_args["room_id"] = scene.room.id
+
+    request.session["action"] = "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE"
+    request.session["action_args"] = json.dumps(action_args)
 
     data = {
         "scene": scene,
@@ -582,8 +586,12 @@ def partial_remove_entity_from_page_slot(request, page_id, slot_id):
         entities.delete();
         send_mqttmanager_reload_command()
 
+    room_id = 0
+    if page.room:
+        room_id = page.room.id
+
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=page.room.id, is_scenes_pages=page.is_scenes_page, is_global_scenes_page=(page.room is None))
+    return entities_pages.get(request=request, view="edit_room", room_id=room_id, is_scenes_pages=page.is_scenes_page, is_global_scenes_page=(page.room is None))
 
 
 @csrf_exempt
@@ -912,8 +920,12 @@ def create_or_update_scene_entity(request):
     new_scene.save()
     send_mqttmanager_reload_command()
 
+    room_id = 0
+    if new_scene.room:
+        room_id = new_scene.room.id
+
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=new_scene.room.id, is_scenes_pages=True, is_global_scenes_page=(new_scene.room == None))
+    return entities_pages.get(request=request, view="edit_room", room_id=room_id, is_scenes_pages=True, is_global_scenes_page=(new_scene.room == None))
 
 
 def initial_setup_welcome(request):
