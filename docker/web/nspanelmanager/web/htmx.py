@@ -750,14 +750,13 @@ def partial_add_entity_to_entities_page_select_entity_source(request, action, ac
     request.session["action_args"] = action_args
 
     # Check if it's adding scenes and then force show select dialog even if only one source is available as we want to give the option to choose "NSPM Scene"
-    is_scenes_add = False
     if action == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE":
-        is_scenes_add = True
+        return render(request, 'partial/add_entity_to_entities_page_select_entity_source.html', data)
 
-    if not is_scenes_add or (get_setting_with_default("home_assistant_address") == "" or get_setting_with_default("home_assistant_token") == "") and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
+    if or (get_setting_with_default("home_assistant_address") == "" or get_setting_with_default("home_assistant_token") == "") and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
         # OpenHAB connection configured but not Home Assistant. Skip selecting source:
         return redirect('htmx_partial_select_new_entity_config', entity_source="openhab")
-    elif not is_scenes_add or get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and (get_setting_with_default("openhab_address") == "" or get_setting_with_default("openhab_token") == ""):
+    elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and (get_setting_with_default("openhab_address") == "" or get_setting_with_default("openhab_token") == ""):
         # OpenHAB connection configured but not Home Assistant. Skip selecting source:
         return redirect('htmx_partial_select_new_entity_config', entity_source="home_assistant")
     elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
