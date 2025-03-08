@@ -750,15 +750,12 @@ def partial_add_entity_to_entities_page_select_entity_source(request, action, ac
     request.session["action_args"] = action_args
     if (get_setting_with_default("home_assistant_address") == "" or get_setting_with_default("home_assistant_token") == "") and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
         # OpenHAB connection configured but not Home Assistant. Skip selecting source:
-        return redirect('htmx_partial_select_new_entity_config_modal', entity_source="openhab")
+        return redirect('htmx_partial_select_new_entity_config', entity_source="openhab")
     elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and (get_setting_with_default("openhab_address") == "" or get_setting_with_default("openhab_token") == ""):
         # OpenHAB connection configured but not Home Assistant. Skip selecting source:
-        return redirect('htmx_partial_select_new_entity_config_modal', entity_source="home_assistant")
+        return redirect('htmx_partial_select_new_entity_config', entity_source="home_assistant")
     elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
         return render(request, 'partial/add_entity_to_entities_page_select_entity_source.html', data)
-    else:
-        return JsonResponse({
-            "status": "error",
             "text": "Unknown sources configured. Check configuration for Home Assistant and/or OpenHAB in settings."
         }, status=500)
 
