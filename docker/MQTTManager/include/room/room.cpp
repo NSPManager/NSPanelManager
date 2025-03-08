@@ -114,11 +114,9 @@ void Room::post_init() {
       SPDLOG_DEBUG("Attached callbacks for all entities in RoomEntitiesPage {}.", page->get_id());
     }
   }
-  this->_room_changed_callbacks(this);
 
-  // if(this->_send_status_updates) {
-  // this->_publish_protobuf_status();
-  // }
+  this->_room_changed_callbacks(this);
+  this->_send_room_state_update();
 }
 
 std::vector<std::shared_ptr<MqttManagerEntity>> Room::get_all_entities() {
@@ -218,6 +216,7 @@ void Room::command_callback(NSPanelMQTTManagerCommand &command) {
 }
 
 void Room::_send_room_state_update() {
+  std::lock_guard<std::mutex> lock_guard(this->_send_room_status_update_mutex);
   NSPanelRoomStatus status;
   status.set_id(this->_id);
   status.set_name(this->_name);
@@ -307,8 +306,6 @@ void Room::_send_room_state_update() {
     status.set_average_color_temperature(0);
   }
 
-  SPDLOG_DEBUG("Room {}::{} average dim level: {}, average color temperature: {}.", this->_id, this->_name, status.average_dim_level(), status.average_color_temperature());
-
   if (num_lights_table_on > 0) {
     float average_kelvin = (float)total_kelvin_table / num_lights_table_on;
     average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
@@ -341,7 +338,7 @@ void Room::_send_room_state_update() {
     status.set_ceiling_lights_color_temperature_value(0);
   }
 
-  SPDLOG_TRACE("Kelvin all lights in room {}::{}: {}", this->_id, this->_name, status.average_color_temperature());
+  SPDLOG_DEBUG("Room {}::{} average dim level: {}, average color temperature: {}. Num ceiling lights on: {}, Ceiling lights brightness: {}, Num table lights on: {}, Table lights brightness: {}", this->_id, this->_name, status.average_dim_level(), status.average_color_temperature(), num_lights_ceiling_on, status.ceiling_lights_dim_level(), num_lights_table_on, status.table_lights_dim_level());
 
   std::string protobuf_str_buffer;
   if (status.SerializeToString(&protobuf_str_buffer)) {

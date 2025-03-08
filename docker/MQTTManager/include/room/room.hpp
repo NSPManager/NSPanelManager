@@ -113,6 +113,9 @@ private:
   // Mutex to only allow one task at the time to access the entity_pages
   std::mutex _entities_pages_mutex;
 
+  // Mutex to only allow one task at the time to send updates to the panel regarding room status
+  std::mutex _send_room_status_update_mutex;
+
   // If set to true, automatic status updates over MQTT when entities changes are disabled.
   bool _send_status_updates;
 
