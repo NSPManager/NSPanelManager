@@ -742,22 +742,33 @@ def partial_add_entity_to_entities_page_select_entity_type(request, action, acti
 
 @csrf_exempt
 def partial_add_entity_to_entities_page_select_entity_source(request, action, action_args):
-    data = {
-        "action": action,
-        "action_args": action_args
-    }
     request.session["action"] = action
     request.session["action_args"] = action_args
+
+    is_home_assistant_configured = False
+    is_openhab_configured = False
+    if get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "":
+        is_home_assistant_configured = True
+    if get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
+        is_openhab_configured = True
+
+    data = {
+        "action": action,
+        "action_args": action_args,
+        "is_home_assistant_configured": is_home_assistant_configured,
+        "is_openhab_configured": is_openhab_configured
+    }
+
 
     # Check if it's adding scenes and then force show select dialog even if only one source is available as we want to give the option to choose "NSPM Scene"
     if action == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE":
         return render(request, 'partial/add_entity_to_entities_page_select_entity_source.html', data)
 
-    if or (get_setting_with_default("home_assistant_address") == "" or get_setting_with_default("home_assistant_token") == "") and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
+    if is_openhab_configured and not is_home_assistant_configured:
         # OpenHAB connection configured but not Home Assistant. Skip selecting source:
         return redirect('htmx_partial_select_new_entity_config', entity_source="openhab")
-    elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and (get_setting_with_default("openhab_address") == "" or get_setting_with_default("openhab_token") == ""):
-        # OpenHAB connection configured but not Home Assistant. Skip selecting source:
+    elif is_home_assistant_configured and not is_openhab_configured:
+        # Home Assistant connection configured but not OpenHAB. Skip selecting source:
         return redirect('htmx_partial_select_new_entity_config', entity_source="home_assistant")
     elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
         return render(request, 'partial/add_entity_to_entities_page_select_entity_source.html', data)
