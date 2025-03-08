@@ -21,5 +21,5 @@ function hide_popover(e) {
 }
 
 $(window).click(function () {
-  $(".dropdown").addClass("hidden");
+  $(".nspanel-actions-menu-dropdown").addClass("hidden");
 });

@@ -71,7 +71,7 @@
             </button>
             <!-- Dropdown menu -->
             <div id="nspanelActionsMenuDropdown-{{ nspanel.data.id }}"
-                class="hidden dropdown z-10 font-normal bg-neutral text-neutral-content divide-y divide-neutral-content rounded-box shadow w-44 md:absolute inset-x-auto overflow-hidden">
+                class="hidden nspanel-actions-menu-dropdown dropdown z-10 font-normal bg-neutral text-neutral-content divide-y divide-neutral-content rounded-box shadow w-44 md:absolute inset-x-auto overflow-hidden">
                 <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
                 <li>
                     {% component "nspanel_reboot_button" id=nspanel.data.id state=nspanel.status.state %}{% endcomponent %}
