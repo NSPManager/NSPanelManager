@@ -171,7 +171,6 @@ urlpatterns = [
     path('htmx/partial/select_weather_outside_temperature_sensor', htmx.select_weather_outside_temperature_sensor, name='htmx_partial_select_weather_outside_temperature_sensor'),
     path('htmx/partial/select_weather_outside_temperature_sensor_provider', htmx.select_weather_outside_temperature_sensor_provider, name='htmx_partial_select_weather_outside_temperature_sensor_provider'),
     path('htmx/partial/select_weather_outside_temperature_sensor_from_list/<str:entity_source>', htmx.select_weather_outside_temperature_sensor_from_list, name='htmx_partial_select_weather_outside_temperature_sensor_from_list'),
-    path('htmx/partial/create_global_scenes_page', htmx.partial_create_global_scenes_page, name='htmx_partial_create_global_scenes_page'),
     path('htmx/interface/theme', htmx.interface_theme, name='htmx_interface_theme'),
 
     # HTMX initial setup URLs

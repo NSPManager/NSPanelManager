@@ -621,20 +621,6 @@ def partial_remove_entity_from_page_slot(request, page_id, slot_id):
 
 
 @csrf_exempt
-def partial_create_global_scenes_page(request):
-    entity_page = RoomEntitiesPage()
-    entity_page.room = None
-    entity_page.display_order = RoomEntitiesPage.objects.filter(room=None).count()
-    entity_page.is_scenes_page = True
-    entity_page.is_global_scenes_page = True
-    entity_page.page_type = 4
-    entity_page.save()
-    # Return new partial HTMX update of all entities pages in this room
-    entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=0, is_scenes_pages=True, is_global_scenes_page=True)
-
-
-@csrf_exempt
 def partial_add_entities_page_to_room(request, room_id, is_scenes_page, is_global_scenes_page):
     data = {
         "room_id": room_id,
