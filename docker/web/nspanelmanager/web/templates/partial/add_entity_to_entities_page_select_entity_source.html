@@ -16,6 +16,9 @@
             <div class="join">
                 <button class="join-item btn btn-xl btn-info" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="home_assistant" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">Home Assistant</button>
                 <button class="join-item btn btn-xl btn-warning" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="openhab" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">OpenHAB</button>
+                {% if action == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE" %}
+                    <button class="join-item btn btn-xl btn-success" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="nspm" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">Scene</button>
+                {% endif %}
             </div>
         </div>
     </div>

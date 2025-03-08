@@ -17,7 +17,6 @@
     nspanel_id: '',
     state: '',
     render: ({nspanel_id, state}) => {
-      console.log("Rendering reboot button");
       if (state == "offline" || state == "unknown") {
         return html`
             ${attachHtmxListeners}
