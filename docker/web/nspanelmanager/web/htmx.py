@@ -635,10 +635,11 @@ def partial_create_global_scenes_page(request):
 
 
 @csrf_exempt
-def partial_add_entities_page_to_room(request, room_id, is_scenes_page):
+def partial_add_entities_page_to_room(request, room_id, is_scenes_page, is_global_scenes_page):
     data = {
         "room_id": room_id,
         "is_scenes_page": is_scenes_page,
+        "is_global_scenes_page": is_global_scenes_page,
     }
     return render(request, 'partial/add_entities_page_to_room.html', data)
 
@@ -810,13 +811,18 @@ def partial_delete_entities_page(request, page_id):
     return entities_pages.get(request=request, view="edit_room", room_id=room_id, is_scenes_pages=page.is_scenes_page, is_global_scenes_page=is_global_scenes_page)
 
 
-def create_entities_page_in_room(request, room_id, page_type, is_scenes_page):
-    room = Room.objects.get(id=room_id)
+def create_entities_page_in_room(request, room_id, page_type, is_scenes_page, is_global_scenes_page):
     entity_page = RoomEntitiesPage()
-    entity_page.room = room
-    entity_page.display_order = RoomEntitiesPage.objects.filter(room=room).count()
     entity_page.is_scenes_page = is_scenes_page == "True"
-    entity_page.is_global_scenes_page = False
+    entity_page.is_global_scenes_page = is_global_scenes_page == "True"
+    if entity_page.is_global_scenes_page:
+        entity_page.room = None
+        entity_page.display_order = RoomEntitiesPage.objects.filter(room=None).count()
+    else:
+        room = Room.objects.get(id=room_id)
+        entity_page.room = room
+        entity_page.display_order = RoomEntitiesPage.objects.filter(room=room).count()
+
     if page_type == 4:
         entity_page.page_type = 4
         entity_page.save()

@@ -2,9 +2,9 @@
     <ul class="modal-box menu menu-lg bg-base-200 rounded-box w-80">
         <span class="">How many entities should the page hold?</span>
         <div class="join items-center justify-center mt-4">
-            <button class="btn btn-neutral join-item btn-lg" hx-get="{% url 'htmx_create_entities_page_in_room' room_id=room_id page_type=4 is_scenes_page=is_scenes_page %}" onclick="modal.close();">4</button>
-            <button class="btn btn-neutral join-item btn-lg" hx-get="{% url 'htmx_create_entities_page_in_room' room_id=room_id page_type=8 is_scenes_page=is_scenes_page %}" onclick="modal.close();">8</button>
-            <button class="btn btn-neutral join-item btn-lg" hx-get="{% url 'htmx_create_entities_page_in_room' room_id=room_id page_type=12 is_scenes_page=is_scenes_page %}" onclick="modal.close();">12</button>
+            <button class="btn btn-neutral join-item btn-lg" hx-get="{% url 'htmx_create_entities_page_in_room' room_id=room_id page_type=4 is_scenes_page=is_scenes_page is_global_scenes_page=is_global_scenes_page %}" onclick="modal.close();">4</button>
+            <button class="btn btn-neutral join-item btn-lg" hx-get="{% url 'htmx_create_entities_page_in_room' room_id=room_id page_type=8 is_scenes_page=is_scenes_page is_global_scenes_page=is_global_scenes_page %}" onclick="modal.close();">8</button>
+            <button class="btn btn-neutral join-item btn-lg" hx-get="{% url 'htmx_create_entities_page_in_room' room_id=room_id page_type=12 is_scenes_page=is_scenes_page is_global_scenes_page=is_global_scenes_page %}" onclick="modal.close();">12</button>
         </div>
     </ul>
 
