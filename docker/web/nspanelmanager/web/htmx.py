@@ -756,6 +756,8 @@ def partial_add_entity_to_entities_page_select_entity_source(request, action, ac
         return redirect('htmx_partial_select_new_entity_config', entity_source="home_assistant")
     elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
         return render(request, 'partial/add_entity_to_entities_page_select_entity_source.html', data)
+    else:
+        return JsonResponse({
             "text": "Unknown sources configured. Check configuration for Home Assistant and/or OpenHAB in settings."
         }, status=500)
 
