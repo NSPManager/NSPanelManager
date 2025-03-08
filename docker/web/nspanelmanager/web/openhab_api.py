@@ -34,11 +34,13 @@ def get_all_openhab_items(filter = {}):
                         # Not type filter applied, return all items
                         add_entity = True
 
+
+
                     if add_entity:
                         return_json["items"].append({
                             "type": "openhab",
                             "openhab_type": "item",
-                            "label": item["label"],
+                            "label": item["name"],
                             "item_id": item["name"],
                             "item": item,
                         })
