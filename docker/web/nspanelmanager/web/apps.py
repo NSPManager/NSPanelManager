@@ -26,9 +26,6 @@ def start_mqtt_manager():
     from .settings_helper import get_setting_with_default
     global mqttmanager_process
 
-    # Setup handler to catch SIGCHLD from mqttmanager_process
-    signal.signal(signal.SIGCHLD, sigchld_handler)
-
     print("Did not find a running MQTTManager, starting MQTTManager...")
     # Restart the process
     logging.info("Starting a new mqtt_manager")
@@ -69,6 +66,9 @@ class WebConfig(AppConfig):
     name = 'web'
 
     def ready(self):
+        # Setup handler to catch SIGCHLD from mqttmanager_process
+        signal.signal(signal.SIGCHLD, sigchld_handler)
+
         try:
             environment = environ.Env()
             if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
