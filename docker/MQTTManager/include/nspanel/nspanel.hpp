@@ -246,5 +246,8 @@ private:
   std::string _mqtt_topic_room_entities_page_status;
 
   std::list<NSPanelLogMessage> _log_messages;
+
+  // Mutex to allow only one thread to send config at a time
+  std::mutex _send_config_mutex;
 };
 #endif // !MQTT_MANAGER_NSPANEL

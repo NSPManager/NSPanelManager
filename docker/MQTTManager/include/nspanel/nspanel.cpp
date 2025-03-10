@@ -44,8 +44,6 @@
 #include <string>
 #include <sys/stat.h>
 #include <system_error>
-#include <thread>
-#include <unordered_map>
 #include <vector>
 #include <websocket_server/websocket_server.hpp>
 
@@ -55,7 +53,11 @@ NSPanel::NSPanel(uint32_t id) {
   // If this panel is just a panel in waiting (ie. not accepted the request yet) it won't have an id.
   this->_has_registered_to_manager = false;
   this->_id = id;
+  SPDLOG_INFO("Loading new NSPanel with ID {}.", id);
   this->reload_config();
+
+  // Send initial config to panel
+  this->send_config();
 
   CommandManager::attach_callback(boost::bind(&NSPanel::command_callback, this, _1));
 
@@ -198,12 +200,10 @@ void NSPanel::reload_config() {
       MQTT_Manager::subscribe(fmt::format("nspanel/{}/log", this->_mac), boost::bind(&NSPanel::mqtt_log_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
-      MqttManagerConfig::attach_config_loaded_listener(boost::bind(&NSPanel::send_config, this));
       this->register_to_home_assistant();
     }
 
     SPDLOG_DEBUG("Loaded NSPanel {}::{}, type: {}.", this->_id, this->_name, this->_is_us_panel ? "US" : "EU");
-    this->send_config();
   } catch (std::system_error &ex) {
     SPDLOG_ERROR("Failed to get config for NSPanel {} from database.", this->_id);
   }
@@ -214,6 +214,8 @@ void NSPanel::reload_config() {
 }
 
 void NSPanel::send_config() {
+  std::lock_guard<std::mutex> lock(this->_send_config_mutex);
+
   SPDLOG_INFO("Sending config over MQTT for panel {}::{}", this->_id, this->_name);
   NSPanelConfig config;
   MqttManagerSettingsHolder global_setting = MqttManagerConfig::get_settings();
@@ -242,6 +244,7 @@ void NSPanel::send_config() {
   config.set_button2_mqtt_topic(this->_get_nspanel_setting_with_default("button2_mqtt_topic", ""));
   config.set_button1_mqtt_payload(this->_get_nspanel_setting_with_default("button1_mqtt_payload", ""));
   config.set_button2_mqtt_payload(this->_get_nspanel_setting_with_default("button2_mqtt_payload", ""));
+
   // TODO: Move detached mode light to manager so that panel only sends a "Hey, trigger detached light on button 1" command
   if (this->_settings.button1_detached_mode_light_id.has_value()) {
     config.set_button1_detached_light_id(this->_settings.button1_detached_mode_light_id.value());
@@ -270,6 +273,13 @@ void NSPanel::send_config() {
   } else {
     SPDLOG_ERROR("Unknown screensaver mode '{}' for NSPanel {}::{}, assuming weather with background.", screensaver_mode, this->_id, this->_name);
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND);
+  }
+
+  std::string show_screensaver_inside_temperature = this->_get_nspanel_setting_with_default("show_screensaver_inside_temperature", MqttManagerConfig::get_setting_with_default("show_screensaver_inside_temperature", "True"));
+  if (show_screensaver_inside_temperature.compare("True") == 0) {
+    config.set_show_screensaver_inside_temperature(true);
+  } else {
+    config.set_show_screensaver_inside_temperature(false);
   }
 
   try {
@@ -343,7 +353,6 @@ void NSPanel::reset_mqtt_topics() {
   // This nspanel was removed. Clear any retain on any MQTT topic.
   MQTT_Manager::clear_retain(this->_mqtt_status_topic);
   MQTT_Manager::clear_retain(this->_mqtt_command_topic);
-  MQTT_Manager::clear_retain(this->_mqtt_config_topic);
 
   this->reset_ha_mqtt_topics();
 }

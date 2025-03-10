@@ -34,6 +34,7 @@ def start_mqtt_manager():
     mqttmanager_env["LOG_LEVEL"] = get_setting_with_default("mqttmanager_log_level")
     mqttmanager_process = subprocess.Popen(["/MQTTManager/build/nspm_mqttmanager"], cwd="/usr/src/app/", env=mqttmanager_env)
 
+
 """
 Restart the MQTT Manager process
 """
@@ -60,6 +61,7 @@ def send_mqttmanager_reload_command():
         if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
             logging.info("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
             os.kill(proc.pid, signal.SIGUSR1)
+
 
 class WebConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'

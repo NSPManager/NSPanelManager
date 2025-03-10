@@ -211,6 +211,7 @@ def edit_nspanel(request, panel_id: int):
         "screen_dim_level": get_nspanel_setting_with_default(panel_id, "screen_dim_level", ""),
         "screensaver_dim_level": get_nspanel_setting_with_default(panel_id, "screensaver_dim_level", ""),
         "is_us_panel": get_nspanel_setting_with_default(panel_id, "is_us_panel", "False"),
+        "show_screensaver_inside_temperature": get_nspanel_setting_with_default(panel_id, "show_screensaver_inside_temperature", "global"),
         "screensaver_activation_timeout": get_nspanel_setting_with_default(panel_id, "screensaver_activation_timeout", ""),
         "screensaver_mode": get_nspanel_setting_with_default(panel_id, "screensaver_mode", "global"),
         "reverse_relays": get_nspanel_setting_with_default(panel_id, "reverse_relays", "False"),
@@ -333,8 +334,12 @@ def save_panel_settings(request, panel_id: int):
     if request.POST["screensaver_mode"] == "global":
         delete_nspanel_setting(panel_id, "screensaver_mode")
     else:
-        set_nspanel_setting_value(
-            panel_id, "screensaver_mode", request.POST["screensaver_mode"])
+        set_nspanel_setting_value(panel_id, "screensaver_mode", request.POST["screensaver_mode"])
+
+    if request.POST["show_screensaver_inside_temperature"] == "global":
+        delete_nspanel_setting(panel_id, "show_screensaver_inside_temperature")
+    else:
+        set_nspanel_setting_value(panel_id, "show_screensaver_inside_temperature", request.POST["show_screensaver_inside_temperature"])
 
     set_nspanel_setting_value(
         panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
@@ -549,6 +554,7 @@ def settings_page(request):
     data["screen_dim_level"] = get_setting_with_default("screen_dim_level")
     data["screensaver_dim_level"] = get_setting_with_default("screensaver_dim_level")
     data["screensaver_mode"] = get_setting_with_default("screensaver_mode")
+    data["show_screensaver_inside_temperature"] = get_setting_with_default("show_screensaver_inside_temperature")
     data["turn_on_behavior"] = get_setting_with_default("turn_on_behavior")
     data["max_live_log_messages"] = get_setting_with_default("max_live_log_messages")
     data["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size")
@@ -600,24 +606,16 @@ def save_settings(request):
     set_setting_value(name="mqtt_ignore_time",
                       value=request.POST["mqtt_ignore_time"])
 
-    set_setting_value(name="screensaver_activation_timeout",
-                      value=request.POST["screensaver_activation_timeout"])
-    set_setting_value(name="screen_dim_level",
-                      value=request.POST["screen_dim_level"])
-    set_setting_value(name="screensaver_dim_level",
-                      value=request.POST["screensaver_dim_level"])
-    set_setting_value(name="screensaver_mode",
-                      value=request.POST["screensaver_mode"])
-    set_setting_value(name="turn_on_behavior",
-                      value=request.POST["turn_on_behavior"])
-    set_setting_value(name="max_live_log_messages",
-                      value=request.POST["max_live_log_messages"])
-    set_setting_value(name="max_log_buffer_size",
-                      value=request.POST["max_log_buffer_size"])
-    set_setting_value(name="mqttmanager_log_level",
-                      value=request.POST["mqttmanager_log_level"])
-    set_setting_value(name="manager_address",
-                      value=request.POST["manager_address"])
+    set_setting_value(name="screensaver_activation_timeout", value=request.POST["screensaver_activation_timeout"])
+    set_setting_value(name="screen_dim_level", value=request.POST["screen_dim_level"])
+    set_setting_value(name="screensaver_dim_level", value=request.POST["screensaver_dim_level"])
+    set_setting_value(name="screensaver_mode", value=request.POST["screensaver_mode"])
+    set_setting_value(name="show_screensaver_inside_temperature", value=request.POST["show_screensaver_inside_temperature"])
+    set_setting_value(name="turn_on_behavior", value=request.POST["turn_on_behavior"])
+    set_setting_value(name="max_live_log_messages", value=request.POST["max_live_log_messages"])
+    set_setting_value(name="max_log_buffer_size", value=request.POST["max_log_buffer_size"])
+    set_setting_value(name="mqttmanager_log_level", value=request.POST["mqttmanager_log_level"])
+    set_setting_value(name="manager_address", value=request.POST["manager_address"])
     set_setting_value(name="manager_port", value=request.POST["manager_port"])
     set_setting_value(name="optimistic_mode", value=request.POST["optimistic_mode"] == "optimistic")
     # Settings saved, restart mqtt_manager

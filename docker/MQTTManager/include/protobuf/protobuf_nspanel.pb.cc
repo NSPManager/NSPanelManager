@@ -450,22 +450,23 @@ inline constexpr NSPanelConfig::Impl_::Impl_(
         screen_dim_level_{0},
         screensaver_dim_level_{0},
         screensaver_mode_{static_cast< ::NSPanelConfig_NSPanelScreensaverMode >(0)},
+        show_screensaver_inside_temperature_{false},
         clock_us_style_{false},
         use_fahrenheit_{false},
         is_us_panel_{false},
-        reverse_relays_{false},
         temperature_calibration_{0},
         button1_mode_{0},
-        button2_mode_{0},
+        reverse_relays_{false},
         relay1_default_mode_{false},
         relay2_default_mode_{false},
         optimistic_mode_{false},
-        relay1_is_in_relay_group_{false},
+        button2_mode_{0},
         button1_detached_light_id_{0},
         button2_detached_light_id_{0},
         raise_light_level_to_100_above_{0},
         nspanel_id_{0},
         relay1_relay_group_{0},
+        relay1_is_in_relay_group_{false},
         relay2_is_in_relay_group_{false},
         relay2_relay_group_{0},
         _cached_size_{0} {}
@@ -529,6 +530,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.screen_dim_level_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.screensaver_dim_level_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.screensaver_mode_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.show_screensaver_inside_temperature_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.clock_us_style_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.use_fahrenheit_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.is_us_panel_),
@@ -744,19 +746,19 @@ static const ::_pbi::MigrationSchema
         {0, -1, -1, sizeof(::NSPanelScene)},
         {11, -1, -1, sizeof(::NSPanelConfig_RoomInfo)},
         {21, -1, -1, sizeof(::NSPanelConfig)},
-        {64, -1, -1, sizeof(::NSPanelWarning)},
-        {74, -1, -1, sizeof(::NSPanelStatusReport)},
-        {90, -1, -1, sizeof(::NSPanelLightStatus)},
-        {108, -1, -1, sizeof(::NSPanelRoomEntitiesPage_EntitySlot)},
-        {121, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
-        {133, -1, -1, sizeof(::NSPanelRoomStatus)},
-        {154, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
-        {167, -1, -1, sizeof(::NSPanelWeatherUpdate)},
-        {183, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
-        {198, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
-        {208, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
-        {225, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
-        {235, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {65, -1, -1, sizeof(::NSPanelWarning)},
+        {75, -1, -1, sizeof(::NSPanelStatusReport)},
+        {91, -1, -1, sizeof(::NSPanelLightStatus)},
+        {109, -1, -1, sizeof(::NSPanelRoomEntitiesPage_EntitySlot)},
+        {122, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
+        {134, -1, -1, sizeof(::NSPanelRoomStatus)},
+        {155, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
+        {168, -1, -1, sizeof(::NSPanelWeatherUpdate)},
+        {184, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
+        {199, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
+        {209, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
+        {226, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
+        {236, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelScene_default_instance_._instance,
@@ -780,7 +782,7 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     protodesc_cold) = {
     "\n\026protobuf_nspanel.proto\"@\n\014NSPanelScene"
     "\022\020\n\010scene_id\030\001 \001(\005\022\020\n\010can_save\030\002 \001(\010\022\014\n\004"
-    "name\030\003 \001(\t\"\222\n\n\rNSPanelConfig\022\014\n\004name\030\001 \001"
+    "name\030\003 \001(\t\"\277\n\n\rNSPanelConfig\022\014\n\004name\030\001 \001"
     "(\t\022\024\n\014default_room\030\002 \001(\005\022\024\n\014default_page"
     "\030\003 \001(\005\022&\n\036screensaver_activation_timeout"
     "\030\004 \001(\005\022\034\n\024min_button_push_time\030\005 \001(\005\022\036\n\026"
@@ -789,109 +791,110 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "release_time\030\010 \001(\005\022\030\n\020screen_dim_level\030\t"
     " \001(\005\022\035\n\025screensaver_dim_level\030\n \001(\005\022\?\n\020s"
     "creensaver_mode\030\013 \001(\0162%.NSPanelConfig.NS"
-    "PanelScreensaverMode\022\026\n\016clock_us_style\030\014"
-    " \001(\010\022\026\n\016use_fahrenheit\030\r \001(\010\022\023\n\013is_us_pa"
-    "nel\030\016 \001(\010\022+\n\nroom_infos\030\017 \003(\0132\027.NSPanelC"
-    "onfig.RoomInfo\022\026\n\016reverse_relays\030\020 \001(\010\022\033"
-    "\n\023relay1_default_mode\030\021 \001(\010\022\033\n\023relay2_de"
-    "fault_mode\030\022 \001(\010\022\037\n\027temperature_calibrat"
-    "ion\030\023 \001(\002\022\024\n\014button1_mode\030\024 \001(\005\022\032\n\022butto"
-    "n1_mqtt_topic\030\025 \001(\t\022\034\n\024button1_mqtt_payl"
-    "oad\030\026 \001(\t\022\024\n\014button2_mode\030\027 \001(\005\022\032\n\022butto"
-    "n2_mqtt_topic\030\030 \001(\t\022\034\n\024button2_mqtt_payl"
-    "oad\030\031 \001(\t\022!\n\031button1_detached_light_id\030\032"
-    " \001(\005\022!\n\031button2_detached_light_id\030\033 \001(\005\022"
-    "$\n\rglobal_scenes\030\034 \003(\0132\r.NSPanelScene\022\027\n"
-    "\017optimistic_mode\030\035 \001(\010\022&\n\036raise_light_le"
-    "vel_to_100_above\030\036 \001(\005\022\022\n\nnspanel_id\030\037 \001"
-    "(\005\022 \n\030relay1_is_in_relay_group\030  \001(\010\022\032\n\022"
-    "relay1_relay_group\030! \001(\005\022 \n\030relay2_is_in"
-    "_relay_group\030\" \001(\010\022\032\n\022relay2_relay_group"
-    "\030# \001(\005\0324\n\010RoomInfo\022\017\n\007room_id\030\001 \001(\005\022\027\n\017e"
-    "ntity_page_ids\030\002 \003(\005\"\250\001\n\026NSPanelScreensa"
-    "verMode\022\033\n\027WEATHER_WITH_BACKGROUND\020\000\022\036\n\032"
-    "WEATHER_WITHOUT_BACKGROUND\020\001\022\034\n\030DATETIME"
-    "_WITH_BACKGROUND\020\003\022\037\n\033DATETIME_WITHOUT_B"
-    "ACKGROUND\020\004\022\022\n\016NO_SCREENSAVER\020\005\"C\n\016NSPan"
-    "elWarning\022#\n\005level\030\001 \001(\0162\024.NSPanelWarnin"
-    "gLevel\022\014\n\004text\030\002 \001(\t\"\311\002\n\023NSPanelStatusRe"
-    "port\0221\n\rnspanel_state\030\001 \001(\0162\032.NSPanelSta"
-    "tusReport.state\022\027\n\017update_progress\030\002 \001(\005"
-    "\022\014\n\004rssi\030\003 \001(\005\022\025\n\rheap_used_pct\030\004 \001(\005\022\023\n"
-    "\013mac_address\030\005 \001(\t\022\023\n\013temperature\030\006 \001(\002\022"
-    "\022\n\nip_address\030\007 \001(\t\022!\n\010warnings\030\010 \003(\0132\017."
-    "NSPanelWarning\"`\n\005state\022\n\n\006ONLINE\020\000\022\013\n\007O"
-    "FFLINE\020\001\022\020\n\014UPDATING_TFT\020\002\022\025\n\021UPDATING_F"
-    "IRMWARE\020\003\022\025\n\021UPDATING_LITTLEFS\020\004\"\325\001\n\022NSP"
-    "anelLightStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001("
-    "\t\022\017\n\007can_dim\030\003 \001(\010\022\035\n\025can_color_temperat"
-    "ure\030\004 \001(\010\022\017\n\007can_rgb\030\005 \001(\010\022\023\n\013light_leve"
-    "l\030\006 \001(\005\022\022\n\ncolor_temp\030\007 \001(\005\022\013\n\003hue\030\010 \001(\005"
-    "\022\022\n\nsaturation\030\t \001(\005\022\032\n\022room_view_positi"
-    "on\030\n \001(\005\"\345\001\n\027NSPanelRoomEntitiesPage\022\n\n\002"
-    "id\030\001 \001(\005\022\021\n\tpage_type\030\002 \001(\005\022\023\n\013header_te"
-    "xt\030\003 \001(\t\0225\n\010entities\030\004 \003(\0132#.NSPanelRoom"
-    "EntitiesPage.EntitySlot\032_\n\nEntitySlot\022\032\n"
-    "\022room_view_position\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022"
-    "\014\n\004icon\030\003 \001(\t\022\013\n\003pco\030\004 \001(\005\022\014\n\004pco2\030\005 \001(\005"
-    "\"\226\003\n\021NSPanelRoomStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004na"
-    "me\030\002 \001(\t\022\031\n\021average_dim_level\030\003 \001(\005\022 \n\030c"
-    "eiling_lights_dim_level\030\004 \001(\005\022\036\n\026table_l"
-    "ights_dim_level\030\005 \001(\005\022!\n\031average_color_t"
-    "emperature\030\006 \001(\005\022.\n&ceiling_lights_color"
-    "_temperature_value\030\007 \001(\005\022,\n$table_lights"
-    "_color_temperature_value\030\010 \001(\005\022\032\n\022num_ce"
-    "iling_lights\030\t \001(\005\022\030\n\020num_table_lights\030\n"
-    " \001(\005\022\035\n\025num_ceiling_lights_on\030\013 \001(\005\022\033\n\023n"
-    "um_table_lights_on\030\014 \001(\005\022\027\n\017entity_page_"
-    "ids\030\r \003(\005\"\277\003\n\024NSPanelWeatherUpdate\022:\n\016fo"
-    "recast_items\030\001 \003(\0132\".NSPanelWeatherUpdat"
-    "e.ForecastItem\022\034\n\024current_weather_icon\030\002"
-    " \001(\t\022\"\n\032current_temperature_string\030\003 \001(\t"
-    "\022\"\n\032current_maxmin_temperature\030\004 \001(\t\022\033\n\023"
-    "current_wind_string\030\005 \001(\t\022\026\n\016sunrise_str"
-    "ing\030\006 \001(\t\022\025\n\rsunset_string\030\007 \001(\t\022$\n\034curr"
-    "ent_precipitation_string\030\010 \001(\t\032\222\001\n\014Forec"
-    "astItem\022\024\n\014weather_icon\030\001 \001(\t\022\034\n\024precipi"
-    "tation_string\030\002 \001(\t\022!\n\031temperature_maxmi"
-    "n_string\030\003 \001(\t\022\023\n\013wind_string\030\004 \001(\t\022\026\n\016d"
-    "isplay_string\030\005 \001(\t\"\305\010\n\031NSPanelMQTTManag"
-    "erCommand\022M\n\022first_page_turn_on\030\001 \001(\0132/."
-    "NSPanelMQTTManagerCommand.FirstPageTurnL"
-    "ightOnH\000\022O\n\023first_page_turn_off\030\002 \001(\01320."
-    "NSPanelMQTTManagerCommand.FirstPageTurnL"
-    "ightOffH\000\022@\n\rlight_command\030\003 \001(\0132\'.NSPan"
-    "elMQTTManagerCommand.LightCommandH\000\022c\n t"
-    "oggle_entity_from_entities_page\030\004 \001(\01327."
-    "NSPanelMQTTManagerCommand.ToggleEntityFr"
-    "omEntitiesPageH\000\032\372\001\n\024FirstPageTurnLightO"
-    "n\022E\n\raffect_lights\030\001 \001(\0162..NSPanelMQTTMa"
-    "nagerCommand.AffectLightsOptions\022\037\n\027brig"
-    "htness_slider_value\030\002 \001(\005\022\033\n\023kelvin_slid"
-    "er_value\030\003 \001(\005\022\025\n\rselected_room\030\004 \001(\005\022\016\n"
-    "\006global\030\005 \001(\010\022\034\n\024has_brightness_value\030\006 "
-    "\001(\010\022\030\n\020has_kelvin_value\030\007 \001(\010\032n\n\025FirstPa"
-    "geTurnLightOff\022E\n\raffect_lights\030\001 \001(\0162.."
-    "NSPanelMQTTManagerCommand.AffectLightsOp"
-    "tions\022\016\n\006global\030\002 \001(\010\032\321\001\n\014LightCommand\022\021"
-    "\n\tlight_ids\030\001 \003(\005\022\026\n\016has_brightness\030\002 \001("
-    "\010\022\022\n\nbrightness\030\003 \001(\005\022\035\n\025has_color_tempe"
-    "rature\030\004 \001(\010\022\031\n\021color_temperature\030\005 \001(\005\022"
-    "\017\n\007has_hue\030\006 \001(\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016has_sat"
-    "uration\030\010 \001(\010\022\022\n\nsaturation\030\t \001(\005\032K\n\034Tog"
-    "gleEntityFromEntitiesPage\022\026\n\016entity_page"
-    "_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001(\005\"D\n\023Affect"
-    "LightsOptions\022\007\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020\001"
-    "\022\022\n\016CEILING_LIGHTS\020\002B\r\n\013CommandData*[\n\023N"
-    "SPanelWarningLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ERRO"
-    "R\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n"
-    "\005TRACE\020\005b\006proto3"
+    "PanelScreensaverMode\022+\n#show_screensaver"
+    "_inside_temperature\030\014 \001(\010\022\026\n\016clock_us_st"
+    "yle\030\r \001(\010\022\026\n\016use_fahrenheit\030\016 \001(\010\022\023\n\013is_"
+    "us_panel\030\017 \001(\010\022+\n\nroom_infos\030\020 \003(\0132\027.NSP"
+    "anelConfig.RoomInfo\022\026\n\016reverse_relays\030\021 "
+    "\001(\010\022\033\n\023relay1_default_mode\030\022 \001(\010\022\033\n\023rela"
+    "y2_default_mode\030\023 \001(\010\022\037\n\027temperature_cal"
+    "ibration\030\024 \001(\002\022\024\n\014button1_mode\030\025 \001(\005\022\032\n\022"
+    "button1_mqtt_topic\030\026 \001(\t\022\034\n\024button1_mqtt"
+    "_payload\030\027 \001(\t\022\024\n\014button2_mode\030\030 \001(\005\022\032\n\022"
+    "button2_mqtt_topic\030\031 \001(\t\022\034\n\024button2_mqtt"
+    "_payload\030\032 \001(\t\022!\n\031button1_detached_light"
+    "_id\030\033 \001(\005\022!\n\031button2_detached_light_id\030\034"
+    " \001(\005\022$\n\rglobal_scenes\030\035 \003(\0132\r.NSPanelSce"
+    "ne\022\027\n\017optimistic_mode\030\036 \001(\010\022&\n\036raise_lig"
+    "ht_level_to_100_above\030\037 \001(\005\022\022\n\nnspanel_i"
+    "d\030  \001(\005\022 \n\030relay1_is_in_relay_group\030! \001("
+    "\010\022\032\n\022relay1_relay_group\030\" \001(\005\022 \n\030relay2_"
+    "is_in_relay_group\030# \001(\010\022\032\n\022relay2_relay_"
+    "group\030$ \001(\005\0324\n\010RoomInfo\022\017\n\007room_id\030\001 \001(\005"
+    "\022\027\n\017entity_page_ids\030\002 \003(\005\"\250\001\n\026NSPanelScr"
+    "eensaverMode\022\033\n\027WEATHER_WITH_BACKGROUND\020"
+    "\000\022\036\n\032WEATHER_WITHOUT_BACKGROUND\020\001\022\034\n\030DAT"
+    "ETIME_WITH_BACKGROUND\020\003\022\037\n\033DATETIME_WITH"
+    "OUT_BACKGROUND\020\004\022\022\n\016NO_SCREENSAVER\020\005\"C\n\016"
+    "NSPanelWarning\022#\n\005level\030\001 \001(\0162\024.NSPanelW"
+    "arningLevel\022\014\n\004text\030\002 \001(\t\"\311\002\n\023NSPanelSta"
+    "tusReport\0221\n\rnspanel_state\030\001 \001(\0162\032.NSPan"
+    "elStatusReport.state\022\027\n\017update_progress\030"
+    "\002 \001(\005\022\014\n\004rssi\030\003 \001(\005\022\025\n\rheap_used_pct\030\004 \001"
+    "(\005\022\023\n\013mac_address\030\005 \001(\t\022\023\n\013temperature\030\006"
+    " \001(\002\022\022\n\nip_address\030\007 \001(\t\022!\n\010warnings\030\010 \003"
+    "(\0132\017.NSPanelWarning\"`\n\005state\022\n\n\006ONLINE\020\000"
+    "\022\013\n\007OFFLINE\020\001\022\020\n\014UPDATING_TFT\020\002\022\025\n\021UPDAT"
+    "ING_FIRMWARE\020\003\022\025\n\021UPDATING_LITTLEFS\020\004\"\325\001"
+    "\n\022NSPanelLightStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004name"
+    "\030\002 \001(\t\022\017\n\007can_dim\030\003 \001(\010\022\035\n\025can_color_tem"
+    "perature\030\004 \001(\010\022\017\n\007can_rgb\030\005 \001(\010\022\023\n\013light"
+    "_level\030\006 \001(\005\022\022\n\ncolor_temp\030\007 \001(\005\022\013\n\003hue\030"
+    "\010 \001(\005\022\022\n\nsaturation\030\t \001(\005\022\032\n\022room_view_p"
+    "osition\030\n \001(\005\"\345\001\n\027NSPanelRoomEntitiesPag"
+    "e\022\n\n\002id\030\001 \001(\005\022\021\n\tpage_type\030\002 \001(\005\022\023\n\013head"
+    "er_text\030\003 \001(\t\0225\n\010entities\030\004 \003(\0132#.NSPane"
+    "lRoomEntitiesPage.EntitySlot\032_\n\nEntitySl"
+    "ot\022\032\n\022room_view_position\030\001 \001(\005\022\014\n\004name\030\002"
+    " \001(\t\022\014\n\004icon\030\003 \001(\t\022\013\n\003pco\030\004 \001(\005\022\014\n\004pco2\030"
+    "\005 \001(\005\"\226\003\n\021NSPanelRoomStatus\022\n\n\002id\030\001 \001(\005\022"
+    "\014\n\004name\030\002 \001(\t\022\031\n\021average_dim_level\030\003 \001(\005"
+    "\022 \n\030ceiling_lights_dim_level\030\004 \001(\005\022\036\n\026ta"
+    "ble_lights_dim_level\030\005 \001(\005\022!\n\031average_co"
+    "lor_temperature\030\006 \001(\005\022.\n&ceiling_lights_"
+    "color_temperature_value\030\007 \001(\005\022,\n$table_l"
+    "ights_color_temperature_value\030\010 \001(\005\022\032\n\022n"
+    "um_ceiling_lights\030\t \001(\005\022\030\n\020num_table_lig"
+    "hts\030\n \001(\005\022\035\n\025num_ceiling_lights_on\030\013 \001(\005"
+    "\022\033\n\023num_table_lights_on\030\014 \001(\005\022\027\n\017entity_"
+    "page_ids\030\r \003(\005\"\277\003\n\024NSPanelWeatherUpdate\022"
+    ":\n\016forecast_items\030\001 \003(\0132\".NSPanelWeather"
+    "Update.ForecastItem\022\034\n\024current_weather_i"
+    "con\030\002 \001(\t\022\"\n\032current_temperature_string\030"
+    "\003 \001(\t\022\"\n\032current_maxmin_temperature\030\004 \001("
+    "\t\022\033\n\023current_wind_string\030\005 \001(\t\022\026\n\016sunris"
+    "e_string\030\006 \001(\t\022\025\n\rsunset_string\030\007 \001(\t\022$\n"
+    "\034current_precipitation_string\030\010 \001(\t\032\222\001\n\014"
+    "ForecastItem\022\024\n\014weather_icon\030\001 \001(\t\022\034\n\024pr"
+    "ecipitation_string\030\002 \001(\t\022!\n\031temperature_"
+    "maxmin_string\030\003 \001(\t\022\023\n\013wind_string\030\004 \001(\t"
+    "\022\026\n\016display_string\030\005 \001(\t\"\305\010\n\031NSPanelMQTT"
+    "ManagerCommand\022M\n\022first_page_turn_on\030\001 \001"
+    "(\0132/.NSPanelMQTTManagerCommand.FirstPage"
+    "TurnLightOnH\000\022O\n\023first_page_turn_off\030\002 \001"
+    "(\01320.NSPanelMQTTManagerCommand.FirstPage"
+    "TurnLightOffH\000\022@\n\rlight_command\030\003 \001(\0132\'."
+    "NSPanelMQTTManagerCommand.LightCommandH\000"
+    "\022c\n toggle_entity_from_entities_page\030\004 \001"
+    "(\01327.NSPanelMQTTManagerCommand.ToggleEnt"
+    "ityFromEntitiesPageH\000\032\372\001\n\024FirstPageTurnL"
+    "ightOn\022E\n\raffect_lights\030\001 \001(\0162..NSPanelM"
+    "QTTManagerCommand.AffectLightsOptions\022\037\n"
+    "\027brightness_slider_value\030\002 \001(\005\022\033\n\023kelvin"
+    "_slider_value\030\003 \001(\005\022\025\n\rselected_room\030\004 \001"
+    "(\005\022\016\n\006global\030\005 \001(\010\022\034\n\024has_brightness_val"
+    "ue\030\006 \001(\010\022\030\n\020has_kelvin_value\030\007 \001(\010\032n\n\025Fi"
+    "rstPageTurnLightOff\022E\n\raffect_lights\030\001 \001"
+    "(\0162..NSPanelMQTTManagerCommand.AffectLig"
+    "htsOptions\022\016\n\006global\030\002 \001(\010\032\321\001\n\014LightComm"
+    "and\022\021\n\tlight_ids\030\001 \003(\005\022\026\n\016has_brightness"
+    "\030\002 \001(\010\022\022\n\nbrightness\030\003 \001(\005\022\035\n\025has_color_"
+    "temperature\030\004 \001(\010\022\031\n\021color_temperature\030\005"
+    " \001(\005\022\017\n\007has_hue\030\006 \001(\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016ha"
+    "s_saturation\030\010 \001(\010\022\022\n\nsaturation\030\t \001(\005\032K"
+    "\n\034ToggleEntityFromEntitiesPage\022\026\n\016entity"
+    "_page_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001(\005\"D\n\023A"
+    "ffectLightsOptions\022\007\n\003ALL\020\000\022\020\n\014TABLE_LIG"
+    "HTS\020\001\022\022\n\016CEILING_LIGHTS\020\002B\r\n\013CommandData"
+    "*[\n\023NSPanelWarningLevel\022\014\n\010CRITICAL\020\000\022\t\n"
+    "\005ERROR\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG"
+    "\020\004\022\t\n\005TRACE\020\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    4296,
+    4341,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
@@ -1559,15 +1562,15 @@ NSPanelConfig::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<5, 35, 2, 134, 7> NSPanelConfig::_table_ = {
+const ::_pbi::TcParseTable<5, 36, 2, 134, 7> NSPanelConfig::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    35, 248,  // max_field_number, fast_idx_mask
+    36, 248,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
     0,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    35,  // num_field_entries
+    36,  // num_field_entries
     2,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelConfig_default_instance_._instance,
@@ -1611,69 +1614,69 @@ const ::_pbi::TcParseTable<5, 35, 2, 134, 7> NSPanelConfig::_table_ = {
     // .NSPanelConfig.NSPanelScreensaverMode screensaver_mode = 11;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelConfig, _impl_.screensaver_mode_), 63>(),
      {88, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.screensaver_mode_)}},
-    // bool clock_us_style = 12;
+    // bool show_screensaver_inside_temperature = 12;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelConfig, _impl_.show_screensaver_inside_temperature_), 63>(),
+     {96, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.show_screensaver_inside_temperature_)}},
+    // bool clock_us_style = 13;
     {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelConfig, _impl_.clock_us_style_), 63>(),
-     {96, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.clock_us_style_)}},
-    // bool use_fahrenheit = 13;
+     {104, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.clock_us_style_)}},
+    // bool use_fahrenheit = 14;
     {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelConfig, _impl_.use_fahrenheit_), 63>(),
-     {104, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.use_fahrenheit_)}},
-    // bool is_us_panel = 14;
+     {112, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.use_fahrenheit_)}},
+    // bool is_us_panel = 15;
     {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelConfig, _impl_.is_us_panel_), 63>(),
-     {112, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.is_us_panel_)}},
-    // repeated .NSPanelConfig.RoomInfo room_infos = 15;
-    {::_pbi::TcParser::FastMtR1,
-     {122, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.room_infos_)}},
-    // bool reverse_relays = 16;
-    {::_pbi::TcParser::FastV8S2,
-     {384, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.reverse_relays_)}},
-    // bool relay1_default_mode = 17;
-    {::_pbi::TcParser::FastV8S2,
-     {392, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.relay1_default_mode_)}},
-    // bool relay2_default_mode = 18;
-    {::_pbi::TcParser::FastV8S2,
-     {400, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.relay2_default_mode_)}},
-    // float temperature_calibration = 19;
-    {::_pbi::TcParser::FastF32S2,
-     {413, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.temperature_calibration_)}},
-    // int32 button1_mode = 20;
-    {::_pbi::TcParser::FastV32S2,
-     {416, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_mode_)}},
-    // string button1_mqtt_topic = 21;
-    {::_pbi::TcParser::FastUS2,
-     {426, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_mqtt_topic_)}},
-    // string button1_mqtt_payload = 22;
-    {::_pbi::TcParser::FastUS2,
-     {434, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_mqtt_payload_)}},
-    // int32 button2_mode = 23;
-    {::_pbi::TcParser::FastV32S2,
-     {440, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_mode_)}},
-    // string button2_mqtt_topic = 24;
-    {::_pbi::TcParser::FastUS2,
-     {450, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_mqtt_topic_)}},
-    // string button2_mqtt_payload = 25;
-    {::_pbi::TcParser::FastUS2,
-     {458, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_mqtt_payload_)}},
-    // int32 button1_detached_light_id = 26;
-    {::_pbi::TcParser::FastV32S2,
-     {464, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_detached_light_id_)}},
-    // int32 button2_detached_light_id = 27;
-    {::_pbi::TcParser::FastV32S2,
-     {472, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_detached_light_id_)}},
-    // repeated .NSPanelScene global_scenes = 28;
+     {120, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.is_us_panel_)}},
+    // repeated .NSPanelConfig.RoomInfo room_infos = 16;
     {::_pbi::TcParser::FastMtR2,
-     {482, 63, 1, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.global_scenes_)}},
-    // bool optimistic_mode = 29;
+     {386, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.room_infos_)}},
+    // bool reverse_relays = 17;
     {::_pbi::TcParser::FastV8S2,
-     {488, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.optimistic_mode_)}},
-    // int32 raise_light_level_to_100_above = 30;
+     {392, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.reverse_relays_)}},
+    // bool relay1_default_mode = 18;
+    {::_pbi::TcParser::FastV8S2,
+     {400, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.relay1_default_mode_)}},
+    // bool relay2_default_mode = 19;
+    {::_pbi::TcParser::FastV8S2,
+     {408, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.relay2_default_mode_)}},
+    // float temperature_calibration = 20;
+    {::_pbi::TcParser::FastF32S2,
+     {421, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.temperature_calibration_)}},
+    // int32 button1_mode = 21;
     {::_pbi::TcParser::FastV32S2,
-     {496, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.raise_light_level_to_100_above_)}},
-    // int32 nspanel_id = 31;
+     {424, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_mode_)}},
+    // string button1_mqtt_topic = 22;
+    {::_pbi::TcParser::FastUS2,
+     {434, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_mqtt_topic_)}},
+    // string button1_mqtt_payload = 23;
+    {::_pbi::TcParser::FastUS2,
+     {442, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_mqtt_payload_)}},
+    // int32 button2_mode = 24;
     {::_pbi::TcParser::FastV32S2,
-     {504, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.nspanel_id_)}},
+     {448, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_mode_)}},
+    // string button2_mqtt_topic = 25;
+    {::_pbi::TcParser::FastUS2,
+     {458, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_mqtt_topic_)}},
+    // string button2_mqtt_payload = 26;
+    {::_pbi::TcParser::FastUS2,
+     {466, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_mqtt_payload_)}},
+    // int32 button1_detached_light_id = 27;
+    {::_pbi::TcParser::FastV32S2,
+     {472, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_detached_light_id_)}},
+    // int32 button2_detached_light_id = 28;
+    {::_pbi::TcParser::FastV32S2,
+     {480, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_detached_light_id_)}},
+    // repeated .NSPanelScene global_scenes = 29;
+    {::_pbi::TcParser::FastMtR2,
+     {490, 63, 1, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.global_scenes_)}},
+    // bool optimistic_mode = 30;
+    {::_pbi::TcParser::FastV8S2,
+     {496, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.optimistic_mode_)}},
+    // int32 raise_light_level_to_100_above = 31;
+    {::_pbi::TcParser::FastV32S2,
+     {504, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.raise_light_level_to_100_above_)}},
   }}, {{
     33, 0, 1,
-    65528, 32,
+    65520, 32,
     65535, 65535
   }}, {{
     // string name = 1;
@@ -1709,83 +1712,86 @@ const ::_pbi::TcParseTable<5, 35, 2, 134, 7> NSPanelConfig::_table_ = {
     // .NSPanelConfig.NSPanelScreensaverMode screensaver_mode = 11;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.screensaver_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
-    // bool clock_us_style = 12;
+    // bool show_screensaver_inside_temperature = 12;
+    {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.show_screensaver_inside_temperature_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool clock_us_style = 13;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.clock_us_style_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // bool use_fahrenheit = 13;
+    // bool use_fahrenheit = 14;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.use_fahrenheit_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // bool is_us_panel = 14;
+    // bool is_us_panel = 15;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.is_us_panel_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // repeated .NSPanelConfig.RoomInfo room_infos = 15;
+    // repeated .NSPanelConfig.RoomInfo room_infos = 16;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.room_infos_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
-    // bool reverse_relays = 16;
+    // bool reverse_relays = 17;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.reverse_relays_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // bool relay1_default_mode = 17;
+    // bool relay1_default_mode = 18;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.relay1_default_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // bool relay2_default_mode = 18;
+    // bool relay2_default_mode = 19;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.relay2_default_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // float temperature_calibration = 19;
+    // float temperature_calibration = 20;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.temperature_calibration_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kFloat)},
-    // int32 button1_mode = 20;
+    // int32 button1_mode = 21;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // string button1_mqtt_topic = 21;
+    // string button1_mqtt_topic = 22;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_mqtt_topic_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string button1_mqtt_payload = 22;
+    // string button1_mqtt_payload = 23;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_mqtt_payload_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // int32 button2_mode = 23;
+    // int32 button2_mode = 24;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // string button2_mqtt_topic = 24;
+    // string button2_mqtt_topic = 25;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_mqtt_topic_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string button2_mqtt_payload = 25;
+    // string button2_mqtt_payload = 26;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_mqtt_payload_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // int32 button1_detached_light_id = 26;
+    // int32 button1_detached_light_id = 27;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_detached_light_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // int32 button2_detached_light_id = 27;
+    // int32 button2_detached_light_id = 28;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_detached_light_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // repeated .NSPanelScene global_scenes = 28;
+    // repeated .NSPanelScene global_scenes = 29;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.global_scenes_), 0, 1,
     (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
-    // bool optimistic_mode = 29;
+    // bool optimistic_mode = 30;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.optimistic_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // int32 raise_light_level_to_100_above = 30;
+    // int32 raise_light_level_to_100_above = 31;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.raise_light_level_to_100_above_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // int32 nspanel_id = 31;
+    // int32 nspanel_id = 32;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.nspanel_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // bool relay1_is_in_relay_group = 32;
+    // bool relay1_is_in_relay_group = 33;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.relay1_is_in_relay_group_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // int32 relay1_relay_group = 33;
+    // int32 relay1_relay_group = 34;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.relay1_relay_group_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // bool relay2_is_in_relay_group = 34;
+    // bool relay2_is_in_relay_group = 35;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.relay2_is_in_relay_group_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // int32 relay2_relay_group = 35;
+    // int32 relay2_relay_group = 36;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.relay2_relay_group_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
   }}, {{
     {::_pbi::TcParser::GetTable<::NSPanelConfig_RoomInfo>()},
     {::_pbi::TcParser::GetTable<::NSPanelScene>()},
   }}, {{
-    "\15\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\22\24\0\22\24\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    "\15\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\22\24\0\22\24\0\0\0\0\0\0\0\0\0\0\0\0\0"
     "NSPanelConfig"
     "name"
     "button1_mqtt_topic"
@@ -1900,60 +1906,67 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
         11, this->_internal_screensaver_mode(), target);
   }
 
-  // bool clock_us_style = 12;
+  // bool show_screensaver_inside_temperature = 12;
+  if (this->_internal_show_screensaver_inside_temperature() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        12, this->_internal_show_screensaver_inside_temperature(), target);
+  }
+
+  // bool clock_us_style = 13;
   if (this->_internal_clock_us_style() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        12, this->_internal_clock_us_style(), target);
+        13, this->_internal_clock_us_style(), target);
   }
 
-  // bool use_fahrenheit = 13;
+  // bool use_fahrenheit = 14;
   if (this->_internal_use_fahrenheit() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        13, this->_internal_use_fahrenheit(), target);
+        14, this->_internal_use_fahrenheit(), target);
   }
 
-  // bool is_us_panel = 14;
+  // bool is_us_panel = 15;
   if (this->_internal_is_us_panel() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        14, this->_internal_is_us_panel(), target);
+        15, this->_internal_is_us_panel(), target);
   }
 
-  // repeated .NSPanelConfig.RoomInfo room_infos = 15;
+  // repeated .NSPanelConfig.RoomInfo room_infos = 16;
   for (unsigned i = 0, n = static_cast<unsigned>(
                            this->_internal_room_infos_size());
        i < n; i++) {
     const auto& repfield = this->_internal_room_infos().Get(i);
     target =
         ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-            15, repfield, repfield.GetCachedSize(),
+            16, repfield, repfield.GetCachedSize(),
             target, stream);
   }
 
-  // bool reverse_relays = 16;
+  // bool reverse_relays = 17;
   if (this->_internal_reverse_relays() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        16, this->_internal_reverse_relays(), target);
+        17, this->_internal_reverse_relays(), target);
   }
 
-  // bool relay1_default_mode = 17;
+  // bool relay1_default_mode = 18;
   if (this->_internal_relay1_default_mode() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        17, this->_internal_relay1_default_mode(), target);
+        18, this->_internal_relay1_default_mode(), target);
   }
 
-  // bool relay2_default_mode = 18;
+  // bool relay2_default_mode = 19;
   if (this->_internal_relay2_default_mode() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        18, this->_internal_relay2_default_mode(), target);
+        19, this->_internal_relay2_default_mode(), target);
   }
 
-  // float temperature_calibration = 19;
+  // float temperature_calibration = 20;
   static_assert(sizeof(::uint32_t) == sizeof(float),
                 "Code assumes ::uint32_t and float are the same size.");
   float tmp_temperature_calibration = this->_internal_temperature_calibration();
@@ -1962,127 +1975,127 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
   if (raw_temperature_calibration != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteFloatToArray(
-        19, this->_internal_temperature_calibration(), target);
+        20, this->_internal_temperature_calibration(), target);
   }
 
-  // int32 button1_mode = 20;
+  // int32 button1_mode = 21;
   if (this->_internal_button1_mode() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteInt32ToArray(
-        20, this->_internal_button1_mode(), target);
+        21, this->_internal_button1_mode(), target);
   }
 
-  // string button1_mqtt_topic = 21;
+  // string button1_mqtt_topic = 22;
   if (!this->_internal_button1_mqtt_topic().empty()) {
     const std::string& _s = this->_internal_button1_mqtt_topic();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelConfig.button1_mqtt_topic");
-    target = stream->WriteStringMaybeAliased(21, _s, target);
+    target = stream->WriteStringMaybeAliased(22, _s, target);
   }
 
-  // string button1_mqtt_payload = 22;
+  // string button1_mqtt_payload = 23;
   if (!this->_internal_button1_mqtt_payload().empty()) {
     const std::string& _s = this->_internal_button1_mqtt_payload();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelConfig.button1_mqtt_payload");
-    target = stream->WriteStringMaybeAliased(22, _s, target);
+    target = stream->WriteStringMaybeAliased(23, _s, target);
   }
 
-  // int32 button2_mode = 23;
+  // int32 button2_mode = 24;
   if (this->_internal_button2_mode() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteInt32ToArray(
-        23, this->_internal_button2_mode(), target);
+        24, this->_internal_button2_mode(), target);
   }
 
-  // string button2_mqtt_topic = 24;
+  // string button2_mqtt_topic = 25;
   if (!this->_internal_button2_mqtt_topic().empty()) {
     const std::string& _s = this->_internal_button2_mqtt_topic();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelConfig.button2_mqtt_topic");
-    target = stream->WriteStringMaybeAliased(24, _s, target);
+    target = stream->WriteStringMaybeAliased(25, _s, target);
   }
 
-  // string button2_mqtt_payload = 25;
+  // string button2_mqtt_payload = 26;
   if (!this->_internal_button2_mqtt_payload().empty()) {
     const std::string& _s = this->_internal_button2_mqtt_payload();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelConfig.button2_mqtt_payload");
-    target = stream->WriteStringMaybeAliased(25, _s, target);
+    target = stream->WriteStringMaybeAliased(26, _s, target);
   }
 
-  // int32 button1_detached_light_id = 26;
+  // int32 button1_detached_light_id = 27;
   if (this->_internal_button1_detached_light_id() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteInt32ToArray(
-        26, this->_internal_button1_detached_light_id(), target);
+        27, this->_internal_button1_detached_light_id(), target);
   }
 
-  // int32 button2_detached_light_id = 27;
+  // int32 button2_detached_light_id = 28;
   if (this->_internal_button2_detached_light_id() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteInt32ToArray(
-        27, this->_internal_button2_detached_light_id(), target);
+        28, this->_internal_button2_detached_light_id(), target);
   }
 
-  // repeated .NSPanelScene global_scenes = 28;
+  // repeated .NSPanelScene global_scenes = 29;
   for (unsigned i = 0, n = static_cast<unsigned>(
                            this->_internal_global_scenes_size());
        i < n; i++) {
     const auto& repfield = this->_internal_global_scenes().Get(i);
     target =
         ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-            28, repfield, repfield.GetCachedSize(),
+            29, repfield, repfield.GetCachedSize(),
             target, stream);
   }
 
-  // bool optimistic_mode = 29;
+  // bool optimistic_mode = 30;
   if (this->_internal_optimistic_mode() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        29, this->_internal_optimistic_mode(), target);
+        30, this->_internal_optimistic_mode(), target);
   }
 
-  // int32 raise_light_level_to_100_above = 30;
+  // int32 raise_light_level_to_100_above = 31;
   if (this->_internal_raise_light_level_to_100_above() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteInt32ToArray(
-        30, this->_internal_raise_light_level_to_100_above(), target);
+        31, this->_internal_raise_light_level_to_100_above(), target);
   }
 
-  // int32 nspanel_id = 31;
+  // int32 nspanel_id = 32;
   if (this->_internal_nspanel_id() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteInt32ToArray(
-        31, this->_internal_nspanel_id(), target);
+        32, this->_internal_nspanel_id(), target);
   }
 
-  // bool relay1_is_in_relay_group = 32;
+  // bool relay1_is_in_relay_group = 33;
   if (this->_internal_relay1_is_in_relay_group() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        32, this->_internal_relay1_is_in_relay_group(), target);
+        33, this->_internal_relay1_is_in_relay_group(), target);
   }
 
-  // int32 relay1_relay_group = 33;
+  // int32 relay1_relay_group = 34;
   if (this->_internal_relay1_relay_group() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteInt32ToArray(
-        33, this->_internal_relay1_relay_group(), target);
+        34, this->_internal_relay1_relay_group(), target);
   }
 
-  // bool relay2_is_in_relay_group = 34;
+  // bool relay2_is_in_relay_group = 35;
   if (this->_internal_relay2_is_in_relay_group() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        34, this->_internal_relay2_is_in_relay_group(), target);
+        35, this->_internal_relay2_is_in_relay_group(), target);
   }
 
-  // int32 relay2_relay_group = 35;
+  // int32 relay2_relay_group = 36;
   if (this->_internal_relay2_relay_group() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteInt32ToArray(
-        35, this->_internal_relay2_relay_group(), target);
+        36, this->_internal_relay2_relay_group(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2103,12 +2116,12 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
   (void) cached_has_bits;
 
   ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
-  // repeated .NSPanelConfig.RoomInfo room_infos = 15;
-  total_size += 1UL * this->_internal_room_infos_size();
+  // repeated .NSPanelConfig.RoomInfo room_infos = 16;
+  total_size += 2UL * this->_internal_room_infos_size();
   for (const auto& msg : this->_internal_room_infos()) {
     total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
   }
-  // repeated .NSPanelScene global_scenes = 28;
+  // repeated .NSPanelScene global_scenes = 29;
   total_size += 2UL * this->_internal_global_scenes_size();
   for (const auto& msg : this->_internal_global_scenes()) {
     total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
@@ -2119,25 +2132,25 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
                                     this->_internal_name());
   }
 
-  // string button1_mqtt_topic = 21;
+  // string button1_mqtt_topic = 22;
   if (!this->_internal_button1_mqtt_topic().empty()) {
     total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_button1_mqtt_topic());
   }
 
-  // string button1_mqtt_payload = 22;
+  // string button1_mqtt_payload = 23;
   if (!this->_internal_button1_mqtt_payload().empty()) {
     total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_button1_mqtt_payload());
   }
 
-  // string button2_mqtt_topic = 24;
+  // string button2_mqtt_topic = 25;
   if (!this->_internal_button2_mqtt_topic().empty()) {
     total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_button2_mqtt_topic());
   }
 
-  // string button2_mqtt_payload = 25;
+  // string button2_mqtt_payload = 26;
   if (!this->_internal_button2_mqtt_payload().empty()) {
     total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_button2_mqtt_payload());
@@ -2203,27 +2216,27 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_screensaver_mode());
   }
 
-  // bool clock_us_style = 12;
+  // bool show_screensaver_inside_temperature = 12;
+  if (this->_internal_show_screensaver_inside_temperature() != 0) {
+    total_size += 2;
+  }
+
+  // bool clock_us_style = 13;
   if (this->_internal_clock_us_style() != 0) {
     total_size += 2;
   }
 
-  // bool use_fahrenheit = 13;
+  // bool use_fahrenheit = 14;
   if (this->_internal_use_fahrenheit() != 0) {
     total_size += 2;
   }
 
-  // bool is_us_panel = 14;
+  // bool is_us_panel = 15;
   if (this->_internal_is_us_panel() != 0) {
     total_size += 2;
   }
 
-  // bool reverse_relays = 16;
-  if (this->_internal_reverse_relays() != 0) {
-    total_size += 3;
-  }
-
-  // float temperature_calibration = 19;
+  // float temperature_calibration = 20;
   static_assert(sizeof(::uint32_t) == sizeof(float),
                 "Code assumes ::uint32_t and float are the same size.");
   float tmp_temperature_calibration = this->_internal_temperature_calibration();
@@ -2233,74 +2246,79 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
     total_size += 6;
   }
 
-  // int32 button1_mode = 20;
+  // int32 button1_mode = 21;
   if (this->_internal_button1_mode() != 0) {
     total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
                                     this->_internal_button1_mode());
   }
 
-  // int32 button2_mode = 23;
+  // bool reverse_relays = 17;
+  if (this->_internal_reverse_relays() != 0) {
+    total_size += 3;
+  }
+
+  // bool relay1_default_mode = 18;
+  if (this->_internal_relay1_default_mode() != 0) {
+    total_size += 3;
+  }
+
+  // bool relay2_default_mode = 19;
+  if (this->_internal_relay2_default_mode() != 0) {
+    total_size += 3;
+  }
+
+  // bool optimistic_mode = 30;
+  if (this->_internal_optimistic_mode() != 0) {
+    total_size += 3;
+  }
+
+  // int32 button2_mode = 24;
   if (this->_internal_button2_mode() != 0) {
     total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
                                     this->_internal_button2_mode());
   }
 
-  // bool relay1_default_mode = 17;
-  if (this->_internal_relay1_default_mode() != 0) {
-    total_size += 3;
-  }
-
-  // bool relay2_default_mode = 18;
-  if (this->_internal_relay2_default_mode() != 0) {
-    total_size += 3;
-  }
-
-  // bool optimistic_mode = 29;
-  if (this->_internal_optimistic_mode() != 0) {
-    total_size += 3;
-  }
-
-  // bool relay1_is_in_relay_group = 32;
-  if (this->_internal_relay1_is_in_relay_group() != 0) {
-    total_size += 3;
-  }
-
-  // int32 button1_detached_light_id = 26;
+  // int32 button1_detached_light_id = 27;
   if (this->_internal_button1_detached_light_id() != 0) {
     total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
                                     this->_internal_button1_detached_light_id());
   }
 
-  // int32 button2_detached_light_id = 27;
+  // int32 button2_detached_light_id = 28;
   if (this->_internal_button2_detached_light_id() != 0) {
     total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
                                     this->_internal_button2_detached_light_id());
   }
 
-  // int32 raise_light_level_to_100_above = 30;
+  // int32 raise_light_level_to_100_above = 31;
   if (this->_internal_raise_light_level_to_100_above() != 0) {
     total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
                                     this->_internal_raise_light_level_to_100_above());
   }
 
-  // int32 nspanel_id = 31;
+  // int32 nspanel_id = 32;
   if (this->_internal_nspanel_id() != 0) {
     total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
                                     this->_internal_nspanel_id());
   }
 
-  // int32 relay1_relay_group = 33;
+  // int32 relay1_relay_group = 34;
   if (this->_internal_relay1_relay_group() != 0) {
     total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
                                     this->_internal_relay1_relay_group());
   }
 
-  // bool relay2_is_in_relay_group = 34;
+  // bool relay1_is_in_relay_group = 33;
+  if (this->_internal_relay1_is_in_relay_group() != 0) {
+    total_size += 3;
+  }
+
+  // bool relay2_is_in_relay_group = 35;
   if (this->_internal_relay2_is_in_relay_group() != 0) {
     total_size += 3;
   }
 
-  // int32 relay2_relay_group = 35;
+  // int32 relay2_relay_group = 36;
   if (this->_internal_relay2_relay_group() != 0) {
     total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
                                     this->_internal_relay2_relay_group());
@@ -2367,6 +2385,9 @@ void NSPanelConfig::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::g
   if (from._internal_screensaver_mode() != 0) {
     _this->_impl_.screensaver_mode_ = from._impl_.screensaver_mode_;
   }
+  if (from._internal_show_screensaver_inside_temperature() != 0) {
+    _this->_impl_.show_screensaver_inside_temperature_ = from._impl_.show_screensaver_inside_temperature_;
+  }
   if (from._internal_clock_us_style() != 0) {
     _this->_impl_.clock_us_style_ = from._impl_.clock_us_style_;
   }
@@ -2375,9 +2396,6 @@ void NSPanelConfig::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::g
   }
   if (from._internal_is_us_panel() != 0) {
     _this->_impl_.is_us_panel_ = from._impl_.is_us_panel_;
-  }
-  if (from._internal_reverse_relays() != 0) {
-    _this->_impl_.reverse_relays_ = from._impl_.reverse_relays_;
   }
   static_assert(sizeof(::uint32_t) == sizeof(float),
                 "Code assumes ::uint32_t and float are the same size.");
@@ -2390,8 +2408,8 @@ void NSPanelConfig::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::g
   if (from._internal_button1_mode() != 0) {
     _this->_impl_.button1_mode_ = from._impl_.button1_mode_;
   }
-  if (from._internal_button2_mode() != 0) {
-    _this->_impl_.button2_mode_ = from._impl_.button2_mode_;
+  if (from._internal_reverse_relays() != 0) {
+    _this->_impl_.reverse_relays_ = from._impl_.reverse_relays_;
   }
   if (from._internal_relay1_default_mode() != 0) {
     _this->_impl_.relay1_default_mode_ = from._impl_.relay1_default_mode_;
@@ -2402,8 +2420,8 @@ void NSPanelConfig::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::g
   if (from._internal_optimistic_mode() != 0) {
     _this->_impl_.optimistic_mode_ = from._impl_.optimistic_mode_;
   }
-  if (from._internal_relay1_is_in_relay_group() != 0) {
-    _this->_impl_.relay1_is_in_relay_group_ = from._impl_.relay1_is_in_relay_group_;
+  if (from._internal_button2_mode() != 0) {
+    _this->_impl_.button2_mode_ = from._impl_.button2_mode_;
   }
   if (from._internal_button1_detached_light_id() != 0) {
     _this->_impl_.button1_detached_light_id_ = from._impl_.button1_detached_light_id_;
@@ -2419,6 +2437,9 @@ void NSPanelConfig::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::g
   }
   if (from._internal_relay1_relay_group() != 0) {
     _this->_impl_.relay1_relay_group_ = from._impl_.relay1_relay_group_;
+  }
+  if (from._internal_relay1_is_in_relay_group() != 0) {
+    _this->_impl_.relay1_is_in_relay_group_ = from._impl_.relay1_is_in_relay_group_;
   }
   if (from._internal_relay2_is_in_relay_group() != 0) {
     _this->_impl_.relay2_is_in_relay_group_ = from._impl_.relay2_is_in_relay_group_;

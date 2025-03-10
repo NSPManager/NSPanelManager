@@ -121,6 +121,7 @@ void EntityManager::load_nspanels() {
     auto existing_nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
     if (existing_nspanel != nullptr) [[likely]] {
       existing_nspanel->reload_config();
+      existing_nspanel->send_config();
     } else {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
       auto panel = std::shared_ptr<NSPanel>(new NSPanel(nspanel_id));

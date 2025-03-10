@@ -307,6 +307,32 @@
           </div>
         </div>
 
+        <!-- Screensaver inside temperature settings -->
+        <div class="flex-auto mb-2">
+            <h3 class="block mb-2 text-sm font-medium">Screensaver inside temperature</h3>
+            <ul
+            class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
+                <!-- Optimistic mode -->
+                <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                <div class="flex items-center ps-3">
+                <input id="show_screensaver_inside_temperature" type="radio" name="show_screensaver_inside_temperature" value="True" {% if show_screensaver_inside_temperature == "True" %}checked{% endif %}
+                    class="w-4 h-4 radio radio-accent">
+                <label for="show_screensaver_inside_temperature" class="w-full py-3 ms-2 text-sm font-medium">Show inside temperature</label>
+                </div>
+            </li>
+
+            <!-- Wait mode -->
+            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                <div class="flex items-center ps-3">
+                <input id="hide_screensaver_inside_temperature" type="radio" name="show_screensaver_inside_temperature" value="False" {% if show_screensaver_inside_temperature == "False" %}checked{% endif %}
+                    class="w-4 h-4 radio radio-accent">
+                <label for="hide_screensaver_inside_temperature"
+                    class="w-full py-3 ms-2 text-sm font-medium">Hide inside temperature</label>
+                </div>
+            </li>
+            </ul>
+        </div>
+
         <!-- MQTT ignore time-->
         <div class="mb-2">
             <label for="mqtt_ignore_time" class="block mb-1 text-sm font-medium">MQTT ignore time (ms)</label>
