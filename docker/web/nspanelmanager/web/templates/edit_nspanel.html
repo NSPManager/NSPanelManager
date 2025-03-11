@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 
 {% block head %}
+<script>
+  var global_screensaver_mode = "{{ screensaver_mode_global }}";
+</script>
+
 {% load static %}
 <script src="{{ ingress_path }}{% static 'edit_nspanel.js' %}"></script>
 {% endblock %}
@@ -525,6 +529,37 @@
                         class="w-4 h-4 radio radio-accent">
                     <label for="hide_screensaver_inside_temperature"
                         class="w-full py-3 ms-2 text-sm font-medium">Hide inside temperature</label>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Screensaver outside temperature settings -->
+        <div class="flex-auto mt-4" id="screensaver_outside_temperature_setting">
+            <h3 class="block mb-2 text-sm font-medium">Screensaver outside temperature</h3>
+            <ul class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
+                <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                    <div class="flex items-center ps-3">
+                    <input id="show_screensaver_outside_temperature_global" type="radio" name="show_screensaver_outside_temperature" value="global" {% if settings.show_screensaver_outside_temperature == "global" %}checked{% endif %}
+                        class="w-4 h-4 radio radio-accent">
+                    <label for="show_screensaver_outside_temperature_global" class="w-full py-3 ms-2 text-sm font-medium">Global</label>
+                    </div>
+                </li>
+
+                <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                    <div class="flex items-center ps-3">
+                        <input id="show_screensaver_outside_temperature" type="radio" name="show_screensaver_outside_temperature" value="True" {% if settings.show_screensaver_outside_temperature == "True" %}checked{% endif %}
+                            class="w-4 h-4 radio radio-accent">
+                        <label for="show_screensaver_outside_temperature" class="w-full py-3 ms-2 text-sm font-medium">Show outside temperature</label>
+                    </div>
+                </li>
+
+                <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                    <div class="flex items-center ps-3">
+                    <input id="hide_screensaver_outside_temperature" type="radio" name="show_screensaver_outside_temperature" value="False" {% if settings.show_screensaver_outside_temperature == "False" %}checked{% endif %}
+                        class="w-4 h-4 radio radio-accent">
+                    <label for="hide_screensaver_outside_temperature"
+                        class="w-full py-3 ms-2 text-sm font-medium">Hide outside temperature</label>
                     </div>
                 </li>
             </ul>

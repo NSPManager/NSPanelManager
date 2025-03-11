@@ -30,37 +30,38 @@ message NSPanelConfig {
     }
     NSPanelScreensaverMode screensaver_mode = 11;
     bool show_screensaver_inside_temperature = 12;
-    bool clock_us_style = 13;
-    bool use_fahrenheit = 14;
-    bool is_us_panel = 15;
+    bool show_screensaver_outside_temperature = 13;
+    bool clock_us_style = 14;
+    bool use_fahrenheit = 15;
+    bool is_us_panel = 16;
 
     message RoomInfo {
         int32 room_id = 1;
         repeated int32 entity_page_ids = 2;
     }
-    repeated RoomInfo room_infos = 16; // Allowed rooms
+    repeated RoomInfo room_infos = 17; // Allowed rooms
 
-    bool reverse_relays = 17;
-    bool relay1_default_mode = 18;
-    bool relay2_default_mode = 19;
-    float temperature_calibration = 20;
-    int32 button1_mode = 21;
-    string button1_mqtt_topic = 22;
-    string button1_mqtt_payload = 23;
-    int32 button2_mode = 24;
-    string button2_mqtt_topic = 25;
-    string button2_mqtt_payload = 26;
-    int32 button1_detached_light_id = 27;
-    int32 button2_detached_light_id = 28;
-    repeated NSPanelScene global_scenes = 29;
-    bool optimistic_mode = 30;
-    int32 raise_light_level_to_100_above = 31;
-    int32 nspanel_id = 32;
+    bool reverse_relays = 18;
+    bool relay1_default_mode = 19;
+    bool relay2_default_mode = 20;
+    float temperature_calibration = 21;
+    int32 button1_mode = 22;
+    string button1_mqtt_topic = 23;
+    string button1_mqtt_payload = 24;
+    int32 button2_mode = 25;
+    string button2_mqtt_topic = 26;
+    string button2_mqtt_payload = 27;
+    int32 button1_detached_light_id = 28;
+    int32 button2_detached_light_id = 29;
+    repeated NSPanelScene global_scenes = 30;
+    bool optimistic_mode = 31;
+    int32 raise_light_level_to_100_above = 32;
+    int32 nspanel_id = 33;
 
-    bool relay1_is_in_relay_group = 33;
-    int32 relay1_relay_group = 34;
-    bool relay2_is_in_relay_group = 35;
-    int32 relay2_relay_group = 36;
+    bool relay1_is_in_relay_group = 34;
+    int32 relay1_relay_group = 35;
+    bool relay2_is_in_relay_group = 36;
+    int32 relay2_relay_group = 37;
 }
 
 enum NSPanelWarningLevel {

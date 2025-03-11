@@ -603,7 +603,7 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_screensaver_mode__descript
   nspanel_config__nspanel_screensaver_mode__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
+static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[37] =
 {
   {
     "name",
@@ -738,8 +738,32 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "clock_us_style",
+    "show_screensaver_inside_temperature",
     12,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, show_screensaver_inside_temperature),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "show_screensaver_outside_temperature",
+    13,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, show_screensaver_outside_temperature),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "clock_us_style",
+    14,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_BOOL,
     0,   /* quantifier_offset */
@@ -751,7 +775,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "use_fahrenheit",
-    13,
+    15,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_BOOL,
     0,   /* quantifier_offset */
@@ -763,7 +787,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "is_us_panel",
-    14,
+    16,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_BOOL,
     0,   /* quantifier_offset */
@@ -775,7 +799,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "room_infos",
-    15,
+    17,
     PROTOBUF_C_LABEL_REPEATED,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(NSPanelConfig, n_room_infos),
@@ -787,7 +811,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "reverse_relays",
-    16,
+    18,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_BOOL,
     0,   /* quantifier_offset */
@@ -799,7 +823,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "relay1_default_mode",
-    17,
+    19,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_BOOL,
     0,   /* quantifier_offset */
@@ -811,7 +835,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "relay2_default_mode",
-    18,
+    20,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_BOOL,
     0,   /* quantifier_offset */
@@ -823,7 +847,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "temperature_calibration",
-    19,
+    21,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_FLOAT,
     0,   /* quantifier_offset */
@@ -835,7 +859,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "button1_mode",
-    20,
+    22,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
@@ -847,7 +871,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "button1_mqtt_topic",
-    21,
+    23,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
@@ -859,7 +883,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "button1_mqtt_payload",
-    22,
+    24,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
@@ -871,7 +895,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "button2_mode",
-    23,
+    25,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
@@ -883,7 +907,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "button2_mqtt_topic",
-    24,
+    26,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
@@ -895,7 +919,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "button2_mqtt_payload",
-    25,
+    27,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
@@ -907,7 +931,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "button1_detached_light_id",
-    26,
+    28,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
@@ -919,7 +943,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "button2_detached_light_id",
-    27,
+    29,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
@@ -931,7 +955,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "global_scenes",
-    28,
+    30,
     PROTOBUF_C_LABEL_REPEATED,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(NSPanelConfig, n_global_scenes),
@@ -943,7 +967,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "optimistic_mode",
-    29,
+    31,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_BOOL,
     0,   /* quantifier_offset */
@@ -955,7 +979,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "raise_light_level_to_100_above",
-    30,
+    32,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
@@ -967,7 +991,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "nspanel_id",
-    31,
+    33,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
@@ -979,7 +1003,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "relay1_is_in_relay_group",
-    32,
+    34,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_BOOL,
     0,   /* quantifier_offset */
@@ -991,7 +1015,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "relay1_relay_group",
-    33,
+    35,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
@@ -1003,7 +1027,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "relay2_is_in_relay_group",
-    34,
+    36,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_BOOL,
     0,   /* quantifier_offset */
@@ -1015,7 +1039,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
   {
     "relay2_relay_group",
-    35,
+    37,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
@@ -1027,46 +1051,48 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[35] =
   },
 };
 static const unsigned nspanel_config__field_indices_by_name[] = {
-  25,   /* field[25] = button1_detached_light_id */
-  19,   /* field[19] = button1_mode */
-  21,   /* field[21] = button1_mqtt_payload */
-  20,   /* field[20] = button1_mqtt_topic */
-  26,   /* field[26] = button2_detached_light_id */
-  22,   /* field[22] = button2_mode */
-  24,   /* field[24] = button2_mqtt_payload */
-  23,   /* field[23] = button2_mqtt_topic */
+  27,   /* field[27] = button1_detached_light_id */
+  21,   /* field[21] = button1_mode */
+  23,   /* field[23] = button1_mqtt_payload */
+  22,   /* field[22] = button1_mqtt_topic */
+  28,   /* field[28] = button2_detached_light_id */
+  24,   /* field[24] = button2_mode */
+  26,   /* field[26] = button2_mqtt_payload */
+  25,   /* field[25] = button2_mqtt_topic */
   5,   /* field[5] = button_long_press_time */
-  11,   /* field[11] = clock_us_style */
+  13,   /* field[13] = clock_us_style */
   2,   /* field[2] = default_page */
   1,   /* field[1] = default_room */
-  27,   /* field[27] = global_scenes */
-  13,   /* field[13] = is_us_panel */
+  29,   /* field[29] = global_scenes */
+  15,   /* field[15] = is_us_panel */
   4,   /* field[4] = min_button_push_time */
   0,   /* field[0] = name */
-  30,   /* field[30] = nspanel_id */
-  28,   /* field[28] = optimistic_mode */
-  29,   /* field[29] = raise_light_level_to_100_above */
-  16,   /* field[16] = relay1_default_mode */
-  31,   /* field[31] = relay1_is_in_relay_group */
-  32,   /* field[32] = relay1_relay_group */
-  17,   /* field[17] = relay2_default_mode */
-  33,   /* field[33] = relay2_is_in_relay_group */
-  34,   /* field[34] = relay2_relay_group */
-  15,   /* field[15] = reverse_relays */
-  14,   /* field[14] = room_infos */
+  32,   /* field[32] = nspanel_id */
+  30,   /* field[30] = optimistic_mode */
+  31,   /* field[31] = raise_light_level_to_100_above */
+  18,   /* field[18] = relay1_default_mode */
+  33,   /* field[33] = relay1_is_in_relay_group */
+  34,   /* field[34] = relay1_relay_group */
+  19,   /* field[19] = relay2_default_mode */
+  35,   /* field[35] = relay2_is_in_relay_group */
+  36,   /* field[36] = relay2_relay_group */
+  17,   /* field[17] = reverse_relays */
+  16,   /* field[16] = room_infos */
   8,   /* field[8] = screen_dim_level */
   3,   /* field[3] = screensaver_activation_timeout */
   9,   /* field[9] = screensaver_dim_level */
   10,   /* field[10] = screensaver_mode */
+  11,   /* field[11] = show_screensaver_inside_temperature */
+  12,   /* field[12] = show_screensaver_outside_temperature */
   7,   /* field[7] = special_mode_release_time */
   6,   /* field[6] = special_mode_trigger_time */
-  18,   /* field[18] = temperature_calibration */
-  12,   /* field[12] = use_fahrenheit */
+  20,   /* field[20] = temperature_calibration */
+  14,   /* field[14] = use_fahrenheit */
 };
 static const ProtobufCIntRange nspanel_config__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 35 }
+  { 0, 37 }
 };
 const ProtobufCMessageDescriptor nspanel_config__descriptor =
 {
@@ -1076,7 +1102,7 @@ const ProtobufCMessageDescriptor nspanel_config__descriptor =
   "NSPanelConfig",
   "",
   sizeof(NSPanelConfig),
-  35,
+  37,
   nspanel_config__field_descriptors,
   nspanel_config__field_indices_by_name,
   1,  nspanel_config__number_ranges,

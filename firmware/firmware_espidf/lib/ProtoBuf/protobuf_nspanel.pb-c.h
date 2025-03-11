@@ -110,6 +110,8 @@ struct  NSPanelConfig
   int32_t screen_dim_level;
   int32_t screensaver_dim_level;
   NSPanelConfig__NSPanelScreensaverMode screensaver_mode;
+  protobuf_c_boolean show_screensaver_inside_temperature;
+  protobuf_c_boolean show_screensaver_outside_temperature;
   protobuf_c_boolean clock_us_style;
   protobuf_c_boolean use_fahrenheit;
   protobuf_c_boolean is_us_panel;
@@ -142,7 +144,7 @@ struct  NSPanelConfig
 };
 #define NSPANEL_CONFIG__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
-    , (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0,NULL, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0,NULL, 0, 0, 0, 0, 0, 0, 0 }
+    , (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0,NULL, 0, 0, 0, 0, 0, 0, 0 }
 
 
 struct  NSPanelWarning

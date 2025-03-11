@@ -282,6 +282,13 @@ void NSPanel::send_config() {
     config.set_show_screensaver_inside_temperature(false);
   }
 
+  std::string show_screensaver_outside_temperature = this->_get_nspanel_setting_with_default("show_screensaver_outside_temperature", MqttManagerConfig::get_setting_with_default("show_screensaver_outside_temperature", "True"));
+  if (show_screensaver_outside_temperature.compare("True") == 0) {
+    config.set_show_screensaver_outside_temperature(true);
+  } else {
+    config.set_show_screensaver_outside_temperature(false);
+  }
+
   try {
     auto relay_group_binding = database_manager::database.get_all<database_manager::NSPanelRelayGroupBinding>(
         sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::relay_num) == 1) and sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::nspanel_id) == this->_id);
@@ -822,7 +829,7 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 
 void NSPanel::accept_register_request() {
   this->reload_config();
-  this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+  // this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
 }
 
 void NSPanel::deny_register_request() {

@@ -212,6 +212,7 @@ def edit_nspanel(request, panel_id: int):
         "screensaver_dim_level": get_nspanel_setting_with_default(panel_id, "screensaver_dim_level", ""),
         "is_us_panel": get_nspanel_setting_with_default(panel_id, "is_us_panel", "False"),
         "show_screensaver_inside_temperature": get_nspanel_setting_with_default(panel_id, "show_screensaver_inside_temperature", "global"),
+        "show_screensaver_outside_temperature": get_nspanel_setting_with_default(panel_id, "show_screensaver_outside_temperature", "global"),
         "screensaver_activation_timeout": get_nspanel_setting_with_default(panel_id, "screensaver_activation_timeout", ""),
         "screensaver_mode": get_nspanel_setting_with_default(panel_id, "screensaver_mode", "global"),
         "reverse_relays": get_nspanel_setting_with_default(panel_id, "reverse_relays", "False"),
@@ -271,7 +272,8 @@ def edit_nspanel(request, panel_id: int):
         "temperature_unit": temperature_unit,
         "multiple": [1, 2, 3, 4],
         "max_live_log_messages": get_setting_with_default("max_live_log_messages"),
-        "logs": panel_logs
+        "logs": panel_logs,
+        "screensaver_mode_global": get_setting_with_default("screensaver_mode"),
     }
 
     return render(request, 'edit_nspanel.html', data)
@@ -340,6 +342,11 @@ def save_panel_settings(request, panel_id: int):
         delete_nspanel_setting(panel_id, "show_screensaver_inside_temperature")
     else:
         set_nspanel_setting_value(panel_id, "show_screensaver_inside_temperature", request.POST["show_screensaver_inside_temperature"])
+
+    if request.POST["show_screensaver_outside_temperature"] == "global":
+        delete_nspanel_setting(panel_id, "show_screensaver_outside_temperature")
+    else:
+        set_nspanel_setting_value(panel_id, "show_screensaver_outside_temperature", request.POST["show_screensaver_outside_temperature"])
 
     set_nspanel_setting_value(
         panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
@@ -555,6 +562,7 @@ def settings_page(request):
     data["screensaver_dim_level"] = get_setting_with_default("screensaver_dim_level")
     data["screensaver_mode"] = get_setting_with_default("screensaver_mode")
     data["show_screensaver_inside_temperature"] = get_setting_with_default("show_screensaver_inside_temperature")
+    data["show_screensaver_outside_temperature"] = get_setting_with_default("show_screensaver_outside_temperature")
     data["turn_on_behavior"] = get_setting_with_default("turn_on_behavior")
     data["max_live_log_messages"] = get_setting_with_default("max_live_log_messages")
     data["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size")
@@ -611,6 +619,7 @@ def save_settings(request):
     set_setting_value(name="screensaver_dim_level", value=request.POST["screensaver_dim_level"])
     set_setting_value(name="screensaver_mode", value=request.POST["screensaver_mode"])
     set_setting_value(name="show_screensaver_inside_temperature", value=request.POST["show_screensaver_inside_temperature"])
+    set_setting_value(name="show_screensaver_outside_temperature", value=request.POST["show_screensaver_outside_temperature"])
     set_setting_value(name="turn_on_behavior", value=request.POST["turn_on_behavior"])
     set_setting_value(name="max_live_log_messages", value=request.POST["max_live_log_messages"])
     set_setting_value(name="max_log_buffer_size", value=request.POST["max_log_buffer_size"])

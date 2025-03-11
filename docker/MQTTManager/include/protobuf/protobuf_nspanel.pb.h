@@ -4070,13 +4070,13 @@ class NSPanelConfig final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kRoomInfosFieldNumber = 16,
-    kGlobalScenesFieldNumber = 29,
+    kRoomInfosFieldNumber = 17,
+    kGlobalScenesFieldNumber = 30,
     kNameFieldNumber = 1,
-    kButton1MqttTopicFieldNumber = 22,
-    kButton1MqttPayloadFieldNumber = 23,
-    kButton2MqttTopicFieldNumber = 25,
-    kButton2MqttPayloadFieldNumber = 26,
+    kButton1MqttTopicFieldNumber = 23,
+    kButton1MqttPayloadFieldNumber = 24,
+    kButton2MqttTopicFieldNumber = 26,
+    kButton2MqttPayloadFieldNumber = 27,
     kDefaultRoomFieldNumber = 2,
     kDefaultPageFieldNumber = 3,
     kScreensaverActivationTimeoutFieldNumber = 4,
@@ -4088,26 +4088,27 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kScreensaverDimLevelFieldNumber = 10,
     kScreensaverModeFieldNumber = 11,
     kShowScreensaverInsideTemperatureFieldNumber = 12,
-    kClockUsStyleFieldNumber = 13,
-    kUseFahrenheitFieldNumber = 14,
-    kIsUsPanelFieldNumber = 15,
-    kTemperatureCalibrationFieldNumber = 20,
-    kButton1ModeFieldNumber = 21,
-    kReverseRelaysFieldNumber = 17,
-    kRelay1DefaultModeFieldNumber = 18,
-    kRelay2DefaultModeFieldNumber = 19,
-    kOptimisticModeFieldNumber = 30,
-    kButton2ModeFieldNumber = 24,
-    kButton1DetachedLightIdFieldNumber = 27,
-    kButton2DetachedLightIdFieldNumber = 28,
-    kRaiseLightLevelTo100AboveFieldNumber = 31,
-    kNspanelIdFieldNumber = 32,
-    kRelay1RelayGroupFieldNumber = 34,
-    kRelay1IsInRelayGroupFieldNumber = 33,
-    kRelay2IsInRelayGroupFieldNumber = 35,
-    kRelay2RelayGroupFieldNumber = 36,
+    kShowScreensaverOutsideTemperatureFieldNumber = 13,
+    kClockUsStyleFieldNumber = 14,
+    kUseFahrenheitFieldNumber = 15,
+    kIsUsPanelFieldNumber = 16,
+    kReverseRelaysFieldNumber = 18,
+    kRelay1DefaultModeFieldNumber = 19,
+    kRelay2DefaultModeFieldNumber = 20,
+    kTemperatureCalibrationFieldNumber = 21,
+    kButton1ModeFieldNumber = 22,
+    kButton2ModeFieldNumber = 25,
+    kButton1DetachedLightIdFieldNumber = 28,
+    kButton2DetachedLightIdFieldNumber = 29,
+    kRaiseLightLevelTo100AboveFieldNumber = 32,
+    kNspanelIdFieldNumber = 33,
+    kOptimisticModeFieldNumber = 31,
+    kRelay1IsInRelayGroupFieldNumber = 34,
+    kRelay2IsInRelayGroupFieldNumber = 36,
+    kRelay1RelayGroupFieldNumber = 35,
+    kRelay2RelayGroupFieldNumber = 37,
   };
-  // repeated .NSPanelConfig.RoomInfo room_infos = 16;
+  // repeated .NSPanelConfig.RoomInfo room_infos = 17;
   int room_infos_size() const;
   private:
   int _internal_room_infos_size() const;
@@ -4124,7 +4125,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   const ::NSPanelConfig_RoomInfo& room_infos(int index) const;
   ::NSPanelConfig_RoomInfo* add_room_infos();
   const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_RoomInfo>& room_infos() const;
-  // repeated .NSPanelScene global_scenes = 29;
+  // repeated .NSPanelScene global_scenes = 30;
   int global_scenes_size() const;
   private:
   int _internal_global_scenes_size() const;
@@ -4157,7 +4158,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   std::string* _internal_mutable_name();
 
   public:
-  // string button1_mqtt_topic = 22;
+  // string button1_mqtt_topic = 23;
   void clear_button1_mqtt_topic() ;
   const std::string& button1_mqtt_topic() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -4173,7 +4174,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   std::string* _internal_mutable_button1_mqtt_topic();
 
   public:
-  // string button1_mqtt_payload = 23;
+  // string button1_mqtt_payload = 24;
   void clear_button1_mqtt_payload() ;
   const std::string& button1_mqtt_payload() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -4189,7 +4190,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   std::string* _internal_mutable_button1_mqtt_payload();
 
   public:
-  // string button2_mqtt_topic = 25;
+  // string button2_mqtt_topic = 26;
   void clear_button2_mqtt_topic() ;
   const std::string& button2_mqtt_topic() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -4205,7 +4206,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   std::string* _internal_mutable_button2_mqtt_topic();
 
   public:
-  // string button2_mqtt_payload = 26;
+  // string button2_mqtt_payload = 27;
   void clear_button2_mqtt_payload() ;
   const std::string& button2_mqtt_payload() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -4331,7 +4332,17 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_show_screensaver_inside_temperature(bool value);
 
   public:
-  // bool clock_us_style = 13;
+  // bool show_screensaver_outside_temperature = 13;
+  void clear_show_screensaver_outside_temperature() ;
+  bool show_screensaver_outside_temperature() const;
+  void set_show_screensaver_outside_temperature(bool value);
+
+  private:
+  bool _internal_show_screensaver_outside_temperature() const;
+  void _internal_set_show_screensaver_outside_temperature(bool value);
+
+  public:
+  // bool clock_us_style = 14;
   void clear_clock_us_style() ;
   bool clock_us_style() const;
   void set_clock_us_style(bool value);
@@ -4341,7 +4352,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_clock_us_style(bool value);
 
   public:
-  // bool use_fahrenheit = 14;
+  // bool use_fahrenheit = 15;
   void clear_use_fahrenheit() ;
   bool use_fahrenheit() const;
   void set_use_fahrenheit(bool value);
@@ -4351,7 +4362,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_use_fahrenheit(bool value);
 
   public:
-  // bool is_us_panel = 15;
+  // bool is_us_panel = 16;
   void clear_is_us_panel() ;
   bool is_us_panel() const;
   void set_is_us_panel(bool value);
@@ -4361,27 +4372,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_is_us_panel(bool value);
 
   public:
-  // float temperature_calibration = 20;
-  void clear_temperature_calibration() ;
-  float temperature_calibration() const;
-  void set_temperature_calibration(float value);
-
-  private:
-  float _internal_temperature_calibration() const;
-  void _internal_set_temperature_calibration(float value);
-
-  public:
-  // int32 button1_mode = 21;
-  void clear_button1_mode() ;
-  ::int32_t button1_mode() const;
-  void set_button1_mode(::int32_t value);
-
-  private:
-  ::int32_t _internal_button1_mode() const;
-  void _internal_set_button1_mode(::int32_t value);
-
-  public:
-  // bool reverse_relays = 17;
+  // bool reverse_relays = 18;
   void clear_reverse_relays() ;
   bool reverse_relays() const;
   void set_reverse_relays(bool value);
@@ -4391,7 +4382,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_reverse_relays(bool value);
 
   public:
-  // bool relay1_default_mode = 18;
+  // bool relay1_default_mode = 19;
   void clear_relay1_default_mode() ;
   bool relay1_default_mode() const;
   void set_relay1_default_mode(bool value);
@@ -4401,7 +4392,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_relay1_default_mode(bool value);
 
   public:
-  // bool relay2_default_mode = 19;
+  // bool relay2_default_mode = 20;
   void clear_relay2_default_mode() ;
   bool relay2_default_mode() const;
   void set_relay2_default_mode(bool value);
@@ -4411,17 +4402,27 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_relay2_default_mode(bool value);
 
   public:
-  // bool optimistic_mode = 30;
-  void clear_optimistic_mode() ;
-  bool optimistic_mode() const;
-  void set_optimistic_mode(bool value);
+  // float temperature_calibration = 21;
+  void clear_temperature_calibration() ;
+  float temperature_calibration() const;
+  void set_temperature_calibration(float value);
 
   private:
-  bool _internal_optimistic_mode() const;
-  void _internal_set_optimistic_mode(bool value);
+  float _internal_temperature_calibration() const;
+  void _internal_set_temperature_calibration(float value);
 
   public:
-  // int32 button2_mode = 24;
+  // int32 button1_mode = 22;
+  void clear_button1_mode() ;
+  ::int32_t button1_mode() const;
+  void set_button1_mode(::int32_t value);
+
+  private:
+  ::int32_t _internal_button1_mode() const;
+  void _internal_set_button1_mode(::int32_t value);
+
+  public:
+  // int32 button2_mode = 25;
   void clear_button2_mode() ;
   ::int32_t button2_mode() const;
   void set_button2_mode(::int32_t value);
@@ -4431,7 +4432,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_button2_mode(::int32_t value);
 
   public:
-  // int32 button1_detached_light_id = 27;
+  // int32 button1_detached_light_id = 28;
   void clear_button1_detached_light_id() ;
   ::int32_t button1_detached_light_id() const;
   void set_button1_detached_light_id(::int32_t value);
@@ -4441,7 +4442,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_button1_detached_light_id(::int32_t value);
 
   public:
-  // int32 button2_detached_light_id = 28;
+  // int32 button2_detached_light_id = 29;
   void clear_button2_detached_light_id() ;
   ::int32_t button2_detached_light_id() const;
   void set_button2_detached_light_id(::int32_t value);
@@ -4451,7 +4452,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_button2_detached_light_id(::int32_t value);
 
   public:
-  // int32 raise_light_level_to_100_above = 31;
+  // int32 raise_light_level_to_100_above = 32;
   void clear_raise_light_level_to_100_above() ;
   ::int32_t raise_light_level_to_100_above() const;
   void set_raise_light_level_to_100_above(::int32_t value);
@@ -4461,7 +4462,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_raise_light_level_to_100_above(::int32_t value);
 
   public:
-  // int32 nspanel_id = 32;
+  // int32 nspanel_id = 33;
   void clear_nspanel_id() ;
   ::int32_t nspanel_id() const;
   void set_nspanel_id(::int32_t value);
@@ -4471,17 +4472,17 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_nspanel_id(::int32_t value);
 
   public:
-  // int32 relay1_relay_group = 34;
-  void clear_relay1_relay_group() ;
-  ::int32_t relay1_relay_group() const;
-  void set_relay1_relay_group(::int32_t value);
+  // bool optimistic_mode = 31;
+  void clear_optimistic_mode() ;
+  bool optimistic_mode() const;
+  void set_optimistic_mode(bool value);
 
   private:
-  ::int32_t _internal_relay1_relay_group() const;
-  void _internal_set_relay1_relay_group(::int32_t value);
+  bool _internal_optimistic_mode() const;
+  void _internal_set_optimistic_mode(bool value);
 
   public:
-  // bool relay1_is_in_relay_group = 33;
+  // bool relay1_is_in_relay_group = 34;
   void clear_relay1_is_in_relay_group() ;
   bool relay1_is_in_relay_group() const;
   void set_relay1_is_in_relay_group(bool value);
@@ -4491,7 +4492,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_relay1_is_in_relay_group(bool value);
 
   public:
-  // bool relay2_is_in_relay_group = 35;
+  // bool relay2_is_in_relay_group = 36;
   void clear_relay2_is_in_relay_group() ;
   bool relay2_is_in_relay_group() const;
   void set_relay2_is_in_relay_group(bool value);
@@ -4501,7 +4502,17 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_relay2_is_in_relay_group(bool value);
 
   public:
-  // int32 relay2_relay_group = 36;
+  // int32 relay1_relay_group = 35;
+  void clear_relay1_relay_group() ;
+  ::int32_t relay1_relay_group() const;
+  void set_relay1_relay_group(::int32_t value);
+
+  private:
+  ::int32_t _internal_relay1_relay_group() const;
+  void _internal_set_relay1_relay_group(::int32_t value);
+
+  public:
+  // int32 relay2_relay_group = 37;
   void clear_relay2_relay_group() ;
   ::int32_t relay2_relay_group() const;
   void set_relay2_relay_group(::int32_t value);
@@ -4516,7 +4527,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 36, 2,
+      5, 37, 2,
       134, 7>
       _table_;
 
@@ -4555,23 +4566,24 @@ class NSPanelConfig final : public ::google::protobuf::Message
     ::int32_t screensaver_dim_level_;
     int screensaver_mode_;
     bool show_screensaver_inside_temperature_;
+    bool show_screensaver_outside_temperature_;
     bool clock_us_style_;
     bool use_fahrenheit_;
     bool is_us_panel_;
-    float temperature_calibration_;
-    ::int32_t button1_mode_;
     bool reverse_relays_;
     bool relay1_default_mode_;
     bool relay2_default_mode_;
-    bool optimistic_mode_;
+    float temperature_calibration_;
+    ::int32_t button1_mode_;
     ::int32_t button2_mode_;
     ::int32_t button1_detached_light_id_;
     ::int32_t button2_detached_light_id_;
     ::int32_t raise_light_level_to_100_above_;
     ::int32_t nspanel_id_;
-    ::int32_t relay1_relay_group_;
+    bool optimistic_mode_;
     bool relay1_is_in_relay_group_;
     bool relay2_is_in_relay_group_;
+    ::int32_t relay1_relay_group_;
     ::int32_t relay2_relay_group_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -5057,7 +5069,29 @@ inline void NSPanelConfig::_internal_set_show_screensaver_inside_temperature(boo
   _impl_.show_screensaver_inside_temperature_ = value;
 }
 
-// bool clock_us_style = 13;
+// bool show_screensaver_outside_temperature = 13;
+inline void NSPanelConfig::clear_show_screensaver_outside_temperature() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.show_screensaver_outside_temperature_ = false;
+}
+inline bool NSPanelConfig::show_screensaver_outside_temperature() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.show_screensaver_outside_temperature)
+  return _internal_show_screensaver_outside_temperature();
+}
+inline void NSPanelConfig::set_show_screensaver_outside_temperature(bool value) {
+  _internal_set_show_screensaver_outside_temperature(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.show_screensaver_outside_temperature)
+}
+inline bool NSPanelConfig::_internal_show_screensaver_outside_temperature() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.show_screensaver_outside_temperature_;
+}
+inline void NSPanelConfig::_internal_set_show_screensaver_outside_temperature(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.show_screensaver_outside_temperature_ = value;
+}
+
+// bool clock_us_style = 14;
 inline void NSPanelConfig::clear_clock_us_style() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.clock_us_style_ = false;
@@ -5079,7 +5113,7 @@ inline void NSPanelConfig::_internal_set_clock_us_style(bool value) {
   _impl_.clock_us_style_ = value;
 }
 
-// bool use_fahrenheit = 14;
+// bool use_fahrenheit = 15;
 inline void NSPanelConfig::clear_use_fahrenheit() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.use_fahrenheit_ = false;
@@ -5101,7 +5135,7 @@ inline void NSPanelConfig::_internal_set_use_fahrenheit(bool value) {
   _impl_.use_fahrenheit_ = value;
 }
 
-// bool is_us_panel = 15;
+// bool is_us_panel = 16;
 inline void NSPanelConfig::clear_is_us_panel() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.is_us_panel_ = false;
@@ -5123,7 +5157,7 @@ inline void NSPanelConfig::_internal_set_is_us_panel(bool value) {
   _impl_.is_us_panel_ = value;
 }
 
-// repeated .NSPanelConfig.RoomInfo room_infos = 16;
+// repeated .NSPanelConfig.RoomInfo room_infos = 17;
 inline int NSPanelConfig::_internal_room_infos_size() const {
   return _internal_room_infos().size();
 }
@@ -5172,7 +5206,7 @@ NSPanelConfig::_internal_mutable_room_infos() {
   return &_impl_.room_infos_;
 }
 
-// bool reverse_relays = 17;
+// bool reverse_relays = 18;
 inline void NSPanelConfig::clear_reverse_relays() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.reverse_relays_ = false;
@@ -5194,7 +5228,7 @@ inline void NSPanelConfig::_internal_set_reverse_relays(bool value) {
   _impl_.reverse_relays_ = value;
 }
 
-// bool relay1_default_mode = 18;
+// bool relay1_default_mode = 19;
 inline void NSPanelConfig::clear_relay1_default_mode() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.relay1_default_mode_ = false;
@@ -5216,7 +5250,7 @@ inline void NSPanelConfig::_internal_set_relay1_default_mode(bool value) {
   _impl_.relay1_default_mode_ = value;
 }
 
-// bool relay2_default_mode = 19;
+// bool relay2_default_mode = 20;
 inline void NSPanelConfig::clear_relay2_default_mode() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.relay2_default_mode_ = false;
@@ -5238,7 +5272,7 @@ inline void NSPanelConfig::_internal_set_relay2_default_mode(bool value) {
   _impl_.relay2_default_mode_ = value;
 }
 
-// float temperature_calibration = 20;
+// float temperature_calibration = 21;
 inline void NSPanelConfig::clear_temperature_calibration() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.temperature_calibration_ = 0;
@@ -5260,7 +5294,7 @@ inline void NSPanelConfig::_internal_set_temperature_calibration(float value) {
   _impl_.temperature_calibration_ = value;
 }
 
-// int32 button1_mode = 21;
+// int32 button1_mode = 22;
 inline void NSPanelConfig::clear_button1_mode() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button1_mode_ = 0;
@@ -5282,7 +5316,7 @@ inline void NSPanelConfig::_internal_set_button1_mode(::int32_t value) {
   _impl_.button1_mode_ = value;
 }
 
-// string button1_mqtt_topic = 22;
+// string button1_mqtt_topic = 23;
 inline void NSPanelConfig::clear_button1_mqtt_topic() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button1_mqtt_topic_.ClearToEmpty();
@@ -5332,7 +5366,7 @@ inline void NSPanelConfig::set_allocated_button1_mqtt_topic(std::string* value) 
   // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.button1_mqtt_topic)
 }
 
-// string button1_mqtt_payload = 23;
+// string button1_mqtt_payload = 24;
 inline void NSPanelConfig::clear_button1_mqtt_payload() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button1_mqtt_payload_.ClearToEmpty();
@@ -5382,7 +5416,7 @@ inline void NSPanelConfig::set_allocated_button1_mqtt_payload(std::string* value
   // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.button1_mqtt_payload)
 }
 
-// int32 button2_mode = 24;
+// int32 button2_mode = 25;
 inline void NSPanelConfig::clear_button2_mode() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button2_mode_ = 0;
@@ -5404,7 +5438,7 @@ inline void NSPanelConfig::_internal_set_button2_mode(::int32_t value) {
   _impl_.button2_mode_ = value;
 }
 
-// string button2_mqtt_topic = 25;
+// string button2_mqtt_topic = 26;
 inline void NSPanelConfig::clear_button2_mqtt_topic() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button2_mqtt_topic_.ClearToEmpty();
@@ -5454,7 +5488,7 @@ inline void NSPanelConfig::set_allocated_button2_mqtt_topic(std::string* value) 
   // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.button2_mqtt_topic)
 }
 
-// string button2_mqtt_payload = 26;
+// string button2_mqtt_payload = 27;
 inline void NSPanelConfig::clear_button2_mqtt_payload() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button2_mqtt_payload_.ClearToEmpty();
@@ -5504,7 +5538,7 @@ inline void NSPanelConfig::set_allocated_button2_mqtt_payload(std::string* value
   // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.button2_mqtt_payload)
 }
 
-// int32 button1_detached_light_id = 27;
+// int32 button1_detached_light_id = 28;
 inline void NSPanelConfig::clear_button1_detached_light_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button1_detached_light_id_ = 0;
@@ -5526,7 +5560,7 @@ inline void NSPanelConfig::_internal_set_button1_detached_light_id(::int32_t val
   _impl_.button1_detached_light_id_ = value;
 }
 
-// int32 button2_detached_light_id = 28;
+// int32 button2_detached_light_id = 29;
 inline void NSPanelConfig::clear_button2_detached_light_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button2_detached_light_id_ = 0;
@@ -5548,7 +5582,7 @@ inline void NSPanelConfig::_internal_set_button2_detached_light_id(::int32_t val
   _impl_.button2_detached_light_id_ = value;
 }
 
-// repeated .NSPanelScene global_scenes = 29;
+// repeated .NSPanelScene global_scenes = 30;
 inline int NSPanelConfig::_internal_global_scenes_size() const {
   return _internal_global_scenes().size();
 }
@@ -5597,7 +5631,7 @@ NSPanelConfig::_internal_mutable_global_scenes() {
   return &_impl_.global_scenes_;
 }
 
-// bool optimistic_mode = 30;
+// bool optimistic_mode = 31;
 inline void NSPanelConfig::clear_optimistic_mode() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.optimistic_mode_ = false;
@@ -5619,7 +5653,7 @@ inline void NSPanelConfig::_internal_set_optimistic_mode(bool value) {
   _impl_.optimistic_mode_ = value;
 }
 
-// int32 raise_light_level_to_100_above = 31;
+// int32 raise_light_level_to_100_above = 32;
 inline void NSPanelConfig::clear_raise_light_level_to_100_above() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.raise_light_level_to_100_above_ = 0;
@@ -5641,7 +5675,7 @@ inline void NSPanelConfig::_internal_set_raise_light_level_to_100_above(::int32_
   _impl_.raise_light_level_to_100_above_ = value;
 }
 
-// int32 nspanel_id = 32;
+// int32 nspanel_id = 33;
 inline void NSPanelConfig::clear_nspanel_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.nspanel_id_ = 0;
@@ -5663,7 +5697,7 @@ inline void NSPanelConfig::_internal_set_nspanel_id(::int32_t value) {
   _impl_.nspanel_id_ = value;
 }
 
-// bool relay1_is_in_relay_group = 33;
+// bool relay1_is_in_relay_group = 34;
 inline void NSPanelConfig::clear_relay1_is_in_relay_group() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.relay1_is_in_relay_group_ = false;
@@ -5685,7 +5719,7 @@ inline void NSPanelConfig::_internal_set_relay1_is_in_relay_group(bool value) {
   _impl_.relay1_is_in_relay_group_ = value;
 }
 
-// int32 relay1_relay_group = 34;
+// int32 relay1_relay_group = 35;
 inline void NSPanelConfig::clear_relay1_relay_group() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.relay1_relay_group_ = 0;
@@ -5707,7 +5741,7 @@ inline void NSPanelConfig::_internal_set_relay1_relay_group(::int32_t value) {
   _impl_.relay1_relay_group_ = value;
 }
 
-// bool relay2_is_in_relay_group = 35;
+// bool relay2_is_in_relay_group = 36;
 inline void NSPanelConfig::clear_relay2_is_in_relay_group() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.relay2_is_in_relay_group_ = false;
@@ -5729,7 +5763,7 @@ inline void NSPanelConfig::_internal_set_relay2_is_in_relay_group(bool value) {
   _impl_.relay2_is_in_relay_group_ = value;
 }
 
-// int32 relay2_relay_group = 36;
+// int32 relay2_relay_group = 37;
 inline void NSPanelConfig::clear_relay2_relay_group() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.relay2_relay_group_ = 0;

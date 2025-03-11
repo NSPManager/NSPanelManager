@@ -39,6 +39,7 @@ default_settings = {
     "screensaver_dim_level": 1,
     "screensaver_mode": "with_background",
     "show_screensaver_inside_temperature": "True",
+    "show_screensaver_outside_temperature": "True",
     "special_mode_release_time": 5000,
     "special_mode_trigger_time": 300,
     "turn_on_behavior": "color_temp",
