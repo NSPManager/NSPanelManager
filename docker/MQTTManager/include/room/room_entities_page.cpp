@@ -134,7 +134,6 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       } else {
         entity_slot->set_pco(65535);
         entity_slot->set_pco2(65535);
-        SPDLOG_DEBUG("Added Light {}::{} to RoomEntityWrapper {}.", light->get_id(), light->get_name(), this->_id);
       }
     } else {
       SPDLOG_ERROR("Unknown entity type {} while processing EntityWrapper while building NSPanelRoomEntitiesPage protobuf object.", (int)entity->get_type());

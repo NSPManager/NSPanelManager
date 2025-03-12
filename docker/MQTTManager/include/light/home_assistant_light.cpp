@@ -37,6 +37,10 @@ HomeAssistantLight::HomeAssistantLight(uint32_t light_id) : Light(light_id) {
   }
 }
 
+HomeAssistantLight::~HomeAssistantLight() {
+  HomeAssistantManager::detach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantLight::home_assistant_event_callback, this, _1));
+}
+
 void HomeAssistantLight::send_state_update_to_controller() {
   // SPDLOG_TRACE("Light {}::{} current mode  : {}", this->_id, this->_name, (int)this->_current_mode);
   // SPDLOG_TRACE("Light {}::{} requested mode: {}", this->_id, this->_name, (int)this->_requested_mode);
@@ -214,5 +218,3 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
     }
   }
 }
-
-HomeAssistantLight::~HomeAssistantLight() {}

@@ -16,6 +16,7 @@
 #include <curl/easy.h>
 #include <fmt/core.h>
 #include <fmt/format.h>
+#include <mutex>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
@@ -67,7 +68,18 @@ OpenhabLight::OpenhabLight(uint32_t light_id) : Light(light_id) {
   SPDLOG_DEBUG("Loaded light {}::{}.", this->_id, this->_name);
 }
 
+OpenhabLight::~OpenhabLight() {
+  OpenhabManager::detach_event_observer(this->_openhab_on_off_item, boost::bind(&OpenhabLight::openhab_event_callback, this, _1));
+  if (this->_can_color_temperature) {
+    OpenhabManager::detach_event_observer(this->_openhab_item_color_temperature, boost::bind(&OpenhabLight::openhab_event_callback, this, _1));
+  }
+  if (this->_can_rgb) {
+    OpenhabManager::detach_event_observer(this->_openhab_item_rgb, boost::bind(&OpenhabLight::openhab_event_callback, this, _1));
+  }
+}
+
 void OpenhabLight::send_state_update_to_controller() {
+  std::lock_guard<std::mutex> lock_guard(this->_openhab_items_mutex);
   // SPDLOG_DEBUG("--- Sending light {}::{} event state ---", this->_id, this->_name);
   // SPDLOG_DEBUG("Current mode: {}", this->_current_mode == MQTT_MANAGER_LIGHT_MODE::RGB ? "RGB" : "DEFAULT");
   // SPDLOG_DEBUG("Requested state: {}, current: {}", this->_requested_state, this->_current_state);
@@ -165,6 +177,7 @@ void OpenhabLight::send_state_update_to_controller() {
 }
 
 void OpenhabLight::openhab_event_callback(nlohmann::json data) {
+  std::lock_guard<std::mutex> lock_guard(this->_openhab_items_mutex);
   if (std::string(data["type"]).compare("ItemStateChangedEvent") == 0) {
     // Extract topic into multiple parts
     std::string topic = data["topic"];
@@ -362,5 +375,3 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
     return;
   }
 }
-
-OpenhabLight::~OpenhabLight() {}
