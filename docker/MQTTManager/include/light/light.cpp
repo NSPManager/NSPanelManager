@@ -12,6 +12,7 @@
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <unistd.h>
 
 Light::Light(uint32_t light_id) {
   this->_id = light_id;
@@ -121,6 +122,10 @@ void Light::turn_on(bool send_update) {
   this->_requested_state = true;
   if (send_update) {
     this->send_state_update_to_controller();
+
+    if (MqttManagerConfig::get_settings().optimistic_mode) {
+      this->_current_state = true;
+    }
   }
 }
 
@@ -129,6 +134,10 @@ void Light::turn_off(bool send_update) {
   this->_requested_state = false;
   if (send_update) {
     this->send_state_update_to_controller();
+
+    if (MqttManagerConfig::get_settings().optimistic_mode) {
+      this->_current_state = false;
+    }
   }
 }
 
@@ -146,6 +155,10 @@ void Light::set_brightness(uint8_t brightness, bool send_update) {
   this->_requested_brightness = brightness;
   if (send_update) {
     this->send_state_update_to_controller();
+
+    if (MqttManagerConfig::get_settings().optimistic_mode) {
+      this->_current_brightness = brightness;
+    }
   }
 }
 
@@ -159,6 +172,10 @@ void Light::set_color_temperature(uint color_temperature, bool send_update) {
   this->_requested_color_temperature = color_temperature;
   if (send_update) {
     this->send_state_update_to_controller();
+
+    if (MqttManagerConfig::get_settings().optimistic_mode) {
+      this->_current_color_temperature = color_temperature;
+    }
   }
 }
 
@@ -172,6 +189,10 @@ void Light::set_hue(uint16_t hue, bool send_update) {
   this->_requested_hue = hue;
   if (send_update) {
     this->send_state_update_to_controller();
+
+    if (MqttManagerConfig::get_settings().optimistic_mode) {
+      this->_current_hue = hue;
+    }
   }
 }
 
@@ -185,6 +206,10 @@ void Light::set_saturation(uint8_t saturation, bool send_update) {
   this->_requested_saturation = saturation;
   if (send_update) {
     this->send_state_update_to_controller();
+
+    if (MqttManagerConfig::get_settings().optimistic_mode) {
+      this->_current_saturation = saturation;
+    }
   }
 }
 
@@ -200,6 +225,12 @@ void Light::set_hsb(uint16_t hue, uint8_t saturation, uint8_t brightness, bool s
   this->_requested_brightness = brightness;
   if (send_update) {
     this->send_state_update_to_controller();
+
+    if (MqttManagerConfig::get_settings().optimistic_mode) {
+      this->_current_hue = hue;
+      this->_current_saturation = saturation;
+      this->_current_brightness = brightness;
+    }
   }
 }
 
