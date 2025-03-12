@@ -570,6 +570,7 @@ def settings_page(request):
     data["manager_address"] = get_setting_with_default("manager_address")
     data["manager_port"] = get_setting_with_default("manager_port")
     data["optimistic_mode"] = get_setting_with_default("optimistic_mode")
+    data["light_turn_on_brightness"] = get_setting_with_default("light_turn_on_brightness")
     return render(request, 'settings.html', data)
 
 
@@ -627,6 +628,7 @@ def save_settings(request):
     set_setting_value(name="manager_address", value=request.POST["manager_address"])
     set_setting_value(name="manager_port", value=request.POST["manager_port"])
     set_setting_value(name="optimistic_mode", value=request.POST["optimistic_mode"] == "optimistic")
+    set_setting_value(name="light_turn_on_brightness", value=request.POST["light_turn_on_brightness"])
     # Settings saved, restart mqtt_manager
     restart_mqtt_manager()
     return redirect('settings')

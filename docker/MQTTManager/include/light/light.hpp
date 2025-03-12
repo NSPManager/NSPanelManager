@@ -31,6 +31,11 @@ public:
   void reload_config();
 
   /**
+   * Get the room ID of the light.
+   */
+  uint16_t get_room_id();
+
+  /**
    * Get light type (ceiling or table)
    */
   MQTT_MANAGER_LIGHT_TYPE get_light_type();
@@ -213,11 +218,6 @@ protected:
   uint16_t _requested_hue;
   uint8_t _requested_saturation;
   MQTT_MANAGER_LIGHT_MODE _requested_mode;
-
-  std::string _mqtt_brightness_topic;
-  std::string _mqtt_kelvin_topic;
-  std::string _mqtt_hue_topic;
-  std::string _mqtt_saturation_topic;
 
   boost::signals2::signal<void(Light *)> _light_destroyed_callbacks;
 };

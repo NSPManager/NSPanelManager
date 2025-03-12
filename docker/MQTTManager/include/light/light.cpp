@@ -19,11 +19,6 @@ Light::Light(uint32_t light_id) {
 
   // Build MQTT Topics
   std::string mqtt_base_topic = fmt::format("nspanel/entities/light/{}/", this->_id);
-  this->_mqtt_brightness_topic = fmt::format("{}/state_brightness_pct", mqtt_base_topic);
-  this->_mqtt_kelvin_topic = fmt::format("{}/state_kelvin", mqtt_base_topic);
-  this->_mqtt_hue_topic = fmt::format("{}/state_hue", mqtt_base_topic);
-  this->_mqtt_saturation_topic = fmt::format("{}/state_sat", mqtt_base_topic);
-
   this->_current_state = false;
   this->_current_brightness = 50;
   this->_current_color_temperature = 2500;
@@ -42,6 +37,10 @@ Light::Light(uint32_t light_id) {
 
 MQTT_MANAGER_LIGHT_TYPE Light::get_light_type() {
   return this->_light_type;
+}
+
+uint16_t Light::get_room_id() {
+  return this->_room_id;
 }
 
 void Light::reload_config() {

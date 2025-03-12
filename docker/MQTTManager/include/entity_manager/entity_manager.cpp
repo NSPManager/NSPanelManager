@@ -238,7 +238,60 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
     auto entity = EntityManager::get_entity_by_page_id_and_slot(command.toggle_entity_from_entities_page().entity_page_id(), command.toggle_entity_from_entities_page().entity_slot());
     if (entity && entity->can_toggle()) {
       SPDLOG_DEBUG("Will toggle entity in slot {} in page with ID {}.", command.toggle_entity_from_entities_page().entity_slot(), command.toggle_entity_from_entities_page().entity_page_id());
-      entity->toggle();
+      // Handle light seperatly as they reequires some special handling in regards to what brightness to turn on to.
+      if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
+        auto light_entity = std::dynamic_pointer_cast<Light>(entity);
+        if (light_entity) {
+          if (light_entity->get_state()) {
+            light_entity->turn_off(true);
+          } else {
+            // Calculate average brightness of all lights in room and turn on light to that level, if lights are off then turn on to default brightness
+            uint16_t room_id = light_entity->get_room_id();
+            auto room = EntityManager::get_room(room_id);
+            if (room) {
+              auto room_entities = room->get_all_entities();
+              // Remove any entities that are not lights
+              room_entities.erase(std::remove_if(room_entities.begin(), room_entities.end(), [](auto entity) {
+                                    return entity->get_type() != MQTT_MANAGER_ENTITY_TYPE::LIGHT;
+                                  }),
+                                  room_entities.end());
+
+              bool any_light_entity_on = std::find_if(room_entities.begin(), room_entities.end(), [](auto &entity) {
+                                           auto light = std::dynamic_pointer_cast<Light>(entity);
+                                           return light && light->get_state();
+                                         }) != room_entities.end();
+
+              // Remove any lights that are not on if a light is on
+              if (any_light_entity_on) {
+                room_entities.erase(std::remove_if(room_entities.begin(), room_entities.end(), [](auto entity) {
+                                      auto light = std::dynamic_pointer_cast<Light>(entity);
+                                      return light && !light->get_state();
+                                    }),
+                                    room_entities.end());
+              }
+
+              uint64_t total_light_brightness = std::accumulate(room_entities.begin(), room_entities.end(), 0, [](uint64_t sum, auto &entity) {
+                auto light = std::dynamic_pointer_cast<Light>(entity);
+                return sum + (light ? light->get_brightness() : 0);
+              });
+
+              uint16_t average_light_brightness = total_light_brightness / room_entities.size();
+              if (average_light_brightness == 0) {
+                average_light_brightness = std::stoi(MqttManagerConfig::get_setting_with_default("light_turn_on_brightness", "50"));
+              }
+
+              light_entity->set_brightness(average_light_brightness, false);
+              light_entity->turn_on(true);
+            } else {
+              SPDLOG_ERROR("Failed to get room that light resides in. Will not be able to turn on light from toggle command.");
+            }
+          }
+        } else {
+          SPDLOG_ERROR("Received command to toggle light entity in slot {} in page with ID {} but entity could not be cast to a light.", command.toggle_entity_from_entities_page().entity_slot(), command.toggle_entity_from_entities_page().entity_page_id());
+        }
+      } else {
+        entity->toggle();
+      }
     } else {
       SPDLOG_DEBUG("Received command to toggle entity in slot {} in page with ID {} bot did not find such an entity.", command.toggle_entity_from_entities_page().entity_slot(), command.toggle_entity_from_entities_page().entity_page_id());
     }

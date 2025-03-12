@@ -139,7 +139,6 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
                 }
                 this->_current_brightness = new_brightness;
                 this->_requested_brightness = new_brightness;
-                MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
               } else {
                 // Light can dim but no brightness was given in update. Fallback to 100%.
                 SPDLOG_ERROR("Got new event data for light {}::{}. Light is configured for brightness (dimmable) but no 'brightness' value was available in entity payload.", this->_id, this->_name);
@@ -149,7 +148,6 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
                 changed_attribute = true; // Something changed from what was assumed to be the current state. Flag to trigger "entity changed" callbacks.
                 this->_current_brightness = 100;
                 this->_requested_brightness = 100;
-                MQTT_Manager::publish(this->_mqtt_brightness_topic, "100", true);
               }
             } else {
               // We will never get a state_changed event from HA that the requested brightness has been set as this is a switch.
@@ -158,7 +156,6 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
               }
               this->_current_brightness = 100;
               this->_requested_brightness = 100;
-              MQTT_Manager::publish(this->_mqtt_brightness_topic, "100", true);
             }
           } else if (new_state.compare("off") == 0) {
             if (this->_current_state) {
@@ -167,7 +164,6 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
             this->_current_state = false;
             this->_requested_state = false;
             this->_requested_brightness = 0;
-            MQTT_Manager::publish(this->_mqtt_brightness_topic, "0", true);
           } else {
             SPDLOG_ERROR("Unknown entity state: {}", new_state);
           }
@@ -188,7 +184,6 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
               }
               this->_current_color_temperature = new_state_attributes["color_temp_kelvin"];
               this->_requested_color_temperature = this->_current_color_temperature;
-              MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature), true);
             }
           } else if (new_color_mode.compare("onoff") == 0) {
             // Light does not support colors. Do nothing.
@@ -206,8 +201,6 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
               this->_requested_hue = this->_current_hue;
               this->_current_saturation = (uint8_t)hs_color[1];
               this->_requested_saturation = this->_current_saturation;
-              MQTT_Manager::publish(this->_mqtt_hue_topic, std::to_string(this->_current_hue), true);
-              MQTT_Manager::publish(this->_mqtt_saturation_topic, std::to_string(this->_current_saturation), true);
             }
           }
         } catch (std::exception &e) {

@@ -395,6 +395,18 @@
           </ul>
         </div>
 
+        <!-- Default light turn on percentage -->
+        <div class="mb-2">
+            <label for="light_turn_on_brightness" class="block mb-1 text-sm font-medium">Default light turn on brightness (%)</label>
+            <div class="flex flex-row-reverse">
+                <input class="rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-btn focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="number" class="input" name="light_turn_on_brightness" min="1" max="100" value="{{ light_turn_on_brightness }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                <span class="mdi mdi-brightness-percent"></span>
+                </span>
+            </div>
+        </div>
+
         <!-- New section-->
       </div>
     </div>

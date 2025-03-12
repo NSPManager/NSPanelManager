@@ -48,6 +48,7 @@ default_settings = {
     "weather_wind_speed_format": "kmh",
     "mqtt_wait_time": 1000,
     "optimistic_mode": True,
+    "light_turn_on_brightness": 50,
 }
 
 def get_setting_with_default(name) -> str:

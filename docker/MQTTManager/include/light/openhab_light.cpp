@@ -210,7 +210,6 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         }
 
         SPDLOG_DEBUG("Light {}::{} got new brightness from Openhab, new brightness: {}", this->_id, this->_name, this->_current_brightness);
-        MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
         this->_last_brightness_change = CurrentTimeMilliseconds();
       }
       this->_signal_entity_changed();
@@ -235,7 +234,6 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         this->_last_color_temp_change = CurrentTimeMilliseconds();
 
         SPDLOG_DEBUG("Light {}::{} got new color temperature from Openhab, new value: {}", this->_id, this->_name, this->_current_color_temperature);
-        MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature), true);
       }
       this->_last_light_mode_change = CurrentTimeMilliseconds();
       this->_signal_entity_changed();
@@ -261,19 +259,16 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         if (hue != this->_current_hue || hue != this->_requested_hue) {
           this->_current_hue = hue;
           this->_requested_hue = this->_current_hue;
-          MQTT_Manager::publish(this->_mqtt_hue_topic, std::to_string(this->_current_hue), true);
         }
 
         if (saturation != this->_current_saturation || saturation != this->_requested_saturation) {
           this->_current_saturation = saturation;
           this->_requested_saturation = this->_current_saturation;
-          MQTT_Manager::publish(this->_mqtt_saturation_topic, std::to_string(this->_current_saturation), true);
         }
 
         if (brightness != this->_current_brightness || brightness != this->_requested_brightness) {
           this->_current_brightness = brightness;
           this->_requested_brightness = this->_current_brightness;
-          MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
         }
 
         this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
@@ -305,7 +300,6 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
 
           this->_requested_state = this->_current_state;
           this->_requested_brightness = this->_current_brightness;
-          MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
         } else {
           SPDLOG_ERROR("Light {}::{} got OpenHAB data from OpenHAB via initial ItemStateFetched event for OpenHAB item {} though current state was not a string.", this->_id, this->_name, this->_openhab_on_off_item);
         }
@@ -320,7 +314,6 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
 
           this->_requested_state = this->_current_state;
           this->_requested_brightness = this->_current_brightness;
-          MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
         } else {
           SPDLOG_ERROR("Light {}::{} got OpenHAB data from OpenHAB via initial ItemStateFetched event for OpenHAB item {} though current on/off state was neither on or off.", this->_id, this->_name, this->_openhab_on_off_item);
         }
@@ -339,7 +332,6 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
 
         this->_current_color_temperature = kelvin;
         this->_requested_color_temperature = this->_current_color_temperature;
-        MQTT_Manager::publish(this->_mqtt_kelvin_topic, std::to_string(this->_current_color_temperature), true);
       } else {
         SPDLOG_ERROR("Light {}::{} got OpenHAB data from OpenHAB via initial ItemStateFetched event for OpenHAB item {} though current color temperature state was not a string.", this->_id, this->_name, this->_openhab_item_color_temperature);
       }
@@ -359,8 +351,6 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
           // Don't set/send out brightness from HSB when initially loading the light state.
           // this->_requested_brightness = this->_current_brightness;
           // MQTT_Manager::publish(this->_mqtt_brightness_topic, std::to_string(this->_current_brightness), true);
-          MQTT_Manager::publish(this->_mqtt_hue_topic, std::to_string(this->_current_hue), true);
-          MQTT_Manager::publish(this->_mqtt_saturation_topic, std::to_string(this->_current_saturation), true);
         } else {
           SPDLOG_ERROR("Failed to decode HSB value '{}' into 3 or more parts.", std::string(data["payload"]["state"]));
         }
