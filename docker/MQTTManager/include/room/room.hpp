@@ -110,6 +110,9 @@ private:
   // All pages with entities for this room
   std::vector<std::shared_ptr<RoomEntitiesPage>> _entity_pages;
 
+  // All scene pages
+  std::vector<std::shared_ptr<RoomEntitiesPage>> _scene_pages;
+
   // Mutex to only allow one task at the time to access the entity_pages
   std::mutex _entities_pages_mutex;
 

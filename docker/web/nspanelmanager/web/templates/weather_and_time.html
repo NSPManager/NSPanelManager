@@ -43,9 +43,9 @@
       <div class="my-2">
           <label for="date_format" class="block mb-1 text-sm font-medium">Date format</label>
           <div class="flex flex-row-reverse">
-              <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+              <input class="rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
               type="text" class="input" id="date_format" name="date_format" value="{{ date_format }}" required>
-              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
                   <span class="mdi mdi-form-textbox"></span>
               </span>
           </div>
@@ -89,7 +89,7 @@
               <button type="button" class="btn btn-info rounded-l-none" hx-get="{% url 'htmx_partial_select_weather_location' %}" hx-indicator="#modal_loading" hx-swap="none">Search</button>
               <input id="location_latitude" class="bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
               type="text" class="input" name="location_latitude" value="{{ location_latitude }}">
-              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
                   <span class="mdi mdi-earth"></span>
               </span>
           </div>
@@ -102,7 +102,7 @@
                 <button type="button" class="btn btn-info rounded-l-none" hx-get='{% url "htmx_partial_select_weather_location" %}' hx-indicator="#modal_loading" hx-swap="none">Search</button>
                 <input id="location_longitude" class="bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                 type="text" class="input" name="location_longitude" value="{{ location_longitude }}">
-                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
                     <span class="mdi mdi-earth"></span>
                 </span>
             </div>
@@ -117,7 +117,7 @@
               <button type="button" class="btn btn-info rounded-l-none" hx-get="{% url 'htmx_partial_select_weather_outside_temperature_sensor_provider' %}" hx-swap="none">Select</button>
               <input class="bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
               type="text" class="input" id="outside_temp_sensor" name="outside_temp_sensor" value="{{ outside_temp_sensor }}">
-              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
                   <span class="mdi mdi-thermometer"></span>
               </span>
           </div>
@@ -128,9 +128,9 @@
       <div class="my-2">
           <label for="weather_update_interval" class="block mb-1 text-sm font-medium">Update interval (minutes)</label>
           <div class="flex flex-row-reverse">
-              <input class="rounded-e-btn bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+              <input class="rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
               type="number" min="1" max="60" class="input" id="weather_update_interval" name="weather_update_interval" value="{{ weather_update_interval }}" required>
-              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
                   <span class="mdi mdi-form-textbox"></span>
               </span>
           </div>

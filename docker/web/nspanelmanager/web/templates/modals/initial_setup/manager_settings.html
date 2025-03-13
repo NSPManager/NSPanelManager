@@ -29,10 +29,10 @@
             <div class="mb-2">
                 <label for="manager_address" class="block mb-1 text-sm font-medium">Manager address</label>
                 <div class="flex flex-row-reverse">
-                    <button type="button" class="button bg-info text-info-content p-2 border border-l-0 rounded-e-btn border-neutral text-sm" onclick="$('#manager_address').val(location.hostname);">Load from URL</button>
+                    <button type="button" class="button bg-info text-info-content p-2 border border-l-0 rounded-e-field border-neutral text-sm" onclick="$('#manager_address').val(location.hostname);">Load from URL</button>
                     <input class="rounded-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                     type="text" class="input" id="manager_address" name="manager_address" value="{{ manager_address }}" required>
-                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
                         <span class="mdi mdi-home"></span>
                     </span>
                 </div>
@@ -43,10 +43,10 @@
             <div class="mb-2">
                 <label for="manager_port" class="block mb-1 text-sm font-medium">Manager port</label>
                 <div class="flex flex-row-reverse">
-                    <button type="button" class="button bg-info text-info-content p-2 border border-l-0 rounded-e-btn border-neutral text-sm" onclick="$('#manager_port').val(location.port);">Load from URL</button>
+                    <button type="button" class="button bg-info text-info-content p-2 border border-l-0 rounded-e-field border-neutral text-sm" onclick="$('#manager_port').val(location.port);">Load from URL</button>
                     <input class="rounded-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                     type="text" class="input" id="manager_port" name="manager_port" value="{{ manager_port }}" required>
-                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-btn peer-focus/name:border-accent">
+                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
                         <span class="mdi mdi-numeric"></span>
                     </span>
                 </div>

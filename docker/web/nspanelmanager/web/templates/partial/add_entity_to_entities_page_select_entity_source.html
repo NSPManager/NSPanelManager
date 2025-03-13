@@ -18,13 +18,13 @@
                     <span class="text-error font-bold">Neither Home Assistant or OpenHAB configured!</span>
                 {% endif %}
                 {% if is_home_assistant_configured %}
-                    <button class="join-item btn btn-xl btn-info" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="home_assistant" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">Home Assistant</button>
+                    <button class="join-item btn btn-lg btn-info" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="home_assistant" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">Home Assistant</button>
                 {% endif %}
                 {% if is_openhab_configured %}
-                    <button class="join-item btn btn-xl btn-warning" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="openhab" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">OpenHAB</button>
+                    <button class="join-item btn btn-lg btn-warning" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="openhab" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">OpenHAB</button>
                 {% endif %}
                 {% if action == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE" %}
-                    <button class="join-item btn btn-xl btn-secondary text-secondary-content" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="nspm_scene" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">NSPM Scene</button>
+                    <button class="join-item btn btn-lg btn-secondary text-secondary-content" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="nspm_scene" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">NSPM Scene</button>
                 {% endif %}
             </div>
         </div>

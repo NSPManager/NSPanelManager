@@ -21,11 +21,11 @@
                 <path d="M1799 349l242 241-1017 1017L7 590l242-241 775 775 775-775z"></path>
               </svg>
             </div>
-            <ul tabindex="0" class="dropdown-content bg-base-300 text-base-content rounded-box z-[1] w-56 p-2 shadow-2xl">
+            <ul tabindex="0" class="dropdown-content bg-base-300 text-base-content rounded-box z-[1] w-64 p-2 shadow-2xl">
               {% with 'default light dark cupcake bumblebee emerald corporate synthwave retro cyberpunk valentine halloween garden forest aqua lofi pastel fantasy wireframe black luxury dracula cmyk autumn business acid lemonade night coffee winter dim nord sunset' as theme_list %}
                   {% for theme_option in theme_list.split %}
                   <li>
-                      <div class="bg-base-100 rounded-lg my-1" data-theme="{{ theme_option }}">
+                      <div class="bg-base-100 rounded-lg my-1 flex items-center justify-between" data-theme="{{ theme_option }}">
                           <label class="label">
                               <input
                                   type="radio"
@@ -37,6 +37,7 @@
                               />
 
                               <span class="label-text justify-start w-full ml-2">{{ theme_option|title }}</span>
+                          </label>
                           <div class="flex">
                               <div class="badge badge-primary badge-xs ms-1"></div>
                               <div class="badge badge-accent badge-xs ms-1"></div>
@@ -44,7 +45,6 @@
                               <div class="badge badge-info badge-xs ms-1"></div>
                               <div class="badge badge-error badge-xs ms-1"></div>
                           </div>
-                          </label>
                       </div>
                   </li>
                   {% endfor %}

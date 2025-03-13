@@ -7,6 +7,10 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Configure HTMX -->
+  <meta name="htmx-config" content='{"includeIndicatorStyles": false, "requestClass": "modal-open", "globalViewTransitions": true}'>
+
   <link rel="shortcut icon" type="image/png" href="{{ ingress_path }}{% static 'favicon.png' %}"/> <!-- Favicon-->
   <link rel="stylesheet" href="{{ ingress_path }}{% static 'css/main.css' %}"> <!-- Compiled version of Tailwind CSS -->
   <script src="{{ ingress_path }}{% static 'jquery.min.js' %}"></script>
@@ -19,11 +23,6 @@
   <link rel="stylesheet" href="{{ ingress_path }}{% static 'base.css' %}?refresh={% now 'U' %}">
   <link rel="stylesheet" href="{{ ingress_path }}{% static 'jquery-ui-1.14.1.custom/jquery-ui.min.css' %}?refresh={% now 'U' %}">
 
-  <script>
-  // Configure HTMX
-  htmx.config.globalViewTransitions = true;
-  // htmx.config.defaultSettleDelay = 50;
-  </script>
 
   <script src="{{ ingress_path }}{% static 'mqttmanager_ws.js' %}?refresh={% now 'U' %}"></script>
   <!-- <script type="module" src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"></script> -->

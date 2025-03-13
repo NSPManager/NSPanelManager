@@ -12,26 +12,40 @@
             <input type="hidden" name="new_entity_id">
             {% if entities|dict_lookup:i %}
                 {% with entity=entities|dict_lookup:i %}
-                    <div class="draggable-entity-item bg-opacity-100 rounded-box border-neutral border-opacity-50 bg-neutral text-neutral-content border-dashed border-2 flex items-center justify-center indicator w-full h-full" data-entity-type="{{ entity.type }}" data-entity-id="{{ entity.id }}">
-                    {% if entity.controlled_by_nspanel_main_page %}
-                        <span class="indicator-item badge badge-secondary me-16 w-6 h-6 flex items-center justify-center" title="Controlled from main page" hx-swap="none" hx-get="#TODO"><span class="mdi mdi-home"></span></span>
-                    {% endif %}
-                    {% if entity.type == "Light" %}
-                        {% url "htmx_partial_edit_light_entity" light_id=entity.id as edit_url %}
-                    {% elif entity.type == "Switch" %}
-                        {% url "htmx_partial_edit_switch_entity" switch_id=entity.id as edit_url %}
-                    {% elif entity.type == "Scene" %}
-                        {% url "htmx_partial_edit_scene_entity" scene_id=entity.id as edit_url %}
-                    {% else %}
-                        <span class="font-bold text-error">UNKNOWN ENTITY TYPE {{ entity.type }}</span>
-                    {% endif %}
-                    <button class="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center" title="Edit entity" hx-swap="none" hx-get="{{ edit_url }}"><span class="mdi mdi-pencil"></span></button>
-                    <button class="indicator-item badge badge-warning hover:badge-error w-6 h-6 flex items-center justify-center" title="Remove entity from page/room" hx-confirm="Do you wish to remove '{{ entity.friendly_name }}' entity?" hx-swap="none" hx-get="{% url 'htmx_partial_remove_entity_from_page_slot' page_id=page.id slot_id=i %}"><span class="mdi mdi-close"></span></button>
-                    <span class="text-sm m-2">{{ entity.friendly_name }}</span>
+                    <div class="draggable-entity-item rounded-box border-neutral/50 bg-neutral text-neutral-content border-dashed border-2 flex items-center justify-center indicator w-full h-full" data-entity-type="{{ entity.type }}" data-entity-id="{{ entity.id }}">
+                        {% if entity.type == "Light" %}
+                            {% url "htmx_partial_edit_light_entity" light_id=entity.id as edit_url %}
+                        {% elif entity.type == "Switch" %}
+                            {% url "htmx_partial_edit_switch_entity" switch_id=entity.id as edit_url %}
+                        {% elif entity.type == "Scene" %}
+                            {% url "htmx_partial_edit_scene_entity" scene_id=entity.id as edit_url %}
+                        {% else %}
+                            <span class="font-bold text-error">UNKNOWN ENTITY TYPE {{ entity.type }}</span>
+                        {% endif %}
+
+                        <!-- Box indicators/buttons -->
+                        {% if entity.controlled_by_nspanel_main_page %}
+                            <span class="indicator-item badge badge-secondary me-16 w-6 h-6 flex items-center justify-center" title="Controlled from main page"><span class="mdi mdi-home"></span></span>
+                        {% endif %}
+                        <button class="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center cursor-pointer" title="Edit entity" hx-swap="none" hx-get="{{ edit_url }}"><span class="mdi mdi-pencil"></span></button>
+                        <button class="indicator-item badge badge-warning hover:badge-error w-6 h-6 flex items-center justify-center cursor-pointer" title="Remove entity from page/room" hx-confirm="Do you wish to remove '{{ entity.friendly_name }}' entity?" hx-swap="none" hx-get="{% url 'htmx_partial_remove_entity_from_page_slot' page_id=page.id slot_id=i %}"><span class="mdi mdi-close"></span></button>
+
+                        <!-- "Status badge" (dot) before name to indicate entity controller -->
+                        {% if entity.controller == "home_assistant" %}
+                            <div class="status status-info shadow-none absolute top-2 left-2" title="Controlled by Home Assistant"></div>
+                        {% elif entity.controller == "openhab" %}
+                            <div class="status status-warning shadow-none absolute top-2 left-2" title="Controlled by OpenHAB"></div>
+                        {% elif entity.controller == "nspm_scene" or entity.controller == "nspm" %}
+                            <div class="status status-accent shadow-none absolute top-2 left-2" title="Controlled by NSPanel Manager"></div>
+                        {% else %}
+                            <div class="status status-error animate-ping absolute top-2 left-2" title="Unknown controller"></div>
+                        {% endif %}
+
+                        <span class="text-sm m-2">{{ entity.friendly_name }}</span>
                     </div>
                 {% endwith %}
             {% else %}
-                <div class="rounded-box border-neutral border-opacity-50 border-dashed border-2 flex items-center justify-center indicator w-full h-full">
+                <div class="rounded-box border-neutral/50 border-dashed border-2 flex items-center justify-center indicator w-full h-full">
                     {% if page.is_scenes_page %}
                         <span class="font-thin italic">No scene set</span>
                     {% else %}

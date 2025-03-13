@@ -1,5 +1,5 @@
 <div id="nspanel_container-{{ nspanel.data.id }}">
-    <div class="text-base-content rounded-b-box rounded-t-btn overflow-hidden nspanel-box bg-base-100 shadow-xl" id="panel_status_box-{{ nspanel.data.id }}">
+    <div class="text-base-content rounded-b-box rounded-t-field overflow-hidden nspanel-box bg-base-100 shadow-xl" id="panel_status_box-{{ nspanel.data.id }}">
     <div class="">
         {% component "nspanel_status_header" id=nspanel.data.id state=nspanel.status.state update_progress=nspanel.status.progress %}{% endcomponent %}
     </div>
@@ -66,7 +66,7 @@
             </div>
             <div>
             <button data-nspanel-dropdown-toggle="nspanelActionsMenuDropdown-{{ nspanel.data.id }}" onclick="show_dropdown_menu(event, this);"
-                class="font-medium text-sm px-1 py-1 text-center inline-flex items-center">
+                class="font-medium text-sm px-1 py-1 text-center inline-flex items-center cursor-pointer">
                 <span class="mdi mdi-cog pr-2"></span>
             </button>
             <!-- Dropdown menu -->
