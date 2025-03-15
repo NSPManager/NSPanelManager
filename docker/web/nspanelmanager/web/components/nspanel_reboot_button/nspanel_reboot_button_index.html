@@ -8,6 +8,7 @@
   });
 
   function attachHtmxListeners(element) {
+    console.log("Element: ", element);
     htmx.process(element);
   }
 
@@ -21,7 +22,7 @@
         return html`
             ${attachHtmxListeners}
             <div hx-post="/htmx/nspanels/${nspanel_id}/reboot" id="reboot-${nspanel_id}" hx-trigger="click" hx-swap="none"
-            class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer">
+            class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer nspanel-reboot-button">
                 <span class="mdi mdi-restart pr-2"></span>Reboot
             </div>
         `;
@@ -29,7 +30,7 @@
         return html`
             ${attachHtmxListeners}
             <div hx-post="/htmx/nspanels/${nspanel_id}/reboot" id="reboot-${nspanel_id}" hx-trigger="click, reboot-all-nspanels from:body" hx-swap="none"
-            class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer">
+            class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer nspanel-reboot-button">
                 <span class="mdi mdi-restart pr-2"></span>Reboot
             </div>
         `;

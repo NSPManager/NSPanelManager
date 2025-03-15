@@ -3,6 +3,16 @@
     themes: all;
 }
 
-.input-color-none {
-    color: transparent;
+
+.modal {
+    &.htmx-request {
+    background-color: oklch(0% 0 0/ 0.4);
+    pointer-events: auto;
+    visibility: visible;
+    opacity: 100%;
+    .modal-box {
+        translate: 0 0;
+        scale: 1;
+        opacity: 1;
+    }
 }
