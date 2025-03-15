@@ -12,7 +12,7 @@
             <input type="hidden" name="new_entity_id">
             {% if entities|dict_lookup:i %}
                 {% with entity=entities|dict_lookup:i %}
-                    <div class="draggable-entity-item rounded-box border-neutral/50 bg-neutral/50 text-neutral-content border-dashed border-2 flex items-center justify-center indicator w-full h-full" data-entity-type="{{ entity.type }}" data-entity-id="{{ entity.id }}">
+                    <div class="draggable-entity-item bg-neutral/50 rounded-box text-neutral-content flex items-center justify-center indicator w-full h-full hover:outline-1 hover:outline-accent cursor-grab" title="Drag & drop to move this entity" data-entity-type="{{ entity.type }}" data-entity-id="{{ entity.id }}">
                         {% if entity.type == "Light" %}
                             {% url "htmx_partial_edit_light_entity" light_id=entity.id as edit_url %}
                         {% elif entity.type == "Switch" %}
@@ -72,7 +72,7 @@
     {% endfor %}
 
     <button class="indicator-item indicator-bottom indicator-end badge badge-neutral hover:badge-error w-6 h-6 flex items-center justify-center" hx-swap="outerHTML" title="Delete page" hx-delete="{% url 'htmx_partial_delete_entities_page' page_id=page.id %}" hx-confirm='Do you want to delete this entity page? <p class="font-bold text-warning">All entities on this page will be removed.</p>'>✕</button>
-    <span class="indicator-item indicator-bottom indicator-center badge badge-neutral hover:badge-info w-6 h-6 flex items-center justify-center nspanel-entities-page-move-handle" title="Move this page"><span class="mdi mdi-hand-back-right"></span></span>
+    <span class="indicator-item indicator-bottom indicator-center badge badge-neutral hover:badge-info w-6 h-6 flex items-center justify-center nspanel-entities-page-move-handle cursor-grab" title="Drag & drop to move this page"><span class="mdi mdi-hand-back-right"></span></span>
 
     <script>
       function get_overlap_area(element1, element2) {

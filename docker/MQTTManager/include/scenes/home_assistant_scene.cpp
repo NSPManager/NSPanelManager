@@ -19,6 +19,8 @@ void HomeAssistantScene::reload_config() {
     auto scene_config = database_manager::database.get<database_manager::Scene>(this->_id);
     this->_name = scene_config.friendly_name;
     this->_entity_id = scene_config.backend_name;
+    this->_page_id = scene_config.entities_page_id;
+    this->_page_slot = scene_config.room_view_position;
     if (scene_config.room_id == nullptr) {
       this->_is_global_scene = true;
     } else {

@@ -115,7 +115,7 @@ target_link_libraries(MQTTManager_Scene spdlog::spdlog nlohmann_json::nlohmann_j
 
 add_library(MQTTManager_RoomEntitiesPage STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room_entities_page.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room_entities_page.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room_entities_page.cpp)
 target_include_directories(MQTTManager_RoomEntitiesPage PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_RoomEntitiesPage Boost::boost spdlog::spdlog nlohmann_json::nlohmann_json Protobuf_MQTTManager MQTTManager_WebHelper MQTTManager_Light MQTTManager_DatabaseManager)
+target_link_libraries(MQTTManager_RoomEntitiesPage Boost::boost spdlog::spdlog nlohmann_json::nlohmann_json Protobuf_MQTTManager MQTTManager_WebHelper MQTTManager_Light MQTTManager_Scene MQTTManager_DatabaseManager)
 
 add_library(MQTTManager_Room STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/room/room.cpp)
 target_include_directories(MQTTManager_Room PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})

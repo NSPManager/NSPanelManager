@@ -1,4 +1,5 @@
 #include <scenes/scene.hpp>
+#include <spdlog/spdlog.h>
 
 uint32_t Scene::get_entity_page_id() {
   return this->_page_id;

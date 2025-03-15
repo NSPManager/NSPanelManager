@@ -18,9 +18,11 @@ public:
   virtual std::string get_name() = 0;
   virtual bool can_save() = 0;
 
-private:
+protected:
   uint32_t _page_id;
   uint8_t _page_slot;
+
+private:
 };
 
 #endif // !MQTT_MANAGER_SCENE_BASE_H

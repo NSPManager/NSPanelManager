@@ -38,6 +38,7 @@ message NSPanelConfig {
     message RoomInfo {
         int32 room_id = 1;
         repeated int32 entity_page_ids = 2;
+        repeated int32 scene_page_ids = 3;
     }
     repeated RoomInfo room_infos = 17; // Allowed rooms
 

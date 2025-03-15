@@ -4,6 +4,7 @@
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_nspanel.pb.h"
+#include "scenes/scene.hpp"
 #include <algorithm>
 #include <boost/bind.hpp>
 #include <boost/stacktrace/stacktrace.hpp>
@@ -33,6 +34,11 @@ RoomEntitiesPage::RoomEntitiesPage(uint32_t page_id, Room *room) {
 
 RoomEntitiesPage::~RoomEntitiesPage() {
   MQTT_Manager::clear_retain(this->_mqtt_state_topic); // Clear old state topic.
+  for (int i = 0; i < this->_entities.size(); i++) {
+    if (this->_entities[i] != nullptr) {
+      this->_entities[i]->detach_entity_changed_callback(boost::bind(&RoomEntitiesPage::_entity_changed_callback, this, _1));
+    }
+  }
   SPDLOG_DEBUG("Destroyed RoomEntitiesPage with ID {}.", this->_id);
 }
 
@@ -135,6 +141,15 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
         entity_slot->set_pco(65535);
         entity_slot->set_pco2(65535);
       }
+    } else if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::SCENE) {
+      std::shared_ptr<Scene> scene = std::static_pointer_cast<Scene>(entity);
+      NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();
+      entity_slot->set_name(scene->get_name());
+      entity_slot->set_room_view_position(i);
+      // TODO: Move state icons for panel from GUI_DATA to manager and convert this!
+      entity_slot->set_icon(scene->can_save() ? "w" : "");
+      entity_slot->set_pco(65024);
+      entity_slot->set_pco2(65024);
     } else {
       SPDLOG_ERROR("Unknown entity type {} while processing EntityWrapper while building NSPanelRoomEntitiesPage protobuf object.", (int)entity->get_type());
     }

@@ -261,18 +261,15 @@ $(document).ready(function () {
       $("#tft_upload_submit_button").removeClass("btn-disabled");
     }
   });
+
+  // Attach event listener for cursor-grab to change it to grabing on mouse down for drag & drop targets
+  $(".cursor-grab")
+    .on("mousedown", function () {
+      $(this).removeClass("cursor-grab");
+      $(this).addClass("cursor-grabbing");
+    })
+    .on("mouseup", function () {
+      $(this).addClass("cursor-grab");
+      $(this).removeClass("cursor-grabbing");
+    });
 });
-
-function addNewRoom() {
-  $("#modal-new-room").removeClass("hidden");
-  $("#new_room_name").select();
-}
-
-function toggle_theme() {
-  $("html").toggleClass("dark");
-
-  data = {
-    dark: $("html").hasClass("dark"),
-  };
-  $.post("/api/save_theme", data, (data) => {});
-}

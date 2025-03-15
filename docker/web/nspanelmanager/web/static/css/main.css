@@ -5690,6 +5690,9 @@
   .loading-xs {
     width: calc(var(--size-selector, 0.25rem) * 4);
   }
+  .w-1 {
+    width: calc(var(--spacing) * 1);
+  }
   .w-1\/2 {
     width: calc(1/2 * 100%);
   }
@@ -5957,6 +5960,12 @@
       outline: 2px solid currentColor;
       outline-offset: 2px;
     }
+  }
+  .cursor-grab {
+    cursor: grab;
+  }
+  .cursor-grabbing {
+    cursor: grabbing;
   }
   .cursor-pointer {
     cursor: pointer;
@@ -7629,6 +7638,9 @@
     font-size: 0.625rem;
     padding-inline: calc(0.25rem * 2 - var(--border));
   }
+  .px-0 {
+    padding-inline: calc(var(--spacing) * 0);
+  }
   .px-0\.5 {
     padding-inline: calc(var(--spacing) * 0.5);
   }
@@ -8613,6 +8625,14 @@
     outline-style: var(--tw-outline-style);
     outline-width: 1px;
   }
+  .outline-1 {
+    outline-style: var(--tw-outline-style);
+    outline-width: 1px;
+  }
+  .outline-2 {
+    outline-style: var(--tw-outline-style);
+    outline-width: 2px;
+  }
   .btn-ghost {
     &:not(.btn-active, :hover, :active:focus, :focus-visible) {
       --btn-shadow: "";
@@ -8624,6 +8644,9 @@
         --btn-fg: currentColor;
       }
     }
+  }
+  .outline-accent {
+    outline-color: var(--color-accent);
   }
   .blur {
     --tw-blur: blur(8px);
@@ -9700,6 +9723,21 @@
     &:hover {
       @media (hover: hover) {
         color: var(--color-white);
+      }
+    }
+  }
+  .hover\:outline-1 {
+    &:hover {
+      @media (hover: hover) {
+        outline-style: var(--tw-outline-style);
+        outline-width: 1px;
+      }
+    }
+  }
+  .hover\:outline-accent {
+    &:hover {
+      @media (hover: hover) {
+        outline-color: var(--color-accent);
       }
     }
   }

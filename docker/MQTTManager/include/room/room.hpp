@@ -110,11 +110,14 @@ private:
   // All pages with entities for this room
   std::vector<std::shared_ptr<RoomEntitiesPage>> _entity_pages;
 
+  // Mutex to only allow one task at the time to access the entity_pages
+  std::mutex _entities_pages_mutex;
+
   // All scene pages
   std::vector<std::shared_ptr<RoomEntitiesPage>> _scene_pages;
 
   // Mutex to only allow one task at the time to access the entity_pages
-  std::mutex _entities_pages_mutex;
+  std::mutex _scene_entities_pages_mutex;
 
   // Mutex to only allow one task at the time to send updates to the panel regarding room status
   std::mutex _send_room_status_update_mutex;

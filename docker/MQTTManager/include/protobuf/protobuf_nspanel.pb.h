@@ -2747,6 +2747,7 @@ class NSPanelConfig_RoomInfo final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kEntityPageIdsFieldNumber = 2,
+    kScenePageIdsFieldNumber = 3,
     kRoomIdFieldNumber = 1,
   };
   // repeated int32 entity_page_ids = 2;
@@ -2767,6 +2768,24 @@ class NSPanelConfig_RoomInfo final : public ::google::protobuf::Message
   ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_entity_page_ids();
 
   public:
+  // repeated int32 scene_page_ids = 3;
+  int scene_page_ids_size() const;
+  private:
+  int _internal_scene_page_ids_size() const;
+
+  public:
+  void clear_scene_page_ids() ;
+  ::int32_t scene_page_ids(int index) const;
+  void set_scene_page_ids(int index, ::int32_t value);
+  void add_scene_page_ids(::int32_t value);
+  const ::google::protobuf::RepeatedField<::int32_t>& scene_page_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* mutable_scene_page_ids();
+
+  private:
+  const ::google::protobuf::RepeatedField<::int32_t>& _internal_scene_page_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_scene_page_ids();
+
+  public:
   // int32 room_id = 1;
   void clear_room_id() ;
   ::int32_t room_id() const;
@@ -2782,7 +2801,7 @@ class NSPanelConfig_RoomInfo final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      1, 2, 0,
+      2, 3, 0,
       0, 2>
       _table_;
 
@@ -2805,6 +2824,8 @@ class NSPanelConfig_RoomInfo final : public ::google::protobuf::Message
                           const NSPanelConfig_RoomInfo& from_msg);
     ::google::protobuf::RepeatedField<::int32_t> entity_page_ids_;
     mutable ::google::protobuf::internal::CachedSize _entity_page_ids_cached_byte_size_;
+    ::google::protobuf::RepeatedField<::int32_t> scene_page_ids_;
+    mutable ::google::protobuf::internal::CachedSize _scene_page_ids_cached_byte_size_;
     ::int32_t room_id_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -4783,6 +4804,51 @@ NSPanelConfig_RoomInfo::_internal_entity_page_ids() const {
 inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig_RoomInfo::_internal_mutable_entity_page_ids() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.entity_page_ids_;
+}
+
+// repeated int32 scene_page_ids = 3;
+inline int NSPanelConfig_RoomInfo::_internal_scene_page_ids_size() const {
+  return _internal_scene_page_ids().size();
+}
+inline int NSPanelConfig_RoomInfo::scene_page_ids_size() const {
+  return _internal_scene_page_ids_size();
+}
+inline void NSPanelConfig_RoomInfo::clear_scene_page_ids() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.scene_page_ids_.Clear();
+}
+inline ::int32_t NSPanelConfig_RoomInfo::scene_page_ids(int index) const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.RoomInfo.scene_page_ids)
+  return _internal_scene_page_ids().Get(index);
+}
+inline void NSPanelConfig_RoomInfo::set_scene_page_ids(int index, ::int32_t value) {
+  _internal_mutable_scene_page_ids()->Set(index, value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.RoomInfo.scene_page_ids)
+}
+inline void NSPanelConfig_RoomInfo::add_scene_page_ids(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_scene_page_ids()->Add(value);
+  // @@protoc_insertion_point(field_add:NSPanelConfig.RoomInfo.scene_page_ids)
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>& NSPanelConfig_RoomInfo::scene_page_ids() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelConfig.RoomInfo.scene_page_ids)
+  return _internal_scene_page_ids();
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig_RoomInfo::mutable_scene_page_ids()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelConfig.RoomInfo.scene_page_ids)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_scene_page_ids();
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>&
+NSPanelConfig_RoomInfo::_internal_scene_page_ids() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.scene_page_ids_;
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig_RoomInfo::_internal_mutable_scene_page_ids() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.scene_page_ids_;
 }
 
 // -------------------------------------------------------------------

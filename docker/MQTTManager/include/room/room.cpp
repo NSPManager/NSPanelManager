@@ -144,6 +144,13 @@ void Room::post_init() {
       page->attach_state_change_callback(boost::bind(&Room::page_changed_callback, this, _1));
       SPDLOG_DEBUG("Attached callbacks for all entities in RoomEntitiesPage {}.", page->get_id());
     }
+
+    std::lock_guard<std::mutex> scene_mutex_guard(this->_scene_entities_pages_mutex);
+    for (std::shared_ptr<RoomEntitiesPage> &page : this->_scene_pages) {
+      page->post_init();
+      page->attach_state_change_callback(boost::bind(&Room::page_changed_callback, this, _1));
+      SPDLOG_DEBUG("Attached callbacks for all scenes in RoomEntitiesPage {}.", page->get_id());
+    }
   }
 
   this->_room_changed_callbacks(this);
