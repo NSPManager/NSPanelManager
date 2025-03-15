@@ -3,7 +3,7 @@
 {% load concat %}
 {% load set_var %}
 
-<li id="nspanel_entities_page_{{ page.id }}" data-page-id="{{ page.id }}" hx-swap-oob="true" class="bg-base-200 float-left m-2 rounded-box p-3 grid grid-cols-2 {% if page.page_type == 12 %}grid-rows-6{% elif page.page_type == 4 %}grid-rows-2{% else %}grid-rows-4{% endif %} gap-4 w-full max-w-[24rem] aspect-square indicator nspanel-entities-page">
+<li id="nspanel_entities_page_{{ page.id }}" data-is-scenes-page="{{ is_scenes_page }}" data-page-id="{{ page.id }}" hx-swap-oob="true" class="bg-base-200 float-left m-2 rounded-box p-3 grid grid-cols-2 {% if page.page_type == 12 %}grid-rows-6{% elif page.page_type == 4 %}grid-rows-2{% else %}grid-rows-4{% endif %} gap-4 w-full max-w-[24rem] aspect-square indicator nspanel-entities-page">
     {% for i in range %}
         <form class="draggable-entity-item-target-slot nspanel-entities-page-entity-slot" data-page-id="{{ page.id }}" data-slot-id="{{ i }}" hx-indicator="#modal_loading" hx-post="{% url 'htmx_partial_move_entity' %}" hx-trigger="entity_moved">
             <input type="hidden" name="page_id" value="{{ page.id }}">
