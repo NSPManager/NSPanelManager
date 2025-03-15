@@ -130,6 +130,7 @@ void OpenhabLight::send_state_update_to_controller() {
       payload_data["value"] = this->_requested_brightness;
       service_data["payload"] = payload_data.dump();
       if (MqttManagerConfig::get_settings().optimistic_mode) {
+        this->_current_state = true;
         this->_current_brightness = this->_requested_brightness;
       }
       OpenhabManager::send_json(service_data);

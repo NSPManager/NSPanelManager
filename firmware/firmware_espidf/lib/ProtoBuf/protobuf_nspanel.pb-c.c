@@ -603,7 +603,7 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_screensaver_mode__descript
   nspanel_config__nspanel_screensaver_mode__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[37] =
+static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
 {
   {
     "name",
@@ -1049,6 +1049,18 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[37] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "default_light_brightess",
+    38,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, default_light_brightess),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_config__field_indices_by_name[] = {
   27,   /* field[27] = button1_detached_light_id */
@@ -1061,6 +1073,7 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
   25,   /* field[25] = button2_mqtt_topic */
   5,   /* field[5] = button_long_press_time */
   13,   /* field[13] = clock_us_style */
+  37,   /* field[37] = default_light_brightess */
   2,   /* field[2] = default_page */
   1,   /* field[1] = default_room */
   29,   /* field[29] = global_scenes */
@@ -1092,7 +1105,7 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
 static const ProtobufCIntRange nspanel_config__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 37 }
+  { 0, 38 }
 };
 const ProtobufCMessageDescriptor nspanel_config__descriptor =
 {
@@ -1102,7 +1115,7 @@ const ProtobufCMessageDescriptor nspanel_config__descriptor =
   "NSPanelConfig",
   "",
   sizeof(NSPanelConfig),
-  37,
+  38,
   nspanel_config__field_descriptors,
   nspanel_config__field_indices_by_name,
   1,  nspanel_config__number_ranges,

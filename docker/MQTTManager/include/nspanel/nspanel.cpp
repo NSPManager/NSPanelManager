@@ -238,6 +238,7 @@ void NSPanel::send_config() {
   config.set_relay1_default_mode(this->_get_nspanel_setting_with_default("relay1_default_mode", "False").compare("True") == 0);
   config.set_relay2_default_mode(this->_get_nspanel_setting_with_default("relay2_default_mode", "False").compare("True") == 0);
   config.set_temperature_calibration(std::stof(this->_get_nspanel_setting_with_default("temperature_calibration", "0")));
+  config.set_default_light_brightess(std::stoi(MqttManagerConfig::get_setting_with_default("light_turn_on_brightness", "50")));
   config.set_button1_mode(this->_settings.button1_mode);
   config.set_button2_mode(this->_settings.button2_mode);
   config.set_button1_mqtt_topic(this->_get_nspanel_setting_with_default("button1_mqtt_topic", ""));

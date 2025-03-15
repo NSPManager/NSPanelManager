@@ -67,6 +67,7 @@ public:
    */
   template <typename CALLBACK_BIND>
   void attach_state_change_callback(CALLBACK_BIND callback) {
+    this->_state_changed_callbacks.disconnect(callback); // Disconnect any existing callback as to not trigger multiple callbacks
     this->_state_changed_callbacks.connect(callback);
   }
 

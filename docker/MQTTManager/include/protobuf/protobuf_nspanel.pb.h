@@ -4107,6 +4107,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kRelay2IsInRelayGroupFieldNumber = 36,
     kRelay1RelayGroupFieldNumber = 35,
     kRelay2RelayGroupFieldNumber = 37,
+    kDefaultLightBrightessFieldNumber = 38,
   };
   // repeated .NSPanelConfig.RoomInfo room_infos = 17;
   int room_infos_size() const;
@@ -4522,12 +4523,22 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_relay2_relay_group(::int32_t value);
 
   public:
+  // int32 default_light_brightess = 38;
+  void clear_default_light_brightess() ;
+  ::int32_t default_light_brightess() const;
+  void set_default_light_brightess(::int32_t value);
+
+  private:
+  ::int32_t _internal_default_light_brightess() const;
+  void _internal_set_default_light_brightess(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelConfig)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 37, 2,
+      5, 38, 2,
       134, 7>
       _table_;
 
@@ -4585,6 +4596,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     bool relay2_is_in_relay_group_;
     ::int32_t relay1_relay_group_;
     ::int32_t relay2_relay_group_;
+    ::int32_t default_light_brightess_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -5783,6 +5795,28 @@ inline ::int32_t NSPanelConfig::_internal_relay2_relay_group() const {
 inline void NSPanelConfig::_internal_set_relay2_relay_group(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.relay2_relay_group_ = value;
+}
+
+// int32 default_light_brightess = 38;
+inline void NSPanelConfig::clear_default_light_brightess() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.default_light_brightess_ = 0;
+}
+inline ::int32_t NSPanelConfig::default_light_brightess() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.default_light_brightess)
+  return _internal_default_light_brightess();
+}
+inline void NSPanelConfig::set_default_light_brightess(::int32_t value) {
+  _internal_set_default_light_brightess(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.default_light_brightess)
+}
+inline ::int32_t NSPanelConfig::_internal_default_light_brightess() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.default_light_brightess_;
+}
+inline void NSPanelConfig::_internal_set_default_light_brightess(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.default_light_brightess_ = value;
 }
 
 // -------------------------------------------------------------------
