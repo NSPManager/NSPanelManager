@@ -16,30 +16,8 @@ import signal
 from .mqttmanager_ipc import send_ipc_request
 
 from .models import NSPanel, Room, Light, Settings, Scene, RelayGroup, RelayGroupBinding, RoomEntitiesPage
-from .apps import start_mqtt_manager
+from .apps import start_mqtt_manager, send_mqttmanager_reload_command
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
-
-def restart_mqtt_manager():
-    for proc in psutil.process_iter():
-        if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
-            print("Killing running MQTTManager")
-            proc.kill()
-            break
-    start_mqtt_manager()
-
-
-def send_mqttmanager_reload_command():
-    for proc in psutil.process_iter():
-        try:
-            if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
-                if proc.status() == psutil.STATUS_ZOMBIE:
-                    print("Found zombie MQTTManager process. Will continue looking for running MQTTManager.")
-                else:
-                    print("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
-                    os.kill(proc.pid, signal.SIGUSR1) # Send SIGUSR1 signal that is listened for in MQTTManager to reload config
-                break
-        except Exception as ex:
-            print(ex)
 
 
 def get_file_md5sum(filename):
@@ -630,7 +608,7 @@ def save_settings(request):
     set_setting_value(name="optimistic_mode", value=request.POST["optimistic_mode"] == "optimistic")
     set_setting_value(name="light_turn_on_brightness", value=request.POST["light_turn_on_brightness"])
     # Settings saved, restart mqtt_manager
-    restart_mqtt_manager()
+    send_mqttmanager_reload_command()
     return redirect('settings')
 
 
@@ -863,7 +841,7 @@ def weather_and_time(request):
         set_setting_value("date_format", request.POST["date_format"])
         set_setting_value("clock_us_style", request.POST["clock_us_style"])
         set_setting_value("use_fahrenheit", request.POST["use_fahrenheit"])
-        restart_mqtt_manager()
+        send_mqttmanager_reload_command()
         return redirect("weather_and_time")
     else:
         data = get_base_data(request)
@@ -893,7 +871,7 @@ def unblock_nspanel(request, nspanel_id):
     panel = NSPanel.objects.filter(id=nspanel_id).first()
     if panel:
         panel.delete()
-        restart_mqtt_manager()
+        send_mqttmanager_reload_command()
     return redirect("denied_nspanels")
 
 

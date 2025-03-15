@@ -19,7 +19,6 @@ def sigchld_handler(signum, frame):
             logging.error(F"MQTTManager binary has exited unexpectedly. Return code: {os.WEXITSTATUS(status)}")
         elif os.WIFSIGNALED(status):
             logging.error(F"MQTTManager binary has exited unexpectedly. Killed by signal: {os.WTERMSIG(status)}")
-            logging.error(F"stderr: {mqttmanager_process.stderr}")
 
 
 def start_mqtt_manager():
@@ -58,9 +57,12 @@ Send command to MQTT Manager to reload config
 """
 def send_mqttmanager_reload_command():
     for proc in psutil.process_iter():
-        if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
-            logging.info("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
-            os.kill(proc.pid, signal.SIGUSR1)
+        if proc.status() == psutil.STATUS_ZOMBIE:
+            print("Found zombie MQTTManager process. Will not process it as it's already dead. Looking for another running MQTTManager process.")
+        else:
+            if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
+                logging.info("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
+                os.kill(proc.pid, signal.SIGUSR1)
 
 
 class WebConfig(AppConfig):

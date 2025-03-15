@@ -3,9 +3,7 @@
 #include "light/light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
-#include "protobuf/protobuf_general.pb.h"
 #include "protobuf/protobuf_nspanel.pb.h"
-#include "protobuf_mqttmanager.pb.h"
 #include "room/room_entities_page.hpp"
 #include <algorithm>
 #include <boost/bind.hpp>
@@ -179,6 +177,7 @@ void Room::page_changed_callback(RoomEntitiesPage *page) {
 void Room::command_callback(NSPanelMQTTManagerCommand &command) {
   if (command.has_first_page_turn_on() && (command.first_page_turn_on().selected_room() == this->_id || command.first_page_turn_on().global())) {
     if (MqttManagerConfig::get_settings().optimistic_mode) {
+      SPDLOG_DEBUG("Optimistic mode enabled, will not send state updates via callbacks in room.");
       this->_send_status_updates = false;
     }
 
@@ -230,6 +229,7 @@ void Room::command_callback(NSPanelMQTTManagerCommand &command) {
     if (MqttManagerConfig::get_settings().optimistic_mode) {
       this->_send_room_state_update();
       this->_send_status_updates = true;
+      SPDLOG_DEBUG("Optimistic mode enabled, reenabled send state updates via callbacks in room.");
     }
   } else if (command.has_first_page_turn_off()) {
     SPDLOG_DEBUG("Room {}:{} got command to turn lights off from first page.", this->_id, this->_name);
@@ -299,7 +299,7 @@ void Room::_send_room_state_update() {
         num_lights_total++;
       }
       if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE) {
-        SPDLOG_TRACE("Room {}::{} found table light {}::{}, state: {}", this->_id, this->_name, light->get_id(), light->get_name(), light->get_state() ? "ON" : "OFF");
+        // SPDLOG_TRACE("Room {}::{} found table light {}::{}, state: {}", this->_id, this->_name, light->get_id(), light->get_name(), light->get_state() ? "ON" : "OFF");
         num_lights_table++;
         if (light->get_state()) {
           total_light_level_table += light->get_brightness();
@@ -307,7 +307,7 @@ void Room::_send_room_state_update() {
           num_lights_table_on++;
         }
       } else if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING) {
-        SPDLOG_TRACE("Room {}::{} found ceiling light {}::{}, state: {}", this->_id, this->_name, light->get_id(), light->get_name(), light->get_state() ? "ON" : "OFF");
+        // SPDLOG_TRACE("Room {}::{} found ceiling light {}::{}, state: {}", this->_id, this->_name, light->get_id(), light->get_name(), light->get_state() ? "ON" : "OFF");
         num_lights_ceiling++;
         if (light->get_state()) {
           total_light_level_ceiling += light->get_brightness();
@@ -350,7 +350,7 @@ void Room::_send_room_state_update() {
     status.set_table_lights_dim_level(total_light_level_table / num_lights_table_on);
     status.set_table_lights_color_temperature_value(kelvin_pct);
   } else {
-    SPDLOG_TRACE("No table lights found, setting value to 0.");
+    // SPDLOG_TRACE("No table lights found, setting value to 0.");
     status.set_table_lights_dim_level(0);
     status.set_table_lights_color_temperature_value(0);
   }
@@ -366,7 +366,7 @@ void Room::_send_room_state_update() {
     status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling_on);
     status.set_ceiling_lights_color_temperature_value(kelvin_pct);
   } else {
-    SPDLOG_TRACE("No ceiling lights found, setting value to 0.");
+    // SPDLOG_TRACE("No ceiling lights found, setting value to 0.");
     status.set_ceiling_lights_dim_level(0);
     status.set_ceiling_lights_color_temperature_value(0);
   }
