@@ -2,3 +2,7 @@
 @plugin "daisyui" {
     themes: all;
 }
+
+.input-color-none {
+    color: transparent;
+}

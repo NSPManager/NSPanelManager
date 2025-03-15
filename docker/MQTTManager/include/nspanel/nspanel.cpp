@@ -182,7 +182,7 @@ void NSPanel::reload_config() {
       this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/r1_state", this->_mac);
       this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/r2_cmd", this->_mac);
       this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/r2_state", this->_mac);
-      this->_mqtt_status_topic = fmt::format("nspanel/{}/state", this->_mac);
+      this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_mac);
       this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_mac);
       this->_mqtt_temperature_topic = fmt::format("nspanel/{}/temperature", this->_mac);
 
@@ -358,7 +358,6 @@ void NSPanel::reset_mqtt_topics() {
   MQTT_Manager::detach_callback(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
 
   // This nspanel was removed. Clear any retain on any MQTT topic.
-  MQTT_Manager::clear_retain(this->_mqtt_status_topic);
   MQTT_Manager::clear_retain(this->_mqtt_command_topic);
 
   this->reset_ha_mqtt_topics();

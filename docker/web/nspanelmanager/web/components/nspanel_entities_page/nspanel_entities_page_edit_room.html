@@ -12,7 +12,7 @@
             <input type="hidden" name="new_entity_id">
             {% if entities|dict_lookup:i %}
                 {% with entity=entities|dict_lookup:i %}
-                    <div class="draggable-entity-item rounded-box border-neutral/50 bg-neutral text-neutral-content border-dashed border-2 flex items-center justify-center indicator w-full h-full" data-entity-type="{{ entity.type }}" data-entity-id="{{ entity.id }}">
+                    <div class="draggable-entity-item rounded-box border-neutral/50 bg-neutral/50 text-neutral-content border-dashed border-2 flex items-center justify-center indicator w-full h-full" data-entity-type="{{ entity.type }}" data-entity-id="{{ entity.id }}">
                         {% if entity.type == "Light" %}
                             {% url "htmx_partial_edit_light_entity" light_id=entity.id as edit_url %}
                         {% elif entity.type == "Switch" %}

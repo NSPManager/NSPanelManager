@@ -4852,20 +4852,6 @@
     background-image: radial-gradient( circle at 35% 30%, oklch(1 0 0 / calc(var(--depth) * 0.5)), #0000 );
     box-shadow: 0 2px 3px -1px color-mix(in oklab, currentColor calc(var(--depth) * 100%), #0000);
   }
-  .status\! {
-    display: inline-block !important;
-    aspect-ratio: 1 / 1 !important;
-    width: calc(0.25rem * 2) !important;
-    height: calc(0.25rem * 2) !important;
-    border-radius: var(--radius-selector) !important;
-    background-color: color-mix(in oklab, var(--color-base-content) 20%, transparent) !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    vertical-align: middle !important;
-    color: color-mix(in oklab, var(--color-black) 30%, transparent) !important;
-    background-image: radial-gradient( circle at 35% 30%, oklch(1 0 0 / calc(var(--depth) * 0.5)), #0000 ) !important;
-    box-shadow: 0 2px 3px -1px color-mix(in oklab, currentColor calc(var(--depth) * 100%), #0000) !important;
-  }
   .badge {
     display: inline-flex;
     align-items: center;
@@ -6840,10 +6826,6 @@
     border-style: var(--tw-border-style);
     border-width: 0px;
   }
-  .border-1 {
-    border-style: var(--tw-border-style);
-    border-width: 1px;
-  }
   .border-2 {
     border-style: var(--tw-border-style);
     border-width: 2px;
@@ -7191,6 +7173,9 @@
   }
   .bg-neutral {
     background-color: var(--color-neutral);
+  }
+  .bg-neutral\/50 {
+    background-color: color-mix(in oklab, var(--color-neutral) 50%, transparent);
   }
   .bg-red-50 {
     background-color: var(--color-red-50);
@@ -8283,6 +8268,9 @@
   }
   .text-secondary-content {
     color: var(--color-secondary-content);
+  }
+  .text-success {
+    color: var(--color-success);
   }
   .text-warning {
     color: var(--color-warning);
@@ -10272,6 +10260,9 @@
       }
     }
   }
+}
+.input-color-none {
+  color: transparent;
 }
 @layer base {
   :where(:root),:root:has(input.theme-controller[value=light]:checked),[data-theme=light] {

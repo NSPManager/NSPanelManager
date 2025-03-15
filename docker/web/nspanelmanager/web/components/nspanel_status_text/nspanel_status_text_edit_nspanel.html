@@ -17,43 +17,43 @@
       if (state == "online") {
         return html`
             <span class="mdi mdi-power-cycle me-2" title="Panel online">
-                State: <span class=text-success>Online</span>
+                State: <span class="text-success">Online</span>
             </span>
         `;
       } else if (state == "offline") {
         return html`
             <span class="mdi mdi-power-cycle me-2" title="Panel offline">
-                State: <span class=text-error>Offline</span>
+                State: <span class="text-error">Offline</span>
             </span>
         `;
       } else if (state == "waiting") {
         return html`
             <span class="mdi mdi-power-cycle me-2" title="Waiting for panel status">
-                State: <span class=text-info>Waiting</span>
+                State: <span class="text-info">Waiting</span>
             </span>
         `;
       } else if (state == "updating_fw") {
         return html`
             <span class="mdi mdi-power-cycle me-2" title="Waiting for panel status">
-                State: <span class=text-info>Updating FW</span>
+                State: <span class="text-info">Updating FW</span>
             </span>
         `;
       } else if (state == "updating_fs") {
               return html`
                   <span class="mdi mdi-power-cycle me-2" title="Waiting for panel status">
-                      State: <span class=text-info>Updating FS</span>
+                      State: <span class="text-info">Updating FS</span>
                   </span>
               `;
       } else if (state == "updating_tft") {
         return html`
             <span class="mdi mdi-power-cycle me-2" title="Waiting for panel status">
-                State: <span class=text-info>Updating TFT</span>
+                State: <span class="text-info">Updating TFT</span>
             </span>
         `;
       } else {
         return html`
             <span class="mdi mdi-power-cycle me-2" title="Waiting for panel status">
-              State: <span class=text-warning>Unknown state ${state}</span>
+              State: <span class="text-warning">Unknown state ${state}</span>
             </span>
         `;
       }
