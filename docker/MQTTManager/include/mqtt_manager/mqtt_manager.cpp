@@ -16,7 +16,6 @@
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <mutex>
 #include <pthread.h>
-#include <random>
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
@@ -221,7 +220,7 @@ void MQTT_Manager::_process_mqtt_messages() {
         SPDLOG_TRACE("Processing message from topic {}", message.topic);
         // Call each observer/listener until a callback return true, ie. the callback was handled.
         MQTT_Manager::_mqtt_callbacks[message.topic](message.topic, message.message);
-      } catch (std::exception ex) {
+      } catch (std::exception &ex) {
         SPDLOG_ERROR("Caught std::exception while processing message on topic '{}'. message: '{}'. Exception: ", message.topic, message.message, boost::diagnostic_information(ex, true));
       } catch (...) {
         SPDLOG_ERROR("Caught exception of type other than std::exception while processing message on topic '{}'. message: {}", message.topic, message.message);

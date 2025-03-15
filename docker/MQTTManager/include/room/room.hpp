@@ -71,6 +71,11 @@ public:
    */
   std::vector<std::shared_ptr<RoomEntitiesPage>> get_all_entities_pages();
 
+  /*
+   * Get all RoomEntitiesPages attached to this room for presenting scenes.
+   */
+  std::vector<std::shared_ptr<RoomEntitiesPage>> get_all_scenes_pages();
+
   /**
    * Callback when that gets run when an entitiy has changed state
    */

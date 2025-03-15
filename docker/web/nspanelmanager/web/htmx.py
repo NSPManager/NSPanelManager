@@ -20,13 +20,12 @@ import base64
 from time import sleep
 
 #from nspanelmanager.web.mqttmanager_ipc import send_ipc_request
-from .views import send_mqttmanager_reload_command
 from .mqttmanager_ipc import send_ipc_request
 
 from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages import NSPanelRoomEntitiesPages
 
 from .models import NSPanel, Room, Light, RoomEntitiesPage, Settings, Scene, RelayGroup, RelayGroupBinding, Switch
-from .apps import start_mqtt_manager
+from .apps import start_mqtt_manager, send_mqttmanager_reload_command
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
 from web.views import get_file_md5sum, relay_groups
 

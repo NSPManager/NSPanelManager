@@ -1,6 +1,18 @@
 var _last_dropdown_id_activated = "";
 var _last_collapse_id_activated = "";
 
+function attach_cursor_change_events() {
+  $(".cursor-grab")
+    .on("mousedown", function () {
+      $(this).removeClass("cursor-grab");
+      $(this).addClass("cursor-grabbing");
+    })
+    .on("mouseup", function () {
+      $(this).addClass("cursor-grab");
+      $(this).removeClass("cursor-grabbing");
+    });
+}
+
 $(document).ready(function () {
   console.log("Document ready, attaching functions.");
 
@@ -263,13 +275,5 @@ $(document).ready(function () {
   });
 
   // Attach event listener for cursor-grab to change it to grabing on mouse down for drag & drop targets
-  $(".cursor-grab")
-    .on("mousedown", function () {
-      $(this).removeClass("cursor-grab");
-      $(this).addClass("cursor-grabbing");
-    })
-    .on("mouseup", function () {
-      $(this).addClass("cursor-grab");
-      $(this).removeClass("cursor-grabbing");
-    });
+  attach_cursor_change_events();
 });

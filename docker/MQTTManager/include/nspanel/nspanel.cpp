@@ -333,6 +333,9 @@ void NSPanel::send_config() {
       for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_entities_pages()) {
         room_info->add_entity_page_ids(page->get_id());
       }
+      for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_scenes_pages()) {
+        room_info->add_scene_page_ids(page->get_id());
+      }
     }
   }
   SPDLOG_DEBUG("NSPanel {}::{} loaded {} rooms.", this->_id, this->_name, config.room_infos_size());

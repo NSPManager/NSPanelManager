@@ -175,6 +175,10 @@ std::vector<std::shared_ptr<RoomEntitiesPage>> Room::get_all_entities_pages() {
   return this->_entity_pages;
 }
 
+std::vector<std::shared_ptr<RoomEntitiesPage>> Room::get_all_scenes_pages() {
+  return this->_scene_pages;
+}
+
 void Room::page_changed_callback(RoomEntitiesPage *page) {
   if (this->_send_status_updates) {
     this->_send_room_state_update();

@@ -253,9 +253,12 @@ void MQTTManagerWeather::send_state_update() {
 
   std::string new_weather_data;
   if (weather_protbuf.SerializeToString(&new_weather_data)) {
-    std::string weather_update_topic = fmt::format("nspanel/mqttmanager_{}/status/weather", MqttManagerConfig::get_settings().manager_address);
-    SPDLOG_DEBUG("Sending new weather data out on topic {}.", weather_update_topic);
-    MQTT_Manager::publish(weather_update_topic, new_weather_data, true);
+    if (new_weather_data.compare(MQTTManagerWeather::_last_weather_update) != 0) {
+      std::string weather_update_topic = fmt::format("nspanel/mqttmanager_{}/status/weather", MqttManagerConfig::get_settings().manager_address);
+      SPDLOG_DEBUG("Sending new weather data out on topic {}.", weather_update_topic);
+      MQTT_Manager::publish(weather_update_topic, new_weather_data, true);
+      MQTTManagerWeather::_last_weather_update = new_weather_data;
+    }
   } else {
     SPDLOG_ERROR("Failed to serialize weather info to string.");
   }

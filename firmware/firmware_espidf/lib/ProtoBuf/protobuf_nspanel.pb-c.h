@@ -90,10 +90,12 @@ struct  NSPanelConfig__RoomInfo
   int32_t room_id;
   size_t n_entity_page_ids;
   int32_t *entity_page_ids;
+  size_t n_scene_page_ids;
+  int32_t *scene_page_ids;
 };
 #define NSPANEL_CONFIG__ROOM_INFO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__room_info__descriptor) \
-    , 0, 0,NULL }
+    , 0, 0,NULL, 0,NULL }
 
 
 struct  NSPanelConfig

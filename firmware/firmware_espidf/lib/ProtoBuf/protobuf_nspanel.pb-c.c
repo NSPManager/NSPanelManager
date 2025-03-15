@@ -518,7 +518,7 @@ const ProtobufCMessageDescriptor nspanel_scene__descriptor =
   (ProtobufCMessageInit) nspanel_scene__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor nspanel_config__room_info__field_descriptors[2] =
+static const ProtobufCFieldDescriptor nspanel_config__room_info__field_descriptors[3] =
 {
   {
     "room_id",
@@ -544,15 +544,28 @@ static const ProtobufCFieldDescriptor nspanel_config__room_info__field_descripto
     0 | PROTOBUF_C_FIELD_FLAG_PACKED,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "scene_page_ids",
+    3,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(NSPanelConfig__RoomInfo, n_scene_page_ids),
+    offsetof(NSPanelConfig__RoomInfo, scene_page_ids),
+    NULL,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_PACKED,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_config__room_info__field_indices_by_name[] = {
   1,   /* field[1] = entity_page_ids */
   0,   /* field[0] = room_id */
+  2,   /* field[2] = scene_page_ids */
 };
 static const ProtobufCIntRange nspanel_config__room_info__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 2 }
+  { 0, 3 }
 };
 const ProtobufCMessageDescriptor nspanel_config__room_info__descriptor =
 {
@@ -562,7 +575,7 @@ const ProtobufCMessageDescriptor nspanel_config__room_info__descriptor =
   "NSPanelConfig__RoomInfo",
   "",
   sizeof(NSPanelConfig__RoomInfo),
-  2,
+  3,
   nspanel_config__room_info__field_descriptors,
   nspanel_config__room_info__field_indices_by_name,
   1,  nspanel_config__room_info__number_ranges,

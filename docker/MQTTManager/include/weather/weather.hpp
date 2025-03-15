@@ -1,3 +1,4 @@
+#include "protobuf_nspanel.pb.h"
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -93,6 +94,9 @@ private:
   static inline uint32_t _update_interval_minutes;
   static inline std::string _clock_format;
   static inline std::string _temperature_unit;
+
+  // The last update sent to manager. Used to compare so that we don't send the same update twice.
+  static inline std::string _last_weather_update;
 };
 
 #endif // !MQTT_MANAGER_WEATHER
