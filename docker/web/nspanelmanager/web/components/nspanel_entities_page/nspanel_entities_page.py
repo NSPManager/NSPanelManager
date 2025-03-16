@@ -16,20 +16,18 @@ class NSPanelEntitiesPage(component.Component):
             "entities": {}
         }
 
-        if page.is_scenes_page:
-            for scene in page.scene_set.all():
-                data["entities"][scene.room_view_position] = scene
-                data["entities"][scene.room_view_position].controller = scene.scene_type
-                data["entities"][scene.room_view_position].type = scene.__class__.__name__
-        else:
-            for entity in page.light_set.all():
-                data["entities"][entity.room_view_position] = entity
-                data["entities"][entity.room_view_position].controller = entity.type
-                data["entities"][entity.room_view_position].type = entity.__class__.__name__
-            for entity in page.switch_set.all():
-                data["entities"][entity.room_view_position] = entity
-                data["entities"][entity.room_view_position].controller = entity.type
-                data["entities"][entity.room_view_position].type = entity.__class__.__name__
+        for entity in page.light_set.all():
+            data["entities"][entity.room_view_position] = entity
+            data["entities"][entity.room_view_position].controller = entity.type
+            data["entities"][entity.room_view_position].type = entity.__class__.__name__
+        for entity in page.switch_set.all():
+            data["entities"][entity.room_view_position] = entity
+            data["entities"][entity.room_view_position].controller = entity.type
+            data["entities"][entity.room_view_position].type = entity.__class__.__name__
+        for scene in page.scene_set.all():
+            data["entities"][scene.room_view_position] = scene
+            data["entities"][scene.room_view_position].controller = scene.scene_type
+            data["entities"][scene.room_view_position].type = scene.__class__.__name__
         return data
 
     def get_template_name(self, context: Context):

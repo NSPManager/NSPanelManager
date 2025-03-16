@@ -71,7 +71,8 @@
         </form>
     {% endfor %}
 
-    <button class="indicator-item indicator-bottom indicator-end badge badge-neutral hover:badge-error w-6 h-6 flex items-center justify-center" hx-swap="outerHTML" title="Delete page" hx-delete="{% url 'htmx_partial_delete_entities_page' page_id=page.id %}" hx-confirm='Do you want to delete this entity page? <p class="font-bold text-warning">All entities on this page will be removed.</p>'>✕</button>
+    <button class="indicator-item indicator-bottom indicator-end badge badge-neutral hover:badge-error w-6 h-6 flex items-center justify-center cursor-pointer" hx-swap="outerHTML" title="Delete page" hx-delete="{% url 'htmx_partial_delete_entities_page' page_id=page.id %}" hx-confirm='Do you want to delete this entity page? <p class="font-bold text-warning">All entities on this page will be removed.</p>'>✕</button>
+    <button class="indicator-item indicator-bottom indicator-end badge badge-info w-6 h-6 flex items-center justify-center me-8 cursor-pointer" hx-swap="none" title="Edit page" hx-get="{% url 'htmx_partial_edit_entities_page' page_id=page.id %}"><span class="mdi mdi-pencil"></span></button>
     <span class="indicator-item indicator-bottom indicator-center badge badge-neutral hover:badge-info w-6 h-6 flex items-center justify-center nspanel-entities-page-move-handle cursor-grab" title="Drag & drop to move this page"><span class="mdi mdi-hand-back-right"></span></span>
 
     <script>

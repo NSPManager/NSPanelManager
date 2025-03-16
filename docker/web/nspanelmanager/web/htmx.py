@@ -629,6 +629,25 @@ def partial_add_entities_page_to_room(request, room_id, is_scenes_page, is_globa
     return render(request, 'partial/add_entities_page_to_room.html', data)
 
 
+def partial_edit_entities_page(request, page_id):
+    data = {
+        "page_id": page_id,
+    }
+    return render(request, 'partial/edit_entities_page.html', data)
+
+
+def partial_save_edit_entities_page(request, page_id, page_type):
+    page = RoomEntitiesPage.objects.get(id=page_id)
+    page.page_type = page_type
+    page.save()
+
+    room_id = 0
+    if page.room:
+        room_id = page.room.id
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(request=request, view="edit_room", room_id=room_id, is_scenes_pages=page.is_scenes_page, is_global_scenes_page=(page.room is None))
+
+
 def get_entity_in_page_slot(page_id, slot_id):
     page = RoomEntitiesPage.objects.get(id=page_id)
     entities = Light.objects.filter(entities_page=page, room_view_position=slot_id)

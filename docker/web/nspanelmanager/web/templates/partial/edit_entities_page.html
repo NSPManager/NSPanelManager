@@ -1,0 +1,21 @@
+<dialog id="modal" class="modal" hx-swap-oob="true">
+    <ul class="modal-box menu menu-lg bg-base-200 rounded-box w-80">
+        <span class="">How many entities should the page hold?</span>
+        <div class="join items-center justify-center mt-4">
+            <button class="btn btn-neutral join-item btn-lg" hx-get="{% url 'htmx_partial_save_edit_entities_page' page_id=page_id page_type=4 %}" onclick="modal.close();">4</button>
+            <button class="btn btn-neutral join-item btn-lg" hx-get="{% url 'htmx_partial_save_edit_entities_page' page_id=page_id page_type=8 %}" onclick="modal.close();">8</button>
+            <button class="btn btn-neutral join-item btn-lg" hx-get="{% url 'htmx_partial_save_edit_entities_page' page_id=page_id page_type=12 %}" onclick="modal.close();">12</button>
+        </div>
+    </ul>
+
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+
+    <script>
+      modal.showModal(); // Show the modal when loaded.
+    </script>
+</dialog>
