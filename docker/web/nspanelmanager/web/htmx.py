@@ -644,6 +644,7 @@ def partial_save_edit_entities_page(request, page_id, page_type):
     room_id = 0
     if page.room:
         room_id = page.room.id
+    send_mqttmanager_reload_command()
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(request=request, view="edit_room", room_id=room_id, is_scenes_pages=page.is_scenes_page, is_global_scenes_page=(page.room is None))
 
