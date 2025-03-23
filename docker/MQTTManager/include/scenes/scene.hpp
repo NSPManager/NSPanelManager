@@ -13,6 +13,8 @@ public:
   uint8_t get_entity_page_slot();
 
   bool can_toggle();
+
+  // The same as activate()
   void toggle();
 
   virtual std::string get_name() = 0;

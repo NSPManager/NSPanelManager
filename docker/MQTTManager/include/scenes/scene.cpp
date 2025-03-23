@@ -10,9 +10,9 @@ uint8_t Scene::get_entity_page_slot() {
 }
 
 bool Scene::can_toggle() {
-  return false;
+  return true;
 }
 
 void Scene::toggle() {
-  // No-op
+  this->activate();
 }
