@@ -50,28 +50,12 @@ class Room(models.Model):
             room.entity_page_ids.append(page.id)
         return room
 
+
 class RoomEntitiesPage(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
     display_order = models.IntegerField()
     page_type = models.IntegerField() # Is this page displaying 4, 8 or 12 entities?
     is_scenes_page = models.BooleanField(default=False)
-
-    def get_protobuf_object(self):
-        from web.protobuf import protobuf_formats_pb2, protobuf_general_pb2, protobuf_mqttmanager_pb2
-        ret_buf = protobuf_general_pb2.RoomEntitiesPageSettings()
-        ret_buf.id = self.id
-        ret_buf.page_type = self.page_type
-        ret_buf.display_order = self.display_order
-        ret_buf.room_id = self.room.id
-        ret_buf.is_scenes_page = self.is_scenes_page
-
-        # Add assigned lights
-        for light in self.light_set.all():
-            wrapper = ret_buf.entities.add()
-            wrapper.light.id = light.id
-            wrapper.light.name = light.friendly_name
-            wrapper.light.room_view_position = light.room_view_position
-        return ret_buf
 
 
 class NSPanel(models.Model):

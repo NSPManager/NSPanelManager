@@ -8,16 +8,17 @@ class NSPanelRoomEntitiesPages(component.Component):
     template_view = None
 
     def get_context_data(self, room_id, is_scenes_pages, is_global_scenes_page):
-        print("Is global scenes page:", is_global_scenes_page)
         if is_global_scenes_page:
             room = None
         else:
             room = Room.objects.get(id=room_id)
 
+        pages = RoomEntitiesPage.objects.filter(room=room, is_scenes_page=is_scenes_pages).order_by('display_order')
         data = {
             "room": room,
             "is_scenes_pages": is_scenes_pages,
-            "entity_pages": RoomEntitiesPage.objects.filter(room=room, is_scenes_page=is_scenes_pages).order_by('display_order'),
+            "entity_pages": pages,
+            "num_entity_pages": len(pages),
         }
         return data
 

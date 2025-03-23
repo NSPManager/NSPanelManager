@@ -6,14 +6,15 @@ from web.models import RoomEntitiesPage
 class NSPanelEntitiesPage(component.Component):
     template_view = None
 
-    def get_context_data(self, id, page):
+    def get_context_data(self, id, page, total_num_entity_pages):
         data = {
             "id": id,
             "page": page,
             "is_scenes_page": page.is_scenes_page,
             "is_global_scenes_page": page.room == None,
             "range": range(0, page.page_type),
-            "entities": {}
+            "entities": {},
+            "total_num_entity_pages": total_num_entity_pages
         }
 
         for entity in page.light_set.all():
@@ -33,14 +34,17 @@ class NSPanelEntitiesPage(component.Component):
     def get_template_name(self, context: Context):
         return "nspanel_entities_page/nspanel_entities_page_edit_room.html"
 
-    def get(self, request, view, id):
+    def get(self, request, view, id, total_num_entity_pages):
         self.template_view = view
         page = RoomEntitiesPage.objects.get(id=id)
+        print("Page: ")
+        print(page)
         args = {
             "id": id,
             "page": page,
             "range": range(0, page.page_type),
-            "entities": {}
+            "entities": {},
+            "total_num_entity_pages": total_num_entity_pages
         }
         for entity in page.light_set.all():
             args["entities"][entity.room_view_position] = entity

@@ -6,7 +6,7 @@
         </form>
         <ul class="list-none w-full nspanel-entities-pages" data-is-scenes-page="{{ is_scenes_pages }}">
             {% for entity_page in entity_pages %}
-                {% component "nspanel_entities_page" id=entity_page.id page=entity_page %}{% endcomponent %}
+                {% component "nspanel_entities_page" id=entity_page.id page=entity_page total_num_entity_pages=num_entity_pages %}{% endcomponent %}
             {% endfor %}
         </ul>
     {% else %}

@@ -148,6 +148,23 @@ def save_new_room(request):
     new_room = Room()
     new_room.friendly_name = request.POST['friendly_name']
     new_room.save()
+
+    # Create RoomEntitiesPage for scenes
+    scenes_page = RoomEntitiesPage()
+    scenes_page.room = new_room
+    scenes_page.page_type = 4
+    scenes_page.is_scenes_page = True
+    scenes_page.display_order = 0
+    scenes_page.save()
+
+    # Create RoomEntitiesPage for entities
+    entities_page = RoomEntitiesPage()
+    entities_page.room = new_room
+    entities_page.page_type = 4
+    entities_page.is_scenes_page = False
+    entities_page.display_order = 0
+    entities_page.save()
+
     send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=new_room.id)
 

@@ -65,6 +65,42 @@ def send_mqttmanager_reload_command():
                 os.kill(proc.pid, signal.SIGUSR1)
 
 
+def create_entity_pages_for_all_rooms():
+    from .models import Room, RoomEntitiesPage
+    for room in Room.objects.all():
+        # Check if an existing scenes page exists, if it does not, create one
+        existing_pages = RoomEntitiesPage.objects.filter(room=room, is_scenes_page=True)
+        if not existing_pages.exists():
+            page = RoomEntitiesPage()
+            page.room = room
+            page.display_order = 0
+            page.page_type = 4
+            page.is_scenes_page = True
+            page.save()
+
+        # Check if an existing entities page exists, if it doesn not, create one.
+        existing_pages = RoomEntitiesPage.objects.filter(room=room, is_scenes_page=False)
+        if not existing_pages.exists():
+            page = RoomEntitiesPage()
+            page.room = room
+            page.display_order = 0
+            page.page_type = 4
+            page.is_scenes_page = False
+            page.save()
+
+
+def create_global_scenes_page():
+    from .models import RoomEntitiesPage
+    existing_pages = RoomEntitiesPage.objects.filter(room=None, is_scenes_page=True)
+    if not existing_pages.exists():
+        page = RoomEntitiesPage()
+        page.room = None
+        page.display_order = 0
+        page.page_type = 4
+        page.is_scenes_page = True
+        page.save()
+
+
 class WebConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'web'
@@ -92,6 +128,9 @@ class WebConfig(AppConfig):
                             "home_assistant_token", environment("SUPERVISOR_TOKEN"))
                     # from .models import Settings
                     # objects = Settings.objects.filter(name=name)
+
+            create_entity_pages_for_all_rooms()
+            create_global_scenes_page()
             restart_mqtt_manager_process()
         except:
             logging.exception(
