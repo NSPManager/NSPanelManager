@@ -31,6 +31,7 @@ typedef struct NSPanelMQTTManagerCommand__FirstPageTurnLightOn NSPanelMQTTManage
 typedef struct NSPanelMQTTManagerCommand__FirstPageTurnLightOff NSPanelMQTTManagerCommand__FirstPageTurnLightOff;
 typedef struct NSPanelMQTTManagerCommand__LightCommand NSPanelMQTTManagerCommand__LightCommand;
 typedef struct NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage;
+typedef struct NSPanelMQTTManagerCommand__SaveSceneCommand NSPanelMQTTManagerCommand__SaveSceneCommand;
 
 
 /* --- enums --- */
@@ -209,10 +210,11 @@ struct  NSPanelRoomEntitiesPage__EntitySlot
   char *icon;
   int32_t pco;
   int32_t pco2;
+  protobuf_c_boolean can_save_scene;
 };
 #define NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_room_entities_page__entity_slot__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0 }
+    , 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0 }
 
 
 /*
@@ -356,12 +358,24 @@ struct  NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage
     , 0, 0 }
 
 
+struct  NSPanelMQTTManagerCommand__SaveSceneCommand
+{
+  ProtobufCMessage base;
+  int32_t entity_page_id;
+  int32_t entity_slot;
+};
+#define NSPANEL_MQTTMANAGER_COMMAND__SAVE_SCENE_COMMAND__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__save_scene_command__descriptor) \
+    , 0, 0 }
+
+
 typedef enum {
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__NOT_SET = 0,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON = 1,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_OFF = 2,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_LIGHT_COMMAND = 3,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_TOGGLE_ENTITY_FROM_ENTITIES_PAGE = 4
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_TOGGLE_ENTITY_FROM_ENTITIES_PAGE = 4,
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_SAVE_SCENE_COMMAND = 5
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__CASE)
 } NSPanelMQTTManagerCommand__CommandDataCase;
 
@@ -377,6 +391,7 @@ struct  NSPanelMQTTManagerCommand
     NSPanelMQTTManagerCommand__FirstPageTurnLightOff *first_page_turn_off;
     NSPanelMQTTManagerCommand__LightCommand *light_command;
     NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage *toggle_entity_from_entities_page;
+    NSPanelMQTTManagerCommand__SaveSceneCommand *save_scene_command;
   };
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__INIT \
@@ -557,6 +572,9 @@ void   nspanel_mqttmanager_command__light_command__init
 /* NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage methods */
 void   nspanel_mqttmanager_command__toggle_entity_from_entities_page__init
                      (NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage         *message);
+/* NSPanelMQTTManagerCommand__SaveSceneCommand methods */
+void   nspanel_mqttmanager_command__save_scene_command__init
+                     (NSPanelMQTTManagerCommand__SaveSceneCommand         *message);
 /* NSPanelMQTTManagerCommand methods */
 void   nspanel_mqttmanager_command__init
                      (NSPanelMQTTManagerCommand         *message);
@@ -623,6 +641,9 @@ typedef void (*NSPanelMQTTManagerCommand__LightCommand_Closure)
 typedef void (*NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage_Closure)
                  (const NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage *message,
                   void *closure_data);
+typedef void (*NSPanelMQTTManagerCommand__SaveSceneCommand_Closure)
+                 (const NSPanelMQTTManagerCommand__SaveSceneCommand *message,
+                  void *closure_data);
 typedef void (*NSPanelMQTTManagerCommand_Closure)
                  (const NSPanelMQTTManagerCommand *message,
                   void *closure_data);
@@ -651,6 +672,7 @@ extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_turn_light_off__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__light_command__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__toggle_entity_from_entities_page__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__save_scene_command__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_mqttmanager_command__affect_lights_options__descriptor;
 
 PROTOBUF_C__END_DECLS

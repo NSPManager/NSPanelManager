@@ -1,4 +1,5 @@
 #include <cstdint>
+
 class EntityIcons {
 public:
   // Entity Icons

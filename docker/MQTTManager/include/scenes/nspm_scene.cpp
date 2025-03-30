@@ -1,15 +1,19 @@
+#include "command_manager/command_manager.hpp"
 #include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "light/light.hpp"
+#include "protobuf_nspanel.pb.h"
 #include "room/room.hpp"
 #include "web_helper/WebHelper.hpp"
+#include <boost/bind.hpp>
 #include <curl/curl.h>
 #include <entity/entity_icons.hpp>
 #include <memory>
 #include <nlohmann/detail/value_t.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <scenes/nspm_scene.hpp>
+#include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 #include <sqlite_orm/sqlite_orm.h>
 #include <system_error>
@@ -17,6 +21,12 @@
 NSPMScene::NSPMScene(uint32_t id) {
   this->_id = id;
   this->reload_config();
+
+  CommandManager::attach_callback(boost::bind(&NSPMScene::command_callback, this, _1));
+}
+
+NSPMScene::~NSPMScene() {
+  CommandManager::detach_callback(boost::bind(&NSPMScene::command_callback, this, _1));
 }
 
 void NSPMScene::reload_config() {
@@ -50,14 +60,24 @@ void NSPMScene::activate() {
         }
 
         if (light_state.color_mode.compare("dimmer") == 0) {
-          light_entity->turn_on(false);
-          light_entity->set_color_temperature(light_state.color_temperature, false);
-          light_entity->set_brightness(light_state.light_level, true);
+          SPDLOG_DEBUG("Setting light {}::{} to light level {} in dimmer mode.", light_entity->get_id(), light_entity->get_name(), light_state.light_level);
+          if (light_state.light_level <= 0) {
+            light_entity->turn_off(true);
+          } else {
+            light_entity->turn_on(false);
+            light_entity->set_color_temperature(light_state.color_temperature, false);
+            light_entity->set_brightness(light_state.light_level, true);
+          }
         } else if (light_state.color_mode.compare("color") == 0) {
-          light_entity->turn_on(false);
-          light_entity->set_hue(light_state.hue, false);
-          light_entity->set_saturation(light_state.saturation, false);
-          light_entity->set_brightness(light_state.light_level, true);
+          SPDLOG_DEBUG("Setting light {}::{} to light level {} in color mode.", light_entity->get_id(), light_entity->get_name(), light_state.light_level);
+          if (light_state.light_level <= 0) {
+            light_entity->turn_off(true);
+          } else {
+            light_entity->turn_on(false);
+            light_entity->set_hue(light_state.hue, false);
+            light_entity->set_saturation(light_state.saturation, false);
+            light_entity->set_brightness(light_state.light_level, true);
+          }
         } else {
           SPDLOG_ERROR("Tried to apply light state from scene with {}::{} for light with ID {} but could not interpret color mode '{}'.", this->get_id(), this->_name, light_state.light_id, light_state.color_mode);
         }
@@ -105,6 +125,7 @@ void NSPMScene::save() {
 
     for (auto &light : lights) {
       database_manager::SceneLightState new_light_state;
+      new_light_state.scene_id = this->_id;
       new_light_state.light_id = light->get_id();
       new_light_state.light_level = light->get_state() ? light->get_brightness() : 0;
       switch (light->get_mode()) {
@@ -167,4 +188,14 @@ uint16_t NSPMScene::get_icon_color() {
 
 uint16_t NSPMScene::get_icon_active_color() {
   return GUI_Colors::icon_color_on;
+}
+
+void NSPMScene::command_callback(NSPanelMQTTManagerCommand &command) {
+  if (command.has_save_scene_command()) {
+    auto save_scene_command = command.save_scene_command();
+    if (save_scene_command.entity_page_id() == this->_page_id && save_scene_command.entity_slot() == this->_page_slot) {
+      this->save();
+      SPDLOG_INFO("Scene {}::{} saved successfully.", this->_id, this->_name);
+    }
+  }
 }

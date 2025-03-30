@@ -126,6 +126,7 @@ message NSPanelRoomEntitiesPage {
         string icon = 3;
         int32 pco = 4;
         int32 pco2 = 5;
+        bool can_save_scene = 6;
     }
 
     repeated EntitySlot entities = 4;
@@ -208,10 +209,16 @@ message NSPanelMQTTManagerCommand {
         int32 entity_slot = 2;
     }
 
+    message SaveSceneCommand {
+        int32 entity_page_id = 1;
+        int32 entity_slot = 2;
+    }
+
     oneof CommandData {
         FirstPageTurnLightOn first_page_turn_on = 1;
         FirstPageTurnLightOff first_page_turn_off = 2;
         LightCommand light_command = 3;
         ToggleEntityFromEntitiesPage toggle_entity_from_entities_page = 4;
+        SaveSceneCommand save_scene_command = 5;
     }
 }

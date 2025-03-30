@@ -69,7 +69,7 @@ MQTT_MANAGER_ENTITY_TYPE OpenhabScene::get_type() {
 }
 
 MQTT_MANAGER_ENTITY_CONTROLLER OpenhabScene::get_controller() {
-  return MQTT_MANAGER_ENTITY_CONTROLLER::NSPM;
+  return MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
 }
 
 std::string OpenhabScene::get_name() {

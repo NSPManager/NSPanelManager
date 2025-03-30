@@ -3,6 +3,7 @@
 
 #include "entity/entity.hpp"
 #include "light/light.hpp"
+#include "protobuf_nspanel.pb.h"
 #include <list>
 #include <nlohmann/json.hpp>
 #include <scenes/scene.hpp>
@@ -11,6 +12,8 @@
 class NSPMScene : public Scene {
 public:
   NSPMScene(uint32_t id);
+  ~NSPMScene();
+
   void reload_config();
   void activate();
   void save();
@@ -24,6 +27,8 @@ public:
   std::string_view get_icon();
   uint16_t get_icon_color();
   uint16_t get_icon_active_color();
+
+  void command_callback(NSPanelMQTTManagerCommand &command);
 
 private:
   bool _is_global_scene;

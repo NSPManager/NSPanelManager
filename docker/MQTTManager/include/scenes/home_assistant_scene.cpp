@@ -61,7 +61,7 @@ MQTT_MANAGER_ENTITY_TYPE HomeAssistantScene::get_type() {
 }
 
 MQTT_MANAGER_ENTITY_CONTROLLER HomeAssistantScene::get_controller() {
-  return MQTT_MANAGER_ENTITY_CONTROLLER::NSPM;
+  return MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
 }
 
 void HomeAssistantScene::post_init() {
