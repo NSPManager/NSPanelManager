@@ -5,7 +5,7 @@
 
 <li id="nspanel_entities_page_{{ page.id }}" data-is-scenes-page="{{ is_scenes_page }}" data-page-id="{{ page.id }}" hx-swap-oob="true" class="bg-base-200 float-left m-2 rounded-box p-3 grid grid-cols-2 {% if page.page_type == 12 %}grid-rows-6{% elif page.page_type == 4 %}grid-rows-2{% else %}grid-rows-4{% endif %} gap-4 w-full max-w-[24rem] aspect-square indicator nspanel-entities-page">
     {% for i in range %}
-        <form class="draggable-entity-item-target-slot nspanel-entities-page-entity-slot" data-page-id="{{ page.id }}" data-slot-id="{{ i }}" hx-indicator="#modal_loading" hx-post="{% url 'htmx_partial_move_entity' %}" hx-trigger="entity_moved">
+        <form class="draggable-entity-item-target-slot nspanel-entities-page-entity-slot rounded-box" data-page-id="{{ page.id }}" data-slot-id="{{ i }}" hx-indicator="#modal_loading" hx-post="{% url 'htmx_partial_move_entity' %}" hx-trigger="entity_moved">
             <input type="hidden" name="page_id" value="{{ page.id }}">
             <input type="hidden" name="slot_id" value="{{ i }}">
             <input type="hidden" name="new_entity_type">
@@ -89,9 +89,8 @@
         snap: ".draggable-entity-item-target-slot",
         snapMode: "inner",
         start: function() {
-          $(this).addClass("bg-opacity-100");
-          $(this).addClass("border-info");
-          $(this).addClass("z-10");
+          $(this).parent().addClass("border border-dashed border-accent border-2");
+          $(this).addClass("bg-opacity-100 border-info z-10");
         },
         drag: function() {
           var max_overlap_element = null;
@@ -145,24 +144,22 @@
             }
           });
 
-          var jq_max_overlap_element = $(max_overlap_element)
+          var jq_max_overlap_element = $(max_overlap_element);
           $(".draggable-entity-item-target-slot").each((index, element) => {
             if($(element).data('slot-id') == jq_max_overlap_element.data('slot-id') && $(element).data('page-id') == jq_max_overlap_element.data('page-id')) {
-              jq_max_overlap_element.children('div').addClass("border-info");
-              jq_max_overlap_element.children('div').removeClass("border-neutral");
+              jq_max_overlap_element.addClass("border-2 border-info border-dashed");
+              jq_max_overlap_element.removeClass("border-neutral");
             } else if($(element).data('slot-id') == $(this).parent().data('slot-id') && $(element).data('page-id') == $(this).parent().data('page-id')) {
-              jq_max_overlap_element.children('div').addClass("border-info");
-              jq_max_overlap_element.children('div').removeClass("border-neutral");
+              // Do nothing, this is the slot it is currently in and the styles for that slot is handled in start/stop functions.
             } else {
-              $(element).children('div').addClass("border-neutral");
-              $(element).children('div').removeClass("border-info");
+              $(element).addClass("border-neutral");
+              $(element).removeClass("border-info border-2");
             }
           });
         },
         stop: function() {
-          //$(this).removeClass("z-10");
-          $(this).removeClass("bg-opacity-100");
-          $(this).removeClass("border-info");
+          $(this).parent().removeClass("border border-dashed border-2");
+          $(this).removeClass("bg-opacity-100 border-info");
           var max_overlap_element = null;
           var max_overlap_area = 0;
           $(".draggable-entity-item-target-slot").each((index, element) => {
