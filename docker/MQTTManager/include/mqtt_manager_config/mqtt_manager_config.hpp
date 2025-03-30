@@ -44,8 +44,6 @@ public:
   static MqttManagerSettingsHolder get_settings();
   static inline std::string timezone;
 
-  static inline nlohmann::json icon_mapping;
-
   static std::string get_setting_with_default(std::string key, std::string default_value);
 
   /**

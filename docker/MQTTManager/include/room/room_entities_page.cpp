@@ -9,6 +9,7 @@
 #include <boost/bind.hpp>
 #include <boost/stacktrace/stacktrace.hpp>
 #include <database_manager/database_manager.hpp>
+#include <entity/entity_icons.hpp>
 #include <exception>
 #include <fmt/format.h>
 #include <memory>
@@ -133,23 +134,18 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_name(light->get_name());
       entity_slot->set_room_view_position(i);
       // TODO: Move state icons for panel from GUI_DATA to manager and convert this!
-      entity_slot->set_icon(light->get_state() ? "s" : "t");
-      if (light->get_state()) {
-        entity_slot->set_pco(65024);
-        entity_slot->set_pco2(65024);
-      } else {
-        entity_slot->set_pco(65535);
-        entity_slot->set_pco2(65535);
-      }
+      entity_slot->set_icon(light->get_icon());
+      entity_slot->set_pco(light->get_icon_color());
+      entity_slot->set_pco2(light->get_icon_active_color());
     } else if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::SCENE) {
       std::shared_ptr<Scene> scene = std::static_pointer_cast<Scene>(entity);
       NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();
       entity_slot->set_name(scene->get_name());
       entity_slot->set_room_view_position(i);
       // TODO: Move state icons for panel from GUI_DATA to manager and convert this!
-      entity_slot->set_icon(scene->can_save() ? "w" : "");
-      entity_slot->set_pco(65024);
-      entity_slot->set_pco2(65024);
+      entity_slot->set_icon(scene->get_icon());
+      entity_slot->set_pco(scene->get_icon_color());
+      entity_slot->set_pco2(scene->get_icon_active_color());
     } else {
       SPDLOG_ERROR("Unknown entity type {} while processing EntityWrapper while building NSPanelRoomEntitiesPage protobuf object.", (int)entity->get_type());
     }

@@ -5,6 +5,7 @@
 #include "room/room.hpp"
 #include "web_helper/WebHelper.hpp"
 #include <curl/curl.h>
+#include <entity/entity_icons.hpp>
 #include <memory>
 #include <nlohmann/detail/value_t.hpp>
 #include <nlohmann/json_fwd.hpp>
@@ -154,4 +155,16 @@ std::string NSPMScene::get_name() {
 
 bool NSPMScene::can_save() {
   return true;
+}
+
+std::string_view NSPMScene::get_icon() {
+  return EntityIcons::save_icon;
+}
+
+uint16_t NSPMScene::get_icon_color() {
+  return GUI_Colors::icon_color_on;
+}
+
+uint16_t NSPMScene::get_icon_active_color() {
+  return GUI_Colors::icon_color_on;
 }

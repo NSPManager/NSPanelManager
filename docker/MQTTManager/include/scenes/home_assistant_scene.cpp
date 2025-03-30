@@ -2,11 +2,13 @@
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include <curl/curl.h>
+#include <entity/entity_icons.hpp>
 #include <home_assistant_manager/home_assistant_manager.hpp>
 #include <nlohmann/detail/value_t.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <scenes/home_assistant_scene.hpp>
 #include <spdlog/spdlog.h>
+#include <string_view>
 #include <system_error>
 
 HomeAssistantScene::HomeAssistantScene(uint32_t id) {
@@ -80,4 +82,16 @@ std::string HomeAssistantScene::get_name() {
 
 bool HomeAssistantScene::can_save() {
   return false;
+}
+
+std::string_view HomeAssistantScene::get_icon() {
+  return EntityIcons::home_assistant_icon;
+}
+
+uint16_t HomeAssistantScene::get_icon_color() {
+  return GUI_Colors::icon_color_off;
+}
+
+uint16_t HomeAssistantScene::get_icon_active_color() {
+  return GUI_Colors::icon_color_off;
 }

@@ -4,6 +4,7 @@
 #include <boost/signals2/signal.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
+#include <string_view>
 enum MQTT_MANAGER_ENTITY_TYPE {
   LIGHT,
   SCENE,
@@ -51,6 +52,21 @@ public:
    * Toggle the entity state.
    */
   virtual void toggle() = 0;
+
+  /*
+   * Get the icon of this entity as to how it should be displayed in the NSPanel itself.
+   */
+  virtual std::string_view get_icon() = 0;
+
+  /*
+   * Get the icon color of this entity as to how it should be displayed in the NSPanel itself.
+   */
+  virtual uint16_t get_icon_color() = 0;
+
+  /*
+   * Get the icon active (pressed) color of this entity as to how it should be displayed in the NSPanel itself.
+   */
+  virtual uint16_t get_icon_active_color() = 0;
 
   /**
    * Register a entity_changed callback listener.

@@ -10,6 +10,7 @@
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <string_view>
 
 enum MQTT_MANAGER_LIGHT_MODE {
   DEFAULT, // Normal, no special case.
@@ -188,6 +189,9 @@ public:
   MQTT_MANAGER_ENTITY_CONTROLLER get_controller();
   bool can_toggle();
   void toggle();
+  std::string_view get_icon();
+  uint16_t get_icon_color();
+  uint16_t get_icon_active_color();
 
   ~Light();
 

@@ -49,7 +49,7 @@ private:
    */
   static void _process_weather_data(std::string &data);
 
-  static std::string _get_icon_from_mapping(std::string &condition, uint8_t hour, bool allow_night_icon);
+  static std::string_view _get_icon_from_mapping(std::string &condition, uint8_t hour, bool allow_night_icon);
 
   struct weather_info {
     std::string condition;

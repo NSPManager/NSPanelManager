@@ -9,6 +9,7 @@
 #include <boost/bind/bind.hpp>
 #include <cstdint>
 #include <entity/entity.hpp>
+#include <entity/entity_icons.hpp>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
@@ -316,5 +317,29 @@ void Light::toggle() {
     this->turn_off(true);
   } else {
     this->turn_on(true);
+  }
+}
+
+std::string_view Light::get_icon() {
+  if (this->get_state()) {
+    return EntityIcons::entity_icon_switch_on;
+  } else {
+    return EntityIcons::entity_icon_switch_off;
+  }
+}
+
+uint16_t Light::get_icon_color() {
+  if (this->get_state()) {
+    return GUI_Colors::icon_color_on;
+  } else {
+    return GUI_Colors::icon_color_off;
+  }
+}
+
+uint16_t Light::get_icon_active_color() {
+  if (this->get_state()) {
+    return GUI_Colors::icon_color_on;
+  } else {
+    return GUI_Colors::icon_color_off;
   }
 }

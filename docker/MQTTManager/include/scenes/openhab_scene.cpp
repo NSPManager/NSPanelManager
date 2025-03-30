@@ -4,6 +4,7 @@
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "web_helper/WebHelper.hpp"
 #include <curl/curl.h>
+#include <entity/entity_icons.hpp>
 #include <nlohmann/detail/value_t.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <openhab_manager/openhab_manager.hpp>
@@ -77,4 +78,16 @@ std::string OpenhabScene::get_name() {
 
 bool OpenhabScene::can_save() {
   return false;
+}
+
+std::string_view OpenhabScene::get_icon() {
+  return EntityIcons::openhab_icon;
+}
+
+uint16_t OpenhabScene::get_icon_color() {
+  return GUI_Colors::icon_color_off;
+}
+
+uint16_t OpenhabScene::get_icon_active_color() {
+  return GUI_Colors::icon_color_off;
 }

@@ -63,8 +63,8 @@ add_library(MQTTManager_DatabaseManager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/da
 target_include_directories(MQTTManager_DatabaseManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTTManager_DatabaseManager PUBLIC spdlog::spdlog sqlite_orm::sqlite_orm)
 
-add_library(MQTTManager_Entity STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.hpp)
-set_target_properties(MQTTManager_Entity PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.hpp)
+add_library(MQTTManager_Entity STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity_icons.hpp)
+set_target_properties(MQTTManager_Entity PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.hpp PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity_icons.hpp)
 target_include_directories(MQTTManager_Entity PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTTManager_Entity spdlog::spdlog Boost::boost nlohmann_json::nlohmann_json)
 
@@ -93,7 +93,7 @@ set_target_properties(MQTTManager_OpenhabManager PROPERTIES PUBLIC_HEADER ${CMAK
 target_include_directories(MQTTManager_OpenhabManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTTManager_OpenhabManager Boost::stacktrace_backtrace spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost MQTTManager_Config)
 
-add_library(MQTTManager_Weather STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.hpp)
+add_library(MQTTManager_Weather STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather_icons.hpp)
 set_target_properties(MQTTManager_Weather PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.hpp)
 target_include_directories(MQTTManager_Weather PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTTManager_Weather MQTTManager_WebHelper spdlog::spdlog nlohmann_json::nlohmann_json MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTT_Manager)

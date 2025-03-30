@@ -1,3 +1,4 @@
+#include <string_view>
 #ifndef OPENHAB_SCENE
 #include "room/room.hpp"
 
@@ -15,6 +16,9 @@ public:
   bool can_save();
   MQTT_MANAGER_ENTITY_TYPE get_type();
   MQTT_MANAGER_ENTITY_CONTROLLER get_controller();
+  std::string_view get_icon();
+  uint16_t get_icon_color();
+  uint16_t get_icon_active_color();
 
 private:
   bool _is_global_scene;

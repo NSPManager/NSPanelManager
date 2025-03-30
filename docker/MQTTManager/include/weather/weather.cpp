@@ -21,6 +21,7 @@
 #include <protobuf_nspanel.pb.h>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <weather/weather_icons.hpp>
 
 void MQTTManagerWeather::start() {
   MQTTManagerWeather::reload_config();
@@ -190,20 +191,23 @@ void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data
   }
 }
 
-std::string MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, uint8_t hour, bool allow_night_icon) {
-  for (nlohmann::json mapping : MqttManagerConfig::icon_mapping["openmeteo_weather_mappings"]) {
-    if (std::string(mapping["id"]).compare(condition) == 0) {
-      if (mapping.contains("character-mapping-day") && ((hour >= MQTTManagerWeather::_next_sunrise_hour && hour <= MQTTManagerWeather::_next_sunset_hour) || !allow_night_icon)) {
-        return mapping["character-mapping-day"];
-      } else if (mapping.contains("character-mapping-night") && (hour <= MQTTManagerWeather::_next_sunrise_hour || hour >= MQTTManagerWeather::_next_sunset_hour)) {
-        return mapping["character-mapping-night"];
-      } else if (mapping.contains("character-mapping")) {
-        return std::string(mapping["character-mapping"]);
-      } else {
-        SPDLOG_ERROR("Found matching condition for {} but no icon-mapping!", condition);
-        SPDLOG_ERROR("Matching condition current hour: {}, sunrise: {}, sunset: {}", hour, MQTTManagerWeather::_next_sunrise_hour, MQTTManagerWeather::_next_sunset_hour);
+std::string_view MQTTManagerWeather::_get_icon_from_mapping(std::string &condition, uint8_t hour, bool allow_night_icon) {
+  try {
+    uint8_t condition_id = std::stoi(condition);
+    for (const WeatherIcons::WeatherIcon &icon_mapping : WeatherIcons::weather_icons) {
+      if (condition_id == icon_mapping.weather_code) {
+        if ((hour >= MQTTManagerWeather::_next_sunrise_hour && hour <= MQTTManagerWeather::_next_sunset_hour) || !allow_night_icon) {
+          return icon_mapping.icon_day;
+        } else if (hour <= MQTTManagerWeather::_next_sunrise_hour || hour >= MQTTManagerWeather::_next_sunset_hour) {
+          return icon_mapping.icon_night;
+        } else {
+          SPDLOG_ERROR("Could not determine wether to use day or night icon, will use day icons. Matching condition current hour: {}, sunrise: {}, sunset: {}", hour, MQTTManagerWeather::_next_sunrise_hour, MQTTManagerWeather::_next_sunset_hour);
+          return icon_mapping.icon_day;
+        }
       }
     }
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Error occurred while processing icon mapping: {}", e.what());
   }
 
   SPDLOG_ERROR("Couldn't find a mapping for condition {}.", condition);

@@ -84,11 +84,6 @@ void MqttManagerConfig::load() {
     }
   }
 
-  // Load icon mapping
-  std::ifstream icon_mapping_stream("/usr/src/app/nspanelmanager/icon_mapping.json");
-  MqttManagerConfig::icon_mapping = nlohmann::json::parse(icon_mapping_stream);
-  icon_mapping_stream.close();
-
   // Notify all listeners that the config has been loaded
   MqttManagerConfig::_config_loaded_listeners();
 }
