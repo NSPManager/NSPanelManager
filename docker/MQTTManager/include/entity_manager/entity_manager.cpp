@@ -6,6 +6,7 @@
 #include "light/openhab_light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "protobuf_general.pb.h"
+#include "protobuf_nspanel.pb.h"
 #include "room/room.hpp"
 #include "scenes/home_assistant_scene.hpp"
 #include "scenes/nspm_scene.hpp"
@@ -19,12 +20,14 @@
 #include <boost/stacktrace.hpp>
 #include <boost/stacktrace/frame.hpp>
 #include <boost/stacktrace/stacktrace_fwd.hpp>
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <database_manager/database_manager.hpp>
 #include <entity_manager/entity_manager.hpp>
+#include <iterator>
 #include <memory>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <mutex>
@@ -36,6 +39,7 @@
 #include <sqlite_orm/sqlite_orm.h>
 #include <string>
 #include <sys/types.h>
+#include <thread>
 #include <vector>
 
 #define ITEM_IN_LIST(list, item) (std::find(list.cbegin(), list.cend(), item) != list.end());
@@ -46,6 +50,13 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 }
 
 void EntityManager::init() {
+  if (!EntityManager::_update_all_rooms_status_thread.joinable()) {
+    SPDLOG_INFO("No thread to handle 'All rooms' status exists, starting...");
+    EntityManager::_last_room_update_time = std::chrono::system_clock::now();
+    EntityManager::_update_all_rooms_status_thread = std::thread(EntityManager::update_all_rooms_status);
+    EntityManager::_update_all_rooms_status_thread.detach();
+  }
+
   CommandManager::attach_callback(&EntityManager::_command_callback);
 
   // MQTT_Manager::attach_observer(EntityManager::mqtt_callback);
@@ -101,6 +112,7 @@ void EntityManager::load_rooms() {
       auto room = std::shared_ptr<Room>(new Room(room_id));
       SPDLOG_INFO("Room {}::{} was found in database but not in config. Creating room.", room->get_id(), room->get_name());
       room->post_init();
+      room->attach_room_changed_callback(&EntityManager::_room_updated_callback);
       EntityManager::_rooms.push_back(room);
     }
   }
@@ -231,6 +243,157 @@ std::shared_ptr<Room> EntityManager::get_room(uint32_t room_id) {
 std::vector<std::shared_ptr<Room>> EntityManager::get_all_rooms() {
   std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
   return EntityManager::_rooms;
+}
+
+void EntityManager::update_all_rooms_status() {
+  SPDLOG_INFO("Started thread to handle 'All rooms' status updates.");
+  for (;;) {
+    // Wait for notification that a room has been updated
+    {
+      std::unique_lock<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+      EntityManager::_room_update_condition_variable.wait(mutex_guard, [&]() {
+        return !EntityManager::_all_rooms_status_updated;
+      });
+    }
+    // Wait until changes has settled as when a user changes light states in "All rooms" mode a burst of changes will occur from all rooms.
+    uint32_t backoff_time = std::stoi(MqttManagerConfig::get_setting_with_default("all_rooms_status_backoff_time", "250"));
+    while (EntityManager::_last_room_update_time.load() + std::chrono::milliseconds(backoff_time) > std::chrono::system_clock::now()) {
+      std::this_thread::sleep_for(EntityManager::_last_room_update_time.load() + std::chrono::milliseconds(backoff_time) - std::chrono::system_clock::now());
+    }
+
+    SPDLOG_DEBUG("Updating 'All rooms' status.");
+    EntityManager::_all_rooms_status_updated = true;
+
+    NSPanelRoomStatus all_rooms_status;
+
+    // Calculate average light level
+    uint64_t total_light_level_all = 0;
+    uint64_t total_light_level_ceiling = 0;
+    uint64_t total_light_level_table = 0;
+    uint64_t total_kelvin_level_all = 0;
+    uint64_t total_kelvin_ceiling = 0;
+    uint64_t total_kelvin_table = 0;
+    uint16_t num_lights_total = 0;
+    uint16_t num_lights_ceiling = 0;
+    uint16_t num_lights_ceiling_on = 0;
+    uint16_t num_lights_table = 0;
+    uint16_t num_lights_table_on = 0;
+
+    // Determine if any light is on in any of the rooms
+    bool any_light_on = false;
+    for (auto room : EntityManager::_rooms) {
+      std::vector<std::shared_ptr<Light>> entities = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+      for (auto light : entities) {
+        if (light->get_state() && light->get_controlled_from_main_page()) {
+          any_light_on = true;
+          break;
+        }
+      }
+    }
+
+    for (auto room : EntityManager::_rooms) {
+      for (auto &light : room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT)) {
+        // Light is not controlled from main page, exclude it from calculations.
+        if (!light->get_controlled_from_main_page()) {
+          continue;
+        }
+
+        if ((any_light_on && light->get_state()) || !any_light_on) {
+          total_light_level_all += light->get_brightness();
+          total_kelvin_level_all += light->get_color_temperature();
+          num_lights_total++;
+        }
+        if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE) {
+          // SPDLOG_TRACE("Room {}::{} found table light {}::{}, state: {}", this->_id, this->_name, light->get_id(), light->get_name(), light->get_state() ? "ON" : "OFF");
+          num_lights_table++;
+          if (light->get_state()) {
+            total_light_level_table += light->get_brightness();
+            total_kelvin_table += light->get_color_temperature();
+            num_lights_table_on++;
+          }
+        } else if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING) {
+          // SPDLOG_TRACE("Room {}::{} found ceiling light {}::{}, state: {}", this->_id, this->_name, light->get_id(), light->get_name(), light->get_state() ? "ON" : "OFF");
+          num_lights_ceiling++;
+          if (light->get_state()) {
+            total_light_level_ceiling += light->get_brightness();
+            total_kelvin_ceiling += light->get_color_temperature();
+            num_lights_ceiling_on++;
+          }
+        }
+      }
+    }
+    // Update result if a ceiling or table light is found.
+    all_rooms_status.set_num_table_lights(num_lights_table);
+    all_rooms_status.set_num_ceiling_lights(num_lights_ceiling);
+    all_rooms_status.set_num_table_lights_on(num_lights_table_on);
+    all_rooms_status.set_num_ceiling_lights_on(num_lights_ceiling_on);
+
+    if (num_lights_total > 0) {
+      float average_kelvin = (float)total_kelvin_level_all / num_lights_total;
+      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
+      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
+      if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+        kelvin_pct = 100 - kelvin_pct;
+      }
+
+      all_rooms_status.set_average_dim_level(total_light_level_all / num_lights_total);
+      all_rooms_status.set_average_color_temperature(kelvin_pct);
+    } else {
+      all_rooms_status.set_average_dim_level(0);
+      all_rooms_status.set_average_color_temperature(0);
+    }
+
+    if (num_lights_table_on > 0) {
+      float average_kelvin = (float)total_kelvin_table / num_lights_table_on;
+      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
+      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
+      if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+        kelvin_pct = 100 - kelvin_pct;
+      }
+
+      all_rooms_status.set_table_lights_dim_level(total_light_level_table / num_lights_table_on);
+      all_rooms_status.set_table_lights_color_temperature_value(kelvin_pct);
+    } else {
+      // SPDLOG_TRACE("No table lights found, setting value to 0.");
+      all_rooms_status.set_table_lights_dim_level(0);
+      all_rooms_status.set_table_lights_color_temperature_value(0);
+    }
+
+    if (num_lights_ceiling_on > 0) {
+      float average_kelvin = (float)total_kelvin_ceiling / num_lights_ceiling_on;
+      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
+      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
+      if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+        kelvin_pct = 100 - kelvin_pct;
+      }
+
+      all_rooms_status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling_on);
+      all_rooms_status.set_ceiling_lights_color_temperature_value(kelvin_pct);
+    } else {
+      // SPDLOG_TRACE("No ceiling lights found, setting value to 0.");
+      all_rooms_status.set_ceiling_lights_dim_level(0);
+      all_rooms_status.set_ceiling_lights_color_temperature_value(0);
+    }
+
+    std::string all_rooms_status_string;
+    if (all_rooms_status.SerializeToString(&all_rooms_status_string)) {
+      SPDLOG_DEBUG("All rooms status updated. Waiting for next notify.");
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/all_rooms_status", MqttManagerConfig::get_settings().manager_address), all_rooms_status_string, true);
+    } else {
+      SPDLOG_ERROR("Failed to serialize 'All rooms' status. Will try again next time there is a room status change.");
+    }
+  }
+}
+
+void EntityManager::_room_updated_callback(Room *room) {
+  SPDLOG_DEBUG("Updating last room changed time.");
+  {
+    std::unique_lock<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+    EntityManager::_last_room_update_time = std::chrono::system_clock::now();
+    EntityManager::_all_rooms_status_updated = false;
+  }
+  SPDLOG_DEBUG("Last room changed time updated. Calling notify_all.");
+  EntityManager::_room_update_condition_variable.notify_all();
 }
 
 void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {

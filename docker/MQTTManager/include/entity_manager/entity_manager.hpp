@@ -5,6 +5,7 @@
 #include "protobuf_nspanel.pb.h"
 #include <algorithm>
 #include <boost/signals2.hpp>
+#include <condition_variable>
 #include <entity/entity.hpp>
 #include <list>
 #include <memory>
@@ -77,6 +78,11 @@ public:
    * Get all currently registered rooms
    */
   static std::vector<std::shared_ptr<Room>> get_all_rooms();
+
+  /*
+   * When a room is updated, update the "All rooms" status for when the panel is in the "All rooms" mode.
+   */
+  static void update_all_rooms_status();
 
   /*
    * Handle commands that are sent to the MQTTManager but are not
@@ -164,6 +170,12 @@ private:
 
   static inline std::vector<std::shared_ptr<NSPanel>> _nspanels;
   static inline std::mutex _nspanels_mutex;
+
+  static inline std::atomic<bool> _all_rooms_status_updated;
+  static inline void _room_updated_callback(Room *room);
+  static inline std::thread _update_all_rooms_status_thread;
+  static inline std::atomic<std::chrono::time_point<std::chrono::system_clock>> _last_room_update_time;
+  static inline std::condition_variable _room_update_condition_variable; // Notify thread that handles "All rooms" status updates
 
   static bool _process_message(const std::string &topic, const std::string &payload);
   static void _handle_register_request(const nlohmann::json &data);

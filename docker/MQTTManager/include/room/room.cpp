@@ -180,6 +180,7 @@ std::vector<std::shared_ptr<RoomEntitiesPage>> Room::get_all_scenes_pages() {
 }
 
 void Room::page_changed_callback(RoomEntitiesPage *page) {
+  this->_room_changed_callbacks(this);
   if (this->_send_status_updates) {
     this->_send_room_state_update();
   }

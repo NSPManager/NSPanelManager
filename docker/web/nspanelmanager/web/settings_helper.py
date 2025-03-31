@@ -33,6 +33,7 @@ default_settings = {
     "outside_temp_sensor_provider": "",
     "weather_precipitation_format": "mm",
     "raise_to_100_light_level": 95,
+    "all_rooms_status_backoff_time": 250,
     "reverse_color_temp": False,
     "screen_dim_level": 100,
     "screensaver_activation_timeout": 30000,
