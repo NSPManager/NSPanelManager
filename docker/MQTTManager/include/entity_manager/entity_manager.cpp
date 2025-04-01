@@ -397,7 +397,61 @@ void EntityManager::_room_updated_callback(Room *room) {
 }
 
 void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
-  if (command.has_toggle_entity_from_entities_page()) {
+  if (command.has_first_page_turn_on() && command.first_page_turn_on().global()) {
+    std::vector<std::shared_ptr<Room>> rooms;
+    {
+      std::lock_guard<std::mutex> lock_guard(EntityManager::_rooms_mutex);
+      rooms = EntityManager::_rooms;
+    }
+    NSPanelMQTTManagerCommand base_command;
+    base_command.CopyFrom(command);
+    auto *turn_on_command = base_command.mutable_first_page_turn_on();
+
+    // Check if ANY table or ceiling light is turned on.
+    bool any_ceiling_light_on = false;
+    bool any_table_light_on = false;
+    for (auto &room : rooms) {
+      for (auto &entity : room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT)) {
+        if (entity->get_controlled_from_main_page() && entity->get_state()) {
+          if (entity->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING) {
+            any_ceiling_light_on = true;
+          } else if (entity->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE) {
+            any_table_light_on = true;
+          }
+        }
+        if (any_ceiling_light_on && any_table_light_on) {
+          break;
+        }
+      }
+      if (any_ceiling_light_on && any_table_light_on) {
+        break;
+      }
+    }
+
+    if (!any_ceiling_light_on && !any_table_light_on) {
+      // Turn on all lights in all the room
+      SPDLOG_DEBUG("No lights are turned on, will send command to ALL rooms while processing 'All rooms' command");
+      for (auto &room : rooms) {
+        turn_on_command->set_global(false);
+        turn_on_command->set_selected_room(room->get_id());
+        room->command_callback(base_command);
+      }
+    } else {
+      // Lights are turned on in any/some rooms, send command to rooms where lights are turned on to change brightness of those lights
+      SPDLOG_DEBUG("Lights are turned on, will send command to all rooms with lights on while processing 'All rooms' command. Ceiling lights on: {}, table lights on: {}", any_ceiling_light_on ? "Yes" : "No", any_table_light_on ? "Yes" : "No");
+      for (auto &room : rooms) {
+        std::vector<std::shared_ptr<Light>> lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+        for (auto &light : lights) {
+          if (light->get_state() && light->get_controlled_from_main_page()) {
+            turn_on_command->set_global(false);
+            turn_on_command->set_selected_room(room->get_id());
+            room->command_callback(base_command);
+            break;
+          }
+        }
+      }
+    }
+  } else if (command.has_toggle_entity_from_entities_page()) {
     auto entity = EntityManager::get_entity_by_page_id_and_slot(command.toggle_entity_from_entities_page().entity_page_id(), command.toggle_entity_from_entities_page().entity_slot());
     if (entity && entity->can_toggle()) {
       SPDLOG_DEBUG("Will toggle entity in slot {} in page with ID {}.", command.toggle_entity_from_entities_page().entity_slot(), command.toggle_entity_from_entities_page().entity_page_id());

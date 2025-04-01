@@ -187,7 +187,8 @@ void Room::page_changed_callback(RoomEntitiesPage *page) {
 }
 
 void Room::command_callback(NSPanelMQTTManagerCommand &command) {
-  if (command.has_first_page_turn_on() && (command.first_page_turn_on().selected_room() == this->_id || command.first_page_turn_on().global())) {
+  if (command.has_first_page_turn_on() && command.first_page_turn_on().selected_room() == this->_id && !command.first_page_turn_on().global()) {
+    SPDLOG_DEBUG("Room {}:{} got command to turn lights on from first page.", this->_id, this->_name);
     if (MqttManagerConfig::get_settings().optimistic_mode) {
       SPDLOG_DEBUG("Optimistic mode enabled, will not send state updates via callbacks in room.");
       this->_send_status_updates = false;
@@ -200,7 +201,6 @@ void Room::command_callback(NSPanelMQTTManagerCommand &command) {
                           }),
                           all_room_lights.end());
 
-    SPDLOG_DEBUG("Room {}:{} got command to turn lights on from first page.", this->_id, this->_name);
     std::vector<std::shared_ptr<Light>> lights_list;
     // Get all lights that are on
     for (auto light : all_room_lights) {
