@@ -66,6 +66,11 @@ public:
    */
   uint16_t get_number_of_entity_pages();
 
+  /**
+   * Get the total number of entity pages used for scenes in this room.
+   */
+  uint16_t get_number_of_scene_pages();
+
   /*
    * Get all RoomEntitiesPages attached to this room.
    */

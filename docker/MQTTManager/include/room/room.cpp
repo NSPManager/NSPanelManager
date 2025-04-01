@@ -171,6 +171,10 @@ uint16_t Room::get_number_of_entity_pages() {
   return this->_entity_pages.size();
 }
 
+uint16_t Room::get_number_of_scene_pages() {
+  return this->_scene_pages.size();
+}
+
 std::vector<std::shared_ptr<RoomEntitiesPage>> Room::get_all_entities_pages() {
   return this->_entity_pages;
 }

@@ -119,7 +119,11 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
   NSPanelRoomEntitiesPage proto_state;
   proto_state.set_id(this->_id);
   proto_state.set_page_type(this->_page_settings.page_type);
-  proto_state.set_header_text(fmt::format("{} {}/{}", this->_room->get_name(), this->_page_settings.display_order + 1, this->_room->get_number_of_entity_pages()));
+  if (this->_page_settings.is_scenes_page) {
+    proto_state.set_header_text(fmt::format("{} {}/{}", this->_room->get_name(), this->_page_settings.display_order + 1, this->_room->get_number_of_scene_pages()));
+  } else {
+    proto_state.set_header_text(fmt::format("{} {}/{}", this->_room->get_name(), this->_page_settings.display_order + 1, this->_room->get_number_of_entity_pages()));
+  }
 
   std::lock_guard<std::mutex> lock_guard(this->_entities_mutex);
   for (int i = 0; i < this->_page_settings.page_type; i++) {
