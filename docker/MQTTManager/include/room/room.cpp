@@ -69,9 +69,9 @@ void Room::reload_config() {
 
           if (!found) {
             this->_entity_pages.push_back(std::shared_ptr<RoomEntitiesPage>(new RoomEntitiesPage(entity_page.id, this)));
-            SPDLOG_DEBUG("Created {} RoomEntitiesPages for room {}::{}.", this->_entity_pages.size(), this->_id, this->_name);
           }
         }
+        SPDLOG_DEBUG("Created {} RoomEntitiesPages for room {}::{}.", this->_entity_pages.size(), this->_id, this->_name);
 
         // Sort the room entities pages by display order and then resend config.
         std::sort(this->_entity_pages.begin(), this->_entity_pages.end(), [](const std::shared_ptr<RoomEntitiesPage> &a, const std::shared_ptr<RoomEntitiesPage> &b) {
@@ -85,8 +85,8 @@ void Room::reload_config() {
         auto scenes_pages = database_manager::database.get_all<database_manager::RoomEntitiesPage>(sqlite_orm::where(sqlite_orm::c(&database_manager::RoomEntitiesPage::room_id) == this->_id and sqlite_orm::c(&database_manager::RoomEntitiesPage::is_scenes_page) == true), sqlite_orm::order_by(&database_manager::RoomEntitiesPage::display_order).asc().collate_nocase());
         // Look for existing but removed RoomEntitiesPages that hold scenes and remove them from the list.
         this->_scene_pages.erase(std::remove_if(this->_scene_pages.begin(), this->_scene_pages.end(), [&scenes_pages](auto scene_page) {
-                                   return std::find_if(scenes_pages.begin(), scenes_pages.end(), [&scene_page](auto room_entity_page) {
-                                            return room_entity_page.id == scene_page->get_id();
+                                   return std::find_if(scenes_pages.begin(), scenes_pages.end(), [&scene_page](auto scene_entity_page) {
+                                            return scene_entity_page.id == scene_page->get_id();
                                           }) == scenes_pages.end();
                                  }),
                                  this->_scene_pages.end());
@@ -94,7 +94,7 @@ void Room::reload_config() {
         // Load new RoomEntitiesPages for scenes
         for (auto &scene_page : scenes_pages) {
           bool found = false;
-          for (auto &existing_scene_page : this->_entity_pages) {
+          for (auto &existing_scene_page : this->_scene_pages) {
             if (existing_scene_page->get_id() == scene_page.id) {
               found = true;
               break;
@@ -103,9 +103,9 @@ void Room::reload_config() {
 
           if (!found) {
             this->_scene_pages.push_back(std::shared_ptr<RoomEntitiesPage>(new RoomEntitiesPage(scene_page.id, this)));
-            SPDLOG_DEBUG("Created {} RoomEntitiesPages (for scenes) for room {}::{}.", this->_scene_pages.size(), this->_id, this->_name);
           }
         }
+        SPDLOG_DEBUG("Created {} RoomEntitiesPages (for scenes) for room {}::{}.", this->_scene_pages.size(), this->_id, this->_name);
 
         // Sort the room entities pages by display order and then resend config.
         std::sort(this->_scene_pages.begin(), this->_scene_pages.end(), [](const std::shared_ptr<RoomEntitiesPage> &a, const std::shared_ptr<RoomEntitiesPage> &b) {

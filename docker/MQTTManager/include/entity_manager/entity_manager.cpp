@@ -75,8 +75,8 @@ void EntityManager::load_entities() {
 
   EntityManager::load_scenes();
   EntityManager::load_lights();
-  EntityManager::load_rooms(); // Rooms are loaded last as to make all room components be able to find entities of other types.
-  EntityManager::load_nspanels();
+  EntityManager::load_rooms();    // Rooms are loaded last as to make all room components be able to find entities of other types.
+  EntityManager::load_nspanels(); // Loads panels after rooms are loaded so that they can find all availables entities and rooms for the panel config.
 
   SPDLOG_INFO("Total loaded NSPanels: {}", EntityManager::_nspanels.size());
   SPDLOG_INFO("Total loaded Rooms: {}", EntityManager::_rooms.size());
@@ -180,6 +180,7 @@ void EntityManager::load_lights() {
       }
     }
   }
+  SPDLOG_DEBUG("Loaded {} lights", light_ids.size());
 }
 
 void EntityManager::load_scenes() {
@@ -194,7 +195,7 @@ void EntityManager::load_scenes() {
 
   // Cause existing NSPanel to reload config or add a new NSPanel if it does not exist.
   for (auto &scene_id : scene_ids) {
-    auto existing_scene = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, scene_id);
+    auto existing_scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
     if (existing_scene != nullptr) [[likely]] {
       existing_scene->reload_config();
     } else {
@@ -223,6 +224,7 @@ void EntityManager::load_scenes() {
       }
     }
   }
+  SPDLOG_DEBUG("Loaded {} scenes", scene_ids.size());
 }
 
 std::shared_ptr<Room> EntityManager::get_room(uint32_t room_id) {
