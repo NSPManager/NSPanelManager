@@ -822,11 +822,11 @@ def create_entities_page_in_room(request, room_id, page_type, is_scenes_page, is
     entity_page.is_global_scenes_page = is_global_scenes_page == "True"
     if entity_page.is_global_scenes_page:
         entity_page.room = None
-        entity_page.display_order = RoomEntitiesPage.objects.filter(room=None).count()
+        entity_page.display_order = RoomEntitiesPage.objects.filter(room=None, is_scenes_page=is_scenes_page).count()
     else:
         room = Room.objects.get(id=room_id)
         entity_page.room = room
-        entity_page.display_order = RoomEntitiesPage.objects.filter(room=room).count()
+        entity_page.display_order = RoomEntitiesPage.objects.filter(room=room, is_scenes_page=is_scenes_page).count()
 
     if page_type == 4:
         entity_page.page_type = 4
