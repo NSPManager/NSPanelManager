@@ -810,6 +810,12 @@ def partial_delete_entities_page(request, page_id):
         is_global_scenes_page = False
         room_id = page.room.id
     page.delete()
+
+    # Recalculate entity page order
+    for index, entity_page in enumerate(RoomEntitiesPage.objects.filter(room=page.room, is_scenes_page=page.is_scenes_page).order_by('display_order'), start=0):
+        entity_page.display_order = index
+        entity_page.save()
+
     send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
