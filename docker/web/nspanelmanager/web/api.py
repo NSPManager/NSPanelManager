@@ -423,8 +423,6 @@ def get_nspanel_config(request):
             "special_mode_trigger_time")
         base["special_mode_release_time"] = get_setting_with_default(
             "special_mode_release_time")
-        base["mqtt_ignore_time"] = get_setting_with_default(
-            "mqtt_ignore_time")
         base["screen_dim_level"] = get_nspanel_setting_with_default(
             nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level"))
         base["screensaver_dim_level"] = get_nspanel_setting_with_default(

@@ -105,7 +105,6 @@ def mqttmanager_get_all_nspanels(request):
                 proto_panel.button_long_press_time = int(get_setting_with_default("button_long_press_time"))
                 proto_panel.special_mode_trigger_time = int(get_setting_with_default("special_mode_trigger_time"))
                 proto_panel.special_mode_release_time = int(get_setting_with_default("special_mode_release_time"))
-                proto_panel.mqtt_ignore_time = int(get_nspanel_setting_with_default(nspanel.id, "mqtt_ignore_time", 3000))
                 proto_panel.screen_dim_level = int(get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level")))
                 proto_panel.screensaver_dim_level = int(get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level")))
 

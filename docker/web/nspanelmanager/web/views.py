@@ -551,7 +551,6 @@ def settings_page(request):
     data["button_long_press_time"] = get_setting_with_default("button_long_press_time")
     data["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time")
     data["special_mode_release_time"] = get_setting_with_default("special_mode_release_time")
-    data["mqtt_ignore_time"] = get_setting_with_default("mqtt_ignore_time")
     data["screensaver_activation_timeout"] = get_setting_with_default("screensaver_activation_timeout")
     data["screen_dim_level"] = get_setting_with_default("screen_dim_level")
     data["screensaver_dim_level"] = get_setting_with_default("screensaver_dim_level")
@@ -608,8 +607,6 @@ def save_settings(request):
                       value=request.POST["special_mode_trigger_time"])
     set_setting_value(name="special_mode_release_time",
                       value=request.POST["special_mode_release_time"])
-    set_setting_value(name="mqtt_ignore_time",
-                      value=request.POST["mqtt_ignore_time"])
 
     set_setting_value(name="screensaver_activation_timeout", value=request.POST["screensaver_activation_timeout"])
     set_setting_value(name="screen_dim_level", value=request.POST["screen_dim_level"])

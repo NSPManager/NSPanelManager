@@ -429,7 +429,6 @@ class NSPanelSettings final : public ::google::protobuf::Message
     kButtonLongPressTimeFieldNumber = 11,
     kSpecialModeTriggerTimeFieldNumber = 12,
     kSpecialModeReleaseTimeFieldNumber = 13,
-    kMqttIgnoreTimeFieldNumber = 14,
     kScreenDimLevelFieldNumber = 15,
     kScreensaverDimLevelFieldNumber = 16,
     kScreensaverActivationTimeoutFieldNumber = 17,
@@ -685,16 +684,6 @@ class NSPanelSettings final : public ::google::protobuf::Message
   void _internal_set_special_mode_release_time(::int32_t value);
 
   public:
-  // int32 mqtt_ignore_time = 14;
-  void clear_mqtt_ignore_time() ;
-  ::int32_t mqtt_ignore_time() const;
-  void set_mqtt_ignore_time(::int32_t value);
-
-  private:
-  ::int32_t _internal_mqtt_ignore_time() const;
-  void _internal_set_mqtt_ignore_time(::int32_t value);
-
-  public:
   // int32 screen_dim_level = 15;
   void clear_screen_dim_level() ;
   ::int32_t screen_dim_level() const;
@@ -912,7 +901,7 @@ class NSPanelSettings final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 39, 0,
+      5, 38, 0,
       157, 9>
       _table_;
 
@@ -954,7 +943,6 @@ class NSPanelSettings final : public ::google::protobuf::Message
     ::int32_t button_long_press_time_;
     ::int32_t special_mode_trigger_time_;
     ::int32_t special_mode_release_time_;
-    ::int32_t mqtt_ignore_time_;
     ::int32_t screen_dim_level_;
     ::int32_t screensaver_dim_level_;
     ::int32_t screensaver_activation_timeout_;
@@ -1456,28 +1444,6 @@ inline ::int32_t NSPanelSettings::_internal_special_mode_release_time() const {
 inline void NSPanelSettings::_internal_set_special_mode_release_time(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.special_mode_release_time_ = value;
-}
-
-// int32 mqtt_ignore_time = 14;
-inline void NSPanelSettings::clear_mqtt_ignore_time() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.mqtt_ignore_time_ = 0;
-}
-inline ::int32_t NSPanelSettings::mqtt_ignore_time() const {
-  // @@protoc_insertion_point(field_get:NSPanelSettings.mqtt_ignore_time)
-  return _internal_mqtt_ignore_time();
-}
-inline void NSPanelSettings::set_mqtt_ignore_time(::int32_t value) {
-  _internal_set_mqtt_ignore_time(value);
-  // @@protoc_insertion_point(field_set:NSPanelSettings.mqtt_ignore_time)
-}
-inline ::int32_t NSPanelSettings::_internal_mqtt_ignore_time() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.mqtt_ignore_time_;
-}
-inline void NSPanelSettings::_internal_set_mqtt_ignore_time(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.mqtt_ignore_time_ = value;
 }
 
 // int32 screen_dim_level = 15;

@@ -21,7 +21,6 @@ message NSPanelSettings {
     int32 button_long_press_time = 11;
     int32 special_mode_trigger_time = 12;
     int32 special_mode_release_time = 13;
-    int32 mqtt_ignore_time = 14;
     int32 screen_dim_level = 15;
     int32 screensaver_dim_level = 16;
     int32 screensaver_activation_timeout = 17;

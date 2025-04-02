@@ -60,7 +60,6 @@ inline constexpr NSPanelSettings::Impl_::Impl_(
         button_long_press_time_{0},
         special_mode_trigger_time_{0},
         special_mode_release_time_{0},
-        mqtt_ignore_time_{0},
         screen_dim_level_{0},
         screensaver_dim_level_{0},
         screensaver_activation_timeout_{0},
@@ -139,7 +138,6 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button_long_press_time_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.special_mode_trigger_time_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.special_mode_release_time_),
-        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.mqtt_ignore_time_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.screen_dim_level_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.screensaver_dim_level_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.screensaver_activation_timeout_),
@@ -192,7 +190,6 @@ const ::uint32_t
         ~0u,
         ~0u,
         ~0u,
-        ~0u,
         0,
         1,
         2,
@@ -220,8 +217,8 @@ const ::uint32_t
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, 47, -1, sizeof(::NSPanelSettings)},
-        {86, -1, -1, sizeof(::MultipleNSPanelsSettings)},
+        {0, 46, -1, sizeof(::NSPanelSettings)},
+        {84, -1, -1, sizeof(::MultipleNSPanelsSettings)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelSettings_default_instance_._instance,
@@ -230,7 +227,7 @@ static const ::_pb::Message* const file_default_instances[] = {
 const char descriptor_table_protodef_protobuf_5fmqttmanager_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\032protobuf_mqttmanager.proto\032\026protobuf_f"
-    "ormats.proto\"\300\016\n\017NSPanelSettings\022\017\n\002id\030\001"
+    "ormats.proto\"\246\016\n\017NSPanelSettings\022\017\n\002id\030\001"
     " \001(\005H\000\210\001\001\022\023\n\013mac_address\030\002 \001(\t\022\014\n\004name\030\003"
     " \001(\t\022\014\n\004home\030\004 \001(\005\0229\n\014default_page\030\005 \001(\016"
     "2#.NSPanelSettings.NSPanelDefaultPage\022 \n"
@@ -238,47 +235,46 @@ const char descriptor_table_protodef_protobuf_5fmqttmanager_2eproto[] ABSL_ATTRI
     "utton_push_time\030\n \001(\005\022\036\n\026button_long_pre"
     "ss_time\030\013 \001(\005\022!\n\031special_mode_trigger_ti"
     "me\030\014 \001(\005\022!\n\031special_mode_release_time\030\r "
-    "\001(\005\022\030\n\020mqtt_ignore_time\030\016 \001(\005\022\030\n\020screen_"
-    "dim_level\030\017 \001(\005\022\035\n\025screensaver_dim_level"
-    "\030\020 \001(\005\022&\n\036screensaver_activation_timeout"
-    "\030\021 \001(\005\022A\n\020screensaver_mode\030\022 \001(\0162\'.NSPan"
-    "elSettings.NSPanelScreensaverMode\022\"\n\014clo"
-    "ck_format\030\023 \001(\0162\014.time_format\022-\n\020tempera"
-    "ture_unit\030\024 \001(\0162\023.temperature_format\022\023\n\013"
-    "is_us_panel\030\025 \001(\010\022\034\n\024lock_to_default_roo"
-    "m\030\026 \001(\010\022\026\n\016reverse_relays\030\027 \001(\010\022\033\n\023relay"
-    "1_default_mode\030\030 \001(\010\022\033\n\023relay2_default_m"
-    "ode\030\031 \001(\010\022\037\n\027temperature_calibration\030\032 \001"
-    "(\005\0228\n\014button1_mode\030\033 \001(\0162\".NSPanelSettin"
-    "gs.NSPanelButtonMode\0228\n\014button2_mode\030\034 \001"
-    "(\0162\".NSPanelSettings.NSPanelButtonMode\022\037"
-    "\n\022button1_mqtt_topic\030\035 \001(\tH\001\210\001\001\022\037\n\022butto"
-    "n2_mqtt_topic\030\036 \001(\tH\002\210\001\001\022!\n\024button1_mqtt"
-    "_payload\030\037 \001(\tH\003\210\001\001\022!\n\024button2_mqtt_payl"
-    "oad\030  \001(\tH\004\210\001\001\022&\n\031button1_detached_light"
-    "_id\030! \001(\005H\005\210\001\001\022&\n\031button2_detached_light"
-    "_id\030\" \001(\005H\006\210\001\001\022\016\n\006denied\030- \001(\010\022\020\n\010accept"
-    "ed\030. \001(\010\022\r\n\005rooms\030/ \003(\005\022\016\n\006scenes\0300 \003(\005\022"
-    "\022\n\nip_address\0301 \001(\t\022@\n\024relay1_register_t"
-    "ype\0302 \001(\0162\".NSPanelSettings.RelayRegiste"
-    "rType\022@\n\024relay2_register_type\0303 \001(\0162\".NS"
-    "PanelSettings.RelayRegisterType\022\024\n\014defau"
-    "lt_room\0304 \001(\005\"C\n\022NSPanelDefaultPage\022\r\n\tM"
-    "AIN_PAGE\020\000\022\017\n\013SCENES_PAGE\020\001\022\r\n\tROOM_PAGE"
-    "\020\002\"\250\001\n\026NSPanelScreensaverMode\022\033\n\027WEATHER"
-    "_WITH_BACKGROUND\020\000\022\036\n\032WEATHER_WITHOUT_BA"
-    "CKGROUND\020\001\022\034\n\030DATETIME_WITH_BACKGROUND\020\003"
-    "\022\037\n\033DATETIME_WITHOUT_BACKGROUND\020\004\022\022\n\016NO_"
-    "SCREENSAVER\020\005\"Y\n\021NSPanelButtonMode\022\017\n\013DI"
-    "RECT_MODE\020\000\022\021\n\rDETACHED_MODE\020\001\022\017\n\013CUSTOM"
-    "_MQTT\020\002\022\017\n\013FOLLOW_MODE\020\003\"*\n\021RelayRegiste"
-    "rType\022\n\n\006SWITCH\020\000\022\t\n\005LIGHT\020\001B\005\n\003_idB\025\n\023_"
-    "button1_mqtt_topicB\025\n\023_button2_mqtt_topi"
-    "cB\027\n\025_button1_mqtt_payloadB\027\n\025_button2_m"
-    "qtt_payloadB\034\n\032_button1_detached_light_i"
-    "dB\034\n\032_button2_detached_light_id\">\n\030Multi"
-    "pleNSPanelsSettings\022\"\n\010nspanels\030\001 \003(\0132\020."
-    "NSPanelSettingsb\006proto3"
+    "\001(\005\022\030\n\020screen_dim_level\030\017 \001(\005\022\035\n\025screens"
+    "aver_dim_level\030\020 \001(\005\022&\n\036screensaver_acti"
+    "vation_timeout\030\021 \001(\005\022A\n\020screensaver_mode"
+    "\030\022 \001(\0162\'.NSPanelSettings.NSPanelScreensa"
+    "verMode\022\"\n\014clock_format\030\023 \001(\0162\014.time_for"
+    "mat\022-\n\020temperature_unit\030\024 \001(\0162\023.temperat"
+    "ure_format\022\023\n\013is_us_panel\030\025 \001(\010\022\034\n\024lock_"
+    "to_default_room\030\026 \001(\010\022\026\n\016reverse_relays\030"
+    "\027 \001(\010\022\033\n\023relay1_default_mode\030\030 \001(\010\022\033\n\023re"
+    "lay2_default_mode\030\031 \001(\010\022\037\n\027temperature_c"
+    "alibration\030\032 \001(\005\0228\n\014button1_mode\030\033 \001(\0162\""
+    ".NSPanelSettings.NSPanelButtonMode\0228\n\014bu"
+    "tton2_mode\030\034 \001(\0162\".NSPanelSettings.NSPan"
+    "elButtonMode\022\037\n\022button1_mqtt_topic\030\035 \001(\t"
+    "H\001\210\001\001\022\037\n\022button2_mqtt_topic\030\036 \001(\tH\002\210\001\001\022!"
+    "\n\024button1_mqtt_payload\030\037 \001(\tH\003\210\001\001\022!\n\024but"
+    "ton2_mqtt_payload\030  \001(\tH\004\210\001\001\022&\n\031button1_"
+    "detached_light_id\030! \001(\005H\005\210\001\001\022&\n\031button2_"
+    "detached_light_id\030\" \001(\005H\006\210\001\001\022\016\n\006denied\030-"
+    " \001(\010\022\020\n\010accepted\030. \001(\010\022\r\n\005rooms\030/ \003(\005\022\016\n"
+    "\006scenes\0300 \003(\005\022\022\n\nip_address\0301 \001(\t\022@\n\024rel"
+    "ay1_register_type\0302 \001(\0162\".NSPanelSetting"
+    "s.RelayRegisterType\022@\n\024relay2_register_t"
+    "ype\0303 \001(\0162\".NSPanelSettings.RelayRegiste"
+    "rType\022\024\n\014default_room\0304 \001(\005\"C\n\022NSPanelDe"
+    "faultPage\022\r\n\tMAIN_PAGE\020\000\022\017\n\013SCENES_PAGE\020"
+    "\001\022\r\n\tROOM_PAGE\020\002\"\250\001\n\026NSPanelScreensaverM"
+    "ode\022\033\n\027WEATHER_WITH_BACKGROUND\020\000\022\036\n\032WEAT"
+    "HER_WITHOUT_BACKGROUND\020\001\022\034\n\030DATETIME_WIT"
+    "H_BACKGROUND\020\003\022\037\n\033DATETIME_WITHOUT_BACKG"
+    "ROUND\020\004\022\022\n\016NO_SCREENSAVER\020\005\"Y\n\021NSPanelBu"
+    "ttonMode\022\017\n\013DIRECT_MODE\020\000\022\021\n\rDETACHED_MO"
+    "DE\020\001\022\017\n\013CUSTOM_MQTT\020\002\022\017\n\013FOLLOW_MODE\020\003\"*"
+    "\n\021RelayRegisterType\022\n\n\006SWITCH\020\000\022\t\n\005LIGHT"
+    "\020\001B\005\n\003_idB\025\n\023_button1_mqtt_topicB\025\n\023_but"
+    "ton2_mqtt_topicB\027\n\025_button1_mqtt_payload"
+    "B\027\n\025_button2_mqtt_payloadB\034\n\032_button1_de"
+    "tached_light_idB\034\n\032_button2_detached_lig"
+    "ht_id\">\n\030MultipleNSPanelsSettings\022\"\n\010nsp"
+    "anels\030\001 \003(\0132\020.NSPanelSettingsb\006proto3"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_protobuf_5fmqttmanager_2eproto_deps[1] =
     {
@@ -288,7 +284,7 @@ static ::absl::once_flag descriptor_table_protobuf_5fmqttmanager_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fmqttmanager_2eproto = {
     false,
     false,
-    1983,
+    1957,
     descriptor_table_protodef_protobuf_5fmqttmanager_2eproto,
     "protobuf_mqttmanager.proto",
     &descriptor_table_protobuf_5fmqttmanager_2eproto_once,
@@ -501,15 +497,15 @@ NSPanelSettings::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<5, 39, 0, 157, 9> NSPanelSettings::_table_ = {
+const ::_pbi::TcParseTable<5, 38, 0, 157, 9> NSPanelSettings::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_._has_bits_),
     0, // no _extensions_
     52, 248,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    448,  // skipmap
+    8640,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    39,  // num_field_entries
+    38,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_NSPanelSettings_default_instance_._instance,
@@ -553,9 +549,7 @@ const ::_pbi::TcParseTable<5, 39, 0, 157, 9> NSPanelSettings::_table_ = {
     // int32 special_mode_release_time = 13;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelSettings, _impl_.special_mode_release_time_), 63>(),
      {104, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.special_mode_release_time_)}},
-    // int32 mqtt_ignore_time = 14;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelSettings, _impl_.mqtt_ignore_time_), 63>(),
-     {112, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.mqtt_ignore_time_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // int32 screen_dim_level = 15;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelSettings, _impl_.screen_dim_level_), 63>(),
      {120, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.screen_dim_level_)}},
@@ -609,7 +603,7 @@ const ::_pbi::TcParseTable<5, 39, 0, 157, 9> NSPanelSettings::_table_ = {
      {506, 2, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_mqtt_payload_)}},
   }}, {{
     33, 0, 2,
-    4092, 29, 65520, 35,
+    4092, 28, 65520, 34,
     65535, 65535
   }}, {{
     // optional int32 id = 1;
@@ -641,9 +635,6 @@ const ::_pbi::TcParseTable<5, 39, 0, 157, 9> NSPanelSettings::_table_ = {
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
     // int32 special_mode_release_time = 13;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.special_mode_release_time_), -1, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // int32 mqtt_ignore_time = 14;
-    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.mqtt_ignore_time_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
     // int32 screen_dim_level = 15;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.screen_dim_level_), -1, 0,
@@ -732,7 +723,7 @@ const ::_pbi::TcParseTable<5, 39, 0, 157, 9> NSPanelSettings::_table_ = {
   }},
   // no aux_entries
   {{
-    "\17\0\13\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\22\22\24\24\0\0\0\0\0\0\12\0\0\0"
+    "\17\0\13\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\22\22\24\24\0\0\0\0\0\0\12\0\0\0\0"
     "NSPanelSettings"
     "mac_address"
     "name"
@@ -865,13 +856,6 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
     target = ::google::protobuf::internal::WireFormatLite::
         WriteInt32ToArrayWithField<13>(
             stream, this->_internal_special_mode_release_time(), target);
-  }
-
-  // int32 mqtt_ignore_time = 14;
-  if (this->_internal_mqtt_ignore_time() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<14>(
-            stream, this->_internal_mqtt_ignore_time(), target);
   }
 
   // int32 screen_dim_level = 15;
@@ -1216,12 +1200,6 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
         this->_internal_special_mode_release_time());
   }
 
-  // int32 mqtt_ignore_time = 14;
-  if (this->_internal_mqtt_ignore_time() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_mqtt_ignore_time());
-  }
-
   // int32 screen_dim_level = 15;
   if (this->_internal_screen_dim_level() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
@@ -1404,9 +1382,6 @@ void NSPanelSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const :
   }
   if (from._internal_special_mode_release_time() != 0) {
     _this->_impl_.special_mode_release_time_ = from._impl_.special_mode_release_time_;
-  }
-  if (from._internal_mqtt_ignore_time() != 0) {
-    _this->_impl_.mqtt_ignore_time_ = from._impl_.mqtt_ignore_time_;
   }
   if (from._internal_screen_dim_level() != 0) {
     _this->_impl_.screen_dim_level_ = from._impl_.screen_dim_level_;

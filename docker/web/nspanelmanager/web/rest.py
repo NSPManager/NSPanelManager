@@ -169,7 +169,6 @@ def nspanels_get(request):
                 "button_long_press_time": get_setting_with_default("button_long_press_time"),
                 "special_mode_trigger_time": get_setting_with_default("special_mode_trigger_time"),
                 "special_mode_release_time": get_setting_with_default("special_mode_release_time"),
-                "mqtt_ignore_time": get_nspanel_setting_with_default(nspanel.id, "mqtt_ignore_time", 3000),
                 "screen_dim_level": get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level")),
                 "screensaver_dim_level": get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level")),
                 "screensaver_activation_timeout": get_nspanel_setting_with_default(nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout")),
