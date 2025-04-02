@@ -916,9 +916,9 @@ def create_or_update_light_entity(request):
 def create_or_update_switch_entity(request):
     action_args = json.loads(request.session["action_args"]) # Loads arguments set when first starting process of adding/updating entity
     entity_source = request.session["entity_source"]
-    is_global_scenes_page = "room_id" not in action_args
 
     print("Action args:", action_args)
+    print("Entity source:", entity_source)
 
     if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
         new_switch = Switch.objects.get(id=int(action_args["entity_id"]))
@@ -928,10 +928,10 @@ def create_or_update_switch_entity(request):
         new_switch.room = Room.objects.get(id=int(action_args["room_id"]))
         new_switch.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
         new_switch.room_view_position = int(action_args["page_slot"])
-        new_switch.scene_type = entity_source
-        if new_switch.scene_type == "home_assistant":
+        new_switch.type = entity_source
+        if new_switch.type == "home_assistant":
             new_switch.home_assistant_name = request.POST["backend_name"]
-        elif new_switch.scene_type == "openhab":
+        elif new_switch.type == "openhab":
             new_switch.openhab_item_switch = request.POST["backend_name"]
 
     new_switch.friendly_name = request.POST["light_name"]
