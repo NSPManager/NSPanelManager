@@ -96,12 +96,12 @@ void HomeAssistantLight::send_state_update_to_controller() {
   } else if (this->_home_assistant_light_type == MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TYPE::TYPE_SWITCH) {
     service_data["domain"] = "switch";
     if (this->_requested_state) {
-      service_data["service"] = "switch_on";
+      service_data["service"] = "turn_on";
       if (MqttManagerConfig::get_settings().optimistic_mode) {
         this->_current_state = true;
       }
     } else {
-      service_data["service"] = "switch_off";
+      service_data["service"] = "turn_off";
       if (MqttManagerConfig::get_settings().optimistic_mode) {
         this->_current_state = false;
       }
