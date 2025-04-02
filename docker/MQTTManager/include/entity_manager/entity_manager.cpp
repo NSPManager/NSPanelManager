@@ -12,6 +12,7 @@
 #include "scenes/nspm_scene.hpp"
 #include "scenes/openhab_scene.hpp"
 #include "scenes/scene.hpp"
+#include "switch/switch.hpp"
 #include "web_helper/WebHelper.hpp"
 #include "websocket_server/websocket_server.hpp"
 #include <algorithm>
@@ -38,6 +39,9 @@
 #include <spdlog/spdlog.h>
 #include <sqlite_orm/sqlite_orm.h>
 #include <string>
+#include <switch/home_assistant_switch.hpp>
+#include <switch/openhab_switch.hpp>
+#include <switch/switch.hpp>
 #include <sys/types.h>
 #include <thread>
 #include <vector>
@@ -73,8 +77,9 @@ void EntityManager::load_entities() {
   SPDLOG_INFO("Loading config...");
   EntityManager::_weather_manager.reload_config();
 
-  EntityManager::load_scenes();
   EntityManager::load_lights();
+  EntityManager::load_switches();
+  EntityManager::load_scenes();
   EntityManager::load_rooms();    // Rooms are loaded last as to make all room components be able to find entities of other types.
   EntityManager::load_nspanels(); // Loads panels after rooms are loaded so that they can find all availables entities and rooms for the panel config.
 
@@ -181,6 +186,46 @@ void EntityManager::load_lights() {
     }
   }
   SPDLOG_DEBUG("Loaded {} lights", light_ids.size());
+}
+
+void EntityManager::load_switches() {
+  auto switch_ids = database_manager::database.select(&database_manager::Switch::id, sqlite_orm::from<database_manager::Switch>());
+  SPDLOG_INFO("Loading {} switches.", switch_ids.size());
+
+  // Check if any existing switch has been removed.
+  EntityManager::_entities.erase(std::remove_if(EntityManager::_entities.begin(), EntityManager::_entities.end(), [&switch_ids](auto entity) {
+                                   return entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::SWITCH_ENTITY && std::find_if(switch_ids.begin(), switch_ids.end(), [&entity](auto id) { return id == entity->get_id(); }) == switch_ids.end();
+                                 }),
+                                 EntityManager::_entities.end());
+
+  // Cause existing switches to reload config or add a new switch if it does not exist.
+  for (auto &switch_id : switch_ids) {
+    auto existing_switch = EntityManager::get_entity_by_id<SwitchEntity>(MQTT_MANAGER_ENTITY_TYPE::SWITCH_ENTITY, switch_id);
+    if (existing_switch != nullptr) [[likely]] {
+      existing_switch->reload_config();
+    } else {
+      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+
+      try {
+        auto switch_settings = database_manager::database.get<database_manager::Switch>(switch_id);
+        if (switch_settings.type.compare("home_assistant") == 0) {
+          std::shared_ptr<HomeAssistantSwitch> switch_entity = std::shared_ptr<HomeAssistantSwitch>(new HomeAssistantSwitch(switch_settings.id));
+          SPDLOG_INFO("Switch {}::{} was found in database but not in config. Creating switch.", switch_entity->get_id(), switch_entity->get_name());
+          EntityManager::_entities.push_back(switch_entity);
+        } else if (switch_settings.type.compare("openhab") == 0) {
+          std::shared_ptr<OpenhabSwitch> switch_entity = std::shared_ptr<OpenhabSwitch>(new OpenhabSwitch(switch_settings.id));
+          SPDLOG_INFO("Switch {}::{} was found in database but not in config. Creating switch.", switch_entity->get_id(), switch_entity->get_name());
+          EntityManager::_entities.push_back(switch_entity);
+        } else {
+          SPDLOG_ERROR("Unknown switch type '{}'. Will ignore entity.", switch_settings.type);
+        }
+      } catch (std::exception &e) {
+        SPDLOG_ERROR("Caught exception: {}", e.what());
+        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+      }
+    }
+  }
+  SPDLOG_DEBUG("Loaded {} lights", switch_ids.size());
 }
 
 void EntityManager::load_scenes() {

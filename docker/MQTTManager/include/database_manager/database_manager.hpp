@@ -109,6 +109,18 @@ struct Light {
   bool controlled_by_nspanel_main_page;
 };
 
+struct Switch {
+  int id = 0;
+  std::string friendly_name;
+  std::string type;
+  std::string home_assistant_name;
+  std::string openhab_name;
+  std::string openhab_item_switch;
+  int entities_page_id;
+  int room_view_position;
+  int room_id;
+};
+
 static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.sqlite3",
                                                        sqlite_orm::make_table("web_roomentitiespage",
                                                                               sqlite_orm::make_column("id", &RoomEntitiesPage::id, sqlite_orm::primary_key().autoincrement()),
@@ -187,7 +199,16 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("room_view_position", &Light::room_view_position),
                                                                               sqlite_orm::make_column("entities_page_id", &Light::entities_page_id),
                                                                               sqlite_orm::foreign_key(&Light::entities_page_id).references(&RoomEntitiesPage::id),
-                                                                              sqlite_orm::make_column("controlled_by_nspanel_main_page", &Light::controlled_by_nspanel_main_page)));
+                                                                              sqlite_orm::make_column("controlled_by_nspanel_main_page", &Light::controlled_by_nspanel_main_page)),
+                                                       sqlite_orm::make_table("web_switch",
+                                                                              sqlite_orm::make_column("id", &Switch::id, sqlite_orm::primary_key().autoincrement()),
+                                                                              sqlite_orm::make_column("room_view_position", &Switch::room_view_position),
+                                                                              sqlite_orm::make_column("friendly_name", &Switch::friendly_name),
+                                                                              sqlite_orm::make_column("type", &Switch::type),
+                                                                              sqlite_orm::make_column("home_assistant_name", &Switch::home_assistant_name),
+                                                                              sqlite_orm::make_column("openhab_item_switch", &Switch::openhab_item_switch),
+                                                                              sqlite_orm::make_column("entities_page_id", &Switch::entities_page_id),
+                                                                              sqlite_orm::make_column("room_id", &Switch::room_id)));
 
 static void init() {
   database_manager::database.open_forever();

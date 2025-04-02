@@ -7,6 +7,7 @@
 #include <string_view>
 enum MQTT_MANAGER_ENTITY_TYPE {
   LIGHT,
+  SWITCH_ENTITY,
   SCENE,
 };
 

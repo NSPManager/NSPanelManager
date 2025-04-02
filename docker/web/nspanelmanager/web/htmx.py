@@ -917,9 +917,6 @@ def create_or_update_switch_entity(request):
     action_args = json.loads(request.session["action_args"]) # Loads arguments set when first starting process of adding/updating entity
     entity_source = request.session["entity_source"]
 
-    print("Action args:", action_args)
-    print("Entity source:", entity_source)
-
     if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
         new_switch = Switch.objects.get(id=int(action_args["entity_id"]))
     else:

@@ -100,6 +100,7 @@ void OpenhabLight::send_state_update_to_controller() {
     service_data["payload"] = payload_data.dump();
     if (MqttManagerConfig::get_settings().optimistic_mode) {
       this->_current_state = this->_requested_state;
+      this->_entity_changed_callbacks(this);
     }
     OpenhabManager::send_json(service_data);
     return; // The light is a switch, it can't do anything more than ON/OFF. Exit function early.

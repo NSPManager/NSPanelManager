@@ -5,6 +5,7 @@
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_nspanel.pb.h"
 #include "scenes/scene.hpp"
+#include "switch/switch.hpp"
 #include <algorithm>
 #include <boost/bind.hpp>
 #include <boost/stacktrace/stacktrace.hpp>
@@ -142,6 +143,15 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_pco(light->get_icon_color());
       entity_slot->set_pco2(light->get_icon_active_color());
       entity_slot->set_can_save_scene(false); // Entity is not a scene.
+    } else if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::SWITCH_ENTITY) {
+      std::shared_ptr<SwitchEntity> switch_entity = std::static_pointer_cast<SwitchEntity>(entity);
+      NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();
+      entity_slot->set_name(switch_entity->get_name());
+      entity_slot->set_room_view_position(i);
+      // TODO: Move state icons for panel from GUI_DATA to manager and convert this!
+      entity_slot->set_icon(switch_entity->get_icon());
+      entity_slot->set_pco(switch_entity->get_icon_color());
+      entity_slot->set_pco2(switch_entity->get_icon_active_color());
     } else if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::SCENE) {
       std::shared_ptr<Scene> scene = std::static_pointer_cast<Scene>(entity);
       NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();

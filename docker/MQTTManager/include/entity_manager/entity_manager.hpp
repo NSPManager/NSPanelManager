@@ -65,6 +65,11 @@ public:
   static void load_lights();
 
   /*
+   * Load all switches from the DB and remove any existing switch that no longer exist.
+   */
+  static void load_switches();
+
+  /*
    * Load all scenes from the DB and remove any existing scene that no longer exist.
    */
   static void load_scenes();
