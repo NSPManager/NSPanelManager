@@ -4,7 +4,6 @@
   document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
     // Update relevant values for the status header from the bundled data in the status update event
     var element = document.getElementById(`nspanel-status-header-${event.detail.event_data.id}`);
-    console.log("Got state update", event.detail.event_data);
     element.state = event.detail.event_data.state;
     element.update_progress = event.detail.event_data.update_progress;
   });
