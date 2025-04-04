@@ -316,6 +316,10 @@ void Light::toggle() {
   if (this->_current_state) {
     this->turn_off(true);
   } else {
+    // Apply default "turn on brightness" if it is requested to become 0 as that won't work.
+    if (this->_requested_brightness == 0) {
+      this->_requested_brightness = std::stoi(MqttManagerConfig::get_setting_with_default("light_turn_on_brightness", "50"));
+    }
     this->turn_on(true);
   }
 }

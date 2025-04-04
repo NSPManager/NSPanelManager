@@ -51,14 +51,17 @@ message NSPanelConfig {
     bool relay1_default_mode = 19;
     bool relay2_default_mode = 20;
     float temperature_calibration = 21;
-    int32 button1_mode = 22;
-    string button1_mqtt_topic = 23;
-    string button1_mqtt_payload = 24;
-    int32 button2_mode = 25;
-    string button2_mqtt_topic = 26;
-    string button2_mqtt_payload = 27;
-    int32 button1_detached_light_id = 28;
-    int32 button2_detached_light_id = 29;
+
+    // There are more button modes avaiable but those are handled by the manager and no the panel itself.
+    // Only send modes that the panel itself can handle or simply tell the panel to tell the manager.
+    enum NSPanelButtonMode {
+        DIRECT = 0;
+        FOLLOW = 1;
+        NOTIFY_MANAGER = 2;
+    };
+    NSPanelButtonMode button1_mode = 22;
+    NSPanelButtonMode button2_mode = 25;
+
     repeated NSPanelScene global_scenes = 30;
     bool optimistic_mode = 31;
     int32 raise_light_level_to_100_above = 32;
@@ -219,11 +222,17 @@ message NSPanelMQTTManagerCommand {
         int32 entity_slot = 2;
     }
 
+    message ButtonPressed {
+        int32 nspanel_id = 1;
+        int32 button_id = 2;
+    }
+
     oneof CommandData {
         FirstPageTurnLightOn first_page_turn_on = 1;
         FirstPageTurnLightOff first_page_turn_off = 2;
         LightCommand light_command = 3;
         ToggleEntityFromEntitiesPage toggle_entity_from_entities_page = 4;
         SaveSceneCommand save_scene_command = 5;
+        ButtonPressed button_pressed = 6;
     }
 }

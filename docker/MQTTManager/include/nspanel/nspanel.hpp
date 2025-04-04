@@ -197,6 +197,13 @@ private:
   std::string _nspanel_warnings_from_manager;
   std::string _mqtt_register_mac;
 
+  enum ButtonMode {
+    DIRECT,
+    DETACHED,
+    MQTT_PAYLOAD,
+    FOLLOW
+  };
+
   // MQTT Stuff:
   // Wether or not relay1 should be registered to Home Assistant as a switch or light.
   bool _register_relay1_as_light;

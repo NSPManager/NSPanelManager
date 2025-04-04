@@ -32,6 +32,7 @@ typedef struct NSPanelMQTTManagerCommand__FirstPageTurnLightOff NSPanelMQTTManag
 typedef struct NSPanelMQTTManagerCommand__LightCommand NSPanelMQTTManagerCommand__LightCommand;
 typedef struct NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage;
 typedef struct NSPanelMQTTManagerCommand__SaveSceneCommand NSPanelMQTTManagerCommand__SaveSceneCommand;
+typedef struct NSPanelMQTTManagerCommand__ButtonPressed NSPanelMQTTManagerCommand__ButtonPressed;
 
 
 /* --- enums --- */
@@ -53,6 +54,16 @@ typedef enum _NSPanelConfig__NSPanelScreensaverMode {
   NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__NO_SCREENSAVER = 5
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE)
 } NSPanelConfig__NSPanelScreensaverMode;
+/*
+ * There are more button modes avaiable but those are handled by the manager and no the panel itself.
+ * Only send modes that the panel itself can handle or simply tell the panel to tell the manager.
+ */
+typedef enum _NSPanelConfig__NSPanelButtonMode {
+  NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT = 0,
+  NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__FOLLOW = 1,
+  NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__NOTIFY_MANAGER = 2
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_CONFIG__NSPANEL_BUTTON_MODE)
+} NSPanelConfig__NSPanelButtonMode;
 typedef enum _NSPanelStatusReport__State {
   NSPANEL_STATUS_REPORT__STATE__ONLINE = 0,
   NSPANEL_STATUS_REPORT__STATE__OFFLINE = 1,
@@ -133,14 +144,8 @@ struct  NSPanelConfig
   protobuf_c_boolean relay1_default_mode;
   protobuf_c_boolean relay2_default_mode;
   float temperature_calibration;
-  int32_t button1_mode;
-  char *button1_mqtt_topic;
-  char *button1_mqtt_payload;
-  int32_t button2_mode;
-  char *button2_mqtt_topic;
-  char *button2_mqtt_payload;
-  int32_t button1_detached_light_id;
-  int32_t button2_detached_light_id;
+  NSPanelConfig__NSPanelButtonMode button1_mode;
+  NSPanelConfig__NSPanelButtonMode button2_mode;
   size_t n_global_scenes;
   NSPanelScene **global_scenes;
   protobuf_c_boolean optimistic_mode;
@@ -157,7 +162,7 @@ struct  NSPanelConfig
 };
 #define NSPANEL_CONFIG__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
-    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0,NULL, 0, 0, 0, 0, 0, 0, 0, 0 }
+    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0, 0, 0, 0, 0 }
 
 
 struct  NSPanelWarning
@@ -375,13 +380,25 @@ struct  NSPanelMQTTManagerCommand__SaveSceneCommand
     , 0, 0 }
 
 
+struct  NSPanelMQTTManagerCommand__ButtonPressed
+{
+  ProtobufCMessage base;
+  int32_t nspanel_id;
+  int32_t button_id;
+};
+#define NSPANEL_MQTTMANAGER_COMMAND__BUTTON_PRESSED__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__button_pressed__descriptor) \
+    , 0, 0 }
+
+
 typedef enum {
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__NOT_SET = 0,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON = 1,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_OFF = 2,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_LIGHT_COMMAND = 3,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_TOGGLE_ENTITY_FROM_ENTITIES_PAGE = 4,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_SAVE_SCENE_COMMAND = 5
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_SAVE_SCENE_COMMAND = 5,
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_BUTTON_PRESSED = 6
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__CASE)
 } NSPanelMQTTManagerCommand__CommandDataCase;
 
@@ -398,6 +415,7 @@ struct  NSPanelMQTTManagerCommand
     NSPanelMQTTManagerCommand__LightCommand *light_command;
     NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage *toggle_entity_from_entities_page;
     NSPanelMQTTManagerCommand__SaveSceneCommand *save_scene_command;
+    NSPanelMQTTManagerCommand__ButtonPressed *button_pressed;
   };
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__INIT \
@@ -581,6 +599,9 @@ void   nspanel_mqttmanager_command__toggle_entity_from_entities_page__init
 /* NSPanelMQTTManagerCommand__SaveSceneCommand methods */
 void   nspanel_mqttmanager_command__save_scene_command__init
                      (NSPanelMQTTManagerCommand__SaveSceneCommand         *message);
+/* NSPanelMQTTManagerCommand__ButtonPressed methods */
+void   nspanel_mqttmanager_command__button_pressed__init
+                     (NSPanelMQTTManagerCommand__ButtonPressed         *message);
 /* NSPanelMQTTManagerCommand methods */
 void   nspanel_mqttmanager_command__init
                      (NSPanelMQTTManagerCommand         *message);
@@ -650,6 +671,9 @@ typedef void (*NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage_Closure)
 typedef void (*NSPanelMQTTManagerCommand__SaveSceneCommand_Closure)
                  (const NSPanelMQTTManagerCommand__SaveSceneCommand *message,
                   void *closure_data);
+typedef void (*NSPanelMQTTManagerCommand__ButtonPressed_Closure)
+                 (const NSPanelMQTTManagerCommand__ButtonPressed *message,
+                  void *closure_data);
 typedef void (*NSPanelMQTTManagerCommand_Closure)
                  (const NSPanelMQTTManagerCommand *message,
                   void *closure_data);
@@ -665,6 +689,7 @@ extern const ProtobufCMessageDescriptor nspanel_config__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_config__room_info__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_default_page__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_screensaver_mode__descriptor;
+extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_button_mode__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_warning__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_status_report__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_status_report__state__descriptor;
@@ -680,6 +705,7 @@ extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__first_page_
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__light_command__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__toggle_entity_from_entities_page__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__save_scene_command__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__button_pressed__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_mqttmanager_command__affect_lights_options__descriptor;
 
 PROTOBUF_C__END_DECLS

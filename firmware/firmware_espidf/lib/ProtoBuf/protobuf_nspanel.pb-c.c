@@ -415,6 +415,12 @@ void   nspanel_mqttmanager_command__save_scene_command__init
   static const NSPanelMQTTManagerCommand__SaveSceneCommand init_value = NSPANEL_MQTTMANAGER_COMMAND__SAVE_SCENE_COMMAND__INIT;
   *message = init_value;
 }
+void   nspanel_mqttmanager_command__button_pressed__init
+                     (NSPanelMQTTManagerCommand__ButtonPressed         *message)
+{
+  static const NSPanelMQTTManagerCommand__ButtonPressed init_value = NSPANEL_MQTTMANAGER_COMMAND__BUTTON_PRESSED__INIT;
+  *message = init_value;
+}
 void   nspanel_mqttmanager_command__init
                      (NSPanelMQTTManagerCommand         *message)
 {
@@ -652,7 +658,37 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_screensaver_mode__descript
   nspanel_config__nspanel_screensaver_mode__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
+static const ProtobufCEnumValue nspanel_config__nspanel_button_mode__enum_values_by_number[3] =
+{
+  { "DIRECT", "NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT", 0 },
+  { "FOLLOW", "NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__FOLLOW", 1 },
+  { "NOTIFY_MANAGER", "NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__NOTIFY_MANAGER", 2 },
+};
+static const ProtobufCIntRange nspanel_config__nspanel_button_mode__value_ranges[] = {
+{0, 0},{0, 3}
+};
+static const ProtobufCEnumValueIndex nspanel_config__nspanel_button_mode__enum_values_by_name[3] =
+{
+  { "DIRECT", 0 },
+  { "FOLLOW", 1 },
+  { "NOTIFY_MANAGER", 2 },
+};
+const ProtobufCEnumDescriptor nspanel_config__nspanel_button_mode__descriptor =
+{
+  PROTOBUF_C__ENUM_DESCRIPTOR_MAGIC,
+  "NSPanelConfig.NSPanelButtonMode",
+  "NSPanelButtonMode",
+  "NSPanelConfig__NSPanelButtonMode",
+  "",
+  3,
+  nspanel_config__nspanel_button_mode__enum_values_by_number,
+  3,
+  nspanel_config__nspanel_button_mode__enum_values_by_name,
+  1,
+  nspanel_config__nspanel_button_mode__value_ranges,
+  NULL,NULL,NULL,NULL   /* reserved[1234] */
+};
+static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[32] =
 {
   {
     "name",
@@ -910,35 +946,11 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
     "button1_mode",
     22,
     PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_INT32,
+    PROTOBUF_C_TYPE_ENUM,
     0,   /* quantifier_offset */
     offsetof(NSPanelConfig, button1_mode),
+    &nspanel_config__nspanel_button_mode__descriptor,
     NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "button1_mqtt_topic",
-    23,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_STRING,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelConfig, button1_mqtt_topic),
-    NULL,
-    &protobuf_c_empty_string,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "button1_mqtt_payload",
-    24,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_STRING,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelConfig, button1_mqtt_payload),
-    NULL,
-    &protobuf_c_empty_string,
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
@@ -946,58 +958,10 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
     "button2_mode",
     25,
     PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_INT32,
+    PROTOBUF_C_TYPE_ENUM,
     0,   /* quantifier_offset */
     offsetof(NSPanelConfig, button2_mode),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "button2_mqtt_topic",
-    26,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_STRING,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelConfig, button2_mqtt_topic),
-    NULL,
-    &protobuf_c_empty_string,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "button2_mqtt_payload",
-    27,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_STRING,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelConfig, button2_mqtt_payload),
-    NULL,
-    &protobuf_c_empty_string,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "button1_detached_light_id",
-    28,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_INT32,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelConfig, button1_detached_light_id),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "button2_detached_light_id",
-    29,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_INT32,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelConfig, button2_detached_light_id),
-    NULL,
+    &nspanel_config__nspanel_button_mode__descriptor,
     NULL,
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
@@ -1112,32 +1076,26 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
   },
 };
 static const unsigned nspanel_config__field_indices_by_name[] = {
-  27,   /* field[27] = button1_detached_light_id */
   21,   /* field[21] = button1_mode */
-  23,   /* field[23] = button1_mqtt_payload */
-  22,   /* field[22] = button1_mqtt_topic */
-  28,   /* field[28] = button2_detached_light_id */
-  24,   /* field[24] = button2_mode */
-  26,   /* field[26] = button2_mqtt_payload */
-  25,   /* field[25] = button2_mqtt_topic */
+  22,   /* field[22] = button2_mode */
   5,   /* field[5] = button_long_press_time */
   13,   /* field[13] = clock_us_style */
-  37,   /* field[37] = default_light_brightess */
+  31,   /* field[31] = default_light_brightess */
   2,   /* field[2] = default_page */
   1,   /* field[1] = default_room */
-  29,   /* field[29] = global_scenes */
+  23,   /* field[23] = global_scenes */
   15,   /* field[15] = is_us_panel */
   4,   /* field[4] = min_button_push_time */
   0,   /* field[0] = name */
-  32,   /* field[32] = nspanel_id */
-  30,   /* field[30] = optimistic_mode */
-  31,   /* field[31] = raise_light_level_to_100_above */
+  26,   /* field[26] = nspanel_id */
+  24,   /* field[24] = optimistic_mode */
+  25,   /* field[25] = raise_light_level_to_100_above */
   18,   /* field[18] = relay1_default_mode */
-  33,   /* field[33] = relay1_is_in_relay_group */
-  34,   /* field[34] = relay1_relay_group */
+  27,   /* field[27] = relay1_is_in_relay_group */
+  28,   /* field[28] = relay1_relay_group */
   19,   /* field[19] = relay2_default_mode */
-  35,   /* field[35] = relay2_is_in_relay_group */
-  36,   /* field[36] = relay2_relay_group */
+  29,   /* field[29] = relay2_is_in_relay_group */
+  30,   /* field[30] = relay2_relay_group */
   17,   /* field[17] = reverse_relays */
   16,   /* field[16] = room_infos */
   8,   /* field[8] = screen_dim_level */
@@ -1151,10 +1109,12 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
   20,   /* field[20] = temperature_calibration */
   14,   /* field[14] = use_fahrenheit */
 };
-static const ProtobufCIntRange nspanel_config__number_ranges[1 + 1] =
+static const ProtobufCIntRange nspanel_config__number_ranges[3 + 1] =
 {
   { 1, 0 },
-  { 0, 38 }
+  { 25, 22 },
+  { 30, 23 },
+  { 0, 32 }
 };
 const ProtobufCMessageDescriptor nspanel_config__descriptor =
 {
@@ -1164,10 +1124,10 @@ const ProtobufCMessageDescriptor nspanel_config__descriptor =
   "NSPanelConfig",
   "",
   sizeof(NSPanelConfig),
-  38,
+  32,
   nspanel_config__field_descriptors,
   nspanel_config__field_indices_by_name,
-  1,  nspanel_config__number_ranges,
+  3,  nspanel_config__number_ranges,
   (ProtobufCMessageInit) nspanel_config__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
@@ -2544,6 +2504,57 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__save_scene_command
   (ProtobufCMessageInit) nspanel_mqttmanager_command__save_scene_command__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__button_pressed__field_descriptors[2] =
+{
+  {
+    "nspanel_id",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__ButtonPressed, nspanel_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "button_id",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__ButtonPressed, button_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_mqttmanager_command__button_pressed__field_indices_by_name[] = {
+  1,   /* field[1] = button_id */
+  0,   /* field[0] = nspanel_id */
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__button_pressed__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 2 }
+};
+const ProtobufCMessageDescriptor nspanel_mqttmanager_command__button_pressed__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand.ButtonPressed",
+  "ButtonPressed",
+  "NSPanelMQTTManagerCommand__ButtonPressed",
+  "",
+  sizeof(NSPanelMQTTManagerCommand__ButtonPressed),
+  2,
+  nspanel_mqttmanager_command__button_pressed__field_descriptors,
+  nspanel_mqttmanager_command__button_pressed__field_indices_by_name,
+  1,  nspanel_mqttmanager_command__button_pressed__number_ranges,
+  (ProtobufCMessageInit) nspanel_mqttmanager_command__button_pressed__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
 static const ProtobufCEnumValue nspanel_mqttmanager_command__affect_lights_options__enum_values_by_number[3] =
 {
   { "ALL", "NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL", 0 },
@@ -2574,7 +2585,7 @@ const ProtobufCEnumDescriptor nspanel_mqttmanager_command__affect_lights_options
   nspanel_mqttmanager_command__affect_lights_options__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[5] =
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[6] =
 {
   {
     "first_page_turn_on",
@@ -2636,8 +2647,21 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descrip
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "button_pressed",
+    6,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(NSPanelMQTTManagerCommand, command_data_case),
+    offsetof(NSPanelMQTTManagerCommand, button_pressed),
+    &nspanel_mqttmanager_command__button_pressed__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_mqttmanager_command__field_indices_by_name[] = {
+  5,   /* field[5] = button_pressed */
   1,   /* field[1] = first_page_turn_off */
   0,   /* field[0] = first_page_turn_on */
   2,   /* field[2] = light_command */
@@ -2647,7 +2671,7 @@ static const unsigned nspanel_mqttmanager_command__field_indices_by_name[] = {
 static const ProtobufCIntRange nspanel_mqttmanager_command__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 5 }
+  { 0, 6 }
 };
 const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
 {
@@ -2657,7 +2681,7 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
   "NSPanelMQTTManagerCommand",
   "",
   sizeof(NSPanelMQTTManagerCommand),
-  5,
+  6,
   nspanel_mqttmanager_command__field_descriptors,
   nspanel_mqttmanager_command__field_indices_by_name,
   1,  nspanel_mqttmanager_command__number_ranges,

@@ -1,7 +1,9 @@
 #include "nspanel.hpp"
 #include "database_manager/database_manager.hpp"
+#include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "ipc_handler/ipc_handler.hpp"
+#include "light/light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_nspanel.pb.h"
@@ -245,24 +247,25 @@ void NSPanel::send_config() {
   config.set_relay2_default_mode(this->_get_nspanel_setting_with_default("relay2_default_mode", "False").compare("True") == 0);
   config.set_temperature_calibration(std::stof(this->_get_nspanel_setting_with_default("temperature_calibration", "0")));
   config.set_default_light_brightess(std::stoi(MqttManagerConfig::get_setting_with_default("light_turn_on_brightness", "50")));
-  config.set_button1_mode(this->_settings.button1_mode);
-  config.set_button2_mode(this->_settings.button2_mode);
-  config.set_button1_mqtt_topic(this->_get_nspanel_setting_with_default("button1_mqtt_topic", ""));
-  config.set_button2_mqtt_topic(this->_get_nspanel_setting_with_default("button2_mqtt_topic", ""));
-  config.set_button1_mqtt_payload(this->_get_nspanel_setting_with_default("button1_mqtt_payload", ""));
-  config.set_button2_mqtt_payload(this->_get_nspanel_setting_with_default("button2_mqtt_payload", ""));
 
-  // TODO: Move detached mode light to manager so that panel only sends a "Hey, trigger detached light on button 1" command
-  if (this->_settings.button1_detached_mode_light_id.has_value()) {
-    config.set_button1_detached_light_id(this->_settings.button1_detached_mode_light_id.value());
+  ButtonMode b1_mode = static_cast<ButtonMode>(this->_settings.button1_mode);
+  if (b1_mode == ButtonMode::DIRECT) {
+    config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_DIRECT);
+  } else if (b1_mode == ButtonMode::FOLLOW) {
+    config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
   } else {
-    config.set_button1_detached_light_id(0);
+    config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
-  if (this->_settings.button2_detached_mode_light_id.has_value()) {
-    config.set_button2_detached_light_id(this->_settings.button2_detached_mode_light_id.value());
+
+  ButtonMode b2_mode = static_cast<ButtonMode>(this->_settings.button2_mode);
+  if (b2_mode == ButtonMode::DIRECT) {
+    config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_DIRECT);
+  } else if (b2_mode == ButtonMode::FOLLOW) {
+    config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
   } else {
-    config.set_button2_detached_light_id(0);
+    config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
+
   config.set_optimistic_mode(global_setting.optimistic_mode);
   config.set_raise_light_level_to_100_above(std::stoi(MqttManagerConfig::get_setting_with_default("raise_to_100_light_level", "96")));
 
@@ -1049,6 +1052,68 @@ void NSPanel::set_relay_state(uint8_t relay, bool state) {
 }
 
 void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
+  if (command.has_button_pressed()) {
+    if (command.button_pressed().nspanel_id() == this->_id) {
+      // TODO: Handle button press
+      SPDLOG_DEBUG("NSPanel {}::{} got button {} press,", this->_id, this->_name, command.button_pressed().button_id());
+
+      if (command.button_pressed().button_id() == 1) {
+        ButtonMode button_mode = static_cast<ButtonMode>(this->_settings.button1_mode);
+        switch (button_mode) {
+        case ButtonMode::DETACHED: {
+          if (this->_settings.button1_detached_mode_light_id.has_value()) {
+            std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, this->_settings.button1_detached_mode_light_id.value());
+            if (light != nullptr)
+              light->toggle();
+            else
+              SPDLOG_ERROR("Tried to toggle detached light via panel but no light was was found with configured ID.");
+          } else {
+            SPDLOG_ERROR("Tried to toggle detached light via panel but no light was configured for button.");
+          }
+          break;
+        }
+
+        case ButtonMode::MQTT_PAYLOAD: {
+          std::string topic = this->_get_nspanel_setting_with_default("button1_mqtt_topic", "");
+          std::string payload = this->_get_nspanel_setting_with_default("button1_mqtt_payload", "");
+          MQTT_Manager::publish(topic, payload);
+          break;
+        }
+
+        default:
+          SPDLOG_WARN("Unknown button mode triggered from panel.");
+          break;
+        }
+      } else if (command.button_pressed().button_id() == 2) {
+        ButtonMode button_mode = static_cast<ButtonMode>(this->_settings.button2_mode);
+        switch (button_mode) {
+        case ButtonMode::DETACHED: {
+          if (this->_settings.button2_detached_mode_light_id.has_value()) {
+            std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, this->_settings.button2_detached_mode_light_id.value());
+            if (light != nullptr)
+              light->toggle();
+            else
+              SPDLOG_ERROR("Tried to toggle detached light via panel but no light was was found with configured ID.");
+          } else {
+            SPDLOG_ERROR("Tried to toggle detached light via panel but no light was configured for button.");
+          }
+          break;
+        }
+
+        case ButtonMode::MQTT_PAYLOAD: {
+          std::string topic = this->_get_nspanel_setting_with_default("button2_mqtt_topic", "");
+          std::string payload = this->_get_nspanel_setting_with_default("button2_mqtt_payload", "");
+          MQTT_Manager::publish(topic, payload);
+          break;
+        }
+
+        default:
+          SPDLOG_WARN("Unknown button mode triggered from panel.");
+          break;
+        }
+      }
+    }
+  }
 }
 
 bool NSPanel::handle_ipc_request_status(nlohmann::json request, nlohmann::json *response_buffer) {
