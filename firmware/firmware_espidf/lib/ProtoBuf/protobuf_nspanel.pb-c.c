@@ -588,6 +588,36 @@ const ProtobufCMessageDescriptor nspanel_config__room_info__descriptor =
   (ProtobufCMessageInit) nspanel_config__room_info__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
+static const ProtobufCEnumValue nspanel_config__nspanel_default_page__enum_values_by_number[3] =
+{
+  { "HOME", "NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME", 0 },
+  { "SCENES", "NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__SCENES", 1 },
+  { "ENTITIES", "NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__ENTITIES", 2 },
+};
+static const ProtobufCIntRange nspanel_config__nspanel_default_page__value_ranges[] = {
+{0, 0},{0, 3}
+};
+static const ProtobufCEnumValueIndex nspanel_config__nspanel_default_page__enum_values_by_name[3] =
+{
+  { "ENTITIES", 2 },
+  { "HOME", 0 },
+  { "SCENES", 1 },
+};
+const ProtobufCEnumDescriptor nspanel_config__nspanel_default_page__descriptor =
+{
+  PROTOBUF_C__ENUM_DESCRIPTOR_MAGIC,
+  "NSPanelConfig.NSPanelDefaultPage",
+  "NSPanelDefaultPage",
+  "NSPanelConfig__NSPanelDefaultPage",
+  "",
+  3,
+  nspanel_config__nspanel_default_page__enum_values_by_number,
+  3,
+  nspanel_config__nspanel_default_page__enum_values_by_name,
+  1,
+  nspanel_config__nspanel_default_page__value_ranges,
+  NULL,NULL,NULL,NULL   /* reserved[1234] */
+};
 static const ProtobufCEnumValue nspanel_config__nspanel_screensaver_mode__enum_values_by_number[5] =
 {
   { "WEATHER_WITH_BACKGROUND", "NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND", 0 },
@@ -652,10 +682,10 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
     "default_page",
     3,
     PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_INT32,
+    PROTOBUF_C_TYPE_ENUM,
     0,   /* quantifier_offset */
     offsetof(NSPanelConfig, default_page),
-    NULL,
+    &nspanel_config__nspanel_default_page__descriptor,
     NULL,
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */

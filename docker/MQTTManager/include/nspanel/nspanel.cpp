@@ -109,6 +109,7 @@ void NSPanel::reload_config() {
     std::lock_guard<std::mutex> lock_guard(this->_settings_mutex);
 
     bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
+    bool name_changed = false;
 
     this->_settings = panel_settings;
     this->_has_registered_to_manager = true; // We managed to get the object in above statement and did not throw, ie. has been registered in manager and has an ID in DB.
@@ -118,6 +119,7 @@ void NSPanel::reload_config() {
     if (this->_name.compare(panel_settings.friendly_name) != 0) {
       this->_name = panel_settings.friendly_name;
       rebuilt_mqtt = true;
+      name_changed = true;
     }
     if (this->_register_relay1_as_light != panel_settings.register_relay1_as_light) {
       rebuilt_mqtt = true;
@@ -200,6 +202,10 @@ void NSPanel::reload_config() {
       MQTT_Manager::subscribe(fmt::format("nspanel/{}/log", this->_mac), boost::bind(&NSPanel::mqtt_log_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+    }
+
+    if (name_changed) {
+      this->reset_ha_mqtt_topics();
       this->register_to_home_assistant();
     }
 
@@ -223,7 +229,7 @@ void NSPanel::send_config() {
   config.set_nspanel_id(this->_id);
   config.set_name(this->_name);
   config.set_default_room(this->_settings.room_id);
-  config.set_default_page(std::stoi(this->_get_nspanel_setting_with_default("default_page", "0")));
+  config.set_default_page(static_cast<NSPanelConfig_NSPanelDefaultPage>(std::stoi(this->_get_nspanel_setting_with_default("default_page", "0"))));
   config.set_min_button_push_time(std::stoi(MqttManagerConfig::get_setting_with_default("min_button_push_time", "50")));
   config.set_button_long_press_time(std::stoi(MqttManagerConfig::get_setting_with_default("button_long_press_time", "5000")));
   config.set_special_mode_trigger_time(std::stoi(MqttManagerConfig::get_setting_with_default("special_mode_trigger_time", "300")));
@@ -352,6 +358,7 @@ void NSPanel::send_config() {
 NSPanel::~NSPanel() {
   SPDLOG_INFO("Destroying NSPanel {}::{}", this->_id, this->_name);
   this->reset_mqtt_topics();
+  this->reset_ha_mqtt_topics();
 }
 
 void NSPanel::reset_mqtt_topics() {
@@ -363,8 +370,6 @@ void NSPanel::reset_mqtt_topics() {
 
   // This nspanel was removed. Clear any retain on any MQTT topic.
   MQTT_Manager::clear_retain(this->_mqtt_command_topic);
-
-  this->reset_ha_mqtt_topics();
 }
 
 void NSPanel::reset_ha_mqtt_topics() {
@@ -382,6 +387,7 @@ void NSPanel::reset_ha_mqtt_topics() {
 void NSPanel::erase() {
   this->reboot();
   this->reset_mqtt_topics();
+  this->reset_ha_mqtt_topics();
 }
 
 uint NSPanel::get_id() {
@@ -907,7 +913,7 @@ void NSPanel::register_to_home_assistant() {
     temperature_sensor_data["unit_of_measurement"] = "°C";
   }
   temperature_sensor_data["name"] = "Temperature";
-  temperature_sensor_data["state_topic"] = fmt::format("nspanel/mqttmanager_{}/nspanel/{}/temperature", MqttManagerConfig::get_settings().manager_address, this->_name);
+  temperature_sensor_data["state_topic"] = fmt::format("nspanel/{}/temperature", this->_mac);
   temperature_sensor_data["unique_id"] = fmt::format("{}_temperature", this->_name);
   std::string temperature_sensor_data_str = temperature_sensor_data.dump();
   SPDLOG_DEBUG("Registring temp sensor for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
@@ -981,8 +987,8 @@ void NSPanel::register_to_home_assistant() {
   nlohmann::json screen_data = nlohmann::json(base_json);
   screen_data["device_class"] = "switch";
   screen_data["name"] = "Screen power";
-  screen_data["state_topic"] = fmt::format("nspanel/{}/screen_state", this->_name);
-  screen_data["command_topic"] = fmt::format("nspanel/{}/screen_cmd", this->_name);
+  screen_data["state_topic"] = fmt::format("nspanel/{}/screen_state", this->_mac);
+  screen_data["command_topic"] = fmt::format("nspanel/{}/screen_cmd", this->_mac);
   screen_data["state_on"] = "1";
   screen_data["state_off"] = "0";
   screen_data["payload_on"] = "1";
@@ -995,7 +1001,8 @@ void NSPanel::register_to_home_assistant() {
   // Register screen brightness
   nlohmann::json screen_brightness_data = nlohmann::json(base_json);
   screen_brightness_data["name"] = "Screen brightness";
-  screen_brightness_data["command_topic"] = fmt::format("nspanel/{}/brightness", this->_name);
+  screen_brightness_data["command_topic"] = fmt::format("nspanel/{}/brightness_cmd", this->_mac);
+  screen_brightness_data["state_topic"] = fmt::format("nspanel/{}/brightness_state", this->_mac);
   screen_brightness_data["min"] = "1";
   screen_brightness_data["max"] = "100";
   screen_brightness_data["unique_id"] = fmt::format("{}_screen_brightness", this->_mqtt_register_mac);
@@ -1006,7 +1013,8 @@ void NSPanel::register_to_home_assistant() {
   // Register screensaver brightness
   nlohmann::json screensaver_brightness_data = nlohmann::json(base_json);
   screensaver_brightness_data["name"] = "Screensaver brightness";
-  screensaver_brightness_data["command_topic"] = fmt::format("nspanel/{}/brightness_screensaver", this->_name);
+  screensaver_brightness_data["command_topic"] = fmt::format("nspanel/{}/brightness_screensaver_cmd", this->_mac);
+  screensaver_brightness_data["state_topic"] = fmt::format("nspanel/{}/brightness_screensaver_state", this->_mac);
   screensaver_brightness_data["min"] = "0";
   screensaver_brightness_data["max"] = "100";
   screensaver_brightness_data["unique_id"] = fmt::format("{}_screensaver_brightness", this->_mqtt_register_mac);
@@ -1017,7 +1025,8 @@ void NSPanel::register_to_home_assistant() {
   // Register screensaver select
   nlohmann::json screensaver_select_data = nlohmann::json(base_json);
   screensaver_select_data["name"] = "Screensaver mode";
-  screensaver_select_data["command_topic"] = fmt::format("nspanel/{}/screensaver_mode", this->_name);
+  screensaver_select_data["command_topic"] = fmt::format("nspanel/{}/screensaver_mode_cmd", this->_mac);
+  screensaver_select_data["state_topic"] = fmt::format("nspanel/{}/screensaver_mode_state", this->_mac);
   std::list<std::string> options;
   options.push_back("with_background");
   options.push_back("without_background");

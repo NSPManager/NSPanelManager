@@ -106,6 +106,40 @@ namespace protobuf {
 }  // namespace protobuf
 }  // namespace google
 
+enum NSPanelConfig_NSPanelDefaultPage : int {
+  NSPanelConfig_NSPanelDefaultPage_HOME = 0,
+  NSPanelConfig_NSPanelDefaultPage_SCENES = 1,
+  NSPanelConfig_NSPanelDefaultPage_ENTITIES = 2,
+  NSPanelConfig_NSPanelDefaultPage_NSPanelConfig_NSPanelDefaultPage_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::min(),
+  NSPanelConfig_NSPanelDefaultPage_NSPanelConfig_NSPanelDefaultPage_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::max(),
+};
+
+bool NSPanelConfig_NSPanelDefaultPage_IsValid(int value);
+extern const uint32_t NSPanelConfig_NSPanelDefaultPage_internal_data_[];
+constexpr NSPanelConfig_NSPanelDefaultPage NSPanelConfig_NSPanelDefaultPage_NSPanelDefaultPage_MIN = static_cast<NSPanelConfig_NSPanelDefaultPage>(0);
+constexpr NSPanelConfig_NSPanelDefaultPage NSPanelConfig_NSPanelDefaultPage_NSPanelDefaultPage_MAX = static_cast<NSPanelConfig_NSPanelDefaultPage>(2);
+constexpr int NSPanelConfig_NSPanelDefaultPage_NSPanelDefaultPage_ARRAYSIZE = 2 + 1;
+const ::google::protobuf::EnumDescriptor*
+NSPanelConfig_NSPanelDefaultPage_descriptor();
+template <typename T>
+const std::string& NSPanelConfig_NSPanelDefaultPage_Name(T value) {
+  static_assert(std::is_same<T, NSPanelConfig_NSPanelDefaultPage>::value ||
+                    std::is_integral<T>::value,
+                "Incorrect type passed to NSPanelDefaultPage_Name().");
+  return NSPanelConfig_NSPanelDefaultPage_Name(static_cast<NSPanelConfig_NSPanelDefaultPage>(value));
+}
+template <>
+inline const std::string& NSPanelConfig_NSPanelDefaultPage_Name(NSPanelConfig_NSPanelDefaultPage value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelConfig_NSPanelDefaultPage_descriptor,
+                                                 0, 2>(
+      static_cast<int>(value));
+}
+inline bool NSPanelConfig_NSPanelDefaultPage_Parse(absl::string_view name, NSPanelConfig_NSPanelDefaultPage* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<NSPanelConfig_NSPanelDefaultPage>(
+      NSPanelConfig_NSPanelDefaultPage_descriptor(), name, value);
+}
 enum NSPanelConfig_NSPanelScreensaverMode : int {
   NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND = 0,
   NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITHOUT_BACKGROUND = 1,
@@ -4288,6 +4322,26 @@ class NSPanelConfig final : public ::google::protobuf::Message
   ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
   using RoomInfo = NSPanelConfig_RoomInfo;
+  using NSPanelDefaultPage = NSPanelConfig_NSPanelDefaultPage;
+  static constexpr NSPanelDefaultPage HOME = NSPanelConfig_NSPanelDefaultPage_HOME;
+  static constexpr NSPanelDefaultPage SCENES = NSPanelConfig_NSPanelDefaultPage_SCENES;
+  static constexpr NSPanelDefaultPage ENTITIES = NSPanelConfig_NSPanelDefaultPage_ENTITIES;
+  static inline bool NSPanelDefaultPage_IsValid(int value) {
+    return NSPanelConfig_NSPanelDefaultPage_IsValid(value);
+  }
+  static constexpr NSPanelDefaultPage NSPanelDefaultPage_MIN = NSPanelConfig_NSPanelDefaultPage_NSPanelDefaultPage_MIN;
+  static constexpr NSPanelDefaultPage NSPanelDefaultPage_MAX = NSPanelConfig_NSPanelDefaultPage_NSPanelDefaultPage_MAX;
+  static constexpr int NSPanelDefaultPage_ARRAYSIZE = NSPanelConfig_NSPanelDefaultPage_NSPanelDefaultPage_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor* NSPanelDefaultPage_descriptor() {
+    return NSPanelConfig_NSPanelDefaultPage_descriptor();
+  }
+  template <typename T>
+  static inline const std::string& NSPanelDefaultPage_Name(T value) {
+    return NSPanelConfig_NSPanelDefaultPage_Name(value);
+  }
+  static inline bool NSPanelDefaultPage_Parse(absl::string_view name, NSPanelDefaultPage* value) {
+    return NSPanelConfig_NSPanelDefaultPage_Parse(name, value);
+  }
   using NSPanelScreensaverMode = NSPanelConfig_NSPanelScreensaverMode;
   static constexpr NSPanelScreensaverMode WEATHER_WITH_BACKGROUND = NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND;
   static constexpr NSPanelScreensaverMode WEATHER_WITHOUT_BACKGROUND = NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITHOUT_BACKGROUND;
@@ -4476,14 +4530,14 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_default_room(::int32_t value);
 
   public:
-  // int32 default_page = 3;
+  // .NSPanelConfig.NSPanelDefaultPage default_page = 3;
   void clear_default_page() ;
-  ::int32_t default_page() const;
-  void set_default_page(::int32_t value);
+  ::NSPanelConfig_NSPanelDefaultPage default_page() const;
+  void set_default_page(::NSPanelConfig_NSPanelDefaultPage value);
 
   private:
-  ::int32_t _internal_default_page() const;
-  void _internal_set_default_page(::int32_t value);
+  ::NSPanelConfig_NSPanelDefaultPage _internal_default_page() const;
+  void _internal_set_default_page(::NSPanelConfig_NSPanelDefaultPage value);
 
   public:
   // int32 screensaver_activation_timeout = 4;
@@ -4810,7 +4864,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     ::google::protobuf::internal::ArenaStringPtr button2_mqtt_topic_;
     ::google::protobuf::internal::ArenaStringPtr button2_mqtt_payload_;
     ::int32_t default_room_;
-    ::int32_t default_page_;
+    int default_page_;
     ::int32_t screensaver_activation_timeout_;
     ::int32_t min_button_push_time_;
     ::int32_t button_long_press_time_;
@@ -5149,24 +5203,24 @@ inline void NSPanelConfig::_internal_set_default_room(::int32_t value) {
   _impl_.default_room_ = value;
 }
 
-// int32 default_page = 3;
+// .NSPanelConfig.NSPanelDefaultPage default_page = 3;
 inline void NSPanelConfig::clear_default_page() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.default_page_ = 0;
 }
-inline ::int32_t NSPanelConfig::default_page() const {
+inline ::NSPanelConfig_NSPanelDefaultPage NSPanelConfig::default_page() const {
   // @@protoc_insertion_point(field_get:NSPanelConfig.default_page)
   return _internal_default_page();
 }
-inline void NSPanelConfig::set_default_page(::int32_t value) {
+inline void NSPanelConfig::set_default_page(::NSPanelConfig_NSPanelDefaultPage value) {
   _internal_set_default_page(value);
   // @@protoc_insertion_point(field_set:NSPanelConfig.default_page)
 }
-inline ::int32_t NSPanelConfig::_internal_default_page() const {
+inline ::NSPanelConfig_NSPanelDefaultPage NSPanelConfig::_internal_default_page() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.default_page_;
+  return static_cast<::NSPanelConfig_NSPanelDefaultPage>(_impl_.default_page_);
 }
-inline void NSPanelConfig::_internal_set_default_page(::int32_t value) {
+inline void NSPanelConfig::_internal_set_default_page(::NSPanelConfig_NSPanelDefaultPage value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.default_page_ = value;
 }
@@ -8980,6 +9034,12 @@ inline NSPanelMQTTManagerCommand::CommandDataCase NSPanelMQTTManagerCommand::Com
 namespace google {
 namespace protobuf {
 
+template <>
+struct is_proto_enum<::NSPanelConfig_NSPanelDefaultPage> : std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor<::NSPanelConfig_NSPanelDefaultPage>() {
+  return ::NSPanelConfig_NSPanelDefaultPage_descriptor();
+}
 template <>
 struct is_proto_enum<::NSPanelConfig_NSPanelScreensaverMode> : std::true_type {};
 template <>

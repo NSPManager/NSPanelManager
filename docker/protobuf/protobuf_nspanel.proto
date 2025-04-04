@@ -11,7 +11,12 @@ message NSPanelScene {
 message NSPanelConfig {
     string name = 1;
     int32 default_room = 2;
-    int32 default_page = 3;
+    enum NSPanelDefaultPage {
+        HOME = 0;
+        SCENES = 1;
+        ENTITIES = 2;
+    };
+    NSPanelDefaultPage default_page = 3;
     int32 screensaver_activation_timeout = 4;
     int32 min_button_push_time = 5;
     int32 button_long_press_time = 6;

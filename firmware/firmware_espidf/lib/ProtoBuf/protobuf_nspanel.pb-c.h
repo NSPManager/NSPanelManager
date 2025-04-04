@@ -36,6 +36,12 @@ typedef struct NSPanelMQTTManagerCommand__SaveSceneCommand NSPanelMQTTManagerCom
 
 /* --- enums --- */
 
+typedef enum _NSPanelConfig__NSPanelDefaultPage {
+  NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME = 0,
+  NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__SCENES = 1,
+  NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__ENTITIES = 2
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE)
+} NSPanelConfig__NSPanelDefaultPage;
 /*
  * Make sure this is updated together with protobuf_mqttmanager
  */
@@ -104,7 +110,7 @@ struct  NSPanelConfig
   ProtobufCMessage base;
   char *name;
   int32_t default_room;
-  int32_t default_page;
+  NSPanelConfig__NSPanelDefaultPage default_page;
   int32_t screensaver_activation_timeout;
   int32_t min_button_push_time;
   int32_t button_long_press_time;
@@ -151,7 +157,7 @@ struct  NSPanelConfig
 };
 #define NSPANEL_CONFIG__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
-    , (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0,NULL, 0, 0, 0, 0, 0, 0, 0, 0 }
+    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0,NULL, 0, 0, 0, 0, 0, 0, 0, 0 }
 
 
 struct  NSPanelWarning
@@ -657,6 +663,7 @@ extern const ProtobufCEnumDescriptor    nspanel_warning_level__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_scene__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_config__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_config__room_info__descriptor;
+extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_default_page__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_screensaver_mode__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_warning__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_status_report__descriptor;
