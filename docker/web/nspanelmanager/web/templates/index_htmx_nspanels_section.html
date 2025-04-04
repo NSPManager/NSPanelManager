@@ -1,5 +1,8 @@
 <div hx-trigger="register_request from:body" hx-get="{% url 'htmx_partial_index_nspanels_section' %}" hx-swap="outerHTML">
     {% if nspanels|length > 0 %}
+    <script>
+        console.debug('NSPanelManager: nspanels found');
+    </script>
         <div class="grid md:grid-cols-3 gap-4 mt-4 items-start" id="nspanels_container" hx-ext="ws" ws-connect="/websocket">
         {% for nspanel in nspanels %}
             {% include 'partial/nspanel_index_view_htmx.html' %}

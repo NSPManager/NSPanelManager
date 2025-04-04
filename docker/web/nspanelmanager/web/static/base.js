@@ -17,7 +17,9 @@ $(document).ready(function () {
   console.log("Document ready, attaching functions.");
 
   // Hook into HTMX websocket to catch custom JSON triggers for HTMX events.
+  console.log("Hooking into HTMX websocket");
   document.querySelectorAll('[hx-ext="ws"]').forEach((element) => {
+    console.debug("Found websocket element to hook", element);
     // On message from manager on websocket.
     element.addEventListener("htmx:wsBeforeMessage", (event) => {
       if (event.detail.message.startsWith("{")) {

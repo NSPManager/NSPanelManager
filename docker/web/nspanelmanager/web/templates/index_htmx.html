@@ -48,6 +48,6 @@
   </div>
 </div>
 <div>
-    <div hx-trigger="revealed" hx-get="{% url 'htmx_partial_index_nspanels_section' %}"></div>
+    {% include 'index_htmx_nspanels_section.html' %}
 </div>
 {% endblock %}

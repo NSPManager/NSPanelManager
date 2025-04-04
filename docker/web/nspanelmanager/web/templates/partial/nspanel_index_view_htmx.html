@@ -87,13 +87,13 @@
                 </ul>
                 <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
                 <li>
-                    <a hx-post="{% url 'htmx_nspanel_update_firmware' nspanel.data.id %}" id="firmware-update-{{ nspanel.data.id }}" hx-trigger="click, {% if nspanel.status.state != 'offline' %}firmware-update-all-nspanels from:body{% endif %}" hx-swap="none"
+                    <a hx-post="{% url 'htmx_nspanel_update_firmware' nspanel.data.id %}" id="firmware-update-{{ nspanel.data.id }}" hx-trigger="click{% if nspanel.status.state != 'offline' %}, firmware-update-all-nspanels from:body{% endif %}" hx-swap="none"
                     class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer"><span
                         class="mdi mdi-upload pr-2"></span>Update firmware
                     </a>
                 </li>
                 <li>
-                    <a hx-post="{% url 'htmx_nspanel_update_screen' nspanel.data.id %}" id="screen-update-{{ nspanel.data.id }}" hx-trigger="click, {% if nspanel.status.state != 'offline' %}screen-update-all-nspanels from:body{% endif %}" hx-swap="none"
+                    <a hx-post="{% url 'htmx_nspanel_update_screen' nspanel.data.id %}" id="screen-update-{{ nspanel.data.id }}" hx-trigger="click{% if nspanel.status.state != 'offline' %}, screen-update-all-nspanels from:body{% endif %}" hx-swap="none"
                     class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer"><span
                         class="mdi mdi-table-arrow-up pr-2"></span>Update GUI
                     </a>
