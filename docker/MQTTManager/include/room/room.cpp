@@ -73,14 +73,15 @@ void Room::reload_config() {
         }
         SPDLOG_DEBUG("Created {} RoomEntitiesPages for room {}::{}.", this->_entity_pages.size(), this->_id, this->_name);
 
-        // Sort the room entities pages by display order and then resend config.
-        std::sort(this->_entity_pages.begin(), this->_entity_pages.end(), [](const std::shared_ptr<RoomEntitiesPage> &a, const std::shared_ptr<RoomEntitiesPage> &b) {
-          return a->get_display_order() < b->get_display_order();
-        });
         // Send state update for all entity pages so that they display the correct order.
         for (auto &entity_page : this->_entity_pages) {
           entity_page->reload_config(true);
         }
+
+        // Sort the room entities pages by display order and then resend config.
+        std::sort(this->_entity_pages.begin(), this->_entity_pages.end(), [](const std::shared_ptr<RoomEntitiesPage> &a, const std::shared_ptr<RoomEntitiesPage> &b) {
+          return a->get_display_order() < b->get_display_order();
+        });
 
         auto scenes_pages = database_manager::database.get_all<database_manager::RoomEntitiesPage>(sqlite_orm::where(sqlite_orm::c(&database_manager::RoomEntitiesPage::room_id) == this->_id and sqlite_orm::c(&database_manager::RoomEntitiesPage::is_scenes_page) == true), sqlite_orm::order_by(&database_manager::RoomEntitiesPage::display_order).asc().collate_nocase());
         // Look for existing but removed RoomEntitiesPages that hold scenes and remove them from the list.
@@ -107,14 +108,15 @@ void Room::reload_config() {
         }
         SPDLOG_DEBUG("Created {} RoomEntitiesPages (for scenes) for room {}::{}.", this->_scene_pages.size(), this->_id, this->_name);
 
-        // Sort the room entities pages by display order and then resend config.
-        std::sort(this->_scene_pages.begin(), this->_scene_pages.end(), [](const std::shared_ptr<RoomEntitiesPage> &a, const std::shared_ptr<RoomEntitiesPage> &b) {
-          return a->get_display_order() < b->get_display_order();
-        });
         // Send state update for all entity pages so that they display the correct order.
         for (auto &scene_page : this->_scene_pages) {
           scene_page->reload_config(true);
         }
+
+        // Sort the room entities pages by display order and then resend config.
+        std::sort(this->_scene_pages.begin(), this->_scene_pages.end(), [](const std::shared_ptr<RoomEntitiesPage> &a, const std::shared_ptr<RoomEntitiesPage> &b) {
+          return a->get_display_order() < b->get_display_order();
+        });
       }
 
       SPDLOG_TRACE("Room {}::{} initialized with status topic '{}'. Room has {} RoomEntitiesPages", this->_id, this->_name, this->_mqtt_state_topic, this->_entity_pages.size());
