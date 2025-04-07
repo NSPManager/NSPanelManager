@@ -182,10 +182,10 @@ void NSPanel::reload_config() {
       this->_mqtt_number_screen_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screen_brightness/config", mqtt_register_mac);
       this->_mqtt_number_screensaver_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screensaver_brightness/config", mqtt_register_mac);
       this->_mqtt_select_screensaver_topic = fmt::format("homeassistant/select/nspanelmanager/{}_screensaver_select/config", mqtt_register_mac);
-      this->_mqtt_relay1_command_topic = fmt::format("nspanel/{}/r1_cmd", this->_mac);
-      this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/r1_state", this->_mac);
-      this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/r2_cmd", this->_mac);
-      this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/r2_state", this->_mac);
+      this->_mqtt_relay1_command_topic = fmt::format("nspanel/{}/relay1_cmd", this->_mac);
+      this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/relay1_state", this->_mac);
+      this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/relay2_cmd", this->_mac);
+      this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/relay2_state", this->_mac);
       this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_mac);
       this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_mac);
       this->_mqtt_temperature_topic = fmt::format("nspanel/{}/temperature", this->_mac);
