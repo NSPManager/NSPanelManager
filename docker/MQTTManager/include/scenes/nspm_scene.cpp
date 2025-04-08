@@ -60,7 +60,7 @@ void NSPMScene::activate() {
         }
 
         if (light_state.color_mode.compare("dimmer") == 0) {
-          SPDLOG_DEBUG("Setting light {}::{} to light level {} in dimmer mode.", light_entity->get_id(), light_entity->get_name(), light_state.light_level);
+          SPDLOG_DEBUG("Setting light {}::{} to light level {} in dimmer mode with kelvin: {}.", light_entity->get_id(), light_entity->get_name(), light_state.light_level, light_state.color_temperature);
           if (light_state.light_level <= 0) {
             light_entity->turn_off(true);
           } else {

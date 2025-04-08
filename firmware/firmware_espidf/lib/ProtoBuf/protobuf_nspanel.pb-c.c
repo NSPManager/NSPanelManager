@@ -688,7 +688,7 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_button_mode__descriptor =
   nspanel_config__nspanel_button_mode__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[32] =
+static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[33] =
 {
   {
     "name",
@@ -1074,6 +1074,18 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[32] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "locked_to_default_room",
+    39,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, locked_to_default_room),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_config__field_indices_by_name[] = {
   21,   /* field[21] = button1_mode */
@@ -1085,6 +1097,7 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
   1,   /* field[1] = default_room */
   23,   /* field[23] = global_scenes */
   15,   /* field[15] = is_us_panel */
+  32,   /* field[32] = locked_to_default_room */
   4,   /* field[4] = min_button_push_time */
   0,   /* field[0] = name */
   26,   /* field[26] = nspanel_id */
@@ -1114,7 +1127,7 @@ static const ProtobufCIntRange nspanel_config__number_ranges[3 + 1] =
   { 1, 0 },
   { 25, 22 },
   { 30, 23 },
-  { 0, 32 }
+  { 0, 33 }
 };
 const ProtobufCMessageDescriptor nspanel_config__descriptor =
 {
@@ -1124,7 +1137,7 @@ const ProtobufCMessageDescriptor nspanel_config__descriptor =
   "NSPanelConfig",
   "",
   sizeof(NSPanelConfig),
-  32,
+  33,
   nspanel_config__field_descriptors,
   nspanel_config__field_indices_by_name,
   3,  nspanel_config__number_ranges,

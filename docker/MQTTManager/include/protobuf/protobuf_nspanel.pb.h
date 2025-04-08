@@ -4657,10 +4657,11 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kButton2ModeFieldNumber = 25,
     kRaiseLightLevelTo100AboveFieldNumber = 32,
     kNspanelIdFieldNumber = 33,
+    kRelay1RelayGroupFieldNumber = 35,
     kOptimisticModeFieldNumber = 31,
     kRelay1IsInRelayGroupFieldNumber = 34,
     kRelay2IsInRelayGroupFieldNumber = 36,
-    kRelay1RelayGroupFieldNumber = 35,
+    kLockedToDefaultRoomFieldNumber = 39,
     kRelay2RelayGroupFieldNumber = 37,
     kDefaultLightBrightessFieldNumber = 38,
   };
@@ -4944,6 +4945,16 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_nspanel_id(::int32_t value);
 
   public:
+  // int32 relay1_relay_group = 35;
+  void clear_relay1_relay_group() ;
+  ::int32_t relay1_relay_group() const;
+  void set_relay1_relay_group(::int32_t value);
+
+  private:
+  ::int32_t _internal_relay1_relay_group() const;
+  void _internal_set_relay1_relay_group(::int32_t value);
+
+  public:
   // bool optimistic_mode = 31;
   void clear_optimistic_mode() ;
   bool optimistic_mode() const;
@@ -4974,14 +4985,14 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_relay2_is_in_relay_group(bool value);
 
   public:
-  // int32 relay1_relay_group = 35;
-  void clear_relay1_relay_group() ;
-  ::int32_t relay1_relay_group() const;
-  void set_relay1_relay_group(::int32_t value);
+  // bool locked_to_default_room = 39;
+  void clear_locked_to_default_room() ;
+  bool locked_to_default_room() const;
+  void set_locked_to_default_room(bool value);
 
   private:
-  ::int32_t _internal_relay1_relay_group() const;
-  void _internal_set_relay1_relay_group(::int32_t value);
+  bool _internal_locked_to_default_room() const;
+  void _internal_set_locked_to_default_room(bool value);
 
   public:
   // int32 relay2_relay_group = 37;
@@ -5009,7 +5020,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 32, 2,
+      5, 33, 2,
       58, 7>
       _table_;
 
@@ -5056,10 +5067,11 @@ class NSPanelConfig final : public ::google::protobuf::Message
     int button2_mode_;
     ::int32_t raise_light_level_to_100_above_;
     ::int32_t nspanel_id_;
+    ::int32_t relay1_relay_group_;
     bool optimistic_mode_;
     bool relay1_is_in_relay_group_;
     bool relay2_is_in_relay_group_;
-    ::int32_t relay1_relay_group_;
+    bool locked_to_default_room_;
     ::int32_t relay2_relay_group_;
     ::int32_t default_light_brightess_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
@@ -6083,6 +6095,28 @@ inline ::int32_t NSPanelConfig::_internal_default_light_brightess() const {
 inline void NSPanelConfig::_internal_set_default_light_brightess(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.default_light_brightess_ = value;
+}
+
+// bool locked_to_default_room = 39;
+inline void NSPanelConfig::clear_locked_to_default_room() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.locked_to_default_room_ = false;
+}
+inline bool NSPanelConfig::locked_to_default_room() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.locked_to_default_room)
+  return _internal_locked_to_default_room();
+}
+inline void NSPanelConfig::set_locked_to_default_room(bool value) {
+  _internal_set_locked_to_default_room(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.locked_to_default_room)
+}
+inline bool NSPanelConfig::_internal_locked_to_default_room() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.locked_to_default_room_;
+}
+inline void NSPanelConfig::_internal_set_locked_to_default_room(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.locked_to_default_room_ = value;
 }
 
 // -------------------------------------------------------------------

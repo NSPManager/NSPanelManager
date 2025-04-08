@@ -73,6 +73,8 @@ message NSPanelConfig {
     int32 relay2_relay_group = 37;
 
     int32 default_light_brightess = 38; // Default brightness for lights when trying to turn on but the current brightness is 0
+
+    bool locked_to_default_room = 39;
 }
 
 enum NSPanelWarningLevel {
