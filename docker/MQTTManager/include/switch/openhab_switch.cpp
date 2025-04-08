@@ -88,7 +88,7 @@ void OpenhabSwitch::openhab_event_callback(nlohmann::json data) {
     if (topic_item.compare(this->_openhab_on_off_item) == 0) {
       // We only care about the first event from Openhab, ignore the rest
       if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() >= this->_last_on_off_change + 1000) {
-        bool state = std::string(payload["value"]).compare("ON");
+        bool state = std::string(payload["value"]).compare("ON") == 0;
         SPDLOG_DEBUG("Switch {}::{} got new state {}, current state: {}.", this->_id, this->_name, state, this->_current_state);
         if (state != this->_current_state) {
           this->_current_state = state;
@@ -105,7 +105,7 @@ void OpenhabSwitch::openhab_event_callback(nlohmann::json data) {
     if (this->_openhab_on_off_item.compare(data["payload"]["name"]) == 0) {
       if (data["payload"]["state"].is_string()) {
         nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
-        bool state = std::string(payload["value"]).compare("ON");
+        bool state = std::string(payload["value"]).compare("ON") == 0;
         SPDLOG_DEBUG("Switch {}::{} got new state {}, current state: {}.", this->_id, this->_name, state, this->_current_state);
         if (state != this->_current_state) {
           this->_current_state = state;
