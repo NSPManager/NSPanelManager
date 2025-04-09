@@ -100,6 +100,7 @@ void OpenhabLight::send_state_update_to_controller() {
     service_data["payload"] = payload_data.dump();
     if (MqttManagerConfig::get_settings().optimistic_mode) {
       this->_current_state = this->_requested_state;
+      this->_last_on_off_change = CurrentTimeMilliseconds();
       this->_entity_changed_callbacks(this);
     }
     OpenhabManager::send_json(service_data);
@@ -120,6 +121,7 @@ void OpenhabLight::send_state_update_to_controller() {
       service_data["payload"] = payload_data.dump();
       if (MqttManagerConfig::get_settings().optimistic_mode) {
         this->_current_state = false;
+        this->_last_on_off_change = CurrentTimeMilliseconds();
       }
       OpenhabManager::send_json(service_data);
     } else {
@@ -131,6 +133,8 @@ void OpenhabLight::send_state_update_to_controller() {
       payload_data["value"] = this->_requested_brightness;
       service_data["payload"] = payload_data.dump();
       if (MqttManagerConfig::get_settings().optimistic_mode) {
+        this->_last_on_off_change = CurrentTimeMilliseconds();
+        this->_last_brightness_change = CurrentTimeMilliseconds();
         this->_current_state = true;
         this->_current_brightness = this->_requested_brightness;
       }
@@ -154,6 +158,7 @@ void OpenhabLight::send_state_update_to_controller() {
       service_data["payload"] = payload_data.dump();
       this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
       if (MqttManagerConfig::get_settings().optimistic_mode) {
+        this->_last_color_temp_change = CurrentTimeMilliseconds();
         this->_current_color_temperature = this->_requested_color_temperature;
       }
       OpenhabManager::send_json(service_data);
@@ -166,6 +171,7 @@ void OpenhabLight::send_state_update_to_controller() {
     service_data["payload"] = payload_data.dump();
     this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
     if (MqttManagerConfig::get_settings().optimistic_mode) {
+      this->_last_rgb_change = CurrentTimeMilliseconds();
       this->_current_hue = this->_requested_hue;
       this->_current_saturation = this->_requested_saturation;
       this->_current_brightness = this->_requested_brightness;
