@@ -143,6 +143,9 @@ private:
   // If set to true, automatic status updates over MQTT when entities changes are disabled.
   bool _send_status_updates;
 
+  // Last room status sent to the panel. Used to avoid sending duplicate status updates.
+  NSPanelRoomStatus _last_room_status;
+
   // When was the last status update sent.
   std::chrono::time_point<std::chrono::system_clock> _last_status_update;
 

@@ -79,29 +79,6 @@ struct NSPanelWarningDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelWarningDefaultTypeInternal _NSPanelWarning_default_instance_;
 
-inline constexpr NSPanelScene::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : name_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        scene_id_{0},
-        can_save_{false},
-        _cached_size_{0} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR NSPanelScene::NSPanelScene(::_pbi::ConstantInitialized)
-    : _impl_(::_pbi::ConstantInitialized()) {}
-struct NSPanelSceneDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR NSPanelSceneDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~NSPanelSceneDefaultTypeInternal() {}
-  union {
-    NSPanelScene _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelSceneDefaultTypeInternal _NSPanelScene_default_instance_;
-
 inline constexpr NSPanelRoomStatus::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : entity_page_ids_{},
@@ -467,7 +444,8 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 inline constexpr NSPanelConfig::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : room_infos_{},
-        global_scenes_{},
+        global_scene_entity_page_ids_{},
+        _global_scene_entity_page_ids_cached_byte_size_{0},
         name_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
@@ -523,17 +501,6 @@ const ::uint32_t
     TableStruct_protobuf_5fnspanel_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
         ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::NSPanelScene, _internal_metadata_),
-        ~0u,  // no _extensions_
-        ~0u,  // no _oneof_case_
-        ~0u,  // no _weak_field_map_
-        ~0u,  // no _inlined_string_donated_
-        ~0u,  // no _split_
-        ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::NSPanelScene, _impl_.scene_id_),
-        PROTOBUF_FIELD_OFFSET(::NSPanelScene, _impl_.can_save_),
-        PROTOBUF_FIELD_OFFSET(::NSPanelScene, _impl_.name_),
-        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig_RoomInfo, _internal_metadata_),
         ~0u,  // no _extensions_
         ~0u,  // no _oneof_case_
@@ -575,7 +542,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.temperature_calibration_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.button1_mode_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.button2_mode_),
-        PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.global_scenes_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.global_scene_entity_page_ids_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.optimistic_mode_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.raise_light_level_to_100_above_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.nspanel_id_),
@@ -796,27 +763,25 @@ const ::uint32_t
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, -1, -1, sizeof(::NSPanelScene)},
-        {11, -1, -1, sizeof(::NSPanelConfig_RoomInfo)},
-        {22, -1, -1, sizeof(::NSPanelConfig)},
-        {63, -1, -1, sizeof(::NSPanelWarning)},
-        {73, -1, -1, sizeof(::NSPanelStatusReport)},
-        {89, -1, -1, sizeof(::NSPanelLightStatus)},
-        {107, -1, -1, sizeof(::NSPanelRoomEntitiesPage_EntitySlot)},
-        {121, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
-        {133, -1, -1, sizeof(::NSPanelRoomStatus)},
-        {154, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
-        {167, -1, -1, sizeof(::NSPanelWeatherUpdate)},
-        {183, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
-        {198, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
-        {208, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
-        {225, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
-        {235, -1, -1, sizeof(::NSPanelMQTTManagerCommand_SaveSceneCommand)},
-        {245, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonPressed)},
-        {255, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {0, -1, -1, sizeof(::NSPanelConfig_RoomInfo)},
+        {11, -1, -1, sizeof(::NSPanelConfig)},
+        {52, -1, -1, sizeof(::NSPanelWarning)},
+        {62, -1, -1, sizeof(::NSPanelStatusReport)},
+        {78, -1, -1, sizeof(::NSPanelLightStatus)},
+        {96, -1, -1, sizeof(::NSPanelRoomEntitiesPage_EntitySlot)},
+        {110, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
+        {122, -1, -1, sizeof(::NSPanelRoomStatus)},
+        {143, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
+        {156, -1, -1, sizeof(::NSPanelWeatherUpdate)},
+        {172, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
+        {187, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
+        {197, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
+        {214, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
+        {224, -1, -1, sizeof(::NSPanelMQTTManagerCommand_SaveSceneCommand)},
+        {234, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonPressed)},
+        {244, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
-    &::_NSPanelScene_default_instance_._instance,
     &::_NSPanelConfig_RoomInfo_default_instance_._instance,
     &::_NSPanelConfig_default_instance_._instance,
     &::_NSPanelWarning_default_instance_._instance,
@@ -837,139 +802,137 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\026protobuf_nspanel.proto\"@\n\014NSPanelScene"
-    "\022\020\n\010scene_id\030\001 \001(\005\022\020\n\010can_save\030\002 \001(\010\022\014\n\004"
-    "name\030\003 \001(\t\"\356\013\n\rNSPanelConfig\022\014\n\004name\030\001 \001"
-    "(\t\022\024\n\014default_room\030\002 \001(\005\0227\n\014default_page"
-    "\030\003 \001(\0162!.NSPanelConfig.NSPanelDefaultPag"
-    "e\022&\n\036screensaver_activation_timeout\030\004 \001("
-    "\005\022\034\n\024min_button_push_time\030\005 \001(\005\022\036\n\026butto"
-    "n_long_press_time\030\006 \001(\005\022!\n\031special_mode_"
-    "trigger_time\030\007 \001(\005\022!\n\031special_mode_relea"
-    "se_time\030\010 \001(\005\022\030\n\020screen_dim_level\030\t \001(\005\022"
-    "\035\n\025screensaver_dim_level\030\n \001(\005\022\?\n\020screen"
-    "saver_mode\030\013 \001(\0162%.NSPanelConfig.NSPanel"
-    "ScreensaverMode\022+\n#show_screensaver_insi"
-    "de_temperature\030\014 \001(\010\022,\n$show_screensaver"
-    "_outside_temperature\030\r \001(\010\022\026\n\016clock_us_s"
-    "tyle\030\016 \001(\010\022\026\n\016use_fahrenheit\030\017 \001(\010\022\023\n\013is"
-    "_us_panel\030\020 \001(\010\022+\n\nroom_infos\030\021 \003(\0132\027.NS"
-    "PanelConfig.RoomInfo\022\026\n\016reverse_relays\030\022"
-    " \001(\010\022\033\n\023relay1_default_mode\030\023 \001(\010\022\033\n\023rel"
-    "ay2_default_mode\030\024 \001(\010\022\037\n\027temperature_ca"
-    "libration\030\025 \001(\002\0226\n\014button1_mode\030\026 \001(\0162 ."
-    "NSPanelConfig.NSPanelButtonMode\0226\n\014butto"
-    "n2_mode\030\031 \001(\0162 .NSPanelConfig.NSPanelBut"
-    "tonMode\022$\n\rglobal_scenes\030\036 \003(\0132\r.NSPanel"
-    "Scene\022\027\n\017optimistic_mode\030\037 \001(\010\022&\n\036raise_"
-    "light_level_to_100_above\030  \001(\005\022\022\n\nnspane"
-    "l_id\030! \001(\005\022 \n\030relay1_is_in_relay_group\030\""
-    " \001(\010\022\032\n\022relay1_relay_group\030# \001(\005\022 \n\030rela"
-    "y2_is_in_relay_group\030$ \001(\010\022\032\n\022relay2_rel"
-    "ay_group\030% \001(\005\022\037\n\027default_light_brightes"
-    "s\030& \001(\005\022\036\n\026locked_to_default_room\030\' \001(\010\032"
-    "L\n\010RoomInfo\022\017\n\007room_id\030\001 \001(\005\022\027\n\017entity_p"
-    "age_ids\030\002 \003(\005\022\026\n\016scene_page_ids\030\003 \003(\005\"8\n"
-    "\022NSPanelDefaultPage\022\010\n\004HOME\020\000\022\n\n\006SCENES\020"
-    "\001\022\014\n\010ENTITIES\020\002\"\250\001\n\026NSPanelScreensaverMo"
-    "de\022\033\n\027WEATHER_WITH_BACKGROUND\020\000\022\036\n\032WEATH"
-    "ER_WITHOUT_BACKGROUND\020\001\022\034\n\030DATETIME_WITH"
-    "_BACKGROUND\020\003\022\037\n\033DATETIME_WITHOUT_BACKGR"
-    "OUND\020\004\022\022\n\016NO_SCREENSAVER\020\005\"\?\n\021NSPanelBut"
-    "tonMode\022\n\n\006DIRECT\020\000\022\n\n\006FOLLOW\020\001\022\022\n\016NOTIF"
-    "Y_MANAGER\020\002\"C\n\016NSPanelWarning\022#\n\005level\030\001"
-    " \001(\0162\024.NSPanelWarningLevel\022\014\n\004text\030\002 \001(\t"
-    "\"\311\002\n\023NSPanelStatusReport\0221\n\rnspanel_stat"
-    "e\030\001 \001(\0162\032.NSPanelStatusReport.state\022\027\n\017u"
-    "pdate_progress\030\002 \001(\005\022\014\n\004rssi\030\003 \001(\005\022\025\n\rhe"
-    "ap_used_pct\030\004 \001(\005\022\023\n\013mac_address\030\005 \001(\t\022\023"
-    "\n\013temperature\030\006 \001(\002\022\022\n\nip_address\030\007 \001(\t\022"
-    "!\n\010warnings\030\010 \003(\0132\017.NSPanelWarning\"`\n\005st"
-    "ate\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE\020\001\022\020\n\014UPDATING"
-    "_TFT\020\002\022\025\n\021UPDATING_FIRMWARE\020\003\022\025\n\021UPDATIN"
-    "G_LITTLEFS\020\004\"\325\001\n\022NSPanelLightStatus\022\n\n\002i"
-    "d\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\017\n\007can_dim\030\003 \001(\010\022\035"
-    "\n\025can_color_temperature\030\004 \001(\010\022\017\n\007can_rgb"
-    "\030\005 \001(\010\022\023\n\013light_level\030\006 \001(\005\022\022\n\ncolor_tem"
-    "p\030\007 \001(\005\022\013\n\003hue\030\010 \001(\005\022\022\n\nsaturation\030\t \001(\005"
-    "\022\032\n\022room_view_position\030\n \001(\005\"\375\001\n\027NSPanel"
-    "RoomEntitiesPage\022\n\n\002id\030\001 \001(\005\022\021\n\tpage_typ"
-    "e\030\002 \001(\005\022\023\n\013header_text\030\003 \001(\t\0225\n\010entities"
-    "\030\004 \003(\0132#.NSPanelRoomEntitiesPage.EntityS"
-    "lot\032w\n\nEntitySlot\022\032\n\022room_view_position\030"
-    "\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\014\n\004icon\030\003 \001(\t\022\013\n\003pco"
-    "\030\004 \001(\005\022\014\n\004pco2\030\005 \001(\005\022\026\n\016can_save_scene\030\006"
-    " \001(\010\"\226\003\n\021NSPanelRoomStatus\022\n\n\002id\030\001 \001(\005\022\014"
-    "\n\004name\030\002 \001(\t\022\031\n\021average_dim_level\030\003 \001(\005\022"
-    " \n\030ceiling_lights_dim_level\030\004 \001(\005\022\036\n\026tab"
-    "le_lights_dim_level\030\005 \001(\005\022!\n\031average_col"
-    "or_temperature\030\006 \001(\005\022.\n&ceiling_lights_c"
-    "olor_temperature_value\030\007 \001(\005\022,\n$table_li"
-    "ghts_color_temperature_value\030\010 \001(\005\022\032\n\022nu"
-    "m_ceiling_lights\030\t \001(\005\022\030\n\020num_table_ligh"
-    "ts\030\n \001(\005\022\035\n\025num_ceiling_lights_on\030\013 \001(\005\022"
-    "\033\n\023num_table_lights_on\030\014 \001(\005\022\027\n\017entity_p"
-    "age_ids\030\r \003(\005\"\277\003\n\024NSPanelWeatherUpdate\022:"
-    "\n\016forecast_items\030\001 \003(\0132\".NSPanelWeatherU"
-    "pdate.ForecastItem\022\034\n\024current_weather_ic"
-    "on\030\002 \001(\t\022\"\n\032current_temperature_string\030\003"
-    " \001(\t\022\"\n\032current_maxmin_temperature\030\004 \001(\t"
-    "\022\033\n\023current_wind_string\030\005 \001(\t\022\026\n\016sunrise"
-    "_string\030\006 \001(\t\022\025\n\rsunset_string\030\007 \001(\t\022$\n\034"
-    "current_precipitation_string\030\010 \001(\t\032\222\001\n\014F"
-    "orecastItem\022\024\n\014weather_icon\030\001 \001(\t\022\034\n\024pre"
-    "cipitation_string\030\002 \001(\t\022!\n\031temperature_m"
-    "axmin_string\030\003 \001(\t\022\023\n\013wind_string\030\004 \001(\t\022"
-    "\026\n\016display_string\030\005 \001(\t\"\315\n\n\031NSPanelMQTTM"
-    "anagerCommand\022M\n\022first_page_turn_on\030\001 \001("
-    "\0132/.NSPanelMQTTManagerCommand.FirstPageT"
-    "urnLightOnH\000\022O\n\023first_page_turn_off\030\002 \001("
-    "\01320.NSPanelMQTTManagerCommand.FirstPageT"
-    "urnLightOffH\000\022@\n\rlight_command\030\003 \001(\0132\'.N"
-    "SPanelMQTTManagerCommand.LightCommandH\000\022"
-    "c\n toggle_entity_from_entities_page\030\004 \001("
-    "\01327.NSPanelMQTTManagerCommand.ToggleEnti"
-    "tyFromEntitiesPageH\000\022I\n\022save_scene_comma"
-    "nd\030\005 \001(\0132+.NSPanelMQTTManagerCommand.Sav"
-    "eSceneCommandH\000\022B\n\016button_pressed\030\006 \001(\0132"
-    "(.NSPanelMQTTManagerCommand.ButtonPresse"
-    "dH\000\032\372\001\n\024FirstPageTurnLightOn\022E\n\raffect_l"
-    "ights\030\001 \001(\0162..NSPanelMQTTManagerCommand."
-    "AffectLightsOptions\022\037\n\027brightness_slider"
-    "_value\030\002 \001(\005\022\033\n\023kelvin_slider_value\030\003 \001("
-    "\005\022\025\n\rselected_room\030\004 \001(\005\022\016\n\006global\030\005 \001(\010"
-    "\022\034\n\024has_brightness_value\030\006 \001(\010\022\030\n\020has_ke"
-    "lvin_value\030\007 \001(\010\032n\n\025FirstPageTurnLightOf"
-    "f\022E\n\raffect_lights\030\001 \001(\0162..NSPanelMQTTMa"
-    "nagerCommand.AffectLightsOptions\022\016\n\006glob"
-    "al\030\002 \001(\010\032\321\001\n\014LightCommand\022\021\n\tlight_ids\030\001"
-    " \003(\005\022\026\n\016has_brightness\030\002 \001(\010\022\022\n\nbrightne"
-    "ss\030\003 \001(\005\022\035\n\025has_color_temperature\030\004 \001(\010\022"
-    "\031\n\021color_temperature\030\005 \001(\005\022\017\n\007has_hue\030\006 "
-    "\001(\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016has_saturation\030\010 \001(\010"
-    "\022\022\n\nsaturation\030\t \001(\005\032K\n\034ToggleEntityFrom"
-    "EntitiesPage\022\026\n\016entity_page_id\030\001 \001(\005\022\023\n\013"
-    "entity_slot\030\002 \001(\005\032\?\n\020SaveSceneCommand\022\026\n"
-    "\016entity_page_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001"
-    "(\005\0326\n\rButtonPressed\022\022\n\nnspanel_id\030\001 \001(\005\022"
-    "\021\n\tbutton_id\030\002 \001(\005\"D\n\023AffectLightsOption"
-    "s\022\007\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020\001\022\022\n\016CEILING_"
-    "LIGHTS\020\002B\r\n\013CommandData*[\n\023NSPanelWarnin"
-    "gLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ERROR\020\001\022\013\n\007WARNI"
-    "NG\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n\005TRACE\020\005b\006pr"
-    "oto3"
+    "\n\026protobuf_nspanel.proto\"\356\013\n\rNSPanelConf"
+    "ig\022\014\n\004name\030\001 \001(\t\022\024\n\014default_room\030\002 \001(\005\0227"
+    "\n\014default_page\030\003 \001(\0162!.NSPanelConfig.NSP"
+    "anelDefaultPage\022&\n\036screensaver_activatio"
+    "n_timeout\030\004 \001(\005\022\034\n\024min_button_push_time\030"
+    "\005 \001(\005\022\036\n\026button_long_press_time\030\006 \001(\005\022!\n"
+    "\031special_mode_trigger_time\030\007 \001(\005\022!\n\031spec"
+    "ial_mode_release_time\030\010 \001(\005\022\030\n\020screen_di"
+    "m_level\030\t \001(\005\022\035\n\025screensaver_dim_level\030\n"
+    " \001(\005\022\?\n\020screensaver_mode\030\013 \001(\0162%.NSPanel"
+    "Config.NSPanelScreensaverMode\022+\n#show_sc"
+    "reensaver_inside_temperature\030\014 \001(\010\022,\n$sh"
+    "ow_screensaver_outside_temperature\030\r \001(\010"
+    "\022\026\n\016clock_us_style\030\016 \001(\010\022\026\n\016use_fahrenhe"
+    "it\030\017 \001(\010\022\023\n\013is_us_panel\030\020 \001(\010\022+\n\nroom_in"
+    "fos\030\021 \003(\0132\027.NSPanelConfig.RoomInfo\022\026\n\016re"
+    "verse_relays\030\022 \001(\010\022\033\n\023relay1_default_mod"
+    "e\030\023 \001(\010\022\033\n\023relay2_default_mode\030\024 \001(\010\022\037\n\027"
+    "temperature_calibration\030\025 \001(\002\0226\n\014button1"
+    "_mode\030\026 \001(\0162 .NSPanelConfig.NSPanelButto"
+    "nMode\0226\n\014button2_mode\030\031 \001(\0162 .NSPanelCon"
+    "fig.NSPanelButtonMode\022$\n\034global_scene_en"
+    "tity_page_ids\030\036 \003(\005\022\027\n\017optimistic_mode\030\037"
+    " \001(\010\022&\n\036raise_light_level_to_100_above\030 "
+    " \001(\005\022\022\n\nnspanel_id\030! \001(\005\022 \n\030relay1_is_in"
+    "_relay_group\030\" \001(\010\022\032\n\022relay1_relay_group"
+    "\030# \001(\005\022 \n\030relay2_is_in_relay_group\030$ \001(\010"
+    "\022\032\n\022relay2_relay_group\030% \001(\005\022\037\n\027default_"
+    "light_brightess\030& \001(\005\022\036\n\026locked_to_defau"
+    "lt_room\030\' \001(\010\032L\n\010RoomInfo\022\017\n\007room_id\030\001 \001"
+    "(\005\022\027\n\017entity_page_ids\030\002 \003(\005\022\026\n\016scene_pag"
+    "e_ids\030\003 \003(\005\"8\n\022NSPanelDefaultPage\022\010\n\004HOM"
+    "E\020\000\022\n\n\006SCENES\020\001\022\014\n\010ENTITIES\020\002\"\250\001\n\026NSPane"
+    "lScreensaverMode\022\033\n\027WEATHER_WITH_BACKGRO"
+    "UND\020\000\022\036\n\032WEATHER_WITHOUT_BACKGROUND\020\001\022\034\n"
+    "\030DATETIME_WITH_BACKGROUND\020\003\022\037\n\033DATETIME_"
+    "WITHOUT_BACKGROUND\020\004\022\022\n\016NO_SCREENSAVER\020\005"
+    "\"\?\n\021NSPanelButtonMode\022\n\n\006DIRECT\020\000\022\n\n\006FOL"
+    "LOW\020\001\022\022\n\016NOTIFY_MANAGER\020\002\"C\n\016NSPanelWarn"
+    "ing\022#\n\005level\030\001 \001(\0162\024.NSPanelWarningLevel"
+    "\022\014\n\004text\030\002 \001(\t\"\311\002\n\023NSPanelStatusReport\0221"
+    "\n\rnspanel_state\030\001 \001(\0162\032.NSPanelStatusRep"
+    "ort.state\022\027\n\017update_progress\030\002 \001(\005\022\014\n\004rs"
+    "si\030\003 \001(\005\022\025\n\rheap_used_pct\030\004 \001(\005\022\023\n\013mac_a"
+    "ddress\030\005 \001(\t\022\023\n\013temperature\030\006 \001(\002\022\022\n\nip_"
+    "address\030\007 \001(\t\022!\n\010warnings\030\010 \003(\0132\017.NSPane"
+    "lWarning\"`\n\005state\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE"
+    "\020\001\022\020\n\014UPDATING_TFT\020\002\022\025\n\021UPDATING_FIRMWAR"
+    "E\020\003\022\025\n\021UPDATING_LITTLEFS\020\004\"\325\001\n\022NSPanelLi"
+    "ghtStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\017\n\007c"
+    "an_dim\030\003 \001(\010\022\035\n\025can_color_temperature\030\004 "
+    "\001(\010\022\017\n\007can_rgb\030\005 \001(\010\022\023\n\013light_level\030\006 \001("
+    "\005\022\022\n\ncolor_temp\030\007 \001(\005\022\013\n\003hue\030\010 \001(\005\022\022\n\nsa"
+    "turation\030\t \001(\005\022\032\n\022room_view_position\030\n \001"
+    "(\005\"\375\001\n\027NSPanelRoomEntitiesPage\022\n\n\002id\030\001 \001"
+    "(\005\022\021\n\tpage_type\030\002 \001(\005\022\023\n\013header_text\030\003 \001"
+    "(\t\0225\n\010entities\030\004 \003(\0132#.NSPanelRoomEntiti"
+    "esPage.EntitySlot\032w\n\nEntitySlot\022\032\n\022room_"
+    "view_position\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\014\n\004ico"
+    "n\030\003 \001(\t\022\013\n\003pco\030\004 \001(\005\022\014\n\004pco2\030\005 \001(\005\022\026\n\016ca"
+    "n_save_scene\030\006 \001(\010\"\226\003\n\021NSPanelRoomStatus"
+    "\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\031\n\021average_di"
+    "m_level\030\003 \001(\005\022 \n\030ceiling_lights_dim_leve"
+    "l\030\004 \001(\005\022\036\n\026table_lights_dim_level\030\005 \001(\005\022"
+    "!\n\031average_color_temperature\030\006 \001(\005\022.\n&ce"
+    "iling_lights_color_temperature_value\030\007 \001"
+    "(\005\022,\n$table_lights_color_temperature_val"
+    "ue\030\010 \001(\005\022\032\n\022num_ceiling_lights\030\t \001(\005\022\030\n\020"
+    "num_table_lights\030\n \001(\005\022\035\n\025num_ceiling_li"
+    "ghts_on\030\013 \001(\005\022\033\n\023num_table_lights_on\030\014 \001"
+    "(\005\022\027\n\017entity_page_ids\030\r \003(\005\"\277\003\n\024NSPanelW"
+    "eatherUpdate\022:\n\016forecast_items\030\001 \003(\0132\".N"
+    "SPanelWeatherUpdate.ForecastItem\022\034\n\024curr"
+    "ent_weather_icon\030\002 \001(\t\022\"\n\032current_temper"
+    "ature_string\030\003 \001(\t\022\"\n\032current_maxmin_tem"
+    "perature\030\004 \001(\t\022\033\n\023current_wind_string\030\005 "
+    "\001(\t\022\026\n\016sunrise_string\030\006 \001(\t\022\025\n\rsunset_st"
+    "ring\030\007 \001(\t\022$\n\034current_precipitation_stri"
+    "ng\030\010 \001(\t\032\222\001\n\014ForecastItem\022\024\n\014weather_ico"
+    "n\030\001 \001(\t\022\034\n\024precipitation_string\030\002 \001(\t\022!\n"
+    "\031temperature_maxmin_string\030\003 \001(\t\022\023\n\013wind"
+    "_string\030\004 \001(\t\022\026\n\016display_string\030\005 \001(\t\"\315\n"
+    "\n\031NSPanelMQTTManagerCommand\022M\n\022first_pag"
+    "e_turn_on\030\001 \001(\0132/.NSPanelMQTTManagerComm"
+    "and.FirstPageTurnLightOnH\000\022O\n\023first_page"
+    "_turn_off\030\002 \001(\01320.NSPanelMQTTManagerComm"
+    "and.FirstPageTurnLightOffH\000\022@\n\rlight_com"
+    "mand\030\003 \001(\0132\'.NSPanelMQTTManagerCommand.L"
+    "ightCommandH\000\022c\n toggle_entity_from_enti"
+    "ties_page\030\004 \001(\01327.NSPanelMQTTManagerComm"
+    "and.ToggleEntityFromEntitiesPageH\000\022I\n\022sa"
+    "ve_scene_command\030\005 \001(\0132+.NSPanelMQTTMana"
+    "gerCommand.SaveSceneCommandH\000\022B\n\016button_"
+    "pressed\030\006 \001(\0132(.NSPanelMQTTManagerComman"
+    "d.ButtonPressedH\000\032\372\001\n\024FirstPageTurnLight"
+    "On\022E\n\raffect_lights\030\001 \001(\0162..NSPanelMQTTM"
+    "anagerCommand.AffectLightsOptions\022\037\n\027bri"
+    "ghtness_slider_value\030\002 \001(\005\022\033\n\023kelvin_sli"
+    "der_value\030\003 \001(\005\022\025\n\rselected_room\030\004 \001(\005\022\016"
+    "\n\006global\030\005 \001(\010\022\034\n\024has_brightness_value\030\006"
+    " \001(\010\022\030\n\020has_kelvin_value\030\007 \001(\010\032n\n\025FirstP"
+    "ageTurnLightOff\022E\n\raffect_lights\030\001 \001(\0162."
+    ".NSPanelMQTTManagerCommand.AffectLightsO"
+    "ptions\022\016\n\006global\030\002 \001(\010\032\321\001\n\014LightCommand\022"
+    "\021\n\tlight_ids\030\001 \003(\005\022\026\n\016has_brightness\030\002 \001"
+    "(\010\022\022\n\nbrightness\030\003 \001(\005\022\035\n\025has_color_temp"
+    "erature\030\004 \001(\010\022\031\n\021color_temperature\030\005 \001(\005"
+    "\022\017\n\007has_hue\030\006 \001(\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016has_sa"
+    "turation\030\010 \001(\010\022\022\n\nsaturation\030\t \001(\005\032K\n\034To"
+    "ggleEntityFromEntitiesPage\022\026\n\016entity_pag"
+    "e_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001(\005\032\?\n\020SaveS"
+    "ceneCommand\022\026\n\016entity_page_id\030\001 \001(\005\022\023\n\013e"
+    "ntity_slot\030\002 \001(\005\0326\n\rButtonPressed\022\022\n\nnsp"
+    "anel_id\030\001 \001(\005\022\021\n\tbutton_id\030\002 \001(\005\"D\n\023Affe"
+    "ctLightsOptions\022\007\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS"
+    "\020\001\022\022\n\016CEILING_LIGHTS\020\002B\r\n\013CommandData*[\n"
+    "\023NSPanelWarningLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ER"
+    "ROR\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022"
+    "\t\n\005TRACE\020\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    4804,
+    4738,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
     nullptr,
     0,
-    18,
+    17,
     schemas,
     file_default_instances,
     TableStruct_protobuf_5fnspanel_2eproto::offsets,
@@ -1093,265 +1056,6 @@ PROTOBUF_CONSTINIT const uint32_t NSPanelWarningLevel_internal_data_[] = {
     393216u, 0u, };
 bool NSPanelWarningLevel_IsValid(int value) {
   return 0 <= value && value <= 5;
-}
-// ===================================================================
-
-class NSPanelScene::_Internal {
- public:
-};
-
-NSPanelScene::NSPanelScene(::google::protobuf::Arena* arena)
-    : ::google::protobuf::Message(arena) {
-  SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:NSPanelScene)
-}
-inline PROTOBUF_NDEBUG_INLINE NSPanelScene::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
-    const Impl_& from, const ::NSPanelScene& from_msg)
-      : name_(arena, from.name_),
-        _cached_size_{0} {}
-
-NSPanelScene::NSPanelScene(
-    ::google::protobuf::Arena* arena,
-    const NSPanelScene& from)
-    : ::google::protobuf::Message(arena) {
-  NSPanelScene* const _this = this;
-  (void)_this;
-  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
-      from._internal_metadata_);
-  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  ::memcpy(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, scene_id_),
-           reinterpret_cast<const char *>(&from._impl_) +
-               offsetof(Impl_, scene_id_),
-           offsetof(Impl_, can_save_) -
-               offsetof(Impl_, scene_id_) +
-               sizeof(Impl_::can_save_));
-
-  // @@protoc_insertion_point(copy_constructor:NSPanelScene)
-}
-inline PROTOBUF_NDEBUG_INLINE NSPanelScene::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility,
-    ::google::protobuf::Arena* arena)
-      : name_(arena),
-        _cached_size_{0} {}
-
-inline void NSPanelScene::SharedCtor(::_pb::Arena* arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
-  ::memset(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, scene_id_),
-           0,
-           offsetof(Impl_, can_save_) -
-               offsetof(Impl_, scene_id_) +
-               sizeof(Impl_::can_save_));
-}
-NSPanelScene::~NSPanelScene() {
-  // @@protoc_insertion_point(destructor:NSPanelScene)
-  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
-  SharedDtor();
-}
-inline void NSPanelScene::SharedDtor() {
-  ABSL_DCHECK(GetArena() == nullptr);
-  _impl_.name_.Destroy();
-  _impl_.~Impl_();
-}
-
-const ::google::protobuf::MessageLite::ClassData*
-NSPanelScene::GetClassData() const {
-  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
-      ClassDataFull _data_ = {
-          {
-              &_table_.header,
-              nullptr,  // OnDemandRegisterArenaDtor
-              nullptr,  // IsInitialized
-              PROTOBUF_FIELD_OFFSET(NSPanelScene, _impl_._cached_size_),
-              false,
-          },
-          &NSPanelScene::MergeImpl,
-          &NSPanelScene::kDescriptorMethods,
-          &descriptor_table_protobuf_5fnspanel_2eproto,
-          nullptr,  // tracker
-      };
-  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
-  return _data_.base();
-}
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 0, 25, 2> NSPanelScene::_table_ = {
-  {
-    0,  // no _has_bits_
-    0, // no _extensions_
-    3, 24,  // max_field_number, fast_idx_mask
-    offsetof(decltype(_table_), field_lookup_table),
-    4294967288,  // skipmap
-    offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
-    &_NSPanelScene_default_instance_._instance,
-    nullptr,  // post_loop_handler
-    ::_pbi::TcParser::GenericFallback,  // fallback
-    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::NSPanelScene>(),  // to_prefetch
-    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
-  }, {{
-    {::_pbi::TcParser::MiniParse, {}},
-    // int32 scene_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelScene, _impl_.scene_id_), 63>(),
-     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelScene, _impl_.scene_id_)}},
-    // bool can_save = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelScene, _impl_.can_save_), 63>(),
-     {16, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelScene, _impl_.can_save_)}},
-    // string name = 3;
-    {::_pbi::TcParser::FastUS1,
-     {26, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelScene, _impl_.name_)}},
-  }}, {{
-    65535, 65535
-  }}, {{
-    // int32 scene_id = 1;
-    {PROTOBUF_FIELD_OFFSET(NSPanelScene, _impl_.scene_id_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // bool can_save = 2;
-    {PROTOBUF_FIELD_OFFSET(NSPanelScene, _impl_.can_save_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // string name = 3;
-    {PROTOBUF_FIELD_OFFSET(NSPanelScene, _impl_.name_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-  }},
-  // no aux_entries
-  {{
-    "\14\0\0\4\0\0\0\0"
-    "NSPanelScene"
-    "name"
-  }},
-};
-
-PROTOBUF_NOINLINE void NSPanelScene::Clear() {
-// @@protoc_insertion_point(message_clear_start:NSPanelScene)
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  _impl_.name_.ClearToEmpty();
-  ::memset(&_impl_.scene_id_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.can_save_) -
-      reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.can_save_));
-  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
-}
-
-::uint8_t* NSPanelScene::_InternalSerialize(
-    ::uint8_t* target,
-    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:NSPanelScene)
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
-
-  // int32 scene_id = 1;
-  if (this->_internal_scene_id() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<1>(
-            stream, this->_internal_scene_id(), target);
-  }
-
-  // bool can_save = 2;
-  if (this->_internal_can_save() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        2, this->_internal_can_save(), target);
-  }
-
-  // string name = 3;
-  if (!this->_internal_name().empty()) {
-    const std::string& _s = this->_internal_name();
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelScene.name");
-    target = stream->WriteStringMaybeAliased(3, _s, target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target =
-        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:NSPanelScene)
-  return target;
-}
-
-::size_t NSPanelScene::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:NSPanelScene)
-  ::size_t total_size = 0;
-
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
-  // string name = 3;
-  if (!this->_internal_name().empty()) {
-    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                    this->_internal_name());
-  }
-
-  // int32 scene_id = 1;
-  if (this->_internal_scene_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_scene_id());
-  }
-
-  // bool can_save = 2;
-  if (this->_internal_can_save() != 0) {
-    total_size += 2;
-  }
-
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-
-void NSPanelScene::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
-  auto* const _this = static_cast<NSPanelScene*>(&to_msg);
-  auto& from = static_cast<const NSPanelScene&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelScene)
-  ABSL_DCHECK_NE(&from, _this);
-  ::uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (!from._internal_name().empty()) {
-    _this->_internal_set_name(from._internal_name());
-  }
-  if (from._internal_scene_id() != 0) {
-    _this->_impl_.scene_id_ = from._impl_.scene_id_;
-  }
-  if (from._internal_can_save() != 0) {
-    _this->_impl_.can_save_ = from._impl_.can_save_;
-  }
-  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void NSPanelScene::CopyFrom(const NSPanelScene& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelScene)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-
-void NSPanelScene::InternalSwap(NSPanelScene* PROTOBUF_RESTRICT other) {
-  using std::swap;
-  auto* arena = GetArena();
-  ABSL_DCHECK_EQ(arena, other->GetArena());
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
-  ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(NSPanelScene, _impl_.can_save_)
-      + sizeof(NSPanelScene::_impl_.can_save_)
-      - PROTOBUF_FIELD_OFFSET(NSPanelScene, _impl_.scene_id_)>(
-          reinterpret_cast<char*>(&_impl_.scene_id_),
-          reinterpret_cast<char*>(&other->_impl_.scene_id_));
-}
-
-::google::protobuf::Metadata NSPanelScene::GetMetadata() const {
-  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // ===================================================================
 
@@ -1625,7 +1329,8 @@ inline PROTOBUF_NDEBUG_INLINE NSPanelConfig::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
     const Impl_& from, const ::NSPanelConfig& from_msg)
       : room_infos_{visibility, arena, from.room_infos_},
-        global_scenes_{visibility, arena, from.global_scenes_},
+        global_scene_entity_page_ids_{visibility, arena, from.global_scene_entity_page_ids_},
+        _global_scene_entity_page_ids_cached_byte_size_{0},
         name_(arena, from.name_),
         _cached_size_{0} {}
 
@@ -1652,7 +1357,8 @@ inline PROTOBUF_NDEBUG_INLINE NSPanelConfig::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
       : room_infos_{visibility, arena},
-        global_scenes_{visibility, arena},
+        global_scene_entity_page_ids_{visibility, arena},
+        _global_scene_entity_page_ids_cached_byte_size_{0},
         name_(arena),
         _cached_size_{0} {}
 
@@ -1697,7 +1403,7 @@ NSPanelConfig::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<5, 33, 2, 58, 7> NSPanelConfig::_table_ = {
+const ::_pbi::TcParseTable<5, 33, 1, 58, 7> NSPanelConfig::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
@@ -1706,7 +1412,7 @@ const ::_pbi::TcParseTable<5, 33, 2, 58, 7> NSPanelConfig::_table_ = {
     515899392,  // skipmap
     offsetof(decltype(_table_), field_entries),
     33,  // num_field_entries
-    2,  // num_aux_entries
+    1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelConfig_default_instance_._instance,
     nullptr,  // post_loop_handler
@@ -1793,9 +1499,9 @@ const ::_pbi::TcParseTable<5, 33, 2, 58, 7> NSPanelConfig::_table_ = {
     {::_pbi::TcParser::MiniParse, {}},
     {::_pbi::TcParser::MiniParse, {}},
     {::_pbi::TcParser::MiniParse, {}},
-    // repeated .NSPanelScene global_scenes = 30;
-    {::_pbi::TcParser::FastMtR2,
-     {498, 63, 1, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.global_scenes_)}},
+    // repeated int32 global_scene_entity_page_ids = 30;
+    {::_pbi::TcParser::FastV32P2,
+     {498, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.global_scene_entity_page_ids_)}},
     // bool optimistic_mode = 31;
     {::_pbi::TcParser::FastV8S2,
      {504, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.optimistic_mode_)}},
@@ -1873,9 +1579,9 @@ const ::_pbi::TcParseTable<5, 33, 2, 58, 7> NSPanelConfig::_table_ = {
     // .NSPanelConfig.NSPanelButtonMode button2_mode = 25;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
-    // repeated .NSPanelScene global_scenes = 30;
-    {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.global_scenes_), 0, 1,
-    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+    // repeated int32 global_scene_entity_page_ids = 30;
+    {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.global_scene_entity_page_ids_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
     // bool optimistic_mode = 31;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.optimistic_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
@@ -1905,7 +1611,6 @@ const ::_pbi::TcParseTable<5, 33, 2, 58, 7> NSPanelConfig::_table_ = {
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
   }}, {{
     {::_pbi::TcParser::GetTable<::NSPanelConfig_RoomInfo>()},
-    {::_pbi::TcParser::GetTable<::NSPanelScene>()},
   }}, {{
     "\15\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
     "NSPanelConfig"
@@ -1921,7 +1626,7 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
   (void) cached_has_bits;
 
   _impl_.room_infos_.Clear();
-  _impl_.global_scenes_.Clear();
+  _impl_.global_scene_entity_page_ids_.Clear();
   _impl_.name_.ClearToEmpty();
   ::memset(&_impl_.default_room_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.default_light_brightess_) -
@@ -2107,15 +1812,13 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
         25, this->_internal_button2_mode(), target);
   }
 
-  // repeated .NSPanelScene global_scenes = 30;
-  for (unsigned i = 0, n = static_cast<unsigned>(
-                           this->_internal_global_scenes_size());
-       i < n; i++) {
-    const auto& repfield = this->_internal_global_scenes().Get(i);
-    target =
-        ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-            30, repfield, repfield.GetCachedSize(),
-            target, stream);
+  // repeated int32 global_scene_entity_page_ids = 30;
+  {
+    int byte_size = _impl_._global_scene_entity_page_ids_cached_byte_size_.Get();
+    if (byte_size > 0) {
+      target = stream->WriteInt32Packed(
+          30, _internal_global_scene_entity_page_ids(), byte_size, target);
+    }
   }
 
   // bool optimistic_mode = 31;
@@ -2204,10 +1907,18 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
   for (const auto& msg : this->_internal_room_infos()) {
     total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
   }
-  // repeated .NSPanelScene global_scenes = 30;
-  total_size += 2UL * this->_internal_global_scenes_size();
-  for (const auto& msg : this->_internal_global_scenes()) {
-    total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+  // repeated int32 global_scene_entity_page_ids = 30;
+  {
+    std::size_t data_size = ::_pbi::WireFormatLite::Int32Size(
+        this->_internal_global_scene_entity_page_ids())
+    ;
+    _impl_._global_scene_entity_page_ids_cached_byte_size_.Set(::_pbi::ToCachedSize(data_size));
+    std::size_t tag_size = data_size == 0
+        ? 0
+        : 2 + ::_pbi::WireFormatLite::Int32Size(
+                            static_cast<int32_t>(data_size))
+    ;
+    total_size += tag_size + data_size;
   }
   // string name = 1;
   if (!this->_internal_name().empty()) {
@@ -2401,8 +2112,7 @@ void NSPanelConfig::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::g
 
   _this->_internal_mutable_room_infos()->MergeFrom(
       from._internal_room_infos());
-  _this->_internal_mutable_global_scenes()->MergeFrom(
-      from._internal_global_scenes());
+  _this->_internal_mutable_global_scene_entity_page_ids()->MergeFrom(from._internal_global_scene_entity_page_ids());
   if (!from._internal_name().empty()) {
     _this->_internal_set_name(from._internal_name());
   }
@@ -2518,7 +2228,7 @@ void NSPanelConfig::InternalSwap(NSPanelConfig* PROTOBUF_RESTRICT other) {
   ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   _impl_.room_infos_.InternalSwap(&other->_impl_.room_infos_);
-  _impl_.global_scenes_.InternalSwap(&other->_impl_.global_scenes_);
+  _impl_.global_scene_entity_page_ids_.InternalSwap(&other->_impl_.global_scene_entity_page_ids_);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.default_light_brightess_)

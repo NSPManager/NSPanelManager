@@ -8,6 +8,7 @@
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_nspanel.pb.h"
 #include "room/room_entities_page.hpp"
+#include "scenes/scene.hpp"
 #include "web_helper/WebHelper.hpp"
 #include <algorithm>
 #include <boost/algorithm/string/classification.hpp>
@@ -350,8 +351,16 @@ void NSPanel::send_config() {
   }
   SPDLOG_DEBUG("NSPanel {}::{} loaded {} rooms.", this->_id, this->_name, config.room_infos_size());
 
-  // TODO: Set scenes
-  config.clear_global_scenes();
+  // Load global scenes
+  std::vector<uint32_t> global_scene_entity_pages_ids;
+  for (auto &scene : EntityManager::get_all_entities_by_type<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE)) {
+    if (scene->is_global()) {
+      if (std::find(global_scene_entity_pages_ids.begin(), global_scene_entity_pages_ids.end(), scene->get_entity_page_id()) == global_scene_entity_pages_ids.end()) {
+        global_scene_entity_pages_ids.push_back(scene->get_entity_page_id());
+        config.add_global_scene_entity_page_ids(scene->get_entity_page_id());
+      }
+    }
+  }
 
   std::string config_str = config.SerializeAsString();
   MQTT_Manager::publish(this->_mqtt_config_topic, config_str, true);

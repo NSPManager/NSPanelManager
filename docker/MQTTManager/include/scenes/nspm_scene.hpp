@@ -31,7 +31,6 @@ public:
   void command_callback(NSPanelMQTTManagerCommand &command);
 
 private:
-  bool _is_global_scene;
   uint16_t _id;
   std::string _name;
   uint16_t _room_id;

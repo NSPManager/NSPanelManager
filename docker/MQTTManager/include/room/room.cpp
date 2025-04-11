@@ -11,6 +11,7 @@
 #include <boost/stacktrace.hpp>
 #include <cstdint>
 #include <database_manager/database_manager.hpp>
+#include <google/protobuf/util/message_differencer.h>
 #include <memory>
 #include <mutex>
 #include <netdb.h>
@@ -147,14 +148,14 @@ void Room::post_init() {
   {
     std::lock_guard<std::mutex> mutex_guard(this->_entities_pages_mutex);
     for (std::shared_ptr<RoomEntitiesPage> &page : this->_entity_pages) {
-      page->post_init();
+      page->post_init(false);
       page->attach_state_change_callback(boost::bind(&Room::page_changed_callback, this, _1));
       SPDLOG_DEBUG("Attached callbacks for all entities in RoomEntitiesPage {}.", page->get_id());
     }
 
     std::lock_guard<std::mutex> scene_mutex_guard(this->_scene_entities_pages_mutex);
     for (std::shared_ptr<RoomEntitiesPage> &page : this->_scene_pages) {
-      page->post_init();
+      page->post_init(false);
       page->attach_state_change_callback(boost::bind(&Room::page_changed_callback, this, _1));
       SPDLOG_DEBUG("Attached callbacks for all scenes in RoomEntitiesPage {}.", page->get_id());
     }
@@ -396,10 +397,14 @@ void Room::_send_room_state_update() {
 
   SPDLOG_DEBUG("Room {}::{} average dim level: {}, average color temperature: {}. Num ceiling lights on: {}, Ceiling lights brightness: {}, Num table lights on: {}, Table lights brightness: {}", this->_id, this->_name, status.average_dim_level(), status.average_color_temperature(), num_lights_ceiling_on, status.ceiling_lights_dim_level(), num_lights_table_on, status.table_lights_dim_level());
 
-  std::string protobuf_str_buffer;
-  if (status.SerializeToString(&protobuf_str_buffer)) {
-    MQTT_Manager::publish(this->_mqtt_state_topic, protobuf_str_buffer, true);
-  } else {
-    SPDLOG_ERROR("Failed to serialize room {}::{} protobuf state object. Will not publish.", this->_id, this->_name);
+  google::protobuf::util::MessageDifferencer differencer;
+  if (!differencer.Equals(status, this->_last_room_status)) {
+    std::string protobuf_str_buffer;
+    if (status.SerializeToString(&protobuf_str_buffer)) {
+      MQTT_Manager::publish(this->_mqtt_state_topic, protobuf_str_buffer, true);
+      this->_last_room_status = status;
+    } else {
+      SPDLOG_ERROR("Failed to serialize room {}::{} protobuf state object. Will not publish.", this->_id, this->_name);
+    }
   }
 }

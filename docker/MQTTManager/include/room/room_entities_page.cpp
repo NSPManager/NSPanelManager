@@ -13,6 +13,7 @@
 #include <entity/entity_icons.hpp>
 #include <exception>
 #include <fmt/format.h>
+#include <google/protobuf/util/message_differencer.h>
 #include <memory>
 #include <mutex>
 #include <protobuf/protobuf_general.pb.h>
@@ -81,20 +82,26 @@ uint16_t RoomEntitiesPage::get_display_order() {
   return this->_page_settings.display_order;
 }
 
-void RoomEntitiesPage::post_init() {
-  std::lock_guard<std::mutex> mutex_guard(this->_page_settings_mutex);
-  this->_entities.resize(this->_page_settings.page_type);
-  uint8_t entities_attached = 0;
-  for (int i = 0; i < this->_page_settings.page_type; i++) {
-    this->_entities[i] = EntityManager::get_entity_by_page_id_and_slot(this->_id, i);
-    if (this->_entities[i] != nullptr) {
-      entities_attached++;
-      SPDLOG_DEBUG("Attached entity type {} with ID {} to RoomEntitiesPage ID {} page slot {}.", (int)this->_entities[i]->get_type(), this->_entities[i]->get_id(), this->_id, i);
+void RoomEntitiesPage::post_init(bool send_state_update) {
+  {
+    std::lock_guard<std::mutex> mutex_guard(this->_page_settings_mutex);
+    this->_entities.resize(this->_page_settings.page_type);
+    uint8_t entities_attached = 0;
+    for (int i = 0; i < this->_page_settings.page_type; i++) {
+      this->_entities[i] = EntityManager::get_entity_by_page_id_and_slot(this->_id, i);
+      if (this->_entities[i] != nullptr) {
+        entities_attached++;
+        SPDLOG_DEBUG("Attached entity type {} with ID {} to RoomEntitiesPage ID {} page slot {}.", (int)this->_entities[i]->get_type(), this->_entities[i]->get_id(), this->_id, i);
 
-      this->_entities[i]->attach_entity_changed_callback(boost::bind(&RoomEntitiesPage::_entity_changed_callback, this, _1));
+        this->_entities[i]->attach_entity_changed_callback(boost::bind(&RoomEntitiesPage::_entity_changed_callback, this, _1));
+      }
     }
+    SPDLOG_DEBUG("Attached {} entities to RoomEntitiesPage {}.", entities_attached, this->_id);
   }
-  SPDLOG_DEBUG("Attached {} entities to RoomEntitiesPage {}.", entities_attached, this->_id);
+
+  if (send_state_update) {
+    this->_send_mqtt_state_update();
+  }
 }
 
 std::vector<std::shared_ptr<MqttManagerEntity>> RoomEntitiesPage::get_entities() {
@@ -121,9 +128,17 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
   proto_state.set_id(this->_id);
   proto_state.set_page_type(this->_page_settings.page_type);
   if (this->_page_settings.is_scenes_page) {
-    proto_state.set_header_text(fmt::format("{} {}/{}", this->_room->get_name(), this->_page_settings.display_order + 1, this->_room->get_number_of_scene_pages()));
+    if (this->_room != nullptr) {
+      proto_state.set_header_text(fmt::format("{} {}/{}", this->_room->get_name(), this->_page_settings.display_order + 1, this->_room->get_number_of_scene_pages()));
+    } else {
+      proto_state.set_header_text(fmt::format("{}/{}", this->_page_settings.display_order + 1, EntityManager::get_number_of_global_room_entities_pages()));
+    }
   } else {
-    proto_state.set_header_text(fmt::format("{} {}/{}", this->_room->get_name(), this->_page_settings.display_order + 1, this->_room->get_number_of_entity_pages()));
+    if (this->_room != nullptr) {
+      proto_state.set_header_text(fmt::format("{} {}/{}", this->_room->get_name(), this->_page_settings.display_order + 1, this->_room->get_number_of_entity_pages()));
+    } else {
+      proto_state.set_header_text(fmt::format("{}/{}", this->_page_settings.display_order + 1, EntityManager::get_number_of_global_room_entities_pages()));
+    }
   }
 
   std::lock_guard<std::mutex> lock_guard(this->_entities_mutex);
@@ -171,10 +186,17 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
     }
   }
 
-  std::string protobuf_buffer;
-  if (proto_state.SerializeToString(&protobuf_buffer)) {
-    MQTT_Manager::publish(this->_mqtt_state_topic, protobuf_buffer, true);
+  google::protobuf::util::MessageDifferencer differencier;
+  if (!differencier.Equals(proto_state, this->_last_entities_page_protobuf_state)) {
+    std::string protobuf_buffer;
+    if (proto_state.SerializeToString(&protobuf_buffer)) {
+      SPDLOG_DEBUG("Publishing state update to {}", this->_mqtt_state_topic);
+      MQTT_Manager::publish(this->_mqtt_state_topic, protobuf_buffer, true);
+      this->_last_entities_page_protobuf_state = proto_state;
+    } else {
+      SPDLOG_ERROR("Failed to serialize protobuf for entity page {} state.", this->_id);
+    }
   } else {
-    SPDLOG_ERROR("Failed to serialize protobuf for entity page {} state.", this->_id);
+    SPDLOG_DEBUG("Did not send update, no difference.");
   }
 }

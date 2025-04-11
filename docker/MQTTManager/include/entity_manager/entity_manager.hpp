@@ -3,6 +3,7 @@
 
 #include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
+#include "room/room_entities_page.hpp"
 #include <algorithm>
 #include <boost/signals2.hpp>
 #include <condition_variable>
@@ -74,6 +75,12 @@ public:
    */
   static void load_scenes();
 
+  /*
+   * Load RoomEntitiesPages from the DB and remove any existing page that no longer exist.
+   * This is primarily used for global scenes pages.
+   */
+  static void load_room_entities_pages();
+
   /**
    * Get a room with the given ID if it existing. Otherwise returns nullptr.
    */
@@ -83,6 +90,16 @@ public:
    * Get all currently registered rooms
    */
   static std::vector<std::shared_ptr<Room>> get_all_rooms();
+
+  /*
+   * Get all currently registered room entities pages.
+   */
+  static std::vector<std::shared_ptr<RoomEntitiesPage>> get_all_global_room_entities_pages();
+
+  /*
+   * Get number of register entities pages.
+   */
+  static int32_t get_number_of_global_room_entities_pages();
 
   /*
    * When a room is updated, update the "All rooms" status for when the panel is in the "All rooms" mode.
@@ -175,6 +192,9 @@ private:
 
   static inline std::vector<std::shared_ptr<NSPanel>> _nspanels;
   static inline std::mutex _nspanels_mutex;
+
+  static inline std::vector<std::shared_ptr<RoomEntitiesPage>> _global_room_entities_pages;
+  static inline std::mutex _global_room_entities_pages_mutex;
 
   static inline std::atomic<bool> _all_rooms_status_updated;
   static inline void _room_updated_callback(Room *room);

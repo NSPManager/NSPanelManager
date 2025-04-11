@@ -1,6 +1,8 @@
 #pragma once
 #include <csignal>
 #include <cstdlib>
+#include <memory>
+#include <optional>
 #include <spdlog/spdlog.h>
 #include <sqlite3.h>
 #include <sqlite_orm/sqlite_orm.h>
@@ -84,8 +86,8 @@ struct RoomEntitiesPage {
   int page_type = 0;
   bool is_scenes_page = false;
 
-  // Reference to parent room that this page is attached to.
-  int room_id = 0;
+  // Reference to parent room that this page is attached to. Not set in case of global page.
+  std::optional<int> room_id = 0;
 };
 
 struct Light {

@@ -128,7 +128,6 @@ def rooms(request):
             "nspanels": room.nspanel_set.filter(accepted=True, denied=False),
         })
 
-    print(data)
     return render(request, 'rooms.html', data)
 
 

@@ -21,7 +21,6 @@ public:
   uint16_t get_icon_active_color();
 
 private:
-  bool _is_global_scene;
   uint16_t _id;
   std::string _name;
   std::string _entity_id;

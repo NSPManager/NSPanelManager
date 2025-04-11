@@ -89,9 +89,6 @@ extern NSPanelRoomEntitiesPage_EntitySlotDefaultTypeInternal _NSPanelRoomEntitie
 class NSPanelRoomStatus;
 struct NSPanelRoomStatusDefaultTypeInternal;
 extern NSPanelRoomStatusDefaultTypeInternal _NSPanelRoomStatus_default_instance_;
-class NSPanelScene;
-struct NSPanelSceneDefaultTypeInternal;
-extern NSPanelSceneDefaultTypeInternal _NSPanelScene_default_instance_;
 class NSPanelStatusReport;
 struct NSPanelStatusReportDefaultTypeInternal;
 extern NSPanelStatusReportDefaultTypeInternal _NSPanelStatusReport_default_instance_;
@@ -381,7 +378,7 @@ class NSPanelWeatherUpdate_ForecastItem final : public ::google::protobuf::Messa
     return reinterpret_cast<const NSPanelWeatherUpdate_ForecastItem*>(
         &_NSPanelWeatherUpdate_ForecastItem_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 9;
+  static constexpr int kIndexInFileMessages = 8;
   friend void swap(NSPanelWeatherUpdate_ForecastItem& a, NSPanelWeatherUpdate_ForecastItem& b) { a.Swap(&b); }
   inline void Swap(NSPanelWeatherUpdate_ForecastItem* other) {
     if (other == this) return;
@@ -630,7 +627,7 @@ class NSPanelWarning final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelWarning*>(
         &_NSPanelWarning_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 3;
+  static constexpr int kIndexInFileMessages = 2;
   friend void swap(NSPanelWarning& a, NSPanelWarning& b) { a.Swap(&b); }
   inline void Swap(NSPanelWarning* other) {
     if (other == this) return;
@@ -764,207 +761,6 @@ class NSPanelWarning final : public ::google::protobuf::Message
 };
 // -------------------------------------------------------------------
 
-class NSPanelScene final : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:NSPanelScene) */ {
- public:
-  inline NSPanelScene() : NSPanelScene(nullptr) {}
-  ~NSPanelScene() override;
-  template <typename = void>
-  explicit PROTOBUF_CONSTEXPR NSPanelScene(
-      ::google::protobuf::internal::ConstantInitialized);
-
-  inline NSPanelScene(const NSPanelScene& from) : NSPanelScene(nullptr, from) {}
-  inline NSPanelScene(NSPanelScene&& from) noexcept
-      : NSPanelScene(nullptr, std::move(from)) {}
-  inline NSPanelScene& operator=(const NSPanelScene& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline NSPanelScene& operator=(NSPanelScene&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetArena() == from.GetArena()
-#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetArena() != nullptr
-#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
-  }
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::google::protobuf::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::google::protobuf::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const NSPanelScene& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const NSPanelScene* internal_default_instance() {
-    return reinterpret_cast<const NSPanelScene*>(
-        &_NSPanelScene_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages = 0;
-  friend void swap(NSPanelScene& a, NSPanelScene& b) { a.Swap(&b); }
-  inline void Swap(NSPanelScene* other) {
-    if (other == this) return;
-#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
-#else   // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() == other->GetArena()) {
-#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::google::protobuf::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(NSPanelScene* other) {
-    if (other == this) return;
-    ABSL_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  NSPanelScene* New(::google::protobuf::Arena* arena = nullptr) const final {
-    return ::google::protobuf::Message::DefaultConstruct<NSPanelScene>(arena);
-  }
-  using ::google::protobuf::Message::CopyFrom;
-  void CopyFrom(const NSPanelScene& from);
-  using ::google::protobuf::Message::MergeFrom;
-  void MergeFrom(const NSPanelScene& from) { NSPanelScene::MergeImpl(*this, from); }
-
-  private:
-  static void MergeImpl(
-      ::google::protobuf::MessageLite& to_msg,
-      const ::google::protobuf::MessageLite& from_msg);
-
-  public:
-  bool IsInitialized() const {
-    return true;
-  }
-  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
-  ::size_t ByteSizeLong() const final;
-  ::uint8_t* _InternalSerialize(
-      ::uint8_t* target,
-      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
-  void InternalSwap(NSPanelScene* other);
- private:
-  friend class ::google::protobuf::internal::AnyMetadata;
-  static ::absl::string_view FullMessageName() { return "NSPanelScene"; }
-
- protected:
-  explicit NSPanelScene(::google::protobuf::Arena* arena);
-  NSPanelScene(::google::protobuf::Arena* arena, const NSPanelScene& from);
-  NSPanelScene(::google::protobuf::Arena* arena, NSPanelScene&& from) noexcept
-      : NSPanelScene(arena) {
-    *this = ::std::move(from);
-  }
-  const ::google::protobuf::Message::ClassData* GetClassData() const final;
-
- public:
-  ::google::protobuf::Metadata GetMetadata() const;
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-  enum : int {
-    kNameFieldNumber = 3,
-    kSceneIdFieldNumber = 1,
-    kCanSaveFieldNumber = 2,
-  };
-  // string name = 3;
-  void clear_name() ;
-  const std::string& name() const;
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_name(Arg_&& arg, Args_... args);
-  std::string* mutable_name();
-  PROTOBUF_NODISCARD std::string* release_name();
-  void set_allocated_name(std::string* value);
-
-  private:
-  const std::string& _internal_name() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_name(
-      const std::string& value);
-  std::string* _internal_mutable_name();
-
-  public:
-  // int32 scene_id = 1;
-  void clear_scene_id() ;
-  ::int32_t scene_id() const;
-  void set_scene_id(::int32_t value);
-
-  private:
-  ::int32_t _internal_scene_id() const;
-  void _internal_set_scene_id(::int32_t value);
-
-  public:
-  // bool can_save = 2;
-  void clear_can_save() ;
-  bool can_save() const;
-  void set_can_save(bool value);
-
-  private:
-  bool _internal_can_save() const;
-  void _internal_set_can_save(bool value);
-
-  public:
-  // @@protoc_insertion_point(class_scope:NSPanelScene)
- private:
-  class _Internal;
-  friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<
-      2, 3, 0,
-      25, 2>
-      _table_;
-
-  static constexpr const void* _raw_default_instance_ =
-      &_NSPanelScene_default_instance_;
-
-  friend class ::google::protobuf::MessageLite;
-  friend class ::google::protobuf::Arena;
-  template <typename T>
-  friend class ::google::protobuf::Arena::InternalHelper;
-  using InternalArenaConstructable_ = void;
-  using DestructorSkippable_ = void;
-  struct Impl_ {
-    inline explicit constexpr Impl_(
-        ::google::protobuf::internal::ConstantInitialized) noexcept;
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena);
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena, const Impl_& from,
-                          const NSPanelScene& from_msg);
-    ::google::protobuf::internal::ArenaStringPtr name_;
-    ::int32_t scene_id_;
-    bool can_save_;
-    mutable ::google::protobuf::internal::CachedSize _cached_size_;
-    PROTOBUF_TSAN_DECLARE_MEMBER
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
-};
-// -------------------------------------------------------------------
-
 class NSPanelRoomStatus final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:NSPanelRoomStatus) */ {
  public:
@@ -1020,7 +816,7 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelRoomStatus*>(
         &_NSPanelRoomStatus_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 8;
+  static constexpr int kIndexInFileMessages = 7;
   friend void swap(NSPanelRoomStatus& a, NSPanelRoomStatus& b) { a.Swap(&b); }
   inline void Swap(NSPanelRoomStatus* other) {
     if (other == this) return;
@@ -1350,7 +1146,7 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
     return reinterpret_cast<const NSPanelRoomEntitiesPage_EntitySlot*>(
         &_NSPanelRoomEntitiesPage_EntitySlot_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 6;
+  static constexpr int kIndexInFileMessages = 5;
   friend void swap(NSPanelRoomEntitiesPage_EntitySlot& a, NSPanelRoomEntitiesPage_EntitySlot& b) { a.Swap(&b); }
   inline void Swap(NSPanelRoomEntitiesPage_EntitySlot* other) {
     if (other == this) return;
@@ -1593,7 +1389,7 @@ class NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage final : public ::go
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage*>(
         &_NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 14;
+  static constexpr int kIndexInFileMessages = 13;
   friend void swap(NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& a, NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* other) {
     if (other == this) return;
@@ -1776,7 +1572,7 @@ class NSPanelMQTTManagerCommand_SaveSceneCommand final : public ::google::protob
     return reinterpret_cast<const NSPanelMQTTManagerCommand_SaveSceneCommand*>(
         &_NSPanelMQTTManagerCommand_SaveSceneCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 15;
+  static constexpr int kIndexInFileMessages = 14;
   friend void swap(NSPanelMQTTManagerCommand_SaveSceneCommand& a, NSPanelMQTTManagerCommand_SaveSceneCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_SaveSceneCommand* other) {
     if (other == this) return;
@@ -1959,7 +1755,7 @@ class NSPanelMQTTManagerCommand_LightCommand final : public ::google::protobuf::
     return reinterpret_cast<const NSPanelMQTTManagerCommand_LightCommand*>(
         &_NSPanelMQTTManagerCommand_LightCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 13;
+  static constexpr int kIndexInFileMessages = 12;
   friend void swap(NSPanelMQTTManagerCommand_LightCommand& a, NSPanelMQTTManagerCommand_LightCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_LightCommand* other) {
     if (other == this) return;
@@ -2235,7 +2031,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOn final : public ::google::pr
     return reinterpret_cast<const NSPanelMQTTManagerCommand_FirstPageTurnLightOn*>(
         &_NSPanelMQTTManagerCommand_FirstPageTurnLightOn_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 11;
+  static constexpr int kIndexInFileMessages = 10;
   friend void swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOn& a, NSPanelMQTTManagerCommand_FirstPageTurnLightOn& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOn* other) {
     if (other == this) return;
@@ -2478,7 +2274,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOff final : public ::google::p
     return reinterpret_cast<const NSPanelMQTTManagerCommand_FirstPageTurnLightOff*>(
         &_NSPanelMQTTManagerCommand_FirstPageTurnLightOff_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 12;
+  static constexpr int kIndexInFileMessages = 11;
   friend void swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOff& a, NSPanelMQTTManagerCommand_FirstPageTurnLightOff& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOff* other) {
     if (other == this) return;
@@ -2661,7 +2457,7 @@ class NSPanelMQTTManagerCommand_ButtonPressed final : public ::google::protobuf:
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ButtonPressed*>(
         &_NSPanelMQTTManagerCommand_ButtonPressed_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 16;
+  static constexpr int kIndexInFileMessages = 15;
   friend void swap(NSPanelMQTTManagerCommand_ButtonPressed& a, NSPanelMQTTManagerCommand_ButtonPressed& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ButtonPressed* other) {
     if (other == this) return;
@@ -2844,7 +2640,7 @@ class NSPanelLightStatus final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelLightStatus*>(
         &_NSPanelLightStatus_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 5;
+  static constexpr int kIndexInFileMessages = 4;
   friend void swap(NSPanelLightStatus& a, NSPanelLightStatus& b) { a.Swap(&b); }
   inline void Swap(NSPanelLightStatus* other) {
     if (other == this) return;
@@ -3129,7 +2925,7 @@ class NSPanelConfig_RoomInfo final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelConfig_RoomInfo*>(
         &_NSPanelConfig_RoomInfo_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 0;
   friend void swap(NSPanelConfig_RoomInfo& a, NSPanelConfig_RoomInfo& b) { a.Swap(&b); }
   inline void Swap(NSPanelConfig_RoomInfo* other) {
     if (other == this) return;
@@ -3342,7 +3138,7 @@ class NSPanelWeatherUpdate final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelWeatherUpdate*>(
         &_NSPanelWeatherUpdate_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 10;
+  static constexpr int kIndexInFileMessages = 9;
   friend void swap(NSPanelWeatherUpdate& a, NSPanelWeatherUpdate& b) { a.Swap(&b); }
   inline void Swap(NSPanelWeatherUpdate* other) {
     if (other == this) return;
@@ -3647,7 +3443,7 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelStatusReport*>(
         &_NSPanelStatusReport_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 4;
+  static constexpr int kIndexInFileMessages = 3;
   friend void swap(NSPanelStatusReport& a, NSPanelStatusReport& b) { a.Swap(&b); }
   inline void Swap(NSPanelStatusReport* other) {
     if (other == this) return;
@@ -3943,7 +3739,7 @@ class NSPanelRoomEntitiesPage final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelRoomEntitiesPage*>(
         &_NSPanelRoomEntitiesPage_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 7;
+  static constexpr int kIndexInFileMessages = 6;
   friend void swap(NSPanelRoomEntitiesPage& a, NSPanelRoomEntitiesPage& b) { a.Swap(&b); }
   inline void Swap(NSPanelRoomEntitiesPage* other) {
     if (other == this) return;
@@ -4173,7 +3969,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelMQTTManagerCommand*>(
         &_NSPanelMQTTManagerCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 17;
+  static constexpr int kIndexInFileMessages = 16;
   friend void swap(NSPanelMQTTManagerCommand& a, NSPanelMQTTManagerCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand* other) {
     if (other == this) return;
@@ -4499,7 +4295,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelConfig*>(
         &_NSPanelConfig_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 2;
+  static constexpr int kIndexInFileMessages = 1;
   friend void swap(NSPanelConfig& a, NSPanelConfig& b) { a.Swap(&b); }
   inline void Swap(NSPanelConfig* other) {
     if (other == this) return;
@@ -4632,7 +4428,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kRoomInfosFieldNumber = 17,
-    kGlobalScenesFieldNumber = 30,
+    kGlobalSceneEntityPageIdsFieldNumber = 30,
     kNameFieldNumber = 1,
     kDefaultRoomFieldNumber = 2,
     kDefaultPageFieldNumber = 3,
@@ -4682,23 +4478,24 @@ class NSPanelConfig final : public ::google::protobuf::Message
   const ::NSPanelConfig_RoomInfo& room_infos(int index) const;
   ::NSPanelConfig_RoomInfo* add_room_infos();
   const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_RoomInfo>& room_infos() const;
-  // repeated .NSPanelScene global_scenes = 30;
-  int global_scenes_size() const;
+  // repeated int32 global_scene_entity_page_ids = 30;
+  int global_scene_entity_page_ids_size() const;
   private:
-  int _internal_global_scenes_size() const;
+  int _internal_global_scene_entity_page_ids_size() const;
 
   public:
-  void clear_global_scenes() ;
-  ::NSPanelScene* mutable_global_scenes(int index);
-  ::google::protobuf::RepeatedPtrField<::NSPanelScene>* mutable_global_scenes();
+  void clear_global_scene_entity_page_ids() ;
+  ::int32_t global_scene_entity_page_ids(int index) const;
+  void set_global_scene_entity_page_ids(int index, ::int32_t value);
+  void add_global_scene_entity_page_ids(::int32_t value);
+  const ::google::protobuf::RepeatedField<::int32_t>& global_scene_entity_page_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* mutable_global_scene_entity_page_ids();
 
   private:
-  const ::google::protobuf::RepeatedPtrField<::NSPanelScene>& _internal_global_scenes() const;
-  ::google::protobuf::RepeatedPtrField<::NSPanelScene>* _internal_mutable_global_scenes();
+  const ::google::protobuf::RepeatedField<::int32_t>& _internal_global_scene_entity_page_ids() const;
+  ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_global_scene_entity_page_ids();
+
   public:
-  const ::NSPanelScene& global_scenes(int index) const;
-  ::NSPanelScene* add_global_scenes();
-  const ::google::protobuf::RepeatedPtrField<::NSPanelScene>& global_scenes() const;
   // string name = 1;
   void clear_name() ;
   const std::string& name() const;
@@ -5020,7 +4817,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 33, 2,
+      5, 33, 1,
       58, 7>
       _table_;
 
@@ -5042,7 +4839,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const NSPanelConfig& from_msg);
     ::google::protobuf::RepeatedPtrField< ::NSPanelConfig_RoomInfo > room_infos_;
-    ::google::protobuf::RepeatedPtrField< ::NSPanelScene > global_scenes_;
+    ::google::protobuf::RepeatedField<::int32_t> global_scene_entity_page_ids_;
+    mutable ::google::protobuf::internal::CachedSize _global_scene_entity_page_ids_cached_byte_size_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::int32_t default_room_;
     int default_page_;
@@ -5093,104 +4891,6 @@ class NSPanelConfig final : public ::google::protobuf::Message
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
-// -------------------------------------------------------------------
-
-// NSPanelScene
-
-// int32 scene_id = 1;
-inline void NSPanelScene::clear_scene_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.scene_id_ = 0;
-}
-inline ::int32_t NSPanelScene::scene_id() const {
-  // @@protoc_insertion_point(field_get:NSPanelScene.scene_id)
-  return _internal_scene_id();
-}
-inline void NSPanelScene::set_scene_id(::int32_t value) {
-  _internal_set_scene_id(value);
-  // @@protoc_insertion_point(field_set:NSPanelScene.scene_id)
-}
-inline ::int32_t NSPanelScene::_internal_scene_id() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.scene_id_;
-}
-inline void NSPanelScene::_internal_set_scene_id(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.scene_id_ = value;
-}
-
-// bool can_save = 2;
-inline void NSPanelScene::clear_can_save() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.can_save_ = false;
-}
-inline bool NSPanelScene::can_save() const {
-  // @@protoc_insertion_point(field_get:NSPanelScene.can_save)
-  return _internal_can_save();
-}
-inline void NSPanelScene::set_can_save(bool value) {
-  _internal_set_can_save(value);
-  // @@protoc_insertion_point(field_set:NSPanelScene.can_save)
-}
-inline bool NSPanelScene::_internal_can_save() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.can_save_;
-}
-inline void NSPanelScene::_internal_set_can_save(bool value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.can_save_ = value;
-}
-
-// string name = 3;
-inline void NSPanelScene::clear_name() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.name_.ClearToEmpty();
-}
-inline const std::string& NSPanelScene::name() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelScene.name)
-  return _internal_name();
-}
-template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void NSPanelScene::set_name(Arg_&& arg,
-                                                     Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:NSPanelScene.name)
-}
-inline std::string* NSPanelScene::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_name();
-  // @@protoc_insertion_point(field_mutable:NSPanelScene.name)
-  return _s;
-}
-inline const std::string& NSPanelScene::_internal_name() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.name_.Get();
-}
-inline void NSPanelScene::_internal_set_name(const std::string& value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.name_.Set(value, GetArena());
-}
-inline std::string* NSPanelScene::_internal_mutable_name() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.name_.Mutable( GetArena());
-}
-inline std::string* NSPanelScene::release_name() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:NSPanelScene.name)
-  return _impl_.name_.Release();
-}
-inline void NSPanelScene::set_allocated_name(std::string* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.name_.SetAllocated(value, GetArena());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-        if (_impl_.name_.IsDefault()) {
-          _impl_.name_.Set("", GetArena());
-        }
-  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:NSPanelScene.name)
-}
-
 // -------------------------------------------------------------------
 
 // NSPanelConfig_RoomInfo
@@ -5872,53 +5572,49 @@ inline void NSPanelConfig::_internal_set_button2_mode(::NSPanelConfig_NSPanelBut
   _impl_.button2_mode_ = value;
 }
 
-// repeated .NSPanelScene global_scenes = 30;
-inline int NSPanelConfig::_internal_global_scenes_size() const {
-  return _internal_global_scenes().size();
+// repeated int32 global_scene_entity_page_ids = 30;
+inline int NSPanelConfig::_internal_global_scene_entity_page_ids_size() const {
+  return _internal_global_scene_entity_page_ids().size();
 }
-inline int NSPanelConfig::global_scenes_size() const {
-  return _internal_global_scenes_size();
+inline int NSPanelConfig::global_scene_entity_page_ids_size() const {
+  return _internal_global_scene_entity_page_ids_size();
 }
-inline void NSPanelConfig::clear_global_scenes() {
+inline void NSPanelConfig::clear_global_scene_entity_page_ids() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.global_scenes_.Clear();
+  _impl_.global_scene_entity_page_ids_.Clear();
 }
-inline ::NSPanelScene* NSPanelConfig::mutable_global_scenes(int index)
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_mutable:NSPanelConfig.global_scenes)
-  return _internal_mutable_global_scenes()->Mutable(index);
+inline ::int32_t NSPanelConfig::global_scene_entity_page_ids(int index) const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.global_scene_entity_page_ids)
+  return _internal_global_scene_entity_page_ids().Get(index);
 }
-inline ::google::protobuf::RepeatedPtrField<::NSPanelScene>* NSPanelConfig::mutable_global_scenes()
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_mutable_list:NSPanelConfig.global_scenes)
+inline void NSPanelConfig::set_global_scene_entity_page_ids(int index, ::int32_t value) {
+  _internal_mutable_global_scene_entity_page_ids()->Set(index, value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.global_scene_entity_page_ids)
+}
+inline void NSPanelConfig::add_global_scene_entity_page_ids(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _internal_mutable_global_scenes();
+  _internal_mutable_global_scene_entity_page_ids()->Add(value);
+  // @@protoc_insertion_point(field_add:NSPanelConfig.global_scene_entity_page_ids)
 }
-inline const ::NSPanelScene& NSPanelConfig::global_scenes(int index) const
+inline const ::google::protobuf::RepeatedField<::int32_t>& NSPanelConfig::global_scene_entity_page_ids() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelConfig.global_scenes)
-  return _internal_global_scenes().Get(index);
+  // @@protoc_insertion_point(field_list:NSPanelConfig.global_scene_entity_page_ids)
+  return _internal_global_scene_entity_page_ids();
 }
-inline ::NSPanelScene* NSPanelConfig::add_global_scenes() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig::mutable_global_scene_entity_page_ids()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelConfig.global_scene_entity_page_ids)
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::NSPanelScene* _add = _internal_mutable_global_scenes()->Add();
-  // @@protoc_insertion_point(field_add:NSPanelConfig.global_scenes)
-  return _add;
+  return _internal_mutable_global_scene_entity_page_ids();
 }
-inline const ::google::protobuf::RepeatedPtrField<::NSPanelScene>& NSPanelConfig::global_scenes() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_list:NSPanelConfig.global_scenes)
-  return _internal_global_scenes();
-}
-inline const ::google::protobuf::RepeatedPtrField<::NSPanelScene>&
-NSPanelConfig::_internal_global_scenes() const {
+inline const ::google::protobuf::RepeatedField<::int32_t>&
+NSPanelConfig::_internal_global_scene_entity_page_ids() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.global_scenes_;
+  return _impl_.global_scene_entity_page_ids_;
 }
-inline ::google::protobuf::RepeatedPtrField<::NSPanelScene>*
-NSPanelConfig::_internal_mutable_global_scenes() {
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig::_internal_mutable_global_scene_entity_page_ids() {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return &_impl_.global_scenes_;
+  return &_impl_.global_scene_entity_page_ids_;
 }
 
 // bool optimistic_mode = 31;

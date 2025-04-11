@@ -36,12 +36,16 @@ std::string MqttManagerConfig::get_setting_with_default(std::string key, std::st
   try {
     auto result = database_manager::database.get_all<database_manager::SettingHolder>(sqlite_orm::where(sqlite_orm::c(&database_manager::SettingHolder::name) == key));
     if (result.size() > 0) [[likely]] {
+      SPDLOG_TRACE("Found setting {} with value {}", key, result[0].value);
       return result[0].value;
     } else {
+      SPDLOG_TRACE("Did not find setting {}. Returning default:   {}", key, default_value);
       return default_value;
     }
   } catch (std::exception &ex) {
+    SPDLOG_ERROR("Caught exception while trying to access database to retrieve setting {}. Exception: {}", key, boost::diagnostic_information(ex));
   }
+  SPDLOG_TRACE("Did not find setting {}. Returning default:   {}", key, default_value);
   return default_value;
 }
 

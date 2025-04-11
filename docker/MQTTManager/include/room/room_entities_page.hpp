@@ -39,8 +39,9 @@ public:
 
   /**
    * Perform post-init on this page. This will among other things look up and bind slots on the page to entities.
+   * @param send_state_update: Whether to send a state update to the MQTT broker after reloading the config.
    */
-  void post_init();
+  void post_init(bool send_state_update);
 
   /**
    * Get all entities registered to this page.
@@ -107,6 +108,9 @@ private:
 
   // Callbacks for when the state of this entity page changes.
   boost::signals2::signal<void(RoomEntitiesPage *)> _state_changed_callbacks;
+
+  // The last protobuf state object sent to panel over MQTT. Used to make sure we don't send the same state twice.
+  NSPanelRoomEntitiesPage _last_entities_page_protobuf_state;
 
   // Entities registered to this page
   std::mutex _entities_mutex;

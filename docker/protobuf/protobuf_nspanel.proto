@@ -2,12 +2,6 @@ syntax = "proto3";
 
 // Protobufs defined in this .proto file are used to communicate with the MQTTManager
 
-message NSPanelScene {
-    int32 scene_id = 1;
-    bool can_save = 2;
-    string name = 3;
-}
-
 message NSPanelConfig {
     string name = 1;
     int32 default_room = 2;
@@ -62,7 +56,7 @@ message NSPanelConfig {
     NSPanelButtonMode button1_mode = 22;
     NSPanelButtonMode button2_mode = 25;
 
-    repeated NSPanelScene global_scenes = 30;
+    repeated int32 global_scene_entity_page_ids = 30;
     bool optimistic_mode = 31;
     int32 raise_light_level_to_100_above = 32;
     int32 nspanel_id = 33;

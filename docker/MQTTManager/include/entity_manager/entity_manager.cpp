@@ -8,6 +8,7 @@
 #include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
 #include "room/room.hpp"
+#include "room/room_entities_page.hpp"
 #include "scenes/home_assistant_scene.hpp"
 #include "scenes/nspm_scene.hpp"
 #include "scenes/openhab_scene.hpp"
@@ -35,6 +36,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <nspanel/nspanel.hpp>
+#include <room/room_entities_page.hpp>
 #include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 #include <sqlite_orm/sqlite_orm.h>
@@ -80,6 +82,7 @@ void EntityManager::load_entities() {
   EntityManager::load_lights();
   EntityManager::load_switches();
   EntityManager::load_scenes();
+  EntityManager::load_room_entities_pages();
   EntityManager::load_rooms();    // Rooms are loaded last as to make all room components be able to find entities of other types.
   EntityManager::load_nspanels(); // Loads panels after rooms are loaded so that they can find all availables entities and rooms for the panel config.
 
@@ -276,6 +279,43 @@ void EntityManager::load_scenes() {
   SPDLOG_DEBUG("Loaded {} scenes", scene_ids.size());
 }
 
+void EntityManager::load_room_entities_pages() {
+  {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_global_room_entities_pages_mutex);
+    auto global_page_ids = database_manager::database.select(&database_manager::RoomEntitiesPage::id, sqlite_orm::from<database_manager::RoomEntitiesPage>(), sqlite_orm::where(sqlite_orm::is_null(&database_manager::RoomEntitiesPage::room_id)));
+    SPDLOG_INFO("Loading {} global pages.", global_page_ids.size());
+
+    // Check if any existing room entity page has been removed.
+    EntityManager::_global_room_entities_pages.erase(std::remove_if(EntityManager::_global_room_entities_pages.begin(), EntityManager::_global_room_entities_pages.end(), [&global_page_ids](auto page) {
+                                                       return std::find_if(global_page_ids.begin(), global_page_ids.end(), [&page](auto id) { return page->get_id() == id; }) == global_page_ids.end();
+                                                     }),
+                                                     EntityManager::_global_room_entities_pages.end());
+
+    // Cause existing NSPanel to reload config or add a new NSPanel if it does not exist.
+    for (auto &page_id : global_page_ids) {
+      auto existing_page = std::find_if(EntityManager::_global_room_entities_pages.begin(), EntityManager::_global_room_entities_pages.end(), [&page_id](auto page) { return page->get_id() == page_id; });
+      if (existing_page != EntityManager::_global_room_entities_pages.end()) [[likely]] {
+        (*existing_page)->reload_config(false);
+      } else {
+        try {
+          auto page_settings = database_manager::database.get<database_manager::RoomEntitiesPage>(page_id);
+          EntityManager::_global_room_entities_pages.push_back(std::shared_ptr<RoomEntitiesPage>(new RoomEntitiesPage(page_settings.id, nullptr)));
+
+        } catch (std::exception &e) {
+          SPDLOG_ERROR("Caught exception: {}", e.what());
+          SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+        }
+      }
+    }
+  }
+
+  // Now that all pages has loaded, send state updates to panels:
+  for (auto &page : EntityManager::_global_room_entities_pages) {
+    page->post_init(true);
+  }
+  SPDLOG_DEBUG("Loaded {} pages", EntityManager::_global_room_entities_pages.size());
+}
+
 std::shared_ptr<Room> EntityManager::get_room(uint32_t room_id) {
   try {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
@@ -296,11 +336,21 @@ std::vector<std::shared_ptr<Room>> EntityManager::get_all_rooms() {
   return EntityManager::_rooms;
 }
 
+std::vector<std::shared_ptr<RoomEntitiesPage>> EntityManager::get_all_global_room_entities_pages() {
+  std::lock_guard<std::mutex> mutex_guard(EntityManager::_global_room_entities_pages_mutex);
+  return EntityManager::_global_room_entities_pages;
+}
+
+int32_t EntityManager::get_number_of_global_room_entities_pages() {
+  return EntityManager::_global_room_entities_pages.size();
+}
+
 void EntityManager::update_all_rooms_status() {
   SPDLOG_INFO("Started thread to handle 'All rooms' status updates.");
+  bool has_performed_initial_update = false;
   for (;;) {
     // Wait for notification that a room has been updated
-    {
+    if (has_performed_initial_update) {
       std::unique_lock<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
       EntityManager::_room_update_condition_variable.wait(mutex_guard, [&]() {
         return !EntityManager::_all_rooms_status_updated;
@@ -430,6 +480,7 @@ void EntityManager::update_all_rooms_status() {
     if (all_rooms_status.SerializeToString(&all_rooms_status_string)) {
       SPDLOG_DEBUG("All rooms status updated. Waiting for next notify.");
       MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/all_rooms_status", MqttManagerConfig::get_settings().manager_address), all_rooms_status_string, true);
+      has_performed_initial_update = true;
     } else {
       SPDLOG_ERROR("Failed to serialize 'All rooms' status. Will try again next time there is a room status change.");
     }

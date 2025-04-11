@@ -25,9 +25,9 @@ void OpenhabScene::reload_config() {
     this->_page_id = scene_config.entities_page_id;
     this->_page_slot = scene_config.room_view_position;
     if (scene_config.room_id == nullptr) {
-      this->_is_global_scene = true;
+      this->_is_global = true;
     } else {
-      this->_is_global_scene = false;
+      this->_is_global = false;
       this->_room_id = *scene_config.room_id;
     }
     SPDLOG_DEBUG("Loaded OpenHAB scene {}::{}.", this->_id, this->_name);

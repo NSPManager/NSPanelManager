@@ -16,3 +16,7 @@ bool Scene::can_toggle() {
 void Scene::toggle() {
   this->activate();
 }
+
+bool Scene::is_global() {
+  return this->_is_global;
+}

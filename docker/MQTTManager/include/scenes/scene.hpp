@@ -14,6 +14,8 @@ public:
 
   bool can_toggle();
 
+  bool is_global();
+
   // The same as activate()
   void toggle();
 
@@ -23,6 +25,7 @@ public:
 protected:
   uint32_t _page_id;
   uint8_t _page_slot;
+  bool _is_global;
 
 private:
 };

@@ -24,9 +24,9 @@ void HomeAssistantScene::reload_config() {
     this->_page_id = scene_config.entities_page_id;
     this->_page_slot = scene_config.room_view_position;
     if (scene_config.room_id == nullptr) {
-      this->_is_global_scene = true;
+      this->_is_global = true;
     } else {
-      this->_is_global_scene = false;
+      this->_is_global = false;
       this->_room_id = *scene_config.room_id;
     }
     SPDLOG_DEBUG("Loaded Home Assistant scene {}::{}.", this->_id, this->_name);
@@ -65,7 +65,7 @@ MQTT_MANAGER_ENTITY_CONTROLLER HomeAssistantScene::get_controller() {
 }
 
 void HomeAssistantScene::post_init() {
-  if (!this->_is_global_scene) {
+  if (!this->_is_global) {
     std::shared_ptr<Room> room_entity = EntityManager::get_room(this->_room_id);
     if (room_entity != nullptr) {
       this->_room = room_entity;

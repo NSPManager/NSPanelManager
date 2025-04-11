@@ -38,6 +38,8 @@ void sigusr1_handler(int signal) {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     MqttManagerConfig::load();
+    HomeAssistantManager::reload_config();
+    OpenhabManager::reload_config();
     EntityManager::load_entities();
 
     MQTT_Manager::publish("nspanel/config/reload", "1");
@@ -159,12 +161,12 @@ int main(void) {
   database_manager::init();
 
   // Load config from environment/manager
-  MqttManagerConfig::load();
-  MQTTManagerWeather::start();
+  MqttManagerConfig::load();   // Load all entities, rooms and panels.
+  MQTTManagerWeather::start(); // Start thread to handle weather updates
 
-  IPCHandler::start();
+  IPCHandler::start(); // Handle IPC (ZMQ) messages
 
-  MQTT_Manager::init();
+  MQTT_Manager::init(); // Initialize MQTT manager to handle everything to do with MQTT
 
   std::thread home_assistant_manager_thread;
   std::thread openhab_manager_thread;

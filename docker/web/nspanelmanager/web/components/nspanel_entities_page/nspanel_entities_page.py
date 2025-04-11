@@ -37,8 +37,6 @@ class NSPanelEntitiesPage(component.Component):
     def get(self, request, view, id, total_num_entity_pages):
         self.template_view = view
         page = RoomEntitiesPage.objects.get(id=id)
-        print("Page: ")
-        print(page)
         args = {
             "id": id,
             "page": page,

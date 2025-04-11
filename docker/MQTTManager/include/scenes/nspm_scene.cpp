@@ -36,9 +36,9 @@ void NSPMScene::reload_config() {
     this->_page_id = scene_config.entities_page_id;
     this->_page_slot = scene_config.room_view_position;
     if (scene_config.room_id == nullptr) {
-      this->_is_global_scene = true;
+      this->_is_global = true;
     } else {
-      this->_is_global_scene = false;
+      this->_is_global = false;
       this->_room_id = *scene_config.room_id;
     }
     SPDLOG_DEBUG("Loading NSPM scene {}::{}.", this->_id, this->_name);
@@ -103,7 +103,7 @@ void NSPMScene::save() {
 
   try {
     std::vector<std::shared_ptr<Light>> lights;
-    if (this->_is_global_scene) {
+    if (this->_is_global) {
       for (std::shared_ptr<Room> room : EntityManager::get_all_rooms()) {
         std::vector<std::shared_ptr<Light>> room_lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
         lights.insert(lights.end(), room_lights.begin(), room_lights.end());
