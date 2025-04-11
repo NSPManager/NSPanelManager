@@ -320,8 +320,6 @@ void Room::_send_room_state_update() {
         total_light_level_all += light->get_brightness();
         total_kelvin_level_all += light->get_color_temperature();
         num_lights_total++;
-
-        SPDLOG_DEBUG("Found light {}::{} while calculating room state updated. Light level: {}%, kelvin: {}.", light->get_id(), light->get_name(), light->get_brightness(), light->get_color_temperature());
       }
       if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE) {
         // SPDLOG_TRACE("Room {}::{} found table light {}::{}, state: {}", this->_id, this->_name, light->get_id(), light->get_name(), light->get_state() ? "ON" : "OFF");

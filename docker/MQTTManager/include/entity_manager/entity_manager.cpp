@@ -437,13 +437,11 @@ void EntityManager::update_all_rooms_status() {
 }
 
 void EntityManager::_room_updated_callback(Room *room) {
-  SPDLOG_DEBUG("Updating last room changed time.");
   {
     std::unique_lock<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
     EntityManager::_last_room_update_time = std::chrono::system_clock::now();
     EntityManager::_all_rooms_status_updated = false;
   }
-  SPDLOG_DEBUG("Last room changed time updated. Calling notify_all.");
   EntityManager::_room_update_condition_variable.notify_all();
 }
 
