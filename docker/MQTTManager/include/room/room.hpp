@@ -36,6 +36,11 @@ public:
   std::string get_name();
 
   /**
+   * Get the display order of the room.
+   */
+  uint32_t get_display_order();
+
+  /**
    * Post init room.
    */
   void post_init();
@@ -116,6 +121,9 @@ private:
   uint16_t _id;
   std::string _name;
   std::string _mqtt_state_topic;
+
+  // In what place in the display order is this room shown?
+  uint32_t _display_order;
 
   // All pages with entities for this room
   std::vector<std::shared_ptr<RoomEntitiesPage>> _entity_pages;

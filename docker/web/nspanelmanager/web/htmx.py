@@ -23,6 +23,7 @@ from time import sleep
 from .mqttmanager_ipc import send_ipc_request
 
 from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages import NSPanelRoomEntitiesPages
+from web.components.rooms_list.rooms_list import RoomsList
 
 from .models import NSPanel, Room, Light, RoomEntitiesPage, Settings, Scene, RelayGroup, RelayGroupBinding, Switch
 from .apps import start_mqtt_manager, send_mqttmanager_reload_command
@@ -851,6 +852,36 @@ def create_entities_page_in_room(request, room_id, page_type, is_scenes_page, is
     # Return new partial HTMX update of all entities pages in this room
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(request=request, view="edit_room", room_id=room_id, is_scenes_pages=entity_page.is_scenes_page, is_global_scenes_page=(entity_page.room == None))
+
+
+@csrf_exempt
+def partial_reorder_rooms(request):
+    if "htmx_form_save_rooms_order_field" in request.POST:
+        json_data = json.loads(request.POST["htmx_form_save_rooms_order_field"])
+        if "rooms" in json_data:
+            if len(json_data["rooms"]) > 0:
+                for key, room in enumerate(json_data["rooms"]):
+                    room = Room.objects.get(id=room)
+                    room.displayOrder = key
+                    room.save()
+                send_mqttmanager_reload_command()
+                rooms_list = RoomsList()
+                return rooms_list.get(request)
+            else:
+                return JsonResponse({
+                    "status": "error",
+                    "text": "'pages' field empty in request POST-data."
+                }, status=500)
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "'rooms' field not available in JSON-data."
+            }, status=500)
+    else:
+        return JsonResponse({
+            "status": "error",
+            "text": "'htmx_form_save_rooms_order_field' field not available in request POST-data."
+        }, status=500)
 
 
 def partial_select_new_outside_temperature_sensor(request):

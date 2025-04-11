@@ -43,6 +43,7 @@ void Room::reload_config() {
     try {
       auto db_room = database_manager::database.get<database_manager::Room>(this->_id);
       this->_name = db_room.friendly_name;
+      this->_display_order = db_room.display_order;
       this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/state", MqttManagerConfig::get_settings().manager_address, this->_id);
 
       {
@@ -136,6 +137,10 @@ uint16_t Room::get_id() {
 
 std::string Room::get_name() {
   return this->_name;
+}
+
+uint32_t Room::get_display_order() {
+  return this->_display_order;
 }
 
 void Room::post_init() {

@@ -41,30 +41,6 @@
 </div>
 
 <div class="p-4 bg-base-100 rounded-md shadow-lg w-full" hx-ext="ws" ws-connect="/websocket">
-    <table class="table">
-        <thead class="">
-            <tr>
-                <th class="px-3 py-1">Name</th>
-                <th class="px-3 py-1">NSPanels</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for room in rooms %}
-            <tr class="hover">
-                <th class="">
-                    <a href="{% url 'edit_room' room_id=room.room.id %}">{{ room.room.friendly_name }}</a>
-                </th>
-                <td>
-                    {% for nspanel in room.nspanels %}
-                    <a href="{% url 'edit_nspanel' panel_id=nspanel.id %}">
-                        {{ nspanel.status }}
-                        {% component "nspanel_status_badge" id=nspanel.id %}{% endcomponent %}
-                    </a>
-                    {% endfor %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% component "rooms_list" %}{% endcomponent %}
 </div>
 {% endblock %}

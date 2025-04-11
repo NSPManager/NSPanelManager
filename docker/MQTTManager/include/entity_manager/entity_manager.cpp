@@ -121,6 +121,10 @@ void EntityManager::load_rooms() {
       EntityManager::_rooms.push_back(room);
     }
   }
+
+  std::sort(EntityManager::_rooms.begin(), EntityManager::_rooms.end(), [](const std::shared_ptr<Room> &a, const std::shared_ptr<Room> &b) {
+    return a->get_display_order() < b->get_display_order();
+  });
 }
 
 void EntityManager::load_nspanels() {
