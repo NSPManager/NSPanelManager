@@ -353,13 +353,8 @@ void NSPanel::send_config() {
 
   // Load global scenes
   std::vector<uint32_t> global_scene_entity_pages_ids;
-  for (auto &scene : EntityManager::get_all_entities_by_type<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE)) {
-    if (scene->is_global()) {
-      if (std::find(global_scene_entity_pages_ids.begin(), global_scene_entity_pages_ids.end(), scene->get_entity_page_id()) == global_scene_entity_pages_ids.end()) {
-        global_scene_entity_pages_ids.push_back(scene->get_entity_page_id());
-        config.add_global_scene_entity_page_ids(scene->get_entity_page_id());
-      }
-    }
+  for (auto &page : EntityManager::get_all_global_room_entities_pages()) {
+    config.add_global_scene_entity_page_ids(page->get_id());
   }
 
   std::string config_str = config.SerializeAsString();

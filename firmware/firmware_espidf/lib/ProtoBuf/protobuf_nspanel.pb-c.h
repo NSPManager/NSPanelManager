@@ -15,7 +15,6 @@ PROTOBUF_C__BEGIN_DECLS
 #endif
 
 
-typedef struct NSPanelScene NSPanelScene;
 typedef struct NSPanelConfig NSPanelConfig;
 typedef struct NSPanelConfig__RoomInfo NSPanelConfig__RoomInfo;
 typedef struct NSPanelWarning NSPanelWarning;
@@ -90,18 +89,6 @@ typedef enum _NSPanelWarningLevel {
 
 /* --- messages --- */
 
-struct  NSPanelScene
-{
-  ProtobufCMessage base;
-  int32_t scene_id;
-  protobuf_c_boolean can_save;
-  char *name;
-};
-#define NSPANEL_SCENE__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&nspanel_scene__descriptor) \
-    , 0, 0, (char *)protobuf_c_empty_string }
-
-
 struct  NSPanelConfig__RoomInfo
 {
   ProtobufCMessage base;
@@ -146,8 +133,8 @@ struct  NSPanelConfig
   float temperature_calibration;
   NSPanelConfig__NSPanelButtonMode button1_mode;
   NSPanelConfig__NSPanelButtonMode button2_mode;
-  size_t n_global_scenes;
-  NSPanelScene **global_scenes;
+  size_t n_global_scene_entity_page_ids;
+  int32_t *global_scene_entity_page_ids;
   protobuf_c_boolean optimistic_mode;
   int32_t raise_light_level_to_100_above;
   int32_t nspanel_id;
@@ -424,25 +411,6 @@ struct  NSPanelMQTTManagerCommand
     , NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__NOT_SET, {0} }
 
 
-/* NSPanelScene methods */
-void   nspanel_scene__init
-                     (NSPanelScene         *message);
-size_t nspanel_scene__get_packed_size
-                     (const NSPanelScene   *message);
-size_t nspanel_scene__pack
-                     (const NSPanelScene   *message,
-                      uint8_t             *out);
-size_t nspanel_scene__pack_to_buffer
-                     (const NSPanelScene   *message,
-                      ProtobufCBuffer     *buffer);
-NSPanelScene *
-       nspanel_scene__unpack
-                     (ProtobufCAllocator  *allocator,
-                      size_t               len,
-                      const uint8_t       *data);
-void   nspanel_scene__free_unpacked
-                     (NSPanelScene *message,
-                      ProtobufCAllocator *allocator);
 /* NSPanelConfig__RoomInfo methods */
 void   nspanel_config__room_info__init
                      (NSPanelConfig__RoomInfo         *message);
@@ -624,9 +592,6 @@ void   nspanel_mqttmanager_command__free_unpacked
                       ProtobufCAllocator *allocator);
 /* --- per-message closures --- */
 
-typedef void (*NSPanelScene_Closure)
-                 (const NSPanelScene *message,
-                  void *closure_data);
 typedef void (*NSPanelConfig__RoomInfo_Closure)
                  (const NSPanelConfig__RoomInfo *message,
                   void *closure_data);
@@ -685,7 +650,6 @@ typedef void (*NSPanelMQTTManagerCommand_Closure)
 /* --- descriptors --- */
 
 extern const ProtobufCEnumDescriptor    nspanel_warning_level__descriptor;
-extern const ProtobufCMessageDescriptor nspanel_scene__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_config__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_config__room_info__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_default_page__descriptor;

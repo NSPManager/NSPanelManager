@@ -7,51 +7,6 @@
 #endif
 
 #include "protobuf_nspanel.pb-c.h"
-void   nspanel_scene__init
-                     (NSPanelScene         *message)
-{
-  static const NSPanelScene init_value = NSPANEL_SCENE__INIT;
-  *message = init_value;
-}
-size_t nspanel_scene__get_packed_size
-                     (const NSPanelScene *message)
-{
-  assert(message->base.descriptor == &nspanel_scene__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
-}
-size_t nspanel_scene__pack
-                     (const NSPanelScene *message,
-                      uint8_t       *out)
-{
-  assert(message->base.descriptor == &nspanel_scene__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
-}
-size_t nspanel_scene__pack_to_buffer
-                     (const NSPanelScene *message,
-                      ProtobufCBuffer *buffer)
-{
-  assert(message->base.descriptor == &nspanel_scene__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
-}
-NSPanelScene *
-       nspanel_scene__unpack
-                     (ProtobufCAllocator  *allocator,
-                      size_t               len,
-                      const uint8_t       *data)
-{
-  return (NSPanelScene *)
-     protobuf_c_message_unpack (&nspanel_scene__descriptor,
-                                allocator, len, data);
-}
-void   nspanel_scene__free_unpacked
-                     (NSPanelScene *message,
-                      ProtobufCAllocator *allocator)
-{
-  if(!message)
-    return;
-  assert(message->base.descriptor == &nspanel_scene__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
-}
 void   nspanel_config__room_info__init
                      (NSPanelConfig__RoomInfo         *message)
 {
@@ -466,70 +421,6 @@ void   nspanel_mqttmanager_command__free_unpacked
   assert(message->base.descriptor == &nspanel_mqttmanager_command__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-static const ProtobufCFieldDescriptor nspanel_scene__field_descriptors[3] =
-{
-  {
-    "scene_id",
-    1,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_INT32,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelScene, scene_id),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "can_save",
-    2,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_BOOL,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelScene, can_save),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "name",
-    3,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_STRING,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelScene, name),
-    NULL,
-    &protobuf_c_empty_string,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-};
-static const unsigned nspanel_scene__field_indices_by_name[] = {
-  1,   /* field[1] = can_save */
-  2,   /* field[2] = name */
-  0,   /* field[0] = scene_id */
-};
-static const ProtobufCIntRange nspanel_scene__number_ranges[1 + 1] =
-{
-  { 1, 0 },
-  { 0, 3 }
-};
-const ProtobufCMessageDescriptor nspanel_scene__descriptor =
-{
-  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
-  "NSPanelScene",
-  "NSPanelScene",
-  "NSPanelScene",
-  "",
-  sizeof(NSPanelScene),
-  3,
-  nspanel_scene__field_descriptors,
-  nspanel_scene__field_indices_by_name,
-  1,  nspanel_scene__number_ranges,
-  (ProtobufCMessageInit) nspanel_scene__init,
-  NULL,NULL,NULL    /* reserved[123] */
-};
 static const ProtobufCFieldDescriptor nspanel_config__room_info__field_descriptors[3] =
 {
   {
@@ -967,15 +858,15 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[33] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "global_scenes",
+    "global_scene_entity_page_ids",
     30,
     PROTOBUF_C_LABEL_REPEATED,
-    PROTOBUF_C_TYPE_MESSAGE,
-    offsetof(NSPanelConfig, n_global_scenes),
-    offsetof(NSPanelConfig, global_scenes),
-    &nspanel_scene__descriptor,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(NSPanelConfig, n_global_scene_entity_page_ids),
+    offsetof(NSPanelConfig, global_scene_entity_page_ids),
     NULL,
-    0,             /* flags */
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_PACKED,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -1095,7 +986,7 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
   31,   /* field[31] = default_light_brightess */
   2,   /* field[2] = default_page */
   1,   /* field[1] = default_room */
-  23,   /* field[23] = global_scenes */
+  23,   /* field[23] = global_scene_entity_page_ids */
   15,   /* field[15] = is_us_panel */
   32,   /* field[32] = locked_to_default_room */
   4,   /* field[4] = min_button_push_time */
