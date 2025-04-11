@@ -159,6 +159,7 @@ void OpenhabLight::send_state_update_to_controller() {
       this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
       if (MqttManagerConfig::get_settings().optimistic_mode) {
         this->_last_color_temp_change = CurrentTimeMilliseconds();
+        this->_last_light_mode_change = CurrentTimeMilliseconds(); // Make sure we do not go to "RGB" mode when Zigbee2Mqtt sends updated HSB values to reflect color temp value
         this->_current_color_temperature = this->_requested_color_temperature;
       }
       OpenhabManager::send_json(service_data);
@@ -172,6 +173,7 @@ void OpenhabLight::send_state_update_to_controller() {
     this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
     if (MqttManagerConfig::get_settings().optimistic_mode) {
       this->_last_rgb_change = CurrentTimeMilliseconds();
+      this->_last_light_mode_change = CurrentTimeMilliseconds(); // Make sure we do not go to "color temp" mode when Zigbee2Mqtt sends updated color temp value to reflect HSB value
       this->_current_hue = this->_requested_hue;
       this->_current_saturation = this->_requested_saturation;
       this->_current_brightness = this->_requested_brightness;
