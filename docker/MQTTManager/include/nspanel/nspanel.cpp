@@ -59,9 +59,6 @@ NSPanel::NSPanel(uint32_t id) {
   SPDLOG_INFO("Loading new NSPanel with ID {}.", id);
   this->reload_config();
 
-  // Send initial config to panel
-  this->send_config();
-
   CommandManager::attach_callback(boost::bind(&NSPanel::command_callback, this, _1));
 
   IPCHandler::attach_callback(fmt::format("nspanel/{}/status", this->_id), boost::bind(&NSPanel::handle_ipc_request_status, this, _1, _2));
@@ -212,7 +209,9 @@ void NSPanel::reload_config() {
       this->register_to_home_assistant();
     }
 
-    SPDLOG_DEBUG("Loaded NSPanel {}::{}, type: {}.", this->_id, this->_name, this->_is_us_panel ? "US" : "EU");
+    SPDLOG_DEBUG("Loaded NSPanel {}::{}, type: {}. Sending config.", this->_id, this->_name, this->_is_us_panel ? "US" : "EU");
+
+    this->send_config();
   } catch (std::system_error &ex) {
     SPDLOG_ERROR("Failed to get config for NSPanel {} from database.", this->_id);
   }
