@@ -10,6 +10,7 @@
 #include <mqtt/subscribe_options.h>
 #include <mutex>
 #include <nlohmann/json_fwd.hpp>
+#include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <unordered_map>
@@ -47,6 +48,7 @@ public:
     if (!already_subscribed) {
       MQTT_Manager::_subscribed_topics[topic] = qos;
       if (MQTT_Manager::is_connected()) {
+        SPDLOG_TRACE("Subscribing to MQTT Topic '{}'.", topic);
         MQTT_Manager::_mqtt_client->subscribe(topic, qos);
       }
     }

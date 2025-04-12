@@ -241,6 +241,7 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
   mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), 0, retain);
   if (MQTT_Manager::_mqtt_client != nullptr) {
     if (MQTT_Manager::is_connected()) {
+      SPDLOG_TRACE("Publising '{}' -> '{}'", topic, payload);
       MQTT_Manager::_mqtt_client->publish(msg);
     } else {
       MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
