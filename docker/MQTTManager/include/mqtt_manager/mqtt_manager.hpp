@@ -5,6 +5,7 @@
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/signals2.hpp>
 #include <functional>
+#include <google/protobuf/message.h>
 #include <mqtt/client.h>
 #include <mqtt/message.h>
 #include <mqtt/subscribe_options.h>
@@ -14,7 +15,6 @@
 #include <spdlog/spdlog.h>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 struct MQTTMessage {
   std::string topic;
@@ -91,6 +91,14 @@ public:
    * @param retain: Wether to set the MQTT retain flag or not.
    */
   static void publish(const std::string &topic, const std::string &payload, bool retain);
+
+  /**
+   * Will send an MQTT message on given topic with the given payload.
+   * @param topic: The MQTT topic to send payload to.
+   * @param payload: MQTT message payload.
+   * @param retain: Wether to set the MQTT retain flag or not.
+   */
+  static void publish_protobuf(const std::string &topic, google::protobuf::Message &payload, bool retain);
 
   /**
    * Will clear retain on a topic (not recursive)

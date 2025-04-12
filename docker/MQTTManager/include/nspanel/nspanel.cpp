@@ -357,8 +357,7 @@ void NSPanel::send_config() {
     config.add_global_scene_entity_page_ids(page->get_id());
   }
 
-  std::string config_str = config.SerializeAsString();
-  MQTT_Manager::publish(this->_mqtt_config_topic, config_str, true);
+  MQTT_Manager::publish_protobuf(this->_mqtt_config_topic, config, true);
 
   SPDLOG_DEBUG("Sent updated NSPanelConfig to panel {}::{} over MQTT.", this->_id, this->_name);
 }

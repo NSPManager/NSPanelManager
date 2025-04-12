@@ -238,7 +238,7 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload)
 
 void MQTT_Manager::publish(const std::string &topic, const std::string &payload, bool retain) {
   std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
-  mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), 0, retain);
+  mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), payload.size(), 0, retain);
   if (MQTT_Manager::_mqtt_client != nullptr) {
     if (MQTT_Manager::is_connected()) {
       SPDLOG_TRACE("Publising '{}' -> '{}'", topic, payload);
@@ -248,6 +248,15 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
     }
   } else {
     MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
+  }
+}
+
+void MQTT_Manager::publish_protobuf(const std::string &topic, google::protobuf::Message &payload, bool retain) {
+  std::string payload_string;
+  if (payload.SerializeToString(&payload_string)) {
+    MQTT_Manager::publish(topic, payload_string.c_str(), retain);
+  } else {
+    SPDLOG_ERROR("Tried to send message to topic '{}' but serialization of protobuf object failed.", topic);
   }
 }
 

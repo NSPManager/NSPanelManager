@@ -71,7 +71,7 @@ target_link_libraries(MQTTManager_Entity spdlog::spdlog Boost::boost nlohmann_js
 add_library(MQTT_Manager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.hpp)
 set_target_properties(MQTT_Manager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.hpp)
 target_include_directories(MQTT_Manager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTT_Manager PahoMqttCpp::paho-mqttpp3-static MQTTManager_Config spdlog::spdlog Boost::boost)
+target_link_libraries(MQTT_Manager PahoMqttCpp::paho-mqttpp3-static MQTTManager_Config spdlog::spdlog Boost::boost protobuf::protobuf)
 
 add_library(MQTTManager_CommandManager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/command_manager/command_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/command_manager/command_manager.hpp)
 set_target_properties(MQTTManager_CommandManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/command_manager/command_manager.hpp)
