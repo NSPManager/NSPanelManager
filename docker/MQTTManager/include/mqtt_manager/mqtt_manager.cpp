@@ -237,6 +237,11 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload)
 }
 
 void MQTT_Manager::publish(const std::string &topic, const std::string &payload, bool retain) {
+  if (topic.empty()) {
+    SPDLOG_ERROR("Tried to publish payload to empty topic. Payload: {}", payload);
+    return; // It's not allowed to publish to empty topic.
+  }
+
   std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
   mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), payload.size(), 0, retain);
   if (MQTT_Manager::_mqtt_client != nullptr) {
