@@ -38,6 +38,7 @@ void sigusr1_handler(int signal) {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     MqttManagerConfig::load();
+    MQTT_Manager::reload_config();
     HomeAssistantManager::reload_config();
     OpenhabManager::reload_config();
     EntityManager::load_entities();
