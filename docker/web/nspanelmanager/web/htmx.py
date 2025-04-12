@@ -697,8 +697,15 @@ def partial_move_entity(request):
     new_entity_in_slot.save()
     send_mqttmanager_reload_command()
 
+    if new_entity_in_slot.room is None:
+        room_id = 0
+        is_global_scenes_page = True
+    else:
+        room_id = new_entity_in_slot.room.id
+        is_global_scenes_page = False
+
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request, view='edit_room', room_id=new_entity_in_slot.room.id, is_scenes_pages=new_entity_in_slot.entities_page.is_scenes_page, is_global_scenes_page=(new_entity_in_slot.entities_page.room == None))
+    return entities_pages.get(request, view='edit_room', room_id=room_id, is_scenes_pages=new_entity_in_slot.entities_page.is_scenes_page, is_global_scenes_page=is_global_scenes_page)
 
 @csrf_exempt
 def partial_move_entities_pages(request):
