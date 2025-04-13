@@ -4429,6 +4429,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
   enum : int {
     kRoomInfosFieldNumber = 17,
     kGlobalSceneEntityPageIdsFieldNumber = 30,
+    kRelay1RelayGroupFieldNumber = 35,
+    kRelay2RelayGroupFieldNumber = 37,
     kNameFieldNumber = 1,
     kDefaultRoomFieldNumber = 2,
     kDefaultPageFieldNumber = 3,
@@ -4453,12 +4455,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kButton2ModeFieldNumber = 25,
     kRaiseLightLevelTo100AboveFieldNumber = 32,
     kNspanelIdFieldNumber = 33,
-    kRelay1RelayGroupFieldNumber = 35,
     kOptimisticModeFieldNumber = 31,
-    kRelay1IsInRelayGroupFieldNumber = 34,
-    kRelay2IsInRelayGroupFieldNumber = 36,
     kLockedToDefaultRoomFieldNumber = 39,
-    kRelay2RelayGroupFieldNumber = 37,
     kDefaultLightBrightessFieldNumber = 38,
   };
   // repeated .NSPanelConfig.RoomInfo room_infos = 17;
@@ -4494,6 +4492,42 @@ class NSPanelConfig final : public ::google::protobuf::Message
   private:
   const ::google::protobuf::RepeatedField<::int32_t>& _internal_global_scene_entity_page_ids() const;
   ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_global_scene_entity_page_ids();
+
+  public:
+  // repeated int32 relay1_relay_group = 35;
+  int relay1_relay_group_size() const;
+  private:
+  int _internal_relay1_relay_group_size() const;
+
+  public:
+  void clear_relay1_relay_group() ;
+  ::int32_t relay1_relay_group(int index) const;
+  void set_relay1_relay_group(int index, ::int32_t value);
+  void add_relay1_relay_group(::int32_t value);
+  const ::google::protobuf::RepeatedField<::int32_t>& relay1_relay_group() const;
+  ::google::protobuf::RepeatedField<::int32_t>* mutable_relay1_relay_group();
+
+  private:
+  const ::google::protobuf::RepeatedField<::int32_t>& _internal_relay1_relay_group() const;
+  ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_relay1_relay_group();
+
+  public:
+  // repeated int32 relay2_relay_group = 37;
+  int relay2_relay_group_size() const;
+  private:
+  int _internal_relay2_relay_group_size() const;
+
+  public:
+  void clear_relay2_relay_group() ;
+  ::int32_t relay2_relay_group(int index) const;
+  void set_relay2_relay_group(int index, ::int32_t value);
+  void add_relay2_relay_group(::int32_t value);
+  const ::google::protobuf::RepeatedField<::int32_t>& relay2_relay_group() const;
+  ::google::protobuf::RepeatedField<::int32_t>* mutable_relay2_relay_group();
+
+  private:
+  const ::google::protobuf::RepeatedField<::int32_t>& _internal_relay2_relay_group() const;
+  ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_relay2_relay_group();
 
   public:
   // string name = 1;
@@ -4742,16 +4776,6 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_nspanel_id(::int32_t value);
 
   public:
-  // int32 relay1_relay_group = 35;
-  void clear_relay1_relay_group() ;
-  ::int32_t relay1_relay_group() const;
-  void set_relay1_relay_group(::int32_t value);
-
-  private:
-  ::int32_t _internal_relay1_relay_group() const;
-  void _internal_set_relay1_relay_group(::int32_t value);
-
-  public:
   // bool optimistic_mode = 31;
   void clear_optimistic_mode() ;
   bool optimistic_mode() const;
@@ -4762,26 +4786,6 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_optimistic_mode(bool value);
 
   public:
-  // bool relay1_is_in_relay_group = 34;
-  void clear_relay1_is_in_relay_group() ;
-  bool relay1_is_in_relay_group() const;
-  void set_relay1_is_in_relay_group(bool value);
-
-  private:
-  bool _internal_relay1_is_in_relay_group() const;
-  void _internal_set_relay1_is_in_relay_group(bool value);
-
-  public:
-  // bool relay2_is_in_relay_group = 36;
-  void clear_relay2_is_in_relay_group() ;
-  bool relay2_is_in_relay_group() const;
-  void set_relay2_is_in_relay_group(bool value);
-
-  private:
-  bool _internal_relay2_is_in_relay_group() const;
-  void _internal_set_relay2_is_in_relay_group(bool value);
-
-  public:
   // bool locked_to_default_room = 39;
   void clear_locked_to_default_room() ;
   bool locked_to_default_room() const;
@@ -4790,16 +4794,6 @@ class NSPanelConfig final : public ::google::protobuf::Message
   private:
   bool _internal_locked_to_default_room() const;
   void _internal_set_locked_to_default_room(bool value);
-
-  public:
-  // int32 relay2_relay_group = 37;
-  void clear_relay2_relay_group() ;
-  ::int32_t relay2_relay_group() const;
-  void set_relay2_relay_group(::int32_t value);
-
-  private:
-  ::int32_t _internal_relay2_relay_group() const;
-  void _internal_set_relay2_relay_group(::int32_t value);
 
   public:
   // int32 default_light_brightess = 38;
@@ -4817,8 +4811,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 33, 1,
-      58, 7>
+      5, 31, 1,
+      50, 7>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -4841,6 +4835,10 @@ class NSPanelConfig final : public ::google::protobuf::Message
     ::google::protobuf::RepeatedPtrField< ::NSPanelConfig_RoomInfo > room_infos_;
     ::google::protobuf::RepeatedField<::int32_t> global_scene_entity_page_ids_;
     mutable ::google::protobuf::internal::CachedSize _global_scene_entity_page_ids_cached_byte_size_;
+    ::google::protobuf::RepeatedField<::int32_t> relay1_relay_group_;
+    mutable ::google::protobuf::internal::CachedSize _relay1_relay_group_cached_byte_size_;
+    ::google::protobuf::RepeatedField<::int32_t> relay2_relay_group_;
+    mutable ::google::protobuf::internal::CachedSize _relay2_relay_group_cached_byte_size_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::int32_t default_room_;
     int default_page_;
@@ -4865,12 +4863,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
     int button2_mode_;
     ::int32_t raise_light_level_to_100_above_;
     ::int32_t nspanel_id_;
-    ::int32_t relay1_relay_group_;
     bool optimistic_mode_;
-    bool relay1_is_in_relay_group_;
-    bool relay2_is_in_relay_group_;
     bool locked_to_default_room_;
-    ::int32_t relay2_relay_group_;
     ::int32_t default_light_brightess_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -5683,92 +5677,94 @@ inline void NSPanelConfig::_internal_set_nspanel_id(::int32_t value) {
   _impl_.nspanel_id_ = value;
 }
 
-// bool relay1_is_in_relay_group = 34;
-inline void NSPanelConfig::clear_relay1_is_in_relay_group() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.relay1_is_in_relay_group_ = false;
+// repeated int32 relay1_relay_group = 35;
+inline int NSPanelConfig::_internal_relay1_relay_group_size() const {
+  return _internal_relay1_relay_group().size();
 }
-inline bool NSPanelConfig::relay1_is_in_relay_group() const {
-  // @@protoc_insertion_point(field_get:NSPanelConfig.relay1_is_in_relay_group)
-  return _internal_relay1_is_in_relay_group();
+inline int NSPanelConfig::relay1_relay_group_size() const {
+  return _internal_relay1_relay_group_size();
 }
-inline void NSPanelConfig::set_relay1_is_in_relay_group(bool value) {
-  _internal_set_relay1_is_in_relay_group(value);
-  // @@protoc_insertion_point(field_set:NSPanelConfig.relay1_is_in_relay_group)
-}
-inline bool NSPanelConfig::_internal_relay1_is_in_relay_group() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.relay1_is_in_relay_group_;
-}
-inline void NSPanelConfig::_internal_set_relay1_is_in_relay_group(bool value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.relay1_is_in_relay_group_ = value;
-}
-
-// int32 relay1_relay_group = 35;
 inline void NSPanelConfig::clear_relay1_relay_group() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.relay1_relay_group_ = 0;
+  _impl_.relay1_relay_group_.Clear();
 }
-inline ::int32_t NSPanelConfig::relay1_relay_group() const {
+inline ::int32_t NSPanelConfig::relay1_relay_group(int index) const {
   // @@protoc_insertion_point(field_get:NSPanelConfig.relay1_relay_group)
-  return _internal_relay1_relay_group();
+  return _internal_relay1_relay_group().Get(index);
 }
-inline void NSPanelConfig::set_relay1_relay_group(::int32_t value) {
-  _internal_set_relay1_relay_group(value);
+inline void NSPanelConfig::set_relay1_relay_group(int index, ::int32_t value) {
+  _internal_mutable_relay1_relay_group()->Set(index, value);
   // @@protoc_insertion_point(field_set:NSPanelConfig.relay1_relay_group)
 }
-inline ::int32_t NSPanelConfig::_internal_relay1_relay_group() const {
+inline void NSPanelConfig::add_relay1_relay_group(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_relay1_relay_group()->Add(value);
+  // @@protoc_insertion_point(field_add:NSPanelConfig.relay1_relay_group)
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>& NSPanelConfig::relay1_relay_group() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelConfig.relay1_relay_group)
+  return _internal_relay1_relay_group();
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig::mutable_relay1_relay_group()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelConfig.relay1_relay_group)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_relay1_relay_group();
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>&
+NSPanelConfig::_internal_relay1_relay_group() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.relay1_relay_group_;
 }
-inline void NSPanelConfig::_internal_set_relay1_relay_group(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.relay1_relay_group_ = value;
-}
-
-// bool relay2_is_in_relay_group = 36;
-inline void NSPanelConfig::clear_relay2_is_in_relay_group() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.relay2_is_in_relay_group_ = false;
-}
-inline bool NSPanelConfig::relay2_is_in_relay_group() const {
-  // @@protoc_insertion_point(field_get:NSPanelConfig.relay2_is_in_relay_group)
-  return _internal_relay2_is_in_relay_group();
-}
-inline void NSPanelConfig::set_relay2_is_in_relay_group(bool value) {
-  _internal_set_relay2_is_in_relay_group(value);
-  // @@protoc_insertion_point(field_set:NSPanelConfig.relay2_is_in_relay_group)
-}
-inline bool NSPanelConfig::_internal_relay2_is_in_relay_group() const {
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig::_internal_mutable_relay1_relay_group() {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.relay2_is_in_relay_group_;
-}
-inline void NSPanelConfig::_internal_set_relay2_is_in_relay_group(bool value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.relay2_is_in_relay_group_ = value;
+  return &_impl_.relay1_relay_group_;
 }
 
-// int32 relay2_relay_group = 37;
+// repeated int32 relay2_relay_group = 37;
+inline int NSPanelConfig::_internal_relay2_relay_group_size() const {
+  return _internal_relay2_relay_group().size();
+}
+inline int NSPanelConfig::relay2_relay_group_size() const {
+  return _internal_relay2_relay_group_size();
+}
 inline void NSPanelConfig::clear_relay2_relay_group() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.relay2_relay_group_ = 0;
+  _impl_.relay2_relay_group_.Clear();
 }
-inline ::int32_t NSPanelConfig::relay2_relay_group() const {
+inline ::int32_t NSPanelConfig::relay2_relay_group(int index) const {
   // @@protoc_insertion_point(field_get:NSPanelConfig.relay2_relay_group)
-  return _internal_relay2_relay_group();
+  return _internal_relay2_relay_group().Get(index);
 }
-inline void NSPanelConfig::set_relay2_relay_group(::int32_t value) {
-  _internal_set_relay2_relay_group(value);
+inline void NSPanelConfig::set_relay2_relay_group(int index, ::int32_t value) {
+  _internal_mutable_relay2_relay_group()->Set(index, value);
   // @@protoc_insertion_point(field_set:NSPanelConfig.relay2_relay_group)
 }
-inline ::int32_t NSPanelConfig::_internal_relay2_relay_group() const {
+inline void NSPanelConfig::add_relay2_relay_group(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_relay2_relay_group()->Add(value);
+  // @@protoc_insertion_point(field_add:NSPanelConfig.relay2_relay_group)
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>& NSPanelConfig::relay2_relay_group() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelConfig.relay2_relay_group)
+  return _internal_relay2_relay_group();
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig::mutable_relay2_relay_group()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelConfig.relay2_relay_group)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_relay2_relay_group();
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>&
+NSPanelConfig::_internal_relay2_relay_group() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.relay2_relay_group_;
 }
-inline void NSPanelConfig::_internal_set_relay2_relay_group(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.relay2_relay_group_ = value;
+inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig::_internal_mutable_relay2_relay_group() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.relay2_relay_group_;
 }
 
 // int32 default_light_brightess = 38;

@@ -9,6 +9,7 @@
 #include <cstring>
 #include <exception>
 #include <fstream>
+#include <google/protobuf/message.h>
 #include <iostream>
 #include <mqtt/client.h>
 #include <mqtt/message.h>

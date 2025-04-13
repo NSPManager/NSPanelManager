@@ -138,10 +138,10 @@ struct  NSPanelConfig
   protobuf_c_boolean optimistic_mode;
   int32_t raise_light_level_to_100_above;
   int32_t nspanel_id;
-  protobuf_c_boolean relay1_is_in_relay_group;
-  int32_t relay1_relay_group;
-  protobuf_c_boolean relay2_is_in_relay_group;
-  int32_t relay2_relay_group;
+  size_t n_relay1_relay_group;
+  int32_t *relay1_relay_group;
+  size_t n_relay2_relay_group;
+  int32_t *relay2_relay_group;
   /*
    * Default brightness for lights when trying to turn on but the current brightness is 0
    */
@@ -150,7 +150,7 @@ struct  NSPanelConfig
 };
 #define NSPANEL_CONFIG__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
-    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0 }
 
 
 struct  NSPanelWarning

@@ -2,6 +2,7 @@
 #define MQTT_MANAGER_NSPANEL
 #include "entity/entity.hpp"
 #include "protobuf_mqttmanager.pb.h"
+#include "protobuf_nspanel.pb.h"
 #include <atomic>
 #include <command_manager/command_manager.hpp>
 #include <cstdint>

@@ -579,7 +579,7 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_button_mode__descriptor =
   nspanel_config__nspanel_button_mode__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[33] =
+static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[31] =
 {
   {
     "name",
@@ -906,51 +906,27 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[33] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "relay1_is_in_relay_group",
-    34,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_BOOL,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelConfig, relay1_is_in_relay_group),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
     "relay1_relay_group",
     35,
-    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_LABEL_REPEATED,
     PROTOBUF_C_TYPE_INT32,
-    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, n_relay1_relay_group),
     offsetof(NSPanelConfig, relay1_relay_group),
     NULL,
     NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "relay2_is_in_relay_group",
-    36,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_BOOL,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelConfig, relay2_is_in_relay_group),
-    NULL,
-    NULL,
-    0,             /* flags */
+    0 | PROTOBUF_C_FIELD_FLAG_PACKED,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
     "relay2_relay_group",
     37,
-    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_LABEL_REPEATED,
     PROTOBUF_C_TYPE_INT32,
-    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, n_relay2_relay_group),
     offsetof(NSPanelConfig, relay2_relay_group),
     NULL,
     NULL,
-    0,             /* flags */
+    0 | PROTOBUF_C_FIELD_FLAG_PACKED,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -983,23 +959,21 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
   22,   /* field[22] = button2_mode */
   5,   /* field[5] = button_long_press_time */
   13,   /* field[13] = clock_us_style */
-  31,   /* field[31] = default_light_brightess */
+  29,   /* field[29] = default_light_brightess */
   2,   /* field[2] = default_page */
   1,   /* field[1] = default_room */
   23,   /* field[23] = global_scene_entity_page_ids */
   15,   /* field[15] = is_us_panel */
-  32,   /* field[32] = locked_to_default_room */
+  30,   /* field[30] = locked_to_default_room */
   4,   /* field[4] = min_button_push_time */
   0,   /* field[0] = name */
   26,   /* field[26] = nspanel_id */
   24,   /* field[24] = optimistic_mode */
   25,   /* field[25] = raise_light_level_to_100_above */
   18,   /* field[18] = relay1_default_mode */
-  27,   /* field[27] = relay1_is_in_relay_group */
-  28,   /* field[28] = relay1_relay_group */
+  27,   /* field[27] = relay1_relay_group */
   19,   /* field[19] = relay2_default_mode */
-  29,   /* field[29] = relay2_is_in_relay_group */
-  30,   /* field[30] = relay2_relay_group */
+  28,   /* field[28] = relay2_relay_group */
   17,   /* field[17] = reverse_relays */
   16,   /* field[16] = room_infos */
   8,   /* field[8] = screen_dim_level */
@@ -1013,12 +987,14 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
   20,   /* field[20] = temperature_calibration */
   14,   /* field[14] = use_fahrenheit */
 };
-static const ProtobufCIntRange nspanel_config__number_ranges[3 + 1] =
+static const ProtobufCIntRange nspanel_config__number_ranges[5 + 1] =
 {
   { 1, 0 },
   { 25, 22 },
   { 30, 23 },
-  { 0, 33 }
+  { 35, 27 },
+  { 37, 28 },
+  { 0, 31 }
 };
 const ProtobufCMessageDescriptor nspanel_config__descriptor =
 {
@@ -1028,10 +1004,10 @@ const ProtobufCMessageDescriptor nspanel_config__descriptor =
   "NSPanelConfig",
   "",
   sizeof(NSPanelConfig),
-  33,
+  31,
   nspanel_config__field_descriptors,
   nspanel_config__field_indices_by_name,
-  3,  nspanel_config__number_ranges,
+  5,  nspanel_config__number_ranges,
   (ProtobufCMessageInit) nspanel_config__init,
   NULL,NULL,NULL    /* reserved[123] */
 };

@@ -756,13 +756,6 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
   auto panel = EntityManager::get_nspanel_by_mac(mac_address);
   if (panel != nullptr && panel->get_state() != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT && panel->get_state() != MQTT_MANAGER_NSPANEL_STATE::DENIED) {
     SPDLOG_TRACE("Has registered to manager? {}", panel->has_registered_to_manager() ? "TRUE" : "FALSE");
-    if (panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
-      SPDLOG_TRACE("State: WAITING");
-    } else if (panel->get_state() == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
-      SPDLOG_TRACE("State: AWAITING_ACCEPT");
-    } else {
-      SPDLOG_DEBUG("State: something else, {}.", int(panel->get_state()));
-    }
     panel->register_to_manager(data);
   }
   if (panel == nullptr) {

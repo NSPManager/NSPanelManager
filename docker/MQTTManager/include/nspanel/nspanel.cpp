@@ -303,32 +303,24 @@ void NSPanel::send_config() {
   try {
     auto relay_group_binding = database_manager::database.get_all<database_manager::NSPanelRelayGroupBinding>(
         sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::relay_num) == 1) and sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::nspanel_id) == this->_id);
-    if (relay_group_binding.size() > 0) [[likely]] {
-      config.set_relay1_is_in_relay_group(true);
-      config.set_relay1_relay_group(relay_group_binding[0].relay_group_id);
-    } else {
-      config.set_relay1_is_in_relay_group(false);
-      config.set_relay1_relay_group(0);
+    if (relay_group_binding.size() > 0) {
+      for (auto &binding : relay_group_binding) {
+        config.add_relay1_relay_group(binding.relay_group_id);
+      }
     }
   } catch (std::system_error) {
-    config.set_relay1_is_in_relay_group(false);
-    config.set_relay1_relay_group(0);
     // Did not find matching relay group binind, relay is not bound.
   }
 
   try {
     auto relay_group_binding = database_manager::database.get_all<database_manager::NSPanelRelayGroupBinding>(
         sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::relay_num) == 2) and sqlite_orm::c(&database_manager::NSPanelRelayGroupBinding::nspanel_id) == this->_id);
-    if (relay_group_binding.size() > 0) [[likely]] {
-      config.set_relay2_is_in_relay_group(true);
-      config.set_relay2_relay_group(relay_group_binding[0].relay_group_id);
-    } else {
-      config.set_relay2_is_in_relay_group(false);
-      config.set_relay2_relay_group(0);
+    if (relay_group_binding.size() > 0) {
+      for (auto &binding : relay_group_binding) {
+        config.add_relay2_relay_group(binding.relay_group_id);
+      }
     }
   } catch (std::system_error) {
-    config.set_relay2_is_in_relay_group(false);
-    config.set_relay2_relay_group(0);
     // Did not find matching relay group binind, relay is not bound.
   }
 
@@ -356,9 +348,8 @@ void NSPanel::send_config() {
     config.add_global_scene_entity_page_ids(page->get_id());
   }
 
+  SPDLOG_DEBUG("Sending updated NSPanelConfig to panel {}::{} over MQTT.", this->_id, this->_name);
   MQTT_Manager::publish_protobuf(this->_mqtt_config_topic, config, true);
-
-  SPDLOG_DEBUG("Sent updated NSPanelConfig to panel {}::{} over MQTT.", this->_id, this->_name);
 }
 
 NSPanel::~NSPanel() {
