@@ -379,6 +379,9 @@ void EntityManager::update_all_rooms_status() {
     uint16_t num_lights_ceiling_on = 0;
     uint16_t num_lights_table = 0;
     uint16_t num_lights_table_on = 0;
+    uint16_t num_kelvin_lights_total = 0;   // Total number of lights with color temperature
+    uint16_t num_kelvin_lights_ceiling = 0; // Total number of ceiling lights with color temperature
+    uint16_t num_kelvin_lights_table = 0;   // Total number of table lights with color temperature
 
     // Determine if any light is on in any of the rooms
     bool any_light_on = false;
@@ -401,7 +404,10 @@ void EntityManager::update_all_rooms_status() {
 
         if ((any_light_on && light->get_state()) || !any_light_on) {
           total_light_level_all += light->get_brightness();
-          total_kelvin_level_all += light->get_color_temperature();
+          if (light->can_color_temperature()) {
+            total_kelvin_level_all += light->get_color_temperature();
+            num_kelvin_lights_total++;
+          }
           num_lights_total++;
         }
         if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE) {
@@ -409,7 +415,10 @@ void EntityManager::update_all_rooms_status() {
           num_lights_table++;
           if (light->get_state()) {
             total_light_level_table += light->get_brightness();
-            total_kelvin_table += light->get_color_temperature();
+            if (light->can_color_temperature()) {
+              total_kelvin_table += light->get_color_temperature();
+              num_kelvin_lights_table++;
+            }
             num_lights_table_on++;
           }
         } else if (light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING) {
@@ -417,7 +426,10 @@ void EntityManager::update_all_rooms_status() {
           num_lights_ceiling++;
           if (light->get_state()) {
             total_light_level_ceiling += light->get_brightness();
-            total_kelvin_ceiling += light->get_color_temperature();
+            if (light->can_color_temperature()) {
+              total_kelvin_ceiling += light->get_color_temperature();
+              num_kelvin_lights_ceiling++;
+            }
             num_lights_ceiling_on++;
           }
         }
@@ -430,30 +442,39 @@ void EntityManager::update_all_rooms_status() {
     all_rooms_status.set_num_ceiling_lights_on(num_lights_ceiling_on);
 
     if (num_lights_total > 0) {
-      float average_kelvin = (float)total_kelvin_level_all / num_lights_total;
-      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
-      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
-      if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
-        kelvin_pct = 100 - kelvin_pct;
-      }
-
       all_rooms_status.set_average_dim_level(total_light_level_all / num_lights_total);
-      all_rooms_status.set_average_color_temperature(kelvin_pct);
+
+      if (num_kelvin_lights_total > 0) {
+        float average_kelvin = (float)total_kelvin_level_all / num_kelvin_lights_total;
+        average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
+        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
+        if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+          kelvin_pct = 100 - kelvin_pct;
+        }
+        all_rooms_status.set_average_color_temperature(kelvin_pct);
+      } else {
+        all_rooms_status.set_average_color_temperature(0);
+      }
     } else {
       all_rooms_status.set_average_dim_level(0);
       all_rooms_status.set_average_color_temperature(0);
     }
 
     if (num_lights_table_on > 0) {
-      float average_kelvin = (float)total_kelvin_table / num_lights_table_on;
-      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
-      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
-      if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
-        kelvin_pct = 100 - kelvin_pct;
-      }
-
       all_rooms_status.set_table_lights_dim_level(total_light_level_table / num_lights_table_on);
-      all_rooms_status.set_table_lights_color_temperature_value(kelvin_pct);
+
+      if (num_kelvin_lights_table > 0) {
+        float average_kelvin = (float)total_kelvin_table / num_kelvin_lights_table;
+        average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
+        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
+        if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+          kelvin_pct = 100 - kelvin_pct;
+        }
+
+        all_rooms_status.set_table_lights_color_temperature_value(kelvin_pct);
+      } else {
+        all_rooms_status.set_table_lights_color_temperature_value(0);
+      }
     } else {
       // SPDLOG_TRACE("No table lights found, setting value to 0.");
       all_rooms_status.set_table_lights_dim_level(0);
@@ -461,15 +482,20 @@ void EntityManager::update_all_rooms_status() {
     }
 
     if (num_lights_ceiling_on > 0) {
-      float average_kelvin = (float)total_kelvin_ceiling / num_lights_ceiling_on;
-      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
-      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
-      if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
-        kelvin_pct = 100 - kelvin_pct;
-      }
-
       all_rooms_status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling_on);
-      all_rooms_status.set_ceiling_lights_color_temperature_value(kelvin_pct);
+
+      if (num_kelvin_lights_ceiling > 0) {
+        float average_kelvin = (float)total_kelvin_ceiling / num_kelvin_lights_ceiling;
+        average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
+        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
+        if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+          kelvin_pct = 100 - kelvin_pct;
+        }
+
+        all_rooms_status.set_ceiling_lights_color_temperature_value(kelvin_pct);
+      } else {
+        all_rooms_status.set_ceiling_lights_color_temperature_value(0);
+      }
     } else {
       // SPDLOG_TRACE("No ceiling lights found, setting value to 0.");
       all_rooms_status.set_ceiling_lights_dim_level(0);
