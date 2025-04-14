@@ -530,7 +530,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         }
 
         // Received new temperature from status report, send out on temperature topic:
-        MQTT_Manager::publish(this->_mqtt_temperature_topic, fmt::format("{:.1f}", std::round(this->_temperature)));
+        MQTT_Manager::publish(this->_mqtt_temperature_topic, fmt::format("{:.1f}", this->_temperature));
         this->send_websocket_update();
       } else {
         SPDLOG_ERROR("Failed to parse NSPanelStatusReport from string as protobuf. Will try JSON.");
