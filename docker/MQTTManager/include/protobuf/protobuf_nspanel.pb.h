@@ -4726,14 +4726,14 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_relay2_default_mode(bool value);
 
   public:
-  // float temperature_calibration = 21;
+  // int32 temperature_calibration = 21;
   void clear_temperature_calibration() ;
-  float temperature_calibration() const;
-  void set_temperature_calibration(float value);
+  ::int32_t temperature_calibration() const;
+  void set_temperature_calibration(::int32_t value);
 
   private:
-  float _internal_temperature_calibration() const;
-  void _internal_set_temperature_calibration(float value);
+  ::int32_t _internal_temperature_calibration() const;
+  void _internal_set_temperature_calibration(::int32_t value);
 
   public:
   // .NSPanelConfig.NSPanelButtonMode button1_mode = 22;
@@ -4858,7 +4858,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     bool reverse_relays_;
     bool relay1_default_mode_;
     bool relay2_default_mode_;
-    float temperature_calibration_;
+    ::int32_t temperature_calibration_;
     int button1_mode_;
     int button2_mode_;
     ::int32_t raise_light_level_to_100_above_;
@@ -5500,24 +5500,24 @@ inline void NSPanelConfig::_internal_set_relay2_default_mode(bool value) {
   _impl_.relay2_default_mode_ = value;
 }
 
-// float temperature_calibration = 21;
+// int32 temperature_calibration = 21;
 inline void NSPanelConfig::clear_temperature_calibration() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.temperature_calibration_ = 0;
 }
-inline float NSPanelConfig::temperature_calibration() const {
+inline ::int32_t NSPanelConfig::temperature_calibration() const {
   // @@protoc_insertion_point(field_get:NSPanelConfig.temperature_calibration)
   return _internal_temperature_calibration();
 }
-inline void NSPanelConfig::set_temperature_calibration(float value) {
+inline void NSPanelConfig::set_temperature_calibration(::int32_t value) {
   _internal_set_temperature_calibration(value);
   // @@protoc_insertion_point(field_set:NSPanelConfig.temperature_calibration)
 }
-inline float NSPanelConfig::_internal_temperature_calibration() const {
+inline ::int32_t NSPanelConfig::_internal_temperature_calibration() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.temperature_calibration_;
 }
-inline void NSPanelConfig::_internal_set_temperature_calibration(float value) {
+inline void NSPanelConfig::_internal_set_temperature_calibration(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.temperature_calibration_ = value;
 }

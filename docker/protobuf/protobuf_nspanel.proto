@@ -44,7 +44,7 @@ message NSPanelConfig {
     bool reverse_relays = 18;
     bool relay1_default_mode = 19;
     bool relay2_default_mode = 20;
-    float temperature_calibration = 21;
+    int32 temperature_calibration = 21;
 
     // There are more button modes avaiable but those are handled by the manager and no the panel itself.
     // Only send modes that the panel itself can handle or simply tell the panel to tell the manager.

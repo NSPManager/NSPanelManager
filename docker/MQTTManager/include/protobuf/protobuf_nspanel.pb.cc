@@ -818,7 +818,7 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "fos\030\021 \003(\0132\027.NSPanelConfig.RoomInfo\022\026\n\016re"
     "verse_relays\030\022 \001(\010\022\033\n\023relay1_default_mod"
     "e\030\023 \001(\010\022\033\n\023relay2_default_mode\030\024 \001(\010\022\037\n\027"
-    "temperature_calibration\030\025 \001(\002\0226\n\014button1"
+    "temperature_calibration\030\025 \001(\005\0226\n\014button1"
     "_mode\030\026 \001(\0162 .NSPanelConfig.NSPanelButto"
     "nMode\0226\n\014button2_mode\030\031 \001(\0162 .NSPanelCon"
     "fig.NSPanelButtonMode\022$\n\034global_scene_en"
@@ -1486,9 +1486,9 @@ const ::_pbi::TcParseTable<5, 31, 1, 50, 7> NSPanelConfig::_table_ = {
     // bool relay2_default_mode = 20;
     {::_pbi::TcParser::FastV8S2,
      {416, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.relay2_default_mode_)}},
-    // float temperature_calibration = 21;
-    {::_pbi::TcParser::FastF32S2,
-     {429, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.temperature_calibration_)}},
+    // int32 temperature_calibration = 21;
+    {::_pbi::TcParser::FastV32S2,
+     {424, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.temperature_calibration_)}},
     // .NSPanelConfig.NSPanelButtonMode button1_mode = 22;
     {::_pbi::TcParser::FastV32S2,
      {432, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_mode_)}},
@@ -1574,9 +1574,9 @@ const ::_pbi::TcParseTable<5, 31, 1, 50, 7> NSPanelConfig::_table_ = {
     // bool relay2_default_mode = 20;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.relay2_default_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // float temperature_calibration = 21;
+    // int32 temperature_calibration = 21;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.temperature_calibration_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kFloat)},
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
     // .NSPanelConfig.NSPanelButtonMode button1_mode = 22;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
@@ -1786,15 +1786,10 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
         20, this->_internal_relay2_default_mode(), target);
   }
 
-  // float temperature_calibration = 21;
-  static_assert(sizeof(::uint32_t) == sizeof(float),
-                "Code assumes ::uint32_t and float are the same size.");
-  float tmp_temperature_calibration = this->_internal_temperature_calibration();
-  ::uint32_t raw_temperature_calibration;
-  memcpy(&raw_temperature_calibration, &tmp_temperature_calibration, sizeof(tmp_temperature_calibration));
-  if (raw_temperature_calibration != 0) {
+  // int32 temperature_calibration = 21;
+  if (this->_internal_temperature_calibration() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteFloatToArray(
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
         21, this->_internal_temperature_calibration(), target);
   }
 
@@ -2042,14 +2037,10 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
     total_size += 3;
   }
 
-  // float temperature_calibration = 21;
-  static_assert(sizeof(::uint32_t) == sizeof(float),
-                "Code assumes ::uint32_t and float are the same size.");
-  float tmp_temperature_calibration = this->_internal_temperature_calibration();
-  ::uint32_t raw_temperature_calibration;
-  memcpy(&raw_temperature_calibration, &tmp_temperature_calibration, sizeof(tmp_temperature_calibration));
-  if (raw_temperature_calibration != 0) {
-    total_size += 6;
+  // int32 temperature_calibration = 21;
+  if (this->_internal_temperature_calibration() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_temperature_calibration());
   }
 
   // .NSPanelConfig.NSPanelButtonMode button1_mode = 22;
@@ -2166,12 +2157,7 @@ void NSPanelConfig::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::g
   if (from._internal_relay2_default_mode() != 0) {
     _this->_impl_.relay2_default_mode_ = from._impl_.relay2_default_mode_;
   }
-  static_assert(sizeof(::uint32_t) == sizeof(float),
-                "Code assumes ::uint32_t and float are the same size.");
-  float tmp_temperature_calibration = from._internal_temperature_calibration();
-  ::uint32_t raw_temperature_calibration;
-  memcpy(&raw_temperature_calibration, &tmp_temperature_calibration, sizeof(tmp_temperature_calibration));
-  if (raw_temperature_calibration != 0) {
+  if (from._internal_temperature_calibration() != 0) {
     _this->_impl_.temperature_calibration_ = from._impl_.temperature_calibration_;
   }
   if (from._internal_button1_mode() != 0) {
