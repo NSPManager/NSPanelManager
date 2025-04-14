@@ -66,6 +66,8 @@ private:
   // Mutex to make sure only one thread can load settings at the time
   static inline std::mutex _config_load_mutex;
 
+  static inline std::mutex _database_access_mutex; // Mutex to only allow one thread to access the "get_setting_with_default" database function as the same time.
+
   static inline boost::signals2::signal<void()> _config_loaded_listeners;
 
   static inline std::mutex _settings_mutex;

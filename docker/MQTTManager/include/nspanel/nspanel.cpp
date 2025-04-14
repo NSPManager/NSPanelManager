@@ -400,7 +400,6 @@ MQTT_MANAGER_NSPANEL_STATE NSPanel::get_state() {
 }
 
 void NSPanel::mqtt_callback(std::string topic, std::string payload) {
-  bool parse_fail = false;
   try {
     if (!payload.empty() && topic.compare(this->_mqtt_log_topic) == 0) {
       // Split log message by semicolon to extract MAC, log level and message.
@@ -470,158 +469,142 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         this->send_websocket_update();
       }
     } else if (topic.compare(this->_mqtt_status_report_topic) == 0) {
-      nlohmann::json data = nlohmann::json::parse(payload);
-      if (std::string(data["mac"]).compare(this->_mac) == 0) {
-        // Update internal status
-        this->_rssi = data["rssi"];
-        this->_heap_used_pct = data["heap_used_pct"];
-        if (data["temperature"].is_number_float()) {
-          this->_temperature = data["temperature"];
-        } else if (data["temperature"].is_string()) {
-          this->_temperature = atof(std::string(data["temperature"]).c_str());
-        } else {
-          SPDLOG_ERROR("Incorrect format of temperature data. Expected float.");
+      NSPanelStatusReport report;
+      if (report.ParseFromString(payload)) {
+        SPDLOG_DEBUG("Got new status report from NSPanel {}::{}", this->_id, this->_name);
+        this->_ip_address = report.ip_address();
+        this->_rssi = report.rssi();
+        this->_heap_used_pct = report.heap_used_pct();
+        this->_temperature = report.temperature();
+        switch (report.nspanel_state()) {
+        case NSPanelStatusReport_state::NSPanelStatusReport_state_ONLINE:
+          this->_update_progress = 0;
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+          break;
+        case NSPanelStatusReport_state_OFFLINE:
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE; // This should never happen, offline state is handled in "/state" and not "/status_report"
+          break;
+        case NSPanelStatusReport_state_UPDATING_TFT:
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT;
+          break;
+        case NSPanelStatusReport_state_UPDATING_FIRMWARE:
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_FIRMWARE;
+          break;
+        case NSPanelStatusReport_state_UPDATING_LITTLEFS:
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA;
+          break;
+        case NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MIN_SENTINEL_DO_NOT_USE_:
+        case NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MAX_SENTINEL_DO_NOT_USE_:
+          break;
         }
-        this->_ip_address = data["ip"];
+
+        this->_update_progress = report.update_progress();
         this->_nspanel_warnings.clear();
-        if (data.at("warnings").is_string()) {
-          // Loaded from old firmware, split string and assume level warning
-          std::vector<std::string> message_lines;
-          boost::split(message_lines, std::string(data.at("warnings")), boost::is_any_of("\n"));
-          for (std::string line : message_lines) {
-            NSPanelWarningWebsocketRepresentation warning_obj = {
-                .level = "warning",
-                .text = line};
-            this->_nspanel_warnings.push_back(warning_obj);
+        for (const NSPanelWarning &warning : report.warnings()) {
+          NSPanelWarningWebsocketRepresentation ws_warn;
+          ws_warn.text = warning.text();
+          switch (warning.level()) {
+          case CRITICAL:
+            ws_warn.level = "CRITICAL";
+            break;
+          case ERROR:
+            ws_warn.level = "ERROR";
+            break;
+          case WARNING:
+            ws_warn.level = "WARNING";
+            break;
+          case INFO:
+            ws_warn.level = "INFO";
+            break;
+          case DEBUG:
+            ws_warn.level = "DEBUG";
+            break;
+          case TRACE:
+            ws_warn.level = "TRACE";
+            break;
+          case NSPanelWarningLevel_INT_MIN_SENTINEL_DO_NOT_USE_:
+          case NSPanelWarningLevel_INT_MAX_SENTINEL_DO_NOT_USE_:
+            break;
           }
-        } else if (data.at("warnings").is_array()) {
-          for (nlohmann::json warning : data.at("warnings")) {
-            if (warning.contains("level") && warning.contains("text")) {
+          this->_nspanel_warnings.push_back(ws_warn);
+        }
+
+        // Received new temperature from status report, send out on temperature topic:
+        MQTT_Manager::publish(this->_mqtt_temperature_topic, fmt::format("{:.1f}", std::round(this->_temperature)));
+        this->send_websocket_update();
+      } else {
+        SPDLOG_ERROR("Failed to parse NSPanelStatusReport from string as protobuf. Will try JSON.");
+
+        nlohmann::json data = nlohmann::json::parse(payload);
+        if (std::string(data["mac"]).compare(this->_mac) == 0) {
+          // Update internal status
+          this->_rssi = data["rssi"];
+          this->_heap_used_pct = data["heap_used_pct"];
+          if (data["temperature"].is_number_float()) {
+            this->_temperature = data["temperature"];
+          } else if (data["temperature"].is_string()) {
+            this->_temperature = atof(std::string(data["temperature"]).c_str());
+          } else {
+            SPDLOG_ERROR("Incorrect format of temperature data. Expected float.");
+          }
+          this->_ip_address = data["ip"];
+          this->_nspanel_warnings.clear();
+          if (data.at("warnings").is_string()) {
+            // Loaded from old firmware, split string and assume level warning
+            std::vector<std::string> message_lines;
+            boost::split(message_lines, std::string(data.at("warnings")), boost::is_any_of("\n"));
+            for (std::string line : message_lines) {
               NSPanelWarningWebsocketRepresentation warning_obj = {
-                  .level = warning.at("level"),
-                  .text = warning.at("text")};
+                  .level = "warning",
+                  .text = line};
               this->_nspanel_warnings.push_back(warning_obj);
-            } else {
-              SPDLOG_WARN("Failed to load warning from NSPanel {}::{}. Missing level or text attribute.", this->_id, this->_name);
+            }
+          } else if (data.at("warnings").is_array()) {
+            for (nlohmann::json warning : data.at("warnings")) {
+              if (warning.contains("level") && warning.contains("text")) {
+                NSPanelWarningWebsocketRepresentation warning_obj = {
+                    .level = warning.at("level"),
+                    .text = warning.at("text")};
+                this->_nspanel_warnings.push_back(warning_obj);
+              } else {
+                SPDLOG_WARN("Failed to load warning from NSPanel {}::{}. Missing level or text attribute.", this->_id, this->_name);
+              }
             }
           }
-        }
 
-        if (data.contains("state")) {
-          std::string state = data["state"];
-          if (this->_state == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
-            // Do nothing, simply block state change to something else.
-          } else if (state.compare("updating_tft") == 0) {
-            this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT;
-          } else if (state.compare("updating_fw") == 0) {
-            this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_FIRMWARE;
-          } else if (state.compare("updating_fs") == 0) {
-            this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA;
+          if (data.contains("state")) {
+            std::string state = data["state"];
+            if (this->_state == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
+              // Do nothing, simply block state change to something else.
+            } else if (state.compare("updating_tft") == 0) {
+              this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT;
+            } else if (state.compare("updating_fw") == 0) {
+              this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_FIRMWARE;
+            } else if (state.compare("updating_fs") == 0) {
+              this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA;
+            } else {
+              SPDLOG_ERROR("Received unknown state from nspanel {}::{}. State: {}", this->_id, this->_name, state);
+            }
           } else {
-            SPDLOG_ERROR("Received unknown state from nspanel {}::{}. State: {}", this->_id, this->_name, state);
+            if (this->_state == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
+              // We were waiting for a new status report. Set panel to online.
+              this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+            }
           }
-        } else {
-          if (this->_state == MQTT_MANAGER_NSPANEL_STATE::WAITING) {
-            // We were waiting for a new status report. Set panel to online.
-            this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+
+          if (data.contains("progress")) {
+            this->_update_progress = data["progress"];
+          } else {
+            this->_update_progress = 0;
           }
-        }
 
-        if (data.contains("progress")) {
-          this->_update_progress = data["progress"];
-        } else {
-          this->_update_progress = 0;
+          this->send_websocket_status_update();
         }
-
-        this->send_websocket_status_update();
       }
     }
   } catch (std::exception &e) {
-    parse_fail = true;
     SPDLOG_ERROR("Caught exception: {}", e.what());
     SPDLOG_ERROR("Stacktrace: {}", boost::diagnostic_information(e, true));
-  }
-
-  if (parse_fail) {
-    SPDLOG_INFO("Failed to parse data. Will try as protobuf.");
-
-    if (boost::ends_with(topic, "/status_report")) {
-      SPDLOG_TRACE("Trying to parse status_report as protobuf.");
-
-      NSPanelStatusReport report;
-      if (!report.ParseFromString(payload)) {
-        SPDLOG_ERROR("Failed to parse NSPanelStatusReport from string as protobuf.");
-        SPDLOG_TRACE("Payload: {}", payload);
-        return;
-      }
-
-      this->_ip_address = report.ip_address();
-      this->_rssi = report.rssi();
-      this->_heap_used_pct = report.heap_used_pct();
-      this->_temperature = report.temperature();
-      switch (report.nspanel_state()) {
-      case NSPanelStatusReport_state::NSPanelStatusReport_state_ONLINE:
-        this->_update_progress = 0;
-        this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
-        break;
-      case NSPanelStatusReport_state_OFFLINE:
-        this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE; // This should never happen, offline state is handled in "/state" and not "/status_report"
-        break;
-      case NSPanelStatusReport_state_UPDATING_TFT:
-        this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT;
-        break;
-      case NSPanelStatusReport_state_UPDATING_FIRMWARE:
-        this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_FIRMWARE;
-        break;
-      case NSPanelStatusReport_state_UPDATING_LITTLEFS:
-        this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA;
-        break;
-      case NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MIN_SENTINEL_DO_NOT_USE_:
-      case NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MAX_SENTINEL_DO_NOT_USE_:
-        break;
-      }
-
-      this->_update_progress = report.update_progress();
-      this->_nspanel_warnings.clear();
-      for (const NSPanelWarning &warning : report.warnings()) {
-        NSPanelWarningWebsocketRepresentation ws_warn;
-        ws_warn.text = warning.text();
-        switch (warning.level()) {
-        case CRITICAL:
-          ws_warn.level = "CRITICAL";
-          break;
-        case ERROR:
-          ws_warn.level = "ERROR";
-          break;
-        case WARNING:
-          ws_warn.level = "WARNING";
-          break;
-        case INFO:
-          ws_warn.level = "INFO";
-          break;
-        case DEBUG:
-          ws_warn.level = "DEBUG";
-          break;
-        case TRACE:
-          ws_warn.level = "TRACE";
-          break;
-        case NSPanelWarningLevel_INT_MIN_SENTINEL_DO_NOT_USE_:
-        case NSPanelWarningLevel_INT_MAX_SENTINEL_DO_NOT_USE_:
-          break;
-        }
-        this->_nspanel_warnings.push_back(ws_warn);
-      }
-
-      // Received new temperature from status report, send out on temperature topic:
-      MQTT_Manager::publish(this->_mqtt_temperature_topic, std::to_string(std::round(this->_temperature * 100.0f) / 100.0f));
-
-      // SPDLOG_TRACE("MAC: {}", report.mac_address());
-      // SPDLOG_TRACE("IP : {}", report.ip_address());
-      // SPDLOG_TRACE("TMP: {}", report.temperature());
-      // SPDLOG_TRACE("HEP: {}", report.heap_used_pct());
-      // SPDLOG_TRACE("RSI: {}", report.rssi());
-      this->send_websocket_update();
-    }
   }
 }
 

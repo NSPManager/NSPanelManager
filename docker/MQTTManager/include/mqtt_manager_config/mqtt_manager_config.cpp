@@ -33,6 +33,7 @@ MqttManagerSettingsHolder MqttManagerConfig::get_settings() {
 }
 
 std::string MqttManagerConfig::get_setting_with_default(std::string key, std::string default_value) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_database_access_mutex);
   try {
     auto result = database_manager::database.get_all<database_manager::SettingHolder>(sqlite_orm::where(sqlite_orm::c(&database_manager::SettingHolder::name) == key));
     if (result.size() > 0) [[likely]] {
