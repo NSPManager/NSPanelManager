@@ -342,6 +342,8 @@ def relay_group_remove_relay(request, relay_binding_id):
     if request.method == "DELETE":
         rgb = RelayGroupBinding.objects.get(id=relay_binding_id)
         rgb.delete()
+        send_mqttmanager_reload_command()
+
         response = HttpResponse()
         response["HX-Refresh"] = "true"
         return response

@@ -825,7 +825,7 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[31] =
     "temperature_calibration",
     21,
     PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_FLOAT,
+    PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
     offsetof(NSPanelConfig, temperature_calibration),
     NULL,

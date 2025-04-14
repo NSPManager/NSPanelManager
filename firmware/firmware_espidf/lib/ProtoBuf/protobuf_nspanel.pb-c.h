@@ -130,7 +130,7 @@ struct  NSPanelConfig
   protobuf_c_boolean reverse_relays;
   protobuf_c_boolean relay1_default_mode;
   protobuf_c_boolean relay2_default_mode;
-  float temperature_calibration;
+  int32_t temperature_calibration;
   NSPanelConfig__NSPanelButtonMode button1_mode;
   NSPanelConfig__NSPanelButtonMode button2_mode;
   size_t n_global_scene_entity_page_ids;
