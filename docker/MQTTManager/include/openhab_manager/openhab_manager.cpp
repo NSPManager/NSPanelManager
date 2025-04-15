@@ -105,6 +105,8 @@ void OpenhabManager::_websocket_message_callback(const ix::WebSocketMessagePtr &
   } else if (msg->type == ix::WebSocketMessageType::Open) {
     SPDLOG_INFO("Connected to Openhab websocket.");
     OpenhabManager::_authenticated = true;
+    OpenhabManager::_connected = true;
+
     for (auto item_observer_pairs : OpenhabManager::_openhab_item_observers) {
       if (item_observer_pairs.second->num_slots() > 0) {
         try {
@@ -126,9 +128,11 @@ void OpenhabManager::_websocket_message_callback(const ix::WebSocketMessagePtr &
   } else if (msg->type == ix::WebSocketMessageType::Close) {
     SPDLOG_WARN("Disconnected from Openhab websocket.");
     OpenhabManager::_authenticated = false;
+    OpenhabManager::_connected = false;
   } else if (msg->type == ix::WebSocketMessageType::Error) {
     SPDLOG_ERROR("Failed to connect to Openhab websocket. Reason: {}", msg->errorInfo.reason);
     OpenhabManager::_authenticated = false;
+    OpenhabManager::_connected = false;
   } else if (msg->type == ix::WebSocketMessageType::Fragment) {
     SPDLOG_ERROR("Received Openhab websocket fragment which is not supported.");
   }
@@ -234,7 +238,7 @@ void OpenhabManager::send_json(nlohmann::json &data) {
 }
 
 void OpenhabManager::_send_string(std::string &data) {
-  if (OpenhabManager::_websocket != nullptr) {
+  if (OpenhabManager::_websocket != nullptr && OpenhabManager::_connected) {
     std::lock_guard<std::mutex> mtex_lock(OpenhabManager::_mutex_websocket_write_access);
     SPDLOG_TRACE("[OH WS] Sending data: {}", data);
     OpenhabManager::_websocket->send(data);

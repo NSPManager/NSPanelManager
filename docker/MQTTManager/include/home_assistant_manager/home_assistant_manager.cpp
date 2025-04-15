@@ -23,6 +23,7 @@
 #include <nlohmann/detail/json_pointer.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
+#include <string>
 
 void HomeAssistantManager::connect() {
   SPDLOG_DEBUG("Initializing Home Assistant Manager component.");
@@ -101,12 +102,15 @@ void HomeAssistantManager::_websocket_message_callback(const ix::WebSocketMessag
     HomeAssistantManager::_process_websocket_message(msg->str);
   } else if (msg->type == ix::WebSocketMessageType::Open) {
     SPDLOG_INFO("Connected to Home Assistant websocket.");
+    HomeAssistantManager::_connected = true;
   } else if (msg->type == ix::WebSocketMessageType::Close) {
     SPDLOG_WARN("Disconnected from Home Assistant websocket.");
     HomeAssistantManager::_authenticated = false;
+    HomeAssistantManager::_connected = false;
   } else if (msg->type == ix::WebSocketMessageType::Error) {
     SPDLOG_ERROR("Failed to connect to Home Assistant websocket. Reason: {}", msg->errorInfo.reason);
     HomeAssistantManager::_authenticated = false;
+    HomeAssistantManager::_connected = false;
   }
 }
 
@@ -175,7 +179,7 @@ void HomeAssistantManager::send_json(nlohmann::json &data) {
 }
 
 void HomeAssistantManager::_send_string(std::string &data) {
-  if (HomeAssistantManager::_websocket != nullptr) {
+  if (HomeAssistantManager::_websocket != nullptr && HomeAssistantManager::_connected) {
     std::lock_guard<std::mutex> mtex_lock(HomeAssistantManager::_mutex_websocket_write_access);
     SPDLOG_TRACE("[HA WS] Sending data: {}", data);
     HomeAssistantManager::_websocket->send(data);
@@ -184,7 +188,7 @@ void HomeAssistantManager::_send_string(std::string &data) {
 
 void HomeAssistantManager::_request_all_states() {
   // Request all current states in HA
-  HomeAssistantManager::_all_statues_request_message_id = HomeAssistantManager::_next_message_id;
+  HomeAssistantManager::_all_statues_request_message_id = HomeAssistantManager::_next_message_id.load();
   nlohmann::json all_states_request_command;
   all_states_request_command["type"] = "get_states";
   HomeAssistantManager::send_json(all_states_request_command);

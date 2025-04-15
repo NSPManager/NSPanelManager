@@ -363,7 +363,7 @@ void Room::_send_room_state_update() {
   if (num_lights_total > 0) {
     status.set_average_dim_level(total_light_level_all / num_lights_total);
 
-    if (num_kelvin_lights_table > 0) {
+    if (num_kelvin_lights_total > 0) {
       float average_kelvin = (float)total_kelvin_level_all / num_kelvin_lights_total;
       average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
       uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
@@ -373,6 +373,7 @@ void Room::_send_room_state_update() {
 
       status.set_average_color_temperature(kelvin_pct);
     } else {
+      SPDLOG_DEBUG("No lights with color temp found, setting to 0.");
       status.set_average_color_temperature(0);
     }
   } else {
@@ -393,6 +394,7 @@ void Room::_send_room_state_update() {
 
       status.set_table_lights_color_temperature_value(kelvin_pct);
     } else {
+      SPDLOG_DEBUG("No table lights with color temp found, setting to 0.");
       status.set_table_lights_color_temperature_value(0);
     }
   } else {
@@ -414,6 +416,7 @@ void Room::_send_room_state_update() {
 
       status.set_ceiling_lights_color_temperature_value(kelvin_pct);
     } else {
+      SPDLOG_DEBUG("No ceiling lights with color temp found, setting to 0.");
       status.set_ceiling_lights_color_temperature_value(0);
     }
   } else {

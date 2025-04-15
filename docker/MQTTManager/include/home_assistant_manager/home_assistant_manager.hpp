@@ -1,6 +1,7 @@
 #ifndef MQTT_MANAGER_HOME_ASSISTANT_MANAGER_HPP
 #define MQTT_MANAGER_HOME_ASSISTANT_MANAGER_HPP
 
+#include <atomic>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/signals2.hpp>
 #include <ixwebsocket/IXWebSocket.h>
@@ -55,9 +56,10 @@ private:
   static void _websocket_message_callback(const ix::WebSocketMessagePtr &msg);
   static void _process_websocket_message(const std::string &data);
 
-  static inline bool _authenticated = false;
-  static inline long _next_message_id = 1;
-  static inline long _all_statues_request_message_id;
+  static inline std::atomic<bool> _authenticated = false;
+  static inline std::atomic<bool> _connected = false;
+  static inline std::atomic<long> _next_message_id = 1;
+  static inline std::atomic<long> _all_statues_request_message_id;
 
   static inline std::mutex _settings_mutex;
   static inline std::string _home_assistant_address;

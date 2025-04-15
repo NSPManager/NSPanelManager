@@ -8,6 +8,7 @@
 #include <boost/algorithm/minmax.hpp>
 #include <cassert>
 #include <chrono>
+#include <csignal>
 #include <cstddef>
 #include <cstdlib>
 #include <ctime>
@@ -153,6 +154,9 @@ int main(void) {
   sigemptyset(&sigUsr1Handler.sa_mask);
   sigUsr1Handler.sa_flags = 0;
   sigaction(SIGUSR1, &sigUsr1Handler, NULL);
+
+  // Ignore SIGPIPE signals to prevent crashes when writing/reading to a closed socket.
+  signal(SIGPIPE, SIG_IGN);
 
   if (sqlite3_threadsafe() == 0) {
     SPDLOG_WARN("SQLite3 compiled NOT threadsafe, ie. without mutexes!");

@@ -1,6 +1,7 @@
 #ifndef MQTT_MANAGER_OPENHAB_MANAGER_HPP
 #define MQTT_MANAGER_OPENHAB_MANAGER_HPP
 
+#include <atomic>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/signals2.hpp>
@@ -83,7 +84,8 @@ private:
   static void _websocket_message_callback(const ix::WebSocketMessagePtr &msg);
   static void _process_websocket_message(const std::string &data);
 
-  static inline bool _authenticated = false;
+  static inline std::atomic<bool> _authenticated = false;
+  static inline std::atomic<bool> _connected = false;
 
   static inline std::mutex _setting_values_mutex; // Mutex to prevent simultaneous access to settings
   static inline std::string _openhab_address;     // Address of OpenHAB server
