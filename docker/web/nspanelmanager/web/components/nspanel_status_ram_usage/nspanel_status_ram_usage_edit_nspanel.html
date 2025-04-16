@@ -5,7 +5,7 @@
     // Update relevant values for the status header from the bundled data in the status update event
     var element = document.getElementById(`nspanel-ram-status-${event.detail.event_data.id}`);
     element.state = event.detail.event_data.state;
-    element.temperature = Math.round(event.detail.event_data.temperature*10)/10;
+    element.ram_usage = event.detail.event_data.ram_usage;
   });
 
   define({
