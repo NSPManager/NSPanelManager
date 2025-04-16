@@ -210,10 +210,14 @@ struct  NSPanelRoomEntitiesPage__EntitySlot
   int32_t pco;
   int32_t pco2;
   protobuf_c_boolean can_save_scene;
+  /*
+   * MQTT topic where NSPanelEntityState is sent for control of individual entity. Empty if not controllable individually.
+   */
+  char *mqtt_state_topic;
 };
 #define NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_room_entities_page__entity_slot__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0 }
+    , 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, (char *)protobuf_c_empty_string }
 
 
 /*

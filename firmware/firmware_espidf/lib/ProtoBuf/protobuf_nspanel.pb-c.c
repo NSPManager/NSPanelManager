@@ -1380,7 +1380,7 @@ const ProtobufCMessageDescriptor nspanel_light_status__descriptor =
   (ProtobufCMessageInit) nspanel_light_status__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor nspanel_room_entities_page__entity_slot__field_descriptors[6] =
+static const ProtobufCFieldDescriptor nspanel_room_entities_page__entity_slot__field_descriptors[7] =
 {
   {
     "room_view_position",
@@ -1454,10 +1454,23 @@ static const ProtobufCFieldDescriptor nspanel_room_entities_page__entity_slot__f
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "mqtt_state_topic",
+    7,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelRoomEntitiesPage__EntitySlot, mqtt_state_topic),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_room_entities_page__entity_slot__field_indices_by_name[] = {
   5,   /* field[5] = can_save_scene */
   2,   /* field[2] = icon */
+  6,   /* field[6] = mqtt_state_topic */
   1,   /* field[1] = name */
   3,   /* field[3] = pco */
   4,   /* field[4] = pco2 */
@@ -1466,7 +1479,7 @@ static const unsigned nspanel_room_entities_page__entity_slot__field_indices_by_
 static const ProtobufCIntRange nspanel_room_entities_page__entity_slot__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 6 }
+  { 0, 7 }
 };
 const ProtobufCMessageDescriptor nspanel_room_entities_page__entity_slot__descriptor =
 {
@@ -1476,7 +1489,7 @@ const ProtobufCMessageDescriptor nspanel_room_entities_page__entity_slot__descri
   "NSPanelRoomEntitiesPage__EntitySlot",
   "",
   sizeof(NSPanelRoomEntitiesPage__EntitySlot),
-  6,
+  7,
   nspanel_room_entities_page__entity_slot__field_descriptors,
   nspanel_room_entities_page__entity_slot__field_indices_by_name,
   1,  nspanel_room_entities_page__entity_slot__number_ranges,
