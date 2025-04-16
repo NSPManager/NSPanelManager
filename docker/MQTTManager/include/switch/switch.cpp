@@ -156,3 +156,7 @@ uint16_t SwitchEntity::get_icon_active_color() {
     return GUI_Colors::icon_color_off;
   }
 }
+
+std::string SwitchEntity::get_mqtt_state_topic() {
+  return "";
+}

@@ -11,7 +11,7 @@
                 {% for room in rooms %}
                 <tr class="hover bg-base-100 room-row" data-room-id="{{ room.room.id }}">
                     <td>
-                        <span class="mdi mdi-drag-horizontal-variant cursor-grab sortable-handle"></span>
+                        <span class="mdi mdi-drag-horizontal-variant cursor-grab sortable-handle" title="Drag and drop to reorder"></span>
                     </td>
                     <th class="">
                         <a href="{% url 'edit_room' room_id=room.room.id %}">{{ room.room.friendly_name }}</a>

@@ -65,6 +65,7 @@ OpenhabLight::OpenhabLight(uint32_t light_id) : Light(light_id) {
     OpenhabManager::attach_event_observer(this->_openhab_item_rgb, boost::bind(&OpenhabLight::openhab_event_callback, this, _1));
   }
 
+  this->send_state_update_to_nspanel(); // Send initial state to NSPanel
   SPDLOG_DEBUG("Loaded light {}::{}.", this->_id, this->_name);
 }
 
@@ -182,6 +183,7 @@ void OpenhabLight::send_state_update_to_controller() {
   }
 
   if (MqttManagerConfig::get_settings().optimistic_mode) {
+    this->send_state_update_to_nspanel();
     this->_entity_changed_callbacks(this);
   }
 }
@@ -236,6 +238,7 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
 
           SPDLOG_DEBUG("Light {}::{} got new brightness from Openhab, new brightness: {}", this->_id, this->_name, this->_current_brightness);
           this->_last_brightness_change = CurrentTimeMilliseconds();
+          this->send_state_update_to_nspanel();
           this->_signal_entity_changed();
         }
       }
@@ -262,6 +265,7 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
 
           SPDLOG_DEBUG("Light {}::{} got new color temperature from Openhab, new value: {}", this->_id, this->_name, this->_current_color_temperature);
           this->_last_light_mode_change = CurrentTimeMilliseconds();
+          this->send_state_update_to_nspanel();
           this->_signal_entity_changed();
         }
       }
@@ -311,6 +315,7 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
 
           SPDLOG_DEBUG("Light {}::{} got new HSB from Openhab, new values: {},{},{}", this->_id, this->_name, this->_current_hue, this->_current_saturation, this->_current_brightness);
           this->_last_light_mode_change = CurrentTimeMilliseconds();
+          this->send_state_update_to_nspanel();
           this->_signal_entity_changed();
         }
       }

@@ -92,6 +92,7 @@ public:
   std::string_view get_icon();
   uint16_t get_icon_color();
   uint16_t get_icon_active_color();
+  std::string get_mqtt_state_topic();
 
   ~SwitchEntity();
 

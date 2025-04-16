@@ -58,7 +58,7 @@ void MQTTManagerWeather::reload_config() {
 
   MQTTManagerWeather::_location_latitude = MqttManagerConfig::get_setting_with_default("location_latitude", "");
   MQTTManagerWeather::_location_longitude = MqttManagerConfig::get_setting_with_default("location_longitude", "");
-  MQTTManagerWeather::_update_interval_minutes = std::stoi(MqttManagerConfig::get_setting_with_default("weather_update_internval", "10"));
+  MQTTManagerWeather::_update_interval_minutes = std::stoi(MqttManagerConfig::get_setting_with_default("weather_update_interval", "10"));
   MQTTManagerWeather::_wind_speed_format = MqttManagerConfig::get_setting_with_default("wind_speed_format", "");
   MQTTManagerWeather::_precipitation_unit = MqttManagerConfig::get_setting_with_default("precipitation_format", "");
   MQTTManagerWeather::_temperature_unit = MqttManagerConfig::get_setting_with_default("use_fahrenheit", "False").compare("True") == 0 ? "fahrenheit" : "celsius";

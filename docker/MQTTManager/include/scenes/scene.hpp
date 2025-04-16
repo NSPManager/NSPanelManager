@@ -22,6 +22,8 @@ public:
   virtual std::string get_name() = 0;
   virtual bool can_save() = 0;
 
+  std::string get_mqtt_state_topic();
+
 protected:
   uint32_t _page_id;
   uint8_t _page_slot;

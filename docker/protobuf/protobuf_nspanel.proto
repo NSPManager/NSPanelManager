@@ -129,6 +129,7 @@ message NSPanelRoomEntitiesPage {
         int32 pco = 4;
         int32 pco2 = 5;
         bool can_save_scene = 6;
+        string mqtt_state_topic = 7; // MQTT topic where NSPanelEntityState is sent for control of individual entity. Empty if not controllable individually.
     }
 
     repeated EntitySlot entities = 4;
@@ -192,6 +193,7 @@ message NSPanelMQTTManagerCommand {
         AffectLightsOptions affect_lights = 1;
         bool global = 2;
     }
+
     // TODO: Once protobuf-c-compiler gets updated, perhaps it's possible to build protobuf C files
     // with optional arguments.
     message LightCommand {

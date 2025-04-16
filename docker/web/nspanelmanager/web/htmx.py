@@ -103,6 +103,7 @@ def unblock_nspanel(request, nspanel_id):
     if request.method == "DELETE":
         nspanel = NSPanel.objects.get(id=nspanel_id)
         nspanel.delete()
+        send_mqttmanager_reload_command()
 
         # Successful, refresh page
         response = HttpResponse("")
@@ -683,9 +684,6 @@ def partial_move_entity(request):
             "text": "Did not find existing entity to move!"
         })
 
-    move_from_page = None
-    move_from_slot = None
-    return_html = ""
     if existing_entity_in_slot:
         # Swap the existing entity place with the new entity to be put on that slot
         existing_entity_in_slot.entities_page = new_entity_in_slot.entities_page

@@ -69,6 +69,11 @@ public:
    */
   virtual uint16_t get_icon_active_color() = 0;
 
+  /*
+   * Get the MQTT state topic of this entity where the NSPanel can subscribe to state changes for this entity.
+   */
+  virtual std::string get_mqtt_state_topic() = 0;
+
   /**
    * Register a entity_changed callback listener.
    */

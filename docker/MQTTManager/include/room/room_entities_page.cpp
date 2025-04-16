@@ -158,6 +158,7 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_pco(light->get_icon_color());
       entity_slot->set_pco2(light->get_icon_active_color());
       entity_slot->set_can_save_scene(false); // Entity is not a scene.
+      entity_slot->set_mqtt_state_topic(light->get_mqtt_state_topic());
     } else if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::SWITCH_ENTITY) {
       std::shared_ptr<SwitchEntity> switch_entity = std::static_pointer_cast<SwitchEntity>(entity);
       NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();
@@ -167,6 +168,7 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_icon(switch_entity->get_icon());
       entity_slot->set_pco(switch_entity->get_icon_color());
       entity_slot->set_pco2(switch_entity->get_icon_active_color());
+      entity_slot->set_mqtt_state_topic(switch_entity->get_mqtt_state_topic());
     } else if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::SCENE) {
       std::shared_ptr<Scene> scene = std::static_pointer_cast<Scene>(entity);
       NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();
@@ -176,6 +178,7 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_icon(scene->get_icon());
       entity_slot->set_pco(scene->get_icon_color());
       entity_slot->set_pco2(scene->get_icon_active_color());
+      entity_slot->set_mqtt_state_topic(scene->get_mqtt_state_topic());
       if (scene->get_controller() == MQTT_MANAGER_ENTITY_CONTROLLER::NSPM) {
         entity_slot->set_can_save_scene(true);
       } else {

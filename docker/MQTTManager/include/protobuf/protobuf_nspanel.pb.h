@@ -1217,6 +1217,7 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
   enum : int {
     kNameFieldNumber = 2,
     kIconFieldNumber = 3,
+    kMqttStateTopicFieldNumber = 7,
     kRoomViewPositionFieldNumber = 1,
     kPcoFieldNumber = 4,
     kPco2FieldNumber = 5,
@@ -1252,6 +1253,22 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
   inline PROTOBUF_ALWAYS_INLINE void _internal_set_icon(
       const std::string& value);
   std::string* _internal_mutable_icon();
+
+  public:
+  // string mqtt_state_topic = 7;
+  void clear_mqtt_state_topic() ;
+  const std::string& mqtt_state_topic() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_mqtt_state_topic(Arg_&& arg, Args_... args);
+  std::string* mutable_mqtt_state_topic();
+  PROTOBUF_NODISCARD std::string* release_mqtt_state_topic();
+  void set_allocated_mqtt_state_topic(std::string* value);
+
+  private:
+  const std::string& _internal_mqtt_state_topic() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_mqtt_state_topic(
+      const std::string& value);
+  std::string* _internal_mutable_mqtt_state_topic();
 
   public:
   // int32 room_view_position = 1;
@@ -1299,8 +1316,8 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      3, 6, 0,
-      51, 2>
+      3, 7, 0,
+      67, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -1322,6 +1339,7 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
                           const NSPanelRoomEntitiesPage_EntitySlot& from_msg);
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::google::protobuf::internal::ArenaStringPtr icon_;
+    ::google::protobuf::internal::ArenaStringPtr mqtt_state_topic_;
     ::int32_t room_view_position_;
     ::int32_t pco_;
     ::int32_t pco2_;
@@ -6592,6 +6610,56 @@ inline bool NSPanelRoomEntitiesPage_EntitySlot::_internal_can_save_scene() const
 inline void NSPanelRoomEntitiesPage_EntitySlot::_internal_set_can_save_scene(bool value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.can_save_scene_ = value;
+}
+
+// string mqtt_state_topic = 7;
+inline void NSPanelRoomEntitiesPage_EntitySlot::clear_mqtt_state_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.mqtt_state_topic_.ClearToEmpty();
+}
+inline const std::string& NSPanelRoomEntitiesPage_EntitySlot::mqtt_state_topic() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelRoomEntitiesPage.EntitySlot.mqtt_state_topic)
+  return _internal_mqtt_state_topic();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelRoomEntitiesPage_EntitySlot::set_mqtt_state_topic(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.mqtt_state_topic_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelRoomEntitiesPage.EntitySlot.mqtt_state_topic)
+}
+inline std::string* NSPanelRoomEntitiesPage_EntitySlot::mutable_mqtt_state_topic() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_mqtt_state_topic();
+  // @@protoc_insertion_point(field_mutable:NSPanelRoomEntitiesPage.EntitySlot.mqtt_state_topic)
+  return _s;
+}
+inline const std::string& NSPanelRoomEntitiesPage_EntitySlot::_internal_mqtt_state_topic() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.mqtt_state_topic_.Get();
+}
+inline void NSPanelRoomEntitiesPage_EntitySlot::_internal_set_mqtt_state_topic(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.mqtt_state_topic_.Set(value, GetArena());
+}
+inline std::string* NSPanelRoomEntitiesPage_EntitySlot::_internal_mutable_mqtt_state_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.mqtt_state_topic_.Mutable( GetArena());
+}
+inline std::string* NSPanelRoomEntitiesPage_EntitySlot::release_mqtt_state_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelRoomEntitiesPage.EntitySlot.mqtt_state_topic)
+  return _impl_.mqtt_state_topic_.Release();
+}
+inline void NSPanelRoomEntitiesPage_EntitySlot::set_allocated_mqtt_state_topic(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.mqtt_state_topic_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.mqtt_state_topic_.IsDefault()) {
+          _impl_.mqtt_state_topic_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelRoomEntitiesPage.EntitySlot.mqtt_state_topic)
 }
 
 // -------------------------------------------------------------------

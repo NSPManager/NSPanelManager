@@ -35,6 +35,8 @@ HomeAssistantLight::HomeAssistantLight(uint32_t light_id) : Light(light_id) {
     this->_home_assistant_light_type = MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TYPE::TYPE_LIGHT;
     SPDLOG_ERROR("Unknown type of home assistant entity '{}'. Will assume light is a light and not a switch.", this->_home_assistant_name);
   }
+
+  this->send_state_update_to_nspanel(); // Send initial state to NSPanel
 }
 
 HomeAssistantLight::~HomeAssistantLight() {
@@ -110,6 +112,7 @@ void HomeAssistantLight::send_state_update_to_controller() {
   HomeAssistantManager::send_json(service_data);
 
   if (MqttManagerConfig::get_settings().optimistic_mode) {
+    this->send_state_update_to_nspanel();
     this->_entity_changed_callbacks(this);
   }
 }
@@ -213,6 +216,7 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
       }
 
       if (changed_attribute) {
+        this->send_state_update_to_nspanel();
         this->_signal_entity_changed();
       }
     }

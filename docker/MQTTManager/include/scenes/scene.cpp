@@ -1,5 +1,6 @@
 #include <scenes/scene.hpp>
 #include <spdlog/spdlog.h>
+#include <string>
 
 uint32_t Scene::get_entity_page_id() {
   return this->_page_id;
@@ -19,4 +20,8 @@ void Scene::toggle() {
 
 bool Scene::is_global() {
   return this->_is_global;
+}
+
+std::string Scene::get_mqtt_state_topic() {
+  return "";
 }

@@ -3,6 +3,7 @@
 
 #include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
+#include "protobuf_nspanel_entity.pb.h"
 #include <boost/signals2.hpp>
 #include <chrono>
 #include <cstdint>
@@ -146,6 +147,11 @@ public:
   virtual void send_state_update_to_controller() = 0;
 
   /**
+   * Send the current NSPanelEntityState out to the NSPanel.
+   */
+  void send_state_update_to_nspanel();
+
+  /**
    * Get the current control mode of the light.
    */
   MQTT_MANAGER_LIGHT_MODE get_mode();
@@ -192,6 +198,7 @@ public:
   std::string_view get_icon();
   uint16_t get_icon_color();
   uint16_t get_icon_active_color();
+  std::string get_mqtt_state_topic();
 
   ~Light();
 
@@ -221,6 +228,7 @@ protected:
   uint16_t _requested_color_temperature;
   uint16_t _requested_hue;
   uint8_t _requested_saturation;
+  NSPanelEntityState _last_entity_state;
   MQTT_MANAGER_LIGHT_MODE _requested_mode;
 
   boost::signals2::signal<void(Light *)> _light_destroyed_callbacks;

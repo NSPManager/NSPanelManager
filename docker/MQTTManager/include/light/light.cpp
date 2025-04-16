@@ -2,6 +2,7 @@
 #include "command_manager/command_manager.hpp"
 #include "database_manager/database_manager.hpp"
 #include "entity_manager/entity_manager.hpp"
+#include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
@@ -10,7 +11,9 @@
 #include <cstdint>
 #include <entity/entity.hpp>
 #include <entity/entity_icons.hpp>
+#include <google/protobuf/util/message_differencer.h>
 #include <nlohmann/json.hpp>
+#include <protobuf/protobuf_nspanel_entity.pb.h>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <unistd.h>
@@ -112,6 +115,33 @@ uint32_t Light::get_entity_page_id() {
 
 uint8_t Light::get_entity_page_slot() {
   return this->_entity_page_slot;
+}
+
+void Light::send_state_update_to_nspanel() {
+  SPDLOG_TRACE("Sending state update to MQTT for light {}::{}", this->_id, this->_name);
+
+  NSPanelEntityState state;
+  NSPanelEntityState_Light *light_state = state.mutable_light();
+  light_state->set_light_id(this->_id);
+  light_state->set_name(this->_name);
+  light_state->set_can_color_temp(this->_can_color_temperature);
+  light_state->set_can_color(this->_can_rgb);
+
+  light_state->set_brightness(this->_current_brightness);
+  light_state->set_hue(this->_current_hue);
+  light_state->set_saturation(this->_current_saturation);
+
+  float kelvin_pct = (((float)this->_current_color_temperature - MqttManagerConfig::get_settings().color_temp_min) / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
+  if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+    kelvin_pct = 100 - kelvin_pct;
+  }
+  light_state->set_color_temp(kelvin_pct);
+
+  google::protobuf::util::MessageDifferencer differencer;
+  if (!differencer.Equals(this->_last_entity_state, state)) {
+    MQTT_Manager::publish_protobuf(this->get_mqtt_state_topic(), state, true);
+    this->_last_entity_state = state;
+  }
 }
 
 MQTT_MANAGER_LIGHT_MODE Light::get_mode() {
@@ -346,4 +376,9 @@ uint16_t Light::get_icon_active_color() {
   } else {
     return GUI_Colors::icon_color_off;
   }
+}
+
+std::string Light::get_mqtt_state_topic() {
+  std::string manager_address = MqttManagerConfig::get_settings().manager_address;
+  return fmt::format("nspanel/mqttmanager_{}/entities/lights/{}/state", manager_address, this->get_id());
 }
