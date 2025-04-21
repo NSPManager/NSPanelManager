@@ -122,6 +122,8 @@ cp compile_commands.json ../
 
 if [ "$STRIP" == "1" ]; then
   echo "Stripping binaries and .so files using '$strip_bin'..."
-  "$strip_bin" /MQTTManager/build/*.so
+  if compgen -G '/MQTTManager/build/*.so' > /dev/null; then
+    "$strip_bin" /MQTTManager/build/*.so
+  fi
   "$strip_bin" /MQTTManager/build/nspm_mqttmanager
 fi
