@@ -35,7 +35,7 @@ COPY --from=build /MQTTManager/build /MQTTManager/build
 RUN apt-get update && apt-get -y upgrade
 
 # Install software needed to build the manager
-RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get install -y --no-install-recommends cmake build-essential gdb curl npm postgresql-client curl inotify-tools net-tools nginx build-essential protobuf-c-compiler \
+RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get install -y --no-install-recommends cmake build-essential gdb curl npm postgresql-client curl inotify-tools net-tools build-essential protobuf-c-compiler \
     && pip install conan && conan profile detect --force \
     && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf \
     && sed -i "s|cppstd=gnu14|cppstd=gnu17|g" /root/.conan2/profiles/default \
@@ -44,6 +44,7 @@ RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get install -y --no-install-recommends
     #&& rm -rf /var/lib/apt/lists/*
     ; fi
 
+RUN apt-get install -y nginx
 RUN pip install --no-cache-dir -r requirements.txt # Install python packages
 
 EXPOSE 8000
