@@ -58,7 +58,35 @@ void   nspanel_entity_state__free_unpacked
   assert(message->base.descriptor == &nspanel_entity_state__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-static const ProtobufCFieldDescriptor nspanel_entity_state__light__field_descriptors[8] =
+static const ProtobufCEnumValue nspanel_entity_state__light__light_mode__enum_values_by_number[2] =
+{
+  { "COLOR_TEMP", "NSPANEL_ENTITY_STATE__LIGHT__LIGHT_MODE__COLOR_TEMP", 0 },
+  { "RGB", "NSPANEL_ENTITY_STATE__LIGHT__LIGHT_MODE__RGB", 1 },
+};
+static const ProtobufCIntRange nspanel_entity_state__light__light_mode__value_ranges[] = {
+{0, 0},{0, 2}
+};
+static const ProtobufCEnumValueIndex nspanel_entity_state__light__light_mode__enum_values_by_name[2] =
+{
+  { "COLOR_TEMP", 0 },
+  { "RGB", 1 },
+};
+const ProtobufCEnumDescriptor nspanel_entity_state__light__light_mode__descriptor =
+{
+  PROTOBUF_C__ENUM_DESCRIPTOR_MAGIC,
+  "NSPanelEntityState.Light.LightMode",
+  "LightMode",
+  "NSPanelEntityState__Light__LightMode",
+  "",
+  2,
+  nspanel_entity_state__light__light_mode__enum_values_by_number,
+  2,
+  nspanel_entity_state__light__light_mode__enum_values_by_name,
+  1,
+  nspanel_entity_state__light__light_mode__value_ranges,
+  NULL,NULL,NULL,NULL   /* reserved[1234] */
+};
+static const ProtobufCFieldDescriptor nspanel_entity_state__light__field_descriptors[9] =
 {
   {
     "light_id",
@@ -156,12 +184,25 @@ static const ProtobufCFieldDescriptor nspanel_entity_state__light__field_descrip
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "current_light_mode",
+    9,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__Light, current_light_mode),
+    &nspanel_entity_state__light__light_mode__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_entity_state__light__field_indices_by_name[] = {
   2,   /* field[2] = brightness */
   7,   /* field[7] = can_color */
   6,   /* field[6] = can_color_temp */
   3,   /* field[3] = color_temp */
+  8,   /* field[8] = current_light_mode */
   4,   /* field[4] = hue */
   0,   /* field[0] = light_id */
   1,   /* field[1] = name */
@@ -170,7 +211,7 @@ static const unsigned nspanel_entity_state__light__field_indices_by_name[] = {
 static const ProtobufCIntRange nspanel_entity_state__light__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 8 }
+  { 0, 9 }
 };
 const ProtobufCMessageDescriptor nspanel_entity_state__light__descriptor =
 {
@@ -180,7 +221,7 @@ const ProtobufCMessageDescriptor nspanel_entity_state__light__descriptor =
   "NSPanelEntityState__Light",
   "",
   sizeof(NSPanelEntityState__Light),
-  8,
+  9,
   nspanel_entity_state__light__field_descriptors,
   nspanel_entity_state__light__field_indices_by_name,
   1,  nspanel_entity_state__light__number_ranges,

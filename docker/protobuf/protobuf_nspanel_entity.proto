@@ -5,6 +5,11 @@ syntax = "proto3";
 
 message NSPanelEntityState {
     message Light {
+        enum LightMode {
+            COLOR_TEMP = 0;
+            RGB = 1;
+        }
+
         int32 light_id = 1;
         string name = 2;
         int32 brightness = 3;
@@ -14,6 +19,7 @@ message NSPanelEntityState {
 
         bool can_color_temp = 7;
         bool can_color = 8;
+        LightMode current_light_mode = 9;
     }
 
     oneof entity {

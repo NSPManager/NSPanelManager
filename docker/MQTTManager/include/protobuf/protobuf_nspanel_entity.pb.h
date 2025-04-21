@@ -27,6 +27,7 @@
 #include "google/protobuf/message.h"
 #include "google/protobuf/repeated_field.h"  // IWYU pragma: export
 #include "google/protobuf/extension_set.h"  // IWYU pragma: export
+#include "google/protobuf/generated_enum_reflection.h"
 #include "google/protobuf/unknown_field_set.h"
 // @@protoc_insertion_point(includes)
 
@@ -60,6 +61,39 @@ namespace protobuf {
 }  // namespace protobuf
 }  // namespace google
 
+enum NSPanelEntityState_Light_LightMode : int {
+  NSPanelEntityState_Light_LightMode_COLOR_TEMP = 0,
+  NSPanelEntityState_Light_LightMode_RGB = 1,
+  NSPanelEntityState_Light_LightMode_NSPanelEntityState_Light_LightMode_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::min(),
+  NSPanelEntityState_Light_LightMode_NSPanelEntityState_Light_LightMode_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::max(),
+};
+
+bool NSPanelEntityState_Light_LightMode_IsValid(int value);
+extern const uint32_t NSPanelEntityState_Light_LightMode_internal_data_[];
+constexpr NSPanelEntityState_Light_LightMode NSPanelEntityState_Light_LightMode_LightMode_MIN = static_cast<NSPanelEntityState_Light_LightMode>(0);
+constexpr NSPanelEntityState_Light_LightMode NSPanelEntityState_Light_LightMode_LightMode_MAX = static_cast<NSPanelEntityState_Light_LightMode>(1);
+constexpr int NSPanelEntityState_Light_LightMode_LightMode_ARRAYSIZE = 1 + 1;
+const ::google::protobuf::EnumDescriptor*
+NSPanelEntityState_Light_LightMode_descriptor();
+template <typename T>
+const std::string& NSPanelEntityState_Light_LightMode_Name(T value) {
+  static_assert(std::is_same<T, NSPanelEntityState_Light_LightMode>::value ||
+                    std::is_integral<T>::value,
+                "Incorrect type passed to LightMode_Name().");
+  return NSPanelEntityState_Light_LightMode_Name(static_cast<NSPanelEntityState_Light_LightMode>(value));
+}
+template <>
+inline const std::string& NSPanelEntityState_Light_LightMode_Name(NSPanelEntityState_Light_LightMode value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelEntityState_Light_LightMode_descriptor,
+                                                 0, 1>(
+      static_cast<int>(value));
+}
+inline bool NSPanelEntityState_Light_LightMode_Parse(absl::string_view name, NSPanelEntityState_Light_LightMode* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<NSPanelEntityState_Light_LightMode>(
+      NSPanelEntityState_Light_LightMode_descriptor(), name, value);
+}
 
 // ===================================================================
 
@@ -187,6 +221,25 @@ class NSPanelEntityState_Light final : public ::google::protobuf::Message
  public:
   ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
+  using LightMode = NSPanelEntityState_Light_LightMode;
+  static constexpr LightMode COLOR_TEMP = NSPanelEntityState_Light_LightMode_COLOR_TEMP;
+  static constexpr LightMode RGB = NSPanelEntityState_Light_LightMode_RGB;
+  static inline bool LightMode_IsValid(int value) {
+    return NSPanelEntityState_Light_LightMode_IsValid(value);
+  }
+  static constexpr LightMode LightMode_MIN = NSPanelEntityState_Light_LightMode_LightMode_MIN;
+  static constexpr LightMode LightMode_MAX = NSPanelEntityState_Light_LightMode_LightMode_MAX;
+  static constexpr int LightMode_ARRAYSIZE = NSPanelEntityState_Light_LightMode_LightMode_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor* LightMode_descriptor() {
+    return NSPanelEntityState_Light_LightMode_descriptor();
+  }
+  template <typename T>
+  static inline const std::string& LightMode_Name(T value) {
+    return NSPanelEntityState_Light_LightMode_Name(value);
+  }
+  static inline bool LightMode_Parse(absl::string_view name, LightMode* value) {
+    return NSPanelEntityState_Light_LightMode_Parse(name, value);
+  }
 
   // accessors -------------------------------------------------------
   enum : int {
@@ -198,6 +251,7 @@ class NSPanelEntityState_Light final : public ::google::protobuf::Message
     kSaturationFieldNumber = 6,
     kCanColorTempFieldNumber = 7,
     kCanColorFieldNumber = 8,
+    kCurrentLightModeFieldNumber = 9,
   };
   // string name = 2;
   void clear_name() ;
@@ -285,12 +339,22 @@ class NSPanelEntityState_Light final : public ::google::protobuf::Message
   void _internal_set_can_color(bool value);
 
   public:
+  // .NSPanelEntityState.Light.LightMode current_light_mode = 9;
+  void clear_current_light_mode() ;
+  ::NSPanelEntityState_Light_LightMode current_light_mode() const;
+  void set_current_light_mode(::NSPanelEntityState_Light_LightMode value);
+
+  private:
+  ::NSPanelEntityState_Light_LightMode _internal_current_light_mode() const;
+  void _internal_set_current_light_mode(::NSPanelEntityState_Light_LightMode value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelEntityState.Light)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      3, 8, 0,
+      4, 9, 0,
       45, 2>
       _table_;
 
@@ -319,6 +383,7 @@ class NSPanelEntityState_Light final : public ::google::protobuf::Message
     ::int32_t saturation_;
     bool can_color_temp_;
     bool can_color_;
+    int current_light_mode_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -741,6 +806,28 @@ inline void NSPanelEntityState_Light::_internal_set_can_color(bool value) {
   _impl_.can_color_ = value;
 }
 
+// .NSPanelEntityState.Light.LightMode current_light_mode = 9;
+inline void NSPanelEntityState_Light::clear_current_light_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_light_mode_ = 0;
+}
+inline ::NSPanelEntityState_Light_LightMode NSPanelEntityState_Light::current_light_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Light.current_light_mode)
+  return _internal_current_light_mode();
+}
+inline void NSPanelEntityState_Light::set_current_light_mode(::NSPanelEntityState_Light_LightMode value) {
+  _internal_set_current_light_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Light.current_light_mode)
+}
+inline ::NSPanelEntityState_Light_LightMode NSPanelEntityState_Light::_internal_current_light_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelEntityState_Light_LightMode>(_impl_.current_light_mode_);
+}
+inline void NSPanelEntityState_Light::_internal_set_current_light_mode(::NSPanelEntityState_Light_LightMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_light_mode_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // NSPanelEntityState
@@ -839,6 +926,19 @@ inline NSPanelEntityState::EntityCase NSPanelEntityState::entity_case() const {
 
 // @@protoc_insertion_point(namespace_scope)
 
+
+namespace google {
+namespace protobuf {
+
+template <>
+struct is_proto_enum<::NSPanelEntityState_Light_LightMode> : std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor<::NSPanelEntityState_Light_LightMode>() {
+  return ::NSPanelEntityState_Light_LightMode_descriptor();
+}
+
+}  // namespace protobuf
+}  // namespace google
 
 // @@protoc_insertion_point(global_scope)
 

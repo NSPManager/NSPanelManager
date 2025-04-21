@@ -131,6 +131,15 @@ void Light::send_state_update_to_nspanel() {
   light_state->set_hue(this->_current_hue);
   light_state->set_saturation(this->_current_saturation);
 
+  if (this->_current_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT) {
+    light_state->set_current_light_mode(NSPanelEntityState_Light_LightMode::NSPanelEntityState_Light_LightMode_COLOR_TEMP);
+  } else if (this->_current_mode == MQTT_MANAGER_LIGHT_MODE::RGB) {
+    light_state->set_current_light_mode(NSPanelEntityState_Light_LightMode::NSPanelEntityState_Light_LightMode_RGB);
+  } else {
+    light_state->set_current_light_mode(NSPanelEntityState_Light_LightMode::NSPanelEntityState_Light_LightMode_COLOR_TEMP);
+    SPDLOG_ERROR("Unknown light mode! Will assume default mode.");
+  }
+
   float kelvin_pct = (((float)this->_current_color_temperature - MqttManagerConfig::get_settings().color_temp_min) / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
   if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
     kelvin_pct = 100 - kelvin_pct;
