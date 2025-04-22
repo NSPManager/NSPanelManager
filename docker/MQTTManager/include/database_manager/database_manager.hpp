@@ -38,8 +38,6 @@ struct NSPanel {
   std::string md5_data_file;
   std::string md5_firmware;
   std::string md5_tft_file;
-  bool register_relay1_as_light;
-  bool register_relay2_as_light;
   bool denied;
   bool accepted;
 };
@@ -152,8 +150,6 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("md5_data_file", &NSPanel::md5_data_file),
                                                                               sqlite_orm::make_column("md5_firmware", &NSPanel::md5_firmware),
                                                                               sqlite_orm::make_column("md5_tft_file", &NSPanel::md5_tft_file),
-                                                                              sqlite_orm::make_column("register_relay1_as_light", &NSPanel::register_relay1_as_light),
-                                                                              sqlite_orm::make_column("register_relay2_as_light", &NSPanel::register_relay2_as_light),
                                                                               sqlite_orm::make_column("denied", &NSPanel::denied),
                                                                               sqlite_orm::make_column("accepted", &NSPanel::accepted)),
                                                        sqlite_orm::make_table("web_relaygroupbinding",
