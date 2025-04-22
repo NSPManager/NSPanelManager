@@ -1,5 +1,6 @@
 #include "openhab_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include "websocket_server/websocket_server.hpp"
 #include <boost/algorithm/string.hpp>
 #include <curl/curl.h>
 #include <exception>
@@ -31,6 +32,8 @@ void OpenhabManager::connect() {
     SPDLOG_ERROR("No OpenHAB address configured, will not continue to load OpenHAB component.");
     return;
   }
+
+  WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Openhab not connected.");
 
   openhab_websocket_url.append("/ws");
 
@@ -103,6 +106,7 @@ void OpenhabManager::_websocket_message_callback(const ix::WebSocketMessagePtr &
   if (msg->type == ix::WebSocketMessageType::Message) {
     OpenhabManager::_process_websocket_message(msg->str);
   } else if (msg->type == ix::WebSocketMessageType::Open) {
+    WebsocketServer::remove_warning("Openhab not connected.");
     SPDLOG_INFO("Connected to Openhab websocket.");
     OpenhabManager::_authenticated = true;
     OpenhabManager::_connected = true;
@@ -126,10 +130,12 @@ void OpenhabManager::_websocket_message_callback(const ix::WebSocketMessagePtr &
       }
     }
   } else if (msg->type == ix::WebSocketMessageType::Close) {
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Openhab not connected.");
     SPDLOG_WARN("Disconnected from Openhab websocket.");
     OpenhabManager::_authenticated = false;
     OpenhabManager::_connected = false;
   } else if (msg->type == ix::WebSocketMessageType::Error) {
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Openhab not connected.");
     SPDLOG_ERROR("Failed to connect to Openhab websocket. Reason: {}", msg->errorInfo.reason);
     OpenhabManager::_authenticated = false;
     OpenhabManager::_connected = false;

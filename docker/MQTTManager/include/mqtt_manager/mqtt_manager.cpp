@@ -24,6 +24,7 @@
 #include <thread>
 #include <utility>
 #include <vector>
+#include <websocket_server/websocket_server.hpp>
 
 inline bool file_exists(const char *name) {
   struct stat buffer;
@@ -32,6 +33,7 @@ inline bool file_exists(const char *name) {
 
 void MQTT_Manager::init() {
   MQTT_Manager::reload_config(); // This will also start a new thread to handle MQTT messages.
+  WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
 }
 
 void MQTT_Manager::connect() {
@@ -61,6 +63,7 @@ void MQTT_Manager::connect() {
             .message = msg->get_payload_str()};
         MQTT_Manager::_mqtt_message_queue.push(message_struct);
       } else if (!MQTT_Manager::_mqtt_client->is_connected()) {
+        WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
         MQTT_Manager::_reconnect_mqtt_client();
       }
     }
@@ -92,8 +95,10 @@ void MQTT_Manager::reload_config() {
     SPDLOG_INFO("Reconnecting MQTT as settings has changed.");
     if (MQTT_Manager::_mqtt_client != nullptr) {
       MQTT_Manager::_mqtt_client->disconnect(); // This will cause it to reconnect with new settings.
+      WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
     } else {
       // Start a new thread to connect via.
+      WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
       std::thread mqtt_thread = std::thread(&MQTT_Manager::connect);
       mqtt_thread.detach();
     }
@@ -109,6 +114,7 @@ bool MQTT_Manager::is_connected() {
 }
 
 void MQTT_Manager::_reconnect_mqtt_client() {
+  WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
   std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
   std::lock_guard<std::mutex> mutex_guard_settings(MQTT_Manager::_settings_mutex);
 
@@ -171,6 +177,7 @@ void MQTT_Manager::_reconnect_mqtt_client() {
   while (!MQTT_Manager::_mqtt_client->is_connected()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
   }
+  WebsocketServer::remove_warning("MQTT not connected.");
   SPDLOG_INFO("Established connection to MQTT server.");
 
   try {

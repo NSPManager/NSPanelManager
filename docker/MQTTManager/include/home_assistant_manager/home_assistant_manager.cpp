@@ -24,6 +24,7 @@
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <websocket_server/websocket_server.hpp>
 
 void HomeAssistantManager::connect() {
   SPDLOG_DEBUG("Initializing Home Assistant Manager component.");
@@ -45,6 +46,8 @@ void HomeAssistantManager::connect() {
         SPDLOG_ERROR("No Home Assistant address configured. Will not continue to load Home Assistant component.");
         return;
       }
+
+      WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant not connected.");
 
       if (MqttManagerConfig::get_settings().is_home_assistant_addon) {
         home_assistant_websocket_url.append("/core/websocket");
@@ -104,10 +107,12 @@ void HomeAssistantManager::_websocket_message_callback(const ix::WebSocketMessag
     SPDLOG_INFO("Connected to Home Assistant websocket.");
     HomeAssistantManager::_connected = true;
   } else if (msg->type == ix::WebSocketMessageType::Close) {
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant not connected.");
     SPDLOG_WARN("Disconnected from Home Assistant websocket.");
     HomeAssistantManager::_authenticated = false;
     HomeAssistantManager::_connected = false;
   } else if (msg->type == ix::WebSocketMessageType::Error) {
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant not connected.");
     SPDLOG_ERROR("Failed to connect to Home Assistant websocket. Reason: {}", msg->errorInfo.reason);
     HomeAssistantManager::_authenticated = false;
     HomeAssistantManager::_connected = false;
@@ -120,8 +125,10 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
     std::string type = data["type"];
 
     if (type.compare("auth_required") == 0) {
+      WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant not connected.");
       HomeAssistantManager::_send_auth();
     } else if (type.compare("auth_ok") == 0) {
+      WebsocketServer::remove_warning("Home Assistant not connected.");
       SPDLOG_INFO("Successfully authenticated to Home Assistant websocket API.");
       HomeAssistantManager::_authenticated = true;
 
