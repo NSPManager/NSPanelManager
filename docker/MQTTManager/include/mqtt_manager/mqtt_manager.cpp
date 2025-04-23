@@ -60,6 +60,7 @@ void MQTT_Manager::connect() {
     while (true) {
       if (!MQTT_Manager::_stop_consuming) [[likely]] {
         // We should be consuming message, try for 1 second.
+        std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
         received_message = MQTT_Manager::_mqtt_client->try_consume_message_for(&msg, std::chrono::milliseconds(1000));
         if (received_message) {
           if (msg) {
@@ -161,6 +162,7 @@ void MQTT_Manager::_reconnect_mqtt_client() {
     return;
   }
 
+  MQTT_Manager::_stop_consuming = true;
   while (true) {
     try {
       std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
@@ -173,13 +175,13 @@ void MQTT_Manager::_reconnect_mqtt_client() {
 
       if (MQTT_Manager::_mqtt_client != nullptr) {
         if (MQTT_Manager::_mqtt_client->is_connected()) {
-          MQTT_Manager::_stop_consuming = true;
           MQTT_Manager::_mqtt_client->stop_consuming();
           MQTT_Manager::_mqtt_client->disconnect();
           std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Wait for changes to settle
         }
         WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
         delete MQTT_Manager::_mqtt_client;
+        MQTT_Manager::_mqtt_client = nullptr;
       }
 
       MQTT_Manager::_mqtt_client = new mqtt::client(connection_url, mqtt_client_name.c_str());

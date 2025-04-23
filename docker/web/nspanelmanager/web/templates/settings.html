@@ -16,9 +16,7 @@
     {% csrf_token %}
     <div class="flex items-center justify-between mb-2">
       <h2 class="font-medium text-2xl">Settings</h2>
-      <a href="{% url 'manual' %}#sec:global_settings" class="btn btn-outline btn-info">
-          Help
-        </a>
+      <a href="https://nspanelmanager.com/docs/web-interface/#global-settings" target="_blank" class="btn btn-outline btn-info">Help</a>
     </div>
     {% component "alert" level="info" text="Changes to NSPanel settings on this page requires a reboot of all NSPanels to take effect." %}{% endcomponent %}
     <div class="mt-2">
