@@ -61,6 +61,10 @@
     </form>
 
     <script>
-        welcome_modal.showModal();
+    htmx.on("htmx:afterSwap", (e) => {
+      if(e.detail.elt.id == "welcome_modal") {
+        modal.showModal();
+      }
+    });
     </script>
 </dialog>
