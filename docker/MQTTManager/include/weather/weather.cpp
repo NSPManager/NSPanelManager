@@ -160,7 +160,7 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
         MQTTManagerWeather::_current_temperature = data["current"]["temperature_2m"];
       }
 
-      if (!MqttManagerConfig::get_settings().clock_24_hour_format) [[likely]] {
+      if (MqttManagerConfig::get_settings().clock_24_hour_format) [[likely]] {
         MQTTManagerWeather::_next_sunrise = fmt::format("{:%H:%M}", MQTTManagerWeather::_forecast_weather_info[0].sunrise);
         MQTTManagerWeather::_next_sunrise_hour = MQTTManagerWeather::_forecast_weather_info[0].sunrise.tm_hour;
         MQTTManagerWeather::_next_sunset = fmt::format("{:%H:%M}", MQTTManagerWeather::_forecast_weather_info[0].sunset);
