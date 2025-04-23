@@ -159,10 +159,18 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
         // Only update the current temperature if no local sensor is configured
         MQTTManagerWeather::_current_temperature = data["current"]["temperature_2m"];
       }
-      MQTTManagerWeather::_next_sunrise = fmt::format("{:%H:%M}", MQTTManagerWeather::_forecast_weather_info[0].sunrise);
-      MQTTManagerWeather::_next_sunrise_hour = MQTTManagerWeather::_forecast_weather_info[0].sunrise.tm_hour;
-      MQTTManagerWeather::_next_sunset = fmt::format("{:%H:%M}", MQTTManagerWeather::_forecast_weather_info[0].sunset);
-      MQTTManagerWeather::_next_sunset_hour = MQTTManagerWeather::_forecast_weather_info[0].sunset.tm_hour;
+
+      if (!MqttManagerConfig::get_settings().clock_24_hour_format) [[likely]] {
+        MQTTManagerWeather::_next_sunrise = fmt::format("{:%H:%M}", MQTTManagerWeather::_forecast_weather_info[0].sunrise);
+        MQTTManagerWeather::_next_sunrise_hour = MQTTManagerWeather::_forecast_weather_info[0].sunrise.tm_hour;
+        MQTTManagerWeather::_next_sunset = fmt::format("{:%H:%M}", MQTTManagerWeather::_forecast_weather_info[0].sunset);
+        MQTTManagerWeather::_next_sunset_hour = MQTTManagerWeather::_forecast_weather_info[0].sunset.tm_hour;
+      } else {
+        MQTTManagerWeather::_next_sunrise = fmt::format("{:%I:%M %p}", MQTTManagerWeather::_forecast_weather_info[0].sunrise);
+        MQTTManagerWeather::_next_sunrise_hour = MQTTManagerWeather::_forecast_weather_info[0].sunrise.tm_hour;
+        MQTTManagerWeather::_next_sunset = fmt::format("{:%I:%M %p}", MQTTManagerWeather::_forecast_weather_info[0].sunset);
+        MQTTManagerWeather::_next_sunset_hour = MQTTManagerWeather::_forecast_weather_info[0].sunset.tm_hour;
+      }
       MQTTManagerWeather::_current_condition = std::to_string(int(data["current"]["weather_code"]));
       MQTTManagerWeather::_current_wind_speed = data["current"]["wind_speed_10m"];
       MQTTManagerWeather::_current_min_temperature = MQTTManagerWeather::_forecast_weather_info[0].temperature_low;
