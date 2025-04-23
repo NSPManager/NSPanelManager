@@ -58,9 +58,8 @@ void MQTT_Manager::connect() {
     mqtt::const_message_ptr msg;
     bool received_message = false;
     while (true) {
-      if (!MQTT_Manager::_stop_consuming) [[likely]] {
+      if (!MQTT_Manager::_stop_consuming && MQTT_Manager::_mqtt_client != nullptr) [[likely]] {
         // We should be consuming message, try for 1 second.
-        std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
         received_message = MQTT_Manager::_mqtt_client->try_consume_message_for(&msg, std::chrono::milliseconds(1000));
         if (received_message) {
           if (msg) {
