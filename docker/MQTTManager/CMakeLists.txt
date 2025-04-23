@@ -25,6 +25,12 @@ set(PROTOBUF_SRC_DIRECTORY /MQTTManager/include/protobuf)
 add_compile_options(-rdynamic -g)
 add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE BOOST_STACKTRACE_USE_BACKTRACE BOOST_BIND_GLOBAL_PLACEHOLDERS)
 
+# Statically link libraries
+IF(DEFINED ENV{STRIP})
+    MESSAGE("Will build as static binary!")
+    ADD_LINK_OPTIONS(-static)
+ENDIF()
+
 # The following two lines are to check for address sanitazation.
 # add_compile_options(-rdynamic -g -fsanitize=address)
 # add_link_options(-fsanitize=address)
