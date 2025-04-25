@@ -86,8 +86,6 @@ std::shared_ptr<NSPanel> NSPanel::create_from_discovery_request(nlohmann::json r
     panel_data.md5_data_file = request_data.at("md5_data_file").get<std::string>();
     panel_data.md5_firmware = request_data.at("md5_firmware").get<std::string>();
     panel_data.md5_tft_file = request_data.at("md5_tft_file").get<std::string>();
-    panel_data.register_relay1_as_light = false;
-    panel_data.register_relay2_as_light = false;
     panel_data.denied = false;
     panel_data.accepted = false;
     try {
@@ -110,6 +108,7 @@ void NSPanel::reload_config() {
 
     bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
     bool name_changed = false;
+    bool reregister_to_ha_mqtt_discovery = false;
 
     this->_settings = panel_settings;
     this->_has_registered_to_manager = true; // We managed to get the object in above statement and did not throw, ie. has been registered in manager and has an ID in DB.
@@ -121,13 +120,21 @@ void NSPanel::reload_config() {
       rebuilt_mqtt = true;
       name_changed = true;
     }
-    if (this->_register_relay1_as_light != panel_settings.register_relay1_as_light) {
+
+    bool register_relay1_as_light = this->_get_nspanel_setting_with_default("relay1_is_light", "False").compare("True") == 0;
+    SPDLOG_DEBUG("Will register NSPanel {}::{} relay 1 as {}", this->_id, this->_name, register_relay1_as_light ? "light" : "relay");
+    if (this->_register_relay1_as_light != register_relay1_as_light) {
       rebuilt_mqtt = true;
-      this->_register_relay1_as_light = panel_settings.register_relay1_as_light;
+      this->_register_relay1_as_light = register_relay1_as_light;
+      reregister_to_ha_mqtt_discovery = true;
     }
-    if (this->_register_relay2_as_light != panel_settings.register_relay2_as_light) {
+
+    bool register_relay2_as_light = this->_get_nspanel_setting_with_default("relay2_is_light", "False").compare("True") == 0;
+    SPDLOG_DEBUG("Will register NSPanel {}::{} relay 2 as {}", this->_id, this->_name, register_relay1_as_light ? "light" : "relay");
+    if (this->_register_relay2_as_light != register_relay2_as_light) {
       rebuilt_mqtt = true;
-      this->_register_relay2_as_light = panel_settings.register_relay2_as_light;
+      this->_register_relay2_as_light = register_relay2_as_light;
+      reregister_to_ha_mqtt_discovery = true;
     }
 
     if (this->_state == MQTT_MANAGER_NSPANEL_STATE::OFFLINE || this->_state == MQTT_MANAGER_NSPANEL_STATE::UNKNOWN) {
@@ -204,7 +211,7 @@ void NSPanel::reload_config() {
       MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     }
 
-    if (name_changed) {
+    if (name_changed || reregister_to_ha_mqtt_discovery) {
       this->reset_ha_mqtt_topics();
       this->register_to_home_assistant();
     }

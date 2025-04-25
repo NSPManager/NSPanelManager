@@ -128,6 +128,7 @@ private:
   static inline uint16_t _mqtt_port;
   static inline std::string _mqtt_username;
   static inline std::string _mqtt_password;
+  static inline std::atomic<bool> _stop_consuming;
 };
 
 #endif // !MQTT_MANAGER_HPP

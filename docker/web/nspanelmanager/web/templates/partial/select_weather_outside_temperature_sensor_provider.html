@@ -25,6 +25,10 @@
     </form>
 
     <script>
-      modal.showModal(); // Show the modal when loaded.
+    htmx.on("htmx:afterSwap", (e) => {
+      if(e.detail.elt.id == "modal") {
+        modal.showModal();
+      }
+    });
     </script>
 </dialog>

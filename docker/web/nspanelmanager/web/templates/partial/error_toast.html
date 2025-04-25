@@ -1,9 +1,44 @@
 <template id="error_toast_template">
-    <div class="alert alert-error">
-        <span class="mdi mdi-alert-circle-outline text-2xl"></span>
-        <span class="error-toast-text">Failed to perform request!</span>
+    <div class="alert alert-error overflow-hidden relative p-0 border-0">
+        <!-- <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress> -->
+        <div class="px-4 py-2 flex items-center">
+            <span class="mdi mdi-alert-circle-outline text-2xl me-2"></span>
+            <span class="toast-text">Failed to perform request!</span>
+        </div>
     </div>
 </template>
+
+<template id="warning_toast_template">
+    <div class="alert alert-warning overflow-hidden relative p-0 border-0">
+        <!-- <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress> -->
+        <div class="px-4 py-2 flex items-center">
+            <span class="mdi mdi-alert-circle-outline text-2xl me-2"></span>
+            <span class="toast-text">Failed to perform request!</span>
+        </div>
+    </div>
+</template>
+
+<template id="info_toast_template">
+    <div class="alert alert-info overflow-hidden relative p-0 border-0">
+        <!-- <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress> -->
+        <div class="px-4 py-2 flex items-center">
+            <span class="mdi mdi-information-outline text-2xl me-2"></span>
+            <span class="toast-text">Failed to perform request!</span>
+        </div>
+    </div>
+</template>
+
+<template id="debug_toast_template">
+    <div class="alert alert-primary overflow-hidden relative p-0 border-0">
+        <!-- <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress> -->
+        <div class="px-4 py-2 flex items-center">
+            <span class="mdi mdi-information-outline text-2xl me-2"></span>
+            <span class="toast-text">Failed to perform request!</span>
+        </div
+    </div>
+</template>
+
+
 
 <div id="error_toast_container" class="toast toast-top toast-end z-10">
 </div>
@@ -11,19 +46,76 @@
 <!-- Javascript needed to create and otherwise handle error toasts -->
 <script>
 
+
 let _error_toast_counter = 0;
-function show_error_toast(error_text) {
+function show_error_toast(level, error_text, timeout = 10) {
   _error_toast_counter++;
   var error_toast_id = `error-toast-${_error_toast_counter}`;
 
-  const new_toast = document.getElementById("error_toast_template").content.cloneNode(true);
+  if(level == 0) { // Error as per C++ enum ActiveWarningLevel
+    var new_toast = document.getElementById("error_toast_template").content.cloneNode(true);
+  } else if (level == 1) { // Warning as per C++ enum ActiveWarningLevel
+    var new_toast = document.getElementById("warning_toast_template").content.cloneNode(true);
+  } else if (level == 2) { // Info as per C++ enum ActiveWarningLevel
+    var new_toast = document.getElementById("info_toast_template").content.cloneNode(true);
+  } else if (level == 3) { // Debug as per C++ enum ActiveWarningLevel
+    var new_toast = document.getElementById("debug_toast_template").content.cloneNode(true);
+  } else {
+    var new_toast = document.getElementById("error_toast_template").content.cloneNode(true);
+    error_text = "Unknown error level" + level + "!";
+  }
+
+
+  // if(timeout > 0) {
+  //   new_toast.querySelector('.timeout_progress').classList.remove("hidden");
+  //   new_toast.querySelector('.timeout_progress').value = timeout*100;
+  //   new_toast.querySelector('.timeout_progress').max = timeout*100;
+  // }
+
   new_toast.querySelector('.alert').id = error_toast_id;
-  new_toast.querySelector('.error-toast-text').innerHTML = error_text;
+  new_toast.querySelector('.toast-text').innerHTML = error_text;
   document.getElementById("error_toast_container").appendChild(new_toast);
 
-  setTimeout(() => {
-    document.getElementById(error_toast_id).remove();
-    //document.getElementById("error_toast_container").removeChild(new_toast);
-  }, 2000);
+  // if(timeout > 0) {
+  //   var interval_id = setInterval(() => {
+  //     let val = document.getElementById(error_toast_id).querySelector(".timeout_progress").value;
+  //     val -= 10;
+  //     document.getElementById(error_toast_id).querySelector(".timeout_progress").value = val;
+
+  //     if(val <= 0) {
+  //       let interval_id = $("#"+error_toast_id).attr('data-interval-id');
+  //       clearInterval(interval_id);
+  //       document.getElementById(error_toast_id).remove();
+  //     }
+  //   }, 10);
+  //   $("#"+error_toast_id).attr('data-interval-id', interval_id);
+
+
+  //   $("#"+error_toast_id).on('mouseover', function() {
+  //     var interval_id = $(event.srcElement).parent('.alert').attr('data-interval-id');
+  //     clearInterval(interval_id);
+  //   });
+
+    // $("#"+error_toast_id).on('mouseout', function() {
+    //  $(event.srcElement).parent('.alert').attr('data-interval-id');
+
+    //   var interval_id = setInterval(() => {
+    //     let val = document.getElementById(error_toast_id).querySelector(".timeout_progress").value;
+    //     val -= 10;
+    //     document.getElementById(error_toast_id).querySelector(".timeout_progress").value = val;
+
+    //     if(val <= 0) {
+    //       let interval_id = $("#"+error_toast_id).attr('data-interval-id');
+    //       clearInterval(interval_id);
+    //       document.getElementById(error_toast_id).remove();
+    //     }
+    //   }, 10);
+    //   $("#"+error_toast_id).attr('data-interval-id', interval_id);
+    // });
+  // }
 }
+
+
+// show_error_toast(0, "MQTT not connected.");
+// show_error_toast(1, "TEST2");
 </script>

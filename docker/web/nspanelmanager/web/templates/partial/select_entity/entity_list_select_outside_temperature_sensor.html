@@ -68,7 +68,11 @@
 
 <script>
 // Open dialog using Javascript as to make it possible to close again
-modal.showModal();
+htmx.on("htmx:afterSwap", (e) => {
+  if(e.detail.elt.id == "modal") {
+    modal.showModal();
+  }
+});
 document.getElementById('add_new_entity_search').focus();
 document.getElementById('add_new_entity_search').select();
 

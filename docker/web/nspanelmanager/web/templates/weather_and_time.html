@@ -59,17 +59,17 @@
           class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
           <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
-              <input id="clock_rest_of_world_style" type="radio" name="clock_us_style" value="False" {% if clock_us_style != "True" %}checked{% endif %}
+              <input id="24_hour_clock" type="radio" name="clock_us_style" value="False" {% if clock_us_style != "True" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent">
-              <label for="keep_color_temp_slider"
+              <label for="24_hour_clock"
                 class="w-full py-3 ms-2 text-sm font-medium">24 hour clock</label>
             </div>
           </li>
           <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
-              <input id="clock_us_style" type="radio" name="clock_us_style" value="True" {% if clock_us_style == "True" %}checked{% endif %}
+              <input id="12_hour_clock" type="radio" name="clock_us_style" value="True" {% if clock_us_style == "True" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent">
-              <label for="reverse_color_temp_slider" class="w-full py-3 ms-2 text-sm font-medium">12 hour clock (AM/PM)</label>
+              <label for="12_hour_clock" class="w-full py-3 ms-2 text-sm font-medium">12 hour clock (AM/PM)</label>
             </div>
           </li>
         </ul>

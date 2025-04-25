@@ -66,11 +66,9 @@ class NSPanel(models.Model):
     button1_mode = models.IntegerField(default=0)
     button1_detached_mode_light = models.ForeignKey(
         "Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
-    register_relay1_as_light = models.BooleanField(default=False)
     button2_mode = models.IntegerField(default=0)
     button2_detached_mode_light = models.ForeignKey(
         "Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
-    register_relay2_as_light = models.BooleanField(default=False)
     md5_firmware = models.CharField(max_length=64, default="")
     md5_data_file = models.CharField(max_length=64, default="")
     md5_tft_file = models.CharField(max_length=64, default="")

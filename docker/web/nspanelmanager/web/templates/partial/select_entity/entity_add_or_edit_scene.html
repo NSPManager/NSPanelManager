@@ -85,7 +85,11 @@
     // Open dialog using Javascript as to make it possible to close again
     update_color_temp_shown();
     update_rgb_shown();
-    modal.showModal();
+    htmx.on("htmx:afterSwap", (e) => {
+      if(e.detail.elt.id == "modal") {
+        modal.showModal();
+      }
+    });
 
     $("#color_temperature").click(update_color_temp_shown);
     $("#rgb").click(update_rgb_shown);

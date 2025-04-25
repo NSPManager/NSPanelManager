@@ -24,6 +24,7 @@
 #include <thread>
 #include <utility>
 #include <vector>
+#include <websocket_server/websocket_server.hpp>
 
 inline bool file_exists(const char *name) {
   struct stat buffer;
@@ -32,6 +33,7 @@ inline bool file_exists(const char *name) {
 
 void MQTT_Manager::init() {
   MQTT_Manager::reload_config(); // This will also start a new thread to handle MQTT messages.
+  WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
 }
 
 void MQTT_Manager::connect() {
@@ -53,33 +55,45 @@ void MQTT_Manager::connect() {
   try {
     // Consume messages
     MQTT_Manager::_mqtt_client->start_consuming();
+    mqtt::const_message_ptr msg;
+    bool received_message = false;
     while (true) {
-      auto msg = MQTT_Manager::_mqtt_client->consume_message();
-      if (msg) {
-        MQTTMessage message_struct{
-            .topic = msg->get_topic(),
-            .message = msg->get_payload_str()};
-        MQTT_Manager::_mqtt_message_queue.push(message_struct);
-      } else if (!MQTT_Manager::_mqtt_client->is_connected()) {
-        MQTT_Manager::_reconnect_mqtt_client();
+      if (!MQTT_Manager::_stop_consuming && MQTT_Manager::_mqtt_client != nullptr) [[likely]] {
+        // We should be consuming message, try for 1 second.
+        received_message = MQTT_Manager::_mqtt_client->try_consume_message_for(&msg, std::chrono::milliseconds(1000));
+        if (received_message) {
+          if (msg) {
+            MQTTMessage message_struct{
+                .topic = msg->get_topic(),
+                .message = msg->get_payload_str()};
+            MQTT_Manager::_mqtt_message_queue.push(message_struct);
+          } else if (!MQTT_Manager::_mqtt_client->is_connected()) {
+            WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
+            MQTT_Manager::_reconnect_mqtt_client();
+          }
+        }
+      } else {
+        SPDLOG_INFO("Stopped consuming messages, will check consume state again in 5 seconds.");
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
       }
     }
-
-    // Disconnect
-    SPDLOG_INFO("Disconnecting from the MQTT server...");
-    MQTT_Manager::_mqtt_client->disconnect();
-    SPDLOG_INFO("Disconnect OK.");
   } catch (const mqtt::exception &exc) {
     std::cerr << exc.what() << std::endl;
   }
 }
 
 void MQTT_Manager::reload_config() {
-  std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_settings_mutex);
-  std::string address = MqttManagerConfig::get_setting_with_default("mqtt_server", "");
-  uint16_t port = std::stoi(MqttManagerConfig::get_setting_with_default("mqtt_port", "1883"));
-  std::string username = MqttManagerConfig::get_setting_with_default("mqtt_username", "");
-  std::string password = MqttManagerConfig::get_setting_with_default("mqtt_password", "");
+  std::string address = "";
+  uint16_t port = 1883;
+  std::string username = "";
+  std::string password = "";
+  {
+    std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_settings_mutex);
+    address = MqttManagerConfig::get_setting_with_default("mqtt_server", "");
+    port = std::stoi(MqttManagerConfig::get_setting_with_default("mqtt_port", "1883"));
+    username = MqttManagerConfig::get_setting_with_default("mqtt_username", "");
+    password = MqttManagerConfig::get_setting_with_default("mqtt_password", "");
+  }
 
   if (MQTT_Manager::_mqtt_address.compare(address) != 0 ||
       MQTT_Manager::_mqtt_port != port ||
@@ -91,9 +105,12 @@ void MQTT_Manager::reload_config() {
     MQTT_Manager::_mqtt_password = password;
     SPDLOG_INFO("Reconnecting MQTT as settings has changed.");
     if (MQTT_Manager::_mqtt_client != nullptr) {
-      MQTT_Manager::_mqtt_client->disconnect(); // This will cause it to reconnect with new settings.
+      SPDLOG_DEBUG("Calling reconnect.");
+      MQTT_Manager::_reconnect_mqtt_client();
     } else {
       // Start a new thread to connect via.
+      WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
+      SPDLOG_DEBUG("Creating new connect thread.");
       std::thread mqtt_thread = std::thread(&MQTT_Manager::connect);
       mqtt_thread.detach();
     }
@@ -109,8 +126,7 @@ bool MQTT_Manager::is_connected() {
 }
 
 void MQTT_Manager::_reconnect_mqtt_client() {
-  std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
-  std::lock_guard<std::mutex> mutex_guard_settings(MQTT_Manager::_settings_mutex);
+  WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
 
   std::stringstream mac_address_str_stream;
   if (file_exists("/sys/class/net/eth0/address")) {
@@ -145,32 +161,52 @@ void MQTT_Manager::_reconnect_mqtt_client() {
     return;
   }
 
-  std::string connection_url = "tcp://";
-  connection_url.append(MQTT_Manager::_mqtt_address);
-  connection_url.append(":");
-  connection_url.append(std::to_string(MQTT_Manager::_mqtt_port));
-  SPDLOG_INFO("Will connect to MQTT via {} as client {}", connection_url, mqtt_client_name);
+  MQTT_Manager::_stop_consuming = true;
+  while (true) {
+    try {
+      std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
+      std::lock_guard<std::mutex> mutex_guard_settings(MQTT_Manager::_settings_mutex);
+      std::string connection_url = "tcp://";
+      connection_url.append(MQTT_Manager::_mqtt_address);
+      connection_url.append(":");
+      connection_url.append(std::to_string(MQTT_Manager::_mqtt_port));
+      SPDLOG_INFO("Will connect to MQTT via {} as client {}", connection_url, mqtt_client_name);
 
-  if (MQTT_Manager::_mqtt_client != nullptr && MQTT_Manager::_mqtt_client->is_connected()) {
-    MQTT_Manager::_mqtt_client->disconnect();
-    delete MQTT_Manager::_mqtt_client;
+      if (MQTT_Manager::_mqtt_client != nullptr) {
+        if (MQTT_Manager::_mqtt_client->is_connected()) {
+          MQTT_Manager::_mqtt_client->stop_consuming();
+          MQTT_Manager::_mqtt_client->disconnect();
+          std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Wait for changes to settle
+        }
+        WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
+        delete MQTT_Manager::_mqtt_client;
+        MQTT_Manager::_mqtt_client = nullptr;
+      }
+
+      MQTT_Manager::_mqtt_client = new mqtt::client(connection_url, mqtt_client_name.c_str());
+
+      auto connOpts = mqtt::connect_options_builder()
+                          .user_name(MQTT_Manager::_mqtt_username)
+                          .password(MQTT_Manager::_mqtt_password)
+                          .keep_alive_interval(std::chrono::seconds(30))
+                          .automatic_reconnect(std::chrono::seconds(2), std::chrono::seconds(10))
+                          .clean_session(false)
+                          .finalize();
+
+      MQTT_Manager::_stop_consuming = false;
+      MQTT_Manager::_mqtt_client->connect(connOpts);
+      SPDLOG_DEBUG("Connect succesful.");
+      break;
+    } catch (std::exception &ex) {
+      SPDLOG_ERROR("Caught exception while trying to connect to MQTT. Will try again in 5 seconds. Exception: {}", boost::diagnostic_information(ex));
+      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    }
   }
-
-  MQTT_Manager::_mqtt_client = new mqtt::client(connection_url, mqtt_client_name.c_str());
-
-  auto connOpts = mqtt::connect_options_builder()
-                      .user_name(MQTT_Manager::_mqtt_username)
-                      .password(MQTT_Manager::_mqtt_password)
-                      .keep_alive_interval(std::chrono::seconds(30))
-                      .automatic_reconnect(std::chrono::seconds(2), std::chrono::seconds(10))
-                      .clean_session(false)
-                      .finalize();
-
-  MQTT_Manager::_mqtt_client->connect(connOpts);
 
   while (!MQTT_Manager::_mqtt_client->is_connected()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
   }
+  WebsocketServer::remove_warning("MQTT not connected.");
   SPDLOG_INFO("Established connection to MQTT server.");
 
   try {
@@ -275,7 +311,7 @@ void MQTT_Manager::clear_retain(const std::string &topic) {
   std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
   if (topic.size() > 0) {
     mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), "", 0, 0, true);
-    if (MQTT_Manager::_mqtt_client != nullptr) {
+    if (MQTT_Manager::_mqtt_client != nullptr && MQTT_Manager::_mqtt_client->is_connected()) {
       MQTT_Manager::_mqtt_client->publish(msg);
     } else {
       MQTT_Manager::_mqtt_messages_buffer.push_back(msg);

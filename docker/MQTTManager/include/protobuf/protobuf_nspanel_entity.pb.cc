@@ -36,6 +36,7 @@ inline constexpr NSPanelEntityState_Light::Impl_::Impl_(
         saturation_{0},
         can_color_temp_{false},
         can_color_{false},
+        current_light_mode_{static_cast< ::NSPanelEntityState_Light_LightMode >(0)},
         _cached_size_{0} {}
 
 template <typename>
@@ -71,8 +72,7 @@ struct NSPanelEntityStateDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelEntityStateDefaultTypeInternal _NSPanelEntityState_default_instance_;
-static constexpr const ::_pb::EnumDescriptor**
-    file_level_enum_descriptors_protobuf_5fnspanel_5fentity_2eproto = nullptr;
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_protobuf_5fnspanel_5fentity_2eproto[1];
 static constexpr const ::_pb::ServiceDescriptor**
     file_level_service_descriptors_protobuf_5fnspanel_5fentity_2eproto = nullptr;
 const ::uint32_t
@@ -94,6 +94,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Light, _impl_.saturation_),
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Light, _impl_.can_color_temp_),
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Light, _impl_.can_color_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Light, _impl_.current_light_mode_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -109,7 +110,7 @@ const ::uint32_t
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::NSPanelEntityState_Light)},
-        {16, -1, -1, sizeof(::NSPanelEntityState)},
+        {17, -1, -1, sizeof(::NSPanelEntityState)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelEntityState_Light_default_instance_._instance,
@@ -117,19 +118,22 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 const char descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\035protobuf_nspanel_entity.proto\"\350\001\n\022NSPa"
+    "\n\035protobuf_nspanel_entity.proto\"\317\002\n\022NSPa"
     "nelEntityState\022*\n\005light\030\001 \001(\0132\031.NSPanelE"
-    "ntityState.LightH\000\032\233\001\n\005Light\022\020\n\010light_id"
+    "ntityState.LightH\000\032\202\002\n\005Light\022\020\n\010light_id"
     "\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\022\n\nbrightness\030\003 \001(\005"
     "\022\022\n\ncolor_temp\030\004 \001(\005\022\013\n\003hue\030\005 \001(\005\022\022\n\nsat"
     "uration\030\006 \001(\005\022\026\n\016can_color_temp\030\007 \001(\010\022\021\n"
-    "\tcan_color\030\010 \001(\010B\010\n\006entityb\006proto3"
+    "\tcan_color\030\010 \001(\010\022\?\n\022current_light_mode\030\t"
+    " \001(\0162#.NSPanelEntityState.Light.LightMod"
+    "e\"$\n\tLightMode\022\016\n\nCOLOR_TEMP\020\000\022\007\n\003RGB\020\001B"
+    "\010\n\006entityb\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_5fentity_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_5fentity_2eproto = {
     false,
     false,
-    274,
+    377,
     descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto,
     "protobuf_nspanel_entity.proto",
     &descriptor_table_protobuf_5fnspanel_5fentity_2eproto_once,
@@ -142,6 +146,26 @@ PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnsp
     file_level_enum_descriptors_protobuf_5fnspanel_5fentity_2eproto,
     file_level_service_descriptors_protobuf_5fnspanel_5fentity_2eproto,
 };
+const ::google::protobuf::EnumDescriptor* NSPanelEntityState_Light_LightMode_descriptor() {
+  ::google::protobuf::internal::AssignDescriptors(&descriptor_table_protobuf_5fnspanel_5fentity_2eproto);
+  return file_level_enum_descriptors_protobuf_5fnspanel_5fentity_2eproto[0];
+}
+PROTOBUF_CONSTINIT const uint32_t NSPanelEntityState_Light_LightMode_internal_data_[] = {
+    131072u, 0u, };
+bool NSPanelEntityState_Light_LightMode_IsValid(int value) {
+  return 0 <= value && value <= 1;
+}
+#if (__cplusplus < 201703) && \
+  (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
+
+constexpr NSPanelEntityState_Light_LightMode NSPanelEntityState_Light::COLOR_TEMP;
+constexpr NSPanelEntityState_Light_LightMode NSPanelEntityState_Light::RGB;
+constexpr NSPanelEntityState_Light_LightMode NSPanelEntityState_Light::LightMode_MIN;
+constexpr NSPanelEntityState_Light_LightMode NSPanelEntityState_Light::LightMode_MAX;
+constexpr int NSPanelEntityState_Light::LightMode_ARRAYSIZE;
+
+#endif  // (__cplusplus < 201703) &&
+        // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
 // ===================================================================
 
 class NSPanelEntityState_Light::_Internal {
@@ -172,9 +196,9 @@ NSPanelEntityState_Light::NSPanelEntityState_Light(
                offsetof(Impl_, light_id_),
            reinterpret_cast<const char *>(&from._impl_) +
                offsetof(Impl_, light_id_),
-           offsetof(Impl_, can_color_) -
+           offsetof(Impl_, current_light_mode_) -
                offsetof(Impl_, light_id_) +
-               sizeof(Impl_::can_color_));
+               sizeof(Impl_::current_light_mode_));
 
   // @@protoc_insertion_point(copy_constructor:NSPanelEntityState.Light)
 }
@@ -189,9 +213,9 @@ inline void NSPanelEntityState_Light::SharedCtor(::_pb::Arena* arena) {
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, light_id_),
            0,
-           offsetof(Impl_, can_color_) -
+           offsetof(Impl_, current_light_mode_) -
                offsetof(Impl_, light_id_) +
-               sizeof(Impl_::can_color_));
+               sizeof(Impl_::current_light_mode_));
 }
 NSPanelEntityState_Light::~NSPanelEntityState_Light() {
   // @@protoc_insertion_point(destructor:NSPanelEntityState.Light)
@@ -225,15 +249,15 @@ NSPanelEntityState_Light::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 8, 0, 45, 2> NSPanelEntityState_Light::_table_ = {
+const ::_pbi::TcParseTable<4, 9, 0, 45, 2> NSPanelEntityState_Light::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    8, 56,  // max_field_number, fast_idx_mask
+    9, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967040,  // skipmap
+    4294966784,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    8,  // num_field_entries
+    9,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_NSPanelEntityState_Light_default_instance_._instance,
@@ -243,9 +267,7 @@ const ::_pbi::TcParseTable<3, 8, 0, 45, 2> NSPanelEntityState_Light::_table_ = {
     ::_pbi::TcParser::GetTable<::NSPanelEntityState_Light>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // bool can_color = 8;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Light, _impl_.can_color_), 63>(),
-     {64, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.can_color_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // int32 light_id = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelEntityState_Light, _impl_.light_id_), 63>(),
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.light_id_)}},
@@ -267,6 +289,18 @@ const ::_pbi::TcParseTable<3, 8, 0, 45, 2> NSPanelEntityState_Light::_table_ = {
     // bool can_color_temp = 7;
     {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Light, _impl_.can_color_temp_), 63>(),
      {56, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.can_color_temp_)}},
+    // bool can_color = 8;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Light, _impl_.can_color_), 63>(),
+     {64, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.can_color_)}},
+    // .NSPanelEntityState.Light.LightMode current_light_mode = 9;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelEntityState_Light, _impl_.current_light_mode_), 63>(),
+     {72, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.current_light_mode_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -294,6 +328,9 @@ const ::_pbi::TcParseTable<3, 8, 0, 45, 2> NSPanelEntityState_Light::_table_ = {
     // bool can_color = 8;
     {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.can_color_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // .NSPanelEntityState.Light.LightMode current_light_mode = 9;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.current_light_mode_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
   }},
   // no aux_entries
   {{
@@ -312,8 +349,8 @@ PROTOBUF_NOINLINE void NSPanelEntityState_Light::Clear() {
 
   _impl_.name_.ClearToEmpty();
   ::memset(&_impl_.light_id_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.can_color_) -
-      reinterpret_cast<char*>(&_impl_.light_id_)) + sizeof(_impl_.can_color_));
+      reinterpret_cast<char*>(&_impl_.current_light_mode_) -
+      reinterpret_cast<char*>(&_impl_.light_id_)) + sizeof(_impl_.current_light_mode_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -381,6 +418,13 @@ PROTOBUF_NOINLINE void NSPanelEntityState_Light::Clear() {
         8, this->_internal_can_color(), target);
   }
 
+  // .NSPanelEntityState.Light.LightMode current_light_mode = 9;
+  if (this->_internal_current_light_mode() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        9, this->_internal_current_light_mode(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -445,6 +489,12 @@ PROTOBUF_NOINLINE void NSPanelEntityState_Light::Clear() {
     total_size += 2;
   }
 
+  // .NSPanelEntityState.Light.LightMode current_light_mode = 9;
+  if (this->_internal_current_light_mode() != 0) {
+    total_size += 1 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_current_light_mode());
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -481,6 +531,9 @@ void NSPanelEntityState_Light::MergeImpl(::google::protobuf::MessageLite& to_msg
   if (from._internal_can_color() != 0) {
     _this->_impl_.can_color_ = from._impl_.can_color_;
   }
+  if (from._internal_current_light_mode() != 0) {
+    _this->_impl_.current_light_mode_ = from._impl_.current_light_mode_;
+  }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -499,8 +552,8 @@ void NSPanelEntityState_Light::InternalSwap(NSPanelEntityState_Light* PROTOBUF_R
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.can_color_)
-      + sizeof(NSPanelEntityState_Light::_impl_.can_color_)
+      PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.current_light_mode_)
+      + sizeof(NSPanelEntityState_Light::_impl_.current_light_mode_)
       - PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.light_id_)>(
           reinterpret_cast<char*>(&_impl_.light_id_),
           reinterpret_cast<char*>(&other->_impl_.light_id_));

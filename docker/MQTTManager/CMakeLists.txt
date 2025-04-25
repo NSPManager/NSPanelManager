@@ -25,6 +25,12 @@ set(PROTOBUF_SRC_DIRECTORY /MQTTManager/include/protobuf)
 add_compile_options(-rdynamic -g)
 add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE BOOST_STACKTRACE_USE_BACKTRACE BOOST_BIND_GLOBAL_PLACEHOLDERS)
 
+# Statically link libraries
+IF(DEFINED ENV{STRIP})
+    MESSAGE("Will build as static binary!")
+    ADD_LINK_OPTIONS(-static)
+ENDIF()
+
 # The following two lines are to check for address sanitazation.
 # add_compile_options(-rdynamic -g -fsanitize=address)
 # add_link_options(-fsanitize=address)
@@ -71,7 +77,7 @@ target_link_libraries(MQTTManager_Entity spdlog::spdlog Boost::boost nlohmann_js
 add_library(MQTT_Manager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.hpp)
 set_target_properties(MQTT_Manager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.hpp)
 target_include_directories(MQTT_Manager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTT_Manager PahoMqttCpp::paho-mqttpp3-static MQTTManager_Config spdlog::spdlog Boost::boost protobuf::protobuf)
+target_link_libraries(MQTT_Manager PahoMqttCpp::paho-mqttpp3-static MQTTManager_Config spdlog::spdlog Boost::boost protobuf::protobuf MQTTManager_WebsocketServer)
 
 add_library(MQTTManager_CommandManager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/command_manager/command_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/command_manager/command_manager.hpp)
 set_target_properties(MQTTManager_CommandManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/command_manager/command_manager.hpp)
@@ -86,12 +92,12 @@ target_link_libraries(MQTTManager_WebsocketServer ixwebsocket::ixwebsocket spdlo
 add_library(MQTTManager_HomeAssistantManager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.hpp)
 set_target_properties(MQTTManager_HomeAssistantManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.hpp)
 target_include_directories(MQTTManager_HomeAssistantManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_HomeAssistantManager Boost::stacktrace_backtrace spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost Boost::stacktrace_backtrace MQTTManager_Config)
+target_link_libraries(MQTTManager_HomeAssistantManager Boost::stacktrace_backtrace spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost Boost::stacktrace_backtrace MQTTManager_Config MQTTManager_WebsocketServer)
 
 add_library(MQTTManager_OpenhabManager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/openhab_manager/openhab_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/openhab_manager/openhab_manager.hpp)
 set_target_properties(MQTTManager_OpenhabManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/openhab_manager/openhab_manager.hpp)
 target_include_directories(MQTTManager_OpenhabManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_OpenhabManager Boost::stacktrace_backtrace spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost MQTTManager_Config)
+target_link_libraries(MQTTManager_OpenhabManager Boost::stacktrace_backtrace spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost MQTTManager_Config MQTTManager_WebsocketServer)
 
 add_library(MQTTManager_Weather STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather_icons.hpp)
 set_target_properties(MQTTManager_Weather PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.hpp)
