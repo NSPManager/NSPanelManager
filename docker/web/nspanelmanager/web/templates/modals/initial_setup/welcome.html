@@ -52,10 +52,8 @@
     </form>
 
     <script>
-    htmx.on("htmx:afterSwap", (e) => {
-      if(e.detail.elt.id == "welcome_modal") {
-        modal.showModal();
-      }
-    });
+    // Initial setup modal is always loaded as part of the page and can therefore be shown immediately.
+      console.log("Showing welcome modal");
+      welcome_modal.showModal();
     </script>
 </dialog>
