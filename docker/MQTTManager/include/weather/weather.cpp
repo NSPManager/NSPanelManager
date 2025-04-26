@@ -254,6 +254,7 @@ void MQTTManagerWeather::send_state_update() {
     // TODO: Implement ability for users to display comming 5 hours instead of 5 days.
     forecast_item->set_display_string(info.day);
   }
+  SPDLOG_DEBUG("Sending {} forecast days.", weather_protbuf.forecast_items_size());
   weather_protbuf.set_current_weather_icon(MQTTManagerWeather::_get_icon_from_mapping(MQTTManagerWeather::_current_condition, MQTTManagerWeather::_current_weather_time.tm_hour, true));
   weather_protbuf.set_current_temperature_string(fmt::format("{:.0f}°", MQTTManagerWeather::_current_temperature));
   weather_protbuf.set_current_maxmin_temperature(fmt::format("{:.0f}°/{:.0f}°", MQTTManagerWeather::_current_max_temperature, MQTTManagerWeather::_current_min_temperature));
