@@ -225,10 +225,12 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
         }
         SPDLOG_DEBUG("Light {}::{} got new brightness {}, current brightness: {}.", this->_id, this->_name, brightness, this->_current_brightness);
         if (brightness != this->_current_brightness) {
-          this->_current_brightness = brightness;
-          this->_requested_brightness = this->_current_brightness;
+          if (brightness != 0) { // Only update internal brightness if not zero as to remember last brightness when toggling light.
+            this->_current_brightness = brightness;
+            this->_requested_brightness = this->_current_brightness;
+          }
 
-          if (this->_current_brightness <= 0) {
+          if (brightness <= 0) {
             this->_requested_state = false;
             this->_current_state = false;
           } else {
