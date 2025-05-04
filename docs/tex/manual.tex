@@ -261,14 +261,15 @@
       \info{There have been issues when using Android and the Chrome browser that it sometimes just shows a blank page. If this is the case, either use a different browser (E.g. Firefox) or another device with WiFi to access the web page.}
       \item Enter a friendly name for the NSPanel.
       \note{This name is only used to register the NSPanel the first time. After the panel has been registered the name has to be changed from the manager web interface.}
-      \item Enter WiFi name and password.
+      \item Enter WiFi name (or select from a list by pressing the "Select from list" button) and password.
+      \important{There has been an observed behavior that the NSPanel in the current framework version does not play nicely with WPA3 WiFi security.}
       \item Enter MQTT address and port. If you are using authentication for MQTT, enter username and password as well.
       \note{If you are running the MQTT server as an add-on to Home Assistant, enter the IP-address of your Home Assistant server.}
       \item Press the "Save" button on the bottom of the page. The panel will reboot and try to connect to the WiFi network.
       \info{If the panel fails to connect to the WiFi network for three minutes it will revert back and start the access point again. It will periodically scan for the configured WiFi and, if it detects that the configured WiFi has come back, it will reboot and connect to it.}
       \item Connect to your WiFi again and go to the NSPanel Manager web interface. If all things are working and setup correctly the panel should show up in the list of panels on the first page. You will then have to accept or deny the panel access into the manager.
       \info{If this is a US NSPanel version then it has to be set in the panel settings. Press the name of the NSPanel in the list and check the "Is US panel"-checkbox.}
-      \item Flash the new GUI file to the panel by pressing the "Actions"-button on the right and select "Update screen".
+      \item Flash the new GUI file to the panel by pressing the "Actions"-button on the right and select "Update GUI".
       \note{The flashing of the GUI file may be finicky and might require multiple tries before it succeeds. If it fails and reboots or you see a "System data error", just try again.}
     \item Continue on to create new rooms and add entities to your configuration. Continue with the section on the web interface and how it work \hyperref[sec:nspanelmanager_web_interface]{here}.
     \end{itemize}

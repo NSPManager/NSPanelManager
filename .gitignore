@@ -6,6 +6,7 @@ docker/test-beta/data*
 docker/web/nspanelmanager/db.sqlite3
 docker/web/nspanelmanager/secret.key
 docker/web/node_modules/
+docker/nginx/sites-enabled/nspanelmanager.conf
 firmware/NSPanelManagerFirmware/data/config.json
 firmware/NSPanelManagerFirmware/.pio
 firmware/NSPanelManagerFirmware/littlefs.md5

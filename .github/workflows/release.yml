@@ -40,6 +40,7 @@ jobs:
         with:
           commit_message: Push updated version back to repo
           branch: "${{ steps.image_name.outputs.branch }}"
+          push_options: '--force'
 
   publish-x86:
     if: ${{ !github.event.act }} # skip during local actions testing
@@ -303,3 +304,4 @@ jobs:
         with:
           commit_message: Update beta version reference
           branch: "main"
+          push_options: '--force'
