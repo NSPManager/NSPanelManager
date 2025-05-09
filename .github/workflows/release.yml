@@ -20,7 +20,6 @@ jobs:
         uses: actions/checkout@v4
       - run: |
           sed -i "s/^version: [0-9A-Za-z\.\-_]\+/version: ${{ github.ref_name }}/g" docker/config.yaml
-          cp docker/web/nspanelmanager/web/templates/footer_template.html docker/web/nspanelmanager/web/templates/footer.html
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
       - name: Get branch name
@@ -40,7 +39,7 @@ jobs:
         with:
           commit_message: Push updated version back to repo
           branch: "${{ steps.image_name.outputs.branch }}"
-          push_options: '--force'
+          push_options: "--force"
 
   publish-x86:
     if: ${{ !github.event.act }} # skip during local actions testing
@@ -304,4 +303,4 @@ jobs:
         with:
           commit_message: Update beta version reference
           branch: "main"
-          push_options: '--force'
+          push_options: "--force"
