@@ -1,0 +1,34 @@
+<script type="module">
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
+
+  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+    // Update relevant values for the status header from the bundled data in the status update event
+    var element = document.getElementById(`nspanel-visit-link-${event.detail.event_data.id}`);
+    element.state = event.detail.event_data.state;
+    element.address = event.detail.event_data.ip_address;
+  });
+
+  define({
+    tag: "nspanel-visit-link",
+    nspanel_id: '',
+    state: '',
+    address: '',
+    render: ({nspanel_id, state, address}) => {
+      if (state == "offline") {
+        return html`
+            <span title="No address available." class="block px-4 py-2 hover:bg-accent hover:text-accent-content line-through">
+                <span class="mdi mdi-web pr-2"></span>Visit
+            </span>
+        `;
+      } else {
+        return html`
+            <a href="http://${address}" target="_blank" class="nspanel-visit-link block px-4 py-2 hover:bg-accent hover:text-accent-content">
+                <span class="mdi mdi-web pr-2"></span>Visit
+            </a>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-visit-link id="nspanel-visit-link-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}" address="{{ address }}"></nspanel-visit-link>

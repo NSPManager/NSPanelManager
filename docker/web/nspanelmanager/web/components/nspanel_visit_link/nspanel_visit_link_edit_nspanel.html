@@ -1,0 +1,38 @@
+<script type="module">
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
+
+  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+    // Update relevant values for the status header from the bundled data in the status update event
+    var element = document.getElementById(`nspanel-visit-link-${event.detail.event_data.id}`);
+    element.state = event.detail.event_data.state;
+    element.address = event.detail.event_data.ip_address;
+  });
+
+  define({
+    tag: "nspanel-visit-link",
+    nspanel_id: '',
+    state: '',
+    address: '',
+    render: ({id, state, address}) => {
+      if (state == "offline") {
+        return html`
+            <a title="No visit link available." class="transition-all ease-linear duration-100">
+                <div class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
+                    <span class="mdi mdi-web me-2"></span><span class="line-through">Visit</span>
+                </div>
+            </a>
+        `;
+      } else {
+        return html`
+            <a href="http://${address}" target="_blank" title="Visit NSPanel settings page." class="transition-all ease-linear duration-100">
+                <div class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
+                    <span class="mdi mdi-web me-2"></span><span class="">Visit</span>
+                </div>
+            </a>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-visit-link id="nspanel-visit-link-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}" address="{{ address }}"></nspanel-visit-link>

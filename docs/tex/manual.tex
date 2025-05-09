@@ -11,14 +11,14 @@
 \usetikzlibrary{positioning}
 \usepackage[most]{tcolorbox}
 \usepackage{hyperref}
-\usepackage{geometry} 
+\usepackage{geometry}
 \usepackage{xpatch}
 \usepackage{xcolor}
 \usepackage{listings}
 \usepackage{realboxes}
 \usepackage{subfig}
 \usepackage{float}
-\geometry{a4paper, left=10mm, right=10mm, top=20mm} 
+\geometry{a4paper, left=10mm, right=10mm, top=20mm}
 
 % Set TikZ styles
 \tikzstyle{arrow} = [thick,->,>=stealth]
@@ -81,7 +81,7 @@
 \newtcolorbox{infoBox}{textmarker,
     borderline west={6pt}{0pt}{blue},
     colback=blue!10!white}
-  
+
 
 % define commands for easy access
 \newcommand{\info}[1]{\begin{infoBox} \textbf{Info:} #1 \end{infoBox}}
@@ -215,6 +215,7 @@
 
     \subsection{NSPanel flashing}
     \label{sec:nspanel_flashing}
+    \hypertarget{sec:nspanel_flashing}{}
     Prerequisites:
     \begin{itemize}
       \item Working TTL flasher for 3.3V.
@@ -247,7 +248,7 @@
       \info{On Windows "/dev/ttyUSB0" will have to be replaced by something like "COM4". If using MacOS or Linux the port will be something similar to "/dev/ttyUSB0".}
     \end{itemize}
     After the flashing is complete you can continue with \hyperref[sec:nspanel_configuration]{NSPanel configuration}.
- 
+
     \subsection{NSPanel configuration}
     \label{sec:nspanel_configuration}
     To configure the NSPanel, do the following:
@@ -295,7 +296,7 @@
       \item \textbf{Delete} - Delete the nspanel from the manager.
     \end{itemize}
 
-    There is also the "Actions"-button on the top right where you can perform some of the actions from the list above to all panels which are online. There is also an option to \textbf{Restart MQTTManager} which will restart the 
+    There is also the "Actions"-button on the top right where you can perform some of the actions from the list above to all panels which are online. There is also an option to \textbf{Restart MQTTManager} which will restart the
     core component that handles all communication between different components of the NSPanel Manager software.
 
     \hypertarget{sec:nspanel_page}{}
@@ -349,7 +350,7 @@
       \end{itemize}
       \item \textbf{Temperature calibration} - Calibrate the internal temperature sensor. Enter a negative value to bring the reported temperature down and vice versa.
     \end{itemize}
-    
+
     \hypertarget{sec:room_page}{}
     \subsection{Room page}
     \label{sec:room_page}
@@ -362,7 +363,7 @@
     \end{figure}
     \subsubsection{Scenes}
     You can choose to use scenes from Home Assistant or OpenHAB though these scenes will not be able to be saved on the fly. This is something that the NSPanel Manager scenes can perform internally.
-    
+
     The NSPanel Manager scenes are easy enough to use. Simply create a scene in the room page and they will be available in the "Scenes"-list for the room on all NSPanels.
     \\ To save a scene, on the NSPanel hold the save button for the scenes for 3 seconds to save all the states of lights \textbf{currently added to the room}.
     \\ To recall/activate a scene, on the NSPanel press the name of the scene and all the saved light states will be restored for that scene.
@@ -375,7 +376,7 @@
     \includegraphics[scale=0.25]{add_new_light.png}
     \caption{Adding a new light to a room}%
     \end{figure}
-    
+
     When done, a new screen will show up and depending on if the selected entity was from Home Assistant or OpenHAB difference options will be shown.
     \begin{figure}[H]
     \centering
@@ -384,7 +385,7 @@
     \subfloat[\centering OpenHAB]{{\includegraphics[width=5cm]{edit_new_light_openhab.png} }}%
     \caption{Add/Edit light}%
     \end{figure}
-    
+
     When adding a Home Assistant entity, simply set a friendly name for it, select the type (Ceiling or Table light), select if it's a switch or dimmable light and what other capabilities it has.\\
     If you are adding an OpenHAB light or switch, things aren't as simple unfortunately. There is really no way around this and as such the user has to chose all the same settings as for Home Assistant but also has to select the appropriate OpenHAB items that corresponds to each capability of the light.
 
@@ -408,12 +409,12 @@
     On the Weather \& Time page settings related to time, date and weather can be changed. Date format is configured according to the strftime function and a link to available formatting options is availabel in the information box.
     \\It is also possible to select between 24 and 12-hour clock format.
 
-    
+
     To configure weather, simply press the "Search" button attached to either the "Latitude" or "Longitude" input fields and search for your city. If it does not show, you can enter your location manually.
     You can also change between celsius and fahrenheit, difference wind speed units and also difference precipitation units. You can also set the update interval for how often to pull down the current weather and the forecast from Open Meteo.
     \\
     If you wish to show temperature from a local temperature sensor available in OpenHAB, this can be selected in the \textbf{Outside temperature sensor} but it is not required.
-    
+
     \hypertarget{sec:global_settings}{}
     \subsection{Global settings}
     These settings will apply to all NSPanels (if they do not have specific configurations), and the NSPanel Manager container. There are two things that need to be set in order to get up and running. Those are:
@@ -467,6 +468,7 @@
         \item \textbf{No screensaver (turn off screen)} - Make the screen completely black when not in use.
       \end{itemize}
       \item \textbf{MQTT ignore time (ms)} - Time to wait (in milliseconds) after sending a command over MQTT before allowing new values to update the screen. This can be raised or lowered to minimize flickering of sliders on the NSPanel.
+      \item \textbf{Entity update mode} - When changing an entity state on the NSPanel itself, should the panel and assume that the new state we be set correctly (optimistic) or should the panel and manager wait for a state update from the entity before displaying the new state (wait).
     \end{itemize}
 
     \subsubsection{MQTT}
@@ -529,32 +531,32 @@
     \textbf{Short press} - Enter Scenes page. If 7 is in Room Lights mode user will enter Room Scenes. If 7 is in All Lights mode user will enter Global Scenes page.
 
    	\subsubsection{Lights control logic}
-    The NSPanel main page might have some behavior that seems odd at first but the logic of it will be described here. The first page will affect entities in the selected room (if in room-mode) or all the configured lights (if in "All lights"-mode). The two left buttons for ceiling and table lights will always behave the same. Pressing a button that is "off" will turn on all the lights of that type. Pressing a button that is "on" will turn off all lights of that type. The sliders will always display an average value of all entities that will be affected of changes. There are few different scenarios:				
+    The NSPanel main page might have some behavior that seems odd at first but the logic of it will be described here. The first page will affect entities in the selected room (if in room-mode) or all the configured lights (if in "All lights"-mode). The two left buttons for ceiling and table lights will always behave the same. Pressing a button that is "off" will turn on all the lights of that type. Pressing a button that is "on" will turn off all lights of that type. The sliders will always display an average value of all entities that will be affected of changes. There are few different scenarios:
 
     \paragraph{One or more lights on}\mbox{} \\
     When changing the sliders, the changes will only be sent out to the lights currently on.
     If turning on a group of lights or individual lights they will be turned on to the current brightness of the slider. I.e. average dimming level in the room.
     \info{If you wish for the light to always turn on with color temperature even though you turned it off from RGB, there is a setting in the global settings.}
-    
+
     \paragraph{No lights on}\mbox{} \\
     When changing the sliders, the changes will be sent out to all lights selected (depending on room or "all lights"-mode).
-    
+
     \paragraph{Lock mode}\mbox{} \\
     You can lock which light to affect by pressing and holding either the ceiling or table-lights button. This will enter a special mode where changes to the sliders will only affect the selected type of lights. By pressing the same button again you can exit the "special mode". The "special mode" will also time out after a few seconds.
-    
+
     \subsubsection{Scenes button (top left corner)}
     The settings icon in the top left corner is for entering the Scenes page. In NSPanel Manager there are both Room Scenes and Global Scenes. If you're in Room Lights mode (button in lower right corner) you will enter the Room Scenes page. If you're in All Lights mode you will enter the Global Scenes page. You'll also see that the settings icon changes when toggling between Room Lights and All Lights mode. Standard settings icon leads to Room Scenes page when pressing it. Settings icon with a roof on top leads to Global Scenes page.
     \subsubsection{Swipe down}
     You can swipe downwards when on the first page to enter the Smart Home Control page.
     This page is a work in progress. Design and funcionality is not finished or decided yet.
     \subsection{Smart Home Control page}
-    Accessed by swiping down on Main page. Work in progress. Design and funcionality is not finished or decided yet.  
+    Accessed by swiping down on Main page. Work in progress. Design and funcionality is not finished or decided yet.
     \subsection{Scenes page}
     To enter Scenes page, press the settings icon in top left corner on Main page. Depending on if you're in Room Lights mode or All Lights mode you will enter Room Scenes page or Global Scenes page.
-    
+
     Scene names that show up here are the ones you have configured in the NSPanel Manager web interface. To store a scene simply hold the save button for three seconds and the current values of the lights in the room you are in or all lights if in All Lights mode will be saved. To activate a scene and send out those saved values you just press the scene name.
     \subsection{Room page}
-	Enter Room page by pressing the room name on Main page. All devices configured for that room will show up here. To control a device individually press the device name. 
+	Enter Room page by pressing the room name on Main page. All devices configured for that room will show up here. To control a device individually press the device name.
     \subsection{Individual Lights page}
     All the capabilities of the chosen light will be shown on this page. If the light is RGB capable there will be an icon in the top right corner to toggle between Color Temperature mode and Color mode.´
 
@@ -636,7 +638,7 @@
 
     The data flow within NSPanel Manager might look intimidating but it's not that bad. Below is an explanation of all the arrows above.
 
-    
+
     \subsubsection{Home Assistant and/or OpenHAB to/from NSPanel Manager container}
     There is two types of traffic flowing between these nodes:
     \begin{itemize}
@@ -662,9 +664,9 @@
     nspanel/<panel\_name>/screen\_state & 1 or 0 & Current state of the screen. \\ \hline
     nspanel/<panel\_name>/brightness & 1 to  100 & Control the brightness of the screen. \\ \hline
     nspanel/<panel\_name>/brightness\_screensaver & 0 to  100 & Control the brightness of the screensaver. \\ \hline
-    nspanel/<panel\_name>/r1\_cmd & 1 or 0 & Send a 1 or 0 to turn on/off relay 1. \\ \hline
+    nspanel/<panel\_name>/r1\_cmd & 1, 0 or 2 & Send a 1, 0 or 2 to turn on, off or toggle relay 1. \\ \hline
     nspanel/<panel\_name>/r1\_state & 1 or 0 & The current state of relay 1. \\ \hline
-    nspanel/<panel\_name>/r2\_cmd & 1 or 0 & Send a 1 or 0 to turn on/off relay 2. \\ \hline
+    nspanel/<panel\_name>/r2\_cmd & 1, 0 or 2 & Send a 1, 0 or 2 to turn on, off or toggle relay 2. \\ \hline
     nspanel/<panel\_name>/r2\_state & 1 or 0 & The current state of relay 2. \\ \hline
     nspanel/<panel\_name>/temperature\_state & Current temperature & The current temperature reading. \\ \hline
     nspanel/<panel\_name>/screensaver\_mode & screensaver mode & \parbox[t]{0.25\textwidth}{Select what screensaver to display Choose from the following:\\ with\_background,\\ without\_background,\\ datetime\_with\_background,\\ datetime\_without\_background\\ or no\_screensaver} \\ \hline

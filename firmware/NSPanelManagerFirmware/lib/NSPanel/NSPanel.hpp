@@ -36,8 +36,6 @@ public:
   static void attachTouchEventCallback(void (*callback)(uint8_t, uint8_t, bool));
   static void attachSleepCallback(void (*callback)());
   static void attachWakeCallback(void (*callback)());
-  /// @brief Return a string of any warnings to show in the warning tooltip in the manager web interface.
-  static std::string getWarnings();
   bool ready();
   bool init();
   bool startOTAUpdate();

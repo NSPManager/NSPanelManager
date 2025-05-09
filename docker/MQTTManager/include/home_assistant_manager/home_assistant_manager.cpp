@@ -1,6 +1,14 @@
 #include "home_assistant_manager.hpp"
+#include "light/home_assistant_light.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/asio.hpp>
+#include <boost/asio/buffer.hpp>
 #include <boost/exception/diagnostic_information.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/process/async_pipe.hpp>
 #include <boost/stacktrace.hpp>
 #include <boost/stacktrace/frame.hpp>
 #include <boost/stacktrace/stacktrace_fwd.hpp>
@@ -15,41 +23,45 @@
 #include <nlohmann/detail/json_pointer.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
+#include <string>
+#include <websocket_server/websocket_server.hpp>
 
 void HomeAssistantManager::connect() {
   SPDLOG_DEBUG("Initializing Home Assistant Manager component.");
   ix::initNetSystem();
 
+  HomeAssistantManager::reload_config();
+
   bool init_success = false;
   while (!init_success) {
     try {
+      std::lock_guard<std::mutex> lock_guard(HomeAssistantManager::_settings_mutex);
       if (HomeAssistantManager::_websocket == nullptr) {
         HomeAssistantManager::_websocket = new ix::WebSocket();
         HomeAssistantManager::_websocket->setPingInterval(30);
       }
 
-      std::string home_assistant_websocket_url = MqttManagerConfig::home_assistant_address;
-      if (MqttManagerConfig::is_home_assistant_addon) {
+      std::string home_assistant_websocket_url = HomeAssistantManager::_home_assistant_address;
+      if (home_assistant_websocket_url.empty()) {
+        SPDLOG_ERROR("No Home Assistant address configured. Will not continue to load Home Assistant component.");
+        return;
+      }
+
+      WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant not connected.");
+
+      if (MqttManagerConfig::get_settings().is_home_assistant_addon) {
         home_assistant_websocket_url.append("/core/websocket");
       } else {
         home_assistant_websocket_url.append("/api/websocket");
       }
-      if (home_assistant_websocket_url.find("https://") != std::string::npos) {
-        SPDLOG_DEBUG("Replacing https with wss");
-        // Replace https with wss
-        home_assistant_websocket_url = home_assistant_websocket_url.replace(home_assistant_websocket_url.find("https://"), sizeof("https://") - 1, "wss://");
-        SPDLOG_DEBUG("Settings TLS options");
+      boost::algorithm::replace_first(home_assistant_websocket_url, "https://", "wss://");
+      boost::algorithm::replace_first(home_assistant_websocket_url, "http://", "ws://");
+      if (boost::algorithm::starts_with(home_assistant_websocket_url, "wss://")) {
+        SPDLOG_DEBUG("Setting TLS options");
         ix::SocketTLSOptions tls_options;
         tls_options.tls = true;
         tls_options.caFile = "NONE";
         HomeAssistantManager::_websocket->setTLSOptions(tls_options);
-      } else if (home_assistant_websocket_url.find("http://") != std::string::npos) {
-        // Replace http with ws
-        SPDLOG_DEBUG("Replacing http with ws");
-        home_assistant_websocket_url = home_assistant_websocket_url.replace(home_assistant_websocket_url.find("http://"), sizeof("http://") - 1, "ws://");
-      } else {
-        SPDLOG_ERROR("Unknown connection type of Home Assistant. Will not continue!");
-        return;
       }
 
       SPDLOG_INFO("Will connect to Home Assistant websocket at {}", home_assistant_websocket_url);
@@ -65,17 +77,45 @@ void HomeAssistantManager::connect() {
   }
 }
 
+void HomeAssistantManager::reload_config() {
+  bool reconnect = false;
+  {
+    std::lock_guard<std::mutex> lock_guard(HomeAssistantManager::_settings_mutex);
+    std::string address = MqttManagerConfig::get_setting_with_default("home_assistant_address", "");
+    std::string token = MqttManagerConfig::get_setting_with_default("home_assistant_token", "");
+
+    if (HomeAssistantManager::_home_assistant_address.compare(address) != 0 || HomeAssistantManager::_home_assistant_token.compare(token) != 0) {
+      HomeAssistantManager::_home_assistant_address = address;
+      HomeAssistantManager::_home_assistant_token = token;
+      reconnect = true;
+    }
+  }
+
+  if (reconnect) {
+    SPDLOG_INFO("Will connect to Home Assistant with new settings. Server address: {}", HomeAssistantManager::_home_assistant_address);
+    if (HomeAssistantManager::_websocket != nullptr) {
+      HomeAssistantManager::_websocket->close();
+      HomeAssistantManager::connect();
+    }
+  }
+}
+
 void HomeAssistantManager::_websocket_message_callback(const ix::WebSocketMessagePtr &msg) {
   if (msg->type == ix::WebSocketMessageType::Message) {
     HomeAssistantManager::_process_websocket_message(msg->str);
   } else if (msg->type == ix::WebSocketMessageType::Open) {
     SPDLOG_INFO("Connected to Home Assistant websocket.");
+    HomeAssistantManager::_connected = true;
   } else if (msg->type == ix::WebSocketMessageType::Close) {
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant not connected.");
     SPDLOG_WARN("Disconnected from Home Assistant websocket.");
     HomeAssistantManager::_authenticated = false;
+    HomeAssistantManager::_connected = false;
   } else if (msg->type == ix::WebSocketMessageType::Error) {
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant not connected.");
     SPDLOG_ERROR("Failed to connect to Home Assistant websocket. Reason: {}", msg->errorInfo.reason);
     HomeAssistantManager::_authenticated = false;
+    HomeAssistantManager::_connected = false;
   }
 }
 
@@ -85,8 +125,10 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
     std::string type = data["type"];
 
     if (type.compare("auth_required") == 0) {
+      WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant not connected.");
       HomeAssistantManager::_send_auth();
     } else if (type.compare("auth_ok") == 0) {
+      WebsocketServer::remove_warning("Home Assistant not connected.");
       SPDLOG_INFO("Successfully authenticated to Home Assistant websocket API.");
       HomeAssistantManager::_authenticated = true;
 
@@ -96,11 +138,7 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
       subscribe_command["event_type"] = "state_changed";
       HomeAssistantManager::send_json(subscribe_command);
 
-      // Request all current states in HA
-      HomeAssistantManager::_all_statues_request_message_id = HomeAssistantManager::_next_message_id;
-      nlohmann::json all_states_request_command;
-      all_states_request_command["type"] = "get_states";
-      HomeAssistantManager::send_json(all_states_request_command);
+      HomeAssistantManager::_request_all_states();
     } else if (type.compare("result") == 0) {
       bool success = data["success"];
       if (!success) {
@@ -132,9 +170,10 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
 }
 
 void HomeAssistantManager::_send_auth() {
+  std::lock_guard<std::mutex> lock_guard(HomeAssistantManager::_settings_mutex);
   nlohmann::json auth_data;
   auth_data["type"] = "auth";
-  auth_data["access_token"] = MqttManagerConfig::home_assistant_access_token;
+  auth_data["access_token"] = HomeAssistantManager::_home_assistant_token;
   std::string buffer = auth_data.dump();
 
   HomeAssistantManager::_send_string(buffer);
@@ -147,11 +186,19 @@ void HomeAssistantManager::send_json(nlohmann::json &data) {
 }
 
 void HomeAssistantManager::_send_string(std::string &data) {
-  if (HomeAssistantManager::_websocket != nullptr) {
+  if (HomeAssistantManager::_websocket != nullptr && HomeAssistantManager::_connected) {
     std::lock_guard<std::mutex> mtex_lock(HomeAssistantManager::_mutex_websocket_write_access);
     SPDLOG_TRACE("[HA WS] Sending data: {}", data);
     HomeAssistantManager::_websocket->send(data);
   }
+}
+
+void HomeAssistantManager::_request_all_states() {
+  // Request all current states in HA
+  HomeAssistantManager::_all_statues_request_message_id = HomeAssistantManager::_next_message_id.load();
+  nlohmann::json all_states_request_command;
+  all_states_request_command["type"] = "get_states";
+  HomeAssistantManager::send_json(all_states_request_command);
 }
 
 void HomeAssistantManager::_process_home_assistant_event(nlohmann::json &event_data) {
@@ -159,7 +206,14 @@ void HomeAssistantManager::_process_home_assistant_event(nlohmann::json &event_d
     if (event_data["event"].contains("event_type") && !event_data["event"]["event_type"].is_null()) {
       if (std::string(event_data["event"]["event_type"]).compare("state_changed") == 0) {
         std::string home_assistant_entity_name = event_data["event"]["data"]["entity_id"];
-        HomeAssistantManager::_home_assistant_observers[home_assistant_entity_name](event_data);
+        if (HomeAssistantManager::_home_assistant_observers.find(home_assistant_entity_name) != HomeAssistantManager::_home_assistant_observers.end()) {
+          try {
+            HomeAssistantManager::_home_assistant_observers.at(home_assistant_entity_name)(event_data);
+          } catch (const std::exception &e) {
+            SPDLOG_ERROR("Caught exception during processing of home assistant event. Diagnostic information: {}", boost::diagnostic_information(e, true));
+            SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+          }
+        }
       }
     }
   }

@@ -1,0 +1,60 @@
+<script type="module">
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
+
+  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+    // Update relevant values for the status header from the bundled data in the status update event
+    var element = document.getElementById(`nspanel-status-text-${event.detail.event_data.id}`);
+    element.state = event.detail.event_data.state;
+    element.update_progress = event.detail.event_data.progress;
+  });
+
+  define({
+    tag: "nspanel-status-text",
+    nspanel_id: '',
+    state: '',
+    update_progress: '',
+    render: ({id, name, state, update_progress}) => {
+      if (state == "online") {
+        return html``; // Nothing should be displayed when online.
+      } else if (state == "offline") {
+        return html`
+            <span class="flex items-end justify-end text-right italic font-light text-sm">
+                Offline
+            </span>
+        `;
+      } else if (state == "waiting") {
+        return html`
+            <span class="flex items-end justify-end text-right italic font-light text-sm">
+                Waiting
+            </span>
+        `;
+      } else if (state == "updating_fw") {
+        return html`
+            <span class="flex items-end justify-end text-right italic font-light text-sm">
+                Updating firmware, ${update_progress}%
+            </span>
+        `;
+      } else if (state == "updating_fs") {
+        return html`
+            <span class="flex items-end justify-end text-right italic font-light text-sm">
+                Updating LittleFS, ${update_progress}%
+            </span>
+          `;
+      } else if (state == "updating_tft") {
+        return html`
+            <span class="flex items-end justify-end text-right italic font-light text-sm">
+                Updating TFT, ${update_progress}%
+            </span>
+        `;
+      } else {
+        return html`
+            <span class="flex items-end justify-end text-right italic font-light text-sm text-warning">
+                Unknown state ${state}!
+            </span>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-status-text id="nspanel-status-text-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}"></nspanel-status-badge>

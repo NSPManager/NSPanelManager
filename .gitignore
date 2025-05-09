@@ -19,6 +19,7 @@ firmware/NSPanelManagerFirmware/.ccls
 firmware/NSPanelManagerFirmware/.ccls-cache
 firmware/NSPanelManagerFirmware/node_modules
 firmware/firmware_espidf/
+firmware/firmware_espidf/node_modules
 docker/MQTTManager/conan_cache/
 docker/MQTTManager/build/
 docker/MQTTManager/.cache/

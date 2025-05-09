@@ -1,0 +1,60 @@
+<div id="rooms_table" hx-swap-oob="true">
+    <table class="table">
+        <thead class="">
+            <tr>
+                <th class="px-3 py-1 w-1"></th>
+                <th class="px-3 py-1">Name</th>
+                <th class="px-3 py-1">NSPanels</th>
+            </tr>
+        </thead>
+        <tbody id="rooms_list">
+                {% for room in rooms %}
+                <tr class="hover bg-base-100 room-row" data-room-id="{{ room.room.id }}">
+                    <td>
+                        <span class="mdi mdi-drag-horizontal-variant cursor-grab sortable-handle" title="Drag and drop to reorder"></span>
+                    </td>
+                    <th class="">
+                        <a href="{% url 'edit_room' room_id=room.room.id %}">{{ room.room.friendly_name }}</a>
+                    </th>
+                    <td>
+                        {% for nspanel in room.nspanels %}
+                        <a href="{% url 'edit_nspanel' panel_id=nspanel.id %}">
+                            {{ nspanel.status }}
+                            {% component "nspanel_status_badge" id=nspanel.id %}{% endcomponent %}
+                        </a>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+        </tbody>
+    </table>
+
+
+    <!-- Only used to send what order the rooms should be in -->
+    <form id="htmx_form_save_rooms_order" hx-post="{% url 'htmx_partial_reorder_rooms' %}" hx-swap="none" hx-indicator="#modal_loading" hx-trigger="reordered">
+        <input type="hidden" name="htmx_form_save_rooms_order_field" id="htmx_form_save_rooms_order_field" value="">
+    </form>
+
+    <script>
+    $(document).ready(() => {
+        console.log("Attaching rooms sortable.");
+        $("#rooms_list").sortable({
+        handle: ".sortable-handle",
+        update: (event, ui) => {
+            $(".room-row").each((index, element) => {
+            // 'update' called ie. the order of elements in the DOM has changed. Update border fields and send HTMX request for new
+            var room_pages = {"rooms": [
+                // Append rooms in the order they are displayed.
+            ]}
+            $(".room-row").each((index, element) => {
+                room_pages.rooms.push($(element).data('room-id'));
+            })
+            $("#htmx_form_save_rooms_order_field").val(JSON.stringify(room_pages)); // Clear any existin value
+
+            htmx.trigger(document.getElementById('htmx_form_save_rooms_order'), "reordered", {});
+            });
+        }
+        });
+    });
+    </script>
+</div>

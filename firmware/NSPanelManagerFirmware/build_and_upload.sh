@@ -54,7 +54,7 @@ fi
 # Upload firmware and LittleFS to NSPanelManager
 curl http://"$NSPanelManager_address":"$NSPanelManager_port"/save_new_firmware -F firmware=@.pio/build/esp32dev/firmware.bin
 firmware_status="$?"
-curl http://"$NSPanelManager_address":"$NSPanelManager_port"/save_new_data_file -F data_upload_file_name=@.pio/build/esp32dev/littlefs.bin
+curl http://"$NSPanelManager_address":"$NSPanelManager_port"/save_new_data_file -F data_file=@.pio/build/esp32dev/littlefs.bin
 data_file_status="$?"
 
 /bin/bash ./build_image.sh

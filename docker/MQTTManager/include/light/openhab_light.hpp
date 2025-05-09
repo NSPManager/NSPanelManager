@@ -2,7 +2,7 @@
 #define MQTT_MANAGER_OPENHAB_LIGHT
 
 #include "light.hpp"
-#include "openhab_manager/openhab_manager.hpp"
+#include "protobuf_general.pb.h"
 
 enum MQTT_MANAGER_OPENHAB_CONTROL_MODE {
   DIMMER,
@@ -11,7 +11,7 @@ enum MQTT_MANAGER_OPENHAB_CONTROL_MODE {
 
 class OpenhabLight : public Light {
 public:
-  OpenhabLight(nlohmann::json &init_data);
+  OpenhabLight(uint32_t light_id);
 
   /**
    * Go through the requested states and compare them with the current states.
@@ -27,6 +27,8 @@ public:
   ~OpenhabLight();
 
 private:
+  // Mutex to only allow one thread to access the openhab items at a time
+  std::mutex _openhab_items_mutex;
   std::string _openhab_name;
   MQTT_MANAGER_OPENHAB_CONTROL_MODE _openhab_control_mode;
   std::string _openhab_on_off_item;            // Controls the item for on/off functioanlity

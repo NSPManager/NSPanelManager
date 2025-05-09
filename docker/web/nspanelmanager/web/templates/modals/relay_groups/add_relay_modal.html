@@ -1,0 +1,68 @@
+<dialog id="modal" class="modal" hx-swap-oob="true">
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        <span class="text-lg">Assign relay to relay group</span>
+
+        <form hx-post="{% url 'htmx_add_relay_to_relay_group' relay_group_id %}">
+            {% csrf_token %}
+            <!-- Select NSPanel -->
+            <div class="mt-4">
+              <label for="nspanel_id" class="block mb-2 text-sm font-medium">Default room</label>
+              <div class="flex flex-row-reverse">
+                <select name="nspanel_id" id="nspanel_id" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id" required>
+                  {% for nspanel in nspanels %}
+                    <option value="{{ nspanel.id }}">{{ nspanel.friendly_name }}</option>
+                  {% endfor %}
+                </select>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/room_id:border-accent">
+                  <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <title>NSPanel</title>
+                    <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+                  </svg>
+                </span>
+              </div>
+            </div>
+
+            <!-- Relay selection -->
+            <div class="flex-auto mt-4">
+              <h3 class="block mb-2 text-sm font-medium">Relay</h3>
+              <ul class="flex items-center w-full text-sm font-medium border border-neutral rounded-lg bg-base-300">
+                <li class="w-full sm:border-b-0 sm:border-r border-neutral">
+                  <div class="flex items-center ps-3">
+                    <input id="relay1" type="radio" name="relay_selection" value="1" class="w-4 h-4 radio radio-accent" required>
+                    <label for="relay1" class="w-full py-3 ms-2 text-sm font-medium">Relay 1 (left)</label>
+                  </div>
+                </li>
+                <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                  <div class="flex items-center ps-3">
+                    <input id="relay2" type="radio" name="relay_selection" value="2" class="w-4 h-4 radio radio-accent" required>
+                    <label for="relay2" class="w-full py-3 ms-2 text-sm font-medium">Relay 2 (right)</label>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="btn btn-success mt-2">Create</button>
+            </div>
+        </form>
+    </div>
+
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+
+    <script>
+      htmx.on("htmx:afterSwap", (e) => {
+        if(e.detail.elt.id == "modal") {
+          modal.showModal();
+        }
+      });
+    </script>
+</dialog>

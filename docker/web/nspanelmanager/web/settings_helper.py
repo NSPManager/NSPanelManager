@@ -1,12 +1,66 @@
 from .models import Settings, NSPanelSettings, NSPanel
+import logging
 
+default_settings = {
+    "button_long_press_time": 5000,
+    "clock_us_style": False,
+    "color_temp_max": 6000,
+    "color_temp_min": 2000,
+    "theme": "default",
+    "date_format": "%a %d/%m %Y",
+    "home_assistant_address": "",
+    "home_assistant_token": "",
+    "location_latitude": "",
+    "location_longitude": "",
+    "manager_address": "",
+    "manager_port": "",
+    "max_live_log_messages": 10,
+    "max_log_buffer_size": "10",
+    "min_button_push_time": 50,
+    "mqttmanager_log_level": "debug",
+    "mqtt_password": "",
+    "mqtt_port": 1883,
+    "mqtt_server": "",
+    "mqtt_username": "",
+    "openhab_address": "",
+    "openhab_token": "",
+    "openhab_brightness_channel_max": 255,
+    "openhab_brightness_channel_min": 0,
+    "openhab_brightness_channel_name": "",
+    "openhab_color_temp_channel_name": "",
+    "openhab_rgb_channel_name": "",
+    "outside_temp_sensor_entity_id": "",
+    "outside_temp_sensor_provider": "",
+    "weather_precipitation_format": "mm",
+    "raise_to_100_light_level": 95,
+    "all_rooms_status_backoff_time": 250,
+    "reverse_color_temp": False,
+    "screen_dim_level": 100,
+    "screensaver_activation_timeout": 30000,
+    "screensaver_dim_level": 1,
+    "screensaver_mode": "with_background",
+    "show_screensaver_inside_temperature": "True",
+    "show_screensaver_outside_temperature": "True",
+    "special_mode_release_time": 5000,
+    "special_mode_trigger_time": 300,
+    "turn_on_behavior": "color_temp",
+    "use_fahrenheit": "False",
+    "weather_update_interval": 10,
+    "weather_wind_speed_format": "kmh",
+    "mqtt_wait_time": 1000,
+    "optimistic_mode": True,
+    "light_turn_on_brightness": 50,
+}
 
-def get_setting_with_default(name, default):
+def get_setting_with_default(name) -> str:
     objects = Settings.objects.filter(name=name)
     if objects.count() > 0:
-        return objects.first().value
+        return str(objects.first().value)
+    elif name in default_settings:
+        return str(default_settings[name])
     else:
-        return default
+        logging.error(F"Failed to get default setting for key '{name}'. No default value for setting exists.")
+        return ""
 
 def does_setting_exist(name):
     objects = Settings.objects.filter(name=name)
@@ -18,6 +72,7 @@ def set_setting_value(name, value):
     })
 
 
+# TODO: Convert so that it ALWAYS return str so that it's easy to handle the same everywhere
 def get_nspanel_setting_with_default(nspanel_id, name, default):
     panel = NSPanel.objects.filter(id=nspanel_id)
     if panel.count() > 0:

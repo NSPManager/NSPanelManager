@@ -1,25 +1,46 @@
 #ifndef MQTT_MANAGER_LIGHT
 #define MQTT_MANAGER_LIGHT
 
-#include "room/room.hpp"
+#include "protobuf_general.pb.h"
+#include "protobuf_nspanel.pb.h"
+#include "protobuf_nspanel_entity.pb.h"
 #include <boost/signals2.hpp>
+#include <chrono>
 #include <cstdint>
 #include <entity/entity.hpp>
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
+#include <string>
+#include <string_view>
 
 enum MQTT_MANAGER_LIGHT_MODE {
   DEFAULT, // Normal, no special case.
   RGB      // Send updated values as HSV and not brightness and/or color_temperature.
 };
 
+enum MQTT_MANAGER_LIGHT_TYPE {
+  CEILING,
+  TABLE
+};
+
 class Light : public MqttManagerEntity {
 public:
-  Light(nlohmann::json &init_data);
+  Light(uint32_t light_id);
 
   /**
-   * Update the config of the light to reflect the new settings
+   * Update the config of the light from DB.
    */
-  void update_config(nlohmann::json &config);
+  void reload_config();
+
+  /**
+   * Get the room ID of the light.
+   */
+  uint16_t get_room_id();
+
+  /**
+   * Get light type (ceiling or table)
+   */
+  MQTT_MANAGER_LIGHT_TYPE get_light_type();
 
   /**
    * Turn on the light
@@ -105,10 +126,30 @@ public:
   std::string get_name();
 
   /**
+   * Is this light controlled from the NSPanel main page?
+   */
+  bool get_controlled_from_main_page();
+
+  /**
+   * Get the ID of the entity page this entity is placed on.
+   */
+  uint32_t get_entity_page_id();
+
+  /**
+   * Get the slot in which this entity is placed on the given entity page.
+   */
+  uint8_t get_entity_page_slot();
+
+  /**
    * Go through the requested states and compare them with the current states.
    * If there is any difference, send the updated values to the controller.
    */
   virtual void send_state_update_to_controller() = 0;
+
+  /**
+   * Send the current NSPanelEntityState out to the NSPanel.
+   */
+  void send_state_update_to_nspanel();
 
   /**
    * Get the current control mode of the light.
@@ -116,9 +157,19 @@ public:
   MQTT_MANAGER_LIGHT_MODE get_mode();
 
   /**
-   * Post init, attach to room.
+   * Is the light dimmable?
    */
-  void post_init();
+  bool can_dim();
+
+  /**
+   * Can the light change color temperature?
+   */
+  bool can_color_temperature();
+
+  /**
+   * Can the light do RGB colors?
+   */
+  bool can_rgb();
 
   /**
    * Attach a callback for when the light is destroyed
@@ -135,8 +186,19 @@ public:
    */
   void reset_requests();
 
+  /**
+   * Callback for NSPanelMQTTManagerCommand protobuf received from MQTT
+   */
+  void command_callback(NSPanelMQTTManagerCommand &command);
+
   MQTT_MANAGER_ENTITY_TYPE get_type();
   MQTT_MANAGER_ENTITY_CONTROLLER get_controller();
+  bool can_toggle();
+  void toggle();
+  std::string_view get_icon();
+  uint16_t get_icon_color();
+  uint16_t get_icon_active_color();
+  std::string get_mqtt_state_topic();
 
   ~Light();
 
@@ -144,8 +206,10 @@ protected:
   uint _id;
   std::string _name;
   uint16_t _room_id;
-  Room *_room;
   MQTT_MANAGER_ENTITY_CONTROLLER _controller;
+  bool _controlled_from_main_page;
+  uint32_t _entity_page_id;
+  uint8_t _entity_page_slot;
 
   bool _can_dim;
   bool _can_color_temperature;
@@ -157,18 +221,15 @@ protected:
   uint16_t _current_hue;
   uint8_t _current_saturation;
   MQTT_MANAGER_LIGHT_MODE _current_mode;
+  MQTT_MANAGER_LIGHT_TYPE _light_type;
 
   bool _requested_state;
   uint8_t _requested_brightness;
   uint16_t _requested_color_temperature;
   uint16_t _requested_hue;
   uint8_t _requested_saturation;
+  NSPanelEntityState _last_entity_state;
   MQTT_MANAGER_LIGHT_MODE _requested_mode;
-
-  std::string _mqtt_brightness_topic;
-  std::string _mqtt_kelvin_topic;
-  std::string _mqtt_hue_topic;
-  std::string _mqtt_saturation_topic;
 
   boost::signals2::signal<void(Light *)> _light_destroyed_callbacks;
 };

@@ -3,43 +3,48 @@
 #include <MqttLog.hpp>
 #include <MqttManager.hpp>
 #include <NSPMConfig.h>
+#include <ReadBufferFixedSize.h>
 #include <WiFi.h>
 #include <esp_task_wdt.h>
 
 void MqttManager::init() {
-  MqttManager::_wifiClient = new WiFiClient();                            // Create WifiClient for MQTT Client
-  MqttManager::_mqttClient = new PubSubClient(*MqttManager::_wifiClient); // Create MQTT Client used to communicate with MQTT
-  MqttManager::_mqttClient->setBufferSize(2048);
-  MqttManager::_mqttClient->setCallback(&MqttManager::_mqttClientCallback);
-  if (MqttLog::instance->getLogLevel() == MqttLogLevel::Debug) {
-    MqttManager::setBufferSize(32);
-  } else {
-    MqttManager::setBufferSize(8);
-  }
+  MqttManager::_wifiClient = new WiFiClient();                           // Create WifiClient for MQTT Client
+  MqttManager::mqttClient = new PubSubClient(*MqttManager::_wifiClient); // Create MQTT Client used to communicate with MQTT
+  MqttManager::mqttClient->setBufferSize(5000);
+  MqttManager::mqttClient->setCallback(&MqttManager::_mqttClientCallback);
+  MqttManager::setBufferSize(32);
 }
 
 void MqttManager::start() {
   if (!MqttManager::_hasStarted) {
-    MqttManager::_wifiClient = new WiFiClient();                            // Create WifiClient for MQTT Client
-    MqttManager::_mqttClient = new PubSubClient(*MqttManager::_wifiClient); // Create MQTT Client used to communicate with MQTT
-    MqttManager::_mqttClient->setBufferSize(5000);
-    MqttManager::_mqttClient->setCallback(&MqttManager::_mqttClientCallback);
-    xTaskCreatePinnedToCore(MqttManager::_taskMqttRunTask, "taskRunMQTT", 50000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+    MqttManager::_hasStarted = true;
+    xTaskCreatePinnedToCore(MqttManager::_taskMqttRunTask, "taskRunMQTT", 10000, NULL, 4, &MqttManager::_taskMqttRunTaskHandle, CONFIG_ARDUINO_RUNNING_CORE);
+    xTaskCreatePinnedToCore(MqttManager::_taskHandleMqttMessageReceiveQueue, "taskHandleMQTTRecvQueue", 10000, NULL, 2, &MqttManager::_taskHandleMqttMessageReceiveQueueHandle, CONFIG_ARDUINO_RUNNING_CORE);
   }
 }
 
 void MqttManager::setBufferSize(uint8_t size) {
   // WARNING! Calling this function will create a new buffer so all messages
   // currently in the buffer will be lost.
-  MqttManager::_sendQueue = xQueueCreate(size, sizeof(PublishMessage *));
+  MqttManager::_sendQueue = xQueueCreate(size, sizeof(MQTTMessage *));
+  MqttManager::_receiveQueue = xQueueCreate(size, sizeof(MQTTMessage *));
 
   if (MqttManager::_sendQueue == NULL) {
-    Serial.println("Failed to create queue!");
+    Serial.println("Failed to create send queue!");
   } else {
     Serial.print("Created _sendQueue of size: ");
     Serial.print(size);
     Serial.print(" * ");
-    Serial.println(sizeof(PublishMessage));
+    Serial.println(sizeof(MQTTMessage));
+  }
+
+  if (MqttManager::_receiveQueue == NULL) {
+    Serial.println("Failed to create receive queue!");
+  } else {
+    Serial.print("Created _receiveQueue of size: ");
+    Serial.print(size);
+    Serial.print(" * ");
+    Serial.println(sizeof(MQTTMessage));
   }
 }
 
@@ -47,7 +52,7 @@ bool MqttManager::connected() {
   if (!MqttManager::_hasStarted) {
     return false;
   } else {
-    return MqttManager::_mqttClient->connected();
+    return MqttManager::mqttClient->connected();
   }
 }
 
@@ -76,15 +81,22 @@ bool MqttManager::publish(std::string &topic, std::string &message) {
   return MqttManager::publish(topic, message, false);
 }
 
-// This is the only function that addes the message to the queue
+// This is the only function that adds the message to the queue
 bool MqttManager::publish(std::string &topic, std::string &message, bool retain) {
+  if (MqttManager::_hasStarted) {
+    bool result = MqttManager::mqttClient->publish(topic.c_str(), message.c_str(), retain);
+    xTaskNotifyGive(MqttManager::_taskMqttRunTaskHandle);
+    return result;
+  }
+  return false;
+
   // Verify that a queue exists, else stop processing
   if (MqttManager::_sendQueue == NULL) {
     Serial.println("ERROR: No MQTT send queue!");
     return false;
   }
 
-  PublishMessage *msg = new PublishMessage;
+  MQTTMessage *msg = new MQTTMessage;
   msg->topic = topic;
   msg->data = message;
   msg->retain = retain;
@@ -107,7 +119,7 @@ bool MqttManager::publish(const char *topic, const char *message, bool retain) {
   return MqttManager::publish(str_topic, str_message, retain);
 }
 
-void MqttManager::subscribeToTopic(const char *topic, std::function<void(char *topic, byte *payload, unsigned int length)> callback) {
+void MqttManager::subscribeToTopic(const char *topic, std::function<void(MQTTMessage *message)> callback) {
   LOG_TRACE("Adding topic ", topic, " to subscribe list.");
   SubscribeTopic tpc;
   tpc.topic = std::string(topic);
@@ -126,26 +138,56 @@ void MqttManager::subscribeToTopic(SubscribeTopic &topic) {
 void MqttManager::_subscribeToTopic(SubscribeTopic &topic) {
   if (MqttManager::connected()) {
     LOG_TRACE("Subscribing to topic ", topic.topic.c_str());
-    MqttManager::_mqttClient->subscribe(topic.topic.c_str());
-    MqttManager::_mqttClient->loop();
+    MqttManager::mqttClient->subscribe(topic.topic.c_str());
+    xTaskNotifyGive(MqttManager::_taskMqttRunTaskHandle);
   }
 }
 
 void MqttManager::_subscribeToAllRegisteredTopics() {
   for (SubscribeTopic &topic : MqttManager::_subscribeTopics) {
     MqttManager::_subscribeToTopic(topic);
-    vTaskDelay(50 / portTICK_PERIOD_MS); // Wait 50ms between each subscribe to allow for processing of any retained message in the topic
+    vTaskDelay(200 / portTICK_PERIOD_MS); // Wait 50ms between each subscribe to allow for processing of any retained message in the topic
   }
 }
 
 void MqttManager::_mqttClientCallback(char *topic, byte *payload, unsigned int length) {
-  auto it = MqttManager::_subscribeTopics.cbegin();
-  while (it != MqttManager::_subscribeTopics.cend()) {
-    if ((*it).topic.compare(topic) == 0) {
-      (*it).callback(topic, payload, length);
-      break;
+  MQTTMessage *received_message = new MQTTMessage;
+  received_message->topic = topic;
+  received_message->data = std::string((char *)payload, length);
+  received_message->retain = false;
+  if (xQueueSendToBack(MqttManager::_receiveQueue, (void *)&received_message, 250 / portTICK_PERIOD_MS) == pdTRUE) {
+    xTaskNotifyGive(MqttManager::_taskHandleMqttMessageReceiveQueueHandle);
+  } else {
+    delete received_message;
+    LOG_ERROR("Failed to add message to receive queue");
+  }
+}
+
+void MqttManager::_taskHandleMqttMessageReceiveQueue(void *param) {
+  for (;;) {
+    MQTTMessage *message = nullptr;
+    try {
+      if (ulTaskNotifyTake(true, portMAX_DELAY) == pdTRUE) {
+        if (xQueueReceive(MqttManager::_receiveQueue, &message, 100 / portTICK_PERIOD_MS)) {
+          for (int i = 0; i < MqttManager::_subscribeTopics.size(); i++) {
+            if (MqttManager::_subscribeTopics[i].topic.compare(message->topic) == 0) {
+              MqttManager::_subscribeTopics[i].callback(message);
+            }
+          }
+          yield();
+          delete message; // Callback has completed. Delete stored message.
+          message = nullptr;
+        }
+      } else {
+        vTaskDelay(50 / portTICK_PERIOD_MS); // We failed to receive a message for whatever reason. Wait to not overload CPU of call itself failed.
+      }
+    } catch (std::exception &ex) {
+      LOG_ERROR("Got exception while trying to process message in queue. Will delete message and continue with others.");
+      LOG_ERROR("Error: ", ex.what());
+      if (message != nullptr) {
+        delete message;
+      }
     }
-    it++;
   }
 }
 
@@ -158,9 +200,9 @@ void MqttManager::_sendMqttMessage() {
 
   if (MqttManager::connected()) {
     if (uxQueueMessagesWaiting(MqttManager::_sendQueue) > 0) {
-      PublishMessage *msg;
+      MQTTMessage *msg;
       if (xQueuePeek(MqttManager::_sendQueue, &(msg), 5 / portTICK_PERIOD_MS)) {
-        if (MqttManager::_mqttClient->publish(msg->topic.c_str(), msg->data.c_str(), msg->retain)) {
+        if (MqttManager::mqttClient->publish(msg->topic.c_str(), (uint8_t *)msg->data.c_str(), msg->data.length(), msg->retain)) {
           // Message was successfully sent, pop item from queue
           if (xQueueReceive(MqttManager::_sendQueue, &(msg), 100 / portTICK_PERIOD_MS)) {
             delete msg;
@@ -177,12 +219,12 @@ void MqttManager::_taskMqttRunTask(void *param) {
     vTaskDelete(NULL);
   }
 
-  MqttManager::_hasStarted = true;
   for (;;) {
+    // Wait for notification to start processing OR 20ms
+    ulTaskNotifyTake(pdTRUE, 250 / portTICK_PERIOD_MS);
     if (MqttManager::connected()) {
-      MqttManager::_sendMqttMessage();
-      MqttManager::_mqttClient->loop();
-      vTaskDelay(25 / portTICK_PERIOD_MS); // Wait 25ms between each tick of MQTT client
+      // MqttManager::_sendMqttMessage();
+      MqttManager::mqttClient->loop();
     } else {
       if (MqttManager::_connect()) {
         MqttManager::_subscribeToAllRegisteredTopics();
@@ -195,13 +237,11 @@ void MqttManager::_taskMqttRunTask(void *param) {
 
 bool MqttManager::_connect() {
   if (!MqttManager::_hasStarted) {
-    LOG_DEBUG("MQTT Manager has not yet started. Will not try to connect to MQTT Server.");
     return false;
   }
 
   // Stop processing if not connected to WiFi
   if (!WiFi.isConnected()) {
-    LOG_DEBUG("WiFi is not yet connected. Will not try to connect to MQTT Server.");
     return false;
   }
 
@@ -227,14 +267,13 @@ bool MqttManager::_connect() {
 
   LOG_INFO("Connecting to MQTT server ", NSPMConfig::instance->mqtt_server.c_str());
   Serial.print("Connecting to MQTT server ");
-  MqttManager::_mqttClient->setSocketTimeout(5); // Set tighter timeout. Default: 15 seconds.
+  MqttManager::mqttClient->setSocketTimeout(5); // Set tighter timeout. Default: 15 seconds.
   Serial.println(NSPMConfig::instance->mqtt_server.c_str());
-  MqttManager::_mqttClient->setServer(NSPMConfig::instance->mqtt_server.c_str(), NSPMConfig::instance->mqtt_port);
-  LOG_DEBUG("Will try to connect to MQTT Server '", NSPMConfig::instance->mqtt_server.c_str(), "' as user '", NSPMConfig::instance->mqtt_username.c_str(), "' with password '", NSPMConfig::instance->mqtt_password.c_str(), "'.");
-  MqttManager::_mqttClient->connect(mqtt_device_name.c_str(), NSPMConfig::instance->mqtt_username.c_str(), NSPMConfig::instance->mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, true, offline_message_buffer);
+  MqttManager::mqttClient->setServer(NSPMConfig::instance->mqtt_server.c_str(), NSPMConfig::instance->mqtt_port);
+  MqttManager::mqttClient->connect(mqtt_device_name.c_str(), NSPMConfig::instance->mqtt_username.c_str(), NSPMConfig::instance->mqtt_password.c_str(), NSPMConfig::instance->mqtt_availability_topic.c_str(), 1, true, offline_message_buffer);
   vTaskDelay(1000 / portTICK_PERIOD_MS);
   if (MqttManager::connected()) {
-    while (!MqttManager::_mqttClient->publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), online_message_buffer, true)) {
+    while (!MqttManager::mqttClient->publish(NSPMConfig::instance->mqtt_availability_topic.c_str(), online_message_buffer, true)) {
       LOG_ERROR("Failed to send online/offline message");
       vTaskDelay(250 / portTICK_PERIOD_MS);
     }

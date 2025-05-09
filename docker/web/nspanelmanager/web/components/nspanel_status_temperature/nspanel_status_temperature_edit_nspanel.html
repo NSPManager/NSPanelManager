@@ -1,0 +1,41 @@
+<script type="module">
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
+
+  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+    // Update relevant values for the status header from the bundled data in the status update event
+    var element = document.getElementById(`nspanel-temperature-status-${event.detail.event_data.id}`);
+    element.state = event.detail.event_data.state;
+    element.temperature = Math.round(event.detail.event_data.temperature*10)/10;
+  });
+
+  define({
+    tag: "nspanel-temperature-status",
+    nspanel_id: '',
+    state: '',
+    temperature: '',
+    temperature_unit: '',
+    render: ({id, state, temperature, temperature_unit}) => {
+      if (state == "offline" || state == "unknown") {
+        return html`
+           <div class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-thermometer"></i>
+                </span>
+                Temp: <span id="temperature-${nspanel_id}">?${temperature_unit}</span>
+            </div>
+        `;
+      } else {
+        return html`
+            <div class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-thermometer"></i>
+                </span>
+                Temp: <span id="temperature-${nspanel_id}">${temperature}${temperature_unit}</span>
+            </div>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-temperature-status id="nspanel-temperature-status-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}" temperature="{{ temperature|floatformat:1 }}" temperature_unit="{{ temperature_unit }}"></nspanel-temperature-status>

@@ -2,6 +2,7 @@
 #include "freertos/portmacro.h"
 #include <Arduino.h>
 #include <ButtonManager.hpp>
+#include <FreeRTOSConfig.h>
 #include <HTTPClient.h>
 #include <InterfaceManager.hpp>
 #include <LittleFS.h>
@@ -12,11 +13,14 @@
 #include <PageManager.hpp>
 #include <PubSubClient.h>
 #include <TftDefines.h>
+#include <WarningManager.hpp>
 #include <WebManager.hpp>
 #include <WiFi.h>
+#include <WriteBufferFixedSize.h>
 #include <cmath>
 #include <math.h>
 #include <nspm-bin-version.h>
+#include <protobuf_defines.h>
 #include <string>
 
 NSPanel nspanel;
@@ -27,46 +31,45 @@ WebManager webMan;
 TaskHandle_t _taskWifiAndMqttManager;
 WiFiClient espClient;
 MqttManager mqttManager;
+uint64_t last_print = 0;
 
 unsigned long lastRegistrationRequest = 0;
 unsigned long lastStatusReport = 0;
 unsigned long lastWiFiconnected = 0;
+uint8_t lastUpdateProgress = 0;
+PROTOBUF_NSPANEL_STATUS_REPORT status_report;
 // Temperature sensing variables:
-#define READ_TEMP_SENSE_DELAY_MS 1000
 #define NUM_TEMP_SENSE_AVERAGE 30
 float averageTemperature = 0;
 uint8_t numberOfTempSamples = 0;
 uint8_t temperatureSlotNumber = 0;
 float tempSensorReadings[NUM_TEMP_SENSE_AVERAGE];
 
-void readNTCTemperatureTask(void *param) {
-  for (;;) {
-    float temperature = analogRead(38);
-    temperature = temperature * 3.3 / 4095.0;
-    temperature = 11200 * temperature / (3.3 - temperature);
-    temperature = 1 / (1 / 298.15 + log(temperature / 10000) / 3950);
-    temperature = temperature - 273.15; // Celsius
+void readNTCTemperature() {
+  float temperature = analogRead(38);
+  temperature = temperature * 3.3 / 4095.0;
+  temperature = 11200 * temperature / (3.3 - temperature);
+  temperature = 1 / (1 / 298.15 + log(temperature / 10000) / 3950);
+  temperature = temperature - 273.15; // Celsius
 
-    if (NSPMConfig::instance->use_fahrenheit) {
-      temperature = (temperature * 9 / 5) + 32;
-    }
-    tempSensorReadings[temperatureSlotNumber] = temperature + NSPMConfig::instance->temperature_calibration;
-    temperatureSlotNumber++;
-    if (temperatureSlotNumber >= NUM_TEMP_SENSE_AVERAGE) {
-      temperatureSlotNumber = 0;
-    }
-    if (numberOfTempSamples < temperatureSlotNumber) {
-      numberOfTempSamples = temperatureSlotNumber;
-    }
-
-    float tempTotal = 0;
-    for (int i = 0; i < numberOfTempSamples; i++) {
-      tempTotal += tempSensorReadings[i];
-    }
-    int averageTempInt = (tempTotal / numberOfTempSamples) * 10;
-    averageTemperature = float(std::round(averageTempInt)) / 10;
-    vTaskDelay(READ_TEMP_SENSE_DELAY_MS / portTICK_PERIOD_MS);
+  if (NSPMConfig::instance->use_fahrenheit) {
+    temperature = (temperature * 9 / 5) + 32;
   }
+  tempSensorReadings[temperatureSlotNumber] = temperature + NSPMConfig::instance->temperature_calibration;
+  temperatureSlotNumber++;
+  if (temperatureSlotNumber >= NUM_TEMP_SENSE_AVERAGE) {
+    temperatureSlotNumber = 0;
+  }
+  if (numberOfTempSamples < temperatureSlotNumber) {
+    numberOfTempSamples = temperatureSlotNumber;
+  }
+
+  float tempTotal = 0;
+  for (int i = 0; i < numberOfTempSamples; i++) {
+    tempTotal += tempSensorReadings[i];
+  }
+  int averageTempInt = (tempTotal / numberOfTempSamples) * 10;
+  averageTemperature = float(std::round(averageTempInt)) / 10;
 }
 
 void sendMqttManagerRegistrationRequest() {
@@ -253,17 +256,16 @@ void taskManageWifiAndMqtt(void *param) {
         LOG_ERROR("WiFi not connected!");
         Serial.println("WiFi not connected!");
         WiFi.setHostname(config.wifi_hostname.c_str());
+        WiFi.begin(config.wifi_ssid.c_str(), config.wifi_psk.c_str());
+        WiFi.setAutoConnect(true);
         WiFi.mode(WIFI_STA);
         for (uint8_t wifi_connect_tries = 0; wifi_connect_tries < 10 && !WiFi.isConnected(); wifi_connect_tries++) {
           Serial.print("Connecting to WiFi ");
           Serial.println(config.wifi_ssid.c_str());
-          WiFi.begin(config.wifi_ssid.c_str(), config.wifi_psk.c_str());
-          vTaskDelay(2000 / portTICK_PERIOD_MS);
           if (!WiFi.isConnected()) {
-            LOG_ERROR("Failed to connect to WiFi. Will try again in 5 seconds");
-            Serial.println("Failed to connect to WiFi. Will try again in 5 seconds");
-            vTaskDelay(5000 / portTICK_PERIOD_MS);
+            LOG_ERROR("Failed to connect to WiFi. Will try again.");
           }
+          vTaskDelay(2000 / portTICK_PERIOD_MS);
         }
 
         if (WiFi.isConnected()) {
@@ -288,39 +290,52 @@ void taskManageWifiAndMqtt(void *param) {
           sendMqttManagerRegistrationRequest();
         }
         bool force_send_mqtt_update = false;
-        JsonDocument *status_report_doc = new JsonDocument;
+        // NSPanelStatusReport report = NSPanelStatusReport_init_zero;
+
         if (NSPanel::instance->getUpdateState()) {
           force_send_mqtt_update = true;
-          (*status_report_doc)["state"] = "updating_tft";
-          (*status_report_doc)["progress"] = NSPanel::instance->getUpdateProgress();
+          status_report.set_nspanel_state(PROTOBUF_NSPANEL_STATUS_REPORT::state::UPDATING_TFT);
+          status_report.set_update_progress(NSPanel::instance->getUpdateProgress());
         } else if (WebManager::getState() == WebManagerState::UPDATING_FIRMWARE) {
           force_send_mqtt_update = true;
-          (*status_report_doc)["state"] = "updating_fw";
-          (*status_report_doc)["progress"] = WebManager::getUpdateProgress();
+          status_report.set_nspanel_state(PROTOBUF_NSPANEL_STATUS_REPORT::state::UPDATING_FIRMWARE);
+          status_report.set_update_progress(WebManager::getUpdateProgress());
         } else if (WebManager::getState() == WebManagerState::UPDATING_LITTLEFS) {
           force_send_mqtt_update = true;
-          (*status_report_doc)["state"] = "updating_fs";
-          (*status_report_doc)["progress"] = WebManager::getUpdateProgress();
+          status_report.set_nspanel_state(PROTOBUF_NSPANEL_STATUS_REPORT::state::UPDATING_LITTLEFS);
+          status_report.set_update_progress(WebManager::getUpdateProgress());
+        } else {
+          status_report.set_nspanel_state(PROTOBUF_NSPANEL_STATUS_REPORT::state::ONLINE);
+          status_report.set_update_progress(0);
         }
-        // Online/Offline state is handled in /status topic managed by MQTTManager.
 
-        if (force_send_mqtt_update || millis() >= lastStatusReport + 30000) {
+        if ((force_send_mqtt_update && lastUpdateProgress != status_report.update_progress()) || millis() >= lastStatusReport + 30000) {
           char display_temp[7]; // Displayed temperature should NEVER have to be more than 7 chars. Example, 1000.0 is 6 chars, -100.0 is 6 chars. Neither should happen!
           std::snprintf(display_temp, sizeof(display_temp), "%.1f", averageTemperature);
-          (*status_report_doc)["rssi"] = WiFi.RSSI();
-          (*status_report_doc)["heap_used_pct"] = round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100);
-          (*status_report_doc)["mac"] = WiFi.macAddress();
-          (*status_report_doc)["temperature"] = display_temp;
-          (*status_report_doc)["ip"] = WiFi.localIP().toString();
+          std::string ip_address = WiFi.localIP().toString().c_str();
+          std::string mac_address = WiFi.macAddress().c_str();
 
-          std::string warning_string = NSPanel::instance->getWarnings();
-          (*status_report_doc)["warnings"] = warning_string.c_str();
+          status_report.set_rssi(WiFi.RSSI());
+          status_report.set_heap_used_pct(round((float(ESP.getFreeHeap()) / float(ESP.getHeapSize())) * 100));
+          status_report.mutable_ip_address().set((char *)ip_address.c_str());
+          status_report.mutable_mac_address().set((char *)mac_address.c_str());
+          status_report.mutable_temperature().set(display_temp);
 
+          for (int i = 0; i < WarningManager::get_warnings().size(); i++) {
+            status_report.add_warnings(WarningManager::get_warnings()[i]);
+          }
+          LOG_TRACE("Loaded ", WarningManager::get_warnings().size(), " warnings.");
+
+          EmbeddedProto::WriteBufferFixedSize<PROTOBUF_NSPANEL_STATUS_MAX_SIZE> write_buffer;
+          if (status_report.serialize(write_buffer) != EmbeddedProto::Error::NO_ERRORS) {
+            LOG_ERROR("Failed to serialize status report! Will cancel.");
+            return;
+          }
+
+          MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, (char *)write_buffer.get_data(), true);
+
+          // Send temperature update
           MqttManager::publish(NSPMConfig::instance->mqtt_panel_temperature_topic, display_temp);
-
-          char buffer[512];
-          uint json_length = serializeJson(*status_report_doc, buffer);
-          MqttManager::publish(NSPMConfig::instance->mqtt_panel_status_topic, buffer, true);
 
           // std::string display_temp = std::to_string((int)round(temperature));
           std::string display_temp_display = display_temp;
@@ -329,13 +344,13 @@ void taskManageWifiAndMqtt(void *param) {
 
           lastStatusReport = millis();
         }
-        delete status_report_doc;
       }
 
       if (WiFi.isConnected()) {
         lastWiFiconnected = millis();
       }
       yield();
+      readNTCTemperature();
       vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
   } else {
@@ -346,7 +361,7 @@ void taskManageWifiAndMqtt(void *param) {
 
 void setup() {
   Serial.begin(115200);
-  Serial.print("Starting NSPanel Manager firmware v. ");
+  Serial.print("Starting NSPanel Manager firmware v");
   Serial.println(NSPanelManagerFirmwareVersion);
   vTaskDelay(250 / portTICK_PERIOD_MS);
   // Load config if any, and if it fails. Factory reset!
@@ -354,13 +369,13 @@ void setup() {
     config.factoryReset();
   }
 
+  mqttManager.init();
+
   // Setup logging
-  logger.init(&(NSPMConfig::instance->mqtt_log_topic));
+  logger.init(&(NSPMConfig::instance->mqtt_log_topic), &mqttManager.mqttClient);
   logger.setLogLevel(static_cast<MqttLogLevel>(config.logging_level));
 
-  mqttManager.init();
   ButtonManager::init();
-  xTaskCreatePinnedToCore(readNTCTemperatureTask, "readTempTask", 5000, NULL, 0, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 
   vTaskDelay(250 / portTICK_PERIOD_MS);
   LOG_INFO("Initializing NSPanel communication");

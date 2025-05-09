@@ -4,8 +4,8 @@ on:
   release:
     types: [published]
     branches:
-      - 'main'
-      - 'beta'
+      - "main"
+      - "beta"
 
 jobs:
   prepare:
@@ -18,17 +18,11 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
-      # - uses: xu-cheng/latex-action@v3
-      #   name: "Update manual"
-      #   with:
-      #     working_directory: docs/tex/
-      #     root_file: |
-      #       manual.tex
       - run: |
           sed -i "s/^version: [0-9A-Za-z\.\-_]\+/version: ${{ github.ref_name }}/g" docker/config.yaml
           cp docker/web/nspanelmanager/web/templates/footer_template.html docker/web/nspanelmanager/web/templates/footer.html
-          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/footer.html
-          cp docs/tex/manual.pdf docker/web/nspanelmanager/manual.pdf
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
       - name: Get branch name
         shell: bash
         id: image_name
@@ -83,7 +77,7 @@ jobs:
         with:
           ref: ${{ steps.image_name.outputs.branch }}
       - name: Publish
-        uses: home-assistant/builder@2024.03.5
+        uses: home-assistant/builder@2025.03.0
         with:
           args: |
             --i386 \
@@ -127,7 +121,7 @@ jobs:
         with:
           ref: ${{ steps.image_name.outputs.branch }}
       - name: Publish
-        uses: home-assistant/builder@2024.03.5
+        uses: home-assistant/builder@2025.03.0
         with:
           args: |
             --amd64 \
@@ -171,7 +165,7 @@ jobs:
         with:
           ref: ${{ steps.image_name.outputs.branch }}
       - name: Publish
-        uses: home-assistant/builder@2024.03.5
+        uses: home-assistant/builder@2025.03.0
         with:
           args: |
             --armhf \
@@ -215,7 +209,7 @@ jobs:
         with:
           ref: ${{ steps.image_name.outputs.branch }}
       - name: Publish
-        uses: home-assistant/builder@2024.03.5
+        uses: home-assistant/builder@2025.03.0
         with:
           args: |
             --armv7 \
@@ -259,7 +253,7 @@ jobs:
         with:
           ref: ${{ steps.image_name.outputs.branch }}
       - name: Publish
-        uses: home-assistant/builder@2024.03.5
+        uses: home-assistant/builder@2025.03.0
         with:
           args: |
             --aarch64 \
@@ -269,11 +263,16 @@ jobs:
             --release ${{ github.ref_name }} \
             --docker-hub ${{ secrets.DOCKERHUB_USERNAME }}
 
-
   update-main-beta-branch:
     if: ${{ !github.event.act }} # skip during local actions testing
     name: Update main branch with new beta build information
-    needs: [publish-x86, publish-x86_64, publish-armhf, publish-armv7, publish-aarch64] # Only tell Home Assistant that a new version exists if the build of all architectures succeeded
+    needs: [
+        publish-x86,
+        publish-x86_64,
+        publish-armhf,
+        publish-armv7,
+        publish-aarch64,
+      ] # Only tell Home Assistant that a new version exists if the build of all architectures succeeded
     permissions:
       contents: write
       actions: read

@@ -7,14 +7,14 @@ STRIP=""
 while true; do
   case "$1" in
   --target-platform)
-    TARGETPLATFORM="$2"
+    export TARGETPLATFORM="$2"
     echo "Will compile for platform $TARGETPLATFORM"
     shift # Remove --target-platform
     shift # Remove value for target platform
     ;;
   --strip)
     echo "Will strip compiled binaries and .so's"
-    STRIP="1"
+    export STRIP="1"
     shift
     ;;
   *) break ;;
@@ -118,7 +118,10 @@ fi
 echo "Conan profile: "
 cat /root/.conan2/profiles/default
 
+echo "Will build MQTTManager in ${BUILD_TYPE} mode."
+
 conan install . --build=missing -pr:b default -pr:h host
+echo "--> Conan install complete."
 cd build
 source $BUILD_TYPE/generators/conanbuild.sh
 cmake .. -DCMAKE_TOOLCHAIN_FILE=$BUILD_TYPE/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
@@ -128,6 +131,8 @@ cp compile_commands.json ../
 
 if [ "$STRIP" == "1" ]; then
   echo "Stripping binaries and .so files using '$strip_bin'..."
-  "$strip_bin" /MQTTManager/build/*.so
+  if compgen -G '/MQTTManager/build/*.so' > /dev/null; then
+    "$strip_bin" /MQTTManager/build/*.so
+  fi
   "$strip_bin" /MQTTManager/build/nspm_mqttmanager
 fi

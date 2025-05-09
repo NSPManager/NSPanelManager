@@ -1,0 +1,76 @@
+<script type="module">
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
+
+  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+    // Update relevant values for the status header from the bundled data in the status update event
+    var element = document.getElementById(`nspanel-wifi-status-${event.detail.event_data.id}`);
+    element.state = event.detail.event_data.state;
+    element.signal_strength = event.detail.event_data.rssi;
+  });
+
+  define({
+    tag: "nspanel-wifi-status",
+    nspanel_id: '',
+    state: '',
+    signal_strength: '',
+    render: ({id, state, signal_strength}) => {
+      if (state == "offline" || state == "unknown") {
+        return html`
+            <span class="icon-text text-sm">
+                <span class="icon me-1">
+                    <i class="mdi mdi-wifi-strength-1-alert"></i>
+                </span>
+                ? dBm
+            </span>
+        `; // Nothing should be displayed when online.
+      } else if (signal_strength <= -90) {
+            return html`
+                <span class="icon-text text-sm">
+                    <span class="icon me-1">
+                        <i class="mdi mdi-wifi-strength-1-alert"></i>
+                    </span>
+                    ${signal_strength} dBm
+                </span>
+            `;
+      } else if (signal_strength <= -80) {
+        return html`
+            <span class="icon-text text-sm">
+                <span class="icon me-1">
+                    <i class="mdi mdi-wifi-strength-1-alert"></i>
+                </span>
+                ${signal_strength} dBm
+            </span>
+        `;
+      } else if (signal_strength <= -67) {
+        return html`
+            <span class="icon-text text-sm">
+                <span class="icon me-1">
+                    <i class="mdi mdi-wifi-strength-2-alert"></i>
+                </span>
+                ${signal_strength} dBm
+            </span>
+        `;
+      } else if (signal_strength <= -55) {
+        return html`
+            <span class="icon-text text-sm">
+                <span class="icon me-1">
+                    <i class="mdi mdi-wifi-strength-3"></i>
+                </span>
+                ${signal_strength} dBm
+            </span>
+        `;
+      } else {
+        return html`
+            <span class="icon-text text-sm">
+                <span class="icon me-1">
+                    <i class="mdi mdi-wifi-strength-4"></i>
+                </span>
+                ${signal_strength} dBm
+            </span>
+          `;
+      }
+    },
+  })
+</script>
+
+<nspanel-wifi-status id="nspanel-wifi-status-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}" signal_strength="{{ signal_strength }}"></nspanel-wifi-status>

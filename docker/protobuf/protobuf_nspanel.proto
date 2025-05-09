@@ -1,0 +1,234 @@
+syntax = "proto3";
+
+// Protobufs defined in this .proto file are used to communicate with the MQTTManager
+
+message NSPanelConfig {
+    string name = 1;
+    int32 default_room = 2;
+    enum NSPanelDefaultPage {
+        HOME = 0;
+        SCENES = 1;
+        ENTITIES = 2;
+    };
+    NSPanelDefaultPage default_page = 3;
+    int32 screensaver_activation_timeout = 4;
+    int32 min_button_push_time = 5;
+    int32 button_long_press_time = 6;
+    int32 special_mode_trigger_time = 7;
+    int32 special_mode_release_time = 8;
+    int32 screen_dim_level = 9;
+    int32 screensaver_dim_level = 10;
+
+    // Make sure this is updated together with protobuf_mqttmanager
+    enum NSPanelScreensaverMode {
+        WEATHER_WITH_BACKGROUND = 0;
+        WEATHER_WITHOUT_BACKGROUND = 1;
+        DATETIME_WITH_BACKGROUND = 3;
+        DATETIME_WITHOUT_BACKGROUND = 4;
+        NO_SCREENSAVER = 5;
+    }
+    NSPanelScreensaverMode screensaver_mode = 11;
+    bool show_screensaver_inside_temperature = 12;
+    bool show_screensaver_outside_temperature = 13;
+    bool clock_us_style = 14;
+    bool use_fahrenheit = 15;
+    bool is_us_panel = 16;
+
+    message RoomInfo {
+        int32 room_id = 1;
+        repeated int32 entity_page_ids = 2;
+        repeated int32 scene_page_ids = 3;
+    }
+    repeated RoomInfo room_infos = 17; // Allowed rooms
+
+    bool reverse_relays = 18;
+    bool relay1_default_mode = 19;
+    bool relay2_default_mode = 20;
+    int32 temperature_calibration = 21;
+
+    // There are more button modes avaiable but those are handled by the manager and no the panel itself.
+    // Only send modes that the panel itself can handle or simply tell the panel to tell the manager.
+    enum NSPanelButtonMode {
+        DIRECT = 0;
+        FOLLOW = 1;
+        NOTIFY_MANAGER = 2;
+    };
+    NSPanelButtonMode button1_mode = 22;
+    NSPanelButtonMode button2_mode = 25;
+
+    repeated int32 global_scene_entity_page_ids = 30;
+    bool optimistic_mode = 31;
+    int32 raise_light_level_to_100_above = 32;
+    int32 nspanel_id = 33;
+
+    repeated int32 relay1_relay_group = 35;
+    repeated int32 relay2_relay_group = 37;
+
+    int32 default_light_brightess = 38; // Default brightness for lights when trying to turn on but the current brightness is 0
+
+    bool locked_to_default_room = 39;
+}
+
+enum NSPanelWarningLevel {
+    CRITICAL = 0;
+    ERROR =1;
+    WARNING = 2;
+    INFO = 3;
+    DEBUG = 4;
+    TRACE = 5;
+}
+
+message NSPanelWarning {
+    NSPanelWarningLevel level = 1;
+    string text = 2;
+}
+
+message NSPanelStatusReport {
+    enum state {
+        ONLINE = 0;
+        OFFLINE = 1;
+        UPDATING_TFT = 2;
+        UPDATING_FIRMWARE = 3;
+        UPDATING_LITTLEFS = 4;
+    }
+    state nspanel_state = 1;
+    int32 update_progress = 2;
+    int32 rssi = 3;
+    int32 heap_used_pct = 4;
+    string mac_address = 5;
+    float temperature = 6;
+    string ip_address = 7;
+
+    repeated NSPanelWarning warnings = 8;
+}
+
+message NSPanelLightStatus {
+    int32 id = 1;
+    string name = 2;
+    bool can_dim = 3;
+    bool can_color_temperature = 4;
+    bool can_rgb = 5;
+    int32 light_level = 6;
+    int32 color_temp = 7;
+    int32 hue = 8;
+    int32 saturation = 9;
+    int32 room_view_position = 10;
+}
+
+// Container of data shown on the "Entities page".
+// When pressing the next or previous button on the panel it will request a new NSPanelRoomEnititesPage from the manager.
+message NSPanelRoomEntitiesPage {
+    int32 id = 1;
+    int32 page_type = 2; // 12, 8 or 4 entities shown?
+    string header_text = 3;
+
+    message EntitySlot {
+        int32 room_view_position = 1;
+        string name = 2;
+        string icon = 3;
+        int32 pco = 4;
+        int32 pco2 = 5;
+        bool can_save_scene = 6;
+        string mqtt_state_topic = 7; // MQTT topic where NSPanelEntityState is sent for control of individual entity. Empty if not controllable individually.
+    }
+
+    repeated EntitySlot entities = 4;
+}
+
+// Data showed on the main page.
+// When pressing "next room" it will request a new NSPanelRoomStatus from the manager.
+message NSPanelRoomStatus {
+    int32 id = 1;
+    string name = 2;
+    int32 average_dim_level = 3;
+    int32 ceiling_lights_dim_level = 4;
+    int32 table_lights_dim_level = 5;
+    int32 average_color_temperature = 6;
+    int32 ceiling_lights_color_temperature_value = 7;
+    int32 table_lights_color_temperature_value = 8;
+    int32 num_ceiling_lights = 9;
+    int32 num_table_lights = 10;
+    int32 num_ceiling_lights_on = 11;
+    int32 num_table_lights_on = 12;
+
+    repeated int32 entity_page_ids = 13;
+}
+
+
+message NSPanelWeatherUpdate {
+    message ForecastItem {
+        string weather_icon = 1;
+        string precipitation_string = 2;
+        string temperature_maxmin_string = 3;
+        string wind_string = 4;
+        string display_string = 5;
+    }
+    repeated ForecastItem forecast_items = 1;
+    string current_weather_icon = 2;
+    string current_temperature_string = 3;
+    string current_maxmin_temperature = 4;
+    string current_wind_string = 5;
+    string sunrise_string = 6;
+    string sunset_string = 7;
+    string current_precipitation_string = 8;
+}
+
+// Command send from NSPanel to MQTTManager
+message NSPanelMQTTManagerCommand {
+    enum AffectLightsOptions {
+        ALL = 0;
+        TABLE_LIGHTS = 1;
+        CEILING_LIGHTS = 2;
+    }
+    message FirstPageTurnLightOn {
+        AffectLightsOptions affect_lights = 1;
+        int32 brightness_slider_value = 2;
+        int32 kelvin_slider_value = 3;
+        int32 selected_room = 4;
+        bool global = 5;
+        bool has_brightness_value = 6;
+        bool has_kelvin_value = 7;
+    }
+    message FirstPageTurnLightOff {
+        AffectLightsOptions affect_lights = 1;
+        bool global = 2;
+    }
+
+    // TODO: Once protobuf-c-compiler gets updated, perhaps it's possible to build protobuf C files
+    // with optional arguments.
+    message LightCommand {
+        repeated int32 light_ids = 1;
+        bool has_brightness = 2;
+        int32 brightness = 3;
+        bool has_color_temperature = 4;
+        int32 color_temperature = 5;
+        bool has_hue = 6;
+        int32 hue = 7;
+        bool has_saturation = 8;
+        int32 saturation = 9;
+    }
+
+    message ToggleEntityFromEntitiesPage {
+        int32 entity_page_id = 1;
+        int32 entity_slot = 2;
+    }
+
+    message SaveSceneCommand {
+        int32 entity_page_id = 1;
+        int32 entity_slot = 2;
+    }
+
+    message ButtonPressed {
+        int32 nspanel_id = 1;
+        int32 button_id = 2;
+    }
+
+    oneof CommandData {
+        FirstPageTurnLightOn first_page_turn_on = 1;
+        FirstPageTurnLightOff first_page_turn_off = 2;
+        LightCommand light_command = 3;
+        ToggleEntityFromEntitiesPage toggle_entity_from_entities_page = 4;
+        SaveSceneCommand save_scene_command = 5;
+        ButtonPressed button_pressed = 6;
+    }
+}

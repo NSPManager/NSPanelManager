@@ -1,14 +1,11 @@
 #include "ButtonManager.hpp"
 #include <InterfaceManager.hpp>
-#include <Light.hpp>
-#include <LightManager.hpp>
 #include <MqttLog.hpp>
 #include <MqttManager.hpp>
 #include <NSPMConfig.h>
 #include <PageManager.hpp>
 
 void ButtonManager::init() {
-  // TODO: Read button state via interupts instead of polling
   // Setup pins for input/output
   pinMode(BUTTON_MANAGER_BUTTON1_PIN, INPUT);
   pinMode(BUTTON_MANAGER_BUTTON2_PIN, INPUT);
@@ -25,7 +22,7 @@ void ButtonManager::init() {
   LOG_DEBUG("Setting relay 2 to default state: ", NSPMConfig::instance->relay2_default_mode ? "ON" : "OFF");
   ButtonManager::setRelayState(2, NSPMConfig::instance->relay2_default_mode);
 
-  xTaskCreatePinnedToCore(ButtonManager::_loop, "_taskButtonManagerLoop", 5000, NULL, 0, &ButtonManager::_loop_task_handle, CONFIG_ARDUINO_RUNNING_CORE);
+  xTaskCreatePinnedToCore(ButtonManager::_loop, "_taskButtonManagerLoop", 5000, NULL, 1, &ButtonManager::_loop_task_handle, CONFIG_ARDUINO_RUNNING_CORE);
 
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_relay1_cmd_topic.c_str(), &ButtonManager::mqttCallback);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_relay2_cmd_topic.c_str(), &ButtonManager::mqttCallback);
@@ -43,20 +40,20 @@ void IRAM_ATTR ButtonManager::button2_state_change() {
   vTaskNotifyGiveFromISR(ButtonManager::_loop_task_handle, NULL);
 }
 
-void ButtonManager::mqttCallback(char *topic, byte *payload, unsigned int length) {
+void ButtonManager::mqttCallback(MQTTMessage *message) {
   uint8_t relay = 0;
-  if (std::string(topic).compare(NSPMConfig::instance->mqtt_relay1_cmd_topic) == 0) {
+  if (message->topic.compare(NSPMConfig::instance->mqtt_relay1_cmd_topic) == 0) {
     relay = 1;
-  } else if (std::string(topic).compare(NSPMConfig::instance->mqtt_relay2_cmd_topic) == 0) {
+  } else if (message->topic.compare(NSPMConfig::instance->mqtt_relay2_cmd_topic) == 0) {
     relay = 2;
   }
 
   if (relay > 0) {
-    if ((*payload) == '0') {
+    if (message->data.compare("0") == 0) {
       ButtonManager::setRelayState(relay, false);
-    } else if ((*payload) == '1') {
+    } else if (message->data.compare("1") == 0) {
       ButtonManager::setRelayState(relay, true);
-    } else if ((*payload) == '2') {
+    } else if (message->data.compare("2") == 0) {
       ButtonManager::setRelayState(relay, !ButtonManager::getRelayState(relay));
     }
   }
@@ -107,19 +104,20 @@ void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
     } else if (NSPMConfig::instance->button1_mode == BUTTON_MODE::FOLLOW) {
       ButtonManager::setRelayState(1, new_state);
     } else if (NSPMConfig::instance->button1_mode == BUTTON_MODE::DETACHED && ButtonManager::button1_detached_mode_light != nullptr && new_state) {
-      LOG_DEBUG("Button 1 pressed, detached light: ", ButtonManager::button1_detached_mode_light->getName().c_str());
-      std::list<Light *> lightsToChange;
-      lightsToChange.push_back(ButtonManager::button1_detached_mode_light);
-      if (ButtonManager::button1_detached_mode_light->getLightLevel() == 0) {
-        int dim_to_level = PageManager::GetHomePage()->getDimmingValue();
-        if (dim_to_level == 0) {
-          LOG_INFO("Trying to turn on a light but the current average room level is 0. Defaulting to 50%");
-          dim_to_level = 50;
-        }
-        LightManager::ChangeLightsToLevel(&lightsToChange, dim_to_level);
-      } else {
-        LightManager::ChangeLightsToLevel(&lightsToChange, 0);
-      }
+      // TODO: Implement detached lights with protobuf
+      // LOG_DEBUG("Button 1 pressed, detached light: ", ButtonManager::button1_detached_mode_light->getName().c_str());
+      // std::list<Light *> lightsToChange;
+      // lightsToChange.push_back(ButtonManager::button1_detached_mode_light);
+      // if (ButtonManager::button1_detached_mode_light->getLightLevel() == 0) {
+      //   int dim_to_level = PageManager::GetHomePage()->getDimmingValue();
+      //   if (dim_to_level == 0) {
+      //     LOG_INFO("Trying to turn on a light but the current average room level is 0. Defaulting to 50%");
+      //     dim_to_level = 50;
+      //   }
+      //   LightManager::ChangeLightsToLevel(&lightsToChange, dim_to_level);
+      // } else {
+      //   LightManager::ChangeLightsToLevel(&lightsToChange, 0);
+      // }
     } else if (NSPMConfig::instance->button1_mode == BUTTON_MODE::CUSTOM_MQTT && new_state) {
       MqttManager::publish(NSPMConfig::instance->button1_mqtt_topic, NSPMConfig::instance->button1_mqtt_payload);
     }
@@ -133,19 +131,20 @@ void ButtonManager::_processButtonStateChange(uint8_t button, bool new_state) {
     } else if (NSPMConfig::instance->button2_mode == BUTTON_MODE::FOLLOW) {
       ButtonManager::setRelayState(2, new_state);
     } else if (NSPMConfig::instance->button2_mode == BUTTON_MODE::DETACHED && ButtonManager::button2_detached_mode_light != nullptr && new_state) {
-      LOG_DEBUG("Button 2 pressed, detached light: ", ButtonManager::button2_detached_mode_light->getName().c_str());
-      std::list<Light *> lightsToChange;
-      lightsToChange.push_back(ButtonManager::button2_detached_mode_light);
-      if (ButtonManager::button2_detached_mode_light->getLightLevel() == 0) {
-        int dim_to_level = PageManager::GetHomePage()->getDimmingValue();
-        if (dim_to_level == 0) {
-          LOG_INFO("Trying to turn on a light but the current average room level is 0. Defaulting to 50%");
-          dim_to_level = 50;
-        }
-        LightManager::ChangeLightsToLevel(&lightsToChange, dim_to_level);
-      } else {
-        LightManager::ChangeLightsToLevel(&lightsToChange, 0);
-      }
+      // TODO: Implement detached lights with protobuf
+      // LOG_DEBUG("Button 2 pressed, detached light: ", ButtonManager::button2_detached_mode_light->getName().c_str());
+      // std::list<Light *> lightsToChange;
+      // lightsToChange.push_back(ButtonManager::button2_detached_mode_light);
+      // if (ButtonManager::button2_detached_mode_light->getLightLevel() == 0) {
+      //   int dim_to_level = PageManager::GetHomePage()->getDimmingValue();
+      //   if (dim_to_level == 0) {
+      //     LOG_INFO("Trying to turn on a light but the current average room level is 0. Defaulting to 50%");
+      //     dim_to_level = 50;
+      //   }
+      //   LightManager::ChangeLightsToLevel(&lightsToChange, dim_to_level);
+      // } else {
+      //   LightManager::ChangeLightsToLevel(&lightsToChange, 0);
+      // }
     } else if (NSPMConfig::instance->button2_mode == BUTTON_MODE::CUSTOM_MQTT && new_state) {
       MqttManager::publish(NSPMConfig::instance->button2_mqtt_topic, NSPMConfig::instance->button2_mqtt_payload);
     }
@@ -182,6 +181,7 @@ void ButtonManager::_loop(void *param) {
             break; // Exit inner loop and start waiting for state change again.
           }
         }
+        Serial.println("BTN");
         vTaskDelay(BUTTON_MANAGER_BUTTON_DEBOUNCE_MS / portTICK_PERIOD_MS);
       }
     }

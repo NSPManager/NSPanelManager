@@ -1,6 +1,17 @@
 #!/bin/bash
 
 mkdir -p data
+NOSTRIP=""
+
+while true; do
+  case "$1" in
+  --no-strip)
+    NOSTRIP="1"
+    shift
+    ;;
+  *) break ;;
+  esac
+done
 
 if [ ! -e "data/nspanelmanager_db.sqlite3" ] && [ -e "$(pwd)/web/nspanelmanager/db.sqlite3" ]; then
 	cp "$(pwd)/web/nspanelmanager/db.sqlite3" "data/nspanelmanager_db.sqlite3"
