@@ -5,9 +5,9 @@
 class Light;
 class NSPanel;
 class RoomManager;
-class Scene;
-class mqttMessage;
+#include <MqttManager.hpp>
 #include <list>
+#include <protobuf_defines.h>
 #include <string>
 
 class InterfaceManager {
@@ -20,11 +20,6 @@ public:
   static void processSleepEvent();
   /// @brief Callback for when the screen wakes from sleep
   static void processWakeEvent();
-  /// @brief Callback for when an entity update comes from MQTT
-  /// @param topic The topic on which the payload was received
-  /// @param payload The payload
-  /// @param length Length of the payload
-  static void mqttCallback(char *topic, byte *payload, unsigned int length);
   /// @brief This function is called whenevent MQTT is connected. Subscribe to all entity status topics
   static void subscribeToMqttTopics();
   /// @brief This variable will block the panel from communicating with panel before the panel has been registered.
@@ -32,9 +27,11 @@ public:
   /// @brief The InfterfaceManager instance
   static inline InterfaceManager *instance;
 
-  static inline void handleNSPanelCommand(char *topic, byte *payload, unsigned int length);
-  static inline void handleNSPanelScreenBrightnessCommand(char *topic, byte *payload, unsigned int length);
-  static inline void handleNSPanelScreensaverBrightnessCommand(char *topic, byte *payload, unsigned int length);
+  static inline void handleNSPanelCommand(MQTTMessage *message);
+  static inline void handleNSPanelScreenBrightnessCommand(MQTTMessage *message);
+  static inline void handleNSPanelScreensaverBrightnessCommand(MQTTMessage *message);
+  static inline void handleNSPanelScreenCommand(MQTTMessage *message);
+  static inline void handleNSPanelConfigUpdate(MQTTMessage *message);
   static void showDefaultPage();
 
 private:
@@ -42,13 +39,8 @@ private:
   /// @brief makes needed adjustments to make the panel ready for use.
   /// @param param Not used
   static void _taskLoadConfigAndInit(void *param);
-  /// @brief MQTT Messages that has been received but not yet processed
-  static inline std::list<mqttMessage> _mqttMessages;
-  /// @brief The task handle used to notify task to start processing MQTT messages
-  static inline TaskHandle_t _taskHandleProcessMqttMessages;
-  /// @brief Task that processes all the MQTT messages in the queue
-  /// @param param Not used
-  static void _taskProcessMqttMessages(void *param);
+  /// @brief Handle data received by the handleNSPanelConfigUpdate callback
+  static void _taskHandleConfigData(void *param);
   /// @brief Task handle used to indicate weather or not a special mode has already ben initialized
   static inline TaskHandle_t _taskHandleSpecialModeTimer;
   /// @brief Used temporarely to hold JSON-data from the server while initializing the panel
@@ -63,6 +55,8 @@ private:
   bool _getRoomConfig(int room_id, JsonDocument *buffer);
 
   bool _processMqttMessages;
+  bool _config_loaded;
+  static inline PROTOBUF_NSPANEL_CONFIG *_new_config;
 };
 
 #endif

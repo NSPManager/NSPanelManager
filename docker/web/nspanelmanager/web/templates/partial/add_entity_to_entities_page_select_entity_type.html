@@ -1,0 +1,34 @@
+<dialog id="modal" class="modal" hx-swap-oob="true">
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        <div class="flex justify-center mb-4 duration-500 transition-transform ease-linear">
+            <ul class="steps">
+                <li class="step step-primary">Select type</li>
+                <li class="step">Select source</li>
+                <li class="step">Configure entity</li>
+            </ul>
+        </div>
+
+        <ul class="menu menu-lg bg-base-200 rounded-box w-full">
+          <li class="flex-row"><button class="w-full" hx-indicator="#modal_loading" onclick="modal.close();" hx-get='{% url "htmx_partial_select_new_entity_source" action="ADD_LIGHT_TO_ROOM" action_args=action_args %}'>Add <span class="font-bold">light</span></button></li>
+          <li class="flex-row"><button class="w-full" hx-indicator="#modal_loading" onclick="modal.close();" hx-get='{% url "htmx_partial_select_new_entity_source" action="ADD_SWITCH_TO_ROOM" action_args=action_args %}'>Add <span class="font-bold">switch</span></button></li>
+        </ul>
+    </div>
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+
+    <script>
+    htmx.on("htmx:afterSwap", (e) => {
+      if(e.detail.elt.id == "modal") {
+        modal.showModal();
+      }
+    });
+    </script>
+</dialog>

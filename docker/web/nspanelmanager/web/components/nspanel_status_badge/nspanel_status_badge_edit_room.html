@@ -1,0 +1,72 @@
+{% load static %}
+
+<script type="module">
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
+
+  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+    // Update relevant values for the status badge from the bundled data in the status update event
+    var element = document.getElementById(`nspanel-status-badge-${event.detail.event_data.id}`);
+    element.name = event.detail.event_data.name;
+    element.state = event.detail.event_data.state;
+    element.update_progress = event.detail.event_data.update_progress;
+  });
+
+  define({
+    tag: "nspanel-status-badge",
+    nspanel_id: '',
+    name: '',
+    state: '',
+    update_progress: '',
+    render: ({id, name, state, update_progress}) => {
+      if (state == "online") {
+        return html`
+          <div class="badge badge-success">${name}</div>
+        `;
+      } else if (state == "offline") {
+        return html`
+          <div class="badge badge-error">${name}</div>
+        `;
+      } else if (state == "waiting") {
+        return html`
+          <div class="badge badge-info transition-all ease-linear duration-300 animate-pulse">${name}</div>
+        `;
+      } else if (state == "updating_fw") {
+        return html`
+            <span class="badge badge-info transition-all ease-linear duration-300">${name}
+                <div
+                class="radial-progress ms-2"
+                style="--value:${update_progress}; --size:1rem; --thickness: 2px;"
+                role="progressbar">
+                </div>
+            </span>
+        `;
+      } else if (state == "updating_fs") {
+        return html`
+            <span class="badge badge-info transition-all ease-linear duration-300">${name}
+                <div
+                class="radial-progress ms-2"
+                style="--value:${update_progress}; --size:1rem; --thickness: 2px;"
+                role="progressbar">
+                </div>
+            </span>
+        `;
+      } else if (state == "updating_tft") {
+        return html`
+          <span class="badge badge-info transition-all ease-linear duration-300">${name}
+                <div
+                class="radial-progress ms-2"
+                style="--value:${update_progress}; --size:1rem; --thickness: 2px;"
+                role="progressbar">
+                </div>
+            </span>
+        `;
+      } else {
+        return html`
+          <span class="badge badge-warning transition-all ease-linear duration-300">${name} UNKNOWN STATE: ${state}</span>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-status-badge id="nspanel-status-badge-{{ id }}" nspanel_id="{{ id }}" name="{{ friendly_name }}" state="{{ state }}" update_progress="{{ update_progress }}"></nspanel-status-badge>

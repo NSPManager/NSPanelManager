@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import logging
 from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 import environ
@@ -34,7 +35,7 @@ if os.path.exists(SECRET_KEY_PATH):
         SECRET_KEY = f.read()
 
 if SECRET_KEY.strip() == "":
-    print("No secret key exists, creating!")
+    logging.info("No secret key exists, creating!")
     SECRET_KEY = get_random_secret_key()
     with open(SECRET_KEY_PATH, "w") as f:
         f.write(SECRET_KEY)
@@ -46,7 +47,6 @@ ALLOWED_HOSTS = ['*']
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'web',
     'django.contrib.admin',
@@ -54,7 +54,13 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    #'django.contrib.staticfiles', Disabled and make use of django_components.safer_staticfiles instead. It will not serve out .py or .html files
+    'django_components.safer_staticfiles',
+    'django_components'
+]
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "web/components")
 ]
 
 MIDDLEWARE = [
@@ -73,7 +79,6 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
-        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -81,6 +86,16 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'loaders':[(
+                'django.template.loaders.cached.Loader', [
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                    'django_components.template_loader.Loader',
+                ]
+            )],
+            'builtins': [
+                'django_components.templatetags.component_tags'
+            ]
         },
     },
 ]
@@ -97,6 +112,20 @@ DATABASES = {
         'NAME': '/data/nspanelmanager_db.sqlite3',
         'timeout': 20
     }
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
 }
 
 
@@ -140,3 +169,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+X_FRAME_OPTIONS = "SAMEORIGIN"

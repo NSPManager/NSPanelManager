@@ -136,11 +136,8 @@ function add_new_light_show_light_page(light_element) {
     $("#openhab_light_options").addClass("hidden");
   }
 
-  close_modals();
-
-  $("#edit_light_loader").addClass("hidden");
   $("#modal-add-light-options-inputs").removeClass("hidden");
-  $("#edit_light_id").val("-1"); // Set text field
+  $("#edit_light_id").val("-1"); // Set to -1 to indicate that is a new light and not a light that already exists and has an ID
   $("#add_new_light_name").val(entity_name); // Set text field
   $("#home_assistant_name").val(entity_id); // Set text field
   $("#openhab_name").val(entity_name); // Set text field
@@ -154,8 +151,7 @@ function add_new_light_show_light_page(light_element) {
 
   // Finaly show the modal
   $("#add_save_light_button").text("Add");
-  $("#modal-add-light").addClass("hidden");
-  $("#modal-add-light-options").removeClass("hidden");
+  modal_add_light_options.showModal();
 }
 
 function add_new_lights_filter_for_type(type) {
@@ -320,7 +316,6 @@ function edit_light(light_id) {
 
     // Finaly show the modal
     $("#add_save_light_button").text("Save");
-    $("#modal-add-light").addClass("hidden");
     $("#modal-add-light-options").removeClass("hidden");
   });
 }

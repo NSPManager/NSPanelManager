@@ -8,6 +8,7 @@
 #include <NSPMConfig.h>
 #include <NSPanel.hpp>
 #include <NSPanelReturnData.h>
+#include <WarningManager.hpp>
 #include <WiFiClient.h>
 #include <cstddef>
 #include <esp_task_wdt.h>
@@ -175,6 +176,8 @@ bool NSPanel::init() {
   this->_readDataToString(&result, 2500, false);
   if (result.compare("NSPM") == 0) {
     this->_has_received_nspm = true;
+  } else {
+    WarningManager::register_warning(NSPanelWarningLevel::CRITICAL, "Did not receive NSPM-flag from screen. Is the screen running the NSPanel Manager TFT file?");
   }
 
   LOG_DEBUG("Got text from panel: ", result.c_str());
@@ -235,7 +238,7 @@ bool NSPanel::init() {
   }
 
   LOG_INFO("Trying to init NSPanel.");
-  xTaskCreatePinnedToCore(_taskSendCommandQueue, "taskSendCommandQueue", 5000, NULL, 1, &this->_taskHandleSendCommandQueue, CONFIG_ARDUINO_RUNNING_CORE);
+  xTaskCreatePinnedToCore(_taskSendCommandQueue, "taskSendCommandQueue", 5000, NULL, 5, &this->_taskHandleSendCommandQueue, CONFIG_ARDUINO_RUNNING_CORE);
   this->_startListeningToPanel();
 
   // Connect to display and start it
@@ -254,7 +257,7 @@ bool NSPanel::init() {
 }
 
 void NSPanel::_startListeningToPanel() {
-  xTaskCreatePinnedToCore(_taskProcessPanelOutput, "taskProcessPanelOutput", 5000, NULL, 1, &this->_taskHandleProcessPanelOutput, CONFIG_ARDUINO_RUNNING_CORE);
+  xTaskCreatePinnedToCore(_taskProcessPanelOutput, "taskProcessPanelOutput", 5000, NULL, 2, &this->_taskHandleProcessPanelOutput, CONFIG_ARDUINO_RUNNING_CORE);
 }
 
 void NSPanel::_stopListeningToPanel() {
@@ -311,7 +314,7 @@ void NSPanel::_taskSendCommandQueue(void *param) {
   LOG_INFO("Starting taskSendCommandQueue.");
   for (;;) {
     // Wait for commands
-    if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY)) {
+    if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) == pdTRUE) {
       while (NSPanel::_writeCommandsToSerial == false) {
         vTaskDelay(50 / portTICK_PERIOD_MS);
       }
@@ -381,16 +384,16 @@ void IRAM_ATTR NSPanel::_onSerialData(void) {
 void NSPanel::_taskProcessPanelOutput(void *param) {
   for (;;) {
     // Wait for things that needs processing
-    if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY)) {
+    if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) == pdTRUE) {
       while (!NSPanel::instance->_processQueue.empty()) {
-        std::vector<char> itemPayload = NSPanel::instance->_processQueue.front();
+        std::vector<char> *itemPayload = &NSPanel::instance->_processQueue.front();
 
         // Select correct action depending on type of event
-        if (!itemPayload.empty()) {
-          switch (itemPayload[0]) {
+        if (!itemPayload->empty()) {
+          switch ((*itemPayload)[0]) {
           case NEX_OUT_TOUCH_EVENT:
-            if (itemPayload.size() >= 3) {
-              NSPanel::_touchEventCallback(itemPayload[1], itemPayload[2], itemPayload[3] == 0x01);
+            if (itemPayload->size() >= 3) {
+              NSPanel::_touchEventCallback((*itemPayload)[1], (*itemPayload)[2], (*itemPayload)[3] == 0x01);
             } else {
               LOG_ERROR("Read nextion touch event but there wasn't enough data to process.");
             }
@@ -409,15 +412,14 @@ void NSPanel::_taskProcessPanelOutput(void *param) {
             break;
 
           default:
-            LOG_TRACE("Read type ", String(itemPayload[0], HEX).c_str());
+            LOG_TRACE("Read type ", String((*itemPayload)[0], HEX).c_str());
             break;
           }
         }
 
         // Done with item, pop it off the queue
         NSPanel::instance->_processQueue.pop();
-        // Wait at least 10ms between each processing of event to allow for other functions to execute.
-        vTaskDelay(10 / portTICK_PERIOD_MS);
+        yield();
       }
     }
   }
@@ -600,14 +602,6 @@ bool NSPanel::getUpdateState() {
 
 uint8_t NSPanel::getUpdateProgress() {
   return this->_update_progress;
-}
-
-std::string NSPanel::getWarnings() {
-  std::string return_string = "";
-  if (!NSPanel::instance->_has_received_nspm) {
-    return_string.append("Did not receive NSPM-flag from screen. Is the screen running the NSPanel Manager TFT file?\n");
-  }
-  return return_string;
 }
 
 bool NSPanel::ready() {

@@ -1,0 +1,35 @@
+{% load static %}
+<dialog id="about_modal" class="modal" hx-swap-oob="true">
+    <div class="modal-box menu menu-lg bg-base-200 rounded-box max-w-96">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        <div class="flex items-center justify-center space-x-3 rtl:space-x-reverse">
+            <div class="bg-neutral/50 p-2 rounded-box">
+                <img src="{{ ingress_path }}{% static 'logo.svg' %}" alt="Logo" class="h-12">
+            </div>
+        </div>
+
+        <div class="mt-1 text-center">
+            <span class="text-center">Version: %version%</span>
+        </div>
+
+        <span class="mt-2 text-center">NSPanel Manager is a software for easy management of multiple Sonoff NSPanels and intuitive use for all family members for the whole house.</span>
+        <span class="my-2 text-center font-bold">Thank you for your support and trust!</span>
+
+        <div id="about_links" class="join join-vertical w-full">
+            <a class="join-item btn btn-link" href="https://nspanelmanager.com" target="_blank">Documentation</a>
+            <a class="join-item btn btn-link" href="https://github.com/NSPManager/NSPanelManager" target="_blank">GitHub</a>
+            <a class="join-item btn btn-link" href="https://discord.gg/RwXvAH56fE" target="_blank">Discord</a>
+            <div class="join-item flex items-center justify-center">
+                <a href="https://www.buymeacoffee.com/nspanelmanager" class="mt-4" target="_blank" rel="nofollow"><img src="https://camo.githubusercontent.com/67f1b859c85032255c81e5f861a5f572fa25813c2ea5e7623b7efa91c395e37f/68747470733a2f2f63646e2e6275796d6561636f666665652e636f6d2f627574746f6e732f64656661756c742d6f72616e67652e706e67" alt="Buy Us A Coffee" height="41" width="174" data-canonical-src="https://cdn.buymeacoffee.com/buttons/default-orange.png" style="max-width: 100%;"></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>

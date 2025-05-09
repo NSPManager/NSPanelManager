@@ -1,27 +1,38 @@
+#include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include <curl/curl.h>
+#include <entity/entity_icons.hpp>
 #include <home_assistant_manager/home_assistant_manager.hpp>
 #include <nlohmann/detail/value_t.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <scenes/home_assistant_scene.hpp>
 #include <spdlog/spdlog.h>
+#include <string_view>
+#include <system_error>
 
-HomeAssistantScene::HomeAssistantScene(nlohmann::json &data) {
-  this->_id = data["id"];
-  this->update_config(data);
+HomeAssistantScene::HomeAssistantScene(uint32_t id) {
+  this->_id = id;
+  this->reload_config();
 }
 
-void HomeAssistantScene::update_config(nlohmann::json &data) {
-  this->_name = data["scene_name"];
-  if (!data["room_id"].is_null()) {
-    this->_is_global_scene = false;
-    this->_room_id = data["room_id"];
-  } else {
-    this->_is_global_scene = true;
+void HomeAssistantScene::reload_config() {
+  try {
+    auto scene_config = database_manager::database.get<database_manager::Scene>(this->_id);
+    this->_name = scene_config.friendly_name;
+    this->_entity_id = scene_config.backend_name;
+    this->_page_id = scene_config.entities_page_id;
+    this->_page_slot = scene_config.room_view_position;
+    if (scene_config.room_id == nullptr) {
+      this->_is_global = true;
+    } else {
+      this->_is_global = false;
+      this->_room_id = *scene_config.room_id;
+    }
+    SPDLOG_DEBUG("Loaded Home Assistant scene {}::{}.", this->_id, this->_name);
+  } catch (std::system_error &ex) {
+    SPDLOG_ERROR("Failed to reload config for scene {}::{}.", this->_id, this->_name);
   }
-  this->_entity_id = data["entity_name"];
-  SPDLOG_DEBUG("Loaded Home Assistant scene {}::{}.", this->_id, this->_name);
 }
 
 void HomeAssistantScene::activate() {
@@ -50,12 +61,12 @@ MQTT_MANAGER_ENTITY_TYPE HomeAssistantScene::get_type() {
 }
 
 MQTT_MANAGER_ENTITY_CONTROLLER HomeAssistantScene::get_controller() {
-  return MQTT_MANAGER_ENTITY_CONTROLLER::NSPM;
+  return MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
 }
 
 void HomeAssistantScene::post_init() {
-  if (!this->_is_global_scene) {
-    Room *room_entity = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, this->_room_id);
+  if (!this->_is_global) {
+    std::shared_ptr<Room> room_entity = EntityManager::get_room(this->_room_id);
     if (room_entity != nullptr) {
       this->_room = room_entity;
     } else {
@@ -63,4 +74,24 @@ void HomeAssistantScene::post_init() {
       return;
     }
   }
+}
+
+std::string HomeAssistantScene::get_name() {
+  return this->_name;
+}
+
+bool HomeAssistantScene::can_save() {
+  return false;
+}
+
+std::string_view HomeAssistantScene::get_icon() {
+  return EntityIcons::home_assistant_icon;
+}
+
+uint16_t HomeAssistantScene::get_icon_color() {
+  return GUI_Colors::icon_color_off;
+}
+
+uint16_t HomeAssistantScene::get_icon_active_color() {
+  return GUI_Colors::icon_color_off;
 }

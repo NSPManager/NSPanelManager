@@ -1,9 +1,8 @@
 #ifndef MQTT_MANAGER_HOME_ASSISTANT_LIGHT
 #define MQTT_MANAGER_HOME_ASSISTANT_LIGHT
 
-#include "home_assistant_manager/home_assistant_manager.hpp"
 #include "light.hpp"
-#include <cstdint>
+#include "protobuf_general.pb.h"
 
 enum MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TYPE {
   TYPE_LIGHT,
@@ -12,10 +11,10 @@ enum MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TYPE {
 
 class HomeAssistantLight : public Light {
 public:
-  HomeAssistantLight(nlohmann::json &init_data);
+  HomeAssistantLight(uint32_t light_id);
+  ~HomeAssistantLight();
   void send_state_update_to_controller();
   void home_assistant_event_callback(nlohmann::json event_data);
-  ~HomeAssistantLight();
 
 private:
   std::string _home_assistant_name;

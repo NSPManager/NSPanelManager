@@ -1,33 +1,46 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
+<dialog id="create_new_room_modal" class="modal">
+    <div class="modal-box">
+        <!-- Upper right close button -->
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
 
-{% block content %}
-<div class="md:flex md:flex-wrap md:justify-between">
-  <h2 class="font-medium text-2xl" id="nspanel_name">Rooms</h2>
-  <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onclick="addNewRoom();">Add new room</button>
+        <form method="POST" action="{% url 'save_new_room' %}">
+            {% csrf_token %}
+            <!-- Modal header -->
+            <h3 class="text-lg font-semibold mb-2">Create new room</h3>
+
+            <div class="my-2">
+                <label for="friendly_name" class="block mb-1 text-sm font-medium">Name</label>
+                <div class="flex flex-row-reverse">
+                    <input class="outline-none rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                    type="text" class="input" id="friendly_name" name="friendly_name" placeholder="Office" required>
+                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                        <span class="mdi mdi-home"></span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button class="btn btn-info">Save</button>
+            </div>
+        </form>
+    </div>
+    <!-- Modal backdrop -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+<div class="md:flex md:flex-wrap md:justify-between items-center mb-4">
+    <h2 class="font-medium text-2xl" id="nspanel_name">Rooms</h2>
+    <button type="button" class="btn btn-info" onclick="create_new_room_modal.showModal(); document.getElementById('friendly_name').focus(); document.getElementById('friendly_name').select();">
+        Add new room
+    </button>
 </div>
 
-<div class="mt-2 p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
-  <table class="w-full text-left rtl:text-right">
-    <thead class="uppercase bg-slate-200 dark:bg-slate-950 border-solid border-b-2 border-slate-600 dark:border-slate-800">
-      <tr>
-        <th class="px-3 py-1">Name</th>
-        <th class="px-3 py-1">NSPanels</th>
-      </tr>
-    </thead>
-    <tbody id="log_body" class="bg-slate-100 dark:bg-slate-600 text-black dark:text-white">
-      {% for room in rooms %}
-        <tr>
-          <th class="px-3 py-3">
-            <a href="{% url 'edit_room' room_id=room.id %}">{{ room.friendly_name }}</a>
-          </th>
-          <td>
-            {% for nspanel in room.nspanel_set.all %}
-              <a href="{% url 'edit_nspanel' panel_id=nspanel.id %}"><span class="bg-gray-200 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">{{ nspanel.friendly_name }}</span></a>
-            {% endfor %}
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="p-4 bg-base-100 rounded-md shadow-lg w-full" hx-ext="ws" ws-connect="/websocket">
+    {% component "rooms_list" %}{% endcomponent %}
 </div>
 {% endblock %}

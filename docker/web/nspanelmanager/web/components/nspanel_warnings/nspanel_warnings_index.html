@@ -1,0 +1,27 @@
+<div class="" hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_warnings' view='index' nspanel_id=id %}" id="nspanel_warnings_container-{{ id }}">
+    <!-- Warning indicator -->
+    {% if warnings|length > 0 %}
+    <div class="badge badge-warning badge-xs mt-2 me-2 ms-1" onmouseover="show_popover(this);" onmouseleave="hide_popover(this);" data-popover-target="nspanel_warning_popover_{{ id }}"></div>
+    {% endif %}
+    <!-- Warning popover-->
+    <div id="nspanel_warning_popover_{{ id }}" role="tooltip" class="absolute bg-base-100 z-10 invisible inline-block w-60 md:w-96 text-sm transition-opacity duration-300 border border-warning rounded-lg shadow-xl opacity-0">
+        <div class="px-3 py-2 bg-base-100 text-base-content rounded-t-lg">
+            <h3 class="font-semibold">Warnings</h3>
+        </div>
+        <div class="px-3 mb-2" id="nspanel_warnings">
+        <!-- Warnings are created in the index.js file-->
+        {% for warning in warnings %}
+            {% if warning.level == 'info' %}
+                <div role="alert" class="alert alert-info my-1">{{ warning.text }}</div>
+            {% elif warning.level == 'warning' %}
+                <div role="alert" class="alert alert-warning my-1">{{ warning.text }}</div>
+            {% elif warning.level == 'error' %}
+                <div role="alert" class="alert alert-error my-1">{{ warning.text }}</div>
+            {% else %}
+                <div role="alert" class="alert alert-error my-1">Unknown alert level: {{ warning.level }}</div>
+                <div role="alert" class="alert my-1">{{ warning.text }}</div>
+            {% endif %}
+        {% endfor %}
+        </div>
+    </div>
+</div>

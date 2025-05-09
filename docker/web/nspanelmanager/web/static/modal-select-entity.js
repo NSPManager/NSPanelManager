@@ -21,15 +21,15 @@ function add_new_entity_to_list(entity, type) {
   }
 
   $("#add_new_entity_options").append(
-    '<div class="select_entity_option w-full py-2 px-2 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300 cursor-pointer" data-type="' +
+    '<tr class="select_entity_option hover cursor-pointer" data-type="' +
       type +
       "\" data-items='" +
       JSON.stringify(entity.items) + "' data-entity_id='" + entity.entity_id + "' data-label='" + entity.label +
-      "'><span class=\"mdi " +
+      "'><td><span class=\"mdi " +
       icon +
       ' add_item_icon me-2"></span>' +
       entity.label +
-      "</div>"
+      "</td></tr>"
   );
 }
 
@@ -63,6 +63,9 @@ function populate_add_new_entity_dialog(filter, callback) {
     $("#add_new_entity_loader").hide();
     $("#add_new_entity_options").show();
 
+    $("#add_new_entity_options .select_entity_option").click(() => {
+      modal_select_entity.close();
+    });
     $("#add_new_entity_options .select_entity_option").click(callback);
   }).fail(function () {
     alert("Failed to get available entities!");
@@ -70,36 +73,34 @@ function populate_add_new_entity_dialog(filter, callback) {
 }
 
 function add_new_entities_filter_for_type(type) {
-  var active_tab_classes = "inline-block p-2 text-blue-600 bg-gray-100 active dark:bg-gray-800 dark:text-blue-500";
-  var inactive_tab_classes = "inline-block p-2 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300";
-  $("#add_new_entity_tabs button").attr("class", inactive_tab_classes);
+  $("#add_new_entity_tabs a").removeClass("tab-active");
   if (type == "all") {
-    $("#filter_for_all").attr("class", active_tab_classes);
+    $("#filter_for_all").addClass("tab-active");
   } else if (type == "home_assistant") {
-    $("#filter_for_home_assistant").attr("class", active_tab_classes);
+    $("#filter_for_home_assistant").addClass("tab-active");
   } else if (type == "openhab") {
-    $("#filter_for_openhab").attr("class", active_tab_classes);
+    $("#filter_for_openhab").addClass("tab-active");
   } else if (type == "manual") {
-    $("#filter_for_manual").attr("class", active_tab_classes);
+    $("#filter_for_manual").addClass("tab-active");
   }
   add_new_entities_filter();
 }
 
 function add_new_entities_filter() {
-  apply_tab_filter = !$("#filter_for_all").hasClass("active");
+  apply_tab_filter = !$("#filter_for_all").hasClass("tab-active");
   tab_filter = "";
   if (apply_tab_filter) {
-    if ($("#filter_for_home_assistant").hasClass("active")) {
+    if ($("#filter_for_home_assistant").hasClass("tab-active")) {
       tab_filter = "home_assistant";
-    } else if ($("#filter_for_openhab").hasClass("active")) {
+    } else if ($("#filter_for_openhab").hasClass("tab-active")) {
       tab_filter = "openhab";
-    } else if ($("#filter_for_manual").hasClass("active")) {
+    } else if ($("#filter_for_manual").hasClass("tab-active")) {
       tab_filter = "manual";
     }
   }
 
   var filter_for = $("#add_new_entity_search").val().toLowerCase();
-  $("#add_new_entity_options > div").each(function () {
+  $("#add_new_entity_options > tr").each(function () {
     if ($(this).html().toLowerCase().includes(filter_for)) {
       if (!apply_tab_filter) {
         $(this).show();
@@ -120,7 +121,7 @@ function add_new_entities_filter() {
 function select_new_entity(filter, callback) {
   $("#add_new_entity_search").val(""); // Clear previous filter
   populate_add_new_entity_dialog(filter, callback);
-  $("#modal-select-entity").removeClass("hidden");
+  modal_select_entity.showModal();
   $("#add_new_entity_search").select();
 }
 

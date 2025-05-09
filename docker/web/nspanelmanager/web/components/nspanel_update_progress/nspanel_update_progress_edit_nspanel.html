@@ -1,0 +1,33 @@
+<script type="module">
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
+
+  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+    // Update relevant values for the status header from the bundled data in the status update event
+    var element = document.getElementById(`nspanel-update-progress-${event.detail.event_data.id}`);
+    element.state = event.detail.event_data.state;
+    element.update_progress = event.detail.event_data.progress;
+  });
+
+  define({
+    tag: "nspanel-update-progress",
+    nspanel_id: '',
+    state: '',
+    update_progress: '',
+    render: ({id, state, update_progress}) => {
+      if (state == "offline" || state == "online" || update_progress == 0) {
+        return html` `; // Nothing should be displayed when progress is 0 or state is other than updating
+      } else {
+        return html`
+            <div class="relative p-3 border-solid border-b-2 border-base-300 transition-all duration-500 ease-linear">
+                <div class="absolute inset-0 h-full transition-all duration-500 ease-linear text-info-content bg-info" id="update_progress_pct_progressbar" style="width: ${update_progress}%"></div>
+                    <div class="relative inset-0 text-info-content flex items-center">
+                    <span class="loading loading-ring loading-xs me-2"></span>Progress: <span id="update_progress_pct_text" class="">${update_progress}%</span>
+                </div>
+            </div>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-update-progress id="nspanel-update-progress-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}" update_progress="{{ progress }}"></nspanel-update-progress>

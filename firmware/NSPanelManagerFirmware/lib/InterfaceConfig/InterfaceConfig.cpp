@@ -1,9 +1,8 @@
 #include <InterfaceConfig.hpp>
-#include <Scene.hpp>
 
-Scene *InterfaceConfig::getSceneById(uint16_t id) {
-  for (Scene *scene : InterfaceConfig::global_scenes) {
-    if (scene->id == id) {
+PROTOBUF_NSPANEL_SCENE *InterfaceConfig::getSceneById(uint16_t id) {
+  for (PROTOBUF_NSPANEL_SCENE *scene : InterfaceConfig::global_scenes) {
+    if (scene->scene_id() == id) {
       return scene;
     }
   }

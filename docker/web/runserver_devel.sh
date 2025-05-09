@@ -18,4 +18,7 @@ echo "Starting Nginx"
 
 echo "Starting NSPanelManager web interface server"
 cd nspanelmanager
-./manage.py runserver 0.0.0.0:8001
+while true; do
+    ./manage.py runserver 0.0.0.0:8001
+    sleep 0.5
+done

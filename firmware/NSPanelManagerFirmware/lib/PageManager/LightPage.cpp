@@ -1,10 +1,11 @@
-#include <Light.hpp>
-#include <LightManager.hpp>
 #include <LightPage.hpp>
 #include <MqttLog.hpp>
+#include <MqttManager.hpp>
 #include <NSPanel.hpp>
 #include <PageManager.hpp>
 #include <TftDefines.h>
+#include <WriteBufferFixedSize.h>
+#include <protobuf_defines.h>
 
 void LightPage::show() {
   this->_currentMode = LIGHT_PAGE_MODE::COLOR_TEMP;
@@ -12,19 +13,14 @@ void LightPage::show() {
   NSPanel::instance->goToPage(LIGHT_PAGE_NAME);
 
   if (this->selectedLight != nullptr) {
-    if (this->selectedLight->canTemperature()) {
+    if (this->selectedLight->can_color_temperature()) {
       this->_currentMode = LIGHT_PAGE_MODE::COLOR_TEMP;
-    } else if (this->selectedLight->canRgb()) {
+    } else if (this->selectedLight->can_rgb()) {
       this->_currentMode = LIGHT_PAGE_MODE::COLOR_RGB;
     } else {
       this->_currentMode = LIGHT_PAGE_MODE::COLOR_TEMP; // Default to color temp although this wont be shown.
     }
     this->updateValues();
-  }
-
-  if (this->selectedLight != nullptr) {
-    this->selectedLight->attachDeconstructCallback(this);
-    this->selectedLight->attachUpdateCallback(this);
   }
 }
 
@@ -32,105 +28,121 @@ void LightPage::update() {
   this->updateValues();
 }
 
-void LightPage::entityDeconstructCallback(DeviceEntity *entity) {
-  entity->detachUpdateCallback(this);
-  entity->detachDeconstructCallback(this);
-  this->selectedLight = nullptr;
-  PageManager::GoBack();
-}
-
-void LightPage::entityUpdateCallback(DeviceEntity *entity) {
-  this->update();
-}
-
 void LightPage::processTouchEvent(uint8_t page, uint8_t component, bool pressed) {
   LOG_DEBUG("Got touch event, component ", page, ".", component, " ", pressed ? "pressed" : "released");
+  if (PageManager::GetLightPage()->selectedLight != nullptr) {
+    switch (component) {
+    case LIGHT_PAGE_BACK_BUTTON_ID: {
+      PageManager::GoBack();
+      break;
+    }
+    case LIGHT_PAGE_BRIGHTNESS_SLIDER_ID: {
+      if (PageManager::GetLightPage()->selectedLight != nullptr) {
+        PROTOBUF_MQTTMANAGER_CMD_LIGHT_COMMAND light_command;
+        light_command.add_light_ids(PageManager::GetLightPage()->selectedLight->id());
+        light_command.set_has_brightness(true);
+        light_command.set_brightness(PageManager::GetLightPage()->getBrightnessValue());
 
-  switch (component) {
-  case LIGHT_PAGE_BACK_BUTTON_ID: {
-    // NSPanel::instance->goToPage(ROOM_PAGE_NAME);
-    // InterfaceManager::instance->_populateRoomPage();
-    PageManager::GoBack();
-    break;
-  }
-  case LIGHT_PAGE_BRIGHTNESS_SLIDER_ID: {
-    if (PageManager::GetLightPage()->selectedLight != nullptr) {
-      std::list<Light *> lights;
-      lights.push_back(PageManager::GetLightPage()->selectedLight);
-      LightManager::ChangeLightsToLevel(&lights, PageManager::GetLightPage()->getBrightnessValue());
-      // PageManager::GetLightPage()->updateValues(); Not needed as slider changes directly
-    }
-    break;
-  }
-  case LIGHT_PAGE_KELVIN_SLIDER_ID: {
-    if (PageManager::GetLightPage()->selectedLight != nullptr) {
-      std::list<Light *> lights;
-      lights.push_back(PageManager::GetLightPage()->selectedLight);
-      if (PageManager::GetLightPage()->getCurrentMode() == LIGHT_PAGE_MODE::COLOR_TEMP) {
-        LightManager::ChangeLightToColorTemperature(&lights, PageManager::GetLightPage()->getKelvinSatValue());
-      } else if (PageManager::GetLightPage()->getCurrentMode() == LIGHT_PAGE_MODE::COLOR_RGB) {
-        LightManager::ChangeLightsToColorSaturation(&lights, PageManager::GetLightPage()->getKelvinSatValue());
+        PROTOBUF_MQTTMANAGER_CMD command;
+        command.set_light_command(light_command);
+
+        EmbeddedProto::WriteBufferFixedSize<PROTOBUF_MQTTMANAGER_CMD_MAX_SIZE> write_buffer;
+        if (command.serialize(write_buffer) != EmbeddedProto::Error::NO_ERRORS) {
+          LOG_ERROR("Failed to serialize MQTTManager command. Will cancel command.");
+          return;
+        }
+        MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, (char *)write_buffer.get_data(), true);
       }
-      // PageManager::GetLightPage()->updateValues(); Not needed as slider changes directly
+      break;
     }
-    break;
-  }
-  case LIGHT_PAGE_HUE_SLIDER_ID: {
-    if (PageManager::GetLightPage()->selectedLight != nullptr) {
-      std::list<Light *> lights;
-      lights.push_back(PageManager::GetLightPage()->selectedLight);
-      LightManager::ChangeLightsToColorHue(&lights, PageManager::GetLightPage()->getHueValue());
+    case LIGHT_PAGE_KELVIN_SLIDER_ID: {
+      if (PageManager::GetLightPage()->selectedLight != nullptr) {
+        PROTOBUF_MQTTMANAGER_CMD_LIGHT_COMMAND light_command;
+        light_command.add_light_ids(PageManager::GetLightPage()->selectedLight->id());
+        if (PageManager::GetLightPage()->_currentMode == LIGHT_PAGE_MODE::COLOR_TEMP) {
+          light_command.set_has_color_temperature(true);
+          light_command.set_brightness(PageManager::GetLightPage()->getBrightnessValue());
+        } else if (PageManager::GetLightPage()->_currentMode == LIGHT_PAGE_MODE::COLOR_RGB) {
+          light_command.set_has_saturation(true);
+          light_command.set_saturation(PageManager::GetLightPage()->getKelvinSatValue());
+        }
+
+        PROTOBUF_MQTTMANAGER_CMD command;
+        command.set_light_command(light_command);
+
+        EmbeddedProto::WriteBufferFixedSize<PROTOBUF_MQTTMANAGER_CMD_MAX_SIZE> write_buffer;
+        if (command.serialize(write_buffer) != EmbeddedProto::Error::NO_ERRORS) {
+          LOG_ERROR("Failed to serialize MQTTManager command. Will cancel command.");
+          return;
+        }
+        MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, (char *)write_buffer.get_data(), true);
+      }
+      break;
     }
-    break;
-  }
-  case LIGHT_PAGE_SWITCH_MODE_BUTTON_ID: {
-    PageManager::GetLightPage()->switchMode();
-    break;
-  }
-  default:
-    break;
+    case LIGHT_PAGE_HUE_SLIDER_ID: {
+      if (PageManager::GetLightPage()->selectedLight != nullptr) {
+        PROTOBUF_MQTTMANAGER_CMD_LIGHT_COMMAND light_command;
+        light_command.add_light_ids(PageManager::GetLightPage()->selectedLight->id());
+        light_command.set_has_hue(true);
+        light_command.set_hue(PageManager::GetLightPage()->getHueValue());
+
+        PROTOBUF_MQTTMANAGER_CMD command;
+        command.set_light_command(light_command);
+
+        EmbeddedProto::WriteBufferFixedSize<PROTOBUF_MQTTMANAGER_CMD_MAX_SIZE> write_buffer;
+        if (command.serialize(write_buffer) != EmbeddedProto::Error::NO_ERRORS) {
+          LOG_ERROR("Failed to serialize MQTTManager command. Will cancel command.");
+          return;
+        }
+        MqttManager::publish(NSPMConfig::instance->mqttmanager_command_topic, (char *)write_buffer.get_data(), true);
+      }
+      break;
+    }
+    case LIGHT_PAGE_SWITCH_MODE_BUTTON_ID: {
+      PageManager::GetLightPage()->switchMode();
+      break;
+    }
+    default:
+      break;
+    }
   }
 }
 
 void LightPage::unshow() {
-  if (this->selectedLight != nullptr) {
-    this->selectedLight->detachDeconstructCallback(this);
-    this->selectedLight->detachUpdateCallback(this);
-    this->selectedLight = nullptr;
-  }
+  this->selectedLight = nullptr;
 }
 
 void LightPage::updateValues() {
   if (this->selectedLight != nullptr) {
-    NSPanel::instance->setComponentText(LIGHT_PAGE_LIGHT_LABEL_NAME, this->selectedLight->getName().c_str());
-    if (this->selectedLight->getLightLevel() != this->_last_brightness) {
-      NSPanel::instance->setComponentVal(LIGHT_PAGE_BRIGHTNESS_SLIDER_NAME, this->selectedLight->getLightLevel());
-      this->_last_brightness = this->selectedLight->getLightLevel();
+    NSPanel::instance->setComponentText(LIGHT_PAGE_LIGHT_LABEL_NAME, this->selectedLight->name());
+    if (this->selectedLight->light_level() != this->_last_brightness) {
+      NSPanel::instance->setComponentVal(LIGHT_PAGE_BRIGHTNESS_SLIDER_NAME, this->selectedLight->light_level());
+      this->_last_brightness = this->selectedLight->light_level();
     }
 
-    if (this->selectedLight->canTemperature() && this->_currentMode == LIGHT_PAGE_MODE::COLOR_TEMP) {
-      if (this->_last_kelvin_saturation != this->selectedLight->getColorTemperature()) {
-        NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, this->selectedLight->getColorTemperature());
-        this->_last_kelvin_saturation = this->selectedLight->getColorTemperature();
+    if (this->selectedLight->can_color_temperature() && this->_currentMode == LIGHT_PAGE_MODE::COLOR_TEMP) {
+      if (this->_last_kelvin_saturation != this->selectedLight->color_temp()) {
+        NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, this->selectedLight->color_temp());
+        this->_last_kelvin_saturation = this->selectedLight->color_temp();
       }
       NSPanel::instance->setComponentPic(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_KELVIN_SLIDER_PIC);
       NSPanel::instance->setComponentPic1(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_KELVIN_SLIDER_PIC1);
       NSPanel::instance->setComponentPic(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, LIGHT_PAGE_COLOR_RGB_MODE_PIC);
-    } else if (this->selectedLight->canRgb() && this->_currentMode == LIGHT_PAGE_MODE::COLOR_RGB) {
-      if (this->_last_hue != this->selectedLight->getHue()) {
-        NSPanel::instance->setComponentVal(LIGHT_PAGE_HUE_SLIDER_NAME, this->selectedLight->getHue());
-        this->_last_hue = this->selectedLight->getHue();
+    } else if (this->selectedLight->can_rgb() && this->_currentMode == LIGHT_PAGE_MODE::COLOR_RGB) {
+      if (this->_last_hue != this->selectedLight->hue()) {
+        NSPanel::instance->setComponentVal(LIGHT_PAGE_HUE_SLIDER_NAME, this->selectedLight->hue());
+        this->_last_hue = this->selectedLight->hue();
       }
-      if (this->_last_kelvin_saturation != this->selectedLight->getSaturation()) {
-        NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, this->selectedLight->getSaturation());
-        this->_last_kelvin_saturation = this->selectedLight->getSaturation();
+      if (this->_last_kelvin_saturation != this->selectedLight->saturation()) {
+        NSPanel::instance->setComponentVal(LIGHT_PAGE_KELVIN_SLIDER_NAME, this->selectedLight->saturation());
+        this->_last_kelvin_saturation = this->selectedLight->saturation();
       }
       NSPanel::instance->setComponentPic(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_SAT_SLIDER_PIC);
       NSPanel::instance->setComponentPic1(LIGHT_PAGE_KELVIN_SLIDER_NAME, LIGHT_PAGE_SAT_SLIDER_PIC1);
       NSPanel::instance->setComponentPic(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, LIGHT_PAGE_COLOR_TEMP_MODE_PIC);
     }
 
-    if (this->selectedLight->canTemperature() && LightPage::selectedLight->canRgb()) {
+    if (this->selectedLight->can_color_temperature() && LightPage::selectedLight->can_rgb()) {
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, true);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, true);
       if (this->_currentMode == LIGHT_PAGE_MODE::COLOR_TEMP) {
@@ -138,15 +150,15 @@ void LightPage::updateValues() {
       } else {
         NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, true);
       }
-    } else if (this->selectedLight->canTemperature() && !LightPage::selectedLight->canRgb()) {
+    } else if (this->selectedLight->can_color_temperature() && !LightPage::selectedLight->can_rgb()) {
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, true);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, false);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, false);
-    } else if (!this->selectedLight->canTemperature() && LightPage::selectedLight->canRgb()) {
+    } else if (!this->selectedLight->can_color_temperature() && LightPage::selectedLight->can_rgb()) {
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, true);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, true);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, false);
-    } else if (!this->selectedLight->canTemperature() && !LightPage::selectedLight->canRgb()) {
+    } else if (!this->selectedLight->can_color_temperature() && !LightPage::selectedLight->can_rgb()) {
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_KELVIN_SLIDER_NAME, false);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_HUE_SLIDER_NAME, false);
       NSPanel::instance->setComponentVisible(LIGHT_PAGE_SWITCH_MODE_BUTTON_NAME, false);

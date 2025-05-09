@@ -1,0 +1,188 @@
+{% load dict_lookup %}
+{% load jsonify %}
+{% load concat %}
+{% load set_var %}
+
+<li id="nspanel_entities_page_{{ page.id }}" data-is-scenes-page="{{ is_scenes_page }}" data-page-id="{{ page.id }}" hx-swap-oob="true" class="bg-base-200 float-left m-2 rounded-box p-3 grid grid-cols-2 {% if page.page_type == 12 %}grid-rows-6{% elif page.page_type == 4 %}grid-rows-2{% else %}grid-rows-4{% endif %} gap-4 w-full max-w-[24rem] aspect-square indicator nspanel-entities-page">
+    {% for i in range %}
+        <form class="draggable-entity-item-target-slot nspanel-entities-page-entity-slot rounded-box" data-page-id="{{ page.id }}" data-slot-id="{{ i }}" hx-indicator="#modal_loading" hx-post="{% url 'htmx_partial_move_entity' %}" hx-trigger="entity_moved">
+            <input type="hidden" name="page_id" value="{{ page.id }}">
+            <input type="hidden" name="slot_id" value="{{ i }}">
+            <input type="hidden" name="new_entity_type">
+            <input type="hidden" name="new_entity_id">
+            {% if entities|dict_lookup:i %}
+                {% with entity=entities|dict_lookup:i %}
+                    <div class="draggable-entity-item bg-neutral/50 rounded-box text-neutral-content flex items-center justify-center indicator w-full h-full hover:outline-1 hover:outline-accent cursor-grab" title="Drag & drop to move this entity" data-entity-type="{{ entity.type }}" data-entity-id="{{ entity.id }}">
+                        {% if entity.type == "Light" %}
+                            {% url "htmx_partial_edit_light_entity" light_id=entity.id as edit_url %}
+                        {% elif entity.type == "Switch" %}
+                            {% url "htmx_partial_edit_switch_entity" switch_id=entity.id as edit_url %}
+                        {% elif entity.type == "Scene" %}
+                            {% url "htmx_partial_edit_scene_entity" scene_id=entity.id as edit_url %}
+                        {% else %}
+                            <span class="font-bold text-error">UNKNOWN ENTITY TYPE {{ entity.type }}</span>
+                        {% endif %}
+
+                        <!-- Box indicators/buttons -->
+                        {% if entity.controlled_by_nspanel_main_page %}
+                            <span class="indicator-item badge badge-secondary me-16 w-6 h-6 flex items-center justify-center" title="Controlled from main page"><span class="mdi mdi-home"></span></span>
+                        {% endif %}
+                        <button class="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center cursor-pointer" title="Edit entity" hx-swap="none" hx-get="{{ edit_url }}"><span class="mdi mdi-pencil"></span></button>
+                        <button class="indicator-item badge badge-warning hover:badge-error w-6 h-6 flex items-center justify-center cursor-pointer" title="Remove entity from page/room" hx-confirm="Do you wish to remove '{{ entity.friendly_name }}' entity?" hx-swap="none" hx-get="{% url 'htmx_partial_remove_entity_from_page_slot' page_id=page.id slot_id=i %}"><span class="mdi mdi-close"></span></button>
+
+                        <!-- "Status badge" (dot) before name to indicate entity controller -->
+                        {% if entity.controller == "home_assistant" %}
+                            <div class="status status-info shadow-none absolute top-2 left-2 cursor-default" title="Controlled by Home Assistant"></div>
+                        {% elif entity.controller == "openhab" %}
+                            <div class="status status-warning shadow-none absolute top-2 left-2 cursor-default" title="Controlled by OpenHAB"></div>
+                        {% elif entity.controller == "nspm_scene" or entity.controller == "nspm" %}
+                            <div class="status status-accent shadow-none absolute top-2 left-2 cursor-default" title="Controlled by NSPanel Manager"></div>
+                        {% else %}
+                            <div class="status status-error animate-ping absolute top-2 left-2 cursor-default" title="Unknown controller"></div>
+                        {% endif %}
+
+                        <span class="text-sm m-2">{{ entity.friendly_name }}</span>
+                    </div>
+                {% endwith %}
+            {% else %}
+                <div class="rounded-box border-neutral/50 border-dashed border-2 flex items-center justify-center indicator w-full h-full">
+                    {% if page.is_scenes_page %}
+                        <span class="font-thin italic">No scene set</span>
+                    {% else %}
+                        <span class="font-thin italic">No entitiy set</span>
+                    {% endif %}
+
+                    {% if page.room %}
+                        {% concat_all '{"page_id": ' page.id ', "page_slot": ' i ', "room_id": ' page.room.id ', "is_scenes_page": "' is_scenes_page '", "is_global_scenes_page": "' is_global_scenes_page '"}' as action_args %}
+                    {% else %}
+                        {% concat_all '{"page_id": ' page.id ', "page_slot": ' i ', "is_scenes_page": "' is_scenes_page '", "is_global_scenes_page": "' is_global_scenes_page '"}' as action_args %}
+                    {% endif %}
+                    {% if page.is_scenes_page %}
+                        <button class="btn btn-neutral hover:btn-success btn-xs btn-circle ms-2 flex items-center justify-center" title="Add entitiy" hx-swap="none" hx-get='{% url "htmx_partial_select_new_entity_source" action="ADD_SCENE_TO_NSPANEL_ENTITY_PAGE" action_args=action_args %}' hx-indicator="#modal_loading">
+                            <span class="mdi mdi-plus"></span>
+                        </button>
+                    {% else %}
+                        <button class="btn btn-neutral hover:btn-success btn-xs btn-circle ms-2 flex items-center justify-center" title="Add entitiy" hx-swap="none" hx-get='{% url "htmx_partial_select_new_entity_type" action="ADD_ENTITY_TO_NSPANEL_ENTITY_PAGE" action_args=action_args %}' hx-indicator="#modal_loading">
+                            <span class="mdi mdi-plus"></span>
+                        </button>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </form>
+    {% endfor %}
+
+    <button {% if total_num_entity_pages <= 1 %}disabled="disabled"{% endif %} class="indicator-item indicator-bottom indicator-end badge not-disabled:badge-neutral not-disabled:hover:badge-error w-6 h-6 flex items-center justify-center not-disabled:cursor-pointer" hx-swap="outerHTML" title="{% if total_num_entity_pages <= 1 %}Cannot delete last page{% else %}Delete page{% endif %}" hx-delete="{% url 'htmx_partial_delete_entities_page' page_id=page.id %}" hx-confirm='Do you want to delete this entity page? <p class="font-bold text-warning">All entities on this page will be removed.</p>'>✕</button>
+    <button class="indicator-item indicator-bottom indicator-end badge badge-info w-6 h-6 flex items-center justify-center me-8 cursor-pointer" hx-swap="none" title="Edit page" hx-get="{% url 'htmx_partial_edit_entities_page' page_id=page.id %}"><span class="mdi mdi-pencil"></span></button>
+    <span class="indicator-item indicator-bottom indicator-center badge badge-neutral hover:badge-info w-6 h-6 flex items-center justify-center nspanel-entities-page-move-handle cursor-grab" title="Drag & drop to move this page"><span class="mdi mdi-hand-back-right"></span></span>
+
+    <script>
+      function get_overlap_area(element1, element2) {
+        var rect1 = element1[0].getBoundingClientRect();
+        var rect2 = element2[0].getBoundingClientRect();
+
+        const overlapX = Math.max(0, Math.min(rect1.right, rect2.right) - Math.max(rect1.left, rect2.left));
+        const overlapY = Math.max(0, Math.min(rect1.bottom, rect2.bottom) - Math.max(rect1.top, rect2.top));
+        return overlapX * overlapY;
+      }
+
+      $(".draggable-entity-item").draggable({
+        snap: ".draggable-entity-item-target-slot",
+        snapMode: "inner",
+        start: function() {
+          $(this).parent().addClass("border border-dashed border-accent border-2");
+          $(this).addClass("bg-opacity-100 border-info z-10");
+        },
+        drag: function() {
+          var max_overlap_element = null;
+          var max_overlap_area = 0;
+          $(".draggable-entity-item-target-slot").each((index, element) => {
+            if($(element).data('slot-id') != $(this).parent().data('slot-id') || $(element).data('page-id') != $(this).parent().data('page-id')) {
+              var overlap_area = get_overlap_area($(this), $(element));
+              if (overlap_area > max_overlap_area) {
+                max_overlap_element = element;
+                max_overlap_area = overlap_area;
+              }
+            }
+          });
+
+          var max_overlap_page = null;
+          var max_overlap_page_area = 0;
+          $(".nspanel-entities-page").each((index, element) => {
+            if($(element).data('slot-id') != $(this).parent().data('slot-id') || $(element).data('page-id') != $(this).parent().data('page-id')) {
+              var overlap_area = get_overlap_area($(this), $(element));
+              if (overlap_area > max_overlap_page_area) {
+                max_overlap_page = element;
+                max_overlap_page_area = overlap_area;
+              }
+            }
+          });
+
+          if(max_overlap_page != null) {
+            var smallest_area = 0;
+            var smallest_area_element = 0;
+            $(max_overlap_page).children('.nspanel-entities-page-entity-slot').each((index, element) => {
+              var rect = element.getBoundingClientRect();
+              var area = rect.width * rect.height;
+              if(smallest_area == 0 || area < smallest_area) {
+                smallest_area = area;
+                smallest_area_element = element;
+              }
+            });
+            $(this).height($(smallest_area_element).height());
+          }
+
+
+          var max_overlap_element = null;
+          var max_overlap_area = 0;
+          $(".draggable-entity-item-target-slot").each((index, element) => {
+            if($(element).data('slot-id') != $(this).parent().data('slot-id') || $(element).data('page-id') != $(this).parent().data('page-id')) {
+              var overlap_area = get_overlap_area($(this), $(element));
+              if (overlap_area > max_overlap_area) {
+                max_overlap_element = element;
+                max_overlap_area = overlap_area;
+              }
+            }
+          });
+
+          var jq_max_overlap_element = $(max_overlap_element);
+          $(".draggable-entity-item-target-slot").each((index, element) => {
+            if($(element).data('slot-id') == jq_max_overlap_element.data('slot-id') && $(element).data('page-id') == jq_max_overlap_element.data('page-id')) {
+              jq_max_overlap_element.addClass("border-2 border-info border-dashed");
+              jq_max_overlap_element.removeClass("border-neutral");
+            } else if($(element).data('slot-id') == $(this).parent().data('slot-id') && $(element).data('page-id') == $(this).parent().data('page-id')) {
+              // Do nothing, this is the slot it is currently in and the styles for that slot is handled in start/stop functions.
+            } else {
+              $(element).addClass("border-neutral");
+              $(element).removeClass("border-info border-2");
+            }
+          });
+        },
+        stop: function() {
+          $(this).parent().removeClass("border border-dashed border-2");
+          $(this).removeClass("bg-opacity-100 border-info");
+          var max_overlap_element = null;
+          var max_overlap_area = 0;
+          $(".draggable-entity-item-target-slot").each((index, element) => {
+            if($(element).data('slot-id') != $(this).parent().data('slot-id') || $(element).data('page-id') != $(this).parent().data('page-id')) {
+              var overlap_area = get_overlap_area($(this), $(element));
+              if (overlap_area > max_overlap_area) {
+                max_overlap_element = element;
+                max_overlap_area = overlap_area;
+              }
+            }
+          });
+          if (max_overlap_element != null) {
+            // Update data to send over to Django for updating actual pages
+            $(max_overlap_element).children('input[name="new_entity_type"]').val($(this).data('entity-type'));
+            $(max_overlap_element).children('input[name="new_entity_id"]').val($(this).data('entity-id'));
+
+            htmx.trigger(max_overlap_element, "entity_moved", {});
+          } else {
+            $(this).attr("style", ""); // Reset to original location
+          }
+        },
+      });
+
+      attach_cursor_change_events();
+    </script>
+</li>

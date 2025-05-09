@@ -1,26 +1,32 @@
+#include "command_manager/command_manager.hpp"
+#include "database_manager/database_manager.hpp"
+#include "entity/entity.hpp"
 #include "openhab_manager/openhab_manager.hpp"
 #include "spdlog/sinks/ansicolor_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "websocket_server/websocket_server.hpp"
 #include <boost/algorithm/minmax.hpp>
+#include <cassert>
 #include <chrono>
+#include <csignal>
 #include <cstddef>
 #include <cstdlib>
 #include <ctime>
+#include <entity_manager/entity_manager.hpp>
 #include <filesystem>
+#include <home_assistant_manager/home_assistant_manager.hpp>
+#include <ipc_handler/ipc_handler.hpp>
 #include <memory>
+#include <mqtt_manager/mqtt_manager.hpp>
+#include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <signal.h>
 #include <spdlog/common.h>
 #include <spdlog/spdlog.h>
+#include <sqlite_orm/sqlite_orm.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <thread>
-
-#include <entity_manager/entity_manager.hpp>
-#include <home_assistant_manager/home_assistant_manager.hpp>
-#include <mqtt_manager/mqtt_manager.hpp>
-#include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <vector>
 
 #define SIGUSR1 10
@@ -33,6 +39,11 @@ void sigusr1_handler(int signal) {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     MqttManagerConfig::load();
+    MQTT_Manager::reload_config();
+    HomeAssistantManager::reload_config();
+    OpenhabManager::reload_config();
+    EntityManager::load_entities();
+
     MQTT_Manager::publish("nspanel/config/reload", "1");
     SPDLOG_INFO("Reload signal processing completed.");
   }
@@ -52,26 +63,30 @@ void publish_time_and_date() {
     std::string date_str;
 
     std::time_t time = std::time({});
-    std::strftime(date_buffer, 100, MqttManagerConfig::date_format.c_str(), std::localtime(&time));
+    std::strftime(date_buffer, 100, MqttManagerConfig::get_settings().date_format.c_str(), std::localtime(&time));
     date_str = date_buffer;
 
-    if (MqttManagerConfig::clock_us_style) {
-      std::strftime(time_buffer, 20, "%I:%M", std::localtime(&time));
-      std::strftime(ampm_buffer, 20, "%p", std::localtime(&time));
+    if (MqttManagerConfig::get_settings().clock_24_hour_format) {
+      std::strftime(time_buffer, 20, "%H:%M", std::localtime(&time));
       time_str = time_buffer;
     } else {
-      std::strftime(time_buffer, 20, "%H:%M", std::localtime(&time));
+      std::strftime(time_buffer, 20, "%I:%M", std::localtime(&time));
+      std::strftime(ampm_buffer, 20, "%p", std::localtime(&time));
       time_str = time_buffer;
     }
 
     if (time_str.compare(last_time_published) != 0) {
-      MQTT_Manager::publish("nspanel/status/time", time_buffer, true);
-      MQTT_Manager::publish("nspanel/status/ampm", ampm_buffer, true);
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/time", MqttManagerConfig::get_settings().manager_address), time_buffer, true);
+      if (MqttManagerConfig::get_settings().clock_24_hour_format) {
+        MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_settings().manager_address), "", true);
+      } else {
+        MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_settings().manager_address), ampm_buffer, true);
+      }
       last_time_published = time_buffer;
     }
 
     if (date_str.compare(last_date_published) != 0) {
-      MQTT_Manager::publish("nspanel/status/date", date_buffer, true);
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/date", MqttManagerConfig::get_settings().manager_address), date_buffer, true);
       last_date_published = date_buffer;
     }
 
@@ -107,20 +122,20 @@ int main(void) {
   auto combined_logger = std::make_shared<spdlog::logger>("combined_logger", begin(spdlog_sinks), end(spdlog_sinks));
   spdlog::register_logger(combined_logger);
   spdlog::set_default_logger(combined_logger);
-
   spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%s:%#] [%t] %v");
 
-  std::string log_level = std::getenv("LOG_LEVEL");
-  if (log_level.size()) {
-    if (log_level.compare("error") == 0) {
+  char *log_level = std::getenv("LOG_LEVEL");
+  if (log_level != NULL) {
+    std::string log_level_str = log_level;
+    if (log_level_str.compare("error") == 0) {
       spdlog::set_level(spdlog::level::err);
-    } else if (log_level.compare("warning") == 0) {
+    } else if (log_level_str.compare("warning") == 0) {
       spdlog::set_level(spdlog::level::warn);
-    } else if (log_level.compare("info") == 0) {
+    } else if (log_level_str.compare("info") == 0) {
       spdlog::set_level(spdlog::level::info);
-    } else if (log_level.compare("debug") == 0) {
+    } else if (log_level_str.compare("debug") == 0) {
       spdlog::set_level(spdlog::level::debug);
-    } else if (log_level.compare("trace") == 0) {
+    } else if (log_level_str.compare("trace") == 0) {
       spdlog::set_level(spdlog::level::trace);
     } else {
       SPDLOG_INFO("No log level was set by 'LOG_LEVEL' environment variable. Will assume level debug.");
@@ -140,61 +155,58 @@ int main(void) {
   sigUsr1Handler.sa_flags = 0;
   sigaction(SIGUSR1, &sigUsr1Handler, NULL);
 
-  std::thread mqtt_manager_thread;
+  // Ignore SIGPIPE signals to prevent crashes when writing/reading to a closed socket.
+  signal(SIGPIPE, SIG_IGN);
+
+  if (sqlite3_threadsafe() == 0) {
+    SPDLOG_WARN("SQLite3 compiled NOT threadsafe, ie. without mutexes!");
+  } else {
+    SPDLOG_INFO("SQLite3 seems to be compiled with threadsafe mutexes. Setting: {}", sqlite3_threadsafe());
+  }
+  database_manager::init();
+
+  // Load config from environment/manager
+  MqttManagerConfig::load();   // Load all entities, rooms and panels.
+  MQTTManagerWeather::start(); // Start thread to handle weather updates
+
+  IPCHandler::start(); // Handle IPC (ZMQ) messages
+
+  MQTT_Manager::init(); // Initialize MQTT manager to handle everything to do with MQTT
+
   std::thread home_assistant_manager_thread;
   std::thread openhab_manager_thread;
   std::thread websocket_server_thread;
   std::thread time_and_date_thread;
 
-  // Load config from environment/manager
-  EntityManager::init();
-  MqttManagerConfig::load();
-
   SPDLOG_INFO("Starting Websocket Server on port 8002.");
   websocket_server_thread = std::thread(WebsocketServer::start);
 
-  if (MqttManagerConfig::mqtt_server.empty() || MqttManagerConfig::mqtt_port == 0) {
-    SPDLOG_CRITICAL("No MQTT server or port configured! Will exit with code 1.");
-    return 1;
-  } else if (MqttManagerConfig::manager_address.empty()) {
-    SPDLOG_CRITICAL("No manager address configured. Will exit with code 2.");
-    return 2;
-  } else if (MqttManagerConfig::manager_port == 0) {
-    SPDLOG_CRITICAL("No manager port configured. Will exit with code 3.");
-    return 3;
-  }
-
   SPDLOG_INFO("Config loaded. Starting components.");
-  mqtt_manager_thread = std::thread(MQTT_Manager::connect);
-
-  while (!MQTT_Manager::is_connected()) {
-    SPDLOG_INFO("Waiting for MQTT to connect before proceeding.");
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  }
 
   time_and_date_thread = std::thread(publish_time_and_date);
-  if (!MqttManagerConfig::home_assistant_address.empty() && !MqttManagerConfig::home_assistant_access_token.empty()) {
-    SPDLOG_INFO("Home Assistant address and access token configured. Starting Home Assistant component.");
-    home_assistant_manager_thread = std::thread(HomeAssistantManager::connect);
-  } else {
-    SPDLOG_WARN("Home Assistant address and/or token missing. Won't start Home Assistant component.");
-  }
+  home_assistant_manager_thread = std::thread(HomeAssistantManager::connect);
+  openhab_manager_thread = std::thread(OpenhabManager::connect);
 
-  if (!MqttManagerConfig::openhab_address.empty() && !MqttManagerConfig::openhab_access_token.empty()) {
-    SPDLOG_INFO("Openhab address and access token configured. Starting Openhab component.");
-    openhab_manager_thread = std::thread(OpenhabManager::connect);
-  } else {
-    SPDLOG_WARN("OpenHAB address and/or token missing. Won't start OpenHAB component.");
-  }
+  SPDLOG_INFO("Home Assistant and/or OpenHAB initialized. Will load entities.");
+  EntityManager::init();
+
+  SPDLOG_INFO("Entities loaded, start listening for commands.");
+  CommandManager::init();
 
   // Wait for threads to exit
-  mqtt_manager_thread.join();
   if (home_assistant_manager_thread.joinable()) {
     home_assistant_manager_thread.join();
   }
   if (openhab_manager_thread.joinable()) {
-    home_assistant_manager_thread.join();
+    openhab_manager_thread.join();
   }
 
-  return EXIT_SUCCESS;
+  // Sleep forever in main thread as to keep manager alive.
+  // Config changes may come from web interface that will restart threads that has exited as they have no
+  // settings to load.
+  while (true) {
+    std::this_thread::sleep_for(std::chrono::minutes(1));
+  }
+
+  return EXIT_FAILURE;
 }

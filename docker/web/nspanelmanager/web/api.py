@@ -14,25 +14,11 @@ import signal
 import subprocess
 import environ
 import os
+import logging
 
+from .apps import restart_mqtt_manager_process
 from .models import NSPanel, Room, Light, LightState, Scene, RelayGroup
-from .apps import start_mqtt_manager
 from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default, set_setting_value
-
-
-def restart_mqtt_manager_process():
-    for proc in psutil.process_iter():
-        if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
-            print("Killing running MQTTManager")
-            proc.kill()
-    start_mqtt_manager()
-
-
-def send_mqttmanager_reload_command():
-    for proc in psutil.process_iter():
-        if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
-            print("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
-            os.kill(proc.pid, signal.SIGUSR1)
 
 
 def get_file_md5sum(filename):
@@ -47,27 +33,27 @@ def get_mqtt_manager_config(request):
     environment = environ.Env()
 
     return_json = {
-        "color_temp_min": int(get_setting_with_default("color_temp_min", "2000")),
-        "color_temp_max": int(get_setting_with_default("color_temp_max", "6000")),
-        "openhab_brightness_channel_name": get_setting_with_default("openhab_brightness_channel_name", ""),
-        "openhab_brightness_channel_min": get_setting_with_default("openhab_brightness_channel_min", 0),
-        "openhab_brightness_channel_max": get_setting_with_default("openhab_brightness_channel_max", 255),
-        "openhab_color_temp_channel_name": get_setting_with_default("openhab_color_temp_channel_name", ""),
-        "openhab_rgb_channel_name": get_setting_with_default("openhab_rgb_channel_name", ""),
-        "clock_us_style": get_setting_with_default("clock_us_style", False) == "True",
-        "use_fahrenheit": get_setting_with_default("use_fahrenheit", False) == "True",
-        "turn_on_behavior": get_setting_with_default("turn_on_behavior", "color_temp"),
-        "max_log_buffer_size": get_setting_with_default("max_log_buffer_size", "10"),
-        "manager_address": get_setting_with_default("manager_address", ""),
-        "manager_port": get_setting_with_default("manager_port", ""),
-        "date_format": get_setting_with_default("date_format", "%a %d/%m %Y"),
-        "outside_temp_sensor_provider": get_setting_with_default("outside_temp_sensor_provider", ""),
-        "outside_temp_sensor_entity_id": get_setting_with_default("outside_temp_sensor_entity_id", ""),
-        "weather_location_latitude": get_setting_with_default("location_latitude", ""),
-        "weather_location_longitude": get_setting_with_default("location_longitude", ""),
-        "weather_wind_speed_format": get_setting_with_default("wind_speed_format", "kmh"),
-        "weather_precipitation_format": get_setting_with_default("precipitation_format", "mm"),
-        "weather_update_interval": int(get_setting_with_default("weather_update_interval", 10)),
+        "color_temp_min": int(get_setting_with_default("color_temp_min")),
+        "color_temp_max": int(get_setting_with_default("color_temp_max")),
+        "openhab_brightness_channel_name": get_setting_with_default("openhab_brightness_channel_name"),
+        "openhab_brightness_channel_min": get_setting_with_default("openhab_brightness_channel_min"),
+        "openhab_brightness_channel_max": get_setting_with_default("openhab_brightness_channel_max"),
+        "openhab_color_temp_channel_name": get_setting_with_default("openhab_color_temp_channel_name"),
+        "openhab_rgb_channel_name": get_setting_with_default("openhab_rgb_channel_name"),
+        "clock_us_style": get_setting_with_default("clock_us_style") == True,
+        "use_fahrenheit": get_setting_with_default("use_fahrenheit") == True,
+        "turn_on_behavior": get_setting_with_default("turn_on_behavior"),
+        "max_log_buffer_size": get_setting_with_default("max_log_buffer_size"),
+        "manager_address": get_setting_with_default("manager_address"),
+        "manager_port": get_setting_with_default("manager_port"),
+        "date_format": get_setting_with_default("date_format"),
+        "outside_temp_sensor_provider": get_setting_with_default("outside_temp_sensor_provider"),
+        "outside_temp_sensor_entity_id": get_setting_with_default("outside_temp_sensor_entity_id"),
+        "weather_location_latitude": get_setting_with_default("location_latitude"),
+        "weather_location_longitude": get_setting_with_default("location_longitude"),
+        "weather_wind_speed_format": get_setting_with_default("wind_speed_format"),
+        "weather_precipitation_format": get_setting_with_default("precipitation_format"),
+        "weather_update_interval": int(get_setting_with_default("weather_update_interval")),
     }
 
     if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
@@ -176,7 +162,6 @@ def get_nspanels_warnings(request):
     md5_us_tft_file = get_file_md5sum("gui_us.tft")
     nspanels = []
 
-    print(md5_firmware)
 
     for nspanel in NSPanel.objects.all():
         panel_info = {}
@@ -200,57 +185,60 @@ def get_nspanels_warnings(request):
         nspanels.append(panel_info)
     return JsonResponse({"panels": nspanels})
 
-
+# TODO: Rework how available entities are gathered
 def get_all_available_entities(request):
     # TODO: Implement manually entered entities
     home_assistant_type_filter = []
-    if "home_assistant_type_filter" in request.GET:
-        home_assistant_type_filter = json.loads(
-            request.GET["home_assistant_type_filter"])
-
     openhab_type_filter = []
-    if "openhab_type_filter" in request.GET:
-        openhab_type_filter = json.loads(
-            request.GET["openhab_type_filter"])
+    if "filter" in request.GET:
+        filter_data = json.loads(request.GET["filter"])
+        if "home_assistant_type_filter" in filter_data:
+            home_assistant_type_filter = filter_data["home_assistant_type_filter"]
+
+        if "openhab_type_filter" in filter_data:
+            openhab_type_filter = filter_data["openhab_type_filter"]
 
     # Get Home Assistant lights
-    return_json = {}
-    return_json["home_assistant_entities"] = []
-    return_json["openhab_entities"] = []
-    return_json["manual_entities"] = []
-    return_json["errors"] = []
+    return_json = {
+        "entities": [],
+        "errors": []
+    }
 
     # Home Assistant
-    if get_setting_with_default("home_assistant_token", "") != "" and get_setting_with_default("home_assistant_address", "") != "":
+    if get_setting_with_default("home_assistant_token") != "" and get_setting_with_default("home_assistant_address") != "":
         home_assistant_request_headers = {
-            "Authorization": "Bearer " + get_setting_with_default("home_assistant_token", ""),
+            "Authorization": "Bearer " + get_setting_with_default("home_assistant_token"),
             "content-type": "application/json",
         }
         try:
             environment = environ.Env()
             if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
-                home_assistant_api_address = get_setting_with_default(
-                    "home_assistant_address", "") + "/core/api/states"
+                home_assistant_api_address = get_setting_with_default("home_assistant_address") + "/core/api/states"
             else:
-                home_assistant_api_address = get_setting_with_default(
-                    "home_assistant_address", "") + "/api/states"
-            print("Trying to get Home Assistant entities via api address: " +
-                  home_assistant_api_address)
-            home_assistant_response = requests.get(
-                home_assistant_api_address, headers=home_assistant_request_headers, timeout=5, verify=False)
+                home_assistant_api_address = get_setting_with_default("home_assistant_address") + "/api/states"
+            logging.debug("Trying to get Home Assistant entities via api address: " + home_assistant_api_address)
+            home_assistant_response = requests.get(home_assistant_api_address, headers=home_assistant_request_headers, timeout=5, verify=False)
             if home_assistant_response.status_code == 200:
                 for entity in home_assistant_response.json():
                     entity_type = entity["entity_id"].split(".")[0]
                     if (len(home_assistant_type_filter) > 0 and entity_type in home_assistant_type_filter) or len(home_assistant_type_filter) == 0:
                         data = {
+                            "type": "home_assistant",
                             "label": entity["entity_id"],
                             "entity_id": entity["entity_id"],
-                            "items": []
+                            "raw_data": entity,
                         }
                         if "friendly_name" in entity["attributes"]:
                             data["label"] = entity["attributes"]["friendly_name"]
 
-                        return_json["home_assistant_entities"].append(data)
+                        if data["entity_id"].startswith("light."):
+                            data["entity_type"] = "light"
+                        elif data["entity_id"].startswith("switch."):
+                            data["entity_type"] = "switch"
+                        else:
+                            logging.warn("Unknown entity type for entity: " + data["entity_id"])
+
+                        return_json["entities"].append(data)
             else:
                 return_json["errors"].append(
                     "Failed to get Home Assistant lights, got return code: " + str(home_assistant_response.status_code))
@@ -264,16 +252,16 @@ def get_all_available_entities(request):
         print("No home assistant configuration values. Will not gather Home Assistant entities.")
 
     # OpenHAB
-    if get_setting_with_default("openhab_token", "") != "" and get_setting_with_default("openhab_address", "") != "":
+    if get_setting_with_default("openhab_token") != "" and get_setting_with_default("openhab_address") != "":
         # TODO: Sort out how to map channels from items to the correct POST request when MQTT is received
         openhab_request_headers = {
-            "Authorization": "Bearer " + get_setting_with_default("openhab_token", ""),
+            "Authorization": "Bearer " + get_setting_with_default("openhab_token"),
             "content-type": "application/json",
         }
         try:
             if "things" in openhab_type_filter:
                 openhab_response = requests.get(get_setting_with_default(
-                    "openhab_address", "") + "/rest/things", headers=openhab_request_headers, verify=False)
+                    "openhab_address") + "/rest/things", headers=openhab_request_headers, verify=False)
 
                 if openhab_response.status_code == 200:
                     for entity in openhab_response.json():
@@ -293,10 +281,13 @@ def get_all_available_entities(request):
                                             items.append(linkedItem)
                             if add_entity:
                                 # return_json["openhab_lights"].append(entity["label"])
-                                return_json["openhab_entities"].append({
+                                return_json["entities"].append({
+                                    "type": "openhab",
+                                    "openhab_type": "thing",
                                     "label": entity["label"],
                                     "entity_id": entity["label"],
-                                    "items": items
+                                    "items": items,
+                                    "raw_data": entity,
                                 })
                 else:
                     return_json["errors"].append(
@@ -305,14 +296,17 @@ def get_all_available_entities(request):
                           str(openhab_response.status_code))
             elif "rules" in openhab_type_filter:
                 openhab_response = requests.get(get_setting_with_default(
-                    "openhab_address", "") + "/rest/rules", headers=openhab_request_headers, verify=False)
+                    "openhab_address") + "/rest/rules", headers=openhab_request_headers, verify=False)
 
                 if openhab_response.status_code == 200:
                     for entity in openhab_response.json():
                         if "name" in entity:
-                            return_json["openhab_entities"].append({
+                            return_json["entities"].append({
+                                "type": "openhab",
+                                "openhab_type": "rule",
                                 "label": entity["name"],
                                 "entity_id": entity["uid"],
+                                "raw_data": entity,
                                 "items": []
                             })
                 else:
@@ -327,7 +321,7 @@ def get_all_available_entities(request):
     else:
         print("No OpenHAB configuration values. Will not gather OpenHAB entities.")
 
-    return JsonResponse(return_json)
+    return return_json
 
 
 def get_client_ip(request):
@@ -343,7 +337,6 @@ def get_client_ip(request):
 def register_nspanel(request):
     """Update the already existing NSPanel OR create a new one"""
     data = json.loads(request.body)
-    print(data)
     if "mac" in data:
         data["mac_address"] = data["mac"]
     if "mac_origin" in data:
@@ -372,6 +365,7 @@ def register_nspanel(request):
                 fs.open("data_file.bin").read()).hexdigest()
         else:
             new_panel.md5_data_file = data["md5_data_file"]
+
     # TFT file will never be flashed by default with a new panel, always set the MD5 from registration
     if "md5_tft_file" in data:
         new_panel.md5_tft_file = data["md5_tft_file"]
@@ -403,8 +397,6 @@ def delete_panel(request, panel_id: int):
 
 
 def get_nspanel_config(request):
-    print(request)
-    print(request.GET)
     try:
         logging.info("Trying to load config for NSPanel with MAC " + request.GET['mac'])
         nspanel = NSPanel.objects.get(mac_address=request.GET["mac"])
@@ -414,35 +406,33 @@ def get_nspanel_config(request):
         base["default_page"] = get_nspanel_setting_with_default(
             nspanel.id, "default_page", "0")
         base["raise_to_100_light_level"] = get_setting_with_default(
-            "raise_to_100_light_level", 95)
+            "raise_to_100_light_level")
         base["color_temp_min"] = get_setting_with_default(
-            "color_temp_min", 2000)
+            "color_temp_min")
         base["color_temp_max"] = get_setting_with_default(
-            "color_temp_max", 6000)
+            "color_temp_max")
         base["reverse_color_temp"] = get_setting_with_default(
-            "reverse_color_temp", False)
+            "reverse_color_temp")
         base["min_button_push_time"] = get_setting_with_default(
-            "min_button_push_time", 50)
+            "min_button_push_time")
         base["button_long_press_time"] = get_setting_with_default(
-            "button_long_press_time", 5000)
+            "button_long_press_time")
         base["special_mode_trigger_time"] = get_setting_with_default(
-            "special_mode_trigger_time", 300)
+            "special_mode_trigger_time")
         base["special_mode_release_time"] = get_setting_with_default(
-            "special_mode_release_time", 5000)
-        base["mqtt_ignore_time"] = get_setting_with_default(
-            "mqtt_ignore_time", 3000)
+            "special_mode_release_time")
         base["screen_dim_level"] = get_nspanel_setting_with_default(
-            nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level", 100))
+            nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level"))
         base["screensaver_dim_level"] = get_nspanel_setting_with_default(
-            nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level", 0))
+            nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level"))
         base["screensaver_activation_timeout"] = get_nspanel_setting_with_default(
-            nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout", 30000))
+            nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout"))
         base["screensaver_mode"] = get_nspanel_setting_with_default(
-            nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode", "with_background"))
+            nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode"))
         base["clock_us_style"] = get_setting_with_default(
-            "clock_us_style", "False")
+            "clock_us_style")
         base["use_fahrenheit"] = get_setting_with_default(
-            "use_fahrenheit", "False")
+            "use_fahrenheit")
         base["is_us_panel"] = get_nspanel_setting_with_default(
             nspanel.id, "is_us_panel", "False")
         base["lock_to_default_room"] = get_nspanel_setting_with_default(
@@ -537,6 +527,7 @@ def get_light_config(request, light_id: int):
     return JsonResponse(return_json)
 
 
+# TODO: Remove set_panel_status as it is no longer used. All this data is stored in memory in the MQTTManager application.
 @csrf_exempt
 def set_panel_status(request, panel_mac: str):
     nspanels = NSPanel.objects.filter(mac_address=panel_mac)
@@ -554,6 +545,7 @@ def set_panel_status(request, panel_mac: str):
 
 
 @csrf_exempt
+# TODO: Remove set_panel_status as it is no longer used. All this data is stored in memory in the MQTTManager application.
 def set_panel_online_status(request, panel_mac: str):
     nspanels = NSPanel.objects.filter(mac_address=panel_mac)
     if nspanels.exists():
@@ -590,36 +582,6 @@ def get_scenes(request):
             })
         return_json["scenes"].append(scene_info)
     return JsonResponse(return_json)
-
-
-@csrf_exempt
-def save_scene(request):
-    data = json.loads(request.body)
-    scene = Scene.objects.filter(id=data["scene_id"]).first()
-    if scene:
-        scene.lightstate_set.all().delete()  # Remove all old states
-        for light_state in data["light_states"]:
-            light = Light.objects.filter(id=light_state["light_id"]).first()
-            if light:
-                new_state = LightState()
-                new_state.light = light
-                new_state.scene = scene
-                if light_state["mode"] == "dimmer":
-                    new_state.color_mode = "dimmer"
-                    new_state.light_level = light_state["level"]
-                    new_state.color_temperature = light_state["color_temp"]
-                elif light_state["mode"] == "color":
-                    new_state.color_mode = "color"
-                    new_state.light_level = light_state["level"]
-                    new_state.hue = light_state["hue"]
-                    new_state.saturation = light_state["saturation"]
-                new_state.save()
-            else:
-                logging.error("ERROR: Couldn't find a light with ID " +
-                              light_state["light_id"] + ". Will skip light!")
-        return HttpResponse("OK", status=200)
-    else:
-        return HttpResponse("Scene does not exist!", status=500)
 
 
 @csrf_exempt

@@ -36,8 +36,11 @@ public:
   /// @brief The port to access to manager at
   uint16_t manager_port = 8000;
 
+  /// @brief The topic where the MQTTManager pushes the current config for this panel
+  std::string nspanel_config_topic;
+
   /// @brief The logging level set for runtime
-  uint8_t logging_level = 3;
+  uint8_t logging_level = 4;
 
   /// @brief The hostname of this device
   std::string wifi_hostname = "";
@@ -82,6 +85,8 @@ public:
   std::string mqtt_relay2_cmd_topic = "";
   /// @brief The MQTT topic to send on/off state updates for relay 2
   std::string mqtt_relay2_state_topic = "";
+  /// @brief The MQTT topic to send command to the MQTTManager on
+  std::string mqttmanager_command_topic = "nspanel/mqttmanager_TODO/command";
 
   /// @brief The upload baud rate for the serial connection when uploading a new TFT file
   uint32_t tft_upload_baud = 115200;

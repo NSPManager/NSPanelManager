@@ -4,15 +4,13 @@
 #include <HomePage.hpp>
 #include <InterfaceConfig.hpp>
 #include <InterfaceManager.hpp>
-#include <Light.hpp>
-#include <LightManager.hpp>
 #include <LightPage.hpp>
 #include <MqttLog.hpp>
+#include <MqttManager.hpp>
 #include <NSPanel.hpp>
 #include <PageManager.hpp>
-#include <Room.hpp>
+#include <ReadBufferFixedSize.h>
 #include <RoomManager.hpp>
-#include <Scene.hpp>
 #include <TftDefines.h>
 #include <WebManager.hpp>
 #include <WiFi.h>
@@ -22,9 +20,11 @@
 void InterfaceManager::init() {
   this->instance = this;
   this->_processMqttMessages = true;
+  this->_config_loaded = false;
+  this->_new_config = new PROTOBUF_NSPANEL_CONFIG;
   RoomManager::init();
   MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1");
-  xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 5000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
+  xTaskCreatePinnedToCore(_taskLoadConfigAndInit, "taskLoadConfigAndInit", 10000, NULL, 1, NULL, CONFIG_ARDUINO_RUNNING_CORE);
 }
 
 void InterfaceManager::stop() {
@@ -37,16 +37,17 @@ void InterfaceManager::stop() {
       InterfaceManager::_taskHandleSpecialModeTimer = NULL;
     }
 
-    for (Room *room : RoomManager::rooms) {
-      for (auto lightPair : room->ceilingLights) {
-        delete lightPair.second;
-      }
-      room->ceilingLights.clear();
-      for (auto lightPair : room->tableLights) {
-        delete lightPair.second;
-      }
-      room->tableLights.clear();
-    }
+    // TODO: Clear rooms with RoomManager
+    // for (Room *room : RoomManager::rooms) {
+    //   for (auto lightPair : room->ceilingLights) {
+    //     delete lightPair.second;
+    //   }
+    //   room->ceilingLights.clear();
+    //   for (auto lightPair : room->tableLights) {
+    //     delete lightPair.second;
+    //   }
+    //   room->tableLights.clear();
+    // }
 
     RoomManager::rooms.clear();
   } catch (const std::exception &e) {
@@ -74,13 +75,16 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
           PageManager::GetNSPanelManagerPage()->setText("Connect to AP NSPMPanel");
           secondary_text = "Connect to IP 192.168.1.1";
         } else {
-          PageManager::GetNSPanelManagerPage()->setText("Connecting to WiFi...");
+          std::string wifi_connect_text = "Connecting to ";
+          wifi_connect_text.append(NSPMConfig::instance->wifi_ssid.c_str());
+          wifi_connect_text.append("...");
+          PageManager::GetNSPanelManagerPage()->setText(wifi_connect_text);
           secondary_text = "";
         }
-      } else if (!InterfaceManager::hasRegisteredToManager) {
-        PageManager::GetNSPanelManagerPage()->setText("Registering to manager...");
       } else if (!MqttManager::connected()) {
         PageManager::GetNSPanelManagerPage()->setText("Connecting to MQTT...");
+      } else if (!InterfaceManager::hasRegisteredToManager) {
+        PageManager::GetNSPanelManagerPage()->setText("Registering to manager...");
       }
 
       if (WiFi.isConnected()) {
@@ -96,12 +100,13 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
     vTaskDelay(250 / portTICK_PERIOD_MS);
   }
 
-  // Start task for MQTT processing
-  xTaskCreatePinnedToCore(_taskProcessMqttMessages, "taskProcessMqttMessages", 5000, NULL, 1, &InterfaceManager::_taskHandleProcessMqttMessages, CONFIG_ARDUINO_RUNNING_CORE);
-
   if (NSPanel::instance->ready()) {
     PageManager::GetNSPanelManagerPage()->setText("Loading config...");
-    RoomManager::loadAllRooms(false);
+    uint64_t start = esp_timer_get_time();
+    while (!InterfaceManager::instance->_config_loaded) {
+      vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+    LOG_DEBUG("Config loaded, will now continue with interface. Loading config took ", esp_timer_get_time() - start, "us");
 
     // Update Home page cache
     PageManager::GetHomePage()->updateDimmerValueCache();
@@ -110,12 +115,11 @@ void InterfaceManager::_taskLoadConfigAndInit(void *param) {
     // As there may be may be MANY topics to subscribe to, do it in checks of 5 with delays
     // between them to allow for processing all the incoming data.
     PageManager::GetNSPanelManagerPage()->setText("Subscribing...");
-    LightManager::subscribeToMqttLightUpdates();
 
     // Loading is done, show Home page
     NSPanel::instance->setDimLevel(InterfaceConfig::screen_dim_level);
-    InterfaceManager::showDefaultPage();
     PageManager::GetHomePage()->setScreensaverTimeout(InterfaceConfig::screensaver_activation_timeout);
+    InterfaceManager::showDefaultPage();
   }
 
   // NSPanel::attachTouchEventCallback(InterfaceManager::processTouchEvent);
@@ -137,57 +141,14 @@ void InterfaceManager::showDefaultPage() {
     PageManager::GetScenePage()->show();
   } else if (InterfaceConfig::default_page == DEFAULT_PAGE::ROOM_PAGE) {
     PageManager::GetRoomPage()->show();
+  } else {
+    LOG_ERROR("Unknown default page ", (uint32_t)InterfaceConfig::default_page);
   }
 }
 
-void InterfaceManager::_taskProcessMqttMessages(void *param) {
-  LOG_INFO("Started _taskProcessMqttMessages.");
-  vTaskDelay(100 / portTICK_PERIOD_MS);
-  for (;;) {
-    // Wait for notification that we need to process messages.
-    if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY)) {
-      // Process all the messages
-      while (InterfaceManager::_mqttMessages.size() > 0) {
-        mqttMessage msg = InterfaceManager::_mqttMessages.front();
-        try {
-          if (InterfaceManager::instance->_processMqttMessages) {
-            if (msg.topic.compare(NSPMConfig::instance->mqtt_screen_cmd_topic) == 0) {
-              if (msg.payload.compare("1") == 0) {
-                InterfaceManager::showDefaultPage();
-                MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1"); // Send out state information that panel woke from sleep
-              } else if (msg.payload.compare("0") == 0) {
-                PageManager::GetScreensaverPage()->show();
-              } else {
-                LOG_ERROR("Invalid payload for screen cmd. Valid payload: 1 or 0");
-              }
-            }
-          }
-        } catch (...) {
-          LOG_ERROR("Error processing MQTT message on topic ", msg.topic.c_str());
-        }
-        InterfaceManager::_mqttMessages.pop_front();
-        vTaskDelay(10 / portTICK_PERIOD_MS); // Wait 10ms between processing each event to allow for other tasks, ie. more MQTT messages to arrive.
-      }
-    }
-  }
-}
-
-void InterfaceManager::mqttCallback(char *topic, byte *payload, unsigned int length) {
-  mqttMessage msg;
-  msg.topic = topic;
-  msg.payload = std::string((char *)payload, length);
-  InterfaceManager::_mqttMessages.push_back(msg);
-  if (InterfaceManager::_taskHandleProcessMqttMessages) {
-    // Notify task that a new message needs processing
-    vTaskNotifyGiveFromISR(InterfaceManager::_taskHandleProcessMqttMessages, NULL);
-    portYIELD_FROM_ISR();
-  }
-}
-
-void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned int length) {
-  std::string payload_str = std::string((char *)payload, length);
+void InterfaceManager::handleNSPanelCommand(MQTTMessage *message) {
   JsonDocument json;
-  DeserializationError error = deserializeJson(json, payload_str);
+  DeserializationError error = deserializeJson(json, message->data);
   if (error) {
     LOG_ERROR("Failed to serialize NSPanel command.");
     return;
@@ -204,16 +165,22 @@ void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned
   } else if (command.compare("register_accept") == 0) {
     NSPMConfig::instance->manager_address = json["address"].as<String>().c_str();
     NSPMConfig::instance->manager_port = json["port"].as<uint16_t>();
+    NSPMConfig::instance->mqttmanager_command_topic = "nspanel/mqttmanager_";
+    NSPMConfig::instance->mqttmanager_command_topic.append(NSPMConfig::instance->manager_address);
+    NSPMConfig::instance->mqttmanager_command_topic.append("/command");
+    NSPMConfig::instance->nspanel_config_topic = json["config_topic"].as<String>().c_str();
 
     Serial.print("Received register accept from manager: ");
     Serial.print(NSPMConfig::instance->manager_address.c_str());
     Serial.print(" at port: ");
     Serial.println(NSPMConfig::instance->manager_port);
+    LOG_DEBUG("Config topic: ", NSPMConfig::instance->nspanel_config_topic.c_str());
     LOG_INFO("Received register accept from manager ", NSPMConfig::instance->manager_address.c_str(), " with port: ", NSPMConfig::instance->manager_port);
+    MqttManager::subscribeToTopic(NSPMConfig::instance->nspanel_config_topic.c_str(), &InterfaceManager::handleNSPanelConfigUpdate);
     InterfaceManager::hasRegisteredToManager = true;
   } else if (command.compare("reload") == 0) {
     if (InterfaceManager::hasRegisteredToManager && NSPMConfig::instance->successful_config_load) {
-      RoomManager::performConfigReload();
+      // RoomManager::performConfigReload(); // TODO: Is this still needed?
     } else {
       LOG_ERROR("Received command to reload config when the panel hasn't yet registered to a manager or yet once successfully downloaded a config from the manager.");
     }
@@ -222,9 +189,8 @@ void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned
   }
 }
 
-void InterfaceManager::handleNSPanelScreenBrightnessCommand(char *topic, byte *payload, unsigned int length) {
-  std::string payload_str = std::string((char *)payload, length);
-  int new_brightness = std::stoi(payload_str);
+void InterfaceManager::handleNSPanelScreenBrightnessCommand(MQTTMessage *message) {
+  int new_brightness = std::stoi(message->data);
   if (new_brightness < 1) {
     new_brightness = 1;
   } else if (new_brightness > 100) {
@@ -236,9 +202,8 @@ void InterfaceManager::handleNSPanelScreenBrightnessCommand(char *topic, byte *p
   }
 }
 
-void InterfaceManager::handleNSPanelScreensaverBrightnessCommand(char *topic, byte *payload, unsigned int length) {
-  std::string payload_str = std::string((char *)payload, length);
-  int new_brightness = std::stoi(payload_str);
+void InterfaceManager::handleNSPanelScreensaverBrightnessCommand(MQTTMessage *message) {
+  int new_brightness = std::stoi(message->data);
   if (new_brightness < 0) {
     new_brightness = 0;
   } else if (new_brightness > 100) {
@@ -250,13 +215,126 @@ void InterfaceManager::handleNSPanelScreensaverBrightnessCommand(char *topic, by
   }
 }
 
+void InterfaceManager::handleNSPanelConfigUpdate(MQTTMessage *message) {
+  try {
+    if (message->get_protobuf_obj<PROTOBUF_NSPANEL_CONFIG>(InterfaceManager::_new_config)) {
+      message->clear(); // We no longer need raw data stored in message.
+      LOG_INFO("Received new config and successfully parsed it into protobuf. Will start _taskHandleConfigData.");
+      xTaskCreatePinnedToCore(&InterfaceManager::_taskHandleConfigData, "handle_config", 20000, NULL, 1, NULL, ARDUINO_RUNNING_CORE);
+    } else {
+      LOG_ERROR("Failed to decode new config!");
+    }
+  } catch (const std::exception &e) {
+    LOG_ERROR("Caught error while processing protobuf object on config topic.");
+  }
+}
+
+void InterfaceManager::_taskHandleConfigData(void *param) {
+  InterfaceConfig::homeScreen = InterfaceManager::_new_config->default_room();
+  InterfaceConfig::default_page = static_cast<DEFAULT_PAGE>(InterfaceManager::_new_config->default_page());
+  InterfaceConfig::button_min_press_time = InterfaceManager::_new_config->min_button_push_time();
+  InterfaceConfig::button_long_press_time = InterfaceManager::_new_config->button_long_press_time();
+  InterfaceConfig::special_mode_trigger_time = InterfaceManager::_new_config->special_mode_trigger_time();
+  InterfaceConfig::special_mode_release_time = InterfaceManager::_new_config->special_mode_release_time();
+  InterfaceConfig::screen_dim_level = InterfaceManager::_new_config->screen_dim_level();
+  InterfaceConfig::screensaver_dim_level = InterfaceManager::_new_config->screensaver_dim_level();
+  InterfaceConfig::screensaver_activation_timeout = InterfaceManager::_new_config->screensaver_activation_timeout();
+  InterfaceConfig::screensaver_mode = InterfaceManager::_new_config->screensaver_mode();
+  InterfaceConfig::clock_us_style = InterfaceManager::_new_config->clock_us_style();
+  InterfaceConfig::lock_to_default_room = false; // TODO: Remove as only "allowed" rooms are loaded.
+  InterfaceConfig::optimistic_mode = InterfaceManager::_new_config->optimistic_mode();
+
+  LOG_DEBUG("Loaded screensaver mode: ", (uint32_t)InterfaceConfig::screensaver_mode);
+  LOG_DEBUG("Screensaver activation timeout: ", InterfaceConfig::screensaver_activation_timeout);
+
+  NSPMConfig::instance->is_us_panel = InterfaceManager::_new_config->is_us_panel();
+  NSPMConfig::instance->use_fahrenheit = InterfaceManager::_new_config->use_fahrenheit();
+  NSPMConfig::instance->temperature_calibration = InterfaceManager::_new_config->temperature_calibration();
+  NSPMConfig::instance->reverse_relays = InterfaceManager::_new_config->reverse_relays();
+  NSPMConfig::instance->button1_mode = static_cast<BUTTON_MODE>(InterfaceManager::_new_config->button1_mode());
+  NSPMConfig::instance->button1_mqtt_topic = InterfaceManager::_new_config->button1_mqtt_topic();
+  NSPMConfig::instance->button1_mqtt_payload = InterfaceManager::_new_config->button1_mqtt_payload();
+  NSPMConfig::instance->button2_mode = static_cast<BUTTON_MODE>(InterfaceManager::_new_config->button2_mode());
+  NSPMConfig::instance->button2_mqtt_topic = InterfaceManager::_new_config->button2_mqtt_topic();
+  NSPMConfig::instance->button2_mqtt_payload = InterfaceManager::_new_config->button2_mqtt_payload();
+
+  bool save_new_config_to_littlefs_at_end = false;
+  bool reboot_after_config_saved = false;
+
+  if (NSPMConfig::instance->relay1_default_mode != InterfaceManager::_new_config->relay1_default_mode()) {
+    LOG_INFO("Saving new relay 1 default mode: ", InterfaceManager::_new_config->relay1_default_mode() ? "ON" : "OFF");
+    NSPMConfig::instance->relay1_default_mode = InterfaceManager::_new_config->relay1_default_mode();
+    save_new_config_to_littlefs_at_end = true;
+  }
+
+  if (NSPMConfig::instance->relay2_default_mode != InterfaceManager::_new_config->relay2_default_mode()) {
+    LOG_INFO("Saving new relay 2 default mode: ", InterfaceManager::_new_config->relay2_default_mode() ? "ON" : "OFF");
+    NSPMConfig::instance->relay2_default_mode = InterfaceManager::_new_config->relay2_default_mode();
+    save_new_config_to_littlefs_at_end = true;
+  }
+
+  if (NSPMConfig::instance->wifi_hostname.compare(InterfaceManager::_new_config->name()) != 0) {
+    save_new_config_to_littlefs_at_end = true;
+    reboot_after_config_saved = true;
+    NSPMConfig::instance->wifi_hostname = InterfaceManager::_new_config->name();
+    LOG_INFO("Name has changed. Restarting.");
+  }
+
+  if (save_new_config_to_littlefs_at_end) {
+    while (!NSPMConfig::instance->saveToLittleFS(false)) {
+      vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+
+    if (reboot_after_config_saved) {
+      ESP.restart();
+      vTaskDelay(portMAX_DELAY);
+      vTaskDelete(NULL);
+    }
+  }
+
+  LOG_DEBUG("Loading ", InterfaceManager::_new_config->room_ids().get_length(), " rooms from config.");
+  InterfaceConfig::room_ids.clear();
+  InterfaceConfig::room_ids.resize(InterfaceManager::_new_config->room_ids().get_length());
+  for (int i = 0; i < InterfaceManager::_new_config->room_ids().get_length(); i++) {
+    InterfaceConfig::room_ids[i] = InterfaceManager::_new_config->room_ids()[i];
+  }
+
+  RoomManager::loadAllRooms();
+  if (!RoomManager::hasValidCurrentRoom()) {
+    LOG_DEBUG("Config loaded, will go to default room ID: ", InterfaceConfig::homeScreen);
+    if (!RoomManager::goToRoomId(InterfaceConfig::homeScreen)) {
+      LOG_ERROR("Failed to go to default room. Will go to first valid room in list.");
+      if (RoomManager::rooms.size() > 0) {
+        RoomManager::goToRoomId((*RoomManager::rooms.begin())->id());
+      } else {
+        LOG_ERROR("No rooms loaded!");
+      }
+    }
+  }
+
+  InterfaceManager::instance->_config_loaded = true;
+  LOG_INFO("Config loaded successfully. Will delete task.");
+  vTaskDelete(NULL);
+}
+
 void InterfaceManager::subscribeToMqttTopics() {
   // Subscribe to command to wake/put to sleep the display
   vTaskDelay(100 / portTICK_PERIOD_MS);
-  MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_screen_cmd_topic.c_str(), &InterfaceManager::mqttCallback);
+  MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_screen_cmd_topic.c_str(), &InterfaceManager::handleNSPanelScreenCommand);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_cmd_topic.c_str(), &InterfaceManager::handleNSPanelCommand);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_screen_brightness_topic.c_str(), &InterfaceManager::handleNSPanelScreenBrightnessCommand);
   MqttManager::subscribeToTopic(NSPMConfig::instance->mqtt_panel_screensaver_brightness.c_str(), &InterfaceManager::handleNSPanelScreensaverBrightnessCommand);
+}
+
+void InterfaceManager::handleNSPanelScreenCommand(MQTTMessage *message) {
+  if (message->data.compare("1") == 0) {
+    InterfaceManager::showDefaultPage();
+    MqttManager::publish(NSPMConfig::instance->mqtt_screen_state_topic, "1"); // Send out state information that panel woke from sleep
+  } else if (message->data.compare("0") == 0) {
+    PageManager::GetScreensaverPage()->show();
+  } else {
+    LOG_ERROR("Invalid payload for screen cmd. Valid payload: 1 or 0");
+  }
 }
 
 void InterfaceManager::processWakeEvent() {

@@ -1,0 +1,43 @@
+<script type="module">
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
+
+  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+    // Update relevant values for the status header from the bundled data in the status update event
+    var element = document.getElementById(`nspanel-status-header-${event.detail.event_data.id}`);
+    element.state = event.detail.event_data.state;
+    element.update_progress = event.detail.event_data.update_progress;
+  });
+
+  define({
+    tag: "nspanel-status-header",
+    nspanel_id: '',
+    name: '',
+    state: '',
+    update_progress: '',
+    render: ({id, name, state, update_progress}) => {
+      if (state == "online") {
+        return html`
+            <div class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-success" id="panel_header-${id}"></div>
+        `;
+      } else if (state == "offline") {
+        return html`
+            <div class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-error" id="panel_header-${id}"></div>
+        `;
+      } else if (state == "waiting") {
+        return html`
+          <div class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-info animate-pulse" id="panel_header-${id}"></div>
+        `;
+      } else if (state == "updating_fw" || state == "updating_fs" || state == "updating_tft") {
+        return html`
+            <div class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-info" style="width: ${update_progress}%" id="panel_header-${id}"></div>
+        `;
+      } else {
+        return html`
+            <div class="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-warning animate-pulse" style="" id="panel_header-${id}"></div>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-status-header id="nspanel-status-header-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}" update_progress="{{ progress }}"></nspanel-status-badge>
