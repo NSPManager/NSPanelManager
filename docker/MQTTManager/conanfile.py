@@ -16,7 +16,7 @@ class CompressorRecipe(ConanFile):
         self.requires("ixwebsocket/11.4.5")
         self.requires("tz/2023c")
         # self.requires("inja/3.4.0")
-        self.requires("boost/1.87.0")
+        self.requires("boost/1.84.0")
         self.requires("cppzmq/4.10.0")
         self.requires("protobuf/5.27.0")
         self.requires("sqlite_orm/1.9.1")

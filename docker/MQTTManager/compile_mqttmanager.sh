@@ -76,7 +76,7 @@ elif [ "$TARGETPLATFORM" == "linux/arm64" ]; then
   #echo "CFLAGS=-march=armv8-a" >>/root/.conan2/profiles/host
   #echo "CXXFLAGS=-march=armv8-a" >>/root/.conan2/profiles/host
 else
-  echo "ERROR !Unknown target platform. Will exit."
+  echo "ERROR! Unknown target platform. Will exit."
   exit 1
 fi
 eval $(dpkg-architecture) # Load in what the builder machine is
