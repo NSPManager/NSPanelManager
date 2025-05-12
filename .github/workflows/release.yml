@@ -8,42 +8,8 @@ on:
       - "beta"
 
 jobs:
-  prepare:
-    if: ${{ !github.event.act }} # skip during local actions testing
-    name: prepare
-    permissions:
-      contents: write
-      actions: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
-      - run: |
-          sed -i "s/^version: [0-9A-Za-z\.\-_]\+/version: ${{ github.ref_name }}/g" docker/config.yaml
-          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
-          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
-      - name: Get branch name
-        shell: bash
-        id: image_name
-        run: |
-          if [ "${{ github.event.release.prerelease }}" != "true" ]; then
-            echo "branch=main" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.release.prerelease }}" == "true" ]; then
-            echo "branch=beta" >> $GITHUB_OUTPUT
-          else
-            echo "Cannot determine image name!"
-            exit 1
-          fi
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        if: ${{ !github.event.act }} # skip during local actions testing
-        with:
-          commit_message: Push updated version back to repo
-          branch: "${{ steps.image_name.outputs.branch }}"
-          push_options: "--force"
-
   publish-x86:
     if: ${{ !github.event.act }} # skip during local actions testing
-    needs: prepare
     name: Publish x86
     runs-on: ubuntu-latest
     permissions:
@@ -65,6 +31,12 @@ jobs:
             echo "Cannot determine image name!"
             exit 1
           fi
+      - name: Update version
+        shell: bash
+        run: |
+          sed -i "s/^version: .+/version: ${{ github.ref_name }}/g" docker/config.yaml
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
@@ -88,7 +60,6 @@ jobs:
 
   publish-x86_64:
     if: ${{ !github.event.act }} # skip during local actions testing
-    needs: prepare
     name: Publish x86_64
     runs-on: ubuntu-latest
     permissions:
@@ -110,6 +81,12 @@ jobs:
             echo "Cannot determine image name!"
             exit 1
           fi
+      - name: Update version
+        shell: bash
+        run: |
+          sed -i "s/^version: .+/version: ${{ github.ref_name }}/g" docker/config.yaml
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
@@ -132,7 +109,6 @@ jobs:
 
   publish-armhf:
     if: ${{ !github.event.act }} # skip during local actions testing
-    needs: prepare
     name: Publish armhf
     runs-on: ubuntu-latest
     permissions:
@@ -154,6 +130,12 @@ jobs:
             echo "Cannot determine image name!"
             exit 1
           fi
+      - name: Update version
+        shell: bash
+        run: |
+          sed -i "s/^version: .+/version: ${{ github.ref_name }}/g" docker/config.yaml
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
@@ -176,7 +158,6 @@ jobs:
 
   publish-armv7:
     if: ${{ !github.event.act }} # skip during local actions testing
-    needs: prepare
     name: Publish ARMv7
     runs-on: ubuntu-latest
     permissions:
@@ -198,6 +179,12 @@ jobs:
             echo "Cannot determine image name!"
             exit 1
           fi
+      - name: Update version
+        shell: bash
+        run: |
+          sed -i "s/^version: .+/version: ${{ github.ref_name }}/g" docker/config.yaml
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
@@ -220,7 +207,6 @@ jobs:
 
   publish-aarch64:
     if: ${{ !github.event.act }} # skip during local actions testing
-    needs: prepare
     name: Publish aarch64
     runs-on: ubuntu-latest
     permissions:
@@ -242,6 +228,12 @@ jobs:
             echo "Cannot determine image name!"
             exit 1
           fi
+      - name: Update version
+        shell: bash
+        run: |
+          sed -i "s/^version: .+/version: ${{ github.ref_name }}/g" docker/config.yaml
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
