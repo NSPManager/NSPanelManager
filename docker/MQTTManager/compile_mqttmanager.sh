@@ -55,7 +55,7 @@ elif [ "$TARGETPLATFORM" == "linux/arm/v6" ]; then
   echo "LD=arm-linux-gnueabihf-ld" >>/root/.conan2/profiles/host
 elif [ "$TARGETPLATFORM" == "linux/arm/v7" ]; then
   deb_add_arch="armhf"
-  conan_target_arch="armv7hf"
+  conan_target_arch="armv7"
   strip_bin="/usr/bin/arm-linux-gnueabihf-strip"
   apt -y install binutils-arm-linux-gnueabihf gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
   echo "" >>/root/.conan2/profiles/host
