@@ -34,7 +34,6 @@ jobs:
       - name: Update version
         shell: bash
         run: |
-          sed -i "s/^version: .+/version: ${{ github.ref_name }}/g" docker/config.yaml
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
       - name: Login to DockerHub
@@ -84,7 +83,6 @@ jobs:
       - name: Update version
         shell: bash
         run: |
-          sed -i "s/^version: .+/version: ${{ github.ref_name }}/g" docker/config.yaml
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
       - name: Login to DockerHub
@@ -133,7 +131,6 @@ jobs:
       - name: Update version
         shell: bash
         run: |
-          sed -i "s/^version: .+/version: ${{ github.ref_name }}/g" docker/config.yaml
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
       - name: Login to DockerHub
@@ -182,7 +179,6 @@ jobs:
       - name: Update version
         shell: bash
         run: |
-          sed -i "s/^version: .+/version: ${{ github.ref_name }}/g" docker/config.yaml
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
       - name: Login to DockerHub
@@ -231,7 +227,6 @@ jobs:
       - name: Update version
         shell: bash
         run: |
-          sed -i "s/^version: .+/version: ${{ github.ref_name }}/g" docker/config.yaml
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
       - name: Login to DockerHub
@@ -281,18 +276,20 @@ jobs:
             echo "Cannot determine image name!"
             exit 1
           fi
-      - name: Checkout the repository
+      - name: Checkout the repository (main)
         uses: actions/checkout@v4
-        if: ${{ steps.image_name.outputs.branch == 'beta' }}
         with:
           ref: main
+      - name: Update main version in main branch
+        if: ${{ steps.image_name.outputs.branch == 'main' }}
+        run: |
+          sed -i "|^version: .*$|version: ${{ github.ref_name }}|g" docker/config.yaml
       - name: Update beta version in main branch
         if: ${{ steps.image_name.outputs.branch == 'beta' }}
         run: |
-          sed -i "/^version/s/.*/version: ${{ github.ref_name }}/g" docker-beta/config.yaml
+          sed -i "|^version: .*$|version: ${{ github.ref_name }}|g" docker-beta/config.yaml
       - uses: stefanzweifel/git-auto-commit-action@v5
-        if: ${{ steps.image_name.outputs.branch == 'beta' }}
         with:
-          commit_message: Update beta version reference
+          commit_message: Update version for Home Assistant config.
           branch: "main"
           push_options: "--force"
