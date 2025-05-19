@@ -23,7 +23,7 @@
         <form hx-post="{% url 'htmx_initial_setup_home_assistant_settings' %}">
             {% csrf_token %}
             {% if is_home_assistant_addon %}
-            {% component "alert" level="info" message="You are running NSPanel Manager as a Home Assistant addon. These settings are managed by Home Assistant for you and are therefore locked." %}{% endcomponent %}
+            {% component "alert" level="info" text="You are running NSPanel Manager as a Home Assistant addon. These settings are managed by Home Assistant for you and are therefore locked." %}{% endcomponent %}
             {% endif %}
 
 
