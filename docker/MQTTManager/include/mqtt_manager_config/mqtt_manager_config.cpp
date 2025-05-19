@@ -76,7 +76,17 @@ void MqttManagerConfig::load() {
     MqttManagerConfig::_settings.clock_24_hour_format = MqttManagerConfig::get_setting_with_default("clock_us_style", "False").compare("False") == 0;
     MqttManagerConfig::_settings.optimistic_mode = MqttManagerConfig::get_setting_with_default("optimistic_mode", "True").compare("True") == 0;
     MqttManagerConfig::_settings.mqtt_wait_time = std::stoi(MqttManagerConfig::get_setting_with_default("mqtt_wait_time", "1000"));
-    MqttManagerConfig::_settings.is_home_assistant_addon = false; // TODO: Is this an HA addon?
+
+    const char *is_home_assistant_addon = std::getenv("IS_HOME_ASSISTANT_ADDON");
+    if (is_home_assistant_addon != nullptr) {
+      if (std::string(is_home_assistant_addon).compare("true") == 0) {
+        MqttManagerConfig::_settings.is_home_assistant_addon = true;
+      } else {
+        MqttManagerConfig::_settings.is_home_assistant_addon = false;
+      }
+    } else {
+      MqttManagerConfig::_settings.is_home_assistant_addon = false;
+    }
 
     std::string turn_on_bevaiour = MqttManagerConfig::get_setting_with_default("turn_on_behaviour", "color_temp");
     if (turn_on_bevaiour.compare("color_temp") == 0) {
