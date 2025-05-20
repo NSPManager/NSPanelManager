@@ -183,7 +183,7 @@
             <div class="flex items-center ps-3">
               <input id="miles_per_hour" type="radio" name="wind_speed_format" value="mph" {% if wind_speed_format == "mph" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent" required>
-              <label for="meter_per_second" class="w-full py-3 ms-2 text-sm font-medium">Mph</label>
+              <label for="miles_per_hour" class="w-full py-3 ms-2 text-sm font-medium">Mph</label>
             </div>
           </li>
           <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
@@ -221,7 +221,7 @@
     </div>
   </div>
   {% component "alert" level="info" text="Set your required Temperature, Wind speed and Precipitation units before saving the configuration." %}{% endcomponent %}
-  
+
 
   <div class="text-right">
     <button type="submit" class="btn btn-info my-2">Save</button>
