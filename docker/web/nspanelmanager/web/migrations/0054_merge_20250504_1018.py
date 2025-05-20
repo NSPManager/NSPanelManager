@@ -6,7 +6,6 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('web', '0043_remove_nspanel_heap_used_pct_and_more'),
         ('web', '0053_remove_nspanel_register_relay1_as_light_and_more'),
     ]
 
