@@ -175,21 +175,21 @@
           <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
               <input id="meter_per_second" type="radio" name="wind_speed_format" value="ms" {% if wind_speed_format == "ms" %}checked{% endif %}
-                class="w-4 h-4 radio radio-accent">
+                class="w-4 h-4 radio radio-accent" required>
               <label for="meter_per_second" class="w-full py-3 ms-2 text-sm font-medium">Meter/s</label>
             </div>
           </li>
           <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
               <input id="miles_per_hour" type="radio" name="wind_speed_format" value="mph" {% if wind_speed_format == "mph" %}checked{% endif %}
-                class="w-4 h-4 radio radio-accent">
+                class="w-4 h-4 radio radio-accent" required>
               <label for="meter_per_second" class="w-full py-3 ms-2 text-sm font-medium">Mph</label>
             </div>
           </li>
           <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
               <input id="knots" type="radio" name="wind_speed_format" value="knots" {% if wind_speed_format == "knots" %}checked{% endif %}
-                class="w-4 h-4 radio radio-accent">
+                class="w-4 h-4 radio radio-accent" required>
               <label for="knots" class="w-full py-3 ms-2 text-sm font-medium">Knots</label>
             </div>
           </li>
@@ -212,7 +212,7 @@
           <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
               <input id="inch" type="radio" name="precipitation_format" value="inch" {% if precipitation_format == "inch" %}checked{% endif %}
-                class="w-4 h-4 radio radio-accent">
+                class="w-4 h-4 radio radio-accent" required>
               <label for="inch" class="w-full py-3 ms-2 text-sm font-medium">Inches</label>
             </div>
           </li>
