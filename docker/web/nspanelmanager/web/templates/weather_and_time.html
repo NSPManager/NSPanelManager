@@ -144,7 +144,7 @@
           <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
               <input id="temp_celsius" type="radio" name="use_fahrenheit" value="False" {% if use_fahrenheit != "True" %}checked{% endif %}
-                class="w-4 h-4 radio radio-accent">
+                class="w-4 h-4 radio radio-accent" required>
               <label for="temp_celsius"
                 class="w-full py-3 ms-2 text-sm font-medium">Celsius</label>
             </div>
@@ -167,7 +167,7 @@
           <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
               <input id="kmh" type="radio" name="wind_speed_format" value="kmh" {% if wind_speed_format == "kmh" %}checked{% endif %}
-                class="w-4 h-4 radio radio-accent">
+                class="w-4 h-4 radio radio-accent" required>
               <label for="kmh"
                 class="w-full py-3 ms-2 text-sm font-medium">Km/h</label>
             </div>
@@ -190,7 +190,7 @@
             <div class="flex items-center ps-3">
               <input id="knots" type="radio" name="wind_speed_format" value="knots" {% if wind_speed_format == "knots" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent">
-              <label for="knots" class="w-full py-3 ms-2 text-sm font-medium">Mph</label>
+              <label for="knots" class="w-full py-3 ms-2 text-sm font-medium">Knots</label>
             </div>
           </li>
         </ul>
@@ -204,7 +204,7 @@
           <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
               <input id="millimeters" type="radio" name="precipitation_format" value="mm" {% if precipitation_format == "mm" %}checked{% endif %}
-                class="w-4 h-4 radio radio-accent">
+                class="w-4 h-4 radio radio-accent" required>
               <label for="millimeters"
                 class="w-full py-3 ms-2 text-sm font-medium">Millimeters</label>
             </div>
@@ -213,13 +213,15 @@
             <div class="flex items-center ps-3">
               <input id="inch" type="radio" name="precipitation_format" value="inch" {% if precipitation_format == "inch" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent">
-              <label for="inch" class="w-full py-3 ms-2 text-sm font-medium">Fahrenheit</label>
+              <label for="inch" class="w-full py-3 ms-2 text-sm font-medium">Inches</label>
             </div>
           </li>
         </ul>
       </div>
     </div>
   </div>
+  {% component "alert" level="info" text="Set your required Temperature, Wind speed and Precipitation units before saving the configuration." %}{% endcomponent %}
+  
 
   <div class="text-right">
     <button type="submit" class="btn btn-info my-2">Save</button>
