@@ -573,23 +573,33 @@ def save_settings(request):
     set_setting_value(name="mqtt_port", value=request.POST["mqtt_port"])
     set_setting_value(name="mqtt_username",
                       value=request.POST["mqtt_username"])
-    set_setting_value(name="mqtt_password",
-                      value=request.POST["mqtt_password"])
+
+    if "clear_mqtt_password" in request.POST:
+        set_setting_value(name="mqtt_password", value="")
+    elif request.POST["mqtt_password"] != "":
+        set_setting_value(name="mqtt_password", value=request.POST["mqtt_password"])
+
     if "home_assistant_address" in request.POST:
         home_assistant_address = request.POST["home_assistant_address"]
         if home_assistant_address.endswith("/"):
             home_assistant_address = home_assistant_address[:-1]
-        set_setting_value(name="home_assistant_address",
-                          value=home_assistant_address)
-    if "home_assistant_token" in request.POST:
-        set_setting_value(name="home_assistant_token",
-                          value=request.POST["home_assistant_token"])
+        set_setting_value(name="home_assistant_address", value=home_assistant_address)
+
+    if "clear_home_assistant_token" in request.POST:
+        set_setting_value(name="home_assistant_token", value="")
+    elif request.POST["home_assistant_token"] != "":
+        set_setting_value(name="home_assistant_token", value=request.POST["home_assistant_token"])
+
     openhab_address = request.POST["openhab_address"]
     if openhab_address.endswith("/"):
         openhab_address = openhab_address[:-1]
     set_setting_value(name="openhab_address", value=openhab_address)
-    set_setting_value(name="openhab_token",
-                      value=request.POST["openhab_token"])
+
+    if "clear_openhab_token" in request.POST:
+        set_setting_value(name="openhab_token", value="")
+    elif request.POST["openhab_token"] != "":
+        set_setting_value(name="openhab_token", value=request.POST["openhab_token"])
+
     set_setting_value(name="raise_to_100_light_level",
                       value=request.POST["raise_to_100_light_level"])
     set_setting_value(name="color_temp_min",

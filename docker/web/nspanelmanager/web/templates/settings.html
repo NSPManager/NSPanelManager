@@ -454,7 +454,7 @@
               <label for="mqtt_password" class="block mb-1 text-sm font-medium">MQTT password</label>
               <div class="flex flex-row-reverse w-full">
                   <input class="outline-none rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
-                  type="password" class="input" id="mqtt_password" name="mqtt_password" value="{{ mqtt_password }}">
+                  type="password" class="input" id="mqtt_password" name="mqtt_password">
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
                       <span class="mdi mdi-account-key"></span>
                   </span>
@@ -462,6 +462,17 @@
           </div>
         </div>
 
+        {% if mqtt_password.strip %}
+        <div class="mb-2 border-2 border-dashed border-info rounded-box p-2">
+            {% component "alert" level="info" text="MQTT password is configured but is not shown for security reasons. Enter a new password to change it or leave blank to keep the current password. If you wish to clear the stored password use the checkbox below." %}{% endcomponent %}
+            <div class="mt-2 flex items-center justify-start w-full">
+                <input type="checkbox" class="checkbox checkbox-accent mr-2 w-4 h-4" id="clear_mqtt_password" name="clear_mqtt_password">
+                <label for="clear_mqtt_password" class="text-sm font-medium">
+                    <span class="label-text">Clear MQTT password</span>
+                </label>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- New section-->
         </div>
@@ -492,12 +503,24 @@
               <label for="home_assistant_token" class="block mb-1 text-sm font-medium">Home Assistant token</label>
               <div class="flex flex-row-reverse w-full">
                   <input class="outline-none rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
-                  type="password" class="input" id="home_assistant_token" name="home_assistant_token" value="{{ home_assistant_token }}" {% if is_home_assistant_addon %}disabled{% endif %}>
+                  type="password" class="input" id="home_assistant_token" name="home_assistant_token" {% if is_home_assistant_addon %}disabled{% endif %}>
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent" {% if is_home_assistant_addon %}disabled{% endif %}>
                       <span class="mdi mdi-web"></span>
                   </span>
               </div>
           </div>
+
+          {% if home_assistant_token.strip and not is_home_assistant_addon %}
+          <div class="mb-2 border-2 border-dashed border-info rounded-box p-2">
+              {% component "alert" level="info" text="Home Assistant token is configured but is not shown for security reasons. Enter a new token to change it or leave blank to keep the current token. If you wish to clear the stored token use the checkbox below." %}{% endcomponent %}
+              <div class="mt-2 flex items-center justify-start w-full">
+                  <input type="checkbox" class="checkbox checkbox-accent mr-2 w-4 h-4" id="clear_home_assistant_token" name="clear_home_assistant_token">
+                  <label for="clear_home_assistant_token" class="text-sm font-medium">
+                      <span class="label-text">Clear Home Assistant token</span>
+                  </label>
+              </div>
+          </div>
+          {% endif %}
 
           <!-- New section-->
         </div>
@@ -523,12 +546,24 @@
               <label for="openhab_token" class="block mb-1 text-sm font-medium">OpenHAB token</label>
               <div class="flex flex-row-reverse w-full">
                   <input class="outline-none rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
-                  type="password" class="input" id="openhab_token" name="openhab_token" value="{{ openhab_token }}">
+                  type="password" class="input" id="openhab_token" name="openhab_token">
                   <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
                       <span class="mdi mdi-web"></span>
                   </span>
               </div>
           </div>
+
+          {% if openhab_token.strip %}
+          <div class="mb-2 border-2 border-dashed border-info rounded-box p-2">
+              {% component "alert" level="info" text="OpenHAB token is configured but is not shown for security reasons. Enter a new token to change it or leave blank to keep the current token. If you wish to clear the stored token use the checkbox below." %}{% endcomponent %}
+              <div class="mt-2 flex items-center justify-start w-full">
+                  <input type="checkbox" class="checkbox checkbox-accent mr-2 w-4 h-4" id="clear_openhab_token" name="clear_openhab_token">
+                  <label for="clear_openhab_token" class="text-sm font-medium">
+                      <span class="label-text">Clear OpenHAB token</span>
+                  </label>
+              </div>
+          </div>
+          {% endif %}
       </div>
     </div>
 

@@ -72,6 +72,7 @@
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
+    --radius-sm: 0.25rem;
     --radius-md: 0.375rem;
     --radius-lg: 0.5rem;
     --ease-in: cubic-bezier(0.4, 0, 1, 1);
@@ -3552,9 +3553,6 @@
       font-size: 0.625rem;
     }
   }
-  .bottom-0 {
-    bottom: calc(var(--spacing) * 0);
-  }
   .left-0 {
     left: calc(var(--spacing) * 0);
   }
@@ -5717,9 +5715,6 @@
   .w-44 {
     width: calc(var(--spacing) * 44);
   }
-  .w-56 {
-    width: calc(var(--spacing) * 56);
-  }
   .w-60 {
     width: calc(var(--spacing) * 60);
   }
@@ -6450,9 +6445,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .overflow-clip {
-    overflow: clip;
-  }
   .overflow-hidden {
     overflow: hidden;
   }
@@ -6596,6 +6588,9 @@
   }
   .rounded-selector {
     border-radius: var(--radius-selector);
+  }
+  .rounded-sm {
+    border-radius: var(--radius-sm);
   }
   .rounded-s {
     border-start-start-radius: 0.25rem;
