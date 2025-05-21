@@ -45,6 +45,7 @@ jobs:
         run: |
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/views.py
       - name: Publish
         uses: home-assistant/builder@2025.03.0
         with:
@@ -93,6 +94,7 @@ jobs:
         run: |
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/views.py
       - name: Publish
         uses: home-assistant/builder@2025.03.0
         with:
@@ -141,6 +143,7 @@ jobs:
         run: |
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/views.py
       - name: Publish
         uses: home-assistant/builder@2025.03.0
         with:
@@ -189,6 +192,7 @@ jobs:
         run: |
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/views.py
       - name: Publish
         uses: home-assistant/builder@2025.03.0
         with:
@@ -237,6 +241,7 @@ jobs:
         run: |
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/about.html
           sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/templates/modals/initial_setup/welcome.html
+          sed -i 's/%version%/${{ github.ref_name }}/g' docker/web/nspanelmanager/web/views.py
       - name: Publish
         uses: home-assistant/builder@2025.03.0
         with:

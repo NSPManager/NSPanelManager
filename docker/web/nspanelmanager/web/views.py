@@ -32,6 +32,7 @@ def get_base_data(request):
     data = {
         'ingress_path':  request.headers["X-Ingress-Path"] if "X-Ingress-Path" in request.headers else "",
         'theme': get_setting_with_default("theme"),
+        'version': '%version%', # This value get's replaced during build
         'manager_address': get_setting_with_default("manager_address"),
     }
 
