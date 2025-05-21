@@ -6,6 +6,7 @@ import subprocess
 import os
 import signal
 import time
+import sys
 import signal
 from web.protobuf import protobuf_mqttmanager_pb2
 
@@ -106,6 +107,11 @@ class WebConfig(AppConfig):
     name = 'web'
 
     def ready(self):
+        # Only start MQTT Manager and load values if we are actually starting the application
+        # and simply not using manager.py for some other functionality.
+        if "uwsgi" not in sys.argv and "runserver" not in sys.argv:
+            return True
+
         # Setup handler to catch SIGCHLD from mqttmanager_process
         signal.signal(signal.SIGCHLD, sigchld_handler)
 
