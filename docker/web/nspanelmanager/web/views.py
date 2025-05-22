@@ -588,18 +588,21 @@ def save_settings(request):
 
     if "clear_home_assistant_token" in request.POST:
         set_setting_value(name="home_assistant_token", value="")
-    elif request.POST["home_assistant_token"] != "":
-        set_setting_value(name="home_assistant_token", value=request.POST["home_assistant_token"])
+    elif "home_assistant_token" in request.POST:
+        if request.POST["home_assistant_token"] != "":
+            set_setting_value(name="home_assistant_token", value=request.POST["home_assistant_token"])
 
-    openhab_address = request.POST["openhab_address"]
-    if openhab_address.endswith("/"):
-        openhab_address = openhab_address[:-1]
-    set_setting_value(name="openhab_address", value=openhab_address)
+    if "openhab_address" in request.POST:
+        openhab_address = request.POST["openhab_address"]
+        if openhab_address.endswith("/"):
+            openhab_address = openhab_address[:-1]
+        set_setting_value(name="openhab_address", value=openhab_address)
 
     if "clear_openhab_token" in request.POST:
         set_setting_value(name="openhab_token", value="")
-    elif request.POST["openhab_token"] != "":
-        set_setting_value(name="openhab_token", value=request.POST["openhab_token"])
+    elif "openhab_token" in request.POST:
+        if request.POST["openhab_token"] != "":
+            set_setting_value(name="openhab_token", value=request.POST["openhab_token"])
 
     set_setting_value(name="raise_to_100_light_level",
                       value=request.POST["raise_to_100_light_level"])
