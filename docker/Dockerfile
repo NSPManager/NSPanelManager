@@ -1,4 +1,7 @@
-FROM --platform=$BUILDPLATFORM python:3.11 AS build
+# syntax=docker/dockerfile:1
+# check=error=true
+
+FROM python:3.11 AS build
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 ARG no_mqttmanager_build
@@ -51,15 +54,13 @@ RUN if [ "$IS_DEVEL" == "yes" ]; then conan profile detect --force && echo 'core
 
 # Install software needed to build and run the manager
 RUN apt-get install -y --no-install-recommends \
-  postgresql-client curl inotify-tools net-tools nginx build-essential
-# && rm -rf /var/lib/apt/lists/*
+  postgresql-client curl inotify-tools net-tools nginx build-essential \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN pip install -r requirements.txt # Install python packages
-#RUN /bin/bash /MQTTManager/install_cmake.sh # Install cmake from source as it's only available for x86_64 and armv8 in repo
 
 RUN echo "alias ll='ls -lh --color=auto'" >> /etc/bash.bashrc
 
-#RUN if [ -z "$no_mqttmanager_build" ]; then /bin/bash /usr/src/app/make_mqttmanager.sh && /bin/bash /MQTTManager/cleanup_build.sh; else echo "Not building MQTTManager."; fi
 
 EXPOSE 8000
 CMD ["/bin/bash", "./run_uwsgi.sh"]
