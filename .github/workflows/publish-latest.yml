@@ -40,8 +40,8 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: ./docker  # Path to your Dockerfile
-          # note: platforms list: https://github.com/docker/setup-qemu-action
-          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7,qemu-arm,qemu-aarch64
+          # note: platforms list: https://github.com/docker/setup-qemu-action qemu-arm,qemu-aarch64
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
           push: true
           tags: ${{ env.DOCKER_IMAGE_REGISTRY_PATH }}:${{ env.DOCKER_TAG }}
           build-args: |
