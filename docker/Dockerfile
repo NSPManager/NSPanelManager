@@ -10,7 +10,7 @@ WORKDIR /MQTTManager
 SHELL ["/bin/bash", "-c"]
 
 RUN echo "Running on $BUILDPLATFORM, building for $TARGETPLATFORM"
-COPY MQTTManager/ /MQTTManager/
+COPY docker/MQTTManager/ /MQTTManager/
 
 # Only build MQTTManager during Docker build if is is not a devel mode.
 RUN if [ "$IS_DEVEL" != "yes" ]; then apt-get update \
