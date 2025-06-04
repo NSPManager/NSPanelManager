@@ -27,6 +27,8 @@ RUN if [ -z "$no_mqttmanager_build" ]; then /bin/bash /MQTTManager/compile_mqttm
 FROM python:3.11
 ARG no_mqttmanager_build
 ARG IS_DEVEL
+ARG GITHUB_REF_NAME
+ENV VERSION=$GITHUB_REF_NAME
 WORKDIR /usr/src/app
 SHELL ["/bin/bash", "-c"]
 
@@ -34,6 +36,12 @@ COPY web/ /usr/src/app/
 COPY nginx/sites-enabled/ /etc/nginx/sites-enabled/
 COPY nginx/sites-templates/ /etc/nginx/sites-templates/
 COPY --from=build /MQTTManager/build /MQTTManager/build
+
+COPY docker/web/nspanelmanager/web/templates/footer_template.html docker/web/nspanelmanager/web/templates/footer.html
+COPY docs/tex/manual.pdf docker/web/nspanelmanager/manual.pdf
+
+RUN  sed -i "s/%version%/$VERSION/g" docker/web/nspanelmanager/web/templates/footer.html
+
 
 # Update container
 RUN apt-get update \
