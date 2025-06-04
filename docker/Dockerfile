@@ -32,9 +32,9 @@ ENV VERSION=$GITHUB_REF_NAME
 WORKDIR /usr/src/app
 SHELL ["/bin/bash", "-c"]
 
-COPY web/ /usr/src/app/
-COPY nginx/sites-enabled/ /etc/nginx/sites-enabled/
-COPY nginx/sites-templates/ /etc/nginx/sites-templates/
+COPY docker/web/ /usr/src/app/
+COPY docker/nginx/sites-enabled/ /etc/nginx/sites-enabled/
+COPY docker/nginx/sites-templates/ /etc/nginx/sites-templates/
 COPY --from=build /MQTTManager/build /MQTTManager/build
 
 COPY docker/web/nspanelmanager/web/templates/footer_template.html docker/web/nspanelmanager/web/templates/footer.html
