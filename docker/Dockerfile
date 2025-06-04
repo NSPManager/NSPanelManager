@@ -38,7 +38,7 @@ COPY nginx/sites-templates/ /etc/nginx/sites-templates/
 COPY --from=build /MQTTManager/build /MQTTManager/build
 
 COPY docker/web/nspanelmanager/web/templates/footer_template.html docker/web/nspanelmanager/web/templates/footer.html
-COPY ../docs/tex/manual.pdf docker/web/nspanelmanager/manual.pdf
+COPY docs/tex/manual.pdf docker/web/nspanelmanager/manual.pdf
 
 RUN  sed -i "s/%version%/$VERSION/g" docker/web/nspanelmanager/web/templates/footer.html
 
