@@ -17,6 +17,7 @@ import os
 import signal
 import json
 import base64
+import environ
 from time import sleep
 
 #from nspanelmanager.web.mqttmanager_ipc import send_ipc_request
@@ -1055,9 +1056,11 @@ def initial_setup_mqtt_settings(request):
         send_mqttmanager_reload_command()
 
         # Save settings succesfully, return the next view in the setup guide. Home Assistant:
+        environment = environ.Env()
         data = {
             "home_assistant_address": get_setting_with_default("home_assistant_address"),
             "home_assistant_token": get_setting_with_default("home_assistant_token"),
+            "is_home_assistant_addon": ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
         }
         return render(request, 'modals/initial_setup/home_assistant.html', data)
     elif request.method == "GET":
@@ -1086,9 +1089,11 @@ def initial_setup_home_assistant_settings(request):
         }
         return render(request, 'modals/initial_setup/openhab.html', data)
     elif request.method == "GET":
+        environment = environ.Env()
         data = {
             "home_assistant_address": get_setting_with_default("home_assistant_address"),
             "home_assistant_token": get_setting_with_default("home_assistant_token"),
+            "is_home_assistant_addon": ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
         }
         return render(request, 'modals/initial_setup/home_assistant.html', data)
 
