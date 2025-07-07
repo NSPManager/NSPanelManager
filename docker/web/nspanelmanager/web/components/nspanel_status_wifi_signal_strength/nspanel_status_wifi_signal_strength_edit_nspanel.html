@@ -23,15 +23,6 @@
                 WiFi: ? dBm
             </span>
         `; // Nothing should be displayed when online.
-      } else if (signal_strength <= -90) {
-            return html`
-                <span class="icon-text">
-                    <span class="icon me-1">
-                        <i class="mdi mdi-wifi-strength-1-alert"></i>
-                    </span>
-                    WiFi: ${signal_strength} dBm
-                </span>
-            `;
       } else if (signal_strength <= -80) {
         return html`
             <span class="icon-text">
@@ -41,11 +32,11 @@
                 WiFi: ${signal_strength} dBm
             </span>
         `;
-      } else if (signal_strength <= -67) {
+      } else if (signal_strength <= -70) {
         return html`
             <span class="icon-text">
                 <span class="icon me-1">
-                    <i class="mdi mdi-wifi-strength-2-alert"></i>
+                    <i class="mdi mdi-wifi-strength-2"></i>
                 </span>
                 WiFi: ${signal_strength} dBm
             </span>
