@@ -39,15 +39,28 @@
 
     document.getElementById("item_select_{{ name }}_input").addEventListener('input', () => {
         var filter_text = $("#item_select_{{ name }}_input").val();
+        var has_uppercase = /[A-Z]/.test(filter_text);
+
         var num_items_shown = 0;
         $("#item_select_options_{{ name }} > button > li").each(function () {
-          if ($(this).attr("data-label").toLowerCase().includes(filter_text) || $(this).attr("data-item-id").toLowerCase().includes(filter_text) || filter_text == "") {
-            $(this).parent().show();
-            $(this).show();
+          if(has_uppercase) {
+            if ($(this).attr("data-label").includes(filter_text) || $(this).attr("data-item-id").includes(filter_text) || filter_text == "") {
+              $(this).parent().show();
+              $(this).show();
               num_items_shown++;
-          } else {
-            $(this).parent().hide();
-            $(this).hide();
+            } else {
+              $(this).parent().hide();
+              $(this).hide();
+            }
+          } else if(!has_uppercase) {
+            if ($(this).attr("data-label").toLowerCase().includes(filter_text.toLowerCase()) || $(this).attr("data-item-id").toLowerCase().includes(filter_text.toLowerCase()) || filter_text == "") {
+              $(this).parent().show();
+              $(this).show();
+              num_items_shown++;
+            } else {
+              $(this).parent().hide();
+              $(this).hide();
+            }
           }
         });
 
