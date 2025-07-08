@@ -29,7 +29,7 @@ SHELL ["/bin/bash", "-c"]
 COPY web/ /usr/src/app/
 COPY nginx/sites-enabled/ /etc/nginx/sites-enabled/
 COPY nginx/sites-templates/ /etc/nginx/sites-templates/
-COPY "HMI files/" /hmi_files/
+COPY "HMI_files/" /HMI_files/
 COPY --from=build /MQTTManager/build /MQTTManager/build
 
 # Update container
