@@ -3,15 +3,15 @@
 CoordMode("Mouse", "Window")
 
 ; ── CONFIG ─────────────────────────────
-hmiFile        := "C:\tft_automation\us\gui.HMI"
-inputImageDir1 := "C:\tft_automation\us\pictures_tft1"
-inputImageDir2 := "C:\tft_automation\us\pictures_tft2"
-inputImageDir3 := "C:\tft_automation\us\pictures_tft3"
-inputImageDir4 := "C:\tft_automation\us\pictures_tft4"
-outputTftDir1  := "C:\tft_automation\us\output_tft1"
-outputTftDir2  := "C:\tft_automation\us\output_tft2"
-outputTftDir3  := "C:\tft_automation\us\output_tft3"
-outputTftDir4  := "C:\tft_automation\us\output_tft4"
+hmiFile        := "C:\Github\NSPanelManager\HMI files\tft_automation\us\gui.HMI"
+inputImageDir1 := "C:\Github\NSPanelManager\HMI files\tft_automation\us\pictures_tft1"
+inputImageDir2 := "C:\Github\NSPanelManager\HMI files\tft_automation\us\pictures_tft2"
+inputImageDir3 := "C:\Github\NSPanelManager\HMI files\tft_automation\us\pictures_tft3"
+inputImageDir4 := "C:\Github\NSPanelManager\HMI files\tft_automation\us\pictures_tft4"
+outputTftDir1  := "C:\Github\NSPanelManager\HMI files\tft_automation\us\output_tft1"
+outputTftDir2  := "C:\Github\NSPanelManager\HMI files\tft_automation\us\output_tft2"
+outputTftDir3  := "C:\Github\NSPanelManager\HMI files\tft_automation\us\output_tft3"
+outputTftDir4  := "C:\Github\NSPanelManager\HMI files\tft_automation\us\output_tft4"
 
 ; ── STEP 1: Open HMI file (starts editor too) ─
 Run(hmiFile)
