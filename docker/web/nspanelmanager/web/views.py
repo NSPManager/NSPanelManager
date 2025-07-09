@@ -46,8 +46,18 @@ def get_base_data(request):
 def index(request):
     md5_firmware = get_file_md5sum("firmware.bin")
     md5_data_file = get_file_md5sum("data_file.bin")
-    md5_tft_file = get_file_md5sum("gui.tft")
-    md5_us_tft_file = get_file_md5sum("gui_us.tft")
+    tft_eu_checksums = {
+        "tft1": get_file_md5sum("HMI_files/tft_automation/eu/output_tft1/gui.tft"),
+        "tft2": get_file_md5sum("HMI_files/tft_automation/eu/output_tft2/gui.tft"),
+        "tft3": get_file_md5sum("HMI_files/tft_automation/eu/output_tft3/gui.tft"),
+        "tft4": get_file_md5sum("HMI_files/tft_automation/eu/output_tft4/gui.tft"),
+    }
+    tft_us_checksums = {
+        "tft1": get_file_md5sum("HMI_files/tft_automation/us/output_tft1/gui.tft"),
+        "tft2": get_file_md5sum("HMI_files/tft_automation/us/output_tft2/gui.tft"),
+        "tft3": get_file_md5sum("HMI_files/tft_automation/us/output_tft3/gui.tft"),
+        "tft4": get_file_md5sum("HMI_files/tft_automation/us/output_tft4/gui.tft"),
+    }
 
     if get_setting_with_default("use_fahrenheit") == "True":
         temperature_unit = "°F"
@@ -81,16 +91,27 @@ def index(request):
                 "level": "info",
                 "text": "Firmware update available."
             })
-        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "False" and nspanel.md5_tft_file != md5_tft_file:
+
+        selected_tft = get_nspanel_setting_with_default(nspanel.id, "selected_tft", "tft1")
+        is_us_panel = get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False")
+        us_panel_orientation = get_nspanel_setting_with_default(nspanel.id, "us_panel_orientation", "vertical")
+        if is_us_panel == "False" and nspanel.md5_tft_file != tft_eu_checksums[selected_tft]:
             panel_info["status"]["warnings"].append({
                 "level": "info",
                 "text": "GUI update available."
             })
-        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True" and nspanel.md5_tft_file != md5_us_tft_file:
+        elif is_us_panel == "True" and us_panel_orientation == "horizontal" and nspanel.md5_tft_file != tft_eu_checksums[selected_tft]:
+            # We use EU tft file for horizontal US panel with buttons on left as it's the same screen and orientation
             panel_info["status"]["warnings"].append({
                 "level": "info",
                 "text": "GUI update available."
             })
+        elif is_us_panel == "True" and us_panel_orientation == "vertical" and nspanel.md5_tft_file != tft_us_checksums[selected_tft]:
+            panel_info["status"]["warnings"].append({
+                "level": "info",
+                "text": "GUI update available."
+            })
+
         # TODO: Load warnings from MQTTManager.
         nspanels.append(panel_info)
 
@@ -206,6 +227,8 @@ def edit_nspanel(request, panel_id: int):
         "screen_dim_level": get_nspanel_setting_with_default(panel_id, "screen_dim_level", ""),
         "screensaver_dim_level": get_nspanel_setting_with_default(panel_id, "screensaver_dim_level", ""),
         "is_us_panel": get_nspanel_setting_with_default(panel_id, "is_us_panel", "False"),
+        "us_panel_orientation": get_nspanel_setting_with_default(panel_id, "us_panel_orientation", "vertical"),
+        "selected_tft": get_nspanel_setting_with_default(panel_id, "selected_tft", "tft1"),
         "show_screensaver_inside_temperature": get_nspanel_setting_with_default(panel_id, "show_screensaver_inside_temperature", "global"),
         "show_screensaver_outside_temperature": get_nspanel_setting_with_default(panel_id, "show_screensaver_outside_temperature", "global"),
         "screensaver_activation_timeout": get_nspanel_setting_with_default(panel_id, "screensaver_activation_timeout", ""),
@@ -355,8 +378,17 @@ def save_panel_settings(request, panel_id: int):
         panel_id, "lock_to_default_room", request.POST["lock_to_default_room"])
     set_nspanel_setting_value(
         panel_id, "reverse_relays", request.POST["reverse_relays"])
-    set_nspanel_setting_value(panel_id, "is_us_panel",
-                              request.POST["is_us_panel"])
+
+    if request.POST["panel_type"] == "eu":
+        set_nspanel_setting_value(panel_id, "is_us_panel", "False")
+    else:
+        if request.POST["panel_type"] == "us_horizontal":
+            set_nspanel_setting_value(panel_id, "is_us_panel", "True")
+            set_nspanel_setting_value(panel_id, "us_panel_orientation", "horizontal")
+        elif request.POST["panel_type"] == "us_vertical":
+            set_nspanel_setting_value(panel_id, "is_us_panel", "True")
+            set_nspanel_setting_value(panel_id, "us_panel_orientation", "vertical")
+
     set_nspanel_setting_value(panel_id, "relay1_is_light",
                               request.POST["relay1_is_light"])
     set_nspanel_setting_value(panel_id, "relay2_is_light",
@@ -730,32 +762,32 @@ def download_data_file(request):
         return HttpResponse(fs.open("data_file.bin").read(), content_type="application/octet-stream")
 
 
-def download_tft_eu(request):
+def download_tft(request, panel_id):
+    selected_tft = get_nspanel_setting_with_default(panel_id, "selected_tft", "tft1")
+    is_us_panel = get_nspanel_setting_with_default(panel_id, "is_us_panel", "False")
+    us_panel_orientation = get_nspanel_setting_with_default(panel_id, "us_panel_orientation", "vertical")
+
+    tft_file = ""
+    if is_us_panel == "False":
+        tft_file = "HMI_files/tft_automation/eu/output_" + selected_tft + "/gui.tft"
+    elif is_us_panel == "True" and us_panel_orientation == "horizontal":
+        # We use EU tft file for horizontal US panel with buttons on left as it's the same screen and orientation
+        tft_file = "HMI_files/tft_automation/eu/output_" + selected_tft + "/gui.tft"
+    elif is_us_panel == "True" and us_panel_orientation == "vertical":
+        tft_file = "HMI_files/tft_automation/us/output_" + selected_tft + "/gui.tft"
+    else:
+        print("ERROR! Could not determine TFT file for NSPanel with ID " + panel_id)
+
     fs = FileSystemStorage()
-    filename = "gui.tft"
     if "Range" in request.headers and request.headers["Range"].startswith("bytes="):
         parts = request.headers["Range"][6:].split('-')
         range_start = int(parts[0])
         range_end = int(parts[1])
         print(F"Received request for partial EU TFT download. Start: {range_start}, end: {range_end}")
-        data = fs.open(filename).read()
+        data = fs.open(tft_file).read()
         return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
     else:
-        return HttpResponse(fs.open(filename).read(), content_type="application/octet-stream")
-
-
-def download_tft_us(request):
-    fs = FileSystemStorage()
-    filename = "gui_us.tft"
-    if "Range" in request.headers and request.headers["Range"].startswith("bytes="):
-        parts = request.headers["Range"][6:].split('-')
-        range_start = int(parts[0])
-        range_end = int(parts[1])
-        print(F"Received request for partial US TFT download. Start: {range_start}, end: {range_end}")
-        data = fs.open(filename).read()
-        return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
-    else:
-        return HttpResponse(fs.open(filename).read(), content_type="application/octet-stream")
+        return HttpResponse(fs.open(tft_file).read(), content_type="application/octet-stream")
 
 
 def checksum_firmware(request):
@@ -766,24 +798,22 @@ def checksum_data_file(request):
     return HttpResponse(get_file_md5sum("data_file.bin"))
 
 
-def checksum_tft_file(request):
-    panel_ip = get_client_ip(request)
-    nspanel = NSPanel.objects.filter(ip_address=panel_ip).first()
-    if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True":
-        filename = "gui_us.tft"
+def checksum_tft_file(request, panel_id):
+    selected_tft = get_nspanel_setting_with_default(panel_id, "selected_tft", "tft1")
+    is_us_panel = get_nspanel_setting_with_default(panel_id, "is_us_panel", "False")
+    us_panel_orientation = get_nspanel_setting_with_default(panel_id, "us_panel_orientation", "vertical")
+    tft_file = ""
+    if is_us_panel == "False":
+        tft_file = "HMI_files/tft_automation/eu/output_" + selected_tft + "/gui.tft"
+    elif is_us_panel == "True" and us_panel_orientation == "horizontal":
+        # We use EU tft file for horizontal US panel with buttons on left as it's the same screen and orientation
+        tft_file = "HMI_files/tft_automation/eu/output_" + selected_tft + "/gui.tft"
+    elif is_us_panel == "True" and us_panel_orientation == "vertical":
+        tft_file = "HMI_files/tft_automation/us/output_" + selected_tft + "/gui.tft"
     else:
-        filename = "gui.tft"
-    return HttpResponse(get_file_md5sum(filename))
+        print("ERROR! Could not determine TFT file for NSPanel with ID " + panel_id)
 
-
-def checksum_tft_file_eu(request):
-    filename = "gui.tft"
-    return HttpResponse(get_file_md5sum(filename))
-
-
-def checksum_tft_file_us(request):
-    filename = "gui_us.tft"
-    return HttpResponse(get_file_md5sum(filename))
+    return HttpResponse(get_file_md5sum(tft_file))
 
 
 def get_manual(request):

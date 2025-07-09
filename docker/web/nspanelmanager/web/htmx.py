@@ -34,8 +34,18 @@ from web.views import get_file_md5sum, relay_groups
 def partial_index_nspanels_section(request):
     md5_firmware = get_file_md5sum("firmware.bin")
     md5_data_file = get_file_md5sum("data_file.bin")
-    md5_tft_file = get_file_md5sum("gui.tft")
-    md5_us_tft_file = get_file_md5sum("gui_us.tft")
+    tft_eu_checksums = {
+        "tft1": get_file_md5sum("HMI_files/tft_automation/eu/output_tft1/gui.tft"),
+        "tft2": get_file_md5sum("HMI_files/tft_automation/eu/output_tft2/gui.tft"),
+        "tft3": get_file_md5sum("HMI_files/tft_automation/eu/output_tft3/gui.tft"),
+        "tft4": get_file_md5sum("HMI_files/tft_automation/eu/output_tft4/gui.tft"),
+    }
+    tft_us_checksums = {
+        "tft1": get_file_md5sum("HMI_files/tft_automation/us/output_tft1/gui.tft"),
+        "tft2": get_file_md5sum("HMI_files/tft_automation/us/output_tft2/gui.tft"),
+        "tft3": get_file_md5sum("HMI_files/tft_automation/us/output_tft3/gui.tft"),
+        "tft4": get_file_md5sum("HMI_files/tft_automation/us/output_tft4/gui.tft"),
+    }
 
     if get_setting_with_default("use_fahrenheit") == "True":
         temperature_unit = "°F"
@@ -62,12 +72,22 @@ def partial_index_nspanels_section(request):
                 "level": "info",
                 "text": "Firmware update available."
             })
-        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "False" and nspanel.md5_tft_file != md5_tft_file:
+
+        selected_tft = get_nspanel_setting_with_default(nspanel.id, "selected_tft", "tft1")
+        is_us_panel = get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False")
+        us_panel_orientation = get_nspanel_setting_with_default(nspanel.id, "us_panel_orientation", "vertical")
+        if is_us_panel == "False" and nspanel.md5_tft_file != tft_eu_checksums[selected_tft]:
             panel_info["status"]["warnings"].append({
                 "level": "info",
                 "text": "GUI update available."
             })
-        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True" and nspanel.md5_tft_file != md5_us_tft_file:
+        elif is_us_panel == "True" and us_panel_orientation == "horizontal" and nspanel.md5_tft_file != tft_eu_checksums[selected_tft]:
+            # We use EU tft file for horizontal US panel with buttons on left as it's the same screen and orientation
+            panel_info["status"]["warnings"].append({
+                "level": "info",
+                "text": "GUI update available."
+            })
+        elif is_us_panel == "True" and us_panel_orientation == "vertical" and nspanel.md5_tft_file != tft_us_checksums[selected_tft]:
             panel_info["status"]["warnings"].append({
                 "level": "info",
                 "text": "GUI update available."
@@ -110,6 +130,28 @@ def unblock_nspanel(request, nspanel_id):
         response = HttpResponse("")
         response["HX-Refresh"] = "true"
         return response
+
+@csrf_exempt
+def select_nspanel_background(request, nspanel_id):
+    if request.method == "GET":
+        nspanel = NSPanel.objects.get(id=nspanel_id)
+        return render(request, "modals/select_background/select_background.html", {
+            "settings": {
+                "is_us_panel": get_nspanel_setting_with_default(nspanel_id, "is_us_panel", "False"),
+                "us_panel_orientation": get_nspanel_setting_with_default(nspanel_id, "us_panel_orientation", "vertical")
+            },
+            "nspanel": nspanel
+        })
+    elif request.method == "POST":
+        set_nspanel_setting_value(nspanel_id, "selected_tft", request.POST.get("selected_background"))
+        send_mqttmanager_reload_command()
+
+        # Successful, refresh page
+        response = HttpResponse("")
+        response["HX-Refresh"] = "true"
+        return response
+
+@csrf_exempt
 
 
 @csrf_exempt

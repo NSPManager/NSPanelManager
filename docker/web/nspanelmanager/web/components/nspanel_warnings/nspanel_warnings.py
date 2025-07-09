@@ -39,8 +39,19 @@ class NSPanelWarnings(component.Component):
 
         md5_firmware = self.get_file_md5sum("firmware.bin")
         md5_data_file = self.get_file_md5sum("data_file.bin")
-        md5_tft_file = self.get_file_md5sum("gui.tft")
-        md5_us_tft_file = self.get_file_md5sum("gui_us.tft")
+        tft_eu_checksums = {
+            "tft1": self.get_file_md5sum("HMI_files/tft_automation/eu/output_tft1/gui.tft"),
+            "tft2": self.get_file_md5sum("HMI_files/tft_automation/eu/output_tft2/gui.tft"),
+            "tft3": self.get_file_md5sum("HMI_files/tft_automation/eu/output_tft3/gui.tft"),
+            "tft4": self.get_file_md5sum("HMI_files/tft_automation/eu/output_tft4/gui.tft"),
+        }
+        tft_us_checksums = {
+            "tft1": self.get_file_md5sum("HMI_files/tft_automation/us/output_tft1/gui.tft"),
+            "tft2": self.get_file_md5sum("HMI_files/tft_automation/us/output_tft2/gui.tft"),
+            "tft3": self.get_file_md5sum("HMI_files/tft_automation/us/output_tft3/gui.tft"),
+            "tft4": self.get_file_md5sum("HMI_files/tft_automation/us/output_tft4/gui.tft"),
+        }
+
         warnings = []
         nspanel = NSPanel.objects.get(id=nspanel_id)
         for panel in NSPanel.objects.filter(denied=False):
@@ -57,12 +68,22 @@ class NSPanelWarnings(component.Component):
                 "level": "info",
                 "text": "Firmware update available."
             })
-        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "False" and nspanel.md5_tft_file != md5_tft_file:
+
+        selected_tft = get_nspanel_setting_with_default(nspanel.id, "selected_tft", "tft1")
+        is_us_panel = get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False")
+        us_panel_orientation = get_nspanel_setting_with_default(nspanel.id, "us_panel_orientation", "vertical")
+        if is_us_panel == "False" and nspanel.md5_tft_file != tft_eu_checksums[selected_tft]:
             warnings.append({
                 "level": "info",
                 "text": "GUI update available."
             })
-        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True" and nspanel.md5_tft_file != md5_us_tft_file:
+        elif is_us_panel == "True" and us_panel_orientation == "horizontal" and nspanel.md5_tft_file != tft_eu_checksums[selected_tft]:
+            # We use EU tft file for horizontal US panel with buttons on left as it's the same screen and orientation
+            warnings.append({
+                "level": "info",
+                "text": "GUI update available."
+            })
+        elif is_us_panel == "True" and us_panel_orientation == "vertical" and nspanel.md5_tft_file != tft_us_checksums[selected_tft]:
             warnings.append({
                 "level": "info",
                 "text": "GUI update available."

@@ -1,15 +1,42 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block head %}
 <script>
   var global_screensaver_mode = "{{ screensaver_mode_global }}";
+
+  $(document).ready(() => {
+    $("#panel_type").on('change', function() {
+      var selected_type = $(this).val();
+      if (selected_type == "eu") {
+        $("#eu-panel-example").show();
+      } else {
+        $("#eu-panel-example").hide();
+      }
+
+      if (selected_type == "us_vertical") {
+        $("#us-panel-vertical-example").show();
+      } else {
+        $("#us-panel-vertical-example").hide();
+      }
+
+      if (selected_type == "us_horizontal") {
+        $("#us-panel-horizontal-example").show();
+      } else {
+        $("#us-panel-horizontal-example").hide();
+      }
+    });
+
+  });
 </script>
 
-{% load static %}
 <script src="{{ ingress_path }}{% static 'edit_nspanel.js' %}"></script>
 {% endblock %}
 
 {% block content %}
+{% load static %}
+{% static "" as static_prefix %}
+
 <!-- Data needed by javascript -->
 <span class="hidden" id="nspanel_id">{{ panel_info.data.id }}</span>
 <span class="hidden" id="max_live_log_messages">{{ max_live_log_messages }}</span>
@@ -51,27 +78,64 @@
         </div>
 
         <!-- Panel type-->
-        <div class="flex-auto mt-4">
-          <h3 class="block mb-2 text-sm font-medium">NSPanel type/orientation</h3>
-          <ul
-            class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex bg-base-300">
-            <li class="w-full sm:border-b-0 sm:border-r border-neutral">
-              <div class="flex items-center ps-3">
-                <input id="is_not_us_panel" type="radio" name="is_us_panel" value="False"
-                {% if settings.is_us_panel != "True" %}checked{% endif %}
-                  class="w-4 h-4 radio radio-accent">
-                <label for="is_not_us_panel" class="w-full py-3 ms-2 text-sm font-medium">EU (horizontal)</label>
-              </div>
-            </li>
-            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
-              <div class="flex items-center ps-3">
-                <input id="is_us_panel" type="radio" name="is_us_panel" value="True"
-                {% if settings.is_us_panel == "True" %}checked{% endif %}
-                  class="w-4 h-4 radio radio-accent">
-                <label for="is_us_panel" class="w-full py-3 ms-2 text-sm font-medium">US (vertical)</label>
-              </div>
-            </li>
-          </ul>
+        <div class="mt-4">
+          <label for="room_id" class="block mb-2 text-sm font-medium">Panel type & orientation</label>
+          <div class="flex flex-row-reverse">
+            <select name="panel_type" id="panel_type" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id">
+              <option value="eu" {% if settings.is_us_panel == 'False' %}selected{% endif %}>EU</option>
+              <option value="us_vertical" {% if settings.is_us_panel == 'True' and settings.us_panel_orientation == 'vertical' %}selected{% endif %}>US Vertical</option>
+              <option value="us_horizontal" {% if settings.is_us_panel == 'True' and settings.us_panel_orientation == 'horizontal' %}selected{% endif %}>US Horizontal</option>
+            </select>
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/room_id:border-accent">
+              <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>Panel type</title>
+                <path
+                  d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-center">
+            <!-- 81 x 81mm without frame -->
+            <div id="eu-panel-example" class="relative mx-auto border-base-300 bg-base-300 border-[0.5rem] rounded-[0.5rem] h-[300px] w-[300px] mt-4 {% if settings.is_us_panel != 'False' %}hidden{% endif %}">
+                <div class="rounded-[0.2rem] w-full h-[77%] bg-black flex justify-center items-center">
+                    <img src="{{ static_prefix }}HMI_files/eu/output_{{ settings.selected_tft }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
+                </div> <!-- screen -->
+                <div class="absolute top-0 left-0 rounded-[0.2rem] w-full h-[77%] opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Choose background"
+                hx-get="{% url 'htmx_select_nspanel_background' panel_info.data.id %}">
+                    <span class="mdi mdi-image-size-select-actual"></span>
+                </div> <!-- Select background overlay -->
+                <div class="rounded-[0.2rem] w-[49%] h-[21.5%] bg-base-200 absolute bottom-0"></div> <!-- Left button -->
+                <div class="rounded-[0.2rem] w-[49%] h-[21.5%] bg-base-200 absolute bottom-0 right-0"></div> <!-- Right button -->
+            </div>
+
+            <!-- 69 x 115mm without frame -->
+            <div id="us-panel-vertical-example" class="relative mx-auto border-base-300 bg-base-300 border-[0.5rem] rounded-[0.5rem] h-[500px] w-[300px] mt-4 {% if settings.is_us_panel != 'True' or settings.us_panel_orientation != 'vertical' %}hidden{% endif %}">
+                <div class="rounded-[0.2rem] w-full h-[81.5%] bg-black flex justify-center items-center">
+                    <img src="{{ static_prefix }}HMI_files/us/output_{{ settings.selected_tft }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
+                </div> <!-- screen -->
+                <div class="absolute top-0 left-0 rounded-[0.2rem] w-full h-[81.5%] opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Choose background"
+                    hx-get="{% url 'htmx_select_nspanel_background' panel_info.data.id %}">
+                    <span class="mdi mdi-image-size-select-actual"></span>
+                </div> <!-- Select background overlay -->
+                <div class="rounded-[0.2rem] w-[49%] h-[15.6%] bg-base-200 absolute bottom-0"></div> <!-- Left button -->
+                <div class="rounded-[0.2rem] w-[49%] h-[15.6%] bg-base-200 absolute bottom-0 right-0"></div> <!-- Right button -->
+            </div>
+
+            <!-- 115 x 69mm without frame -->
+            <div id="us-panel-horizontal-example" class="relative mx-auto border-base-300 bg-base-300 border-[0.5rem] rounded-[0.5rem] h-[300px] w-[500px] mt-4 {% if settings.is_us_panel != 'True' or settings.us_panel_orientation != 'horizontal' %}hidden{% endif %}">
+                <div class="rounded-[0.2rem] w-[15.6%] h-[49%] bg-base-200 absolute top-0 left-0"></div> <!-- Upper button -->
+                <div class="rounded-[0.2rem] w-[15.6%] h-[49%] bg-base-200 absolute bottom-0 left-0"></div> <!-- Bottom button -->
+                <div class="rounded-[0.2rem] w-[81.5%] h-full bg-black flex justify-center items-center absolute top-0 right-0">
+                    <!-- We use EU tft file for a horizontal US panel with buttons on left as it's the same screen and the correct layout -->
+                    <img src="{{ static_prefix }}HMI_files/eu/output_{{ settings.selected_tft }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
+                </div> <!-- screen -->
+                <div class="absolute top-0 right-0 rounded-[0.2rem] w-[81.5%] h-full opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Choose background"
+                    hx-get="{% url 'htmx_select_nspanel_background' panel_info.data.id %}">
+                    <span class="mdi mdi-image-size-select-actual"></span>
+                </div> <!-- Select background overlay -->
+            </div>
         </div>
 
         <!-- Default room -->
@@ -80,11 +144,11 @@
           <div class="flex flex-row-reverse">
             <select name="room_id" id="room_id" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id">
               {% for room in rooms %}
-              {% if room.id == panel_info.data.room.id %}
-              <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
-              {% else %}
-              <option value="{{ room.id }}">{{ room.friendly_name }}</option>
-              {% endif %}
+                {% if room.id == panel_info.data.room.id %}
+                    <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
+                {% else %}
+                    <option value="{{ room.id }}">{{ room.friendly_name }}</option>
+                {% endif %}
               {% endfor %}
             </select>
             <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/room_id:border-accent">
