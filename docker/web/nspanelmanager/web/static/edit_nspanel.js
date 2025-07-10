@@ -129,4 +129,25 @@ $(document).ready(() => {
   $("#button1_mode").change(update_shown_elements);
   $("#button2_mode").change(update_shown_elements);
   $("#screensaver_mode").change(update_shown_elements);
+
+  $("#panel_type").on("change", function () {
+    var selected_type = $(this).val();
+    if (selected_type == "eu") {
+      $("#eu-panel-example").show();
+    } else {
+      $("#eu-panel-example").hide();
+    }
+
+    if (selected_type == "us_vertical") {
+      $("#us-panel-vertical-example").show();
+    } else {
+      $("#us-panel-vertical-example").hide();
+    }
+
+    if (selected_type == "us_horizontal") {
+      $("#us-panel-horizontal-example").show();
+    } else {
+      $("#us-panel-horizontal-example").hide();
+    }
+  });
 });

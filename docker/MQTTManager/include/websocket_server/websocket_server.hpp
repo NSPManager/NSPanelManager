@@ -41,7 +41,7 @@ public:
   StompTopic(std::string topic_name, std::string current_value);
 
   std::string get_name() const;
-  void subscribe(ix::WebSocket &websocket, int subscription_id);
+  void subscribe(ix::WebSocket &websocket, std::string subscription_id);
   void unsubscribe(ix::WebSocket &websocket);
   void update_value(std::string new_value);
   void set_retained(bool retained);
@@ -51,7 +51,7 @@ private:
   bool _retained = false;
   std::string _topic_name;
   std::string _current_value;
-  std::list<std::pair<ix::WebSocket *, int>> _subscribers;
+  std::list<std::pair<ix::WebSocket *, std::string>> _subscribers;
 };
 
 class WebsocketServer {

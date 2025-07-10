@@ -1,10 +1,12 @@
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <codecvt>
 #include <cstddef>
 #include <fmt/core.h>
 #include <fstream>
@@ -13,6 +15,7 @@
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXWebSocketMessageType.h>
 #include <ixwebsocket/IXWebSocketServer.h>
+#include <locale>
 #include <memory>
 #include <mutex>
 #include <spdlog/spdlog.h>
@@ -30,7 +33,7 @@ std::string StompTopic::get_name() const {
   return _topic_name;
 }
 
-void StompTopic::subscribe(ix::WebSocket &webSocket, int subscription_id) {
+void StompTopic::subscribe(ix::WebSocket &webSocket, std::string subscription_id) {
   _subscribers.push_back(std::make_pair(&webSocket, subscription_id));
 
   if (this->_retained) {
@@ -39,7 +42,7 @@ void StompTopic::subscribe(ix::WebSocket &webSocket, int subscription_id) {
     frame.headers["message-id"] = boost::uuids::to_string(this->_uuid_generator());
     frame.headers["content-type"] = "text/plain";
     frame.headers["destination"] = this->_topic_name;
-    frame.headers["subscription"] = std::to_string(subscription_id);
+    frame.headers["subscription"] = subscription_id;
     frame.body = this->_current_value;
     WebsocketServer::send_stomp_frame(frame, webSocket);
   }
@@ -65,7 +68,7 @@ void StompTopic::update_value(std::string value) {
   frame.body = value;
 
   for (auto &subscriber : _subscribers) {
-    frame.headers["subscription"] = std::to_string(subscriber.second);
+    frame.headers["subscription"] = subscriber.second;
     WebsocketServer::send_stomp_frame(frame, *subscriber.first);
   }
 }
@@ -163,6 +166,11 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
           }
         }
       } else if (std::find(WebsocketServer::_connected_websockets_stomps.begin(), WebsocketServer::_connected_websockets_stomps.end(), &webSocket) != WebsocketServer::_connected_websockets_stomps.end()) {
+        // This is a STOMP heartbeat. Ignore it.
+        if (msg->str.length() == 1 && *msg->str.data() == '\n') {
+          return;
+        }
+
         // STOMP connection
         std::string data = msg->str;
         std::optional<StompFrame> frame = WebsocketServer::decode_stomp_frame(data);
@@ -172,9 +180,17 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
           if (frame->type == StompFrame::CONNECT) {
             // Client sent CONNECT frame, answer with CONNECTED frame if same protocol version can be negotiated
             if (frame->headers.find("accept-version") != frame->headers.end()) {
+              SPDLOG_DEBUG("Got STOMP connection request, accepting request, sending CONNECTED");
               std::string accept_version_header = frame->headers["accept-version"];
               std::vector<std::string> accepted_versions;
               boost::split(accepted_versions, accept_version_header, boost::is_any_of(","));
+
+              std::string heartbeat_header = "0,0";
+              if (frame->headers.find("heart-beat") != frame->headers.end()) {
+                heartbeat_header = frame->headers["heart-beat"];
+              }
+              std::vector<std::string> accepted_heartbeats;
+              boost::split(accepted_heartbeats, heartbeat_header, boost::is_any_of(","));
 
               if (std::find(accepted_versions.begin(), accepted_versions.end(), "1.2") != accepted_versions.end()) {
                 // Generate UUID for this connection.
@@ -184,6 +200,11 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
                 connected_frame.type = StompFrame::CONNECTED;
                 connected_frame.headers["session"] = boost::uuids::to_string(uuid);
                 connected_frame.headers["version"] = "1.2";
+                connected_frame.headers["server"] = "NSPanelManager";
+                if (std::stoi(accepted_heartbeats[0]) != 0) {
+                  connected_frame.headers["heart-beat"] = "0,1000";
+                }
+
                 WebsocketServer::send_stomp_frame(connected_frame, webSocket);
               } else {
                 SPDLOG_ERROR("STOMP client tried to connect but no supported versions exists. MQTTManager supports version 1.2, client supports {}", accept_version_header);
@@ -205,23 +226,25 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
               return;
             }
 
+            SPDLOG_DEBUG("STOMP subscribing to topic {}", frame->headers["destination"]);
             for (auto &topic : WebsocketServer::_stomp_topics) {
               if (topic.get_name() == frame->headers["destination"]) {
                 std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-                topic.subscribe(webSocket, std::stoi(frame->headers["id"]));
+                topic.subscribe(webSocket, frame->headers["id"]);
                 return; // We found the topics and subscribed to it, nothing else to do.
               }
             }
 
             // Topic was not found, create topic and subscribe to it
             WebsocketServer::_stomp_topics.push_back(StompTopic(frame->headers["destination"], ""));
-            WebsocketServer::_stomp_topics.back().subscribe(webSocket, std::stoi(frame->headers["id"]));
+            WebsocketServer::_stomp_topics.back().subscribe(webSocket, frame->headers["id"]);
           } else if (frame->type == StompFrame::UNSUBSCRIBE) {
             if (frame->headers.find("destination") == frame->headers.end()) {
               SPDLOG_ERROR("Got STOMP frame to subscribe to topic but not 'destination' was set!");
               return;
             }
 
+            SPDLOG_DEBUG("STOMP unsubscribing to topic {}", frame->headers["destination"]);
             for (auto &topic : WebsocketServer::_stomp_topics) {
               if (topic.get_name() == frame->headers["destination"]) {
                 std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
@@ -237,6 +260,8 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
                 return; // We found the topic and published to it, nothing else to do.
               }
             }
+          } else {
+            SPDLOG_WARN("Received unknown STOMP frame type {}.", static_cast<int>(frame->type));
           }
         } else {
           SPDLOG_ERROR("Failed to parse STOMP frame");
@@ -268,7 +293,6 @@ void WebsocketServer::broadcast_string(std::string &data) {
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::string value) {
   std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-  SPDLOG_DEBUG("Updating STOMP topic {} to value {}", topic_name, value);
   for (auto &topic : WebsocketServer::_stomp_topics) {
     if (topic.get_name().compare(topic_name) == 0) {
       topic.update_value(value);
@@ -306,6 +330,10 @@ std::optional<StompFrame> WebsocketServer::decode_stomp_frame(std::string &data)
       if (colon_pos != std::string::npos) {
         std::string key = line.substr(0, colon_pos);
         std::string value = line.substr(colon_pos + 1);
+        boost::replace_all(value, "\\r", "\r");  // Replace escaped carriage return characters with actual carriage return characters
+        boost::replace_all(value, "\\n", "\n");  // Replace escaped newline characters with actual newline characters
+        boost::replace_all(value, "\\c", ":");   // Replace escaped colon characters with actual colon characters
+        boost::replace_all(value, "\\\\", "\\"); // Replace escaped backslash characters with actual backslash characters
         // As per specification https://stomp.github.io/stomp-specification-1.2.html#Standard_Headers only the first header is used
         if (frame.headers.find(key) == frame.headers.end()) {
           frame.headers[key] = value;
@@ -404,7 +432,7 @@ void WebsocketServer::send_stomp_frame(StompFrame &frame, ix::WebSocket &websock
   }
 
   // TODO: Make content-type adjustable
-  frame.headers["content-type"] = "text/plain";
+  frame.headers["content-type"] = "text/plain;charset=utf-8";
 
   for (auto &header : frame.headers) {
     message.append(header.first);
@@ -415,7 +443,8 @@ void WebsocketServer::send_stomp_frame(StompFrame &frame, ix::WebSocket &websock
 
   message.append("\n");
   message.append(frame.body);
-  message.append("\0\n");
+  message.push_back('\0');
+  message.push_back('\n');
 
   websocket.send(message);
 }
