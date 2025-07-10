@@ -62,6 +62,7 @@
   }
 
   function stomp_reconnect_callback() {
+    // No username or password required to connect to STOMP websocket. Set dummy values.
     stomp_client.connect("user", "pass", stomp_connected_callback, stomp_disconnected_callback, stomp_error_callback);
   }
 

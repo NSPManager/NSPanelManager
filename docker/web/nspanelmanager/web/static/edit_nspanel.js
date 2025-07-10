@@ -2,10 +2,6 @@ const ws = new MQTTManager_WS();
 var mac_address;
 var nspanel_id;
 
-function request_log_backtrace() {
-  ws.send_command("get_nspanels_logs", { nspanels: [nspanel_id] }, null);
-}
-
 function push_log_message_to_view(data) {
   var add_html = "<tr class='hover'><td class='py-1'>";
   add_html += data.time;
@@ -103,9 +99,6 @@ $(document).ready(() => {
       if (event.detail.message.startsWith("{")) {
         try {
           var data = JSON.parse(event.detail.message);
-          if (data.level && data.message) {
-            push_log_message_to_view(data);
-          }
         } catch (error) {
           console.error(error);
           // We couldn't parse to json. Just let HTMX continue.
@@ -149,5 +142,16 @@ $(document).ready(() => {
     } else {
       $("#us-panel-horizontal-example").hide();
     }
+  });
+
+  stomp_subscribe("nspanel/" + nspanel_mac + "/log", (message) => {
+    push_log_message_to_view(JSON.parse(message.body));
+  });
+
+  // Fetch log backtrace once.
+  stomp_subscribe("nspanel/" + nspanel_mac + "/log_backtrace", (message) => {
+    console.log(message);
+
+    stomp_unsubscribe("nspanel/" + nspanel_mac + "/log_backtrace");
   });
 });

@@ -4,6 +4,7 @@
 {% block head %}
 <script>
   var global_screensaver_mode = "{{ screensaver_mode_global }}";
+  var nspanel_mac = "{{ panel_info.data.mac_address }}";
 </script>
 
 <script src="{{ ingress_path }}{% static 'edit_nspanel.js' %}"></script>
