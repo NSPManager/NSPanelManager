@@ -33,6 +33,7 @@
 #include <fmt/chrono.h>
 #include <fmt/core.h>
 #include <iomanip>
+#include <ixwebsocket/IXWebSocketSendInfo.h>
 #include <list>
 #include <mutex>
 #include <netinet/in.h>
@@ -201,6 +202,9 @@ void NSPanel::reload_config() {
     }
 
     if (this->_has_registered_to_manager && !panel_settings.denied && panel_settings.accepted) {
+      WebsocketServer::set_stomp_topic_retained(this->_mqtt_status_topic, true);
+      WebsocketServer::set_stomp_topic_retained(this->_mqtt_status_report_topic, true);
+
       // If this NSPanel is registered to manager, listen to state topics.
       SPDLOG_INFO("Subscribing to NSPanel MQTT topics.");
       MQTT_Manager::subscribe(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
@@ -444,6 +448,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         log_data["level"] = message_parts[1];
         log_data["message"] = message_parts[2];
         WebsocketServer::broadcast_json(log_data);
+        WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data.dump());
 
         // Save log message in backtrace for when (if) the log interface requests it.
         NSPanelLogMessage message;
@@ -460,21 +465,20 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       }
     } else if (topic.compare(this->_mqtt_status_topic) == 0) {
       nlohmann::json data = nlohmann::json::parse(payload);
-      if (std::string(data["mac"]).compare(this->_mac) == 0) {
-        // Update internal state.
-        std::string state = data["state"];
-        if (state.compare("online") == 0) {
-          this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
-          SPDLOG_DEBUG("NSPanel {}::{} became ONLINE.", this->_id, this->_name);
-        } else if (state.compare("offline") == 0) {
-          this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE;
-          SPDLOG_DEBUG("NSPanel {}::{} became OFFLINE.", this->_id, this->_name);
-        } else {
-          SPDLOG_ERROR("Received unknown state for nspanel {}::{}. State: {}", this->_id, this->_name, state);
-        }
-
-        this->send_websocket_update();
+      // Update internal state.
+      std::string state = data["state"];
+      if (state.compare("online") == 0) {
+        this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
+        SPDLOG_DEBUG("NSPanel {}::{} became ONLINE.", this->_id, this->_name);
+      } else if (state.compare("offline") == 0) {
+        this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE;
+        SPDLOG_DEBUG("NSPanel {}::{} became OFFLINE.", this->_id, this->_name);
+      } else {
+        SPDLOG_ERROR("Received unknown state for nspanel {}::{}. State: {}", this->_id, this->_name, state);
       }
+
+      this->send_websocket_update();
+      WebsocketServer::update_stomp_topic_value(this->_mqtt_status_topic, state);
     } else if (topic.compare(this->_mqtt_status_report_topic) == 0) {
       NSPanelStatusReport report;
       if (report.ParseFromString(payload)) {
@@ -538,6 +542,14 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
 
         // Received new temperature from status report, send out on temperature topic:
         MQTT_Manager::publish(this->_mqtt_temperature_topic, fmt::format("{:.1f}", this->_temperature));
+
+        nlohmann::json json_data;
+        json_data["temperature"] = this->_temperature;
+        json_data["ip_address"] = this->_ip_address;
+        json_data["rssi"] = this->_rssi;
+        json_data["heap_used_pct"] = this->_heap_used_pct;
+        WebsocketServer::update_stomp_topic_value(this->_mqtt_status_report_topic, json_data.dump());
+
         this->send_websocket_update();
       } else {
         SPDLOG_ERROR("Failed to parse NSPanelStatusReport from string as protobuf. Will try JSON.");
@@ -662,6 +674,7 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   payload = payload.substr(1);
   log_data["message"] = payload; // TODO: Clean up message before sending it out
   WebsocketServer::broadcast_json(log_data);
+  WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data.dump());
 
   // Save log message in backtrace for when (if) the log interface requests it.
   NSPanelLogMessage message;

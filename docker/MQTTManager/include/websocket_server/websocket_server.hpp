@@ -1,12 +1,58 @@
 #ifndef MQTTMANAGER_WEBSOCKET_SERVER_HPP
 #define MQTTMANAGER_WEBSOCKET_SERVER_HPP
 
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid.hpp>
 #include <ixwebsocket/IXConnectionState.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <mutex>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <string>
+#include <tuple>
+#include <unordered_map>
+
+struct StompFrame {
+  enum MessageType {
+    // Client commands
+    CONNECT,
+    DISCONNECT,
+    SEND,
+    SUBSCRIBE,
+    UNSUBSCRIBE,
+    ACK,
+    NACK,
+
+    // Server commands
+    CONNECTED,
+    MESSAGE,
+    RECEIPT,
+    ERROR,
+  };
+
+  MessageType type;
+  std::unordered_map<std::string, std::string> headers;
+  std::string body;
+};
+
+class StompTopic {
+public:
+  StompTopic(std::string topic_name, std::string current_value);
+
+  std::string get_name() const;
+  void subscribe(ix::WebSocket &websocket, int subscription_id);
+  void unsubscribe(ix::WebSocket &websocket);
+  void update_value(std::string new_value);
+  void set_retained(bool retained);
+
+private:
+  boost::uuids::random_generator _uuid_generator = boost::uuids::random_generator(); // Used to generate unique UUIDs for STOMP clients
+  bool _retained = false;
+  std::string _topic_name;
+  std::string _current_value;
+  std::list<std::pair<ix::WebSocket *, int>> _subscribers;
+};
 
 class WebsocketServer {
 public:
@@ -16,14 +62,34 @@ public:
   static void start();
 
   /**
-   * Convert a JSON payload to a string and broadcast to all connected clients.
+   * Convert a JSON payload to a string and broadcast to all connected "legacy" clients.
    */
   static void broadcast_json(nlohmann::json &json);
 
   /**
-   * Send a message to all connected clients.
+   * Send a message to all connected "legacy" clients.
    */
   static void broadcast_string(std::string &data);
+
+  /**
+   * Update the value of a STOMP topic and send out the updated value to all connected clients.
+   */
+  static void update_stomp_topic_value(std::string topic_name, std::string value);
+
+  /**
+   * Update a STOMP topic to retain or not to retain the value. Will create topic if it doesn't exist.
+   */
+  static void set_stomp_topic_retained(std::string topic_name, bool retain);
+
+  /**
+   * Decode a STOMP frame from a string.
+   */
+  static std::optional<StompFrame> decode_stomp_frame(std::string &data);
+
+  /**
+   * Send a STOMP frame to a specific websocket client.
+   */
+  static void send_stomp_frame(StompFrame &frame, ix::WebSocket &websocket);
 
   /**
    * Attach a message callback. Callback should return true if the message was handled.
@@ -54,11 +120,15 @@ private:
     std::string warning_text;
   };
 
-  static inline std::list<ix::WebSocket> _connected_websockets;
   static inline ix::WebSocketServer *_server;
   static inline std::mutex _server_mutex;
   static inline std::list<std::function<bool(std::string &message, std::string *response_buf)>> _callbacks;
-  static inline std::list<std::function<bool()>> _client_connect_callbacks;
+
+  static inline boost::uuids::random_generator _uuid_generator = boost::uuids::random_generator(); // Used to generate unique UUIDs for STOMP clients
+  static inline std::vector<StompTopic> _stomp_topics;
+
+  static inline std::list<ix::WebSocket *> _connected_websockets;
+  static inline std::list<ix::WebSocket *> _connected_websockets_stomps;
 
   static inline std::mutex _active_warnings_mutex;
   static inline std::list<ActiveWarning> _active_warnings;
