@@ -253,30 +253,6 @@ def edit_nspanel(request, panel_id: int):
     panel_status = send_ipc_request(F"nspanel/{nspanel.id}/status", {"command": "get"})
     panel_info["status"] = panel_status
     panel_info["status"]["warnings"] = []
-    for panel in NSPanel.objects.filter(denied=False):
-        if panel == nspanel:
-            continue
-        elif panel.friendly_name == nspanel.friendly_name:
-            panel_info["status"]["warnings"].append({
-                "level": "error",
-                "text": "Two or more panels exists with the same name. This may have unintended consequences"
-            })
-            break
-    if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
-        panel_info["status"]["warnings"].append({
-            "level": "info",
-            "text": "Firmware update available."
-        })
-    if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "False" and nspanel.md5_tft_file != md5_tft_file:
-        panel_info["status"]["warnings"].append({
-            "level": "info",
-            "text": "GUI update available."
-        })
-    if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True" and nspanel.md5_tft_file != md5_us_tft_file:
-        panel_info["status"]["warnings"].append({
-            "level": "info",
-            "text": "GUI update available."
-        })
 
     data = get_base_data(request)
     data = data|{
@@ -675,6 +651,7 @@ def save_new_firmware(request):
         fs = FileSystemStorage()
         fs.delete("firmware.bin")
         fs.save("firmware.bin", uploaded_file)
+        send_mqttmanager_reload_command()
     return redirect('/')
 
 
@@ -686,6 +663,7 @@ def save_new_data_file(request):
         fs = FileSystemStorage()
         fs.delete("data_file.bin")
         fs.save("data_file.bin", uploaded_file)
+        send_mqttmanager_reload_command()
     return redirect('/')
 
 
@@ -696,6 +674,7 @@ def save_new_merged_flash(request):
         fs = FileSystemStorage()
         fs.delete("merged_flash.bin")
         fs.save("merged_flash.bin", uploaded_file)
+        # send_mqttmanager_reload_command() # Manager does not keep track of checksum for merged_flash.bin. Do not send reload command.
     return redirect('/')
 # TODO: Make exempt only when Debug = true
 
@@ -712,15 +691,36 @@ def get_client_ip(request):
 @csrf_exempt
 def save_new_tft_file(request):
     if request.method == 'POST':
-        if request.POST["tft_file_type"] == "eu":
-            filename = "gui.tft"
+        tft_file_type = request.POST["tft_file_type"]
+        file_path = ""
+
+        if(tft_file_type == "eu1"):
+            file_path = "HMI_files/tft_automation/eu/output_tft1/gui.tft"
+        elif(tft_file_type == "eu2"):
+            file_path = "HMI_files/tft_automation/eu/output_tft2/gui.tft"
+        elif(tft_file_type == "eu3"):
+            file_path = "HMI_files/tft_automation/eu/output_tft3/gui.tft"
+        elif(tft_file_type == "eu4"):
+            file_path = "HMI_files/tft_automation/eu/output_tft4/gui.tft"
+        elif(tft_file_type == "us1"):
+            file_path = "HMI_files/tft_automation/us/output_tft1/gui.tft"
+        elif(tft_file_type == "us2"):
+            file_path = "HMI_files/tft_automation/us/output_tft2/gui.tft"
+        elif(tft_file_type == "us3"):
+            file_path = "HMI_files/tft_automation/us/output_tft3/gui.tft"
+        elif(tft_file_type == "us4"):
+            file_path = "HMI_files/tft_automation/us/output_tft4/gui.tft"
         else:
-            filename = "gui_us.tft"
+            print("ERROR! Unknown TFT file type!")
+            return HttpResponse("ERROR! Unknown TFT file type!", status=500)
+
+        print("Saving new TFT file ", file_path)
 
         uploaded_file = request.FILES['tft_file']
         fs = FileSystemStorage()
-        fs.delete(filename)
-        fs.save(filename, uploaded_file)
+        fs.delete(file_path)
+        fs.save(file_path, uploaded_file)
+        send_mqttmanager_reload_command()
     return redirect('/')
 
 

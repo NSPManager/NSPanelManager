@@ -86,26 +86,28 @@
           <h3 class="text-lg font-semibold mb-2">Upload TFT file</h3>
           {% component "alert" level="warning" text="This functionality is only ment to be used to upload new files from developers or if you really know what you are doing. Uploading incorrect or corrupt files here can cause your NSPanels to not function properly and require a reflash." %}{% endcomponent %}
 
-          <!-- TFT file type-->
-          <div class="flex-auto mt-4">
-            <h3 class="block mb-2 text-sm font-medium">File type</h3>
-            <ul
-              class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex bg-base-300">
-              <li class="w-full sm:border-b-0 sm:border-r border-neutral">
-                <div class="flex items-center ps-3">
-                  <input id="tft_file_type_eu" type="radio" name="tft_file_type" value="eu"
-                  class="w-4 h-4 radio radio-accent" required>
-                  <label for="tft_file_type_eu" class="w-full py-3 ms-2 text-sm font-medium">EU</label>
-                </div>
-              </li>
-              <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
-                <div class="flex items-center ps-3">
-                  <input id="tft_file_type_us" type="radio" name="tft_file_type" value="us"
-                    class="w-4 h-4 radio radio-accent" required>
-                  <label for="tft_file_type_us" class="w-full py-3 ms-2 text-sm font-medium">US</label>
-                </div>
-              </li>
-            </ul>
+          <!-- TFT file type -->
+          <div class="mt-4">
+            <label for="screensaver_mode" class="block mb-2 text-sm font-medium">Screensaver mode</label>
+            <div class="flex flex-row-reverse">
+              <select name="tft_file_type" id="tft_file_type" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id">
+                <option value="eu1">EU 1/US Landscape 1 (buttons left)</option>
+                <option value="eu2">EU 2/US Landscape 2 (buttons left)</option>
+                <option value="eu3">EU 3/US Landscape 3 (buttons left)</option>
+                <option value="eu4">EU 4/US Landscape 4 (buttons left)</option>
+                <option value="us1">US 1</option>
+                <option value="us2">US 2</option>
+                <option value="us3">US 3</option>
+                <option value="us4">US 4</option>
+              </select>
+              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/room_id:border-accent">
+                <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <title>Screensaver mode</title>
+                  <path
+                    d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+                </svg>
+              </span>
+            </div>
           </div>
 
           <div id="tft_dragdrop_target" class="py-4">

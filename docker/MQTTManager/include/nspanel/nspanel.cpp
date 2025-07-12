@@ -712,12 +712,20 @@ void NSPanel::send_websocket_status_update() {
   }
 
   // Check if NSPanel has firmware, littlefs or tft file updates available and set appropriate warning.
-  if (this->has_firmware_update() || this->has_littlefs_update()) {
+  if (this->_current_firmware_md5_checksum.empty() || this->_current_littlefs_md5_checksum.empty()) {
+    status_data["warnings"].push_back(nlohmann::json{
+        {"level", "warning"},
+        {"text", "Manager has no checksum for installed firmware on panel."}});
+  } else if (this->has_firmware_update() || this->has_littlefs_update()) {
     status_data["warnings"].push_back(nlohmann::json{
         {"level", "warning"},
         {"text", "Firmware update available"}});
   }
-  if (this->has_tft_update()) {
+  if (this->_current_tft_md5_checksum.empty()) {
+    status_data["warnings"].push_back(nlohmann::json{
+        {"level", "warning"},
+        {"text", "Manager has no checksum for installed GUI on panel."}});
+  } else if (this->has_tft_update()) {
     status_data["warnings"].push_back(nlohmann::json{
         {"level", "warning"},
         {"text", "GUI update available"}});
