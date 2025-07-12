@@ -3,10 +3,6 @@ from django.template.context import Context
 from django.core.files.storage import FileSystemStorage
 import hashlib
 
-from web.mqttmanager_ipc import send_ipc_request
-from web.models import NSPanel
-from web.settings_helper import get_nspanel_setting_with_default
-
 @component.register("item_select")
 class ItemSelect(component.Component):
     template_view = None

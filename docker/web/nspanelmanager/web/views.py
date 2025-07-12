@@ -12,9 +12,6 @@ import environ
 import os
 import signal
 
-#from nspanelmanager.web.mqttmanager_ipc import send_ipc_request
-from .mqttmanager_ipc import send_ipc_request
-
 from .models import NSPanel, Room, Light, Settings, Scene, RelayGroup, RelayGroupBinding, RoomEntitiesPage
 from .apps import start_mqtt_manager, send_mqttmanager_reload_command
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
@@ -44,21 +41,6 @@ def get_base_data(request):
 
 
 def index(request):
-    md5_firmware = get_file_md5sum("firmware.bin")
-    md5_data_file = get_file_md5sum("data_file.bin")
-    tft_eu_checksums = {
-        "tft1": get_file_md5sum("HMI_files/tft_automation/eu/output_tft1/gui.tft"),
-        "tft2": get_file_md5sum("HMI_files/tft_automation/eu/output_tft2/gui.tft"),
-        "tft3": get_file_md5sum("HMI_files/tft_automation/eu/output_tft3/gui.tft"),
-        "tft4": get_file_md5sum("HMI_files/tft_automation/eu/output_tft4/gui.tft"),
-    }
-    tft_us_checksums = {
-        "tft1": get_file_md5sum("HMI_files/tft_automation/us/output_tft1/gui.tft"),
-        "tft2": get_file_md5sum("HMI_files/tft_automation/us/output_tft2/gui.tft"),
-        "tft3": get_file_md5sum("HMI_files/tft_automation/us/output_tft3/gui.tft"),
-        "tft4": get_file_md5sum("HMI_files/tft_automation/us/output_tft4/gui.tft"),
-    }
-
     if get_setting_with_default("use_fahrenheit") == "True":
         temperature_unit = "°F"
     else:
@@ -73,45 +55,6 @@ def index(request):
     for nspanel in NSPanel.objects.filter(denied=False):
         panel_info = {}
         panel_info["data"] = nspanel
-        print(F"Checking status for panel {nspanel.id}")
-        panel_info["status"] = send_ipc_request(F"nspanel/{nspanel.id}/status", {"command": "get"})
-        print(F"Got status for panel {nspanel.id}")
-        panel_info["status"]["warnings"] = [] # TODO: Check if already array, then don't clear existin warnings
-        for panel in NSPanel.objects.filter(denied=False):
-            if panel == nspanel:
-                continue
-            elif panel.friendly_name == nspanel.friendly_name:
-                panel_info["status"]["warnings"].append({
-                    "level": "error",
-                    "text": "Two or more panels exists with the same name. This may have unintended consequences"
-                })
-                break
-        if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
-            panel_info["status"]["warnings"].append({
-                "level": "info",
-                "text": "Firmware update available."
-            })
-
-        selected_tft = get_nspanel_setting_with_default(nspanel.id, "selected_tft", "tft1")
-        is_us_panel = get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False")
-        us_panel_orientation = get_nspanel_setting_with_default(nspanel.id, "us_panel_orientation", "vertical")
-        if is_us_panel == "False" and nspanel.md5_tft_file != tft_eu_checksums[selected_tft]:
-            panel_info["status"]["warnings"].append({
-                "level": "info",
-                "text": "GUI update available."
-            })
-        elif is_us_panel == "True" and us_panel_orientation == "horizontal" and nspanel.md5_tft_file != tft_eu_checksums[selected_tft]:
-            # We use EU tft file for horizontal US panel with buttons on left as it's the same screen and orientation
-            panel_info["status"]["warnings"].append({
-                "level": "info",
-                "text": "GUI update available."
-            })
-        elif is_us_panel == "True" and us_panel_orientation == "vertical" and nspanel.md5_tft_file != tft_us_checksums[selected_tft]:
-            panel_info["status"]["warnings"].append({
-                "level": "info",
-                "text": "GUI update available."
-            })
-
         # TODO: Load warnings from MQTTManager.
         nspanels.append(panel_info)
 
@@ -250,9 +193,6 @@ def edit_nspanel(request, panel_id: int):
     nspanel = NSPanel.objects.get(id=panel_id)
     panel_info = {}
     panel_info["data"] = nspanel
-    panel_status = send_ipc_request(F"nspanel/{nspanel.id}/status", {"command": "get"})
-    panel_info["status"] = panel_status
-    panel_info["status"]["warnings"] = []
 
     data = get_base_data(request)
     data = data|{
@@ -437,12 +377,7 @@ def add_light_to_room(request, room_id: int):
                     break
 
     newLight.save()
-    #send_mqttmanager_reload_command()
-    command_data = {
-        # TODO: Base64 Encode data.
-        "data": newLight.get_protobuf_object().SerializeToString()
-    }
-    send_ipc_request("entity_manager/add_light", command_data)
+    send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=room_id)
 
 

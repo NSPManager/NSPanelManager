@@ -6,7 +6,6 @@ from django.core.files.storage import FileSystemStorage
 import hashlib
 import logging
 import json
-from .mqttmanager_ipc import send_ipc_request
 
 from .models import NSPanel, Room, Light, LightState, Scene, RelayGroup
 from .apps import start_mqtt_manager
@@ -284,30 +283,10 @@ def nspanel_post(request):
         return JsonResponse({"status": "error"}, status=500)
 
 
-##############################
-## NSPanel command section ###
-##############################
-
-@csrf_exempt
-def nspanel_reboot(request, panel_id):
-    try:
-        if request.method == 'POST':
-            response = send_ipc_request(F"nspanel/{panel_id}/reboot", {})
-            if response["status"] == "ok":
-                return JsonResponse({"status": "ok"}, status=200)
-            else:
-                return JsonResponse({"status": "error"}, status=500)
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
 
 ##################################
 ## NSPanel Relay Group section ###
 ##################################
-
 def relay_groups(request):
     try:
         if request.method == 'GET':

@@ -2,7 +2,6 @@ from django_components import component
 from django.template.context import Context
 
 from web.models import NSPanel
-from web.mqttmanager_ipc import send_ipc_request
 
 @component.register("nspanel_update_progress")
 class NSPanelUpdateProgress(component.Component):

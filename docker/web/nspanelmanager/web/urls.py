@@ -11,7 +11,7 @@ from .components.nspanel_visit_link.nspanel_visit_link import NSPanelVisitLink
 from .components.nspanel_reboot_button.nspanel_reboot_button import NSPanelRebootButton
 from .components.nspanel_warnings.nspanel_warnings import NSPanelWarnings
 from .components.nspanel_room_entities_pages.nspanel_room_entities_pages import NSPanelRoomEntitiesPages
-from . import views, api, rest, htmx, protobuf_api
+from . import views, api, rest, htmx
 
 urlpatterns = [
     # Web routes
@@ -119,18 +119,6 @@ urlpatterns = [
     path('rest/lights/<int:light_id>', rest.light_delete, name='rest_light_delete'),
     # Scene URLs
     path('rest/scenes', rest.scenes, name='rest_lights'),
-
-    ####################
-    ### PROTOBUF API ###
-    ####################
-    path('protobuf/mqttmanager/all_settings', protobuf_api.mqttmanager_get_all_settings, name="protobuf_mqttmanager_get_all_settings"),
-    path('protobuf/mqttmanager/all_nspanels', protobuf_api.mqttmanager_get_all_nspanels, name="protobuf_mqttmanager_get_all_nspanels"),
-    path('protobuf/mqttmanager/all_lights', protobuf_api.mqttmanager_get_all_lights, name="protobuf_mqttmanager_get_all_lights"),
-    path('protobuf/mqttmanager/lights/<int:light_id>', protobuf_api.mqttmanager_get_light),
-    path('protobuf/mqttmanager/all_rooms', protobuf_api.mqttmanager_get_all_rooms, name="protobuf_mqttmanager_get_all_rooms"),
-    path('protobuf/mqttmanager/get_room_entities_page/<int:page_id>', protobuf_api.mqttmanager_get_room_entities_page),
-    path('protobuf/mqttmanager/get_room_entities_page/<int:page_id>/entity_in_slot/<int:room_view_position>', protobuf_api.mqttmanager_get_entity_at_room_entities_page_position),
-
 
     #######################
     ### HTMX "API" URLs ###
