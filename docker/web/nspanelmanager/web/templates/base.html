@@ -49,7 +49,10 @@
     var subscription = stomp_client.subscribe(topic, stomp_message_callback);
 
     if(stomp_subscriptions[topic]) {
-      stomp_subscriptions[topic]["callbacks"].push(callback);
+      if (!stomp_subscriptions[topic]["callbacks"].includes(callback)) {
+        console.log("Attaching callback to existing subscription");
+        stomp_subscriptions[topic]["callbacks"].push(callback);
+      }
     } else {
       stomp_subscriptions[topic] = {"subscription": subscription, "callbacks": [callback]};
     }

@@ -711,6 +711,18 @@ void NSPanel::send_websocket_status_update() {
     });
   }
 
+  // Check if NSPanel has firmware, littlefs or tft file updates available and set appropriate warning.
+  if (this->has_firmware_update() || this->has_littlefs_update()) {
+    status_data["warnings"].push_back(nlohmann::json{
+        {"level", "warning"},
+        {"text", "Firmware update available"}});
+  }
+  if (this->has_tft_update()) {
+    status_data["warnings"].push_back(nlohmann::json{
+        {"level", "warning"},
+        {"text", "GUI update available"}});
+  }
+
   switch (this->_state) {
   case MQTT_MANAGER_NSPANEL_STATE::ONLINE:
     status_data["state"] = "online";
@@ -741,6 +753,47 @@ void NSPanel::send_websocket_status_update() {
     break;
   }
   WebsocketServer::update_stomp_topic_value(this->_mqtt_status_topic, status_data);
+}
+
+bool NSPanel::has_firmware_update() {
+  return this->_current_firmware_md5_checksum.compare(MqttManagerConfig::get_firmware_checksum()) != 0;
+}
+
+bool NSPanel::has_littlefs_update() {
+  return this->_current_littlefs_md5_checksum.compare(MqttManagerConfig::get_littlefs_checksum()) != 0;
+}
+
+bool NSPanel::has_tft_update() {
+  // Check if using EU file (we use EU file for US panel in landscape left orientation as it's the same screen and orientation as the EU panel).
+  if (!this->_is_us_panel || (this->_is_us_panel && this->_us_panel_orientation == US_PANEL_ORIENTATION::LANDSCAPE_LEFT)) {
+    if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft1") == 0) {
+      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_eu_tft1_checksum()) != 0;
+    } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft2") == 0) {
+      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_eu_tft2_checksum()) != 0;
+    } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft3") == 0) {
+      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_eu_tft3_checksum()) != 0;
+    } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft4") == 0) {
+      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_eu_tft4_checksum()) != 0;
+    } else {
+      SPDLOG_ERROR("Could not determin selected TFT file when comparing checksums! Selected TFT for nspanel {}::{} is {}", this->_id, this->_name, this->_get_nspanel_setting_with_default("selected_tft", "tft1"));
+    }
+  } else if (this->_is_us_panel && this->_us_panel_orientation == US_PANEL_ORIENTATION::PORTRAIT) {
+    if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft1") == 0) {
+      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_us_tft1_checksum()) != 0;
+    } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft2") == 0) {
+      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_us_tft2_checksum()) != 0;
+    } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft3") == 0) {
+      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_us_tft3_checksum()) != 0;
+    } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft4") == 0) {
+      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_us_tft4_checksum()) != 0;
+    } else {
+      SPDLOG_ERROR("Could not determin selected TFT file when comparing checksums! Selected TFT for nspanel {}::{} is {}", this->_id, this->_name, this->_get_nspanel_setting_with_default("selected_tft", "tft1"));
+    }
+  } else {
+    SPDLOG_ERROR("Unsupported NSPanel orientation for NSPanel {}::{}", this->_id, this->_name);
+  }
+
+  return false;
 }
 
 nlohmann::json NSPanel::get_websocket_json_representation() {
@@ -877,6 +930,17 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
     std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/nspanels";
     std::string response_data;
     std::string payload_data = register_request_payload.dump();
+
+    if (register_request_payload.contains("md5_firmware")) {
+      this->_current_firmware_md5_checksum = register_request_payload["md5_firmware"];
+    }
+    if (register_request_payload.contains("md5_data_file")) {
+      this->_current_littlefs_md5_checksum = register_request_payload["md5_data_file"];
+    }
+    if (register_request_payload.contains("md5_tft_file")) {
+      this->_current_tft_md5_checksum = register_request_payload["md5_tft_file"];
+    }
+
     if (WebHelper::perform_post_request(&url, &response_data, nullptr, &payload_data)) {
       SPDLOG_INFO("Panel registration OK. Updating internal data.");
       this->reload_config();

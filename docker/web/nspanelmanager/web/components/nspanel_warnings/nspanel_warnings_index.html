@@ -1,27 +1,78 @@
-<div class="" hx-swap="outerHTML" hx-trigger="nspanel-{{ id }}-state-change from:body" hx-get="{% url 'nspanel_warnings' view='index' nspanel_id=id %}" id="nspanel_warnings_container-{{ id }}">
-    <!-- Warning indicator -->
-    {% if warnings|length > 0 %}
-    <div class="badge badge-warning badge-xs mt-2 me-2 ms-1" onmouseover="show_popover(this);" onmouseleave="hide_popover(this);" data-popover-target="nspanel_warning_popover_{{ id }}"></div>
-    {% endif %}
-    <!-- Warning popover-->
-    <div id="nspanel_warning_popover_{{ id }}" role="tooltip" class="absolute bg-base-100 z-10 invisible inline-block w-60 md:w-96 text-sm transition-opacity duration-300 border border-warning rounded-lg shadow-xl opacity-0">
-        <div class="px-3 py-2 bg-base-100 text-base-content rounded-t-lg">
-            <h3 class="font-semibold">Warnings</h3>
-        </div>
-        <div class="px-3 mb-2" id="nspanel_warnings">
-        <!-- Warnings are created in the index.js file-->
-        {% for warning in warnings %}
-            {% if warning.level == 'info' %}
-                <div role="alert" class="alert alert-info my-1">{{ warning.text }}</div>
-            {% elif warning.level == 'warning' %}
-                <div role="alert" class="alert alert-warning my-1">{{ warning.text }}</div>
-            {% elif warning.level == 'error' %}
-                <div role="alert" class="alert alert-error my-1">{{ warning.text }}</div>
-            {% else %}
-                <div role="alert" class="alert alert-error my-1">Unknown alert level: {{ warning.level }}</div>
-                <div role="alert" class="alert my-1">{{ warning.text }}</div>
-            {% endif %}
-        {% endfor %}
-        </div>
-    </div>
-</div>
+<script type="module">
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
+
+  stomp_subscribe("nspanel/{{ nspanel.mac_address }}/status", (message) => {
+    var element = document.getElementById(`nspanel-warnings-container-{{ nspanel.id }}`);
+    var data = JSON.parse(message.body);
+    element.state = data.state;
+    element.warnings_string = JSON.stringify(data.warnings);
+  })
+
+
+  define({
+    tag: "nspanel-warnings",
+    nspanel_id: '',
+    state: '',
+    warnings_string: '',
+    render: ({id, state, warnings_string}) => {
+      if (state == "offline" || state == "unknown") {
+        return html``;
+      } else if(warnings_string.length > 0) {
+        var warnings = JSON.parse(warnings_string);
+        var warning_divs = "";
+        var alert_badge_color = "badge-info";
+        var alert_border_color = "border-info";
+        if(warnings.length > 0) {
+          warnings.forEach(warning => {
+            if(warning.level == "error") {
+              if(alert_badge_color == "badge-info" || alert_badge_color == "badge-warning") {
+                alert_badge_color = "badge-error";
+                alert_border_color = "border-error";
+              }
+              warning_divs += `
+                <div role="alert" class="alert alert-error my-1">${warning.text}</div>
+              `;
+            } else if(warning.level == "warning") {
+              if(alert_badge_color == "badge-info") {
+                alert_badge_color = "badge-warning";
+                alert_border_color = "border-warning";
+              }
+              warning_divs += `
+                <div role="alert" class="alert alert-warning my-1">${warning.text}</div>
+              `;
+            } else if(warning.level == "info") {
+              warning_divs += `
+                <div role="alert" class="alert alert-info my-1">${warning.text}</div>
+              `;
+            } else {
+              warning_divs += `
+                <div role="alert" class="alert alert-error my-1">UNKNOWN LEVEL ${warning.level} FOR WARNING: ${warning.text}</div>
+              `;
+            }
+          });
+
+          return html`
+              <!-- Warning indicator -->
+              <div class="badge ${alert_badge_color} badge-xs mt-2 me-2 ms-1" onmouseover="show_popover(this);" onmouseleave="hide_popover(this);" data-popover-target="nspanel_warning_popover_{{ id }}"></div>
+              <!-- Warning popover-->
+              <div id="nspanel_warning_popover_{{ id }}" role="tooltip" class="absolute bg-base-100 z-10 invisible inline-block w-60 md:w-96 text-sm transition-opacity duration-300 border ${alert_border_color} rounded-lg shadow-xl opacity-0">
+                  <div class="px-3 py-2 bg-base-100 text-base-content rounded-t-lg">
+                      <h3 class="font-semibold">Warnings</h3>
+                  </div>
+                  <div class="px-3 mb-2" id="nspanel_warnings" innerHTML="${warning_divs}">
+                  </div>
+              </div>
+          `;
+        } else {
+          // No warnings active, return empty
+          return html``;
+        }
+      } else if (warnings_string.length == 0) {
+        return html``;
+      }
+    },
+  })
+</script>
+
+
+<nspanel-warnings id="nspanel-warnings-container-{{ nspanel.id }}"></nspanel-warnings>

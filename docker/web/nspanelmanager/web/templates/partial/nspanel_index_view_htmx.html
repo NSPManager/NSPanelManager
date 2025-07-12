@@ -38,31 +38,31 @@
             <div class="w-full me-2 mt-1">
                 {% component "nspanel_status_text" id=nspanel.data.id %}{% endcomponent %}
             </div>
-            {% component "nspanel_warnings" id=nspanel.data.id warnings=nspanel.status.warnings %}{% endcomponent %}
+            {% component "nspanel_warnings" id=nspanel.data.id %}{% endcomponent %}
             </span>
         </div>
         <!-- Status information -->
         <div class="flex justify-between items-end">
             <div>
-            <div class="my-1">
-                <!-- WiFi strength -->
-                <div class="info-item">
-                    {% component "nspanel_status_wifi_signal_strength" id=nspanel.data.id %}{% endcomponent %}
+                <div class="my-1">
+                    <!-- WiFi strength -->
+                    <div class="info-item">
+                        {% component "nspanel_status_wifi_signal_strength" id=nspanel.data.id %}{% endcomponent %}
+                    </div>
                 </div>
-            </div>
-            <div class="my-1">
-                <!-- Temperature -->
-                <div class="info-item">
-                    {% component "nspanel_status_temperature" id=nspanel.data.id %}{% endcomponent %}
-                </span>
+                <div class="my-1">
+                    <!-- Temperature -->
+                    <div class="info-item">
+                        {% component "nspanel_status_temperature" id=nspanel.data.id %}{% endcomponent %}
+                    </span>
+                    </div>
                 </div>
-            </div>
-            <div class="my-1">
-                <!-- RAM usage -->
-                <div class="info-item">
-                    {% component "nspanel_status_ram_usage" id=nspanel.data.id %}{% endcomponent %}
+                <div class="my-1">
+                    <!-- RAM usage -->
+                    <div class="info-item">
+                        {% component "nspanel_status_ram_usage" id=nspanel.data.id %}{% endcomponent %}
+                    </div>
                 </div>
-            </div>
             </div>
             <div>
             <button data-nspanel-dropdown-toggle="nspanelActionsMenuDropdown-{{ nspanel.data.id }}" onclick="show_dropdown_menu(event, this);"

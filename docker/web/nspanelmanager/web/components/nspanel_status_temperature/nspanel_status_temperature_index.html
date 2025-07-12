@@ -4,7 +4,6 @@
   stomp_subscribe("nspanel/{{ nspanel.mac_address }}/status", (message) => {
     var element = document.getElementById(`nspanel-temperature-status-{{ nspanel.id }}`);
     var data = JSON.parse(message.body);
-    console.log(data);
     element.state = data.state;
     element.temperature = Math.round(data.temperature*10)/10;
   })

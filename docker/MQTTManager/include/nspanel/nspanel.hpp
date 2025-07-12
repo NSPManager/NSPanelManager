@@ -135,6 +135,21 @@ public:
   void send_websocket_status_update();
 
   /**
+   * Compare stored firmware checksum with current firmware checksum and return true if they are different.
+   */
+  bool has_firmware_update();
+
+  /**
+   * Compare stored LittleFS checksum with current LittleFS checksum and return true if they are different.
+   */
+  bool has_littlefs_update();
+
+  /**
+   * Compare stored TFT checksum with current TFT checksum for the selected panel type and background (ie. TFT-file) and return true if they are different.
+   */
+  bool has_tft_update();
+
+  /**
    * Register NSPanel to manager.
    */
   bool register_to_manager(const nlohmann::json &register_request_payload);
@@ -173,6 +188,12 @@ private:
   std::string _mac;
   std::string _name;
   bool _is_us_panel;
+  enum US_PANEL_ORIENTATION {
+    LANDSCAPE_LEFT,
+    LANDSCAPE_RIGHT,
+    PORTRAIT
+  };
+  US_PANEL_ORIENTATION _us_panel_orientation;
   bool _has_registered_to_manager;
   std::string _ip_address;
   int16_t _rssi;
@@ -183,6 +204,10 @@ private:
   std::vector<NSPanelWarningWebsocketRepresentation> _nspanel_warnings;
   std::string _nspanel_warnings_from_manager;
   std::string _mqtt_register_mac;
+
+  std::string _current_firmware_md5_checksum;
+  std::string _current_littlefs_md5_checksum;
+  std::string _current_tft_md5_checksum;
 
   enum ButtonMode {
     DIRECT,

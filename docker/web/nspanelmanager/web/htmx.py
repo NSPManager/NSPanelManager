@@ -56,7 +56,6 @@ def partial_index_nspanels_section(request):
     for nspanel in NSPanel.objects.filter(denied=False):
         panel_info = {}
         panel_info["data"] = nspanel
-        panel_info["status"] = send_ipc_request(F"nspanel/{nspanel.id}/status", {"command": "get"})
         panel_info["status"]["warnings"] = [] # TODO: Check if already array, then don't clear existin warnings
         for panel in NSPanel.objects.filter(denied=False):
             if panel == nspanel:
@@ -107,7 +106,6 @@ def partial_nspanel_index_view(request, nspanel_id):
         if request.method == 'GET':
             data = {
                 "nspanel": {
-                    "status": send_ipc_request(F"nspanel/{nspanel_id}/status", {"command": "get"}),
                     "data": NSPanel.objects.get(id=nspanel_id)
                 },
             }
