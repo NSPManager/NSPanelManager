@@ -3,16 +3,11 @@
 <script type="module">
   import { define, html } from '/static/node_modules/hybrids/src/index.js';
 
-  // document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
-  //   // Update relevant values for the status badge from the bundled data in the status update event
-  //   var element = document.getElementById(`nspanel-status-badge-${event.detail.event_data.id}`);
-  //   element.name = event.detail.event_data.name;
-  //   element.state = event.detail.event_data.state;
-  //   element.update_progress = event.detail.event_data.update_progress;
-  // });
-
-  stomp_subscribe("nspanel/{{ nspanel_mac }}/state", (message) => {
-    console.log(message);
+  stomp_subscribe("nspanel/{{ nspanel.mac_address }}/status", (message) => {
+    var element = document.getElementById(`nspanel-status-badge-{{ nspanel.id }}`);
+    var data = JSON.parse(message.body);
+    element.state = data.state;
+    element.update_progress = data.update_progress;
   })
 
   define({
@@ -73,4 +68,4 @@
   })
 </script>
 
-<nspanel-status-badge id="nspanel-status-badge-{{ id }}" nspanel_id="{{ id }}" name="{{ friendly_name }}" state="{{ state }}" update_progress="{{ update_progress }}"></nspanel-status-badge>
+<nspanel-status-badge id="nspanel-status-badge-{{ nspanel.id }}" nspanel_id="{{ nspanel.id }}" name="{{ nspanel.friendly_name }}" state="" update_progress=""></nspanel-status-badge>

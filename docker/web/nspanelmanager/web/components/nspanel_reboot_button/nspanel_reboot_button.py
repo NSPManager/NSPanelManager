@@ -1,16 +1,13 @@
 from django_components import component
 from django.template.context import Context
 
-from web.mqttmanager_ipc import send_ipc_request
-
 @component.register("nspanel_reboot_button")
 class NSPanelRebootButton(component.Component):
     template_view = None
 
-    def get_context_data(self, id, state):
+    def get_context_data(self, id):
         return {
             "id": id,
-            "state": state,
         }
 
     def get_template_name(self, context: Context):
@@ -25,10 +22,8 @@ class NSPanelRebootButton(component.Component):
 
     def get(self, request, view, nspanel_id):
         self.template_view = view
-        panel_status = send_ipc_request(F"nspanel/{nspanel_id}/status", {"command": "get"})
         args = {
             "id": nspanel_id,
-            "state": panel_status["state"],
         }
         return self.render_to_response(kwargs=args)
 

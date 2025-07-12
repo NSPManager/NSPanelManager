@@ -74,7 +74,7 @@
                 class="hidden nspanel-actions-menu-dropdown dropdown z-10 font-normal bg-neutral text-neutral-content divide-y divide-neutral-content rounded-box shadow w-44 md:absolute inset-x-auto overflow-hidden">
                 <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
                 <li>
-                    {% component "nspanel_reboot_button" id=nspanel.data.id state=nspanel.status.state %}{% endcomponent %}
+                    {% component "nspanel_reboot_button" id=nspanel.data.id %}{% endcomponent %}
                 </li>
                 <li>
                     <a class="nspanel-settings-link block px-4 py-2 hover:bg-accent hover:text-accent-content" href="{% url 'edit_nspanel' nspanel.data.id %}">
@@ -82,7 +82,7 @@
                     </a>
                 </li>
                 <li>
-                    {% component 'nspanel_visit_link' id=nspanel.data.id state=nspanel.status.state address=nspanel.status.ip_address %}{% endcomponent %}
+                    {% component 'nspanel_visit_link' id=nspanel.data.id %}{% endcomponent %}
                 </li>
                 </ul>
                 <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
