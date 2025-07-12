@@ -1,12 +1,12 @@
 <script type="module">
   import { define, html } from '/static/node_modules/hybrids/src/index.js';
 
-  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
-    // Update relevant values for the status header from the bundled data in the status update event
-    var element = document.getElementById(`nspanel-update-progress-${event.detail.event_data.id}`);
-    element.state = event.detail.event_data.state;
-    element.update_progress = event.detail.event_data.progress;
-  });
+  stomp_subscribe("nspanel/{{ nspanel.mac_address }}/status", (message) => {
+    var element = document.getElementById(`nspanel-update-progress-{{ nspanel.id }}`);
+    var data = JSON.parse(message.body);
+    element.state = data.state;
+    element.update_progress = data.update_progress;
+  })
 
   define({
     tag: "nspanel-update-progress",
@@ -30,4 +30,4 @@
   })
 </script>
 
-<nspanel-update-progress id="nspanel-update-progress-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}" update_progress="{{ progress }}"></nspanel-update-progress>
+<nspanel-update-progress id="nspanel-update-progress-{{ nspanel.id }}" nspanel_id="{{ nspanel.id }}" state="" update_progress=""></nspanel-update-progress>
