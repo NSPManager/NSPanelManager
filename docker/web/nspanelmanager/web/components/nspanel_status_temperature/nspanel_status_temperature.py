@@ -2,7 +2,6 @@ from django_components import component
 from django.template.context import Context
 
 from web.models import NSPanel
-from web.mqttmanager_ipc import send_ipc_request
 from web.settings_helper import get_setting_with_default
 
 @component.register("nspanel_status_temperature")

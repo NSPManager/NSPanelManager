@@ -642,7 +642,7 @@
           </div>
           {% component "nspanel_update_progress" id=panel_info.data.id %}{% endcomponent %}
           <div class="p-3 border-solid border-b-2 border-base-300">
-            {% component "nspanel_status_wifi_signal_strength" id=panel_info.data.id state=panel_info.status.state signal_strength=panel_info.status.rssi %}{% endcomponent %}
+            {% component "nspanel_status_wifi_signal_strength" id=panel_info.data.id %}{% endcomponent %}
           </div>
           <div class="p-3 border-solid border-b-2 border-base-300">
             {% component "nspanel_status_ram_usage" id=panel_info.data.id state=panel_info.status.state ram_usage=panel_info.status.ram_usage %}{% endcomponent %}

@@ -1,17 +1,16 @@
 from django_components import component
 from django.template.context import Context
 
-from web.mqttmanager_ipc import send_ipc_request
+from web.models import NSPanel
 
 @component.register("nspanel_status_wifi_signal_strength")
 class NSPanelStatusWifiSignalStrength(component.Component):
     template_view = None
 
-    def get_context_data(self, id, state, signal_strength):
+    def get_context_data(self, id):
+        nspanel = NSPanel.objects.get(id=id)
         return {
-            "id": id,
-            "state": state,
-            "signal_strength": signal_strength,
+            "nspanel": nspanel,
         }
 
     def get_template_name(self, context: Context):
@@ -26,11 +25,8 @@ class NSPanelStatusWifiSignalStrength(component.Component):
 
     def get(self, request, view, nspanel_id):
         self.template_view = view
-        panel_status = send_ipc_request(F"nspanel/{nspanel_id}/status", {"command": "get"})
         args = {
             "id": nspanel_id,
-            "state": panel_status["state"],
-            "signal_strength": panel_status["rssi"],
         }
         return self.render_to_response(kwargs=args)
 
