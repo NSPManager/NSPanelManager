@@ -248,7 +248,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
               return;
             }
 
-            SPDLOG_DEBUG("STOMP subscribing to topic {}", frame->headers["destination"]);
+            SPDLOG_DEBUG("STOMP subscribing to topic {} (id: {})", frame->headers["destination"], frame->headers["id"]);
             for (auto &topic : WebsocketServer::_stomp_topics) {
               if (topic.get_name() == frame->headers["destination"]) {
                 std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);

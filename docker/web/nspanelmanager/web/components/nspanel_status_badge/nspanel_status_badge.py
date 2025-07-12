@@ -1,7 +1,6 @@
 from django_components import component
 from django.template.context import Context
 
-from web.mqttmanager_ipc import send_ipc_request
 from web.models import NSPanel
 
 @component.register("nspanel_status_badge")
@@ -9,22 +8,10 @@ class NSPanelStatusBadge(component.Component):
     template_view = None
 
     def get_context_data(self, id):
-        panel = NSPanel.objects.get(id=id)
-        panel_status = send_ipc_request(F"nspanel/{id}/status", {"command": "get"})
-        if "status" in panel_status and panel_status["status"] == "error":
-            return {
-                "id": id,
-                "friendly_name": panel.friendly_name,
-                "state": "error",
-                "update_progress": 0,
-            }
-        else:
-            return {
-                "id": id,
-                "friendly_name": panel.friendly_name,
-                "state": panel_status["state"],
-                "update_progress": panel_status["update_progress"],
-            }
+        nspanel = NSPanel.objects.get(id=id)
+        return {
+            "nspanel": nspanel,
+        }
 
     def get_template_name(self, context: Context):
             if self.template_view:

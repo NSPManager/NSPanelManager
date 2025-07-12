@@ -3,13 +3,17 @@
 <script type="module">
   import { define, html } from '/static/node_modules/hybrids/src/index.js';
 
-  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
-    // Update relevant values for the status badge from the bundled data in the status update event
-    var element = document.getElementById(`nspanel-status-badge-${event.detail.event_data.id}`);
-    element.name = event.detail.event_data.name;
-    element.state = event.detail.event_data.state;
-    element.update_progress = event.detail.event_data.update_progress;
-  });
+  // document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
+  //   // Update relevant values for the status badge from the bundled data in the status update event
+  //   var element = document.getElementById(`nspanel-status-badge-${event.detail.event_data.id}`);
+  //   element.name = event.detail.event_data.name;
+  //   element.state = event.detail.event_data.state;
+  //   element.update_progress = event.detail.event_data.update_progress;
+  // });
+
+  stomp_subscribe("nspanel/{{ nspanel_mac }}/state", (message) => {
+    console.log(message);
+  })
 
   define({
     tag: "nspanel-status-badge",

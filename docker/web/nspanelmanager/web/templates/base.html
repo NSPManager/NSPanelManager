@@ -88,7 +88,7 @@
   stomp_client.heartbeat.outgoing = 1000;
   stomp_client.heartbeat.incoming = 1000;
   stomp_client.reconnect_delay = 2500;
-  // stomp_client.debug = function(str) {} // Disable debug logging
+  stomp_client.debug = function(str) {} // Disable debug logging
   stomp_client.connect("user", "pass", stomp_connected_callback, stomp_disconnected_callback, stomp_error_callback);
   </script>
 

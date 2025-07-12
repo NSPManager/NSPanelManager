@@ -1,12 +1,10 @@
 <script type="module">
   import { define, html } from '/static/node_modules/hybrids/src/index.js';
 
-  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
-    // Update relevant values for the status header from the bundled data in the status update event
-    var element = document.getElementById(`nspanel-status-text-${event.detail.event_data.id}`);
-    element.state = event.detail.event_data.state;
-    element.update_progress = event.detail.event_data.progress;
-  });
+  stomp_subscribe("nspanel/{{ nspanel.mac_address }}/status", (message) => {
+    var element = document.getElementById(`nspanel-status-text-{{ nspanel.id }}`);
+    element.state = message.body;
+  })
 
   define({
     tag: "nspanel-status-text",
@@ -57,4 +55,4 @@
   })
 </script>
 
-<nspanel-status-text id="nspanel-status-text-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}"></nspanel-status-badge>
+<nspanel-status-text id="nspanel-status-text-{{ nspanel.id }}" nspanel_id="{{ nspanel.id }}" state=""></nspanel-status-badge>

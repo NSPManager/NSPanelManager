@@ -36,7 +36,7 @@
             </div>
             <!-- Status-->
             <div class="w-full me-2 mt-1">
-                {% component "nspanel_status_text" id=nspanel.data.id progress=nspanel.status.update_progress state=nspanel.status.state %}{% endcomponent %}
+                {% component "nspanel_status_text" id=nspanel.data.id %}{% endcomponent %}
             </div>
             {% component "nspanel_warnings" id=nspanel.data.id warnings=nspanel.status.warnings %}{% endcomponent %}
             </span>
