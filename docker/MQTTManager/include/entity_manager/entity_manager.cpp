@@ -909,19 +909,6 @@ bool EntityManager::websocket_callback(std::string &message, std::string *respon
       }
     }
     return true;
-  } else if (command.compare("get_nspanel_logs") == 0) {
-    SPDLOG_DEBUG("Processing request for NSPanel logs.");
-    nlohmann::json args = data["args"];
-    uint16_t nspanel_id = atoi(std::string(args["nspanel_id"]).c_str());
-    auto nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
-    if (nspanel != nullptr) {
-      nlohmann::json response = nspanel->get_websocket_json_logs();
-      response["cmd_id"] = command_id;
-      (*response_buffer) = response.dump();
-    } else {
-      SPDLOG_ERROR("Received request for logs from NSPanel with ID {} but no panel with that ID is loaded.");
-    }
-    return true;
   } else if (command.compare("nspanel_accept") == 0) {
     nlohmann::json args = data["args"];
     std::string mac = args["mac_address"];

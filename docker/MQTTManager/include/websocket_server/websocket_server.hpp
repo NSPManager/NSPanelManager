@@ -42,15 +42,18 @@ public:
 
   std::string get_name() const;
   void subscribe(ix::WebSocket &websocket, std::string subscription_id);
-  void unsubscribe(ix::WebSocket &websocket);
+  void unsubscribe(ix::WebSocket &websocket, std::string subscription_id);
   void update_value(std::string new_value);
+  void update_value(nlohmann::json &new_value);
   void set_retained(bool retained);
+  int get_subscriber_count() const;
 
-private:
+protected:
   boost::uuids::random_generator _uuid_generator = boost::uuids::random_generator(); // Used to generate unique UUIDs for STOMP clients
   bool _retained = false;
   std::string _topic_name;
   std::string _current_value;
+  nlohmann::json _current_json_data;
   std::list<std::pair<ix::WebSocket *, std::string>> _subscribers;
 };
 
@@ -75,6 +78,11 @@ public:
    * Update the value of a STOMP topic and send out the updated value to all connected clients.
    */
   static void update_stomp_topic_value(std::string topic_name, std::string value);
+
+  /**
+   * Update the value of a STOMP topic and send out the updated value to all connected clients.
+   */
+  static void update_stomp_topic_value(std::string topic_name, nlohmann::json &value);
 
   /**
    * Update a STOMP topic to retain or not to retain the value. Will create topic if it doesn't exist.

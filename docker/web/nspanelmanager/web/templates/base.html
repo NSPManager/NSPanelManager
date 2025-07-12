@@ -46,19 +46,28 @@
   }
 
   function stomp_subscribe(topic, callback) {
-    stomp_client.subscribe(topic, stomp_message_callback);
+    var subscription = stomp_client.subscribe(topic, stomp_message_callback);
 
     if(stomp_subscriptions[topic]) {
-      stomp_subscriptions[topic].push(callback);
+      stomp_subscriptions[topic]["callbacks"].push(callback);
     } else {
-      stomp_subscriptions[topic] = [callback];
+      stomp_subscriptions[topic] = {"subscription": subscription, "callbacks": [callback]};
+    }
+  }
+
+  function stomp_unsubscribe(topic, callback) {
+    stomp_subscriptions[topic]["callbacks"].splice(stomp_subscriptions[topic]["callbacks"].indexOf(callback), 1);
+
+    if(stomp_subscriptions[topic]["callbacks"].length === 0) {
+      stomp_subscriptions[topic]["subscription"].unsubscribe();
+      delete stomp_subscriptions[topic];
     }
   }
 
   function stomp_message_callback(message) {
-    for(const i in stomp_subscriptions[message.headers.destination]) {
-      stomp_subscriptions[message.headers.destination][i](message);
-    }
+    stomp_subscriptions[message.headers.destination]["callbacks"].forEach(function(callback) {
+      callback(message);
+    });
   }
 
   function stomp_reconnect_callback() {
@@ -79,7 +88,7 @@
   stomp_client.heartbeat.outgoing = 1000;
   stomp_client.heartbeat.incoming = 1000;
   stomp_client.reconnect_delay = 2500;
-  stomp_client.debug = function(str) {} // Disable debug logging
+  // stomp_client.debug = function(str) {} // Disable debug logging
   stomp_client.connect("user", "pass", stomp_connected_callback, stomp_disconnected_callback, stomp_error_callback);
   </script>
 

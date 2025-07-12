@@ -278,10 +278,6 @@ def edit_nspanel(request, panel_id: int):
             "text": "GUI update available."
         })
 
-    panel_logs = send_ipc_request(F"nspanel/{nspanel.id}/logs", {"command": "get"})
-    if len(panel_logs) > int(get_setting_with_default("max_live_log_messages")):
-        panel_logs = panel_logs[0:int(get_setting_with_default("max_live_log_messages"))]
-
     data = get_base_data(request)
     data = data|{
         'panel_info': panel_info,
@@ -290,7 +286,6 @@ def edit_nspanel(request, panel_id: int):
         "temperature_unit": temperature_unit,
         "multiple": [1, 2, 3, 4],
         "max_live_log_messages": get_setting_with_default("max_live_log_messages"),
-        "logs": panel_logs,
         "screensaver_mode_global": get_setting_with_default("screensaver_mode"),
     }
 

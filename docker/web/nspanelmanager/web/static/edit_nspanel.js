@@ -149,9 +149,11 @@ $(document).ready(() => {
   });
 
   // Fetch log backtrace once.
-  stomp_subscribe("nspanel/" + nspanel_mac + "/log_backtrace", (message) => {
-    console.log(message);
+  stomp_subscribe("nspanel/" + nspanel_mac + "/log_backlog", (message) => {
+    JSON.parse(message.body).logs.forEach((message) => {
+      push_log_message_to_view(message);
+    });
 
-    stomp_unsubscribe("nspanel/" + nspanel_mac + "/log_backtrace");
+    stomp_unsubscribe("nspanel/" + nspanel_mac + "/log_backlog");
   });
 });

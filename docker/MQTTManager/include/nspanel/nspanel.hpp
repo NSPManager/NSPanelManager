@@ -33,13 +33,6 @@ struct NSPanelWarningWebsocketRepresentation {
   std::string text;
 };
 
-class NSPanelLogMessage {
-public:
-  std::string time;
-  std::string level;
-  std::string message;
-};
-
 class NSPanel {
 public:
   NSPanel(uint32_t panel_id);
@@ -95,11 +88,6 @@ public:
    * Get the JSON message that will be sent over the websocket when a client requests the state of the NSPanel.
    */
   nlohmann::json get_websocket_json_representation();
-
-  /**
-   * Get the JSON message that will be sent over the websocket when a client requests the logs from the given NSPanel.
-   */
-  nlohmann::json get_websocket_json_logs();
 
   /**
    * Sends a reboot command to the panel over MQTT.
@@ -175,7 +163,6 @@ public:
   bool handle_ipc_request_update_screen(nlohmann::json message, nlohmann::json *response_buffer);
   bool handle_ipc_request_accept_register_request(nlohmann::json message, nlohmann::json *response_buffer);
   bool handle_ipc_request_deny_register_request(nlohmann::json message, nlohmann::json *response_buffer);
-  bool handle_ipc_request_get_logs(nlohmann::json message, nlohmann::json *response_buffer);
 
 private:
   std::string _get_nspanel_setting_with_default(std::string key, std::string default_value);
@@ -253,7 +240,8 @@ private:
   // Topic where to send the NSPanelRoomEntitiesPage protobuf state updates
   std::string _mqtt_topic_room_entities_page_status;
 
-  std::list<NSPanelLogMessage> _log_messages;
+  // JSON representation of log messages backlog. Used to buffer historical log messages before sending them to web interface
+  nlohmann::json _log_messages_backlog;
 
   // Mutex to allow only one thread to send config at a time
   std::mutex _send_config_mutex;

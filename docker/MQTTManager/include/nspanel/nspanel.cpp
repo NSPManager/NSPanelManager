@@ -68,7 +68,9 @@ NSPanel::NSPanel(uint32_t id) {
   IPCHandler::attach_callback(fmt::format("nspanel/{}/update_firmware", this->_id), boost::bind(&NSPanel::handle_ipc_request_update_firmware, this, _1, _2));
   IPCHandler::attach_callback(fmt::format("nspanel/{}/accept_register_request", this->_id), boost::bind(&NSPanel::handle_ipc_request_accept_register_request, this, _1, _2));
   IPCHandler::attach_callback(fmt::format("nspanel/{}/deny_register_request", this->_id), boost::bind(&NSPanel::handle_ipc_request_deny_register_request, this, _1, _2));
-  IPCHandler::attach_callback(fmt::format("nspanel/{}/logs", this->_id), boost::bind(&NSPanel::handle_ipc_request_get_logs, this, _1, _2));
+
+  // Create default JSON structure for historical logs
+  this->_log_messages_backlog["logs"] = nlohmann::json::array();
 }
 
 std::shared_ptr<NSPanel> NSPanel::create_from_discovery_request(nlohmann::json request_data) {
@@ -204,6 +206,7 @@ void NSPanel::reload_config() {
     if (this->_has_registered_to_manager && !panel_settings.denied && panel_settings.accepted) {
       WebsocketServer::set_stomp_topic_retained(this->_mqtt_status_topic, true);
       WebsocketServer::set_stomp_topic_retained(this->_mqtt_status_report_topic, true);
+      WebsocketServer::set_stomp_topic_retained(fmt::format("nspanel/{}/log_backlog", this->_mac), true);
 
       // If this NSPanel is registered to manager, listen to state topics.
       SPDLOG_INFO("Subscribing to NSPanel MQTT topics.");
@@ -448,18 +451,15 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         log_data["level"] = message_parts[1];
         log_data["message"] = message_parts[2];
         WebsocketServer::broadcast_json(log_data);
-        WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data.dump());
+        WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data);
 
         // Save log message in backtrace for when (if) the log interface requests it.
-        NSPanelLogMessage message;
-        message.time = buffer.str();
-        message.level = message_parts[1];
-        message.message = message_parts[2];
-        this->_log_messages.push_front(message);
+        this->_log_messages_backlog["logs"].insert(this->_log_messages_backlog["logs"].begin(), log_data);
         // Remove older messages from backtrace.
-        while (this->_log_messages.size() > MqttManagerConfig::get_settings().max_log_buffer_size) {
-          this->_log_messages.pop_back();
+        if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_settings().max_log_buffer_size) {
+          this->_log_messages_backlog["logs"].erase(this->_log_messages_backlog["logs"].begin() + MqttManagerConfig::get_settings().max_log_buffer_size, this->_log_messages_backlog["logs"].end());
         }
+        WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log_backlog", this->_mac), this->_log_messages_backlog);
       } else {
         SPDLOG_ERROR("Received message on log topic {} with wrong format. Message: {}", topic, payload);
       }
@@ -677,15 +677,12 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data.dump());
 
   // Save log message in backtrace for when (if) the log interface requests it.
-  NSPanelLogMessage message;
-  message.time = buffer.str();
-  message.level = log_data["level"];
-  message.message = payload;
-  this->_log_messages.push_front(message);
+  this->_log_messages_backlog["logs"].insert(this->_log_messages_backlog["logs"].begin(), log_data);
   // Remove older messages from backtrace.
-  while (this->_log_messages.size() > MqttManagerConfig::get_settings().max_log_buffer_size) {
-    this->_log_messages.pop_back();
+  if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_settings().max_log_buffer_size) {
+    this->_log_messages_backlog["logs"].erase(this->_log_messages_backlog["logs"].begin() + MqttManagerConfig::get_settings().max_log_buffer_size, this->_log_messages_backlog["logs"].end());
   }
+  WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log_backlog", this->_mac), this->_log_messages_backlog);
 }
 
 void NSPanel::send_websocket_update() {
@@ -814,21 +811,6 @@ void NSPanel::send_command(nlohmann::json &command) {
 
 std::string NSPanel::get_name() {
   return this->_name;
-}
-
-nlohmann::json NSPanel::get_websocket_json_logs() {
-  std::list<nlohmann::json> logs;
-  for (NSPanelLogMessage log : this->_log_messages) {
-    nlohmann::json log_message;
-    log_message["time"] = log.time;
-    log_message["level"] = log.level;
-    log_message["message"] = log.message;
-    logs.push_front(log_message);
-  }
-
-  nlohmann::json response;
-  response["logs"] = logs;
-  return response;
 }
 
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
@@ -1198,21 +1180,6 @@ bool NSPanel::handle_ipc_request_accept_register_request(nlohmann::json request,
 bool NSPanel::handle_ipc_request_deny_register_request(nlohmann::json request, nlohmann::json *response_buffer) {
   this->deny_register_request();
   nlohmann::json data = {{"status", "ok"}};
-  (*response_buffer) = data;
-  return true;
-}
-
-bool NSPanel::handle_ipc_request_get_logs(nlohmann::json request, nlohmann::json *response_buffer) {
-  nlohmann::json data = {{"status", "ok"}};
-  data["messages"] = nlohmann::json::array();
-  for (auto it = this->_log_messages.cbegin(); it != this->_log_messages.end(); it++) {
-    nlohmann::json log = {
-        {"time", it->time},
-        {"level", it->level},
-        {"message", it->message}};
-    data["messages"].push_back(log);
-  }
-
   (*response_buffer) = data;
   return true;
 }

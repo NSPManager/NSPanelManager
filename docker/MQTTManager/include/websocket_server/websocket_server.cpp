@@ -40,17 +40,23 @@ void StompTopic::subscribe(ix::WebSocket &webSocket, std::string subscription_id
     StompFrame frame;
     frame.type = StompFrame::MessageType::MESSAGE;
     frame.headers["message-id"] = boost::uuids::to_string(this->_uuid_generator());
-    frame.headers["content-type"] = "text/plain";
     frame.headers["destination"] = this->_topic_name;
     frame.headers["subscription"] = subscription_id;
-    frame.body = this->_current_value;
+
+    if (this->_current_json_data.empty()) {
+      frame.headers["content-type"] = "text/plain";
+      frame.body = this->_current_value;
+    } else {
+      frame.headers["content-type"] = "application/json";
+      frame.body = this->_current_json_data.dump();
+    }
     WebsocketServer::send_stomp_frame(frame, webSocket);
   }
 }
 
-void StompTopic::unsubscribe(ix::WebSocket &webSocket) {
-  _subscribers.erase(std::remove_if(_subscribers.begin(), _subscribers.end(), [&webSocket](const auto &pair) {
-                       return pair.first == &webSocket;
+void StompTopic::unsubscribe(ix::WebSocket &webSocket, std::string subscription_id) {
+  _subscribers.erase(std::remove_if(_subscribers.begin(), _subscribers.end(), [&webSocket, &subscription_id](const auto &pair) {
+                       return pair.first == &webSocket && (pair.second == subscription_id || subscription_id.empty()); // An empty ID is used to unsubscribe all subscriptions for the given WebSocket.
                      }),
                      _subscribers.end());
 }
@@ -60,21 +66,37 @@ void StompTopic::update_value(std::string value) {
     this->_current_value = value;
   }
 
-  StompFrame frame;
-  frame.type = StompFrame::MessageType::MESSAGE;
-  frame.headers["message-id"] = boost::uuids::to_string(this->_uuid_generator());
-  frame.headers["content-type"] = "text/plain";
-  frame.headers["destination"] = this->_topic_name;
-  frame.body = value;
+  if (this->get_subscriber_count() > 0) {
+    StompFrame frame;
+    frame.type = StompFrame::MessageType::MESSAGE;
+    frame.headers["message-id"] = boost::uuids::to_string(this->_uuid_generator());
+    frame.headers["content-type"] = "text/plain";
+    frame.headers["destination"] = this->_topic_name;
+    frame.body = value;
 
-  for (auto &subscriber : _subscribers) {
-    frame.headers["subscription"] = subscriber.second;
-    WebsocketServer::send_stomp_frame(frame, *subscriber.first);
+    for (auto &subscriber : _subscribers) {
+      frame.headers["subscription"] = subscriber.second;
+      WebsocketServer::send_stomp_frame(frame, *subscriber.first);
+    }
+  }
+}
+
+void StompTopic::update_value(nlohmann::json &data) {
+  if (this->_retained) {
+    this->_current_json_data = data;
+  }
+
+  if (this->get_subscriber_count() > 0) {
+    StompTopic::update_value(data.dump());
   }
 }
 
 void StompTopic::set_retained(bool retained) {
   this->_retained = retained;
+}
+
+int StompTopic::get_subscriber_count() const {
+  return this->_subscribers.size();
 }
 
 void WebsocketServer::start() {
@@ -136,7 +158,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
       WebsocketServer::_connected_websockets_stomps.remove(&webSocket);
 
       for (auto &topic : WebsocketServer::_stomp_topics) {
-        topic.unsubscribe(webSocket);
+        topic.unsubscribe(webSocket, "");
       }
     } else if (msg->type == ix::WebSocketMessageType::Message) {
       if (std::find(WebsocketServer::_connected_websockets.begin(), WebsocketServer::_connected_websockets.end(), &webSocket) != WebsocketServer::_connected_websockets.end()) {
@@ -239,16 +261,11 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
             WebsocketServer::_stomp_topics.push_back(StompTopic(frame->headers["destination"], ""));
             WebsocketServer::_stomp_topics.back().subscribe(webSocket, frame->headers["id"]);
           } else if (frame->type == StompFrame::UNSUBSCRIBE) {
-            if (frame->headers.find("destination") == frame->headers.end()) {
-              SPDLOG_ERROR("Got STOMP frame to subscribe to topic but not 'destination' was set!");
-              return;
-            }
-
-            SPDLOG_DEBUG("STOMP unsubscribing to topic {}", frame->headers["destination"]);
+            SPDLOG_DEBUG("STOMP subscription ID {} unsubscribing.", frame->headers["id"]);
             for (auto &topic : WebsocketServer::_stomp_topics) {
               if (topic.get_name() == frame->headers["destination"]) {
                 std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-                topic.unsubscribe(webSocket);
+                topic.unsubscribe(webSocket, frame->headers["id"]);
                 return; // We found the topics and unsubscribed from it, nothing else to do.
               }
             }
@@ -292,6 +309,16 @@ void WebsocketServer::broadcast_string(std::string &data) {
 }
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::string value) {
+  std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
+  for (auto &topic : WebsocketServer::_stomp_topics) {
+    if (topic.get_name().compare(topic_name) == 0) {
+      topic.update_value(value);
+      return;
+    }
+  }
+}
+
+void WebsocketServer::update_stomp_topic_value(std::string topic_name, nlohmann::json &value) {
   std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
   for (auto &topic : WebsocketServer::_stomp_topics) {
     if (topic.get_name().compare(topic_name) == 0) {
