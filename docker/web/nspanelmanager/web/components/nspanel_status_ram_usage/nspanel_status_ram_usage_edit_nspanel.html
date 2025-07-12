@@ -1,12 +1,12 @@
 <script type="module">
   import { define, html } from '/static/node_modules/hybrids/src/index.js';
 
-  document.getElementsByTagName('body')[0].addEventListener('nspanel-{{ id }}-state-change', (event) => {
-    // Update relevant values for the status header from the bundled data in the status update event
-    var element = document.getElementById(`nspanel-ram-status-${event.detail.event_data.id}`);
-    element.state = event.detail.event_data.state;
-    element.ram_usage = event.detail.event_data.ram_usage;
-  });
+  stomp_subscribe("nspanel/{{ nspanel.mac_address }}/status", (message) => {
+    var element = document.getElementById(`nspanel-ram-status-{{ nspanel.id }}`);
+    var data = JSON.parse(message.body);
+    element.state = data.state;
+    element.ram_usage = data.ram_usage;
+  })
 
   define({
     tag: "nspanel-ram-status",
@@ -37,4 +37,4 @@
   })
 </script>
 
-<nspanel-ram-status id="nspanel-ram-status-{{ id }}" nspanel_id="{{ id }}" state="{{ state }}" ram_usage="{{ ram_usage }}"></nspanel-ram-status>
+<nspanel-ram-status id="nspanel-ram-status-{{ nspanel.id }}" nspanel_id="{{ nspanel.id }}" state="" ram_usage=""></nspanel-ram-status>

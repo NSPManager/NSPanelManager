@@ -1,17 +1,16 @@
 from django_components import component
 from django.template.context import Context
 
-from web.mqttmanager_ipc import send_ipc_request
+from web.models import NSPanel
 
 @component.register("nspanel_status_ram_usage")
 class NSPanelStatusRamUsage(component.Component):
     template_view = None
 
-    def get_context_data(self, id, state, ram_usage):
+    def get_context_data(self, id):
+        nspanel = NSPanel.objects.get(id=id)
         return {
-            "id": id,
-            "state": state,
-            "ram_usage": ram_usage,
+            "nspanel": nspanel,
         }
 
     def get_template_name(self, context: Context):
@@ -25,12 +24,9 @@ class NSPanelStatusRamUsage(component.Component):
                 return "nspanel_status_ram_usage/nspanel_status_ram_usage_edit_nspanel.html"
 
     def get(self, request, view, nspanel_id):
-        panel_status = send_ipc_request(F"nspanel/{nspanel_id}/status", {"command": "get"})
         self.template_view = view
         args = {
             "id": nspanel_id,
-            "state": panel_status["state"],
-            "ram_usage": panel_status["ram_usage"],
         }
         return self.render_to_response(kwargs=args)
 
