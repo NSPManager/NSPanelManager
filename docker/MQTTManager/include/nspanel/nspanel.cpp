@@ -62,7 +62,6 @@ NSPanel::NSPanel(uint32_t id) {
 
   CommandManager::attach_callback(boost::bind(&NSPanel::command_callback, this, _1));
 
-  IPCHandler::attach_callback(fmt::format("nspanel/{}/status", this->_id), boost::bind(&NSPanel::handle_ipc_request_status, this, _1, _2));
   IPCHandler::attach_callback(fmt::format("nspanel/{}/reboot", this->_id), boost::bind(&NSPanel::handle_ipc_request_reboot, this, _1, _2));
   IPCHandler::attach_callback(fmt::format("nspanel/{}/update_screen", this->_id), boost::bind(&NSPanel::handle_ipc_request_update_screen, this, _1, _2));
   IPCHandler::attach_callback(fmt::format("nspanel/{}/update_firmware", this->_id), boost::bind(&NSPanel::handle_ipc_request_update_firmware, this, _1, _2));
@@ -205,7 +204,6 @@ void NSPanel::reload_config() {
 
     if (this->_has_registered_to_manager && !panel_settings.denied && panel_settings.accepted) {
       WebsocketServer::set_stomp_topic_retained(this->_mqtt_status_topic, true);
-      WebsocketServer::set_stomp_topic_retained(this->_mqtt_status_report_topic, true);
       WebsocketServer::set_stomp_topic_retained(fmt::format("nspanel/{}/log_backlog", this->_mac), true);
 
       // If this NSPanel is registered to manager, listen to state topics.
@@ -478,7 +476,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       }
 
       this->send_websocket_update();
-      WebsocketServer::update_stomp_topic_value(this->_mqtt_status_topic, state);
+      this->send_websocket_status_update();
     } else if (topic.compare(this->_mqtt_status_report_topic) == 0) {
       NSPanelStatusReport report;
       if (report.ParseFromString(payload)) {
@@ -542,15 +540,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
 
         // Received new temperature from status report, send out on temperature topic:
         MQTT_Manager::publish(this->_mqtt_temperature_topic, fmt::format("{:.1f}", this->_temperature));
-
-        nlohmann::json json_data;
-        json_data["temperature"] = this->_temperature;
-        json_data["ip_address"] = this->_ip_address;
-        json_data["rssi"] = this->_rssi;
-        json_data["heap_used_pct"] = this->_heap_used_pct;
-        WebsocketServer::update_stomp_topic_value(this->_mqtt_status_report_topic, json_data.dump());
-
-        this->send_websocket_update();
+        this->send_websocket_status_update();
       } else {
         SPDLOG_ERROR("Failed to parse NSPanelStatusReport from string as protobuf. Will try JSON.");
 
@@ -693,7 +683,6 @@ void NSPanel::send_websocket_update() {
   }
 
   nlohmann::json current_status_data;
-  this->handle_ipc_request_status(NULL, &current_status_data);
 
   // Send status over to web interface:
   nlohmann::json event_trigger_data;
@@ -703,11 +692,55 @@ void NSPanel::send_websocket_update() {
 }
 
 void NSPanel::send_websocket_status_update() {
+  // Send out status report on status topic through STOMP
   SPDLOG_TRACE("Sending websocket status update for {}::{}", this->_id, this->_name);
-  // Send status over to web interface:
-  nlohmann::json event_trigger_data;
-  event_trigger_data["event_type"] = fmt::format("nspanel-{}-status-change", this->_id);
-  WebsocketServer::broadcast_json(event_trigger_data);
+  nlohmann::json status_data = {
+      {"id", this->_id},
+      {"name", this->_name},
+      {"ip_address", this->_ip_address},
+      {"rssi", this->_rssi},
+      {"temperature", this->_temperature},
+      {"ram_usage", this->_heap_used_pct},
+      {"update_progress", this->_update_progress},
+  };
+  status_data["warnings"] = nlohmann::json::array({});
+  for (NSPanelWarningWebsocketRepresentation warning : this->_nspanel_warnings) {
+    status_data["warnings"].push_back(nlohmann::json{
+        {"level", warning.level},
+        {"text", warning.text},
+    });
+  }
+
+  switch (this->_state) {
+  case MQTT_MANAGER_NSPANEL_STATE::ONLINE:
+    status_data["state"] = "online";
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::OFFLINE:
+    status_data["state"] = "offline";
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::UPDATING_FIRMWARE:
+    status_data["state"] = "updating_fw";
+    status_data["progress"] = this->_update_progress;
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA:
+    status_data["state"] = "updating_fs";
+    status_data["progress"] = this->_update_progress;
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT:
+    status_data["state"] = "updating_tft";
+    status_data["progress"] = this->_update_progress;
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::WAITING:
+    status_data["state"] = "waiting";
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT:
+    status_data["state"] = "awaiting_accept";
+    break;
+  default:
+    status_data["state"] = "unknown";
+    break;
+  }
+  WebsocketServer::update_stomp_topic_value(this->_mqtt_status_topic, status_data);
 }
 
 nlohmann::json NSPanel::get_websocket_json_representation() {
@@ -1093,57 +1126,6 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
       }
     }
   }
-}
-
-bool NSPanel::handle_ipc_request_status(nlohmann::json request, nlohmann::json *response_buffer) {
-  nlohmann::json data = {
-      {"id", this->_id},
-      {"name", this->_name},
-      {"ip_address", this->_ip_address},
-      {"rssi", this->_rssi},
-      {"temperature", this->_temperature},
-      {"ram_usage", this->_heap_used_pct},
-      {"update_progress", this->_update_progress},
-  };
-  data["warnings"] = nlohmann::json::array({});
-  for (NSPanelWarningWebsocketRepresentation warning : this->_nspanel_warnings) {
-    data["warnings"].push_back(nlohmann::json{
-        {"level", warning.level},
-        {"text", warning.text},
-    });
-  }
-
-  switch (this->_state) {
-  case MQTT_MANAGER_NSPANEL_STATE::ONLINE:
-    data["state"] = "online";
-    break;
-  case MQTT_MANAGER_NSPANEL_STATE::OFFLINE:
-    data["state"] = "offline";
-    break;
-  case MQTT_MANAGER_NSPANEL_STATE::UPDATING_FIRMWARE:
-    data["state"] = "updating_fw";
-    data["progress"] = this->_update_progress;
-    break;
-  case MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA:
-    data["state"] = "updating_fs";
-    data["progress"] = this->_update_progress;
-    break;
-  case MQTT_MANAGER_NSPANEL_STATE::UPDATING_TFT:
-    data["state"] = "updating_tft";
-    data["progress"] = this->_update_progress;
-    break;
-  case MQTT_MANAGER_NSPANEL_STATE::WAITING:
-    data["state"] = "waiting";
-    break;
-  case MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT:
-    data["state"] = "awaiting_accept";
-    break;
-  default:
-    data["state"] = "unknown";
-    break;
-  }
-  (*response_buffer) = data;
-  return true;
 }
 
 bool NSPanel::handle_ipc_request_reboot(nlohmann::json request, nlohmann::json *response_buffer) {

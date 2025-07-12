@@ -1,6 +1,7 @@
 from django_components import component
 from django.template.context import Context
 
+from web.models import NSPanel
 from web.mqttmanager_ipc import send_ipc_request
 from web.settings_helper import get_setting_with_default
 
@@ -8,11 +9,10 @@ from web.settings_helper import get_setting_with_default
 class NSPanelStatusTemperature(component.Component):
     template_view = None
 
-    def get_context_data(self, id, state, temperature):
+    def get_context_data(self, id):
+        nspanel = NSPanel.objects.get(id=id)
         return {
-            "id": id,
-            "state": state,
-            "temperature": temperature,
+            "nspanel": nspanel,
             "temperature_unit": "°F" if get_setting_with_default("use_fahrenheit") == "True" else "°C"
         }
 
@@ -28,12 +28,8 @@ class NSPanelStatusTemperature(component.Component):
 
     def get(self, request, view, nspanel_id):
         self.template_view = view
-        temperature_unit = get_setting_with_default("temperature_unit")
-        panel_status = send_ipc_request(F"nspanel/{nspanel_id}/status", {"command": "get"})
         args = {
             "id": nspanel_id,
-            "state": panel_status["state"],
-            "temperature": panel_status["temperature"],
         }
         return self.render_to_response(kwargs=args)
 

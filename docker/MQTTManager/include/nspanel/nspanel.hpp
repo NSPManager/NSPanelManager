@@ -157,7 +157,6 @@ public:
   /**
    * When an IPC request for NSPanel status comes in handle it and send the response back
    */
-  bool handle_ipc_request_status(nlohmann::json message, nlohmann::json *response_buffer);
   bool handle_ipc_request_reboot(nlohmann::json message, nlohmann::json *response_buffer);
   bool handle_ipc_request_update_firmware(nlohmann::json message, nlohmann::json *response_buffer);
   bool handle_ipc_request_update_screen(nlohmann::json message, nlohmann::json *response_buffer);

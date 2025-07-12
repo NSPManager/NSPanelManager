@@ -3,7 +3,9 @@
 
   stomp_subscribe("nspanel/{{ nspanel.mac_address }}/status", (message) => {
     var element = document.getElementById(`nspanel-status-text-{{ nspanel.id }}`);
-    element.state = message.body;
+    var data = JSON.parse(message.body);
+    element.state = data.state;
+    element.update_progress = data.update_progress;
   })
 
   define({

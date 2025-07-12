@@ -1,7 +1,7 @@
 <div id="nspanel_container-{{ nspanel.data.id }}">
     <div class="text-base-content rounded-b-box rounded-t-field overflow-hidden nspanel-box bg-base-100 shadow-xl" id="panel_status_box-{{ nspanel.data.id }}">
     <div class="">
-        {% component "nspanel_status_header" id=nspanel.data.id state=nspanel.status.state update_progress=nspanel.status.progress %}{% endcomponent %}
+        {% component "nspanel_status_header" id=nspanel.data.id %}{% endcomponent %}
     </div>
     <div class="p-2">
         <!-- Hidden data values for the specific panel -->
@@ -53,7 +53,7 @@
             <div class="my-1">
                 <!-- Temperature -->
                 <div class="info-item">
-                    {% component "nspanel_status_temperature" id=nspanel.data.id state=nspanel.status.state temperature=nspanel.status.temperature %}{% endcomponent %}
+                    {% component "nspanel_status_temperature" id=nspanel.data.id %}{% endcomponent %}
                 </span>
                 </div>
             </div>

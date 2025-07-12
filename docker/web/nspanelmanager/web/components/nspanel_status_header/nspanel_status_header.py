@@ -1,17 +1,16 @@
 from django_components import component
 from django.template.context import Context
 
-from web.mqttmanager_ipc import send_ipc_request
+from web.models import NSPanel
 
 @component.register("nspanel_status_header")
 class NSPanelHeader(component.Component):
     template_view = None
 
-    def get_context_data(self, id, state, update_progress):
+    def get_context_data(self, id):
+        nspanel = NSPanel.objects.get(id=id)
         return {
-            "id": id,
-            "state": state,
-            "progress": update_progress
+            "nspanel": nspanel,
         }
 
     def get_template_name(self, context: Context):
@@ -23,12 +22,9 @@ class NSPanelHeader(component.Component):
             return "nspanel_status_header/nspanel_status_header_index.html"
 
     def get(self, request, view, nspanel_id):
-        panel_status = send_ipc_request(F"nspanel/{nspanel_id}/status", {"command": "get"})
         self.template_view = view
         args = {
             "id": nspanel_id,
-            "state": panel_status["state"],
-            "update_progress": panel_status["update_progress"]
         }
         return self.render_to_response(kwargs=args)
 
