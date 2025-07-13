@@ -224,7 +224,7 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
           SPDLOG_ERROR("Unknown openhab control mode for light {}::{}.", this->_id, this->_name);
         }
         SPDLOG_DEBUG("Light {}::{} got new brightness {}, current brightness: {}.", this->_id, this->_name, brightness, this->_current_brightness);
-        if (brightness != this->_current_brightness) {
+        if (brightness != this->_current_brightness || (!this->_current_state && brightness > 0)) {
           if (brightness != 0) { // Only update internal brightness if not zero as to remember last brightness when toggling light.
             this->_current_brightness = brightness;
             this->_requested_brightness = this->_current_brightness;
