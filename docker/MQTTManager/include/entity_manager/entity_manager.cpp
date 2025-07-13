@@ -1,6 +1,5 @@
 #include "command_manager/command_manager.hpp"
 #include "entity/entity.hpp"
-#include "ipc_handler/ipc_handler.hpp"
 #include "light/home_assistant_light.hpp"
 #include "light/light.hpp"
 #include "light/openhab_light.hpp"

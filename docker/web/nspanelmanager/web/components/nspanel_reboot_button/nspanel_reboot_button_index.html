@@ -1,4 +1,4 @@
-<div hx-post="/htmx/nspanels/{{ id }}/reboot" id="reboot-{{ id }}" hx-trigger="click, reboot-all-nspanels from:body" hx-swap="none"
+<div onclick="stomp_send('nspanel/{{ nspanel.mac_address }}/command', 'reboot')" id="reboot-{{ id }}" hx-swap="none"
 class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer nspanel-reboot-button">
     <span class="mdi mdi-restart pr-2"></span>Reboot
 </div>

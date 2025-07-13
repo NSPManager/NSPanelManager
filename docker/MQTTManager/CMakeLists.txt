@@ -54,11 +54,6 @@ add_library(Protobuf_MQTTManager STATIC ${PROTOBUF_PB_CC_FILES} ${PROTOBUF_PB_H_
 target_include_directories(Protobuf_MQTTManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(Protobuf_MQTTManager protobuf::protobuf)
 
-add_library(MQTTManager_IPCHandler STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/ipc_handler/ipc_handler.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/ipc_handler/ipc_handler.hpp)
-set_target_properties(MQTTManager_IPCHandler PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/ipc_handler/ipc_handler.hpp)
-target_include_directories(MQTTManager_IPCHandler PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_IPCHandler spdlog::spdlog Boost::boost cppzmq nlohmann_json::nlohmann_json)
-
 add_library(MQTTManager_WebHelper STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/web_helper/WebHelper.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/web_helper/WebHelper.hpp)
 set_target_properties(MQTTManager_WebHelper PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/WebHelper/web_helper.hpp)
 target_include_directories(MQTTManager_WebHelper PUBLIC ${CURL_INCLUDE_DIR} ${CMAKE_INCLUDE_SRC_DIRECTORY})
@@ -117,7 +112,7 @@ target_link_libraries(MQTTManager_Switch MQTTManager_HomeAssistantManager spdlog
 add_library(MQTTManager_NSPanel STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.hpp)
 set_target_properties(MQTTManager_NSPanel PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.hpp)
 target_include_directories(MQTTManager_NSPanel PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_Room MQTTManager_WebsocketServer tz::tz Boost::boost MQTTManager_Config MQTTManager_IPCHandler Protobuf_MQTTManager MQTTManager_DatabaseManager)
+target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_Room MQTTManager_WebsocketServer tz::tz Boost::boost MQTTManager_Config Protobuf_MQTTManager MQTTManager_DatabaseManager)
 
 add_library(MQTTManager_Scene STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.cpp)
 # set_target_properties(MQTTManager_Scene PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/nspm_scene.hpp)
@@ -145,4 +140,4 @@ target_link_libraries(MQTTManager_Config spdlog::spdlog MQTTManager_WebHelper nl
 
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_IPCHandler MQTTManager_CommandManager)
+target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager)

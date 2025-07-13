@@ -3,6 +3,7 @@
 #include "entity/entity.hpp"
 #include "protobuf_mqttmanager.pb.h"
 #include "protobuf_nspanel.pb.h"
+#include "websocket_server/websocket_server.hpp"
 #include <atomic>
 #include <command_manager/command_manager.hpp>
 #include <cstdint>
@@ -110,16 +111,6 @@ public:
   void erase();
 
   /**
-   * Accept register request from this panel.
-   */
-  void accept_register_request();
-
-  /**
-   * Deny register request from this panel and add to "ignore"-list.
-   */
-  void deny_register_request();
-
-  /**
    * Returns true if the NSPanel is register in manager, otherwise false.
    */
   bool has_registered_to_manager();
@@ -172,11 +163,7 @@ public:
   /**
    * When an IPC request for NSPanel status comes in handle it and send the response back
    */
-  bool handle_ipc_request_reboot(nlohmann::json message, nlohmann::json *response_buffer);
-  bool handle_ipc_request_update_firmware(nlohmann::json message, nlohmann::json *response_buffer);
-  bool handle_ipc_request_update_screen(nlohmann::json message, nlohmann::json *response_buffer);
-  bool handle_ipc_request_accept_register_request(nlohmann::json message, nlohmann::json *response_buffer);
-  bool handle_ipc_request_deny_register_request(nlohmann::json message, nlohmann::json *response_buffer);
+  void handle_stomp_command_callback(StompFrame frame);
 
 private:
   std::string _get_nspanel_setting_with_default(std::string key, std::string default_value);

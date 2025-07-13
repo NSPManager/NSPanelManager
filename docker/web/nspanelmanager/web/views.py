@@ -156,11 +156,6 @@ def update_room_form(request, room_id: int):
 
 
 def edit_nspanel(request, panel_id: int):
-    md5_firmware = get_file_md5sum("firmware.bin")
-    md5_data_file = get_file_md5sum("data_file.bin")
-    md5_tft_file = get_file_md5sum("gui.tft")
-    md5_us_tft_file = get_file_md5sum("gui_us.tft")
-
     if get_setting_with_default("use_fahrenheit") == "True":
         temperature_unit = "°F"
     else:
@@ -277,18 +272,12 @@ def save_panel_settings(request, panel_id: int):
     else:
         set_nspanel_setting_value(panel_id, "show_screensaver_outside_temperature", request.POST["show_screensaver_outside_temperature"])
 
-    set_nspanel_setting_value(
-        panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
-    set_nspanel_setting_value(
-        panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
-    set_nspanel_setting_value(panel_id, "temperature_calibration", float(
-        request.POST["temperature_calibration"]))
-    set_nspanel_setting_value(panel_id, "default_page",
-                              request.POST["default_page"])
-    set_nspanel_setting_value(
-        panel_id, "lock_to_default_room", request.POST["lock_to_default_room"])
-    set_nspanel_setting_value(
-        panel_id, "reverse_relays", request.POST["reverse_relays"])
+    set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
+    set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
+    set_nspanel_setting_value(panel_id, "temperature_calibration", float(request.POST["temperature_calibration"]))
+    set_nspanel_setting_value(panel_id, "default_page", request.POST["default_page"])
+    set_nspanel_setting_value(panel_id, "lock_to_default_room", request.POST["lock_to_default_room"])
+    set_nspanel_setting_value(panel_id, "reverse_relays", request.POST["reverse_relays"])
 
     if request.POST["panel_type"] == "eu":
         set_nspanel_setting_value(panel_id, "is_us_panel", "False")
@@ -302,10 +291,8 @@ def save_panel_settings(request, panel_id: int):
 
     set_nspanel_setting_value(panel_id, "selected_tft", request.POST.get("selected_tft"))
 
-    set_nspanel_setting_value(panel_id, "relay1_is_light",
-                              request.POST["relay1_is_light"])
-    set_nspanel_setting_value(panel_id, "relay2_is_light",
-                              request.POST["relay2_is_light"])
+    set_nspanel_setting_value(panel_id, "relay1_is_light", request.POST["relay1_is_light"])
+    set_nspanel_setting_value(panel_id, "relay2_is_light", request.POST["relay2_is_light"])
 
     panel.save()
     send_mqttmanager_reload_command()

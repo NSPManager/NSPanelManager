@@ -1,6 +1,8 @@
 #ifndef MQTTMANAGER_WEBSOCKET_SERVER_HPP
 #define MQTTMANAGER_WEBSOCKET_SERVER_HPP
 
+#include <boost/ptr_container/ptr_map.hpp>
+#include <boost/signals2.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <ixwebsocket/IXConnectionState.h>
@@ -10,7 +12,6 @@
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <string>
-#include <tuple>
 #include <unordered_map>
 
 struct StompFrame {
@@ -100,6 +101,26 @@ public:
   static void send_stomp_frame(StompFrame &frame, ix::WebSocket &websocket);
 
   /**
+   * Attach a callback to be called when a message is received on a specific topic using STOMP.
+   */
+  template <typename CALLBACK_BIND>
+  static void attach_stomp_callback(std::string topic, CALLBACK_BIND callback) {
+    std::lock_guard<std::mutex> mutex_guard(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
+    WebsocketServer::_on_stomp_send_message_callbacks[topic].disconnect(callback); // First disconnect in case it was already connected to avaid duplicate callbacks
+    WebsocketServer::_on_stomp_send_message_callbacks[topic].connect(callback);
+  }
+
+  template <typename CALLBACK_BIND>
+  static void detach_stomp_callback(std::string topic, CALLBACK_BIND callback) {
+    std::lock_guard<std::mutex> mutex_guard(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
+    WebsocketServer::_on_stomp_send_message_callbacks[topic].disconnect(callback);
+
+    if (WebsocketServer::_on_stomp_send_message_callbacks[topic].empty()) {
+      WebsocketServer::_on_stomp_send_message_callbacks.erase(topic);
+    }
+  }
+
+  /**
    * Attach a message callback. Callback should return true if the message was handled.
    * If any callback returns true, the data in the *reponse_buf will be sent back to the client that make the request.
    */
@@ -137,6 +158,10 @@ private:
 
   static inline std::list<ix::WebSocket *> _connected_websockets;
   static inline std::list<ix::WebSocket *> _connected_websockets_stomps;
+
+  // Callback for when a SEND message is received on a STOMP topic
+  static inline std::mutex _on_stomp_send_message_callbacks_mutex;
+  static inline boost::ptr_map<std::string, boost::signals2::signal<void(StompFrame)>> _on_stomp_send_message_callbacks;
 
   static inline std::mutex _active_warnings_mutex;
   static inline std::list<ActiveWarning> _active_warnings;

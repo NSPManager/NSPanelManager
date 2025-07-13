@@ -1,13 +1,16 @@
 from django_components import component
 from django.template.context import Context
 
+from web.models import NSPanel
+
 @component.register("nspanel_reboot_button")
 class NSPanelRebootButton(component.Component):
     template_view = None
 
     def get_context_data(self, id):
+        nspanel = NSPanel.objects.get(id=id)
         return {
-            "id": id,
+            "nspanel": nspanel,
         }
 
     def get_template_name(self, context: Context):

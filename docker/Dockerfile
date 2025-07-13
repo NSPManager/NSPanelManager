@@ -47,8 +47,6 @@ RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get install -y --no-install-recommends
 
 RUN apt-get install -y nginx
 RUN pip install --no-cache-dir -r requirements.txt # Install python packages (except pyzmq as it requires custom arguments, see https://github.com/zeromq/pyzmq/issues/2084)
-RUN pip install -C cmake.args="-DCMAKE_POLICY_VERSION_MINIMUM=3.14" pyzmq==26.2.0 # Install pyzmq
-RUN pip install --no-cache-dir -r requirements.txt # Install pyzmq
 
 EXPOSE 8000
 CMD ["/bin/bash", "./run_uwsgi.sh"]

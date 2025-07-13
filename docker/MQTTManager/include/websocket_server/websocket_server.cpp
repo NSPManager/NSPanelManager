@@ -270,18 +270,21 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
               }
             }
           } else if (frame->type == StompFrame::SEND) {
-            std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
             // Only allow SEND commands to send to already define/existing topics.
-
-            for (auto &topic : WebsocketServer::_stomp_topics) {
-              if (topic.get_name() == frame->headers["destination"]) {
-                SPDLOG_DEBUG("Received STOMP SEND command, setting topic {} to value {}", frame->headers["destination"], frame->body);
-                topic.update_value(frame->body);
-                return; // We found the topic and published to it, nothing else to do.
-              }
+            if (frame->headers.find("destination") == frame->headers.end()) {
+              SPDLOG_WARN("Received a SEND STOMP frame but not destination header was set!");
+              return;
             }
 
-            SPDLOG_WARN("Received STOMP SEND command for unknown topic. Will not publish, topic {}, value {}", frame->headers["destination"], frame->body);
+            std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
+            std::lock_guard<std::mutex> lock_guard_callbacks(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
+            if (WebsocketServer::_on_stomp_send_message_callbacks.count(frame->headers["destination"]) > 0) {
+              SPDLOG_DEBUG("Received STOMP SEND command for existing topic, setting topic '{}' to value '{}'", frame->headers["destination"], frame->body);
+              WebsocketServer::_on_stomp_send_message_callbacks[frame->headers["destination"]](frame.value());
+              return;
+            }
+
+            SPDLOG_WARN("Received STOMP SEND command for unknown topic. Will not publish, topic '{}', value '{}'", frame->headers["destination"], frame->body);
           } else {
             SPDLOG_WARN("Received unknown STOMP frame type {}.", static_cast<int>(frame->type));
           }

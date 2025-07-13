@@ -15,7 +15,6 @@
 #include <entity_manager/entity_manager.hpp>
 #include <filesystem>
 #include <home_assistant_manager/home_assistant_manager.hpp>
-#include <ipc_handler/ipc_handler.hpp>
 #include <memory>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
@@ -168,8 +167,6 @@ int main(void) {
   // Load config from environment/manager
   MqttManagerConfig::load();   // Load all entities, rooms and panels.
   MQTTManagerWeather::start(); // Start thread to handle weather updates
-
-  IPCHandler::start(); // Handle IPC (ZMQ) messages
 
   MQTT_Manager::init(); // Initialize MQTT manager to handle everything to do with MQTT
 

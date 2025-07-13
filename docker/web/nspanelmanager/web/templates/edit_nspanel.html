@@ -753,10 +753,10 @@
         <div class="block mt-2 rounded-lg bg-base-100 shadow-lg">
           {% component "nspanel_reboot_button" id=panel_info.data.id %}{% endcomponent %}
           {% component "nspanel_visit_link" id=panel_info.data.id %}{% endcomponent %}
-          <div hx-post="{% url 'htmx_nspanel_update_firmware' panel_info.data.id %}" hx-trigger="click" hx-swap="none" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
+          <div onclick="stomp_send('nspanel/{{ panel_info.data.mac_address }}/command', 'firmware_update')" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
             <span class="mdi mdi-upload me-2"></span><span class="">Update firmware</span>
           </div>
-          <div hx-post="{% url 'htmx_nspanel_update_screen' panel_info.data.id %}" hx-trigger="click" hx-swap="none" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
+          <div onclick="stomp_send('nspanel/{{ panel_info.data.mac_address }}/command', 'gui_update')" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
             <span class="mdi mdi-table-arrow-up me-2"></span><span class="">Update GUI</span>
           </div>
           <div hx-delete="{% url 'htmx_nspanel_delete' nspanel_id=panel_info.data.id %}" hx-trigger="click" class="nspanel-delete-button p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer rounded-b-lg text-red-600">

@@ -2,7 +2,6 @@
 #include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
-#include "ipc_handler/ipc_handler.hpp"
 #include "light/light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
@@ -61,12 +60,7 @@ NSPanel::NSPanel(uint32_t id) {
   this->reload_config();
 
   CommandManager::attach_callback(boost::bind(&NSPanel::command_callback, this, _1));
-
-  IPCHandler::attach_callback(fmt::format("nspanel/{}/reboot", this->_id), boost::bind(&NSPanel::handle_ipc_request_reboot, this, _1, _2));
-  IPCHandler::attach_callback(fmt::format("nspanel/{}/update_screen", this->_id), boost::bind(&NSPanel::handle_ipc_request_update_screen, this, _1, _2));
-  IPCHandler::attach_callback(fmt::format("nspanel/{}/update_firmware", this->_id), boost::bind(&NSPanel::handle_ipc_request_update_firmware, this, _1, _2));
-  IPCHandler::attach_callback(fmt::format("nspanel/{}/accept_register_request", this->_id), boost::bind(&NSPanel::handle_ipc_request_accept_register_request, this, _1, _2));
-  IPCHandler::attach_callback(fmt::format("nspanel/{}/deny_register_request", this->_id), boost::bind(&NSPanel::handle_ipc_request_deny_register_request, this, _1, _2));
+  WebsocketServer::attach_stomp_callback(fmt::format("nspanel/{}/command", this->_mac), boost::bind(&NSPanel::handle_stomp_command_callback, this, _1));
 
   // Create default JSON structure for historical logs
   this->_log_messages_backlog["logs"] = nlohmann::json::array();
@@ -366,6 +360,8 @@ void NSPanel::send_config() {
 
 NSPanel::~NSPanel() {
   SPDLOG_INFO("Destroying NSPanel {}::{}", this->_id, this->_name);
+  WebsocketServer::detach_stomp_callback(fmt::format("nspanel/{}/command", this->_mac), boost::bind(&NSPanel::handle_stomp_command_callback, this, _1));
+
   this->reset_mqtt_topics();
   this->reset_ha_mqtt_topics();
 }
@@ -916,22 +912,6 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
   return size * nmemb;
 }
 
-void NSPanel::accept_register_request() {
-  this->reload_config();
-  // this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
-}
-
-void NSPanel::deny_register_request() {
-  this->reload_config();
-  this->_state = MQTT_MANAGER_NSPANEL_STATE::DENIED;
-
-  nlohmann::json data;
-  data["mac_address"] = this->_mac;
-  data["friendly_name"] = this->_name;
-  data["denied"] = true;
-  bool result = this->register_to_manager(data);
-}
-
 bool NSPanel::has_registered_to_manager() {
   return this->_has_registered_to_manager;
 }
@@ -1204,42 +1184,16 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
   }
 }
 
-bool NSPanel::handle_ipc_request_reboot(nlohmann::json request, nlohmann::json *response_buffer) {
-  this->reboot();
-  this->send_websocket_update();
-  nlohmann::json data = {{"status", "ok"}};
-  (*response_buffer) = data;
-  return true;
-}
-
-bool NSPanel::handle_ipc_request_update_firmware(nlohmann::json request, nlohmann::json *response_buffer) {
-  this->firmware_update();
-  this->send_websocket_update();
-  nlohmann::json data = {{"status", "ok"}};
-  (*response_buffer) = data;
-  return true;
-}
-
-bool NSPanel::handle_ipc_request_update_screen(nlohmann::json request, nlohmann::json *response_buffer) {
-  this->tft_update();
-  this->send_websocket_update();
-  nlohmann::json data = {{"status", "ok"}};
-  (*response_buffer) = data;
-  return true;
-}
-
-bool NSPanel::handle_ipc_request_accept_register_request(nlohmann::json request, nlohmann::json *response_buffer) {
-  this->accept_register_request();
-  nlohmann::json data = {{"status", "ok"}};
-  (*response_buffer) = data;
-  return true;
-}
-
-bool NSPanel::handle_ipc_request_deny_register_request(nlohmann::json request, nlohmann::json *response_buffer) {
-  this->deny_register_request();
-  nlohmann::json data = {{"status", "ok"}};
-  (*response_buffer) = data;
-  return true;
+void NSPanel::handle_stomp_command_callback(StompFrame frame) {
+  if (frame.body.compare("reboot") == 0) {
+    this->reboot();
+  } else if (frame.body.compare("firmware_update") == 0) {
+    this->firmware_update();
+  } else if (frame.body.compare("gui_update") == 0) {
+    this->tft_update();
+  } else {
+    SPDLOG_WARN("NSPanel {}::{} received unknown STOMP command '{}'", this->_id, this->_name, frame.body);
+  }
 }
 
 std::string NSPanel::_get_nspanel_setting_with_default(std::string key, std::string default_value) {

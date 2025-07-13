@@ -20,9 +20,6 @@ import base64
 import environ
 from time import sleep
 
-#from nspanelmanager.web.mqttmanager_ipc import send_ipc_request
-from .mqttmanager_ipc import send_ipc_request
-
 from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages import NSPanelRoomEntitiesPages
 from web.components.rooms_list.rooms_list import RoomsList
 
@@ -91,54 +88,6 @@ def unblock_nspanel(request, nspanel_id):
         response = HttpResponse("")
         response["HX-Refresh"] = "true"
         return response
-
-
-@csrf_exempt
-def nspanel_reboot(request, nspanel_id):
-    try:
-        if request.method == 'POST':
-            response = send_ipc_request(F"nspanel/{nspanel_id}/reboot", {})
-            if response["status"] == "ok":
-                return JsonResponse({"status": "ok"}, status=200)
-            else:
-                return JsonResponse({"status": "error"}, status=500)
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
-
-@csrf_exempt
-def nspanel_update_screen(request, nspanel_id):
-    try:
-        if request.method == 'POST':
-            response = send_ipc_request(F"nspanel/{nspanel_id}/update_screen", {})
-            if response["status"] == "ok":
-                return JsonResponse({"status": "ok"}, status=200)
-            else:
-                return JsonResponse({"status": "error"}, status=500)
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
-
-@csrf_exempt
-def nspanel_update_firmware(request, nspanel_id):
-    try:
-        if request.method == 'POST':
-            response = send_ipc_request(F"nspanel/{nspanel_id}/update_firmware", {})
-            if response["status"] == "ok":
-                return JsonResponse({"status": "ok"}, status=200)
-            else:
-                return JsonResponse({"status": "error"}, status=500)
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
 
 
 @csrf_exempt
