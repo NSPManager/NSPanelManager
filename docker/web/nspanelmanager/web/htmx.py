@@ -56,43 +56,6 @@ def partial_index_nspanels_section(request):
     for nspanel in NSPanel.objects.filter(denied=False):
         panel_info = {}
         panel_info["data"] = nspanel
-        panel_info["status"]["warnings"] = [] # TODO: Check if already array, then don't clear existin warnings
-        for panel in NSPanel.objects.filter(denied=False):
-            if panel == nspanel:
-                continue
-            elif panel.friendly_name == nspanel.friendly_name:
-                panel_info["status"]["warnings"].append({
-                    "level": "error",
-                    "text": "Two or more panels exists with the same name. This may have unintended consequences"
-                })
-                break
-        if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
-            panel_info["status"]["warnings"].append({
-                "level": "info",
-                "text": "Firmware update available."
-            })
-
-        selected_tft = get_nspanel_setting_with_default(nspanel.id, "selected_tft", "tft1")
-        is_us_panel = get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False")
-        us_panel_orientation = get_nspanel_setting_with_default(nspanel.id, "us_panel_orientation", "vertical")
-        if is_us_panel == "False" and nspanel.md5_tft_file != tft_eu_checksums[selected_tft]:
-            panel_info["status"]["warnings"].append({
-                "level": "info",
-                "text": "GUI update available."
-            })
-        elif is_us_panel == "True" and us_panel_orientation == "horizontal" and nspanel.md5_tft_file != tft_eu_checksums[selected_tft]:
-            # We use EU tft file for horizontal US panel with buttons on left as it's the same screen and orientation
-            panel_info["status"]["warnings"].append({
-                "level": "info",
-                "text": "GUI update available."
-            })
-        elif is_us_panel == "True" and us_panel_orientation == "vertical" and nspanel.md5_tft_file != tft_us_checksums[selected_tft]:
-            panel_info["status"]["warnings"].append({
-                "level": "info",
-                "text": "GUI update available."
-            })
-        # TODO: Load warnings from MQTTManager.
-        nspanels.append(panel_info)
 
     data = {
         'nspanels': nspanels,
@@ -128,28 +91,6 @@ def unblock_nspanel(request, nspanel_id):
         response = HttpResponse("")
         response["HX-Refresh"] = "true"
         return response
-
-@csrf_exempt
-def select_nspanel_background(request, nspanel_id):
-    if request.method == "GET":
-        nspanel = NSPanel.objects.get(id=nspanel_id)
-        return render(request, "modals/select_background/select_background.html", {
-            "settings": {
-                "is_us_panel": get_nspanel_setting_with_default(nspanel_id, "is_us_panel", "False"),
-                "us_panel_orientation": get_nspanel_setting_with_default(nspanel_id, "us_panel_orientation", "vertical")
-            },
-            "nspanel": nspanel
-        })
-    elif request.method == "POST":
-        set_nspanel_setting_value(nspanel_id, "selected_tft", request.POST.get("selected_background"))
-        send_mqttmanager_reload_command()
-
-        # Successful, refresh page
-        response = HttpResponse("")
-        response["HX-Refresh"] = "true"
-        return response
-
-@csrf_exempt
 
 
 @csrf_exempt

@@ -300,6 +300,8 @@ def save_panel_settings(request, panel_id: int):
             set_nspanel_setting_value(panel_id, "is_us_panel", "True")
             set_nspanel_setting_value(panel_id, "us_panel_orientation", "vertical")
 
+    set_nspanel_setting_value(panel_id, "selected_tft", request.POST.get("selected_tft"))
+
     set_nspanel_setting_value(panel_id, "relay1_is_light",
                               request.POST["relay1_is_light"])
     set_nspanel_setting_value(panel_id, "relay2_is_light",
