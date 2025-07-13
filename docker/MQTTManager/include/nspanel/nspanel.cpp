@@ -444,7 +444,6 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         log_data["mac_address"] = message_parts[0];
         log_data["level"] = message_parts[1];
         log_data["message"] = message_parts[2];
-        WebsocketServer::broadcast_json(log_data);
         WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data);
 
         // Save log message in backtrace for when (if) the log interface requests it.
@@ -662,7 +661,6 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   // Remove first char that indicates log level. This is stored separately
   payload = payload.substr(1);
   log_data["message"] = payload; // TODO: Clean up message before sending it out
-  WebsocketServer::broadcast_json(log_data);
   WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data.dump());
 
   // Save log message in backtrace for when (if) the log interface requests it.

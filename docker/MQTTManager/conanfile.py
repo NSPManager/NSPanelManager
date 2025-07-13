@@ -17,21 +17,13 @@ class CompressorRecipe(ConanFile):
         self.requires("tz/2023c")
         # self.requires("inja/3.4.0")
         self.requires("boost/1.84.0")
-        self.requires("cppzmq/4.10.0")
         self.requires("protobuf/5.27.0")
         self.requires("sqlite_orm/1.9.1")
-        # self.requires("sqlite3/3.48.0", override=True)
-
-    # def build_requirements(self):
-    #     self.tool_requires("cmake/3.28.1")
 
     def configure(self):
         self.options["boost"].without_stacktrace = False
         self.options["boost"].with_stacktrace_backtrace = True
         self.options["sqlite_orm"].SQLITE_ORM_ENABLE_CXX_17 = True
-        # self.options["boost"].without_context = True
-        # self.options["boost"].without_coroutine = True
-        # self.options["boost"].without_fiber = True
 
     def layout(self):
         cmake_layout(self)
