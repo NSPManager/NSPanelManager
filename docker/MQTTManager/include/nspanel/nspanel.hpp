@@ -116,11 +116,6 @@ public:
   bool has_registered_to_manager();
 
   /**
-   * Send an event over the websocket that indicates that the NSPanel state changed.
-   */
-  void send_websocket_update();
-
-  /**
    * Send an event over the websocket that indicates that the NSPanel status changed.
    */
   void send_websocket_status_update();

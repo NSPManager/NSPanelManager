@@ -223,8 +223,8 @@ void NSPanel::reload_config() {
   }
   SPDLOG_TRACE("NSPanel {}::{} received config update.", this->_id, this->_name);
 
-  // Config changed, send "reload" command to web interface
-  this->send_websocket_update();
+  // Config changed, send updated status to web interface
+  this->send_websocket_status_update();
 }
 
 void NSPanel::send_config() {
@@ -471,7 +471,6 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         SPDLOG_ERROR("Received unknown state for nspanel {}::{}. State: {}", this->_id, this->_name, state);
       }
 
-      this->send_websocket_update();
       this->send_websocket_status_update();
     } else if (topic.compare(this->_mqtt_status_report_topic) == 0) {
       NSPanelStatusReport report;
@@ -673,22 +672,6 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
     this->_log_messages_backlog["logs"].erase(this->_log_messages_backlog["logs"].begin() + MqttManagerConfig::get_settings().max_log_buffer_size, this->_log_messages_backlog["logs"].end());
   }
   WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log_backlog", this->_mac), this->_log_messages_backlog);
-}
-
-void NSPanel::send_websocket_update() {
-  if (this->_has_registered_to_manager) {
-    SPDLOG_TRACE("Sending websocket update for {}::{}", this->_id, this->_name);
-  } else {
-    SPDLOG_TRACE("Sending websocket update for new NSPanel ??::{}", this->_name);
-  }
-
-  nlohmann::json current_status_data;
-
-  // Send status over to web interface:
-  nlohmann::json event_trigger_data;
-  event_trigger_data["event_type"] = fmt::format("nspanel-{}-state-change", this->_id);
-  event_trigger_data["event_data"] = current_status_data;
-  WebsocketServer::broadcast_json(event_trigger_data);
 }
 
 void NSPanel::send_websocket_status_update() {
@@ -946,7 +929,6 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
       MQTT_Manager::publish(reply_topic, response.dump());
 
       SPDLOG_TRACE("Sending websocket update for NSPanel {}::{} state change.", this->_id, this->_name);
-      this->send_websocket_update();
       nlohmann::json data = nlohmann::json::parse(response_data);
 
     } else {

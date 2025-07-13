@@ -4,6 +4,7 @@
 #include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
 #include "room/room_entities_page.hpp"
+#include "websocket_server/websocket_server.hpp"
 #include <algorithm>
 #include <boost/signals2.hpp>
 #include <condition_variable>
@@ -178,7 +179,7 @@ public:
   /**
    * Process any incomming message from the websocket. Return true if message was handled.
    */
-  static bool websocket_callback(std::string &message, std::string *response_buffer);
+  static void websocket_callback(StompFrame frame);
 
   static std::shared_ptr<NSPanel> get_nspanel_by_id(uint id);
   static std::shared_ptr<NSPanel> get_nspanel_by_mac(std::string mac);

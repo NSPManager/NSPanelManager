@@ -31,6 +31,7 @@
   var stomp_subscription_destinations = {};
   function stomp_connected_callback() {
     console.log("Connected to STOMP. Resubscribing...");
+    $("#ws_connection_in_progress_notification").addClass("hidden");
 
     // Resubscribe to all subscriptions
     for(const topic in stomp_subscription_destinations) {
@@ -52,14 +53,17 @@
 
   function stomp_disconnected_callback() {
     console.log("Disconnected from STOMP.");
+    $("#ws_connection_in_progress_notification").removeClass("hidden");
   }
 
   function stomp_websocket_close_callback() {
     console.log("Disconnected from STOMP (websocket closed).");
+    $("#ws_connection_in_progress_notification").removeClass("hidden");
   }
 
   function stomp_websocket_error_callback() {
     console.log("Disconnected from STOMP (websocket error).");
+    $("#ws_connection_in_progress_notification").removeClass("hidden");
   }
 
   function stomp_error_callback(error) {
@@ -141,6 +145,49 @@
   stomp_client.onStompError = stomp_error_callback;
 
   stomp_client.activate();
+
+
+  // Listen for warnings from MQTTManager
+  stomp_subscribe("mqttmanager/warnings", (data) => {
+    var json = JSON.parse(data.body);
+    var warnings = json.warnings;
+    // Remove any removed warnings
+      $("#error_toast_container > .alert").each(function () {
+        let found = false;
+        let match_text = $(this).find(".toast-text").text();
+        for (let i = 0; i < warnings.length; i++) {
+          if (warnings[i].text === match_text) {
+            found = true;
+            return;
+          }
+        }
+
+        if (!found) {
+          $(this).remove();
+        }
+      });
+
+      for (let i = 0; i < warnings.length; i++) {
+        // Check so that identical warnings are not shown multiple times
+        let found = false;
+        $("#error_toast_container > .alert").each(function () {
+          if (
+            $(this).find(".toast-text").text() ==
+            warnings[i].text
+          ) {
+            found = true;
+            return;
+          }
+        });
+
+        if (!found) {
+          show_error_toast(
+            warnings[i].level,
+            warnings[i].text,
+          );
+        }
+      }
+    });
   </script>
 
 

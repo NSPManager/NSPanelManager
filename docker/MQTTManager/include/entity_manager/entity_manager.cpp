@@ -65,7 +65,7 @@ void EntityManager::init() {
   CommandManager::attach_callback(&EntityManager::_command_callback);
 
   // MQTT_Manager::attach_observer(EntityManager::mqtt_callback);
-  WebsocketServer::attach_message_callback(EntityManager::websocket_callback);
+  WebsocketServer::attach_stomp_callback("mqttmanager/command", EntityManager::websocket_callback);
   // TODO: On 'reload config signal', reload the config.
   // MqttManagerConfig::attach_config_loaded_listener(EntityManager::post_init_entities);
   MQTT_Manager::subscribe("nspanel/mqttmanager/command", &EntityManager::mqtt_topic_callback);
@@ -653,6 +653,9 @@ void EntityManager::mqtt_topic_callback(const std::string &topic, const std::str
   EntityManager::_process_message(topic, payload);
 }
 
+void EntityManager::websocket_callback(StompFrame frame) {
+}
+
 bool EntityManager::mqtt_callback(const std::string &topic, const std::string &payload) {
   SPDLOG_TRACE("Processing message on topic: {}, payload: {}", topic, payload);
   try {
@@ -824,152 +827,4 @@ std::shared_ptr<NSPanel> EntityManager::get_nspanel_by_mac(std::string mac) {
   }
   SPDLOG_TRACE("Did not find NSPanel by MAC {}", mac);
   return nullptr;
-}
-
-bool EntityManager::websocket_callback(std::string &message, std::string *response_buffer) {
-  nlohmann::json data = nlohmann::json::parse(message);
-  nlohmann::json args = data["args"];
-
-  uint64_t command_id = data["cmd_id"];
-  std::string command = data["command"];
-
-  if (command.compare("get_nspanels_status") == 0) {
-    SPDLOG_DEBUG("Processing request for NSPanels status.");
-    std::vector<nlohmann::json> panel_responses;
-    for (auto it = EntityManager::_nspanels.cbegin(); it != EntityManager::_nspanels.cend(); it++) {
-      if ((*it)->get_state() == MQTT_MANAGER_NSPANEL_STATE::DENIED) {
-        continue; // Skip any panel that is denied.
-      }
-      if ((*it)->has_registered_to_manager()) {
-        SPDLOG_DEBUG("Requesting state from NSPanel {}::{}", (*it)->get_id(), (*it)->get_name());
-      } else {
-        SPDLOG_DEBUG("Requesting state from NSPanel ??::{}", (*it)->get_name());
-      }
-      if (args.contains("nspanel_id")) {
-        if ((*it)->get_id() == atoi(std::string(args["nspanel_id"]).c_str())) {
-          panel_responses.push_back((*it)->get_websocket_json_representation());
-          break;
-        }
-      } else {
-        // In case no ID was specified, send status for all panels.
-        panel_responses.push_back((*it)->get_websocket_json_representation());
-      }
-    }
-    nlohmann::json response;
-    response["nspanels"] = panel_responses;
-    response["cmd_id"] = command_id;
-    (*response_buffer) = response.dump();
-    return true;
-  } else if (command.compare("reboot_nspanels") == 0) {
-    nlohmann::json args = data["args"];
-    nlohmann::json nspanels = args["nspanels"];
-    for (std::string nspanel_id_str : nspanels) {
-      uint16_t nspanel_id = atoi(nspanel_id_str.c_str());
-      auto nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
-      if (nspanel != nullptr) {
-        SPDLOG_INFO("Sending reboot command to nspanel {}::{}.", nspanel->get_id(), nspanel->get_name());
-        nlohmann::json cmd;
-        cmd["command"] = "reboot";
-        nspanel->send_command(cmd);
-      } else {
-        SPDLOG_ERROR("Received command to reboot NSPanel with ID {} but no panel with that ID is loaded.", nspanel_id);
-      }
-    }
-    return true;
-  } else if (command.compare("firmware_update_nspanels") == 0) {
-    nlohmann::json args = data["args"];
-    nlohmann::json nspanels = args["nspanels"];
-    for (std::string nspanel_id_str : nspanels) {
-      uint16_t nspanel_id = atoi(nspanel_id_str.c_str());
-      auto nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
-      if (nspanel != nullptr) {
-        SPDLOG_INFO("Sending firmware update command to nspanel {}::{}.", nspanel->get_id(), nspanel->get_name());
-        nlohmann::json cmd;
-        cmd["command"] = "firmware_update";
-        nspanel->send_command(cmd);
-      } else {
-        SPDLOG_ERROR("Received command to firmware update NSPanel with ID {} but no panel with that ID is loaded.");
-      }
-    }
-    return true;
-  } else if (command.compare("tft_update_nspanels") == 0) {
-    nlohmann::json args = data["args"];
-    nlohmann::json nspanels = args["nspanels"];
-    for (std::string nspanel_id_str : nspanels) {
-      uint16_t nspanel_id = atoi(nspanel_id_str.c_str());
-      auto nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
-      if (nspanel != nullptr) {
-        SPDLOG_INFO("Sending TFT update command to nspanel {}::{}.", nspanel->get_id(), nspanel->get_name());
-        nlohmann::json cmd;
-        cmd["command"] = "tft_update";
-        nspanel->send_command(cmd);
-      } else {
-        SPDLOG_ERROR("Received command to TFT update NSPanel with ID {} but no panel with that ID is loaded.", nspanel_id);
-      }
-    }
-    return true;
-  } else if (command.compare("nspanel_accept") == 0) {
-    nlohmann::json args = data["args"];
-    std::string mac = args["mac_address"];
-    auto panel = EntityManager::get_nspanel_by_mac(mac);
-    if (panel != nullptr) {
-      SPDLOG_INFO("Accepting reqister request for NSPanel with MAC {} as per user request from websocket.", mac);
-      panel->accept_register_request();
-      nlohmann::json response;
-      response["cmd_id"] = command_id;
-      response["success"] = true;
-      response["mac_address"] = mac;
-      (*response_buffer) = response.dump();
-      panel->send_websocket_update();
-      return true;
-    } else {
-      SPDLOG_DEBUG("Received NSPanel accept request for a panel we could not find. Ignoring request.");
-    }
-  } else if (command.compare("nspanel_deny") == 0) {
-    nlohmann::json args = data["args"];
-    std::string mac = args["mac_address"];
-    auto panel = EntityManager::get_nspanel_by_mac(mac);
-    if (panel != nullptr) {
-      SPDLOG_INFO("Accepting reqister request for NSPanel with MAC {} as per user request from websocket.", mac);
-      panel->deny_register_request();
-      nlohmann::json response;
-      response["cmd_id"] = command_id;
-      response["success"] = true;
-      response["mac_address"] = mac;
-      (*response_buffer) = response.dump();
-      panel->send_websocket_update();
-      return true;
-    } else {
-      SPDLOG_DEBUG("Received NSPanel deny request for a panel we could not find. Ignoring request.");
-    }
-  } else if (command.compare("nspanel_delete") == 0) {
-    nlohmann::json args = data["args"];
-    std::string mac = args["mac_address"];
-    auto panel = EntityManager::get_nspanel_by_mac(mac);
-    if (panel != nullptr) {
-      SPDLOG_INFO("Received command to delete NSPanel {}::{}.", panel->get_id(), panel->get_name());
-      std::string url = fmt::format("http://" MANAGER_ADDRESS ":" MANAGER_PORT "/api/delete_nspanel/{}", panel->get_id()).c_str();
-      std::string response_data;
-      if (WebHelper::perform_get_request(&url, &response_data, nullptr) && !response_data.empty()) {
-        panel->reboot();
-        nlohmann::json response;
-        response["cmd_id"] = command_id;
-        response["success"] = true;
-        response["mac_address"] = mac;
-        (*response_buffer) = response.dump();
-
-        // Instantly delete NSPanel from manager.
-        EntityManager::load_nspanels();
-
-        SPDLOG_DEBUG("Panel with MAC {} delete call completed.", mac);
-        return true;
-      } else {
-        SPDLOG_ERROR("Failed to delete NSPanel with given MAC.");
-      }
-    } else {
-      SPDLOG_ERROR("Received request to delete NSPanel but no NSPanel with MAC {} is register to this manager.", mac);
-    }
-  }
-
-  return false;
 }

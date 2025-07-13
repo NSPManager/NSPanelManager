@@ -27,7 +27,9 @@
     Help
   </a>
 </div>
+
 <div class="pm-2" id="warning_container">
+    {% component "nspanel_warnings" id=panel_info.data.id %}{% endcomponent %}
 </div>
 
 <!-- NSPanel select background modal -->
@@ -781,29 +783,6 @@
       </tr>
     </thead>
     <tbody id="log_body" class="">
-        {% for message in logs.messages %}
-        <tr class="hover">
-            <td class="py-1">
-                {{ message.time }}
-            </td>
-            <td class="py-1">
-                {% if message.level == "ERROR" %}
-                    <span class="text-error">ERROR</span>
-                {% elif message.level == "WARNING" %}
-                    <span class="text-warning">WARNING</span>
-                {% elif message.level == "INFO" %}
-                    <span class="text-info">INFO</span>
-                {% elif message.level == "DEBUG" %}
-                    <span class="">DEBUG</span>
-                {% elif message.level == "TRACE" %}
-                    <span class="">TRACE</span>
-                {% else %}
-                    <span class="text-primary">UNKNOWN LOG LEVEL: {{ message.level }}</span>
-                {% endif %}
-            </td>
-            <td class="py-1">{{ message.message }}</td>
-        </tr>
-        {% endfor %}
     </tbody>
   </table>
 </div>

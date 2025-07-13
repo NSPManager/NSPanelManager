@@ -119,6 +119,9 @@ void WebsocketServer::start() {
     }
   }
 
+  // Always retain active warnings so they are sent when new clients connect.
+  WebsocketServer::set_stomp_topic_retained("mqttmanager/warnings", true);
+
   WebsocketServer::_server->disablePerMessageDeflate();
   WebsocketServer::_server->start();
   WebsocketServer::_server->wait();
@@ -138,18 +141,6 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
           std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
           WebsocketServer::_connected_websockets.push_back(&webSocket);
         }
-
-        // Client just connected, send updated warnings
-        std::lock_guard<std::mutex> lock_guard(WebsocketServer::_active_warnings_mutex);
-        nlohmann::json base;
-        base["event_data"] = nlohmann::json::object();
-        base["event_data"]["warnings"] = nlohmann::json::array();
-        base["event_type"] = "mqttmanager_active_warnings";
-        for (auto &warning : WebsocketServer::_active_warnings) {
-          base["event_data"]["warnings"].push_back({{"level", warning.level}, {"text", warning.warning_text}});
-        }
-        std::string json = nlohmann::to_string(base);
-        webSocket.sendText(json);
       }
     } else if (msg->type == ix::WebSocketMessageType::Close) {
       std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
@@ -544,13 +535,10 @@ void WebsocketServer::_send_active_warnings() {
   std::lock_guard<std::mutex> lock_guard(WebsocketServer::_active_warnings_mutex);
   SPDLOG_DEBUG("Broadcasting active warnings to all connected weboscket clients.");
   nlohmann::json base;
-  base["event_data"] = nlohmann::json::object();
-  base["event_data"]["warnings"] = nlohmann::json::array();
-  base["event_type"] = "mqttmanager_active_warnings";
+  base["warnings"] = nlohmann::json::array();
   for (auto &warning : WebsocketServer::_active_warnings) {
     SPDLOG_DEBUG("Sending warnings, found warning: {}", warning.warning_text);
-    base["event_data"]["warnings"].push_back({{"level", warning.level}, {"text", warning.warning_text}});
+    base["warnings"].push_back({{"level", warning.level}, {"text", warning.warning_text}});
   }
-
-  WebsocketServer::broadcast_json(base);
+  WebsocketServer::update_stomp_topic_value("mqttmanager/warnings", base);
 }

@@ -25,6 +25,7 @@ $(document).ready(function () {
         try {
           var data = JSON.parse(event.detail.message);
           if (data.event_type) {
+            console.log("Triggering custom event: " + data.event_type);
             const trigger_event = new CustomEvent(data.event_type, {
               detail: data,
             });
@@ -44,22 +45,6 @@ $(document).ready(function () {
           // We couldn't parse to json. Just let HTMX continue.
         }
       }
-    });
-
-    element.addEventListener("htmx:wsConnecting", (event) => {
-      console.debug("Connecting to MQTTManager.");
-      $("#ws_connection_in_progress_notification").removeClass("hidden");
-    });
-
-    element.addEventListener("htmx:wsError", (event) => {
-      console.log("Connecting to MQTTManager. Session error.");
-      console.log(event.detail.error);
-      $("#ws_connection_in_progress_notification").removeClass("hidden");
-    });
-
-    element.addEventListener("htmx:wsOpen", (event) => {
-      console.log("Connected to MQTTManager.");
-      $("#ws_connection_in_progress_notification").addClass("hidden");
     });
   });
 
@@ -87,47 +72,6 @@ $(document).ready(function () {
       show_error_toast(0, "Error while processing error response from server.");
     }
   });
-
-  document
-    .getElementsByTagName("body")[0]
-    .addEventListener("mqttmanager_active_warnings", (event) => {
-      // Remove any removed warnings
-      $("#error_toast_container > .alert").each(function () {
-        let found = false;
-        let match_text = $(this).find(".toast-text").text();
-        for (let i = 0; i < event.detail.event_data.warnings.length; i++) {
-          if (event.detail.event_data.warnings[i].text === match_text) {
-            found = true;
-            return;
-          }
-        }
-
-        if (!found) {
-          $(this).remove();
-        }
-      });
-
-      for (let i = 0; i < event.detail.event_data.warnings.length; i++) {
-        // Check so that identical warnings are not shown multiple times
-        let found = false;
-        $("#error_toast_container > .alert").each(function () {
-          if (
-            $(this).find(".toast-text").text() ==
-            event.detail.event_data.warnings[i].text
-          ) {
-            found = true;
-            return;
-          }
-        });
-
-        if (!found) {
-          show_error_toast(
-            event.detail.event_data.warnings[i].level,
-            event.detail.event_data.warnings[i].text,
-          );
-        }
-      }
-    });
 
   // Use custom confirm modal with HTMX
   document.addEventListener("htmx:confirm", function (e) {
