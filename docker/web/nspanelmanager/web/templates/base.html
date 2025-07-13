@@ -29,11 +29,12 @@
 
   var stomp_subscriptions = {};
   function stomp_connected_callback() {
-    console.log("Connected to STOMP");
+    console.log("Connected to STOMP. Resubscribing...");
 
     // Resubscribe to all subscriptions
     for(const subscription in stomp_subscriptions) {
-      stomp_client.subscribe(subscription);
+      console.log("sub:", subscription);
+      stomp_client.subscribe(subscription, stomp_message_callback);
     }
   }
 
