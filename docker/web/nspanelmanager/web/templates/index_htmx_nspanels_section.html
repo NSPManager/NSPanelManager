@@ -3,13 +3,13 @@
     <script>
         console.debug('NSPanelManager: nspanels found');
     </script>
-        <div class="grid md:grid-cols-3 gap-4 mt-4 items-start" id="nspanels_container" hx-ext="ws" ws-connect="/websocket">
+        <div class="grid md:grid-cols-3 gap-4 mt-4 items-start" id="nspanels_container">
         {% for nspanel in nspanels %}
             {% include 'partial/nspanel_index_view_htmx.html' %}
         {% endfor %}
         </div>
     {% else %}
-    <div class="grid md:grid-cols-3 gap-4 mt-4 items-start" id="nspanels_container" hx-ext="ws" ws-connect="/websocket">
+    <div class="grid md:grid-cols-3 gap-4 mt-4 items-start" id="nspanels_container">
         <div class="col-span-3 w-full text-center text-xl text-base-content">No NSPanel added to the manager. Getting started? <a href="https://nspanelmanager.com/docs/getting-started/flash-nspanel" target="_blank" class="text-accent">Read the documentation.</a></span>
     </div>
     {% endif %}

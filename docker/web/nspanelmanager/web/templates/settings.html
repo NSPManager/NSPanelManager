@@ -8,10 +8,6 @@
 
 {% block content %}
 
-<!-- Create a connection to the websocket as to be able to show active warnings. -->
-<div class="hidden" hx-ext="ws" ws-connect="/websocket">
-</div>
-
 <form method="POST" action="{% url 'save_settings' %}" id="config">
     {% csrf_token %}
     <div class="flex items-center justify-between mb-2">

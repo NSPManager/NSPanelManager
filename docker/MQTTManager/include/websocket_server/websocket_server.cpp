@@ -135,50 +135,20 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
       if (boost::algorithm::ends_with(msg->openInfo.uri, "/stomp")) {
         std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
         WebsocketServer::_connected_websockets_stomps.push_back(&webSocket);
-      } else if (boost::algorithm::ends_with(msg->openInfo.uri, "/websocket")) {
-        // This is a "legacy" websocket connection that will be bit by bit replaced by STOMP.
-        {
-          std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-          WebsocketServer::_connected_websockets.push_back(&webSocket);
-        }
+      } else {
+        SPDLOG_ERROR("Connected websocket to URL {} does not end with /stomp. Unknown protocol. Will close socket.");
+        webSocket.close();
       }
     } else if (msg->type == ix::WebSocketMessageType::Close) {
       std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
       SPDLOG_DEBUG("Websocket closed. Code: {}, Reason: {}", msg->closeInfo.code, msg->closeInfo.reason);
-      WebsocketServer::_connected_websockets.remove(&webSocket);
       WebsocketServer::_connected_websockets_stomps.remove(&webSocket);
 
       for (auto &topic : WebsocketServer::_stomp_topics) {
         topic.unsubscribe(webSocket, "");
       }
     } else if (msg->type == ix::WebSocketMessageType::Message) {
-      if (std::find(WebsocketServer::_connected_websockets.begin(), WebsocketServer::_connected_websockets.end(), &webSocket) != WebsocketServer::_connected_websockets.end()) {
-        // "Legacy" connection
-        try {
-          nlohmann::json json = nlohmann::json::parse(msg->str);
-          if (std::string(json["type"]).compare("broadcast") == 0) {
-            for (auto client : WebsocketServer::_server->getClients()) {
-              if (json["data"].is_string()) {
-                client->sendText(json["data"]);
-              } else {
-                client->sendText(nlohmann::to_string(json["data"]));
-              }
-            }
-            return;
-          }
-        } catch (...) {
-        }
-
-        SPDLOG_TRACE("Got message: {}", msg->str);
-        std::string message = msg->str;
-        std::string response_buffer;
-        for (auto callback : WebsocketServer::_callbacks) {
-          if (callback(message, &response_buffer)) {
-            webSocket.sendText(response_buffer);
-            break;
-          }
-        }
-      } else if (std::find(WebsocketServer::_connected_websockets_stomps.begin(), WebsocketServer::_connected_websockets_stomps.end(), &webSocket) != WebsocketServer::_connected_websockets_stomps.end()) {
+      if (std::find(WebsocketServer::_connected_websockets_stomps.begin(), WebsocketServer::_connected_websockets_stomps.end(), &webSocket) != WebsocketServer::_connected_websockets_stomps.end()) {
         // This is a STOMP heartbeat. Ignore it.
         if (msg->str.length() == 1 && *msg->str.data() == '\n') {
           return;
@@ -282,28 +252,15 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
         } else {
           SPDLOG_ERROR("Failed to parse STOMP frame");
         }
+      } else {
+        SPDLOG_WARN("Received message from websocket but it's not registered among any protocol lists. Will close websocket.");
+        webSocket.close();
       }
     }
   } catch (std::exception ex) {
     SPDLOG_ERROR("Caught std::exception while processing websocket event. Exception: {}", ex.what());
   } catch (...) {
     SPDLOG_ERROR("Caught exception while processing WebSocket event.");
-  }
-}
-
-void WebsocketServer::broadcast_json(nlohmann::json &json) {
-  std::string data = json.dump();
-  WebsocketServer::broadcast_string(data);
-}
-
-void WebsocketServer::broadcast_string(std::string &data) {
-  if (WebsocketServer::_server != nullptr) {
-    std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-    for (auto &websocket : WebsocketServer::_connected_websockets) {
-      websocket->send(data);
-    }
-  } else {
-    SPDLOG_ERROR("Trying to send data over WebSocket before websocket exists.");
   }
 }
 

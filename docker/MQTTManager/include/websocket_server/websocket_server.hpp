@@ -66,16 +66,6 @@ public:
   static void start();
 
   /**
-   * Convert a JSON payload to a string and broadcast to all connected "legacy" clients.
-   */
-  static void broadcast_json(nlohmann::json &json);
-
-  /**
-   * Send a message to all connected "legacy" clients.
-   */
-  static void broadcast_string(std::string &data);
-
-  /**
    * Update the value of a STOMP topic and send out the updated value to all connected clients.
    */
   static void update_stomp_topic_value(std::string topic_name, std::string value);
@@ -156,7 +146,6 @@ private:
   static inline boost::uuids::random_generator _uuid_generator = boost::uuids::random_generator(); // Used to generate unique UUIDs for STOMP clients
   static inline std::vector<StompTopic> _stomp_topics;
 
-  static inline std::list<ix::WebSocket *> _connected_websockets;
   static inline std::list<ix::WebSocket *> _connected_websockets_stomps;
 
   // Callback for when a SEND message is received on a STOMP topic

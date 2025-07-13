@@ -18,7 +18,7 @@
 <span class="hidden" id="nspanel_id">{{ panel_info.data.id }}</span>
 <span class="hidden" id="max_live_log_messages">{{ max_live_log_messages }}</span>
 
-<div class="flex items-center justify-between" id="nspanel_settings_container" hx-ext="ws" ws-connect="/websocket">
+<div class="flex items-center justify-between" id="nspanel_settings_container">
   <div>
     <h2 class="font-medium text-2xl" id="nspanel_name">Settings for '{{ panel_info.data.friendly_name }}'</h2>
     <h2 class="font-light text-xs">MAC: <span id="nspanel_mac">{{ panel_info.data.mac_address }}</span></h2>
