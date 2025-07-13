@@ -29,21 +29,6 @@ from web.settings_helper import delete_nspanel_setting, get_setting_with_default
 from web.views import get_file_md5sum, relay_groups
 
 def partial_index_nspanels_section(request):
-    md5_firmware = get_file_md5sum("firmware.bin")
-    md5_data_file = get_file_md5sum("data_file.bin")
-    tft_eu_checksums = {
-        "tft1": get_file_md5sum("HMI_files/tft_automation/eu/output_tft1/gui.tft"),
-        "tft2": get_file_md5sum("HMI_files/tft_automation/eu/output_tft2/gui.tft"),
-        "tft3": get_file_md5sum("HMI_files/tft_automation/eu/output_tft3/gui.tft"),
-        "tft4": get_file_md5sum("HMI_files/tft_automation/eu/output_tft4/gui.tft"),
-    }
-    tft_us_checksums = {
-        "tft1": get_file_md5sum("HMI_files/tft_automation/us/output_tft1/gui.tft"),
-        "tft2": get_file_md5sum("HMI_files/tft_automation/us/output_tft2/gui.tft"),
-        "tft3": get_file_md5sum("HMI_files/tft_automation/us/output_tft3/gui.tft"),
-        "tft4": get_file_md5sum("HMI_files/tft_automation/us/output_tft4/gui.tft"),
-    }
-
     if get_setting_with_default("use_fahrenheit") == "True":
         temperature_unit = "°F"
     else:
@@ -53,6 +38,7 @@ def partial_index_nspanels_section(request):
     for nspanel in NSPanel.objects.filter(denied=False):
         panel_info = {}
         panel_info["data"] = nspanel
+        nspanels.append(panel_info)
 
     data = {
         'nspanels': nspanels,

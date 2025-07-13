@@ -797,7 +797,7 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
       nlohmann::json data = {
           {"event_type", "register_request"},
           {"nspanel_id", new_panel->get_id()}};
-      WebsocketServer::broadcast_json(data);
+      WebsocketServer::update_stomp_topic_value("mqttmanager/events", data);
     }
   }
 }

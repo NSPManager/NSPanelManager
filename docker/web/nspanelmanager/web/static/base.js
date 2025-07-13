@@ -16,36 +16,51 @@ function attach_cursor_change_events() {
 $(document).ready(function () {
   console.log("Document ready, attaching functions.");
 
-  // Hook into HTMX websocket to catch custom JSON triggers for HTMX events.
-  console.log("Hooking into HTMX websocket");
-  document.querySelectorAll('[hx-ext="ws"]').forEach((element) => {
-    // On message from manager on websocket.
-    element.addEventListener("htmx:wsBeforeMessage", (event) => {
-      if (event.detail.message.startsWith("{")) {
-        try {
-          var data = JSON.parse(event.detail.message);
-          if (data.event_type) {
-            console.log("Triggering custom event: " + data.event_type);
-            const trigger_event = new CustomEvent(data.event_type, {
-              detail: data,
-            });
-            document
-              .getElementsByTagName("body")[0]
-              .dispatchEvent(trigger_event);
-            // console.log(
-            //   "Triggered '" +
-            //     data.event_type +
-            //     "' event from websocket on body element. Event data: ",
-            //   data,
-            // );
-            event.preventDefault();
-          }
-        } catch (error) {
-          console.error(error);
-          // We couldn't parse to json. Just let HTMX continue.
+  stomp_subscribe("mqttmanager/events", (frame) => {
+    var json_data = JSON.parse(frame.body);
+    if (json_data.event_type) {
+      console.log("Triggering custom event: " + json_data.event_type);
+      const trigger_event = new CustomEvent(json_data.event_type, {
+        detail: json_data,
+      });
+      document.getElementsByTagName("body")[0].dispatchEvent(trigger_event);
+    }
+  });
+
+  // Listen for warnings from MQTTManager
+  stomp_subscribe("mqttmanager/warnings", (data) => {
+    var json = JSON.parse(data.body);
+    var warnings = json.warnings;
+    // Remove any removed warnings
+    $("#error_toast_container > .alert").each(function () {
+      let found = false;
+      let match_text = $(this).find(".toast-text").text();
+      for (let i = 0; i < warnings.length; i++) {
+        if (warnings[i].text === match_text) {
+          found = true;
+          return;
         }
       }
+
+      if (!found) {
+        $(this).remove();
+      }
     });
+
+    for (let i = 0; i < warnings.length; i++) {
+      // Check so that identical warnings are not shown multiple times
+      let found = false;
+      $("#error_toast_container > .alert").each(function () {
+        if ($(this).find(".toast-text").text() == warnings[i].text) {
+          found = true;
+          return;
+        }
+      });
+
+      if (!found) {
+        show_error_toast(warnings[i].level, warnings[i].text);
+      }
+    }
   });
 
   // Something went wrong while sending/processing AJAX request via HTMX. Show error toast.
@@ -105,18 +120,6 @@ $(document).ready(function () {
 
     document.getElementById("modal_confirm_text").innerHTML = e.detail.question;
     dialog.showModal();
-  });
-
-  $(".modal-background").click(function () {
-    $(".modal").removeClass("is-active");
-  });
-
-  $(".modal-card-head .delete").click(function () {
-    $(".modal").removeClass("is-active");
-  });
-
-  $(".modal-cancel-button").click(function () {
-    $(".modal").removeClass("is-active");
   });
 
   $("[data-dropdown-toggle]").click(function (e) {
