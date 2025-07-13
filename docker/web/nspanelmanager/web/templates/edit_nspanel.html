@@ -62,13 +62,13 @@
   }
 </script>
 <dialog id="select_background_modal" class="modal">
-    <div class="modal-box w-2xl max-w-none">
+    <div class="modal-box max-w-2xl">
         <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
 
         <!-- 69x69 without frame EU panel -->
-        <div class="grid grid-cols-2 content-start gap-2 mb-2 eu-backgrounds">
+        <div class="grid md:grid-cols-2 content-start gap-2 mb-2 eu-backgrounds">
             {% for i in "1234" %}
             <div class="relative mx-auto border-base-300 bg-base-300 border-[0.5rem] rounded-[0.5rem] h-[300px] w-[300px] mt-4">
                 <div class="rounded-[0.2rem] w-full h-[77%] bg-black flex justify-center items-center">
@@ -84,7 +84,7 @@
         </div>
 
         <!-- 69 x 115mm without frame US vertical -->
-        <div class="grid grid-cols-2 content-start gap-2 mb-2 us-vertical-backgrounds">
+        <div class="grid md:grid-cols-2 content-start gap-2 mb-2 us-vertical-backgrounds">
             {% for i in "1234" %}
             <div class="relative mx-auto border-base-300 bg-base-300 border-[0.5rem] rounded-[0.5rem] h-[500px] w-[300px] mt-4">
                 <div class="rounded-[0.2rem] w-full h-[81.5%] bg-black flex justify-center items-center">

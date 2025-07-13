@@ -45,6 +45,7 @@
     --spacing: 0.25rem;
     --breakpoint-xl: 80rem;
     --container-md: 28rem;
+    --container-lg: 32rem;
     --container-xl: 36rem;
     --container-2xl: 42rem;
     --container-3xl: 48rem;
@@ -5772,8 +5773,14 @@
   .w-full {
     width: 100%;
   }
+  .w-lg {
+    width: var(--container-lg);
+  }
   .w-screen {
     width: 100vw;
+  }
+  .w-xl {
+    width: var(--container-xl);
   }
   .max-w-2xl {
     max-width: var(--container-2xl);
