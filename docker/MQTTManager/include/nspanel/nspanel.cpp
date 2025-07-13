@@ -485,6 +485,10 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         this->_rssi = report.rssi();
         this->_heap_used_pct = report.heap_used_pct();
         this->_temperature = report.temperature();
+        this->_current_firmware_md5_checksum = report.md5_firmware();
+        this->_current_littlefs_md5_checksum = report.md5_littlefs();
+        this->_current_tft_md5_checksum = report.md5_tft_gui();
+
         switch (report.nspanel_state()) {
         case NSPanelStatusReport_state::NSPanelStatusReport_state_ONLINE:
           this->_update_progress = 0;

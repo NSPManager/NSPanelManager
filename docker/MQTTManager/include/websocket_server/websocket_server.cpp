@@ -271,12 +271,17 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
             }
           } else if (frame->type == StompFrame::SEND) {
             std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
+            // Only allow SEND commands to send to already define/existing topics.
+
             for (auto &topic : WebsocketServer::_stomp_topics) {
               if (topic.get_name() == frame->headers["destination"]) {
+                SPDLOG_DEBUG("Received STOMP SEND command, setting topic {} to value {}", frame->headers["destination"], frame->body);
                 topic.update_value(frame->body);
                 return; // We found the topic and published to it, nothing else to do.
               }
             }
+
+            SPDLOG_WARN("Received STOMP SEND command for unknown topic. Will not publish, topic {}, value {}", frame->headers["destination"], frame->body);
           } else {
             SPDLOG_WARN("Received unknown STOMP frame type {}.", static_cast<int>(frame->type));
           }

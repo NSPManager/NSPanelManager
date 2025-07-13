@@ -1,4 +1,3 @@
-const ws = new MQTTManager_WS();
 var mac_address;
 var nspanel_id;
 
@@ -94,19 +93,6 @@ function update_shown_elements() {
 }
 
 $(document).ready(() => {
-  document.querySelectorAll('[hx-ext="ws"]').forEach((element) => {
-    element.addEventListener("htmx:wsBeforeMessage", (event) => {
-      if (event.detail.message.startsWith("{")) {
-        try {
-          var data = JSON.parse(event.detail.message);
-        } catch (error) {
-          console.error(error);
-          // We couldn't parse to json. Just let HTMX continue.
-        }
-      }
-    });
-  });
-
   document
     .querySelectorAll(".nspanel_settings_container")
     .forEach((element) => {

@@ -175,17 +175,4 @@ urlpatterns = [
     path('htmx/relay_groups/add_relay_modal/<int:relay_group_id>', htmx.relay_group_add_relay_modal, name='htmx_modal_add_relay_to_relay_group'),
     path('htmx/relay_groups/add_relay/<int:relay_group_id>', htmx.relay_group_add_relay, name='htmx_add_relay_to_relay_group'),
     path('htmx/relay_groups/remove_relay_binding/<int:relay_binding_id>', htmx.relay_group_remove_relay, name='htmx_remove_relay_from_relay_group'),
-
-    # Components
-    path('htmx/component/nspanel_status_header/<str:view>/<int:nspanel_id>', NSPanelHeader.as_view(), name="nspanel_status_header"),
-    path('htmx/component/nspanel_status_text/<str:view>/<int:nspanel_id>', NSPanelStatusText.as_view(), name="nspanel_status_text"),
-    path('htmx/component/nspanel_status_update_progress/<str:view>/<int:nspanel_id>', NSPanelUpdateProgress.as_view(), name="nspanel_status_update_progress"),
-    path('htmx/component/nspanel_status_wifi_signal_strength/<str:view>/<int:nspanel_id>', NSPanelStatusWifiSignalStrength.as_view(), name="nspanel_status_wifi_signal_strength"),
-    path('htmx/component/nspanel_status_ram_usage/<str:view>/<int:nspanel_id>', NSPanelStatusRamUsage.as_view(), name="nspanel_status_ram_usage"),
-    path('htmx/component/nspanel_status_temperature/<str:view>/<int:nspanel_id>', NSPanelStatusTemperature.as_view(), name="nspanel_status_temperature"),
-    path('htmx/component/nspanel_visit_link/<str:view>/<int:nspanel_id>', NSPanelVisitLink.as_view(), name="nspanel_visit_link"),
-    path('htmx/component/nspanel_reboot_button/<str:view>/<int:nspanel_id>', NSPanelRebootButton.as_view(), name="nspanel_reboot_button"),
-    path('htmx/component/nspanel_warnings/<str:view>/<int:nspanel_id>', NSPanelWarnings.as_view(), name="nspanel_warnings"),
-    path('htmx/component/nspanel_status_badge/<str:view>/<int:nspanel_id>', NSPanelStatusBadge.as_view(), name="nspanel_status_badge"),
-    path('htmx/component/room_entities_pages_view/<str:view>/<int:room_id>', NSPanelRoomEntitiesPages.as_view(), name="nspanel_room_entities_pages"),
 ]

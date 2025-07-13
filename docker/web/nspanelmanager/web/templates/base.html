@@ -19,7 +19,7 @@
   <script src="{{ ingress_path }}{% static 'node_modules/htmx.org/dist/htmx.min.js' %}?version={{ version }}"></script>
   <script src="{{ ingress_path }}{% static 'node_modules/htmx-ext-ws/dist/ws.min.js' %}?version={{ version }}"></script>
   <script src="{{ ingress_path }}{% static 'base.js' %}?refresh={% now 'U' %}?version={{ version }}"></script>
-  <script src="{{ ingress_path }}{% static 'stomp.min.js' %}?refresh={% now 'U' %}?version={{ version }}"></script>
+  <script src="{{ ingress_path }}{% static 'stomp.min-1.7.0.js' %}?refresh={% now 'U' %}?version={{ version }}"></script>
   <link rel="stylesheet" href="{{ ingress_path }}{% static 'mdi/css/materialdesignicons.min.css' %}?version={{ version }}">
   <link rel="stylesheet" href="{{ ingress_path }}{% static 'loader.css' %}?refresh={% now 'U' %}?version={{ version }}">
   <link rel="stylesheet" href="{{ ingress_path }}{% static 'base.css' %}?refresh={% now 'U' %}?version={{ version }}">
@@ -27,19 +27,39 @@
 
   <script>
 
-  var stomp_subscriptions = {};
+  var stomp_subscription_callbacks = {};
+  var stomp_subscription_destinations = {};
   function stomp_connected_callback() {
     console.log("Connected to STOMP. Resubscribing...");
 
     // Resubscribe to all subscriptions
-    for(const subscription in stomp_subscriptions) {
-      console.log("sub:", subscription);
-      stomp_client.subscribe(subscription, stomp_message_callback);
+    for(const topic in stomp_subscription_destinations) {
+      console.log("sub:", topic);
+      var subscription = stomp_client.subscribe(topic, stomp_message_callback);
+      stomp_subscription_destinations[topic] = subscription;
     }
   }
 
+  function stomp_send(destination, message) {
+    stomp_client.publish({
+      destination: destination,
+      headers: {
+        "content-type": "text/plain"
+      },
+      body: message
+    });
+  }
+
   function stomp_disconnected_callback() {
-    console.log("Disconnected from STOMP");
+    console.log("Disconnected from STOMP.");
+  }
+
+  function stomp_websocket_close_callback() {
+    console.log("Disconnected from STOMP (websocket closed).");
+  }
+
+  function stomp_websocket_error_callback() {
+    console.log("Disconnected from STOMP (websocket error).");
   }
 
   function stomp_error_callback(error) {
@@ -47,29 +67,43 @@
   }
 
   function stomp_subscribe(topic, callback) {
-    var subscription = stomp_client.subscribe(topic, stomp_message_callback);
-
-    if(stomp_subscriptions[topic]) {
-      if (!stomp_subscriptions[topic]["callbacks"].includes(callback)) {
+    if(stomp_subscription_callbacks[topic]) {
+      if (!stomp_subscription_callbacks[topic]["callbacks"].includes(callback)) {
         console.log("Attaching callback to existing subscription");
-        stomp_subscriptions[topic]["callbacks"].push(callback);
+        stomp_subscription_callbacks[topic]["callbacks"].push(callback);
       }
     } else {
-      stomp_subscriptions[topic] = {"subscription": subscription, "callbacks": [callback]};
+      stomp_subscription_callbacks[topic] = {"subscription": subscription, "callbacks": [callback]};
     }
+
+    // Try subscribing if not already subscribed.
+    if(!stomp_subscription_destinations[topic]) {
+        stomp_subscription_destinations[topic] = null;
+
+        // If the subscribe fails, log the error but it's still in the list of subscriptions though null.
+        // It will most probaby fail because there is no STOMP connection. When a connection is established,
+        // the subscription will be retried.
+        try {
+          var subscription = stomp_client.subscribe(topic, stomp_message_callback);
+          stomp_subscription_destinations[topic] = subscription;
+        } catch (error) {
+          console.error("STOMP subscription error:", error);
+        }
+      }
   }
 
   function stomp_unsubscribe(topic, callback) {
-    stomp_subscriptions[topic]["callbacks"].splice(stomp_subscriptions[topic]["callbacks"].indexOf(callback), 1);
+    stomp_subscription_callbacks[topic]["callbacks"].splice(stomp_subscription_callbacks[topic]["callbacks"].indexOf(callback), 1);
 
-    if(stomp_subscriptions[topic]["callbacks"].length === 0) {
-      stomp_subscriptions[topic]["subscription"].unsubscribe();
-      delete stomp_subscriptions[topic];
+    if(stomp_subscription_callbacks[topic]["callbacks"].length === 0) {
+      stomp_subscription_destinations[topic].unsubscribe();
+      delete stomp_subscription_callbacks[topic];
+      delete stomp_subscription_destinations[topic];
     }
   }
 
   function stomp_message_callback(message) {
-    stomp_subscriptions[message.headers.destination]["callbacks"].forEach(function(callback) {
+    stomp_subscription_callbacks[message.headers.destination]["callbacks"].forEach(function(callback) {
       callback(message);
     });
   }
@@ -88,16 +122,28 @@
   }
 
   stomp_websocket_address += location.hostname + ":" + location.port + "/websocket/stomp";
-  var stomp_client = Stomp.client(stomp_websocket_address);
-  stomp_client.heartbeat.outgoing = 1000;
-  stomp_client.heartbeat.incoming = 1000;
-  stomp_client.reconnect_delay = 2500;
-  stomp_client.debug = function(str) {} // Disable debug logging
-  stomp_client.connect("user", "pass", stomp_connected_callback, stomp_disconnected_callback, stomp_error_callback);
+  const stomp_client = new StompJs.Client({
+    brokerURL: stomp_websocket_address,
+    connectHeaders: {
+      login: "user",
+      passcode: "pass"
+    },
+    reconnectDelay: 2500,
+    heartbeatIncoming: 1000,
+    heartbeatOutgoing: 1000,
+    debug: function(str) {} // Disable debug logging
+  });
+
+  stomp_client.onConnect = stomp_connected_callback;
+  stomp_client.onDisconnect = stomp_disconnected_callback;
+  stomp_client.onWebSocketClose = stomp_websocket_close_callback;
+  stomp_client.onWebSocketError = stomp_websocket_error_callback;
+  stomp_client.onStompError = stomp_error_callback;
+
+  stomp_client.activate();
   </script>
 
 
-  <script src="{{ ingress_path }}{% static 'mqttmanager_ws.js' %}?refresh={% now 'U' %}"></script>
   <!-- <script type="module" src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"></script> -->
   {% block head %}
   {% endblock %}

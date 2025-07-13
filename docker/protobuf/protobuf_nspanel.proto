@@ -100,6 +100,10 @@ message NSPanelStatusReport {
     string ip_address = 7;
 
     repeated NSPanelWarning warnings = 8;
+
+    string md5_firmware = 9;
+    string md5_littlefs = 10;
+    string md5_tft_gui = 11;
 }
 
 message NSPanelLightStatus {

@@ -379,6 +379,15 @@ inline constexpr NSPanelStatusReport::Impl_::Impl_(
         ip_address_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
+        md5_firmware_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        md5_littlefs_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        md5_tft_gui_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
         nspanel_state_{static_cast< ::NSPanelStatusReport_state >(0)},
         update_progress_{0},
         rssi_{0},
@@ -579,6 +588,9 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.temperature_),
         PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.ip_address_),
         PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.warnings_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.md5_firmware_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.md5_littlefs_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.md5_tft_gui_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelLightStatus, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -769,19 +781,19 @@ static const ::_pbi::MigrationSchema
         {11, -1, -1, sizeof(::NSPanelConfig)},
         {50, -1, -1, sizeof(::NSPanelWarning)},
         {60, -1, -1, sizeof(::NSPanelStatusReport)},
-        {76, -1, -1, sizeof(::NSPanelLightStatus)},
-        {94, -1, -1, sizeof(::NSPanelRoomEntitiesPage_EntitySlot)},
-        {109, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
-        {121, -1, -1, sizeof(::NSPanelRoomStatus)},
-        {142, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
-        {155, -1, -1, sizeof(::NSPanelWeatherUpdate)},
-        {171, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
-        {186, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
-        {196, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
-        {213, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
-        {223, -1, -1, sizeof(::NSPanelMQTTManagerCommand_SaveSceneCommand)},
-        {233, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonPressed)},
-        {243, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {79, -1, -1, sizeof(::NSPanelLightStatus)},
+        {97, -1, -1, sizeof(::NSPanelRoomEntitiesPage_EntitySlot)},
+        {112, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
+        {124, -1, -1, sizeof(::NSPanelRoomStatus)},
+        {145, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
+        {158, -1, -1, sizeof(::NSPanelWeatherUpdate)},
+        {174, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
+        {189, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
+        {199, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
+        {216, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
+        {226, -1, -1, sizeof(::NSPanelMQTTManagerCommand_SaveSceneCommand)},
+        {236, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonPressed)},
+        {246, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelConfig_RoomInfo_default_instance_._instance,
@@ -842,92 +854,94 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "CREENSAVER\020\005\"\?\n\021NSPanelButtonMode\022\n\n\006DIR"
     "ECT\020\000\022\n\n\006FOLLOW\020\001\022\022\n\016NOTIFY_MANAGER\020\002\"C\n"
     "\016NSPanelWarning\022#\n\005level\030\001 \001(\0162\024.NSPanel"
-    "WarningLevel\022\014\n\004text\030\002 \001(\t\"\311\002\n\023NSPanelSt"
+    "WarningLevel\022\014\n\004text\030\002 \001(\t\"\212\003\n\023NSPanelSt"
     "atusReport\0221\n\rnspanel_state\030\001 \001(\0162\032.NSPa"
     "nelStatusReport.state\022\027\n\017update_progress"
     "\030\002 \001(\005\022\014\n\004rssi\030\003 \001(\005\022\025\n\rheap_used_pct\030\004 "
     "\001(\005\022\023\n\013mac_address\030\005 \001(\t\022\023\n\013temperature\030"
     "\006 \001(\002\022\022\n\nip_address\030\007 \001(\t\022!\n\010warnings\030\010 "
-    "\003(\0132\017.NSPanelWarning\"`\n\005state\022\n\n\006ONLINE\020"
-    "\000\022\013\n\007OFFLINE\020\001\022\020\n\014UPDATING_TFT\020\002\022\025\n\021UPDA"
-    "TING_FIRMWARE\020\003\022\025\n\021UPDATING_LITTLEFS\020\004\"\325"
-    "\001\n\022NSPanelLightStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004nam"
-    "e\030\002 \001(\t\022\017\n\007can_dim\030\003 \001(\010\022\035\n\025can_color_te"
-    "mperature\030\004 \001(\010\022\017\n\007can_rgb\030\005 \001(\010\022\023\n\013ligh"
-    "t_level\030\006 \001(\005\022\022\n\ncolor_temp\030\007 \001(\005\022\013\n\003hue"
-    "\030\010 \001(\005\022\022\n\nsaturation\030\t \001(\005\022\032\n\022room_view_"
-    "position\030\n \001(\005\"\230\002\n\027NSPanelRoomEntitiesPa"
-    "ge\022\n\n\002id\030\001 \001(\005\022\021\n\tpage_type\030\002 \001(\005\022\023\n\013hea"
-    "der_text\030\003 \001(\t\0225\n\010entities\030\004 \003(\0132#.NSPan"
-    "elRoomEntitiesPage.EntitySlot\032\221\001\n\nEntity"
-    "Slot\022\032\n\022room_view_position\030\001 \001(\005\022\014\n\004name"
-    "\030\002 \001(\t\022\014\n\004icon\030\003 \001(\t\022\013\n\003pco\030\004 \001(\005\022\014\n\004pco"
-    "2\030\005 \001(\005\022\026\n\016can_save_scene\030\006 \001(\010\022\030\n\020mqtt_"
-    "state_topic\030\007 \001(\t\"\226\003\n\021NSPanelRoomStatus\022"
-    "\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\031\n\021average_dim"
-    "_level\030\003 \001(\005\022 \n\030ceiling_lights_dim_level"
-    "\030\004 \001(\005\022\036\n\026table_lights_dim_level\030\005 \001(\005\022!"
-    "\n\031average_color_temperature\030\006 \001(\005\022.\n&cei"
-    "ling_lights_color_temperature_value\030\007 \001("
-    "\005\022,\n$table_lights_color_temperature_valu"
-    "e\030\010 \001(\005\022\032\n\022num_ceiling_lights\030\t \001(\005\022\030\n\020n"
-    "um_table_lights\030\n \001(\005\022\035\n\025num_ceiling_lig"
-    "hts_on\030\013 \001(\005\022\033\n\023num_table_lights_on\030\014 \001("
-    "\005\022\027\n\017entity_page_ids\030\r \003(\005\"\277\003\n\024NSPanelWe"
-    "atherUpdate\022:\n\016forecast_items\030\001 \003(\0132\".NS"
-    "PanelWeatherUpdate.ForecastItem\022\034\n\024curre"
-    "nt_weather_icon\030\002 \001(\t\022\"\n\032current_tempera"
-    "ture_string\030\003 \001(\t\022\"\n\032current_maxmin_temp"
-    "erature\030\004 \001(\t\022\033\n\023current_wind_string\030\005 \001"
-    "(\t\022\026\n\016sunrise_string\030\006 \001(\t\022\025\n\rsunset_str"
-    "ing\030\007 \001(\t\022$\n\034current_precipitation_strin"
-    "g\030\010 \001(\t\032\222\001\n\014ForecastItem\022\024\n\014weather_icon"
-    "\030\001 \001(\t\022\034\n\024precipitation_string\030\002 \001(\t\022!\n\031"
-    "temperature_maxmin_string\030\003 \001(\t\022\023\n\013wind_"
-    "string\030\004 \001(\t\022\026\n\016display_string\030\005 \001(\t\"\315\n\n"
-    "\031NSPanelMQTTManagerCommand\022M\n\022first_page"
-    "_turn_on\030\001 \001(\0132/.NSPanelMQTTManagerComma"
-    "nd.FirstPageTurnLightOnH\000\022O\n\023first_page_"
-    "turn_off\030\002 \001(\01320.NSPanelMQTTManagerComma"
-    "nd.FirstPageTurnLightOffH\000\022@\n\rlight_comm"
-    "and\030\003 \001(\0132\'.NSPanelMQTTManagerCommand.Li"
-    "ghtCommandH\000\022c\n toggle_entity_from_entit"
-    "ies_page\030\004 \001(\01327.NSPanelMQTTManagerComma"
-    "nd.ToggleEntityFromEntitiesPageH\000\022I\n\022sav"
-    "e_scene_command\030\005 \001(\0132+.NSPanelMQTTManag"
-    "erCommand.SaveSceneCommandH\000\022B\n\016button_p"
-    "ressed\030\006 \001(\0132(.NSPanelMQTTManagerCommand"
-    ".ButtonPressedH\000\032\372\001\n\024FirstPageTurnLightO"
-    "n\022E\n\raffect_lights\030\001 \001(\0162..NSPanelMQTTMa"
-    "nagerCommand.AffectLightsOptions\022\037\n\027brig"
-    "htness_slider_value\030\002 \001(\005\022\033\n\023kelvin_slid"
-    "er_value\030\003 \001(\005\022\025\n\rselected_room\030\004 \001(\005\022\016\n"
-    "\006global\030\005 \001(\010\022\034\n\024has_brightness_value\030\006 "
-    "\001(\010\022\030\n\020has_kelvin_value\030\007 \001(\010\032n\n\025FirstPa"
-    "geTurnLightOff\022E\n\raffect_lights\030\001 \001(\0162.."
-    "NSPanelMQTTManagerCommand.AffectLightsOp"
-    "tions\022\016\n\006global\030\002 \001(\010\032\321\001\n\014LightCommand\022\021"
-    "\n\tlight_ids\030\001 \003(\005\022\026\n\016has_brightness\030\002 \001("
-    "\010\022\022\n\nbrightness\030\003 \001(\005\022\035\n\025has_color_tempe"
-    "rature\030\004 \001(\010\022\031\n\021color_temperature\030\005 \001(\005\022"
-    "\017\n\007has_hue\030\006 \001(\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016has_sat"
-    "uration\030\010 \001(\010\022\022\n\nsaturation\030\t \001(\005\032K\n\034Tog"
-    "gleEntityFromEntitiesPage\022\026\n\016entity_page"
-    "_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001(\005\032\?\n\020SaveSc"
-    "eneCommand\022\026\n\016entity_page_id\030\001 \001(\005\022\023\n\013en"
-    "tity_slot\030\002 \001(\005\0326\n\rButtonPressed\022\022\n\nnspa"
-    "nel_id\030\001 \001(\005\022\021\n\tbutton_id\030\002 \001(\005\"D\n\023Affec"
-    "tLightsOptions\022\007\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020"
-    "\001\022\022\n\016CEILING_LIGHTS\020\002B\r\n\013CommandData*[\n\023"
-    "NSPanelWarningLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ERR"
-    "OR\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t"
-    "\n\005TRACE\020\005b\006proto3"
+    "\003(\0132\017.NSPanelWarning\022\024\n\014md5_firmware\030\t \001"
+    "(\t\022\024\n\014md5_littlefs\030\n \001(\t\022\023\n\013md5_tft_gui\030"
+    "\013 \001(\t\"`\n\005state\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE\020\001\022"
+    "\020\n\014UPDATING_TFT\020\002\022\025\n\021UPDATING_FIRMWARE\020\003"
+    "\022\025\n\021UPDATING_LITTLEFS\020\004\"\325\001\n\022NSPanelLight"
+    "Status\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\017\n\007can_"
+    "dim\030\003 \001(\010\022\035\n\025can_color_temperature\030\004 \001(\010"
+    "\022\017\n\007can_rgb\030\005 \001(\010\022\023\n\013light_level\030\006 \001(\005\022\022"
+    "\n\ncolor_temp\030\007 \001(\005\022\013\n\003hue\030\010 \001(\005\022\022\n\nsatur"
+    "ation\030\t \001(\005\022\032\n\022room_view_position\030\n \001(\005\""
+    "\230\002\n\027NSPanelRoomEntitiesPage\022\n\n\002id\030\001 \001(\005\022"
+    "\021\n\tpage_type\030\002 \001(\005\022\023\n\013header_text\030\003 \001(\t\022"
+    "5\n\010entities\030\004 \003(\0132#.NSPanelRoomEntitiesP"
+    "age.EntitySlot\032\221\001\n\nEntitySlot\022\032\n\022room_vi"
+    "ew_position\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\014\n\004icon\030"
+    "\003 \001(\t\022\013\n\003pco\030\004 \001(\005\022\014\n\004pco2\030\005 \001(\005\022\026\n\016can_"
+    "save_scene\030\006 \001(\010\022\030\n\020mqtt_state_topic\030\007 \001"
+    "(\t\"\226\003\n\021NSPanelRoomStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004"
+    "name\030\002 \001(\t\022\031\n\021average_dim_level\030\003 \001(\005\022 \n"
+    "\030ceiling_lights_dim_level\030\004 \001(\005\022\036\n\026table"
+    "_lights_dim_level\030\005 \001(\005\022!\n\031average_color"
+    "_temperature\030\006 \001(\005\022.\n&ceiling_lights_col"
+    "or_temperature_value\030\007 \001(\005\022,\n$table_ligh"
+    "ts_color_temperature_value\030\010 \001(\005\022\032\n\022num_"
+    "ceiling_lights\030\t \001(\005\022\030\n\020num_table_lights"
+    "\030\n \001(\005\022\035\n\025num_ceiling_lights_on\030\013 \001(\005\022\033\n"
+    "\023num_table_lights_on\030\014 \001(\005\022\027\n\017entity_pag"
+    "e_ids\030\r \003(\005\"\277\003\n\024NSPanelWeatherUpdate\022:\n\016"
+    "forecast_items\030\001 \003(\0132\".NSPanelWeatherUpd"
+    "ate.ForecastItem\022\034\n\024current_weather_icon"
+    "\030\002 \001(\t\022\"\n\032current_temperature_string\030\003 \001"
+    "(\t\022\"\n\032current_maxmin_temperature\030\004 \001(\t\022\033"
+    "\n\023current_wind_string\030\005 \001(\t\022\026\n\016sunrise_s"
+    "tring\030\006 \001(\t\022\025\n\rsunset_string\030\007 \001(\t\022$\n\034cu"
+    "rrent_precipitation_string\030\010 \001(\t\032\222\001\n\014For"
+    "ecastItem\022\024\n\014weather_icon\030\001 \001(\t\022\034\n\024preci"
+    "pitation_string\030\002 \001(\t\022!\n\031temperature_max"
+    "min_string\030\003 \001(\t\022\023\n\013wind_string\030\004 \001(\t\022\026\n"
+    "\016display_string\030\005 \001(\t\"\315\n\n\031NSPanelMQTTMan"
+    "agerCommand\022M\n\022first_page_turn_on\030\001 \001(\0132"
+    "/.NSPanelMQTTManagerCommand.FirstPageTur"
+    "nLightOnH\000\022O\n\023first_page_turn_off\030\002 \001(\0132"
+    "0.NSPanelMQTTManagerCommand.FirstPageTur"
+    "nLightOffH\000\022@\n\rlight_command\030\003 \001(\0132\'.NSP"
+    "anelMQTTManagerCommand.LightCommandH\000\022c\n"
+    " toggle_entity_from_entities_page\030\004 \001(\0132"
+    "7.NSPanelMQTTManagerCommand.ToggleEntity"
+    "FromEntitiesPageH\000\022I\n\022save_scene_command"
+    "\030\005 \001(\0132+.NSPanelMQTTManagerCommand.SaveS"
+    "ceneCommandH\000\022B\n\016button_pressed\030\006 \001(\0132(."
+    "NSPanelMQTTManagerCommand.ButtonPressedH"
+    "\000\032\372\001\n\024FirstPageTurnLightOn\022E\n\raffect_lig"
+    "hts\030\001 \001(\0162..NSPanelMQTTManagerCommand.Af"
+    "fectLightsOptions\022\037\n\027brightness_slider_v"
+    "alue\030\002 \001(\005\022\033\n\023kelvin_slider_value\030\003 \001(\005\022"
+    "\025\n\rselected_room\030\004 \001(\005\022\016\n\006global\030\005 \001(\010\022\034"
+    "\n\024has_brightness_value\030\006 \001(\010\022\030\n\020has_kelv"
+    "in_value\030\007 \001(\010\032n\n\025FirstPageTurnLightOff\022"
+    "E\n\raffect_lights\030\001 \001(\0162..NSPanelMQTTMana"
+    "gerCommand.AffectLightsOptions\022\016\n\006global"
+    "\030\002 \001(\010\032\321\001\n\014LightCommand\022\021\n\tlight_ids\030\001 \003"
+    "(\005\022\026\n\016has_brightness\030\002 \001(\010\022\022\n\nbrightness"
+    "\030\003 \001(\005\022\035\n\025has_color_temperature\030\004 \001(\010\022\031\n"
+    "\021color_temperature\030\005 \001(\005\022\017\n\007has_hue\030\006 \001("
+    "\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016has_saturation\030\010 \001(\010\022\022"
+    "\n\nsaturation\030\t \001(\005\032K\n\034ToggleEntityFromEn"
+    "titiesPage\022\026\n\016entity_page_id\030\001 \001(\005\022\023\n\013en"
+    "tity_slot\030\002 \001(\005\032\?\n\020SaveSceneCommand\022\026\n\016e"
+    "ntity_page_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001(\005"
+    "\0326\n\rButtonPressed\022\022\n\nnspanel_id\030\001 \001(\005\022\021\n"
+    "\tbutton_id\030\002 \001(\005\"D\n\023AffectLightsOptions\022"
+    "\007\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020\001\022\022\n\016CEILING_LI"
+    "GHTS\020\002B\r\n\013CommandData*[\n\023NSPanelWarningL"
+    "evel\022\014\n\010CRITICAL\020\000\022\t\n\005ERROR\020\001\022\013\n\007WARNING"
+    "\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n\005TRACE\020\005b\006prot"
+    "o3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    4697,
+    4762,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
@@ -2454,6 +2468,9 @@ inline PROTOBUF_NDEBUG_INLINE NSPanelStatusReport::Impl_::Impl_(
       : warnings_{visibility, arena, from.warnings_},
         mac_address_(arena, from.mac_address_),
         ip_address_(arena, from.ip_address_),
+        md5_firmware_(arena, from.md5_firmware_),
+        md5_littlefs_(arena, from.md5_littlefs_),
+        md5_tft_gui_(arena, from.md5_tft_gui_),
         _cached_size_{0} {}
 
 NSPanelStatusReport::NSPanelStatusReport(
@@ -2481,6 +2498,9 @@ inline PROTOBUF_NDEBUG_INLINE NSPanelStatusReport::Impl_::Impl_(
       : warnings_{visibility, arena},
         mac_address_(arena),
         ip_address_(arena),
+        md5_firmware_(arena),
+        md5_littlefs_(arena),
+        md5_tft_gui_(arena),
         _cached_size_{0} {}
 
 inline void NSPanelStatusReport::SharedCtor(::_pb::Arena* arena) {
@@ -2501,6 +2521,9 @@ inline void NSPanelStatusReport::SharedDtor() {
   ABSL_DCHECK(GetArena() == nullptr);
   _impl_.mac_address_.Destroy();
   _impl_.ip_address_.Destroy();
+  _impl_.md5_firmware_.Destroy();
+  _impl_.md5_littlefs_.Destroy();
+  _impl_.md5_tft_gui_.Destroy();
   _impl_.~Impl_();
 }
 
@@ -2525,15 +2548,15 @@ NSPanelStatusReport::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 8, 1, 57, 2> NSPanelStatusReport::_table_ = {
+const ::_pbi::TcParseTable<4, 11, 1, 92, 2> NSPanelStatusReport::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    8, 56,  // max_field_number, fast_idx_mask
+    11, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967040,  // skipmap
+    4294965248,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    8,  // num_field_entries
+    11,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelStatusReport_default_instance_._instance,
@@ -2543,9 +2566,7 @@ const ::_pbi::TcParseTable<3, 8, 1, 57, 2> NSPanelStatusReport::_table_ = {
     ::_pbi::TcParser::GetTable<::NSPanelStatusReport>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // repeated .NSPanelWarning warnings = 8;
-    {::_pbi::TcParser::FastMtR1,
-     {66, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.warnings_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // .NSPanelStatusReport.state nspanel_state = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelStatusReport, _impl_.nspanel_state_), 63>(),
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.nspanel_state_)}},
@@ -2567,6 +2588,22 @@ const ::_pbi::TcParseTable<3, 8, 1, 57, 2> NSPanelStatusReport::_table_ = {
     // string ip_address = 7;
     {::_pbi::TcParser::FastUS1,
      {58, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.ip_address_)}},
+    // repeated .NSPanelWarning warnings = 8;
+    {::_pbi::TcParser::FastMtR1,
+     {66, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.warnings_)}},
+    // string md5_firmware = 9;
+    {::_pbi::TcParser::FastUS1,
+     {74, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.md5_firmware_)}},
+    // string md5_littlefs = 10;
+    {::_pbi::TcParser::FastUS1,
+     {82, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.md5_littlefs_)}},
+    // string md5_tft_gui = 11;
+    {::_pbi::TcParser::FastUS1,
+     {90, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.md5_tft_gui_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -2594,13 +2631,25 @@ const ::_pbi::TcParseTable<3, 8, 1, 57, 2> NSPanelStatusReport::_table_ = {
     // repeated .NSPanelWarning warnings = 8;
     {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.warnings_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+    // string md5_firmware = 9;
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.md5_firmware_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string md5_littlefs = 10;
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.md5_littlefs_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string md5_tft_gui = 11;
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.md5_tft_gui_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }}, {{
     {::_pbi::TcParser::GetTable<::NSPanelWarning>()},
   }}, {{
-    "\23\0\0\0\0\13\0\12\0\0\0\0\0\0\0\0"
+    "\23\0\0\0\0\13\0\12\0\14\14\13\0\0\0\0"
     "NSPanelStatusReport"
     "mac_address"
     "ip_address"
+    "md5_firmware"
+    "md5_littlefs"
+    "md5_tft_gui"
   }},
 };
 
@@ -2614,6 +2663,9 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
   _impl_.warnings_.Clear();
   _impl_.mac_address_.ClearToEmpty();
   _impl_.ip_address_.ClearToEmpty();
+  _impl_.md5_firmware_.ClearToEmpty();
+  _impl_.md5_littlefs_.ClearToEmpty();
+  _impl_.md5_tft_gui_.ClearToEmpty();
   ::memset(&_impl_.nspanel_state_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.temperature_) -
       reinterpret_cast<char*>(&_impl_.nspanel_state_)) + sizeof(_impl_.temperature_));
@@ -2694,6 +2746,30 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
             target, stream);
   }
 
+  // string md5_firmware = 9;
+  if (!this->_internal_md5_firmware().empty()) {
+    const std::string& _s = this->_internal_md5_firmware();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelStatusReport.md5_firmware");
+    target = stream->WriteStringMaybeAliased(9, _s, target);
+  }
+
+  // string md5_littlefs = 10;
+  if (!this->_internal_md5_littlefs().empty()) {
+    const std::string& _s = this->_internal_md5_littlefs();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelStatusReport.md5_littlefs");
+    target = stream->WriteStringMaybeAliased(10, _s, target);
+  }
+
+  // string md5_tft_gui = 11;
+  if (!this->_internal_md5_tft_gui().empty()) {
+    const std::string& _s = this->_internal_md5_tft_gui();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelStatusReport.md5_tft_gui");
+    target = stream->WriteStringMaybeAliased(11, _s, target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -2727,6 +2803,24 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
   if (!this->_internal_ip_address().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_ip_address());
+  }
+
+  // string md5_firmware = 9;
+  if (!this->_internal_md5_firmware().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_md5_firmware());
+  }
+
+  // string md5_littlefs = 10;
+  if (!this->_internal_md5_littlefs().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_md5_littlefs());
+  }
+
+  // string md5_tft_gui = 11;
+  if (!this->_internal_md5_tft_gui().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_md5_tft_gui());
   }
 
   // .NSPanelStatusReport.state nspanel_state = 1;
@@ -2783,6 +2877,15 @@ void NSPanelStatusReport::MergeImpl(::google::protobuf::MessageLite& to_msg, con
   if (!from._internal_ip_address().empty()) {
     _this->_internal_set_ip_address(from._internal_ip_address());
   }
+  if (!from._internal_md5_firmware().empty()) {
+    _this->_internal_set_md5_firmware(from._internal_md5_firmware());
+  }
+  if (!from._internal_md5_littlefs().empty()) {
+    _this->_internal_set_md5_littlefs(from._internal_md5_littlefs());
+  }
+  if (!from._internal_md5_tft_gui().empty()) {
+    _this->_internal_set_md5_tft_gui(from._internal_md5_tft_gui());
+  }
   if (from._internal_nspanel_state() != 0) {
     _this->_impl_.nspanel_state_ = from._impl_.nspanel_state_;
   }
@@ -2822,6 +2925,9 @@ void NSPanelStatusReport::InternalSwap(NSPanelStatusReport* PROTOBUF_RESTRICT ot
   _impl_.warnings_.InternalSwap(&other->_impl_.warnings_);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.mac_address_, &other->_impl_.mac_address_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.ip_address_, &other->_impl_.ip_address_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.md5_firmware_, &other->_impl_.md5_firmware_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.md5_littlefs_, &other->_impl_.md5_littlefs_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.md5_tft_gui_, &other->_impl_.md5_tft_gui_, arena);
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.temperature_)
       + sizeof(NSPanelStatusReport::_impl_.temperature_)

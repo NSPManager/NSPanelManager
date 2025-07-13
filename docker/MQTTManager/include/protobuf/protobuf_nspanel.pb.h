@@ -3555,6 +3555,9 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
     kWarningsFieldNumber = 8,
     kMacAddressFieldNumber = 5,
     kIpAddressFieldNumber = 7,
+    kMd5FirmwareFieldNumber = 9,
+    kMd5LittlefsFieldNumber = 10,
+    kMd5TftGuiFieldNumber = 11,
     kNspanelStateFieldNumber = 1,
     kUpdateProgressFieldNumber = 2,
     kRssiFieldNumber = 3,
@@ -3608,6 +3611,54 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
   inline PROTOBUF_ALWAYS_INLINE void _internal_set_ip_address(
       const std::string& value);
   std::string* _internal_mutable_ip_address();
+
+  public:
+  // string md5_firmware = 9;
+  void clear_md5_firmware() ;
+  const std::string& md5_firmware() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_md5_firmware(Arg_&& arg, Args_... args);
+  std::string* mutable_md5_firmware();
+  PROTOBUF_NODISCARD std::string* release_md5_firmware();
+  void set_allocated_md5_firmware(std::string* value);
+
+  private:
+  const std::string& _internal_md5_firmware() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_md5_firmware(
+      const std::string& value);
+  std::string* _internal_mutable_md5_firmware();
+
+  public:
+  // string md5_littlefs = 10;
+  void clear_md5_littlefs() ;
+  const std::string& md5_littlefs() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_md5_littlefs(Arg_&& arg, Args_... args);
+  std::string* mutable_md5_littlefs();
+  PROTOBUF_NODISCARD std::string* release_md5_littlefs();
+  void set_allocated_md5_littlefs(std::string* value);
+
+  private:
+  const std::string& _internal_md5_littlefs() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_md5_littlefs(
+      const std::string& value);
+  std::string* _internal_mutable_md5_littlefs();
+
+  public:
+  // string md5_tft_gui = 11;
+  void clear_md5_tft_gui() ;
+  const std::string& md5_tft_gui() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_md5_tft_gui(Arg_&& arg, Args_... args);
+  std::string* mutable_md5_tft_gui();
+  PROTOBUF_NODISCARD std::string* release_md5_tft_gui();
+  void set_allocated_md5_tft_gui(std::string* value);
+
+  private:
+  const std::string& _internal_md5_tft_gui() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_md5_tft_gui(
+      const std::string& value);
+  std::string* _internal_mutable_md5_tft_gui();
 
   public:
   // .NSPanelStatusReport.state nspanel_state = 1;
@@ -3665,8 +3716,8 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      3, 8, 1,
-      57, 2>
+      4, 11, 1,
+      92, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -3689,6 +3740,9 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
     ::google::protobuf::RepeatedPtrField< ::NSPanelWarning > warnings_;
     ::google::protobuf::internal::ArenaStringPtr mac_address_;
     ::google::protobuf::internal::ArenaStringPtr ip_address_;
+    ::google::protobuf::internal::ArenaStringPtr md5_firmware_;
+    ::google::protobuf::internal::ArenaStringPtr md5_littlefs_;
+    ::google::protobuf::internal::ArenaStringPtr md5_tft_gui_;
     int nspanel_state_;
     ::int32_t update_progress_;
     ::int32_t rssi_;
@@ -6166,6 +6220,156 @@ inline ::google::protobuf::RepeatedPtrField<::NSPanelWarning>*
 NSPanelStatusReport::_internal_mutable_warnings() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.warnings_;
+}
+
+// string md5_firmware = 9;
+inline void NSPanelStatusReport::clear_md5_firmware() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.md5_firmware_.ClearToEmpty();
+}
+inline const std::string& NSPanelStatusReport::md5_firmware() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelStatusReport.md5_firmware)
+  return _internal_md5_firmware();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelStatusReport::set_md5_firmware(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.md5_firmware_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelStatusReport.md5_firmware)
+}
+inline std::string* NSPanelStatusReport::mutable_md5_firmware() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_md5_firmware();
+  // @@protoc_insertion_point(field_mutable:NSPanelStatusReport.md5_firmware)
+  return _s;
+}
+inline const std::string& NSPanelStatusReport::_internal_md5_firmware() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.md5_firmware_.Get();
+}
+inline void NSPanelStatusReport::_internal_set_md5_firmware(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.md5_firmware_.Set(value, GetArena());
+}
+inline std::string* NSPanelStatusReport::_internal_mutable_md5_firmware() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.md5_firmware_.Mutable( GetArena());
+}
+inline std::string* NSPanelStatusReport::release_md5_firmware() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelStatusReport.md5_firmware)
+  return _impl_.md5_firmware_.Release();
+}
+inline void NSPanelStatusReport::set_allocated_md5_firmware(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.md5_firmware_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.md5_firmware_.IsDefault()) {
+          _impl_.md5_firmware_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelStatusReport.md5_firmware)
+}
+
+// string md5_littlefs = 10;
+inline void NSPanelStatusReport::clear_md5_littlefs() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.md5_littlefs_.ClearToEmpty();
+}
+inline const std::string& NSPanelStatusReport::md5_littlefs() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelStatusReport.md5_littlefs)
+  return _internal_md5_littlefs();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelStatusReport::set_md5_littlefs(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.md5_littlefs_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelStatusReport.md5_littlefs)
+}
+inline std::string* NSPanelStatusReport::mutable_md5_littlefs() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_md5_littlefs();
+  // @@protoc_insertion_point(field_mutable:NSPanelStatusReport.md5_littlefs)
+  return _s;
+}
+inline const std::string& NSPanelStatusReport::_internal_md5_littlefs() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.md5_littlefs_.Get();
+}
+inline void NSPanelStatusReport::_internal_set_md5_littlefs(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.md5_littlefs_.Set(value, GetArena());
+}
+inline std::string* NSPanelStatusReport::_internal_mutable_md5_littlefs() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.md5_littlefs_.Mutable( GetArena());
+}
+inline std::string* NSPanelStatusReport::release_md5_littlefs() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelStatusReport.md5_littlefs)
+  return _impl_.md5_littlefs_.Release();
+}
+inline void NSPanelStatusReport::set_allocated_md5_littlefs(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.md5_littlefs_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.md5_littlefs_.IsDefault()) {
+          _impl_.md5_littlefs_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelStatusReport.md5_littlefs)
+}
+
+// string md5_tft_gui = 11;
+inline void NSPanelStatusReport::clear_md5_tft_gui() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.md5_tft_gui_.ClearToEmpty();
+}
+inline const std::string& NSPanelStatusReport::md5_tft_gui() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelStatusReport.md5_tft_gui)
+  return _internal_md5_tft_gui();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelStatusReport::set_md5_tft_gui(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.md5_tft_gui_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelStatusReport.md5_tft_gui)
+}
+inline std::string* NSPanelStatusReport::mutable_md5_tft_gui() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_md5_tft_gui();
+  // @@protoc_insertion_point(field_mutable:NSPanelStatusReport.md5_tft_gui)
+  return _s;
+}
+inline const std::string& NSPanelStatusReport::_internal_md5_tft_gui() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.md5_tft_gui_.Get();
+}
+inline void NSPanelStatusReport::_internal_set_md5_tft_gui(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.md5_tft_gui_.Set(value, GetArena());
+}
+inline std::string* NSPanelStatusReport::_internal_mutable_md5_tft_gui() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.md5_tft_gui_.Mutable( GetArena());
+}
+inline std::string* NSPanelStatusReport::release_md5_tft_gui() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelStatusReport.md5_tft_gui)
+  return _impl_.md5_tft_gui_.Release();
+}
+inline void NSPanelStatusReport::set_allocated_md5_tft_gui(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.md5_tft_gui_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.md5_tft_gui_.IsDefault()) {
+          _impl_.md5_tft_gui_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelStatusReport.md5_tft_gui)
 }
 
 // -------------------------------------------------------------------
