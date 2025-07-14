@@ -1,3 +1,11 @@
+<script>
+stomp_subscribe("nspanel/{{ nspanel.data.mac_address }}/status", (frame) => {
+  var data = JSON.parse(frame.body);
+  var info_tag = $(".nspanel_info_tag[data-nspanel-mac='{{ nspanel.data.mac_address }}']");
+  info_tag.attr("data-nspanel-state", data.state);
+});
+</script>
+
 <div id="nspanel_container-{{ nspanel.data.id }}">
     <div class="text-base-content rounded-b-box rounded-t-field overflow-hidden nspanel-box bg-base-100 shadow-xl" id="panel_status_box-{{ nspanel.data.id }}">
     <div class="">
@@ -5,8 +13,8 @@
     </div>
     <div class="p-2">
         <!-- Hidden data values for the specific panel -->
-        <span id="nspanel_id" class="hidden nspanel_id_container">{{ nspanel.id }}</span>
-        <span id="nspanel_mac_container" class="hidden nspanel_mac_container" data-nspanel-mac="{{ nspanel_mac }}">{{ nspanel.mac }}</span>
+        <span class="hidden nspanel_mac_container" data-nspanel-mac="{{ nspanel.data.mac_address }}">{{ nspanel.data.mac_address }}</span>
+        <span class="hidden nspanel_info_tag" data-nspanel-mac="{{ nspanel.data.mac_address }}" data-nspanel-state="" data-nspanel-id="{{ nspanel.data.id }}">{{ nspanel.data.mac_address }}</span>
 
         <!-- Overlay for "accept/deny request" -->
         <!-- TODO: Move the "accept new panel" into it's own partial -->

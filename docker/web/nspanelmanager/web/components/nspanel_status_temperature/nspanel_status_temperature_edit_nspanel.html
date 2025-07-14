@@ -14,7 +14,7 @@
     state: '',
     temperature: '',
     temperature_unit: '',
-    render: ({id, state, temperature, temperature_unit}) => {
+    render: ({id, nspanel_id, state, temperature, temperature_unit}) => {
       if (state == "offline" || state == "unknown") {
         return html`
            <div class="icon-text">

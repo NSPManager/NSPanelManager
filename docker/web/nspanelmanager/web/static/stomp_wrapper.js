@@ -6,7 +6,7 @@ function stomp_connected_callback() {
 
   // Resubscribe to all subscriptions
   for (const topic in stomp_subscription_destinations) {
-    console.log("sub:", topic);
+    console.log("STOMP sub:", topic);
     var subscription = stomp_client.subscribe(topic, stomp_message_callback);
     stomp_subscription_destinations[topic] = subscription;
   }
@@ -65,7 +65,7 @@ function stomp_subscribe(topic, callback) {
       var subscription = stomp_client.subscribe(topic, stomp_message_callback);
       stomp_subscription_destinations[topic] = subscription;
     } catch (error) {
-      console.error("STOMP subscription error:", error);
+      // console.error("STOMP subscription error:", error);
     }
   }
 }
@@ -130,4 +130,7 @@ stomp_client.onWebSocketClose = stomp_websocket_close_callback;
 stomp_client.onWebSocketError = stomp_websocket_error_callback;
 stomp_client.onStompError = stomp_error_callback;
 
-stomp_client.activate();
+$(document).ready(() => {
+  // Only connect once the whole document has loaded and all callbacks has been registered
+  stomp_client.activate();
+});

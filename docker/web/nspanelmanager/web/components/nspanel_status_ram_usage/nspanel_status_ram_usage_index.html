@@ -13,7 +13,7 @@
     nspanel_id: '',
     state: '',
     ram_usage: '',
-    render: ({id, state, ram_usage}) => {
+    render: ({id, nspanel_id, state, ram_usage}) => {
       if (state == "offline" || state == "unknown") {
         return html`
            <div class="icon-text">
