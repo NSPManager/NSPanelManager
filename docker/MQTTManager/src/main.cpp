@@ -168,8 +168,6 @@ int main(void) {
   MqttManagerConfig::load();   // Load all entities, rooms and panels.
   MQTTManagerWeather::start(); // Start thread to handle weather updates
 
-  MQTT_Manager::init(); // Initialize MQTT manager to handle everything to do with MQTT
-
   std::thread home_assistant_manager_thread;
   std::thread openhab_manager_thread;
   std::thread websocket_server_thread;
@@ -187,7 +185,8 @@ int main(void) {
   SPDLOG_INFO("Home Assistant and/or OpenHAB initialized. Will load entities.");
   EntityManager::init();
 
-  SPDLOG_INFO("Entities loaded, start listening for commands.");
+  SPDLOG_INFO("Entities loaded, connect to MQTT and start listening for commands.");
+  MQTT_Manager::init(); // Initialize MQTT manager to handle everything to do with MQTT
   CommandManager::init();
 
   // Wait for threads to exit
