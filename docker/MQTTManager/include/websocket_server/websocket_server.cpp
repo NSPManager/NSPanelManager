@@ -13,6 +13,7 @@
 #include <iterator>
 #include <ixwebsocket/IXConnectionState.h>
 #include <ixwebsocket/IXWebSocket.h>
+#include <ixwebsocket/IXWebSocketHttpHeaders.h>
 #include <ixwebsocket/IXWebSocketMessageType.h>
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <locale>
@@ -130,7 +131,7 @@ void WebsocketServer::start() {
 void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::ConnectionState> connectionState, ix::WebSocket &webSocket, const ix::WebSocketMessagePtr &msg) {
   try {
     if (msg->type == ix::WebSocketMessageType::Open) {
-      SPDLOG_DEBUG("Websocket connected. URL: {}", msg->openInfo.uri);
+      SPDLOG_DEBUG("Websocket connected. URL: {}.", msg->openInfo.uri);
 
       if (boost::algorithm::ends_with(msg->openInfo.uri, "/stomp")) {
         std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
@@ -167,6 +168,9 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
               std::string accept_version_header = frame->headers["accept-version"];
               std::vector<std::string> accepted_versions;
               boost::split(accepted_versions, accept_version_header, boost::is_any_of(","));
+              if (accepted_versions.empty()) {
+                SPDLOG_WARN("Accepting websocket connection to /websocket/stomp even though accept-version header is empty. Assuming STOMP v1.2.");
+              }
 
               std::string heartbeat_header = "0,0";
               if (frame->headers.find("heart-beat") != frame->headers.end()) {
@@ -175,7 +179,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
               std::vector<std::string> accepted_heartbeats;
               boost::split(accepted_heartbeats, heartbeat_header, boost::is_any_of(","));
 
-              if (std::find(accepted_versions.begin(), accepted_versions.end(), "1.2") != accepted_versions.end()) {
+              if (std::find(accepted_versions.begin(), accepted_versions.end(), "1.2") != accepted_versions.end() || accept_version_header.empty()) {
                 // Generate UUID for this connection.
                 boost::uuids::uuid uuid = WebsocketServer::_uuid_generator();
 

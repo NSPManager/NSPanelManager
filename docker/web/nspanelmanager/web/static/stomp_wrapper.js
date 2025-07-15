@@ -129,6 +129,7 @@ stomp_client.onDisconnect = stomp_disconnected_callback;
 stomp_client.onWebSocketClose = stomp_websocket_close_callback;
 stomp_client.onWebSocketError = stomp_websocket_error_callback;
 stomp_client.onStompError = stomp_error_callback;
+stomp_client.stompVersions = new StompJs.Versions([]); // Set empty versions as to not set the "Sec-WebSocket-Protocol" header as that causes chrome to fail to connect.
 
 $(document).ready(() => {
   // Only connect once the whole document has loaded and all callbacks has been registered
