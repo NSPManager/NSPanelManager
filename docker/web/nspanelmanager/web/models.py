@@ -36,20 +36,6 @@ class Room(models.Model):
     def __str__(self) -> str:
         return self.friendly_name
 
-    """Get a protobuf_general_pb2.RoomSettings object populated with settings"""
-    def get_protobuf_object(self):
-        from web.protobuf import protobuf_formats_pb2, protobuf_general_pb2, protobuf_mqttmanager_pb2
-        room = protobuf_general_pb2.RoomSettings()
-        room.id = self.id
-        room.name = self.friendly_name
-        for light in self.light_set.all():
-            room.light_ids.append(light.id)
-        for scene in self.scene_set.all():
-            room.scene_ids.append(scene.id)
-        for page in self.roomentitiespage_set.all():
-            room.entity_page_ids.append(page.id)
-        return room
-
 
 class RoomEntitiesPage(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
@@ -91,6 +77,19 @@ class RelayGroupBinding(models.Model):
     relay_group = models.ForeignKey(RelayGroup, on_delete=models.CASCADE, null=True, default=None)
     nspanel = models.ForeignKey(NSPanel, on_delete=models.CASCADE)
     relay_num = models.IntegerField(default=1)
+
+
+class Entity(models.Model):
+    class EntityType(models.TextChoices):
+        LIGHT = "light"
+        SWITCH = "switch"
+
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    friendly_name = models.CharField(max_length=255, default="")
+    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE, null=True)
+    room_view_position = models.IntegerField(default=0)
+    entity_type = models.CharField(max_length=64, choices=EntityType)
+    entity_data = models.JSONField(default=dict)
 
 
 class Light(models.Model):
@@ -145,7 +144,7 @@ class Scene(models.Model):
 
 
 class LightState(models.Model):
-    light = models.ForeignKey(Light, on_delete=models.CASCADE)
+    light = models.ForeignKey(Entity, on_delete=models.CASCADE)
     scene = models.ForeignKey(Scene, on_delete=models.CASCADE)
     color_mode = models.CharField(max_length=32, default="dimmer")
     light_level = models.IntegerField(default=0)

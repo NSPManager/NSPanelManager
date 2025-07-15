@@ -14,8 +14,8 @@ class Migration(migrations.Migration):
             Entity.objects.create(
                 room=switch.room,
                 friendly_name=switch.friendly_name,
-                entities_page=switch.room.entities_page,
-                room_view_position=switch.room.entities_page.room_view_position,
+                entities_page=switch.entities_page,
+                room_view_position=switch.room_view_position,
                 entity_type='switch',
                 entity_data={
                     'controller': switch.type,
@@ -25,6 +25,36 @@ class Migration(migrations.Migration):
                 },
             )
             switch.delete()
+
+
+    def convert_lights_to_entities(apps, schema_editor):
+        Entity = apps.get_model('web', 'Entity')
+        Light = apps.get_model('web', 'Light')
+
+        for light in Light.objects.all():
+            Entity.objects.create(
+                id=light.id,
+                room=light.room,
+                friendly_name=light.friendly_name,
+                entities_page=light.entities_page,
+                room_view_position=light.room_view_position,
+                entity_type='light',
+                entity_data={
+                    'controller': light.type,
+                    'home_assistant_name': light.home_assistant_name,
+                    'openhab_name': light.openhab_name,
+                    'openhab_control_mode': light.openhab_control_mode,
+                    'openhab_item_switch': light.openhab_item_switch,
+                    'openhab_item_dimmer': light.openhab_item_dimmer,
+                    'openhab_item_color_temp': light.openhab_item_color_temp,
+                    'openhab_item_rgb': light.openhab_item_rgb,
+                    'can_dim': light.can_dim,
+                    'can_color_temperature': light.can_color_temperature,
+                    'can_rgb': light.can_rgb,
+                    'is_ceiling_light': light.is_ceiling_light,
+                },
+            )
+            light.delete()
 
     dependencies = [
         ('web', '0056_alter_entity_entity_data'),
@@ -41,5 +71,6 @@ class Migration(migrations.Migration):
             name='room_view_position',
             field=models.IntegerField(default=0),
         ),
+        migrations.RunPython(convert_lights_to_entities),
         migrations.RunPython(convert_switches_to_entities),
     ]
