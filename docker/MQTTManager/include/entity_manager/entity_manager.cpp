@@ -1,3 +1,6 @@
+#include "button/button.hpp"
+#include "button/home_assistant_button.hpp"
+#include "button/nspm_button.hpp"
 #include "command_manager/command_manager.hpp"
 #include "entity/entity.hpp"
 #include "light/home_assistant_light.hpp"
@@ -79,6 +82,7 @@ void EntityManager::load_entities() {
   EntityManager::_weather_manager.reload_config();
 
   EntityManager::load_lights();
+  EntityManager::load_buttons();
   EntityManager::load_switches();
   EntityManager::load_scenes();
   EntityManager::load_room_entities_pages();
@@ -199,6 +203,53 @@ void EntityManager::load_lights() {
     }
   }
   SPDLOG_DEBUG("Loaded {} lights", light_ids.size());
+}
+
+void EntityManager::load_buttons() {
+  auto button_ids = database_manager::database.select(&database_manager::Entity::id, sqlite_orm::from<database_manager::Entity>(),
+                                                      sqlite_orm::where(sqlite_orm::glob(&database_manager::Entity::entity_type, "button")));
+  SPDLOG_INFO("Loading {} buttons.", button_ids.size());
+
+  // Check if any existing button has been removed.
+  EntityManager::_entities.erase(std::remove_if(EntityManager::_entities.begin(), EntityManager::_entities.end(), [&button_ids](auto entity) {
+                                   return entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::BUTTON && std::find_if(button_ids.begin(), button_ids.end(), [&entity](auto id) { return id == entity->get_id(); }) == button_ids.end();
+                                 }),
+                                 EntityManager::_entities.end());
+
+  // Cause existing buttons to reload config or add a new button if it does not exist.
+  for (auto &button_id : button_ids) {
+    auto existing_button = EntityManager::get_entity_by_id<ButtonEntity>(MQTT_MANAGER_ENTITY_TYPE::BUTTON, button_id);
+    if (existing_button != nullptr) [[likely]] {
+      existing_button->reload_config();
+    } else {
+      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+
+      try {
+        auto button_settings = database_manager::database.get<database_manager::Entity>(button_id);
+        nlohmann::json entity_data = button_settings.get_entity_data_json();
+        if (entity_data.contains("controller")) {
+          std::string controller = entity_data["controller"];
+          if (controller.compare("home_assistant") == 0) {
+            std::shared_ptr<ButtonEntity> button_entity = std::shared_ptr<ButtonEntity>(new HomeAssistantButton(button_settings.id));
+            SPDLOG_INFO("Button {}::{} was found in database but not in config. Creating button.", button_entity->get_id(), button_entity->get_name());
+            EntityManager::_entities.push_back(button_entity);
+          } else if (controller.compare("nspm") == 0) {
+            std::shared_ptr<ButtonEntity> button_entity = std::shared_ptr<ButtonEntity>(new NSPMButton(button_settings.id));
+            SPDLOG_INFO("Button {}::{} was found in database but not in config. Creating button.", button_entity->get_id(), button_entity->get_name());
+            EntityManager::_entities.push_back(button_entity);
+          } else {
+            SPDLOG_ERROR("Unknown button type '{}'. Will ignore entity.", controller);
+          }
+        } else {
+          SPDLOG_ERROR("Button {}::{} does not define a controller!", button_settings.id, button_settings.friendly_name);
+        }
+      } catch (std::exception &e) {
+        SPDLOG_ERROR("Caught exception: {}", e.what());
+        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+      }
+    }
+  }
+  SPDLOG_DEBUG("Loaded {} lights", button_ids.size());
 }
 
 void EntityManager::load_switches() {

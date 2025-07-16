@@ -67,6 +67,11 @@ public:
   static void load_lights();
 
   /*
+   * Load all buttons from the DB and remove any existing button that no longer exist.
+   */
+  static void load_buttons();
+
+  /*
    * Load all switches from the DB and remove any existing switch that no longer exist.
    */
   static void load_switches();

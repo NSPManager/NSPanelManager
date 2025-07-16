@@ -1001,7 +1001,7 @@ def create_or_update_button_entity(request):
         new_button.room_view_position = int(action_args["page_slot"])
         if entity_data['controller'] == "home_assistant":
             entity_data['home_assistant_name'] = request.POST["backend_name"]
-        elif entity_data['controller'] == "manual":
+        elif entity_data['controller'] == "nspm":
             entity_data['mqtt_topic'] = request.POST["mqtt_topic"]
             entity_data['mqtt_payload'] = request.POST["mqtt_payload"]
 

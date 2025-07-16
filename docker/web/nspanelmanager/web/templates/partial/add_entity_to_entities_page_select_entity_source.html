@@ -31,7 +31,7 @@
                     <button class="join-item btn btn-lg btn-secondary text-secondary-content" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="nspm_scene" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">NSPM Scene</button>
                 {% endif %}
                 {% if action in manual_supported_entity_types %}
-                    <button class="join-item btn btn-lg btn-secondary text-secondary-content" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="manual" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">Manual</button>
+                    <button class="join-item btn btn-lg btn-secondary text-secondary-content" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="nspm" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">NSPM</button>
                 {% endif %}
             </div>
         </div>

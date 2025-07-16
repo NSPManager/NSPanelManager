@@ -37,7 +37,7 @@
                             <div class="status status-info shadow-none absolute top-2 left-2 cursor-default" title="Controlled by Home Assistant"></div>
                         {% elif entity.controller == "openhab" %}
                             <div class="status status-warning shadow-none absolute top-2 left-2 cursor-default" title="Controlled by OpenHAB"></div>
-                        {% elif entity.controller == "nspm_scene" or entity.controller == "nspm" or entity.controller == "manual" %}
+                        {% elif entity.controller == "nspm_scene" or entity.controller == "nspm" %}
                             <div class="status status-accent shadow-none absolute top-2 left-2 cursor-default" title="Controlled by NSPanel Manager"></div>
                         {% else %}
                             <div class="status status-error animate-ping absolute top-2 left-2 cursor-default" title="Unknown controller"></div>
