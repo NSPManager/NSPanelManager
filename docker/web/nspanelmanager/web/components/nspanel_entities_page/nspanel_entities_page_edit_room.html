@@ -17,6 +17,8 @@
                             {% url "htmx_partial_edit_light_entity" light_id=entity.id as edit_url %}
                         {% elif entity.type == "switch" %}
                             {% url "htmx_partial_edit_switch_entity" switch_id=entity.id as edit_url %}
+                        {% elif entity.type == "button" %}
+                            {% url "htmx_partial_edit_button_entity" button_id=entity.id as edit_url %}
                         {% elif entity.type == "scene" %}
                             {% url "htmx_partial_edit_scene_entity" scene_id=entity.id as edit_url %}
                         {% else %}
@@ -35,7 +37,7 @@
                             <div class="status status-info shadow-none absolute top-2 left-2 cursor-default" title="Controlled by Home Assistant"></div>
                         {% elif entity.controller == "openhab" %}
                             <div class="status status-warning shadow-none absolute top-2 left-2 cursor-default" title="Controlled by OpenHAB"></div>
-                        {% elif entity.controller == "nspm_scene" or entity.controller == "nspm" %}
+                        {% elif entity.controller == "nspm_scene" or entity.controller == "nspm" or entity.controller == "manual" %}
                             <div class="status status-accent shadow-none absolute top-2 left-2 cursor-default" title="Controlled by NSPanel Manager"></div>
                         {% else %}
                             <div class="status status-error animate-ping absolute top-2 left-2 cursor-default" title="Unknown controller"></div>

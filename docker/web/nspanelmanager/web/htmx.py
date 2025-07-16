@@ -271,6 +271,8 @@ def handle_entity_modal_result(request):
         return create_or_update_light_entity(request)
     elif request.session["action"] == "ADD_SWITCH_TO_ROOM":
         return create_or_update_switch_entity(request)
+    elif request.session["action"] == "ADD_BUTTON_TO_ROOM":
+        return create_or_update_button_entity(request)
     elif request.session["action"] == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE":
         return create_or_update_scene_entity(request)
     else:
@@ -431,6 +433,40 @@ def partial_entity_add_switch_entity(request):
     return render(request, 'partial/select_entity/entity_add_or_edit_switch_to_room.html', data)
 
 
+def partial_entity_add_button_entity(request):
+    data = {
+        "entity_source": request.session["entity_source"],
+        "openhab_item": "",
+        "home_assistant_item": "",
+        "controlled_by_nspanel_main_page": True, # By default when adding a light. Make it controlled by the NSPanel main page.
+        "openhab_items": [],
+        "home_assistant_items": [],
+    }
+
+    if data["entity_source"] == "home_assistant":
+        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["button", "input_button"]})
+        if len(ha_items["errors"]) == 0:
+            data["home_assistant_items"] = ha_items["items"]
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "Failed to get items from Home Assistant!"
+            }, status=500)
+    elif data["entity_source"] == "openhab":
+        openhab_items = web.openhab_api.get_all_openhab_items()
+        if len(openhab_items["errors"]) == 0:
+            data["openhab_items"] = openhab_items["items"]
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "Failed to get items from OpenHAB!"
+            }, status=500)
+    else:
+        logging.error("Unknown entity source! Source: " + data["entity_source"])
+
+    return render(request, 'partial/select_entity/entity_add_or_edit_button_to_room.html', data)
+
+
 def partial_entity_edit_switch_entity(request, switch_id):
     switch = Entity.objects.get(id=switch_id)
 
@@ -450,6 +486,27 @@ def partial_entity_edit_switch_entity(request, switch_id):
         },
     }
     return render(request, "partial/select_entity/entity_add_or_edit_switch_to_room.html", data)
+
+
+def partial_entity_edit_button_entity(request, button_id):
+    button = Entity.objects.get(id=button_id)
+
+    request.session["action"] = "ADD_SWITCH_TO_ROOM"
+    request.session["action_args"] = json.dumps({
+        "entity_id": button_id,
+        "room_id": button.room.id,
+        "page_id": button.entities_page.id,
+        "page_slot": button.room_view_position,
+    })
+
+    data = {
+        "button": button,
+        "edit_light_id": button_id,
+        "entity": {
+            "name": button.friendly_name,
+        },
+    }
+    return render(request, "partial/select_entity/entity_add_or_edit_button_to_room.html", data)
 
 
 def partial_entity_edit_scene_entity(request, scene_id):
@@ -677,7 +734,16 @@ def partial_add_entity_to_entities_page_select_entity_source(request, action, ac
         "action": action,
         "action_args": action_args,
         "is_home_assistant_configured": is_home_assistant_configured,
-        "is_openhab_configured": is_openhab_configured
+        "is_openhab_configured": is_openhab_configured,
+        "home_assistant_supported_entity_types": [
+            "ADD_LIGHT_TO_ROOM", "ADD_SWITCH_TO_ROOM", "ADD_BUTTON_TO_ROOM", "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE"
+        ],
+        "openhab_supported_entity_types": [
+            "ADD_LIGHT_TO_ROOM", "ADD_SWITCH_TO_ROOM", "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE"
+        ],
+        "manual_supported_entity_types": [
+            "ADD_BUTTON_TO_ROOM"
+        ]
     }
 
 
@@ -706,6 +772,8 @@ def partial_add_entity_to_entities_page_config_modal(request, entity_source):
         return partial_entity_add_light_entity(request)
     elif request.session["action"] == "ADD_SWITCH_TO_ROOM":
         return partial_entity_add_switch_entity(request)
+    elif request.session["action"] == "ADD_BUTTON_TO_ROOM":
+        return partial_entity_add_button_entity(request)
     elif request.session["action"] == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE":
         return partial_entity_add_scene_entity(request)
     else:
@@ -910,6 +978,41 @@ def create_or_update_switch_entity(request):
 
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(request=request, view="edit_room", room_id=new_switch.room.id, is_scenes_pages=False, is_global_scenes_page=False)
+
+
+def create_or_update_button_entity(request):
+    action_args = json.loads(request.session["action_args"]) # Loads arguments set when first starting process of adding/updating entity
+
+    entity_data = {
+        'controller': request.session["entity_source"],
+        'home_assistant_name': '',
+        'mqtt_topic': '', # Used in case of controller = manual
+        'mqtt_payload': '', # Used in case of controller = manual
+    }
+    if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
+        new_button = Entity.objects.get(id=int(action_args["entity_id"]))
+        entity_data = new_button.entity_data
+    else:
+        new_button = Entity()
+        new_button.entity_type = Entity.EntityType.BUTTON
+        # Only set once, during initial creation:
+        new_button.room = Room.objects.get(id=int(action_args["room_id"]))
+        new_button.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+        new_button.room_view_position = int(action_args["page_slot"])
+        if entity_data['controller'] == "home_assistant":
+            entity_data['home_assistant_name'] = request.POST["backend_name"]
+        elif entity_data['controller'] == "manual":
+            entity_data['mqtt_topic'] = request.POST["mqtt_topic"]
+            entity_data['mqtt_payload'] = request.POST["mqtt_payload"]
+
+    new_button.friendly_name = request.POST["light_name"]
+    new_button.entity_data = entity_data
+    new_button.save()
+    send_mqttmanager_reload_command()
+
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(request=request, view="edit_room", room_id=new_button.room.id, is_scenes_pages=False, is_global_scenes_page=False)
+
 
 
 def create_or_update_scene_entity(request):

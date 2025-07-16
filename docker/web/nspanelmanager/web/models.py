@@ -83,6 +83,7 @@ class Entity(models.Model):
     class EntityType(models.TextChoices):
         LIGHT = "light"
         SWITCH = "switch"
+        BUTTON = "button"
 
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     friendly_name = models.CharField(max_length=255, default="")
