@@ -223,7 +223,6 @@ message NSPanelMQTTManagerCommand {
     }
 
     message ButtonPressed {
-        int32 nspanel_id = 1;
         int32 button_id = 2;
     }
 
@@ -235,4 +234,7 @@ message NSPanelMQTTManagerCommand {
         SaveSceneCommand save_scene_command = 5;
         ButtonPressed button_pressed = 6;
     }
+
+
+    int32 nspanel_id = 100;
 }

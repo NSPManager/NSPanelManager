@@ -537,8 +537,17 @@ void EntityManager::_room_updated_callback(Room *room) {
 
 void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
   if (command.has_first_page_turn_on() && command.first_page_turn_on().global()) {
+    std::shared_ptr<NSPanel> nspanel = EntityManager::get_nspanel_by_id(command.nspanel_id());
+    if (nspanel == nullptr) {
+      SPDLOG_ERROR("NSPanel with ID {} not found while processing command. Will cancel processing.", command.nspanel_id());
+      return;
+    }
+
     std::vector<std::shared_ptr<Room>> rooms;
-    {
+    if (nspanel->is_locked_to_default_room()) {
+      SPDLOG_DEBUG("NSPanel {}::{} is locked to it's default room.", nspanel->get_id(), nspanel->get_name());
+      rooms.push_back(EntityManager::get_room(nspanel->get_default_room_id()));
+    } else {
       std::lock_guard<std::mutex> lock_guard(EntityManager::_rooms_mutex);
       rooms = EntityManager::_rooms;
     }

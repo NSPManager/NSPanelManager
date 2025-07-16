@@ -259,8 +259,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 
 inline constexpr NSPanelMQTTManagerCommand_ButtonPressed::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : nspanel_id_{0},
-        button_id_{0},
+      : button_id_{0},
         _cached_size_{0} {}
 
 template <typename>
@@ -435,7 +434,8 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 
 inline constexpr NSPanelMQTTManagerCommand::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : CommandData_{},
+      : nspanel_id_{0},
+        CommandData_{},
         _cached_size_{0},
         _oneof_case_{} {}
 
@@ -756,7 +756,6 @@ const ::uint32_t
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ButtonPressed, _impl_.nspanel_id_),
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ButtonPressed, _impl_.button_id_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand, _internal_metadata_),
@@ -772,6 +771,7 @@ const ::uint32_t
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand, _impl_.nspanel_id_),
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand, _impl_.CommandData_),
 };
 
@@ -793,7 +793,7 @@ static const ::_pbi::MigrationSchema
         {216, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
         {226, -1, -1, sizeof(::NSPanelMQTTManagerCommand_SaveSceneCommand)},
         {236, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonPressed)},
-        {246, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {245, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelConfig_RoomInfo_default_instance_._instance,
@@ -911,25 +911,25 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "\030\005 \001(\0132+.NSPanelMQTTManagerCommand.SaveS"
     "ceneCommandH\000\022B\n\016button_pressed\030\006 \001(\0132(."
     "NSPanelMQTTManagerCommand.ButtonPressedH"
-    "\000\032\372\001\n\024FirstPageTurnLightOn\022E\n\raffect_lig"
-    "hts\030\001 \001(\0162..NSPanelMQTTManagerCommand.Af"
-    "fectLightsOptions\022\037\n\027brightness_slider_v"
-    "alue\030\002 \001(\005\022\033\n\023kelvin_slider_value\030\003 \001(\005\022"
-    "\025\n\rselected_room\030\004 \001(\005\022\016\n\006global\030\005 \001(\010\022\034"
-    "\n\024has_brightness_value\030\006 \001(\010\022\030\n\020has_kelv"
-    "in_value\030\007 \001(\010\032n\n\025FirstPageTurnLightOff\022"
-    "E\n\raffect_lights\030\001 \001(\0162..NSPanelMQTTMana"
-    "gerCommand.AffectLightsOptions\022\016\n\006global"
-    "\030\002 \001(\010\032\321\001\n\014LightCommand\022\021\n\tlight_ids\030\001 \003"
-    "(\005\022\026\n\016has_brightness\030\002 \001(\010\022\022\n\nbrightness"
-    "\030\003 \001(\005\022\035\n\025has_color_temperature\030\004 \001(\010\022\031\n"
-    "\021color_temperature\030\005 \001(\005\022\017\n\007has_hue\030\006 \001("
-    "\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016has_saturation\030\010 \001(\010\022\022"
-    "\n\nsaturation\030\t \001(\005\032K\n\034ToggleEntityFromEn"
-    "titiesPage\022\026\n\016entity_page_id\030\001 \001(\005\022\023\n\013en"
-    "tity_slot\030\002 \001(\005\032\?\n\020SaveSceneCommand\022\026\n\016e"
-    "ntity_page_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001(\005"
-    "\0326\n\rButtonPressed\022\022\n\nnspanel_id\030\001 \001(\005\022\021\n"
+    "\000\022\022\n\nnspanel_id\030d \001(\005\032\372\001\n\024FirstPageTurnL"
+    "ightOn\022E\n\raffect_lights\030\001 \001(\0162..NSPanelM"
+    "QTTManagerCommand.AffectLightsOptions\022\037\n"
+    "\027brightness_slider_value\030\002 \001(\005\022\033\n\023kelvin"
+    "_slider_value\030\003 \001(\005\022\025\n\rselected_room\030\004 \001"
+    "(\005\022\016\n\006global\030\005 \001(\010\022\034\n\024has_brightness_val"
+    "ue\030\006 \001(\010\022\030\n\020has_kelvin_value\030\007 \001(\010\032n\n\025Fi"
+    "rstPageTurnLightOff\022E\n\raffect_lights\030\001 \001"
+    "(\0162..NSPanelMQTTManagerCommand.AffectLig"
+    "htsOptions\022\016\n\006global\030\002 \001(\010\032\321\001\n\014LightComm"
+    "and\022\021\n\tlight_ids\030\001 \003(\005\022\026\n\016has_brightness"
+    "\030\002 \001(\010\022\022\n\nbrightness\030\003 \001(\005\022\035\n\025has_color_"
+    "temperature\030\004 \001(\010\022\031\n\021color_temperature\030\005"
+    " \001(\005\022\017\n\007has_hue\030\006 \001(\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016ha"
+    "s_saturation\030\010 \001(\010\022\022\n\nsaturation\030\t \001(\005\032K"
+    "\n\034ToggleEntityFromEntitiesPage\022\026\n\016entity"
+    "_page_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001(\005\032\?\n\020S"
+    "aveSceneCommand\022\026\n\016entity_page_id\030\001 \001(\005\022"
+    "\023\n\013entity_slot\030\002 \001(\005\032\"\n\rButtonPressed\022\021\n"
     "\tbutton_id\030\002 \001(\005\"D\n\023AffectLightsOptions\022"
     "\007\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020\001\022\022\n\016CEILING_LI"
     "GHTS\020\002B\r\n\013CommandData*[\n\023NSPanelWarningL"
@@ -6559,12 +6559,7 @@ inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_ButtonPressed::Impl_::Im
 
 inline void NSPanelMQTTManagerCommand_ButtonPressed::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  ::memset(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, nspanel_id_),
-           0,
-           offsetof(Impl_, button_id_) -
-               offsetof(Impl_, nspanel_id_) +
-               sizeof(Impl_::button_id_));
+  _impl_.button_id_ = {};
 }
 NSPanelMQTTManagerCommand_ButtonPressed::~NSPanelMQTTManagerCommand_ButtonPressed() {
   // @@protoc_insertion_point(destructor:NSPanelMQTTManagerCommand.ButtonPressed)
@@ -6597,15 +6592,15 @@ NSPanelMQTTManagerCommand_ButtonPressed::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<1, 2, 0, 0, 2> NSPanelMQTTManagerCommand_ButtonPressed::_table_ = {
+const ::_pbi::TcParseTable<0, 1, 0, 0, 2> NSPanelMQTTManagerCommand_ButtonPressed::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    2, 8,  // max_field_number, fast_idx_mask
+    2, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967292,  // skipmap
+    4294967293,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    2,  // num_field_entries
+    1,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_NSPanelMQTTManagerCommand_ButtonPressed_default_instance_._instance,
@@ -6618,15 +6613,9 @@ const ::_pbi::TcParseTable<1, 2, 0, 0, 2> NSPanelMQTTManagerCommand_ButtonPresse
     // int32 button_id = 2;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_ButtonPressed, _impl_.button_id_), 63>(),
      {16, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ButtonPressed, _impl_.button_id_)}},
-    // int32 nspanel_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_ButtonPressed, _impl_.nspanel_id_), 63>(),
-     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ButtonPressed, _impl_.nspanel_id_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // int32 nspanel_id = 1;
-    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ButtonPressed, _impl_.nspanel_id_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
     // int32 button_id = 2;
     {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ButtonPressed, _impl_.button_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
@@ -6643,9 +6632,7 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_ButtonPressed::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&_impl_.nspanel_id_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.button_id_) -
-      reinterpret_cast<char*>(&_impl_.nspanel_id_)) + sizeof(_impl_.button_id_));
+  _impl_.button_id_ = 0;
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -6655,13 +6642,6 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_ButtonPressed::Clear() {
   // @@protoc_insertion_point(serialize_to_array_start:NSPanelMQTTManagerCommand.ButtonPressed)
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
-
-  // int32 nspanel_id = 1;
-  if (this->_internal_nspanel_id() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<1>(
-            stream, this->_internal_nspanel_id(), target);
-  }
 
   // int32 button_id = 2;
   if (this->_internal_button_id() != 0) {
@@ -6687,13 +6667,6 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_ButtonPressed::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
-  // int32 nspanel_id = 1;
-  if (this->_internal_nspanel_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_nspanel_id());
-  }
-
   // int32 button_id = 2;
   if (this->_internal_button_id() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
@@ -6712,9 +6685,6 @@ void NSPanelMQTTManagerCommand_ButtonPressed::MergeImpl(::google::protobuf::Mess
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from._internal_nspanel_id() != 0) {
-    _this->_impl_.nspanel_id_ = from._impl_.nspanel_id_;
-  }
   if (from._internal_button_id() != 0) {
     _this->_impl_.button_id_ = from._impl_.button_id_;
   }
@@ -6732,12 +6702,7 @@ void NSPanelMQTTManagerCommand_ButtonPressed::CopyFrom(const NSPanelMQTTManagerC
 void NSPanelMQTTManagerCommand_ButtonPressed::InternalSwap(NSPanelMQTTManagerCommand_ButtonPressed* PROTOBUF_RESTRICT other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ButtonPressed, _impl_.button_id_)
-      + sizeof(NSPanelMQTTManagerCommand_ButtonPressed::_impl_.button_id_)
-      - PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ButtonPressed, _impl_.nspanel_id_)>(
-          reinterpret_cast<char*>(&_impl_.nspanel_id_),
-          reinterpret_cast<char*>(&other->_impl_.nspanel_id_));
+        swap(_impl_.button_id_, other->_impl_.button_id_);
 }
 
 ::google::protobuf::Metadata NSPanelMQTTManagerCommand_ButtonPressed::GetMetadata() const {
@@ -6850,6 +6815,7 @@ NSPanelMQTTManagerCommand::NSPanelMQTTManagerCommand(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  _impl_.nspanel_id_ = from._impl_.nspanel_id_;
   switch (CommandData_case()) {
     case COMMANDDATA_NOT_SET:
       break;
@@ -6884,6 +6850,7 @@ inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand::Impl_::Impl_(
 
 inline void NSPanelMQTTManagerCommand::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.nspanel_id_ = {};
 }
 NSPanelMQTTManagerCommand::~NSPanelMQTTManagerCommand() {
   // @@protoc_insertion_point(destructor:NSPanelMQTTManagerCommand)
@@ -6979,15 +6946,15 @@ NSPanelMQTTManagerCommand::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 6, 6, 0, 2> NSPanelMQTTManagerCommand::_table_ = {
+const ::_pbi::TcParseTable<0, 7, 6, 0, 7> NSPanelMQTTManagerCommand::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    6, 0,  // max_field_number, fast_idx_mask
+    100, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
     4294967232,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    6,  // num_field_entries
+    7,  // num_field_entries
     6,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelMQTTManagerCommand_default_instance_._instance,
@@ -6997,8 +6964,12 @@ const ::_pbi::TcParseTable<0, 6, 6, 0, 2> NSPanelMQTTManagerCommand::_table_ = {
     ::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
+    // int32 nspanel_id = 100;
+    {::_pbi::TcParser::FastV32S2,
+     {1696, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.nspanel_id_)}},
   }}, {{
+    100, 0, 1,
+    65534, 6,
     65535, 65535
   }}, {{
     // .NSPanelMQTTManagerCommand.FirstPageTurnLightOn first_page_turn_on = 1;
@@ -7019,6 +6990,9 @@ const ::_pbi::TcParseTable<0, 6, 6, 0, 2> NSPanelMQTTManagerCommand::_table_ = {
     // .NSPanelMQTTManagerCommand.ButtonPressed button_pressed = 6;
     {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.button_pressed_), _Internal::kOneofCaseOffset + 0, 5,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // int32 nspanel_id = 100;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.nspanel_id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
   }}, {{
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_FirstPageTurnLightOn>()},
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_FirstPageTurnLightOff>()},
@@ -7037,6 +7011,7 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  _impl_.nspanel_id_ = 0;
   clear_CommandData();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -7082,6 +7057,13 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand::Clear() {
     default:
       break;
   }
+  // int32 nspanel_id = 100;
+  if (this->_internal_nspanel_id() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        100, this->_internal_nspanel_id(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -7098,6 +7080,12 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand::Clear() {
   ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
+
+  // int32 nspanel_id = 100;
+  if (this->_internal_nspanel_id() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_nspanel_id());
+  }
 
   switch (CommandData_case()) {
     // .NSPanelMQTTManagerCommand.FirstPageTurnLightOn first_page_turn_on = 1;
@@ -7153,6 +7141,9 @@ void NSPanelMQTTManagerCommand::MergeImpl(::google::protobuf::MessageLite& to_ms
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
+  if (from._internal_nspanel_id() != 0) {
+    _this->_impl_.nspanel_id_ = from._impl_.nspanel_id_;
+  }
   if (const uint32_t oneof_from_case = from._impl_._oneof_case_[0]) {
     const uint32_t oneof_to_case = _this->_impl_._oneof_case_[0];
     const bool oneof_needs_init = oneof_to_case != oneof_from_case;
@@ -7236,6 +7227,7 @@ void NSPanelMQTTManagerCommand::CopyFrom(const NSPanelMQTTManagerCommand& from) 
 void NSPanelMQTTManagerCommand::InternalSwap(NSPanelMQTTManagerCommand* PROTOBUF_RESTRICT other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+        swap(_impl_.nspanel_id_, other->_impl_.nspanel_id_);
   swap(_impl_.CommandData_, other->_impl_.CommandData_);
   swap(_impl_._oneof_case_[0], other->_impl_._oneof_case_[0]);
 }

@@ -10,9 +10,7 @@
 #include "scenes/scene.hpp"
 #include "web_helper/WebHelper.hpp"
 #include <algorithm>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
 #include <boost/bind/placeholders.hpp>
 #include <boost/exception/diagnostic_information.hpp>
@@ -253,7 +251,7 @@ void NSPanel::send_config() {
   config.set_relay2_default_mode(this->_get_nspanel_setting_with_default("relay2_default_mode", "False").compare("True") == 0);
   config.set_temperature_calibration((std::stof(this->_get_nspanel_setting_with_default("temperature_calibration", "0.0")) * 10));
   config.set_default_light_brightess(std::stoi(MqttManagerConfig::get_setting_with_default("light_turn_on_brightness", "50")));
-  config.set_locked_to_default_room(this->_get_nspanel_setting_with_default("locked_to_default_room", "False").compare("True") == 0);
+  config.set_locked_to_default_room(this->is_locked_to_default_room());
 
   ButtonMode b1_mode = static_cast<ButtonMode>(this->_settings.button1_mode);
   if (b1_mode == ButtonMode::DIRECT) {
@@ -333,7 +331,9 @@ void NSPanel::send_config() {
   // Load rooms
   // TODO: Only add rooms on the "allowed" list for this room.
   SPDLOG_DEBUG("NSPanel {}::{} loading available rooms.", this->_id, this->_name);
-  for (auto &room : EntityManager::get_all_rooms()) {
+  if (this->is_locked_to_default_room()) {
+    SPDLOG_DEBUG("NSPanel {}::{} locked to default room.", this->_id, this->_name);
+    std::shared_ptr<Room> room = EntityManager::get_room(this->get_default_room_id());
     if (room != nullptr) {
       NSPanelConfig_RoomInfo *room_info = config.add_room_infos();
       room_info->set_room_id(room->get_id());
@@ -343,6 +343,20 @@ void NSPanel::send_config() {
       }
       for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_scenes_pages()) {
         room_info->add_scene_page_ids(page->get_id());
+      }
+    }
+  } else {
+    for (auto &room : EntityManager::get_all_rooms()) {
+      if (room != nullptr) {
+        NSPanelConfig_RoomInfo *room_info = config.add_room_infos();
+        room_info->set_room_id(room->get_id());
+        // Get all entity pages attached to room and add those IDs to list of availabe entity pages for that room
+        for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_entities_pages()) {
+          room_info->add_entity_page_ids(page->get_id());
+        }
+        for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_scenes_pages()) {
+          room_info->add_scene_page_ids(page->get_id());
+        }
       }
     }
   }
@@ -1101,7 +1115,7 @@ void NSPanel::set_relay_state(uint8_t relay, bool state) {
 
 void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
   if (command.has_button_pressed()) {
-    if (command.button_pressed().nspanel_id() == this->_id) {
+    if (command.nspanel_id() == this->_id) {
       // TODO: Handle button press
       SPDLOG_DEBUG("NSPanel {}::{} got button {} press,", this->_id, this->_name, command.button_pressed().button_id());
 
@@ -1174,6 +1188,16 @@ void NSPanel::handle_stomp_command_callback(StompFrame frame) {
   } else {
     SPDLOG_WARN("NSPanel {}::{} received unknown STOMP command '{}'", this->_id, this->_name, frame.body);
   }
+}
+
+bool NSPanel::is_locked_to_default_room() {
+  std::string setting = this->_get_nspanel_setting_with_default("lock_to_default_room", "False");
+  boost::algorithm::to_lower(setting);
+  return setting.compare("true") == 0;
+}
+
+int32_t NSPanel::get_default_room_id() {
+  return this->_settings.room_id;
 }
 
 std::string NSPanel::_get_nspanel_setting_with_default(std::string key, std::string default_value) {

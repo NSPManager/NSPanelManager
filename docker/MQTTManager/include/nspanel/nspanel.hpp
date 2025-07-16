@@ -160,6 +160,16 @@ public:
    */
   void handle_stomp_command_callback(StompFrame frame);
 
+  /**
+   * Check if NSPanel is locked to default room through settings, and if so, return true, otherwise false.
+   */
+  bool is_locked_to_default_room();
+
+  /**
+   * Get the default room ID from NSPanel settings.
+   */
+  int32_t get_default_room_id();
+
 private:
   std::string _get_nspanel_setting_with_default(std::string key, std::string default_value);
 

@@ -2544,19 +2544,8 @@ class NSPanelMQTTManagerCommand_ButtonPressed final : public ::google::protobuf:
 
   // accessors -------------------------------------------------------
   enum : int {
-    kNspanelIdFieldNumber = 1,
     kButtonIdFieldNumber = 2,
   };
-  // int32 nspanel_id = 1;
-  void clear_nspanel_id() ;
-  ::int32_t nspanel_id() const;
-  void set_nspanel_id(::int32_t value);
-
-  private:
-  ::int32_t _internal_nspanel_id() const;
-  void _internal_set_nspanel_id(::int32_t value);
-
-  public:
   // int32 button_id = 2;
   void clear_button_id() ;
   ::int32_t button_id() const;
@@ -2572,7 +2561,7 @@ class NSPanelMQTTManagerCommand_ButtonPressed final : public ::google::protobuf:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      1, 2, 0,
+      0, 1, 0,
       0, 2>
       _table_;
 
@@ -2593,7 +2582,6 @@ class NSPanelMQTTManagerCommand_ButtonPressed final : public ::google::protobuf:
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const NSPanelMQTTManagerCommand_ButtonPressed& from_msg);
-    ::int32_t nspanel_id_;
     ::int32_t button_id_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -4136,6 +4124,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
+    kNspanelIdFieldNumber = 100,
     kFirstPageTurnOnFieldNumber = 1,
     kFirstPageTurnOffFieldNumber = 2,
     kLightCommandFieldNumber = 3,
@@ -4143,6 +4132,16 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
     kSaveSceneCommandFieldNumber = 5,
     kButtonPressedFieldNumber = 6,
   };
+  // int32 nspanel_id = 100;
+  void clear_nspanel_id() ;
+  ::int32_t nspanel_id() const;
+  void set_nspanel_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_nspanel_id() const;
+  void _internal_set_nspanel_id(::int32_t value);
+
+  public:
   // .NSPanelMQTTManagerCommand.FirstPageTurnLightOn first_page_turn_on = 1;
   bool has_first_page_turn_on() const;
   private:
@@ -4272,8 +4271,8 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   inline void clear_has_CommandData();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 6, 6,
-      0, 2>
+      0, 7, 6,
+      0, 7>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -4293,6 +4292,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const NSPanelMQTTManagerCommand& from_msg);
+    ::int32_t nspanel_id_;
     union CommandDataUnion {
       constexpr CommandDataUnion() : _constinit_{} {}
       ::google::protobuf::internal::ConstantInitialized _constinit_;
@@ -8542,28 +8542,6 @@ inline void NSPanelMQTTManagerCommand_SaveSceneCommand::_internal_set_entity_slo
 
 // NSPanelMQTTManagerCommand_ButtonPressed
 
-// int32 nspanel_id = 1;
-inline void NSPanelMQTTManagerCommand_ButtonPressed::clear_nspanel_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.nspanel_id_ = 0;
-}
-inline ::int32_t NSPanelMQTTManagerCommand_ButtonPressed::nspanel_id() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.ButtonPressed.nspanel_id)
-  return _internal_nspanel_id();
-}
-inline void NSPanelMQTTManagerCommand_ButtonPressed::set_nspanel_id(::int32_t value) {
-  _internal_set_nspanel_id(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.ButtonPressed.nspanel_id)
-}
-inline ::int32_t NSPanelMQTTManagerCommand_ButtonPressed::_internal_nspanel_id() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.nspanel_id_;
-}
-inline void NSPanelMQTTManagerCommand_ButtonPressed::_internal_set_nspanel_id(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.nspanel_id_ = value;
-}
-
 // int32 button_id = 2;
 inline void NSPanelMQTTManagerCommand_ButtonPressed::clear_button_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
@@ -9062,6 +9040,28 @@ inline ::NSPanelMQTTManagerCommand_ButtonPressed* NSPanelMQTTManagerCommand::mut
   ::NSPanelMQTTManagerCommand_ButtonPressed* _msg = _internal_mutable_button_pressed();
   // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.button_pressed)
   return _msg;
+}
+
+// int32 nspanel_id = 100;
+inline void NSPanelMQTTManagerCommand::clear_nspanel_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.nspanel_id_ = 0;
+}
+inline ::int32_t NSPanelMQTTManagerCommand::nspanel_id() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.nspanel_id)
+  return _internal_nspanel_id();
+}
+inline void NSPanelMQTTManagerCommand::set_nspanel_id(::int32_t value) {
+  _internal_set_nspanel_id(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.nspanel_id)
+}
+inline ::int32_t NSPanelMQTTManagerCommand::_internal_nspanel_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.nspanel_id_;
+}
+inline void NSPanelMQTTManagerCommand::_internal_set_nspanel_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.nspanel_id_ = value;
 }
 
 inline bool NSPanelMQTTManagerCommand::has_CommandData() const {
