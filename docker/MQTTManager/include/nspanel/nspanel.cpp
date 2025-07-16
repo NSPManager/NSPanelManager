@@ -864,10 +864,14 @@ void NSPanel::reboot() {
   }
 }
 
-void NSPanel::firmware_update() {
+void NSPanel::firmware_update(bool force) {
   SPDLOG_INFO("Sending firmware update command to nspanel {}::{}.", this->_id, this->_name);
   nlohmann::json cmd;
-  cmd["command"] = "firmware_update";
+  if (force) {
+    cmd["command"] = "firmware_update_force";
+  } else {
+    cmd["command"] = "firmware_update";
+  }
   this->send_command(cmd);
 
   if (this->_state != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
@@ -1182,7 +1186,9 @@ void NSPanel::handle_stomp_command_callback(StompFrame frame) {
   if (frame.body.compare("reboot") == 0) {
     this->reboot();
   } else if (frame.body.compare("firmware_update") == 0) {
-    this->firmware_update();
+    this->firmware_update(false);
+  } else if (frame.body.compare("firmware_update_force") == 0) {
+    this->firmware_update(true);
   } else if (frame.body.compare("gui_update") == 0) {
     this->tft_update();
   } else {

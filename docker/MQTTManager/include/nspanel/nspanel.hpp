@@ -98,7 +98,7 @@ public:
   /**
    * Sends a command to start firmware update.
    */
-  void firmware_update();
+  void firmware_update(bool force);
 
   /**
    * Sends a command to start TFT screen update.
