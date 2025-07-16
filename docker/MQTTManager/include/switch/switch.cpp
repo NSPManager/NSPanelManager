@@ -33,20 +33,27 @@ uint16_t SwitchEntity::get_room_id() {
 }
 
 void SwitchEntity::reload_config() {
-  auto light = database_manager::database.get<database_manager::Switch>(this->_id);
-  this->_name = light.friendly_name;
+  auto switch_entity = database_manager::database.get<database_manager::Entity>(this->_id);
+  this->_name = switch_entity.friendly_name;
   SPDLOG_DEBUG("Loading switch {}::{}.", this->_id, this->_name);
 
-  this->_room_id = light.room_id;
-  this->_entity_page_id = light.entities_page_id;
-  this->_entity_page_slot = light.room_view_position;
+  this->_room_id = switch_entity.room_id;
+  this->_entity_page_id = switch_entity.entities_page_id;
+  this->_entity_page_slot = switch_entity.room_view_position;
 
-  if (std::string(light.type).compare("home_assistant") == 0) {
-    this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
-  } else if (std::string(light.type).compare("openhab") == 0) {
-    this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
+  nlohmann::json entity_data = switch_entity.get_entity_data_json();
+  if (entity_data.contains("controller")) {
+    std::string controller = entity_data["controller"];
+    if (controller.compare("home_assistant") == 0) {
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
+    } else if (controller.compare("openhab") == 0) {
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
+    } else {
+      SPDLOG_ERROR("Got unknown controller ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(controller), this->_id, this->_name);
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
+    }
   } else {
-    SPDLOG_ERROR("Got unknown type ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(light.type), this->_id, this->_name);
+    SPDLOG_ERROR("No controller defined for light {}::{}. Will default to HOME_ASSISTANT.", this->_id, this->_name);
     this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
   }
 }

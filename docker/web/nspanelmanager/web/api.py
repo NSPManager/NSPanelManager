@@ -17,128 +17,8 @@ import os
 import logging
 
 from .apps import restart_mqtt_manager_process
-from .models import NSPanel, Room, Light, LightState, Scene, RelayGroup
+from .models import NSPanel, Room, LightState, Scene, RelayGroup
 from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default, set_setting_value
-
-
-def get_file_md5sum(filename):
-    fs = FileSystemStorage()
-    if fs.exists(filename):
-        return hashlib.md5(fs.open(filename).read()).hexdigest()
-    else:
-        return None
-
-
-def get_mqtt_manager_config(request):
-    environment = environ.Env()
-
-    return_json = {
-        "color_temp_min": int(get_setting_with_default("color_temp_min")),
-        "color_temp_max": int(get_setting_with_default("color_temp_max")),
-        "openhab_brightness_channel_name": get_setting_with_default("openhab_brightness_channel_name"),
-        "openhab_brightness_channel_min": get_setting_with_default("openhab_brightness_channel_min"),
-        "openhab_brightness_channel_max": get_setting_with_default("openhab_brightness_channel_max"),
-        "openhab_color_temp_channel_name": get_setting_with_default("openhab_color_temp_channel_name"),
-        "openhab_rgb_channel_name": get_setting_with_default("openhab_rgb_channel_name"),
-        "clock_us_style": get_setting_with_default("clock_us_style") == True,
-        "use_fahrenheit": get_setting_with_default("use_fahrenheit") == True,
-        "turn_on_behavior": get_setting_with_default("turn_on_behavior"),
-        "max_log_buffer_size": get_setting_with_default("max_log_buffer_size"),
-        "manager_address": get_setting_with_default("manager_address"),
-        "manager_port": get_setting_with_default("manager_port"),
-        "date_format": get_setting_with_default("date_format"),
-        "outside_temp_sensor_provider": get_setting_with_default("outside_temp_sensor_provider"),
-        "outside_temp_sensor_entity_id": get_setting_with_default("outside_temp_sensor_entity_id"),
-        "weather_location_latitude": get_setting_with_default("location_latitude"),
-        "weather_location_longitude": get_setting_with_default("location_longitude"),
-        "weather_wind_speed_format": get_setting_with_default("wind_speed_format"),
-        "weather_precipitation_format": get_setting_with_default("precipitation_format"),
-        "weather_update_interval": int(get_setting_with_default("weather_update_interval")),
-    }
-
-    if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
-        return_json["is_home_assistant_addon"] = True
-    else:
-        return_json["is_home_assistant_addon"] = False
-    fs = FileSystemStorage()
-    return_json["icon_mapping"] = json.loads(
-        fs.open("icon_mapping.json").read())
-
-    return_json["lights"] = {}
-    for light in Light.objects.all():
-        lightConfig = {}
-        lightConfig["type"] = "light"
-        lightConfig["id"] = light.id
-        lightConfig["name"] = light.friendly_name
-        lightConfig["room_name"] = light.room.friendly_name
-        lightConfig["room_id"] = light.room.id
-        lightConfig["light_type"] = light.type
-        lightConfig["can_dim"] = light.can_dim
-        lightConfig["can_color_temperature"] = light.can_color_temperature
-        lightConfig["can_rgb"] = light.can_rgb
-        lightConfig["home_assistant_name"] = light.home_assistant_name
-        lightConfig["openhab_name"] = light.openhab_name
-        lightConfig["openhab_control_mode"] = light.openhab_control_mode
-        lightConfig["openhab_item_switch"] = light.openhab_item_switch
-        lightConfig["openhab_item_dimmer"] = light.openhab_item_dimmer
-        lightConfig["openhab_item_color_temp"] = light.openhab_item_color_temp
-        lightConfig["openhab_item_rgb"] = light.openhab_item_rgb
-        return_json["lights"][light.id] = lightConfig
-
-    return_json["nspanels"] = {}
-    for panel in NSPanel.objects.all():
-        return_json["nspanels"][panel.id] = get_nspanel_json_representation(
-            panel)
-
-    return_json["scenes"] = []
-    for scene in Scene.objects.all():
-        scene_info = {
-            "id": scene.id,
-            "type": "scene",
-            "scene_type": scene.scene_type,
-            "scene_name": scene.friendly_name,
-            "entity_name": scene.backend_name,
-            "room_name": scene.room.friendly_name if scene.room != None else None,
-            "room_id": scene.room.id if scene.room != None else None,
-            "light_states": []
-        }
-        for state in scene.lightstate_set.all():
-            scene_info["light_states"].append({
-                "type": "light_state",
-                "light_id": state.light.id,
-                "light_type": state.light.type,
-                "color_mode": state.color_mode,
-                "light_level": state.light_level,
-                "color_temp": state.color_temperature,
-                "hue": state.hue,
-                "saturation": state.saturation
-            })
-        return_json["scenes"].append(scene_info)
-
-    return_json["rooms"] = []
-    for room in Room.objects.all():
-        room_info = {
-            "type": "room",
-            "id": room.id,
-            "name": room.friendly_name
-        }
-        return_json["rooms"].append(room_info)
-
-    return_json["nspanel_relay_groups"] = []
-    for relay_group in RelayGroup.objects.all():
-        rg_info = {
-            "type": "nspanel_relay_group",
-            "id": relay_group.id,
-            "name": relay_group.friendly_name,
-            "relays": []
-        }
-        for relay_binding in relay_group.relaygroupbinding_set.all():
-            rg_info["relays"].append(
-                {"nspanel_id": relay_binding.nspanel.id, "relay_num": relay_binding.relay_num})
-        return_json["nspanel_relay_groups"].append(rg_info)
-
-    return JsonResponse(return_json)
-
 
 def get_nspanel_json_representation(panel):
     panel_config = {
@@ -153,37 +33,6 @@ def get_nspanel_json_representation(panel):
         "denied": "True" if panel.denied else "False"
     }
     return panel_config
-
-
-def get_nspanels_warnings(request):
-    md5_firmware = get_file_md5sum("firmware.bin")
-    md5_data_file = get_file_md5sum("data_file.bin")
-    md5_tft_file = get_file_md5sum("gui.tft")
-    md5_us_tft_file = get_file_md5sum("gui_us.tft")
-    nspanels = []
-
-
-    for nspanel in NSPanel.objects.all():
-        panel_info = {}
-        panel_info["nspanel"] = {
-            "name": nspanel.friendly_name,
-            "mac": nspanel.mac_address
-        }
-        panel_info["warnings"] = ""
-        for panel in NSPanel.objects.all():
-            if panel == nspanel:
-                continue
-            elif panel.friendly_name == nspanel.friendly_name:
-                panel_info["warnings"] += "Two or more panels exists with the same name. This may have unintended consequences\n"
-                break
-        if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
-            panel_info["warnings"] += "Firmware update available.\n"
-        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "False" and nspanel.md5_tft_file != md5_tft_file:
-            panel_info["warnings"] += "GUI update available.\n"
-        if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True" and nspanel.md5_tft_file != md5_us_tft_file:
-            panel_info["warnings"] += "GUI update available.\n"
-        nspanels.append(panel_info)
-    return JsonResponse({"panels": nspanels})
 
 # TODO: Rework how available entities are gathered
 def get_all_available_entities(request):
@@ -504,26 +353,6 @@ def get_room_config(request, room_id: int):
             return_json["scenes"][scene.id]["can_save"] = True
         else:
             return_json["scenes"][scene.id]["can_save"] = False
-    return JsonResponse(return_json)
-
-
-def get_light_config(request, light_id: int):
-    light = Light.objects.get(id=light_id)
-    return_json = {}
-    return_json["id"] = light.id
-    return_json["name"] = light.friendly_name
-    return_json["type"] = light.type
-    return_json["ceiling"] = light.is_ceiling_light
-    return_json["can_dim"] = light.can_dim
-    return_json["can_color_temperature"] = light.can_color_temperature
-    return_json["can_rgb"] = light.can_rgb
-    return_json["home_assistant_name"] = light.home_assistant_name
-    return_json["openhab_name"] = light.openhab_name
-    return_json["openhab_control_mode"] = light.openhab_control_mode
-    return_json["openhab_item_switch"] = light.openhab_item_switch
-    return_json["openhab_item_dimmer"] = light.openhab_item_dimmer
-    return_json["openhab_item_color_temp"] = light.openhab_item_color_temp
-    return_json["openhab_item_rgb"] = light.openhab_item_rgb
     return JsonResponse(return_json)
 
 

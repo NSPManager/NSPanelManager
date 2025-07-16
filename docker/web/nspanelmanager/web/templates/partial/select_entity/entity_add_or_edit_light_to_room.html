@@ -50,13 +50,13 @@
                             class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex bg-base-300">
                             <li class="w-full sm:border-b-0 sm:border-r border-neutral">
                             <div class="flex items-center ps-3">
-                                <input id="light_type_ceiling" type="radio" name="light_type" value="ceiling" class="w-4 h-4 radio radio-accent" {% if light.is_ceiling_light %}checked{% endif %} required>
+                                <input id="light_type_ceiling" type="radio" name="light_type" value="ceiling" class="w-4 h-4 radio radio-accent" {% if light.entity_data.is_ceiling_light %}checked{% endif %} required>
                                 <label for="light_type_ceiling" class="w-full py-3 ms-2 text-sm font-medium">Ceiling</label>
                             </div>
                             </li>
                             <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
                             <div class="flex items-center ps-3">
-                                <input id="light_type_table" type="radio" name="light_type" value="table" class="w-4 h-4 radio radio-accent" {% if not light.is_ceiling_light %}checked{% endif %} required>
+                                <input id="light_type_table" type="radio" name="light_type" value="table" class="w-4 h-4 radio radio-accent" {% if not light.entity_data.is_ceiling_light %}checked{% endif %} required>
                                 <label for="light_type_table" class="w-full py-3 ms-2 text-sm font-medium">Table</label>
                             </div>
                             </li>

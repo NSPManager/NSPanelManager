@@ -24,7 +24,6 @@ class Migration(migrations.Migration):
                     'openhab_item_switch': switch.openhab_item_switch,
                 },
             )
-            switch.delete()
 
 
     def convert_lights_to_entities(apps, schema_editor):
@@ -54,7 +53,6 @@ class Migration(migrations.Migration):
                     'is_ceiling_light': light.is_ceiling_light,
                 },
             )
-            light.delete()
 
     dependencies = [
         ('web', '0056_alter_entity_entity_data'),

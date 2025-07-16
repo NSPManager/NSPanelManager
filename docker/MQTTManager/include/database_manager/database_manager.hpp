@@ -1,7 +1,9 @@
 #pragma once
+#include "nlohmann/json.hpp"
 #include <csignal>
 #include <cstdlib>
 #include <memory>
+#include <nlohmann/json_fwd.hpp>
 #include <optional>
 #include <spdlog/spdlog.h>
 #include <sqlite3.h>
@@ -88,37 +90,17 @@ struct RoomEntitiesPage {
   std::optional<int> room_id = 0;
 };
 
-struct Light {
+struct Entity {
   int id = 0;
-  bool can_dim;
-  bool can_rgb;
-  bool can_color_temperature;
-  int room_id;
+  std::string entity_type;
   std::string friendly_name;
-  bool is_ceiling_light;
-  std::string type;
-  std::string openhab_item_color_temperature;
-  std::string openhab_item_dimmer;
-  std::string openhab_item_switch;
-  std::string openhab_item_rgb;
-  std::string openhab_control_mode;
-  std::string openhab_name;
-  int room_view_position;
   int entities_page_id;
-  std::string home_assistant_name;
-  bool controlled_by_nspanel_main_page;
-};
+  int room_view_position;
+  int room_id;
+  std::string entity_data;
 
-struct Switch {
-  int id = 0;
-  std::string friendly_name;
-  std::string type;
-  std::string home_assistant_name;
-  std::string openhab_name;
-  std::string openhab_item_switch;
-  int entities_page_id;
-  int room_view_position;
-  int room_id;
+  nlohmann::json get_entity_data_json() const;
+  void set_entity_data_json(const nlohmann::json &json);
 };
 
 static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.sqlite3",
@@ -178,35 +160,14 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("color_temperature", &SceneLightState::color_temperature),
                                                                               sqlite_orm::make_column("hue", &SceneLightState::hue),
                                                                               sqlite_orm::make_column("saturation", &SceneLightState::saturation)),
-                                                       sqlite_orm::make_table("web_light",
-                                                                              sqlite_orm::make_column("id", &Light::id, sqlite_orm::primary_key().autoincrement()),
-                                                                              sqlite_orm::make_column("can_dim", &Light::can_dim),
-                                                                              sqlite_orm::make_column("can_rgb", &Light::can_rgb),
-                                                                              sqlite_orm::make_column("can_color_temperature", &Light::can_color_temperature),
-                                                                              sqlite_orm::make_column("room_id", &Light::room_id),
-                                                                              sqlite_orm::make_column("friendly_name", &Light::friendly_name),
-                                                                              sqlite_orm::make_column("is_ceiling_light", &Light::is_ceiling_light),
-                                                                              sqlite_orm::make_column("type", &Light::type),
-                                                                              sqlite_orm::make_column("openhab_item_color_temp", &Light::openhab_item_color_temperature),
-                                                                              sqlite_orm::make_column("openhab_item_dimmer", &Light::openhab_item_dimmer),
-                                                                              sqlite_orm::make_column("openhab_item_switch", &Light::openhab_item_switch),
-                                                                              sqlite_orm::make_column("openhab_item_rgb", &Light::openhab_item_rgb),
-                                                                              sqlite_orm::make_column("openhab_control_mode", &Light::openhab_control_mode),
-                                                                              sqlite_orm::make_column("openhab_name", &Light::openhab_name),
-                                                                              sqlite_orm::make_column("home_assistant_name", &Light::home_assistant_name),
-                                                                              sqlite_orm::make_column("room_view_position", &Light::room_view_position),
-                                                                              sqlite_orm::make_column("entities_page_id", &Light::entities_page_id),
-                                                                              sqlite_orm::foreign_key(&Light::entities_page_id).references(&RoomEntitiesPage::id),
-                                                                              sqlite_orm::make_column("controlled_by_nspanel_main_page", &Light::controlled_by_nspanel_main_page)),
-                                                       sqlite_orm::make_table("web_switch",
-                                                                              sqlite_orm::make_column("id", &Switch::id, sqlite_orm::primary_key().autoincrement()),
-                                                                              sqlite_orm::make_column("room_view_position", &Switch::room_view_position),
-                                                                              sqlite_orm::make_column("friendly_name", &Switch::friendly_name),
-                                                                              sqlite_orm::make_column("type", &Switch::type),
-                                                                              sqlite_orm::make_column("home_assistant_name", &Switch::home_assistant_name),
-                                                                              sqlite_orm::make_column("openhab_item_switch", &Switch::openhab_item_switch),
-                                                                              sqlite_orm::make_column("entities_page_id", &Switch::entities_page_id),
-                                                                              sqlite_orm::make_column("room_id", &Switch::room_id)));
+                                                       sqlite_orm::make_table("web_entity",
+                                                                              sqlite_orm::make_column("id", &Entity::id, sqlite_orm::primary_key().autoincrement()),
+                                                                              sqlite_orm::make_column("room_view_position", &Entity::room_view_position),
+                                                                              sqlite_orm::make_column("friendly_name", &Entity::friendly_name),
+                                                                              sqlite_orm::make_column("entity_type", &Entity::entity_type),
+                                                                              sqlite_orm::make_column("entities_page_id", &Entity::entities_page_id),
+                                                                              sqlite_orm::make_column("entity_data", &Entity::entity_data),
+                                                                              sqlite_orm::make_column("room_id", &Entity::room_id)));
 
 static void init() {
   database_manager::database.open_forever();

@@ -51,10 +51,10 @@ class NSPanel(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     button1_mode = models.IntegerField(default=0)
     button1_detached_mode_light = models.ForeignKey(
-        "Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
+        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
     button2_mode = models.IntegerField(default=0)
     button2_detached_mode_light = models.ForeignKey(
-        "Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
+        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
     md5_firmware = models.CharField(max_length=64, default="")
     md5_data_file = models.CharField(max_length=64, default="")
     md5_tft_file = models.CharField(max_length=64, default="")
@@ -90,47 +90,6 @@ class Entity(models.Model):
     room_view_position = models.IntegerField(default=0)
     entity_type = models.CharField(max_length=64, choices=EntityType)
     entity_data = models.JSONField(default=dict)
-
-
-class Light(models.Model):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    friendly_name = models.CharField(max_length=255, default="")
-    # "home_assistant", "openhab" or "manual":
-    type = models.CharField(max_length=16, default="manual")
-    is_ceiling_light = models.BooleanField(default=False)
-    controlled_by_nspanel_main_page = models.BooleanField(default=True)
-    can_dim = models.BooleanField(default=False)
-    can_rgb = models.BooleanField(default=False)
-    can_color_temperature = models.BooleanField(default=False)
-    home_assistant_name = models.CharField(max_length=255, default="")
-    openhab_name = models.CharField(max_length=255, default="")
-    openhab_control_mode = models.CharField(max_length=32, default="dimmer")
-    openhab_item_switch = models.CharField(max_length=255, default="")
-    openhab_item_dimmer = models.CharField(max_length=255, default="")
-    openhab_item_color_temp = models.CharField(max_length=255, default="")
-    openhab_item_rgb = models.CharField(max_length=255, default="")
-    room_view_position = models.IntegerField()
-    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE)
-
-    def __str__(self) -> str:
-        if self.room:
-            return F"{self.room.friendly_name} -> {self.friendly_name}"
-        else:
-            return F"??? -> {self.friendly_name}"
-
-
-class Switch(models.Model):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE)
-    room_view_position = models.IntegerField()
-    friendly_name= models.CharField(max_length=32)
-
-    # "home_assistant", "openhab" or "manual":
-    type = models.CharField(max_length=16, default="manual")
-    home_assistant_name = models.CharField(max_length=128, default="")
-    openhab_name = models.CharField(max_length=255, default="")
-    openhab_item_switch = models.CharField(max_length=255, default="")
-
 
 
 class Scene(models.Model):

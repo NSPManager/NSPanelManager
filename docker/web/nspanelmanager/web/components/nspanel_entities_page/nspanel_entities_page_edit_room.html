@@ -13,11 +13,11 @@
             {% if entities|dict_lookup:i %}
                 {% with entity=entities|dict_lookup:i %}
                     <div class="draggable-entity-item bg-neutral/50 rounded-box text-neutral-content flex items-center justify-center indicator w-full h-full hover:outline-1 hover:outline-accent cursor-grab" title="Drag & drop to move this entity" data-entity-type="{{ entity.type }}" data-entity-id="{{ entity.id }}">
-                        {% if entity.type == "Light" %}
+                        {% if entity.type == "light" %}
                             {% url "htmx_partial_edit_light_entity" light_id=entity.id as edit_url %}
-                        {% elif entity.type == "Switch" %}
+                        {% elif entity.type == "switch" %}
                             {% url "htmx_partial_edit_switch_entity" switch_id=entity.id as edit_url %}
-                        {% elif entity.type == "Scene" %}
+                        {% elif entity.type == "scene" %}
                             {% url "htmx_partial_edit_scene_entity" scene_id=entity.id as edit_url %}
                         {% else %}
                             <span class="font-bold text-error">UNKNOWN ENTITY TYPE {{ entity.type }}</span>

@@ -39,30 +39,66 @@ OpenhabLight::OpenhabLight(uint32_t light_id) : Light(light_id) {
     return;
   }
 
-  auto light = database_manager::database.get<database_manager::Light>(this->_id);
+  auto light = database_manager::database.get<database_manager::Entity>(this->_id);
+  nlohmann::json entity_data = light.get_entity_data_json();
 
-  this->_openhab_name = light.openhab_name;
-  std::string openhab_control_mode = light.openhab_control_mode;
-  if (openhab_control_mode.compare("dimmer") == 0) {
-    this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::DIMMER;
-    this->_openhab_on_off_item = light.openhab_item_dimmer;
-  } else if (openhab_control_mode.compare("switch") == 0) {
-    this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH;
-    this->_openhab_on_off_item = light.openhab_item_switch;
+  if (entity_data.contains("openhab_name")) {
+    this->_openhab_name = entity_data["openhab_name"];
   } else {
-    SPDLOG_ERROR("Got unknown OpenHAB control mode ({}) for light {}::{}. Will assume switch.", openhab_control_mode, this->_id, this->_name);
+    SPDLOG_ERROR("No openhab_name defined for light {}::{}", this->_id, this->_name);
+  }
+
+  if (entity_data.contains("openhab_control_mode")) {
+    std::string openhab_control_mode = entity_data["openhab_control_mode"];
+    if (openhab_control_mode.compare("dimmer") == 0) {
+      this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::DIMMER;
+      if (entity_data.contains("openhab_item_dimmer")) {
+        this->_openhab_on_off_item = entity_data["openhab_item_dimmer"];
+      } else {
+        SPDLOG_ERROR("No openhab on/off/dimmer item defined for light {}::{}", this->_id, this->_name);
+      }
+    } else if (openhab_control_mode.compare("switch") == 0) {
+      this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH;
+      if (entity_data.contains("openhab_item_switch")) {
+        this->_openhab_on_off_item = entity_data["openhab_item_switch"];
+      } else {
+        SPDLOG_ERROR("No openhab on/off item defined for light {}::{}", this->_id, this->_name);
+      }
+    } else {
+      SPDLOG_ERROR("Got unknown OpenHAB control mode ({}) for light {}::{}. Will assume switch.", openhab_control_mode, this->_id, this->_name);
+      this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH;
+      if (entity_data.contains("openhab_item_switch")) {
+        this->_openhab_on_off_item = entity_data["openhab_item_switch"];
+      } else {
+        SPDLOG_ERROR("No openhab on/off item defined for light {}::{}", this->_id, this->_name);
+      }
+    }
+  } else {
+    SPDLOG_ERROR("No OpenHAB control mode defined for light {}::{}. Will assume switch.", this->_id, this->_name);
     this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH;
-    this->_openhab_on_off_item = light.openhab_item_switch;
+    if (entity_data.contains("openhab_item_switch")) {
+      this->_openhab_on_off_item = entity_data["openhab_item_switch"];
+    } else {
+      SPDLOG_ERROR("No openhab on/off item defined for light {}::{}", this->_id, this->_name);
+    }
   }
 
   OpenhabManager::attach_event_observer(this->_openhab_on_off_item, boost::bind(&OpenhabLight::openhab_event_callback, this, _1));
   if (this->_can_color_temperature) {
-    this->_openhab_item_color_temperature = light.openhab_item_color_temperature;
-    OpenhabManager::attach_event_observer(this->_openhab_item_color_temperature, boost::bind(&OpenhabLight::openhab_event_callback, this, _1));
+    if (entity_data.contains("openhab_item_color_temp")) {
+      this->_openhab_item_color_temperature = entity_data["openhab_item_color_temp"];
+      OpenhabManager::attach_event_observer(this->_openhab_item_color_temperature, boost::bind(&OpenhabLight::openhab_event_callback, this, _1));
+    } else {
+      SPDLOG_ERROR("No openhab color temperature item defined for light {}::{}", this->_id, this->_name);
+    }
   }
   if (this->_can_rgb) {
-    this->_openhab_item_rgb = light.openhab_item_rgb;
-    OpenhabManager::attach_event_observer(this->_openhab_item_rgb, boost::bind(&OpenhabLight::openhab_event_callback, this, _1));
+    if (entity_data.contains("openhab_item_rgb")) {
+      this->_openhab_item_rgb = entity_data["openhab_item_rgb"];
+      OpenhabManager::attach_event_observer(this->_openhab_item_rgb, boost::bind(&OpenhabLight::openhab_event_callback, this, _1));
+    } else {
+      SPDLOG_ERROR("No openhab color item defined for light {}::{}", this->_id, this->_name);
+    }
   }
 
   this->send_state_update_to_nspanel(); // Send initial state to NSPanel

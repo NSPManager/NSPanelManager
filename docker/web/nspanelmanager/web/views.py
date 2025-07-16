@@ -12,7 +12,7 @@ import environ
 import os
 import signal
 
-from .models import NSPanel, Room, Light, Settings, Scene, RelayGroup, RelayGroupBinding, RoomEntitiesPage
+from .models import NSPanel, Entity, Room, Settings, Scene, RelayGroup, RelayGroupBinding, RoomEntitiesPage
 from .apps import start_mqtt_manager, send_mqttmanager_reload_command
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
 
@@ -209,7 +209,7 @@ def save_panel_settings(request, panel_id: int):
     panel.friendly_name = request.POST["name"]
     panel.button1_mode = request.POST["button1_mode"]
     if request.POST["button1_mode"] == "1":  # Detached mode
-        panel.button1_detached_mode_light = Light.objects.get(
+        panel.button1_detached_mode_light = Entity.objects.get(
             id=request.POST["button1_detached_mode_light"])
     else:
         panel.button1_detached_mode_light = None
@@ -225,7 +225,7 @@ def save_panel_settings(request, panel_id: int):
 
     panel.button2_mode = request.POST["button2_mode"]
     if request.POST["button2_mode"] == "1":  # Detached mode
-        panel.button2_detached_mode_light = Light.objects.get(
+        panel.button2_detached_mode_light = Entity.objects.get(
             id=request.POST["button2_detached_mode_light"])
     else:
         panel.button2_detached_mode_light = None
@@ -297,159 +297,6 @@ def save_panel_settings(request, panel_id: int):
     panel.save()
     send_mqttmanager_reload_command()
     return redirect('edit_nspanel', panel_id)
-
-
-def remove_light_from_room(request, room_id: int, light_id: int):
-    Light.objects.filter(id=light_id).delete()
-    send_mqttmanager_reload_command()
-    return redirect('edit_room', room_id=room_id)
-
-
-def add_light_to_room(request, room_id: int):
-    room = Room.objects.filter(id=room_id).first()
-    if request.POST["edit_light_id"] != "" and int(request.POST["edit_light_id"]) >= 0:
-        newLight = Light.objects.get(id=int(request.POST["edit_light_id"]))
-    else:
-        newLight = Light()
-    newLight.room = room
-    newLight.type = request.POST["add_new_light_type"]
-    newLight.friendly_name = request.POST["add_new_light_name"]
-    if request.POST["light_type"] == "ceiling":
-        newLight.is_ceiling_light = True
-    else:
-        newLight.is_ceiling_light = False
-
-    if newLight.type == "home_assistant":
-        newLight.home_assistant_name = request.POST["entity_id"]
-    elif newLight.type == "openhab":
-        newLight.openhab_name = request.POST["entity_id"]
-
-    if request.POST["light_control_mode"] == "dimmer":
-        newLight.can_dim = True
-        newLight.openhab_control_mode = "dimmer"
-        if newLight.type == "openhab":
-            newLight.openhab_item_dimmer = request.POST["openhab_dimming_channel_name"]
-    else:
-        newLight.openhab_control_mode = "switch"
-        newLight.can_dim = False
-        if newLight.type == "openhab":
-            newLight.openhab_item_switch = request.POST["openhab_switch_channel_name"]
-
-    if "color_temperature" in request.POST:
-        newLight.can_color_temperature = True
-        if newLight.type == "openhab":
-            newLight.openhab_item_color_temp = request.POST["openhab_color_temperature_channel_name"]
-    else:
-        newLight.can_color_temperature = False
-        newLight.openhab_item_color_temp = ""
-
-    if "rgb" in request.POST:
-        newLight.can_rgb = True
-        if newLight.type == "openhab":
-            newLight.openhab_item_rgb = request.POST["openhab_RGB_channel_name"]
-    else:
-        newLight.can_rgb = False
-        newLight.openhab_item_rgb = ""
-
-    if "add_to_room_view" in request.POST:
-        if newLight.room_view_position == 0:
-            all_lights = Light.objects.filter(
-                room=room, room_view_position__gte=1, room_view_position__lte=12)
-            for i in range(1, 13):
-                position_free = True
-                for light in all_lights:
-                    if light.room_view_position == i:
-                        position_free = False
-                        break
-                if position_free:
-                    newLight.room_view_position = i
-                    break
-
-    newLight.save()
-    send_mqttmanager_reload_command()
-    return redirect('edit_room', room_id=room_id)
-
-
-def add_scene_to_room(request, room_id: int):
-    room = Room.objects.filter(id=room_id).first()
-    if request.POST["edit_scene_id"].strip() != "" and int(request.POST["edit_scene_id"]) >= 0:
-        new_scene = Scene.objects.get(id=int(request.POST["edit_scene_id"]))
-    else:
-        new_scene = Scene()
-        new_scene.scene_type = "nspm_scene"
-    new_scene.friendly_name = request.POST["scene_name"]
-    new_scene.room = room
-    new_scene.save()
-    send_mqttmanager_reload_command()
-    return redirect('edit_room', room_id=room_id)
-
-
-def add_existing_scene_to_room(request, room_id: int):
-    room = Room.objects.filter(id=room_id).first()
-    new_scene = Scene()
-    new_scene.friendly_name = request.POST["scene_name"]
-    new_scene.backend_name = request.POST["scene_entity_name"]
-    new_scene.scene_type = request.POST["scene_type"]
-    new_scene.room = room
-    new_scene.save()
-    send_mqttmanager_reload_command()
-    return redirect('edit_room', room_id=room_id)
-
-
-def delete_scene(request, scene_id: int):
-    scene = Scene.objects.get(id=scene_id)
-    if scene:
-        scene.delete()
-        send_mqttmanager_reload_command()
-    return redirect('edit_room', room_id=scene.room.id)
-
-
-def delete_global_scene(request, scene_id: int):
-    scene = Scene.objects.get(id=scene_id)
-    if scene:
-        scene.delete()
-        send_mqttmanager_reload_command()
-    return redirect('global_scenes')
-
-
-def add_scene_to_global(request):
-    if request.POST["edit_scene_id"].strip() != "" and int(request.POST["edit_scene_id"]) >= 0:
-        new_scene = Scene.objects.get(id=int(request.POST["edit_scene_id"]))
-    else:
-        new_scene = Scene()
-        new_scene.scene_type = "nspm_scene"
-    new_scene.friendly_name = request.POST["scene_name"]
-    new_scene.room = None
-    new_scene.save()
-    send_mqttmanager_reload_command()
-    return redirect('global_scenes')
-
-
-def add_light_to_room_view(request, room_id: int):
-    if "light_id" not in request.POST:
-        return redirect('edit_room', room_id=room_id)
-    room = Room.objects.filter(id=room_id).first()
-    light_position = int(request.POST["position"])
-    existing_light_at_position = Light.objects.filter(
-        room=room, room_view_position=light_position).first()
-    if existing_light_at_position != None:
-        existing_light_at_position.room_view_position = 0
-        existing_light_at_position.save()
-    new_light = Light.objects.filter(id=int(request.POST["light_id"])).first()
-    new_light.room_view_position = light_position
-    new_light.save()
-    return redirect('edit_room', room_id=room_id)
-
-
-def remove_light_from_room_view(request, room_id: int):
-    room = Room.objects.filter(id=room_id).first()
-    light_position = int(request.POST["position"])
-    existing_light_at_position = Light.objects.filter(
-        room=room, room_view_position=light_position).first()
-    if existing_light_at_position != None:
-        existing_light_at_position.room_view_position = 0
-        existing_light_at_position.save()
-    return redirect('edit_room', room_id=room_id)
 
 
 def settings_page(request):

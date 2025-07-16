@@ -1,16 +1,5 @@
 from django.contrib import admin
 from django.urls import path, include
-from .components.nspanel_status_wifi_signal_strength.nspanel_status_wifi_signal_strength import NSPanelStatusWifiSignalStrength
-from .components.nspanel_status_text.nspanel_status_text import NSPanelStatusText
-from .components.nspanel_status_badge.nspanel_status_badge import NSPanelStatusBadge
-from .components.nspanel_status_header.nspanel_status_header import NSPanelHeader
-from .components.nspanel_status_ram_usage.nspanel_status_ram_usage import NSPanelStatusRamUsage
-from .components.nspanel_status_temperature.nspanel_status_temperature import NSPanelStatusTemperature
-from .components.nspanel_update_progress.nspanel_update_progress import NSPanelUpdateProgress
-from .components.nspanel_visit_link.nspanel_visit_link import NSPanelVisitLink
-from .components.nspanel_reboot_button.nspanel_reboot_button import NSPanelRebootButton
-from .components.nspanel_warnings.nspanel_warnings import NSPanelWarnings
-from .components.nspanel_room_entities_pages.nspanel_room_entities_pages import NSPanelRoomEntitiesPages
 from . import views, api, rest, htmx
 
 urlpatterns = [
@@ -18,27 +7,9 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('rooms', views.rooms, name='rooms'),
     path('rooms/<int:room_id>/', views.edit_room, name='edit_room'),
-    path('save_room/<int:room_id>',
-         views.update_room_form, name='update_room_form'),
+    path('save_room/<int:room_id>', views.update_room_form, name='update_room_form'),
     path('nspanel/<int:panel_id>', views.edit_nspanel, name='edit_nspanel'),
-    path('save_nspanel_settings/<int:panel_id>',
-         views.save_panel_settings, name='save_panel_settings'),
-    path('remove_light/<int:room_id>/<int:light_id>',
-         views.remove_light_from_room, name="remove_light_from_room"),
-    path('add_light/<int:room_id>', views.add_light_to_room, name="add_new_light"),
-    path('add_scene/<int:room_id>', views.add_scene_to_room,
-         name="add_new_scene_to_room"),
-    path('add_existing_scene/<int:room_id>', views.add_existing_scene_to_room,
-         name="add_existing_scene_to_room"),
-    path('add_scene/', views.add_scene_to_global,
-         name="add_new_scene_to_global"),
-    path('add_light_to_view/<int:room_id>', views.add_light_to_room_view,
-         name="add_new_light_to_room_view"),
-    path('remove_light_from_view/<int:room_id>',
-         views.remove_light_from_room_view, name="remove_light_from_room_view"),
-    path('delete_scene/<int:scene_id>', views.delete_scene, name="delete_scene"),
-    path('delete_global_scene/<int:scene_id>',
-         views.delete_global_scene, name="delete_global_scene"),
+    path('save_nspanel_settings/<int:panel_id>', views.save_panel_settings, name='save_panel_settings'),
     path('settings', views.settings_page, name="settings"),
     path('save_settings', views.save_settings, name="save_settings"),
     path('save_new_room', views.save_new_room, name='save_new_room'),
@@ -82,14 +53,8 @@ urlpatterns = [
          name='get_nspanel_config'),
     path('api/get_nspanel_config/room/<int:room_id>',
          api.get_room_config, name='get_nspanel_config'),
-    path('api/get_nspanels_warnings', api.get_nspanels_warnings,
-         name='get_nspanels_warnings'),
     path('api/get_all_available_entities', api.get_all_available_entities,
          name='get_all_available_entities'),
-    path('api/get_light_config/<int:light_id>',
-         api.get_light_config, name='get_all_available_entities'),
-    path('api/get_mqtt_manager_config', api.get_mqtt_manager_config,
-         name='get_mqtt_manager_config'),
     path('api/set_panel_status/<str:panel_mac>/',
          api.set_panel_status, name='set_panel_status'),
     path('api/set_panel_online_status/<str:panel_mac>/',
@@ -114,9 +79,6 @@ urlpatterns = [
     # Room URLs
     path('rest/rooms/<int:room_id>', rest.room_delete, name='rest_room_delete'),
     path('rest/rooms', rest.rooms, name='rest_rooms_create'),
-    # Light URLs
-    path('rest/lights', rest.lights, name='rest_lights'),
-    path('rest/lights/<int:light_id>', rest.light_delete, name='rest_light_delete'),
     # Scene URLs
     path('rest/scenes', rest.scenes, name='rest_lights'),
 

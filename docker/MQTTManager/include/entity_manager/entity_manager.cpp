@@ -155,7 +155,8 @@ void EntityManager::load_nspanels() {
 }
 
 void EntityManager::load_lights() {
-  auto light_ids = database_manager::database.select(&database_manager::Light::id, sqlite_orm::from<database_manager::Light>());
+  auto light_ids = database_manager::database.select(&database_manager::Entity::id, sqlite_orm::from<database_manager::Entity>(),
+                                                     sqlite_orm::where(sqlite_orm::glob(&database_manager::Entity::entity_type, "light")));
   SPDLOG_INFO("Loading {} lights.", light_ids.size());
 
   // Check if any existing light has been removed.
@@ -173,17 +174,23 @@ void EntityManager::load_lights() {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
 
       try {
-        auto light_settings = database_manager::database.get<database_manager::Light>(light_id);
-        if (light_settings.type.compare("home_assistant") == 0) {
-          std::shared_ptr<HomeAssistantLight> light = std::shared_ptr<HomeAssistantLight>(new HomeAssistantLight(light_settings.id));
-          SPDLOG_INFO("Light {}::{} was found in database but not in config. Creating light.", light->get_id(), light->get_name());
-          EntityManager::_entities.push_back(light);
-        } else if (light_settings.type.compare("openhab") == 0) {
-          std::shared_ptr<OpenhabLight> light = std::shared_ptr<OpenhabLight>(new OpenhabLight(light_settings.id));
-          SPDLOG_INFO("Light {}::{} was found in database but not in config. Creating light.", light->get_id(), light->get_name());
-          EntityManager::_entities.push_back(light);
+        auto light_settings = database_manager::database.get<database_manager::Entity>(light_id);
+        nlohmann::json entity_data = light_settings.get_entity_data_json();
+        if (entity_data.contains("controller")) {
+          std::string controller = entity_data["controller"];
+          if (controller.compare("home_assistant") == 0) {
+            std::shared_ptr<HomeAssistantLight> light = std::shared_ptr<HomeAssistantLight>(new HomeAssistantLight(light_settings.id));
+            SPDLOG_INFO("Light {}::{} was found in database but not in config. Creating light.", light->get_id(), light->get_name());
+            EntityManager::_entities.push_back(light);
+          } else if (controller.compare("openhab") == 0) {
+            std::shared_ptr<OpenhabLight> light = std::shared_ptr<OpenhabLight>(new OpenhabLight(light_settings.id));
+            SPDLOG_INFO("Light {}::{} was found in database but not in config. Creating light.", light->get_id(), light->get_name());
+            EntityManager::_entities.push_back(light);
+          } else {
+            SPDLOG_ERROR("Unknown light controller '{}'. Will ignore entity.", controller);
+          }
         } else {
-          SPDLOG_ERROR("Unknown light type '{}'. Will ignore entity.", light_settings.type);
+          SPDLOG_ERROR("Light {}::{} does not define a controller!", light_settings.id, light_settings.friendly_name);
         }
       } catch (std::exception &e) {
         SPDLOG_ERROR("Caught exception: {}", e.what());
@@ -195,7 +202,8 @@ void EntityManager::load_lights() {
 }
 
 void EntityManager::load_switches() {
-  auto switch_ids = database_manager::database.select(&database_manager::Switch::id, sqlite_orm::from<database_manager::Switch>());
+  auto switch_ids = database_manager::database.select(&database_manager::Entity::id, sqlite_orm::from<database_manager::Entity>(),
+                                                      sqlite_orm::where(sqlite_orm::glob(&database_manager::Entity::entity_type, "switch")));
   SPDLOG_INFO("Loading {} switches.", switch_ids.size());
 
   // Check if any existing switch has been removed.
@@ -213,17 +221,23 @@ void EntityManager::load_switches() {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
 
       try {
-        auto switch_settings = database_manager::database.get<database_manager::Switch>(switch_id);
-        if (switch_settings.type.compare("home_assistant") == 0) {
-          std::shared_ptr<HomeAssistantSwitch> switch_entity = std::shared_ptr<HomeAssistantSwitch>(new HomeAssistantSwitch(switch_settings.id));
-          SPDLOG_INFO("Switch {}::{} was found in database but not in config. Creating switch.", switch_entity->get_id(), switch_entity->get_name());
-          EntityManager::_entities.push_back(switch_entity);
-        } else if (switch_settings.type.compare("openhab") == 0) {
-          std::shared_ptr<OpenhabSwitch> switch_entity = std::shared_ptr<OpenhabSwitch>(new OpenhabSwitch(switch_settings.id));
-          SPDLOG_INFO("Switch {}::{} was found in database but not in config. Creating switch.", switch_entity->get_id(), switch_entity->get_name());
-          EntityManager::_entities.push_back(switch_entity);
+        auto switch_settings = database_manager::database.get<database_manager::Entity>(switch_id);
+        nlohmann::json entity_data = switch_settings.get_entity_data_json();
+        if (entity_data.contains("controller")) {
+          std::string controller = entity_data["controller"];
+          if (controller.compare("home_assistant") == 0) {
+            std::shared_ptr<HomeAssistantSwitch> switch_entity = std::shared_ptr<HomeAssistantSwitch>(new HomeAssistantSwitch(switch_settings.id));
+            SPDLOG_INFO("Switch {}::{} was found in database but not in config. Creating switch.", switch_entity->get_id(), switch_entity->get_name());
+            EntityManager::_entities.push_back(switch_entity);
+          } else if (controller.compare("openhab") == 0) {
+            std::shared_ptr<OpenhabSwitch> switch_entity = std::shared_ptr<OpenhabSwitch>(new OpenhabSwitch(switch_settings.id));
+            SPDLOG_INFO("Switch {}::{} was found in database but not in config. Creating switch.", switch_entity->get_id(), switch_entity->get_name());
+            EntityManager::_entities.push_back(switch_entity);
+          } else {
+            SPDLOG_ERROR("Unknown switch type '{}'. Will ignore entity.", controller);
+          }
         } else {
-          SPDLOG_ERROR("Unknown switch type '{}'. Will ignore entity.", switch_settings.type);
+          SPDLOG_ERROR("Switch {}::{} does not define a controller!", switch_settings.id, switch_settings.friendly_name);
         }
       } catch (std::exception &e) {
         SPDLOG_ERROR("Caught exception: {}", e.what());

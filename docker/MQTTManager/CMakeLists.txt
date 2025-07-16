@@ -61,7 +61,7 @@ target_link_libraries(MQTTManager_WebHelper ${CURL_LIBRARIES} spdlog::spdlog Boo
 add_library(MQTTManager_DatabaseManager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/database_manager/database_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/database_manager/database_manager.hpp)
 # set_target_properties(MQTTManager_DatabaseManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/database_manager/database_manager.hpp)
 target_include_directories(MQTTManager_DatabaseManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_DatabaseManager PUBLIC spdlog::spdlog sqlite_orm::sqlite_orm)
+target_link_libraries(MQTTManager_DatabaseManager PUBLIC spdlog::spdlog sqlite_orm::sqlite_orm nlohmann_json::nlohmann_json)
 
 add_library(MQTTManager_Entity STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity_icons.hpp)
 set_target_properties(MQTTManager_Entity PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.hpp PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity_icons.hpp)

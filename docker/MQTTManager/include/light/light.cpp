@@ -49,33 +49,51 @@ uint16_t Light::get_room_id() {
 }
 
 void Light::reload_config() {
-  auto light = database_manager::database.get<database_manager::Light>(this->_id);
+  auto light = database_manager::database.get<database_manager::Entity>(this->_id);
   this->_name = light.friendly_name;
   SPDLOG_DEBUG("Loading light {}::{}.", this->_id, this->_name);
 
   this->_room_id = light.room_id;
   this->_entity_page_id = light.entities_page_id;
   this->_entity_page_slot = light.room_view_position;
-  this->_controlled_from_main_page = light.controlled_by_nspanel_main_page;
+  nlohmann::json entity_data = light.get_entity_data_json();
 
-  if (light.is_ceiling_light) {
+  if (entity_data.contains("controlled_from_main_page")) {
+    this->_controlled_from_main_page = entity_data["controlled_from_main_page"];
+  } else {
+    this->_controlled_from_main_page = true;
+  }
+
+  if (entity_data.contains("is_ceiling_light") && entity_data["is_ceiling_light"] == true) {
     this->_light_type = MQTT_MANAGER_LIGHT_TYPE::CEILING;
   } else {
     this->_light_type = MQTT_MANAGER_LIGHT_TYPE::TABLE;
   }
 
-  if (std::string(light.type).compare("home_assistant") == 0) {
-    this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
-  } else if (std::string(light.type).compare("openhab") == 0) {
-    this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
+  if (entity_data.contains("controller")) {
+    std::string controller = entity_data["controller"];
+    if (controller.compare("home_assistant") == 0) {
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
+    } else if (controller.compare("openhab") == 0) {
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
+    } else {
+      SPDLOG_ERROR("Got unknown type ({}) for light {}::{}. Will default to HOME_ASSISTANT.", controller, this->_id, this->_name);
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
+    }
   } else {
-    SPDLOG_ERROR("Got unknown type ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(light.type), this->_id, this->_name);
+    SPDLOG_ERROR("No controller defined for light {}::{}. Will default to HOME_ASSISTANT.", this->_id, this->_name);
     this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
   }
 
-  this->_can_dim = light.can_dim;
-  this->_can_color_temperature = light.can_color_temperature;
-  this->_can_rgb = light.can_rgb;
+  if (entity_data.contains("can_dim")) {
+    this->_can_dim = entity_data["can_dim"] == true;
+  }
+  if (entity_data.contains("can_color_temperature")) {
+    this->_can_color_temperature = entity_data["can_color_temperature"] == true;
+  }
+  if (entity_data.contains("can_rgb")) {
+    this->_can_rgb = entity_data["can_rgb"] == true;
+  }
 
   if (this->_can_dim) {
     this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;

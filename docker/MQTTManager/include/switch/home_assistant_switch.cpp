@@ -22,8 +22,13 @@ HomeAssistantSwitch::HomeAssistantSwitch(uint32_t switch_id) : SwitchEntity(swit
     return;
   }
 
-  auto db_switch = database_manager::database.get<database_manager::Switch>(this->_id);
-  this->_home_assistant_name = db_switch.home_assistant_name;
+  auto db_switch = database_manager::database.get<database_manager::Entity>(this->_id);
+  nlohmann::json entity_data = db_switch.get_entity_data_json();
+  if (entity_data.contains("home_assistant_name")) {
+    this->_home_assistant_name = entity_data["home_assistant_name"];
+  } else {
+    SPDLOG_ERROR("No Home Assistant name defined for switch {}::{}", this->_id, this->_name);
+  }
   SPDLOG_DEBUG("Loaded Switch {}::{}, home assistant entity ID: {}", this->_id, this->_name, this->_home_assistant_name);
   HomeAssistantManager::attach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantSwitch::home_assistant_event_callback, this, _1));
 }

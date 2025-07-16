@@ -5,7 +5,6 @@
 
 {% block head %}
 {% load static %}
-<script src="{{ ingress_path }}{% static 'edit_room.js' %}?refresh={% now 'U' %}"></script>
 <script src="{{ ingress_path }}{% static 'modal-select-entity.js' %}?refresh={% now 'U' %}"></script>
 <link rel="stylesheet" href="{{ ingress_path }}{% static 'edit_room.css' %}">
 {% endblock %}

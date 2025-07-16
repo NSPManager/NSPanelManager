@@ -22,8 +22,15 @@ HomeAssistantLight::HomeAssistantLight(uint32_t light_id) : Light(light_id) {
     return;
   }
 
-  auto light = database_manager::database.get<database_manager::Light>(this->_id);
-  this->_home_assistant_name = light.home_assistant_name;
+  auto light = database_manager::database.get<database_manager::Entity>(this->_id);
+  nlohmann::json entity_data = light.get_entity_data_json();
+
+  if (entity_data.contains("home_assistant_name")) {
+    this->_home_assistant_name = entity_data["home_assistant_name"];
+  } else {
+
+    SPDLOG_ERROR("No home assistant name defined for Light {}::{}", this->_id, this->_name);
+  }
   SPDLOG_DEBUG("Loaded light {}::{}, home assistant entity ID: {}", this->_id, this->_name, this->_home_assistant_name);
   HomeAssistantManager::attach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantLight::home_assistant_event_callback, this, _1));
 
