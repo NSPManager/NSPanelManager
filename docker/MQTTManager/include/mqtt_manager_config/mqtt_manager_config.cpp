@@ -108,6 +108,16 @@ std::string MqttManagerConfig::get_setting_with_default(std::string key, std::st
   return default_value;
 }
 
+void MqttManagerConfig::set_nspanel_setting_value(int32_t nspanel_id, std::string key, std::string value) {
+  SPDLOG_DEBUG("Setting '{}' to value '{}' for NSPanel with ID {}", key, value, nspanel_id);
+
+  database_manager::NSPanelSettingHolder setting;
+  setting.nspanel_id = nspanel_id;
+  setting.name = key;
+  setting.value = value;
+  database_manager::database.insert(setting);
+}
+
 void MqttManagerConfig::update_firmware_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
   SPDLOG_INFO("Updating/calculating MD5 checksums for all firmware files.");

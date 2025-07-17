@@ -47,6 +47,11 @@ public:
 
   static std::string get_setting_with_default(std::string key, std::string default_value);
 
+  /**
+   * Set a value for a NSPanel setting.
+   */
+  static void set_nspanel_setting_value(int32_t nspanel_id, std::string key, std::string default_value);
+
   static void update_firmware_checksum();
   static void update_tft_checksums();
 

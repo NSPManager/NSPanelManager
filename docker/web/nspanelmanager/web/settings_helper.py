@@ -50,6 +50,7 @@ default_settings = {
     "mqtt_wait_time": 1000,
     "optimistic_mode": True,
     "light_turn_on_brightness": 50,
+    "default_nspanel_type": "eu"
 }
 
 def get_setting_with_default(name) -> str:

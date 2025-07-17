@@ -308,6 +308,7 @@ def settings_page(request):
 
     data = get_base_data(request)
     data["mqttmanager_log_level"] = get_setting_with_default("mqttmanager_log_level")
+    data["default_nspanel_type"] = get_setting_with_default("default_nspanel_type")
     data["color_temp_min"] = get_setting_with_default("color_temp_min")
     data["color_temp_max"] = get_setting_with_default("color_temp_max")
     data["reverse_color_temp"] = get_setting_with_default("reverse_color_temp")
@@ -382,22 +383,15 @@ def save_settings(request):
         if request.POST["openhab_token"] != "":
             set_setting_value(name="openhab_token", value=request.POST["openhab_token"])
 
-    set_setting_value(name="raise_to_100_light_level",
-                      value=request.POST["raise_to_100_light_level"])
-    set_setting_value(name="color_temp_min",
-                      value=request.POST["color_temp_min"])
-    set_setting_value(name="color_temp_max",
-                      value=request.POST["color_temp_max"])
-    set_setting_value(name="reverse_color_temp",
-                      value=request.POST["reverse_color_temp"])
-    set_setting_value(name="min_button_push_time",
-                      value=request.POST["min_button_push_time"])
-    set_setting_value(name="button_long_press_time",
-                      value=request.POST["button_long_press_time"])
-    set_setting_value(name="special_mode_trigger_time",
-                      value=request.POST["special_mode_trigger_time"])
-    set_setting_value(name="special_mode_release_time",
-                      value=request.POST["special_mode_release_time"])
+    set_setting_value(name="raise_to_100_light_level", value=request.POST["raise_to_100_light_level"])
+    set_setting_value(name="default_nspanel_type", value=request.POST["default_nspanel_type"])
+    set_setting_value(name="color_temp_min", value=request.POST["color_temp_min"])
+    set_setting_value(name="color_temp_max", value=request.POST["color_temp_max"])
+    set_setting_value(name="reverse_color_temp", value=request.POST["reverse_color_temp"])
+    set_setting_value(name="min_button_push_time", value=request.POST["min_button_push_time"])
+    set_setting_value(name="button_long_press_time", value=request.POST["button_long_press_time"])
+    set_setting_value(name="special_mode_trigger_time", value=request.POST["special_mode_trigger_time"])
+    set_setting_value(name="special_mode_release_time", value=request.POST["special_mode_release_time"])
 
     set_setting_value(name="screensaver_activation_timeout", value=request.POST["screensaver_activation_timeout"])
     set_setting_value(name="screen_dim_level", value=request.POST["screen_dim_level"])

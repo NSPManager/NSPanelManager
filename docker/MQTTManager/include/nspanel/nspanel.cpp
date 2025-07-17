@@ -84,6 +84,11 @@ std::shared_ptr<NSPanel> NSPanel::create_from_discovery_request(nlohmann::json r
     panel_data.accepted = false;
     try {
       int new_nspanel_id = database_manager::database.insert(panel_data);
+      if (MqttManagerConfig::get_setting_with_default("default_nspanel_type", "eu").compare("eu") == 0) {
+        MqttManagerConfig::set_nspanel_setting_value(new_nspanel_id, "is_us_panel", "False");
+      } else {
+        MqttManagerConfig::set_nspanel_setting_value(new_nspanel_id, "is_us_panel", "True");
+      }
       return std::shared_ptr<NSPanel>(new NSPanel(new_nspanel_id));
     } catch (std::system_error &ex) {
       SPDLOG_ERROR("Failed to create new NSPanel {} in database. What: {}.", request_data.at("mac_origin").get<std::string>(), ex.what());

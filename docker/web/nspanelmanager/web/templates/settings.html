@@ -109,6 +109,20 @@
       <div class="p-4 bg-base-100 rounded-box shadow-lg w-full">
         <span class="block mb-2 text-xl">Global NSPanel settings</span>
 
+        <!-- Default NSPanel type eu/us -->
+        <div class="mb-2">
+          <label for="default_nspanel_type" class="block mb-1 text-sm font-medium">Default NSPanel type</label>
+          <div class="flex flex-row-reverse">
+            <select name="default_nspanel_type" id="default_nspanel_type" class="rounded-none bg-base-300 border-neutral rounded-e-field border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id" required>
+                <option value="eu" {% if default_nspanel_type == "eu" %}selected{% endif %}>EU</option>
+                <option value="us" {% if default_nspanel_type == "us" %}selected{% endif %}>US</option>
+            </select>
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/room_id:border-accent">
+              <span class="mdi mdi-home"></span>
+            </span>
+          </div>
+        </div>
+
         <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
           <!-- Minimum color temperature-->
           <div class="mb-2 w-full md:me-1">
