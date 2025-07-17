@@ -272,9 +272,13 @@ def save_panel_settings(request, panel_id: int):
     else:
         set_nspanel_setting_value(panel_id, "show_screensaver_outside_temperature", request.POST["show_screensaver_outside_temperature"])
 
+    if request.POST["temperature_calibration"] == "":
+        set_nspanel_setting_value(panel_id, "temperature_calibration", float(0))
+    else:
+        set_nspanel_setting_value(panel_id, "temperature_calibration", float(request.POST.get("temperature_calibration", 0)))
+
     set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
     set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
-    set_nspanel_setting_value(panel_id, "temperature_calibration", float(request.POST["temperature_calibration"]))
     set_nspanel_setting_value(panel_id, "default_page", request.POST["default_page"])
     set_nspanel_setting_value(panel_id, "lock_to_default_room", request.POST["lock_to_default_room"])
     set_nspanel_setting_value(panel_id, "reverse_relays", request.POST["reverse_relays"])
