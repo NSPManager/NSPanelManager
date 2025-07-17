@@ -325,15 +325,37 @@
 
             <!-- Button 1 detached mode -->
             <div id="button1_detached_mode_controls" class="hidden mt-4">
-              <label for="button1_detached_mode_light" class="block mb-2 text-sm font-medium">Left button controls light</label>
+              <label for="button1_detached_mode_light_room" class="block mb-2 text-sm font-medium">Left button controls light</label>
+              <div class="flex flex-row-reverse">
+                <select name="button1_detached_mode_room" id="button1_detached_mode_room" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
+                  {% for room in rooms %}
+                    {% if panel_info.data.button1_detached_mode_light.room == room %}
+                        <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
+                    {% else %}
+                        <option value="{{ room.id }}">{{ room.friendly_name }}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/default_page:border-accent">
+                  <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <title>Room</title>
+                    <path
+                      d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+                  </svg>
+                </span>
+              </div>
               <div class="flex flex-row-reverse">
                 <select name="button1_detached_mode_light" id="button1_detached_mode_light" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
-                  {% for light in panel_info.data.room.light_set.all %}
-                  {% if panel_info.data.button1_detached_mode_light == light %}
-                  <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
-                  {% else %}
-                  <option value="{{ light.id }}">{{ light.friendly_name }}</option>
-                  {% endif %}
+                  {% for room in rooms %}
+                    {% for entity in room.entity_set.all %}
+                        {% if entity.entity_type == 'light' %}
+                            {% if panel_info.data.button1_detached_mode_light == entity %}
+                            <option class="button1_detached_mode_light_option" data-room-id="{{ room.id }}" value="{{ entity.id }}" selected>{{ entity.friendly_name }}</option>
+                            {% else %}
+                            <option class="button1_detached_mode_light_option" data-room-id="{{ room.id }}" value="{{ entity.id }}">{{ entity.friendly_name }}</option>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
                   {% endfor %}
                 </select>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/default_page:border-accent">
@@ -402,17 +424,39 @@
               </span>
             </div>
 
-            <!-- Button 1 detached mode -->
+            <!-- Button 2 detached mode -->
             <div id="button2_detached_mode_controls" class="hidden mt-4">
-              <label for="button2_detached_mode_light" class="block mb-2 text-sm font-medium">Right button controls light</label>
+              <label for="button2_detached_mode_room" class="block mb-2 text-sm font-medium">Right button controls light</label>
               <div class="flex flex-row-reverse">
-                <select name="button2_detached_mode_light" id="button1_detached_mode_light" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
-                  {% for light in panel_info.data.room.light_set.all %}
-                  {% if panel_info.data.button2_detached_mode_light == light %}
-                  <option value="{{ light.id }}" selected>{{ light.friendly_name }}</option>
-                  {% else %}
-                  <option value="{{ light.id }}">{{ light.friendly_name }}</option>
-                  {% endif %}
+                <select name="button2_detached_mode_light" id="button2_detached_mode_room" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
+                  {% for room in rooms %}
+                    {% if panel_info.data.button2_detached_mode_light.room == room %}
+                        <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
+                    {% else %}
+                        <option value="{{ room.id }}">{{ room.friendly_name }}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/default_page:border-accent">
+                  <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <title>Room</title>
+                    <path
+                      d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+                  </svg>
+                </span>
+              </div>
+              <div class="flex flex-row-reverse">
+                <select name="button2_detached_mode_light" id="button2_detached_mode_light" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
+                  {% for room in rooms %}
+                    {% for entity in room.entity_set.all %}
+                        {% if entity.entity_type == 'light' %}
+                            {% if panel_info.data.button2_detached_mode_light == entity %}
+                            <option class="button2_detached_mode_light_option" data-room-id="{{ room.id }}" value="{{ entity.id }}" selected>{{ entity.friendly_name }}</option>
+                            {% else %}
+                            <option class="button2_detached_mode_light_option" data-room-id="{{ room.id }}" value="{{ entity.id }}">{{ entity.friendly_name }}</option>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
                   {% endfor %}
                 </select>
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/default_page:border-accent">

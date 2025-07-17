@@ -77,6 +77,81 @@ function update_shown_elements() {
     $("#button2_mqtt_mode_controls").addClass("hidden");
   }
 
+  // Update shown lights depending on selected room
+  var button1_selected_room_id = $("#button1_detached_mode_room").val();
+  $(
+    ".button1_detached_mode_light_option[data-room-id='" +
+      button1_selected_room_id +
+      "']",
+  ).show();
+  $(
+    ".button1_detached_mode_light_option[data-room-id!='" +
+      button1_selected_room_id +
+      "']",
+  ).hide();
+
+  // Check if selected button1_detached_mode_light option is visible, if not, select the first of the options.
+  if (
+    $(
+      ".button1_detached_mode_light_option[data-room-id='" +
+        button1_selected_room_id +
+        "']:selected",
+    ).length == 0
+  ) {
+    var button1_detached_light_first_value = $(
+      ".button1_detached_mode_light_option[data-room-id='" +
+        button1_selected_room_id +
+        "']:first",
+    ).val();
+    if (button1_detached_light_first_value) {
+      console.log(
+        "Selected option for button1 detached light is no longer accissible in selected room, will select ",
+        button1_detached_light_first_value,
+        " instead.",
+      );
+      $("#button1_detached_mode_light")
+        .val(button1_detached_light_first_value)
+        .change();
+    }
+  }
+
+  var button2_selected_room_id = $("#button2_detached_mode_room").val();
+  $(
+    ".button2_detached_mode_light_option[data-room-id='" +
+      button2_selected_room_id +
+      "']",
+  ).show();
+  $(
+    ".button2_detached_mode_light_option[data-room-id!='" +
+      button2_selected_room_id +
+      "']",
+  ).hide();
+
+  // Check if selected button2_detached_mode_light option is visible, if not, select the first of the options.
+  if (
+    $(
+      ".button2_detached_mode_light_option[data-room-id='" +
+        button2_selected_room_id +
+        "']:selected",
+    ).length == 0
+  ) {
+    var button2_detached_light_first_value = $(
+      ".button2_detached_mode_light_option[data-room-id='" +
+        button2_selected_room_id +
+        "']:first",
+    ).val();
+    if (button2_detached_light_first_value) {
+      console.log(
+        "Selected option for button2 detached light is no longer accissible in selected room, will select ",
+        button2_detached_light_first_value,
+        " instead.",
+      );
+      $("#button2_detached_mode_light")
+        .val(button2_detached_light_first_value)
+        .change();
+    }
+  }
+
   // Update if screensaver outside temperature setting is available or not.
   var screensaver_mode = $("#screensaver_mode").val();
   if (screensaver_mode == "global") {
@@ -108,6 +183,8 @@ $(document).ready(() => {
   $("#button1_mode").change(update_shown_elements);
   $("#button2_mode").change(update_shown_elements);
   $("#screensaver_mode").change(update_shown_elements);
+  $("#button1_detached_mode_room").change(update_shown_elements);
+  $("#button2_detached_mode_room").change(update_shown_elements);
 
   $("#panel_type").on("change", function () {
     var selected_type = $(this).val();

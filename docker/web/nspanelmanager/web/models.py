@@ -34,7 +34,7 @@ class Room(models.Model):
     displayOrder = models.IntegerField(default=number)
 
     def __str__(self) -> str:
-        return self.friendly_name
+        return "room_obj: " + str(self.id) + "::" + self.friendly_name
 
 
 class RoomEntitiesPage(models.Model):
