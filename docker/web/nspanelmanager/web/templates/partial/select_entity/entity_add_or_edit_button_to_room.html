@@ -39,13 +39,13 @@
                 </div>
 
 
-                {% if button.entity_data.controller == "home_assistant" %}
+                {% if entity_source == "home_assistant" %}
                     <div class="mt-4">
                         {% component "item_select" name="backend_name" label="Home Assistant item" items=home_assistant_items selected=button.entity_data.home_assistant_name %}{% endcomponent %}
                     </div>
                 {% endif %}
 
-                {% if button.entity_data.controller == "nspm" %}
+                {% if entity_source == "nspm" %}
                 <!-- MQTT Topic -->
                 <div class="">
                     <label for="mqtt_topic" class="block mb-2 text-sm font-medium">MQTT Topic</label>
