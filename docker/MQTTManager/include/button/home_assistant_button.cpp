@@ -22,7 +22,7 @@ HomeAssistantButton::HomeAssistantButton(uint32_t button_id) : ButtonEntity(butt
     SPDLOG_ERROR("HomeAssistantSwitch has not been recognized as controlled by HOME_ASSISTANT. Will stop processing switch.");
     return;
   }
-  SPDLOG_DEBUG("Loaded Switch {}::{}, home assistant entity ID: {}", this->_id, this->_name);
+  SPDLOG_DEBUG("Loaded Switch {}::{}, home assistant entity ID: {}", this->_id, this->_name, this->_entity_data.value("home_assistant_name", "NOT DEFINED!"));
 }
 
 HomeAssistantButton::~HomeAssistantButton() {

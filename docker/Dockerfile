@@ -15,7 +15,7 @@ RUN if [ "$IS_DEVEL" != "yes" ]; then apt-get update \
     && pip install conan; fi
 
 RUN if [ "$IS_DEVEL" != "yes" ]; then conan profile detect --force && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf \
-    && sed -i "s|cppstd=gnu14|cppstd=gnu17|g" /root/.conan2/profiles/default \
+    && sed -i "s|cppstd=gnu14|cppstd=gnu23|g" /root/.conan2/profiles/default \
     && sed -i "s|build_type=Release|build_type=Debug|g" /root/.conan2/profiles/default; fi
 
 RUN if [ -z "$no_mqttmanager_build" ]; then /bin/bash /MQTTManager/compile_mqttmanager.sh --target-platform "$TARGETPLATFORM" --strip; else echo "Not building MQTTManager."; fi
@@ -39,7 +39,7 @@ RUN apt-get update && apt-get -y upgrade
 RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get install -y --no-install-recommends cmake build-essential gdb curl npm postgresql-client curl inotify-tools net-tools build-essential protobuf-c-compiler \
     && pip install conan && conan profile detect --force \
     && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf \
-    && sed -i "s|cppstd=gnu14|cppstd=gnu17|g" /root/.conan2/profiles/default \
+    && sed -i "s|cppstd=gnu14|cppstd=gnu23|g" /root/.conan2/profiles/default \
     && sed -i "s|build_type=Release|build_type=Debug|g" /root/.conan2/profiles/default \
     && echo "alias ll='ls -lh --color=auto'" >> /etc/bash.bashrc \
     #&& rm -rf /var/lib/apt/lists/*
