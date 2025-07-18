@@ -5,6 +5,7 @@ public:
   // Entity Icons
   static constexpr const char *entity_icon_switch_on = "s";
   static constexpr const char *entity_icon_switch_off = "t";
+  static constexpr const char *entity_icon_button = "z";
 
   // Misc Icons
   static constexpr const char *save_icon = "w";

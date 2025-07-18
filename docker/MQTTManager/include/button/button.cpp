@@ -108,7 +108,7 @@ void ButtonEntity::toggle() {
 }
 
 std::string_view ButtonEntity::get_icon() {
-  return ""; // Show no icon
+  return EntityIcons::entity_icon_button;
 }
 
 uint16_t ButtonEntity::get_icon_color() {
