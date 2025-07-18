@@ -31,6 +31,7 @@
 #include <cstdlib>
 #include <database_manager/database_manager.hpp>
 #include <entity_manager/entity_manager.hpp>
+#include <expected>
 #include <iterator>
 #include <memory>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
@@ -115,9 +116,9 @@ void EntityManager::load_rooms() {
   // Cause existing room to reload config or add a new room if it does not exist.
   for (auto &room_id : room_ids) {
     auto existing_room = EntityManager::get_room(room_id);
-    if (existing_room != nullptr) [[likely]] {
-      existing_room->reload_config();
-      existing_room->post_init();
+    if (existing_room) [[likely]] {
+      (*existing_room)->reload_config();
+      (*existing_room)->post_init();
     } else {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
       auto room = std::shared_ptr<Room>(new Room(room_id));
@@ -146,9 +147,9 @@ void EntityManager::load_nspanels() {
   // Cause existing NSPanel to reload config or add a new NSPanel if it does not exist.
   for (auto &nspanel_id : nspanel_ids) {
     auto existing_nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
-    if (existing_nspanel != nullptr) [[likely]] {
-      existing_nspanel->reload_config();
-      existing_nspanel->send_config();
+    if (existing_nspanel) [[likely]] {
+      (*existing_nspanel)->reload_config();
+      (*existing_nspanel)->send_config();
     } else {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
       auto panel = std::shared_ptr<NSPanel>(new NSPanel(nspanel_id));
@@ -172,8 +173,8 @@ void EntityManager::load_lights() {
   // Cause existing lights to reload config or add a new light if it does not exist.
   for (auto &light_id : light_ids) {
     auto existing_light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, light_id);
-    if (existing_light != nullptr) [[likely]] {
-      existing_light->reload_config();
+    if (existing_light) [[likely]] {
+      (*existing_light)->reload_config();
     } else {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
 
@@ -219,8 +220,8 @@ void EntityManager::load_buttons() {
   // Cause existing buttons to reload config or add a new button if it does not exist.
   for (auto &button_id : button_ids) {
     auto existing_button = EntityManager::get_entity_by_id<ButtonEntity>(MQTT_MANAGER_ENTITY_TYPE::BUTTON, button_id);
-    if (existing_button != nullptr) [[likely]] {
-      existing_button->reload_config();
+    if (existing_button) [[likely]] {
+      (*existing_button)->reload_config();
     } else {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
 
@@ -266,8 +267,8 @@ void EntityManager::load_switches() {
   // Cause existing switches to reload config or add a new switch if it does not exist.
   for (auto &switch_id : switch_ids) {
     auto existing_switch = EntityManager::get_entity_by_id<SwitchEntity>(MQTT_MANAGER_ENTITY_TYPE::SWITCH_ENTITY, switch_id);
-    if (existing_switch != nullptr) [[likely]] {
-      existing_switch->reload_config();
+    if (existing_switch) [[likely]] {
+      (*existing_switch)->reload_config();
     } else {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
 
@@ -312,8 +313,8 @@ void EntityManager::load_scenes() {
   // Cause existing NSPanel to reload config or add a new NSPanel if it does not exist.
   for (auto &scene_id : scene_ids) {
     auto existing_scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
-    if (existing_scene != nullptr) [[likely]] {
-      existing_scene->reload_config();
+    if (existing_scene) [[likely]] {
+      (*existing_scene)->reload_config();
     } else {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
 
@@ -380,7 +381,7 @@ void EntityManager::load_room_entities_pages() {
   SPDLOG_DEBUG("Loaded {} pages", EntityManager::_global_room_entities_pages.size());
 }
 
-std::shared_ptr<Room> EntityManager::get_room(uint32_t room_id) {
+std::expected<std::shared_ptr<Room>, EntityManager::EntityError> EntityManager::get_room(uint32_t room_id) {
   try {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
     for (auto room = EntityManager::_rooms.begin(); room != EntityManager::_rooms.end(); room++) {
@@ -392,20 +393,26 @@ std::shared_ptr<Room> EntityManager::get_room(uint32_t room_id) {
     SPDLOG_ERROR("Caught exception: {}", e.what());
     SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
   }
-  return nullptr;
+  return std::unexpected(EntityManager::EntityError::NOT_FOUND);
 }
 
-std::vector<std::shared_ptr<Room>> EntityManager::get_all_rooms() {
+std::expected<std::vector<std::shared_ptr<Room>>, EntityManager::EntityError> EntityManager::get_all_rooms() {
   std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
   return EntityManager::_rooms;
 }
 
-std::vector<std::shared_ptr<RoomEntitiesPage>> EntityManager::get_all_global_room_entities_pages() {
-  std::lock_guard<std::mutex> mutex_guard(EntityManager::_global_room_entities_pages_mutex);
+std::expected<std::vector<std::shared_ptr<RoomEntitiesPage>>, EntityManager::EntityError> EntityManager::get_all_global_room_entities_pages() {
+  if (EntityManager::_global_room_entities_pages.empty()) {
+    return std::unexpected(EntityManager::EntityError::NONE_LOADED);
+  }
+
   return EntityManager::_global_room_entities_pages;
 }
 
-int32_t EntityManager::get_number_of_global_room_entities_pages() {
+std::expected<int32_t, EntityManager::EntityError> EntityManager::get_number_of_global_room_entities_pages() {
+  if (EntityManager::_global_room_entities_pages.empty()) {
+    return std::unexpected(EntityManager::EntityError::NONE_LOADED);
+  }
   return EntityManager::_global_room_entities_pages.size();
 }
 
@@ -588,16 +595,21 @@ void EntityManager::_room_updated_callback(Room *room) {
 
 void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
   if (command.has_first_page_turn_on() && command.first_page_turn_on().global()) {
-    std::shared_ptr<NSPanel> nspanel = EntityManager::get_nspanel_by_id(command.nspanel_id());
-    if (nspanel == nullptr) {
+    auto nspanel = EntityManager::get_nspanel_by_id(command.nspanel_id());
+    if (!nspanel) {
       SPDLOG_ERROR("NSPanel with ID {} not found while processing command. Will cancel processing.", command.nspanel_id());
       return;
     }
 
     std::vector<std::shared_ptr<Room>> rooms;
-    if (nspanel->is_locked_to_default_room()) {
-      SPDLOG_DEBUG("NSPanel {}::{} is locked to it's default room.", nspanel->get_id(), nspanel->get_name());
-      rooms.push_back(EntityManager::get_room(nspanel->get_default_room_id()));
+    if ((*nspanel)->is_locked_to_default_room()) {
+      SPDLOG_DEBUG("NSPanel {}::{} is locked to it's default room.", (*nspanel)->get_id(), (*nspanel)->get_name());
+      auto room = EntityManager::get_room((*nspanel)->get_default_room_id());
+      if (room) {
+        rooms.push_back(*room);
+      } else {
+        SPDLOG_ERROR("Default room for NSPanel {}::{} not found.", (*nspanel)->get_id(), (*nspanel)->get_name());
+      }
     } else {
       std::lock_guard<std::mutex> lock_guard(EntityManager::_rooms_mutex);
       rooms = EntityManager::_rooms;
@@ -652,11 +664,11 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
     }
   } else if (command.has_toggle_entity_from_entities_page()) {
     auto entity = EntityManager::get_entity_by_page_id_and_slot(command.toggle_entity_from_entities_page().entity_page_id(), command.toggle_entity_from_entities_page().entity_slot());
-    if (entity && entity->can_toggle()) {
+    if (entity && (*entity)->can_toggle()) {
       SPDLOG_DEBUG("Will toggle entity in slot {} in page with ID {}.", command.toggle_entity_from_entities_page().entity_slot(), command.toggle_entity_from_entities_page().entity_page_id());
-      // Handle light seperatly as they reequires some special handling in regards to what brightness to turn on to.
-      if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
-        auto light_entity = std::dynamic_pointer_cast<Light>(entity);
+      // Handle light separately as they require some special handling in regards to what brightness to turn on to.
+      if ((*entity)->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
+        auto light_entity = std::dynamic_pointer_cast<Light>(*entity);
         if (light_entity) {
           if (light_entity->get_state()) {
             light_entity->turn_off(true);
@@ -665,7 +677,7 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
             uint16_t room_id = light_entity->get_room_id();
             auto room = EntityManager::get_room(room_id);
             if (room) {
-              auto room_entities = room->get_all_entities();
+              auto room_entities = (*room)->get_all_entities();
               // Remove any entities that are not lights
               room_entities.erase(std::remove_if(room_entities.begin(), room_entities.end(), [](auto entity) {
                                     return entity->get_type() != MQTT_MANAGER_ENTITY_TYPE::LIGHT;
@@ -706,7 +718,7 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
           SPDLOG_ERROR("Received command to toggle light entity in slot {} in page with ID {} but entity could not be cast to a light.", command.toggle_entity_from_entities_page().entity_slot(), command.toggle_entity_from_entities_page().entity_page_id());
         }
       } else {
-        entity->toggle();
+        (*entity)->toggle();
       }
     } else {
       SPDLOG_DEBUG("Received command to toggle entity in slot {} in page with ID {} bot did not find such an entity.", command.toggle_entity_from_entities_page().entity_slot(), command.toggle_entity_from_entities_page().entity_page_id());
@@ -745,6 +757,8 @@ bool EntityManager::mqtt_callback(const std::string &topic, const std::string &p
 
 bool EntityManager::_process_message(const std::string &topic, const std::string &payload) {
   try {
+    SPDLOG_DEBUG("Got MQTT message on topic {}", topic);
+
     if (topic.compare("nspanel/mqttmanager/command") == 0) {
       SPDLOG_TRACE("Received command payload: {}", payload);
       nlohmann::json data = nlohmann::json::parse(payload);
@@ -753,86 +767,10 @@ bool EntityManager::_process_message(const std::string &topic, const std::string
         return true;
       }
       std::string mac_origin = data["mac_origin"];
-      if (data.contains("method")) {
-        auto panel = EntityManager::get_nspanel_by_mac(mac_origin);
-        if (panel == nullptr) {
-          SPDLOG_TRACE("Received command from an unknown NSPanel. Will ignore it.");
-          return true;
-        } else if (panel != nullptr && !panel->has_registered_to_manager()) {
-          SPDLOG_TRACE("Received command from an NSPanel that hasn't registered to the manager yet. Will ignore it.");
-          return true;
-        }
-        std::string command_method = data["method"];
-        if (command_method.compare("set") == 0) {
-          std::string command_set_attribute = data["attribute"];
-          if (command_set_attribute.compare("brightness") == 0) {
-            std::vector<uint> entity_ids = data["entity_ids"];
-            uint8_t new_brightness = data["brightness"];
-            for (uint entity_id : entity_ids) {
-              std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
-              if (light != nullptr) {
-                if (new_brightness != 0) {
-                  light->set_brightness(new_brightness, false);
-                  light->turn_on(true);
-                } else {
-                  light->turn_off(true);
-                }
-              }
-            }
-          } else if (command_set_attribute.compare("kelvin") == 0) {
-            std::vector<uint> entity_ids = data["entity_ids"];
-            uint16_t new_kelvin = data["kelvin"];
-            for (uint entity_id : entity_ids) {
-              std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
-              if (light != nullptr) {
-                light->set_color_temperature(new_kelvin, true);
-              }
-            }
-          } else if (command_set_attribute.compare("hue") == 0) {
-            std::vector<uint> entity_ids = data["entity_ids"];
-            uint16_t new_hue = data["hue"];
-            for (uint entity_id : entity_ids) {
-              std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
-              if (light != nullptr) {
-                light->set_hue(new_hue, true);
-              }
-            }
-          } else if (command_set_attribute.compare("saturation") == 0) {
-            std::vector<uint> entity_ids = data["entity_ids"];
-            uint8_t new_saturation = data["saturation"];
-            for (uint entity_id : entity_ids) {
-              std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, entity_id);
-              if (light != nullptr) {
-                light->set_saturation(new_saturation, true);
-              }
-            }
-          } else {
-            SPDLOG_ERROR("Unknown attribute '{}' in set-command request.", command_set_attribute);
-          }
-        } else {
-          SPDLOG_ERROR("Unknown method. Payload: {}", payload);
-        }
-      } else if (data.contains("command")) {
+      if (data.contains("command")) {
         std::string command = data["command"];
         if (command.compare("register_request") == 0) {
           EntityManager::_handle_register_request(data);
-        } else if (command.compare("activate_scene") == 0) {
-          int scene_id = data["scene_id"];
-          std::shared_ptr<Scene> scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
-          if (scene != nullptr) {
-            scene->activate();
-          } else {
-            SPDLOG_ERROR("No scene with ID {} exists.", scene_id);
-          }
-        } else if (command.compare("save_scene") == 0) {
-          int scene_id = data["scene_id"];
-          std::shared_ptr<Scene> scene = EntityManager::get_entity_by_id<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE, scene_id);
-          if (scene != nullptr) {
-            scene->save();
-          } else {
-            SPDLOG_ERROR("No scene with ID {} exists.", scene_id);
-          }
-
         } else {
           SPDLOG_ERROR("Got command but no handler for it exists. Command: {}", command);
         }
@@ -856,9 +794,9 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
   std::string name = data["friendly_name"];
   SPDLOG_INFO("Got register request from NSPanel with name {} and MAC: {}", name, mac_address);
   auto panel = EntityManager::get_nspanel_by_mac(mac_address);
-  if (panel != nullptr && panel->get_state() != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT && panel->get_state() != MQTT_MANAGER_NSPANEL_STATE::DENIED) {
-    SPDLOG_TRACE("Has registered to manager? {}", panel->has_registered_to_manager() ? "TRUE" : "FALSE");
-    panel->register_to_manager(data);
+  if (panel && (*panel)->get_state() != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT && (*panel)->get_state() != MQTT_MANAGER_NSPANEL_STATE::DENIED) {
+    SPDLOG_TRACE("Has registered to manager? {}", (*panel)->has_registered_to_manager() ? "TRUE" : "FALSE");
+    (*panel)->register_to_manager(data);
   }
   if (panel == nullptr) {
     nlohmann::json init_data = data;
@@ -876,7 +814,7 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
   }
 }
 
-std::shared_ptr<NSPanel> EntityManager::get_nspanel_by_id(uint id) {
+std::expected<std::shared_ptr<NSPanel>, EntityManager::EntityError> EntityManager::get_nspanel_by_id(uint id) {
   SPDLOG_TRACE("Trying to find NSPanel by ID {}", id);
   std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
   for (auto nspanel : EntityManager::_nspanels) {
@@ -886,10 +824,10 @@ std::shared_ptr<NSPanel> EntityManager::get_nspanel_by_id(uint id) {
     }
   }
   SPDLOG_TRACE("Did not find NSPanel by ID {}", id);
-  return nullptr;
+  return std::unexpected(EntityManager::EntityError::NOT_FOUND);
 }
 
-std::shared_ptr<NSPanel> EntityManager::get_nspanel_by_mac(std::string mac) {
+std::expected<std::shared_ptr<NSPanel>, EntityManager::EntityError> EntityManager::get_nspanel_by_mac(std::string mac) {
   SPDLOG_TRACE("Trying to find NSPanel by MAC {}", mac);
   std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
   for (auto nspanel : EntityManager::_nspanels) {
@@ -900,5 +838,5 @@ std::shared_ptr<NSPanel> EntityManager::get_nspanel_by_mac(std::string mac) {
     }
   }
   SPDLOG_TRACE("Did not find NSPanel by MAC {}", mac);
-  return nullptr;
+  return std::unexpected(EntityManager::EntityError::NOT_FOUND);
 }

@@ -1,15 +1,13 @@
 #ifndef MQTT_MANAGER_ENTITY_MANAGER
 #define MQTT_MANAGER_ENTITY_MANAGER
 
-#include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
 #include "room/room_entities_page.hpp"
 #include "websocket_server/websocket_server.hpp"
-#include <algorithm>
 #include <boost/signals2.hpp>
 #include <condition_variable>
 #include <entity/entity.hpp>
-#include <list>
+#include <expected>
 #include <memory>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <mutex>
@@ -26,10 +24,17 @@ class Light;
 
 class EntityManager {
 public:
+  // Error that are used within std::expected to indicate what went wrong.
+  enum EntityError {
+    NOT_FOUND,   // The entity was not found
+    NONE_LOADED, // No entities loaded of the type requested
+  };
+
   /**
    * Setup function callbacks and other prerequisites for the EntityManager
    */
-  static void init();
+  static void
+  init();
 
   /*
    * Load entities from database, update any already loaded entities.
@@ -88,24 +93,24 @@ public:
   static void load_room_entities_pages();
 
   /**
-   * Get a room with the given ID if it existing. Otherwise returns nullptr.
+   * Get a room with the given ID if it existing.
    */
-  static std::shared_ptr<Room> get_room(uint32_t room_id);
+  static std::expected<std::shared_ptr<Room>, EntityError> get_room(uint32_t room_id);
 
   /**
    * Get all currently registered rooms
    */
-  static std::vector<std::shared_ptr<Room>> get_all_rooms();
+  static std::expected<std::vector<std::shared_ptr<Room>>, EntityError> get_all_rooms();
 
   /*
    * Get all currently registered room entities pages.
    */
-  static std::vector<std::shared_ptr<RoomEntitiesPage>> get_all_global_room_entities_pages();
+  static std::expected<std::vector<std::shared_ptr<RoomEntitiesPage>>, EntityError> get_all_global_room_entities_pages();
 
   /*
    * Get number of register entities pages.
    */
-  static int32_t get_number_of_global_room_entities_pages();
+  static std::expected<int32_t, EntityError> get_number_of_global_room_entities_pages();
 
   /*
    * When a room is updated, update the "All rooms" status for when the panel is in the "All rooms" mode.
@@ -123,7 +128,7 @@ public:
    * Return pointer to entity if found, otherwise a nullptr
    */
   template <class EntityClass>
-  static std::shared_ptr<EntityClass> get_entity_by_id(MQTT_MANAGER_ENTITY_TYPE type, int id) {
+  static std::expected<std::shared_ptr<EntityClass>, EntityError> get_entity_by_id(MQTT_MANAGER_ENTITY_TYPE type, int id) {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     auto rit = EntityManager::_entities.cbegin();
     while (rit != EntityManager::_entities.cend()) {
@@ -133,14 +138,14 @@ public:
         ++rit;
       }
     }
-    return nullptr;
+    return std::unexpected(EntityError::NOT_FOUND);
   }
 
   /**
    * Get an MqttManagerEntity that is placed in the given slot on the given page.
    * Returns shared_ptr to MqttManagerEntity object if found, otherwise nullptr.
    */
-  static std::shared_ptr<MqttManagerEntity> get_entity_by_page_id_and_slot(uint32_t page_id, uint8_t page_slot) {
+  static std::expected<std::shared_ptr<MqttManagerEntity>, EntityError> get_entity_by_page_id_and_slot(uint32_t page_id, uint8_t page_slot) {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     auto rit = EntityManager::_entities.cbegin();
     while (rit != EntityManager::_entities.cend()) {
@@ -150,7 +155,7 @@ public:
         ++rit;
       }
     }
-    return nullptr;
+    return std::unexpected(EntityError::NOT_FOUND);
   }
 
   /**
@@ -158,7 +163,7 @@ public:
    * Return std::list of pointers to entities.
    */
   template <class EntityClass>
-  static std::vector<std::shared_ptr<EntityClass>> get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE type) {
+  static std::expected<std::vector<std::shared_ptr<EntityClass>>, EntityError> get_all_entities_by_type(MQTT_MANAGER_ENTITY_TYPE type) {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     std::vector<std::shared_ptr<EntityClass>> entities;
 
@@ -168,7 +173,12 @@ public:
       }
     }
 
-    return entities;
+    if (entities.size() > 0) {
+      return entities;
+    } else {
+
+      return std::unexpected(EntityError::NONE_LOADED);
+    }
   }
 
   /**
@@ -186,8 +196,8 @@ public:
    */
   static void websocket_callback(StompFrame frame);
 
-  static std::shared_ptr<NSPanel> get_nspanel_by_id(uint id);
-  static std::shared_ptr<NSPanel> get_nspanel_by_mac(std::string mac);
+  static std::expected<std::shared_ptr<NSPanel>, EntityError> get_nspanel_by_id(uint id);
+  static std::expected<std::shared_ptr<NSPanel>, EntityError> get_nspanel_by_mac(std::string mac);
 
 private:
   static inline std::vector<std::shared_ptr<MqttManagerEntity>> _entities;

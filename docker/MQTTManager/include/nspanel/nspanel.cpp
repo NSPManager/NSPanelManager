@@ -338,39 +338,49 @@ void NSPanel::send_config() {
   SPDLOG_DEBUG("NSPanel {}::{} loading available rooms.", this->_id, this->_name);
   if (this->is_locked_to_default_room()) {
     SPDLOG_DEBUG("NSPanel {}::{} locked to default room.", this->_id, this->_name);
-    std::shared_ptr<Room> room = EntityManager::get_room(this->get_default_room_id());
-    if (room != nullptr) {
+    auto room = EntityManager::get_room(this->get_default_room_id());
+    if (room) {
       NSPanelConfig_RoomInfo *room_info = config.add_room_infos();
-      room_info->set_room_id(room->get_id());
+      room_info->set_room_id((*room)->get_id());
       // Get all entity pages attached to room and add those IDs to list of availabe entity pages for that room
-      for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_entities_pages()) {
+      for (std::shared_ptr<RoomEntitiesPage> &page : (*room)->get_all_entities_pages()) {
         room_info->add_entity_page_ids(page->get_id());
       }
-      for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_scenes_pages()) {
+      for (std::shared_ptr<RoomEntitiesPage> &page : (*room)->get_all_scenes_pages()) {
         room_info->add_scene_page_ids(page->get_id());
       }
     }
   } else {
-    for (auto &room : EntityManager::get_all_rooms()) {
-      if (room != nullptr) {
-        NSPanelConfig_RoomInfo *room_info = config.add_room_infos();
-        room_info->set_room_id(room->get_id());
-        // Get all entity pages attached to room and add those IDs to list of availabe entity pages for that room
-        for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_entities_pages()) {
-          room_info->add_entity_page_ids(page->get_id());
-        }
-        for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_scenes_pages()) {
-          room_info->add_scene_page_ids(page->get_id());
+    auto rooms = EntityManager::get_all_rooms();
+    if (rooms) {
+      for (auto &room : *rooms) {
+        if (room != nullptr) {
+          NSPanelConfig_RoomInfo *room_info = config.add_room_infos();
+          room_info->set_room_id(room->get_id());
+          // Get all entity pages attached to room and add those IDs to list of availabe entity pages for that room
+          for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_entities_pages()) {
+            room_info->add_entity_page_ids(page->get_id());
+          }
+          for (std::shared_ptr<RoomEntitiesPage> &page : room->get_all_scenes_pages()) {
+            room_info->add_scene_page_ids(page->get_id());
+          }
         }
       }
+    } else {
+      SPDLOG_ERROR("No rooms loaded while trying to send config to NSPanel {}::{}.", this->_id, this->_name);
     }
   }
   SPDLOG_DEBUG("NSPanel {}::{} loaded {} rooms.", this->_id, this->_name, config.room_infos_size());
 
   // Load global scenes
   std::vector<uint32_t> global_scene_entity_pages_ids;
-  for (auto &page : EntityManager::get_all_global_room_entities_pages()) {
-    config.add_global_scene_entity_page_ids(page->get_id());
+  auto global_entities_pages = EntityManager::get_all_global_room_entities_pages();
+  if (global_entities_pages) {
+    for (auto &page : *global_entities_pages) {
+      config.add_global_scene_entity_page_ids(page->get_id());
+    }
+  } else {
+    SPDLOG_WARN("No global entities pages were loaded while building config for NSPanel {}::{}", this->_id, this->_name);
   }
 
   SPDLOG_DEBUG("Sending updated NSPanelConfig to panel {}::{} over MQTT.", this->_id, this->_name);
@@ -1133,9 +1143,9 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
         switch (button_mode) {
         case ButtonMode::DETACHED: {
           if (this->_settings.button1_detached_mode_light_id.has_value()) {
-            std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, this->_settings.button1_detached_mode_light_id.value());
-            if (light != nullptr)
-              light->toggle();
+            auto light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, this->_settings.button1_detached_mode_light_id.value());
+            if (light)
+              (*light)->toggle();
             else
               SPDLOG_ERROR("Tried to toggle detached light via panel but no light was was found with configured ID.");
           } else {
@@ -1160,9 +1170,9 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
         switch (button_mode) {
         case ButtonMode::DETACHED: {
           if (this->_settings.button2_detached_mode_light_id.has_value()) {
-            std::shared_ptr<Light> light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, this->_settings.button2_detached_mode_light_id.value());
-            if (light != nullptr)
-              light->toggle();
+            auto light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, this->_settings.button2_detached_mode_light_id.value());
+            if (light)
+              (*light)->toggle();
             else
               SPDLOG_ERROR("Tried to toggle detached light via panel but no light was was found with configured ID.");
           } else {

@@ -89,12 +89,16 @@ void RoomEntitiesPage::post_init(bool send_state_update) {
     this->_entities.resize(this->_page_settings.page_type);
     uint8_t entities_attached = 0;
     for (int i = 0; i < this->_page_settings.page_type; i++) {
-      this->_entities[i] = EntityManager::get_entity_by_page_id_and_slot(this->_id, i);
-      if (this->_entities[i] != nullptr) {
+      auto entity_in_slot = EntityManager::get_entity_by_page_id_and_slot(this->_id, i);
+      if (entity_in_slot) {
+        this->_entities[i] = *entity_in_slot;
         entities_attached++;
         SPDLOG_DEBUG("Attached entity type {} with ID {} to RoomEntitiesPage ID {} page slot {}.", (int)this->_entities[i]->get_type(), this->_entities[i]->get_id(), this->_id, i);
 
         this->_entities[i]->attach_entity_changed_callback(boost::bind(&RoomEntitiesPage::_entity_changed_callback, this, _1));
+      } else {
+        SPDLOG_DEBUG("Found no entity for slot {}.", i);
+        this->_entities[i] = nullptr;
       }
     }
     SPDLOG_DEBUG("Attached {} entities to RoomEntitiesPage {}.", entities_attached, this->_id);
@@ -132,22 +136,35 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
     if (this->_room != nullptr) {
       proto_state.set_header_text(fmt::format("{} {}/{}", this->_room->get_name(), this->_page_settings.display_order + 1, this->_room->get_number_of_scene_pages()));
     } else {
-      proto_state.set_header_text(fmt::format("{}/{}", this->_page_settings.display_order + 1, EntityManager::get_number_of_global_room_entities_pages()));
+      auto number_of_global_room_entities_pages = EntityManager::get_number_of_global_room_entities_pages();
+      if (number_of_global_room_entities_pages) {
+        proto_state.set_header_text(fmt::format("{}/{}", this->_page_settings.display_order + 1, *number_of_global_room_entities_pages));
+      } else {
+        proto_state.set_header_text(fmt::format("{}/{}", this->_page_settings.display_order + 0, 0));
+      }
     }
   } else {
     if (this->_room != nullptr) {
       proto_state.set_header_text(fmt::format("{} {}/{}", this->_room->get_name(), this->_page_settings.display_order + 1, this->_room->get_number_of_entity_pages()));
     } else {
-      proto_state.set_header_text(fmt::format("{}/{}", this->_page_settings.display_order + 1, EntityManager::get_number_of_global_room_entities_pages()));
+      auto number_of_global_room_entities_pages = EntityManager::get_number_of_global_room_entities_pages();
+      if (number_of_global_room_entities_pages) {
+        proto_state.set_header_text(fmt::format("{}/{}", this->_page_settings.display_order + 1, *number_of_global_room_entities_pages));
+      } else {
+        proto_state.set_header_text(fmt::format("{}/{}", this->_page_settings.display_order + 0, 0));
+      }
     }
   }
 
   std::lock_guard<std::mutex> lock_guard(this->_entities_mutex);
   for (int i = 0; i < this->_page_settings.page_type; i++) {
-    std::shared_ptr<MqttManagerEntity> entity = EntityManager::get_entity_by_page_id_and_slot(this->_id, i);
-    if (entity == nullptr) {
+    auto entity_result = EntityManager::get_entity_by_page_id_and_slot(this->_id, i);
+    if (!entity_result) {
+      SPDLOG_DEBUG("No entity assigned to slot {}", i);
       continue; // No entity assigned in slot, move to next slot.
     }
+    auto entity = entity_result.value();
+    SPDLOG_DEBUG("Got shared ptr for entity with ID {}", entity->get_id());
 
     if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
       std::shared_ptr<Light> light = std::static_pointer_cast<Light>(entity);

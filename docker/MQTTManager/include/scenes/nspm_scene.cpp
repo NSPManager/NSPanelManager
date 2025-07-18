@@ -52,8 +52,9 @@ void NSPMScene::activate() {
   try {
     auto light_states = database_manager::database.get_all<database_manager::SceneLightState>(sqlite_orm::where(sqlite_orm::c(&database_manager::SceneLightState::scene_id) == this->_id));
     for (auto &light_state : light_states) {
-      auto light_entity = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, light_state.light_id);
-      if (light_entity != nullptr) [[likely]] {
+      auto light_entity_result = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, light_state.light_id);
+      if (light_entity_result) [[likely]] {
+        auto light_entity = *light_entity_result;
         if (light_state.light_level == 0) {
           light_entity->turn_off(true);
           continue;
@@ -104,14 +105,19 @@ void NSPMScene::save() {
   try {
     std::vector<std::shared_ptr<Light>> lights;
     if (this->_is_global) {
-      for (std::shared_ptr<Room> room : EntityManager::get_all_rooms()) {
-        std::vector<std::shared_ptr<Light>> room_lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
-        lights.insert(lights.end(), room_lights.begin(), room_lights.end());
+      auto rooms = EntityManager::get_all_rooms();
+      if (rooms) {
+        for (std::shared_ptr<Room> room : *rooms) {
+          std::vector<std::shared_ptr<Light>> room_lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+          lights.insert(lights.end(), room_lights.begin(), room_lights.end());
+        }
+      } else {
+        SPDLOG_ERROR("No rooms loaded while trying to save global scene.");
       }
     } else {
       auto room = EntityManager::get_room(this->_room_id);
-      if (room != nullptr) [[likely]] {
-        lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+      if (room) [[likely]] {
+        lights = (*room)->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
       } else {
         SPDLOG_ERROR("Failed to get room for scene {}::{} when saving light states.", this->_id, this->_name);
       }
