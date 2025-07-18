@@ -6,9 +6,7 @@
 
         <form hx-post="{% url 'htmx_handle_entity_modal_result' %}" hx-indicator="#modal_loading" onsubmit="modal.close();">
             {% csrf_token %}
-            <input class="input" type="hidden" id="entity_type" name="entity_type" value="{{ entity.type }}">
-            <input class="input" type="hidden" id="entity_id" name="entity_id" value="{{ entity.entity_id }}">
-            <input class="input" type="hidden" id="edit_light_id" name="edit_light_id" value="{{ edit_light_id }}">
+            <input class="input" type="hidden" id="edit_button_id" name="edit_button_id" value="{{ edit_button_id }}">
             <!-- Modal content -->
             <div class="">
                 <!-- Modal header -->

@@ -452,15 +452,6 @@ def partial_entity_add_button_entity(request):
                 "status": "error",
                 "text": "Failed to get items from Home Assistant!"
             }, status=500)
-    elif data["entity_source"] == "openhab":
-        openhab_items = web.openhab_api.get_all_openhab_items()
-        if len(openhab_items["errors"]) == 0:
-            data["openhab_items"] = openhab_items["items"]
-        else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from OpenHAB!"
-            }, status=500)
     else:
         logging.error("Unknown entity source! Source: " + data["entity_source"])
 
@@ -491,7 +482,7 @@ def partial_entity_edit_switch_entity(request, switch_id):
 def partial_entity_edit_button_entity(request, button_id):
     button = Entity.objects.get(id=button_id)
 
-    request.session["action"] = "ADD_SWITCH_TO_ROOM"
+    request.session["action"] = "ADD_BUTTON_TO_ROOM"
     request.session["action_args"] = json.dumps({
         "entity_id": button_id,
         "room_id": button.room.id,
@@ -501,11 +492,22 @@ def partial_entity_edit_button_entity(request, button_id):
 
     data = {
         "button": button,
-        "edit_light_id": button_id,
+        "edit_button_id": button_id,
+        "entity_source": button.entity_data["controller"],
         "entity": {
             "name": button.friendly_name,
         },
     }
+    if data["entity_source"] == "home_assistant":
+        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["button", "input_button"]})
+        if len(ha_items["errors"]) == 0:
+            data["home_assistant_items"] = ha_items["items"]
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "Failed to get items from Home Assistant!"
+            }, status=500)
+
     return render(request, "partial/select_entity/entity_add_or_edit_button_to_room.html", data)
 
 
@@ -973,7 +975,7 @@ def create_or_update_button_entity(request):
         'mqtt_topic': '', # Used in case of controller = manual
         'mqtt_payload': '', # Used in case of controller = manual
     }
-    if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
+    if "entity_id" in action_args and int(action_args["entity_id"]):
         new_button = Entity.objects.get(id=int(action_args["entity_id"]))
         entity_data = new_button.entity_data
     else:
@@ -983,12 +985,15 @@ def create_or_update_button_entity(request):
         new_button.room = Room.objects.get(id=int(action_args["room_id"]))
         new_button.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
         new_button.room_view_position = int(action_args["page_slot"])
-        if entity_data['controller'] == "home_assistant":
-            entity_data['home_assistant_name'] = request.POST["backend_name"]
-        elif entity_data['controller'] == "nspm":
-            entity_data['mqtt_topic'] = request.POST["mqtt_topic"]
-            entity_data['mqtt_payload'] = request.POST["mqtt_payload"]
 
+    print("Entity data: ", entity_data)
+    print("TEST1")
+    if entity_data['controller'] == "home_assistant":
+        entity_data['home_assistant_name'] = request.POST["backend_name"]
+    elif entity_data['controller'] == "nspm":
+        entity_data['mqtt_topic'] = request.POST["mqtt_topic"]
+        entity_data['mqtt_payload'] = request.POST["mqtt_payload"]
+    print("TEST2")
     new_button.friendly_name = request.POST["light_name"]
     new_button.entity_data = entity_data
     new_button.save()
