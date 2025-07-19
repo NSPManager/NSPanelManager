@@ -87,10 +87,10 @@ public:
   static void load_scenes();
 
   /*
-   * Load RoomEntitiesPages from the DB and remove any existing page that no longer exist.
-   * This is primarily used for global scenes pages.
+   * Load global RoomEntitiesPages from the DB and remove any existing page that no longer exist.
+   * This is primarily used for global scenes pages. Any page associated with a room is ignored and is instead handled within each room itself.
    */
-  static void load_room_entities_pages();
+  static void load_global_room_entities_pages();
 
   /**
    * Get a room with the given ID if it existing.

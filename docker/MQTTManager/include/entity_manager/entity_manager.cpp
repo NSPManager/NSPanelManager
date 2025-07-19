@@ -86,7 +86,7 @@ void EntityManager::load_entities() {
   EntityManager::load_buttons();
   EntityManager::load_switches();
   EntityManager::load_scenes();
-  EntityManager::load_room_entities_pages();
+  EntityManager::load_global_room_entities_pages();
   EntityManager::load_rooms();    // Rooms are loaded last as to make all room components be able to find entities of other types.
   EntityManager::load_nspanels(); // Loads panels after rooms are loaded so that they can find all availables entities and rooms for the panel config.
 
@@ -344,9 +344,9 @@ void EntityManager::load_scenes() {
   SPDLOG_DEBUG("Loaded {} scenes", scene_ids.size());
 }
 
-void EntityManager::load_room_entities_pages() {
+void EntityManager::load_global_room_entities_pages() {
   {
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_global_room_entities_pages_mutex);
+    EntityManager::_global_room_entities_pages_mutex.lock();
     auto global_page_ids = database_manager::database.select(&database_manager::RoomEntitiesPage::id, sqlite_orm::from<database_manager::RoomEntitiesPage>(), sqlite_orm::where(sqlite_orm::is_null(&database_manager::RoomEntitiesPage::room_id)));
     SPDLOG_INFO("Loading {} global pages.", global_page_ids.size());
 
@@ -360,18 +360,28 @@ void EntityManager::load_room_entities_pages() {
     for (auto &page_id : global_page_ids) {
       auto existing_page = std::find_if(EntityManager::_global_room_entities_pages.begin(), EntityManager::_global_room_entities_pages.end(), [&page_id](auto page) { return page->get_id() == page_id; });
       if (existing_page != EntityManager::_global_room_entities_pages.end()) [[likely]] {
+        // Unlock mutex to allow entities page to gather information then lock again to continue loop.
+        EntityManager::_global_room_entities_pages_mutex.unlock();
         (*existing_page)->reload_config(false);
+        EntityManager::_global_room_entities_pages_mutex.lock();
       } else {
+        std::shared_ptr<RoomEntitiesPage> new_page = nullptr;
         try {
+          // Unlock mutex to allow entities page to gather information then lock again to continue loop.
+          EntityManager::_global_room_entities_pages_mutex.unlock();
           auto page_settings = database_manager::database.get<database_manager::RoomEntitiesPage>(page_id);
-          EntityManager::_global_room_entities_pages.push_back(std::shared_ptr<RoomEntitiesPage>(new RoomEntitiesPage(page_settings.id, nullptr)));
-
+          new_page = std::shared_ptr<RoomEntitiesPage>(new RoomEntitiesPage(page_settings.id, nullptr));
         } catch (std::exception &e) {
           SPDLOG_ERROR("Caught exception: {}", e.what());
           SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
         }
+        EntityManager::_global_room_entities_pages_mutex.lock();
+        if (new_page != nullptr) {
+          EntityManager::_global_room_entities_pages.push_back(new_page);
+        }
       }
     }
+    EntityManager::_global_room_entities_pages_mutex.unlock();
   }
 
   // Now that all pages has loaded, send state updates to panels:
@@ -402,6 +412,7 @@ std::expected<std::vector<std::shared_ptr<Room>>, EntityManager::EntityError> En
 }
 
 std::expected<std::vector<std::shared_ptr<RoomEntitiesPage>>, EntityManager::EntityError> EntityManager::get_all_global_room_entities_pages() {
+  std::lock_guard<std::mutex> mutex_guard(EntityManager::_global_room_entities_pages_mutex);
   if (EntityManager::_global_room_entities_pages.empty()) {
     return std::unexpected(EntityManager::EntityError::NONE_LOADED);
   }
@@ -410,6 +421,7 @@ std::expected<std::vector<std::shared_ptr<RoomEntitiesPage>>, EntityManager::Ent
 }
 
 std::expected<int32_t, EntityManager::EntityError> EntityManager::get_number_of_global_room_entities_pages() {
+  std::lock_guard<std::mutex> mutex_guard(EntityManager::_global_room_entities_pages_mutex);
   if (EntityManager::_global_room_entities_pages.empty()) {
     return std::unexpected(EntityManager::EntityError::NONE_LOADED);
   }
