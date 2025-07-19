@@ -4,20 +4,27 @@ var nspanel_id;
 function push_log_message_to_view(data) {
   var add_html = "<tr class='hover'><td class='py-1'>";
   add_html += data.time;
-  add_html += "</td><td class='py-1'>";
+  var level_tag;
+  var level_tag_background;
   if (data.level == "ERROR") {
-    add_html += '<span class="text-error">ERROR</span>';
+    level_tag_background = "bg-error";
+    level_tag = '<span class="bg-error-content">ERROR</span>';
   } else if (data.level == "WARNING") {
-    add_html += '<span class="text-warning">WARNING</span>';
+    level_tag_background = "bg-warning";
+    level_tag = '<span class="bg-warning-content">WARNING</span>';
   } else if (data.level == "INFO") {
-    add_html += '<span class="text-info">INFO</span>';
+    level_tag_background = "bg-info";
+    level_tag = '<span class="bg-info-content">INFO</span>';
   } else if (data.level == "DEBUG") {
-    add_html += '<span class="">DEBUG</span>';
+    level_tag_background = "bg-neutral";
+    level_tag = '<span class="text-neutral-content">DEBUG</span>';
   } else if (data.level == "TRACE") {
-    add_html += '<span class="dark:text-gray-400 text-gray-800">TRACE</span>';
+    level_tag = '<span class="text-gray-800">TRACE</span>';
   } else {
-    add_html += '<span class="tag is-light">???UNKNOWN???</span>';
+    level_tag = '<span class="tag is-light">???UNKNOWN???</span>';
   }
+  add_html += `</td><td class='py-1 text-center ${level_tag_background}'>`;
+  add_html += level_tag;
   add_html += "</td>";
   add_html += "<td class='py-1'>";
   add_html += data.message;

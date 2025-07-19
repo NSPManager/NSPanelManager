@@ -7212,6 +7212,9 @@
   .bg-error {
     background-color: var(--color-error);
   }
+  .bg-error-content {
+    background-color: var(--color-error-content);
+  }
   .bg-gray-50 {
     background-color: var(--color-gray-50);
   }
@@ -7226,6 +7229,9 @@
   }
   .bg-info {
     background-color: var(--color-info);
+  }
+  .bg-info-content {
+    background-color: var(--color-info-content);
   }
   .bg-neutral {
     background-color: var(--color-neutral);
@@ -7256,6 +7262,9 @@
   }
   .bg-warning {
     background-color: var(--color-warning);
+  }
+  .bg-warning-content {
+    background-color: var(--color-warning-content);
   }
   .bg-white {
     background-color: var(--color-white);
@@ -7619,6 +7628,9 @@
     --size: calc(var(--size-selector, 0.25rem) * 4);
     font-size: 0.625rem;
     padding-inline: calc(0.25rem * 2 - var(--border));
+  }
+  .px-0 {
+    padding-inline: calc(var(--spacing) * 0);
   }
   .px-0\.5 {
     padding-inline: calc(var(--spacing) * 0.5);
