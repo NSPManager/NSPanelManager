@@ -9919,6 +9919,11 @@
       position: absolute;
     }
   }
+  .md\:relative {
+    @media (width >= 48rem) {
+      position: relative;
+    }
+  }
   .md\:sticky {
     @media (width >= 48rem) {
       position: sticky;
@@ -9927,6 +9932,16 @@
   .md\:top-4 {
     @media (width >= 48rem) {
       top: calc(var(--spacing) * 4);
+    }
+  }
+  .md\:top-auto {
+    @media (width >= 48rem) {
+      top: auto;
+    }
+  }
+  .md\:bottom-0 {
+    @media (width >= 48rem) {
+      bottom: calc(var(--spacing) * 0);
     }
   }
   .md\:order-1 {
