@@ -26,7 +26,7 @@
                         {% endif %}
 
                         <!-- Box indicators/buttons -->
-                        {% if entity.controlled_by_nspanel_main_page %}
+                        {% if entity.entity_data.controlled_by_nspanel_main_page %}
                             <span class="indicator-item badge badge-secondary me-16 w-6 h-6 flex items-center justify-center" title="Controlled from main page"><span class="mdi mdi-home"></span></span>
                         {% endif %}
                         <button class="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center cursor-pointer" title="Edit entity" hx-swap="none" hx-get="{{ edit_url }}"><span class="mdi mdi-pencil"></span></button>

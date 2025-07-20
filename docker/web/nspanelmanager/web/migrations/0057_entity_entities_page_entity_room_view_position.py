@@ -51,6 +51,7 @@ class Migration(migrations.Migration):
                     'can_color_temperature': light.can_color_temperature,
                     'can_rgb': light.can_rgb,
                     'is_ceiling_light': light.is_ceiling_light,
+                    'controlled_by_nspanel_main_page': light.controlled_by_nspanel_main_page
                 },
             )
 

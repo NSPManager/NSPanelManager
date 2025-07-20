@@ -364,18 +364,18 @@ def partial_entity_edit_light_entity(request, light_id):
         "can_rgb": entity_data.get("can_rgb", False),
         "home_assistant_item": entity_data.get("home_assistant_name", ""),
         "openhab_brightness_item": "", # Set below
-        "openhab_color_temperature_item": entity_data.get("openhab_color_temperature_item", ""),
-        "openhab_rgb_item": entity_data.get("openhab_rgb_item", ""),
+        "openhab_color_temperature_item": entity_data.get("openhab_item_color_temp", ""),
+        "openhab_rgb_item": entity_data.get("openhab_item_rgb", ""),
         "openhab_items": [],
         "home_assistant_items": [],
     }
 
     if entity_data.get("can_dim", False):
         data["control_mode"] = "dimmable"
-        data["openhab_brightness_item"] = entity_data.get("openhab_brightness_item", "")
+        data["openhab_brightness_item"] = entity_data.get("openhab_item_dimmer", "")
     else:
         data["control_mode"] = "switch"
-        data["openhab_brightness_item"] = entity_data.get("openhab_brightness_item", "")
+        data["openhab_brightness_item"] = entity_data.get("openhab_item_switch", "")
 
     if data["entity_source"] == "home_assistant":
         ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["light", "switch"]})
