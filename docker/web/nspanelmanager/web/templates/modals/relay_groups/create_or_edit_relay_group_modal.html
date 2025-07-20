@@ -12,7 +12,7 @@
             {% endif %}
         </span>
 
-        <form hx-post="{% url 'htmx_save_relay_group' %}">
+        <form hx-post="{{ ingress_path }}{% url 'htmx_save_relay_group' %}">
             {% csrf_token %}
             {% if relay_group %}
                 <input type="hidden" name="relay_group_id" value="{{ relay_group.id }}">

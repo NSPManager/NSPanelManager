@@ -13,13 +13,13 @@
 {% load static %}
 
 <!-- Beginning of vissible content-->
-<form method="POST" action="{% url 'update_room_form' room_id=room.id %}">
+<form method="POST" action="{{ ingress_path }}{% url 'update_room_form' room_id=room.id %}">
   {% csrf_token %}
   <div class="flex items-center justify-between" id="nspanel_settings_container">
     <div>
       <h2 class="font-medium text-2xl" id="nspanel_name">Settings for room '{{ room.friendly_name }}'</h2>
       {% for nspanel in nspanels %}
-          <a href="{% url 'edit_nspanel' panel_id=nspanel.id %}">
+          <a href="{{ ingress_path }}{% url 'edit_nspanel' panel_id=nspanel.id %}">
           {{ nspanel.status }}
           {% component "nspanel_status_badge" id=nspanel.id %}{% endcomponent %}
           </a>
@@ -50,7 +50,7 @@
         <span class="font-medium">Info.</span> The last room cannot be deleted. Rename this room or create another room before removing this one.
       </div>
       <div class="text-right mt-4">
-          <a type="submit" href="{% if total_num_rooms != 1 %}{% url 'delete_room' room_id=room.id %}{% else %}#{% endif %}"
+          <a type="submit" href="{% if total_num_rooms != 1 %}{{ ingress_path }}{% url 'delete_room' room_id=room.id %}{% else %}#{% endif %}"
           class="btn btn-error" {% if total_num_rooms == 1 %}disabled{% endif %}
           >Delete</a>
           <button type="submit" class="btn btn-success">Save</button>
@@ -63,7 +63,7 @@
   <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
     <div class="md:flex md:flex-wrap md:justify-between items-center mb-2">
       <span class="block mb-2 text-xl">{{ room.friendly_name }} scenes</span>
-      <button type="button" hx-get="{% url "htmx_partial_add_entities_page_to_room" room_id=room.id is_scenes_page=True is_global_scenes_page=False %}" hx-swap="none" class="btn btn-info btn-outline">Add scenes page</button>
+      <button type="button" hx-get="{{ ingress_path }}{% url "htmx_partial_add_entities_page_to_room" room_id=room.id is_scenes_page=True is_global_scenes_page=False %}" hx-swap="none" class="btn btn-info btn-outline">Add scenes page</button>
     </div>
 
     {% component "nspanel_room_entities_pages" room_id=room.id is_scenes_pages=True is_global_scenes_page=False %}{% endcomponent %}
@@ -74,7 +74,7 @@
   <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
     <div class="md:flex md:flex-wrap md:justify-between items-center">
         <span class="block mb-2 text-xl">{{ room.friendly_name }} entities</span>
-        <button type="button" hx-get='{% url "htmx_partial_add_entities_page_to_room" room_id=room.id is_scenes_page=False is_global_scenes_page=False %}' hx-swap="none" hx-indicator="#modal_loading" class="btn btn-info btn-outline">Add page</button>
+        <button type="button" hx-get='{{ ingress_path }}{% url "htmx_partial_add_entities_page_to_room" room_id=room.id is_scenes_page=False is_global_scenes_page=False %}' hx-swap="none" hx-indicator="#modal_loading" class="btn btn-info btn-outline">Add page</button>
     </div>
 
     {% component "nspanel_room_entities_pages" room_id=room.id is_scenes_pages=False is_global_scenes_page=False %}{% endcomponent %}

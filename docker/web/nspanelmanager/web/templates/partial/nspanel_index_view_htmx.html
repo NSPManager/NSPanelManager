@@ -25,8 +25,8 @@ stomp_subscribe("nspanel/{{ nspanel.data.mac_address }}/status", (frame) => {
             </div>
             <div class="flex w-full items-center justify-center pt-2 pb-4">
                 <div>
-                <button class="btn btn-error m-1 rounded-btn" hx-post="{% url 'htmx_nspanel_deny_register_request' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}">Deny</button>
-                <button class="btn btn-info m-1 rounded-btn" hx-post="{% url 'htmx_nspanel_accept_register_request' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}">Accept</button>
+                <button class="btn btn-error m-1 rounded-btn" hx-post="{{ ingress_path }}{% url 'htmx_nspanel_deny_register_request' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}">Deny</button>
+                <button class="btn btn-info m-1 rounded-btn" hx-post="{{ ingress_path }}{% url 'htmx_nspanel_accept_register_request' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}">Accept</button>
                 </div>
             </div>
         </div>
@@ -85,7 +85,7 @@ stomp_subscribe("nspanel/{{ nspanel.data.mac_address }}/status", (frame) => {
                     {% component "nspanel_reboot_button" id=nspanel.data.id %}{% endcomponent %}
                 </li>
                 <li>
-                    <a class="nspanel-settings-link block px-4 py-2 hover:bg-accent hover:text-accent-content" href="{% url 'edit_nspanel' nspanel.data.id %}">
+                    <a class="nspanel-settings-link block px-4 py-2 hover:bg-accent hover:text-accent-content" href="{{ ingress_path }}{% url 'edit_nspanel' nspanel.data.id %}">
                         <span class="mdi mdi-cog pr-2"></span>Settings
                     </a>
                 </li>
@@ -109,7 +109,7 @@ stomp_subscribe("nspanel/{{ nspanel.data.mac_address }}/status", (frame) => {
                 </ul>
                 <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
                 <li>
-                    <a hx-delete="{% url 'htmx_nspanel_delete' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}" class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer">
+                    <a hx-delete="{{ ingress_path }}{% url 'htmx_nspanel_delete' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}" class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer">
                         <span class="mdi mdi-minus-circle pr-2"></span>Delete
                     </a>
                 </li>

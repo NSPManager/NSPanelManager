@@ -32,7 +32,7 @@
                                   name="theme-dropdown"
                                   class="theme-controller radio radio-xs checked:bg-success ml-2"
                                   value="{{ theme_option }}"
-                                  hx-post="{% url 'htmx_interface_theme' %}" hx-swap="none"
+                                  hx-post="{{ ingress_path }}{% url 'htmx_interface_theme' %}" hx-swap="none"
                                   {% if theme_option == theme %}checked{% endif %}
                               />
 
@@ -67,11 +67,11 @@
       <ul
         class="flex flex-col p-4 md:p-0 mt-4 font-medium border rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0">
         <li>
-          <a href="{% url 'index' %}" data-active="{% if request.path == '/' %}true{% endif %}"
+          <a href="{{ ingress_path }}{% url 'index' %}" data-active="{% if request.path == '/' %}true{% endif %}"
             class="block py-2 px-3 rounded md:p-0 md:hover:text-accent hover:bg-accent hover: md:hover:bg-transparent border-gray-700 data-[active=true]:text-accent ">NSPanels</a>
         </li>
         <li>
-          <a href="{% url 'rooms' %}" data-active="{% if request.path == '/rooms' %}true{% endif %}"
+          <a href="{{ ingress_path }}{% url 'rooms' %}" data-active="{% if request.path == '/rooms' %}true{% endif %}"
             class="flex items-center justify-between w-full py-2 px-3 rounded md:border-0 md:p-0 md:w-auto  md:hover:text-accent focus: border-gray-700 hover:bg-accent md:hover:bg-transparent data-[active=true]:text-accent ">
             Rooms
           </a>
@@ -91,20 +91,20 @@
             class="z-10 font-normal hidden bg-neutral divide-y devide-neutral-content rounded-lg shadow md:absolute inset-x-auto w-full md:w-44 overflow-hidden">
             <ul class="py-2 text-sm text-neutral-content" aria-labelledby="dropdownLargeButton">
               <li>
-                <a href="{% url 'relay_groups' %}" data-active="{% if request.path == '/entities/relay_groups' %}true{% endif %}"
+                <a href="{{ ingress_path }}{% url 'relay_groups' %}" data-active="{% if request.path == '/entities/relay_groups' %}true{% endif %}"
                   class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover: data-[active=true]:text-accent ">Relay/Light groups</a>
               </li>
               <li>
-                <a href="{% url 'global_scenes' %}" data-active="{% if request.path == '/entities/global_scenes' %}true{% endif %}" class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover: data-[active=true]:text-accent ">
+                <a href="{{ ingress_path }}{% url 'global_scenes' %}" data-active="{% if request.path == '/entities/global_scenes' %}true{% endif %}" class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover: data-[active=true]:text-accent ">
                   Global scenes</a>
               </li>
               <li>
-                <a href="{% url 'weather_and_time' %}" data-active="{% if request.path == '/entities/weather_and_time' %}true{% endif %}"
+                <a href="{{ ingress_path }}{% url 'weather_and_time' %}" data-active="{% if request.path == '/entities/weather_and_time' %}true{% endif %}"
                   class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover: data-[active=true]:text-accent ">Weather & Time</a>
               </li>
             </ul>
             <div class="py-1 text-sm text-neutral-content">
-              <a href="{% url 'denied_nspanels' %}" data-active="{% if request.path == '/denied_nspanels' %}true{% endif %}" class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover: data-[active=true]:text-accent ">Denied NSPanels</a>
+              <a href="{{ ingress_path }}{% url 'denied_nspanels' %}" data-active="{% if request.path == '/denied_nspanels' %}true{% endif %}" class="block px-4 py-2  hover:bg-accent hover:text-accent-content hover: data-[active=true]:text-accent ">Denied NSPanels</a>
             </div>
           </div>
         <li>
@@ -137,7 +137,7 @@
           </div>
         </li>
         <li>
-          <a href="{% url 'settings' %}" data-active="{% if request.path == '/settings' %}true{% endif %}"
+          <a href="{{ ingress_path }}{% url 'settings' %}" data-active="{% if request.path == '/settings' %}true{% endif %}"
             class="block py-2 px-3 rounded md:p-0 md:hover:text-accent hover:bg-accent md:hover:bg-transparent border-gray-700 data-[active=true]:text-accent ">Settings</a>
         </li>
         <li>

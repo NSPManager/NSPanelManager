@@ -6,7 +6,7 @@
     <h2 class="font-medium text-2xl" id="nspanel_name">Relay groups</h2>
   </div>
   <div>
-      <button type="button" class="btn btn-info" hx-get="{% url 'htmx_modal_create_new_relay_group' %}" hx-swap="none" hx-indicator="#modal_loading">Add new relay group</button>
+      <button type="button" class="btn btn-info" hx-get="{{ ingress_path }}{% url 'htmx_modal_create_new_relay_group' %}" hx-swap="none" hx-indicator="#modal_loading">Add new relay group</button>
       <a href="https://nspanelmanager.com/docs/web-interface#relay-groups" target="_blank" type="button" class="btn btn-info">Help</a>
   </div>
 </div>
@@ -33,16 +33,16 @@
                     <li class="join my-1 mx-1 w-full">
                         <span class="join-item badge badge-neutral">{{ member.nspanel.friendly_name }}</span>
                         <span class="join-item badge badge-info">Relay {{ member.relay_num }}</span>
-                        <span class="join-item badge badge-error cursor-pointer" title="Delete" hx-delete="{% url 'htmx_remove_relay_from_relay_group' member.id %}" hx-indicator="#modal_indicator" hx-confirm="Delete relay binding?">✕</span>
+                        <span class="join-item badge badge-error cursor-pointer" title="Delete" hx-delete="{{ ingress_path }}{% url 'htmx_remove_relay_from_relay_group' member.id %}" hx-indicator="#modal_indicator" hx-confirm="Delete relay binding?">✕</span>
                     </li>
                     {% endfor %}
                 </ul>
             </td>
             <td>
                 <div class="join">
-                    <button class="join-item btn btn-neutral btn-sm" type="button" hx-get="{% url 'htmx_modal_add_relay_to_relay_group' relay_group.id %}" hx-swap="none" hx-indicator="#modal_loading">Add relay</button>
-                    <button class="join-item btn btn-neutral btn-sm" type="button" hx-get="{% url 'htmx_modal_edit_relay_group' relay_group.id %}" hx-swap="none" hx-indicator="#modal_loading">Edit</button>
-                    <button class="join-item btn btn-sm btn-error" type="button" hx-delete="{% url 'htmx_delete_relay_group' relay_group.id %}" hx-swap="none" hx-indicator="#modal_loading" hx-confirm="Delete relay group {{ relay_group.friendly_name }}?">Delete</button>
+                    <button class="join-item btn btn-neutral btn-sm" type="button" hx-get="{{ ingress_path }}{% url 'htmx_modal_add_relay_to_relay_group' relay_group.id %}" hx-swap="none" hx-indicator="#modal_loading">Add relay</button>
+                    <button class="join-item btn btn-neutral btn-sm" type="button" hx-get="{{ ingress_path }}{% url 'htmx_modal_edit_relay_group' relay_group.id %}" hx-swap="none" hx-indicator="#modal_loading">Edit</button>
+                    <button class="join-item btn btn-sm btn-error" type="button" hx-delete="{{ ingress_path }}{% url 'htmx_delete_relay_group' relay_group.id %}" hx-swap="none" hx-indicator="#modal_loading" hx-confirm="Delete relay group {{ relay_group.friendly_name }}?">Delete</button>
                 </div>
             </td>
           </tr>

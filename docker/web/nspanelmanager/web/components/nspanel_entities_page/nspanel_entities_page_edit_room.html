@@ -5,7 +5,7 @@
 
 <li id="nspanel_entities_page_{{ page.id }}" data-is-scenes-page="{{ is_scenes_page }}" data-page-id="{{ page.id }}" hx-swap-oob="true" class="bg-base-200 float-left m-2 rounded-box p-3 grid grid-cols-2 {% if page.page_type == 12 %}grid-rows-6{% elif page.page_type == 4 %}grid-rows-2{% else %}grid-rows-4{% endif %} gap-4 w-full max-w-[24rem] aspect-square indicator nspanel-entities-page">
     {% for i in range %}
-        <form class="draggable-entity-item-target-slot nspanel-entities-page-entity-slot rounded-box" data-page-id="{{ page.id }}" data-slot-id="{{ i }}" hx-indicator="#modal_loading" hx-post="{% url 'htmx_partial_move_entity' %}" hx-trigger="entity_moved">
+        <form class="draggable-entity-item-target-slot nspanel-entities-page-entity-slot rounded-box" data-page-id="{{ page.id }}" data-slot-id="{{ i }}" hx-indicator="#modal_loading" hx-post="{{ ingress_path }}{% url 'htmx_partial_move_entity' %}" hx-trigger="entity_moved">
             <input type="hidden" name="page_id" value="{{ page.id }}">
             <input type="hidden" name="slot_id" value="{{ i }}">
             <input type="hidden" name="new_entity_type">
@@ -29,8 +29,8 @@
                         {% if entity.entity_data.controlled_by_nspanel_main_page %}
                             <span class="indicator-item badge badge-secondary me-16 w-6 h-6 flex items-center justify-center" title="Controlled from main page"><span class="mdi mdi-home"></span></span>
                         {% endif %}
-                        <button class="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center cursor-pointer" title="Edit entity" hx-swap="none" hx-get="{{ edit_url }}"><span class="mdi mdi-pencil"></span></button>
-                        <button class="indicator-item badge badge-warning hover:badge-error w-6 h-6 flex items-center justify-center cursor-pointer" title="Remove entity from page/room" hx-confirm="Do you wish to remove '{{ entity.friendly_name }}' entity?" hx-swap="none" hx-get="{% url 'htmx_partial_remove_entity_from_page_slot' page_id=page.id slot_id=i %}"><span class="mdi mdi-close"></span></button>
+                        <button class="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center cursor-pointer" title="Edit entity" hx-swap="none" hx-get="{{ ingress_path }}{{ edit_url }}"><span class="mdi mdi-pencil"></span></button>
+                        <button class="indicator-item badge badge-warning hover:badge-error w-6 h-6 flex items-center justify-center cursor-pointer" title="Remove entity from page/room" hx-confirm="Do you wish to remove '{{ entity.friendly_name }}' entity?" hx-swap="none" hx-get="{{ ingress_path }}{% url 'htmx_partial_remove_entity_from_page_slot' page_id=page.id slot_id=i %}"><span class="mdi mdi-close"></span></button>
 
                         <!-- "Status badge" (dot) before name to indicate entity controller -->
                         {% if entity.controller == "home_assistant" %}
@@ -60,11 +60,11 @@
                         {% concat_all '{"page_id": ' page.id ', "page_slot": ' i ', "is_scenes_page": "' is_scenes_page '", "is_global_scenes_page": "' is_global_scenes_page '"}' as action_args %}
                     {% endif %}
                     {% if page.is_scenes_page %}
-                        <button class="btn btn-neutral hover:btn-success btn-xs btn-circle ms-2 flex items-center justify-center" title="Add entitiy" hx-swap="none" hx-get='{% url "htmx_partial_select_new_entity_source" action="ADD_SCENE_TO_NSPANEL_ENTITY_PAGE" action_args=action_args %}' hx-indicator="#modal_loading">
+                        <button class="btn btn-neutral hover:btn-success btn-xs btn-circle ms-2 flex items-center justify-center" title="Add entitiy" hx-swap="none" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_source" action="ADD_SCENE_TO_NSPANEL_ENTITY_PAGE" action_args=action_args %}' hx-indicator="#modal_loading">
                             <span class="mdi mdi-plus"></span>
                         </button>
                     {% else %}
-                        <button class="btn btn-neutral hover:btn-success btn-xs btn-circle ms-2 flex items-center justify-center" title="Add entitiy" hx-swap="none" hx-get='{% url "htmx_partial_select_new_entity_type" action="ADD_ENTITY_TO_NSPANEL_ENTITY_PAGE" action_args=action_args %}' hx-indicator="#modal_loading">
+                        <button class="btn btn-neutral hover:btn-success btn-xs btn-circle ms-2 flex items-center justify-center" title="Add entitiy" hx-swap="none" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_type" action="ADD_ENTITY_TO_NSPANEL_ENTITY_PAGE" action_args=action_args %}' hx-indicator="#modal_loading">
                             <span class="mdi mdi-plus"></span>
                         </button>
                     {% endif %}
@@ -74,7 +74,7 @@
     {% endfor %}
 
     <button {% if total_num_entity_pages <= 1 %}disabled="disabled"{% endif %} class="indicator-item indicator-bottom indicator-end badge not-disabled:badge-neutral not-disabled:hover:badge-error w-6 h-6 flex items-center justify-center not-disabled:cursor-pointer" hx-swap="outerHTML" title="{% if total_num_entity_pages <= 1 %}Cannot delete last page{% else %}Delete page{% endif %}" hx-delete="{% url 'htmx_partial_delete_entities_page' page_id=page.id %}" hx-confirm='Do you want to delete this entity page? <p class="font-bold text-warning">All entities on this page will be removed.</p>'>✕</button>
-    <button class="indicator-item indicator-bottom indicator-end badge badge-info w-6 h-6 flex items-center justify-center me-8 cursor-pointer" hx-swap="none" title="Edit page" hx-get="{% url 'htmx_partial_edit_entities_page' page_id=page.id %}"><span class="mdi mdi-pencil"></span></button>
+    <button class="indicator-item indicator-bottom indicator-end badge badge-info w-6 h-6 flex items-center justify-center me-8 cursor-pointer" hx-swap="none" title="Edit page" hx-get="{{ ingress_path }}{% url 'htmx_partial_edit_entities_page' page_id=page.id %}"><span class="mdi mdi-pencil"></span></button>
     <span class="indicator-item indicator-bottom indicator-center badge badge-neutral hover:badge-info w-6 h-6 flex items-center justify-center nspanel-entities-page-move-handle cursor-grab" title="Drag & drop to move this page"><span class="mdi mdi-hand-back-right"></span></span>
 
     <script>

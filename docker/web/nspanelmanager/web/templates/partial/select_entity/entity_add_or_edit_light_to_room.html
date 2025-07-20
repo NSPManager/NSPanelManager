@@ -12,7 +12,7 @@
             </ul>
         </div>
 
-        <form hx-post="{% url 'htmx_handle_entity_modal_result' %}" hx-indicator="#modal_loading" onsubmit="modal.close();">
+        <form hx-post="{{ ingress_path }}{% url 'htmx_handle_entity_modal_result' %}" hx-indicator="#modal_loading" onsubmit="modal.close();">
             {% csrf_token %}
             <!-- Modal content -->
             <div class="">

@@ -23,7 +23,7 @@
 
 {% block content %}
 
-<form method="POST" action="{% url 'weather_and_time' %}">
+<form method="POST" action="{{ ingress_path }}{% url 'weather_and_time' %}">
   {% csrf_token %}
   <div class="flex items-center justify-between" id="nspanel_settings_container">
     <div>
@@ -86,7 +86,7 @@
         <div class="my-2 w-full md:me-1">
           <label for="location_latitude" class="block mb-1 text-sm font-medium">Latitude</label>
           <div class="flex flex-row-reverse">
-              <button type="button" class="btn btn-info rounded-l-none" hx-get="{% url 'htmx_partial_select_weather_location' %}" hx-indicator="#modal_loading" hx-swap="none">Search</button>
+              <button type="button" class="btn btn-info rounded-l-none" hx-get="{{ ingress_path }}{% url 'htmx_partial_select_weather_location' %}" hx-indicator="#modal_loading" hx-swap="none">Search</button>
               <input id="location_latitude" class="outline-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
               type="text" name="location_latitude" value="{{ location_latitude }}">
               <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
@@ -99,7 +99,7 @@
         <div class="my-2 w-full md:ms-1">
             <label for="location_longitude" class="block mb-1 text-sm font-medium">Longitude</label>
             <div class="flex flex-row-reverse">
-                <button type="button" class="btn btn-info rounded-l-none" hx-get='{% url "htmx_partial_select_weather_location" %}' hx-indicator="#modal_loading" hx-swap="none">Search</button>
+                <button type="button" class="btn btn-info rounded-l-none" hx-get='{{ ingress_path }}{% url "htmx_partial_select_weather_location" %}' hx-indicator="#modal_loading" hx-swap="none">Search</button>
                 <input id="location_longitude" class="outline-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                 type="text" name="location_longitude" value="{{ location_longitude }}">
                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
@@ -114,7 +114,7 @@
       <div class="my-2 w-full md:ms-1">
           <label for="outside_temp_sensor" class="block mb-1 text-sm font-medium">Outside temperature sensor</label>
           <div class="flex flex-row-reverse">
-              <button type="button" class="btn btn-info rounded-l-none" hx-get="{% url 'htmx_partial_select_weather_outside_temperature_sensor_provider' %}" hx-swap="none">Select</button>
+              <button type="button" class="btn btn-info rounded-l-none" hx-get="{{ ingress_path }}{% url 'htmx_partial_select_weather_outside_temperature_sensor_provider' %}" hx-swap="none">Select</button>
               <input class="outline-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
               type="text" id="outside_temp_sensor" name="outside_temp_sensor" value="{{ outside_temp_sensor }}">
               <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">

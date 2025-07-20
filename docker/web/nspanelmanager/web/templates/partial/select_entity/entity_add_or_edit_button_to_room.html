@@ -4,7 +4,7 @@
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
 
-        <form hx-post="{% url 'htmx_handle_entity_modal_result' %}" hx-indicator="#modal_loading" onsubmit="modal.close();">
+        <form hx-post="{{ ingress_path }}{% url 'htmx_handle_entity_modal_result' %}" hx-indicator="#modal_loading" onsubmit="modal.close();">
             {% csrf_token %}
             <input class="input" type="hidden" id="edit_button_id" name="edit_button_id" value="{{ edit_button_id }}">
             <!-- Modal content -->

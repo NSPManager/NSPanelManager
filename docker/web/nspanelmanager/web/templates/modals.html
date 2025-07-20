@@ -5,7 +5,7 @@
         <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
-        <form method="POST" action="{% url 'save_new_firmware' %}" enctype="multipart/form-data">
+        <form method="POST" action="{{ ingress_path }}{% url 'save_new_firmware' %}" enctype="multipart/form-data">
         {% csrf_token %}
 
 
@@ -42,7 +42,7 @@
         <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
-        <form method="POST" action="{% url 'save_new_data_file' %}" enctype="multipart/form-data">
+        <form method="POST" action="{{ ingress_path }}{% url 'save_new_data_file' %}" enctype="multipart/form-data">
           {% csrf_token %}
 
           <h3 class="text-lg font-semibold mb-2">Upload data file</h3>
@@ -80,7 +80,7 @@
         <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
-        <form method="POST" action="{% url 'save_new_tft_file' %}" enctype="multipart/form-data">
+        <form method="POST" action="{{ ingress_path }}{% url 'save_new_tft_file' %}" enctype="multipart/form-data">
           {% csrf_token %}
 
           <h3 class="text-lg font-semibold mb-2">Upload TFT file</h3>
@@ -135,7 +135,7 @@
     </form>
 </dialog>
 
-<form method="POST" action="{% url 'save_new_tft_file' %}" enctype="multipart/form-data">
+<form method="POST" action="{{ ingress_path }}{% url 'save_new_tft_file' %}" enctype="multipart/form-data">
   {% csrf_token %}
   <dialog id="update_tft_file_modal" class="modal">
     class="hidden modal overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full max-h-full p-4 max-w- mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">

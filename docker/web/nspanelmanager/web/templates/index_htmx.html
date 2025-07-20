@@ -41,7 +41,7 @@
         </li>
 
         <div class="border-t border-t-base-300 text-sm text-neutral-content">
-          <a hx-post="{% url 'restart_mqtt_manager' %}" hx-swap="none" class="block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
+          <a hx-post="{{ ingress_path }}{% url 'restart_mqtt_manager' %}" hx-swap="none" class="block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
               class="mdi mdi-restart pr-2 has-text-primary"></span>Restart MQTTManager</a>
         </div>
       </ul>

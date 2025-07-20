@@ -14,11 +14,11 @@
                         <span class="mdi mdi-drag-horizontal-variant cursor-grab sortable-handle" title="Drag and drop to reorder"></span>
                     </td>
                     <th class="">
-                        <a href="{% url 'edit_room' room_id=room.room.id %}">{{ room.room.friendly_name }}</a>
+                        <a href="{{ ingress_path }}{% url 'edit_room' room_id=room.room.id %}">{{ room.room.friendly_name }}</a>
                     </th>
                     <td>
                         {% for nspanel in room.nspanels %}
-                        <a href="{% url 'edit_nspanel' panel_id=nspanel.id %}">
+                        <a href="{{ ingress_path }}{% url 'edit_nspanel' panel_id=nspanel.id %}">
                             {{ nspanel.status }}
                             {% component "nspanel_status_badge" id=nspanel.id %}{% endcomponent %}
                         </a>

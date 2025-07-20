@@ -6,7 +6,7 @@
 
         <span class="text-lg">Assign relay to relay group</span>
 
-        <form hx-post="{% url 'htmx_add_relay_to_relay_group' relay_group_id %}">
+        <form hx-post="{{ ingress_path }}{% url 'htmx_add_relay_to_relay_group' relay_group_id %}">
             {% csrf_token %}
             <!-- Select NSPanel -->
             <div class="mt-4">

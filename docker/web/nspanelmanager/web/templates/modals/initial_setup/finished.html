@@ -7,12 +7,12 @@
 
         <div class="flex justify-center mb-2">
             <ul class="steps">
-                <li hx-get="{% url 'htmx_initial_setup_welcome' %}" hx-swap="none" class="step step-primary cursor-pointer">Welcome</li>
-                <li hx-get="{% url 'htmx_initial_setup_manager_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">Manager</li>
-                <li hx-get="{% url 'htmx_initial_setup_mqtt_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">MQTT</li>
-                <li hx-get="{% url 'htmx_initial_setup_home_assistant_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">Home Assistant</li>
-                <li hx-get="{% url 'htmx_initial_setup_openhab_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">OpenHAB</li>
-                <li hx-get="{% url 'htmx_initial_setup_finished' %}" hx-swap="none" class="step step-primary cursor-pointer">Finish</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_welcome' %}" hx-swap="none" class="step step-primary cursor-pointer">Welcome</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_manager_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">Manager</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_mqtt_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">MQTT</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_home_assistant_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">Home Assistant</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_openhab_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">OpenHAB</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_finished' %}" hx-swap="none" class="step step-primary cursor-pointer">Finish</li>
             </ul>
         </div>
 
@@ -23,7 +23,7 @@
         </div>
 
         <div class="text-center mt-2">
-            <span class="mt-2 text-center">This initial setup guide is now finished. If you want to see more settings have a look in the <a class="link link-primary" href="{% url 'settings' %}">settings page</a>.</span>
+            <span class="mt-2 text-center">This initial setup guide is now finished. If you want to see more settings have a look in the <a class="link link-primary" href="{{ ingress_path }}{% url 'settings' %}">settings page</a>.</span>
         </div>
 
         <div class="text-center mt-4">

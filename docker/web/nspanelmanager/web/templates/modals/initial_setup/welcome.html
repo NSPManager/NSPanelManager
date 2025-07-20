@@ -7,12 +7,12 @@
 
         <div class="flex justify-center mb-2">
             <ul class="steps">
-                <li hx-get="{% url 'htmx_initial_setup_welcome' %}" hx-swap="none" class="step step-primary cursor-pointer">Welcome</li>
-                <li hx-get="{% url 'htmx_initial_setup_manager_settings' %}" hx-swap="none" class="step cursor-pointer">Manager</li>
-                <li hx-get="{% url 'htmx_initial_setup_mqtt_settings' %}" hx-swap="none" class="step cursor-pointer">MQTT</li>
-                <li hx-get="{% url 'htmx_initial_setup_home_assistant_settings' %}" hx-swap="none" class="step cursor-pointer">Home Assistant</li>
-                <li hx-get="{% url 'htmx_initial_setup_openhab_settings' %}" hx-swap="none" class="step cursor-pointer">OpenHAB</li>
-                <li hx-get="{% url 'htmx_initial_setup_finished' %}" hx-swap="none" class="step cursor-pointer">Finish</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_welcome' %}" hx-swap="none" class="step step-primary cursor-pointer">Welcome</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_manager_settings' %}" hx-swap="none" class="step cursor-pointer">Manager</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_mqtt_settings' %}" hx-swap="none" class="step cursor-pointer">MQTT</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_home_assistant_settings' %}" hx-swap="none" class="step cursor-pointer">Home Assistant</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_openhab_settings' %}" hx-swap="none" class="step cursor-pointer">OpenHAB</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_finished' %}" hx-swap="none" class="step cursor-pointer">Finish</li>
             </ul>
         </div>
 
@@ -41,7 +41,7 @@
         </div>
 
         <div class="flex justify-end mt-4">
-            <button class="btn btn-success" hx-get="{% url 'htmx_initial_setup_manager_settings' %}" hx-swap="none">Next</button>
+            <button class="btn btn-success" hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_manager_settings' %}" hx-swap="none">Next</button>
         </div>
 
     </div>

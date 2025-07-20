@@ -4,7 +4,7 @@
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
 
-        <form hx-post="{% url 'htmx_handle_entity_modal_result' %}" hx-indicator="#modal_loading" onsubmit="modal.close();">
+        <form hx-post="{{ ingress_path }}{% url 'htmx_handle_entity_modal_result' %}" hx-indicator="#modal_loading" onsubmit="modal.close();">
             {% csrf_token %}
             <input class="input" type="hidden" id="entity_type" name="entity_type" value="{{ entity.type }}">
             <input class="input" type="hidden" id="entity_id" name="entity_id" value="{{ entity.entity_id }}">

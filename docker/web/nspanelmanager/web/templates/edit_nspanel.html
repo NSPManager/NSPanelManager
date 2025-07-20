@@ -76,9 +76,9 @@
             {% for i in "1234" %}
             <div class="relative mx-auto border-base-300 bg-base-300 border-[0.5rem] rounded-[0.5rem] h-[300px] w-[300px] mt-4">
                 <div class="rounded-[0.2rem] w-full h-[77%] bg-black flex justify-center items-center">
-                    <img src="{{ static_prefix }}HMI_files/eu/output_tft{{ i }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
+                    <img src="{{ ingress_path }}{{ static_prefix }}HMI_files/eu/output_tft{{ i }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
                 </div> <!-- screen -->
-                <button onclick="selectBackground('{{ i }}', '{{ static_prefix }}HMI_files/eu/output_tft{{ i }}/example.png')" class="absolute top-0 left-0 rounded-[0.2rem] w-full h-[77%] opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Select background">
+                <button onclick="selectBackground('{{ i }}', '{{ ingress_path }}{{ static_prefix }}HMI_files/eu/output_tft{{ i }}/example.png')" class="absolute top-0 left-0 rounded-[0.2rem] w-full h-[77%] opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Select background">
                     <span class="text-2xl text-success mdi mdi-check-circle"></span>
                 </button> <!-- Select background overlay -->
                 <div class="rounded-[0.2rem] w-[49%] h-[21.5%] bg-base-200 absolute bottom-0"></div> <!-- Left button -->
@@ -92,9 +92,9 @@
             {% for i in "1234" %}
             <div class="relative mx-auto border-base-300 bg-base-300 border-[0.5rem] rounded-[0.5rem] h-[500px] w-[300px] mt-4">
                 <div class="rounded-[0.2rem] w-full h-[81.5%] bg-black flex justify-center items-center">
-                    <img src="{{ static_prefix }}HMI_files/us/output_tft{{ i }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
+                    <img src="{{ ingress_path }}{{ static_prefix }}HMI_files/us/output_tft{{ i }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
                 </div> <!-- screen -->
-                <button onclick="selectBackground('{{ i }}', '{{ static_prefix }}HMI_files/us/output_tft{{ i }}/example.png')" class="absolute top-0 left-0 rounded-[0.2rem] w-full h-[81.5%] opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Select background">
+                <button onclick="selectBackground('{{ i }}', '{{ ingress_path }}{{ static_prefix }}HMI_files/us/output_tft{{ i }}/example.png')" class="absolute top-0 left-0 rounded-[0.2rem] w-full h-[81.5%] opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Select background">
                     <span class="mdi mdi-check-circle"></span>
                 </button> <!-- Select background overlay -->
                 <div class="rounded-[0.2rem] w-[49%] h-[15.6%] bg-base-200 absolute bottom-0"></div> <!-- Left button -->
@@ -111,9 +111,9 @@
                 <div class="rounded-[0.2rem] w-[15.6%] h-[49%] bg-base-200 absolute bottom-0 left-0"></div> <!-- Bottom button -->
                 <div class="rounded-[0.2rem] w-[81.5%] h-full bg-black flex justify-center items-center absolute top-0 right-0">
                     <!-- We use EU tft file for a horizontal US panel with buttons on left as it's the same screen and the correct layout -->
-                    <img src="{{ static_prefix }}HMI_files/eu/output_tft{{ i }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
+                    <img src="{{ ingress_path }}{{ static_prefix }}HMI_files/eu/output_tft{{ i }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
                 </div> <!-- screen -->
-                <button onclick="selectBackground('{{ i }}', '{{ static_prefix }}HMI_files/eu/output_tft{{ i }}/example.png')" class="absolute top-0 right-0 rounded-[0.2rem] w-[81.5%] h-full opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Select background">
+                <button onclick="selectBackground('{{ i }}', '{{ ingress_path }}{{ static_prefix }}HMI_files/eu/output_tft{{ i }}/example.png')" class="absolute top-0 right-0 rounded-[0.2rem] w-[81.5%] h-full opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Select background">
                     <span class="mdi mdi-check-circle"></span>
                 </button> <!-- Select background overlay -->
             </div>
@@ -128,9 +128,9 @@
                 <div class="rounded-[0.2rem] w-[15.6%] h-[49%] bg-base-200 absolute bottom-0 right-0"></div> <!-- Bottom button -->
                 <div class="rounded-[0.2rem] w-[81.5%] h-full bg-black flex justify-center items-center absolute top-0 left-0">
                     <!-- We use EU tft file for a horizontal US panel with buttons on left as it's the same screen and the correct layout -->
-                    <img src="{{ static_prefix }}HMI_files/eu/output_tft{{ i }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
+                    <img src="{{ ingress_path }}{{ static_prefix }}HMI_files/eu/output_tft{{ i }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
                 </div> <!-- screen -->
-                <button onclick="selectBackground('{{ i }}', '{{ static_prefix }}HMI_files/eu/output_tft{{ i }}/example.png')" class="absolute top-0 left-0 rounded-[0.2rem] w-[81.5%] h-full opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Select background">
+                <button onclick="selectBackground('{{ i }}', '{{ ingress_path }}{{ static_prefix }}HMI_files/eu/output_tft{{ i }}/example.png')" class="absolute top-0 left-0 rounded-[0.2rem] w-[81.5%] h-full opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Select background">
                     <span class="mdi mdi-check-circle"></span>
                 </button> <!-- Select background overlay -->
             </div>
@@ -145,7 +145,7 @@
 
 <div class="md:flex md:justify-between md:items-start mt-2 mb-6">
   <div class="w-full mr-4">
-    <form method="POST" class="mt-2" action="{% url 'save_panel_settings' panel_id=panel_info.data.id %}">
+    <form method="POST" class="mt-2" action="{{ ingress_path }}{% url 'save_panel_settings' panel_id=panel_info.data.id %}">
       {% csrf_token %}
       <input type="hidden" name="selected_tft" id="selected_tft" value="{{ settings.selected_tft }}">
 
@@ -193,7 +193,7 @@
             <!-- 81 x 81mm without frame -->
             <div id="eu-panel-example" class="relative mx-auto border-base-300 bg-base-300 border-[0.5rem] rounded-[0.5rem] h-[300px] w-[300px] mt-4 {% if settings.is_us_panel != 'False' %}hidden{% endif %}">
                 <div class="rounded-[0.2rem] w-full h-[77%] bg-black flex justify-center items-center">
-                    <img id="eu-panel-example-image" src="{{ static_prefix }}HMI_files/eu/output_{{ settings.selected_tft }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
+                    <img id="eu-panel-example-image" src="{{ ingress_path }}{{ static_prefix }}HMI_files/eu/output_{{ settings.selected_tft }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
                 </div> <!-- screen -->
                 <div class="absolute top-0 left-0 rounded-[0.2rem] w-full h-[77%] opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Choose background"
                     onclick="openBackgroundSelector();">
@@ -206,7 +206,7 @@
             <!-- 69 x 115mm without frame -->
             <div id="us-panel-vertical-example" class="relative mx-auto border-base-300 bg-base-300 border-[0.5rem] rounded-[0.5rem] h-[500px] w-[300px] mt-4 {% if settings.is_us_panel != 'True' or settings.us_panel_orientation != 'vertical' %}hidden{% endif %}">
                 <div class="rounded-[0.2rem] w-full h-[81.5%] bg-black flex justify-center items-center">
-                    <img id="us-panel-vertical-example-image" src="{{ static_prefix }}HMI_files/us/output_{{ settings.selected_tft }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
+                    <img id="us-panel-vertical-example-image" src="{{ ingress_path }}{{ static_prefix }}HMI_files/us/output_{{ settings.selected_tft }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
                 </div> <!-- screen -->
                 <div class="absolute top-0 left-0 rounded-[0.2rem] w-full h-[81.5%] opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Choose background"
                     onclick="openBackgroundSelector();">
@@ -222,7 +222,7 @@
                 <div class="rounded-[0.2rem] w-[15.6%] h-[49%] bg-base-200 absolute bottom-0 left-0"></div> <!-- Bottom button -->
                 <div class="rounded-[0.2rem] w-[81.5%] h-full bg-black flex justify-center items-center absolute top-0 right-0">
                     <!-- We use EU tft file for a horizontal US panel with buttons on left as it's the same screen and the correct layout -->
-                    <img id="us-panel-horizontal-example-image" src="{{ static_prefix }}HMI_files/eu/output_{{ settings.selected_tft }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
+                    <img id="us-panel-horizontal-example-image" src="{{ ingress_path }}{{ static_prefix }}HMI_files/eu/output_{{ settings.selected_tft }}/example.png" alt="Display example" class="p-[22.2px] object-fill">
                 </div> <!-- screen -->
                 <div class="absolute top-0 right-0 rounded-[0.2rem] w-[81.5%] h-full opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="Choose background"
                     onclick="openBackgroundSelector();">
@@ -234,7 +234,7 @@
             <div id="us-panel-horizontal-mirrored-example" class="relative mx-auto border-base-300 bg-base-300 border-[0.5rem] rounded-[0.5rem] h-[300px] w-[500px] mt-4 {% if settings.is_us_panel != 'True' or settings.us_panel_orientation != 'horizontal_mirrored' %}hidden{% endif %}">
                 <div class="rounded-[0.2rem] w-[81.5%] h-full bg-black flex justify-center items-center absolute top-0 left-0">
                     <!-- we use eu tft file for a horizontal us panel with buttons on left as it's the same screen and the correct layout -->
-                    <img id="us-panel-horizontal-mirrored-example-image" src="{{ static_prefix }}HMI_files/eu/output_{{ settings.selected_tft }}/example.png" alt="display example" class="p-[22.2px] object-fill">
+                    <img id="us-panel-horizontal-mirrored-example-image" src="{{ ingress_path }}{{ static_prefix }}HMI_files/eu/output_{{ settings.selected_tft }}/example.png" alt="display example" class="p-[22.2px] object-fill">
                 </div> <!-- screen -->
                 <div class="absolute top-0 left-0 rounded-[0.2rem] w-[81.5%] h-full opacity-0 flex justify-center items-center hover:backdrop-blur-sm transition-all duration-[20ms] hover:opacity-100 cursor-pointer" title="choose background"
                     onclick="openBackgroundSelector();">
@@ -799,7 +799,7 @@
           <div onclick="stomp_send('nspanel/{{ panel_info.data.mac_address }}/command', 'gui_update')" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
             <span class="mdi mdi-table-arrow-up me-2"></span><span class="">Update GUI</span>
           </div>
-          <div hx-delete="{% url 'htmx_nspanel_delete' nspanel_id=panel_info.data.id %}" hx-trigger="click" class="nspanel-delete-button p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer rounded-b-lg text-red-600">
+          <div hx-delete="{{ ingress_path }}{% url 'htmx_nspanel_delete' nspanel_id=panel_info.data.id %}" hx-trigger="click" class="nspanel-delete-button p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer rounded-b-lg text-red-600">
             <span class="mdi mdi-table-arrow-up me-2"></span><span class="">Delete</span>
           </div>
         </div>

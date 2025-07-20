@@ -1,4 +1,4 @@
-<div hx-trigger="register_request from:body" hx-get="{% url 'htmx_partial_index_nspanels_section' %}" hx-swap="outerHTML">
+<div hx-trigger="register_request from:body" hx-get="{{ ingress_path }}{% url 'htmx_partial_index_nspanels_section' %}" hx-swap="outerHTML">
     {% if nspanels|length > 0 %}
     <script>
         console.debug('NSPanelManager: nspanels found');

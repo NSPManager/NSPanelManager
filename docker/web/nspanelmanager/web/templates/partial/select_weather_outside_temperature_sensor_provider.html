@@ -13,8 +13,8 @@
 
         <div class="flex justify-center">
             <div class="join">
-                <button class="join-item btn btn-lg btn-info" hx-get='{% url "htmx_partial_select_weather_outside_temperature_sensor_from_list" entity_source="home_assistant" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">Home Assistant</button>
-                <button class="join-item btn btn-lg btn-warning" hx-get='{% url "htmx_partial_select_weather_outside_temperature_sensor_from_list" entity_source="openhab" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">OpenHAB</button>
+                <button class="join-item btn btn-lg btn-info" hx-get='{{ ingress_path }}{% url "htmx_partial_select_weather_outside_temperature_sensor_from_list" entity_source="home_assistant" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">Home Assistant</button>
+                <button class="join-item btn btn-lg btn-warning" hx-get='{{ ingress_path }}{% url "htmx_partial_select_weather_outside_temperature_sensor_from_list" entity_source="openhab" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">OpenHAB</button>
             </div>
         </div>
     </div>

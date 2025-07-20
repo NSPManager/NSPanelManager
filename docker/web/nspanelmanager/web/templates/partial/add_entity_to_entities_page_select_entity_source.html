@@ -19,19 +19,19 @@
                 {% endif %}
                 {% if is_home_assistant_configured %}
                     {% if action in home_assistant_supported_entity_types %}
-                        <button class="join-item btn btn-lg btn-info" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="home_assistant" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">Home Assistant</button>
+                        <button class="join-item btn btn-lg btn-info" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_config" entity_source="home_assistant" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">Home Assistant</button>
                     {% endif %}
                 {% endif %}
                 {% if is_openhab_configured %}
                     {% if action in openhab_supported_entity_types %}
-                        <button class="join-item btn btn-lg btn-warning" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="openhab" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">OpenHAB</button>
+                        <button class="join-item btn btn-lg btn-warning" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_config" entity_source="openhab" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">OpenHAB</button>
                     {% endif %}
                 {% endif %}
                 {% if action == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE" %}
-                    <button class="join-item btn btn-lg btn-secondary text-secondary-content" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="nspm_scene" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">NSPM Scene</button>
+                    <button class="join-item btn btn-lg btn-secondary text-secondary-content" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_config" entity_source="nspm_scene" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">NSPM Scene</button>
                 {% endif %}
                 {% if action in manual_supported_entity_types %}
-                    <button class="join-item btn btn-lg btn-secondary text-secondary-content" hx-get='{% url "htmx_partial_select_new_entity_config" entity_source="nspm" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">NSPM</button>
+                    <button class="join-item btn btn-lg btn-secondary text-secondary-content" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_config" entity_source="nspm" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">NSPM</button>
                 {% endif %}
             </div>
         </div>

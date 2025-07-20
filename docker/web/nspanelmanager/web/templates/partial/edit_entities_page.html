@@ -4,9 +4,9 @@
         <div class="mt-2 w-full">
             <span class="">How many entities should the page hold?</span>
             <div class="join items-center justify-center mt-4 w-full">
-                <button class="btn btn-neutral join-item btn-lg" hx-get="{% url 'htmx_partial_save_edit_entities_page' page_id=page_id page_type=4 %}" onclick="modal.close();">4</button>
-                <button class="btn btn-neutral join-item btn-lg" hx-get="{% url 'htmx_partial_save_edit_entities_page' page_id=page_id page_type=8 %}" onclick="modal.close();">8</button>
-                <button class="btn btn-neutral join-item btn-lg" hx-get="{% url 'htmx_partial_save_edit_entities_page' page_id=page_id page_type=12 %}" onclick="modal.close();">12</button>
+                <button class="btn btn-neutral join-item btn-lg" hx-get="{{ ingress_path }}{% url 'htmx_partial_save_edit_entities_page' page_id=page_id page_type=4 %}" onclick="modal.close();">4</button>
+                <button class="btn btn-neutral join-item btn-lg" hx-get="{{ ingress_path }}{% url 'htmx_partial_save_edit_entities_page' page_id=page_id page_type=8 %}" onclick="modal.close();">8</button>
+                <button class="btn btn-neutral join-item btn-lg" hx-get="{{ ingress_path }}{% url 'htmx_partial_save_edit_entities_page' page_id=page_id page_type=12 %}" onclick="modal.close();">12</button>
             </div>
         </div>
     </ul>

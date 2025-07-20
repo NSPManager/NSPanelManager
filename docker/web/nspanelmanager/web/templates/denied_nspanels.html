@@ -26,7 +26,7 @@
           </th>
           <td>{{ nspanel.mac_address }}</td>
           <td>
-              <a hx-delete="{% url 'htmx_unblock_nspanel' nspanel.id %}" class="btn btn-info btn-sm">Unblock</a>
+              <a hx-delete="{{ ingress_path }}{% url 'htmx_unblock_nspanel' nspanel.id %}" class="btn btn-info btn-sm">Unblock</a>
           </td>
         </tr>
         {% endif %}

@@ -20,7 +20,7 @@ function edit_scene(id, name) {
 {% endblock %}
 
 {% block content %}
-<form method="POST" action="{% url 'add_new_scene_to_global' %}">
+<form method="POST" action="{{ ingress_path }}{% url 'add_new_scene_to_global' %}">
   {% csrf_token %}
   <input type="hidden" id="edit_scene_id" name="edit_scene_id">
 
@@ -78,7 +78,7 @@ function edit_scene(id, name) {
   <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
     <div class="md:flex md:flex-wrap md:justify-between items-center mb-2">
       <span class="block mb-2 text-xl">Global scenes</span>
-      <button type="button" hx-get="{% url "htmx_partial_add_entities_page_to_room" room_id=0 is_scenes_page=True is_global_scenes_page=True %}" hx-swap="none" class="btn btn-info btn-outline">Add scenes page</button>
+      <button type="button" hx-get="{{ ingress_path }}{% url "htmx_partial_add_entities_page_to_room" room_id=0 is_scenes_page=True is_global_scenes_page=True %}" hx-swap="none" class="btn btn-info btn-outline">Add scenes page</button>
     </div>
 
     {% component "nspanel_room_entities_pages" room_id=room.id is_scenes_pages=True is_global_scenes_page=True %}{% endcomponent %}

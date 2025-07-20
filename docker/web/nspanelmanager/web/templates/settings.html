@@ -8,7 +8,7 @@
 
 {% block content %}
 
-<form method="POST" action="{% url 'save_settings' %}" id="config">
+<form method="POST" action="{{ ingress_path }}{% url 'save_settings' %}" id="config">
     {% csrf_token %}
     <div class="flex items-center justify-between mb-2">
       <h2 class="font-medium text-2xl">Settings</h2>
@@ -55,7 +55,7 @@
 
         <div class="flex items-center justify-between">
           <span class="block mb-2 text-xl">Logging options</span>
-          <a href="{% url 'download_mqttmanager_log' %}" title="Download MQTTManager log" class="btn btn-outline btn-info">
+          <a href="{{ ingress_path }}{{ ingress_path }}{% url 'download_mqttmanager_log' %}" title="Download MQTTManager log" class="btn btn-outline btn-info">
             <span class="mdi mdi-download"></span>
             Download
           </a>
