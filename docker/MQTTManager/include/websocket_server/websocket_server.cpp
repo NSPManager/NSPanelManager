@@ -15,6 +15,7 @@
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXWebSocketHttpHeaders.h>
 #include <ixwebsocket/IXWebSocketMessageType.h>
+#include <ixwebsocket/IXWebSocketPerMessageDeflate.h>
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <locale>
 #include <memory>
@@ -122,6 +123,9 @@ void WebsocketServer::start() {
 
   // Always retain active warnings so they are sent when new clients connect.
   WebsocketServer::set_stomp_topic_retained("mqttmanager/warnings", true);
+
+  // Subscribe to stomp topic that is used to dismiss errors/warnings
+  WebsocketServer::attach_stomp_callback("mqttmanager/warnings/dismiss", &WebsocketServer::_stomp_dismiss_warning_callback);
 
   WebsocketServer::_server->disablePerMessageDeflate();
   WebsocketServer::_server->start();
@@ -241,7 +245,6 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
               return;
             }
 
-            std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
             std::lock_guard<std::mutex> lock_guard_callbacks(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
             if (WebsocketServer::_on_stomp_send_message_callbacks.count(frame->headers["destination"]) > 0) {
               SPDLOG_DEBUG("Received STOMP SEND command for existing topic, setting topic '{}' to value '{}'", frame->headers["destination"], frame->body);
@@ -280,6 +283,7 @@ void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::stri
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, nlohmann::json &value) {
   std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
+  SPDLOG_DEBUG("Updating stomp topic '{}'", topic_name);
   for (auto &topic : WebsocketServer::_stomp_topics) {
     if (topic.get_name().compare(topic_name) == 0) {
       topic.update_value(value);
@@ -476,7 +480,7 @@ void WebsocketServer::remove_warning(std::string warning_text) {
     auto it = WebsocketServer::_active_warnings.begin();
     while (it != WebsocketServer::_active_warnings.end()) {
       if (it->warning_text.compare(warning_text) == 0) {
-        SPDLOG_DEBUG("Removing warning {}", warning_text);
+        SPDLOG_DEBUG("Removing warning '{}'", warning_text);
         it = WebsocketServer::_active_warnings.erase(it);
 
         send_update = true;
@@ -490,6 +494,10 @@ void WebsocketServer::remove_warning(std::string warning_text) {
   if (send_update) {
     WebsocketServer::_send_active_warnings();
   }
+}
+
+void WebsocketServer::_stomp_dismiss_warning_callback(StompFrame frame) {
+  WebsocketServer::remove_warning(frame.body);
 }
 
 void WebsocketServer::_send_active_warnings() {

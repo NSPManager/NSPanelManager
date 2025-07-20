@@ -157,6 +157,7 @@ private:
 
   static void _websocket_message_callback(std::shared_ptr<ix::ConnectionState> connectionState, ix::WebSocket &webSocket, const ix::WebSocketMessagePtr &msg);
 
+  static void _stomp_dismiss_warning_callback(StompFrame frame);
   static void _send_active_warnings();
 };
 
