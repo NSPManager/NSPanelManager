@@ -289,6 +289,9 @@ def save_panel_settings(request, panel_id: int):
         if request.POST["panel_type"] == "us_horizontal":
             set_nspanel_setting_value(panel_id, "is_us_panel", "True")
             set_nspanel_setting_value(panel_id, "us_panel_orientation", "horizontal")
+        elif request.POST["panel_type"] == "us_horizontal_mirrored":
+            set_nspanel_setting_value(panel_id, "is_us_panel", "True")
+            set_nspanel_setting_value(panel_id, "us_panel_orientation", "horizontal_mirrored")
         elif request.POST["panel_type"] == "us_vertical":
             set_nspanel_setting_value(panel_id, "is_us_panel", "True")
             set_nspanel_setting_value(panel_id, "us_panel_orientation", "vertical")

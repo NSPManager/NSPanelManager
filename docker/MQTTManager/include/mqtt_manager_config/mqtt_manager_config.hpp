@@ -1,15 +1,12 @@
 #ifndef MQTTMANAGER_CONFIG_HPP
 #define MQTTMANAGER_CONFIG_HPP
-#include "protobuf_general.pb.h"
 #include <boost/signals2.hpp>
-#include <list>
-#include <memory>
+#include <expected>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <protobuf/protobuf_mqttmanager.pb.h>
 #include <string>
-#include <vector>
 
 #define MANAGER_ADDRESS "127.0.0.1"
 #define MANAGER_PORT "8000"
@@ -55,16 +52,20 @@ public:
   static void update_firmware_checksum();
   static void update_tft_checksums();
 
-  static std::string get_firmware_checksum();
-  static std::string get_littlefs_checksum();
-  static std::string get_eu_tft1_checksum();
-  static std::string get_eu_tft2_checksum();
-  static std::string get_eu_tft3_checksum();
-  static std::string get_eu_tft4_checksum();
-  static std::string get_us_tft1_checksum();
-  static std::string get_us_tft2_checksum();
-  static std::string get_us_tft3_checksum();
-  static std::string get_us_tft4_checksum();
+  static std::expected<std::string, bool> get_firmware_checksum();
+  static std::expected<std::string, bool> get_littlefs_checksum();
+  static std::expected<std::string, bool> get_eu_tft1_checksum();
+  static std::expected<std::string, bool> get_eu_tft2_checksum();
+  static std::expected<std::string, bool> get_eu_tft3_checksum();
+  static std::expected<std::string, bool> get_eu_tft4_checksum();
+  static std::expected<std::string, bool> get_us_tft1_checksum();
+  static std::expected<std::string, bool> get_us_tft2_checksum();
+  static std::expected<std::string, bool> get_us_tft3_checksum();
+  static std::expected<std::string, bool> get_us_tft4_checksum();
+  static std::expected<std::string, bool> get_us_horizontal_mirrored_tft1_checksum();
+  static std::expected<std::string, bool> get_us_horizontal_mirrored_tft2_checksum();
+  static std::expected<std::string, bool> get_us_horizontal_mirrored_tft3_checksum();
+  static std::expected<std::string, bool> get_us_horizontal_mirrored_tft4_checksum();
 
   /**
    * Attach a callback to be called when config has been fully loaded.
@@ -105,6 +106,10 @@ private:
   static inline std::string _md5_checksum_us_tft2;
   static inline std::string _md5_checksum_us_tft3;
   static inline std::string _md5_checksum_us_tft4;
+  static inline std::string _md5_checksum_us_horizontal_mirrored_tft1;
+  static inline std::string _md5_checksum_us_horizontal_mirrored_tft2;
+  static inline std::string _md5_checksum_us_horizontal_mirrored_tft3;
+  static inline std::string _md5_checksum_us_horizontal_mirrored_tft4;
 };
 
 #endif // !MQTTMANAGER_CONFIG_HPP

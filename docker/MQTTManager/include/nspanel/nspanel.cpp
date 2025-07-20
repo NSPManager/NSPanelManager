@@ -1,13 +1,10 @@
 #include "nspanel.hpp"
 #include "database_manager/database_manager.hpp"
-#include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
-#include "light/light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_nspanel.pb.h"
 #include "room/room_entities_page.hpp"
-#include "scenes/scene.hpp"
 #include "web_helper/WebHelper.hpp"
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
@@ -19,7 +16,6 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/write.hpp>
 #include <chrono>
-#include <cmath>
 #include <command_manager/command_manager.hpp>
 #include <cstddef>
 #include <cstdint>
@@ -31,7 +27,7 @@
 #include <fmt/core.h>
 #include <iomanip>
 #include <ixwebsocket/IXWebSocketSendInfo.h>
-#include <list>
+#include <light/light.hpp>
 #include <mutex>
 #include <netinet/in.h>
 #include <nlohmann/json.hpp>
@@ -113,6 +109,17 @@ void NSPanel::reload_config() {
     this->_has_registered_to_manager = true; // We managed to get the object in above statement and did not throw, ie. has been registered in manager and has an ID in DB.
     this->_mac = panel_settings.mac_address;
     this->_is_us_panel = this->_get_nspanel_setting_with_default("is_us_panel", "False").compare("True") == 0;
+    std::string us_panel_orientation = this->_get_nspanel_setting_with_default("us_panel_orientation", "vertical");
+    if (us_panel_orientation.compare("vertical") == 0) {
+      this->_us_panel_orientation = US_PANEL_ORIENTATION::PORTRAIT;
+    } else if (us_panel_orientation.compare("horizontal") == 0) {
+      this->_us_panel_orientation = US_PANEL_ORIENTATION::LANDSCAPE_LEFT;
+    } else if (us_panel_orientation.compare("horizontal_mirrored") == 0) {
+      this->_us_panel_orientation = US_PANEL_ORIENTATION::LANDSCAPE_RIGHT;
+    } else {
+      this->_us_panel_orientation = US_PANEL_ORIENTATION::PORTRAIT;
+      SPDLOG_ERROR("Error while processing US panel orientation, unknown orientation '{}'. Defaulting to vertical/portrait.", us_panel_orientation);
+    }
 
     if (this->_name.compare(panel_settings.friendly_name) != 0) {
       this->_name = panel_settings.friendly_name;
@@ -774,43 +781,141 @@ void NSPanel::send_websocket_status_update() {
 }
 
 bool NSPanel::has_firmware_update() {
-  return this->_current_firmware_md5_checksum.compare(MqttManagerConfig::get_firmware_checksum()) != 0;
+  auto file_checksum = MqttManagerConfig::get_firmware_checksum();
+  if (file_checksum) {
+    return this->_current_firmware_md5_checksum.compare(*file_checksum) != 0;
+  } else {
+    SPDLOG_ERROR("Failed to get checksum for firmware file!");
+    return false;
+  }
 }
 
 bool NSPanel::has_littlefs_update() {
-  return this->_current_littlefs_md5_checksum.compare(MqttManagerConfig::get_littlefs_checksum()) != 0;
+  auto file_checksum = MqttManagerConfig::get_littlefs_checksum();
+  if (file_checksum) {
+    return this->_current_littlefs_md5_checksum.compare(*file_checksum) != 0;
+  } else {
+    SPDLOG_ERROR("Failed to get checksum for littlefs file!");
+    return false;
+  }
 }
 
 bool NSPanel::has_tft_update() {
   // Check if using EU file (we use EU file for US panel in landscape left orientation as it's the same screen and orientation as the EU panel).
   if (!this->_is_us_panel || (this->_is_us_panel && this->_us_panel_orientation == US_PANEL_ORIENTATION::LANDSCAPE_LEFT)) {
     if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft1") == 0) {
-      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_eu_tft1_checksum()) != 0;
+      auto file_checksum = MqttManagerConfig::get_eu_tft1_checksum();
+      if (file_checksum) {
+        return this->_current_tft_md5_checksum.compare(*file_checksum) != 0;
+      } else {
+        SPDLOG_ERROR("Checksum for selected TFT file does not exist!");
+        return false;
+      }
     } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft2") == 0) {
-      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_eu_tft2_checksum()) != 0;
+      auto file_checksum = MqttManagerConfig::get_us_tft2_checksum();
+      if (file_checksum) {
+        return this->_current_tft_md5_checksum.compare(*file_checksum) != 0;
+      } else {
+        SPDLOG_ERROR("Checksum for selected TFT file does not exist!");
+        return false;
+      }
     } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft3") == 0) {
-      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_eu_tft3_checksum()) != 0;
+      auto file_checksum = MqttManagerConfig::get_eu_tft3_checksum();
+      if (file_checksum) {
+        return this->_current_tft_md5_checksum.compare(*file_checksum) != 0;
+      } else {
+        SPDLOG_ERROR("Checksum for selected TFT file does not exist!");
+        return false;
+      }
     } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft4") == 0) {
-      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_eu_tft4_checksum()) != 0;
+      auto file_checksum = MqttManagerConfig::get_eu_tft4_checksum();
+      if (file_checksum) {
+        return this->_current_tft_md5_checksum.compare(*file_checksum) != 0;
+      } else {
+        SPDLOG_ERROR("Checksum for selected TFT file does not exist!");
+        return false;
+      }
     } else {
       SPDLOG_ERROR("Could not determin selected TFT file when comparing checksums! Selected TFT for nspanel {}::{} is {}", this->_id, this->_name, this->_get_nspanel_setting_with_default("selected_tft", "tft1"));
+      return false;
     }
   } else if (this->_is_us_panel && this->_us_panel_orientation == US_PANEL_ORIENTATION::PORTRAIT) {
     if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft1") == 0) {
-      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_us_tft1_checksum()) != 0;
-    } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft2") == 0) {
-      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_us_tft2_checksum()) != 0;
-    } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft3") == 0) {
-      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_us_tft3_checksum()) != 0;
+      auto file_checksum = MqttManagerConfig::get_us_tft1_checksum();
+      if (file_checksum) {
+        return this->_current_tft_md5_checksum.compare(*file_checksum) != 0;
+      } else {
+        SPDLOG_ERROR("Checksum for selected TFT file does not exist!");
+        return false;
+      }
+    } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("2222") == 0) {
+      auto file_checksum = MqttManagerConfig::get_us_tft2_checksum();
+      if (file_checksum) {
+        return this->_current_tft_md5_checksum.compare(*file_checksum) != 0;
+      } else {
+        SPDLOG_ERROR("Checksum for selected TFT file does not exist!");
+        return false;
+      }
+    }
+    if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft3") == 0) {
+      auto file_checksum = MqttManagerConfig::get_us_tft3_checksum();
+      if (file_checksum) {
+        return this->_current_tft_md5_checksum.compare(*file_checksum) != 0;
+      } else {
+        SPDLOG_ERROR("Checksum for selected TFT file does not exist!");
+        return false;
+      }
     } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft4") == 0) {
-      return this->_current_tft_md5_checksum.compare(MqttManagerConfig::get_us_tft4_checksum()) != 0;
+      auto file_checksum = MqttManagerConfig::get_us_tft4_checksum();
+      if (file_checksum) {
+        return this->_current_tft_md5_checksum.compare(*file_checksum) != 0;
+      } else {
+        SPDLOG_ERROR("Checksum for selected TFT file does not exist!");
+        return false;
+      }
+    } else {
+      SPDLOG_ERROR("Could not determin selected TFT file when comparing checksums! Selected TFT for nspanel {}::{} is {}", this->_id, this->_name, this->_get_nspanel_setting_with_default("selected_tft", "tft1"));
+    }
+  } else if (this->_is_us_panel && this->_us_panel_orientation == US_PANEL_ORIENTATION::LANDSCAPE_RIGHT) {
+    if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft1") == 0) {
+      auto file_checksum = MqttManagerConfig::get_us_horizontal_mirrored_tft1_checksum();
+      if (file_checksum) {
+        return this->_current_tft_md5_checksum.compare(*file_checksum) != 0;
+      } else {
+        SPDLOG_ERROR("Checksum for selected TFT file does not exist!");
+        return false;
+      }
+    } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft2") == 0) {
+      auto file_checksum = MqttManagerConfig::get_us_horizontal_mirrored_tft2_checksum();
+      if (file_checksum) {
+        return this->_current_tft_md5_checksum.compare(*file_checksum) != 0;
+      } else {
+        SPDLOG_ERROR("Checksum for selected TFT file does not exist!");
+        return false;
+      }
+    }
+    if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft3") == 0) {
+      auto file_checksum = MqttManagerConfig::get_us_horizontal_mirrored_tft3_checksum();
+      if (file_checksum) {
+        return this->_current_tft_md5_checksum.compare(*file_checksum) != 0;
+      } else {
+        SPDLOG_ERROR("Checksum for selected TFT file does not exist!");
+        return false;
+      }
+    } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft4") == 0) {
+      auto file_checksum = MqttManagerConfig::get_us_horizontal_mirrored_tft4_checksum();
+      if (file_checksum) {
+        return this->_current_tft_md5_checksum.compare(*file_checksum) != 0;
+      } else {
+        SPDLOG_ERROR("Checksum for selected TFT file does not exist!");
+        return false;
+      }
     } else {
       SPDLOG_ERROR("Could not determin selected TFT file when comparing checksums! Selected TFT for nspanel {}::{} is {}", this->_id, this->_name, this->_get_nspanel_setting_with_default("selected_tft", "tft1"));
     }
   } else {
     SPDLOG_ERROR("Unsupported NSPanel orientation for NSPanel {}::{}", this->_id, this->_name);
   }
-
   return false;
 }
 

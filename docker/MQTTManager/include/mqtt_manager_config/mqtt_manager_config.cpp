@@ -206,6 +206,38 @@ void MqttManagerConfig::update_tft_checksums() {
   } else {
     SPDLOG_ERROR("Failed to calculate checksum for US TFT4 Nextion GUI file!");
   }
+
+  auto us_tft1_horizontal_mirrored_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft1/gui.tft");
+  if (us_tft1_horizontal_mirrored_checksum.has_value()) {
+    MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft1 = us_tft1_horizontal_mirrored_checksum.value();
+    SPDLOG_INFO("US landscape mirrored TFT1 GUI file checksum: {}", us_tft1_horizontal_mirrored_checksum.value());
+  } else {
+    SPDLOG_ERROR("Failed to calculate checksum for US landscape mirrored TFT1 Nextion GUI file!");
+  }
+
+  auto us_tft2_horizontal_mirrored_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft2/gui.tft");
+  if (us_tft2_horizontal_mirrored_checksum.has_value()) {
+    MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft2 = us_tft2_horizontal_mirrored_checksum.value();
+    SPDLOG_INFO("US landscape mirrored TFT2 GUI file checksum: {}", us_tft2_horizontal_mirrored_checksum.value());
+  } else {
+    SPDLOG_ERROR("Failed to calculate checksum for US landscape mirrored TFT2 Nextion GUI file!");
+  }
+
+  auto us_tft3_horizontal_mirrored_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft3/gui.tft");
+  if (us_tft3_horizontal_mirrored_checksum.has_value()) {
+    MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft3 = us_tft3_horizontal_mirrored_checksum.value();
+    SPDLOG_INFO("US landscape mirrored TFT3 GUI file checksum: {}", us_tft3_horizontal_mirrored_checksum.value());
+  } else {
+    SPDLOG_ERROR("Failed to calculate checksum for US landscape mirrored TFT3 Nextion GUI file!");
+  }
+
+  auto us_tft4_horizontal_mirrored_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft4/gui.tft");
+  if (us_tft4_horizontal_mirrored_checksum.has_value()) {
+    MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft4 = us_tft4_horizontal_mirrored_checksum.value();
+    SPDLOG_INFO("US landscape mirrored TFT4 GUI file checksum: {}", us_tft4_horizontal_mirrored_checksum.value());
+  } else {
+    SPDLOG_ERROR("Failed to calculate checksum for US landscape mirrored TFT4 Nextion GUI file!");
+  }
 }
 
 std::optional<std::string> MqttManagerConfig::_get_file_md5_checksum(std::string file_path) {
@@ -258,52 +290,114 @@ std::optional<std::string> MqttManagerConfig::_get_file_md5_checksum(std::string
   return boost::algorithm::to_lower_copy(ss.str()); // Convert to lowercase as the md5 checksum calculated in Django is calculated with lower case latters.
 }
 
-std::string MqttManagerConfig::get_firmware_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_firmware_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_firmware.empty()) {
+    return std::unexpected(false);
+  }
   return MqttManagerConfig::_md5_checksum_firmware;
 }
 
-std::string MqttManagerConfig::get_littlefs_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_littlefs_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_littlefs.empty()) {
+    return std::unexpected(false);
+  }
   return MqttManagerConfig::_md5_checksum_littlefs;
 }
 
-std::string MqttManagerConfig::get_eu_tft1_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_eu_tft1_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_eu_tft1.empty()) {
+    return std::unexpected(false);
+  }
   return MqttManagerConfig::_md5_checksum_eu_tft1;
 }
 
-std::string MqttManagerConfig::get_eu_tft2_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_eu_tft2_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_eu_tft2.empty()) {
+    return std::unexpected(false);
+  }
   return MqttManagerConfig::_md5_checksum_eu_tft2;
 }
 
-std::string MqttManagerConfig::get_eu_tft3_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_eu_tft3_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_eu_tft3.empty()) {
+    return std::unexpected(false);
+  }
   return MqttManagerConfig::_md5_checksum_eu_tft3;
 }
 
-std::string MqttManagerConfig::get_eu_tft4_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_eu_tft4_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_eu_tft4.empty()) {
+    return std::unexpected(false);
+  }
   return MqttManagerConfig::_md5_checksum_eu_tft4;
 }
 
-std::string MqttManagerConfig::get_us_tft1_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_us_tft1_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_us_tft1.empty()) {
+    return std::unexpected(false);
+  }
   return MqttManagerConfig::_md5_checksum_us_tft1;
 }
 
-std::string MqttManagerConfig::get_us_tft2_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_us_tft2_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_us_tft2.empty()) {
+    return std::unexpected(false);
+  }
   return MqttManagerConfig::_md5_checksum_us_tft2;
 }
 
-std::string MqttManagerConfig::get_us_tft3_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_us_tft3_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_us_tft3.empty()) {
+    return std::unexpected(false);
+  }
   return MqttManagerConfig::_md5_checksum_us_tft3;
 }
 
-std::string MqttManagerConfig::get_us_tft4_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_us_tft4_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_us_tft4.empty()) {
+    return std::unexpected(false);
+  }
   return MqttManagerConfig::_md5_checksum_us_tft4;
+}
+
+std::expected<std::string, bool> MqttManagerConfig::get_us_horizontal_mirrored_tft1_checksum() {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft1.empty()) {
+    return std::unexpected(false);
+  }
+  return MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft1;
+}
+
+std::expected<std::string, bool> MqttManagerConfig::get_us_horizontal_mirrored_tft2_checksum() {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft2.empty()) {
+    return std::unexpected(false);
+  }
+  return MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft2;
+}
+
+std::expected<std::string, bool> MqttManagerConfig::get_us_horizontal_mirrored_tft3_checksum() {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft3.empty()) {
+    return std::unexpected(false);
+  }
+  return MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft3;
+}
+
+std::expected<std::string, bool> MqttManagerConfig::get_us_horizontal_mirrored_tft4_checksum() {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft4.empty()) {
+    return std::unexpected(false);
+  }
+  return MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft4;
 }
