@@ -6,18 +6,14 @@
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <codecvt>
 #include <cstddef>
 #include <fmt/core.h>
-#include <fstream>
-#include <iterator>
 #include <ixwebsocket/IXConnectionState.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXWebSocketHttpHeaders.h>
 #include <ixwebsocket/IXWebSocketMessageType.h>
 #include <ixwebsocket/IXWebSocketPerMessageDeflate.h>
 #include <ixwebsocket/IXWebSocketServer.h>
-#include <locale>
 #include <memory>
 #include <mutex>
 #include <spdlog/spdlog.h>
@@ -26,9 +22,7 @@
 #include <utility>
 #include <websocket_server/websocket_server.hpp>
 
-StompTopic::StompTopic(std::string topic, std::string current_value) {
-  _topic_name = topic;
-  _current_value = current_value;
+StompTopic::StompTopic(std::string topic, std::string current_value) : _topic_name(topic), _current_value(current_value) {
 }
 
 std::string StompTopic::get_name() const {
@@ -36,6 +30,7 @@ std::string StompTopic::get_name() const {
 }
 
 void StompTopic::subscribe(ix::WebSocket &webSocket, std::string subscription_id) {
+  std::lock_guard<std::mutex> _lock_guard(this->_subscribers_mutex);
   _subscribers.push_back(std::make_pair(&webSocket, subscription_id));
 
   if (this->_retained) {
@@ -57,6 +52,7 @@ void StompTopic::subscribe(ix::WebSocket &webSocket, std::string subscription_id
 }
 
 void StompTopic::unsubscribe(ix::WebSocket &webSocket, std::string subscription_id) {
+  std::lock_guard<std::mutex> _lock_guard(this->_subscribers_mutex);
   _subscribers.erase(std::remove_if(_subscribers.begin(), _subscribers.end(), [&webSocket, &subscription_id](const auto &pair) {
                        return pair.first == &webSocket && (pair.second == subscription_id || subscription_id.empty()); // An empty ID is used to unsubscribe all subscriptions for the given WebSocket.
                      }),
@@ -76,6 +72,7 @@ void StompTopic::update_value(std::string value) {
     frame.headers["destination"] = this->_topic_name;
     frame.body = value;
 
+    std::lock_guard<std::mutex> _lock_guard(this->_subscribers_mutex);
     for (auto &subscriber : _subscribers) {
       frame.headers["subscription"] = subscriber.second;
       WebsocketServer::send_stomp_frame(frame, *subscriber.first);
@@ -97,7 +94,8 @@ void StompTopic::set_retained(bool retained) {
   this->_retained = retained;
 }
 
-int StompTopic::get_subscriber_count() const {
+int StompTopic::get_subscriber_count() {
+  std::lock_guard<std::mutex> _lock_guard(this->_subscribers_mutex);
   return this->_subscribers.size();
 }
 
@@ -150,7 +148,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
       WebsocketServer::_connected_websockets_stomps.remove(&webSocket);
 
       for (auto &topic : WebsocketServer::_stomp_topics) {
-        topic.unsubscribe(webSocket, "");
+        topic->unsubscribe(webSocket, "");
       }
     } else if (msg->type == ix::WebSocketMessageType::Message) {
       if (std::find(WebsocketServer::_connected_websockets_stomps.begin(), WebsocketServer::_connected_websockets_stomps.end(), &webSocket) != WebsocketServer::_connected_websockets_stomps.end()) {
@@ -219,22 +217,22 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
 
             SPDLOG_DEBUG("STOMP subscribing to topic {} (id: {})", frame->headers["destination"], frame->headers["id"]);
             for (auto &topic : WebsocketServer::_stomp_topics) {
-              if (topic.get_name() == frame->headers["destination"]) {
+              if (topic->get_name() == frame->headers["destination"]) {
                 std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-                topic.subscribe(webSocket, frame->headers["id"]);
+                topic->subscribe(webSocket, frame->headers["id"]);
                 return; // We found the topics and subscribed to it, nothing else to do.
               }
             }
 
             // Topic was not found, create topic and subscribe to it
-            WebsocketServer::_stomp_topics.push_back(StompTopic(frame->headers["destination"], ""));
-            WebsocketServer::_stomp_topics.back().subscribe(webSocket, frame->headers["id"]);
+            WebsocketServer::_stomp_topics.push_back(std::make_shared<StompTopic>(frame->headers["destination"], ""));
+            WebsocketServer::_stomp_topics.back()->subscribe(webSocket, frame->headers["id"]);
           } else if (frame->type == StompFrame::UNSUBSCRIBE) {
             SPDLOG_DEBUG("STOMP subscription ID {} unsubscribing.", frame->headers["id"]);
             for (auto &topic : WebsocketServer::_stomp_topics) {
-              if (topic.get_name() == frame->headers["destination"]) {
+              if (topic->get_name() == frame->headers["destination"]) {
                 std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-                topic.unsubscribe(webSocket, frame->headers["id"]);
+                topic->unsubscribe(webSocket, frame->headers["id"]);
                 return; // We found the topics and unsubscribed from it, nothing else to do.
               }
             }
@@ -273,9 +271,10 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::string value) {
   std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
+  SPDLOG_DEBUG("Updating stomp topic value '{}'", topic_name);
   for (auto &topic : WebsocketServer::_stomp_topics) {
-    if (topic.get_name().compare(topic_name) == 0) {
-      topic.update_value(value);
+    if (topic->get_name().compare(topic_name) == 0) {
+      topic->update_value(value);
       return;
     }
   }
@@ -283,10 +282,10 @@ void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::stri
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, nlohmann::json &value) {
   std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-  SPDLOG_DEBUG("Updating stomp topic '{}'", topic_name);
+  SPDLOG_DEBUG("Updating stomp topic JSON '{}'", topic_name);
   for (auto &topic : WebsocketServer::_stomp_topics) {
-    if (topic.get_name().compare(topic_name) == 0) {
-      topic.update_value(value);
+    if (topic->get_name().compare(topic_name) == 0) {
+      topic->update_value(value);
       return;
     }
   }
@@ -295,15 +294,15 @@ void WebsocketServer::update_stomp_topic_value(std::string topic_name, nlohmann:
 void WebsocketServer::set_stomp_topic_retained(std::string topic_name, bool retained) {
   std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
   for (auto &topic : WebsocketServer::_stomp_topics) {
-    if (topic.get_name().compare(topic_name) == 0) {
-      topic.set_retained(retained);
+    if (topic->get_name().compare(topic_name) == 0) {
+      topic->set_retained(retained);
       return;
     }
   }
 
   // We didn't find topic, create it and set retained flag
-  WebsocketServer::_stomp_topics.push_back(StompTopic(topic_name, ""));
-  WebsocketServer::_stomp_topics.back().set_retained(retained);
+  WebsocketServer::_stomp_topics.push_back(std::make_shared<StompTopic>(topic_name, ""));
+  WebsocketServer::_stomp_topics.back()->set_retained(retained);
 }
 
 std::optional<StompFrame> WebsocketServer::decode_stomp_frame(std::string &data) {

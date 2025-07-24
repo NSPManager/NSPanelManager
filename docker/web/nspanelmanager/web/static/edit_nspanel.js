@@ -176,7 +176,7 @@ function update_shown_elements() {
 
 // Update the view of the example NSPanel model and orientation.
 function update_nspanel_example_view() {
-  var selected_type = $(this).val();
+  var selected_type = $("#panel_type").val();
   if (selected_type == "eu") {
     $("#eu-panel-example").show();
   } else {

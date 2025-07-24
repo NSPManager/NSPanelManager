@@ -47,14 +47,16 @@ public:
   void update_value(std::string new_value);
   void update_value(nlohmann::json &new_value);
   void set_retained(bool retained);
-  int get_subscriber_count() const;
+  int get_subscriber_count();
 
-protected:
+private:
   boost::uuids::random_generator _uuid_generator = boost::uuids::random_generator(); // Used to generate unique UUIDs for STOMP clients
   bool _retained = false;
-  std::string _topic_name;
+  const std::string _topic_name;
   std::string _current_value;
   nlohmann::json _current_json_data;
+
+  std::mutex _subscribers_mutex;
   std::list<std::pair<ix::WebSocket *, std::string>> _subscribers;
 };
 
@@ -144,7 +146,7 @@ private:
   static inline std::list<std::function<bool(std::string &message, std::string *response_buf)>> _callbacks;
 
   static inline boost::uuids::random_generator _uuid_generator = boost::uuids::random_generator(); // Used to generate unique UUIDs for STOMP clients
-  static inline std::vector<StompTopic> _stomp_topics;
+  static inline std::vector<std::shared_ptr<StompTopic>> _stomp_topics;
 
   static inline std::list<ix::WebSocket *> _connected_websockets_stomps;
 
