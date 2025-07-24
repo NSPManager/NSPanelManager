@@ -111,7 +111,7 @@ if (location.protocol === "https:") {
 }
 
 stomp_websocket_address +=
-  location.hostname + ":" + location.port + "/websocket/stomp";
+  location.hostname + ":" + location.port + "{{ingress_path}}/websocket/stomp";
 const stomp_client = new StompJs.Client({
   brokerURL: stomp_websocket_address,
   connectHeaders: {
