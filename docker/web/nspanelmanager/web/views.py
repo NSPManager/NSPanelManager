@@ -482,6 +482,14 @@ def save_new_tft_file(request):
             file_path = "HMI_files/tft_automation/us/output_tft3/gui.tft"
         elif(tft_file_type == "us4"):
             file_path = "HMI_files/tft_automation/us/output_tft4/gui.tft"
+        elif(tft_file_type == "us1_horizontal_mirrored"):
+            file_path = "HMI_files/tft_automation/us_horizontal_mirrored/output_tft1/gui.tft"
+        elif(tft_file_type == "us2_horizontal_mirrored"):
+            file_path = "HMI_files/tft_automation/us_horizontal_mirrored/output_tft2/gui.tft"
+        elif(tft_file_type == "us3_horizontal_mirrored"):
+            file_path = "HMI_files/tft_automation/us_horizontal_mirrored/output_tft3/gui.tft"
+        elif(tft_file_type == "us4_horizontal_mirrored"):
+            file_path = "HMI_files/tft_automation/us_horizontal_mirrored/output_tft4/gui.tft"
         else:
             print("ERROR! Unknown TFT file type!")
             return HttpResponse("ERROR! Unknown TFT file type!", status=500)
