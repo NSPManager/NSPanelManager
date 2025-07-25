@@ -540,6 +540,9 @@ def download_tft(request, panel_id):
     elif is_us_panel == "True" and us_panel_orientation == "horizontal":
         # We use EU tft file for horizontal US panel with buttons on left as it's the same screen and orientation
         tft_file = "HMI_files/tft_automation/eu/output_" + selected_tft + "/gui.tft"
+    elif is_us_panel == "True" and us_panel_orientation == "horizontal_mirrored":
+        # We use EU tft file for horizontal US panel with buttons on left as it's the same screen and orientation
+        tft_file = "HMI_files/tft_automation/us_horizontal_mirrored/output_" + selected_tft + "/gui.tft"
     elif is_us_panel == "True" and us_panel_orientation == "vertical":
         tft_file = "HMI_files/tft_automation/us/output_" + selected_tft + "/gui.tft"
     else:
