@@ -8,13 +8,13 @@ function push_log_message_to_view(data) {
   var level_tag_background;
   if (data.level == "ERROR") {
     level_tag_background = "bg-error";
-    level_tag = '<span class="bg-error-content">ERROR</span>';
+    level_tag = '<span class="text-error-content">ERROR</span>';
   } else if (data.level == "WARNING") {
     level_tag_background = "bg-warning";
-    level_tag = '<span class="bg-warning-content">WARNING</span>';
+    level_tag = '<span classtextbg-warning-content">WARNING</span>';
   } else if (data.level == "INFO") {
     level_tag_background = "bg-info";
-    level_tag = '<span class="bg-info-content">INFO</span>';
+    level_tag = '<span classtextbg-info-content">INFO</span>';
   } else if (data.level == "DEBUG") {
     level_tag_background = "bg-neutral";
     level_tag = '<span class="text-neutral-content">DEBUG</span>';
