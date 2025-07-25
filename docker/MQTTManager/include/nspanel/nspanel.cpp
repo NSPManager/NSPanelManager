@@ -812,7 +812,7 @@ bool NSPanel::has_tft_update() {
         return false;
       }
     } else if (this->_get_nspanel_setting_with_default("selected_tft", "tft1").compare("tft2") == 0) {
-      auto file_checksum = MqttManagerConfig::get_us_tft2_checksum();
+      auto file_checksum = MqttManagerConfig::get_eu_tft2_checksum();
       if (file_checksum) {
         return this->_current_tft_md5_checksum.compare(*file_checksum) != 0;
       } else {
