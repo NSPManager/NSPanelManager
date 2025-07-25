@@ -60,17 +60,21 @@
 
 
 let _error_toast_counter = 0;
+const ERROR_TOAST_LEVEL_ERROR = 0;
+const ERROR_TOAST_LEVEL_WARNING = 1;
+const ERROR_TOAST_LEVEL_INFO = 2;
+const ERROR_TOAST_LEVEL_DEBUG = 3;
 function show_error_toast(level, error_text, timeout = 10) {
   _error_toast_counter++;
   var error_toast_id = `error-toast-${_error_toast_counter}`;
 
-  if(level == 0) { // Error as per C++ enum ActiveWarningLevel
+  if(level == ERROR_TOAST_LEVEL_ERROR) { // Error as per C++ enum ActiveWarningLevel
     var new_toast = document.getElementById("error_toast_template").content.cloneNode(true);
-  } else if (level == 1) { // Warning as per C++ enum ActiveWarningLevel
+  } else if (level == ERROR_TOAST_LEVEL_WARNING) { // Warning as per C++ enum ActiveWarningLevel
     var new_toast = document.getElementById("warning_toast_template").content.cloneNode(true);
-  } else if (level == 2) { // Info as per C++ enum ActiveWarningLevel
+  } else if (level == ERROR_TOAST_LEVEL_INFO) { // Info as per C++ enum ActiveWarningLevel
     var new_toast = document.getElementById("info_toast_template").content.cloneNode(true);
-  } else if (level == 3) { // Debug as per C++ enum ActiveWarningLevel
+  } else if (level == ERROR_TOAST_LEVEL_DEBUG) { // Debug as per C++ enum ActiveWarningLevel
     var new_toast = document.getElementById("debug_toast_template").content.cloneNode(true);
   } else {
     var new_toast = document.getElementById("error_toast_template").content.cloneNode(true);

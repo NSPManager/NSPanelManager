@@ -81,6 +81,8 @@ urlpatterns = [
     path('rest/rooms', rest.rooms, name='rest_rooms_create'),
     # Scene URLs
     path('rest/scenes', rest.scenes, name='rest_lights'),
+    # Misc
+    path('rest/get_ip_by_hostname', rest.get_ip_by_hostname, name='get_ip_by_hostname'),
 
     #######################
     ### HTMX "API" URLs ###

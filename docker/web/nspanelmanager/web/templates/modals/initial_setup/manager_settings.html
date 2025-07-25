@@ -1,4 +1,28 @@
 {% load static %}
+<script>
+function set_manager_address_from_window_location() {
+  $.ajax({
+      type: "POST",
+      url: "{{ ingress_path }}{% url 'get_ip_by_hostname' %}",
+      data: JSON.stringify({ hostname: location.hostname }),
+      contentType: "application/json; charset=utf-8",
+      dataType: 'json',
+      success: function(data) {
+          if("ip" in data) {
+            document.getElementById('manager_address').value = data.ip;
+          } else {
+            show_error_toast(ERROR_TOAST_LEVEL_ERROR, `Manager returned no error but no 'ip' key exists in returned data. Manager log may contain more details.`);
+          }
+      },
+      error: function(errMsg) {
+          show_error_toast(ERROR_TOAST_LEVEL_ERROR, `Failed to translate window location (${location.hostname}) to an IP via REST api. Manager log may contain more details.`);
+          console.error(err);
+      }
+  });
+}
+
+</script>
+
 <dialog id="welcome_modal" class="modal" hx-swap-oob="true">
     <div class="modal-box">
         <form method="dialog">
@@ -29,7 +53,7 @@
             <div class="mb-2">
                 <label for="manager_address" class="block mb-1 text-sm font-medium">Manager address</label>
                 <div class="flex flex-row-reverse">
-                    <button type="button" class="button bg-info text-info-content p-2 border border-l-0 rounded-e-field border-neutral text-sm" onclick="$('#manager_address').val(location.hostname);">Load from URL</button>
+                    <button type="button" class="button bg-info text-info-content p-2 border border-l-0 rounded-e-field border-neutral text-sm cursor-pointer" onclick="set_manager_address_from_window_location()">Load from URL</button>
                     <input class="outline-none rounded-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                     type="text" class="input" id="manager_address" name="manager_address" value="{{ manager_address }}" required>
                     <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
@@ -43,7 +67,7 @@
             <div class="mb-2">
                 <label for="manager_port" class="block mb-1 text-sm font-medium">Manager port</label>
                 <div class="flex flex-row-reverse">
-                    <button type="button" class="button bg-info text-info-content p-2 border border-l-0 rounded-e-field border-neutral text-sm" onclick="$('#manager_port').val(location.port);">Load from URL</button>
+                    <button type="button" class="button bg-info text-info-content p-2 border border-l-0 rounded-e-field border-neutral text-sm cursor-pointer" onclick="$('#manager_port').val(location.port);">Load from URL</button>
                     <input class="outline-none rounded-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                     type="text" class="input" id="manager_port" name="manager_port" value="{{ manager_port }}" required>
                     <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">

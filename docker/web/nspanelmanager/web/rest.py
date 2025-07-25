@@ -1,4 +1,5 @@
 from re import A
+import socket
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
@@ -468,3 +469,20 @@ def scenes_post(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
+
+
+
+####################
+### Misc section ###
+####################
+@csrf_exempt
+def get_ip_by_hostname(request):
+    try:
+        data = json.loads(request.body)
+        ip_address = socket.gethostbyname(data['hostname'])
+        return JsonResponse({"ip": ip_address}, status=200)
+    except socket.gaierror:
+        return JsonResponse({"error": "Hostname not found"}, status=404)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"error": "Internal server error"}, status=500)
