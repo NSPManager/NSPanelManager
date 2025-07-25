@@ -112,13 +112,15 @@ function update_shown_elements() {
     ).val();
     if (button1_detached_light_first_value) {
       console.log(
-        "Selected option for button1 detached light is no longer accissible in selected room, will select ",
+        "Selected option for button1 detached light is no longer accessible in selected room, will select '",
         button1_detached_light_first_value,
-        " instead.",
+        "' instead.",
       );
       $("#button1_detached_mode_light")
         .val(button1_detached_light_first_value)
         .change();
+    } else {
+      $("#button1_detached_mode_light").val("").change();
     }
   }
 
@@ -149,13 +151,15 @@ function update_shown_elements() {
     ).val();
     if (button2_detached_light_first_value) {
       console.log(
-        "Selected option for button2 detached light is no longer accissible in selected room, will select ",
+        "Selected option for button2 detached light is no longer accessible in selected room, will select '",
         button2_detached_light_first_value,
-        " instead.",
+        "' instead.",
       );
       $("#button2_detached_mode_light")
         .val(button2_detached_light_first_value)
         .change();
+    } else {
+      $("#button2_detached_mode_light").val("").change();
     }
   }
 

@@ -86,8 +86,4 @@ function show_error_toast(level, error_text, timeout = 10) {
 function dismiss_error(toast) {
   stomp_send("mqttmanager/warnings/dismiss", toast.getAttribute("data-toast-text"));
 }
-
-
-// show_error_toast(0, "MQTT not connected.");
-// show_error_toast(1, "TEST2");
 </script>
