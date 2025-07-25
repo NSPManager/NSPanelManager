@@ -9,10 +9,10 @@ class CompressorRecipe(ConanFile):
     def requirements(self):
         self.requires("zlib/1.3.1", override=True)
         self.requires("openssl/3.4.1", override=True)
-        self.requires("paho-mqtt-cpp/1.4.1")
-        self.requires("spdlog/1.15.1")
+        self.requires("paho-mqtt-cpp/1.5.3")
+        self.requires("spdlog/1.15.3")
         self.requires("libcurl/8.12.1")
-        self.requires("nlohmann_json/3.11.3")
+        self.requires("nlohmann_json/3.12.0")
         self.requires("ixwebsocket/11.4.5")
         self.requires("tz/2023c")
         # self.requires("inja/3.4.0")
