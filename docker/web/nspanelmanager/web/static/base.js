@@ -32,7 +32,9 @@ $(document).ready(function () {
     var json = JSON.parse(data.body);
     var warnings = json.warnings;
     // Remove any removed warnings
-    $("#error_toast_container > .alert").each(function () {
+    $(
+      `#error_toast_container > .alert[data-error-source='${ERROR_TOAST_SOURCE_MANAGER}']`,
+    ).each(function () {
       let found = false;
       let match_text = $(this).find(".toast-text").text();
       for (let i = 0; i < warnings.length; i++) {
@@ -43,7 +45,7 @@ $(document).ready(function () {
       }
 
       if (!found) {
-        $(this).remove();
+        remove_error_toast($(this).data("error-id"));
       }
     });
 
@@ -73,18 +75,34 @@ $(document).ready(function () {
       if ("status" in obj) {
         if (obj.status == "error") {
           if ("text" in obj) {
-            show_error_toast(0, obj["text"]);
+            show_error_toast(0, obj["text"], ERROR_TOAST_SOURCE_MANAGER);
           } else {
-            show_error_toast(0, "Request error but no message specified.");
+            show_error_toast(
+              0,
+              "Request error but no message specified.",
+              ERROR_TOAST_SOURCE_MANAGER,
+            );
           }
         } else {
-          show_error_toast(0, "Unknown request error.");
+          show_error_toast(
+            0,
+            "Unknown request error.",
+            ERROR_TOAST_SOURCE_MANAGER,
+          );
         }
       } else {
-        show_error_toast(0, "Unknown request error.");
+        show_error_toast(
+          0,
+          "Unknown request error.",
+          ERROR_TOAST_SOURCE_MANAGER,
+        );
       }
     } catch (error) {
-      show_error_toast(0, "Error while processing error response from server.");
+      show_error_toast(
+        0,
+        "Error while processing error response from server.",
+        ERROR_TOAST_SOURCE_WEB_INTERFACE,
+      );
     }
   });
 

@@ -11,11 +11,11 @@ function set_manager_address_from_window_location() {
           if("ip" in data) {
             document.getElementById('manager_address').value = data.ip;
           } else {
-            show_error_toast(ERROR_TOAST_LEVEL_ERROR, `Manager returned no error but no 'ip' key exists in returned data. Manager log may contain more details.`);
+            show_error_toast(ERROR_TOAST_LEVEL_ERROR, `Manager returned no error but no 'ip' key exists in returned data. Manager log may contain more details.`, ERROR_TOAST_SOURCE_WEB_INTERFACE);
           }
       },
       error: function(errMsg) {
-          show_error_toast(ERROR_TOAST_LEVEL_ERROR, `Failed to translate window location (${location.hostname}) to an IP via REST api. Manager log may contain more details.`);
+          show_error_toast(ERROR_TOAST_LEVEL_ERROR, `Failed to translate window location (${location.hostname}) to an IP via REST api. Manager log may contain more details.`, ERROR_TOAST_SOURCE_MANAGER);
           console.error(err);
       }
   });
