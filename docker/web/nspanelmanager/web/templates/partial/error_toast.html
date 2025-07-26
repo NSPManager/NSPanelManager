@@ -1,36 +1,30 @@
 <template id="error_toast_template">
-    <div class="error_toast alert alert-error overflow-hidden relative p-0 border-0" data-pause-timer-countdown="false" onmouseenter="_error_toast_pause(this);" onmouseleave="_error_toast_continue(this);">
+    <div class="error_toast alert alert-error overflow-hidden relative p-2 border-0 flex items-center gap-1" data-pause-timer-countdown="false" onmouseenter="_error_toast_pause(this);" onmouseleave="_error_toast_continue(this);">
         <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress>
-        <div class="mx-2 my-2 flex items-center">
-            <span class="mdi mdi-alert-circle-outline text-2xl me-2"></span>
-            <span class="toast-text">Failed to perform request!</span>
-        </div>
-        <button class="cursor-pointer dismiss-button" title="Dismiss" data-toast-id="" data-toast-text="" onclick="dismiss_error(this);">
+        <span class="mdi mdi-alert-circle-outline text-2xl me-2"></span>
+        <span class="toast-text w-full">Failed to perform request!</span>
+        <button class="cursor-pointer dismiss-button" title="Dismiss" data-toast-id="" data-toast-text="" onclick="dismiss_error(this.getAttribute('data-toast-id'));">
             <span class="mdi mdi-close-circle text-xl mx-2"></span>
         </button>
     </div>
 </template>
 
 <template id="warning_toast_template">
-    <div class="error_toast alert alert-warning overflow-hidden relative p-0 border-0" data-pause-timer-countdown="false" onmouseenter="_error_toast_pause(this);" onmouseleave="_error_toast_continue(this);">
+    <div class="error_toast alert alert-warning overflow-hidden relative p-2 border-0 flex items-center gap-1" data-pause-timer-countdown="false" onmouseenter="_error_toast_pause(this);" onmouseleave="_error_toast_continue(this);">
         <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress>
-        <div class="mx-2 my-2 flex items-center">
-            <span class="mdi mdi-alert-circle-outline text-2xl me-2"></span>
-            <span class="toast-text">Failed to perform request!</span>
-        </div>
-        <button class="cursor-pointer dismiss-button" title="Dismiss" data-toast-id="" data-toast-text="" onclick="dismiss_error(this);">
+        <span class="mdi mdi-alert-circle-outline text-2xl me-2"></span>
+        <span class="toast-text w-full">Failed to perform request!</span>
+        <button class="cursor-pointer dismiss-button" title="Dismiss" data-toast-id="" data-toast-text="" onclick="dismiss_error(this.getAttribute('data-toast-id'));">
             <span class="mdi mdi-close-circle text-xl mx-2"></span>
         </button>
     </div>
 </template>
 
 <template id="info_toast_template">
-    <div class="error_toast alert alert-info overflow-hidden relative p-0 border-0" data-pause-timer-countdown="false" onmouseenter="_error_toast_pause(this);" onmouseleave="_error_toast_continue(this);">
+    <div class="error_toast alert alert-info overflow-hidden relative p-2 border-0 flex items-center gap-1" data-pause-timer-countdown="false" onmouseenter="_error_toast_pause(this);" onmouseleave="_error_toast_continue(this);">
         <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress>
-        <div class="mx-2 my-2 flex items-center">
-            <span class="mdi mdi-information-outline text-2xl me-2"></span>
-            <span class="toast-text">Failed to perform request!</span>
-        </div>
+        <span class="mdi mdi-information-outline text-2xl"></span>
+        <span class="toast-text w-full">Failed to perform request!</span>
         <button class="cursor-pointer dismiss-button" title="Dismiss" data-toast-id="" data-toast-text="" onclick="dismiss_error(this.getAttribute('data-toast-id'));">
             <span class="mdi mdi-close-circle text-xl mx-2"></span>
         </button>
@@ -38,13 +32,11 @@
 </template>
 
 <template id="debug_toast_template">
-    <div class="error_toast alert alert-primary overflow-hidden relative p-0 border-0" data-pause-timer-countdown="false" onmouseenter="_error_toast_pause(this);" onmouseleave="_error_toast_continue(this);">
+    <div class="error_toast alert alert-primary overflow-hidden relative p-2 border-0 flex items-center gap-1" data-pause-timer-countdown="false" onmouseenter="_error_toast_pause(this);" onmouseleave="_error_toast_continue(this);">
         <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress>
-        <div class="mx-2 my-2 flex items-center">
-            <span class="mdi mdi-information-outline text-2xl me-2"></span>
-            <span class="toast-text">Failed to perform request!</span>
-        </div
-        <button class="cursor-pointer dismiss-button" title="Dismiss" data-toast-id="" data-toast-text="" onclick="dismiss_error(this);">
+        <span class="mdi mdi-information-outline text-2xl me-2"></span>
+        <span class="toast-text w-full">Failed to perform request!</span>
+        <button class="cursor-pointer dismiss-button" title="Dismiss" data-toast-id="" data-toast-text="" onclick="dismiss_error(this.getAttribute('data-toast-id'));">
             <span class="mdi mdi-close-circle text-xl mx-2"></span>
         </button>
     </div>
@@ -52,7 +44,7 @@
 
 
 
-<div id="error_toast_container" class="toast toast-top md:bottom-4 md:top-auto toast-end relative md:fixed z-10">
+<div id="error_toast_container" class="flex flex-col gap-2 md:toast md:bottom-4 md:top-auto md:toast-end relative md:fixed md:z-10 w-full">
 </div>
 
 <!-- Javascript needed to create and otherwise handle error toasts -->
@@ -108,10 +100,19 @@ function show_error_toast(level, error_text, error_source, timeout = 0) {
   document.getElementById("error_toast_container").appendChild(new_toast);
 }
 
+function remove_error_toast_element_by_id(toast_id) {
+  let toast_container = document.getElementById(toast_id);
+  if(toast_container) {
+    toast_container.remove();
+  } else {
+    console.error("Tried to remove error toast with ID '" + toast_id + "' but no source error toast was found.");
+  }
+}
+
 function dismiss_error(toast_id) {
   let toast_container = document.getElementById(toast_id);
   if(toast_container.getAttribute('data-error-source') == ERROR_TOAST_SOURCE_WEB_INTERFACE) {
-    toast_container.remove();
+    remove_error_toast_element_by_id(toast_id);
   } else if(toast_container.getAttribute('data-error-source') == ERROR_TOAST_SOURCE_MANAGER) {
     stomp_send("mqttmanager/warnings/dismiss", toast_container.querySelector(".toast-text").innerHTML);
   } else {
@@ -160,6 +161,6 @@ function _stop_error_toast_timeout_timer() {
   }
 }
 
-// show_error_toast(ERROR_TOAST_LEVEL_INFO, "Test info toast.", ERROR_TOAST_SOURCE_WEB_INTERFACE, 0);
-// show_error_toast(ERROR_TOAST_LEVEL_INFO, "Test info toast with timeout.", ERROR_TOAST_SOURCE_WEB_INTERFACE, 10000);
+show_error_toast(ERROR_TOAST_LEVEL_INFO, "Test info toast.", ERROR_TOAST_SOURCE_WEB_INTERFACE, 0);
+show_error_toast(ERROR_TOAST_LEVEL_INFO, "Test info toast with timeout.", ERROR_TOAST_SOURCE_WEB_INTERFACE, 10000);
 </script>

@@ -45,7 +45,7 @@ $(document).ready(function () {
       }
 
       if (!found) {
-        remove_error_toast($(this).data("error-id"));
+        remove_error_toast_element_by_id(this.getAttribute("id"));
       }
     });
 
@@ -60,7 +60,11 @@ $(document).ready(function () {
       });
 
       if (!found) {
-        show_error_toast(warnings[i].level, warnings[i].text);
+        show_error_toast(
+          warnings[i].level,
+          warnings[i].text,
+          ERROR_TOAST_SOURCE_MANAGER,
+        );
       }
     }
   });
