@@ -9,10 +9,12 @@
 #include "room/room_entities_page.hpp"
 #include <algorithm>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/bind.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/exception/exception.hpp>
+#include <boost/range/algorithm_ext.hpp>
 #include <boost/stacktrace.hpp>
 #include <cstdint>
 #include <database_manager/database_manager.hpp>
@@ -511,7 +513,6 @@ void Room::_send_room_state_update() {
 
 void Room::_room_temperature_state_change_callback(nlohmann::json data) {
   try {
-    SPDLOG_DEBUG("Got room temp state update: {}", data.dump());
     if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT) {
       if (!data.contains("event")) [[unlikely]] {
         SPDLOG_ERROR("Home assistant room temperature sensor state change callback received invalid data. No 'event' key found.");
@@ -544,23 +545,64 @@ void Room::_room_temperature_state_change_callback(nlohmann::json data) {
       }
 
     } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB) {
-      if (!data.contains("payload")) [[unlikely]] {
-        SPDLOG_ERROR("OpenHAB room temperature sensor state change callback received invalid data. No 'payload' key found.");
+      if (!data.contains("type")) {
+        SPDLOG_ERROR("OpenHAB room temperature sensor state change callback received invalid data. No 'type' key found.");
         return;
       }
 
-      if (!data["payload"].contains("state")) [[unlikely]] {
-        SPDLOG_ERROR("OpenHAB room temperature sensor state change callback received invalid data. No 'state' key found.");
-        return;
-      }
+      if (data["type"].get<std::string>().compare("ItemStateFetched") == 0) {
+        if (!data.contains("payload")) [[unlikely]] {
+          SPDLOG_ERROR("OpenHAB room temperature sensor state change callback received invalid data. No 'payload' key found.");
+          return;
+        }
 
-      std::string temperature = data["payload"]["state"].get<std::string>();
-      SPDLOG_DEBUG("Room {}::{} got new temperature {}.", this->_id, this->_name, temperature);
-      MQTT_Manager::publish(this->_mqtt_temperature_state_topic, temperature, true);
+        if (!data["payload"].contains("state")) [[unlikely]] {
+          SPDLOG_ERROR("OpenHAB room temperature sensor state change callback received invalid data. No 'state' key found.");
+          return;
+        }
+
+        std::string temperature_str = data["payload"]["state"].get<std::string>();
+        boost::remove_erase_if(temperature_str, boost::is_any_of(" °CcFf"));
+        SPDLOG_DEBUG("Room {}::{} got new temperature '{}'.", this->_id, this->_name, temperature_str);
+
+        try {
+          float temperature = std::stof(temperature_str);
+          MQTT_Manager::publish(this->_mqtt_temperature_state_topic, fmt::format("{:.1f}", temperature), true);
+        } catch (const std::invalid_argument &e) {
+          SPDLOG_WARN("Failed to convert temperature to float. Will send raw string to panel.: {}", e.what());
+          MQTT_Manager::publish(this->_mqtt_temperature_state_topic, temperature_str, true);
+          return;
+        }
+
+      } else if (data["type"].get<std::string>().compare("ItemStateChangedEvent") == 0) {
+        if (!data.contains("payload")) [[unlikely]] {
+          SPDLOG_ERROR("OpenHAB room temperature sensor state change callback received invalid data. No 'payload' key found.");
+          return;
+        }
+        std::string payload_string = data["payload"].get<std::string>();
+        nlohmann::json payload_json = nlohmann::json::parse(payload_string);
+
+        if (!payload_json.contains("value")) [[unlikely]] {
+          SPDLOG_ERROR("OpenHAB room temperature sensor state change callback received invalid data. Payload does not contain 'value'. Key not found.");
+          return;
+        }
+
+        std::string temperature_str = payload_json["value"].get<std::string>();
+        boost::remove_erase_if(temperature_str, boost::is_any_of(" °CcFf"));
+        SPDLOG_DEBUG("Room {}::{} got new temperature '{}'.", this->_id, this->_name, temperature_str);
+
+        try {
+          float temperature = std::stof(temperature_str);
+          MQTT_Manager::publish(this->_mqtt_temperature_state_topic, fmt::format("{:.1f}", temperature), true);
+        } catch (const std::invalid_argument &e) {
+          SPDLOG_WARN("Failed to convert temperature to float. Will send raw string to panel.: {}", e.what());
+          MQTT_Manager::publish(this->_mqtt_temperature_state_topic, temperature_str, true);
+          return;
+        }
+      }
     } else {
       SPDLOG_ERROR("Unsupported controller set when processing room temperature sensor callback!");
     }
-
   } catch (const std::exception &e) {
     SPDLOG_ERROR("Caught exception during processing of room temperature sensor state change. Diagnostic information: {}", boost::diagnostic_information(e, true));
   }
