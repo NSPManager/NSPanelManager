@@ -44,7 +44,18 @@
 
 
 
-<div id="error_toast_container" class="flex flex-col gap-2 md:toast md:bottom-4 md:top-auto md:toast-end relative md:fixed md:z-10 w-full">
+<div id="ws_connection_in_progress_notification" class="hidden">
+    <div class="flex flex-col gap-2 md:toast md:bottom-4 md:top-auto md:toast-end relative md:fixed md:z-10 w-full">
+        <div class="error_toast alert alert-error overflow-hidden relative p-2 border-0 flex items-center gap-1" data-pause-timer-countdown="false" data-error-source="1" data-timeout="0">
+            <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress>
+            <span class="loading loading-spinner text-neutral"></span>
+            <!-- <span class="mdi mdi-information-outline text-2xl me-2"></span> -->
+            <span class="toast-text w-full">Connecting to MQTTManager...</span>
+            <button class="btn btn-sm btn-circle cursor-pointer" title="Restart MQTTManager" hx-post="{{ ingress_path }}{% url 'restart_mqtt_manager' %}" hx-swap="none" data-toast-id="" data-toast-text="">
+                <span class="mdi mdi-restart text-xl mx-2"></span>
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- Javascript needed to create and otherwise handle error toasts -->
