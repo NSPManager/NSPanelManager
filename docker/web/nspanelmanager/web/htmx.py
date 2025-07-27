@@ -135,10 +135,10 @@ def nspanel_delete(request, nspanel_id):
 def select_room_temperature_sensor_provider(request, room_id):
     if (get_setting_with_default("home_assistant_address") == "" or get_setting_with_default("home_assistant_token") == "") and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
         # OpenHAB connection configured but not Home Assistant. Skip selecting source:
-        return redirect('htmx_partial_select_room_temperature_sensor_from_list', entity_source="openhab")
+        return redirect('htmx_partial_select_room_temperature_sensor_from_list', entity_source="openhab", room_id=room_id)
     elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and (get_setting_with_default("openhab_address") == "" or get_setting_with_default("openhab_token") == ""):
         # OpenHAB connection not configured but Home Assistant is. Skip selecting source:
-        return redirect('htmx_partial_select_room_temperature_sensor_from_list', entity_source="home_assistant")
+        return redirect('htmx_partial_select_room_temperature_sensor_from_list', entity_source="home_assistant", room_id=room_id)
     elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
         return render(request, 'partial/select_room_temperature_sensor_provider.html', {'room_id': room_id})
     else:
