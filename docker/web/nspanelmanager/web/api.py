@@ -266,22 +266,6 @@ def get_room_config(request, room_id: int):
     return_json = {}
     return_json["name"] = room.friendly_name
     return_json["lights"] = {}
-    for light in room.light_set.all():
-        return_json["lights"][light.id] = {}
-        return_json["lights"][light.id]["name"] = light.friendly_name
-        return_json["lights"][light.id]["ceiling"] = light.is_ceiling_light
-        return_json["lights"][light.id]["can_dim"] = light.can_dim
-        return_json["lights"][light.id]["can_temperature"] = light.can_color_temperature
-        return_json["lights"][light.id]["can_rgb"] = light.can_rgb
-        return_json["lights"][light.id]["view_position"] = light.room_view_position
-    return_json["scenes"] = {}
-    for scene in room.scene_set.all():
-        return_json["scenes"][scene.id] = {}
-        return_json["scenes"][scene.id]["name"] = scene.friendly_name
-        if scene.scene_type == "nspm_scene":
-            return_json["scenes"][scene.id]["can_save"] = True
-        else:
-            return_json["scenes"][scene.id]["can_save"] = False
     return JsonResponse(return_json)
 
 
