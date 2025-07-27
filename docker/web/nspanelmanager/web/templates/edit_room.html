@@ -7,6 +7,25 @@
 {% load static %}
 <script src="{{ ingress_path }}{% static 'modal-select-entity.js' %}?refresh={% now 'U' %}"></script>
 <link rel="stylesheet" href="{{ ingress_path }}{% static 'edit_room.css' %}">
+
+<script>
+  // This function is used from select_room_temperature_sensor.html to do the final selection of
+  // sensor and update the fields on this page.
+  function select_room_temperature_sensor(sensor) {
+    var item = $(sensor);
+    var entity_source = item.data('entity-source');
+    var entity_id = item.data('entity-id');
+
+    $("#room_temp_provider").val(entity_source);
+    $("#room_temp_sensor").val(entity_id);
+    modal.close();
+  }
+
+  function clear_selected_room_temperatuer_sensor() {
+    $("#room_temp_provider").val("");
+    $("#room_temp_sensor").val("");
+  }
+</script>
 {% endblock %}
 
 {% block content %}
@@ -46,12 +65,32 @@
             </span>
         </div>
       </div>
-      <div class="p-4 mb-4 mt-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-700 dark:text-gray-50 {% if total_num_rooms != 1 %}hidden{% endif %}" role="alert">
-        <span class="font-medium">Info.</span> The last room cannot be deleted. Rename this room or create another room before removing this one.
+
+      <!-- Room temperature sensor -->
+      <input type="hidden" name="room_temp_provider" id="room_temp_provider" readonly value="{{ room.room_temp_provider }}">
+      <div class="my-2 w-full md:ms-1">
+          <label for="room_temp_sensor" class="block mb-1 text-sm font-medium">Room temperature sensor</label>
+          <div class="flex flex-row-reverse">
+              <button type="button" class="btn btn-info rounded-l-none" hx-get="{{ ingress_path }}{% url 'htmx_partial_select_room_temperature_sensor_provider' room_id=room.id %}" hx-swap="none">Select</button>
+              <button type="button" class="btn btn-error rounded-none" onclick="clear_selected_room_temperatuer_sensor()">Clear</button>
+              <input class="outline-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+              type="text" id="room_temp_sensor" name="room_temp_sensor" value="{{ room.room_temp_sensor }}" placeholder="None selected" readonly>
+              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                  <span class="mdi mdi-thermometer"></span>
+              </span>
+          </div>
       </div>
+      {% component "alert" level="info" text="A specific temperature sensor is not a requirement but it can be used to provide a more accurate value on the screensaver. If no sensor is selected the temperature will be read using the built-in NTC thermistor. If a sensor is selected the panel will still report its temperature over MQTT to Home Assistant." %}{% endcomponent %}
+
+      {% if total_num_rooms <= 1 %}
+      <div class="my-4">
+          {% component "alert" level="info" text="The last room cannot be deleted. Rename this or create another room before removing this one." %}{% endcomponent %}
+      </div>
+      {% endif %}
       <div class="text-right mt-4">
-          <a type="submit" href="{% if total_num_rooms != 1 %}{{ ingress_path }}{% url 'delete_room' room_id=room.id %}{% else %}#{% endif %}"
-          class="btn btn-error" {% if total_num_rooms == 1 %}disabled{% endif %}
+          <a href="{% if total_num_rooms != 1 %}{{ ingress_path }}{% url 'delete_room' room_id=room.id %}{% else %}#{% endif %}"
+          class="btn btn-error " {% if total_num_rooms == 1 %}disabled{% endif %}
+          {% if total_num_rooms == 1 %}btn-disabled{% endif %}
           >Delete</a>
           <button type="submit" class="btn btn-success">Save</button>
       </div>

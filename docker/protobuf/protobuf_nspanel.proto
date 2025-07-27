@@ -67,6 +67,8 @@ message NSPanelConfig {
     int32 default_light_brightess = 38; // Default brightness for lights when trying to turn on but the current brightness is 0
 
     bool locked_to_default_room = 39;
+
+    string inside_temperature_sensor_mqtt_topic = 40; // The topic for an inside temperature sensor. If this is empty then no sensor is configured.
 }
 
 enum NSPanelWarningLevel {

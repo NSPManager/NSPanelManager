@@ -4504,6 +4504,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kRelay1RelayGroupFieldNumber = 35,
     kRelay2RelayGroupFieldNumber = 37,
     kNameFieldNumber = 1,
+    kInsideTemperatureSensorMqttTopicFieldNumber = 40,
     kDefaultRoomFieldNumber = 2,
     kDefaultPageFieldNumber = 3,
     kScreensaverActivationTimeoutFieldNumber = 4,
@@ -4616,6 +4617,22 @@ class NSPanelConfig final : public ::google::protobuf::Message
   inline PROTOBUF_ALWAYS_INLINE void _internal_set_name(
       const std::string& value);
   std::string* _internal_mutable_name();
+
+  public:
+  // string inside_temperature_sensor_mqtt_topic = 40;
+  void clear_inside_temperature_sensor_mqtt_topic() ;
+  const std::string& inside_temperature_sensor_mqtt_topic() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_inside_temperature_sensor_mqtt_topic(Arg_&& arg, Args_... args);
+  std::string* mutable_inside_temperature_sensor_mqtt_topic();
+  PROTOBUF_NODISCARD std::string* release_inside_temperature_sensor_mqtt_topic();
+  void set_allocated_inside_temperature_sensor_mqtt_topic(std::string* value);
+
+  private:
+  const std::string& _internal_inside_temperature_sensor_mqtt_topic() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_inside_temperature_sensor_mqtt_topic(
+      const std::string& value);
+  std::string* _internal_mutable_inside_temperature_sensor_mqtt_topic();
 
   public:
   // int32 default_room = 2;
@@ -4883,8 +4900,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 31, 1,
-      50, 7>
+      5, 32, 1,
+      94, 7>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -4912,6 +4929,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     ::google::protobuf::RepeatedField<::int32_t> relay2_relay_group_;
     mutable ::google::protobuf::internal::CachedSize _relay2_relay_group_cached_byte_size_;
     ::google::protobuf::internal::ArenaStringPtr name_;
+    ::google::protobuf::internal::ArenaStringPtr inside_temperature_sensor_mqtt_topic_;
     ::int32_t default_room_;
     int default_page_;
     ::int32_t screensaver_activation_timeout_;
@@ -5881,6 +5899,56 @@ inline bool NSPanelConfig::_internal_locked_to_default_room() const {
 inline void NSPanelConfig::_internal_set_locked_to_default_room(bool value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.locked_to_default_room_ = value;
+}
+
+// string inside_temperature_sensor_mqtt_topic = 40;
+inline void NSPanelConfig::clear_inside_temperature_sensor_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.inside_temperature_sensor_mqtt_topic_.ClearToEmpty();
+}
+inline const std::string& NSPanelConfig::inside_temperature_sensor_mqtt_topic() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.inside_temperature_sensor_mqtt_topic)
+  return _internal_inside_temperature_sensor_mqtt_topic();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig::set_inside_temperature_sensor_mqtt_topic(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.inside_temperature_sensor_mqtt_topic_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelConfig.inside_temperature_sensor_mqtt_topic)
+}
+inline std::string* NSPanelConfig::mutable_inside_temperature_sensor_mqtt_topic() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_inside_temperature_sensor_mqtt_topic();
+  // @@protoc_insertion_point(field_mutable:NSPanelConfig.inside_temperature_sensor_mqtt_topic)
+  return _s;
+}
+inline const std::string& NSPanelConfig::_internal_inside_temperature_sensor_mqtt_topic() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.inside_temperature_sensor_mqtt_topic_.Get();
+}
+inline void NSPanelConfig::_internal_set_inside_temperature_sensor_mqtt_topic(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.inside_temperature_sensor_mqtt_topic_.Set(value, GetArena());
+}
+inline std::string* NSPanelConfig::_internal_mutable_inside_temperature_sensor_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.inside_temperature_sensor_mqtt_topic_.Mutable( GetArena());
+}
+inline std::string* NSPanelConfig::release_inside_temperature_sensor_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelConfig.inside_temperature_sensor_mqtt_topic)
+  return _impl_.inside_temperature_sensor_mqtt_topic_.Release();
+}
+inline void NSPanelConfig::set_allocated_inside_temperature_sensor_mqtt_topic(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.inside_temperature_sensor_mqtt_topic_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.inside_temperature_sensor_mqtt_topic_.IsDefault()) {
+          _impl_.inside_temperature_sensor_mqtt_topic_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.inside_temperature_sensor_mqtt_topic)
 }
 
 // -------------------------------------------------------------------

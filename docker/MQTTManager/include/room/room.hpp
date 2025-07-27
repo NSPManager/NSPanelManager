@@ -86,6 +86,16 @@ public:
    */
   std::vector<std::shared_ptr<RoomEntitiesPage>> get_all_scenes_pages();
 
+  /*
+   * Check if this room has a temperature sensor configured and loaded properly, if so, returns true, otherwise false.
+   */
+  bool has_temperature_sensor();
+
+  /*
+   * Check if this room has a temperature sensor configured and loaded properly, if so, return the MQTT topic where the temperature is sent.
+   */
+  std::string get_temperature_sensor_mqtt_topic();
+
   /**
    * Callback when that gets run when an entitiy has changed state
    */
@@ -118,9 +128,15 @@ private:
    */
   void _send_room_state_update();
 
+  /*
+   * When the room temperature changes, send an update to the panel.
+   */
+  void _room_temperature_state_change_callback(nlohmann::json data);
+
   uint16_t _id;
   std::string _name;
   std::string _mqtt_state_topic;
+  std::string _mqtt_temperature_state_topic;
 
   // In what place in the display order is this room shown?
   uint32_t _display_order;
@@ -151,6 +167,12 @@ private:
 
   // List of callback to call when this room is changed.
   boost::signals2::signal<void(Room *)> _room_changed_callbacks;
+
+  // Room temperature sensor provider
+  MQTT_MANAGER_ENTITY_CONTROLLER _room_temp_provider;
+
+  // Room temperature sensor item name/home assistant entity id
+  std::string _room_temp_sensor;
 };
 
 #endif // !MQTT_MANAGER_ROOM_H

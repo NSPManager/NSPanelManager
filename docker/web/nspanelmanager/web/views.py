@@ -100,6 +100,7 @@ def edit_room(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
     data = get_base_data(request)
     data.update({
+        "total_num_rooms": Room.objects.count(),
         "room": room,
         "nspanels": room.nspanel_set.filter(accepted=True, denied=False),
         "entity_pages": RoomEntitiesPage.objects.filter(room=room)
@@ -150,6 +151,8 @@ def delete_room(request, room_id: int):
 def update_room_form(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
     room.friendly_name = request.POST['friendly_name']
+    room.room_temp_provider = request.POST['room_temp_provider']
+    room.room_temp_sensor = request.POST['room_temp_sensor']
     room.save()
     send_mqttmanager_reload_command()
     return redirect('edit_room', room_id=room_id)

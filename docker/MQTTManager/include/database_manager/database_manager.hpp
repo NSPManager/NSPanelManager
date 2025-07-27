@@ -55,6 +55,8 @@ struct NSPanelRelayGroupBinding {
 struct Room {
   int id = 0;
   std::string friendly_name;
+  std::string room_temp_provider;
+  std::string room_temp_sensor;
   int display_order = 0;
 };
 
@@ -142,6 +144,8 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                        sqlite_orm::make_table("web_room",
                                                                               sqlite_orm::make_column("id", &Room::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("friendly_name", &Room::friendly_name),
+                                                                              sqlite_orm::make_column("room_temp_provider", &Room::room_temp_provider),
+                                                                              sqlite_orm::make_column("room_temp_sensor", &Room::room_temp_sensor),
                                                                               sqlite_orm::make_column("displayOrder", &Room::display_order)),
                                                        sqlite_orm::make_table("web_scene",
                                                                               sqlite_orm::make_column("id", &Scene::id, sqlite_orm::primary_key().autoincrement()),

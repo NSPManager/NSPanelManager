@@ -1,13 +1,18 @@
 #include "command_manager/command_manager.hpp"
 #include "entity/entity.hpp"
+#include "home_assistant_manager/home_assistant_manager.hpp"
 #include "light/light.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include "openhab_manager/openhab_manager.hpp"
 #include "protobuf/protobuf_nspanel.pb.h"
 #include "room/room_entities_page.hpp"
 #include <algorithm>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/bind.hpp>
 #include <boost/bind/bind.hpp>
+#include <boost/exception/exception.hpp>
 #include <boost/stacktrace.hpp>
 #include <cstdint>
 #include <database_manager/database_manager.hpp>
@@ -46,6 +51,55 @@ void Room::reload_config() {
       this->_name = db_room.friendly_name;
       this->_display_order = db_room.display_order;
       this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/state", MqttManagerConfig::get_settings().manager_address, this->_id);
+      this->_mqtt_temperature_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/temperature_state", MqttManagerConfig::get_settings().manager_address, this->_id);
+
+      if (!db_room.room_temp_provider.empty() && !db_room.room_temp_sensor.empty()) {
+        MQTT_MANAGER_ENTITY_CONTROLLER temperature_sensor_controller;
+        if (db_room.room_temp_provider.compare("home_assistant") == 0) {
+          temperature_sensor_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
+        } else if (db_room.room_temp_provider.compare("openhab") == 0) {
+          temperature_sensor_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
+        } else {
+          SPDLOG_ERROR("Got unknown temperature provider for room temperature sensor. Provider '{}' is not suppored!", db_room.room_temp_provider);
+        }
+
+        // Selected sensor has changed, unsubscribe from the old one and subscribe to new one.
+        if (temperature_sensor_controller != this->_room_temp_provider || db_room.room_temp_sensor.compare(this->_room_temp_sensor) != 0) {
+          if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::NONE) {
+            // We have not subscribed to any temperature sensor so there is nothing to unsubscribe from.
+          } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT) {
+            HomeAssistantManager::detach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
+          } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB) {
+            OpenhabManager::detach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
+          } else {
+            SPDLOG_ERROR("Got unknown temperature provider for room temperature sensor. Provider '{}' is not suppored!", static_cast<int>(this->_room_temp_provider));
+          }
+
+          this->_room_temp_provider = temperature_sensor_controller;
+          this->_room_temp_sensor = db_room.room_temp_sensor;
+
+          if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT) {
+            HomeAssistantManager::attach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
+          } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB) {
+            OpenhabManager::attach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
+          } else {
+            SPDLOG_ERROR("Got unknown temperature provider for room temperature sensor. Provider '{}' is not suppored!", static_cast<int>(this->_room_temp_provider));
+          }
+        }
+      } else {
+        if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::NONE) {
+          // We have not subscribed to any temperature sensor so there is nothing to unsubscribe from.
+        } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT) {
+          HomeAssistantManager::detach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
+        } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB) {
+          OpenhabManager::detach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
+        } else {
+          SPDLOG_ERROR("Got unknown temperature provider for room temperature sensor. Provider '{}' is not suppored!", static_cast<int>(this->_room_temp_provider));
+        }
+
+        this->_room_temp_provider = MQTT_MANAGER_ENTITY_CONTROLLER::NONE;
+        this->_room_temp_sensor.clear();
+      }
 
       {
         std::lock_guard<std::mutex> mutex_guard(this->_entities_pages_mutex);
@@ -189,6 +243,22 @@ std::vector<std::shared_ptr<RoomEntitiesPage>> Room::get_all_entities_pages() {
 
 std::vector<std::shared_ptr<RoomEntitiesPage>> Room::get_all_scenes_pages() {
   return this->_scene_pages;
+}
+
+bool Room::has_temperature_sensor() {
+  if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT && !this->_room_temp_sensor.empty()) {
+    return true;
+  } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB && !this->_room_temp_sensor.empty()) {
+    return true;
+  }
+  return false;
+}
+
+std::string Room::get_temperature_sensor_mqtt_topic() {
+  if (this->has_temperature_sensor()) {
+    return this->_mqtt_temperature_state_topic;
+  }
+  return "";
 }
 
 void Room::page_changed_callback(RoomEntitiesPage *page) {
@@ -436,5 +506,62 @@ void Room::_send_room_state_update() {
     } else {
       SPDLOG_ERROR("Failed to serialize room {}::{} protobuf state object. Will not publish.", this->_id, this->_name);
     }
+  }
+}
+
+void Room::_room_temperature_state_change_callback(nlohmann::json data) {
+  try {
+    SPDLOG_DEBUG("Got room temp state update: {}", data.dump());
+    if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT) {
+      if (!data.contains("event")) [[unlikely]] {
+        SPDLOG_ERROR("Home assistant room temperature sensor state change callback received invalid data. No 'event' key found.");
+        return;
+      }
+
+      if (!data["event"].contains("data")) [[unlikely]] {
+        SPDLOG_ERROR("Home assistant room temperature sensor state change callback received invalid data. No 'data' key found.");
+        return;
+      }
+
+      if (!data["event"]["data"].contains("new_state")) [[unlikely]] {
+        SPDLOG_ERROR("Home assistant room temperature sensor state change callback received invalid data. No 'new_state' key found.");
+        return;
+      }
+
+      if (!data["event"]["data"]["new_state"].contains("state")) [[unlikely]] {
+        SPDLOG_ERROR("Home assistant room temperature sensor state change callback received invalid data. No 'state' key found.");
+        return;
+      }
+
+      try {
+        float temperature = std::stof(data["event"]["data"]["new_state"]["state"].get<std::string>());
+        MQTT_Manager::publish(this->_mqtt_temperature_state_topic, fmt::format("{:.1f}", temperature), true);
+      } catch (const std::invalid_argument &e) {
+        SPDLOG_WARN("Failed to convert temperature to float. Will send raw string to panel.: {}", e.what());
+        std::string temperature = data["event"]["data"]["new_state"]["state"].get<std::string>();
+        MQTT_Manager::publish(this->_mqtt_temperature_state_topic, temperature, true);
+        return;
+      }
+
+    } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB) {
+      if (!data.contains("payload")) [[unlikely]] {
+        SPDLOG_ERROR("OpenHAB room temperature sensor state change callback received invalid data. No 'payload' key found.");
+        return;
+      }
+
+      if (!data["payload"].contains("state")) [[unlikely]] {
+        SPDLOG_ERROR("OpenHAB room temperature sensor state change callback received invalid data. No 'state' key found.");
+        return;
+      }
+
+      std::string temperature = data["payload"]["state"].get<std::string>();
+      SPDLOG_DEBUG("Room {}::{} got new temperature {}.", this->_id, this->_name, temperature);
+      MQTT_Manager::publish(this->_mqtt_temperature_state_topic, temperature, true);
+    } else {
+      SPDLOG_ERROR("Unsupported controller set when processing room temperature sensor callback!");
+    }
+
+  } catch (const std::exception &e) {
+    SPDLOG_ERROR("Caught exception during processing of room temperature sensor state change. Diagnostic information: {}", boost::diagnostic_information(e, true));
   }
 }

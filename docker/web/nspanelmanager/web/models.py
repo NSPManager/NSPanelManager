@@ -1,3 +1,4 @@
+from logging import NullHandler
 from requests.models import default_hooks
 from django.db import models
 from datetime import datetime
@@ -32,6 +33,8 @@ class Room(models.Model):
 
     friendly_name = models.CharField(max_length=30)
     displayOrder = models.IntegerField(default=number)
+    room_temp_provider = models.CharField(max_length=255, default="")
+    room_temp_sensor = models.CharField(max_length=255, default="")
 
     def __str__(self) -> str:
         return "room_obj: " + str(self.id) + "::" + self.friendly_name

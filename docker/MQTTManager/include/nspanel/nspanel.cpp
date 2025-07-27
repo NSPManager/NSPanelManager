@@ -244,6 +244,12 @@ void NSPanel::send_config() {
   NSPanelConfig config;
   MqttManagerSettingsHolder global_setting = MqttManagerConfig::get_settings();
 
+  auto default_room = EntityManager::get_room(this->_settings.room_id);
+  if (!default_room) {
+    SPDLOG_ERROR("Failed to reterive default room for NSPanel.");
+    return;
+  }
+
   config.set_nspanel_id(this->_id);
   config.set_name(this->_name);
   config.set_default_room(this->_settings.room_id);
@@ -264,6 +270,9 @@ void NSPanel::send_config() {
   config.set_temperature_calibration((std::stof(this->_get_nspanel_setting_with_default("temperature_calibration", "0.0")) * 10));
   config.set_default_light_brightess(std::stoi(MqttManagerConfig::get_setting_with_default("light_turn_on_brightness", "50")));
   config.set_locked_to_default_room(this->is_locked_to_default_room());
+  if ((*default_room)->has_temperature_sensor()) {
+    config.set_inside_temperature_sensor_mqtt_topic((*default_room)->get_temperature_sensor_mqtt_topic());
+  }
 
   ButtonMode b1_mode = static_cast<ButtonMode>(this->_settings.button1_mode);
   if (b1_mode == ButtonMode::DIRECT) {

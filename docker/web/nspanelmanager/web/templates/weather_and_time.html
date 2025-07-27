@@ -18,6 +18,11 @@
     $("#outside_temp_sensor").val(entity_id);
     modal.close();
   }
+
+  function clear_selected_outside_temperature_sensor() {
+    $("#outside_temp_provider").val("");
+    $("#outside_temp_sensor").val("");
+  }
   </script>
 {% endblock %}
 
@@ -115,8 +120,9 @@
           <label for="outside_temp_sensor" class="block mb-1 text-sm font-medium">Outside temperature sensor</label>
           <div class="flex flex-row-reverse">
               <button type="button" class="btn btn-info rounded-l-none" hx-get="{{ ingress_path }}{% url 'htmx_partial_select_weather_outside_temperature_sensor_provider' %}" hx-swap="none">Select</button>
+              <button type="button" class="btn btn-error rounded-none" onclick="clear_selected_outside_temperature_sensor();">Select</button>
               <input class="outline-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
-              type="text" id="outside_temp_sensor" name="outside_temp_sensor" value="{{ outside_temp_sensor }}">
+              type="text" id="outside_temp_sensor" name="outside_temp_sensor" value="{{ outside_temp_sensor }}" placeholder="None selected" readonly>
               <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
                   <span class="mdi mdi-thermometer"></span>
               </span>
