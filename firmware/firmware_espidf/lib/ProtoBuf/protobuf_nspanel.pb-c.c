@@ -579,7 +579,7 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_button_mode__descriptor =
   nspanel_config__nspanel_button_mode__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[31] =
+static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[32] =
 {
   {
     "name",
@@ -953,6 +953,18 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[31] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "inside_temperature_sensor_mqtt_topic",
+    40,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, inside_temperature_sensor_mqtt_topic),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_config__field_indices_by_name[] = {
   21,   /* field[21] = button1_mode */
@@ -963,6 +975,7 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
   2,   /* field[2] = default_page */
   1,   /* field[1] = default_room */
   23,   /* field[23] = global_scene_entity_page_ids */
+  31,   /* field[31] = inside_temperature_sensor_mqtt_topic */
   15,   /* field[15] = is_us_panel */
   30,   /* field[30] = locked_to_default_room */
   4,   /* field[4] = min_button_push_time */
@@ -994,7 +1007,7 @@ static const ProtobufCIntRange nspanel_config__number_ranges[5 + 1] =
   { 30, 23 },
   { 35, 27 },
   { 37, 28 },
-  { 0, 31 }
+  { 0, 32 }
 };
 const ProtobufCMessageDescriptor nspanel_config__descriptor =
 {
@@ -1004,7 +1017,7 @@ const ProtobufCMessageDescriptor nspanel_config__descriptor =
   "NSPanelConfig",
   "",
   sizeof(NSPanelConfig),
-  31,
+  32,
   nspanel_config__field_descriptors,
   nspanel_config__field_indices_by_name,
   5,  nspanel_config__number_ranges,
@@ -1096,7 +1109,7 @@ const ProtobufCEnumDescriptor nspanel_status_report__state__descriptor =
   nspanel_status_report__state__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_status_report__field_descriptors[8] =
+static const ProtobufCFieldDescriptor nspanel_status_report__field_descriptors[11] =
 {
   {
     "nspanel_state",
@@ -1194,11 +1207,50 @@ static const ProtobufCFieldDescriptor nspanel_status_report__field_descriptors[8
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "md5_firmware",
+    9,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelStatusReport, md5_firmware),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "md5_littlefs",
+    10,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelStatusReport, md5_littlefs),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "md5_tft_gui",
+    11,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelStatusReport, md5_tft_gui),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_status_report__field_indices_by_name[] = {
   3,   /* field[3] = heap_used_pct */
   6,   /* field[6] = ip_address */
   4,   /* field[4] = mac_address */
+  8,   /* field[8] = md5_firmware */
+  9,   /* field[9] = md5_littlefs */
+  10,   /* field[10] = md5_tft_gui */
   0,   /* field[0] = nspanel_state */
   2,   /* field[2] = rssi */
   5,   /* field[5] = temperature */
@@ -1208,7 +1260,7 @@ static const unsigned nspanel_status_report__field_indices_by_name[] = {
 static const ProtobufCIntRange nspanel_status_report__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 8 }
+  { 0, 11 }
 };
 const ProtobufCMessageDescriptor nspanel_status_report__descriptor =
 {
@@ -1218,7 +1270,7 @@ const ProtobufCMessageDescriptor nspanel_status_report__descriptor =
   "NSPanelStatusReport",
   "",
   sizeof(NSPanelStatusReport),
-  8,
+  11,
   nspanel_status_report__field_descriptors,
   nspanel_status_report__field_indices_by_name,
   1,  nspanel_status_report__number_ranges,
@@ -2397,20 +2449,8 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__save_scene_command
   (ProtobufCMessageInit) nspanel_mqttmanager_command__save_scene_command__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__button_pressed__field_descriptors[2] =
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__button_pressed__field_descriptors[1] =
 {
-  {
-    "nspanel_id",
-    1,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_INT32,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelMQTTManagerCommand__ButtonPressed, nspanel_id),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
   {
     "button_id",
     2,
@@ -2425,13 +2465,12 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__button_presse
   },
 };
 static const unsigned nspanel_mqttmanager_command__button_pressed__field_indices_by_name[] = {
-  1,   /* field[1] = button_id */
-  0,   /* field[0] = nspanel_id */
+  0,   /* field[0] = button_id */
 };
 static const ProtobufCIntRange nspanel_mqttmanager_command__button_pressed__number_ranges[1 + 1] =
 {
-  { 1, 0 },
-  { 0, 2 }
+  { 2, 0 },
+  { 0, 1 }
 };
 const ProtobufCMessageDescriptor nspanel_mqttmanager_command__button_pressed__descriptor =
 {
@@ -2441,7 +2480,7 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__button_pressed__de
   "NSPanelMQTTManagerCommand__ButtonPressed",
   "",
   sizeof(NSPanelMQTTManagerCommand__ButtonPressed),
-  2,
+  1,
   nspanel_mqttmanager_command__button_pressed__field_descriptors,
   nspanel_mqttmanager_command__button_pressed__field_indices_by_name,
   1,  nspanel_mqttmanager_command__button_pressed__number_ranges,
@@ -2478,7 +2517,7 @@ const ProtobufCEnumDescriptor nspanel_mqttmanager_command__affect_lights_options
   nspanel_mqttmanager_command__affect_lights_options__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[6] =
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[7] =
 {
   {
     "first_page_turn_on",
@@ -2552,19 +2591,33 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descrip
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "nspanel_id",
+    100,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand, nspanel_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_mqttmanager_command__field_indices_by_name[] = {
   5,   /* field[5] = button_pressed */
   1,   /* field[1] = first_page_turn_off */
   0,   /* field[0] = first_page_turn_on */
   2,   /* field[2] = light_command */
+  6,   /* field[6] = nspanel_id */
   4,   /* field[4] = save_scene_command */
   3,   /* field[3] = toggle_entity_from_entities_page */
 };
-static const ProtobufCIntRange nspanel_mqttmanager_command__number_ranges[1 + 1] =
+static const ProtobufCIntRange nspanel_mqttmanager_command__number_ranges[2 + 1] =
 {
   { 1, 0 },
-  { 0, 6 }
+  { 100, 6 },
+  { 0, 7 }
 };
 const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
 {
@@ -2574,10 +2627,10 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
   "NSPanelMQTTManagerCommand",
   "",
   sizeof(NSPanelMQTTManagerCommand),
-  6,
+  7,
   nspanel_mqttmanager_command__field_descriptors,
   nspanel_mqttmanager_command__field_indices_by_name,
-  1,  nspanel_mqttmanager_command__number_ranges,
+  2,  nspanel_mqttmanager_command__number_ranges,
   (ProtobufCMessageInit) nspanel_mqttmanager_command__init,
   NULL,NULL,NULL    /* reserved[123] */
 };

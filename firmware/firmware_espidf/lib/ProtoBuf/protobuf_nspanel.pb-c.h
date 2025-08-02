@@ -147,10 +147,14 @@ struct  NSPanelConfig
    */
   int32_t default_light_brightess;
   protobuf_c_boolean locked_to_default_room;
+  /*
+   * The topic for an inside temperature sensor. If this is empty then no sensor is configured.
+   */
+  char *inside_temperature_sensor_mqtt_topic;
 };
 #define NSPANEL_CONFIG__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
-    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0 }
+    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, (char *)protobuf_c_empty_string }
 
 
 struct  NSPanelWarning
@@ -176,10 +180,13 @@ struct  NSPanelStatusReport
   char *ip_address;
   size_t n_warnings;
   NSPanelWarning **warnings;
+  char *md5_firmware;
+  char *md5_littlefs;
+  char *md5_tft_gui;
 };
 #define NSPANEL_STATUS_REPORT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_status_report__descriptor) \
-    , NSPANEL_STATUS_REPORT__STATE__ONLINE, 0, 0, 0, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, 0,NULL }
+    , NSPANEL_STATUS_REPORT__STATE__ONLINE, 0, 0, 0, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, 0,NULL, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
 struct  NSPanelLightStatus
@@ -375,12 +382,11 @@ struct  NSPanelMQTTManagerCommand__SaveSceneCommand
 struct  NSPanelMQTTManagerCommand__ButtonPressed
 {
   ProtobufCMessage base;
-  int32_t nspanel_id;
   int32_t button_id;
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__BUTTON_PRESSED__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__button_pressed__descriptor) \
-    , 0, 0 }
+    , 0 }
 
 
 typedef enum {
@@ -400,6 +406,7 @@ typedef enum {
 struct  NSPanelMQTTManagerCommand
 {
   ProtobufCMessage base;
+  int32_t nspanel_id;
   NSPanelMQTTManagerCommand__CommandDataCase command_data_case;
   union {
     NSPanelMQTTManagerCommand__FirstPageTurnLightOn *first_page_turn_on;
@@ -412,7 +419,7 @@ struct  NSPanelMQTTManagerCommand
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__descriptor) \
-    , NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__NOT_SET, {0} }
+    , 0, NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__NOT_SET, {0} }
 
 
 /* NSPanelConfig__RoomInfo methods */
