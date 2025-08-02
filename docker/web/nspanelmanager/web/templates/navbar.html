@@ -9,6 +9,13 @@
     </a>
     <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
       <div class="flex items-center">
+          <button class="btn btn-sm mdi mdi-inbox" hx-get="{% url 'htmx_show_messages' %}" hx-swap="none" hx-swap-oob="true">
+          Messages
+          {% if has_unread_messages %}
+              <span class="badge badge-sm badge-info">new</span>
+          {% endif %}
+          </button>
+
           <div class="dropdown dropdown-end">
             <div tabindex="0" role="button" class="btn btn-sm m-1">
               Themes

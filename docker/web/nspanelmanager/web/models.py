@@ -114,3 +114,8 @@ class LightState(models.Model):
     color_temperature = models.IntegerField(default=4000)
     hue = models.IntegerField(default=0)
     saturation = models.IntegerField(default=0)
+
+class Message(models.Model):
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    read = models.BooleanField(default=False)

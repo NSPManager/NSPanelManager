@@ -104,6 +104,8 @@ urlpatterns = [
     path('htmx/partial/select_weather_outside_temperature_sensor_provider', htmx.select_weather_outside_temperature_sensor_provider, name='htmx_partial_select_weather_outside_temperature_sensor_provider'),
     path('htmx/partial/select_weather_outside_temperature_sensor_from_list/<str:entity_source>', htmx.select_weather_outside_temperature_sensor_from_list, name='htmx_partial_select_weather_outside_temperature_sensor_from_list'),
     path('htmx/interface/theme', htmx.interface_theme, name='htmx_interface_theme'),
+    path('htmx/show_messages', htmx.show_messages, name="htmx_show_messages"),
+    path('htmx/mark_message_read/<int:message_id>', htmx.mark_message_read, name="htmx_mark_message_read"),
 
     # HTMX initial setup URLs
     path('htmx/initial_setup/welcome', htmx.initial_setup_welcome, name='htmx_initial_setup_welcome'),

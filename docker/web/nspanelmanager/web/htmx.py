@@ -20,10 +20,11 @@ import base64
 import environ
 from time import sleep
 
+from web.views import get_base_data
 from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages import NSPanelRoomEntitiesPages
 from web.components.rooms_list.rooms_list import RoomsList
 
-from .models import NSPanel, Room, RoomEntitiesPage, Settings, Scene, RelayGroup, RelayGroupBinding, Entity
+from .models import NSPanel, Room, RoomEntitiesPage, Settings, Scene, RelayGroup, RelayGroupBinding, Entity, Message
 from .apps import start_mqtt_manager, send_mqttmanager_reload_command
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
 from web.views import get_file_md5sum, relay_groups
@@ -1193,3 +1194,21 @@ def initial_setup_openhab_settings(request):
 
 def initial_setup_finished(request):
     return render(request, 'modals/initial_setup/finished.html')
+
+
+def show_messages(request):
+    data = get_base_data(request)
+    data["messages"] = Message.objects.all()
+    return render(request, 'partial/show_messages.html', data)
+
+def mark_message_read(request, message_id):
+    try:
+        message = Message.objects.get(id=message_id)
+        message.read = True
+        message.save()
+        return show_messages(request)
+    except Exception as e:
+        return JsonResponse({
+            "status": "error",
+            "text": str(e)
+        }, status=500)

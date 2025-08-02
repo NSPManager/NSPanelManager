@@ -12,7 +12,7 @@ import environ
 import os
 import signal
 
-from .models import NSPanel, Entity, Room, Settings, Scene, RelayGroup, RelayGroupBinding, RoomEntitiesPage
+from .models import NSPanel, Entity, Room, Settings, Scene, RelayGroup, RelayGroupBinding, RoomEntitiesPage, Message
 from .apps import start_mqtt_manager, send_mqttmanager_reload_command
 from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
 
@@ -31,6 +31,7 @@ def get_base_data(request):
         'theme': get_setting_with_default("theme"),
         'version': '%version%', # This value get's replaced during build
         'manager_address': get_setting_with_default("manager_address"),
+        'has_unread_messages': Message.objects.filter(read=False).exists(),
     }
 
     if data["manager_address"] == "":
