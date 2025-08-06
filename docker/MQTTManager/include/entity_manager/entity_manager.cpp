@@ -809,7 +809,9 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
   if (panel && (*panel)->get_state() != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT && (*panel)->get_state() != MQTT_MANAGER_NSPANEL_STATE::DENIED) {
     SPDLOG_TRACE("Has registered to manager? {}", (*panel)->has_registered_to_manager() ? "TRUE" : "FALSE");
     (*panel)->register_to_manager(data);
-  } else {
+  }
+
+  if (!panel) {
     nlohmann::json init_data = data;
     SPDLOG_INFO("Panel is not registered to manager, adding panel but as 'pending accept' status.");
 
