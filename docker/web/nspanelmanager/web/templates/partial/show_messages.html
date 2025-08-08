@@ -5,18 +5,24 @@
         </form>
 
         <ul class="list">
-            {% for message in messages %}
+            {% if messages %}
+                {% for message in messages %}
+                    <li class="list-row">
+                        <div class="text-2xl">{{ message.title }}</div>
+                        <p class="list-col-wrap">
+                            {{ message.message }}
+                        </p>
+                        <button class="btn btn-square btn-ghost text-2xl {% if message.read %}btn-disabled text-success{% endif %}" {% if message.read %}disabled{% endif %} title="Mark as read"
+                            hx-get="{% url 'htmx_mark_message_read' message_id=message.id %}" hx-swap-oob="true" hx-swap="none">
+                            <span class="mdi mdi-check"></span>
+                        </button>
+                    </li>
+                {% endfor %}
+            {% else %}
                 <li class="list-row">
-                    <div class="text-2xl">{{ message.title }}</div>
-                    <p class="list-col-wrap">
-                        {{ message.message }}
-                    </p>
-                    <button class="btn btn-square btn-ghost text-2xl {% if message.read %}btn-disabled text-success{% endif %}" {% if message.read %}disabled{% endif %} title="Mark as read"
-                        hx-get="{% url 'htmx_mark_message_read' message_id=message.id %}" hx-swap-oob="true" hx-swap="none">
-                        <span class="mdi mdi-check"></span>
-                    </button>
+                    <div class="text-2xl">No messages.</div>
                 </li>
-            {% endfor %}
+            {% endif %}
         </ul>
     </div>
 

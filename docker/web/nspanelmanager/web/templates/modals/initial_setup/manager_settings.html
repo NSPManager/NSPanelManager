@@ -1,27 +1,4 @@
 {% load static %}
-<script>
-function set_manager_address_from_window_location() {
-  $.ajax({
-      type: "POST",
-      url: "{{ ingress_path }}{% url 'get_ip_by_hostname' %}",
-      data: JSON.stringify({ hostname: location.hostname }),
-      contentType: "application/json; charset=utf-8",
-      dataType: 'json',
-      success: function(data) {
-          if("ip" in data) {
-            document.getElementById('manager_address').value = data.ip;
-          } else {
-            show_error_toast(ERROR_TOAST_LEVEL_ERROR, `Manager returned no error but no 'ip' key exists in returned data. Manager log may contain more details.`, ERROR_TOAST_SOURCE_WEB_INTERFACE);
-          }
-      },
-      error: function(errMsg) {
-          show_error_toast(ERROR_TOAST_LEVEL_ERROR, `Failed to translate window location (${location.hostname}) to an IP via REST api. Manager log may contain more details.`, ERROR_TOAST_SOURCE_MANAGER);
-          console.error(err);
-      }
-  });
-}
-
-</script>
 
 <dialog id="welcome_modal" class="modal" hx-swap-oob="true">
     <div class="modal-box">
@@ -95,5 +72,28 @@ function set_manager_address_from_window_location() {
         welcome_modal.showModal();
       }
     });
+
+
+    function set_manager_address_from_window_location() {
+      $.ajax({
+          type: "POST",
+          url: "{{ ingress_path }}{% url 'get_ip_by_hostname' %}",
+          data: JSON.stringify({ hostname: location.hostname }),
+          contentType: "application/json; charset=utf-8",
+          dataType: 'json',
+          success: function(data) {
+              if("ip" in data) {
+                document.getElementById('manager_address').value = data.ip;
+              } else {
+                show_error_toast(ERROR_TOAST_LEVEL_ERROR, `Manager returned no error but no 'ip' key exists in returned data. Manager log may contain more details.`, ERROR_TOAST_SOURCE_WEB_INTERFACE);
+              }
+          },
+          error: function(errMsg) {
+              show_error_toast(ERROR_TOAST_LEVEL_ERROR, `Failed to translate window location (${location.hostname}) to an IP via REST api. Manager log may contain more details.`, ERROR_TOAST_SOURCE_MANAGER);
+              console.error(err);
+          }
+      });
+    }
+
     </script>
 </dialog>

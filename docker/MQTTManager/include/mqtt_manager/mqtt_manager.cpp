@@ -103,7 +103,7 @@ void MQTT_Manager::reload_config() {
     MQTT_Manager::_mqtt_port = port;
     MQTT_Manager::_mqtt_username = username;
     MQTT_Manager::_mqtt_password = password;
-    SPDLOG_INFO("Reconnecting MQTT as settings has changed.");
+    SPDLOG_INFO("Reconnecting to MQTT as settings has changed.");
     if (MQTT_Manager::_mqtt_client != nullptr) {
       SPDLOG_DEBUG("Calling reconnect.");
       MQTT_Manager::_reconnect_mqtt_client();
