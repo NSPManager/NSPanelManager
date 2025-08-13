@@ -58,8 +58,8 @@ void Light::reload_config() {
   this->_entity_page_slot = light.room_view_position;
   nlohmann::json entity_data = light.get_entity_data_json();
 
-  if (entity_data.contains("controlled_from_main_page")) {
-    this->_controlled_from_main_page = entity_data["controlled_from_main_page"];
+  if (entity_data.contains("controlled_by_nspanel_main_page")) {
+    this->_controlled_from_main_page = entity_data["controlled_by_nspanel_main_page"];
   } else {
     this->_controlled_from_main_page = true;
   }
