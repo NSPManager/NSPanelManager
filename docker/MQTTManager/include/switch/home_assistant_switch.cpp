@@ -51,18 +51,18 @@ void HomeAssistantSwitch::send_state_update_to_controller() {
   service_data["domain"] = "switch";
   if (this->_requested_state) {
     service_data["service"] = "turn_on";
-    if (MqttManagerConfig::get_settings().optimistic_mode) {
+    if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
       this->_current_state = true;
     }
   } else {
     service_data["service"] = "turn_off";
-    if (MqttManagerConfig::get_settings().optimistic_mode) {
+    if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
       this->_current_state = false;
     }
   }
   HomeAssistantManager::send_json(service_data);
 
-  if (MqttManagerConfig::get_settings().optimistic_mode) {
+  if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
     this->_entity_changed_callbacks(this);
   }
 }

@@ -25,8 +25,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 #include <thread>
 #include <vector>
+
+#if defined(TEST_MODE) && TEST_MODE == 1
+#include <gtest/gtest.h>
+#endif
 
 #define SIGUSR1 10
 std::string last_time_published;
@@ -62,10 +67,10 @@ void publish_time_and_date() {
     std::string date_str;
 
     std::time_t time = std::time({});
-    std::strftime(date_buffer, 100, MqttManagerConfig::get_settings().date_format.c_str(), std::localtime(&time));
+    std::strftime(date_buffer, 100, MqttManagerConfig::get_setting_with_default<std::string>("date_format").c_str(), std::localtime(&time));
     date_str = date_buffer;
 
-    if (MqttManagerConfig::get_settings().clock_24_hour_format) {
+    if (!MqttManagerConfig::get_setting_with_default<bool>("clock_us_style")) [[likely]] {
       std::strftime(time_buffer, 20, "%H:%M", std::localtime(&time));
       time_str = time_buffer;
     } else {
@@ -75,17 +80,17 @@ void publish_time_and_date() {
     }
 
     if (time_str.compare(last_time_published) != 0) {
-      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/time", MqttManagerConfig::get_settings().manager_address), time_buffer, true);
-      if (MqttManagerConfig::get_settings().clock_24_hour_format) {
-        MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_settings().manager_address), "", true);
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/time", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), time_buffer, true);
+      if (!MqttManagerConfig::get_setting_with_default<bool>("clock_us_style")) [[likely]] {
+        MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), "", true);
       } else {
-        MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_settings().manager_address), ampm_buffer, true);
+        MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), ampm_buffer, true);
       }
       last_time_published = time_buffer;
     }
 
     if (date_str.compare(last_date_published) != 0) {
-      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/date", MqttManagerConfig::get_settings().manager_address), date_buffer, true);
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/date", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), date_buffer, true);
       last_date_published = date_buffer;
     }
 
@@ -93,7 +98,16 @@ void publish_time_and_date() {
   }
 }
 
-int main(void) {
+int main(int argc, char *argv[]) {
+
+// If we are in test mode, don't start the MQTTManager. Simply run all test then exit.
+#if defined(TEST_MODE) && TEST_MODE == 1
+  database_manager::init();
+
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+#endif
+
   SPDLOG_INFO("Starting MQTTManager.");
 
   std::filesystem::path log_partition_path = "/dev/shm/";
