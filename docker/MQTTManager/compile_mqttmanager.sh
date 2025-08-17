@@ -3,6 +3,7 @@ echo "Starting to compile MQTTManager."
 
 TARGETPLATFORM=""
 STRIP=""
+TEST_MODE=0
 
 while true; do
   case "$1" in
@@ -17,9 +18,23 @@ while true; do
     export STRIP="1"
     shift
     ;;
+  --test)
+    echo "Will compile for testing. Removing old test DB (if any)."
+    rm -f /tmp/nspanelmanager_db_test.sqlite3
+    TEST_MODE=1
+    shift
+    ;;
   *) break ;;
   esac
 done
+
+if [ "$TEST_MODE" -eq 1 ]; then
+  sed -i 's/set(TEST_MODE.*/set(TEST_MODE 1)/g' /MQTTManager/CMakeLists.txt
+  sed -i 's/add_compile_definitions(TEST_MODE.*/add_compile_definitions(TEST_MODE=1)/g' /MQTTManager/CMakeLists.txt
+else
+  sed -i 's/set(TEST_MODE.*/set(TEST_MODE 0)/g' /MQTTManager/CMakeLists.txt
+  sed -i 's/add_compile_definitions(TEST_MODE.*/add_compile_definitions(TEST_MODE=0)/g' /MQTTManager/CMakeLists.txt
+fi
 
 if [ -z "$TARGETPLATFORM" ]; then
   TARGETPLATFORM="linux/$(dpkg-architecture -q DEB_BUILD_ARCH_CPU)"

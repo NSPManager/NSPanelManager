@@ -89,10 +89,10 @@ void MQTT_Manager::reload_config() {
   std::string password = "";
   {
     std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_settings_mutex);
-    address = MqttManagerConfig::get_setting_with_default("mqtt_server", "");
-    port = std::stoi(MqttManagerConfig::get_setting_with_default("mqtt_port", "1883"));
-    username = MqttManagerConfig::get_setting_with_default("mqtt_username", "");
-    password = MqttManagerConfig::get_setting_with_default("mqtt_password", "");
+    address = MqttManagerConfig::get_setting_with_default<std::string>("mqtt_server");
+    port = MqttManagerConfig::get_setting_with_default<uint32_t>("mqtt_port");
+    username = MqttManagerConfig::get_setting_with_default<std::string>("mqtt_username");
+    password = MqttManagerConfig::get_setting_with_default<std::string>("mqtt_password");
   }
 
   if (MQTT_Manager::_mqtt_address.compare(address) != 0 ||

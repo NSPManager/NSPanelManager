@@ -75,8 +75,8 @@ void OpenhabManager::reload_config() {
   bool reconnect = false;
   {
     std::lock_guard<std::mutex> lock_guard(OpenhabManager::_setting_values_mutex);
-    std::string address = MqttManagerConfig::get_setting_with_default("openhab_address", "");
-    std::string token = MqttManagerConfig::get_setting_with_default("openhab_token", "");
+    std::string address = MqttManagerConfig::get_setting_with_default<std::string>("openhab_address");
+    std::string token = MqttManagerConfig::get_setting_with_default<std::string>("openhab_token");
 
     if (OpenhabManager::_openhab_address.compare(address) != 0 || OpenhabManager::_openhab_token.compare(token) != 0) {
       OpenhabManager::_openhab_address = address;
