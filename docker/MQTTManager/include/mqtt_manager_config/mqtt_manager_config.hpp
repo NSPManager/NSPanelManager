@@ -192,7 +192,7 @@ inline std::string MqttManagerConfig::get_setting_with_default(std::string key) 
       SPDLOG_TRACE("Did not find setting {} in database. Looking for default value.", key);
 
       if (MqttManagerConfig::_default_settings_values.contains(key)) {
-        SPDLOG_TRACE("Returning default value '{}' for setting '{}'", key, MqttManagerConfig::_default_settings_values[key]);
+        SPDLOG_TRACE("Returning default value '{}' for setting '{}'", MqttManagerConfig::_default_settings_values[key], key);
         return MqttManagerConfig::_default_settings_values[key];
       } else {
         SPDLOG_ERROR("Did not find default setting value for key '{}'. Returning empty string.", key);
