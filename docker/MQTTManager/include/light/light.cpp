@@ -347,6 +347,7 @@ void Light::command_callback(NSPanelMQTTManagerCommand &command) {
     });
 
     if (light_id != command.light_command().light_ids().end()) {
+      SPDLOG_TRACE("Light {}::{} handling light command from NSPanel with ID {}.", this->_id, this->_name, command.nspanel_id());
       NSPanelMQTTManagerCommand_LightCommand cmd = command.light_command();
       if (cmd.has_brightness()) {
         this->set_brightness(cmd.brightness(), false);

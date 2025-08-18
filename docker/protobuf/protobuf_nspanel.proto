@@ -205,9 +205,9 @@ message NSPanelMQTTManagerCommand {
     message LightCommand {
         repeated int32 light_ids = 1;
         bool has_brightness = 2;
-        int32 brightness = 3;
+        int32 brightness = 3; // Brightness in 0-100%
         bool has_color_temperature = 4;
-        int32 color_temperature = 5;
+        int32 color_temperature = 5; // Color temperature in 0-100%
         bool has_hue = 6;
         int32 hue = 7;
         bool has_saturation = 8;

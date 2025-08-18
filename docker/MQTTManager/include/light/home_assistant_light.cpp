@@ -3,12 +3,14 @@
 #include "entity/entity.hpp"
 #include "light/light.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include "protobuf_nspanel.pb.h"
 #include <boost/bind.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <cstdint>
 #include <gtest/gtest.h>
 #include <home_assistant_manager/home_assistant_manager.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 #include <string>
 
@@ -96,6 +98,7 @@ void HomeAssistantLight::send_state_update_to_controller() {
         service_data["service_data"]["kelvin"] = this->_requested_color_temperature;
         if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
           this->_current_color_temperature = this->_requested_color_temperature;
+          this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
         }
       }
 
@@ -103,12 +106,14 @@ void HomeAssistantLight::send_state_update_to_controller() {
         service_data["service_data"]["kelvin"] = this->_requested_color_temperature;
         if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
           this->_current_color_temperature = this->_requested_color_temperature;
+          this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
         }
       } else if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::RGB && this->_requested_hue != this->_current_hue || this->_requested_saturation != this->_current_saturation) {
         service_data["service_data"]["hs_color"] = {this->_requested_hue, this->_requested_saturation};
         if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
           this->_current_hue = this->_requested_hue;
           this->_current_saturation = this->_requested_saturation;
+          this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
         }
       }
     } else {
@@ -260,6 +265,7 @@ protected:
     // Initialize any necessary resources or setup for the tests
     database_manager::Entity light_entity;
     light_entity.entity_type = "light";
+    light_entity.friendly_name = "Unit test HA light (light)";
     light_entity.room_id = 1;
     light_entity.room_view_position = 2;
     light_entity.set_entity_data_json({{"can_color_temperature", true},
@@ -317,6 +323,9 @@ TEST_F(HomeAssistantLightTest, is_on_after_turn_on_in_optimistic_mode) {
 }
 
 TEST_F(HomeAssistantLightTest, light_reacts_to_state_changes_from_home_assistant) {
+  // Enable optimistic mode for this test
+  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
+
   nlohmann::json event_data = nlohmann::json::parse(R"(
       {
 
@@ -439,6 +448,116 @@ TEST_F(HomeAssistantLightTest, light_reacts_to_state_changes_from_home_assistant
   EXPECT_EQ(light->get_brightness(), 60);
   EXPECT_EQ(light->get_color_temperature(), 4000);
   EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT);
+}
+
+#define COLOR_TEMP_PERCENT_TO_KELVIN(min, max, kelvin_pct) (((max - min) / 100) * kelvin_pct + min)
+TEST_F(HomeAssistantLightTest, verify_nspanel_command_compliance) {
+  // Enable optimistic mode for this test
+  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+  // spdlog::set_level(spdlog::level::trace);
+
+  NSPanelMQTTManagerCommand cmd;
+  cmd.set_nspanel_id(0);
+  NSPanelMQTTManagerCommand_LightCommand *light_cmd = cmd.mutable_light_command();
+  std::vector<uint32_t> light_ids = {light->get_id()};
+  light_cmd->add_light_ids(light->get_id());
+  light_cmd->set_brightness(50);
+  light_cmd->set_has_brightness(true);
+  light_cmd->set_color_temperature(50);
+  light_cmd->set_has_color_temperature(true);
+  light_cmd->set_has_hue(false);
+  light_cmd->set_has_saturation(false);
+
+  light->command_callback(cmd);
+
+  // Check that light turns on, sets correct brightness and color temperature.
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 50);
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 50));
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT);
+
+  // Verify that only color temperature can be change.
+  light_cmd->set_has_brightness(false);
+  light_cmd->set_color_temperature(70);
+  light_cmd->set_has_color_temperature(true);
+  light->command_callback(cmd);
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 50);
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 70));
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT);
+
+  // Verify that only brightness can be change.
+  light_cmd->set_has_color_temperature(false);
+  light_cmd->set_has_brightness(true);
+  light_cmd->set_brightness(70);
+  light->command_callback(cmd);
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 70);
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 70));
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT);
+
+  // Verify that hue and saturation can be changed and the lights goes into RGB mode.
+  light_cmd->set_has_color_temperature(false);
+  light_cmd->set_has_brightness(false);
+  light_cmd->set_hue(30);
+  light_cmd->set_has_hue(true);
+  light_cmd->set_saturation(60);
+  light_cmd->set_has_saturation(true);
+  light->command_callback(cmd);
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 70);                                                                      // Verify that value is unchanged.
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 70)); // Verify that value is unchanged.
+  EXPECT_EQ(light->get_hue(), 30);
+  EXPECT_EQ(light->get_saturation(), 60);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
+
+  // Verify that only hue can be changed.
+  light_cmd->set_has_color_temperature(false);
+  light_cmd->set_has_brightness(false);
+  light_cmd->set_hue(40);
+  light_cmd->set_has_hue(true);
+  light_cmd->set_saturation(60);
+  light_cmd->set_has_saturation(false);
+  light->command_callback(cmd);
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 70);                                                                      // Verify that value is unchanged.
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 70)); // Verify that value is unchanged.
+  EXPECT_EQ(light->get_hue(), 40);
+  EXPECT_EQ(light->get_saturation(), 60); // Verify that value is unchanged.
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
+
+  // Verify that only saturation can be changed.
+  light_cmd->set_has_color_temperature(false);
+  light_cmd->set_has_brightness(false);
+  light_cmd->set_hue(40);
+  light_cmd->set_has_hue(false);
+  light_cmd->set_saturation(70);
+  light_cmd->set_has_saturation(true);
+  light->command_callback(cmd);
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 70);                                                                      // Verify that value is unchanged.
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 70)); // Verify that value is unchanged.
+  EXPECT_EQ(light->get_hue(), 40);                                                                             // Verify that value is unchanged.
+  EXPECT_EQ(light->get_saturation(), 70);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
+
+  // Verify that brightness can be changed and RGB is kept.
+  light_cmd->set_has_color_temperature(false);
+  light_cmd->set_brightness(100);
+  light_cmd->set_has_brightness(true);
+  light_cmd->set_hue(40);
+  light_cmd->set_has_hue(false);
+  light_cmd->set_saturation(70);
+  light_cmd->set_has_saturation(false);
+  light->command_callback(cmd);
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 100);                                                                     // Verify that value is unchanged.
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 70)); // Verify that value is unchanged.
+  EXPECT_EQ(light->get_hue(), 40);                                                                             // Verify that value is unchanged.
+  EXPECT_EQ(light->get_saturation(), 70);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
 }
 
 #endif // !MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TEST
