@@ -20,11 +20,13 @@ HomeAssistantLight::HomeAssistantLight(uint32_t light_id) : Light(light_id) {
   this->_current_brightness = 0;
   this->_current_color_temperature = 0;
   this->_current_hue = 0;
+  this->_current_saturation = 0;
   this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
   this->_current_state = false;
   this->_requested_brightness = 0;
   this->_requested_color_temperature = 0;
   this->_requested_hue = 0;
+  this->_requested_saturation = 0;
   this->_requested_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
   this->_requested_state = false;
 
@@ -558,6 +560,95 @@ TEST_F(HomeAssistantLightTest, verify_nspanel_command_compliance) {
   EXPECT_EQ(light->get_hue(), 40);                                                                             // Verify that value is unchanged.
   EXPECT_EQ(light->get_saturation(), 70);
   EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
+
+  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
+}
+
+TEST_F(HomeAssistantLightTest, verify_optimistic_mode_compliance) {
+  // Enable optimistic mode for this test
+  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+  // spdlog::set_level(spdlog::level::trace);
+
+  NSPanelMQTTManagerCommand cmd;
+  cmd.set_nspanel_id(0);
+  NSPanelMQTTManagerCommand_LightCommand *light_cmd = cmd.mutable_light_command();
+  std::vector<uint32_t> light_ids = {light->get_id()};
+  light_cmd->add_light_ids(light->get_id());
+  light_cmd->set_brightness(50);
+  light_cmd->set_has_brightness(true);
+  light_cmd->set_color_temperature(50);
+  light_cmd->set_has_color_temperature(true);
+  light_cmd->set_has_hue(false);
+  light_cmd->set_has_saturation(false);
+
+  light->command_callback(cmd);
+
+  // Check that light turns on, sets correct brightness and color temperature.
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 50);
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 50));
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT);
+
+  light_cmd->set_has_brightness(false);
+  light_cmd->set_has_color_temperature(false);
+  light_cmd->set_hue(30);
+  light_cmd->set_has_hue(true);
+  light_cmd->set_saturation(50);
+  light_cmd->set_has_saturation(true);
+  light->command_callback(cmd);
+
+  EXPECT_EQ(light->get_state(), true);                                                                         // Verify light is still on
+  EXPECT_EQ(light->get_brightness(), 50);                                                                      // Verify light is still set to 50% brightness
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 50)); // Verify color temp has not changed.
+  EXPECT_EQ(light->get_hue(), 30);
+  EXPECT_EQ(light->get_saturation(), 50);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB); // Light should have switched to RGB mode.
+}
+
+TEST_F(HomeAssistantLightTest, verify_non_optimistic_mode_compliance) {
+  // Turn off optimistic mode and verify that no values change.
+  MqttManagerConfig::set_setting_value("optimistic_mode", "false");
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+  // spdlog::set_level(spdlog::level::trace);
+
+  NSPanelMQTTManagerCommand cmd;
+  cmd.set_nspanel_id(0);
+  NSPanelMQTTManagerCommand_LightCommand *light_cmd = cmd.mutable_light_command();
+  std::vector<uint32_t> light_ids = {light->get_id()};
+  light_cmd->add_light_ids(light->get_id());
+  light_cmd->set_brightness(50);
+  light_cmd->set_has_brightness(true);
+  light_cmd->set_color_temperature(50);
+  light_cmd->set_has_color_temperature(true);
+  light_cmd->set_has_hue(false);
+  light_cmd->set_has_saturation(false);
+
+  // Verify light is still off, brightness is still 0 and hue and saturation did not change.
+  EXPECT_EQ(light->get_state(), false);
+  EXPECT_EQ(light->get_brightness(), 0);
+  EXPECT_EQ(light->get_color_temperature(), 0);
+  EXPECT_EQ(light->get_hue(), 0);
+  EXPECT_EQ(light->get_saturation(), 0);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT); // Light should have switched to RGB mode.
+
+  light_cmd->set_has_brightness(false);
+  light_cmd->set_has_color_temperature(false);
+
+  light_cmd->set_hue(30);
+  light_cmd->set_has_hue(true);
+  light_cmd->set_saturation(30);
+  light_cmd->set_has_saturation(true);
+
+  // Verify light is still off, brightness is still 0 and hue and saturation did not change.
+  EXPECT_EQ(light->get_state(), false);
+  EXPECT_EQ(light->get_brightness(), 0);
+  EXPECT_EQ(light->get_color_temperature(), 0);
+  EXPECT_EQ(light->get_hue(), 0);
+  EXPECT_EQ(light->get_saturation(), 0);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT); // Light should have switched to RGB mode.
 }
 
 #endif // !MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TEST
