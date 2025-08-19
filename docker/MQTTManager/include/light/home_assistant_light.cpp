@@ -421,8 +421,8 @@ TEST_F(HomeAssistantLightTest, light_reacts_to_state_changes_from_home_assistant
 
   // Change to RGB mode
   event_data["event"]["data"]["new_state"]["state"] = "on";
-  event_data["event"]["data"]["new_state"]["attributes"]["brightness"] = 153;     // 60%
-  event_data["event"]["data"]["new_state"]["attributes"]["color_mode"] = "color"; // TODO: Update with correct color mode as sent from HA.
+  event_data["event"]["data"]["new_state"]["attributes"]["brightness"] = 153;  // 60%
+  event_data["event"]["data"]["new_state"]["attributes"]["color_mode"] = "xy"; // TODO: Update with correct color mode as sent from HA.
   light->home_assistant_event_callback(event_data);
   EXPECT_EQ(light->get_state(), true);
   EXPECT_EQ(light->get_brightness(), 60);
@@ -442,8 +442,8 @@ TEST_F(HomeAssistantLightTest, light_reacts_to_state_changes_from_home_assistant
 
   // Verify that we can revert back to color temp mode
   event_data["event"]["data"]["new_state"]["state"] = "on";
-  event_data["event"]["data"]["new_state"]["attributes"]["brightness"] = 153;          // 60%
-  event_data["event"]["data"]["new_state"]["attributes"]["color_mode"] = "color_temp"; // TODO: Update with correct color mode as sent from HA.
+  event_data["event"]["data"]["new_state"]["attributes"]["brightness"] = 153; // 60%
+  event_data["event"]["data"]["new_state"]["attributes"]["color_mode"] = "color_temp";
   event_data["event"]["data"]["new_state"]["attributes"]["color_temp_kelvin"] = 4000;
   light->home_assistant_event_callback(event_data);
   EXPECT_EQ(light->get_state(), true);
@@ -625,6 +625,7 @@ TEST_F(HomeAssistantLightTest, verify_non_optimistic_mode_compliance) {
   light_cmd->set_has_color_temperature(true);
   light_cmd->set_has_hue(false);
   light_cmd->set_has_saturation(false);
+  light->command_callback(cmd);
 
   // Verify light is still off, brightness is still 0 and hue and saturation did not change.
   EXPECT_EQ(light->get_state(), false);
@@ -636,11 +637,11 @@ TEST_F(HomeAssistantLightTest, verify_non_optimistic_mode_compliance) {
 
   light_cmd->set_has_brightness(false);
   light_cmd->set_has_color_temperature(false);
-
   light_cmd->set_hue(30);
   light_cmd->set_has_hue(true);
   light_cmd->set_saturation(30);
   light_cmd->set_has_saturation(true);
+  light->command_callback(cmd);
 
   // Verify light is still off, brightness is still 0 and hue and saturation did not change.
   EXPECT_EQ(light->get_state(), false);
