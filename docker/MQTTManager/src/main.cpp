@@ -34,8 +34,6 @@
 #endif
 
 #define SIGUSR1 10
-std::string last_time_published;
-std::string last_date_published;
 
 void sigusr1_handler(int signal) {
   if (signal == SIGUSR1) {
@@ -79,20 +77,14 @@ void publish_time_and_date() {
       time_str = time_buffer;
     }
 
-    if (time_str.compare(last_time_published) != 0) {
-      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/time", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), time_buffer, true);
-      if (!MqttManagerConfig::get_setting_with_default<bool>("clock_us_style")) [[likely]] {
-        MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), "", true);
-      } else {
-        MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), ampm_buffer, true);
-      }
-      last_time_published = time_buffer;
+    MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/time", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), time_buffer, true);
+    if (!MqttManagerConfig::get_setting_with_default<bool>("clock_us_style")) [[likely]] {
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), "", true);
+    } else {
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), ampm_buffer, true);
     }
 
-    if (date_str.compare(last_date_published) != 0) {
-      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/date", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), date_buffer, true);
-      last_date_published = date_buffer;
-    }
+    MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/date", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), date_buffer, true);
 
     // Sleep until next minute
     auto t_now = std::chrono::system_clock::now();
