@@ -19,10 +19,7 @@ firmware/NSPanelManagerFirmware/.cache
 firmware/NSPanelManagerFirmware/.ccls
 firmware/NSPanelManagerFirmware/.ccls-cache
 firmware/NSPanelManagerFirmware/node_modules
-<<<<<<< HEAD
 firmware/firmware_espidf/
-=======
->>>>>>> devel
 firmware/firmware_espidf/node_modules
 docker/MQTTManager/conan_cache/
 docker/MQTTManager/build/
@@ -30,6 +27,7 @@ docker/MQTTManager/.cache/
 docker/MQTTManager/CMakeFiles/
 docker/MQTTManager/lib/
 docker/MQTTManager/env.sh
+docker/MQTTManager/Testing/*
 docker/MQTTManager/compile_commands.json
 
 # User/computer specific files that is user depandant
