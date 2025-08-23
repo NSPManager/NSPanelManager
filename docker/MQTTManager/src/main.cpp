@@ -94,7 +94,23 @@ void publish_time_and_date() {
       last_date_published = date_buffer;
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    // Sleep until next minute
+    auto t_now = std::chrono::system_clock::now();
+    auto t_now_c = std::chrono::system_clock::to_time_t(t_now);
+    std::tm next_minute_tm = *std::localtime(&t_now_c);
+    next_minute_tm.tm_sec = 1; // Always wait to minute change over and not the exact same second
+
+    next_minute_tm.tm_min++;
+    if (next_minute_tm.tm_min >= 60) { // We went over to next hour
+      next_minute_tm.tm_min = 0;
+      next_minute_tm.tm_hour++;
+      if (next_minute_tm.tm_hour >= 24) { // We went over to next day
+        next_minute_tm.tm_hour = 0;
+      }
+    }
+
+    auto t_next_minute = std::chrono::system_clock::from_time_t(std::mktime(&next_minute_tm));
+    std::this_thread::sleep_until(t_next_minute);
   }
 }
 
