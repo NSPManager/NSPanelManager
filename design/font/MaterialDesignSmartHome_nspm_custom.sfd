@@ -21,7 +21,7 @@ OS2Version: 4
 OS2_WeightWidthSlopeOnly: 0
 OS2_UseTypoMetrics: 1
 CreationTime: -2082844800
-ModificationTime: 1755975336
+ModificationTime: 1756020490
 PfmFamily: 17
 TTFWeight: 400
 TTFWidth: 5
@@ -89,7 +89,7 @@ DisplaySize: -48
 AntiAlias: 1
 FitToEm: 0
 WinInfo: 0 27 9
-BeginChars: 65538 78
+BeginChars: 65538 80
 
 StartChar: .notdef
 Encoding: 65536 -1 0
@@ -3905,6 +3905,40 @@ Flags: W
 LayerCount: 2
 Fore
 SplineSet
+329 94 m 1,0,-1
+ 231 192 l 1,1,-1
+ 329 290 l 1,2,-1
+ 299 320 l 1,3,-1
+ 171 192 l 1,4,-1
+ 299 64 l 1,5,-1
+ 329 94 l 1,0,-1
+EndSplineSet
+EndChar
+
+StartChar: quotedbl
+Encoding: 34 34 73
+Width: 512
+Flags: W
+LayerCount: 2
+Fore
+SplineSet
+183 94 m 1,0,-1
+ 281 192 l 1,1,-1
+ 183 290 l 1,2,-1
+ 213 320 l 1,3,-1
+ 341 192 l 1,4,-1
+ 213 64 l 1,5,-1
+ 183 94 l 1,0,-1
+EndSplineSet
+EndChar
+
+StartChar: numbersign
+Encoding: 35 35 74
+Width: 512
+Flags: W
+LayerCount: 2
+Fore
+SplineSet
 267 405 m 0,0,1
  230 405 230 405 211 381 c 128,-1,2
  192 357 192 357 193.5 319 c 128,-1,3
@@ -3972,8 +4006,8 @@ SplineSet
 EndSplineSet
 EndChar
 
-StartChar: quotedbl
-Encoding: 34 34 73
+StartChar: dollar
+Encoding: 36 36 75
 Width: 512
 Flags: W
 LayerCount: 2
@@ -4028,8 +4062,8 @@ SplineSet
 EndSplineSet
 EndChar
 
-StartChar: numbersign
-Encoding: 35 35 74
+StartChar: percent
+Encoding: 37 37 76
 Width: 512
 Flags: W
 LayerCount: 2
@@ -4075,8 +4109,8 @@ SplineSet
 EndSplineSet
 EndChar
 
-StartChar: dollar
-Encoding: 36 36 75
+StartChar: ampersand
+Encoding: 38 38 77
 Width: 512
 Flags: W
 LayerCount: 2
@@ -4131,8 +4165,8 @@ SplineSet
 EndSplineSet
 EndChar
 
-StartChar: percent
-Encoding: 37 37 76
+StartChar: quotesingle
+Encoding: 39 39 78
 Width: 512
 Flags: W
 LayerCount: 2
@@ -4203,8 +4237,8 @@ SplineSet
 EndSplineSet
 EndChar
 
-StartChar: ampersand
-Encoding: 38 38 77
+StartChar: parenleft
+Encoding: 40 40 79
 Width: 512
 Flags: W
 LayerCount: 2
