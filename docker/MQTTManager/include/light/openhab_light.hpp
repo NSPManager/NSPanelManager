@@ -35,6 +35,12 @@ private:
   std::string _openhab_item_color_temperature; // Item for chaning color temp
   std::string _openhab_item_rgb;               // Item for chaning color
 
+  std::mutex _openhab_group_item_state_changed_event_mutex;
+  uint64_t _last_group_item_state_changed_event_ms;           // Last time a Group Item state changed event was received
+  nlohmann::json _last_group_item_state_changed_event_data;   // Last Group Item state changed event data
+  std::thread _openhab_group_item_state_changed_event_thread; // Event to wait for Group Item state changed events to settle before processing event data
+  void _openhab_group_item_state_changed_event_thread_func();
+
   uint64_t _last_on_off_change;
   uint64_t _last_brightness_change;
   uint64_t _last_color_temp_change;

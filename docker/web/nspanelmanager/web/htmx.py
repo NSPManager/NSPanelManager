@@ -937,10 +937,9 @@ def create_or_update_light_entity(request):
     else:
         new_light = Entity()
         new_light.entity_type = Entity.EntityType.LIGHT
-        # Only set once, when first created:
-        if entity_data["controller"] == "home_assistant":
-            entity_data['home_assistant_name'] = request.POST["home_assistant_item"]
 
+    if entity_data["controller"] == "home_assistant":
+        entity_data['home_assistant_name'] = request.POST["home_assistant_item"]
     new_light.friendly_name = request.POST["add_new_light_name"]
     new_light.room = Room.objects.get(id=int(action_args["room_id"]))
     new_light.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
