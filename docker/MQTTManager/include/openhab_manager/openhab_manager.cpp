@@ -65,7 +65,7 @@ void OpenhabManager::connect() {
   nlohmann::json filter;
   filter["type"] = "WebSocketEvent";
   filter["topic"] = "openhab/websocket/filter/type";
-  filter["payload"] = "[\"ItemStateEvent\", \"ItemStateChangedEvent\", \"ItemStateUpdatedEvent\"]";
+  filter["payload"] = "[\"ItemStateEvent\", \"ItemStateChangedEvent\", \"ItemStateUpdatedEvent\", \"GroupStateEvent\", \"GroupItemStateChangedEvent\"]";
   OpenhabManager::send_json(filter);
 
   SPDLOG_DEBUG("OpenHAB connect finished.");
@@ -155,7 +155,7 @@ void OpenhabManager::_process_websocket_message(const std::string &message) {
       SPDLOG_TRACE("Received PONG.");
     } else if (type.compare("WebSocketEvent") == 0 && std::string(data["payload"]).compare("PONG") == 0) {
       SPDLOG_TRACE("Received PONG.");
-    } else if (type.compare("ItemStateChangedEvent") == 0 || type.compare("ItemStateUpdatedEvent") == 0) {
+    } else if (type.compare("ItemStateChangedEvent") == 0 || type.compare("ItemStateUpdatedEvent") == 0 || type.compare("GroupStateEvent") == 0 || type.compare("GroupItemStateChangedEvent") == 0) {
       OpenhabManager::_process_openhab_event(data);
     } else {
       // SPDLOG_TRACE("Got unhandled message: {}", message);
@@ -253,7 +253,7 @@ void OpenhabManager::_send_string(std::string &data) {
 
 void OpenhabManager::_process_openhab_event(nlohmann::json &event_data) {
   SPDLOG_TRACE("Processing Openhab event: {}", event_data.dump());
-  if (std::string(event_data["type"]).compare("ItemStateChangedEvent") == 0) {
+  if (std::string(event_data["type"]).compare("ItemStateChangedEvent") == 0 || std::string(event_data["type"]).compare("GroupItemStateChangedEvent") == 0) {
     // Extract topic into multiple parts
     std::string topic = event_data["topic"];
     std::vector<std::string> topic_parts;

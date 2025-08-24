@@ -226,14 +226,14 @@ void OpenhabLight::send_state_update_to_controller() {
 
 void OpenhabLight::openhab_event_callback(nlohmann::json data) {
   std::lock_guard<std::mutex> lock_guard(this->_openhab_items_mutex);
-  if (std::string(data["type"]).compare("ItemStateChangedEvent") == 0) {
+  if (std::string(data["type"]).compare("ItemStateChangedEvent") == 0 || std::string(data["type"]).compare("GroupItemStateChangedEvent") == 0) {
     // Extract topic into multiple parts
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
 
     if (topic_parts.size() < 3) {
-      SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enought parts, topic: {}", std::string(data["topic"]));
+      SPDLOG_ERROR("Received ItemStateChangedEvent or GroupItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
 

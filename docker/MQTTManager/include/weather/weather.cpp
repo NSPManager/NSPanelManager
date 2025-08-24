@@ -70,6 +70,11 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 }
 
 void MQTTManagerWeather::_pull_new_weather_data() {
+  if (MQTTManagerWeather::_location_latitude.empty() || MQTTManagerWeather::_location_longitude.empty()) {
+    SPDLOG_INFO("No weather location set. Will not pull weather data.");
+    return;
+  }
+
   std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
   std::string pull_weather_url = fmt::format("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&wind_speed_unit={}&timezone={}&precipitation_unit={}&temperature_unit={}",
                                              MQTTManagerWeather::_location_latitude,
