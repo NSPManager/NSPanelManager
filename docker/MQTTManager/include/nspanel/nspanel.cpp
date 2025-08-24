@@ -677,7 +677,7 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   std::tm tm = *std::localtime(&now);
   std::stringstream buffer;
-  if (!MqttManagerConfig::get_setting_with_default<uint32_t>("clock_us_style")) {
+  if (!MqttManagerConfig::get_setting_with_default<bool>("clock_us_style")) {
     buffer << std::put_time(&tm, "%H:%M:%S");
   } else {
     buffer << std::put_time(&tm, "%I:%M:%S %p");

@@ -219,10 +219,10 @@ inline int32_t MqttManagerConfig::get_setting_with_default(std::string key) {
   try {
     return std::stoi(value);
   } catch (std::invalid_argument &ex) {
-    SPDLOG_ERROR("Caught exception while trying to convert string to integer. Returning 0. Exception: {}", boost::diagnostic_information(ex));
+    SPDLOG_ERROR("Caught exception while trying to convert string to integer. Returning 0. Key: {}, Exception: {}", key, boost::diagnostic_information(ex));
     return 0;
   } catch (std::out_of_range &ex) {
-    SPDLOG_ERROR("Caught exception while trying to convert string to integer. Returning 0. Exception: {}", boost::diagnostic_information(ex));
+    SPDLOG_ERROR("Caught exception while trying to convert string to integer. Returning 0. Key: {}, Exception: {}", key, boost::diagnostic_information(ex));
     return 0;
   }
 }
@@ -233,10 +233,10 @@ inline uint32_t MqttManagerConfig::get_setting_with_default(std::string key) {
   try {
     return std::stoul(value);
   } catch (std::invalid_argument &ex) {
-    SPDLOG_ERROR("Caught exception while trying to convert string to unsigned integer. Returning 0. Exception: {}", boost::diagnostic_information(ex));
+    SPDLOG_ERROR("Caught exception while trying to convert string to unsigned integer. Key: {}, Returning 0. Exception: {}", key, boost::diagnostic_information(ex));
     return 0;
   } catch (std::out_of_range &ex) {
-    SPDLOG_ERROR("Caught exception while trying to convert string to unsigned integer. Returning 0. Exception: {}", boost::diagnostic_information(ex));
+    SPDLOG_ERROR("Caught exception while trying to convert string to unsigned integer. Key: {}, Returning 0. Exception: {}", key, boost::diagnostic_information(ex));
     return 0;
   }
 }
@@ -247,10 +247,10 @@ inline float MqttManagerConfig::get_setting_with_default(std::string key) {
   try {
     return std::stof(value);
   } catch (std::invalid_argument &ex) {
-    SPDLOG_ERROR("Caught exception while trying to convert string to float. Returning 0.0f. Exception: {}", boost::diagnostic_information(ex));
+    SPDLOG_ERROR("Caught exception while trying to convert string to float. Returning 0.0f. Key: {}, Exception: {}", key, boost::diagnostic_information(ex));
     return 0.0f;
   } catch (std::out_of_range &ex) {
-    SPDLOG_ERROR("Caught exception while trying to convert string to float. Returning 0.0f. Exception: {}", boost::diagnostic_information(ex));
+    SPDLOG_ERROR("Caught exception while trying to convert string to float. Returning 0.0f. Key: {}, Exception: {}", key, boost::diagnostic_information(ex));
     return 0.0f;
   }
 }
