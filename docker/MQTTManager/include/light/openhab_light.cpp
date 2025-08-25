@@ -225,37 +225,64 @@ void OpenhabLight::send_state_update_to_controller() {
 }
 
 void OpenhabLight::openhab_event_callback(nlohmann::json data) {
+  // Extract topic into multiple parts
+  std::string topic = data["topic"];
+  std::vector<std::string> topic_parts;
+  boost::split(topic_parts, topic, boost::is_any_of("/"));
+  std::string topic_item = topic_parts[2];
+
+  if (topic_parts.size() < 3) {
+    SPDLOG_ERROR("Received ItemStateChangedEvent or GroupItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
+    return;
+  }
+
   std::lock_guard<std::mutex> lock_guard(this->_openhab_items_mutex);
   if (std::string(data["type"]).compare("GroupItemStateChangedEvent") == 0) {
-    if (CurrentTimeMilliseconds() < this->_last_brightness_change + 1000 ||
-        CurrentTimeMilliseconds() < this->_last_color_temp_change + 1000 ||
-        CurrentTimeMilliseconds() < this->_last_rgb_change + 1000) {
-      // Update received inside ignore time from last change. Simply ignore it.
-      return;
-    }
+    if (CurrentTimeMilliseconds() > this->_last_brightness_change + 1000 && topic_item.compare(this->_openhab_on_off_item) == 0) {
+      SPDLOG_DEBUG("Light {}::{} got group brightness item state update.", this->_id, this->_name);
+      std::lock_guard<std::mutex> lock_guard(this->_openhab_group_brightness_item_state_changed_event_mutex);
+      this->_last_group_brightness_item_state_changed_event_ms = CurrentTimeMilliseconds();
+      nlohmann::json event_data = data;
+      event_data["type"] = "GroupItemStateChangedEventFinal";
+      this->_last_group_brightness_item_state_changed_event_data = event_data;
 
-    // TODO: Set event in local variable and start thread to wait 1 second from last GroupItemStateChangedEvent before processing event.
-    std::lock_guard<std::mutex> lock_guard(this->_openhab_group_item_state_changed_event_mutex);
-    this->_last_group_item_state_changed_event_ms = CurrentTimeMilliseconds();
-    nlohmann::json event_data = data;
-    event_data["type"] = "GroupItemStateChangedEventFinal";
-    this->_last_group_item_state_changed_event_data = event_data;
+      if (!this->_openhab_group_brightness_item_state_changed_event_thread_running) {
+        if (this->_openhab_group_brightness_item_state_changed_event_thread.joinable()) {
+          this->_openhab_group_brightness_item_state_changed_event_thread.join(); // Cleanup old thread.
+        }
+        this->_openhab_group_brightness_item_state_changed_event_thread = std::thread(&OpenhabLight::_openhab_group_brightness_item_state_changed_event_thread_func, this);
+      }
+    } else if (CurrentTimeMilliseconds() > this->_last_color_temp_change + 1000 && topic_item.compare(this->_openhab_item_color_temperature) == 0) {
+      SPDLOG_DEBUG("Light {}::{} got group color temperature item state update.", this->_id, this->_name);
+      std::lock_guard<std::mutex> lock_guard(this->_openhab_group_color_temp_item_state_changed_event_mutex);
+      this->_last_group_color_temp_item_state_changed_event_ms = CurrentTimeMilliseconds();
+      nlohmann::json event_data = data;
+      event_data["type"] = "GroupItemStateChangedEventFinal";
+      this->_last_group_color_temp_item_state_changed_event_data = event_data;
 
-    if (!this->_openhab_group_item_state_changed_event_thread.joinable()) {
-      this->_openhab_group_item_state_changed_event_thread = std::thread(&OpenhabLight::_openhab_group_item_state_changed_event_thread_func, this);
+      if (!this->_openhab_group_color_temp_item_state_changed_event_thread_running) {
+        if (this->_openhab_group_color_temp_item_state_changed_event_thread.joinable()) {
+          this->_openhab_group_color_temp_item_state_changed_event_thread.join(); // Cleanup old thread.
+        }
+        this->_openhab_group_color_temp_item_state_changed_event_thread = std::thread(&OpenhabLight::_openhab_group_color_temp_item_state_changed_event_thread_func, this);
+      }
+    } else if (CurrentTimeMilliseconds() > this->_last_rgb_change + 1000 && topic_item.compare(this->_openhab_item_rgb) == 0) {
+      SPDLOG_DEBUG("Light {}::{} got group RGB item state update.", this->_id, this->_name);
+      std::lock_guard<std::mutex> lock_guard(this->_openhab_group_rgb_item_state_changed_event_mutex);
+      this->_last_group_rgb_item_state_changed_event_ms = CurrentTimeMilliseconds();
+      nlohmann::json event_data = data;
+      event_data["type"] = "GroupItemStateChangedEventFinal";
+      this->_last_group_rgb_item_state_changed_event_data = event_data;
+
+      if (!this->_openhab_group_rgb_item_state_changed_event_thread_running) {
+        if (this->_openhab_group_rgb_item_state_changed_event_thread.joinable()) {
+          this->_openhab_group_rgb_item_state_changed_event_thread.join(); // Cleanup old thread.
+        }
+        this->_openhab_group_rgb_item_state_changed_event_thread = std::thread(&OpenhabLight::_openhab_group_rgb_item_state_changed_event_thread_func, this);
+      }
     }
   } else if (std::string(data["type"]).compare("ItemStateChangedEvent") == 0 || std::string(data["type"]).compare("GroupItemStateChangedEventFinal") == 0) {
-    // Extract topic into multiple parts
-    std::string topic = data["topic"];
-    std::vector<std::string> topic_parts;
-    boost::split(topic_parts, topic, boost::is_any_of("/"));
 
-    if (topic_parts.size() < 3) {
-      SPDLOG_ERROR("Received ItemStateChangedEvent or GroupItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
-      return;
-    }
-
-    std::string topic_item = topic_parts[2];
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_on_off_item) == 0) {
       // We only care about the first event from Openhab, ignore the rest but still indicate that event was handled so the manager stops looping over all entities.
@@ -458,17 +485,62 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
   }
 }
 
-void OpenhabLight::_openhab_group_item_state_changed_event_thread_func() {
+void OpenhabLight::_openhab_group_brightness_item_state_changed_event_thread_func() {
+  this->_openhab_group_brightness_item_state_changed_event_mutex.lock();
+  this->_openhab_group_brightness_item_state_changed_event_thread_running = true;
+  this->_openhab_group_brightness_item_state_changed_event_mutex.unlock();
+
   for (;;) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    std::lock_guard<std::mutex> lock(this->_openhab_group_item_state_changed_event_mutex);
-    if (CurrentTimeMilliseconds() - this->_last_group_item_state_changed_event_ms > 1000) {
+    std::lock_guard<std::mutex> lock(this->_openhab_group_brightness_item_state_changed_event_mutex);
+    if (CurrentTimeMilliseconds() - this->_last_group_brightness_item_state_changed_event_ms > 1000) {
       break;
     }
   }
 
   // Process event:
-  SPDLOG_TRACE("Light {}::{} group event state changes has settled. Starting to process event...", this->_id, this->_name);
-  std::lock_guard<std::mutex> lock(this->_openhab_group_item_state_changed_event_mutex);
-  this->openhab_event_callback(this->_last_group_item_state_changed_event_data);
+  SPDLOG_DEBUG("Light {}::{} group event state changes has settled. Starting to process brightness group event...", this->_id, this->_name);
+  std::lock_guard<std::mutex> lock(this->_openhab_group_brightness_item_state_changed_event_mutex);
+  this->openhab_event_callback(this->_last_group_brightness_item_state_changed_event_data);
+  this->_openhab_group_brightness_item_state_changed_event_thread_running = false;
+}
+
+void OpenhabLight::_openhab_group_color_temp_item_state_changed_event_thread_func() {
+  this->_openhab_group_color_temp_item_state_changed_event_mutex.lock();
+  this->_openhab_group_color_temp_item_state_changed_event_thread_running = true;
+  this->_openhab_group_color_temp_item_state_changed_event_mutex.unlock();
+
+  for (;;) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::lock_guard<std::mutex> lock(this->_openhab_group_color_temp_item_state_changed_event_mutex);
+    if (CurrentTimeMilliseconds() - this->_last_group_color_temp_item_state_changed_event_ms > 1000) {
+      break;
+    }
+  }
+
+  // Process event:
+  SPDLOG_DEBUG("Light {}::{} group event state changes has settled. Starting to process color temperature group event...", this->_id, this->_name);
+  std::lock_guard<std::mutex> lock(this->_openhab_group_color_temp_item_state_changed_event_mutex);
+  this->openhab_event_callback(this->_last_group_color_temp_item_state_changed_event_data);
+  this->_openhab_group_color_temp_item_state_changed_event_thread_running = false;
+}
+
+void OpenhabLight::_openhab_group_rgb_item_state_changed_event_thread_func() {
+  this->_openhab_group_rgb_item_state_changed_event_mutex.lock();
+  this->_openhab_group_rgb_item_state_changed_event_thread_running = true;
+  this->_openhab_group_rgb_item_state_changed_event_mutex.unlock();
+
+  for (;;) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::lock_guard<std::mutex> lock(this->_openhab_group_rgb_item_state_changed_event_mutex);
+    if (CurrentTimeMilliseconds() - this->_last_group_rgb_item_state_changed_event_ms > 1000) {
+      break;
+    }
+  }
+
+  // Process event:
+  SPDLOG_DEBUG("Light {}::{} group event state changes has settled. Starting to process RGB group event...", this->_id, this->_name);
+  std::lock_guard<std::mutex> lock(this->_openhab_group_rgb_item_state_changed_event_mutex);
+  this->openhab_event_callback(this->_last_group_rgb_item_state_changed_event_data);
+  this->_openhab_group_rgb_item_state_changed_event_thread_running = false;
 }
