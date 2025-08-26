@@ -139,7 +139,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
         std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
         WebsocketServer::_connected_websockets_stomps.push_back(&webSocket);
       } else {
-        SPDLOG_ERROR("Connected websocket to URL {} does not end with /stomp. Unknown protocol. Will close socket.");
+        SPDLOG_ERROR("Connected websocket does not end with /stomp. Unknown protocol. Will close socket.");
         webSocket.close();
       }
     } else if (msg->type == ix::WebSocketMessageType::Close) {
