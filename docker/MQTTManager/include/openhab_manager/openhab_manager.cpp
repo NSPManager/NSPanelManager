@@ -111,14 +111,17 @@ void OpenhabManager::_websocket_message_callback(const ix::WebSocketMessagePtr &
     OpenhabManager::_authenticated = true;
     OpenhabManager::_connected = true;
 
+    // Fetch current state of all items as we've just connected to OpenHAB and things might be in an inconsistent state
     for (auto item_observer_pairs : OpenhabManager::_openhab_item_observers) {
       if (item_observer_pairs.second->num_slots() > 0) {
         try {
           std::string data = OpenhabManager::_fetch_item_state_via_rest(item_observer_pairs.first);
           if (data.length() > 0) {
+            SPDLOG_TRACE("Creating ItemStateFetched event.");
             nlohmann::json update_data;
             update_data["type"] = "ItemStateFetched";
             update_data["payload"] = nlohmann::json::parse(data);
+            SPDLOG_TRACE("ItemStateFetched event created. Updating observers for item {}", item_observer_pairs.first);
             OpenhabManager::_openhab_item_observers[item_observer_pairs.first](update_data);
           } else {
             SPDLOG_ERROR("Failed to get current state for item '{}' via OpenHAB REST API.", item_observer_pairs.first);
@@ -233,7 +236,7 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
   /* always cleanup */
   curl_easy_cleanup(curl);
   curl_slist_free_all(headers);
-  SPDLOG_TRACE("Got data for OpenHAB item {}.", item);
+  SPDLOG_TRACE("Got data for OpenHAB item {}. Data: {}", item, response_data);
   return response_data;
 }
 

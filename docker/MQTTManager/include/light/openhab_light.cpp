@@ -225,19 +225,19 @@ void OpenhabLight::send_state_update_to_controller() {
 }
 
 void OpenhabLight::openhab_event_callback(nlohmann::json data) {
-  // Extract topic into multiple parts
-  std::string topic = data["topic"];
-  std::vector<std::string> topic_parts;
-  boost::split(topic_parts, topic, boost::is_any_of("/"));
-  std::string topic_item = topic_parts[2];
-
-  if (topic_parts.size() < 3) {
-    SPDLOG_ERROR("Received ItemStateChangedEvent or GroupItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
-    return;
-  }
-
   std::lock_guard<std::mutex> lock_guard(this->_openhab_items_mutex);
   if (std::string(data["type"]).compare("GroupItemStateChangedEvent") == 0) {
+    // Extract topic into multiple parts
+    std::string topic = data["topic"];
+    std::vector<std::string> topic_parts;
+    boost::split(topic_parts, topic, boost::is_any_of("/"));
+    std::string topic_item = topic_parts[2];
+
+    if (topic_parts.size() < 3) {
+      SPDLOG_ERROR("Received ItemStateChangedEvent or GroupItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
+      return;
+    }
+
     if (CurrentTimeMilliseconds() > this->_last_brightness_change + 1000 && topic_item.compare(this->_openhab_on_off_item) == 0) {
       SPDLOG_DEBUG("Light {}::{} got group brightness item state update.", this->_id, this->_name);
       std::lock_guard<std::mutex> lock_guard(this->_openhab_group_brightness_item_state_changed_event_mutex);
@@ -282,6 +282,16 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
       }
     }
   } else if (std::string(data["type"]).compare("ItemStateChangedEvent") == 0 || std::string(data["type"]).compare("GroupItemStateChangedEventFinal") == 0) {
+    // Extract topic into multiple parts
+    std::string topic = data["topic"];
+    std::vector<std::string> topic_parts;
+    boost::split(topic_parts, topic, boost::is_any_of("/"));
+    std::string topic_item = topic_parts[2];
+
+    if (topic_parts.size() < 3) {
+      SPDLOG_ERROR("Received ItemStateChangedEvent or GroupItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
+      return;
+    }
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_on_off_item) == 0) {

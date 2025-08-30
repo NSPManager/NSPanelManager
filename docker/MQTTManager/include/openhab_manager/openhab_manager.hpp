@@ -40,9 +40,11 @@ public:
     try {
       data = OpenhabManager::_fetch_item_state_via_rest(item);
       if (data.length() > 0) {
+        SPDLOG_TRACE("Creating ItemStateFetched event.");
         nlohmann::json update_data;
         update_data["type"] = "ItemStateFetched";
         update_data["payload"] = nlohmann::json::parse(data);
+        SPDLOG_TRACE("ItemStateFetched event created. Updating observer for item {}.", item);
         OpenhabManager::_openhab_item_observers[item](update_data);
       } else {
         SPDLOG_WARN("Failed to get current state for item '{}' via OpenHAB REST API. Current state is not available and will only be updated on next openhab state chage event..", item);
