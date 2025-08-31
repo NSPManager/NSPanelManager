@@ -454,8 +454,12 @@ MQTT_MANAGER_NSPANEL_STATE NSPanel::get_state() {
 }
 
 void NSPanel::mqtt_callback(std::string topic, std::string payload) {
+  if (payload.empty()) {
+    return;
+  }
+
   try {
-    if (!payload.empty() && topic.compare(this->_mqtt_log_topic) == 0) {
+    if (topic.compare(this->_mqtt_log_topic) == 0) {
       // Split log message by semicolon to extract MAC, log level and message.
       std::string message = payload;
       std::vector<std::string> message_parts;
@@ -520,6 +524,18 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
     } else if (topic.compare(this->_mqtt_status_report_topic) == 0 || topic.compare(fmt::format("nspanel/{}/status_report", this->_name)) == 0) { // TODO: Remove and only use MAC-based topic after 2.0 is stable.
       NSPanelStatusReport report;
       if (report.ParseFromString(payload)) {
+        // Successfully received a new type of status report in protobuf format. This means that we have successfully updated to 2.0 firmware. Remove old MQTT topic retains:
+        // TODO: Remove once 2.0 is stable release
+        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/status", this->_name));
+        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/status_report", this->_name));
+        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/log", this->_name));
+        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/r1_state", this->_name));
+        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/r2_state", this->_name));
+        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/screen_state", this->_name));
+        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/temperature_state", this->_name));
+        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/command", this->_name));
+        MQTT_Manager::clear_retain(fmt::format("nspanel/{}", this->_name));
+
         SPDLOG_DEBUG("Got new status report from NSPanel {}::{}", this->_id, this->_name);
         this->_ip_address = report.ip_address();
         this->_rssi = report.rssi();
