@@ -1,4 +1,5 @@
 #include "mqtt_manager_config.hpp"
+#include "light/light.hpp"
 #include "openssl/evp.h"
 #include "web_helper/WebHelper.hpp"
 #include <boost/algorithm/string/case_conv.hpp>
@@ -7,14 +8,12 @@
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/stacktrace/stacktrace_fwd.hpp>
-#include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <database_manager/database_manager.hpp>
-#include <exception>
 #include <fmt/core.h>
 #include <fstream>
 #include <mutex>
@@ -31,11 +30,6 @@
 #include <string>
 #include <websocket_server/websocket_server.hpp>
 
-MqttManagerSettingsHolder MqttManagerConfig::get_settings() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_settings_mutex);
-  return MqttManagerConfig::_settings;
-}
-
 void MqttManagerConfig::load() {
   SPDLOG_TRACE("Loading timezone from /etc/timezone.");
   // Begin by loading timezone
@@ -48,39 +42,32 @@ void MqttManagerConfig::load() {
   MqttManagerConfig::timezone = timezone_str;
   SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
 
+  SPDLOG_DEBUG("Clearing config values cache.");
+  MqttManagerConfig::_settings_values_cache.clear();
+
   {
     SPDLOG_INFO("Loading MQTT Manager settings.");
     std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_settings_mutex);
 
-    MqttManagerConfig::_settings.manager_address = MqttManagerConfig::get_setting_with_default("manager_address", "");
-    MqttManagerConfig::_settings.manager_port = std::stoi(MqttManagerConfig::get_setting_with_default("manager_port", "8000"));
-    MqttManagerConfig::_settings.color_temp_min = std::stoi(MqttManagerConfig::get_setting_with_default("color_temp_min", "2000"));
-    MqttManagerConfig::_settings.color_temp_max = std::stoi(MqttManagerConfig::get_setting_with_default("color_temp_max", "6000"));
-    MqttManagerConfig::_settings.reverse_color_temperature_slider = MqttManagerConfig::get_setting_with_default("reverse_color_temp", "False").compare("True") == 0;
-    MqttManagerConfig::_settings.date_format = MqttManagerConfig::get_setting_with_default("date_format", "%a %d/%m/ %Y");
-    MqttManagerConfig::_settings.clock_24_hour_format = MqttManagerConfig::get_setting_with_default("clock_us_style", "False").compare("False") == 0;
-    MqttManagerConfig::_settings.optimistic_mode = MqttManagerConfig::get_setting_with_default("optimistic_mode", "True").compare("True") == 0;
-    MqttManagerConfig::_settings.mqtt_wait_time = std::stoi(MqttManagerConfig::get_setting_with_default("mqtt_wait_time", "1000"));
-
     const char *is_home_assistant_addon = std::getenv("IS_HOME_ASSISTANT_ADDON");
     if (is_home_assistant_addon != nullptr) {
       if (std::string(is_home_assistant_addon).compare("true") == 0) {
-        MqttManagerConfig::_settings.is_home_assistant_addon = true;
+        MqttManagerConfig::_is_home_assistant_addon = true;
       } else {
-        MqttManagerConfig::_settings.is_home_assistant_addon = false;
+        MqttManagerConfig::_is_home_assistant_addon = false;
       }
     } else {
-      MqttManagerConfig::_settings.is_home_assistant_addon = false;
+      MqttManagerConfig::_is_home_assistant_addon = false;
     }
 
-    std::string turn_on_bevaiour = MqttManagerConfig::get_setting_with_default("turn_on_behaviour", "color_temp");
+    std::string turn_on_bevaiour = MqttManagerConfig::get_setting_with_default<std::string>("turn_on_behaviour");
     if (turn_on_bevaiour.compare("color_temp") == 0) {
-      MqttManagerConfig::_settings.light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
+      MqttManagerConfig::_light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
     } else if (turn_on_bevaiour.compare("restore") == 0) {
-      MqttManagerConfig::_settings.light_turn_on_behaviour = LightTurnOnBehaviour::RESTORE_PREVIOUS;
+      MqttManagerConfig::_light_turn_on_behaviour = LightTurnOnBehaviour::RESTORE_PREVIOUS;
     } else {
       SPDLOG_WARN("Failed to determine turn on bevaiour for lights, assuming color temp. Value set: {}", turn_on_bevaiour);
-      MqttManagerConfig::_settings.light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
+      MqttManagerConfig::_light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
     }
   }
 
@@ -91,32 +78,46 @@ void MqttManagerConfig::load() {
   MqttManagerConfig::_config_loaded_listeners();
 }
 
-std::string MqttManagerConfig::get_setting_with_default(std::string key, std::string default_value) {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_database_access_mutex);
+void MqttManagerConfig::set_setting_value(std::string key, std::string value) {
+  SPDLOG_DEBUG("Setting '{}' to value '{}'", key, value);
+
   try {
-    auto result = database_manager::database.get_all<database_manager::SettingHolder>(sqlite_orm::where(sqlite_orm::c(&database_manager::SettingHolder::name) == key));
-    if (result.size() > 0) [[likely]] {
-      SPDLOG_TRACE("Found setting {} with value {}", key, result[0].value);
-      return result[0].value;
-    } else {
-      SPDLOG_TRACE("Did not find setting {}. Returning default:   {}", key, default_value);
-      return default_value;
-    }
-  } catch (std::exception &ex) {
-    SPDLOG_ERROR("Caught exception while trying to access database to retrieve setting {}. Exception: {}", key, boost::diagnostic_information(ex));
+    database_manager::SettingHolder setting = database_manager::database.get<database_manager::SettingHolder>(key);
+    setting.value = value;
+    database_manager::database.update(setting);
+  } catch (const std::exception &e) {
+    database_manager::SettingHolder setting;
+    setting.name = key;
+    setting.value = value;
+    database_manager::database.insert(setting);
   }
-  SPDLOG_TRACE("Did not find setting {}. Returning default:   {}", key, default_value);
-  return default_value;
+
+  MqttManagerConfig::_settings_values_cache[key] = value;
 }
 
 void MqttManagerConfig::set_nspanel_setting_value(int32_t nspanel_id, std::string key, std::string value) {
   SPDLOG_DEBUG("Setting '{}' to value '{}' for NSPanel with ID {}", key, value, nspanel_id);
 
-  database_manager::NSPanelSettingHolder setting;
-  setting.nspanel_id = nspanel_id;
-  setting.name = key;
-  setting.value = value;
-  database_manager::database.insert(setting);
+  auto result = database_manager::database.get_all<database_manager::NSPanelSettingHolder>(sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelSettingHolder::name) == key) and sqlite_orm::c(&database_manager::NSPanelSettingHolder::nspanel_id) == nspanel_id);
+  if (result.size() == 0) {
+    database_manager::NSPanelSettingHolder setting;
+    setting.value = value;
+    database_manager::database.update(setting);
+  } else {
+    database_manager::NSPanelSettingHolder setting;
+    setting.nspanel_id = nspanel_id;
+    setting.name = key;
+    setting.value = value;
+    database_manager::database.insert(setting);
+  }
+}
+
+bool MqttManagerConfig::is_home_assistant_addon() {
+  return MqttManagerConfig::_is_home_assistant_addon;
+}
+
+LightTurnOnBehaviour MqttManagerConfig::get_light_turn_on_behaviour() {
+  return MqttManagerConfig::_light_turn_on_behaviour;
 }
 
 void MqttManagerConfig::update_firmware_checksum() {

@@ -49,7 +49,7 @@ void HomeAssistantManager::connect() {
 
       WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant not connected.");
 
-      if (MqttManagerConfig::get_settings().is_home_assistant_addon) {
+      if (MqttManagerConfig::is_home_assistant_addon()) {
         home_assistant_websocket_url.append("/core/websocket");
       } else {
         home_assistant_websocket_url.append("/api/websocket");
@@ -81,8 +81,8 @@ void HomeAssistantManager::reload_config() {
   bool reconnect = false;
   {
     std::lock_guard<std::mutex> lock_guard(HomeAssistantManager::_settings_mutex);
-    std::string address = MqttManagerConfig::get_setting_with_default("home_assistant_address", "");
-    std::string token = MqttManagerConfig::get_setting_with_default("home_assistant_token", "");
+    std::string address = MqttManagerConfig::get_setting_with_default<std::string>("home_assistant_address");
+    std::string token = MqttManagerConfig::get_setting_with_default<std::string>("home_assistant_token");
 
     if (HomeAssistantManager::_home_assistant_address.compare(address) != 0 || HomeAssistantManager::_home_assistant_token.compare(token) != 0) {
       HomeAssistantManager::_home_assistant_address = address;
@@ -208,6 +208,7 @@ void HomeAssistantManager::_process_home_assistant_event(nlohmann::json &event_d
         std::string home_assistant_entity_name = event_data["event"]["data"]["entity_id"];
         if (HomeAssistantManager::_home_assistant_observers.find(home_assistant_entity_name) != HomeAssistantManager::_home_assistant_observers.end()) {
           try {
+            SPDLOG_TRACE("HA Event: {}", event_data.dump());
             HomeAssistantManager::_home_assistant_observers.at(home_assistant_entity_name)(event_data);
           } catch (const std::exception &e) {
             SPDLOG_ERROR("Caught exception during processing of home assistant event. Diagnostic information: {}", boost::diagnostic_information(e, true));

@@ -49,7 +49,19 @@ uint16_t Light::get_room_id() {
 }
 
 void Light::reload_config() {
-  auto light = database_manager::database.get<database_manager::Entity>(this->_id);
+  database_manager::Entity light;
+  try {
+    light = database_manager::database.get<database_manager::Entity>(this->_id);
+  } catch (const std::exception &e) {
+    SPDLOG_ERROR("Failed to load light {}: {}", this->_id, e.what());
+    SPDLOG_ERROR("Will use default values.");
+    this->_name = "UNKNOWN";
+    this->_room_id = 0;
+    this->_entity_page_id = 0;
+    this->_entity_page_slot = 0;
+    return;
+  }
+
   this->_name = light.friendly_name;
   SPDLOG_DEBUG("Loading light {}::{}.", this->_id, this->_name);
 
@@ -158,8 +170,8 @@ void Light::send_state_update_to_nspanel() {
     SPDLOG_ERROR("Unknown light mode! Will assume default mode.");
   }
 
-  float kelvin_pct = (((float)this->_current_color_temperature - MqttManagerConfig::get_settings().color_temp_min) / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
-  if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+  float kelvin_pct = (((float)this->_current_color_temperature - MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min")) / (MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max") - MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min"))) * 100;
+  if (MqttManagerConfig::get_setting_with_default<bool>("reverse_color_temp")) {
     kelvin_pct = 100 - kelvin_pct;
   }
   light_state->set_color_temp(kelvin_pct);
@@ -181,7 +193,7 @@ void Light::turn_on(bool send_update) {
   if (send_update) {
     this->send_state_update_to_controller();
 
-    if (MqttManagerConfig::get_settings().optimistic_mode) {
+    if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
       this->_current_state = true;
     }
   }
@@ -193,7 +205,7 @@ void Light::turn_off(bool send_update) {
   if (send_update) {
     this->send_state_update_to_controller();
 
-    if (MqttManagerConfig::get_settings().optimistic_mode) {
+    if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
       this->_current_state = false;
     }
   }
@@ -214,7 +226,7 @@ void Light::set_brightness(uint8_t brightness, bool send_update) {
   if (send_update) {
     this->send_state_update_to_controller();
 
-    if (MqttManagerConfig::get_settings().optimistic_mode) {
+    if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
       this->_current_brightness = brightness;
     }
   }
@@ -231,7 +243,7 @@ void Light::set_color_temperature(uint color_temperature, bool send_update) {
   if (send_update) {
     this->send_state_update_to_controller();
 
-    if (MqttManagerConfig::get_settings().optimistic_mode) {
+    if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
       this->_current_color_temperature = color_temperature;
     }
   }
@@ -248,7 +260,7 @@ void Light::set_hue(uint16_t hue, bool send_update) {
   if (send_update) {
     this->send_state_update_to_controller();
 
-    if (MqttManagerConfig::get_settings().optimistic_mode) {
+    if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
       this->_current_hue = hue;
     }
   }
@@ -265,7 +277,7 @@ void Light::set_saturation(uint8_t saturation, bool send_update) {
   if (send_update) {
     this->send_state_update_to_controller();
 
-    if (MqttManagerConfig::get_settings().optimistic_mode) {
+    if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
       this->_current_saturation = saturation;
     }
   }
@@ -284,7 +296,7 @@ void Light::set_hsb(uint16_t hue, uint8_t saturation, uint8_t brightness, bool s
   if (send_update) {
     this->send_state_update_to_controller();
 
-    if (MqttManagerConfig::get_settings().optimistic_mode) {
+    if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
       this->_current_hue = hue;
       this->_current_saturation = saturation;
       this->_current_brightness = brightness;
@@ -346,11 +358,11 @@ void Light::command_callback(NSPanelMQTTManagerCommand &command) {
       }
       if (cmd.has_color_temperature()) {
         // Convert color temperature (0-100) to actual color temperature in kelvin.
-        uint32_t color_temperature_kelvin = cmd.color_temperature() * ((MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min) / 100);
-        if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
-          color_temperature_kelvin = MqttManagerConfig::get_settings().color_temp_max - color_temperature_kelvin;
+        uint32_t color_temperature_kelvin = cmd.color_temperature() * ((MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max") - MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min")) / 100);
+        if (MqttManagerConfig::get_setting_with_default<bool>("reverse_color_temp")) {
+          color_temperature_kelvin = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max") - color_temperature_kelvin;
         } else {
-          color_temperature_kelvin += MqttManagerConfig::get_settings().color_temp_min;
+          color_temperature_kelvin += MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
         }
         this->set_color_temperature(color_temperature_kelvin, false);
       }
@@ -375,7 +387,7 @@ void Light::toggle() {
   } else {
     // Apply default "turn on brightness" if it is requested to become 0 as that won't work.
     if (this->_requested_brightness == 0) {
-      this->_requested_brightness = std::stoi(MqttManagerConfig::get_setting_with_default("light_turn_on_brightness", "50"));
+      this->_requested_brightness = MqttManagerConfig::get_setting_with_default<uint32_t>("light_turn_on_brightness");
     }
     this->turn_on(true);
   }
@@ -406,6 +418,6 @@ uint16_t Light::get_icon_active_color() {
 }
 
 std::string Light::get_mqtt_state_topic() {
-  std::string manager_address = MqttManagerConfig::get_settings().manager_address;
+  std::string manager_address = MqttManagerConfig::get_setting_with_default<std::string>("manager_address");
   return fmt::format("nspanel/mqttmanager_{}/entities/lights/{}/state", manager_address, this->get_id());
 }

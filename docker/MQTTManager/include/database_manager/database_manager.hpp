@@ -1,7 +1,4 @@
 #pragma once
-#include "nlohmann/json.hpp"
-#include <csignal>
-#include <cstdlib>
 #include <memory>
 #include <nlohmann/json_fwd.hpp>
 #include <optional>
@@ -105,7 +102,11 @@ struct Entity {
   void set_entity_data_json(const nlohmann::json &json);
 };
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+static inline auto database = sqlite_orm::make_storage("/tmp/nspanelmanager_db_test.sqlite3",
+#else
 static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.sqlite3",
+#endif
                                                        sqlite_orm::make_table("web_roomentitiespage",
                                                                               sqlite_orm::make_column("id", &RoomEntitiesPage::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("display_order", &RoomEntitiesPage::display_order),
@@ -174,7 +175,36 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("room_id", &Entity::room_id)));
 
 static void init() {
+
+#if defined(TEST_MODE) && TEST_MODE == 1
+  SPDLOG_INFO("Running database /tmp/nspanelmanager_db_test.sqlite3 as it's in TEST_MODE. Syncing schema...");
+  auto result = database_manager::database.sync_schema();
+  SPDLOG_INFO("Sync schema result:");
+  for (auto &n : result) {
+    switch (n.second) {
+    case sqlite_orm::sync_schema_result::new_table_created:
+      SPDLOG_INFO("Created table {}", n.first);
+      break;
+    case sqlite_orm::sync_schema_result::already_in_sync:
+      SPDLOG_INFO("Table {} already in sync", n.first);
+      break;
+    case sqlite_orm::sync_schema_result::old_columns_removed:
+      SPDLOG_INFO("Removed old columns from table {}", n.first);
+      break;
+    case sqlite_orm::sync_schema_result::new_columns_added:
+      SPDLOG_INFO("Added new columns to table {}", n.first);
+      break;
+    case sqlite_orm::sync_schema_result::new_columns_added_and_old_columns_removed:
+      SPDLOG_INFO("Added new columns and removed old columns from table {}", n.first);
+      break;
+    case sqlite_orm::sync_schema_result::dropped_and_recreated:
+      SPDLOG_INFO("Dropped and recreated table {}", n.first);
+      break;
+    }
+  }
+#else
   database_manager::database.open_forever();
+#endif
 }
 
 }; // namespace database_manager

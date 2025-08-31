@@ -80,7 +80,7 @@ std::shared_ptr<NSPanel> NSPanel::create_from_discovery_request(nlohmann::json r
     panel_data.accepted = false;
     try {
       int new_nspanel_id = database_manager::database.insert(panel_data);
-      if (MqttManagerConfig::get_setting_with_default("default_nspanel_type", "eu").compare("eu") == 0) {
+      if (MqttManagerConfig::get_setting_with_default<std::string>("default_nspanel_type").compare("eu") == 0) {
         MqttManagerConfig::set_nspanel_setting_value(new_nspanel_id, "is_us_panel", "False");
       } else {
         MqttManagerConfig::set_nspanel_setting_value(new_nspanel_id, "is_us_panel", "True");
@@ -242,7 +242,6 @@ void NSPanel::send_config() {
 
   SPDLOG_INFO("Sending config over MQTT for panel {}::{}", this->_id, this->_name);
   NSPanelConfig config;
-  MqttManagerSettingsHolder global_setting = MqttManagerConfig::get_settings();
 
   auto default_room = EntityManager::get_room(this->_settings.room_id);
   if (!default_room) {
@@ -254,21 +253,21 @@ void NSPanel::send_config() {
   config.set_name(this->_name);
   config.set_default_room(this->_settings.room_id);
   config.set_default_page(static_cast<NSPanelConfig_NSPanelDefaultPage>(std::stoi(this->_get_nspanel_setting_with_default("default_page", "0"))));
-  config.set_min_button_push_time(std::stoi(MqttManagerConfig::get_setting_with_default("min_button_push_time", "50")));
-  config.set_button_long_press_time(std::stoi(MqttManagerConfig::get_setting_with_default("button_long_press_time", "5000")));
-  config.set_special_mode_trigger_time(std::stoi(MqttManagerConfig::get_setting_with_default("special_mode_trigger_time", "300")));
-  config.set_special_mode_release_time(std::stoi(MqttManagerConfig::get_setting_with_default("special_mode_release_time", "5000")));
-  config.set_screen_dim_level(std::stoi(this->_get_nspanel_setting_with_default("screen_dim_level", MqttManagerConfig::get_setting_with_default("screen_dim_level", "100"))));
-  config.set_screensaver_dim_level(std::stoi(this->_get_nspanel_setting_with_default("screensaver_dim_level", MqttManagerConfig::get_setting_with_default("screensaver_dim_level", "1"))));
-  config.set_screensaver_activation_timeout(std::stoi(this->_get_nspanel_setting_with_default("screensaver_activation_timeout", MqttManagerConfig::get_setting_with_default("screensaver_activation_timeout", "30000"))));
-  config.set_clock_us_style(!global_setting.clock_24_hour_format);
-  config.set_use_fahrenheit(MqttManagerConfig::get_setting_with_default("use_fahrenheit", "False").compare("True") == 0);
+  config.set_min_button_push_time(MqttManagerConfig::get_setting_with_default<uint32_t>("min_button_push_time"));
+  config.set_button_long_press_time(MqttManagerConfig::get_setting_with_default<uint32_t>("button_long_press_time"));
+  config.set_special_mode_trigger_time(MqttManagerConfig::get_setting_with_default<uint32_t>("special_mode_trigger_time"));
+  config.set_special_mode_release_time(MqttManagerConfig::get_setting_with_default<uint32_t>("special_mode_release_time"));
+  config.set_screen_dim_level(std::stoi(this->_get_nspanel_setting_with_default("screen_dim_level", MqttManagerConfig::get_setting_with_default<std::string>("screen_dim_level"))));
+  config.set_screensaver_dim_level(std::stoi(this->_get_nspanel_setting_with_default("screensaver_dim_level", MqttManagerConfig::get_setting_with_default<std::string>("screensaver_dim_level"))));
+  config.set_screensaver_activation_timeout(std::stoi(this->_get_nspanel_setting_with_default("screensaver_activation_timeout", MqttManagerConfig::get_setting_with_default<std::string>("screensaver_activation_timeout"))));
+  config.set_clock_us_style(MqttManagerConfig::get_setting_with_default<bool>("clock_us_style"));
+  config.set_use_fahrenheit(MqttManagerConfig::get_setting_with_default<bool>("use_fahrenheit"));
   config.set_is_us_panel(this->_get_nspanel_setting_with_default("is_us_panel", "False").compare("True") == 0);
   config.set_reverse_relays(this->_get_nspanel_setting_with_default("reverse_relays", "False").compare("True") == 0);
   config.set_relay1_default_mode(this->_get_nspanel_setting_with_default("relay1_default_mode", "False").compare("True") == 0);
   config.set_relay2_default_mode(this->_get_nspanel_setting_with_default("relay2_default_mode", "False").compare("True") == 0);
   config.set_temperature_calibration((std::stof(this->_get_nspanel_setting_with_default("temperature_calibration", "0.0")) * 10));
-  config.set_default_light_brightess(std::stoi(MqttManagerConfig::get_setting_with_default("light_turn_on_brightness", "50")));
+  config.set_default_light_brightess(MqttManagerConfig::get_setting_with_default<uint32_t>("light_turn_on_brightness"));
   config.set_locked_to_default_room(this->is_locked_to_default_room());
   if ((*default_room)->has_temperature_sensor()) {
     config.set_inside_temperature_sensor_mqtt_topic((*default_room)->get_temperature_sensor_mqtt_topic());
@@ -292,10 +291,10 @@ void NSPanel::send_config() {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
 
-  config.set_optimistic_mode(global_setting.optimistic_mode);
-  config.set_raise_light_level_to_100_above(std::stoi(MqttManagerConfig::get_setting_with_default("raise_to_100_light_level", "96")));
+  config.set_optimistic_mode(MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode"));
+  config.set_raise_light_level_to_100_above(MqttManagerConfig::get_setting_with_default<uint32_t>("raise_to_100_light_level"));
 
-  std::string screensaver_mode = this->_get_nspanel_setting_with_default("screensaver_mode", MqttManagerConfig::get_setting_with_default("screensaver_mode", "with_background"));
+  std::string screensaver_mode = this->_get_nspanel_setting_with_default("screensaver_mode", MqttManagerConfig::get_setting_with_default<std::string>("screensaver_mode"));
   if (screensaver_mode.compare("with_background") == 0) {
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND);
   } else if (screensaver_mode.compare("without_background") == 0) {
@@ -311,14 +310,14 @@ void NSPanel::send_config() {
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND);
   }
 
-  std::string show_screensaver_inside_temperature = this->_get_nspanel_setting_with_default("show_screensaver_inside_temperature", MqttManagerConfig::get_setting_with_default("show_screensaver_inside_temperature", "True"));
+  std::string show_screensaver_inside_temperature = this->_get_nspanel_setting_with_default("show_screensaver_inside_temperature", MqttManagerConfig::get_setting_with_default<std::string>("show_screensaver_inside_temperature"));
   if (show_screensaver_inside_temperature.compare("True") == 0) {
     config.set_show_screensaver_inside_temperature(true);
   } else {
     config.set_show_screensaver_inside_temperature(false);
   }
 
-  std::string show_screensaver_outside_temperature = this->_get_nspanel_setting_with_default("show_screensaver_outside_temperature", MqttManagerConfig::get_setting_with_default("show_screensaver_outside_temperature", "True"));
+  std::string show_screensaver_outside_temperature = this->_get_nspanel_setting_with_default("show_screensaver_outside_temperature", MqttManagerConfig::get_setting_with_default<std::string>("show_screensaver_outside_temperature"));
   if (show_screensaver_outside_temperature.compare("True") == 0) {
     config.set_show_screensaver_outside_temperature(true);
   } else {
@@ -473,7 +472,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         std::tm tm = *std::localtime(&now);
         std::stringstream buffer;
-        if (MqttManagerConfig::get_settings().clock_24_hour_format) {
+        if (MqttManagerConfig::get_setting_with_default<bool>("clock_us_style")) {
           buffer << std::put_time(&tm, "%H:%M:%S");
         } else {
           buffer << std::put_time(&tm, "%I:%M:%S %p");
@@ -494,8 +493,8 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         // Save log message in backtrace for when (if) the log interface requests it.
         this->_log_messages_backlog["logs"].insert(this->_log_messages_backlog["logs"].begin(), log_data);
         // Remove older messages from backtrace.
-        if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_settings().max_log_buffer_size) {
-          this->_log_messages_backlog["logs"].erase(this->_log_messages_backlog["logs"].begin() + MqttManagerConfig::get_settings().max_log_buffer_size, this->_log_messages_backlog["logs"].end());
+        if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_setting_with_default<uint32_t>("max_log_buffer_size")) {
+          this->_log_messages_backlog["logs"].erase(this->_log_messages_backlog["logs"].begin() + MqttManagerConfig::get_setting_with_default<uint32_t>("max_log_buffer_size"), this->_log_messages_backlog["logs"].end());
         }
         WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log_backlog", this->_mac), this->_log_messages_backlog);
       } else {
@@ -678,7 +677,7 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   std::tm tm = *std::localtime(&now);
   std::stringstream buffer;
-  if (MqttManagerConfig::get_settings().clock_24_hour_format) {
+  if (MqttManagerConfig::get_setting_with_default<uint32_t>("clock_us_style")) {
     buffer << std::put_time(&tm, "%H:%M:%S");
   } else {
     buffer << std::put_time(&tm, "%I:%M:%S %p");
@@ -711,8 +710,8 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   // Save log message in backtrace for when (if) the log interface requests it.
   this->_log_messages_backlog["logs"].insert(this->_log_messages_backlog["logs"].begin(), log_data);
   // Remove older messages from backtrace.
-  if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_settings().max_log_buffer_size) {
-    this->_log_messages_backlog["logs"].erase(this->_log_messages_backlog["logs"].begin() + MqttManagerConfig::get_settings().max_log_buffer_size, this->_log_messages_backlog["logs"].end());
+  if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_setting_with_default<uint32_t>("max_log_buffer_size")) {
+    this->_log_messages_backlog["logs"].erase(this->_log_messages_backlog["logs"].begin() + MqttManagerConfig::get_setting_with_default<uint32_t>("max_log_buffer_size"), this->_log_messages_backlog["logs"].end());
   }
   WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log_backlog", this->_mac), this->_log_messages_backlog);
 }
@@ -1067,8 +1066,8 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
       // Everything was successfull, send registration accept to panel:
       nlohmann::json response;
       response["command"] = "register_accept";
-      response["address"] = MqttManagerConfig::get_settings().manager_address;
-      response["port"] = MqttManagerConfig::get_settings().manager_port;
+      response["address"] = MqttManagerConfig::get_setting_with_default<std::string>("manager_address");
+      response["port"] = MqttManagerConfig::get_setting_with_default<uint32_t>("manager_port");
       response["config_topic"] = this->_mqtt_config_topic;
       std::string reply_topic = fmt::format("nspanel/{}/command", std::string(register_request_payload.at("friendly_name")));
       MQTT_Manager::publish(reply_topic, response.dump());
@@ -1105,7 +1104,7 @@ void NSPanel::register_to_home_assistant() {
   // Register temperature sensor
   nlohmann::json temperature_sensor_data = nlohmann::json(base_json);
   temperature_sensor_data["device_class"] = "temperature";
-  if (MqttManagerConfig::get_setting_with_default("use_fahrenheit", "False").compare("True") == 0) {
+  if (MqttManagerConfig::get_setting_with_default<bool>("use_fahrenheit")) {
     temperature_sensor_data["unit_of_measurement"] = "°F";
   } else {
     temperature_sensor_data["unit_of_measurement"] = "°C";

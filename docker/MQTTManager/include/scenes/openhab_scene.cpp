@@ -39,9 +39,10 @@ void OpenhabScene::reload_config() {
 void OpenhabScene::activate() {
   SPDLOG_INFO("Activating scene {}::{}.", this->_id, this->_name);
 
-  std::string openhab_trigger_scene_url = fmt::format("{}/rest/rules/{}/runnow", MqttManagerConfig::get_setting_with_default("openhab_address", ""), this->_entity_id);
+  std::string openhab_trigger_scene_url = fmt::format("{}/rest/rules/{}/runnow", MqttManagerConfig::get_setting_with_default<std::string>("openhab_address"), this->_entity_id);
+  std::string openhab_token = MqttManagerConfig::get_setting_with_default<std::string>("openhab_token");
   std::list<const char *> headers = {
-      fmt::format("Authorization: Bearer {}", MqttManagerConfig::get_setting_with_default("openhab_token", "")).c_str(),
+      fmt::format("Authorization: Bearer {}", openhab_token).c_str(),
       "Content-type: application/json"};
   std::string response_data;
   std::string post_data = "";

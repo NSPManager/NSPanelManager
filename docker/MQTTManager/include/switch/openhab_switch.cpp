@@ -72,7 +72,7 @@ void OpenhabSwitch::send_state_update_to_controller() {
   payload_data["value"] = this->_requested_state ? "ON" : "OFF";
   service_data["payload"] = payload_data.dump();
 
-  if (MqttManagerConfig::get_settings().optimistic_mode) {
+  if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
     this->_current_state = this->_requested_state;
     this->_entity_changed_callbacks(this);
   }

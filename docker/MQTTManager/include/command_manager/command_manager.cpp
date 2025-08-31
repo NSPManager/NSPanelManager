@@ -8,7 +8,7 @@
 #include <spdlog/spdlog.h>
 
 void CommandManager::init() {
-  MQTT_Manager::subscribe(fmt::format("nspanel/mqttmanager_{}/command", MqttManagerConfig::get_settings().manager_address), &CommandManager::process_command);
+  MQTT_Manager::subscribe(fmt::format("nspanel/mqttmanager_{}/command", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), &CommandManager::process_command);
   SPDLOG_INFO("CommandManager initialized.");
 }
 
