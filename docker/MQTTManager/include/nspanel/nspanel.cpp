@@ -214,7 +214,9 @@ void NSPanel::reload_config() {
       SPDLOG_INFO("Subscribing to NSPanel MQTT topics.");
       MQTT_Manager::subscribe(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
-      MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2)); // TODO: Remove me and use only topic based on MAC-address instead
+      MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));                                // TODO: Remove me and use only topic based on MAC-address instead
+      MQTT_Manager::subscribe(fmt::format("nspanel/{}/status", this->_name), boost::bind(&NSPanel::mqtt_callback, this, _1, _2));        // TODO: Remove me and use only topic based on MAC-address instead
+      MQTT_Manager::subscribe(fmt::format("nspanel/{}/status_report", this->_name), boost::bind(&NSPanel::mqtt_callback, this, _1, _2)); // TODO: Remove me and use only topic based on MAC-address instead
       MQTT_Manager::subscribe(fmt::format("nspanel/{}/log", this->_mac), boost::bind(&NSPanel::mqtt_log_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
@@ -501,7 +503,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       } else {
         SPDLOG_ERROR("Received message on log topic {} with wrong format. Message: {}", topic, payload);
       }
-    } else if (topic.compare(this->_mqtt_status_topic) == 0) {
+    } else if (topic.compare(this->_mqtt_status_topic) == 0 || topic.compare(fmt::format("nspanel/{}/status", this->_name)) == 0) { // TODO: Remove and only use MAC-based topic after 2.0 is stable.
       nlohmann::json data = nlohmann::json::parse(payload);
       // Update internal state.
       std::string state = data["state"];
@@ -516,7 +518,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       }
 
       this->send_websocket_status_update();
-    } else if (topic.compare(this->_mqtt_status_report_topic) == 0) {
+    } else if (topic.compare(this->_mqtt_status_report_topic) == 0 || topic.compare(fmt::format("nspanel/{}/status_report", this->_name)) == 0) { // TODO: Remove and only use MAC-based topic after 2.0 is stable.
       NSPanelStatusReport report;
       if (report.ParseFromString(payload)) {
         SPDLOG_DEBUG("Got new status report from NSPanel {}::{}", this->_id, this->_name);
@@ -606,6 +608,9 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
             std::vector<std::string> message_lines;
             boost::split(message_lines, std::string(data.at("warnings")), boost::is_any_of("\n"));
             for (std::string line : message_lines) {
+              if (line.empty()) {
+                continue;
+              }
               NSPanelWarningWebsocketRepresentation warning_obj = {
                   .level = "warning",
                   .text = line};
@@ -741,7 +746,7 @@ void NSPanel::send_websocket_status_update() {
   if (this->_current_firmware_md5_checksum.empty() || this->_current_littlefs_md5_checksum.empty()) {
     status_data["warnings"].push_back(nlohmann::json{
         {"level", "warning"},
-        {"text", "Manager has no checksum for installed firmware on panel."}});
+        {"text", "Manager has no checksum for installed firmware on panel. If this doesn't go away within 5 minutes, try performing a firmware update from the manager."}});
   } else if (this->has_firmware_update() || this->has_littlefs_update()) {
     status_data["warnings"].push_back(nlohmann::json{
         {"level", "warning"},
@@ -750,7 +755,7 @@ void NSPanel::send_websocket_status_update() {
   if (this->_current_tft_md5_checksum.empty()) {
     status_data["warnings"].push_back(nlohmann::json{
         {"level", "warning"},
-        {"text", "Manager has no checksum for installed GUI on panel."}});
+        {"text", "Manager has no checksum for installed GUI on panel. If this doesn't go away within 5 minutes, try performing a GUI update from the manager."}});
   } else if (this->has_tft_update()) {
     status_data["warnings"].push_back(nlohmann::json{
         {"level", "warning"},
