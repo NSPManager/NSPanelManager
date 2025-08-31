@@ -16,10 +16,13 @@
 #include <curl/easy.h>
 #include <fmt/core.h>
 #include <fmt/format.h>
+#include <gtest/gtest.h>
 #include <mutex>
 #include <nlohmann/json_fwd.hpp>
+#include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <thread>
 
 uint64_t CurrentTimeMilliseconds() {
   return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -27,12 +30,23 @@ uint64_t CurrentTimeMilliseconds() {
 
 OpenhabLight::OpenhabLight(uint32_t light_id) : Light(light_id) {
   // Process OpenHAB specific details. General light data is loaded in the "Light" constructor.
-  //
   this->_last_light_mode_change = 0;
   this->_last_rgb_change = 0;
   this->_last_on_off_change = 0;
   this->_last_brightness_change = 0;
   this->_last_color_temp_change = 0;
+  this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
+  this->_current_brightness = 0;
+  this->_current_color_temperature = 0;
+  this->_current_hue = 0;
+  this->_current_saturation = 0;
+  this->_current_state = false;
+  this->_requested_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
+  this->_requested_brightness = 0;
+  this->_requested_color_temperature = 0;
+  this->_requested_hue = 0;
+  this->_requested_saturation = 0;
+  this->_requested_state = false;
 
   if (this->_controller != MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB) {
     SPDLOG_ERROR("OpenhabLight has not been recognized as controlled by OPENHAB. Will stop processing light.");
@@ -207,8 +221,8 @@ void OpenhabLight::send_state_update_to_controller() {
     payload_data["type"] = "HSB";
     payload_data["value"] = fmt::format("{},{},{}", this->_requested_hue, this->_requested_saturation, this->_requested_brightness);
     service_data["payload"] = payload_data.dump();
-    this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
     if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+      this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
       this->_last_rgb_change = CurrentTimeMilliseconds();
       this->_last_light_mode_change = CurrentTimeMilliseconds(); // Make sure we do not go to "color temp" mode when Zigbee2Mqtt sends updated color temp value to reflect HSB value
       this->_current_hue = this->_requested_hue;
@@ -554,3 +568,393 @@ void OpenhabLight::_openhab_group_rgb_item_state_changed_event_thread_func() {
   this->openhab_event_callback(this->_last_group_rgb_item_state_changed_event_data);
   this->_openhab_group_rgb_item_state_changed_event_thread_running = false;
 }
+
+// TESTING
+#if defined(TEST_MODE) && TEST_MODE == 1
+#include <gtest/gtest.h>
+#define COLOR_TEMP_PERCENT_TO_KELVIN(min, max, kelvin_pct) (((max - min) / 100) * kelvin_pct + min)
+
+class OpenhabLightTest : public ::testing::Test {
+protected:
+  OpenhabLightTest() {
+    // Initialize any necessary resources or setup for the tests
+  }
+
+  void SetUp() override {
+
+    // Initialize any necessary resources or setup for the tests
+    database_manager::Entity light_entity;
+    light_entity.entity_type = "light";
+    light_entity.friendly_name = "Unit test OH light (light)";
+    light_entity.room_id = 1;
+    light_entity.room_view_position = 2;
+    light_entity.set_entity_data_json({{"can_color_temperature", true},
+                                       {"can_dim", true},
+                                       {"can_rgb", true},
+                                       {"controlled_by_nspanel_main_page", true},
+                                       {"controller", "openhab"},
+                                       {"home_assistant_name", ""},
+                                       {"is_ceiling_light", true},
+                                       {"openhab_control_mode", "dimmer"},
+                                       {"openhab_item_color_temp", "oh_item_color_temp"},
+                                       {"openhab_item_dimmer", "oh_item_dimmer"},
+                                       {"openhab_item_rgb", "oh_item_hsb"},
+                                       {"openhab_item_switch", ""},
+                                       {"openhab_name", "oh_name"}});
+    oh_light_id = database_manager::database.insert(light_entity);
+    // light_entity = database_manager::database.get<database_manager::Entity>(ha_light_id);
+
+    SPDLOG_INFO("OpenHAB Light created in DB. Creating instance of light object.");
+    light = new OpenhabLight(oh_light_id);
+  }
+
+  void TearDown() override {
+    // Clean up any resources or teardown after the tests
+
+    database_manager::database.remove<database_manager::Entity>(oh_light_id);
+    // database_manager::database.remove<database_manager::Entity>(ha_light_switch_id);
+  }
+
+  OpenhabLight *light = nullptr;
+
+  int32_t oh_light_id;
+  int32_t oh_light_switch_id;
+};
+
+TEST_F(OpenhabLightTest, is_off_by_default) {
+  EXPECT_EQ(light->get_state(), false);
+  EXPECT_EQ(light->get_brightness(), 0);
+}
+
+TEST_F(OpenhabLightTest, is_not_on_after_turn_on_in_nonoptimistic_mode) {
+  MqttManagerConfig::set_setting_value("optimistic_mode", "false");
+  light->turn_on(false);
+  light->set_brightness(50, true);
+  EXPECT_EQ(light->get_state(), false);
+  EXPECT_EQ(light->get_brightness(), 0);
+}
+
+TEST_F(OpenhabLightTest, is_on_after_turn_on_in_optimistic_mode) {
+  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
+  light->turn_on(false);
+  light->set_brightness(50, true);
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 50);
+}
+
+TEST_F(OpenhabLightTest, light_reacts_to_state_changes_from_openhab) {
+  // Enable optimistic mode for this test
+  spdlog::set_level(spdlog::level::debug);
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+
+  // Verify brightness changes are handled correctly
+  light->openhab_event_callback(
+      nlohmann::json::parse(R"(
+            {"payload":"{\"type\":\"Percent\",\"value\":\"80\"}","topic":"openhab/items/oh_item_dimmer/stateupdated","type":"ItemStateChangedEvent"}
+        )"));
+
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 80);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1050)); // Sleep for 1 second as to not skip the next state update.
+
+  light->openhab_event_callback(
+      nlohmann::json::parse(R"(
+            {"payload":"{\"type\":\"Percent\",\"value\":\"60\"}","topic":"openhab/items/oh_item_dimmer/stateupdated","type":"ItemStateChangedEvent"}
+        )"));
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 60);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1050)); // Sleep for 1 second as to not skip the next state update.
+
+  light->openhab_event_callback(
+      nlohmann::json::parse(R"(
+            {"payload":"{\"type\":\"Percent\",\"value\":\"0\"}","topic":"openhab/items/oh_item_dimmer/stateupdated","type":"ItemStateChangedEvent"}
+        )"));
+  EXPECT_EQ(light->get_state(), false);
+  EXPECT_EQ(light->get_brightness(), 60);                       // Light should remember last state.
+  std::this_thread::sleep_for(std::chrono::milliseconds(1050)); // Sleep for 1 second as to not skip the next state update.
+
+  // Turn light back on for the rest of the tests
+  light->openhab_event_callback(
+      nlohmann::json::parse(R"(
+            {"payload":"{\"type\":\"Percent\",\"value\":\"100\"}","topic":"openhab/items/oh_item_dimmer/stateupdated","type":"ItemStateChangedEvent"}
+        )"));
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 100);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1050)); // Sleep for 1 second as to not skip the next state update.
+
+  // Test color temperature
+  light->openhab_event_callback(
+      nlohmann::json::parse(R"(
+            {"payload":"{\"type\":\"Percent\",\"value\":\"80\"}","topic":"openhab/items/oh_item_color_temp/stateupdated","type":"ItemStateChangedEvent"}
+        )"));
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, (100 - 80))); // Color temp percentage to kelvin conversion is reversed for OpenHAB
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1050)); // Sleep for 1 second as to not skip the next state update.
+
+  light->openhab_event_callback(
+      nlohmann::json::parse(R"(
+            {"payload":"{\"type\":\"Percent\",\"value\":\"0\"}","topic":"openhab/items/oh_item_color_temp/stateupdated","type":"ItemStateChangedEvent"}
+        )"));
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, (100 - 0))); // Color temp percentage to kelvin conversion is reversed for OpenHAB
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1050)); // Sleep for 1 second as to not skip the next state update.
+
+  light->openhab_event_callback(
+      nlohmann::json::parse(R"(
+            {"payload":"{\"type\":\"Percent\",\"value\":\"50\"}","topic":"openhab/items/oh_item_color_temp/stateupdated","type":"ItemStateChangedEvent"}
+        )"));
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, (100 - 50))); // Color temp percentage to kelvin conversion is reversed for OpenHAB
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1050)); // Sleep for 1 second as to not skip the next state update.
+
+  // Test RGB
+  light->openhab_event_callback(
+      nlohmann::json::parse(R"(
+            {"payload":"{\"type\":\"Percent\",\"value\":\"215,47,11\"}","topic":"openhab/items/oh_item_hsb/stateupdated","type":"ItemStateChangedEvent"}
+        )"));
+  EXPECT_EQ(light->get_hue(), 215);
+  EXPECT_EQ(light->get_saturation(), 47);
+  EXPECT_EQ(light->get_brightness(), 11);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1050)); // Sleep for 1 second as to not skip the next state update.
+
+  light->openhab_event_callback(
+      nlohmann::json::parse(R"(
+            {"payload":"{\"type\":\"Percent\",\"value\":\"200,47,11\"}","topic":"openhab/items/oh_item_hsb/stateupdated","type":"ItemStateChangedEvent"}
+        )"));
+  EXPECT_EQ(light->get_hue(), 200);
+  EXPECT_EQ(light->get_saturation(), 47);
+  EXPECT_EQ(light->get_brightness(), 11);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1050)); // Sleep for 1 second as to not skip the next state update.
+
+  light->openhab_event_callback(
+      nlohmann::json::parse(R"(
+            {"payload":"{\"type\":\"Percent\",\"value\":\"200,30,11\"}","topic":"openhab/items/oh_item_hsb/stateupdated","type":"ItemStateChangedEvent"}
+        )"));
+  EXPECT_EQ(light->get_hue(), 200);
+  EXPECT_EQ(light->get_saturation(), 30);
+  EXPECT_EQ(light->get_brightness(), 11);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1050)); // Sleep for 1 second as to not skip the next state update.
+
+  light->openhab_event_callback(
+      nlohmann::json::parse(R"(
+            {"payload":"{\"type\":\"Percent\",\"value\":\"200,30,100\"}","topic":"openhab/items/oh_item_hsb/stateupdated","type":"ItemStateChangedEvent"}
+        )"));
+  EXPECT_EQ(light->get_hue(), 200);
+  EXPECT_EQ(light->get_saturation(), 30);
+  EXPECT_EQ(light->get_brightness(), 100);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1050)); // Sleep for 1 second as to not skip the next state update.
+
+  // Verify light goes back to color temp mode when a new color temp was received.
+  light->openhab_event_callback(
+      nlohmann::json::parse(R"(
+            {"payload":"{\"type\":\"Percent\",\"value\":\"80\"}","topic":"openhab/items/oh_item_color_temp/stateupdated","type":"ItemStateChangedEvent"}
+        )"));
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, (100 - 80)));
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT);
+}
+
+TEST_F(OpenhabLightTest, verify_nspanel_command_compliance) {
+  // Enable optimistic mode for this test
+  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+  // spdlog::set_level(spdlog::level::trace);
+
+  NSPanelMQTTManagerCommand cmd;
+  cmd.set_nspanel_id(0);
+  NSPanelMQTTManagerCommand_LightCommand *light_cmd = cmd.mutable_light_command();
+  std::vector<uint32_t> light_ids = {light->get_id()};
+  light_cmd->add_light_ids(light->get_id());
+  light_cmd->set_brightness(50);
+  light_cmd->set_has_brightness(true);
+  light_cmd->set_color_temperature(50);
+  light_cmd->set_has_color_temperature(true);
+  light_cmd->set_has_hue(false);
+  light_cmd->set_has_saturation(false);
+
+  light->command_callback(cmd);
+
+  // Check that light turns on, sets correct brightness and color temperature.
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 50);
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 50));
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT);
+
+  // Verify that only color temperature can be change.
+  light_cmd->set_has_brightness(false);
+  light_cmd->set_color_temperature(70);
+  light_cmd->set_has_color_temperature(true);
+  light->command_callback(cmd);
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 50);
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 70));
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT);
+
+  // Verify that only brightness can be change.
+  light_cmd->set_has_color_temperature(false);
+  light_cmd->set_has_brightness(true);
+  light_cmd->set_brightness(70);
+  light->command_callback(cmd);
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 70);
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 70));
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT);
+
+  // Verify that hue and saturation can be changed and the lights goes into RGB mode.
+  light_cmd->set_has_color_temperature(false);
+  light_cmd->set_has_brightness(false);
+  light_cmd->set_hue(30);
+  light_cmd->set_has_hue(true);
+  light_cmd->set_saturation(60);
+  light_cmd->set_has_saturation(true);
+  light->command_callback(cmd);
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 70);                                                                      // Verify that value is unchanged.
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 70)); // Verify that value is unchanged.
+  EXPECT_EQ(light->get_hue(), 30);
+  EXPECT_EQ(light->get_saturation(), 60);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
+
+  // Verify that only hue can be changed.
+  light_cmd->set_has_color_temperature(false);
+  light_cmd->set_has_brightness(false);
+  light_cmd->set_hue(40);
+  light_cmd->set_has_hue(true);
+  light_cmd->set_saturation(60);
+  light_cmd->set_has_saturation(false);
+  light->command_callback(cmd);
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 70);                                                                      // Verify that value is unchanged.
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 70)); // Verify that value is unchanged.
+  EXPECT_EQ(light->get_hue(), 40);
+  EXPECT_EQ(light->get_saturation(), 60); // Verify that value is unchanged.
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
+
+  // Verify that only saturation can be changed.
+  light_cmd->set_has_color_temperature(false);
+  light_cmd->set_has_brightness(false);
+  light_cmd->set_hue(40);
+  light_cmd->set_has_hue(false);
+  light_cmd->set_saturation(70);
+  light_cmd->set_has_saturation(true);
+  light->command_callback(cmd);
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 70);                                                                      // Verify that value is unchanged.
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 70)); // Verify that value is unchanged.
+  EXPECT_EQ(light->get_hue(), 40);                                                                             // Verify that value is unchanged.
+  EXPECT_EQ(light->get_saturation(), 70);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
+
+  // Verify that brightness can be changed and RGB is kept.
+  light_cmd->set_has_color_temperature(false);
+  light_cmd->set_brightness(100);
+  light_cmd->set_has_brightness(true);
+  light_cmd->set_hue(40);
+  light_cmd->set_has_hue(false);
+  light_cmd->set_saturation(70);
+  light_cmd->set_has_saturation(false);
+  light->command_callback(cmd);
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 100);                                                                     // Verify that value is unchanged.
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 70)); // Verify that value is unchanged.
+  EXPECT_EQ(light->get_hue(), 40);                                                                             // Verify that value is unchanged.
+  EXPECT_EQ(light->get_saturation(), 70);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
+
+  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
+}
+
+TEST_F(OpenhabLightTest, verify_optimistic_mode_compliance) {
+  // Enable optimistic mode for this test
+  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+  // spdlog::set_level(spdlog::level::trace);
+
+  NSPanelMQTTManagerCommand cmd;
+  cmd.set_nspanel_id(0);
+  NSPanelMQTTManagerCommand_LightCommand *light_cmd = cmd.mutable_light_command();
+  std::vector<uint32_t> light_ids = {light->get_id()};
+  light_cmd->add_light_ids(light->get_id());
+  light_cmd->set_brightness(50);
+  light_cmd->set_has_brightness(true);
+  light_cmd->set_color_temperature(50);
+  light_cmd->set_has_color_temperature(true);
+  light_cmd->set_has_hue(false);
+  light_cmd->set_has_saturation(false);
+
+  light->command_callback(cmd);
+
+  // Check that light turns on, sets correct brightness and color temperature.
+  EXPECT_EQ(light->get_state(), true);
+  EXPECT_EQ(light->get_brightness(), 50);
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 50));
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT);
+
+  light_cmd->set_has_brightness(false);
+  light_cmd->set_has_color_temperature(false);
+  light_cmd->set_hue(30);
+  light_cmd->set_has_hue(true);
+  light_cmd->set_saturation(50);
+  light_cmd->set_has_saturation(true);
+  light->command_callback(cmd);
+
+  EXPECT_EQ(light->get_state(), true);                                                                         // Verify light is still on
+  EXPECT_EQ(light->get_brightness(), 50);                                                                      // Verify light is still set to 50% brightness
+  EXPECT_EQ(light->get_color_temperature(), COLOR_TEMP_PERCENT_TO_KELVIN(color_temp_min, color_temp_max, 50)); // Verify color temp has not changed.
+  EXPECT_EQ(light->get_hue(), 30);
+  EXPECT_EQ(light->get_saturation(), 50);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB); // Light should have switched to RGB mode.
+}
+
+TEST_F(OpenhabLightTest, verify_non_optimistic_mode_compliance) {
+  // Turn off optimistic mode and verify that no values change.
+  MqttManagerConfig::set_setting_value("optimistic_mode", "false");
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+  // spdlog::set_level(spdlog::level::trace);
+
+  NSPanelMQTTManagerCommand cmd;
+  cmd.set_nspanel_id(0);
+  NSPanelMQTTManagerCommand_LightCommand *light_cmd = cmd.mutable_light_command();
+  std::vector<uint32_t> light_ids = {light->get_id()};
+  light_cmd->add_light_ids(light->get_id());
+  light_cmd->set_brightness(50);
+  light_cmd->set_has_brightness(true);
+  light_cmd->set_color_temperature(50);
+  light_cmd->set_has_color_temperature(true);
+  light_cmd->set_has_hue(false);
+  light_cmd->set_has_saturation(false);
+  light->command_callback(cmd);
+
+  // Verify light is still off, brightness is still 0 and hue and saturation did not change.
+  EXPECT_EQ(light->get_state(), false);
+  EXPECT_EQ(light->get_brightness(), 0);
+  EXPECT_EQ(light->get_color_temperature(), 0);
+  EXPECT_EQ(light->get_hue(), 0);
+  EXPECT_EQ(light->get_saturation(), 0);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT); // Light should have switched to RGB mode.
+
+  light_cmd->set_has_brightness(false);
+  light_cmd->set_has_color_temperature(false);
+  light_cmd->set_hue(30);
+  light_cmd->set_has_hue(true);
+  light_cmd->set_saturation(30);
+  light_cmd->set_has_saturation(true);
+  light->command_callback(cmd);
+
+  // Verify light is still off, brightness is still 0 and hue and saturation did not change.
+  EXPECT_EQ(light->get_state(), false);
+  EXPECT_EQ(light->get_brightness(), 0);
+  EXPECT_EQ(light->get_color_temperature(), 0);
+  EXPECT_EQ(light->get_hue(), 0);
+  EXPECT_EQ(light->get_saturation(), 0);
+  EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::DEFAULT); // Light should have switched to RGB mode.
+}
+
+#endif // !MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TEST
