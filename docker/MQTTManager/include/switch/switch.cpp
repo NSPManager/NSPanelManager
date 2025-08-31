@@ -88,7 +88,7 @@ void SwitchEntity::turn_on(bool send_update) {
   if (send_update) {
     this->send_state_update_to_controller();
 
-    if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+    if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
       this->_current_state = true;
     }
   }
@@ -100,7 +100,7 @@ void SwitchEntity::turn_off(bool send_update) {
   if (send_update) {
     this->send_state_update_to_controller();
 
-    if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+    if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
       this->_current_state = false;
     }
   }

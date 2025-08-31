@@ -149,7 +149,7 @@ void OpenhabLight::send_state_update_to_controller() {
     payload_data["type"] = "OnOff";
     payload_data["value"] = this->_requested_state ? "ON" : "OFF";
     service_data["payload"] = payload_data.dump();
-    if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+    if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
       this->_current_state = this->_requested_state;
       this->_last_on_off_change = CurrentTimeMilliseconds();
       this->_entity_changed_callbacks(this);
@@ -170,7 +170,7 @@ void OpenhabLight::send_state_update_to_controller() {
       SPDLOG_DEBUG("Setting light {}::{} to level: 0", this->_id, this->_name);
       payload_data["value"] = 0;
       service_data["payload"] = payload_data.dump();
-      if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
         this->_current_state = false;
         this->_last_on_off_change = CurrentTimeMilliseconds();
       }
@@ -183,7 +183,7 @@ void OpenhabLight::send_state_update_to_controller() {
       SPDLOG_DEBUG("Setting light {}::{} to level: {}", this->_id, this->_name, this->_requested_brightness);
       payload_data["value"] = this->_requested_brightness;
       service_data["payload"] = payload_data.dump();
-      if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
         this->_last_on_off_change = CurrentTimeMilliseconds();
         this->_last_brightness_change = CurrentTimeMilliseconds();
         this->_current_state = true;
@@ -194,8 +194,8 @@ void OpenhabLight::send_state_update_to_controller() {
 
     if ((this->_can_color_temperature && this->_requested_color_temperature != this->_current_color_temperature) || force_send_kelvin) {
       // Calculate color temp percentage
-      uint16_t kelvin_max_floored = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max") - MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
-      uint16_t kelvin_floored = this->_requested_color_temperature - MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
+      uint16_t kelvin_max_floored = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX) - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+      uint16_t kelvin_floored = this->_requested_color_temperature - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
       uint8_t color_temp_percentage = 100 - int(((float)kelvin_floored / (float)kelvin_max_floored) * 100);
       if (color_temp_percentage > 100) {
         color_temp_percentage = 100;
@@ -207,7 +207,7 @@ void OpenhabLight::send_state_update_to_controller() {
       service_data["topic"] = fmt::format("openhab/items/{}/command", this->_openhab_item_color_temperature);
       payload_data["value"] = color_temp_percentage;
       service_data["payload"] = payload_data.dump();
-      if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
         this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
         this->_last_color_temp_change = CurrentTimeMilliseconds();
         this->_last_light_mode_change = CurrentTimeMilliseconds(); // Make sure we do not go to "RGB" mode when Zigbee2Mqtt sends updated HSB values to reflect color temp value
@@ -221,7 +221,7 @@ void OpenhabLight::send_state_update_to_controller() {
     payload_data["type"] = "HSB";
     payload_data["value"] = fmt::format("{},{},{}", this->_requested_hue, this->_requested_saturation, this->_requested_brightness);
     service_data["payload"] = payload_data.dump();
-    if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+    if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
       this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
       this->_last_rgb_change = CurrentTimeMilliseconds();
       this->_last_light_mode_change = CurrentTimeMilliseconds(); // Make sure we do not go to "color temp" mode when Zigbee2Mqtt sends updated color temp value to reflect HSB value
@@ -232,7 +232,7 @@ void OpenhabLight::send_state_update_to_controller() {
     OpenhabManager::send_json(service_data);
   }
 
-  if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+  if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
     this->send_state_update_to_nspanel();
     this->_entity_changed_callbacks(this);
   }
@@ -360,8 +360,8 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
           color_temperature = 100;
         }
         // Convert from percentage to actual color temp.
-        unsigned long kelvin_max_floored = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max") - MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
-        uint16_t kelvin = std::round(MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min") + int((color_temperature / (double)100) * kelvin_max_floored));
+        unsigned long kelvin_max_floored = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX) - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+        uint16_t kelvin = std::round(MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN) + int((color_temperature / (double)100) * kelvin_max_floored));
 
         if (kelvin != this->_current_color_temperature) {
           this->_current_color_temperature = kelvin;
@@ -473,8 +473,8 @@ void OpenhabLight::openhab_event_callback(nlohmann::json data) {
           color_temperature = 100;
         }
         // Convert from percentage to actual color temp.
-        unsigned long kelvin_max_floored = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max") - MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
-        uint16_t kelvin = std::round(MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min") + int((color_temperature / (double)100) * kelvin_max_floored));
+        unsigned long kelvin_max_floored = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX) - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+        uint16_t kelvin = std::round(MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN) + int((color_temperature / (double)100) * kelvin_max_floored));
 
         this->_current_color_temperature = kelvin;
         this->_requested_color_temperature = this->_current_color_temperature;
@@ -627,7 +627,7 @@ TEST_F(OpenhabLightTest, is_off_by_default) {
 }
 
 TEST_F(OpenhabLightTest, is_not_on_after_turn_on_in_nonoptimistic_mode) {
-  MqttManagerConfig::set_setting_value("optimistic_mode", "false");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, "false");
   light->turn_on(false);
   light->set_brightness(50, true);
   EXPECT_EQ(light->get_state(), false);
@@ -635,7 +635,7 @@ TEST_F(OpenhabLightTest, is_not_on_after_turn_on_in_nonoptimistic_mode) {
 }
 
 TEST_F(OpenhabLightTest, is_on_after_turn_on_in_optimistic_mode) {
-  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, "true");
   light->turn_on(false);
   light->set_brightness(50, true);
   EXPECT_EQ(light->get_state(), true);
@@ -645,8 +645,8 @@ TEST_F(OpenhabLightTest, is_on_after_turn_on_in_optimistic_mode) {
 TEST_F(OpenhabLightTest, light_reacts_to_state_changes_from_openhab) {
   // Enable optimistic mode for this test
   spdlog::set_level(spdlog::level::debug);
-  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
-  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX);
 
   // Verify brightness changes are handled correctly
   light->openhab_event_callback(
@@ -760,9 +760,9 @@ TEST_F(OpenhabLightTest, light_reacts_to_state_changes_from_openhab) {
 
 TEST_F(OpenhabLightTest, verify_nspanel_command_compliance) {
   // Enable optimistic mode for this test
-  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
-  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
-  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, "true");
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX);
   // spdlog::set_level(spdlog::level::trace);
 
   NSPanelMQTTManagerCommand cmd;
@@ -866,14 +866,14 @@ TEST_F(OpenhabLightTest, verify_nspanel_command_compliance) {
   EXPECT_EQ(light->get_saturation(), 70);
   EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
 
-  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, "true");
 }
 
 TEST_F(OpenhabLightTest, verify_optimistic_mode_compliance) {
   // Enable optimistic mode for this test
-  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
-  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
-  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, "true");
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX);
   // spdlog::set_level(spdlog::level::trace);
 
   NSPanelMQTTManagerCommand cmd;
@@ -914,9 +914,9 @@ TEST_F(OpenhabLightTest, verify_optimistic_mode_compliance) {
 
 TEST_F(OpenhabLightTest, verify_non_optimistic_mode_compliance) {
   // Turn off optimistic mode and verify that no values change.
-  MqttManagerConfig::set_setting_value("optimistic_mode", "false");
-  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
-  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, "false");
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX);
   // spdlog::set_level(spdlog::level::trace);
 
   NSPanelMQTTManagerCommand cmd;

@@ -47,7 +47,7 @@ void HomeAssistantButton::send_state_update_to_controller() {
   }
   HomeAssistantManager::send_json(service_data);
 
-  if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+  if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
     this->_entity_changed_callbacks(this);
   }
 }

@@ -65,10 +65,10 @@ void publish_time_and_date() {
     std::string date_str;
 
     std::time_t time = std::time({});
-    std::strftime(date_buffer, 100, MqttManagerConfig::get_setting_with_default<std::string>("date_format").c_str(), std::localtime(&time));
+    std::strftime(date_buffer, 100, MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::DATE_FORMAT).c_str(), std::localtime(&time));
     date_str = date_buffer;
 
-    if (!MqttManagerConfig::get_setting_with_default<bool>("clock_us_style")) [[likely]] {
+    if (!MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::CLOCK_US_STYLE)) [[likely]] {
       std::strftime(time_buffer, 20, "%H:%M", std::localtime(&time));
       time_str = time_buffer;
     } else {
@@ -77,14 +77,14 @@ void publish_time_and_date() {
       time_str = time_buffer;
     }
 
-    MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/time", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), time_buffer, true);
-    if (!MqttManagerConfig::get_setting_with_default<bool>("clock_us_style")) [[likely]] {
-      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), "", true);
+    MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/time", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), time_buffer, true);
+    if (!MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::CLOCK_US_STYLE)) [[likely]] {
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), "", true);
     } else {
-      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), ampm_buffer, true);
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), ampm_buffer, true);
     }
 
-    MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/date", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), date_buffer, true);
+    MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/date", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), date_buffer, true);
 
     // Sleep until next minute
     auto t_now = std::chrono::system_clock::now();

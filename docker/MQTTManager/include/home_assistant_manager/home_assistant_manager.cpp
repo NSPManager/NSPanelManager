@@ -81,8 +81,8 @@ void HomeAssistantManager::reload_config() {
   bool reconnect = false;
   {
     std::lock_guard<std::mutex> lock_guard(HomeAssistantManager::_settings_mutex);
-    std::string address = MqttManagerConfig::get_setting_with_default<std::string>("home_assistant_address");
-    std::string token = MqttManagerConfig::get_setting_with_default<std::string>("home_assistant_token");
+    std::string address = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::HOME_ASSISTANT_ADDRESS);
+    std::string token = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::HOME_ASSISTANT_TOKEN);
 
     if (HomeAssistantManager::_home_assistant_address.compare(address) != 0 || HomeAssistantManager::_home_assistant_token.compare(token) != 0) {
       HomeAssistantManager::_home_assistant_address = address;

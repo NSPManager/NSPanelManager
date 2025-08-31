@@ -84,13 +84,13 @@ void HomeAssistantLight::send_state_update_to_controller() {
     service_data["domain"] = "light";
     if (this->_requested_state) {
       service_data["service"] = "turn_on";
-      if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
         this->_current_state = true;
       }
 
       if (this->_requested_brightness != this->_current_brightness) {
         service_data["service_data"]["brightness_pct"] = this->_requested_brightness;
-        if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+        if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
           this->_current_brightness = this->_requested_brightness;
         }
       }
@@ -98,7 +98,7 @@ void HomeAssistantLight::send_state_update_to_controller() {
       // This is a turn on event and it currently off. Send kelvin if turn on behavior is to use color temp.
       if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT || (!this->_current_state && MqttManagerConfig::get_light_turn_on_behaviour() == LightTurnOnBehaviour::COLOR_TEMPERATURE)) {
         service_data["service_data"]["kelvin"] = this->_requested_color_temperature;
-        if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+        if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
           this->_current_color_temperature = this->_requested_color_temperature;
           this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
         }
@@ -106,13 +106,13 @@ void HomeAssistantLight::send_state_update_to_controller() {
 
       if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT && this->_requested_color_temperature != this->_current_color_temperature) {
         service_data["service_data"]["kelvin"] = this->_requested_color_temperature;
-        if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+        if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
           this->_current_color_temperature = this->_requested_color_temperature;
           this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
         }
       } else if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::RGB && this->_requested_hue != this->_current_hue || this->_requested_saturation != this->_current_saturation) {
         service_data["service_data"]["hs_color"] = {this->_requested_hue, this->_requested_saturation};
-        if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+        if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
           this->_current_hue = this->_requested_hue;
           this->_current_saturation = this->_requested_saturation;
           this->_current_mode = MQTT_MANAGER_LIGHT_MODE::RGB;
@@ -120,7 +120,7 @@ void HomeAssistantLight::send_state_update_to_controller() {
       }
     } else {
       service_data["service"] = "turn_off";
-      if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
         this->_current_state = false;
       }
     }
@@ -128,19 +128,19 @@ void HomeAssistantLight::send_state_update_to_controller() {
     service_data["domain"] = "switch";
     if (this->_requested_state) {
       service_data["service"] = "turn_on";
-      if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
         this->_current_state = true;
       }
     } else {
       service_data["service"] = "turn_off";
-      if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
         this->_current_state = false;
       }
     }
   }
   HomeAssistantManager::send_json(service_data);
 
-  if (MqttManagerConfig::get_setting_with_default<bool>("optimistic_mode")) {
+  if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
     this->send_state_update_to_nspanel();
     this->_entity_changed_callbacks(this);
   }
@@ -309,7 +309,7 @@ TEST_F(HomeAssistantLightTest, is_off_by_default) {
 }
 
 TEST_F(HomeAssistantLightTest, is_not_on_after_turn_on_in_nonoptimistic_mode) {
-  MqttManagerConfig::set_setting_value("optimistic_mode", "false");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, "false");
   light->turn_on(false);
   light->set_brightness(50, true);
   EXPECT_EQ(light->get_state(), false);
@@ -317,7 +317,7 @@ TEST_F(HomeAssistantLightTest, is_not_on_after_turn_on_in_nonoptimistic_mode) {
 }
 
 TEST_F(HomeAssistantLightTest, is_on_after_turn_on_in_optimistic_mode) {
-  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, "true");
   light->turn_on(false);
   light->set_brightness(50, true);
   EXPECT_EQ(light->get_state(), true);
@@ -326,7 +326,7 @@ TEST_F(HomeAssistantLightTest, is_on_after_turn_on_in_optimistic_mode) {
 
 TEST_F(HomeAssistantLightTest, light_reacts_to_state_changes_from_home_assistant) {
   // Enable optimistic mode for this test
-  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, "true");
 
   nlohmann::json event_data = nlohmann::json::parse(R"(
       {
@@ -455,9 +455,9 @@ TEST_F(HomeAssistantLightTest, light_reacts_to_state_changes_from_home_assistant
 #define COLOR_TEMP_PERCENT_TO_KELVIN(min, max, kelvin_pct) (((max - min) / 100) * kelvin_pct + min)
 TEST_F(HomeAssistantLightTest, verify_nspanel_command_compliance) {
   // Enable optimistic mode for this test
-  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
-  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
-  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, "true");
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX);
   // spdlog::set_level(spdlog::level::trace);
 
   NSPanelMQTTManagerCommand cmd;
@@ -561,14 +561,14 @@ TEST_F(HomeAssistantLightTest, verify_nspanel_command_compliance) {
   EXPECT_EQ(light->get_saturation(), 70);
   EXPECT_EQ(light->get_mode(), MQTT_MANAGER_LIGHT_MODE::RGB);
 
-  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, "true");
 }
 
 TEST_F(HomeAssistantLightTest, verify_optimistic_mode_compliance) {
   // Enable optimistic mode for this test
-  MqttManagerConfig::set_setting_value("optimistic_mode", "true");
-  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
-  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, "true");
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX);
   // spdlog::set_level(spdlog::level::trace);
 
   NSPanelMQTTManagerCommand cmd;
@@ -609,9 +609,9 @@ TEST_F(HomeAssistantLightTest, verify_optimistic_mode_compliance) {
 
 TEST_F(HomeAssistantLightTest, verify_non_optimistic_mode_compliance) {
   // Turn off optimistic mode and verify that no values change.
-  MqttManagerConfig::set_setting_value("optimistic_mode", "false");
-  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
-  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, "false");
+  uint32_t color_temp_min = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+  uint32_t color_temp_max = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX);
   // spdlog::set_level(spdlog::level::trace);
 
   NSPanelMQTTManagerCommand cmd;

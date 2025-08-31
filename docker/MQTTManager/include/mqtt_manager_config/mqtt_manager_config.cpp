@@ -60,7 +60,7 @@ void MqttManagerConfig::load() {
       MqttManagerConfig::_is_home_assistant_addon = false;
     }
 
-    std::string turn_on_bevaiour = MqttManagerConfig::get_setting_with_default<std::string>("turn_on_behaviour");
+    std::string turn_on_bevaiour = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::TURN_ON_BEHAVIOR);
     if (turn_on_bevaiour.compare("color_temp") == 0) {
       MqttManagerConfig::_light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
     } else if (turn_on_bevaiour.compare("restore") == 0) {
@@ -78,16 +78,17 @@ void MqttManagerConfig::load() {
   MqttManagerConfig::_config_loaded_listeners();
 }
 
-void MqttManagerConfig::set_setting_value(std::string key, std::string value) {
-  SPDLOG_DEBUG("Setting '{}' to value '{}'", key, value);
+void MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING key, std::string value) {
+  std::string setting_db_key = MqttManagerConfig::_setting_key_map[key].first;
+  SPDLOG_DEBUG("Setting '{}' to value '{}'", setting_db_key, value);
 
   try {
-    database_manager::SettingHolder setting = database_manager::database.get<database_manager::SettingHolder>(key);
+    database_manager::SettingHolder setting = database_manager::database.get<database_manager::SettingHolder>(setting_db_key);
     setting.value = value;
     database_manager::database.update(setting);
   } catch (const std::exception &e) {
     database_manager::SettingHolder setting;
-    setting.name = key;
+    setting.name = setting_db_key;
     setting.value = value;
     database_manager::database.insert(setting);
   }

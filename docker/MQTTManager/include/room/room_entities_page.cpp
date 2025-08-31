@@ -56,7 +56,7 @@ void RoomEntitiesPage::reload_config(bool send_state_update) {
       std::lock_guard<std::mutex> mutex_guard(this->_page_settings_mutex);
       this->_page_settings = db_room;
 
-      this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/entity_pages/{}/state", MqttManagerConfig::get_setting_with_default<std::string>("manager_address"), this->_id);
+      this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/entity_pages/{}/state", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS), this->_id);
     }
 
     SPDLOG_DEBUG("RoomEntitiesPage {} loaded successfully.", this->_id);

@@ -440,7 +440,7 @@ void EntityManager::update_all_rooms_status() {
       });
     }
     // Wait until changes has settled as when a user changes light states in "All rooms" mode a burst of changes will occur from all rooms.
-    uint32_t backoff_time = MqttManagerConfig::get_setting_with_default<uint32_t>("all_rooms_status_backoff_time");
+    uint32_t backoff_time = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::ALL_ROOMS_STATUS_BACKOFF_TIME);
     while (EntityManager::_last_room_update_time.load() + std::chrono::milliseconds(backoff_time) > std::chrono::system_clock::now()) {
       std::this_thread::sleep_for(EntityManager::_last_room_update_time.load() + std::chrono::milliseconds(backoff_time) - std::chrono::system_clock::now());
     }
@@ -529,9 +529,9 @@ void EntityManager::update_all_rooms_status() {
 
       if (num_kelvin_lights_total > 0) {
         float average_kelvin = (float)total_kelvin_level_all / num_kelvin_lights_total;
-        average_kelvin -= MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
-        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max") - MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min"))) * 100;
-        if (MqttManagerConfig::get_setting_with_default<bool>("reverse_color_temp")) {
+        average_kelvin -= MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX) - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN))) * 100;
+        if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::REVERSE_COLOR_TEMP)) {
           kelvin_pct = 100 - kelvin_pct;
         }
         all_rooms_status.set_average_color_temperature(kelvin_pct);
@@ -548,9 +548,9 @@ void EntityManager::update_all_rooms_status() {
 
       if (num_kelvin_lights_table > 0) {
         float average_kelvin = (float)total_kelvin_table / num_kelvin_lights_table;
-        average_kelvin -= MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
-        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max") - MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min"))) * 100;
-        if (MqttManagerConfig::get_setting_with_default<bool>("reverse_color_temp")) {
+        average_kelvin -= MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX) - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN))) * 100;
+        if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::REVERSE_COLOR_TEMP)) {
           kelvin_pct = 100 - kelvin_pct;
         }
 
@@ -569,9 +569,9 @@ void EntityManager::update_all_rooms_status() {
 
       if (num_kelvin_lights_ceiling > 0) {
         float average_kelvin = (float)total_kelvin_table / num_kelvin_lights_table;
-        average_kelvin -= MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min");
-        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_max") - MqttManagerConfig::get_setting_with_default<uint32_t>("color_temp_min"))) * 100;
-        if (MqttManagerConfig::get_setting_with_default<bool>("reverse_color_temp")) {
+        average_kelvin -= MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX) - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN))) * 100;
+        if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::REVERSE_COLOR_TEMP)) {
           kelvin_pct = 100 - kelvin_pct;
         }
 
@@ -588,7 +588,7 @@ void EntityManager::update_all_rooms_status() {
     std::string all_rooms_status_string;
     if (all_rooms_status.SerializeToString(&all_rooms_status_string)) {
       SPDLOG_DEBUG("All rooms status updated. Waiting for next notify.");
-      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/all_rooms_status", MqttManagerConfig::get_setting_with_default<std::string>("manager_address")), all_rooms_status_string, true);
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/all_rooms_status", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), all_rooms_status_string, true);
       has_performed_initial_update = true;
     } else {
       SPDLOG_ERROR("Failed to serialize 'All rooms' status. Will try again next time there is a room status change.");
@@ -717,7 +717,7 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
 
               uint16_t average_light_brightness = total_light_brightness / room_entities.size();
               if (average_light_brightness == 0) {
-                average_light_brightness = MqttManagerConfig::get_setting_with_default<uint32_t>("light_turn_on_brightness");
+                average_light_brightness = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::LIGHT_TURN_ON_BRIGHTNESS);
               }
 
               light_entity->set_brightness(average_light_brightness, false);
