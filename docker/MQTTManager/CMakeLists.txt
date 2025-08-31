@@ -3,13 +3,13 @@ project(nspm_mqttmanager)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
-set(TEST_MODE 0)
+set(TEST_MODE 1)
 set(CMAKE_INCLUDE_SRC_DIRECTORY /MQTTManager/include)
 set(PROTOBUF_SRC_DIRECTORY /MQTTManager/include/protobuf)
 
 add_compile_options(-rdynamic -g)
 add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE BOOST_STACKTRACE_USE_BACKTRACE BOOST_BIND_GLOBAL_PLACEHOLDERS BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK)
-add_compile_definitions(TEST_MODE=0)
+add_compile_definitions(TEST_MODE=1)
 
 # Statically link libraries
 IF(DEFINED ENV{STRIP})

@@ -14,6 +14,10 @@
 #include <string>
 #include <unordered_map>
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+#include <gtest/gtest.h>
+#endif
+
 enum LightTurnOnBehaviour {
   COLOR_TEMPERATURE,
   RESTORE_PREVIOUS,
@@ -70,6 +74,7 @@ enum MQTT_MANAGER_SETTING {
   OPTIMISTIC_MODE,
   LIGHT_TURN_ON_BRIGHTNESS,
   DEFAULT_NSPANEL_TYPE,
+  LAST, // Keep last as to be able to reference the last element in the list.
 };
 
 class MqttManagerConfig {
@@ -221,7 +226,16 @@ private:
       {MQTT_MANAGER_SETTING::MQTT_WAIT_TIME, {"mqtt_wait_time", "1000"}},
       {MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, {"optimistic_mode", "True"}},
       {MQTT_MANAGER_SETTING::LIGHT_TURN_ON_BRIGHTNESS, {"light_turn_on_brightness", "50"}},
-      {MQTT_MANAGER_SETTING::DEFAULT_NSPANEL_TYPE, {"default_nspanel_type", "eu"}}};
+      {MQTT_MANAGER_SETTING::DEFAULT_NSPANEL_TYPE, {"default_nspanel_type", "eu"}},
+#if defined(TEST_MODE) && TEST_MODE == 1
+      {MQTT_MANAGER_SETTING::LAST, {"last", "last_value"}},
+#endif
+  };
+
+#if defined(TEST_MODE) && TEST_MODE == 1
+  FRIEND_TEST(MqttManagerConfigTest, verify_all_settings_exists_and_have_db_key);
+  FRIEND_TEST(MqttManagerConfigTest, verify_settings_cache_is_used);
+#endif
 };
 
 template <>
@@ -242,8 +256,10 @@ inline std::string MqttManagerConfig::get_setting_with_default(MQTT_MANAGER_SETT
       SPDLOG_TRACE("Did not find setting {} in database. Looking for default value.", setting_db_key);
 
       if (MqttManagerConfig::_setting_key_map.contains(key)) {
-        SPDLOG_TRACE("Returning default value '{}' for setting '{}'", MqttManagerConfig::_setting_key_map[key].second, setting_db_key);
-        return MqttManagerConfig::_setting_key_map[key].second;
+        std::string value = MqttManagerConfig::_setting_key_map[key].second;
+        SPDLOG_TRACE("Returning default value '{}' for setting '{}'", value, setting_db_key);
+        MqttManagerConfig::_settings_values_cache[key] = value;
+        return value;
       } else {
         SPDLOG_ERROR("Did not find default setting value for key '{}'. Returning empty string.", setting_db_key);
         return "";

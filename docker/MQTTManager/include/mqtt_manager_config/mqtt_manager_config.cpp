@@ -432,3 +432,25 @@ std::expected<std::string, bool> MqttManagerConfig::get_us_horizontal_mirrored_t
   }
   return MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft4;
 }
+
+// TESTING
+#if defined(TEST_MODE) && TEST_MODE == 1
+#include <gtest/gtest.h>
+
+TEST(MqttManagerConfigTest, verify_all_settings_exists_and_have_db_key) {
+  for (int i = 0; i < static_cast<int>(MQTT_MANAGER_SETTING::LAST); i++) {
+    MQTT_MANAGER_SETTING setting = static_cast<MQTT_MANAGER_SETTING>(i);
+    bool found = MqttManagerConfig::_setting_key_map.contains(setting);
+    EXPECT_TRUE(found) << "Setting (enum value) " << i << " not found in the settings list. Cannot test if it has a setting key.";
+    if (found) {
+      EXPECT_TRUE(!MqttManagerConfig::_setting_key_map[setting].first.empty()) << "Setting (enum value) " << i << " does not name a DB key.";
+    }
+  }
+}
+
+TEST(MqttManagerConfigTest, verify_settings_cache_is_used) {
+  bool value = MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::CLOCK_US_STYLE);
+  EXPECT_TRUE(MqttManagerConfig::_settings_values_cache.contains(MQTT_MANAGER_SETTING::CLOCK_US_STYLE));
+}
+
+#endif
