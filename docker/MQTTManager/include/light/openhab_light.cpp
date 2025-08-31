@@ -523,7 +523,6 @@ void OpenhabLight::_openhab_group_brightness_item_state_changed_event_thread_fun
   }
 
   // Process event:
-<<<<<<< HEAD
   SPDLOG_DEBUG("Light {}::{} group event state changes has settled. Starting to process brightness group event...", this->_id, this->_name);
   std::lock_guard<std::mutex> lock(this->_openhab_group_brightness_item_state_changed_event_mutex);
   this->openhab_event_callback(this->_last_group_brightness_item_state_changed_event_data);
@@ -568,11 +567,6 @@ void OpenhabLight::_openhab_group_rgb_item_state_changed_event_thread_func() {
   std::lock_guard<std::mutex> lock(this->_openhab_group_rgb_item_state_changed_event_mutex);
   this->openhab_event_callback(this->_last_group_rgb_item_state_changed_event_data);
   this->_openhab_group_rgb_item_state_changed_event_thread_running = false;
-=======
-  SPDLOG_TRACE("Light {}::{} group event state changes has settled. Starting to process event...", this->_id, this->_name);
-  std::lock_guard<std::mutex> lock(this->_openhab_group_item_state_changed_event_mutex);
-  this->openhab_event_callback(this->_last_group_item_state_changed_event_data);
->>>>>>> d267e9d2 (Fixed a bug where it was not possible to change an assigned entitiy to a light. Also implemented backoff time for OH GroupItemStateChangedEvent for OH groups)
 }
 
 // TESTING
