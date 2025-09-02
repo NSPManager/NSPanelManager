@@ -52,12 +52,12 @@ void MqttManagerConfig::load() {
     const char *is_home_assistant_addon = std::getenv("IS_HOME_ASSISTANT_ADDON");
     if (is_home_assistant_addon != nullptr) {
       if (std::string(is_home_assistant_addon).compare("true") == 0) {
-        MqttManagerConfig::_is_home_assistant_addon = true;
+        MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::IS_HOME_ASSISTANT_ADDON, "true");
       } else {
-        MqttManagerConfig::_is_home_assistant_addon = false;
+        MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::IS_HOME_ASSISTANT_ADDON, "false");
       }
     } else {
-      MqttManagerConfig::_is_home_assistant_addon = false;
+      MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::IS_HOME_ASSISTANT_ADDON, "false");
     }
 
     std::string turn_on_bevaiour = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::TURN_ON_BEHAVIOR);
@@ -74,19 +74,60 @@ void MqttManagerConfig::load() {
   MqttManagerConfig::update_firmware_checksum();
   MqttManagerConfig::update_tft_checksums();
 
+  MqttManagerConfig::populate_default_and_clean();
+
   // Notify all listeners that the config has been loaded
   MqttManagerConfig::_config_loaded_listeners();
+}
+
+void MqttManagerConfig::populate_default_and_clean() {
+  auto settings = database_manager::database.get_all<database_manager::SettingHolder>();
+  // Check for set settings that are invalid/unused.
+  for (const auto &setting : settings) {
+    bool found = false;
+    for (const auto &setting_pair : MqttManagerConfig::_setting_key_map) {
+      if (setting_pair.second.first == setting.name) {
+        found = true;
+        break;
+      }
+    }
+    // Cleanup old setting.
+    if (!found) {
+      SPDLOG_WARN("Removing invalid setting {} from DB.", setting.name);
+      database_manager::database.remove<database_manager::SettingHolder>(setting.id);
+    }
+  }
+
+  // Check if all default settings are set.
+  for (const auto &setting : MqttManagerConfig::_setting_key_map) {
+    bool found = false;
+    for (const auto &setting_pair : settings) {
+      if (setting_pair.name == setting.second.first) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      SPDLOG_INFO("Setting {} not found in DB. Setting default value: '{}'.", setting.second.first, setting.second.second);
+      database_manager::SettingHolder new_setting;
+      new_setting.name = setting.second.first;
+      new_setting.value = setting.second.second;
+      database_manager::database.insert(new_setting);
+    }
+  }
 }
 
 void MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING key, std::string value) {
   std::string setting_db_key = MqttManagerConfig::_setting_key_map[key].first;
   SPDLOG_DEBUG("Setting '{}' to value '{}'", setting_db_key, value);
 
-  try {
-    database_manager::SettingHolder setting = database_manager::database.get<database_manager::SettingHolder>(setting_db_key);
-    setting.value = value;
-    database_manager::database.update(setting);
-  } catch (const std::exception &e) {
+  auto result = database_manager::database.get_all<database_manager::SettingHolder>(sqlite_orm::where(sqlite_orm::c(&database_manager::SettingHolder::name) == setting_db_key));
+  if (!result.empty()) {
+    result[0].value = value;
+    SPDLOG_DEBUG("Set settings key '{}' to value '{}'", setting_db_key, value);
+    database_manager::database.update(result[0]);
+  } else {
+    SPDLOG_ERROR("Failed to find existing setting for key '{}'. Will create a new key.", setting_db_key);
     database_manager::SettingHolder setting;
     setting.name = setting_db_key;
     setting.value = value;
@@ -97,13 +138,13 @@ void MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING key, std::string 
 }
 
 void MqttManagerConfig::set_nspanel_setting_value(int32_t nspanel_id, std::string key, std::string value) {
+  using namespace sqlite_orm;
   SPDLOG_DEBUG("Setting '{}' to value '{}' for NSPanel with ID {}", key, value, nspanel_id);
 
-  auto result = database_manager::database.get_all<database_manager::NSPanelSettingHolder>(sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelSettingHolder::name) == key) and sqlite_orm::c(&database_manager::NSPanelSettingHolder::nspanel_id) == nspanel_id);
-  if (result.size() == 0) {
-    database_manager::NSPanelSettingHolder setting;
-    setting.value = value;
-    database_manager::database.update(setting);
+  auto result = database_manager::database.get_all<database_manager::NSPanelSettingHolder>(sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelSettingHolder::name) = key) and sqlite_orm::c(&database_manager::NSPanelSettingHolder::nspanel_id) == nspanel_id);
+  if (!result.empty()) {
+    result[0].value = value;
+    database_manager::database.update(result[0]);
   } else {
     database_manager::NSPanelSettingHolder setting;
     setting.nspanel_id = nspanel_id;
@@ -114,7 +155,7 @@ void MqttManagerConfig::set_nspanel_setting_value(int32_t nspanel_id, std::strin
 }
 
 bool MqttManagerConfig::is_home_assistant_addon() {
-  return MqttManagerConfig::_is_home_assistant_addon;
+  return MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::IS_HOME_ASSISTANT_ADDON);
 }
 
 LightTurnOnBehaviour MqttManagerConfig::get_light_turn_on_behaviour() {

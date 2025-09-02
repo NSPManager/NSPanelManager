@@ -79,7 +79,13 @@ enum MQTT_MANAGER_SETTING {
 
 class MqttManagerConfig {
 public:
+  // Initialize this static library with settings and configuration options
   static void load();
+
+  // Populate the database with default values in case they are not already set
+  // and clean up any invalid or outdated settings.
+  static void populate_default_and_clean();
+
   static inline std::string timezone;
 
   template <typename T>
@@ -149,9 +155,6 @@ private:
 
   static inline std::mutex _settings_mutex;
 
-  // True if we are currently running as a Home Assistant addon
-  static inline bool _is_home_assistant_addon = false;
-
   static inline LightTurnOnBehaviour _light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
 
   static std::optional<std::string> _get_file_md5_checksum(std::string file_path);
@@ -202,9 +205,6 @@ private:
       {MQTT_MANAGER_SETTING::OPENHAB_TOKEN, {"openhab_token", ""}},
       {MQTT_MANAGER_SETTING::OPENHAB_BRIGHTNESS_CHANNEL_MAX, {"openhab_brightness_channel_max", "255"}},
       {MQTT_MANAGER_SETTING::OPENHAB_BRIGHTNESS_CHANNEL_MIN, {"openhab_brightness_channel_min", "0"}},
-      {MQTT_MANAGER_SETTING::OPENHAB_BRIGHTNESS_CHANNEL_NAME, {"openhab_brightness_channel_name", ""}},
-      {MQTT_MANAGER_SETTING::OPENHAB_COLOR_TEMP_CHANNEL_NAME, {"openhab_color_temp_channel_name", ""}},
-      {MQTT_MANAGER_SETTING::OPENHAB_RGB_CHANNEL_NAME, {"openhab_rgb_channel_name", ""}},
       {MQTT_MANAGER_SETTING::OUTSIDE_TEMP_SENSOR_ENTITY_ID, {"outside_temp_sensor_entity_id", ""}},
       {MQTT_MANAGER_SETTING::OUTSIDE_TEMP_SENSOR_PROVIDER, {"outside_temp_sensor_provider", ""}},
       {MQTT_MANAGER_SETTING::WEATHER_PRECIPITATION_FORMAT, {"weather_precipitation_format", "mm"}},
