@@ -341,7 +341,7 @@
         <!-- Button modes -->
         <div class="md:flex md:flex-wrap md:justify-between mt-4">
           <!-- Button 1 -->
-          <div class="flex-auto mr-1">
+          <div class="flex-auto mr-1 max-w-6/12">
             <label for="button1_mode" class="block mb-2 text-sm font-medium">Left button mode</label>
             <div class="flex flex-row-reverse">
               <select name="button1_mode" id="button1_mode" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
@@ -349,6 +349,8 @@
                 <option value="1" {% if panel_info.data.button1_mode == 1 %}selected{% endif %}>Detached mode</option>
                 <option value="2" {% if panel_info.data.button1_mode == 2 %}selected{% endif %}>Custom MQTT</option>
                 <option value="3" {% if panel_info.data.button1_mode == 3 %}selected{% endif %}>Follow mode</option>
+                <option value="4" {% if panel_info.data.button1_mode == 4 %}selected{% endif %}>Thermostat (heating) mode</option>
+                <option value="5" {% if panel_info.data.button1_mode == 5 %}selected{% endif %}>Thermostat (cooling) mode</option>
               </select>
               <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/default_page:border-accent">
                 <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -441,6 +443,38 @@
                 </div>
               </div>
             </div>
+
+            <!-- Button 1 Thermostat mode -->
+            <div id="button1_thermostat_mode_controls" class="hidden">
+                <div class="mt-2">
+                    {% component "alert" level="warning" text="We are not responsible for any damages caused by the use of this setting. Be aware that the panel can hang and therefore not react to temperature changes." %}{% endcomponent %}
+                </div>
+                <div class="mt-2">
+                    {% component "alert" level="info" text="Be aware that the panel may warm by having the relay activated and may therefore skew the temperature readings." %}{% endcomponent %}
+                </div>
+              <div class="">
+                <label for="button1_relay_on_temperature" class="block mb-2 text-sm font-medium">Relay 1 on temperature</label>
+                <div class="flex flex-row-reverse">
+                  <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="button1_relay_on_temperature" value="{{ settings.button1_relay_on_temperature }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                      <span class="mdi mdi-thermometer"></span>
+                  </span>
+                </div>
+              </div>
+
+              <div class="">
+                <label for="button1_relay_off_temperature" class="block mb-2 text-sm font-medium">Relay 1 off temperature</label>
+                <div class="flex flex-row-reverse">
+                  <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                  type="text" class="input" name="button1_relay_off_temperature" value="{{ settings.button1_relay_off_temperature }}">
+                  <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                      <span class="mdi mdi-thermometer"></span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!-- Button 2 -->

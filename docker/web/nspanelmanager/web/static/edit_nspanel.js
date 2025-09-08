@@ -40,26 +40,27 @@ function push_log_message_to_view(data) {
 }
 
 function update_shown_elements() {
+  $("#button1_detached_mode_controls").addClass("hidden");
+  $("#button1_detached_mode_light").addClass("hidden");
+  $("#button1_mqtt_mode_controls").addClass("hidden");
+  $("#button1_thermostat_mode_controls").addClass("hidden");
+  $("#button1_detached_mode_light").prop("required", false);
+
   if ($("#button1_mode").val() == 0) {
     // Direct mode
-    $("#button1_detached_mode_controls").addClass("hidden");
-    $("#button1_detached_mode_light").prop("required", false);
-    $("#button1_mqtt_mode_controls").addClass("hidden");
   } else if ($("#button1_mode").val() == 1) {
     // Detached mode
     $("#button1_detached_mode_controls").removeClass("hidden");
     $("#button1_detached_mode_light").prop("required", true);
-    $("#button1_mqtt_mode_controls").addClass("hidden");
+    $("#button1_detached_mode_light").removeClass("hidden");
   } else if ($("#button1_mode").val() == 2) {
     // MQTT mode
-    $("#button1_detached_mode_controls").addClass("hidden");
-    $("#button1_detached_mode_light").prop("required", false);
     $("#button1_mqtt_mode_controls").removeClass("hidden");
   } else if ($("#button1_mode").val() == 3) {
     // Follow mode
-    $("#button1_detached_mode_controls").addClass("hidden");
-    $("#button1_detached_mode_light").prop("required", false);
-    $("#button1_mqtt_mode_controls").addClass("hidden");
+  } else if ($("#button1_mode").val() == 4 || $("#button1_mode").val() == 5) {
+    // Thermostat mode
+    $("#button1_thermostat_mode_controls").removeClass("hidden");
   }
 
   if ($("#button2_mode").val() == 0) {
