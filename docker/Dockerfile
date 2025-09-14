@@ -12,7 +12,7 @@ COPY MQTTManager/ /MQTTManager/
 # Only build MQTTManager during Docker build if is is not a devel mode.
 RUN if [ "$IS_DEVEL" != "yes" ]; then apt-get update \
     && apt-get -y install cmake build-essential curl; \
-    fi
+    && pip install -U conan; fi
 
 RUN if [ "$IS_DEVEL" != "yes" ]; then conan profile detect --force && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf \
     && sed -i "s|cppstd=gnu14|cppstd=gnu23|g" /root/.conan2/profiles/default \
