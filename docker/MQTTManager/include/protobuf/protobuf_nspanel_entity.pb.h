@@ -56,6 +56,9 @@ extern NSPanelEntityStateDefaultTypeInternal _NSPanelEntityState_default_instanc
 class NSPanelEntityState_Light;
 struct NSPanelEntityState_LightDefaultTypeInternal;
 extern NSPanelEntityState_LightDefaultTypeInternal _NSPanelEntityState_Light_default_instance_;
+class NSPanelEntityState_Thermostat;
+struct NSPanelEntityState_ThermostatDefaultTypeInternal;
+extern NSPanelEntityState_ThermostatDefaultTypeInternal _NSPanelEntityState_Thermostat_default_instance_;
 namespace google {
 namespace protobuf {
 }  // namespace protobuf
@@ -98,6 +101,399 @@ inline bool NSPanelEntityState_Light_LightMode_Parse(absl::string_view name, NSP
 // ===================================================================
 
 
+// -------------------------------------------------------------------
+
+class NSPanelEntityState_Thermostat final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:NSPanelEntityState.Thermostat) */ {
+ public:
+  inline NSPanelEntityState_Thermostat() : NSPanelEntityState_Thermostat(nullptr) {}
+  ~NSPanelEntityState_Thermostat() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR NSPanelEntityState_Thermostat(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline NSPanelEntityState_Thermostat(const NSPanelEntityState_Thermostat& from) : NSPanelEntityState_Thermostat(nullptr, from) {}
+  inline NSPanelEntityState_Thermostat(NSPanelEntityState_Thermostat&& from) noexcept
+      : NSPanelEntityState_Thermostat(nullptr, std::move(from)) {}
+  inline NSPanelEntityState_Thermostat& operator=(const NSPanelEntityState_Thermostat& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline NSPanelEntityState_Thermostat& operator=(NSPanelEntityState_Thermostat&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const NSPanelEntityState_Thermostat& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const NSPanelEntityState_Thermostat* internal_default_instance() {
+    return reinterpret_cast<const NSPanelEntityState_Thermostat*>(
+        &_NSPanelEntityState_Thermostat_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 1;
+  friend void swap(NSPanelEntityState_Thermostat& a, NSPanelEntityState_Thermostat& b) { a.Swap(&b); }
+  inline void Swap(NSPanelEntityState_Thermostat* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(NSPanelEntityState_Thermostat* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  NSPanelEntityState_Thermostat* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<NSPanelEntityState_Thermostat>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const NSPanelEntityState_Thermostat& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const NSPanelEntityState_Thermostat& from) { NSPanelEntityState_Thermostat::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(NSPanelEntityState_Thermostat* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "NSPanelEntityState.Thermostat"; }
+
+ protected:
+  explicit NSPanelEntityState_Thermostat(::google::protobuf::Arena* arena);
+  NSPanelEntityState_Thermostat(::google::protobuf::Arena* arena, const NSPanelEntityState_Thermostat& from);
+  NSPanelEntityState_Thermostat(::google::protobuf::Arena* arena, NSPanelEntityState_Thermostat&& from) noexcept
+      : NSPanelEntityState_Thermostat(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kModesFieldNumber = 3,
+    kSwingModesFieldNumber = 5,
+    kFanModesFieldNumber = 7,
+    kPresetsFieldNumber = 9,
+    kNameFieldNumber = 2,
+    kCurrentModeFieldNumber = 4,
+    kCurrentSwingModeFieldNumber = 6,
+    kCurrentFanModeFieldNumber = 8,
+    kCurrentPresetFieldNumber = 10,
+    kThermostatIdFieldNumber = 1,
+    kTemperatureFieldNumber = 11,
+  };
+  // repeated string modes = 3;
+  int modes_size() const;
+  private:
+  int _internal_modes_size() const;
+
+  public:
+  void clear_modes() ;
+  const std::string& modes(int index) const;
+  std::string* mutable_modes(int index);
+  void set_modes(int index, const std::string& value);
+  void set_modes(int index, std::string&& value);
+  void set_modes(int index, const char* value);
+  void set_modes(int index, const char* value, std::size_t size);
+  void set_modes(int index, absl::string_view value);
+  std::string* add_modes();
+  void add_modes(const std::string& value);
+  void add_modes(std::string&& value);
+  void add_modes(const char* value);
+  void add_modes(const char* value, std::size_t size);
+  void add_modes(absl::string_view value);
+  const ::google::protobuf::RepeatedPtrField<std::string>& modes() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* mutable_modes();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<std::string>& _internal_modes() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_modes();
+
+  public:
+  // repeated string swing_modes = 5;
+  int swing_modes_size() const;
+  private:
+  int _internal_swing_modes_size() const;
+
+  public:
+  void clear_swing_modes() ;
+  const std::string& swing_modes(int index) const;
+  std::string* mutable_swing_modes(int index);
+  void set_swing_modes(int index, const std::string& value);
+  void set_swing_modes(int index, std::string&& value);
+  void set_swing_modes(int index, const char* value);
+  void set_swing_modes(int index, const char* value, std::size_t size);
+  void set_swing_modes(int index, absl::string_view value);
+  std::string* add_swing_modes();
+  void add_swing_modes(const std::string& value);
+  void add_swing_modes(std::string&& value);
+  void add_swing_modes(const char* value);
+  void add_swing_modes(const char* value, std::size_t size);
+  void add_swing_modes(absl::string_view value);
+  const ::google::protobuf::RepeatedPtrField<std::string>& swing_modes() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* mutable_swing_modes();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<std::string>& _internal_swing_modes() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_swing_modes();
+
+  public:
+  // repeated string fan_modes = 7;
+  int fan_modes_size() const;
+  private:
+  int _internal_fan_modes_size() const;
+
+  public:
+  void clear_fan_modes() ;
+  const std::string& fan_modes(int index) const;
+  std::string* mutable_fan_modes(int index);
+  void set_fan_modes(int index, const std::string& value);
+  void set_fan_modes(int index, std::string&& value);
+  void set_fan_modes(int index, const char* value);
+  void set_fan_modes(int index, const char* value, std::size_t size);
+  void set_fan_modes(int index, absl::string_view value);
+  std::string* add_fan_modes();
+  void add_fan_modes(const std::string& value);
+  void add_fan_modes(std::string&& value);
+  void add_fan_modes(const char* value);
+  void add_fan_modes(const char* value, std::size_t size);
+  void add_fan_modes(absl::string_view value);
+  const ::google::protobuf::RepeatedPtrField<std::string>& fan_modes() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* mutable_fan_modes();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<std::string>& _internal_fan_modes() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_fan_modes();
+
+  public:
+  // repeated string presets = 9;
+  int presets_size() const;
+  private:
+  int _internal_presets_size() const;
+
+  public:
+  void clear_presets() ;
+  const std::string& presets(int index) const;
+  std::string* mutable_presets(int index);
+  void set_presets(int index, const std::string& value);
+  void set_presets(int index, std::string&& value);
+  void set_presets(int index, const char* value);
+  void set_presets(int index, const char* value, std::size_t size);
+  void set_presets(int index, absl::string_view value);
+  std::string* add_presets();
+  void add_presets(const std::string& value);
+  void add_presets(std::string&& value);
+  void add_presets(const char* value);
+  void add_presets(const char* value, std::size_t size);
+  void add_presets(absl::string_view value);
+  const ::google::protobuf::RepeatedPtrField<std::string>& presets() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* mutable_presets();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<std::string>& _internal_presets() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_presets();
+
+  public:
+  // string name = 2;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  PROTOBUF_NODISCARD std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_name(
+      const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
+  // string current_mode = 4;
+  void clear_current_mode() ;
+  const std::string& current_mode() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_current_mode(Arg_&& arg, Args_... args);
+  std::string* mutable_current_mode();
+  PROTOBUF_NODISCARD std::string* release_current_mode();
+  void set_allocated_current_mode(std::string* value);
+
+  private:
+  const std::string& _internal_current_mode() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_current_mode(
+      const std::string& value);
+  std::string* _internal_mutable_current_mode();
+
+  public:
+  // string current_swing_mode = 6;
+  void clear_current_swing_mode() ;
+  const std::string& current_swing_mode() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_current_swing_mode(Arg_&& arg, Args_... args);
+  std::string* mutable_current_swing_mode();
+  PROTOBUF_NODISCARD std::string* release_current_swing_mode();
+  void set_allocated_current_swing_mode(std::string* value);
+
+  private:
+  const std::string& _internal_current_swing_mode() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_current_swing_mode(
+      const std::string& value);
+  std::string* _internal_mutable_current_swing_mode();
+
+  public:
+  // string current_fan_mode = 8;
+  void clear_current_fan_mode() ;
+  const std::string& current_fan_mode() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_current_fan_mode(Arg_&& arg, Args_... args);
+  std::string* mutable_current_fan_mode();
+  PROTOBUF_NODISCARD std::string* release_current_fan_mode();
+  void set_allocated_current_fan_mode(std::string* value);
+
+  private:
+  const std::string& _internal_current_fan_mode() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_current_fan_mode(
+      const std::string& value);
+  std::string* _internal_mutable_current_fan_mode();
+
+  public:
+  // string current_preset = 10;
+  void clear_current_preset() ;
+  const std::string& current_preset() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_current_preset(Arg_&& arg, Args_... args);
+  std::string* mutable_current_preset();
+  PROTOBUF_NODISCARD std::string* release_current_preset();
+  void set_allocated_current_preset(std::string* value);
+
+  private:
+  const std::string& _internal_current_preset() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_current_preset(
+      const std::string& value);
+  std::string* _internal_mutable_current_preset();
+
+  public:
+  // int32 thermostat_id = 1;
+  void clear_thermostat_id() ;
+  ::int32_t thermostat_id() const;
+  void set_thermostat_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_thermostat_id() const;
+  void _internal_set_thermostat_id(::int32_t value);
+
+  public:
+  // float temperature = 11;
+  void clear_temperature() ;
+  float temperature() const;
+  void set_temperature(float value);
+
+  private:
+  float _internal_temperature() const;
+  void _internal_set_temperature(float value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:NSPanelEntityState.Thermostat)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      4, 11, 0,
+      142, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_NSPanelEntityState_Thermostat_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const NSPanelEntityState_Thermostat& from_msg);
+    ::google::protobuf::RepeatedPtrField<std::string> modes_;
+    ::google::protobuf::RepeatedPtrField<std::string> swing_modes_;
+    ::google::protobuf::RepeatedPtrField<std::string> fan_modes_;
+    ::google::protobuf::RepeatedPtrField<std::string> presets_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    ::google::protobuf::internal::ArenaStringPtr current_mode_;
+    ::google::protobuf::internal::ArenaStringPtr current_swing_mode_;
+    ::google::protobuf::internal::ArenaStringPtr current_fan_mode_;
+    ::google::protobuf::internal::ArenaStringPtr current_preset_;
+    ::int32_t thermostat_id_;
+    float temperature_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_protobuf_5fnspanel_5fentity_2eproto;
+};
 // -------------------------------------------------------------------
 
 class NSPanelEntityState_Light final : public ::google::protobuf::Message
@@ -445,13 +841,14 @@ class NSPanelEntityState final : public ::google::protobuf::Message
   }
   enum EntityCase {
     kLight = 1,
+    kThermostat = 2,
     ENTITY_NOT_SET = 0,
   };
   static inline const NSPanelEntityState* internal_default_instance() {
     return reinterpret_cast<const NSPanelEntityState*>(
         &_NSPanelEntityState_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 2;
   friend void swap(NSPanelEntityState& a, NSPanelEntityState& b) { a.Swap(&b); }
   inline void Swap(NSPanelEntityState* other) {
     if (other == this) return;
@@ -518,10 +915,12 @@ class NSPanelEntityState final : public ::google::protobuf::Message
   ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
   using Light = NSPanelEntityState_Light;
+  using Thermostat = NSPanelEntityState_Thermostat;
 
   // accessors -------------------------------------------------------
   enum : int {
     kLightFieldNumber = 1,
+    kThermostatFieldNumber = 2,
   };
   // .NSPanelEntityState.Light light = 1;
   bool has_light() const;
@@ -542,17 +941,37 @@ class NSPanelEntityState final : public ::google::protobuf::Message
   ::NSPanelEntityState_Light* _internal_mutable_light();
 
   public:
+  // .NSPanelEntityState.Thermostat thermostat = 2;
+  bool has_thermostat() const;
+  private:
+  bool _internal_has_thermostat() const;
+
+  public:
+  void clear_thermostat() ;
+  const ::NSPanelEntityState_Thermostat& thermostat() const;
+  PROTOBUF_NODISCARD ::NSPanelEntityState_Thermostat* release_thermostat();
+  ::NSPanelEntityState_Thermostat* mutable_thermostat();
+  void set_allocated_thermostat(::NSPanelEntityState_Thermostat* value);
+  void unsafe_arena_set_allocated_thermostat(::NSPanelEntityState_Thermostat* value);
+  ::NSPanelEntityState_Thermostat* unsafe_arena_release_thermostat();
+
+  private:
+  const ::NSPanelEntityState_Thermostat& _internal_thermostat() const;
+  ::NSPanelEntityState_Thermostat* _internal_mutable_thermostat();
+
+  public:
   void clear_entity();
   EntityCase entity_case() const;
   // @@protoc_insertion_point(class_scope:NSPanelEntityState)
  private:
   class _Internal;
   void set_has_light();
+  void set_has_thermostat();
   inline bool has_entity() const;
   inline void clear_has_entity();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 1, 1,
+      0, 2, 2,
       0, 2>
       _table_;
 
@@ -577,6 +996,7 @@ class NSPanelEntityState final : public ::google::protobuf::Message
       constexpr EntityUnion() : _constinit_{} {}
       ::google::protobuf::internal::ConstantInitialized _constinit_;
       ::NSPanelEntityState_Light* light_;
+      ::NSPanelEntityState_Thermostat* thermostat_;
     } entity_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
@@ -830,6 +1250,712 @@ inline void NSPanelEntityState_Light::_internal_set_current_light_mode(::NSPanel
 
 // -------------------------------------------------------------------
 
+// NSPanelEntityState_Thermostat
+
+// int32 thermostat_id = 1;
+inline void NSPanelEntityState_Thermostat::clear_thermostat_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.thermostat_id_ = 0;
+}
+inline ::int32_t NSPanelEntityState_Thermostat::thermostat_id() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Thermostat.thermostat_id)
+  return _internal_thermostat_id();
+}
+inline void NSPanelEntityState_Thermostat::set_thermostat_id(::int32_t value) {
+  _internal_set_thermostat_id(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.thermostat_id)
+}
+inline ::int32_t NSPanelEntityState_Thermostat::_internal_thermostat_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.thermostat_id_;
+}
+inline void NSPanelEntityState_Thermostat::_internal_set_thermostat_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.thermostat_id_ = value;
+}
+
+// string name = 2;
+inline void NSPanelEntityState_Thermostat::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+}
+inline const std::string& NSPanelEntityState_Thermostat::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Thermostat.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelEntityState_Thermostat::set_name(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.name)
+}
+inline std::string* NSPanelEntityState_Thermostat::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.Thermostat.name)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_Thermostat::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void NSPanelEntityState_Thermostat::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* NSPanelEntityState_Thermostat::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* NSPanelEntityState_Thermostat::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.Thermostat.name)
+  return _impl_.name_.Release();
+}
+inline void NSPanelEntityState_Thermostat::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.name_.IsDefault()) {
+          _impl_.name_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.Thermostat.name)
+}
+
+// repeated string modes = 3;
+inline int NSPanelEntityState_Thermostat::_internal_modes_size() const {
+  return _internal_modes().size();
+}
+inline int NSPanelEntityState_Thermostat::modes_size() const {
+  return _internal_modes_size();
+}
+inline void NSPanelEntityState_Thermostat::clear_modes() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.modes_.Clear();
+}
+inline std::string* NSPanelEntityState_Thermostat::add_modes()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  std::string* _s = _internal_mutable_modes()->Add();
+  // @@protoc_insertion_point(field_add_mutable:NSPanelEntityState.Thermostat.modes)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_Thermostat::modes(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Thermostat.modes)
+  return _internal_modes().Get(index);
+}
+inline std::string* NSPanelEntityState_Thermostat::mutable_modes(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.Thermostat.modes)
+  return _internal_mutable_modes()->Mutable(index);
+}
+inline void NSPanelEntityState_Thermostat::set_modes(int index, const std::string& value) {
+  _internal_mutable_modes()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.modes)
+}
+inline void NSPanelEntityState_Thermostat::set_modes(int index, std::string&& value) {
+  _internal_mutable_modes()->Mutable(index)->assign(std::move(value));
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.modes)
+}
+inline void NSPanelEntityState_Thermostat::set_modes(int index, const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  _internal_mutable_modes()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:NSPanelEntityState.Thermostat.modes)
+}
+inline void NSPanelEntityState_Thermostat::set_modes(int index, const char* value,
+                              std::size_t size) {
+  _internal_mutable_modes()->Mutable(index)->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:NSPanelEntityState.Thermostat.modes)
+}
+inline void NSPanelEntityState_Thermostat::set_modes(int index, absl::string_view value) {
+  _internal_mutable_modes()->Mutable(index)->assign(
+      value.data(), value.size());
+  // @@protoc_insertion_point(field_set_string_piece:NSPanelEntityState.Thermostat.modes)
+}
+inline void NSPanelEntityState_Thermostat::add_modes(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_modes()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add:NSPanelEntityState.Thermostat.modes)
+}
+inline void NSPanelEntityState_Thermostat::add_modes(std::string&& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_modes()->Add(std::move(value));
+  // @@protoc_insertion_point(field_add:NSPanelEntityState.Thermostat.modes)
+}
+inline void NSPanelEntityState_Thermostat::add_modes(const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_modes()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:NSPanelEntityState.Thermostat.modes)
+}
+inline void NSPanelEntityState_Thermostat::add_modes(const char* value, std::size_t size) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_modes()->Add()->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:NSPanelEntityState.Thermostat.modes)
+}
+inline void NSPanelEntityState_Thermostat::add_modes(absl::string_view value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_modes()->Add()->assign(value.data(),
+                                                     value.size());
+  // @@protoc_insertion_point(field_add_string_piece:NSPanelEntityState.Thermostat.modes)
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+NSPanelEntityState_Thermostat::modes() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelEntityState.Thermostat.modes)
+  return _internal_modes();
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+NSPanelEntityState_Thermostat::mutable_modes() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelEntityState.Thermostat.modes)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_modes();
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+NSPanelEntityState_Thermostat::_internal_modes() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.modes_;
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+NSPanelEntityState_Thermostat::_internal_mutable_modes() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.modes_;
+}
+
+// string current_mode = 4;
+inline void NSPanelEntityState_Thermostat::clear_current_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_mode_.ClearToEmpty();
+}
+inline const std::string& NSPanelEntityState_Thermostat::current_mode() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Thermostat.current_mode)
+  return _internal_current_mode();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelEntityState_Thermostat::set_current_mode(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_mode_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.current_mode)
+}
+inline std::string* NSPanelEntityState_Thermostat::mutable_current_mode() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_current_mode();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.Thermostat.current_mode)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_Thermostat::_internal_current_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.current_mode_.Get();
+}
+inline void NSPanelEntityState_Thermostat::_internal_set_current_mode(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_mode_.Set(value, GetArena());
+}
+inline std::string* NSPanelEntityState_Thermostat::_internal_mutable_current_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.current_mode_.Mutable( GetArena());
+}
+inline std::string* NSPanelEntityState_Thermostat::release_current_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.Thermostat.current_mode)
+  return _impl_.current_mode_.Release();
+}
+inline void NSPanelEntityState_Thermostat::set_allocated_current_mode(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_mode_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.current_mode_.IsDefault()) {
+          _impl_.current_mode_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.Thermostat.current_mode)
+}
+
+// repeated string swing_modes = 5;
+inline int NSPanelEntityState_Thermostat::_internal_swing_modes_size() const {
+  return _internal_swing_modes().size();
+}
+inline int NSPanelEntityState_Thermostat::swing_modes_size() const {
+  return _internal_swing_modes_size();
+}
+inline void NSPanelEntityState_Thermostat::clear_swing_modes() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.swing_modes_.Clear();
+}
+inline std::string* NSPanelEntityState_Thermostat::add_swing_modes()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  std::string* _s = _internal_mutable_swing_modes()->Add();
+  // @@protoc_insertion_point(field_add_mutable:NSPanelEntityState.Thermostat.swing_modes)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_Thermostat::swing_modes(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Thermostat.swing_modes)
+  return _internal_swing_modes().Get(index);
+}
+inline std::string* NSPanelEntityState_Thermostat::mutable_swing_modes(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.Thermostat.swing_modes)
+  return _internal_mutable_swing_modes()->Mutable(index);
+}
+inline void NSPanelEntityState_Thermostat::set_swing_modes(int index, const std::string& value) {
+  _internal_mutable_swing_modes()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.swing_modes)
+}
+inline void NSPanelEntityState_Thermostat::set_swing_modes(int index, std::string&& value) {
+  _internal_mutable_swing_modes()->Mutable(index)->assign(std::move(value));
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.swing_modes)
+}
+inline void NSPanelEntityState_Thermostat::set_swing_modes(int index, const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  _internal_mutable_swing_modes()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:NSPanelEntityState.Thermostat.swing_modes)
+}
+inline void NSPanelEntityState_Thermostat::set_swing_modes(int index, const char* value,
+                              std::size_t size) {
+  _internal_mutable_swing_modes()->Mutable(index)->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:NSPanelEntityState.Thermostat.swing_modes)
+}
+inline void NSPanelEntityState_Thermostat::set_swing_modes(int index, absl::string_view value) {
+  _internal_mutable_swing_modes()->Mutable(index)->assign(
+      value.data(), value.size());
+  // @@protoc_insertion_point(field_set_string_piece:NSPanelEntityState.Thermostat.swing_modes)
+}
+inline void NSPanelEntityState_Thermostat::add_swing_modes(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_swing_modes()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add:NSPanelEntityState.Thermostat.swing_modes)
+}
+inline void NSPanelEntityState_Thermostat::add_swing_modes(std::string&& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_swing_modes()->Add(std::move(value));
+  // @@protoc_insertion_point(field_add:NSPanelEntityState.Thermostat.swing_modes)
+}
+inline void NSPanelEntityState_Thermostat::add_swing_modes(const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_swing_modes()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:NSPanelEntityState.Thermostat.swing_modes)
+}
+inline void NSPanelEntityState_Thermostat::add_swing_modes(const char* value, std::size_t size) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_swing_modes()->Add()->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:NSPanelEntityState.Thermostat.swing_modes)
+}
+inline void NSPanelEntityState_Thermostat::add_swing_modes(absl::string_view value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_swing_modes()->Add()->assign(value.data(),
+                                                     value.size());
+  // @@protoc_insertion_point(field_add_string_piece:NSPanelEntityState.Thermostat.swing_modes)
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+NSPanelEntityState_Thermostat::swing_modes() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelEntityState.Thermostat.swing_modes)
+  return _internal_swing_modes();
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+NSPanelEntityState_Thermostat::mutable_swing_modes() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelEntityState.Thermostat.swing_modes)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_swing_modes();
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+NSPanelEntityState_Thermostat::_internal_swing_modes() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.swing_modes_;
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+NSPanelEntityState_Thermostat::_internal_mutable_swing_modes() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.swing_modes_;
+}
+
+// string current_swing_mode = 6;
+inline void NSPanelEntityState_Thermostat::clear_current_swing_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_swing_mode_.ClearToEmpty();
+}
+inline const std::string& NSPanelEntityState_Thermostat::current_swing_mode() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Thermostat.current_swing_mode)
+  return _internal_current_swing_mode();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelEntityState_Thermostat::set_current_swing_mode(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_swing_mode_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.current_swing_mode)
+}
+inline std::string* NSPanelEntityState_Thermostat::mutable_current_swing_mode() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_current_swing_mode();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.Thermostat.current_swing_mode)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_Thermostat::_internal_current_swing_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.current_swing_mode_.Get();
+}
+inline void NSPanelEntityState_Thermostat::_internal_set_current_swing_mode(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_swing_mode_.Set(value, GetArena());
+}
+inline std::string* NSPanelEntityState_Thermostat::_internal_mutable_current_swing_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.current_swing_mode_.Mutable( GetArena());
+}
+inline std::string* NSPanelEntityState_Thermostat::release_current_swing_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.Thermostat.current_swing_mode)
+  return _impl_.current_swing_mode_.Release();
+}
+inline void NSPanelEntityState_Thermostat::set_allocated_current_swing_mode(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_swing_mode_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.current_swing_mode_.IsDefault()) {
+          _impl_.current_swing_mode_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.Thermostat.current_swing_mode)
+}
+
+// repeated string fan_modes = 7;
+inline int NSPanelEntityState_Thermostat::_internal_fan_modes_size() const {
+  return _internal_fan_modes().size();
+}
+inline int NSPanelEntityState_Thermostat::fan_modes_size() const {
+  return _internal_fan_modes_size();
+}
+inline void NSPanelEntityState_Thermostat::clear_fan_modes() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.fan_modes_.Clear();
+}
+inline std::string* NSPanelEntityState_Thermostat::add_fan_modes()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  std::string* _s = _internal_mutable_fan_modes()->Add();
+  // @@protoc_insertion_point(field_add_mutable:NSPanelEntityState.Thermostat.fan_modes)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_Thermostat::fan_modes(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Thermostat.fan_modes)
+  return _internal_fan_modes().Get(index);
+}
+inline std::string* NSPanelEntityState_Thermostat::mutable_fan_modes(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.Thermostat.fan_modes)
+  return _internal_mutable_fan_modes()->Mutable(index);
+}
+inline void NSPanelEntityState_Thermostat::set_fan_modes(int index, const std::string& value) {
+  _internal_mutable_fan_modes()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.fan_modes)
+}
+inline void NSPanelEntityState_Thermostat::set_fan_modes(int index, std::string&& value) {
+  _internal_mutable_fan_modes()->Mutable(index)->assign(std::move(value));
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.fan_modes)
+}
+inline void NSPanelEntityState_Thermostat::set_fan_modes(int index, const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  _internal_mutable_fan_modes()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:NSPanelEntityState.Thermostat.fan_modes)
+}
+inline void NSPanelEntityState_Thermostat::set_fan_modes(int index, const char* value,
+                              std::size_t size) {
+  _internal_mutable_fan_modes()->Mutable(index)->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:NSPanelEntityState.Thermostat.fan_modes)
+}
+inline void NSPanelEntityState_Thermostat::set_fan_modes(int index, absl::string_view value) {
+  _internal_mutable_fan_modes()->Mutable(index)->assign(
+      value.data(), value.size());
+  // @@protoc_insertion_point(field_set_string_piece:NSPanelEntityState.Thermostat.fan_modes)
+}
+inline void NSPanelEntityState_Thermostat::add_fan_modes(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_fan_modes()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add:NSPanelEntityState.Thermostat.fan_modes)
+}
+inline void NSPanelEntityState_Thermostat::add_fan_modes(std::string&& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_fan_modes()->Add(std::move(value));
+  // @@protoc_insertion_point(field_add:NSPanelEntityState.Thermostat.fan_modes)
+}
+inline void NSPanelEntityState_Thermostat::add_fan_modes(const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_fan_modes()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:NSPanelEntityState.Thermostat.fan_modes)
+}
+inline void NSPanelEntityState_Thermostat::add_fan_modes(const char* value, std::size_t size) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_fan_modes()->Add()->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:NSPanelEntityState.Thermostat.fan_modes)
+}
+inline void NSPanelEntityState_Thermostat::add_fan_modes(absl::string_view value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_fan_modes()->Add()->assign(value.data(),
+                                                     value.size());
+  // @@protoc_insertion_point(field_add_string_piece:NSPanelEntityState.Thermostat.fan_modes)
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+NSPanelEntityState_Thermostat::fan_modes() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelEntityState.Thermostat.fan_modes)
+  return _internal_fan_modes();
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+NSPanelEntityState_Thermostat::mutable_fan_modes() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelEntityState.Thermostat.fan_modes)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_fan_modes();
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+NSPanelEntityState_Thermostat::_internal_fan_modes() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.fan_modes_;
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+NSPanelEntityState_Thermostat::_internal_mutable_fan_modes() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.fan_modes_;
+}
+
+// string current_fan_mode = 8;
+inline void NSPanelEntityState_Thermostat::clear_current_fan_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_fan_mode_.ClearToEmpty();
+}
+inline const std::string& NSPanelEntityState_Thermostat::current_fan_mode() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Thermostat.current_fan_mode)
+  return _internal_current_fan_mode();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelEntityState_Thermostat::set_current_fan_mode(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_fan_mode_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.current_fan_mode)
+}
+inline std::string* NSPanelEntityState_Thermostat::mutable_current_fan_mode() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_current_fan_mode();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.Thermostat.current_fan_mode)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_Thermostat::_internal_current_fan_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.current_fan_mode_.Get();
+}
+inline void NSPanelEntityState_Thermostat::_internal_set_current_fan_mode(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_fan_mode_.Set(value, GetArena());
+}
+inline std::string* NSPanelEntityState_Thermostat::_internal_mutable_current_fan_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.current_fan_mode_.Mutable( GetArena());
+}
+inline std::string* NSPanelEntityState_Thermostat::release_current_fan_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.Thermostat.current_fan_mode)
+  return _impl_.current_fan_mode_.Release();
+}
+inline void NSPanelEntityState_Thermostat::set_allocated_current_fan_mode(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_fan_mode_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.current_fan_mode_.IsDefault()) {
+          _impl_.current_fan_mode_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.Thermostat.current_fan_mode)
+}
+
+// repeated string presets = 9;
+inline int NSPanelEntityState_Thermostat::_internal_presets_size() const {
+  return _internal_presets().size();
+}
+inline int NSPanelEntityState_Thermostat::presets_size() const {
+  return _internal_presets_size();
+}
+inline void NSPanelEntityState_Thermostat::clear_presets() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.presets_.Clear();
+}
+inline std::string* NSPanelEntityState_Thermostat::add_presets()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  std::string* _s = _internal_mutable_presets()->Add();
+  // @@protoc_insertion_point(field_add_mutable:NSPanelEntityState.Thermostat.presets)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_Thermostat::presets(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Thermostat.presets)
+  return _internal_presets().Get(index);
+}
+inline std::string* NSPanelEntityState_Thermostat::mutable_presets(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.Thermostat.presets)
+  return _internal_mutable_presets()->Mutable(index);
+}
+inline void NSPanelEntityState_Thermostat::set_presets(int index, const std::string& value) {
+  _internal_mutable_presets()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.presets)
+}
+inline void NSPanelEntityState_Thermostat::set_presets(int index, std::string&& value) {
+  _internal_mutable_presets()->Mutable(index)->assign(std::move(value));
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.presets)
+}
+inline void NSPanelEntityState_Thermostat::set_presets(int index, const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  _internal_mutable_presets()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:NSPanelEntityState.Thermostat.presets)
+}
+inline void NSPanelEntityState_Thermostat::set_presets(int index, const char* value,
+                              std::size_t size) {
+  _internal_mutable_presets()->Mutable(index)->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:NSPanelEntityState.Thermostat.presets)
+}
+inline void NSPanelEntityState_Thermostat::set_presets(int index, absl::string_view value) {
+  _internal_mutable_presets()->Mutable(index)->assign(
+      value.data(), value.size());
+  // @@protoc_insertion_point(field_set_string_piece:NSPanelEntityState.Thermostat.presets)
+}
+inline void NSPanelEntityState_Thermostat::add_presets(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_presets()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add:NSPanelEntityState.Thermostat.presets)
+}
+inline void NSPanelEntityState_Thermostat::add_presets(std::string&& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_presets()->Add(std::move(value));
+  // @@protoc_insertion_point(field_add:NSPanelEntityState.Thermostat.presets)
+}
+inline void NSPanelEntityState_Thermostat::add_presets(const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_presets()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:NSPanelEntityState.Thermostat.presets)
+}
+inline void NSPanelEntityState_Thermostat::add_presets(const char* value, std::size_t size) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_presets()->Add()->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:NSPanelEntityState.Thermostat.presets)
+}
+inline void NSPanelEntityState_Thermostat::add_presets(absl::string_view value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_presets()->Add()->assign(value.data(),
+                                                     value.size());
+  // @@protoc_insertion_point(field_add_string_piece:NSPanelEntityState.Thermostat.presets)
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+NSPanelEntityState_Thermostat::presets() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelEntityState.Thermostat.presets)
+  return _internal_presets();
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+NSPanelEntityState_Thermostat::mutable_presets() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelEntityState.Thermostat.presets)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_presets();
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+NSPanelEntityState_Thermostat::_internal_presets() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.presets_;
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+NSPanelEntityState_Thermostat::_internal_mutable_presets() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.presets_;
+}
+
+// string current_preset = 10;
+inline void NSPanelEntityState_Thermostat::clear_current_preset() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_preset_.ClearToEmpty();
+}
+inline const std::string& NSPanelEntityState_Thermostat::current_preset() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Thermostat.current_preset)
+  return _internal_current_preset();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelEntityState_Thermostat::set_current_preset(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_preset_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.current_preset)
+}
+inline std::string* NSPanelEntityState_Thermostat::mutable_current_preset() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_current_preset();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.Thermostat.current_preset)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_Thermostat::_internal_current_preset() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.current_preset_.Get();
+}
+inline void NSPanelEntityState_Thermostat::_internal_set_current_preset(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_preset_.Set(value, GetArena());
+}
+inline std::string* NSPanelEntityState_Thermostat::_internal_mutable_current_preset() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.current_preset_.Mutable( GetArena());
+}
+inline std::string* NSPanelEntityState_Thermostat::release_current_preset() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.Thermostat.current_preset)
+  return _impl_.current_preset_.Release();
+}
+inline void NSPanelEntityState_Thermostat::set_allocated_current_preset(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.current_preset_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.current_preset_.IsDefault()) {
+          _impl_.current_preset_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.Thermostat.current_preset)
+}
+
+// float temperature = 11;
+inline void NSPanelEntityState_Thermostat::clear_temperature() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.temperature_ = 0;
+}
+inline float NSPanelEntityState_Thermostat::temperature() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Thermostat.temperature)
+  return _internal_temperature();
+}
+inline void NSPanelEntityState_Thermostat::set_temperature(float value) {
+  _internal_set_temperature(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.temperature)
+}
+inline float NSPanelEntityState_Thermostat::_internal_temperature() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.temperature_;
+}
+inline void NSPanelEntityState_Thermostat::_internal_set_temperature(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.temperature_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // NSPanelEntityState
 
 // .NSPanelEntityState.Light light = 1;
@@ -908,6 +2034,85 @@ inline ::NSPanelEntityState_Light* NSPanelEntityState::_internal_mutable_light()
 inline ::NSPanelEntityState_Light* NSPanelEntityState::mutable_light() ABSL_ATTRIBUTE_LIFETIME_BOUND {
   ::NSPanelEntityState_Light* _msg = _internal_mutable_light();
   // @@protoc_insertion_point(field_mutable:NSPanelEntityState.light)
+  return _msg;
+}
+
+// .NSPanelEntityState.Thermostat thermostat = 2;
+inline bool NSPanelEntityState::has_thermostat() const {
+  return entity_case() == kThermostat;
+}
+inline bool NSPanelEntityState::_internal_has_thermostat() const {
+  return entity_case() == kThermostat;
+}
+inline void NSPanelEntityState::set_has_thermostat() {
+  _impl_._oneof_case_[0] = kThermostat;
+}
+inline void NSPanelEntityState::clear_thermostat() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (entity_case() == kThermostat) {
+    if (GetArena() == nullptr) {
+      delete _impl_.entity_.thermostat_;
+    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.entity_.thermostat_);
+    }
+    clear_has_entity();
+  }
+}
+inline ::NSPanelEntityState_Thermostat* NSPanelEntityState::release_thermostat() {
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.thermostat)
+  if (entity_case() == kThermostat) {
+    clear_has_entity();
+    auto* temp = _impl_.entity_.thermostat_;
+    if (GetArena() != nullptr) {
+      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.entity_.thermostat_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::NSPanelEntityState_Thermostat& NSPanelEntityState::_internal_thermostat() const {
+  return entity_case() == kThermostat ? *_impl_.entity_.thermostat_ : reinterpret_cast<::NSPanelEntityState_Thermostat&>(::_NSPanelEntityState_Thermostat_default_instance_);
+}
+inline const ::NSPanelEntityState_Thermostat& NSPanelEntityState::thermostat() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.thermostat)
+  return _internal_thermostat();
+}
+inline ::NSPanelEntityState_Thermostat* NSPanelEntityState::unsafe_arena_release_thermostat() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:NSPanelEntityState.thermostat)
+  if (entity_case() == kThermostat) {
+    clear_has_entity();
+    auto* temp = _impl_.entity_.thermostat_;
+    _impl_.entity_.thermostat_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void NSPanelEntityState::unsafe_arena_set_allocated_thermostat(::NSPanelEntityState_Thermostat* value) {
+  // We rely on the oneof clear method to free the earlier contents
+  // of this oneof. We can directly use the pointer we're given to
+  // set the new value.
+  clear_entity();
+  if (value) {
+    set_has_thermostat();
+    _impl_.entity_.thermostat_ = value;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:NSPanelEntityState.thermostat)
+}
+inline ::NSPanelEntityState_Thermostat* NSPanelEntityState::_internal_mutable_thermostat() {
+  if (entity_case() != kThermostat) {
+    clear_entity();
+    set_has_thermostat();
+    _impl_.entity_.thermostat_ =
+        ::google::protobuf::Message::DefaultConstruct<::NSPanelEntityState_Thermostat>(GetArena());
+  }
+  return _impl_.entity_.thermostat_;
+}
+inline ::NSPanelEntityState_Thermostat* NSPanelEntityState::mutable_thermostat() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::NSPanelEntityState_Thermostat* _msg = _internal_mutable_thermostat();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.thermostat)
   return _msg;
 }
 

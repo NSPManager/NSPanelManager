@@ -16,6 +16,7 @@
             <li class="flex-row"><button class="w-full" hx-indicator="#modal_loading" onclick="modal.close();" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_source" action="ADD_LIGHT_TO_ROOM" action_args=action_args %}'>Add <span class="font-bold">light</span></button></li>
             <li class="flex-row"><button class="w-full" hx-indicator="#modal_loading" onclick="modal.close();" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_source" action="ADD_SWITCH_TO_ROOM" action_args=action_args %}'>Add <span class="font-bold">switch</span></button></li>
             <li class="flex-row"><button class="w-full" hx-indicator="#modal_loading" onclick="modal.close();" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_source" action="ADD_BUTTON_TO_ROOM" action_args=action_args %}'>Add <span class="font-bold">button</span></button></li>
+            <li class="flex-row"><button class="w-full" hx-indicator="#modal_loading" onclick="modal.close();" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_source" action="ADD_THERMOSTAT_TO_ROOM" action_args=action_args %}'>Add <span class="font-bold">thermostat/climate</span></button></li>
         </ul>
     </div>
 

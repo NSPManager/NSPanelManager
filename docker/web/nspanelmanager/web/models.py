@@ -87,6 +87,7 @@ class Entity(models.Model):
         LIGHT = "light"
         SWITCH = "switch"
         BUTTON = "button"
+        THERMOSTAT = "thermostat"
 
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     friendly_name = models.CharField(max_length=255, default="")

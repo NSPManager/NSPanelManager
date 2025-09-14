@@ -19,6 +19,8 @@
                             {% url "htmx_partial_edit_switch_entity" switch_id=entity.id as edit_url %}
                         {% elif entity.type == "button" %}
                             {% url "htmx_partial_edit_button_entity" button_id=entity.id as edit_url %}
+                        {% elif entity.type == "thermostat" %}
+                            {% url "htmx_partial_edit_thermostat_entity" thermostat_id=entity.id as edit_url %}
                         {% elif entity.type == "scene" %}
                             {% url "htmx_partial_edit_scene_entity" scene_id=entity.id as edit_url %}
                         {% else %}

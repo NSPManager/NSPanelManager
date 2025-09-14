@@ -19,10 +19,10 @@
                 <div class="">
                     <!-- Name -->
                     <div class="">
-                        <label for="add_new_light_name" class="block mb-2 text-sm font-medium">Name</label>
+                        <label for="friendly_name" class="block mb-2 text-sm font-medium">Name</label>
                         <div class="flex flex-row-reverse">
                         <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
-                        type="text" class="input" name="light_name" id="light_name" value="{{ entity.name }}">
+                        type="text" class="input" name="friendly_name" id="friendly_name" value="{{ entity.name }}">
                         <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/search_text:border-accent">
                             <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <title>Name</title>
@@ -38,11 +38,11 @@
 
                 {% if entity_source == "home_assistant" %}
                     <div class="mt-4">
-                        {% component "item_select" name="backend_name" label="Home Assistant item" items=home_assistant_items selected=button.entity_data.home_assistant_name %}{% endcomponent %}
+                        {% component "item_select" name="backend_name" label="Home Assistant item" items=home_assistant_items selected=thermostat.entity_data.home_assistant_name %}{% endcomponent %}
                     </div>
                 {% endif %}
 
-                {% if entity_source == "nspm" %}
+                {% if entity_source == "openhab" %}
                 <!-- MQTT Topic -->
                 <div class="">
                     <label for="mqtt_topic" class="block mb-2 text-sm font-medium">MQTT Topic</label>

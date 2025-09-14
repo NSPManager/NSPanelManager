@@ -77,6 +77,11 @@ public:
   static void load_buttons();
 
   /*
+   * Load all thermostats from the DB and remove any existing thermostat that no longer exist.
+   */
+  static void load_thermostats();
+
+  /*
    * Load all switches from the DB and remove any existing switch that no longer exist.
    */
   static void load_switches();

@@ -235,6 +235,31 @@ message NSPanelMQTTManagerCommand {
         int32 button_id = 2;
     }
 
+    message ThermostatTemperatureCommand {
+        int32 thermostat_id = 1;
+        float temperature = 2;
+    }
+
+    message ThermostatModeCommand {
+        int32 thermostat_id = 1;
+        string mode = 2;
+    }
+
+    message ThermostatSwingCommand {
+        int32 thermostat_id = 1;
+        string swing_mode = 2;
+    }
+
+    message ThermostatFanModeCommand {
+        int32 thermostat_id = 1;
+        string fan_mode = 2;
+    }
+
+    message ThermostatPresetModeCommand {
+        int32 thermostat_id = 1;
+        string preset_mode = 2;
+    }
+
     oneof CommandData {
         FirstPageTurnLightOn first_page_turn_on = 1;
         FirstPageTurnLightOff first_page_turn_off = 2;
@@ -242,6 +267,12 @@ message NSPanelMQTTManagerCommand {
         ToggleEntityFromEntitiesPage toggle_entity_from_entities_page = 4;
         SaveSceneCommand save_scene_command = 5;
         ButtonPressed button_pressed = 6;
+
+        ThermostatTemperatureCommand thermostat_temperature_command = 7;
+        ThermostatModeCommand thermostat_mode_command = 8;
+        ThermostatSwingCommand thermostat_swing_command = 9;
+        ThermostatFanModeCommand thermostat_fan_mode_command = 10;
+        ThermostatPresetModeCommand thermostat_preset_mode_command = 11;
     }
 
 

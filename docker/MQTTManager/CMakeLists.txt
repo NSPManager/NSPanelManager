@@ -97,6 +97,11 @@ set_target_properties(MQTTManager_Button PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUD
 target_include_directories(MQTTManager_Button PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTTManager_Button MQTTManager_HomeAssistantManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
 
+add_library(MQTTManager_Thermostat STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/thermostat.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/thermostat.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/home_assistant_thermostat.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/home_assistant_thermostat.cpp)
+set_target_properties(MQTTManager_Thermostat PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/thermostat.hpp)
+target_include_directories(MQTTManager_Thermostat PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_link_libraries(MQTTManager_Thermostat MQTTManager_HomeAssistantManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
+
 add_library(MQTTManager_Switch STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/switch.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/home_assistant_switch.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/home_assistant_switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/openhab_switch.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/openhab_switch.hpp)
 set_target_properties(MQTTManager_Switch PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/home_assistant_switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/openhab_switch.hpp)
 target_include_directories(MQTTManager_Switch PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
@@ -123,7 +128,7 @@ target_link_libraries(MQTTManager_Room MQTTManager_RoomEntitiesPage spdlog::spdl
 add_library(MQTTManager_EntityManager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)
 set_target_properties(MQTTManager_EntityManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity_manager/entity_manager.hpp)
 target_include_directories(MQTTManager_EntityManager PUBLIC MQTTManager_WebHelper ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_EntityManager MQTTManager_WebHelper spdlog::spdlog MQTT_Manager MQTTManager_NSPanel MQTTManager_Light MQTTManager_Button MQTTManager_Switch MQTTManager_WebsocketServer Boost::boost Boost::stacktrace_backtrace dl MQTTManager_Weather gtest::gtest)
+target_link_libraries(MQTTManager_EntityManager MQTTManager_WebHelper spdlog::spdlog MQTT_Manager MQTTManager_NSPanel MQTTManager_Light MQTTManager_Button MQTTManager_Thermostat MQTTManager_Switch MQTTManager_WebsocketServer Boost::boost Boost::stacktrace_backtrace dl MQTTManager_Weather gtest::gtest)
 
 add_library(MQTTManager_Config STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.hpp)
 # set_target_properties(MQTTManager_Config PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager_config/mqtt_manager_config.hpp)

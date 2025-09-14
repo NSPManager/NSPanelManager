@@ -324,6 +324,8 @@ def handle_entity_modal_result(request):
         return create_or_update_switch_entity(request)
     elif request.session["action"] == "ADD_BUTTON_TO_ROOM":
         return create_or_update_button_entity(request)
+    elif request.session["action"] == "ADD_THERMOSTAT_TO_ROOM":
+        return create_or_update_thermostat_entity(request)
     elif request.session["action"] == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE":
         return create_or_update_scene_entity(request)
     else:
@@ -509,6 +511,30 @@ def partial_entity_add_button_entity(request):
     return render(request, 'partial/select_entity/entity_add_or_edit_button_to_room.html', data)
 
 
+def partial_entity_add_thermostat_entity(request):
+    data = {
+        "entity_source": request.session["entity_source"],
+        "openhab_item": "",
+        "home_assistant_item": "",
+        "openhab_items": [],
+        "home_assistant_items": [],
+    }
+
+    if data["entity_source"] == "home_assistant":
+        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["climate"]})
+        if len(ha_items["errors"]) == 0:
+            data["home_assistant_items"] = ha_items["items"]
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "Failed to get items from Home Assistant!"
+            }, status=500)
+    else:
+        logging.error("Unknown entity source! Source: " + data["entity_source"])
+
+    return render(request, 'partial/select_entity/entity_add_or_edit_thermostat_to_room.html', data)
+
+
 def partial_entity_edit_switch_entity(request, switch_id):
     switch = Entity.objects.get(id=switch_id)
 
@@ -560,6 +586,38 @@ def partial_entity_edit_button_entity(request, button_id):
             }, status=500)
 
     return render(request, "partial/select_entity/entity_add_or_edit_button_to_room.html", data)
+
+
+def partial_entity_edit_thermostat_entity(request, thermostat_id):
+    thermostat = Entity.objects.get(id=thermostat_id)
+
+    request.session["action"] = "ADD_THERMOSTAT_TO_ROOM"
+    request.session["action_args"] = json.dumps({
+        "entity_id": thermostat_id,
+        "room_id": thermostat.room.id,
+        "page_id": thermostat.entities_page.id,
+        "page_slot": thermostat.room_view_position,
+    })
+
+    data = {
+        "thermostat": thermostat,
+        "edit_thermostat_id": thermostat_id,
+        "entity_source": thermostat.entity_data["controller"],
+        "entity": {
+            "name": thermostat.friendly_name,
+        },
+    }
+    if data["entity_source"] == "home_assistant":
+        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["climate"]})
+        if len(ha_items["errors"]) == 0:
+            data["home_assistant_items"] = ha_items["items"]
+        else:
+            return JsonResponse({
+                "status": "error",
+                "text": "Failed to get items from Home Assistant!"
+            }, status=500)
+
+    return render(request, "partial/select_entity/entity_add_or_edit_thermostat_to_room.html", data)
 
 
 def partial_entity_edit_scene_entity(request, scene_id):
@@ -789,10 +847,17 @@ def partial_add_entity_to_entities_page_select_entity_source(request, action, ac
         "is_home_assistant_configured": is_home_assistant_configured,
         "is_openhab_configured": is_openhab_configured,
         "home_assistant_supported_entity_types": [
-            "ADD_LIGHT_TO_ROOM", "ADD_SWITCH_TO_ROOM", "ADD_BUTTON_TO_ROOM", "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE"
+            "ADD_LIGHT_TO_ROOM",
+            "ADD_SWITCH_TO_ROOM",
+            "ADD_BUTTON_TO_ROOM",
+            "ADD_THERMOSTAT_TO_ROOM",
+            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE"
         ],
         "openhab_supported_entity_types": [
-            "ADD_LIGHT_TO_ROOM", "ADD_SWITCH_TO_ROOM", "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE"
+            "ADD_LIGHT_TO_ROOM",
+            "ADD_SWITCH_TO_ROOM",
+            "ADD_THERMOSTAT_TO_ROOM",
+            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE"
         ],
         "manual_supported_entity_types": [
             "ADD_BUTTON_TO_ROOM"
@@ -811,6 +876,8 @@ def partial_add_entity_to_entities_page_config_modal(request, entity_source):
         return partial_entity_add_switch_entity(request)
     elif request.session["action"] == "ADD_BUTTON_TO_ROOM":
         return partial_entity_add_button_entity(request)
+    elif request.session["action"] == "ADD_THERMOSTAT_TO_ROOM":
+        return partial_entity_add_thermostat_entity(request)
     elif request.session["action"] == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE":
         return partial_entity_add_scene_entity(request)
     else:
@@ -1036,14 +1103,11 @@ def create_or_update_button_entity(request):
         new_button.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
         new_button.room_view_position = int(action_args["page_slot"])
 
-    print("Entity data: ", entity_data)
-    print("TEST1")
     if entity_data['controller'] == "home_assistant":
         entity_data['home_assistant_name'] = request.POST["backend_name"]
     elif entity_data['controller'] == "nspm":
         entity_data['mqtt_topic'] = request.POST["mqtt_topic"]
         entity_data['mqtt_payload'] = request.POST["mqtt_payload"]
-    print("TEST2")
     new_button.friendly_name = request.POST["light_name"]
     new_button.entity_data = entity_data
     new_button.save()
@@ -1052,6 +1116,37 @@ def create_or_update_button_entity(request):
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(request=request, view="edit_room", room_id=new_button.room.id, is_scenes_pages=False, is_global_scenes_page=False)
 
+def create_or_update_thermostat_entity(request):
+    action_args = json.loads(request.session["action_args"]) # Loads arguments set when first starting process of adding/updating entity
+
+    entity_data = {
+        'controller': request.session["entity_source"],
+        'home_assistant_name': '',
+        'openhab_name': '',
+    }
+    if "entity_id" in action_args and int(action_args["entity_id"]):
+        new_button = Entity.objects.get(id=int(action_args["entity_id"]))
+        entity_data = new_button.entity_data
+    else:
+        new_button = Entity()
+        new_button.entity_type = Entity.EntityType.THERMOSTAT
+        # Only set once, during initial creation:
+        new_button.room = Room.objects.get(id=int(action_args["room_id"]))
+        new_button.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+        new_button.room_view_position = int(action_args["page_slot"])
+
+    if entity_data['controller'] == "home_assistant":
+        entity_data['home_assistant_name'] = request.POST["backend_name"]
+    elif entity_data['controller'] == "nspm":
+        entity_data['mqtt_topic'] = request.POST["mqtt_topic"]
+        entity_data['mqtt_payload'] = request.POST["mqtt_payload"]
+    new_button.friendly_name = request.POST["friendly_name"]
+    new_button.entity_data = entity_data
+    new_button.save()
+    send_mqttmanager_reload_command()
+
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(request=request, view="edit_room", room_id=new_button.room.id, is_scenes_pages=False, is_global_scenes_page=False)
 
 
 def create_or_update_scene_entity(request):
