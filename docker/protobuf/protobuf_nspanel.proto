@@ -52,6 +52,8 @@ message NSPanelConfig {
         DIRECT = 0;
         FOLLOW = 1;
         NOTIFY_MANAGER = 2;
+        THERMOSTAT_HEAT = 3;
+        THERMOSTAT_COOL = 4;
     };
     NSPanelButtonMode button1_mode = 22;
     NSPanelButtonMode button2_mode = 25;
@@ -69,6 +71,11 @@ message NSPanelConfig {
     bool locked_to_default_room = 39;
 
     string inside_temperature_sensor_mqtt_topic = 40; // The topic for an inside temperature sensor. If this is empty then no sensor is configured.
+
+    int32 button1_lower_temperature = 41; // At what temperature should relay1 turn on (heating) or off (cooling) when in thermostat mode.
+    int32 button1_upper_temperature = 42; // At what temperature should relay1 turn off (heating) or on (cooling) when in thermostat mode.
+    int32 button2_lower_temperature = 43; // At what temperature should relay2 turn on (heating) or off (cooling) when in thermostat mode.
+    int32 button2_upper_temperature = 44; // At what temperature should relay2 turn off (heating) or on (cooling) when in thermostat mode.
 }
 
 enum NSPanelWarningLevel {

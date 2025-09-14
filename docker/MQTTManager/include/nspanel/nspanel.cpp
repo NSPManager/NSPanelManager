@@ -271,6 +271,10 @@ void NSPanel::send_config() {
   config.set_temperature_calibration((std::stof(this->_get_nspanel_setting_with_default("temperature_calibration", "0.0")) * 10));
   config.set_default_light_brightess(MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::LIGHT_TURN_ON_BRIGHTNESS));
   config.set_locked_to_default_room(this->is_locked_to_default_room());
+  config.set_button1_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_upper_temperature", "0")));
+  config.set_button1_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_upper_temperature", "0")));
+  config.set_button2_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_lower_temperature", "0")));
+  config.set_button2_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_upper_temperature", "0")));
   if ((*default_room)->has_temperature_sensor()) {
     config.set_inside_temperature_sensor_mqtt_topic((*default_room)->get_temperature_sensor_mqtt_topic());
   }
@@ -280,6 +284,10 @@ void NSPanel::send_config() {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_DIRECT);
   } else if (b1_mode == ButtonMode::FOLLOW) {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
+  } else if (b1_mode == ButtonMode::THERMOSTAT_HEATING) {
+    config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
+  } else if (b1_mode == ButtonMode::THERMOSTAT_COOLING) {
+    config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
   } else {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
@@ -289,6 +297,10 @@ void NSPanel::send_config() {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_DIRECT);
   } else if (b2_mode == ButtonMode::FOLLOW) {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
+  } else if (b2_mode == ButtonMode::THERMOSTAT_HEATING) {
+    config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
+  } else if (b2_mode == ButtonMode::THERMOSTAT_COOLING) {
+    config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
   } else {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
@@ -690,6 +702,11 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   if (trim_start_pos == std::string::npos) {
     return; // Message contains no valid chars, only spaces
   }
+
+  if (payload.length() <= 0) [[unlikely]] {
+    return; // Message is empty.
+  }
+
   payload = payload.substr(trim_start_pos, trim_end_pos + 1 - 4); // Trim spaces and such but also the first 7 chars that is the color coding for the message
   if (payload[0] == 0x1B) {                                       // Message formated with color. Remove color
     payload = payload.substr(7);
@@ -723,9 +740,19 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
     return;
   }
 
+  // Convert payload strings non-printable characters to their hex representation
+  std::string converted_payload;
+  for (char c : payload) {
+    if (!std::isprint(c)) {
+      converted_payload += fmt::format("{{0x{:02X}}}", static_cast<unsigned char>(c));
+    } else {
+      converted_payload += c;
+    }
+  }
+
   // Remove first char that indicates log level. This is stored separately
   payload = payload.substr(1);
-  log_data["message"] = payload; // TODO: Clean up message before sending it out
+  log_data["message"] = converted_payload; // TODO: Clean up message before sending it out
   WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data.dump());
 
   // Save log message in backtrace for when (if) the log interface requests it.

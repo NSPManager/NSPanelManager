@@ -205,7 +205,9 @@ private:
     DIRECT,
     DETACHED,
     MQTT_PAYLOAD,
-    FOLLOW
+    FOLLOW,
+    THERMOSTAT_HEATING,
+    THERMOSTAT_COOLING,
   };
 
   // MQTT Stuff:

@@ -221,6 +221,10 @@ def edit_nspanel(request, panel_id: int):
         "button1_custom_mqtt_payload": get_nspanel_setting_with_default(panel_id, "button1_mqtt_payload", ""),
         "button2_custom_mqtt_topic": get_nspanel_setting_with_default(panel_id, "button2_mqtt_topic", ""),
         "button2_custom_mqtt_payload": get_nspanel_setting_with_default(panel_id, "button2_mqtt_payload", ""),
+        "button1_relay_lower_temperature": get_nspanel_setting_with_default(panel_id, "button1_relay_lower_temperature", ""),
+        "button1_relay_upper_temperature": get_nspanel_setting_with_default(panel_id, "button1_relay_upper_temperature", ""),
+        "button2_relay_lower_temperature": get_nspanel_setting_with_default(panel_id, "button2_relay_lower_temperature", ""),
+        "button2_relay_upper_temperature": get_nspanel_setting_with_default(panel_id, "button2_relay_upper_temperature", ""),
         "default_page": get_nspanel_setting_with_default(panel_id, "default_page", "0"),
     }
 
@@ -322,6 +326,10 @@ def save_panel_settings(request, panel_id: int):
     set_nspanel_setting_value(panel_id, "default_page", request.POST["default_page"])
     set_nspanel_setting_value(panel_id, "lock_to_default_room", request.POST["lock_to_default_room"])
     set_nspanel_setting_value(panel_id, "reverse_relays", request.POST["reverse_relays"])
+    set_nspanel_setting_value(panel_id, "button1_relay_lower_temperature", request.POST["button1_relay_lower_temperature"])
+    set_nspanel_setting_value(panel_id, "button1_relay_upper_temperature", request.POST["button1_relay_upper_temperature"])
+    set_nspanel_setting_value(panel_id, "button2_relay_lower_temperature", request.POST["button2_relay_lower_temperature"])
+    set_nspanel_setting_value(panel_id, "button2_relay_upper_temperature", request.POST["button2_relay_upper_temperature"])
 
     if request.POST["panel_type"] == "eu":
         set_nspanel_setting_value(panel_id, "is_us_panel", "False")
