@@ -4,11 +4,14 @@
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
+#include "protobuf_nspanel_entity.pb.h"
 #include <boost/bind.hpp>
 #include <boost/bind/bind.hpp>
 #include <cstdint>
 #include <entity/entity.hpp>
 #include <entity/entity_icons.hpp>
+#include <google/protobuf/util/message_differencer.h>
+#include <mqtt_manager/mqtt_manager.hpp>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
@@ -103,7 +106,61 @@ std::vector<std::string> ThermostatEntity::get_supported_swing_modes() {
 }
 
 void ThermostatEntity::send_state_update_to_nspanel() {
-  SPDLOG_ERROR("TODO: Implement sending Protobuf ThermostatEntity state to NSPanel over MQTT.");
+  NSPanelEntityState state = NSPanelEntityState();
+  NSPanelEntityState_Thermostat *th_status = state.mutable_thermostat();
+  th_status->set_thermostat_id(this->_id);
+  th_status->set_name(this->_name);
+  th_status->set_current_temperature(this->_current_temperature * 10);
+
+  if (!this->_supported_modes.empty()) {
+    auto mode_options = th_status->add_options();
+    mode_options->set_name("Mode");
+    mode_options->set_current_value(this->_current_mode);
+    mode_options->set_icon(EntityIcons::entity_icon_button);
+    for (const auto &mode : this->_supported_modes) {
+      mode_options->add_options(mode);
+    }
+  }
+
+  if (!this->_supported_fan_modes.empty()) {
+    auto fan_options = th_status->add_options();
+    fan_options->set_name("Fan");
+    fan_options->set_current_value(this->_current_fan_mode);
+    fan_options->set_icon(EntityIcons::entity_icon_switch_off);
+    for (const auto &mode : this->_supported_fan_modes) {
+      fan_options->add_options(mode);
+    }
+  }
+
+  if (!this->_supported_presets.empty()) {
+    auto preset_options = th_status->add_options();
+    preset_options->set_name("Preset");
+    preset_options->set_current_value(this->_current_preset);
+    preset_options->set_icon(EntityIcons::entity_icon_switch_off);
+    for (const auto &preset : this->_supported_presets) {
+      preset_options->add_options(preset);
+    }
+  }
+
+  if (!this->_supported_swing_modes.empty()) {
+    auto swing_options = th_status->add_options();
+    swing_options->set_name("Swing");
+    swing_options->set_current_value(this->_current_swing_mode);
+    swing_options->set_icon(EntityIcons::entity_icon_switch_off);
+    for (const auto &mode : this->_supported_swing_modes) {
+      swing_options->add_options(mode);
+    }
+  }
+
+  google::protobuf::util::MessageDifferencer differencer;
+  if (!differencer.Compare(this->_last_thermostat_state, state)) {
+    SPDLOG_DEBUG("Sending updated state for thermostat {}::{} over MQTT.", this->_id, this->_name);
+    this->_last_thermostat_state = state;
+
+    MQTT_Manager::publish_protobuf(this->get_mqtt_state_topic(), state, true);
+  } else {
+    SPDLOG_DEBUG("Did not send state update for thermostat {}::{} as there were no changes.", this->_id, this->_name);
+  }
 }
 
 void ThermostatEntity::set_fan_mode(std::string fan_mode) {

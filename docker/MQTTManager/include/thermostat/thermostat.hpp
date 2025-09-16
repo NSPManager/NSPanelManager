@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <entity/entity.hpp>
 #include <nlohmann/json.hpp>
+#include <protobuf_nspanel_entity.pb.h>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <string_view>
@@ -173,6 +174,7 @@ protected:
   std::string _current_fan_mode;
   std::string _current_preset;
   float _current_temperature;
+  NSPanelEntityState _last_thermostat_state;
 
   std::string _requested_mode;
   std::string _requested_swing_mode;
