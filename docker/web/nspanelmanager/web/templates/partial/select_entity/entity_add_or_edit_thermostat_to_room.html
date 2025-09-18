@@ -1,4 +1,7 @@
-<dialog id="modal" class="modal" hx-swap-oob="true">
+{% load jsonify %}
+{% load base64 %}
+
+<dialog id="modal" class="modal configure-hvac-modal" hx-swap-oob="true">
     <div class="modal-box">
         <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
@@ -15,71 +18,119 @@
                 </h3>
                 <!-- Modal content -->
                 <div class="p-4 md:p-5 space-y-4">
-                <!-- Common controls -->
-                <div class="">
-                    <!-- Name -->
+                    <!-- Common controls -->
                     <div class="">
-                        <label for="friendly_name" class="block mb-2 text-sm font-medium">Name</label>
-                        <div class="flex flex-row-reverse">
-                        <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
-                        type="text" class="input" name="friendly_name" id="friendly_name" value="{{ entity.name }}">
-                        <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/search_text:border-accent">
-                            <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <title>Name</title>
-                            <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
-                                4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
-                                7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
-                            </svg>
-                        </span>
+                        <!-- Name -->
+                        <div class="">
+                            <label for="friendly_name" class="block mb-4 text-sm font-medium">Name</label>
+                            <div class="flex flex-row-reverse">
+                                <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
+                                type="text" class="input" name="friendly_name" id="friendly_name" value="{{ entity.name }}" required>
+                                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/search_text:border-accent">
+                                    <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <title>Name</title>
+                                    <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
+                                        4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
+                                        7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
+                                    </svg>
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
 
-                {% if entity_source == "home_assistant" %}
-                    <div class="mt-4">
-                        {% component "item_select" name="backend_name" label="Home Assistant item" items=home_assistant_items selected=thermostat.entity_data.home_assistant_name %}{% endcomponent %}
+                    {% if entity_source == "home_assistant" %}
+                        <div class="mt-4">
+                            {% component "item_select" name="backend_name" label="Home Assistant item" items=home_assistant_items selected=thermostat.entity_data.home_assistant_name %}{% endcomponent %}
+                        </div>
+                    {% elif entity_source == "openhab" %}
+
+                    <div class="mt-4 border-1 border-primary rounded-box p-4">
+                        {% component "item_select" name="temperature_item" label="Temperature item" items=openhab_items selected=thermostat.entity_data.openhab_temperature_item %}{% endcomponent %}
+                        <!-- Step size -->
+                        <div class="mb-4 w-full md:me-1">
+                            <label for="step_size" class="block mb-1 text-sm font-medium">Step size</label>
+                            <div class="flex flex-row-reverse">
+                                <input class="outline-none rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                                type="number" class="input" name="step_size" value="{{ thermostat.entity_data.openhab_step_size }}" min="0.1" max="1.0" step="0.1" required>
+                                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                                    <span class="mdi mdi-sun-thermometer-outline"></span>
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                {% endif %}
 
-                {% if entity_source == "openhab" %}
-                <!-- MQTT Topic -->
-                <div class="">
-                    <label for="mqtt_topic" class="block mb-2 text-sm font-medium">MQTT Topic</label>
-                    <div class="flex flex-row-reverse">
-                    <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
-                    type="text" class="input" name="mqtt_topic" id="mqtt_topic" value="{{ button.entity_data.mqtt_topic }}">
-                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/search_text:border-accent">
-                        <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <title>MQTT Topic</title>
-                        <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
-                            4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
-                            7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
-                        </svg>
-                        </svg>
-                    </span>
+
+                    <template id="input_field_template">
+                        <div class="mb-2 input_field_option" id="option_name_1">
+                            <div class="flex flex-row-reverse">
+                                <button type="button" title="Delete" data-option_name="option_name_1" onclick="delete_option_field(this);" class="inline-flex hover:bg-error hover:text-error-content cursor-pointer items-center px-3 text-sm border border-neutral rounded-e-md rounded-s-0 peer-focus/search_text:border-accent">
+                                    <span class="mdi mdi-delete"></span>
+                                </button>
+                                <input class="outline-none rounded-none bg-base-300 border-neutral border border-y-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
+                                type="text" class="input" value="">
+                                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/search_text:border-accent">
+                                    <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <title class="input_field_title">Title text</title>
+                                    <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
+                                        4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
+                                        7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div class="mt-4 border-1 border-primary rounded-box p-4">
+                        {% component "item_select" name="fan_mode_item" label="Fan mode item" items=openhab_items selected=thermostat.entity_data.openhab_fan_mode_item %}{% endcomponent %}
+                        <div id="fan_mode_options" class="mt-4">
+                            <div class="flex items-center justify-between w-full mb-1">
+                                <span class="input_field_label block mb-2 text-sm font-medium">Fan modes</span>
+                                <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add fan mode" onclick="add_option_field('fan_mode_options', 'fan_mode_option');">+</button>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-
-                <!-- MQTT Payload -->
-                <div class="">
-                    <label for="mqtt_payload" class="block mb-2 text-sm font-medium">MQTT Payload</label>
-                    <div class="flex flex-row-reverse">
-                    <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
-                    type="text" class="input" name="mqtt_payload" id="mqtt_payload" value="{{ button.entity_data.mqtt_payload }}">
-                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/search_text:border-accent">
-                        <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <title>MQTT Payload</title>
-                        <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
-                            4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
-                            7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
-                        </svg>
-                        </svg>
-                    </span>
+                    <div class="mt-4 border-1 border-primary rounded-box p-4">
+                        {% component "item_select" name="hvac_mode_item" label="Mode item" items=openhab_items selected=thermostat.entity_data.openhab_hvac_mode_item %}{% endcomponent %}
+                        <div id="hvac_mode_options" class="mt-4">
+                            <div class="flex items-center justify-between w-full mb-1">
+                                <span class="input_field_label block mb-2 text-sm font-medium">Modes</span>
+                                <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add mode" onclick="add_option_field('hvac_mode_options', 'hvac_mode_option');">+</button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                {% endif %}
+
+                    <div class="mt-4 border-1 border-primary rounded-box p-4">
+                        {% component "item_select" name="preset_item" label="Preset item" items=openhab_items selected=thermostat.entity_data.openhab_preset_item %}{% endcomponent %}
+                        <div id="preset_options" class="mt-4">
+                            <div class="flex items-center justify-between w-full mb-1">
+                                <span class="input_field_label block mb-2 text-sm font-medium">Presets</span>
+                                <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add preset" onclick="add_option_field('preset_options', 'preset_option');">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 border-1 border-primary rounded-box p-4">
+                        {% component "item_select" name="swing_item" label="Swing item" items=openhab_items selected=thermostat.entity_data.openhab_swing_item %}{% endcomponent %}
+                        <div id="swing_options" class="mt-4">
+                            <div class="flex items-center justify-between w-full mb-1">
+                                <span class="input_field_label block mb-2 text-sm font-medium">Swing options</span>
+                                <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add swing option" onclick="add_option_field('swing_options', 'swing_option');">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 border-1 border-primary rounded-box p-4">
+                        {% component "item_select" name="swingh_item" label="Horizontal swing item" items=openhab_items selected=thermostat.entity_data.openhab_swingh_item %}{% endcomponent %}
+                        <div id="swingh_options" class="mt-4">
+                            <div class="flex items-center justify-between w-full mb-1">
+                                <span class="input_field_label block mb-2 text-sm font-medium">Horizontal swing options</span>
+                                <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add horizontal swing option" onclick="add_option_field('swingh_options', 'swingh_option');">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
 
                 </div>
                 <!-- Modal footer -->
@@ -87,18 +138,72 @@
                     <button type="submit" class="btn btn-info">Save</button>
                 </div>
             </div>
-        </div>
-
         </form>
+    </div>
+
     <form method="dialog" class="modal-backdrop">
         <button>close</button>
     </form>
 
     <script>
+
+    function add_option_field(parent_id, field_name, value="") {
+      var parent_element = document.getElementById(parent_id);
+      var option = document.getElementById("input_field_template").content.cloneNode(true);
+      var current_number_of_options = parent_element.querySelectorAll(".input_field_option").length;
+
+      option.querySelector("input").value = value;
+      option.querySelector("input").name = field_name + "_" + current_number_of_options;
+      option.querySelector("button").dataset.option_name = field_name + "_" + current_number_of_options;
+      option.querySelector("#option_name_1").id = field_name + "_" + current_number_of_options;
+      parent_element.appendChild(option);
+    }
+
+    function delete_option_field(option) {
+      var option = document.getElementById(option.dataset.option_name);
+      option.remove();
+    }
+
     // Open dialog using Javascript as to make it possible to close again
     htmx.on("htmx:afterSwap", (e) => {
       if(e.detail.elt.id == "modal") {
         modal.showModal();
+
+        // Begin by clearing the existing options
+        var existingOptions = document.querySelectorAll(".input_field_option");
+        existingOptions.forEach(option => {
+          option.remove();
+        });
+
+        var fan_modes = JSON.parse(atob('{{ thermostat.entity_data.openhab_fan_modes|jsonify|base64_encode }}'));
+        fan_modes.forEach(mode => {
+          console.log('Adding existing mode:', mode);
+          add_option_field("fan_mode_options", "fan_mode_option", mode);
+        });
+
+        var hvac_modes = JSON.parse(atob('{{ thermostat.entity_data.openhab_hvac_modes|jsonify|base64_encode }}'));
+        hvac_modes.forEach(mode => {
+          console.log('Adding existing mode:', mode);
+          add_option_field("hvac_mode_options", "hvac_mode_option", mode);
+        });
+
+        var presets = JSON.parse(atob('{{ thermostat.entity_data.openhab_preset_modes|jsonify|base64_encode }}'));
+        presets.forEach(mode => {
+          console.log('Adding existing mode:', mode);
+          add_option_field("preset_options", "preset_option", mode);
+        });
+
+        var swing_options = JSON.parse(atob('{{ thermostat.entity_data.openhab_swing_modes|jsonify|base64_encode }}'));
+        swing_options.forEach(mode => {
+          console.log('Adding existing mode:', mode);
+          add_option_field("swing_options", "swing_option", mode);
+        });
+
+        var swingh_options = JSON.parse(atob('{{ thermostat.entity_data.openhab_swingh_modes|jsonify|base64_encode }}'));
+        swingh_options.forEach(mode => {
+          console.log('Adding existing mode:', mode);
+          add_option_field("swingh_options", "swingh_option", mode);
+        });
       }
     });
     </script>

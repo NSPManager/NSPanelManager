@@ -1,4 +1,4 @@
-<div class="w-full" id="item_select_{{ name }}" tabindex="0"> <!-- We set a tabindex so that the element can be focused. This is used to collapse the "dropdown" menu of items when an item has been selected -->
+<div class="w-full mb-0" id="item_select_{{ name }}" tabindex="0"> <!-- We set a tabindex so that the element can be focused. This is used to collapse the "dropdown" menu of items when an item has been selected -->
     <div class="w-full group">
         <label for="friendly_name" class="block mb-2 text-sm font-medium">{{ label }}</label>
         <div class="flex flex-row-reverse">
@@ -14,7 +14,7 @@
             </span>
         </div>
 
-        <div id="dropdown_content_container_{{ name }}" class="overflow-x-clip overflow-y-scroll rounded-b-box bg-neutral text-neutral-content border-accent border border-t-0 z-20 w-full p-2 max-h-0 invisible group-focus-within:max-h-72 group-focus-within:h-auto group-focus-within:visible transition-all duration-100 ease-in-out">
+        <div id="dropdown_content_container_{{ name }}" class="overflow-x-clip overflow-y-scroll rounded-b-box bg-neutral text-neutral-content border-accent border border-t-0 z-20 w-full p-2 max-h-0 hidden group-focus-within:max-h-72 group-focus-within:h-auto group-focus-within:block transition-all duration-100 ease-in-out">
             <ul class="w-full" id="item_select_options_{{ name }}">
                 {% for item in items %}
                     <button type="button" class="w-full text-left"><li data-selected="{% if item.item_id == selected %}true{% else %}false{% endif %}" class="item_select_{{ name }}_option py-1 px-2 rounded-btn data-[selected=true]:bg-base-300 data-[selected=true]:text-info hover:bg-base-100 text-wrap w-full cursor-pointer" data-label="{{ item.label }}" data-item-id="{{ item.item_id }}">{{ item.label }} ({{ item.item_id }})</li></button>
