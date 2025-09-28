@@ -461,7 +461,7 @@ def partial_entity_add_switch_entity(request):
     }
 
     if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["switch"]})
+        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["switch", "input_boolean"]})
         if len(ha_items["errors"]) == 0:
             data["home_assistant_items"] = ha_items["items"]
         else:

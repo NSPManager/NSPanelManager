@@ -4,6 +4,7 @@
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_general.pb.h"
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/bind.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <chrono>
@@ -48,19 +49,37 @@ void HomeAssistantSwitch::send_state_update_to_controller() {
   nlohmann::json service_data;
   service_data["type"] = "call_service";
   service_data["target"]["entity_id"] = this->_home_assistant_name;
-  service_data["domain"] = "switch";
-  if (this->_requested_state) {
-    service_data["service"] = "turn_on";
-    if (MqttManagerConfig::get_settings().optimistic_mode) {
-      this->_current_state = true;
+  if (boost::starts_with(this->_home_assistant_name, "switch.")) {
+    service_data["domain"] = "switch";
+    if (this->_requested_state) {
+      service_data["service"] = "turn_on";
+      if (MqttManagerConfig::get_settings().optimistic_mode) {
+        this->_current_state = true;
+      }
+    } else {
+      service_data["service"] = "turn_off";
+      if (MqttManagerConfig::get_settings().optimistic_mode) {
+        this->_current_state = false;
+      }
     }
+    HomeAssistantManager::send_json(service_data);
+  } else if (boost::starts_with(this->_home_assistant_name, "input_boolean.")) {
+    service_data["domain"] = "input_boolean";
+    if (this->_requested_state) {
+      service_data["service"] = "turn_on";
+      if (MqttManagerConfig::get_settings().optimistic_mode) {
+        this->_current_state = true;
+      }
+    } else {
+      service_data["service"] = "turn_off";
+      if (MqttManagerConfig::get_settings().optimistic_mode) {
+        this->_current_state = false;
+      }
+    }
+    HomeAssistantManager::send_json(service_data);
   } else {
-    service_data["service"] = "turn_off";
-    if (MqttManagerConfig::get_settings().optimistic_mode) {
-      this->_current_state = false;
-    }
+    SPDLOG_ERROR("Could not determin domain for switch entity {}::{}. HA Name: {}", this->_id, this->_name, this->_home_assistant_name);
   }
-  HomeAssistantManager::send_json(service_data);
 
   if (MqttManagerConfig::get_settings().optimistic_mode) {
     this->_entity_changed_callbacks(this);
