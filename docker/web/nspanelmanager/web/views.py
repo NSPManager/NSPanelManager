@@ -68,6 +68,97 @@ def get_base_data(request):
         'version': '%version%', # This value get's replaced during build
         'manager_address': get_setting_with_default("manager_address"),
         'has_unread_messages': Message.objects.filter(read=False).exists(),
+        'icons': [
+            {
+                'name': 'Heating',
+                'icon': '!',
+            },
+            {
+                'name': 'Cooling',
+                'icon': '"',
+            },
+            {
+                'name': 'Hot/Cold',
+                'icon': '#',
+            },
+            {
+                'name': 'Thermostat Auto',
+                'icon': '$',
+            },
+            {
+                'name': 'Dry',
+                'icon': '%',
+            },
+            {
+                'name': 'Eco',
+                'icon': '&',
+            },
+            {
+                'name': 'Away',
+                'icon': "'",
+            },
+            {
+                'name': 'Home',
+                'icon': '(',
+            },
+            {
+                'name': 'Sleep',
+                'icon': ')',
+            },
+            {
+                'name': 'Boost',
+                'icon': '*',
+            },
+            {
+                'name': 'Comfort',
+                'icon': '+',
+            },
+            {
+                'name': 'Activity',
+                'icon': ',',
+            },
+            {
+                'name': 'Defrosting',
+                'icon': '-',
+            },
+            {
+                'name': 'Swing Both',
+                'icon': '.',
+            },
+            {
+                'name': 'Swing Horizontal',
+                'icon': '/',
+            },
+            {
+                'name': 'Swing Vertical',
+                'icon': '0',
+            },
+            {
+                'name': 'Fan Off',
+                'icon': '1',
+            },
+            {
+                'name': 'Fan Auto',
+                'icon': '2',
+            },
+            {
+                'name': 'Fan',
+                'icon': '3',
+            },
+            {
+                'name': 'Fan 1',
+                'icon': '4',
+            },
+            {
+                'name': 'Fan 2',
+                'icon': '5',
+            },
+            {
+                'name': 'Fan 3',
+                'icon': '6',
+            },
+
+        ]
     }
 
     if data["manager_address"] == "":

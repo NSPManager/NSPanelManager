@@ -116,7 +116,7 @@ void ThermostatEntity::send_state_update_to_nspanel() {
     auto mode_options = th_status->add_options();
     mode_options->set_name("Mode");
     mode_options->set_current_value(this->_current_mode);
-    mode_options->set_icon("#"); // TODO: FIX
+    mode_options->set_icon(EntityIcons::thermostat_auto); // TODO: Enable user selectable icons for each mode.
     for (const auto &mode : this->_supported_modes) {
       SPDLOG_DEBUG("Adding HVAC option '{}' to thermostat {}::{} state message.", mode, this->_id, this->_name);
       mode_options->add_options(mode);
@@ -127,7 +127,7 @@ void ThermostatEntity::send_state_update_to_nspanel() {
     auto fan_options = th_status->add_options();
     fan_options->set_name("Fan");
     fan_options->set_current_value(this->_current_fan_mode);
-    fan_options->set_icon("$"); // TODO: FIX
+    fan_options->set_icon(EntityIcons::fan_auto); // TODO: Enable user selectable icons for each mode.
     for (const auto &mode : this->_supported_fan_modes) {
       SPDLOG_DEBUG("Adding fan option '{}' to thermostat {}::{} state message.", mode, this->_id, this->_name);
       fan_options->add_options(mode);
@@ -136,9 +136,9 @@ void ThermostatEntity::send_state_update_to_nspanel() {
 
   if (!this->_supported_presets.empty()) {
     auto preset_options = th_status->add_options();
-    preset_options->set_name("Preset");
+    preset_options->set_name("Preset"); // TODO: Enable user selectable icons for each mode.
     preset_options->set_current_value(this->_current_preset);
-    preset_options->set_icon("%"); // TODO: FIX
+    preset_options->set_icon(EntityIcons::eco);
     for (const auto &preset : this->_supported_presets) {
       SPDLOG_DEBUG("Adding preset option '{}' to thermostat {}::{} state message.", preset, this->_id, this->_name);
       preset_options->add_options(preset);
@@ -149,9 +149,20 @@ void ThermostatEntity::send_state_update_to_nspanel() {
     auto swing_options = th_status->add_options();
     swing_options->set_name("Swing");
     swing_options->set_current_value(this->_current_swing_mode);
-    swing_options->set_icon("&"); // TODO: FIX
+    swing_options->set_icon(EntityIcons::swing_vertical); // TODO: Enable user selectable icons for each mode.
     for (const auto &mode : this->_supported_swing_modes) {
       SPDLOG_DEBUG("Adding swing option '{}' to thermostat {}::{} state message.", mode, this->_id, this->_name);
+      swing_options->add_options(mode);
+    }
+  }
+
+  if (!this->_supported_swing_modes.empty()) {
+    auto swing_options = th_status->add_options();
+    swing_options->set_name("Swing Horizontal");
+    swing_options->set_current_value(this->_current_swingh_mode);
+    swing_options->set_icon(EntityIcons::swing_horizontal); // TODO: Enable user selectable icons for each mode.
+    for (const auto &mode : this->_supported_swingh_modes) {
+      SPDLOG_DEBUG("Adding swingh option '{}' to thermostat {}::{} state message.", mode, this->_id, this->_name);
       swing_options->add_options(mode);
     }
   }

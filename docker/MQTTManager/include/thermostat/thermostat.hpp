@@ -167,11 +167,13 @@ protected:
 
   std::vector<std::string> _supported_modes;
   std::vector<std::string> _supported_swing_modes;
+  std::vector<std::string> _supported_swingh_modes;
   std::vector<std::string> _supported_fan_modes;
   std::vector<std::string> _supported_presets;
 
   std::string _current_mode;
   std::string _current_swing_mode;
+  std::string _current_swingh_mode;
   std::string _current_fan_mode;
   std::string _current_preset;
   float _current_temperature;
@@ -179,6 +181,7 @@ protected:
 
   std::string _requested_mode;
   std::string _requested_swing_mode;
+  std::string _requested_swingh_mode;
   std::string _requested_fan_mode;
   std::string _requested_preset;
   float _requested_temperature;

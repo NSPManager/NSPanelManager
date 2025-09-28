@@ -1,4 +1,5 @@
 from requests import delete
+from requests.sessions import Request
 from django.shortcuts import render, redirect, HttpResponse
 from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
@@ -463,7 +464,7 @@ def partial_entity_add_switch_entity(request):
     }
 
     if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["switch"]})
+        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["switch", "input_boolean"]})
         if len(ha_items["errors"]) == 0:
             data["home_assistant_items"] = ha_items["items"]
         else:
@@ -512,7 +513,8 @@ def partial_entity_add_button_entity(request):
 
 
 def partial_entity_add_thermostat_entity(request):
-    data = {
+    data = get_base_data(request)
+    data |= {
         "entity_source": request.session["entity_source"],
         "openhab_item": "",
         "home_assistant_item": "",
@@ -608,7 +610,8 @@ def partial_entity_edit_thermostat_entity(request, thermostat_id):
         "page_slot": thermostat.room_view_position,
     })
 
-    data = {
+    data = get_base_data(request)
+    data |= {
         "thermostat": thermostat,
         "edit_thermostat_id": thermostat_id,
         "entity_source": thermostat.entity_data["controller"],
@@ -767,17 +770,16 @@ def get_entity_in_page_slot(page_id, slot_id):
 def partial_move_entity(request):
     existing_entity_in_slot = get_entity_in_page_slot(request.POST["page_id"], request.POST["slot_id"])
     new_entity_in_slot = None
-    if request.POST["new_entity_type"] == "Light":
-        new_entity_in_slot = Entity.objects.get(id=request.POST["new_entity_id"])
-    elif request.POST["new_entity_type"] == "Switch":
-        new_entity_in_slot = Entity.objects.get(id=request.POST["new_entity_id"])
-    elif request.POST["new_entity_type"] == "Scene":
+    if request.POST["new_entity_type"] == "Scene":
         new_entity_in_slot = Scene.objects.get(id=request.POST["new_entity_id"])
     else:
-        return JsonResponse({
-            "status": "error",
-            "text": "Did not find existing entity to move!"
-        })
+        try:
+            new_entity_in_slot = Entity.objects.get(id=request.POST["new_entity_id"])
+        except Exception as e:
+            return JsonResponse({
+                "status": "error",
+                "text": "Did not find existing entity to move!"
+            })
 
     if existing_entity_in_slot:
         # Swap the existing entity place with the new entity to be put on that slot

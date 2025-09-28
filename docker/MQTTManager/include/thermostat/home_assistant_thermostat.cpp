@@ -88,6 +88,11 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
         changed_attribute = true;
       }
 
+      if (new_state_attributes.contains("swing_horizontal_modes") && this->_supported_swingh_modes.empty() && !new_state_attributes["swing_horizontal_modes"].is_null()) [[unlikely]] {
+        this->_supported_swingh_modes = new_state_attributes["swing_horizontal_modes"];
+        changed_attribute = true;
+      }
+
       if (new_state_attributes.contains("target_temp_step") && !new_state_attributes["target_temp_step"].is_null()) {
         float new_target_temp_step = new_state_attributes["target_temp_step"].get<float>();
         if (new_target_temp_step != this->_step_size) {

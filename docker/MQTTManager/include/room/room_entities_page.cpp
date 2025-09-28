@@ -98,7 +98,7 @@ void RoomEntitiesPage::post_init(bool send_state_update) {
 
         this->_entities[i]->attach_entity_changed_callback(boost::bind(&RoomEntitiesPage::_entity_changed_callback, this, _1));
       } else {
-        SPDLOG_DEBUG("Found no entity for slot {}.", i);
+        SPDLOG_TRACE("Found no entity for slot {}.", i);
         this->_entities[i] = nullptr;
       }
     }

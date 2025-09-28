@@ -64,11 +64,30 @@
                     <template id="input_field_template">
                         <div class="mb-2 input_field_option" id="option_name_1">
                             <div class="flex flex-row-reverse">
+                                <!--Delete button-->
                                 <button type="button" title="Delete" data-option_name="option_name_1" onclick="delete_option_field(this);" class="inline-flex hover:bg-error hover:text-error-content cursor-pointer items-center px-3 text-sm border border-neutral rounded-e-md rounded-s-0 peer-focus/search_text:border-accent">
                                     <span class="mdi mdi-delete"></span>
                                 </button>
+                                <!--Select icon dropdown-->
+                                <details class="dropdown dropdown-end">
+                                    <summary class="btn border-t border-b border-neutral rounded-none bg-base-100 hover:bg-info hover:text-info-content">+</summary>
+                                    <div class="dropdown-content bg-base-100 rounded-box rounded-tr-none w-56 border border-primary">
+                                        <div class="flex justify-center pb-1 mb-2 mt-1 border-b border-primary">
+                                            <span class="text-sm">Select Icon</span>
+                                        </div>
+                                        <div class="grid grid-cols-4 w-full">
+                                        {% for icon in icons %}
+                                            <button type="button" title="{{ icon.name }}" class="btn btn-ghost rounded-none hover:btn-info" onclick="select_icon('{{ icon }}')">
+                                                <span class="font-nspm-mdi">{{ icon.icon }}</span>
+                                            </button>
+                                        {% endfor %}
+                                        </div>
+                                    </div>
+                                </details>
+                                <!--Text field-->
                                 <input class="outline-none rounded-none bg-base-300 border-neutral border border-y-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                                 type="text" class="input" value="">
+                                <!--Option left icon-->
                                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/search_text:border-accent">
                                     <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <title class="input_field_title">Title text</title>
