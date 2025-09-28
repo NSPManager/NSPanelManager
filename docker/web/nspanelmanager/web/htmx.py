@@ -691,17 +691,16 @@ def get_entity_in_page_slot(page_id, slot_id):
 def partial_move_entity(request):
     existing_entity_in_slot = get_entity_in_page_slot(request.POST["page_id"], request.POST["slot_id"])
     new_entity_in_slot = None
-    if request.POST["new_entity_type"] == "Light":
-        new_entity_in_slot = Entity.objects.get(id=request.POST["new_entity_id"])
-    elif request.POST["new_entity_type"] == "Switch":
-        new_entity_in_slot = Entity.objects.get(id=request.POST["new_entity_id"])
-    elif request.POST["new_entity_type"] == "Scene":
+    if request.POST["new_entity_type"] == "Scene":
         new_entity_in_slot = Scene.objects.get(id=request.POST["new_entity_id"])
     else:
-        return JsonResponse({
-            "status": "error",
-            "text": "Did not find existing entity to move!"
-        })
+        try:
+            new_entity_in_slot = Entity.objects.get(id=request.POST["new_entity_id"])
+        except Exception as e:
+            return JsonResponse({
+                "status": "error",
+                "text": "Did not find existing entity to move!"
+            })
 
     if existing_entity_in_slot:
         # Swap the existing entity place with the new entity to be put on that slot

@@ -11,12 +11,12 @@ public:
   static constexpr const char *save_icon = "w";
   static constexpr const char *home_assistant_icon = "x";
   static constexpr const char *openhab_icon = "y";
-  
-  //Thermostat Icons
+
+  // Thermostat Icons
   static constexpr const char *heating = "!";
-  static constexpr const char *cooling = """;
-  static constexpr const char *hot-cold = "#";
-  static constexpr const char *thermostat-auto = "$";
+  static constexpr const char *cooling = "\"";
+  static constexpr const char *hot_cold = "#";
+  static constexpr const char *thermostat_auto = "$";
   static constexpr const char *dry = "%";
   static constexpr const char *eco = "&";
   static constexpr const char *away = "'";
@@ -26,17 +26,16 @@ public:
   static constexpr const char *comfort = "+";
   static constexpr const char *activity = ",";
   static constexpr const char *defrosting = "-";
-  static constexpr const char *swing-both = ".";
-  static constexpr const char *swing-horizontal = "/";
-  static constexpr const char *swing-vertical = "0";
-  static constexpr const char *fan-off = "1";
-  static constexpr const char *fan-auto = "2";
+  static constexpr const char *swing_both = ".";
+  static constexpr const char *swing_horizontal = "/";
+  static constexpr const char *swing_vertical = "0";
+  static constexpr const char *fan_off = "1";
+  static constexpr const char *fan_auto = "2";
   static constexpr const char *fan = "3";
   static constexpr const char *fan1 = "4";
   static constexpr const char *fan2 = "5";
   static constexpr const char *fan3 = "6";
 };
-
 
 class GUI_Colors {
 public:
