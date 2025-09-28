@@ -296,7 +296,7 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
 void MQTT_Manager::publish_protobuf(const std::string &topic, google::protobuf::Message &payload, bool retain) {
   std::string payload_string;
   if (payload.SerializeToString(&payload_string)) {
-    MQTT_Manager::publish(topic, payload_string.c_str(), retain);
+    MQTT_Manager::publish(topic, payload_string, retain);
   } else {
     SPDLOG_ERROR("Tried to send message to topic '{}' but serialization of protobuf object failed.", topic);
   }

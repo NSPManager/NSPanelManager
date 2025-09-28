@@ -19,12 +19,11 @@
 
 ThermostatEntity::ThermostatEntity(uint32_t light_id) {
   this->_id = light_id;
+  this->_step_size = 1.0; // Set default step size to only whole numbers.
   this->reload_config();
 
   // Build MQTT Topics
   std::string mqtt_base_topic = fmt::format("nspanel/entities/light/{}/", this->_id);
-  this->_current_state = false;
-  this->_requested_state = false;
   CommandManager::attach_callback(boost::bind(&ThermostatEntity::command_callback, this, _1));
 
   SPDLOG_DEBUG("Switch {}::{} base loaded.", this->_id, this->_name);
@@ -106,18 +105,20 @@ std::vector<std::string> ThermostatEntity::get_supported_swing_modes() {
 }
 
 void ThermostatEntity::send_state_update_to_nspanel() {
-  NSPanelEntityState state = NSPanelEntityState();
+  NSPanelEntityState state;
   NSPanelEntityState_Thermostat *th_status = state.mutable_thermostat();
   th_status->set_thermostat_id(this->_id);
   th_status->set_name(this->_name);
-  th_status->set_current_temperature(this->_current_temperature * 10);
+  th_status->set_current_temperature(this->_current_temperature);
+  th_status->set_step_size(this->_step_size);
 
   if (!this->_supported_modes.empty()) {
     auto mode_options = th_status->add_options();
     mode_options->set_name("Mode");
     mode_options->set_current_value(this->_current_mode);
-    mode_options->set_icon(EntityIcons::entity_icon_button);
+    mode_options->set_icon("#"); // TODO: FIX
     for (const auto &mode : this->_supported_modes) {
+      SPDLOG_DEBUG("Adding HVAC option '{}' to thermostat {}::{} state message.", mode, this->_id, this->_name);
       mode_options->add_options(mode);
     }
   }
@@ -126,8 +127,9 @@ void ThermostatEntity::send_state_update_to_nspanel() {
     auto fan_options = th_status->add_options();
     fan_options->set_name("Fan");
     fan_options->set_current_value(this->_current_fan_mode);
-    fan_options->set_icon(EntityIcons::entity_icon_switch_off);
+    fan_options->set_icon("$"); // TODO: FIX
     for (const auto &mode : this->_supported_fan_modes) {
+      SPDLOG_DEBUG("Adding fan option '{}' to thermostat {}::{} state message.", mode, this->_id, this->_name);
       fan_options->add_options(mode);
     }
   }
@@ -136,8 +138,9 @@ void ThermostatEntity::send_state_update_to_nspanel() {
     auto preset_options = th_status->add_options();
     preset_options->set_name("Preset");
     preset_options->set_current_value(this->_current_preset);
-    preset_options->set_icon(EntityIcons::entity_icon_switch_off);
+    preset_options->set_icon("%"); // TODO: FIX
     for (const auto &preset : this->_supported_presets) {
+      SPDLOG_DEBUG("Adding preset option '{}' to thermostat {}::{} state message.", preset, this->_id, this->_name);
       preset_options->add_options(preset);
     }
   }
@@ -146,8 +149,9 @@ void ThermostatEntity::send_state_update_to_nspanel() {
     auto swing_options = th_status->add_options();
     swing_options->set_name("Swing");
     swing_options->set_current_value(this->_current_swing_mode);
-    swing_options->set_icon(EntityIcons::entity_icon_switch_off);
+    swing_options->set_icon("&"); // TODO: FIX
     for (const auto &mode : this->_supported_swing_modes) {
+      SPDLOG_DEBUG("Adding swing option '{}' to thermostat {}::{} state message.", mode, this->_id, this->_name);
       swing_options->add_options(mode);
     }
   }
@@ -236,7 +240,6 @@ void ThermostatEntity::reset_requests() {
   this->_requested_temperature = this->_current_temperature;
   this->_requested_mode = this->_current_mode;
   this->_requested_fan_mode = this->_current_fan_mode;
-  this->_requested_state = this->_current_state;
   this->_requested_swing_mode = this->_current_swing_mode;
 }
 

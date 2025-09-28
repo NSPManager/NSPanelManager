@@ -68,85 +68,98 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
       bool changed_attribute = false;
 
       // Load the supported settings from the attributes
-      if (new_state_attributes.contains("hvac_modes") && this->_supported_modes.empty()) [[unlikely]] {
+      if (new_state_attributes.contains("hvac_modes") && this->_supported_modes.empty() && !new_state_attributes["hvac_modes"].is_null()) [[unlikely]] {
         this->_supported_modes = new_state_attributes["hvac_modes"];
+        changed_attribute = true;
       }
-      if (new_state_attributes.contains("fan_modes") && this->_supported_fan_modes.empty()) [[unlikely]] {
+
+      if (new_state_attributes.contains("fan_modes") && this->_supported_fan_modes.empty() && !new_state_attributes["fan_modes"].is_null()) [[unlikely]] {
         this->_supported_fan_modes = new_state_attributes["fan_modes"];
+        changed_attribute = true;
       }
-      if (new_state_attributes.contains("preset_modes") && this->_supported_presets.empty()) [[unlikely]] {
+
+      if (new_state_attributes.contains("preset_modes") && this->_supported_presets.empty() && !new_state_attributes["preset_modes"].is_null()) [[unlikely]] {
         this->_supported_presets = new_state_attributes["preset_modes"];
+        changed_attribute = true;
       }
-      if (new_state_attributes.contains("swing_modes") && this->_supported_swing_modes.empty()) [[unlikely]] {
+
+      if (new_state_attributes.contains("swing_modes") && this->_supported_swing_modes.empty() && !new_state_attributes["swing_modes"].is_null()) [[unlikely]] {
         this->_supported_swing_modes = new_state_attributes["swing_modes"];
+        changed_attribute = true;
       }
 
-      if (new_state_data.contains("state") && !new_state_data["state"].is_null()) {
-        try {
-          if (new_state_data.contains("state")) {
-            std::string new_state = new_state_data["state"].get<std::string>();
-            if (new_state.compare(this->_current_mode) != 0) {
-              if (std::find(this->_supported_modes.begin(), this->_supported_modes.end(), new_state) != this->_supported_modes.end()) {
-                this->_current_mode = new_state;
-                changed_attribute = true;
-                SPDLOG_DEBUG("Thermostat {}::{} got new state: {}", this->_id, this->_name, new_state_data.at("state").get<std::string>());
-              } else {
-                SPDLOG_WARN("Thermostat {}::{} got new state '{}' from HA but that HVAC mode is not supported.", this->_id, this->_name, new_state_data.at("state").get<std::string>());
-              }
-            }
-          }
-
-          if (new_state_attributes.contains("fan_mode")) {
-            std::string new_fan_mode = new_state_attributes.at("fan_mode").get<std::string>();
-            if (new_fan_mode.compare(this->_current_fan_mode) != 0) {
-              if (std::find(this->_supported_fan_modes.begin(), this->_supported_fan_modes.end(), new_fan_mode) != this->_supported_fan_modes.end()) {
-                this->_current_fan_mode = new_fan_mode;
-                changed_attribute = true;
-                SPDLOG_DEBUG("Thermostat {}::{} got new fan mode: {}", this->_id, this->_name, new_fan_mode);
-              } else {
-                SPDLOG_WARN("Thermostat {}::{} got new fan mode '{}' from HA but that fan mode is not supported.", this->_id, this->_name, new_fan_mode);
-              }
-            }
-          }
-
-          if (new_state_attributes.contains("preset_mode")) {
-            std::string new_preset_mode = new_state_attributes.at("preset_mode").get<std::string>();
-            if (new_preset_mode.compare(this->_current_preset) != 0) {
-              if (std::find(this->_supported_presets.begin(), this->_supported_presets.end(), new_preset_mode) != this->_supported_presets.end()) {
-                this->_current_preset = new_preset_mode;
-                changed_attribute = true;
-                SPDLOG_DEBUG("Thermostat {}::{} got new preset mode: {}", this->_id, this->_name, new_preset_mode);
-              } else {
-                SPDLOG_WARN("Thermostat {}::{} got new preset mode '{}' from HA but that preset mode is not supported.", this->_id, this->_name, new_preset_mode);
-              }
-            }
-          }
-
-          if (new_state_attributes.contains("swing_mode")) {
-            std::string new_swing_mode = new_state_attributes.at("swing_mode").get<std::string>();
-            if (new_swing_mode.compare(this->_current_swing_mode) != 0) {
-              if (std::find(this->_supported_swing_modes.begin(), this->_supported_swing_modes.end(), new_swing_mode) != this->_supported_swing_modes.end()) {
-                this->_current_swing_mode = new_swing_mode;
-                changed_attribute = true;
-                SPDLOG_DEBUG("Thermostat {}::{} got new swing mode: {}", this->_id, this->_name, new_swing_mode);
-              } else {
-                SPDLOG_WARN("Thermostat {}::{} got new swing mode '{}' from HA but that swing mode is not supported.", this->_id, this->_name, new_swing_mode);
-              }
-            }
-          }
-
-          if (new_state_attributes.contains("temperature")) {
-            float temperature = new_state_attributes.at("temperature").get<float>();
-            if (temperature != this->_current_temperature) {
-              this->_current_temperature = temperature;
-              changed_attribute = true;
-              SPDLOG_DEBUG("Thermostat {}::{} got new temperature: {}", this->_id, this->_name, temperature);
-            }
-          }
-
-        } catch (std::exception &e) {
-          SPDLOG_ERROR("Caught exception when trying to update state for light {}::{} message: {}. Working data: {}", this->_id, this->_name, boost::diagnostic_information(e, true), new_state_attributes.dump());
+      if (new_state_attributes.contains("target_temp_step") && !new_state_attributes["target_temp_step"].is_null()) {
+        float new_target_temp_step = new_state_attributes["target_temp_step"].get<float>();
+        if (new_target_temp_step != this->_step_size) {
+          this->_step_size = new_target_temp_step;
+          changed_attribute = true;
         }
+      }
+
+      try {
+        if (new_state_data.contains("state") && !new_state_data["state"].is_null()) {
+          std::string new_state = new_state_data["state"].get<std::string>();
+          if (new_state.compare(this->_current_mode) != 0) {
+            if (std::find(this->_supported_modes.begin(), this->_supported_modes.end(), new_state) != this->_supported_modes.end()) {
+              this->_current_mode = new_state;
+              changed_attribute = true;
+              SPDLOG_DEBUG("Thermostat {}::{} got new state: {}", this->_id, this->_name, new_state_data.at("state").get<std::string>());
+            } else {
+              SPDLOG_WARN("Thermostat {}::{} got new state '{}' from HA but that HVAC mode is not supported.", this->_id, this->_name, new_state_data.at("state").get<std::string>());
+            }
+          }
+        }
+
+        if (new_state_attributes.contains("fan_mode") && !new_state_attributes["fan_mode"].is_null()) {
+          std::string new_fan_mode = new_state_attributes.at("fan_mode").get<std::string>();
+          if (new_fan_mode.compare(this->_current_fan_mode) != 0) {
+            if (std::find(this->_supported_fan_modes.begin(), this->_supported_fan_modes.end(), new_fan_mode) != this->_supported_fan_modes.end()) {
+              this->_current_fan_mode = new_fan_mode;
+              changed_attribute = true;
+              SPDLOG_DEBUG("Thermostat {}::{} got new fan mode: {}", this->_id, this->_name, new_fan_mode);
+            } else {
+              SPDLOG_WARN("Thermostat {}::{} got new fan mode '{}' from HA but that fan mode is not supported.", this->_id, this->_name, new_fan_mode);
+            }
+          }
+        }
+
+        if (new_state_attributes.contains("preset_mode") && !new_state_attributes["preset_mode"].is_null()) {
+          std::string new_preset_mode = new_state_attributes.at("preset_mode").get<std::string>();
+          if (new_preset_mode.compare(this->_current_preset) != 0) {
+            if (std::find(this->_supported_presets.begin(), this->_supported_presets.end(), new_preset_mode) != this->_supported_presets.end()) {
+              this->_current_preset = new_preset_mode;
+              changed_attribute = true;
+              SPDLOG_DEBUG("Thermostat {}::{} got new preset mode: {}", this->_id, this->_name, new_preset_mode);
+            } else {
+              SPDLOG_WARN("Thermostat {}::{} got new preset mode '{}' from HA but that preset mode is not supported.", this->_id, this->_name, new_preset_mode);
+            }
+          }
+        }
+
+        if (new_state_attributes.contains("swing_mode") && !new_state_attributes["swing_mode"].is_null()) {
+          std::string new_swing_mode = new_state_attributes.at("swing_mode").get<std::string>();
+          if (new_swing_mode.compare(this->_current_swing_mode) != 0) {
+            if (std::find(this->_supported_swing_modes.begin(), this->_supported_swing_modes.end(), new_swing_mode) != this->_supported_swing_modes.end()) {
+              this->_current_swing_mode = new_swing_mode;
+              changed_attribute = true;
+              SPDLOG_DEBUG("Thermostat {}::{} got new swing mode: {}", this->_id, this->_name, new_swing_mode);
+            } else {
+              SPDLOG_WARN("Thermostat {}::{} got new swing mode '{}' from HA but that swing mode is not supported.", this->_id, this->_name, new_swing_mode);
+            }
+          }
+        }
+
+        if (new_state_attributes.contains("temperature") && !new_state_attributes["temperature"].is_null()) {
+          float temperature = new_state_attributes.at("temperature").get<float>();
+          if (temperature != this->_current_temperature) {
+            this->_current_temperature = temperature;
+            changed_attribute = true;
+            SPDLOG_DEBUG("Thermostat {}::{} got new temperature: {}", this->_id, this->_name, temperature);
+          }
+        }
+
+      } catch (std::exception &e) {
+        SPDLOG_ERROR("Caught exception when trying to update state for light {}::{} message: {}. Working data: {}", this->_id, this->_name, boost::diagnostic_information(e, true), new_state_attributes.dump());
       }
 
       if (changed_attribute) {

@@ -25,7 +25,8 @@ message NSPanelEntityState {
     message Thermostat {
         int32 thermostat_id = 1;
         string name = 2;
-        int32 current_temperature = 3; // Current temperature *10 (devide by 10 to get 1 decimal place)
+        float current_temperature = 3;
+        float step_size = 4;
 
         message ThermostatOption {
             string name = 1;
@@ -33,7 +34,7 @@ message NSPanelEntityState {
             repeated string options = 3;
             string icon = 4;
         }
-        repeated ThermostatOption options = 4;
+        repeated ThermostatOption options = 5;
     }
 
     oneof entity {

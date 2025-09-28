@@ -163,6 +163,7 @@ protected:
   MQTT_MANAGER_ENTITY_CONTROLLER _controller;
   uint32_t _entity_page_id;
   uint8_t _entity_page_slot;
+  float _step_size;
 
   std::vector<std::string> _supported_modes;
   std::vector<std::string> _supported_swing_modes;
@@ -181,9 +182,6 @@ protected:
   std::string _requested_fan_mode;
   std::string _requested_preset;
   float _requested_temperature;
-
-  bool _current_state;
-  bool _requested_state;
 
   boost::signals2::signal<void(ThermostatEntity *)> _thermostat_destroyed_callbacks;
 };
