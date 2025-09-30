@@ -271,7 +271,6 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::string value) {
   std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-  SPDLOG_DEBUG("Updating stomp topic value '{}'", topic_name);
   for (auto &topic : WebsocketServer::_stomp_topics) {
     if (topic->get_name().compare(topic_name) == 0) {
       topic->update_value(value);
@@ -282,7 +281,6 @@ void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::stri
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, nlohmann::json &value) {
   std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-  SPDLOG_DEBUG("Updating stomp topic JSON '{}'", topic_name);
   for (auto &topic : WebsocketServer::_stomp_topics) {
     if (topic->get_name().compare(topic_name) == 0) {
       topic->update_value(value);

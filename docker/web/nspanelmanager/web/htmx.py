@@ -1168,38 +1168,51 @@ def create_or_update_thermostat_entity(request):
         # Loop over all options starting with fan_mode_option_
         fan_modes = []
         for option in request.POST:
-            if option.startswith("fan_mode_option_"):
-                print("Found fan option: ", option)
-                fan_modes.append(request.POST[option])
+            if option.startswith("fan_mode_option_") and not option.endswith("_icon"):
+                fan_modes.append({
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"]
+                })
         entity_data['openhab_fan_modes'] = fan_modes
 
         # Loop over all options starting with hvac_mode_option_
         hvac_modes = []
         for option in request.POST:
-            if option.startswith("hvac_mode_option_"):
-                print("Found hvac option: ", option)
-                hvac_modes.append(request.POST[option])
+            if option.startswith("hvac_mode_option_") and not option.endswith("_icon"):
+                hvac_modes.append({
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"]
+                })
         entity_data['openhab_hvac_modes'] = hvac_modes
 
         # Loop over all options starting with preset_option_
         preset_modes = []
         for option in request.POST:
-            if option.startswith("preset_option_"):
-                preset_modes.append(request.POST[option])
+            if option.startswith("preset_option_") and not option.endswith("_icon"):
+                preset_modes.append({
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"]
+                })
         entity_data['openhab_preset_modes'] = preset_modes
 
         # Loop over all options starting with swing_option
         swing_modes = []
         for option in request.POST:
-            if option.startswith("swing_option_"):
-                swing_modes.append(request.POST[option])
+            if option.startswith("swing_option_") and not option.endswith("_icon"):
+                swing_modes.append({
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"]
+                })
         entity_data['openhab_swing_modes'] = swing_modes
 
         # Loop over all options starting with swingh_option
         swingh_modes = []
         for option in request.POST:
-            if option.startswith("swingh_option_"):
-                swingh_modes.append(request.POST[option])
+            if option.startswith("swingh_option_") and not option.endswith("_icon"):
+                swingh_modes.append({
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"]
+                })
         entity_data['openhab_swingh_modes'] = swingh_modes
 
     new_thermostat.friendly_name = request.POST["friendly_name"]

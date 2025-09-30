@@ -67,40 +67,6 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
       nlohmann::json new_state_attributes = new_state_data["attributes"];
       bool changed_attribute = false;
 
-      // Load the supported settings from the attributes
-      if (new_state_attributes.contains("hvac_modes") && this->_supported_modes.empty() && !new_state_attributes["hvac_modes"].is_null()) [[unlikely]] {
-        this->_supported_modes = new_state_attributes["hvac_modes"];
-        changed_attribute = true;
-      }
-
-      if (new_state_attributes.contains("fan_modes") && this->_supported_fan_modes.empty() && !new_state_attributes["fan_modes"].is_null()) [[unlikely]] {
-        this->_supported_fan_modes = new_state_attributes["fan_modes"];
-        changed_attribute = true;
-      }
-
-      if (new_state_attributes.contains("preset_modes") && this->_supported_presets.empty() && !new_state_attributes["preset_modes"].is_null()) [[unlikely]] {
-        this->_supported_presets = new_state_attributes["preset_modes"];
-        changed_attribute = true;
-      }
-
-      if (new_state_attributes.contains("swing_modes") && this->_supported_swing_modes.empty() && !new_state_attributes["swing_modes"].is_null()) [[unlikely]] {
-        this->_supported_swing_modes = new_state_attributes["swing_modes"];
-        changed_attribute = true;
-      }
-
-      if (new_state_attributes.contains("swing_horizontal_modes") && this->_supported_swingh_modes.empty() && !new_state_attributes["swing_horizontal_modes"].is_null()) [[unlikely]] {
-        this->_supported_swingh_modes = new_state_attributes["swing_horizontal_modes"];
-        changed_attribute = true;
-      }
-
-      if (new_state_attributes.contains("target_temp_step") && !new_state_attributes["target_temp_step"].is_null()) {
-        float new_target_temp_step = new_state_attributes["target_temp_step"].get<float>();
-        if (new_target_temp_step != this->_step_size) {
-          this->_step_size = new_target_temp_step;
-          changed_attribute = true;
-        }
-      }
-
       try {
         if (new_state_data.contains("state") && !new_state_data["state"].is_null()) {
           std::string new_state = new_state_data["state"].get<std::string>();

@@ -32,6 +32,11 @@ typedef struct NSPanelMQTTManagerCommand__LightCommand NSPanelMQTTManagerCommand
 typedef struct NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage;
 typedef struct NSPanelMQTTManagerCommand__SaveSceneCommand NSPanelMQTTManagerCommand__SaveSceneCommand;
 typedef struct NSPanelMQTTManagerCommand__ButtonPressed NSPanelMQTTManagerCommand__ButtonPressed;
+typedef struct NSPanelMQTTManagerCommand__ThermostatTemperatureCommand NSPanelMQTTManagerCommand__ThermostatTemperatureCommand;
+typedef struct NSPanelMQTTManagerCommand__ThermostatModeCommand NSPanelMQTTManagerCommand__ThermostatModeCommand;
+typedef struct NSPanelMQTTManagerCommand__ThermostatSwingCommand NSPanelMQTTManagerCommand__ThermostatSwingCommand;
+typedef struct NSPanelMQTTManagerCommand__ThermostatFanModeCommand NSPanelMQTTManagerCommand__ThermostatFanModeCommand;
+typedef struct NSPanelMQTTManagerCommand__ThermostatPresetModeCommand NSPanelMQTTManagerCommand__ThermostatPresetModeCommand;
 
 
 /* --- enums --- */
@@ -60,7 +65,9 @@ typedef enum _NSPanelConfig__NSPanelScreensaverMode {
 typedef enum _NSPanelConfig__NSPanelButtonMode {
   NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT = 0,
   NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__FOLLOW = 1,
-  NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__NOTIFY_MANAGER = 2
+  NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__NOTIFY_MANAGER = 2,
+  NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__THERMOSTAT_HEAT = 3,
+  NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__THERMOSTAT_COOL = 4
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_CONFIG__NSPANEL_BUTTON_MODE)
 } NSPanelConfig__NSPanelButtonMode;
 typedef enum _NSPanelStatusReport__State {
@@ -151,10 +158,26 @@ struct  NSPanelConfig
    * The topic for an inside temperature sensor. If this is empty then no sensor is configured.
    */
   char *inside_temperature_sensor_mqtt_topic;
+  /*
+   * At what temperature should relay1 turn on (heating) or off (cooling) when in thermostat mode.
+   */
+  int32_t button1_lower_temperature;
+  /*
+   * At what temperature should relay1 turn off (heating) or on (cooling) when in thermostat mode.
+   */
+  int32_t button1_upper_temperature;
+  /*
+   * At what temperature should relay2 turn on (heating) or off (cooling) when in thermostat mode.
+   */
+  int32_t button2_lower_temperature;
+  /*
+   * At what temperature should relay2 turn off (heating) or on (cooling) when in thermostat mode.
+   */
+  int32_t button2_upper_temperature;
 };
 #define NSPANEL_CONFIG__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
-    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, (char *)protobuf_c_empty_string }
+    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0 }
 
 
 struct  NSPanelWarning
@@ -344,8 +367,14 @@ struct  NSPanelMQTTManagerCommand__LightCommand
   size_t n_light_ids;
   int32_t *light_ids;
   protobuf_c_boolean has_brightness;
+  /*
+   * Brightness in 0-100%
+   */
   int32_t brightness;
   protobuf_c_boolean has_color_temperature;
+  /*
+   * Color temperature in 0-100%
+   */
   int32_t color_temperature;
   protobuf_c_boolean has_hue;
   int32_t hue;
@@ -389,6 +418,61 @@ struct  NSPanelMQTTManagerCommand__ButtonPressed
     , 0 }
 
 
+struct  NSPanelMQTTManagerCommand__ThermostatTemperatureCommand
+{
+  ProtobufCMessage base;
+  int32_t thermostat_id;
+  float temperature;
+};
+#define NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_TEMPERATURE_COMMAND__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__thermostat_temperature_command__descriptor) \
+    , 0, 0 }
+
+
+struct  NSPanelMQTTManagerCommand__ThermostatModeCommand
+{
+  ProtobufCMessage base;
+  int32_t thermostat_id;
+  char *mode;
+};
+#define NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_MODE_COMMAND__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__thermostat_mode_command__descriptor) \
+    , 0, (char *)protobuf_c_empty_string }
+
+
+struct  NSPanelMQTTManagerCommand__ThermostatSwingCommand
+{
+  ProtobufCMessage base;
+  int32_t thermostat_id;
+  char *swing_mode;
+};
+#define NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_SWING_COMMAND__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__thermostat_swing_command__descriptor) \
+    , 0, (char *)protobuf_c_empty_string }
+
+
+struct  NSPanelMQTTManagerCommand__ThermostatFanModeCommand
+{
+  ProtobufCMessage base;
+  int32_t thermostat_id;
+  char *fan_mode;
+};
+#define NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_FAN_MODE_COMMAND__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__thermostat_fan_mode_command__descriptor) \
+    , 0, (char *)protobuf_c_empty_string }
+
+
+struct  NSPanelMQTTManagerCommand__ThermostatPresetModeCommand
+{
+  ProtobufCMessage base;
+  int32_t thermostat_id;
+  char *preset_mode;
+};
+#define NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_PRESET_MODE_COMMAND__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__thermostat_preset_mode_command__descriptor) \
+    , 0, (char *)protobuf_c_empty_string }
+
+
 typedef enum {
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__NOT_SET = 0,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON = 1,
@@ -396,7 +480,12 @@ typedef enum {
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_LIGHT_COMMAND = 3,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_TOGGLE_ENTITY_FROM_ENTITIES_PAGE = 4,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_SAVE_SCENE_COMMAND = 5,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_BUTTON_PRESSED = 6
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_BUTTON_PRESSED = 6,
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_TEMPERATURE_COMMAND = 7,
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_MODE_COMMAND = 8,
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_SWING_COMMAND = 9,
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_FAN_MODE_COMMAND = 10,
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_PRESET_MODE_COMMAND = 11
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__CASE)
 } NSPanelMQTTManagerCommand__CommandDataCase;
 
@@ -415,6 +504,11 @@ struct  NSPanelMQTTManagerCommand
     NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage *toggle_entity_from_entities_page;
     NSPanelMQTTManagerCommand__SaveSceneCommand *save_scene_command;
     NSPanelMQTTManagerCommand__ButtonPressed *button_pressed;
+    NSPanelMQTTManagerCommand__ThermostatTemperatureCommand *thermostat_temperature_command;
+    NSPanelMQTTManagerCommand__ThermostatModeCommand *thermostat_mode_command;
+    NSPanelMQTTManagerCommand__ThermostatSwingCommand *thermostat_swing_command;
+    NSPanelMQTTManagerCommand__ThermostatFanModeCommand *thermostat_fan_mode_command;
+    NSPanelMQTTManagerCommand__ThermostatPresetModeCommand *thermostat_preset_mode_command;
   };
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__INIT \
@@ -582,6 +676,21 @@ void   nspanel_mqttmanager_command__save_scene_command__init
 /* NSPanelMQTTManagerCommand__ButtonPressed methods */
 void   nspanel_mqttmanager_command__button_pressed__init
                      (NSPanelMQTTManagerCommand__ButtonPressed         *message);
+/* NSPanelMQTTManagerCommand__ThermostatTemperatureCommand methods */
+void   nspanel_mqttmanager_command__thermostat_temperature_command__init
+                     (NSPanelMQTTManagerCommand__ThermostatTemperatureCommand         *message);
+/* NSPanelMQTTManagerCommand__ThermostatModeCommand methods */
+void   nspanel_mqttmanager_command__thermostat_mode_command__init
+                     (NSPanelMQTTManagerCommand__ThermostatModeCommand         *message);
+/* NSPanelMQTTManagerCommand__ThermostatSwingCommand methods */
+void   nspanel_mqttmanager_command__thermostat_swing_command__init
+                     (NSPanelMQTTManagerCommand__ThermostatSwingCommand         *message);
+/* NSPanelMQTTManagerCommand__ThermostatFanModeCommand methods */
+void   nspanel_mqttmanager_command__thermostat_fan_mode_command__init
+                     (NSPanelMQTTManagerCommand__ThermostatFanModeCommand         *message);
+/* NSPanelMQTTManagerCommand__ThermostatPresetModeCommand methods */
+void   nspanel_mqttmanager_command__thermostat_preset_mode_command__init
+                     (NSPanelMQTTManagerCommand__ThermostatPresetModeCommand         *message);
 /* NSPanelMQTTManagerCommand methods */
 void   nspanel_mqttmanager_command__init
                      (NSPanelMQTTManagerCommand         *message);
@@ -651,6 +760,21 @@ typedef void (*NSPanelMQTTManagerCommand__SaveSceneCommand_Closure)
 typedef void (*NSPanelMQTTManagerCommand__ButtonPressed_Closure)
                  (const NSPanelMQTTManagerCommand__ButtonPressed *message,
                   void *closure_data);
+typedef void (*NSPanelMQTTManagerCommand__ThermostatTemperatureCommand_Closure)
+                 (const NSPanelMQTTManagerCommand__ThermostatTemperatureCommand *message,
+                  void *closure_data);
+typedef void (*NSPanelMQTTManagerCommand__ThermostatModeCommand_Closure)
+                 (const NSPanelMQTTManagerCommand__ThermostatModeCommand *message,
+                  void *closure_data);
+typedef void (*NSPanelMQTTManagerCommand__ThermostatSwingCommand_Closure)
+                 (const NSPanelMQTTManagerCommand__ThermostatSwingCommand *message,
+                  void *closure_data);
+typedef void (*NSPanelMQTTManagerCommand__ThermostatFanModeCommand_Closure)
+                 (const NSPanelMQTTManagerCommand__ThermostatFanModeCommand *message,
+                  void *closure_data);
+typedef void (*NSPanelMQTTManagerCommand__ThermostatPresetModeCommand_Closure)
+                 (const NSPanelMQTTManagerCommand__ThermostatPresetModeCommand *message,
+                  void *closure_data);
 typedef void (*NSPanelMQTTManagerCommand_Closure)
                  (const NSPanelMQTTManagerCommand *message,
                   void *closure_data);
@@ -682,6 +806,11 @@ extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__light_comma
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__toggle_entity_from_entities_page__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__save_scene_command__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__button_pressed__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_temperature_command__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_mode_command__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_swing_command__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_fan_mode_command__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_preset_mode_command__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_mqttmanager_command__affect_lights_options__descriptor;
 
 PROTOBUF_C__END_DECLS

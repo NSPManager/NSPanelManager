@@ -17,6 +17,9 @@ PROTOBUF_C__BEGIN_DECLS
 
 typedef struct NSPanelEntityState NSPanelEntityState;
 typedef struct NSPanelEntityState__Light NSPanelEntityState__Light;
+typedef struct NSPanelEntityState__Thermostat NSPanelEntityState__Thermostat;
+typedef struct NSPanelEntityState__Thermostat__ThermostatOption NSPanelEntityState__Thermostat__ThermostatOption;
+typedef struct NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue;
 
 
 /* --- enums --- */
@@ -47,9 +50,50 @@ struct  NSPanelEntityState__Light
     , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, NSPANEL_ENTITY_STATE__LIGHT__LIGHT_MODE__COLOR_TEMP }
 
 
+struct  NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue
+{
+  ProtobufCMessage base;
+  char *value;
+  char *icon;
+};
+#define NSPANEL_ENTITY_STATE__THERMOSTAT__THERMOSTAT_OPTION__THERMOSTAT_OPTION_VALUE__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_entity_state__thermostat__thermostat_option__thermostat_option_value__descriptor) \
+    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
+
+
+struct  NSPanelEntityState__Thermostat__ThermostatOption
+{
+  ProtobufCMessage base;
+  char *name;
+  char *current_value;
+  char *current_icon;
+  size_t n_options;
+  NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue **options;
+};
+#define NSPANEL_ENTITY_STATE__THERMOSTAT__THERMOSTAT_OPTION__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_entity_state__thermostat__thermostat_option__descriptor) \
+    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0,NULL }
+
+
+struct  NSPanelEntityState__Thermostat
+{
+  ProtobufCMessage base;
+  int32_t thermostat_id;
+  char *name;
+  float current_temperature;
+  float step_size;
+  size_t n_options;
+  NSPanelEntityState__Thermostat__ThermostatOption **options;
+};
+#define NSPANEL_ENTITY_STATE__THERMOSTAT__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_entity_state__thermostat__descriptor) \
+    , 0, (char *)protobuf_c_empty_string, 0, 0, 0,NULL }
+
+
 typedef enum {
   NSPANEL_ENTITY_STATE__ENTITY__NOT_SET = 0,
-  NSPANEL_ENTITY_STATE__ENTITY_LIGHT = 1
+  NSPANEL_ENTITY_STATE__ENTITY_LIGHT = 1,
+  NSPANEL_ENTITY_STATE__ENTITY_THERMOSTAT = 2
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_ENTITY_STATE__ENTITY__CASE)
 } NSPanelEntityState__EntityCase;
 
@@ -59,6 +103,7 @@ struct  NSPanelEntityState
   NSPanelEntityState__EntityCase entity_case;
   union {
     NSPanelEntityState__Light *light;
+    NSPanelEntityState__Thermostat *thermostat;
   };
 };
 #define NSPANEL_ENTITY_STATE__INIT \
@@ -69,6 +114,15 @@ struct  NSPanelEntityState
 /* NSPanelEntityState__Light methods */
 void   nspanel_entity_state__light__init
                      (NSPanelEntityState__Light         *message);
+/* NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue methods */
+void   nspanel_entity_state__thermostat__thermostat_option__thermostat_option_value__init
+                     (NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue         *message);
+/* NSPanelEntityState__Thermostat__ThermostatOption methods */
+void   nspanel_entity_state__thermostat__thermostat_option__init
+                     (NSPanelEntityState__Thermostat__ThermostatOption         *message);
+/* NSPanelEntityState__Thermostat methods */
+void   nspanel_entity_state__thermostat__init
+                     (NSPanelEntityState__Thermostat         *message);
 /* NSPanelEntityState methods */
 void   nspanel_entity_state__init
                      (NSPanelEntityState         *message);
@@ -93,6 +147,15 @@ void   nspanel_entity_state__free_unpacked
 typedef void (*NSPanelEntityState__Light_Closure)
                  (const NSPanelEntityState__Light *message,
                   void *closure_data);
+typedef void (*NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue_Closure)
+                 (const NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue *message,
+                  void *closure_data);
+typedef void (*NSPanelEntityState__Thermostat__ThermostatOption_Closure)
+                 (const NSPanelEntityState__Thermostat__ThermostatOption *message,
+                  void *closure_data);
+typedef void (*NSPanelEntityState__Thermostat_Closure)
+                 (const NSPanelEntityState__Thermostat *message,
+                  void *closure_data);
 typedef void (*NSPanelEntityState_Closure)
                  (const NSPanelEntityState *message,
                   void *closure_data);
@@ -105,6 +168,9 @@ typedef void (*NSPanelEntityState_Closure)
 extern const ProtobufCMessageDescriptor nspanel_entity_state__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_entity_state__light__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_entity_state__light__light_mode__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__thermostat_option__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__thermostat_option__thermostat_option_value__descriptor;
 
 PROTOBUF_C__END_DECLS
 

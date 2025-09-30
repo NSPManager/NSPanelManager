@@ -69,11 +69,11 @@ void ThermostatEntity::set_mode(std::string mode) {
   this->send_state_update_to_controller();
 }
 
-std::string ThermostatEntity::get_mode() {
+nlohmann::json ThermostatEntity::get_mode() {
   return this->_requested_mode;
 }
 
-std::vector<std::string> ThermostatEntity::get_supported_modes() {
+std::vector<nlohmann::json> ThermostatEntity::get_supported_modes() {
   return this->_supported_modes;
 }
 
@@ -96,11 +96,11 @@ void ThermostatEntity::set_swing_mode(std::string swing_mode) {
   this->send_state_update_to_controller();
 }
 
-std::string ThermostatEntity::get_swing_mode() {
+nlohmann::json ThermostatEntity::get_swing_mode() {
   return this->_requested_swing_mode;
 }
 
-std::vector<std::string> ThermostatEntity::get_supported_swing_modes() {
+std::vector<nlohmann::json> ThermostatEntity::get_supported_swing_modes() {
   return this->_supported_swing_modes;
 }
 
@@ -116,10 +116,12 @@ void ThermostatEntity::send_state_update_to_nspanel() {
     auto mode_options = th_status->add_options();
     mode_options->set_name("Mode");
     mode_options->set_current_value(this->_current_mode);
-    mode_options->set_icon(EntityIcons::thermostat_auto); // TODO: Enable user selectable icons for each mode.
+    mode_options->set_current_icon(EntityIcons::thermostat_auto); // TODO: Enable user selectable icons for each mode.
     for (const auto &mode : this->_supported_modes) {
-      SPDLOG_DEBUG("Adding HVAC option '{}' to thermostat {}::{} state message.", mode, this->_id, this->_name);
-      mode_options->add_options(mode);
+      SPDLOG_DEBUG("Adding HVAC option '{}' to thermostat {}::{} state message.", std::string(mode["value"]), this->_id, this->_name);
+      auto option = mode_options->add_options();
+      option->set_value(std::string(mode["value"]));
+      option->set_icon(std::string(mode["icon"]));
     }
   }
 
@@ -127,10 +129,12 @@ void ThermostatEntity::send_state_update_to_nspanel() {
     auto fan_options = th_status->add_options();
     fan_options->set_name("Fan");
     fan_options->set_current_value(this->_current_fan_mode);
-    fan_options->set_icon(EntityIcons::fan_auto); // TODO: Enable user selectable icons for each mode.
+    fan_options->set_current_icon(EntityIcons::fan_auto); // TODO: Enable user selectable icons for each mode.
     for (const auto &mode : this->_supported_fan_modes) {
-      SPDLOG_DEBUG("Adding fan option '{}' to thermostat {}::{} state message.", mode, this->_id, this->_name);
-      fan_options->add_options(mode);
+      SPDLOG_DEBUG("Adding fan option '{}' to thermostat {}::{} state message.", std::string(mode["value"]), this->_id, this->_name);
+      auto option = fan_options->add_options();
+      option->set_value(std::string(mode["value"]));
+      option->set_icon(std::string(mode["icon"]));
     }
   }
 
@@ -138,10 +142,12 @@ void ThermostatEntity::send_state_update_to_nspanel() {
     auto preset_options = th_status->add_options();
     preset_options->set_name("Preset"); // TODO: Enable user selectable icons for each mode.
     preset_options->set_current_value(this->_current_preset);
-    preset_options->set_icon(EntityIcons::eco);
+    preset_options->set_current_icon(EntityIcons::eco);
     for (const auto &preset : this->_supported_presets) {
-      SPDLOG_DEBUG("Adding preset option '{}' to thermostat {}::{} state message.", preset, this->_id, this->_name);
-      preset_options->add_options(preset);
+      SPDLOG_DEBUG("Adding preset option '{}' to thermostat {}::{} state message.", std::string(preset["value"]), this->_id, this->_name);
+      auto option = preset_options->add_options();
+      option->set_value(std::string(preset["value"]));
+      option->set_icon(std::string(preset["icon"]));
     }
   }
 
@@ -149,10 +155,12 @@ void ThermostatEntity::send_state_update_to_nspanel() {
     auto swing_options = th_status->add_options();
     swing_options->set_name("Swing");
     swing_options->set_current_value(this->_current_swing_mode);
-    swing_options->set_icon(EntityIcons::swing_vertical); // TODO: Enable user selectable icons for each mode.
+    swing_options->set_current_icon(EntityIcons::swing_vertical); // TODO: Enable user selectable icons for each mode.
     for (const auto &mode : this->_supported_swing_modes) {
-      SPDLOG_DEBUG("Adding swing option '{}' to thermostat {}::{} state message.", mode, this->_id, this->_name);
-      swing_options->add_options(mode);
+      SPDLOG_DEBUG("Adding swing option '{}' to thermostat {}::{} state message.", std::string(mode["value"]), this->_id, this->_name);
+      auto option = swing_options->add_options();
+      option->set_value(std::string(mode["value"]));
+      option->set_icon(std::string(mode["icon"]));
     }
   }
 
@@ -160,10 +168,12 @@ void ThermostatEntity::send_state_update_to_nspanel() {
     auto swing_options = th_status->add_options();
     swing_options->set_name("Swing Horizontal");
     swing_options->set_current_value(this->_current_swingh_mode);
-    swing_options->set_icon(EntityIcons::swing_horizontal); // TODO: Enable user selectable icons for each mode.
+    swing_options->set_current_icon(EntityIcons::swing_horizontal); // TODO: Enable user selectable icons for each mode.
     for (const auto &mode : this->_supported_swingh_modes) {
-      SPDLOG_DEBUG("Adding swingh option '{}' to thermostat {}::{} state message.", mode, this->_id, this->_name);
-      swing_options->add_options(mode);
+      SPDLOG_DEBUG("Adding swingh option '{}' to thermostat {}::{} state message.", std::string(mode["value"]), this->_id, this->_name);
+      auto option = swing_options->add_options();
+      option->set_value(std::string(mode["value"]));
+      option->set_icon(std::string(mode["icon"]));
     }
   }
 
@@ -188,11 +198,11 @@ void ThermostatEntity::set_fan_mode(std::string fan_mode) {
   this->send_state_update_to_controller();
 }
 
-std::string ThermostatEntity::get_fan_mode() {
+nlohmann::json ThermostatEntity::get_fan_mode() {
   return this->_requested_fan_mode;
 }
 
-std::vector<std::string> ThermostatEntity::get_supported_fan_modes() {
+std::vector<nlohmann::json> ThermostatEntity::get_supported_fan_modes() {
   return this->_supported_fan_modes;
 }
 
@@ -206,11 +216,11 @@ void ThermostatEntity::set_preset(std::string preset) {
   this->send_state_update_to_controller();
 }
 
-std::string ThermostatEntity::get_preset() {
+nlohmann::json ThermostatEntity::get_preset() {
   return this->_requested_preset;
 }
 
-std::vector<std::string> ThermostatEntity::get_supported_presets() {
+std::vector<nlohmann::json> ThermostatEntity::get_supported_presets() {
   return this->_supported_presets;
 }
 

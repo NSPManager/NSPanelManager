@@ -31,8 +31,13 @@ message NSPanelEntityState {
         message ThermostatOption {
             string name = 1;
             string current_value = 2;
-            repeated string options = 3;
-            string icon = 4;
+            string current_icon = 3;
+            message ThermostatOptionValue {
+                string value = 1;
+                string icon = 2;
+            }
+
+            repeated ThermostatOptionValue options = 4;
         }
         repeated ThermostatOption options = 5;
     }

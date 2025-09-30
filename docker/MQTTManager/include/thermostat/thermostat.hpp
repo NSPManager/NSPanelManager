@@ -33,12 +33,12 @@ public:
   /**
    * Get the current mode of the thermostat.
    */
-  std::string get_mode();
+  nlohmann::json get_mode();
 
   /**
    * Get all supported modes.
    */
-  std::vector<std::string> get_supported_modes();
+  std::vector<nlohmann::json> get_supported_modes();
 
   /**
    * Set the thermostat temperature
@@ -58,12 +58,12 @@ public:
   /**
    * Get the thermostat fan mode
    */
-  std::string get_fan_mode();
+  nlohmann::json get_fan_mode();
 
   /**
    * Get all supported fan modes.
    */
-  std::vector<std::string> get_supported_fan_modes();
+  std::vector<nlohmann::json> get_supported_fan_modes();
 
   /**
    * Set the thermostat preset
@@ -73,12 +73,12 @@ public:
   /**
    * Get the thermostat preset
    */
-  std::string get_preset();
+  nlohmann::json get_preset();
 
   /**
    * Get all supported presets.
    */
-  std::vector<std::string> get_supported_presets();
+  std::vector<nlohmann::json> get_supported_presets();
 
   /**
    * Set the thermostat swing mode
@@ -88,12 +88,12 @@ public:
   /**
    * Get the thermostat swing mode
    */
-  std::string get_swing_mode();
+  nlohmann::json get_swing_mode();
 
   /**
    * Get all supported swing modes.
    */
-  std::vector<std::string> get_supported_swing_modes();
+  std::vector<nlohmann::json> get_supported_swing_modes();
 
   /**
    * Send state update to NSPanel via MQTT as Protobuf object.
@@ -165,25 +165,25 @@ protected:
   uint8_t _entity_page_slot;
   float _step_size;
 
-  std::vector<std::string> _supported_modes;
-  std::vector<std::string> _supported_swing_modes;
-  std::vector<std::string> _supported_swingh_modes;
-  std::vector<std::string> _supported_fan_modes;
-  std::vector<std::string> _supported_presets;
+  std::vector<nlohmann::json> _supported_modes;
+  std::vector<nlohmann::json> _supported_swing_modes;
+  std::vector<nlohmann::json> _supported_swingh_modes;
+  std::vector<nlohmann::json> _supported_fan_modes;
+  std::vector<nlohmann::json> _supported_presets;
 
-  std::string _current_mode;
-  std::string _current_swing_mode;
-  std::string _current_swingh_mode;
-  std::string _current_fan_mode;
-  std::string _current_preset;
+  nlohmann::json _current_mode;
+  nlohmann::json _current_swing_mode;
+  nlohmann::json _current_swingh_mode;
+  nlohmann::json _current_fan_mode;
+  nlohmann::json _current_preset;
   float _current_temperature;
   NSPanelEntityState _last_thermostat_state;
 
-  std::string _requested_mode;
-  std::string _requested_swing_mode;
-  std::string _requested_swingh_mode;
-  std::string _requested_fan_mode;
-  std::string _requested_preset;
+  nlohmann::json _requested_mode;
+  nlohmann::json _requested_swing_mode;
+  nlohmann::json _requested_swingh_mode;
+  nlohmann::json _requested_fan_mode;
+  nlohmann::json _requested_preset;
   float _requested_temperature;
 
   boost::signals2::signal<void(ThermostatEntity *)> _thermostat_destroyed_callbacks;
