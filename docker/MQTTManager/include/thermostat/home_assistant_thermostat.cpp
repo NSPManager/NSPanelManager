@@ -3,6 +3,7 @@
 #include "entity/entity.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_nspanel.pb.h"
+#include "thermostat/thermostat.hpp"
 #include <boost/bind.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <cstdint>
@@ -15,12 +16,6 @@
 
 HomeAssistantThermostat::HomeAssistantThermostat(uint32_t thermostat_id) : ThermostatEntity(thermostat_id) {
   // Process Home Assistant specific details. General thermostat data is loaded in the "ThermostatEntity" constructor.
-  this->_current_fan_mode = "";
-  this->_current_mode = "";
-  this->_current_swing_mode = "";
-  this->_current_preset = "";
-  this->_current_temperature = 0;
-
   if (this->_controller != MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT) {
     SPDLOG_ERROR("HomeAssistantThermostat has not been recognized as controlled by HOME_ASSISTANT. Will stop processing thermostat.");
     return;
@@ -38,8 +33,8 @@ HomeAssistantThermostat::HomeAssistantThermostat(uint32_t thermostat_id) : Therm
   if (entity_data.contains("home_assistant_name")) {
     this->_home_assistant_name = entity_data["home_assistant_name"];
   } else {
-
     SPDLOG_ERROR("No home assistant name defined for Thermostat {}::{}", this->_id, this->_name);
+    return;
   }
   SPDLOG_DEBUG("Loaded thermostat {}::{}, home assistant entity ID: {}", this->_id, this->_name, this->_home_assistant_name);
   HomeAssistantManager::attach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantThermostat::home_assistant_event_callback, this, _1));
@@ -60,6 +55,20 @@ void HomeAssistantThermostat::send_state_update_to_controller() {
 }
 
 void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data) {
+  if (!data.contains("event")) [[unlikely]] {
+    SPDLOG_ERROR("Thermostat {}::{} received malformed event data from HA. Data contains no 'event' key.", this->_id, this->_name);
+    return;
+  } else if (!data["event"].contains("event_type")) [[unlikely]] {
+    SPDLOG_ERROR("Thermostat {}::{} received malformed event data from HA. Data contains no 'event.event_type' key.", this->_id, this->_name);
+    return;
+  } else if (!data["event"].contains("data")) [[unlikely]] {
+    SPDLOG_ERROR("Thermostat {}::{} received malformed event data from HA. Data contains no 'event.data' key.", this->_id, this->_name);
+    return;
+  } else if (!data["event"]["data"].contains("entity_id")) [[unlikely]] {
+    SPDLOG_ERROR("Thermostat {}::{} received malformed event data from HA. Data contains no 'event.data.entity_id' key.", this->_id, this->_name);
+    return;
+  }
+
   if (std::string(data["event"]["event_type"]).compare("state_changed") == 0) {
     if (std::string(data["event"]["data"]["entity_id"]).compare(this->_home_assistant_name) == 0) {
       SPDLOG_DEBUG("Got event update for HA thermostat {}::{}.", this->_id, this->_name);
@@ -70,11 +79,14 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
       try {
         if (new_state_data.contains("state") && !new_state_data["state"].is_null()) {
           std::string new_state = new_state_data["state"].get<std::string>();
-          if (new_state.compare(this->_current_mode) != 0) {
-            if (std::find(this->_supported_modes.begin(), this->_supported_modes.end(), new_state) != this->_supported_modes.end()) {
-              this->_current_mode = new_state;
+          if (new_state.compare(this->_current_mode.value) != 0) {
+            auto new_mode = std::find_if(this->_supported_modes.begin(), this->_supported_modes.end(), [&](const ThermostatOptionHolder &mode) {
+              return mode.value.compare(new_state) == 0;
+            });
+            if (new_mode != this->_supported_modes.end()) {
+              this->_current_mode = *new_mode;
               changed_attribute = true;
-              SPDLOG_DEBUG("Thermostat {}::{} got new state: {}", this->_id, this->_name, new_state_data.at("state").get<std::string>());
+              SPDLOG_DEBUG("Thermostat {}::{} got new state: {}", this->_id, this->_name, new_mode->value);
             } else {
               SPDLOG_WARN("Thermostat {}::{} got new state '{}' from HA but that HVAC mode is not supported.", this->_id, this->_name, new_state_data.at("state").get<std::string>());
             }
@@ -83,11 +95,14 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
 
         if (new_state_attributes.contains("fan_mode") && !new_state_attributes["fan_mode"].is_null()) {
           std::string new_fan_mode = new_state_attributes.at("fan_mode").get<std::string>();
-          if (new_fan_mode.compare(this->_current_fan_mode) != 0) {
-            if (std::find(this->_supported_fan_modes.begin(), this->_supported_fan_modes.end(), new_fan_mode) != this->_supported_fan_modes.end()) {
-              this->_current_fan_mode = new_fan_mode;
+          if (new_fan_mode.compare(this->_current_fan_mode.value) != 0) {
+            auto new_mode = std::find_if(this->_supported_fan_modes.begin(), this->_supported_fan_modes.end(), [&](const ThermostatOptionHolder &mode) {
+              return mode.value.compare(new_fan_mode) == 0;
+            });
+            if (new_mode != this->_supported_fan_modes.end()) {
+              this->_current_fan_mode = *new_mode;
               changed_attribute = true;
-              SPDLOG_DEBUG("Thermostat {}::{} got new fan mode: {}", this->_id, this->_name, new_fan_mode);
+              SPDLOG_DEBUG("Thermostat {}::{} got new fan mode: {}", this->_id, this->_name, new_mode->value);
             } else {
               SPDLOG_WARN("Thermostat {}::{} got new fan mode '{}' from HA but that fan mode is not supported.", this->_id, this->_name, new_fan_mode);
             }
@@ -96,11 +111,14 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
 
         if (new_state_attributes.contains("preset_mode") && !new_state_attributes["preset_mode"].is_null()) {
           std::string new_preset_mode = new_state_attributes.at("preset_mode").get<std::string>();
-          if (new_preset_mode.compare(this->_current_preset) != 0) {
-            if (std::find(this->_supported_presets.begin(), this->_supported_presets.end(), new_preset_mode) != this->_supported_presets.end()) {
-              this->_current_preset = new_preset_mode;
+          if (new_preset_mode.compare(this->_current_preset.value) != 0) {
+            auto request_preset = std::find_if(this->_supported_presets.begin(), this->_supported_presets.end(), [&](const ThermostatOptionHolder &mode) {
+              return mode.value.compare(new_preset_mode) == 0;
+            });
+            if (request_preset != this->_supported_presets.end()) {
+              this->_current_preset = *request_preset;
               changed_attribute = true;
-              SPDLOG_DEBUG("Thermostat {}::{} got new preset mode: {}", this->_id, this->_name, new_preset_mode);
+              SPDLOG_DEBUG("Thermostat {}::{} got new preset mode: {}", this->_id, this->_name, request_preset->value);
             } else {
               SPDLOG_WARN("Thermostat {}::{} got new preset mode '{}' from HA but that preset mode is not supported.", this->_id, this->_name, new_preset_mode);
             }
@@ -109,13 +127,32 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
 
         if (new_state_attributes.contains("swing_mode") && !new_state_attributes["swing_mode"].is_null()) {
           std::string new_swing_mode = new_state_attributes.at("swing_mode").get<std::string>();
-          if (new_swing_mode.compare(this->_current_swing_mode) != 0) {
-            if (std::find(this->_supported_swing_modes.begin(), this->_supported_swing_modes.end(), new_swing_mode) != this->_supported_swing_modes.end()) {
-              this->_current_swing_mode = new_swing_mode;
+          if (new_swing_mode.compare(this->_current_swing_mode.value) != 0) {
+            auto request_swing_mode = std::find_if(this->_supported_swing_modes.begin(), this->_supported_swing_modes.end(), [&](const ThermostatOptionHolder &mode) {
+              return mode.value.compare(new_swing_mode) == 0;
+            });
+            if (request_swing_mode != this->_supported_swing_modes.end()) {
+              this->_current_swing_mode = *request_swing_mode;
               changed_attribute = true;
-              SPDLOG_DEBUG("Thermostat {}::{} got new swing mode: {}", this->_id, this->_name, new_swing_mode);
+              SPDLOG_DEBUG("Thermostat {}::{} got new swing mode: {}", this->_id, this->_name, request_swing_mode->value);
             } else {
               SPDLOG_WARN("Thermostat {}::{} got new swing mode '{}' from HA but that swing mode is not supported.", this->_id, this->_name, new_swing_mode);
+            }
+          }
+        }
+
+        if (new_state_attributes.contains("swing_horizontal_mode") && !new_state_attributes["swing_horizontal_mode"].is_null()) {
+          std::string new_swingh_mode = new_state_attributes.at("swing_horizontal_mode").get<std::string>();
+          if (new_swingh_mode.compare(this->_current_swingh_mode.value) != 0) {
+            auto request_swingh_mode = std::find_if(this->_supported_swingh_modes.begin(), this->_supported_swingh_modes.end(), [&](const ThermostatOptionHolder &mode) {
+              return mode.value.compare(new_swingh_mode) == 0;
+            });
+            if (request_swingh_mode != this->_supported_swingh_modes.end()) {
+              this->_current_swingh_mode = *request_swingh_mode;
+              changed_attribute = true;
+              SPDLOG_DEBUG("Thermostat {}::{} got new swing mode: {}", this->_id, this->_name, new_swingh_mode);
+            } else {
+              SPDLOG_WARN("Thermostat {}::{} got new swing mode '{}' from HA but that swing mode is not supported.", this->_id, this->_name, new_swingh_mode);
             }
           }
         }

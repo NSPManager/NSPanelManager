@@ -2,7 +2,7 @@
 {% load base64 %}
 
 <dialog id="modal" class="modal configure-hvac-modal" hx-swap-oob="true">
-    <div class="modal-box">
+    <div class="modal-box w-156 max-w-none">
         <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
@@ -43,8 +43,14 @@
                         <div class="mt-4">
                             {% component "item_select" name="backend_name" label="Home Assistant item" items=home_assistant_items selected=thermostat.entity_data.home_assistant_name %}{% endcomponent %}
                         </div>
-                    {% elif entity_source == "openhab" %}
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-primary btn-block" onclick="load_ha_thermostat_options()">
+                                Load options from selected Home Assistant entity
+                            </button>
+                        </div>
+                    {% endif %}
 
+                    {% if entity_source == "openhab" %}
                     <div class="mt-4 border-1 border-primary rounded-box p-4">
                         {% component "item_select" name="temperature_item" label="Temperature item" items=openhab_items selected=thermostat.entity_data.openhab_temperature_item %}{% endcomponent %}
                         <!-- Step size -->
@@ -59,6 +65,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
 
 
                     <template id="input_field_template">
@@ -85,9 +92,12 @@
                                         </div>
                                     </div>
                                 </details>
-                                <!--Text field-->
-                                <input class="outline-none rounded-none bg-base-300 border-neutral border border-y-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
-                                type="text" id="input_value" value="">
+                                <!--Label field-->
+                                <input class="outline-none rounded-none bg-base-300 border-neutral border border-y-1 focus:ring-0 peer-focus/search_text:border-accent focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
+                                type="text" id="input_label" value="" title="Mode label" placeholder="Mode label">
+                                <!--Mode field-->
+                                <input class="outline-none rounded-none bg-base-300 border-neutral border border-y-1 focus:ring-0 peer-focus/search_text:border-accent focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
+                                type="text" id="input_value" value="" title="Mode value" placeholder="Mode value">
                                 <!--Option left icon-->
                                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/search_text:border-accent">
                                     <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -102,8 +112,10 @@
                     </template>
 
                     <div class="mt-4 border-1 border-primary rounded-box p-4">
-                        {% component "item_select" name="fan_mode_item" label="Fan mode item" items=openhab_items selected=thermostat.entity_data.openhab_fan_mode_item %}{% endcomponent %}
-                        <div id="fan_mode_options" class="mt-4">
+                        {% if entity_source == "openhab" %}
+                            {% component "item_select" name="fan_mode_item" label="Fan mode item" items=openhab_items selected=thermostat.entity_data.openhab_fan_mode_item %}{% endcomponent %}
+                        {% endif %}
+                        <div id="fan_mode_options" class="{% if entity_source == "openhab" %}mt-4{% endif %}">
                             <div class="flex items-center justify-between w-full mb-1">
                                 <span class="input_field_label block mb-2 text-sm font-medium">Fan modes</span>
                                 <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add fan mode" onclick="add_option_field('fan_mode_options', 'fan_mode_option');">+</button>
@@ -112,8 +124,10 @@
                     </div>
 
                     <div class="mt-4 border-1 border-primary rounded-box p-4">
-                        {% component "item_select" name="hvac_mode_item" label="Mode item" items=openhab_items selected=thermostat.entity_data.openhab_hvac_mode_item %}{% endcomponent %}
-                        <div id="hvac_mode_options" class="mt-4">
+                        {% if entity_source == "openhab" %}
+                            {% component "item_select" name="hvac_mode_item" label="Mode item" items=openhab_items selected=thermostat.entity_data.openhab_hvac_mode_item %}{% endcomponent %}
+                        {% endif %}
+                        <div id="hvac_mode_options" class="{% if entity_source == "openhab" %}mt-4{% endif %}">
                             <div class="flex items-center justify-between w-full mb-1">
                                 <span class="input_field_label block mb-2 text-sm font-medium">Modes</span>
                                 <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add mode" onclick="add_option_field('hvac_mode_options', 'hvac_mode_option');">+</button>
@@ -122,8 +136,10 @@
                     </div>
 
                     <div class="mt-4 border-1 border-primary rounded-box p-4">
-                        {% component "item_select" name="preset_item" label="Preset item" items=openhab_items selected=thermostat.entity_data.openhab_preset_item %}{% endcomponent %}
-                        <div id="preset_options" class="mt-4">
+                        {% if entity_source == "openhab" %}
+                            {% component "item_select" name="preset_item" label="Preset item" items=openhab_items selected=thermostat.entity_data.openhab_preset_item %}{% endcomponent %}
+                        {% endif %}
+                        <div id="preset_options" class="{% if entity_source == "openhab" %}mt-4{% endif %}">
                             <div class="flex items-center justify-between w-full mb-1">
                                 <span class="input_field_label block mb-2 text-sm font-medium">Presets</span>
                                 <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add preset" onclick="add_option_field('preset_options', 'preset_option');">+</button>
@@ -132,8 +148,10 @@
                     </div>
 
                     <div class="mt-4 border-1 border-primary rounded-box p-4">
-                        {% component "item_select" name="swing_item" label="Swing item" items=openhab_items selected=thermostat.entity_data.openhab_swing_item %}{% endcomponent %}
-                        <div id="swing_options" class="mt-4">
+                        {% if entity_source == "openhab" %}
+                            {% component "item_select" name="swing_item" label="Swing item" items=openhab_items selected=thermostat.entity_data.openhab_swing_item %}{% endcomponent %}
+                        {% endif %}
+                        <div id="swing_options" class="{% if entity_source == "openhab" %}mt-4{% endif %}">
                             <div class="flex items-center justify-between w-full mb-1">
                                 <span class="input_field_label block mb-2 text-sm font-medium">Swing options</span>
                                 <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add swing option" onclick="add_option_field('swing_options', 'swing_option');">+</button>
@@ -142,15 +160,16 @@
                     </div>
 
                     <div class="mt-4 border-1 border-primary rounded-box p-4">
-                        {% component "item_select" name="swingh_item" label="Horizontal swing item" items=openhab_items selected=thermostat.entity_data.openhab_swingh_item %}{% endcomponent %}
-                        <div id="swingh_options" class="mt-4">
+                        {% if entity_source == "openhab" %}
+                            {% component "item_select" name="swingh_item" label="Horizontal swing item" items=openhab_items selected=thermostat.entity_data.openhab_swingh_item %}{% endcomponent %}
+                        {% endif %}
+                        <div id="swingh_options" class="{% if entity_source == "openhab" %}mt-4{% endif %}">
                             <div class="flex items-center justify-between w-full mb-1">
                                 <span class="input_field_label block mb-2 text-sm font-medium">Horizontal swing options</span>
                                 <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add horizontal swing option" onclick="add_option_field('swingh_options', 'swingh_option');">+</button>
                             </div>
                         </div>
                     </div>
-                    {% endif %}
 
                 </div>
                 <!-- Modal footer -->
@@ -175,10 +194,14 @@
       document.querySelector("#icon_selector_value_" + option_name).value = selected_icon;
     }
 
-    function add_option_field(parent_id, field_name, value="", icon="!") {
+    function add_option_field(parent_id, field_name, value="", icon="!", label="") {
       var parent_element = document.getElementById(parent_id);
       var option = document.getElementById("input_field_template").content.cloneNode(true);
       var current_number_of_options = parent_element.querySelectorAll(".input_field_option").length;
+
+      if(label == "") {
+        label = value;
+      }
 
       // Setup icon selector
       option.querySelector("#icon_selector_button").innerHTML = icon;
@@ -194,6 +217,10 @@
       // Setup input field
       option.querySelector("#input_value").value = value;
       option.querySelector("#input_value").name = field_name + "_" + current_number_of_options;
+      option.querySelector("#input_value").id = "input_value_" + current_number_of_options;
+      option.querySelector("#input_label").value = label;
+      option.querySelector("#input_label").name = field_name + "_" + current_number_of_options + "_label";
+      option.querySelector("#input_label").id = "input_label_" + current_number_of_options + "_label";
       option.querySelector("#delete_button").dataset.option_name = field_name + "_" + current_number_of_options;
       option.querySelector("#option_name_1").id = field_name + "_" + current_number_of_options;
       parent_element.appendChild(option);
@@ -202,6 +229,59 @@
     function delete_option_field(option) {
       var option = document.getElementById(option.dataset.option_name);
       option.remove();
+    }
+
+    function load_ha_thermostat_options() {
+      var selected_entity = document.getElementById("item_select_backend_name_input");
+      if (selected_entity) {
+        var raw_base64 = selected_entity.dataset["rawBase64"];
+        var string_data = atob(raw_base64);
+        if(string_data) {
+          var json_data = JSON.parse(string_data);
+          var attributes = json_data["item"]["attributes"];
+          console.log(json_data);
+
+          if("fan_modes" in attributes) {
+            var fan_modes = attributes["fan_modes"];
+            fan_modes.forEach(mode => {
+              add_option_field("fan_mode_options", "fan_mode_option", mode);
+            });
+          }
+
+          if("fan_modes" in attributes) {
+            var hvac_modes = attributes["hvac_modes"];
+            hvac_modes.forEach(mode => {
+              add_option_field("hvac_mode_options", "hvac_mode_option", mode);
+            });
+          }
+
+          if("preset_modes" in attributes) {
+            var presets = attributes["preset_modes"];
+            presets.forEach(mode => {
+              add_option_field("preset_options", "preset_option", mode);
+            });
+          }
+
+          if("swing_modes" in attributes) {
+            var swing_options = attributes["swing_modes"];
+            swing_options.forEach(mode => {
+              add_option_field("swing_options", "swing_option", mode);
+            });
+          }
+
+          if("swing_horizontal_modes" in attributes) {
+            var swingh_options = attributes["swing_horizontal_modes"];
+            swingh_options.forEach(mode => {
+              add_option_field("swingh_options", "swingh_option", mode);
+            });
+          }
+
+        } else {
+          show_error_toast(ERROR_TOAST_LEVEL_ERROR, "Error converting base64 data into JSON string data.", ERROR_TOAST_SOURCE_WEB_INTERFACE, 5000);
+        }
+      } else {
+        show_error_toast(ERROR_TOAST_LEVEL_ERROR, "Error finding selected entity.", ERROR_TOAST_SOURCE_WEB_INTERFACE, 5000);
+      }
     }
 
     // Open dialog using Javascript as to make it possible to close again
@@ -215,29 +295,29 @@
           option.remove();
         });
 
-        var fan_modes = JSON.parse(atob('{{ thermostat.entity_data.openhab_fan_modes|jsonify|base64_encode }}'));
+        var fan_modes = JSON.parse(atob('{{ thermostat.entity_data.fan_modes|jsonify|base64_encode }}'));
         fan_modes.forEach(mode => {
-          add_option_field("fan_mode_options", "fan_mode_option", mode.value, mode.icon);
+          add_option_field("fan_mode_options", "fan_mode_option", mode.value, mode.icon, mode.label);
         });
 
-        var hvac_modes = JSON.parse(atob('{{ thermostat.entity_data.openhab_hvac_modes|jsonify|base64_encode }}'));
+        var hvac_modes = JSON.parse(atob('{{ thermostat.entity_data.hvac_modes|jsonify|base64_encode }}'));
         hvac_modes.forEach(mode => {
-          add_option_field("hvac_mode_options", "hvac_mode_option", mode.value, mode.icon);
+          add_option_field("hvac_mode_options", "hvac_mode_option", mode.value, mode.icon, mode.label);
         });
 
-        var presets = JSON.parse(atob('{{ thermostat.entity_data.openhab_preset_modes|jsonify|base64_encode }}'));
+        var presets = JSON.parse(atob('{{ thermostat.entity_data.preset_modes|jsonify|base64_encode }}'));
         presets.forEach(mode => {
-          add_option_field("preset_options", "preset_option", mode.value, mode.icon);
+          add_option_field("preset_options", "preset_option", mode.value, mode.icon, mode.label);
         });
 
-        var swing_options = JSON.parse(atob('{{ thermostat.entity_data.openhab_swing_modes|jsonify|base64_encode }}'));
+        var swing_options = JSON.parse(atob('{{ thermostat.entity_data.swing_modes|jsonify|base64_encode }}'));
         swing_options.forEach(mode => {
-          add_option_field("swing_options", "swing_option", mode.value, mode.icon);
+          add_option_field("swing_options", "swing_option", mode.value, mode.icon, mode.label);
         });
 
-        var swingh_options = JSON.parse(atob('{{ thermostat.entity_data.openhab_swingh_modes|jsonify|base64_encode }}'));
+        var swingh_options = JSON.parse(atob('{{ thermostat.entity_data.swingh_modes|jsonify|base64_encode }}'));
         swingh_options.forEach(mode => {
-          add_option_field("swingh_options", "swingh_option", mode.value, mode.icon);
+          add_option_field("swingh_options", "swingh_option", mode.value, mode.icon, mode.label);
         });
       }
     });

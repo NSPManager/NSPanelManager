@@ -11,6 +11,12 @@
 #include <string>
 #include <string_view>
 
+struct ThermostatOptionHolder {
+  std::string value;
+  std::string icon;
+  std::string label;
+};
+
 class ThermostatEntity : public MqttManagerEntity {
 public:
   ThermostatEntity(uint32_t thermostat_id);
@@ -33,12 +39,12 @@ public:
   /**
    * Get the current mode of the thermostat.
    */
-  nlohmann::json get_mode();
+  ThermostatOptionHolder get_mode();
 
   /**
    * Get all supported modes.
    */
-  std::vector<nlohmann::json> get_supported_modes();
+  std::vector<ThermostatOptionHolder> get_supported_modes();
 
   /**
    * Set the thermostat temperature
@@ -58,12 +64,12 @@ public:
   /**
    * Get the thermostat fan mode
    */
-  nlohmann::json get_fan_mode();
+  ThermostatOptionHolder get_fan_mode();
 
   /**
    * Get all supported fan modes.
    */
-  std::vector<nlohmann::json> get_supported_fan_modes();
+  std::vector<ThermostatOptionHolder> get_supported_fan_modes();
 
   /**
    * Set the thermostat preset
@@ -73,12 +79,12 @@ public:
   /**
    * Get the thermostat preset
    */
-  nlohmann::json get_preset();
+  ThermostatOptionHolder get_preset();
 
   /**
    * Get all supported presets.
    */
-  std::vector<nlohmann::json> get_supported_presets();
+  std::vector<ThermostatOptionHolder> get_supported_presets();
 
   /**
    * Set the thermostat swing mode
@@ -88,12 +94,12 @@ public:
   /**
    * Get the thermostat swing mode
    */
-  nlohmann::json get_swing_mode();
+  ThermostatOptionHolder get_swing_mode();
 
   /**
    * Get all supported swing modes.
    */
-  std::vector<nlohmann::json> get_supported_swing_modes();
+  std::vector<ThermostatOptionHolder> get_supported_swing_modes();
 
   /**
    * Send state update to NSPanel via MQTT as Protobuf object.
@@ -165,25 +171,25 @@ protected:
   uint8_t _entity_page_slot;
   float _step_size;
 
-  std::vector<nlohmann::json> _supported_modes;
-  std::vector<nlohmann::json> _supported_swing_modes;
-  std::vector<nlohmann::json> _supported_swingh_modes;
-  std::vector<nlohmann::json> _supported_fan_modes;
-  std::vector<nlohmann::json> _supported_presets;
+  std::vector<ThermostatOptionHolder> _supported_modes;
+  std::vector<ThermostatOptionHolder> _supported_swing_modes;
+  std::vector<ThermostatOptionHolder> _supported_swingh_modes;
+  std::vector<ThermostatOptionHolder> _supported_fan_modes;
+  std::vector<ThermostatOptionHolder> _supported_presets;
 
-  nlohmann::json _current_mode;
-  nlohmann::json _current_swing_mode;
-  nlohmann::json _current_swingh_mode;
-  nlohmann::json _current_fan_mode;
-  nlohmann::json _current_preset;
+  ThermostatOptionHolder _current_mode;
+  ThermostatOptionHolder _current_swing_mode;
+  ThermostatOptionHolder _current_swingh_mode;
+  ThermostatOptionHolder _current_fan_mode;
+  ThermostatOptionHolder _current_preset;
   float _current_temperature;
   NSPanelEntityState _last_thermostat_state;
 
-  nlohmann::json _requested_mode;
-  nlohmann::json _requested_swing_mode;
-  nlohmann::json _requested_swingh_mode;
-  nlohmann::json _requested_fan_mode;
-  nlohmann::json _requested_preset;
+  ThermostatOptionHolder _requested_mode;
+  ThermostatOptionHolder _requested_swing_mode;
+  ThermostatOptionHolder _requested_swingh_mode;
+  ThermostatOptionHolder _requested_fan_mode;
+  ThermostatOptionHolder _requested_preset;
   float _requested_temperature;
 
   boost::signals2::signal<void(ThermostatEntity *)> _thermostat_destroyed_callbacks;

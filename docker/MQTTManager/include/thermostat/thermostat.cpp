@@ -57,23 +57,151 @@ void ThermostatEntity::reload_config() {
     SPDLOG_ERROR("No controller defined for light {}::{}. Will default to HOME_ASSISTANT.", this->_id, this->_name);
     this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
   }
+
+  this->_supported_fan_modes.clear();
+  this->_supported_modes.clear();
+  this->_supported_swing_modes.clear();
+  this->_supported_swingh_modes.clear();
+  this->_supported_presets.clear();
+
+  SPDLOG_DEBUG("Loading fan modes for {}::{}.", this->_id, this->_name);
+  if (entity_data.contains("fan_modes")) {
+    for (auto &mode : entity_data["fan_modes"]) {
+      if (mode.contains("value")) {
+        ThermostatOptionHolder holder;
+        holder.value = mode["value"];
+        if (mode.contains("icon")) {
+          holder.icon = mode["icon"];
+        } else [[unlikely]] {
+          SPDLOG_ERROR("Mode does not contain an icon key.");
+        }
+        if (mode.contains("label")) {
+          holder.label = mode["label"];
+        } else [[unlikely]] {
+          SPDLOG_WARN("Thermostat entry for mode {} does not give a label. Will use raw mode value.", holder.value);
+          holder.label = mode;
+        }
+        this->_supported_fan_modes.push_back(holder);
+      } else {
+        SPDLOG_ERROR("Mode does not contain a value key.");
+      }
+    }
+  }
+
+  SPDLOG_DEBUG("Loading HVAC modes for {}::{}.", this->_id, this->_name);
+  if (entity_data.contains("hvac_modes")) {
+    for (auto &mode : entity_data["hvac_modes"]) {
+      if (mode.contains("value")) {
+        ThermostatOptionHolder holder;
+        holder.value = mode["value"];
+        if (mode.contains("icon")) {
+          holder.icon = mode["icon"];
+        } else [[unlikely]] {
+          SPDLOG_ERROR("Mode does not contain an icon key.");
+        }
+        if (mode.contains("label")) {
+          holder.label = mode["label"];
+        } else [[unlikely]] {
+          SPDLOG_WARN("Thermostat entry for mode {} does not give a label. Will use raw mode value.", holder.value);
+          holder.label = mode;
+        }
+        this->_supported_modes.push_back(holder);
+      } else {
+        SPDLOG_ERROR("Mode does not contain a value key.");
+      }
+    }
+  }
+
+  SPDLOG_DEBUG("Loading presets for {}::{}.", this->_id, this->_name);
+  if (entity_data.contains("preset_modes")) {
+    for (auto &mode : entity_data["preset_modes"]) {
+      if (mode.contains("value")) {
+        ThermostatOptionHolder holder;
+        holder.value = mode["value"];
+        if (mode.contains("icon")) {
+          holder.icon = mode["icon"];
+        } else [[unlikely]] {
+          SPDLOG_ERROR("Mode does not contain an icon key.");
+        }
+        if (mode.contains("label")) {
+          holder.label = mode["label"];
+        } else [[unlikely]] {
+          SPDLOG_WARN("Thermostat entry for mode {} does not give a label. Will use raw mode value.", holder.value);
+          holder.label = mode;
+        }
+        this->_supported_presets.push_back(holder);
+      } else {
+        SPDLOG_ERROR("Mode does not contain a value key.");
+      }
+    }
+  }
+
+  SPDLOG_DEBUG("Loading swing modes for {}::{}.", this->_id, this->_name);
+  if (entity_data.contains("swing_modes")) {
+    for (auto &mode : entity_data["swing_modes"]) {
+      if (mode.contains("value")) {
+        ThermostatOptionHolder holder;
+        holder.value = mode["value"];
+        if (mode.contains("icon")) {
+          holder.icon = mode["icon"];
+        } else [[unlikely]] {
+          SPDLOG_ERROR("Mode does not contain an icon key.");
+        }
+        if (mode.contains("label")) {
+          holder.label = mode["label"];
+        } else [[unlikely]] {
+          SPDLOG_WARN("Thermostat entry for mode {} does not give a label. Will use raw mode value.", holder.value);
+          holder.label = mode;
+        }
+        this->_supported_swing_modes.push_back(holder);
+      } else {
+        SPDLOG_ERROR("Mode does not contain a value key.");
+      }
+    }
+  }
+
+  SPDLOG_DEBUG("Loading horizontal swing modes for {}::{}.", this->_id, this->_name);
+  if (entity_data.contains("swingh_modes")) {
+    for (auto &mode : entity_data["swingh_modes"]) {
+      if (mode.contains("value")) {
+        ThermostatOptionHolder holder;
+        holder.value = mode["value"];
+        if (mode.contains("icon")) {
+          holder.icon = mode["icon"];
+        } else [[unlikely]] {
+          SPDLOG_ERROR("Mode does not contain an icon key.");
+        }
+        if (mode.contains("label")) {
+          holder.label = mode["label"];
+        } else [[unlikely]] {
+          SPDLOG_WARN("Thermostat entry for mode {} does not give a label. Will use raw mode value.", holder.value);
+          holder.label = mode;
+        }
+        this->_supported_swingh_modes.push_back(holder);
+      } else {
+        SPDLOG_ERROR("Mode does not contain a value key.");
+      }
+    }
+  }
 }
 
 void ThermostatEntity::set_mode(std::string mode) {
-  if (std::find(this->_supported_modes.begin(), this->_supported_modes.end(), mode) != this->_supported_modes.end()) {
-    this->_requested_mode = mode;
+  auto request_mode = std::find_if(this->_supported_modes.begin(), this->_supported_modes.end(), [&](const ThermostatOptionHolder &holder) {
+    return holder.value.compare(mode) == 0;
+  });
+  if (request_mode != this->_supported_modes.end()) {
+    this->_requested_mode = *request_mode;
+    this->send_state_update_to_controller();
   } else {
     SPDLOG_ERROR("Invalid mode ({}) for thermostat {}::{}. Will default to 'off'.", mode, this->_id, this->_name);
-    this->_requested_mode = "off";
   }
-  this->send_state_update_to_controller();
 }
 
-nlohmann::json ThermostatEntity::get_mode() {
+ThermostatOptionHolder ThermostatEntity::get_mode() {
   return this->_requested_mode;
 }
 
-std::vector<nlohmann::json> ThermostatEntity::get_supported_modes() {
+std::vector<ThermostatOptionHolder> ThermostatEntity::get_supported_modes() {
   return this->_supported_modes;
 }
 
@@ -87,20 +215,22 @@ float ThermostatEntity::get_temperature() {
 }
 
 void ThermostatEntity::set_swing_mode(std::string swing_mode) {
-  if (std::find(this->_supported_swing_modes.begin(), this->_supported_swing_modes.end(), swing_mode) != this->_supported_swing_modes.end()) {
-    this->_requested_swing_mode = swing_mode;
+  auto request_swing_mode = std::find_if(this->_supported_swing_modes.begin(), this->_supported_swing_modes.end(), [&](const ThermostatOptionHolder &holder) {
+    return holder.value.compare(swing_mode) == 0;
+  });
+  if (request_swing_mode != this->_supported_swing_modes.end()) {
+    this->_requested_swing_mode = *request_swing_mode;
+    this->send_state_update_to_controller();
   } else {
     SPDLOG_ERROR("Invalid swing mode ({}) for thermostat {}::{}. Will default to 'off'.", swing_mode, this->_id, this->_name);
-    this->_requested_swing_mode = "off";
   }
-  this->send_state_update_to_controller();
 }
 
-nlohmann::json ThermostatEntity::get_swing_mode() {
+ThermostatOptionHolder ThermostatEntity::get_swing_mode() {
   return this->_requested_swing_mode;
 }
 
-std::vector<nlohmann::json> ThermostatEntity::get_supported_swing_modes() {
+std::vector<ThermostatOptionHolder> ThermostatEntity::get_supported_swing_modes() {
   return this->_supported_swing_modes;
 }
 
@@ -115,65 +245,60 @@ void ThermostatEntity::send_state_update_to_nspanel() {
   if (!this->_supported_modes.empty()) {
     auto mode_options = th_status->add_options();
     mode_options->set_name("Mode");
-    mode_options->set_current_value(this->_current_mode);
-    mode_options->set_current_icon(EntityIcons::thermostat_auto); // TODO: Enable user selectable icons for each mode.
+    mode_options->set_current_value(this->_current_mode.label);
+    mode_options->set_current_icon(this->_current_mode.icon);
     for (const auto &mode : this->_supported_modes) {
-      SPDLOG_DEBUG("Adding HVAC option '{}' to thermostat {}::{} state message.", std::string(mode["value"]), this->_id, this->_name);
       auto option = mode_options->add_options();
-      option->set_value(std::string(mode["value"]));
-      option->set_icon(std::string(mode["icon"]));
+      option->set_value(mode.label);
+      option->set_icon(mode.icon);
     }
   }
 
   if (!this->_supported_fan_modes.empty()) {
     auto fan_options = th_status->add_options();
     fan_options->set_name("Fan");
-    fan_options->set_current_value(this->_current_fan_mode);
-    fan_options->set_current_icon(EntityIcons::fan_auto); // TODO: Enable user selectable icons for each mode.
+    fan_options->set_current_value(this->_current_fan_mode.label);
+    fan_options->set_current_icon(this->_current_fan_mode.icon);
     for (const auto &mode : this->_supported_fan_modes) {
-      SPDLOG_DEBUG("Adding fan option '{}' to thermostat {}::{} state message.", std::string(mode["value"]), this->_id, this->_name);
       auto option = fan_options->add_options();
-      option->set_value(std::string(mode["value"]));
-      option->set_icon(std::string(mode["icon"]));
+      option->set_value(mode.label);
+      option->set_icon(mode.icon);
     }
   }
 
   if (!this->_supported_presets.empty()) {
     auto preset_options = th_status->add_options();
-    preset_options->set_name("Preset"); // TODO: Enable user selectable icons for each mode.
-    preset_options->set_current_value(this->_current_preset);
-    preset_options->set_current_icon(EntityIcons::eco);
+    preset_options->set_name("Preset");
+    preset_options->set_current_value(this->_current_preset.label);
+    preset_options->set_current_icon(this->_current_preset.icon);
     for (const auto &preset : this->_supported_presets) {
-      SPDLOG_DEBUG("Adding preset option '{}' to thermostat {}::{} state message.", std::string(preset["value"]), this->_id, this->_name);
       auto option = preset_options->add_options();
-      option->set_value(std::string(preset["value"]));
-      option->set_icon(std::string(preset["icon"]));
+      option->set_value(preset.label);
+      option->set_icon(preset.icon);
     }
   }
 
   if (!this->_supported_swing_modes.empty()) {
     auto swing_options = th_status->add_options();
     swing_options->set_name("Swing");
-    swing_options->set_current_value(this->_current_swing_mode);
-    swing_options->set_current_icon(EntityIcons::swing_vertical); // TODO: Enable user selectable icons for each mode.
+    swing_options->set_current_value(this->_current_swing_mode.label);
+    swing_options->set_current_icon(this->_current_swing_mode.icon);
     for (const auto &mode : this->_supported_swing_modes) {
-      SPDLOG_DEBUG("Adding swing option '{}' to thermostat {}::{} state message.", std::string(mode["value"]), this->_id, this->_name);
       auto option = swing_options->add_options();
-      option->set_value(std::string(mode["value"]));
-      option->set_icon(std::string(mode["icon"]));
+      option->set_value(mode.label);
+      option->set_icon(mode.icon);
     }
   }
 
-  if (!this->_supported_swing_modes.empty()) {
-    auto swing_options = th_status->add_options();
-    swing_options->set_name("Swing Horizontal");
-    swing_options->set_current_value(this->_current_swingh_mode);
-    swing_options->set_current_icon(EntityIcons::swing_horizontal); // TODO: Enable user selectable icons for each mode.
+  if (!this->_supported_swingh_modes.empty()) {
+    auto swingh_options = th_status->add_options();
+    swingh_options->set_name("H Swing");
+    swingh_options->set_current_value(this->_current_swingh_mode.label);
+    swingh_options->set_current_icon(this->_current_swingh_mode.icon);
     for (const auto &mode : this->_supported_swingh_modes) {
-      SPDLOG_DEBUG("Adding swingh option '{}' to thermostat {}::{} state message.", std::string(mode["value"]), this->_id, this->_name);
-      auto option = swing_options->add_options();
-      option->set_value(std::string(mode["value"]));
-      option->set_icon(std::string(mode["icon"]));
+      auto option = swingh_options->add_options();
+      option->set_value(mode.label);
+      option->set_icon(mode.icon);
     }
   }
 
@@ -189,38 +314,42 @@ void ThermostatEntity::send_state_update_to_nspanel() {
 }
 
 void ThermostatEntity::set_fan_mode(std::string fan_mode) {
-  if (std::find(this->_supported_fan_modes.begin(), this->_supported_fan_modes.end(), fan_mode) != this->_supported_fan_modes.end()) {
-    this->_requested_fan_mode = fan_mode;
+  auto request_fan_mode = std::find_if(this->_supported_fan_modes.begin(), this->_supported_fan_modes.end(), [fan_mode](const ThermostatOptionHolder &holder) {
+    return holder.value.compare(fan_mode) == 0;
+  });
+  if (request_fan_mode != this->_supported_fan_modes.end()) {
+    this->_requested_fan_mode = *request_fan_mode;
+    this->send_state_update_to_controller();
   } else {
     SPDLOG_ERROR("Invalid fan mode ({}) for thermostat {}::{}. Will default to 'off'.", fan_mode, this->_id, this->_name);
-    this->_requested_fan_mode = "off";
   }
-  this->send_state_update_to_controller();
 }
 
-nlohmann::json ThermostatEntity::get_fan_mode() {
+ThermostatOptionHolder ThermostatEntity::get_fan_mode() {
   return this->_requested_fan_mode;
 }
 
-std::vector<nlohmann::json> ThermostatEntity::get_supported_fan_modes() {
+std::vector<ThermostatOptionHolder> ThermostatEntity::get_supported_fan_modes() {
   return this->_supported_fan_modes;
 }
 
 void ThermostatEntity::set_preset(std::string preset) {
-  if (std::find(this->_supported_presets.begin(), this->_supported_presets.end(), preset) != this->_supported_presets.end()) {
-    this->_requested_preset = preset;
+  auto request_preset = std::find_if(this->_supported_presets.begin(), this->_supported_presets.end(), [preset](const ThermostatOptionHolder &holder) {
+    return holder.value.compare(preset) == 0;
+  });
+  if (request_preset != this->_supported_presets.end()) {
+    this->_requested_preset = *request_preset;
+    this->send_state_update_to_controller();
   } else {
     SPDLOG_ERROR("Invalid preset ({}) for thermostat {}::{}. Will default to 'off'.", preset, this->_id, this->_name);
-    this->_requested_preset = "off";
   }
-  this->send_state_update_to_controller();
 }
 
-nlohmann::json ThermostatEntity::get_preset() {
+ThermostatOptionHolder ThermostatEntity::get_preset() {
   return this->_requested_preset;
 }
 
-std::vector<nlohmann::json> ThermostatEntity::get_supported_presets() {
+std::vector<ThermostatOptionHolder> ThermostatEntity::get_supported_presets() {
   return this->_supported_presets;
 }
 
