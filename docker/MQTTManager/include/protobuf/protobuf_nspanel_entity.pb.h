@@ -954,13 +954,15 @@ class NSPanelEntityState_Thermostat final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kOptionsFieldNumber = 5,
+    kOptionsFieldNumber = 7,
     kNameFieldNumber = 2,
     kThermostatIdFieldNumber = 1,
     kCurrentTemperatureFieldNumber = 3,
-    kStepSizeFieldNumber = 4,
+    kHasCurrentTemperatureFieldNumber = 4,
+    kSetTemperatureFieldNumber = 5,
+    kStepSizeFieldNumber = 6,
   };
-  // repeated .NSPanelEntityState.Thermostat.ThermostatOption options = 5;
+  // repeated .NSPanelEntityState.Thermostat.ThermostatOption options = 7;
   int options_size() const;
   private:
   int _internal_options_size() const;
@@ -1013,7 +1015,27 @@ class NSPanelEntityState_Thermostat final : public ::google::protobuf::Message
   void _internal_set_current_temperature(float value);
 
   public:
-  // float step_size = 4;
+  // bool has_current_temperature = 4;
+  void clear_has_current_temperature() ;
+  bool has_current_temperature() const;
+  void set_has_current_temperature(bool value);
+
+  private:
+  bool _internal_has_current_temperature() const;
+  void _internal_set_has_current_temperature(bool value);
+
+  public:
+  // float set_temperature = 5;
+  void clear_set_temperature() ;
+  float set_temperature() const;
+  void set_set_temperature(float value);
+
+  private:
+  float _internal_set_temperature() const;
+  void _internal_set_set_temperature(float value);
+
+  public:
+  // float step_size = 6;
   void clear_step_size() ;
   float step_size() const;
   void set_step_size(float value);
@@ -1028,7 +1050,7 @@ class NSPanelEntityState_Thermostat final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      3, 5, 1,
+      3, 7, 1,
       42, 2>
       _table_;
 
@@ -1053,6 +1075,8 @@ class NSPanelEntityState_Thermostat final : public ::google::protobuf::Message
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::int32_t thermostat_id_;
     float current_temperature_;
+    bool has_current_temperature_;
+    float set_temperature_;
     float step_size_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -1927,7 +1951,51 @@ inline void NSPanelEntityState_Thermostat::_internal_set_current_temperature(flo
   _impl_.current_temperature_ = value;
 }
 
-// float step_size = 4;
+// bool has_current_temperature = 4;
+inline void NSPanelEntityState_Thermostat::clear_has_current_temperature() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_current_temperature_ = false;
+}
+inline bool NSPanelEntityState_Thermostat::has_current_temperature() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Thermostat.has_current_temperature)
+  return _internal_has_current_temperature();
+}
+inline void NSPanelEntityState_Thermostat::set_has_current_temperature(bool value) {
+  _internal_set_has_current_temperature(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.has_current_temperature)
+}
+inline bool NSPanelEntityState_Thermostat::_internal_has_current_temperature() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_current_temperature_;
+}
+inline void NSPanelEntityState_Thermostat::_internal_set_has_current_temperature(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_current_temperature_ = value;
+}
+
+// float set_temperature = 5;
+inline void NSPanelEntityState_Thermostat::clear_set_temperature() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.set_temperature_ = 0;
+}
+inline float NSPanelEntityState_Thermostat::set_temperature() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Thermostat.set_temperature)
+  return _internal_set_temperature();
+}
+inline void NSPanelEntityState_Thermostat::set_set_temperature(float value) {
+  _internal_set_set_temperature(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Thermostat.set_temperature)
+}
+inline float NSPanelEntityState_Thermostat::_internal_set_temperature() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.set_temperature_;
+}
+inline void NSPanelEntityState_Thermostat::_internal_set_set_temperature(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.set_temperature_ = value;
+}
+
+// float step_size = 6;
 inline void NSPanelEntityState_Thermostat::clear_step_size() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.step_size_ = 0;
@@ -1949,7 +2017,7 @@ inline void NSPanelEntityState_Thermostat::_internal_set_step_size(float value) 
   _impl_.step_size_ = value;
 }
 
-// repeated .NSPanelEntityState.Thermostat.ThermostatOption options = 5;
+// repeated .NSPanelEntityState.Thermostat.ThermostatOption options = 7;
 inline int NSPanelEntityState_Thermostat::_internal_options_size() const {
   return _internal_options().size();
 }

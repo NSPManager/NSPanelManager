@@ -5,6 +5,7 @@
 #include "protobuf_nspanel.pb.h"
 #include "room/room_entities_page.hpp"
 #include <chrono>
+#include <expected>
 #include <memory>
 #include <mutex>
 #include <nlohmann/json_fwd.hpp>
@@ -96,6 +97,11 @@ public:
    */
   std::string get_temperature_sensor_mqtt_topic();
 
+  /*
+   * Get the temperature of this room if it has a temperature sensor configured and loaded properly.
+   */
+  std::expected<float, std::string> get_temperature();
+
   /**
    * Callback when that gets run when an entitiy has changed state
    */
@@ -173,6 +179,9 @@ private:
 
   // Room temperature sensor item name/home assistant entity id
   std::string _room_temp_sensor;
+
+  // Last value received via the room temperature sensor
+  float _last_room_temperature_value;
 };
 
 #endif // !MQTT_MANAGER_ROOM_H

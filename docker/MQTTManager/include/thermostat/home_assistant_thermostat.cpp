@@ -51,7 +51,65 @@ HomeAssistantThermostat::~HomeAssistantThermostat() {
 }
 
 void HomeAssistantThermostat::send_state_update_to_controller() {
-  SPDLOG_ERROR("TODO: Implement send commands/state update to controller.");
+  if (this->_requested_mode != this->_current_mode) {
+    nlohmann::json command = {
+        {"type", "call_service"},
+        {"domain", "climate"},
+        {"target", {{"entity_id", this->_home_assistant_name}}},
+        {"service", "set_hvac_mode"},
+        {"service_data", {{"hvac_mode", this->_requested_mode.value}}}};
+    HomeAssistantManager::send_json(command);
+  }
+
+  if (this->_requested_fan_mode != this->_current_fan_mode) {
+    nlohmann::json command = {
+        {"type", "call_service"},
+        {"domain", "climate"},
+        {"target", {{"entity_id", this->_home_assistant_name}}},
+        {"service", "set_fan_mode"},
+        {"service_data", {{"fan_mode", this->_requested_fan_mode.value}}}};
+    HomeAssistantManager::send_json(command);
+  }
+
+  if (this->_requested_preset != this->_current_preset) {
+    nlohmann::json command = {
+        {"type", "call_service"},
+        {"domain", "climate"},
+        {"target", {{"entity_id", this->_home_assistant_name}}},
+        {"service", "set_preset_mode"},
+        {"service_data", {{"preset_mode", this->_requested_preset.value}}}};
+    HomeAssistantManager::send_json(command);
+  }
+
+  if (this->_requested_swing_mode != this->_current_swing_mode) {
+    nlohmann::json command = {
+        {"type", "call_service"},
+        {"domain", "climate"},
+        {"target", {{"entity_id", this->_home_assistant_name}}},
+        {"service", "set_swing_mode"},
+        {"service_data", {{"swing_mode", this->_requested_swing_mode.value}}}};
+    HomeAssistantManager::send_json(command);
+  }
+
+  if (this->_requested_swingh_mode != this->_current_swingh_mode) {
+    nlohmann::json command = {
+        {"type", "call_service"},
+        {"domain", "climate"},
+        {"target", {{"entity_id", this->_home_assistant_name}}},
+        {"service", "set_swing_horizontal_mode"},
+        {"service_data", {{"swing_horizontal_mode", this->_requested_swingh_mode.value}}}};
+    HomeAssistantManager::send_json(command);
+  }
+
+  if (this->_requested_temperature != this->_current_temperature) {
+    nlohmann::json command = {
+        {"type", "call_service"},
+        {"domain", "climate"},
+        {"target", {{"entity_id", this->_home_assistant_name}}},
+        {"service", "set_temperature"},
+        {"service_data", {{"temperature", this->_requested_temperature}}}};
+    HomeAssistantManager::send_json(command);
+  }
 }
 
 void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data) {
@@ -85,6 +143,7 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
             });
             if (new_mode != this->_supported_modes.end()) {
               this->_current_mode = *new_mode;
+              this->_requested_mode = *new_mode;
               changed_attribute = true;
               SPDLOG_DEBUG("Thermostat {}::{} got new state: {}", this->_id, this->_name, new_mode->value);
             } else {
@@ -101,6 +160,7 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
             });
             if (new_mode != this->_supported_fan_modes.end()) {
               this->_current_fan_mode = *new_mode;
+              this->_requested_fan_mode = *new_mode;
               changed_attribute = true;
               SPDLOG_DEBUG("Thermostat {}::{} got new fan mode: {}", this->_id, this->_name, new_mode->value);
             } else {
@@ -117,6 +177,7 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
             });
             if (request_preset != this->_supported_presets.end()) {
               this->_current_preset = *request_preset;
+              this->_requested_preset = *request_preset;
               changed_attribute = true;
               SPDLOG_DEBUG("Thermostat {}::{} got new preset mode: {}", this->_id, this->_name, request_preset->value);
             } else {
@@ -133,6 +194,7 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
             });
             if (request_swing_mode != this->_supported_swing_modes.end()) {
               this->_current_swing_mode = *request_swing_mode;
+              this->_requested_swing_mode = *request_swing_mode;
               changed_attribute = true;
               SPDLOG_DEBUG("Thermostat {}::{} got new swing mode: {}", this->_id, this->_name, request_swing_mode->value);
             } else {
@@ -149,6 +211,7 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
             });
             if (request_swingh_mode != this->_supported_swingh_modes.end()) {
               this->_current_swingh_mode = *request_swingh_mode;
+              this->_requested_swingh_mode = *request_swingh_mode;
               changed_attribute = true;
               SPDLOG_DEBUG("Thermostat {}::{} got new swing mode: {}", this->_id, this->_name, new_swingh_mode);
             } else {

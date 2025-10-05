@@ -15,6 +15,10 @@ struct ThermostatOptionHolder {
   std::string value;
   std::string icon;
   std::string label;
+
+  bool operator==(const ThermostatOptionHolder &other) const {
+    return value == other.value;
+  }
 };
 
 class ThermostatEntity : public MqttManagerEntity {
@@ -102,6 +106,21 @@ public:
   std::vector<ThermostatOptionHolder> get_supported_swing_modes();
 
   /**
+   * Set the thermostat swing horizontal mode
+   */
+  void set_swing_horizontal_mode(std::string swing_mode);
+
+  /**
+   * Get the thermostat swing mode
+   */
+  ThermostatOptionHolder get_swing_horizontal_mode();
+
+  /**
+   * Get all supported swing modes.
+   */
+  std::vector<ThermostatOptionHolder> get_supported_swing_horizontal_modes();
+
+  /**
    * Send state update to NSPanel via MQTT as Protobuf object.
    */
   void send_state_update_to_nspanel();
@@ -170,6 +189,12 @@ protected:
   uint32_t _entity_page_id;
   uint8_t _entity_page_slot;
   float _step_size;
+
+  static constexpr const char *mode_label = "Mode";
+  static constexpr const char *fan_label = "Fan";
+  static constexpr const char *preset_label = "Presets";
+  static constexpr const char *swing_label = "Swing";
+  static constexpr const char *swingh_label = "H Swing";
 
   std::vector<ThermostatOptionHolder> _supported_modes;
   std::vector<ThermostatOptionHolder> _supported_swing_modes;

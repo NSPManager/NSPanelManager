@@ -240,24 +240,10 @@ message NSPanelMQTTManagerCommand {
         float temperature = 2;
     }
 
-    message ThermostatModeCommand {
+    message ThermostatCommand {
         int32 thermostat_id = 1;
-        string mode = 2;
-    }
-
-    message ThermostatSwingCommand {
-        int32 thermostat_id = 1;
-        string swing_mode = 2;
-    }
-
-    message ThermostatFanModeCommand {
-        int32 thermostat_id = 1;
-        string fan_mode = 2;
-    }
-
-    message ThermostatPresetModeCommand {
-        int32 thermostat_id = 1;
-        string preset_mode = 2;
+        string option = 2;
+        string new_value = 3;
     }
 
     oneof CommandData {
@@ -269,10 +255,7 @@ message NSPanelMQTTManagerCommand {
         ButtonPressed button_pressed = 6;
 
         ThermostatTemperatureCommand thermostat_temperature_command = 7;
-        ThermostatModeCommand thermostat_mode_command = 8;
-        ThermostatSwingCommand thermostat_swing_command = 9;
-        ThermostatFanModeCommand thermostat_fan_mode_command = 10;
-        ThermostatPresetModeCommand thermostat_preset_mode_command = 11;
+        ThermostatCommand thermostat_command = 8;
     }
 
 

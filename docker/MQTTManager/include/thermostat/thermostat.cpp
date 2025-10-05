@@ -1,10 +1,12 @@
 #include "thermostat/thermostat.hpp"
 #include "command_manager/command_manager.hpp"
 #include "database_manager/database_manager.hpp"
+#include "entity_manager/entity_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
 #include "protobuf_nspanel_entity.pb.h"
+#include "room/room.hpp"
 #include <boost/bind.hpp>
 #include <boost/bind/bind.hpp>
 #include <cstdint>
@@ -193,7 +195,7 @@ void ThermostatEntity::set_mode(std::string mode) {
     this->_requested_mode = *request_mode;
     this->send_state_update_to_controller();
   } else {
-    SPDLOG_ERROR("Invalid mode ({}) for thermostat {}::{}. Will default to 'off'.", mode, this->_id, this->_name);
+    SPDLOG_ERROR("Invalid mode ({}) for thermostat {}::{}.", mode, this->_id, this->_name);
   }
 }
 
@@ -222,7 +224,7 @@ void ThermostatEntity::set_swing_mode(std::string swing_mode) {
     this->_requested_swing_mode = *request_swing_mode;
     this->send_state_update_to_controller();
   } else {
-    SPDLOG_ERROR("Invalid swing mode ({}) for thermostat {}::{}. Will default to 'off'.", swing_mode, this->_id, this->_name);
+    SPDLOG_ERROR("Invalid swing mode ({}) for thermostat {}::{}.", swing_mode, this->_id, this->_name);
   }
 }
 
@@ -234,82 +236,124 @@ std::vector<ThermostatOptionHolder> ThermostatEntity::get_supported_swing_modes(
   return this->_supported_swing_modes;
 }
 
-void ThermostatEntity::send_state_update_to_nspanel() {
-  NSPanelEntityState state;
-  NSPanelEntityState_Thermostat *th_status = state.mutable_thermostat();
-  th_status->set_thermostat_id(this->_id);
-  th_status->set_name(this->_name);
-  th_status->set_current_temperature(this->_current_temperature);
-  th_status->set_step_size(this->_step_size);
-
-  if (!this->_supported_modes.empty()) {
-    auto mode_options = th_status->add_options();
-    mode_options->set_name("Mode");
-    mode_options->set_current_value(this->_current_mode.label);
-    mode_options->set_current_icon(this->_current_mode.icon);
-    for (const auto &mode : this->_supported_modes) {
-      auto option = mode_options->add_options();
-      option->set_value(mode.label);
-      option->set_icon(mode.icon);
-    }
-  }
-
-  if (!this->_supported_fan_modes.empty()) {
-    auto fan_options = th_status->add_options();
-    fan_options->set_name("Fan");
-    fan_options->set_current_value(this->_current_fan_mode.label);
-    fan_options->set_current_icon(this->_current_fan_mode.icon);
-    for (const auto &mode : this->_supported_fan_modes) {
-      auto option = fan_options->add_options();
-      option->set_value(mode.label);
-      option->set_icon(mode.icon);
-    }
-  }
-
-  if (!this->_supported_presets.empty()) {
-    auto preset_options = th_status->add_options();
-    preset_options->set_name("Preset");
-    preset_options->set_current_value(this->_current_preset.label);
-    preset_options->set_current_icon(this->_current_preset.icon);
-    for (const auto &preset : this->_supported_presets) {
-      auto option = preset_options->add_options();
-      option->set_value(preset.label);
-      option->set_icon(preset.icon);
-    }
-  }
-
-  if (!this->_supported_swing_modes.empty()) {
-    auto swing_options = th_status->add_options();
-    swing_options->set_name("Swing");
-    swing_options->set_current_value(this->_current_swing_mode.label);
-    swing_options->set_current_icon(this->_current_swing_mode.icon);
-    for (const auto &mode : this->_supported_swing_modes) {
-      auto option = swing_options->add_options();
-      option->set_value(mode.label);
-      option->set_icon(mode.icon);
-    }
-  }
-
-  if (!this->_supported_swingh_modes.empty()) {
-    auto swingh_options = th_status->add_options();
-    swingh_options->set_name("H Swing");
-    swingh_options->set_current_value(this->_current_swingh_mode.label);
-    swingh_options->set_current_icon(this->_current_swingh_mode.icon);
-    for (const auto &mode : this->_supported_swingh_modes) {
-      auto option = swingh_options->add_options();
-      option->set_value(mode.label);
-      option->set_icon(mode.icon);
-    }
-  }
-
-  google::protobuf::util::MessageDifferencer differencer;
-  if (!differencer.Compare(this->_last_thermostat_state, state)) {
-    SPDLOG_DEBUG("Sending updated state for thermostat {}::{} over MQTT.", this->_id, this->_name);
-    this->_last_thermostat_state = state;
-
-    MQTT_Manager::publish_protobuf(this->get_mqtt_state_topic(), state, true);
+void ThermostatEntity::set_swing_horizontal_mode(std::string swingh_mode) {
+  auto request_swingh_mode = std::find_if(this->_supported_swingh_modes.begin(), this->_supported_swingh_modes.end(), [&](const ThermostatOptionHolder &holder) {
+    return holder.value.compare(swingh_mode) == 0;
+  });
+  if (request_swingh_mode != this->_supported_swingh_modes.end()) {
+    this->_requested_swingh_mode = *request_swingh_mode;
+    this->send_state_update_to_controller();
   } else {
-    SPDLOG_DEBUG("Did not send state update for thermostat {}::{} as there were no changes.", this->_id, this->_name);
+    SPDLOG_ERROR("Invalid swing (horizontal) mode ({}) for thermostat {}::{}.", swingh_mode, this->_id, this->_name);
+  }
+}
+
+ThermostatOptionHolder ThermostatEntity::get_swing_horizontal_mode() {
+  return this->_requested_swingh_mode;
+}
+
+std::vector<ThermostatOptionHolder> ThermostatEntity::get_supported_swing_horizontal_modes() {
+  return this->_supported_swingh_modes;
+}
+
+void ThermostatEntity::send_state_update_to_nspanel() {
+  auto room = EntityManager::get_room(this->_room_id);
+  if (room) {
+    NSPanelEntityState state;
+    NSPanelEntityState_Thermostat *th_status = state.mutable_thermostat();
+    th_status->set_thermostat_id(this->_id);
+    th_status->set_name(this->_name);
+    th_status->set_set_temperature(this->_current_temperature);
+    th_status->set_step_size(this->_step_size);
+    th_status->set_has_current_temperature(false);
+
+    if ((*room)->has_temperature_sensor()) {
+      auto room_temp = (*room)->get_temperature();
+      if (room_temp) {
+        th_status->set_current_temperature(*room_temp);
+        th_status->set_has_current_temperature(true);
+      } else {
+        SPDLOG_ERROR("Failed to get room temperature from room {}::{} while trying to send state update for thermostat {}::{}. Will send temperature thermostat set temp as room temp. Got message: {}", (*room)->get_id(), (*room)->get_name(), this->_id, this->_name, room_temp.error());
+        th_status->set_current_temperature(this->_current_temperature);
+        th_status->set_has_current_temperature(true);
+      }
+    } else {
+      SPDLOG_ERROR("Failed to get room {}::{} has not temperature sensor. Will send state update for thermostat {}::{} with current room temperature set temp as thermostat set point.", (*room)->get_id(), (*room)->get_name(), this->_id, this->_name);
+      th_status->set_current_temperature(this->_current_temperature);
+      th_status->set_has_current_temperature(true);
+    }
+
+    if (!this->_supported_modes.empty()) {
+      auto mode_options = th_status->add_options();
+      mode_options->set_name("Mode");
+      mode_options->set_current_value(this->_current_mode.label);
+      mode_options->set_current_icon(this->_current_mode.icon);
+      for (const auto &mode : this->_supported_modes) {
+        auto option = mode_options->add_options();
+        option->set_value(mode.label);
+        option->set_icon(mode.icon);
+      }
+    }
+
+    if (!this->_supported_fan_modes.empty()) {
+      auto fan_options = th_status->add_options();
+      fan_options->set_name(ThermostatEntity::fan_label);
+      fan_options->set_current_value(this->_current_fan_mode.label);
+      fan_options->set_current_icon(this->_current_fan_mode.icon);
+      for (const auto &mode : this->_supported_fan_modes) {
+        auto option = fan_options->add_options();
+        option->set_value(mode.label);
+        option->set_icon(mode.icon);
+      }
+    }
+
+    if (!this->_supported_presets.empty()) {
+      auto preset_options = th_status->add_options();
+      preset_options->set_name(ThermostatEntity::preset_label);
+      preset_options->set_current_value(this->_current_preset.label);
+      preset_options->set_current_icon(this->_current_preset.icon);
+      for (const auto &preset : this->_supported_presets) {
+        auto option = preset_options->add_options();
+        option->set_value(preset.label);
+        option->set_icon(preset.icon);
+      }
+    }
+
+    if (!this->_supported_swing_modes.empty()) {
+      auto swing_options = th_status->add_options();
+      swing_options->set_name(ThermostatEntity::swing_label);
+      swing_options->set_current_value(this->_current_swing_mode.label);
+      swing_options->set_current_icon(this->_current_swing_mode.icon);
+      for (const auto &mode : this->_supported_swing_modes) {
+        auto option = swing_options->add_options();
+        option->set_value(mode.label);
+        option->set_icon(mode.icon);
+      }
+    }
+
+    if (!this->_supported_swingh_modes.empty()) {
+      auto swingh_options = th_status->add_options();
+      swingh_options->set_name(ThermostatEntity::swingh_label);
+      swingh_options->set_current_value(this->_current_swingh_mode.label);
+      swingh_options->set_current_icon(this->_current_swingh_mode.icon);
+      for (const auto &mode : this->_supported_swingh_modes) {
+        auto option = swingh_options->add_options();
+        option->set_value(mode.label);
+        option->set_icon(mode.icon);
+      }
+    }
+
+    google::protobuf::util::MessageDifferencer differencer;
+    if (!differencer.Compare(this->_last_thermostat_state, state)) {
+      SPDLOG_DEBUG("Sending updated state for thermostat {}::{} over MQTT.", this->_id, this->_name);
+      this->_last_thermostat_state = state;
+
+      MQTT_Manager::publish_protobuf(this->get_mqtt_state_topic(), state, true);
+    } else {
+      SPDLOG_DEBUG("Did not send state update for thermostat {}::{} as there were no changes.", this->_id, this->_name);
+    }
+  } else {
+    SPDLOG_ERROR("Failed to get room from EntityManager while trying to send state update for thermostat {}::{} to NSPanel.", this->_id, this->_name);
   }
 }
 
@@ -394,6 +438,57 @@ void ThermostatEntity::reset_requests() {
 }
 
 void ThermostatEntity::command_callback(NSPanelMQTTManagerCommand &command) {
+  if (command.has_thermostat_command() && command.thermostat_command().thermostat_id() == this->_id) {
+    auto thermostat_command = command.thermostat_command();
+    SPDLOG_DEBUG("Received command from NSPanel to set thermostat {}::{} setting {} to value {}", this->_id, this->_name, thermostat_command.option(), thermostat_command.new_value());
+
+    if (thermostat_command.option().compare(ThermostatEntity::mode_label) == 0) {
+      auto new_mode = std::find_if(this->_supported_modes.begin(), this->_supported_modes.end(), [thermostat_command](const ThermostatOptionHolder &mode) {
+        return mode.label.compare(thermostat_command.new_value()) == 0;
+      });
+      if (new_mode != this->_supported_modes.end()) [[likely]] {
+        this->set_mode(new_mode->value);
+      } else {
+        SPDLOG_ERROR("Thermostat {}::{} received command to set set option {} to value {} but that value is not valid.", this->_id, this->_name, thermostat_command.option(), thermostat_command.new_value());
+      }
+    } else if (thermostat_command.option().compare(ThermostatEntity::fan_label) == 0) {
+      auto new_mode = std::find_if(this->_supported_fan_modes.begin(), this->_supported_fan_modes.end(), [thermostat_command](const ThermostatOptionHolder &mode) {
+        return mode.label.compare(thermostat_command.new_value()) == 0;
+      });
+      if (new_mode != this->_supported_fan_modes.end()) [[likely]] {
+        this->set_fan_mode(new_mode->value);
+      } else {
+        SPDLOG_ERROR("Thermostat {}::{} received command to set set option {} to value {} but that value is not valid.", this->_id, this->_name, thermostat_command.option(), thermostat_command.new_value());
+      }
+    } else if (thermostat_command.option().compare(ThermostatEntity::preset_label) == 0) {
+      auto new_preset = std::find_if(this->_supported_presets.begin(), this->_supported_presets.end(), [thermostat_command](const ThermostatOptionHolder &mode) {
+        return mode.label.compare(thermostat_command.new_value()) == 0;
+      });
+      if (new_preset != this->_supported_presets.end()) [[likely]] {
+        this->set_preset(new_preset->value);
+      } else {
+        SPDLOG_ERROR("Thermostat {}::{} received command to set set option {} to value {} but that value is not valid.", this->_id, this->_name, thermostat_command.option(), thermostat_command.new_value());
+      }
+    } else if (thermostat_command.option().compare(ThermostatEntity::swing_label) == 0) {
+      auto new_mode = std::find_if(this->_supported_swing_modes.begin(), this->_supported_swing_modes.end(), [thermostat_command](const ThermostatOptionHolder &mode) {
+        return mode.label.compare(thermostat_command.new_value()) == 0;
+      });
+      if (new_mode != this->_supported_swing_modes.end()) [[likely]] {
+        this->set_swing_mode(new_mode->value);
+      } else {
+        SPDLOG_ERROR("Thermostat {}::{} received command to set set option {} to value {} but that value is not valid.", this->_id, this->_name, thermostat_command.option(), thermostat_command.new_value());
+      }
+    } else if (thermostat_command.option().compare(ThermostatEntity::swingh_label) == 0) {
+      auto new_mode = std::find_if(this->_supported_swingh_modes.begin(), this->_supported_swingh_modes.end(), [thermostat_command](const ThermostatOptionHolder &mode) {
+        return mode.label.compare(thermostat_command.new_value()) == 0;
+      });
+      if (new_mode != this->_supported_swingh_modes.end()) [[likely]] {
+        this->set_swing_horizontal_mode(new_mode->value);
+      } else {
+        SPDLOG_ERROR("Thermostat {}::{} received command to set set option {} to value {} but that value is not valid.", this->_id, this->_name, thermostat_command.option(), thermostat_command.new_value());
+      }
+    }
+  }
 }
 
 ThermostatEntity::~ThermostatEntity() {

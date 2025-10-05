@@ -311,14 +311,39 @@ void NSPanel::send_config() {
   std::string screensaver_mode = this->_get_nspanel_setting_with_default("screensaver_mode", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::SCREENSAVER_MODE));
   if (screensaver_mode.compare("with_background") == 0) {
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND);
+
+    if (config.screensaver_dim_level() == 0) {
+      SPDLOG_WARN("Setting screensaver dim level to 10 as a screensaver has been chosen to be displayed but screensaver brightness is set to 0.");
+      config.set_screensaver_dim_level(10);
+    }
   } else if (screensaver_mode.compare("without_background") == 0) {
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITHOUT_BACKGROUND);
+
+    if (config.screensaver_dim_level() == 0) {
+      SPDLOG_WARN("Setting screensaver dim level to 10 as a screensaver has been chosen to be displayed but screensaver brightness is set to 0.");
+      config.set_screensaver_dim_level(10);
+    }
   } else if (screensaver_mode.compare("datetime_with_background") == 0) {
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_DATETIME_WITH_BACKGROUND);
+
+    if (config.screensaver_dim_level() == 0) {
+      SPDLOG_WARN("Setting screensaver dim level to 10 as a screensaver has been chosen to be displayed but screensaver brightness is set to 0.");
+      config.set_screensaver_dim_level(10);
+    }
   } else if (screensaver_mode.compare("datetime_without_background") == 0) {
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_DATETIME_WITHOUT_BACKGROUND);
+
+    if (config.screensaver_dim_level() == 0) {
+      SPDLOG_WARN("Setting screensaver dim level to 10 as a screensaver has been chosen to be displayed but screensaver brightness is set to 0.");
+      config.set_screensaver_dim_level(10);
+    }
   } else if (screensaver_mode.compare("no_screensaver") == 0) {
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_NO_SCREENSAVER);
+
+    if (config.screensaver_dim_level() == 0) {
+      SPDLOG_WARN("Setting screensaver dim level to 10 as a screensaver has been chosen to be displayed but screensaver brightness is set to 0.");
+      config.set_screensaver_dim_level(10);
+    }
   } else {
     SPDLOG_ERROR("Unknown screensaver mode '{}' for NSPanel {}::{}, assuming weather with background.", screensaver_mode, this->_id, this->_name);
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND);

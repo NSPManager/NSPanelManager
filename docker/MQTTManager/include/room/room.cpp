@@ -263,6 +263,13 @@ std::string Room::get_temperature_sensor_mqtt_topic() {
   return "";
 }
 
+std::expected<float, std::string> Room::get_temperature() {
+  if (!this->has_temperature_sensor()) {
+    return std::unexpected("No temperature sensor configured");
+  }
+  return this->_last_room_temperature_value;
+}
+
 void Room::page_changed_callback(RoomEntitiesPage *page) {
   this->_room_changed_callbacks(this);
   if (this->_send_status_updates) {
@@ -537,6 +544,7 @@ void Room::_room_temperature_state_change_callback(nlohmann::json data) {
 
       try {
         float temperature = std::stof(data["event"]["data"]["new_state"]["state"].get<std::string>());
+        this->_last_room_temperature_value = temperature;
         MQTT_Manager::publish(this->_mqtt_temperature_state_topic, fmt::format("{:.1f}", temperature), true);
       } catch (const std::invalid_argument &e) {
         SPDLOG_WARN("Failed to convert temperature to float. Will send raw string to panel.: {}", e.what());

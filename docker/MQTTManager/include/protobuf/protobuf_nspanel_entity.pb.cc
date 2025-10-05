@@ -113,6 +113,8 @@ inline constexpr NSPanelEntityState_Thermostat::Impl_::Impl_(
             ::_pbi::ConstantInitialized()),
         thermostat_id_{0},
         current_temperature_{0},
+        has_current_temperature_{false},
+        set_temperature_{0},
         step_size_{0},
         _cached_size_{0} {}
 
@@ -205,6 +207,8 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Thermostat, _impl_.thermostat_id_),
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Thermostat, _impl_.name_),
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Thermostat, _impl_.current_temperature_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Thermostat, _impl_.has_current_temperature_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Thermostat, _impl_.set_temperature_),
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Thermostat, _impl_.step_size_),
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Thermostat, _impl_.options_),
         ~0u,  // no _has_bits_
@@ -226,7 +230,7 @@ static const ::_pbi::MigrationSchema
         {17, -1, -1, sizeof(::NSPanelEntityState_Thermostat_ThermostatOption_ThermostatOptionValue)},
         {27, -1, -1, sizeof(::NSPanelEntityState_Thermostat_ThermostatOption)},
         {39, -1, -1, sizeof(::NSPanelEntityState_Thermostat)},
-        {52, -1, -1, sizeof(::NSPanelEntityState)},
+        {54, -1, -1, sizeof(::NSPanelEntityState)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelEntityState_Light_default_instance_._instance,
@@ -237,7 +241,7 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 const char descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\035protobuf_nspanel_entity.proto\"\211\006\n\022NSPa"
+    "\n\035protobuf_nspanel_entity.proto\"\303\006\n\022NSPa"
     "nelEntityState\022*\n\005light\030\001 \001(\0132\031.NSPanelE"
     "ntityState.LightH\000\0224\n\nthermostat\030\002 \001(\0132\036"
     ".NSPanelEntityState.ThermostatH\000\032\202\002\n\005Lig"
@@ -247,23 +251,24 @@ const char descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto[] ABSL_
     "_temp\030\007 \001(\010\022\021\n\tcan_color\030\010 \001(\010\022\?\n\022curren"
     "t_light_mode\030\t \001(\0162#.NSPanelEntityState."
     "Light.LightMode\"$\n\tLightMode\022\016\n\nCOLOR_TE"
-    "MP\020\000\022\007\n\003RGB\020\001\032\201\003\n\nThermostat\022\025\n\rthermost"
+    "MP\020\000\022\007\n\003RGB\020\001\032\273\003\n\nThermostat\022\025\n\rthermost"
     "at_id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\033\n\023current_tem"
-    "perature\030\003 \001(\002\022\021\n\tstep_size\030\004 \001(\002\022@\n\007opt"
-    "ions\030\005 \003(\0132/.NSPanelEntityState.Thermost"
-    "at.ThermostatOption\032\333\001\n\020ThermostatOption"
-    "\022\014\n\004name\030\001 \001(\t\022\025\n\rcurrent_value\030\002 \001(\t\022\024\n"
-    "\014current_icon\030\003 \001(\t\022V\n\007options\030\004 \003(\0132E.N"
-    "SPanelEntityState.Thermostat.ThermostatO"
-    "ption.ThermostatOptionValue\0324\n\025Thermosta"
-    "tOptionValue\022\r\n\005value\030\001 \001(\t\022\014\n\004icon\030\002 \001("
-    "\tB\010\n\006entityb\006proto3"
+    "perature\030\003 \001(\002\022\037\n\027has_current_temperatur"
+    "e\030\004 \001(\010\022\027\n\017set_temperature\030\005 \001(\002\022\021\n\tstep"
+    "_size\030\006 \001(\002\022@\n\007options\030\007 \003(\0132/.NSPanelEn"
+    "tityState.Thermostat.ThermostatOption\032\333\001"
+    "\n\020ThermostatOption\022\014\n\004name\030\001 \001(\t\022\025\n\rcurr"
+    "ent_value\030\002 \001(\t\022\024\n\014current_icon\030\003 \001(\t\022V\n"
+    "\007options\030\004 \003(\0132E.NSPanelEntityState.Ther"
+    "mostat.ThermostatOption.ThermostatOption"
+    "Value\0324\n\025ThermostatOptionValue\022\r\n\005value\030"
+    "\001 \001(\t\022\014\n\004icon\030\002 \001(\tB\010\n\006entityb\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_5fentity_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_5fentity_2eproto = {
     false,
     false,
-    819,
+    877,
     descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto,
     "protobuf_nspanel_entity.proto",
     &descriptor_table_protobuf_5fnspanel_5fentity_2eproto_once,
@@ -1278,15 +1283,15 @@ NSPanelEntityState_Thermostat::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 5, 1, 42, 2> NSPanelEntityState_Thermostat::_table_ = {
+const ::_pbi::TcParseTable<3, 7, 1, 42, 2> NSPanelEntityState_Thermostat::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    5, 56,  // max_field_number, fast_idx_mask
+    7, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967264,  // skipmap
+    4294967168,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    5,  // num_field_entries
+    7,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelEntityState_Thermostat_default_instance_._instance,
@@ -1306,14 +1311,18 @@ const ::_pbi::TcParseTable<3, 5, 1, 42, 2> NSPanelEntityState_Thermostat::_table
     // float current_temperature = 3;
     {::_pbi::TcParser::FastF32S1,
      {29, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Thermostat, _impl_.current_temperature_)}},
-    // float step_size = 4;
+    // bool has_current_temperature = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Thermostat, _impl_.has_current_temperature_), 63>(),
+     {32, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Thermostat, _impl_.has_current_temperature_)}},
+    // float set_temperature = 5;
     {::_pbi::TcParser::FastF32S1,
-     {37, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Thermostat, _impl_.step_size_)}},
-    // repeated .NSPanelEntityState.Thermostat.ThermostatOption options = 5;
+     {45, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Thermostat, _impl_.set_temperature_)}},
+    // float step_size = 6;
+    {::_pbi::TcParser::FastF32S1,
+     {53, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Thermostat, _impl_.step_size_)}},
+    // repeated .NSPanelEntityState.Thermostat.ThermostatOption options = 7;
     {::_pbi::TcParser::FastMtR1,
-     {42, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Thermostat, _impl_.options_)}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
+     {58, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Thermostat, _impl_.options_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -1326,10 +1335,16 @@ const ::_pbi::TcParseTable<3, 5, 1, 42, 2> NSPanelEntityState_Thermostat::_table
     // float current_temperature = 3;
     {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Thermostat, _impl_.current_temperature_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kFloat)},
-    // float step_size = 4;
+    // bool has_current_temperature = 4;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Thermostat, _impl_.has_current_temperature_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // float set_temperature = 5;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Thermostat, _impl_.set_temperature_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kFloat)},
+    // float step_size = 6;
     {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Thermostat, _impl_.step_size_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kFloat)},
-    // repeated .NSPanelEntityState.Thermostat.ThermostatOption options = 5;
+    // repeated .NSPanelEntityState.Thermostat.ThermostatOption options = 7;
     {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Thermostat, _impl_.options_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
@@ -1390,7 +1405,26 @@ PROTOBUF_NOINLINE void NSPanelEntityState_Thermostat::Clear() {
         3, this->_internal_current_temperature(), target);
   }
 
-  // float step_size = 4;
+  // bool has_current_temperature = 4;
+  if (this->_internal_has_current_temperature() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        4, this->_internal_has_current_temperature(), target);
+  }
+
+  // float set_temperature = 5;
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_set_temperature = this->_internal_set_temperature();
+  ::uint32_t raw_set_temperature;
+  memcpy(&raw_set_temperature, &tmp_set_temperature, sizeof(tmp_set_temperature));
+  if (raw_set_temperature != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(
+        5, this->_internal_set_temperature(), target);
+  }
+
+  // float step_size = 6;
   static_assert(sizeof(::uint32_t) == sizeof(float),
                 "Code assumes ::uint32_t and float are the same size.");
   float tmp_step_size = this->_internal_step_size();
@@ -1399,17 +1433,17 @@ PROTOBUF_NOINLINE void NSPanelEntityState_Thermostat::Clear() {
   if (raw_step_size != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteFloatToArray(
-        4, this->_internal_step_size(), target);
+        6, this->_internal_step_size(), target);
   }
 
-  // repeated .NSPanelEntityState.Thermostat.ThermostatOption options = 5;
+  // repeated .NSPanelEntityState.Thermostat.ThermostatOption options = 7;
   for (unsigned i = 0, n = static_cast<unsigned>(
                            this->_internal_options_size());
        i < n; i++) {
     const auto& repfield = this->_internal_options().Get(i);
     target =
         ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-            5, repfield, repfield.GetCachedSize(),
+            7, repfield, repfield.GetCachedSize(),
             target, stream);
   }
 
@@ -1431,7 +1465,7 @@ PROTOBUF_NOINLINE void NSPanelEntityState_Thermostat::Clear() {
   (void) cached_has_bits;
 
   ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
-  // repeated .NSPanelEntityState.Thermostat.ThermostatOption options = 5;
+  // repeated .NSPanelEntityState.Thermostat.ThermostatOption options = 7;
   total_size += 1UL * this->_internal_options_size();
   for (const auto& msg : this->_internal_options()) {
     total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
@@ -1458,7 +1492,22 @@ PROTOBUF_NOINLINE void NSPanelEntityState_Thermostat::Clear() {
     total_size += 5;
   }
 
-  // float step_size = 4;
+  // bool has_current_temperature = 4;
+  if (this->_internal_has_current_temperature() != 0) {
+    total_size += 2;
+  }
+
+  // float set_temperature = 5;
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_set_temperature = this->_internal_set_temperature();
+  ::uint32_t raw_set_temperature;
+  memcpy(&raw_set_temperature, &tmp_set_temperature, sizeof(tmp_set_temperature));
+  if (raw_set_temperature != 0) {
+    total_size += 5;
+  }
+
+  // float step_size = 6;
   static_assert(sizeof(::uint32_t) == sizeof(float),
                 "Code assumes ::uint32_t and float are the same size.");
   float tmp_step_size = this->_internal_step_size();
@@ -1495,6 +1544,17 @@ void NSPanelEntityState_Thermostat::MergeImpl(::google::protobuf::MessageLite& t
   memcpy(&raw_current_temperature, &tmp_current_temperature, sizeof(tmp_current_temperature));
   if (raw_current_temperature != 0) {
     _this->_impl_.current_temperature_ = from._impl_.current_temperature_;
+  }
+  if (from._internal_has_current_temperature() != 0) {
+    _this->_impl_.has_current_temperature_ = from._impl_.has_current_temperature_;
+  }
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_set_temperature = from._internal_set_temperature();
+  ::uint32_t raw_set_temperature;
+  memcpy(&raw_set_temperature, &tmp_set_temperature, sizeof(tmp_set_temperature));
+  if (raw_set_temperature != 0) {
+    _this->_impl_.set_temperature_ = from._impl_.set_temperature_;
   }
   static_assert(sizeof(::uint32_t) == sizeof(float),
                 "Code assumes ::uint32_t and float are the same size.");
