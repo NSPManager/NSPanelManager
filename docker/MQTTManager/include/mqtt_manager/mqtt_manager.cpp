@@ -185,12 +185,16 @@ void MQTT_Manager::_reconnect_mqtt_client() {
 
       MQTT_Manager::_mqtt_client = new mqtt::client(connection_url, mqtt_client_name.c_str());
 
+      auto last_will = mqtt::message(fmt::format("nspanel/mqttmanager_{}/status/status", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)),
+                                     "offline", 1, true);
+
       auto connOpts = mqtt::connect_options_builder()
                           .user_name(MQTT_Manager::_mqtt_username)
                           .password(MQTT_Manager::_mqtt_password)
                           .keep_alive_interval(std::chrono::seconds(30))
                           .automatic_reconnect(std::chrono::seconds(2), std::chrono::seconds(10))
                           .clean_session(false)
+                          .will(std::move(last_will))
                           .finalize();
 
       MQTT_Manager::_stop_consuming = false;
@@ -207,7 +211,10 @@ void MQTT_Manager::_reconnect_mqtt_client() {
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
   }
   WebsocketServer::remove_warning("MQTT not connected.");
-  SPDLOG_INFO("Established connection to MQTT server.");
+  SPDLOG_INFO("Established connection to MQTT server. Sending updated MQTT status.");
+
+  MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/status", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)),
+                        "online", true);
 
   try {
     SPDLOG_DEBUG("Subscribing to registered MQTT topics.");
