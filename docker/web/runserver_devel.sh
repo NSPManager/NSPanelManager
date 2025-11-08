@@ -7,6 +7,11 @@ fi
 export TZ="$(cat /etc/timezone)"
 echo "Will use timezone: $TZ"
 
+echo "Creating backup of database"
+cp /data/nspanelmanager.sqlite3 /data/nspanelmanager.sqlite3.backup_"$(date +%Y-%m-%d_%H:%M:%S)"
+echo "Backup complete, checking and removing backup files if more than 5 exists"
+ls -t /data/nspanelmanager_db.sqlite3.backup_* | sed -e '1,5d' | xargs -d '\n' rm
+
 echo "Running migrations..."
 cd nspanelmanager
 /usr/local/bin/python manage.py migrate
@@ -18,4 +23,7 @@ echo "Starting Nginx"
 
 echo "Starting NSPanelManager web interface server"
 cd nspanelmanager
-./manage.py runserver 0.0.0.0:8001
+while true; do
+    ./manage.py runserver 0.0.0.0:8001
+    sleep 0.5
+done

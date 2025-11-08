@@ -1,133 +1,162 @@
+#include "command_manager/command_manager.hpp"
+#include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "light/light.hpp"
+#include "protobuf_nspanel.pb.h"
+#include "room/room.hpp"
 #include "web_helper/WebHelper.hpp"
+#include <boost/bind.hpp>
 #include <curl/curl.h>
+#include <entity/entity_icons.hpp>
+#include <memory>
 #include <nlohmann/detail/value_t.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <scenes/nspm_scene.hpp>
+#include <spdlog/common.h>
 #include <spdlog/spdlog.h>
+#include <sqlite_orm/sqlite_orm.h>
+#include <system_error>
 
-NSPMScene::NSPMScene(nlohmann::json &data) {
-  this->_id = data["id"];
-  this->update_config(data);
+NSPMScene::NSPMScene(uint32_t id) {
+  this->_id = id;
+  this->reload_config();
+
+  CommandManager::attach_callback(boost::bind(&NSPMScene::command_callback, this, _1));
 }
 
-void NSPMScene::update_config(nlohmann::json &data) {
-  this->_name = data["scene_name"];
-  if (!data["room_id"].is_null()) {
-    this->_is_global_scene = false;
-    this->_room_id = data["room_id"];
-  } else {
-    this->_is_global_scene = true;
+NSPMScene::~NSPMScene() {
+  CommandManager::detach_callback(boost::bind(&NSPMScene::command_callback, this, _1));
+}
+
+void NSPMScene::reload_config() {
+  try {
+    auto scene_config = database_manager::database.get<database_manager::Scene>(this->_id);
+    this->_name = scene_config.friendly_name;
+    this->_page_id = scene_config.entities_page_id;
+    this->_page_slot = scene_config.room_view_position;
+    if (scene_config.room_id == nullptr) {
+      this->_is_global = true;
+    } else {
+      this->_is_global = false;
+      this->_room_id = *scene_config.room_id;
+    }
+    SPDLOG_DEBUG("Loading NSPM scene {}::{}.", this->_id, this->_name);
+  } catch (std::system_error &ex) {
+    SPDLOG_DEBUG("Failed to update config for scene {}::{}.", this->_id, this->_name);
   }
-  SPDLOG_DEBUG("Loading NSPM scene {}::{}.", this->_id, this->_name);
-  this->_light_states.clear();
-  for (nlohmann::json light_data : data["light_states"]) {
-    LightState state;
-    state._light = nullptr;
-    state.light_id = light_data["light_id"];
-    state.color_mode = light_data["color_mode"];
-    state.brightness = light_data["light_level"];
-    state.color_temperature = light_data["color_temp"];
-    state.hue = light_data["hue"];
-    state.saturation = light_data["saturation"];
-    this->_light_states.push_back(state);
-  }
-  SPDLOG_DEBUG("Loaded scene {}::{}.", this->_id, this->_name);
 }
 
 void NSPMScene::activate() {
   SPDLOG_INFO("Activating scene {}::{}.", this->_id, this->_name);
-  for (LightState state : this->_light_states) {
-    if (state._light != nullptr) {
-      SPDLOG_DEBUG("Activating light state for light {}::{}.", state._light->get_id(), state._light->get_name());
-      if (state.brightness == 0) {
-        state._light->turn_off(true);
-        continue;
-      }
+  try {
+    auto light_states = database_manager::database.get_all<database_manager::SceneLightState>(sqlite_orm::where(sqlite_orm::c(&database_manager::SceneLightState::scene_id) == this->_id));
+    for (auto &light_state : light_states) {
+      auto light_entity_result = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, light_state.light_id);
+      if (light_entity_result) [[likely]] {
+        auto light_entity = *light_entity_result;
+        if (light_state.light_level == 0) {
+          light_entity->turn_off(true);
+          continue;
+        }
 
-      if (state.color_mode.compare("dimmer") == 0) {
-        state._light->turn_on(false);
-        state._light->set_color_temperature(state.color_temperature, false);
-        state._light->set_brightness(state.brightness, true);
-      } else if (state.color_mode.compare("color") == 0) {
-        state._light->turn_on(false);
-        state._light->set_hue(state.hue, false);
-        state._light->set_saturation(state.saturation, false);
-        state._light->set_brightness(state.brightness, true);
+        if (light_state.color_mode.compare("dimmer") == 0) {
+          SPDLOG_DEBUG("Setting light {}::{} to light level {} in dimmer mode with kelvin: {}.", light_entity->get_id(), light_entity->get_name(), light_state.light_level, light_state.color_temperature);
+          if (light_state.light_level <= 0) {
+            light_entity->turn_off(true);
+          } else {
+            light_entity->turn_on(false);
+            light_entity->set_color_temperature(light_state.color_temperature, false);
+            light_entity->set_brightness(light_state.light_level, true);
+          }
+        } else if (light_state.color_mode.compare("color") == 0) {
+          SPDLOG_DEBUG("Setting light {}::{} to light level {} in color mode.", light_entity->get_id(), light_entity->get_name(), light_state.light_level);
+          if (light_state.light_level <= 0) {
+            light_entity->turn_off(true);
+          } else {
+            light_entity->turn_on(false);
+            light_entity->set_hue(light_state.hue, false);
+            light_entity->set_saturation(light_state.saturation, false);
+            light_entity->set_brightness(light_state.light_level, true);
+          }
+        } else {
+          SPDLOG_ERROR("Tried to apply light state from scene with {}::{} for light with ID {} but could not interpret color mode '{}'.", this->get_id(), this->_name, light_state.light_id, light_state.color_mode);
+        }
       } else {
-        SPDLOG_ERROR("Trying to apply light state from scene with {}::{} for light with ID {} but could not interpret color mode '{}'.", this->get_id(), this->_name, state.light_id, state.color_mode);
+        SPDLOG_WARN("Tried to activate setting from scene {}::{} to light with ID {} but not such light was found.", this->_id, this->_name, light_state.light_id);
       }
-    } else {
-      SPDLOG_ERROR("Trying to apply light state from scene with ID {}::{} for light with ID {} but could not find such a light.", this->get_id(), this->_name, state.light_id);
     }
+  } catch (std::system_error &ex) {
+    SPDLOG_ERROR("Tried to activate scene {}::{} but something went wrong.", this->_id, this->_name);
   }
 }
 
 void NSPMScene::save() {
   // Update all light_states to current values.
   SPDLOG_DEBUG("Saving scene {}::{}.", this->_id, this->_name);
-  this->_light_states.clear(); // Clear current light states
-  std::list<nlohmann::json> json_light_states;
-  std::list<Light *> lights;
-  if (this->_is_global_scene) {
-    lights = EntityManager::get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
-  } else {
-    lights = this->_room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+
+  // Remove any exinsting light states for this scene:
+  try {
+    database_manager::database.remove_all<database_manager::SceneLightState>(sqlite_orm::where(sqlite_orm::c(&database_manager::SceneLightState::scene_id) == this->_id));
+  } catch (std::system_error &ex) {
+    SPDLOG_ERROR("Error while deleting existing light states for scene {}::{}. Error: {}", this->_id, this->_name, ex.what());
   }
-  for (Light *light : lights) {
-    SPDLOG_TRACE("Saving light {}::{}", light->get_id(), light->get_name());
-    nlohmann::json light_state_json;
-    LightState new_light_state;
-    switch (light->get_mode()) {
-    case MQTT_MANAGER_LIGHT_MODE::DEFAULT:
-      light_state_json["mode"] = "dimmer";
-      light_state_json["saturation"] = 0;
-      light_state_json["hue"] = 0;
-      light_state_json["color_temp"] = light->get_color_temperature();
 
-      new_light_state.color_mode = "dimmer";
-      new_light_state.saturation = 0;
-      new_light_state.hue = 0;
-      new_light_state.color_temperature = light->get_color_temperature();
-      break;
-    case MQTT_MANAGER_LIGHT_MODE::RGB:
-      light_state_json["mode"] = "color";
-      light_state_json["saturation"] = light->get_saturation();
-      light_state_json["hue"] = light->get_hue();
-      light_state_json["color_temp"] = 0;
-
-      new_light_state.color_mode = "color";
-      new_light_state.saturation = light->get_saturation();
-      new_light_state.hue = light->get_hue();
-      new_light_state.color_temperature = 0;
-      break;
-    default:
-      SPDLOG_ERROR("Unknown light mode!");
-      break;
+  try {
+    std::vector<std::shared_ptr<Light>> lights;
+    if (this->_is_global) {
+      auto rooms = EntityManager::get_all_rooms();
+      if (rooms) {
+        for (std::shared_ptr<Room> room : *rooms) {
+          std::vector<std::shared_ptr<Light>> room_lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+          lights.insert(lights.end(), room_lights.begin(), room_lights.end());
+        }
+      } else {
+        SPDLOG_ERROR("No rooms loaded while trying to save global scene.");
+      }
+    } else {
+      auto room = EntityManager::get_room(this->_room_id);
+      if (room) [[likely]] {
+        lights = (*room)->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
+      } else {
+        SPDLOG_ERROR("Failed to get room for scene {}::{} when saving light states.", this->_id, this->_name);
+      }
     }
-    light_state_json["light_id"] = light->get_id();
-    light_state_json["level"] = light->get_state() ? light->get_brightness() : 0;
-    json_light_states.push_back(light_state_json);
 
-    new_light_state.light_id = light->get_id();
-    new_light_state._light = light;
-    new_light_state.brightness = light->get_state() ? light->get_brightness() : 0;
-    this->_light_states.push_back(new_light_state);
-  }
+    // Remove lights not controlled from main page.
+    lights.erase(std::remove_if(lights.begin(), lights.end(), [](std::shared_ptr<Light> light) {
+                   return !light->get_controlled_from_main_page();
+                 }),
+                 lights.end());
 
-  // Update all light_states for lights.
-  nlohmann::json save_scene_data;
-  save_scene_data["scene_id"] = this->get_id();
-  save_scene_data["light_states"] = json_light_states;
-  std::string json_payload = save_scene_data.dump();
+    for (auto &light : lights) {
+      database_manager::SceneLightState new_light_state;
+      new_light_state.scene_id = this->_id;
+      new_light_state.light_id = light->get_id();
+      new_light_state.light_level = light->get_state() ? light->get_brightness() : 0;
+      switch (light->get_mode()) {
+      case MQTT_MANAGER_LIGHT_MODE::DEFAULT:
+        new_light_state.color_mode = "dimmer";
+        new_light_state.saturation = 0;
+        new_light_state.hue = 0;
+        new_light_state.color_temperature = light->get_color_temperature();
+        database_manager::database.insert(new_light_state);
+        break;
+      case MQTT_MANAGER_LIGHT_MODE::RGB:
+        new_light_state.color_mode = "color";
+        new_light_state.saturation = light->get_saturation();
+        new_light_state.hue = light->get_hue();
+        new_light_state.color_temperature = 0;
+        database_manager::database.insert(new_light_state);
+        break;
+      default:
+        SPDLOG_ERROR("Unknown light mode {} of light {}::{}!", (int)light->get_mode(), light->get_id(), light->get_name());
+        break;
+      }
+    }
 
-  std::string url = "http://127.0.0.1:8000/api/save_scene";
-  if (WebHelper::perform_request(&url, nullptr, nullptr, &json_payload)) {
-    SPDLOG_INFO("Saved scene {}::{}.", this->_id, this->_name);
-  } else {
-    SPDLOG_INFO("Failed to save scene {}::{}.", this->_id, this->_name);
+  } catch (std::system_error &ex) {
+    SPDLOG_ERROR("Error while saving new scene light states for scene {}::{}. Error: {}", this->_id, this->_name, ex.what());
   }
 }
 
@@ -147,47 +176,32 @@ MQTT_MANAGER_ENTITY_CONTROLLER NSPMScene::get_controller() {
   return MQTT_MANAGER_ENTITY_CONTROLLER::NSPM;
 }
 
-void NSPMScene::post_init() {
-  if (!this->_is_global_scene) {
-    Room *room_entity = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, this->_room_id);
-    if (room_entity != nullptr) {
-      this->_room = room_entity;
-    } else {
-      SPDLOG_ERROR("Did not find any room with room ID: {}. Will not continue loading.", this->_room_id);
-      return;
-    }
-
-    for (LightState &state : this->_light_states) {
-      Light *light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, state.light_id);
-      if (light != nullptr) {
-        SPDLOG_DEBUG("Attaching light {}::{} to light state attached to scene {}::{}.", light->get_id(), light->get_name(), this->_id, this->_name);
-        state._light = light;
-        light->attach_delete_callback(this->light_destroyed_callback);
-      } else {
-        SPDLOG_ERROR("Did not find any light matching a light state for scene {}::{}.", this->_id, this->_name);
-      }
-    }
-  }
+std::string NSPMScene::get_name() {
+  return this->_name;
 }
 
-void NSPMScene::remove_light(Light *light) {
-  auto it = this->_light_states.begin();
-  while (it != this->_light_states.end()) {
-    if (it->light_id == light->get_id()) {
-      SPDLOG_INFO("Removing light state for light {}::{}", light->get_id(), light->get_name());
-      this->_light_states.erase(it++);
-    } else {
-      it++;
-    }
-  }
+bool NSPMScene::can_save() {
+  return true;
 }
 
-void NSPMScene::light_destroyed_callback(Light *light) {
-  std::list<Scene *> all_nspm_scenes = EntityManager::get_all_entities_by_type<Scene>(MQTT_MANAGER_ENTITY_TYPE::SCENE);
-  for (MqttManagerEntity *entity : all_nspm_scenes) {
-    NSPMScene *scene = dynamic_cast<NSPMScene *>(entity);
-    if (scene != nullptr) {
-      scene->remove_light(light);
+std::string_view NSPMScene::get_icon() {
+  return EntityIcons::save_icon;
+}
+
+uint16_t NSPMScene::get_icon_color() {
+  return GUI_Colors::icon_color_on;
+}
+
+uint16_t NSPMScene::get_icon_active_color() {
+  return GUI_Colors::icon_color_on;
+}
+
+void NSPMScene::command_callback(NSPanelMQTTManagerCommand &command) {
+  if (command.has_save_scene_command()) {
+    auto save_scene_command = command.save_scene_command();
+    if (save_scene_command.entity_page_id() == this->_page_id && save_scene_command.entity_slot() == this->_page_slot) {
+      this->save();
+      SPDLOG_INFO("Scene {}::{} saved successfully.", this->_id, this->_name);
     }
   }
 }

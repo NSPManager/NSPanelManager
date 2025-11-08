@@ -1,3 +1,4 @@
+from logging import NullHandler
 from requests.models import default_hooks
 from django.db import models
 from datetime import datetime
@@ -32,45 +33,42 @@ class Room(models.Model):
 
     friendly_name = models.CharField(max_length=30)
     displayOrder = models.IntegerField(default=number)
+    room_temp_provider = models.CharField(max_length=255, default="")
+    room_temp_sensor = models.CharField(max_length=255, default="")
 
     def __str__(self) -> str:
-        return self.friendly_name
+        return "room_obj: " + str(self.id) + "::" + self.friendly_name
 
 
-def _default_nspanel_status_data():
-    return {
-        "rssi": 0,
-        "mac": "??:??:??:??:??:??",
-        "free_heap": 0
-    }
+class RoomEntitiesPage(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
+    display_order = models.IntegerField()
+    page_type = models.IntegerField() # Is this page displaying 4, 8 or 12 entities?
+    is_scenes_page = models.BooleanField(default=False)
 
 
 class NSPanel(models.Model):
     mac_address = models.CharField(max_length=17)
     friendly_name = models.CharField(max_length=100)
-    ip_address = models.CharField(max_length=15, default="")
     version = models.CharField(max_length=15, default="")
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    wifi_rssi = models.IntegerField(default=0)
-    heap_used_pct = models.IntegerField(default=0)
-    temperature = models.FloatField(default=0)
-    online_state = models.BooleanField(default=False)
     button1_mode = models.IntegerField(default=0)
     button1_detached_mode_light = models.ForeignKey(
-        "Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
-    register_relay1_as_light = models.BooleanField(default=False)
+        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
     button2_mode = models.IntegerField(default=0)
     button2_detached_mode_light = models.ForeignKey(
-        "Light", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
-    register_relay2_as_light = models.BooleanField(default=False)
+        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
     md5_firmware = models.CharField(max_length=64, default="")
     md5_data_file = models.CharField(max_length=64, default="")
     md5_tft_file = models.CharField(max_length=64, default="")
     denied = models.BooleanField(default=False)
-    accepted = models.BooleanField(default=True)
+    accepted = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.friendly_name
+
+def _default_nspanel_status_data():
+    pass
 
 
 class RelayGroup(models.Model):
@@ -79,32 +77,23 @@ class RelayGroup(models.Model):
 
 
 class RelayGroupBinding(models.Model):
-    relay_group = models.ForeignKey(
-        RelayGroup, on_delete=models.CASCADE, null=True, default=None)
+    relay_group = models.ForeignKey(RelayGroup, on_delete=models.CASCADE, null=True, default=None)
     nspanel = models.ForeignKey(NSPanel, on_delete=models.CASCADE)
     relay_num = models.IntegerField(default=1)
 
 
-class Light(models.Model):
+class Entity(models.Model):
+    class EntityType(models.TextChoices):
+        LIGHT = "light"
+        SWITCH = "switch"
+        BUTTON = "button"
+
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     friendly_name = models.CharField(max_length=255, default="")
-    # "home_assistant", "openhab" or "manual"
-    type = models.CharField(max_length=16, default="manual")
-    is_ceiling_light = models.BooleanField(default=False)
-    can_dim = models.BooleanField(default=False)
-    can_rgb = models.BooleanField(default=False)
-    can_color_temperature = models.BooleanField(default=False)
-    home_assistant_name = models.CharField(max_length=255, default="")
-    openhab_name = models.CharField(max_length=255, default="")
-    openhab_control_mode = models.CharField(max_length=32, default="dimmer")
-    openhab_item_switch = models.CharField(max_length=255, default="")
-    openhab_item_dimmer = models.CharField(max_length=255, default="")
-    openhab_item_color_temp = models.CharField(max_length=255, default="")
-    openhab_item_rgb = models.CharField(max_length=255, default="")
+    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE, null=True)
     room_view_position = models.IntegerField(default=0)
-
-    def __str__(self) -> str:
-        return F"{self.room.friendly_name} -> {self.friendly_name}"
+    entity_type = models.CharField(max_length=64, choices=EntityType)
+    entity_data = models.JSONField(default=dict)
 
 
 class Scene(models.Model):
@@ -112,15 +101,21 @@ class Scene(models.Model):
     # The name of the scene in Home Assistant or OpenHAB
     backend_name = models.CharField(max_length=32, null=True, default=None)
     scene_type = models.CharField(max_length=64)
-    room = models.ForeignKey(
-        Room, null=True, blank=True, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, null=True, blank=True, on_delete=models.CASCADE)
+    room_view_position = models.IntegerField()
+    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE, null=True)
 
 
 class LightState(models.Model):
-    light = models.ForeignKey(Light, on_delete=models.CASCADE)
+    light = models.ForeignKey(Entity, on_delete=models.CASCADE)
     scene = models.ForeignKey(Scene, on_delete=models.CASCADE)
     color_mode = models.CharField(max_length=32, default="dimmer")
     light_level = models.IntegerField(default=0)
     color_temperature = models.IntegerField(default=4000)
     hue = models.IntegerField(default=0)
     saturation = models.IntegerField(default=0)
+
+class Message(models.Model):
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    read = models.BooleanField(default=False)

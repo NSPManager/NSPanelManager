@@ -1,42 +1,52 @@
+#include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "web_helper/WebHelper.hpp"
 #include <curl/curl.h>
+#include <entity/entity_icons.hpp>
 #include <nlohmann/detail/value_t.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <openhab_manager/openhab_manager.hpp>
 #include <scenes/openhab_scene.hpp>
 #include <spdlog/spdlog.h>
+#include <system_error>
 
-OpenhabScene::OpenhabScene(nlohmann::json &data) {
-  this->_id = data["id"];
-  this->update_config(data);
+OpenhabScene::OpenhabScene(uint32_t id) {
+  this->_id = id;
+  this->reload_config();
 }
 
-void OpenhabScene::update_config(nlohmann::json &data) {
-  this->_name = data["scene_name"];
-  if (!data["room_id"].is_null()) {
-    this->_is_global_scene = false;
-    this->_room_id = data["room_id"];
-  } else {
-    this->_is_global_scene = true;
+void OpenhabScene::reload_config() {
+  try {
+    auto scene_config = database_manager::database.get<database_manager::Scene>(this->_id);
+    this->_name = scene_config.friendly_name;
+    this->_entity_id = scene_config.backend_name;
+    this->_page_id = scene_config.entities_page_id;
+    this->_page_slot = scene_config.room_view_position;
+    if (scene_config.room_id == nullptr) {
+      this->_is_global = true;
+    } else {
+      this->_is_global = false;
+      this->_room_id = *scene_config.room_id;
+    }
+    SPDLOG_DEBUG("Loaded OpenHAB scene {}::{}.", this->_id, this->_name);
+  } catch (std::system_error &ex) {
+    SPDLOG_ERROR("Failed to update config for scene {}::{}.", this->_id, this->_name);
   }
-  this->_entity_id = data["entity_name"];
-  SPDLOG_DEBUG("Loaded OpenHAB scene {}::{}.", this->_id, this->_name);
 }
 
 void OpenhabScene::activate() {
   SPDLOG_INFO("Activating scene {}::{}.", this->_id, this->_name);
 
-  std::string openhab_trigger_scene_url = fmt::format("{}/rest/rules/{}/runnow", MqttManagerConfig::openhab_address, this->_entity_id);
+  std::string openhab_trigger_scene_url = fmt::format("{}/rest/rules/{}/runnow", MqttManagerConfig::get_setting_with_default("openhab_address", ""), this->_entity_id);
   std::list<const char *> headers = {
-      fmt::format("Authorization: Bearer {}", MqttManagerConfig::openhab_access_token).c_str(),
+      fmt::format("Authorization: Bearer {}", MqttManagerConfig::get_setting_with_default("openhab_token", "")).c_str(),
       "Content-type: application/json"};
   std::string response_data;
   std::string post_data = "";
   SPDLOG_DEBUG("Triggering OpenHAB scene {}::{} via POST request to {}", this->_id, this->_name, openhab_trigger_scene_url);
-  if (WebHelper::perform_request(&openhab_trigger_scene_url, &response_data, &headers, &post_data)) {
+  if (WebHelper::perform_post_request(&openhab_trigger_scene_url, &response_data, &headers, &post_data)) {
     SPDLOG_DEBUG("Successfully activated OpenHAB scene {}::{}", this->_id, this->_name);
   } else {
     SPDLOG_ERROR("Failed to activate scene.");
@@ -59,17 +69,25 @@ MQTT_MANAGER_ENTITY_TYPE OpenhabScene::get_type() {
 }
 
 MQTT_MANAGER_ENTITY_CONTROLLER OpenhabScene::get_controller() {
-  return MQTT_MANAGER_ENTITY_CONTROLLER::NSPM;
+  return MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
 }
 
-void OpenhabScene::post_init() {
-  if (!this->_is_global_scene) {
-    Room *room_entity = EntityManager::get_entity_by_id<Room>(MQTT_MANAGER_ENTITY_TYPE::ROOM, this->_room_id);
-    if (room_entity != nullptr) {
-      this->_room = room_entity;
-    } else {
-      SPDLOG_ERROR("Did not find any room with room ID: {}. Will not continue loading.", this->_room_id);
-      return;
-    }
-  }
+std::string OpenhabScene::get_name() {
+  return this->_name;
+}
+
+bool OpenhabScene::can_save() {
+  return false;
+}
+
+std::string_view OpenhabScene::get_icon() {
+  return EntityIcons::openhab_icon;
+}
+
+uint16_t OpenhabScene::get_icon_color() {
+  return GUI_Colors::icon_color_off;
+}
+
+uint16_t OpenhabScene::get_icon_active_color() {
+  return GUI_Colors::icon_color_off;
 }

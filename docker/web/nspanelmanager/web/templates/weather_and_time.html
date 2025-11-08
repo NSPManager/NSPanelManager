@@ -2,414 +2,235 @@
 
 {% block head %}
 {% load static %}
-  <script src="{% static 'question.js' %}?refresh={% now 'U' %}"></script>
-  <script src="{% static 'modal-select-entity.js' %}?refresh={% now 'U' %}"></script>
+  <script src="{{ ingress_path }}{% static 'question.js' %}?refresh={% now 'U' %}"></script>
+  <script src="{{ ingress_path }}{% static 'modal-select-entity.js' %}?refresh={% now 'U' %}"></script>
+
   <script>
-    function select_new_outside_temp_sensor() {
-      var types = {
-        "home_assistant_type_filter": JSON.stringify([
-          "sensor"
-        ]),
-        "openhab_type_filter": JSON.stringify([
-          "things"
-        ])
-      };
-      select_new_entity(types, (element) => {
-        $(".modal").addClass("hidden");
-        var weather_entity_id = $(element.currentTarget).data("entity_id");
-        var entity_type = $(element.currentTarget).data("type");
-        if(entity_type == "home_assistant") {
-          $("#outside_temp_provider").val(entity_type);
-          $("#outside_temp_sensor").val(weather_entity_id);
-        } else if (entity_type == "openhab") {
-          var temp_thing = $(element.currentTarget).data("entity_id");
-          var items = $(element.currentTarget).data("items");
-          var temp_item = "";
-          if(items.length > 1) {
-            var options = [];
-            items.forEach(item => {
-              options.push({text: item, value: item});
-            });
 
-            select_openhab_items("Select temperature item", options, [
-              {text: "Outside temperature sensor", id: "temp_item"},
-            ], (data) => {
-              temp_item = data["temp_item"];
-            });
-          } else if(items.length == 1) {
-            temp_item = items[0];
-          } else {
-            alert("No items/channels linked to thing! Cannot proceed.");
-          }
+  // This function is used from select_weather_outside_temperature_sensor.html to do the final selection of
+  // sensor and update the fields on this page.
+  function select_outside_temperature_sensor(sensor) {
+    var item = $(sensor);
+    var entity_source = item.data('entity-source');
+    var entity_id = item.data('entity-id');
 
-          $("#outside_temp_provider").val(entity_type);
-          $("#outside_temp_sensor").val(temp_item);
-        }else {
-          $("#outside_temp_provider").val("");
-          $("#outside_temp_sensor").val("");
-          alert("Unknown entity type. Cannot proceed!");
-        }
-      });
-    }
+    $("#outside_temp_provider").val(entity_source);
+    $("#outside_temp_sensor").val(entity_id);
+    modal.close();
+  }
 
-    function start_search_location() {
-      $("#modal-select-location").removeClass("invisible");
-      $("#modal-select-location").removeClass("hidden");
-    }
-
-    function search_location() {
-      var location_string = $("#search_location").val();
-
-      if (location_string == "") {
-        $("#locations_list").html("");
-        return;
-      }
-
-      $.get("https://geocoding-api.open-meteo.com/v1/search?name=" + location_string, (data) => {
-        $("#locations_list").html("");
-        if("results" in data) {
-          data.results.forEach((location) => {
-            var location_template = $($("#location_template").html());
-            location_template.find(".location_flag").attr("src", "https://open-meteo.com/images/country-flags/" + location.country_code.toLowerCase() + ".svg");
-            location_template.find(".location_text").html(location.name + ", " + location.country);
-            location_template.find(".latitude").html(location.latitude);
-            location_template.find(".longitude").html(location.longitude);
-            $("#locations_list").append(location_template);
-          });
-        }
-      });
-    }
-
-    function choose_location(item) {
-      var lat = $(item).find(".latitude").html();
-      var long = $(item).find(".longitude").html();
-      $("#location_latitude").val(lat);
-      $("#location_longitude").val(long);
-      close_modals();
-    }
-
-    $(document).ready(() => {
-      $("#search_location").on('input', search_location);
-    });
+  function clear_selected_outside_temperature_sensor() {
+    $("#outside_temp_provider").val("");
+    $("#outside_temp_sensor").val("");
+  }
   </script>
 {% endblock %}
 
 {% block content %}
-{% include 'modal-select-entity.html' %}
 
-<div id="modal-select-location" tabindex="-1" aria-hidden="true"
-  class="invisible modal overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full p-4 mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">
-  <!-- Backdrop -->
-  <div class="w-full h-screen fixed bg-black/80 backdrop-blur-sm" onclick="close_modals();"></div>
-
-  <div class="relative p-4 w-full max-w-2xl">
-    <!-- Modal content -->
-    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 flex flex-col">
-      <!-- Modal header -->
-      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 w-full">
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-          Select location
-        </h3>
-        <button type="button" onclick="close_modals();"
-          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-          data-modal-hide="default-modal">
-          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-          </svg>
-          <span class="sr-only">Close</span>
-        </button>
-      </div>
-      <!-- Modal content -->
-      <div class="">
-        <!-- Search -->
-        <div class="">
-          <div class="flex">
-            <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300">
-              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <title>Search</title>
-                <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"></path>
-              </svg>
-            </span>
-            <input class="bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-            type="text" class="input" name="search_location" id="search_location" placeholder="Search">
-          </div>
-        </div>
-      </div>
-
-      <template id="location_template">
-        <button type="button" onclick="choose_location(this);" class="relative w-full px-4 py-2 text-sm font-medium border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white">
-          <div class="w-full items-center justify-start flex">
-            <div class="me-2">
-              <img class="location_flag w-5 h-5" aria-hidden="true" src="https://open-meteo.com/images/country-flags/se.svg">
-            </div>
-            <p class="location_text text-lg">Stockholm, Sweden</p>
-          </div>
-          <div class="location_cords w-full flex items-center justify-start text-xs font-thin pt-1">
-            <span class="latitude"></span>E, <span class="longitude"></span>N
-          </div>
-        </button>
-      </template>
-      <!-- List of locations -->
-      <div class="max-h-96 overflow-y-scroll p-4">
-        <div id="locations_list" class="w-full text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-        </div>
-      </div>
-
-      <!-- Modal footer -->
-      <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-        <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-        onclick="close_modals();">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<form method="POST" action="{% url 'weather_and_time' %}">
+<form method="POST" action="{{ ingress_path }}{% url 'weather_and_time' %}">
   {% csrf_token %}
-  <div class="flex items-center justify-between">
-    <h2 class="font-medium text-2xl" id="nspanel_name">Weather & Time</h2>
-    <a href="{% url 'manual' %}#sec:weather_and_time" title="Toggle Light/Dark theme"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-      Help
-    </a>
+  <div class="flex items-center justify-between" id="nspanel_settings_container">
+    <div>
+      <h2 class="font-medium text-2xl" id="nspanel_name">Weather & Time</h2>
+    </div>
+    <a href="https://nspanelmanager.com/docs/web-interface#weather-and-time" target="_blank" class="btn btn-outline btn-info">
+        Help
+      </a>
   </div>
-  <div class="p-4 mb-2 mt-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50" role="alert">
-    <span class="font-medium">Info.</span> Changes to settings on this page requires a reboot of all NSPanels to take effect.
-  </div>
+
   <div class="mt-2">
-    <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+    <div class="p-4 bg-base-100 rounded-box shadow-lg w-full">
       <!-- General settings -->
-      <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">Date & Time</span>
+      <span class="block mb-2 text-xl">Date & Time</span>
 
       <!-- Date format -->
-      <div class="mt-4">
-        <label for="date_format" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Date format</label>
-        <div class="flex">
-          <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <title>Date format</title>
-              <path d="M17,7H22V17H17V19A1,1 0 0,0 18,20H20V22H17.5C16.95,22 16,21.55 16,21C16,21.55 15.05,22 14.5,22H12V20H14A1,1 0 0,0 15,19V5A1,1 0 0,0 14,4H12V2H14.5C15.05,2 16,2.45 16,3C16,2.45 16.95,2 17.5,2H20V4H18A1,1 0 0,0 17,5V7M2,7H13V9H4V15H13V17H2V7M20,15V9H17V15H20Z"></path>
-            </svg>
-          </span>
-          <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-          type="text" class="input" name="date_format" id="date_format" placeholder="Date format" value="{{ date_format }}">
-        </div>
+      <div class="my-2">
+          <label for="date_format" class="block mb-1 text-sm font-medium">Date format</label>
+          <div class="flex flex-row-reverse">
+              <input class="outline-none rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+              type="text" id="date_format" name="date_format" value="{{ date_format }}" required>
+              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                  <span class="mdi mdi-form-textbox"></span>
+              </span>
+          </div>
       </div>
-      <div class="p-4 mb-4 mt-2 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50" role="alert">
-        <div class="font-medium">Info.</div>
-        The format of the date on the NSPanel. This is set using the strftime function. See <a href="https://cplusplus.com/reference/ctime/strftime/" target="_blank" class="border-dotted border-b-2 border-black">available</a> formatting for all options.
-      </div>
+      {% component "alert" level="info" text='The format of the date on the NSPanel. This is set using the strftime function. See <a href="https://cplusplus.com/reference/ctime/strftime/" target="_blank" class="border-dotted border-b-2 border-black">available</a> formatting for all options.' %}{% endcomponent %}
 
-      <!-- Clock format-->
-      <div class="flex-auto mt-4">
-        <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Time format</h3>
+      <!-- Clock format -->
+      <div class="flex-auto my-2">
+        <h3 class="block mb-2 text-sm font-medium">Clock format</h3>
         <ul
-          class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
-          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+          class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
+          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
-              <input id="relay1_off" type="radio" name="clock_us_style" value="False"
-              {% if clock_us_style != "True" %}checked{% endif %}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-              <label for="relay1_off"
-                class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">24 hour clock</label>
+              <input id="24_hour_clock" type="radio" name="clock_us_style" value="False" {% if clock_us_style != "True" %}checked{% endif %}
+                class="w-4 h-4 radio radio-accent">
+              <label for="24_hour_clock"
+                class="w-full py-3 ms-2 text-sm font-medium">24 hour clock</label>
             </div>
           </li>
-          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
-              <input id="relay1_on" type="radio" name="clock_us_style" value="True"
-              {% if clock_us_style == "True" %}checked{% endif %}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-              <label for="relay1_on" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">12 hour clock (AM/PM)</label>
+              <input id="12_hour_clock" type="radio" name="clock_us_style" value="True" {% if clock_us_style == "True" %}checked{% endif %}
+                class="w-4 h-4 radio radio-accent">
+              <label for="12_hour_clock" class="w-full py-3 ms-2 text-sm font-medium">12 hour clock (AM/PM)</label>
             </div>
           </li>
         </ul>
       </div>
     </div>
 
-    <div class="p-4 mt-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+    <div class="mt-2 p-4 bg-base-100 rounded-box shadow-lg w-full">
       <!-- Weather and temp -->
-      <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">Weather & Temperature</span>
+      <span class="block mb-2 text-xl">Weather & Temperature</span>
 
       <!-- Select location format -->
-      <div class="flex flex-wrap md:flex-nowrap justify-between items-center">
+      <div class="flex flex-wrap md:flex-nowrap items-center justify-between">
         <!-- Latitude -->
-        <div class="mb-2 w-full md:me-1">
-          <label for="location_latitude" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Latitude</label>
-          <div class="flex">
-            <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <title>Latitude</title>
-                <path d="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path>
-              </svg>
-            </span>
-            <input class="rounded-none bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-            type="text" class="input" name="location_latitude" id="location_latitude" placeholder="Latitude" value="{{ location_latitude }}">
-            <button type="button" onclick="start_search_location();" class="inline-flex items-center px-3 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-e-0 rounded-e-md">
-              Search
-            </button>
+        <div class="my-2 w-full md:me-1">
+          <label for="location_latitude" class="block mb-1 text-sm font-medium">Latitude</label>
+          <div class="flex flex-row-reverse">
+              <button type="button" class="btn btn-info rounded-l-none" hx-get="{{ ingress_path }}{% url 'htmx_partial_select_weather_location' %}" hx-indicator="#modal_loading" hx-swap="none">Search</button>
+              <input id="location_latitude" class="outline-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+              type="text" name="location_latitude" value="{{ location_latitude }}">
+              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                  <span class="mdi mdi-earth"></span>
+              </span>
           </div>
         </div>
 
         <!-- Longitude -->
-        <div class="mb-2 w-full md:ms-1">
-          <label for="location_longitude" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Longitude</label>
-          <div class="flex">
-            <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <title>Longitude</title>
-                <path d="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path>
-              </svg>
-            </span>
-            <input class="rounded-none bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-            type="text" class="input" name="location_longitude" id="location_longitude" placeholder="Longitude" value="{{ location_longitude }}">
-            <button type="button" onclick="start_search_location();" class="inline-flex items-center px-3 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-e-0 rounded-e-md">
-              Search
-            </button>
-          </div>
+        <div class="my-2 w-full md:ms-1">
+            <label for="location_longitude" class="block mb-1 text-sm font-medium">Longitude</label>
+            <div class="flex flex-row-reverse">
+                <button type="button" class="btn btn-info rounded-l-none" hx-get='{{ ingress_path }}{% url "htmx_partial_select_weather_location" %}' hx-indicator="#modal_loading" hx-swap="none">Search</button>
+                <input id="location_longitude" class="outline-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="text" name="location_longitude" value="{{ location_longitude }}">
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                    <span class="mdi mdi-earth"></span>
+                </span>
+            </div>
         </div>
-
       </div>
 
       <!-- Outside temperature sensor -->
       <input type="hidden" name="outside_temp_provider" id="outside_temp_provider" readonly value="{{ outside_temp_provider }}">
-      <div class="mt-4">
-        <label for="outside_temp_sensor" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Outside temperature sensor</label>
-        <div class="flex">
-          <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <title>Outside temperature sensor</title>
-              <path d="M15 13V5A3 3 0 0 0 9 5V13A5 5 0 1 0 15 13M12 4A1 1 0 0 1 13 5V8H11V5A1 1 0 0 1 12 4Z" />
-            </svg>
-          </span>
-          <input class="rounded-none bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-          type="text" class="input" name="outside_temp_sensor" id="outside_temp_sensor" readonly value="{{ outside_temp_sensor }}">
-          <button type="button" onclick="select_new_outside_temp_sensor();" class="inline-flex items-center px-3 text-sm text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-e-0 rounded-e-md">
-            Select
-          </button>
-        </div>
+      <div class="my-2 w-full md:ms-1">
+          <label for="outside_temp_sensor" class="block mb-1 text-sm font-medium">Outside temperature sensor</label>
+          <div class="flex flex-row-reverse">
+              <button type="button" class="btn btn-info rounded-l-none" hx-get="{{ ingress_path }}{% url 'htmx_partial_select_weather_outside_temperature_sensor_provider' %}" hx-swap="none">Select</button>
+              <button type="button" class="btn btn-error rounded-none" onclick="clear_selected_outside_temperature_sensor();">Clear</button>
+              <input class="outline-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+              type="text" id="outside_temp_sensor" name="outside_temp_sensor" value="{{ outside_temp_sensor }}" placeholder="None selected" readonly>
+              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                  <span class="mdi mdi-thermometer"></span>
+              </span>
+          </div>
       </div>
-      <div class="p-4 mb-4 mt-2 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50" role="alert">
-        <div class="font-medium">Info.</div>
-        The outside temperature is not a requirement for using the weather functionality but it can be used to provide a more accurate value on the screensaver.
-      </div>
+      {% component "alert" level="info" text="The outside temperature is not a requirement for using the weather functionality but it can be used to provide a more accurate value on the screensaver." %}{% endcomponent %}
 
       <!-- Update interval -->
-      <div class="mt-4">
-        <label for="weather_update_interval" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Update interval (minutes)</label>
-        <div class="flex">
-          <span
-            class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md   ">
-            <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <title>Update interval</title>
-              <path
-                d="M12,18V6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z" />
-            </svg>
-          </span>
-          <input
-            class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-            type="number" name="weather_update_interval" id="weather_update_interval" placeholder="Weather update interval" min=10 max=255 value="{{ weather_update_interval }}" />
-        </div>
+      <div class="my-2">
+          <label for="weather_update_interval" class="block mb-1 text-sm font-medium">Update interval (minutes)</label>
+          <div class="flex flex-row-reverse">
+              <input class="outline-none rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+              type="number" min="1" max="60" id="weather_update_interval" name="weather_update_interval" value="{{ weather_update_interval }}" required>
+              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                  <span class="mdi mdi-form-textbox"></span>
+              </span>
+          </div>
       </div>
 
       <!-- Temperature format-->
-      <div class="flex-auto mt-4">
-        <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Temperature format</h3>
+      <div class="flex-auto my-2">
+        <h3 class="block mb-2 text-sm font-medium">Temperature format</h3>
         <ul
-          class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
-          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+          class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
+          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
-              <input id="celsius" type="radio" name="use_fahrenheit" value="False"
-              {% if use_fahrenheit != "True" %}checked{% endif %}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-              <label for="celsius"
-                class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Celsius</label>
+              <input id="temp_celsius" type="radio" name="use_fahrenheit" value="False" {% if use_fahrenheit != "True" %}checked{% endif %}
+                class="w-4 h-4 radio radio-accent" required>
+              <label for="temp_celsius"
+                class="w-full py-3 ms-2 text-sm font-medium">Celsius</label>
             </div>
           </li>
-          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
-              <input id="fahrenheit" type="radio" name="use_fahrenheit" value="True"
-              {% if use_fahrenheit == "True" %}checked{% endif %}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-              <label for="fahrenheit" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Fahrenheit</label>
+              <input id="temp_fahrenheit" type="radio" name="use_fahrenheit" value="True" {% if use_fahrenheit == "True" %}checked{% endif %}
+                class="w-4 h-4 radio radio-accent" required>
+              <label for="temp_fahrenheit" class="w-full py-3 ms-2 text-sm font-medium">Fahrenheit</label>
             </div>
           </li>
         </ul>
       </div>
 
       <!-- Wind format-->
-      <div class="flex-auto mt-4">
-        <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Wind speed format</h3>
+      <div class="flex-auto my-2">
+        <h3 class="block mb-2 text-sm font-medium">Wind speed format</h3>
         <ul
-          class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
-          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+          class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
+          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
-              <input id="kmh" type="radio" name="wind_speed_format" value="kmh"
-              {% if wind_speed_format == "kmh" %}checked{% endif %}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+              <input id="kmh" type="radio" name="wind_speed_format" value="kmh" {% if wind_speed_format == "kmh" %}checked{% endif %}
+                class="w-4 h-4 radio radio-accent" required>
               <label for="kmh"
-                class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Km/h</label>
+                class="w-full py-3 ms-2 text-sm font-medium">Km/h</label>
             </div>
           </li>
-          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
-              <input id="meter_per_second" type="radio" name="wind_speed_format" value="ms"
-              {% if wind_speed_format == "ms" %}checked{% endif %}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-              <label for="meter_per_second" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">m/s</label>
+              <input id="meter_per_second" type="radio" name="wind_speed_format" value="ms" {% if wind_speed_format == "ms" %}checked{% endif %}
+                class="w-4 h-4 radio radio-accent" required>
+              <label for="meter_per_second" class="w-full py-3 ms-2 text-sm font-medium">Meter/s</label>
             </div>
           </li>
-          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
-              <input id="miles_per_hour" type="radio" name="wind_speed_format" value="mph"
-              {% if wind_speed_format == "mph" %}checked{% endif %}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-              <label for="miles_per_hour" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Mph</label>
+              <input id="miles_per_hour" type="radio" name="wind_speed_format" value="mph" {% if wind_speed_format == "mph" %}checked{% endif %}
+                class="w-4 h-4 radio radio-accent" required>
+              <label for="miles_per_hour" class="w-full py-3 ms-2 text-sm font-medium">Mph</label>
             </div>
           </li>
-          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
-              <input id="knots" type="radio" name="wind_speed_format" value="kn"
-              {% if wind_speed_format == "kn" %}checked{% endif %}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-              <label for="knots" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Knots</label>
+              <input id="knots" type="radio" name="wind_speed_format" value="knots" {% if wind_speed_format == "knots" %}checked{% endif %}
+                class="w-4 h-4 radio radio-accent" required>
+              <label for="knots" class="w-full py-3 ms-2 text-sm font-medium">Knots</label>
             </div>
           </li>
         </ul>
       </div>
 
       <!-- Precipitation unit -->
-      <div class="flex-auto mt-4">
-        <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Precipitation unit</h3>
+      <div class="flex-auto my-2">
+        <h3 class="block mb-2 text-sm font-medium">Precipitation unit</h3>
         <ul
-          class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
-          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+          class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
+          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
-              <input id="millimeters" type="radio" name="precipitation_format" value="mm"
-              {% if precipitation_format == "mm" %}checked{% endif %}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+              <input id="millimeters" type="radio" name="precipitation_format" value="mm" {% if precipitation_format == "mm" %}checked{% endif %}
+                class="w-4 h-4 radio radio-accent" required>
               <label for="millimeters"
-                class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Millimeters</label>
+                class="w-full py-3 ms-2 text-sm font-medium">Millimeters</label>
             </div>
           </li>
-          <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
             <div class="flex items-center ps-3">
-              <input id="inches" type="radio" name="precipitation_format" value="inch"
-              {% if precipitation_format == "inch" %}checked{% endif %}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-              <label for="inches" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Inches</label>
+              <input id="inch" type="radio" name="precipitation_format" value="inch" {% if precipitation_format == "inch" %}checked{% endif %}
+                class="w-4 h-4 radio radio-accent" required>
+              <label for="inch" class="w-full py-3 ms-2 text-sm font-medium">Inches</label>
             </div>
           </li>
         </ul>
       </div>
-
     </div>
   </div>
+  {% component "alert" level="info" text="Set your required Temperature, Wind speed and Precipitation units before saving the configuration." %}{% endcomponent %}
+
 
   <div class="text-right">
-    <button type="submit"
-      class="mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ">Save</button>
+    <button type="submit" class="btn btn-info my-2">Save</button>
   </div>
 </form>
 {% endblock %}

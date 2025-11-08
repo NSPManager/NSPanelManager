@@ -1,538 +1,122 @@
 {% extends 'base.html' %}
+{% load jsonify %}
+{% load set_var %}
+{% load concat %}
 
 {% block head %}
 {% load static %}
-<script src="{% static 'edit_room.js' %}?refresh={% now 'U' %}"></script>
-<script src="{% static 'modal-select-entity.js' %}?refresh={% now 'U' %}"></script>
-<link rel="stylesheet" href="{% static 'edit_room.css' %}">
+<script src="{{ ingress_path }}{% static 'modal-select-entity.js' %}?refresh={% now 'U' %}"></script>
+<link rel="stylesheet" href="{{ ingress_path }}{% static 'edit_room.css' %}">
+
+<script>
+  // This function is used from select_room_temperature_sensor.html to do the final selection of
+  // sensor and update the fields on this page.
+  function select_room_temperature_sensor(sensor) {
+    var item = $(sensor);
+    var entity_source = item.data('entity-source');
+    var entity_id = item.data('entity-id');
+
+    $("#room_temp_provider").val(entity_source);
+    $("#room_temp_sensor").val(entity_id);
+    modal.close();
+  }
+
+  function clear_selected_room_temperatuer_sensor() {
+    $("#room_temp_provider").val("");
+    $("#room_temp_sensor").val("");
+  }
+</script>
 {% endblock %}
 
 {% block content %}
 {% load static %}
-{% include 'modal-select-entity.html' %}
-
-<div class="modal hidden" id="modal-add-light">
-  <div class="modal-background"></div>
-  <div class="modal-card">
-    <nav class="panel" style="background-color: white;" id="add_new_light_modal_panel">
-      <p class="panel-heading">
-        Choose a light
-      </p>
-      <div class="panel-block">
-        <p class="control has-icons-left">
-          <input class="input" type="text" placeholder="Search" id="add_new_light_search">
-          <span class="icon is-left">
-            <i class="mdi mdi-magnify" aria-hidden="true"></i>
-          </span>
-        </p>
-      </div>
-      <div id="add_new_light_errors">
-      </div>
-      <p class="panel-tabs" id="add_new_light_tabs">
-        <a class="is-active" id="filter_for_all" onclick="add_new_lights_filter_for_type('all');">All</a>
-        <a id="filter_for_home_assistant" onclick="add_new_lights_filter_for_type('home_assistant');">Home
-          Assistant</a>
-        <a id="filter_for_openhab" onclick="add_new_lights_filter_for_type('openhab');">OpenHAB</a>
-        <a id="filter_for_manual" onclick="add_new_lights_filter_for_type('manual');">Manual</a>
-      </p>
-      <div id="add_new_light_options">
-      </div>
-      <div id="add_new_light_loader">
-        <center>{% include 'loader.html' %}</center>
-      </div>
-    </nav>
-  </div>
-</div>
-
-
-
-<form method="POST" action="{% url 'add_new_light' room.id %}">
-  {% csrf_token %}
-  <input class="input" type="hidden" id="add_new_light_type" name="add_new_light_type">
-  <input class="input" type="hidden" id="home_assistant_name" name="home_assistant_name">
-  <input class="input" type="hidden" id="openhab_name" name="openhab_name">
-  <input class="input" type="hidden" id="edit_light_id" name="edit_light_id" default="-1">
-
-  <div id="modal-add-light-options" tabindex="-1" aria-hidden="true"
-    class="hidden modal overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full max-h-full p-4 max-w- mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">
-    <div class="w-full h-full fixed bg-black/80 backdrop-blur-sm" onclick="close_modals();"></div>
-    <div class="relative p-4 w-full max-w-2xl max-h-full">
-      <!-- Modal content -->
-      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-        <!-- Modal header -->
-        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-            Configure light
-          </h3>
-          <button type="button" onclick="close_modals();"
-            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-            data-modal-hide="default-modal">
-            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-            </svg>
-            <span class="sr-only">Close</span>
-          </button>
-        </div>
-        <!-- Modal content -->
-        <div class="p-4 md:p-5 space-y-4">
-          <!-- Common controls -->
-          <div class="">
-            <!-- Name -->
-            <label for="add_new_light_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Name</label>
-            <div class="flex">
-              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>Name</title>
-                  <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
-                    4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
-                    7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
-                </svg>
-              </span>
-              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="text" class="input" name="add_new_light_name" id="add_new_light_name" placeholder="Office">
-            </div>
-            <!-- Control mode (dimmer/switch etc...) -->
-            <div class="flex-auto mt-4">
-              <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Type</h3>
-              <ul
-                class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
-                <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
-                  <div class="flex items-center ps-3">
-                    <input id="light_type_ceiling" type="radio" name="light_type" value="ceiling"
-                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" required>
-                    <label for="light_type_ceiling"
-                      class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Ceiling</label>
-                  </div>
-                </li>
-                <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
-                  <div class="flex items-center ps-3">
-                    <input id="light_type_table" type="radio" name="light_type" value="table"
-                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" required>
-                    <label for="light_type_table" class="w-full py-3 ms-2 text-sm font-medium text-gray-900">Table</label>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <!-- Type-->
-            <div class="flex-auto mt-4">
-              <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Type</h3>
-              <ul
-                class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   ">
-                <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
-                  <div class="flex items-center ps-3">
-                    <input id="light_control_mode_dimmer" type="radio" name="light_control_mode" value="dimmer"
-                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" required>
-                    <label for="light_control_mode_dimmer"
-                      class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Dimmable</label>
-                  </div>
-                </li>
-                <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
-                  <div class="flex items-center ps-3">
-                    <input id="light_control_mode_switch" type="radio" name="light_control_mode" value="switch"
-                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" required>
-                    <label for="light_control_mode_switch" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 ">Switch</label>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <!-- Capabilities -->
-            <div class="flex-auto mt-4">
-              <h3 class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Capabilities</h3>
-              <ul class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                  <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-                      <div class="flex items-center ps-3">
-                          <input id="color_temperature" name="color_temperature" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                          <label for="color_temperature" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Color temperature</label>
-                      </div>
-                  </li>
-                  <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-                      <div class="flex items-center ps-3">
-                        <input id="rgb" name="rgb" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                        <label for="rgb" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Color (RGB)</label>
-                      </div>
-                  </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- OpenHAB Light options-->
-          <div id="openhab_light_options">
-            <!-- Switch item selector -->
-            <div class="mt-4" id="openhab_switch_channel_selector">
-              <label for="openhab_switch_channel_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Switch</label>
-              <div class="flex">
-                <span
-                  class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                  <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <title>Switch item</title>
-                    <path
-                      d="M13,9V3.5L18.5,9M6,2C4.89,2 4,2.89 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6Z" />
-                  </svg>
-                </span>
-                <select name="openhab_switch_channel_name" id="openhab_switch_channel_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                </select>
-              </div>
-            </div>
-            <!-- Dimming item selector -->
-            <div class="mt-4" id="openhab_dimming_channel_selector">
-              <label for="openhab_dimming_channel_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Dimmer item</label>
-              <div class="flex">
-                <span
-                  class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                  <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <title>Dimmer item</title>
-                    <path
-                      d="M13,9V3.5L18.5,9M6,2C4.89,2 4,2.89 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6Z" />
-                  </svg>
-                </span>
-                <select name="openhab_dimming_channel_name" id="openhab_dimming_channel_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                </select>
-              </div>
-            </div>
-            <!-- Color temperature item selector -->
-            <div class="mt-4" id="openhab_color_temp_channel_selector">
-              <label for="openhab_color_temperature_channel_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Color temperature item</label>
-              <div class="flex">
-                <span
-                  class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                  <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <title>Color temperature item</title>
-                    <path
-                      d="M13,9V3.5L18.5,9M6,2C4.89,2 4,2.89 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6Z" />
-                  </svg>
-                </span>
-                <select name="openhab_color_temperature_channel_name" id="openhab_color_temperature_channel_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                </select>
-              </div>
-            </div>
-            <!-- Color (RGB) item selector -->
-            <div class="mt-4" id="openhab_rgb_channel_selector">
-              <label for="openhab_RGB_channel_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Color item</label>
-              <div class="flex">
-                <span
-                  class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                  <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <title>Color temperature item</title>
-                    <path
-                      d="M13,9V3.5L18.5,9M6,2C4.89,2 4,2.89 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6Z" />
-                  </svg>
-                </span>
-                <select name="openhab_RGB_channel_name" id="openhab_RGB_channel_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Add to room view -->
-          <div class="flex items-center mb-4 pl-4">
-              <input id="add_to_room_view" name="add_to_room_view" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" checked>
-              <label for="add_to_room_view" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Add to room view</label>
-          </div>
-        </div>
-        <!-- Modal footer -->
-        <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-          <button data-modal-hide="static-modal" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >Save</button>
-          <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-          onclick="close_modals();">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</form>
-
-<form method="POST" action="{% url 'add_new_scene_to_room' room.id %}">
-  {% csrf_token %}
-  <input type="hidden" id="edit_scene_id" name="edit_scene_id">
-
-  <div id="add_new_scene_to_room_modal" tabindex="-1" aria-hidden="true"
-    class="hidden modal overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full max-h-full p-4 max-w- mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">
-    <div class="w-full h-full fixed bg-black/80 backdrop-blur-sm" onclick="close_modals();"></div>
-    <div class="relative p-4 w-full max-w-2xl max-h-full">
-      <!-- Modal content -->
-      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-        <!-- Modal header -->
-        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-            Create new scene
-          </h3>
-          <button type="button" onclick="close_modals();"
-            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-            data-modal-hide="default-modal">
-            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-            </svg>
-            <span class="sr-only">Close</span>
-          </button>
-        </div>
-        <!-- Modal content -->
-        <div class="p-4 md:p-5 space-y-4">
-          <!-- Common controls -->
-          <div class="">
-            <!-- Name -->
-            <label for="scene_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Name</label>
-            <div class="flex">
-              <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <title>Name</title>
-                  <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
-                    4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
-                    7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
-                </svg>
-              </span>
-              <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-              type="text" class="input" name="scene_name" id="scene_name" placeholder="Scene name">
-            </div>
-          </div>
-        </div>
-        <!-- Modal footer -->
-        <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-          <button data-modal-hide="static-modal" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >Add</button>
-          <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-          onclick="close_modals();">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</form>
-
-<form method="POST" action="{% url 'add_new_light_to_room_view' room.id %}">
-  {% csrf_token %}
-  <input type="hidden" id="add_new_light_to_room_view_position" name="position">
-  <div id="modal-add-light-to-room-view" tabindex="-1" aria-hidden="true"
-    class="hidden modal overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center w-full max-h-full p-4 max-w- mx-auto my-auto sm:w-3/4 md:w-2/4 inset-0 flex items-center">
-    <div class="w-full h-full fixed bg-black/80 backdrop-blur-sm" onclick="close_modals();"></div>
-    <div class="relative p-4 w-full max-w-2xl max-h-full">
-      <!-- Modal content -->
-      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-        <!-- Modal header -->
-        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-            Configure entity slot
-          </h3>
-          <button type="button" onclick="close_modals();"
-            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-            data-modal-hide="default-modal">
-            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-            </svg>
-            <span class="sr-only">Close</span>
-          </button>
-        </div>
-        <!-- Modal content -->
-        <div class="p-4 md:p-5 space-y-4" id="add_new_light_to_room_view_position_card_body">
-          {% if room.light_set.all.count > 0 %}
-          <div class="mt-4">
-            <label for="add_new_light_to_position_select" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Light</label>
-            <div class="flex">
-              <span
-                class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <title>Entity</title>
-                  <path
-                    d="M13,9V3.5L18.5,9M6,2C4.89,2 4,2.89 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6Z" />
-                </svg>
-              </span>
-              <select name="light_id" id="add_new_light_to_position_select" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                {% for light in room.light_set.all %}
-                {% if light.room_view_position == 0 %}
-                <option value="{{ light.id }}">{{ light.friendly_name }}</option>
-                {% endif %}
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-          {% else %}
-          No lights avaiable. Add lights to room.
-          {% endif %}
-        </div>
-        <!-- Modal footer -->
-        <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-          <button data-modal-hide="static-modal" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >Add</button>
-          <button type="submit" class="py-2.5 px-5 ms-3 text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm focus:outline-none"
-          formaction="{% url 'remove_light_from_room_view' room.id %}">Delete</button>
-          <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-          onclick="close_modals();">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</form>
-
-{% comment %} Form filled in by the "add_existing_scene" function and sent off to register a Home Assistant or OpenHAB scene in the manager {% endcomment %}
-<form id="add_existing_scene_form" class="invisible" method="POST" action="{% url 'add_existing_scene_to_room' room.id %}">
-  {% csrf_token %}
-  <input type="hidden" name="scene_entity_name" id="add_existing_scene_entity_name">
-  <input type="hidden" name="scene_name" id="add_existing_scene_friendly_name">
-  <input type="hidden" name="scene_type" id="add_existing_scene_type">
-</form>
 
 <!-- Beginning of vissible content-->
-<form method="POST" action="{% url 'update_room_form' room_id=room.id %}">
+<form method="POST" action="{{ ingress_path }}{% url 'update_room_form' room_id=room.id %}">
   {% csrf_token %}
-  <div class="flex justify-between items-center">
-    <h2 class="font-medium text-2xl" id="nspanel_name">Settings for room '{{ room.friendly_name }}'</h2>
-    <a href="{% url 'manual' %}#sec:room_page" title="Toggle Light/Dark theme"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-      Help
-    </a>
+  <div class="flex items-center justify-between" id="nspanel_settings_container">
+    <div>
+      <h2 class="font-medium text-2xl" id="nspanel_name">Settings for room '{{ room.friendly_name }}'</h2>
+      {% for nspanel in nspanels %}
+          <a href="{{ ingress_path }}{% url 'edit_nspanel' panel_id=nspanel.id %}">
+          {{ nspanel.status }}
+          {% component "nspanel_status_badge" id=nspanel.id %}{% endcomponent %}
+          </a>
+      {% endfor %}
+    </div>
+    <a href="https://nspanelmanager.com/docs/web-interface#room-page" target="_blank" class="btn btn-outline btn-info">Help</a>
   </div>
   <div class="md:flex md:justify-between md:items-start mt-2">
-    <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
-      <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">General</span>
+    <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
+      <span class="block mb-2 text-xl">General</span>
       <!-- Friendly name -->
-      <div class="">
-        <label for="friendly_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-50">Name</label>
-        <div class="flex">
-          <span class="inline-flex items-center px-3 text-sm text-gray-900 dark:text-gray-50 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
-            <svg class="w-4 h-4 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <title>Friendly name</title>
-              <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
-            </svg>
-          </span>
-          <input class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5"
-          type="text" class="input" name="friendly_name" value="{{ room.friendly_name }}">
+        <div class="">
+            <label for="friendly_name" class="block mb-2 text-sm font-medium">Name</label>
+            <div class="flex flex-row-reverse">
+            <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+            type="text" name="friendly_name" value="{{ room.friendly_name }}">
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>Friendly name</title>
+                <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
+                    4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
+                    7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
+                </svg>
+            </span>
         </div>
       </div>
-      <div class="p-4 mb-4 mt-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-700 dark:text-gray-50 {% if total_num_rooms != 1 %}hidden{% endif %}" role="alert">
-        <span class="font-medium">Info.</span> The last room cannot be deleted. Rename this room or create another room before removing this one.
+
+      <!-- Room temperature sensor -->
+      <input type="hidden" name="room_temp_provider" id="room_temp_provider" readonly value="{{ room.room_temp_provider }}">
+      <div class="my-2 w-full md:ms-1">
+          <label for="room_temp_sensor" class="block mb-1 text-sm font-medium">Room temperature sensor</label>
+          <div class="flex flex-row-reverse">
+              <button type="button" class="btn btn-info rounded-l-none" hx-get="{{ ingress_path }}{% url 'htmx_partial_select_room_temperature_sensor_provider' room_id=room.id %}" hx-swap="none">Select</button>
+              <button type="button" class="btn btn-error rounded-none" onclick="clear_selected_room_temperatuer_sensor()">Clear</button>
+              <input class="outline-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+              type="text" id="room_temp_sensor" name="room_temp_sensor" value="{{ room.room_temp_sensor }}" placeholder="None selected" readonly>
+              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                  <span class="mdi mdi-thermometer"></span>
+              </span>
+          </div>
       </div>
+      {% component "alert" level="info" text="A specific temperature sensor is not a requirement but it can be used to provide a more accurate value on the screensaver. If no sensor is selected the temperature will be read using the built-in NTC thermistor. If a sensor is selected the panel will still report its temperature over MQTT to Home Assistant and OpenHAB." %}{% endcomponent %}
+
+      {% if total_num_rooms <= 1 %}
+      <div class="my-4">
+          {% component "alert" level="info" text="The last room cannot be deleted. Rename this or create another room before removing this one." %}{% endcomponent %}
+      </div>
+      {% endif %}
       <div class="text-right mt-4">
-        <button type="submit"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Save</button>
-          <a type="submit" href="{% if total_num_rooms != 1 %}{% url 'delete_room' room_id=room.id %}{% else %}#{% endif %}"
-          class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none" {% if total_num_rooms == 1 %}disabled{% endif %}
+          <a href="{% if total_num_rooms != 1 %}{{ ingress_path }}{% url 'delete_room' room_id=room.id %}{% else %}#{% endif %}"
+          class="btn btn-error " {% if total_num_rooms == 1 %}disabled{% endif %}
+          {% if total_num_rooms == 1 %}btn-disabled{% endif %}
           >Delete</a>
+          <button type="submit" class="btn btn-success">Save</button>
       </div>
     </div>
   </div>
 </form>
 
 <div class="md:flex md:justify-between md:items-start mt-2">
-  <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
-    <div class="md:flex md:flex-wrap md:justify-between items-center">
-      <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">{{ room.friendly_name }} scenes</span>
-      <div class="">
-          {% if room.scene_set.all|length < 4 %}
-        <button type="button" onclick="add_existing_scene();"
-            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Add scene</button>
-          <button type="button" onclick="add_new_scene();"
-            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">New NSPM scene</button>
-        {% else %}
-        <div class="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-300 dark:text-black" role="alert">
-          <span class="font-medium">Info!</span> Only 4 scenes can be assigned per room.
-        </div>
-        {% endif %}
-      </div>
+  <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
+    <div class="md:flex md:flex-wrap md:justify-between items-center mb-2">
+      <span class="block mb-2 text-xl">{{ room.friendly_name }} scenes</span>
+      <button type="button" hx-get="{{ ingress_path }}{% url "htmx_partial_add_entities_page_to_room" room_id=room.id is_scenes_page=True is_global_scenes_page=False %}" hx-swap="none" class="btn btn-info btn-outline">Add scenes page</button>
     </div>
 
-    <table class="w-full text-left rtl:text-right">
-      <thead class="uppercase bg-slate-200 dark:bg-slate-950 border-solid border-b-2 border-slate-600 dark:border-slate-800">
-        <tr>
-          <th class="px-3 py-1">Name</th>
-          <th class="px-3 py-1">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="log_body" class="bg-slate-100 dark:bg-slate-600 text-black dark:text-white">
-        {% for scene in room.scene_set.all %}
-        <tr>
-          <th class="px-3 py-3">{{ scene.friendly_name }}</th>
-          <td class="px-3 py-3">
-            <button type="button" onclick="edit_scene({{ scene.id }}, '{{ scene.friendly_name }}');"
-              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Edit</button>
-            <a href='{% url "delete_scene" scene.id %}'
-              class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none" {% if total_num_rooms == 1 %}disabled{% endif %}
-              >Delete</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    {% component "nspanel_room_entities_pages" room_id=room.id is_scenes_pages=True is_global_scenes_page=False %}{% endcomponent %}
   </div>
 </div>
 
-<div class="md:flex md:justify-between md:items-start mt-2">
-  <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
+<div class="md:flex md:justify-between md:items-start mt-2 mb-4">
+  <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
     <div class="md:flex md:flex-wrap md:justify-between items-center">
-      <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">{{ room.friendly_name }} lights</span>
-      <button type="button" onclick="add_new_light();"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">New light</button>
+        <span class="block mb-2 text-xl">{{ room.friendly_name }} entities</span>
+        <button type="button" hx-get='{{ ingress_path }}{% url "htmx_partial_add_entities_page_to_room" room_id=room.id is_scenes_page=False is_global_scenes_page=False %}' hx-swap="none" hx-indicator="#modal_loading" class="btn btn-info btn-outline">Add page</button>
     </div>
 
-    <table class="w-full text-left rtl:text-right">
-      <thead class="uppercase bg-slate-200 dark:bg-slate-950 border-solid border-b-2 border-slate-600 dark:border-slate-800">
-        <tr>
-          <th class="px-3 py-1">Name</th>
-          <th class="px-3 py-1">Source</th>
-          <th class="px-3 py-1">Type</th>
-          <th class="px-3 py-1">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="log_body" class="bg-slate-100 dark:bg-slate-600 text-black dark:text-white">
-        {% for light in room.light_set.all %}
-        <tr>
-          <th class="px-3 py-3">{{ light.friendly_name }}</th>
-          <td>
-            {% if light.type == "home_assistant" %}
-            <span class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-5 py-2.5 rounded dark:bg-blue-900 dark:text-blue-300">Home Assistant</span>
-            {% elif light.type == "openhab" %}
-            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium me-2 px-5 py-2.5 rounded dark:bg-yellow-900 dark:text-yellow-300">OpenHAB</span>
-            {% elif light.type == "manual" %}
-            <span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-5 py-2.5 rounded dark:bg-gray-700 dark:text-gray-300">Manual</span>
-            {% else %}
-            <span class="bg-red-100 text-red-800 text-xs font-medium me-2 px-5 py-2.5 rounded dark:bg-red-900 dark:text-red-300">Unknown: {{ light.type }}</span>
-            {% endif %}
-          </td>
-          {% if light.is_ceiling_light %}
-          <td>Ceiling</td>
-          {% else %}
-          <td>Table</td>
-          {% endif %}
-          <td class="px-3 py-3">
-            <button type="button" onclick="edit_light({{ light.id }});"
-              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Edit</button>
-            <a href='{% url "remove_light_from_room" room.id light.id %}'
-              class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none" {% if total_num_rooms == 1 %}disabled{% endif %}
-              >Remove</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-
-
-<div class="md:flex md:justify-between md:items-start mt-2">
-  <div class="p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
-  <span class="block mb-2 text-xl text-gray-900 dark:text-gray-50">Individual light control</span>
-  <span class="block mb-2 text-sm text-gray-900 dark:text-gray-50">Click on each "button" to select the light/switch controlled by it.</span>
-  <div class="nspanel_view" id="nspanel_room_view">
-    <div id="room_name">{{ room.friendly_name }}</div>
-    <span class="light_r1 px-3" id="light1" onclick="add_new_light_to_room_view(1);">{{ light1.friendly_name }}</span>
-    <span class="light_r1 px-3" id="light2" onclick="add_new_light_to_room_view(2);">{{ light2.friendly_name }}</span>
-    <span class="light_r1 px-3" id="light3" onclick="add_new_light_to_room_view(3);">{{ light3.friendly_name }}</span>
-    <span class="light_r1 px-3" id="light4" onclick="add_new_light_to_room_view(4);">{{ light4.friendly_name }}</span>
-    <span class="light_r1 px-3" id="light5" onclick="add_new_light_to_room_view(5);">{{ light5.friendly_name }}</span>
-    <span class="light_r1 px-3" id="light6" onclick="add_new_light_to_room_view(6);">{{ light6.friendly_name }}</span>
-
-    <span class="light_r2 px-3" id="light7" onclick="add_new_light_to_room_view(7);">{{ light7.friendly_name }}</span>
-    <span class="light_r2 px-3" id="light8" onclick="add_new_light_to_room_view(8);">{{ light8.friendly_name }}</span>
-    <span class="light_r2 px-3" id="light9" onclick="add_new_light_to_room_view(9);">{{ light9.friendly_name }}</span>
-    <span class="light_r2 px-3" id="light10" onclick="add_new_light_to_room_view(10);">{{ light10.friendly_name }}</span>
-    <span class="light_r2 px-3" id="light11" onclick="add_new_light_to_room_view(11);">{{ light11.friendly_name }}</span>
-    <span class="light_r2 px-3" id="light12" onclick="add_new_light_to_room_view(12);">{{ light12.friendly_name }}</span>
-    </div>
+    {% component "nspanel_room_entities_pages" room_id=room.id is_scenes_pages=False is_global_scenes_page=False %}{% endcomponent %}
   </div>
 </div>
 {% endblock %}

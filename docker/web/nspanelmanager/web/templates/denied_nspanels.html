@@ -1,29 +1,32 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="md:flex md:flex-wrap md:justify-between">
-  <h2 class="font-medium text-2xl" id="nspanel_name">Denied NSPanels</h2>
+<div class="flex items-center justify-between" id="nspanel_settings_container">
+  <div>
+    <h2 class="font-medium text-2xl" id="nspanel_name">Denied NSPanels</h2>
+  </div>
 </div>
-
-<div class="mt-2 p-4 bg-slate-50 dark:bg-slate-800 text-black dark:text-white rounded-md shadow-slate-200 dark:shadow-slate-950 shadow-md w-full">
-  <table class="w-full text-left rtl:text-right">
-    <thead class="uppercase bg-slate-200 dark:bg-slate-950 border-solid border-b-2 border-slate-600 dark:border-slate-800">
+<div class="pm-2" id="warning_container">
+</div>
+<div class="md:flex md:justify-between md:items-start mt-2 mb-6 p-4 bg-base-100 rounded-md shadow-lg w-full">
+  <table class="table table-sm">
+    <thead class="">
       <tr>
         <th class="px-3 py-1">Name</th>
         <th class="px-3 py-1">MAC</th>
         <th class="px-3 py-1">Actions</th>
       </tr>
     </thead>
-    <tbody id="log_body" class="bg-slate-100 dark:bg-slate-600 text-black dark:text-white">
+    <tbody id="log_body" class="">
       {% for nspanel in nspanels %}
       {% if nspanel.denied %}
-        <tr>
-          <th class="px-3 py-3">
+        <tr class="hover">
+          <th class="">
             {{ nspanel.friendly_name }}
           </th>
           <td>{{ nspanel.mac_address }}</td>
           <td>
-            <a href="{% url 'unblock_nspanel' nspanel.id %}" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Unblock</a>
+              <a hx-delete="{{ ingress_path }}{% url 'htmx_unblock_nspanel' nspanel.id %}" class="btn btn-info btn-sm">Unblock</a>
           </td>
         </tr>
         {% endif %}

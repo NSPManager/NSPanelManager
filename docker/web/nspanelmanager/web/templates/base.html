@@ -1,21 +1,34 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en" class="min-h-screen  {% if dark_theme == 'true' %}dark{% endif %} dark:bg-gray-800 dark:text-gray-50">
+<html lang="en" class="min-h-screen bg-base-200">
 
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="shortcut icon" type="image/png" href="{% static 'favicon.png' %}"/> <!-- Favicon-->
-  <link rel="stylesheet" href="{% static 'css/main.css' %}"> <!-- Compiled version of Tailwind CSS -->
-  <script src="{% static 'jquery.min.js' %}"></script>
-  <script src="{% static 'base.js' %}?refresh={% now 'U' %}"></script>
-  <link rel="stylesheet" href="{% static 'mdi/css/materialdesignicons.min.css' %}">
-  <link rel="stylesheet" href="{% static 'loader.css' %}?refresh={% now 'U' %}">
-  <link rel="stylesheet" href="{% static 'base.css' %}?refresh={% now 'U' %}">
 
-  <script src="{% static 'mqttmanager_ws.js' %}?refresh={% now 'U' %}"></script>
+  <!-- Configure HTMX -->
+  <!-- <meta name="htmx-config" content='{"includeIndicatorStyles": false, "requestClass": "modal-open", "globalViewTransitions": true}'> -->
+  <meta name="htmx-config" content='{"includeIndicatorStyles": false, "globalViewTransitions": true}'>
+
+  <link rel="shortcut icon" type="image/png" href="{{ ingress_path }}{% static 'favicon.png' %}"/> <!-- Favicon-->
+  <link rel="stylesheet" href="{{ ingress_path }}{% static 'css/main.css' %}?version={{ version }}"> <!-- Compiled version of Tailwind CSS -->
+  <script src="{{ ingress_path }}{% static 'jquery.min.js' %}?version={{ version }}"></script>
+  <script src="{{ ingress_path }}{% static 'jquery-ui-1.14.1.custom/jquery-ui.min.js' %}?version={{ version }}"></script>
+  <script src="{{ ingress_path }}{% static 'node_modules/htmx.org/dist/htmx.min.js' %}?version={{ version }}"></script>
+  <script src="{{ ingress_path }}{% static 'base.js' %}?refresh={% now 'U' %}?version={{ version }}"></script>
+  <script src="{{ ingress_path }}{% static 'stomp.min-1.7.0.js' %}?refresh={% now 'U' %}?version={{ version }}"></script>
+  <script src="{{ ingress_path }}{% static 'stomp_wrapper.js' %}?refresh={% now 'U' %}?version={{ version }}"></script>
+  <link rel="stylesheet" href="{{ ingress_path }}{% static 'mdi/css/materialdesignicons.min.css' %}?version={{ version }}">
+  <link rel="stylesheet" href="{{ ingress_path }}{% static 'loader.css' %}?refresh={% now 'U' %}?version={{ version }}">
+  <link rel="stylesheet" href="{{ ingress_path }}{% static 'base.css' %}?refresh={% now 'U' %}?version={{ version }}">
+  <link rel="stylesheet" href="{{ ingress_path }}{% static 'jquery-ui-1.14.1.custom/jquery-ui.min.css' %}?refresh={% now 'U' %}?version={{ version }}">
+
+  <script>
+  </script>
+
+
   <!-- <script type="module" src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"></script> -->
   {% block head %}
   {% endblock %}
@@ -24,32 +37,39 @@
 
 <body class="min-h-screen">
   {% include 'modals.html' %}
+  {% include 'partial/error_toast.html' %}
   {% include 'navbar.html' %}
 
   <div class="w-full flex flex-wrap justify-center mx-auto">
     <div class="w-screen max-w-screen-xl">
       <!-- Displays any warnings or errors -->
-      <div id="notification_holder" class="mt-4 mb-4">
+      <div class="mt-4 mb-4">
         {% for notification in notifications %}
-        {% if notification.class == "error" %}
-        <div class="p-4 mt-2 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-700 dark:text-white">{{ notification.text }}</div>
-        {% elif notification.class == "warning" %}
-        <div class="p-4 mt-2 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-300 dark:text-gray-800">{{ notification.text }}</div>
-        {% elif notification.class == "info" %}
-        <div class="p-4 mb-2 mt-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50">{{ notification.text }}</div>
-        {% else  %}
-        <div class="p-4 mb-2 mt-4 text-sm text-pink-800 rounded-lg bg-pink-50-50 dark:bg-pink-50-700 dark:text-gray-50">UNKNOWN NOTIFICATION CLASS: {{ notification.class }}</div>
-        {% endif %}
+            {% if notification.class == "error" %}
+                <div class="p-4 mt-2 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-700 dark:text-white">{{ notification.text }}</div>
+            {% elif notification.class == "warning" %}
+                <div class="p-4 mt-2 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-yellow-300 dark:text-gray-800">{{ notification.text }}</div>
+            {% elif notification.class == "info" %}
+                <div class="p-4 mb-2 mt-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-blue-700 dark:text-gray-50">{{ notification.text }}</div>
+            {% else  %}
+                <div class="p-4 mb-2 mt-4 text-sm text-pink-800 rounded-lg bg-pink-50-50 dark:bg-pink-50-700 dark:text-gray-50">UNKNOWN NOTIFICATION CLASS: {{ notification.class }}</div>
+            {% endif %}
         {% endfor %}
       </div>
       <div class="mt-4 px-2">
+        <!-- If no manager address is set, show the initial setup guide. -->
+        {% if manager_address == "" %}{% include 'modals/initial_setup/welcome.html' %}{% endif %}
+
+        <!-- Any content that uses this as the base template will place its own elements within the "content" block -->
         {% block content %}
         {% endblock %}
       </div>
     </div>
   </div>
 
-  {% include 'footer.html' %}
+  <!-- This #modal gets replace when an HTMX-request is made that uses hx-swap-oob to replace it with a new modal -->
+  <div id="modal"></div>
+  {% include 'about.html' %}
 </body>
 
 </html>

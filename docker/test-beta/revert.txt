@@ -1,2 +1,0 @@
-To revert to old "stable" release, remove the current "data" directory and restore the backup that was made before the upgrade was done.
-After that, run the "start_stable.sh"-script

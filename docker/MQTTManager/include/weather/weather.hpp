@@ -1,3 +1,4 @@
+#include "protobuf_nspanel.pb.h"
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -15,7 +16,7 @@ public:
   /**
    * Load new values from config.
    */
-  static void update_config();
+  static void reload_config();
 
   /**
    * Trigger for events from Home Assistant.
@@ -48,7 +49,7 @@ private:
    */
   static void _process_weather_data(std::string &data);
 
-  static std::string _get_icon_from_mapping(std::string &condition, uint8_t hour);
+  static std::string_view _get_icon_from_mapping(std::string &condition, uint8_t hour, bool allow_night_icon);
 
   struct weather_info {
     std::string condition;
@@ -71,8 +72,7 @@ private:
   static inline std::mutex _weater_data_mutex;
 
   static inline std::vector<weather_info> _forecast_weather_info;
-  static inline std::string _windspeed_unit;
-  static inline std::string _precipitation_unit;
+  static inline std::string _windspeed_unit; // Unit of wind speed to show
   static inline std::string _current_condition;
   static inline std::tm _current_weather_time;
   static inline int _next_sunrise_hour;
@@ -84,6 +84,19 @@ private:
   static inline float _current_min_temperature;
   static inline float _current_wind_speed;
   static inline float _current_precipitation_probability;
+
+  static inline std::string _outside_temperature_sensor_provider;
+  static inline std::string _outside_temperature_sensor_entity_id;
+  static inline std::string _location_latitude;
+  static inline std::string _location_longitude;
+  static inline std::string _wind_speed_format; // Unit of wind speed to request, not necessary the exact same as the unit to show. For example "mm" in request but perhaps "Mm" to show.
+  static inline std::string _precipitation_unit;
+  static inline uint32_t _update_interval_minutes;
+  static inline std::string _clock_format;
+  static inline std::string _temperature_unit;
+
+  // The last update sent to manager. Used to compare so that we don't send the same update twice.
+  static inline std::string _last_weather_update;
 };
 
 #endif // !MQTT_MANAGER_WEATHER
