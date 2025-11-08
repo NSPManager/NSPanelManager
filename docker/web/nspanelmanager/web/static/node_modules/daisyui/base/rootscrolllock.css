@@ -1,0 +1,1 @@
+/*! 🌼 daisyUI 5.0.49 - MIT License */ @layer base{:root:has(.modal-open,.modal[open],.modal:target,.modal-toggle:checked,.drawer:not([class*=drawer-open])>.drawer-toggle:checked){overflow:hidden}}

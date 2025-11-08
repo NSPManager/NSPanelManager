@@ -1,0 +1,18 @@
+/* General Label Style */
+.label {
+    display: inline-block;
+    font-size: 12px; /* Similar to GitHub's small text */
+    font-weight: 600; /* Bold text */
+    color: #ffffff; /* Default text color (white) */
+    background-color: #6e5494; /* Default background color */
+    padding: 0.2em 0.6em; /* Padding for compact sizing */
+    border-radius: 2em; /* Rounded corners */
+    text-align: center;
+    white-space: nowrap; /* Prevent text wrapping */
+    vertical-align: middle;
+}
+
+/* Example hover effect */
+.label:hover {
+    opacity: 0.9; /* Slightly dim on hover */
+}

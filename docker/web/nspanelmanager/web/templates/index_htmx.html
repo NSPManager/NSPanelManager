@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% load static %}
+<script src="{{ ingress_path }}{% static 'index_htmx.js' %}?refresh={% now 'U' %}"></script>
+<link rel="stylesheet" type="text/css" href="{{ ingress_path }}{% static 'index.css' %}?refresh={% now 'U' %}">
+{% if manager_address == "" %}<script src="{{ ingress_path }}{% static 'initial_setup.js' %}?refresh={% now 'U' %}"></script>{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<span class="hidden" id="temperature_unit">{{ temperature_unit }}</span>
+<div class="flex flex-wrap justify-between items-center">
+  <div class="flex justify-between items-center">
+    <span class="font-medium text-2xl me-2">NSPanels</span>
+  </div>
+  <div>
+    <button data-dropdown-toggle="actionsMenuDropdown"
+      class="btn btn-outline btn-sm">
+      Actions
+      <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+        viewBox="0 0 10 6">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
+      </svg>
+    </button>
+    <!-- Dropdown menu -->
+    <div id="actionsMenuDropdown"
+      class="hidden z-10 font-normal bg-neutral text-neutral-content divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600 md:absolute inset-x-auto overflow-hidden">
+      <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
+        <li>
+          <a onclick="reboot_all_nspanels();" class="cursor-pointer block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
+              class="mdi mdi-restart pr-2 has-text-primary"></span>Reboot all panels</a>
+        </li>
+        <li>
+            <a onclick="start_all_nspanels_firmware_update_ota();" class="cursor-pointer block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
+              class="mdi mdi-upload pr-2 has-text-info"></span>Update firmware on all panels</a>
+        </li>
+        <li>
+            <a onclick="start_all_nspanels_gui_update_ota();" class="cursor-pointer block px-4 py-2 hover:bg-accent hover:text-accent-content"><span
+              class="mdi mdi-table-arrow-up pr-2 has-text-info"></span>Update GUI on all panels</a>
+        </li>
+
+        <div class="border-t border-t-base-300 text-sm text-neutral-content">
+          <a hx-post="{{ ingress_path }}{% url 'restart_mqtt_manager' %}" hx-swap="none" class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer"><span
+              class="mdi mdi-restart pr-2 has-text-primary"></span>Restart MQTTManager</a>
+        </div>
+      </ul>
+    </div>
+  </div>
+</div>
+<div>
+    {% include 'index_htmx_nspanels_section.html' %}
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+// This file contains definitions that are general and not specific for any given component.
+
+message RoomEntityWrapper {
+    message LightEntity {
+        int32 id = 1;
+        string name = 2;
+        int32 room_view_position = 3;
+    }
+
+    message SwitchEntity {
+        int32 id = 1;
+        string name = 2;
+        int32 room_view_position = 3;
+    }
+
+    oneof entity {
+        LightEntity light = 1;
+        SwitchEntity switch = 2;
+    }
+}
+
+message RoomEntitiesPageSettings {
+    int32 id = 1;
+    int32 page_type = 2; // Page type, 12, 8 or 4 entities shown?
+    int32 display_order = 3;
+    int32 room_id = 4;
+    bool is_scenes_page = 5;
+    repeated RoomEntityWrapper entities = 6;
+}
+
+message RoomSettings {
+    int32 id = 1;
+    string name = 2;
+    repeated int32 light_ids = 3;
+    repeated int32 scene_ids = 4;
+    repeated int32 entity_page_ids = 5;
+}
+
+message MultipleRoomsSettings {
+    repeated RoomSettings rooms = 1;
+}
+
+message LightSettings {
+    int32 id = 1;
+    int32 room_id = 2;
+    string name = 3;
+    string type = 4;
+    bool is_ceiling_light = 5;
+    bool can_dim = 6;
+    bool can_color_temperature = 7;
+    bool can_rgb = 8;
+    optional string home_assistant_name = 9;
+    optional string openhab_name = 10;
+    optional string openhab_control_mode = 11;
+    optional string openhab_item_switch = 12;
+    optional string openhab_item_dimmer = 13;
+    optional string openhab_item_color_temp = 14;
+    optional string openhab_item_rgb = 15;
+
+    int32 entities_page_id = 16;
+    int32 entities_page_room_view_position = 17;
+    bool controlled_from_main_page = 18;
+}
+
+message MultipleLightsSettings {
+    repeated LightSettings lights = 1;
+}

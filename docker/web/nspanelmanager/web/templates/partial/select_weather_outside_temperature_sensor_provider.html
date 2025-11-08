@@ -1,0 +1,34 @@
+<dialog id="modal" class="modal" hx-swap-oob="true">
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        <div class="flex justify-center mb-4 duration-500 transition-transform ease-linear">
+            <ul class="steps">
+                <li class="step step-primary">Select source</li>
+                <li class="step">Configure entity</li>
+            </ul>
+        </div>
+
+        <div class="flex justify-center">
+            <div class="join">
+                <button class="join-item btn btn-lg btn-info" hx-get='{{ ingress_path }}{% url "htmx_partial_select_weather_outside_temperature_sensor_from_list" entity_source="home_assistant" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">Home Assistant</button>
+                <button class="join-item btn btn-lg btn-warning" hx-get='{{ ingress_path }}{% url "htmx_partial_select_weather_outside_temperature_sensor_from_list" entity_source="openhab" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">OpenHAB</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+    <script>
+    htmx.on("htmx:afterSwap", (e) => {
+      if(e.detail.elt.id == "modal") {
+        modal.showModal();
+      }
+    });
+    </script>
+</dialog>

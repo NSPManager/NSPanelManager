@@ -1,0 +1,125 @@
+<script>
+stomp_subscribe("nspanel/{{ nspanel.data.mac_address }}/status", (frame) => {
+  var data = JSON.parse(frame.body);
+  var info_tag = $(".nspanel_info_tag[data-nspanel-mac='{{ nspanel.data.mac_address }}']");
+  info_tag.attr("data-nspanel-state", data.state);
+});
+</script>
+
+<div id="nspanel_container-{{ nspanel.data.id }}">
+    <div class="text-base-content rounded-b-box rounded-t-field overflow-hidden nspanel-box bg-base-100 shadow-xl" id="panel_status_box-{{ nspanel.data.id }}">
+    <div class="">
+        {% component "nspanel_status_header" id=nspanel.data.id %}{% endcomponent %}
+    </div>
+    <div class="p-2">
+        <!-- Hidden data values for the specific panel -->
+        <span class="hidden nspanel_mac_container" data-nspanel-mac="{{ nspanel.data.mac_address }}">{{ nspanel.data.mac_address }}</span>
+        <span class="hidden nspanel_info_tag" data-nspanel-mac="{{ nspanel.data.mac_address }}" data-nspanel-state="" data-nspanel-id="{{ nspanel.data.id }}">{{ nspanel.data.mac_address }}</span>
+
+        <!-- Overlay for "accept/deny request" -->
+        <!-- TODO: Move the "accept new panel" into it's own partial -->
+        {% if not nspanel.data.denied and not nspanel.data.accepted %}
+        <div class="accept-request-overlay">
+            <div class="flex w-full items-/center justify-center pt-2">
+                <span class="nspanel-name">NSPanel '{{ nspanel.data.friendly_name }}' is requesting access.</span>
+            </div>
+            <div class="flex w-full items-center justify-center pt-2 pb-4">
+                <div>
+                <button class="btn btn-error m-1 rounded-btn" hx-post="{{ ingress_path }}{% url 'htmx_nspanel_deny_register_request' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}">Deny</button>
+                <button class="btn btn-info m-1 rounded-btn" hx-post="{{ ingress_path }}{% url 'htmx_nspanel_accept_register_request' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}">Accept</button>
+                </div>
+            </div>
+        </div>
+        {% else %}
+
+        <!-- Normal view for accepted panels -->
+        <div class="nspanel-status-view">
+        <!-- Name -->
+        <div class="flex justify-between mx-auto mb-1">
+            <!-- Name -->
+            <div class="w-full">
+            <span class="">
+                {% component "nspanel_name" id=nspanel.data.id name=nspanel.data.friendly_name %}{% endcomponent %}
+            </span>
+            </div>
+            <!-- Status-->
+            <div class="w-full me-2 mt-1">
+                {% component "nspanel_status_text" id=nspanel.data.id %}{% endcomponent %}
+            </div>
+            {% component "nspanel_warnings" id=nspanel.data.id %}{% endcomponent %}
+            </span>
+        </div>
+        <!-- Status information -->
+        <div class="flex justify-between items-end">
+            <div>
+                <div class="my-1">
+                    <!-- WiFi strength -->
+                    <div class="info-item">
+                        {% component "nspanel_status_wifi_signal_strength" id=nspanel.data.id %}{% endcomponent %}
+                    </div>
+                </div>
+                <div class="my-1">
+                    <!-- Temperature -->
+                    <div class="info-item">
+                        {% component "nspanel_status_temperature" id=nspanel.data.id %}{% endcomponent %}
+                    </span>
+                    </div>
+                </div>
+                <div class="my-1">
+                    <!-- RAM usage -->
+                    <div class="info-item">
+                        {% component "nspanel_status_ram_usage" id=nspanel.data.id %}{% endcomponent %}
+                    </div>
+                </div>
+            </div>
+            <div>
+            <button data-nspanel-dropdown-toggle="nspanelActionsMenuDropdown-{{ nspanel.data.id }}" onclick="show_dropdown_menu(event, this);"
+                class="font-medium text-sm px-1 py-1 text-center inline-flex items-center cursor-pointer">
+                <span class="mdi mdi-cog pr-2"></span>
+            </button>
+            <!-- Dropdown menu -->
+            <div id="nspanelActionsMenuDropdown-{{ nspanel.data.id }}"
+                class="hidden nspanel-actions-menu-dropdown dropdown z-10 font-normal bg-neutral text-neutral-content divide-y divide-neutral-content rounded-box shadow w-44 md:absolute inset-x-auto overflow-hidden">
+                <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
+                <li>
+                    {% component "nspanel_reboot_button" id=nspanel.data.id %}{% endcomponent %}
+                </li>
+                <li>
+                    <a class="nspanel-settings-link block px-4 py-2 hover:bg-accent hover:text-accent-content" href="{{ ingress_path }}{% url 'edit_nspanel' nspanel.data.id %}">
+                        <span class="mdi mdi-cog pr-2"></span>Settings
+                    </a>
+                </li>
+                <li>
+                    {% component 'nspanel_visit_link' id=nspanel.data.id %}{% endcomponent %}
+                </li>
+                </ul>
+                <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
+                <li>
+                    <a onclick="stomp_send('nspanel/{{ nspanel.data.mac_address }}/command', 'firmware_update')" id="firmware-update-{{ nspanel.data.id }}"
+                    class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer"><span
+                        class="mdi mdi-upload pr-2"></span>Update firmware
+                    </a>
+                </li>
+                <li>
+                    <a onclick="stomp_send('nspanel/{{ nspanel.data.mac_address }}/command', 'gui_update')" id="screen-update-{{ nspanel.data.id }}"
+                    class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer"><span
+                        class="mdi mdi-table-arrow-up pr-2"></span>Update GUI
+                    </a>
+                </li>
+                </ul>
+                <ul class="py-2 text-sm" aria-labelledby="dropdownLargeButton">
+                <li>
+                    <a hx-delete="{{ ingress_path }}{% url 'htmx_nspanel_delete' nspanel_id=nspanel.data.id %}" hx-target="#nspanel_container-{{ nspanel.data.id }}" class="block px-4 py-2 hover:bg-accent hover:text-accent-content cursor-pointer">
+                        <span class="mdi mdi-minus-circle pr-2"></span>Delete
+                    </a>
+                </li>
+                </ul>
+            </div>
+            </div>
+        </div>
+        </div>
+        {% endif %}
+    </div>
+    </div>
+
+</div>

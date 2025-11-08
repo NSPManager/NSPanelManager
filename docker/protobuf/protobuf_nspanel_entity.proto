@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+// Protobufs defined in this .proto file are used to communicate with the MQTTManager
+// and control/update individual entities.
+
+message NSPanelEntityState {
+    message Light {
+        enum LightMode {
+            COLOR_TEMP = 0;
+            RGB = 1;
+        }
+
+        int32 light_id = 1;
+        string name = 2;
+        int32 brightness = 3;
+        int32 color_temp = 4;
+        int32 hue = 5;
+        int32 saturation = 6;
+
+        bool can_color_temp = 7;
+        bool can_color = 8;
+        LightMode current_light_mode = 9;
+    }
+
+    oneof entity {
+        Light light = 1;
+    }
+}

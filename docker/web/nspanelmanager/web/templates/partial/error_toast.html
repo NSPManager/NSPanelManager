@@ -1,0 +1,180 @@
+<template id="error_toast_template">
+    <div class="error_toast alert alert-error overflow-hidden relative p-2 border-0 flex items-center gap-1" data-pause-timer-countdown="false" onmouseenter="_error_toast_pause(this);" onmouseleave="_error_toast_continue(this);">
+        <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress>
+        <span class="mdi mdi-alert-circle-outline text-2xl me-2"></span>
+        <span class="toast-text w-full">Failed to perform request!</span>
+        <button class="cursor-pointer dismiss-button" title="Dismiss" data-toast-id="" data-toast-text="" onclick="dismiss_error(this.getAttribute('data-toast-id'));">
+            <span class="mdi mdi-close-circle text-xl mx-2"></span>
+        </button>
+    </div>
+</template>
+
+<template id="warning_toast_template">
+    <div class="error_toast alert alert-warning overflow-hidden relative p-2 border-0 flex items-center gap-1" data-pause-timer-countdown="false" onmouseenter="_error_toast_pause(this);" onmouseleave="_error_toast_continue(this);">
+        <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress>
+        <span class="mdi mdi-alert-circle-outline text-2xl me-2"></span>
+        <span class="toast-text w-full">Failed to perform request!</span>
+        <button class="cursor-pointer dismiss-button" title="Dismiss" data-toast-id="" data-toast-text="" onclick="dismiss_error(this.getAttribute('data-toast-id'));">
+            <span class="mdi mdi-close-circle text-xl mx-2"></span>
+        </button>
+    </div>
+</template>
+
+<template id="info_toast_template">
+    <div class="error_toast alert alert-info overflow-hidden relative p-2 border-0 flex items-center gap-1" data-pause-timer-countdown="false" onmouseenter="_error_toast_pause(this);" onmouseleave="_error_toast_continue(this);">
+        <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress>
+        <span class="mdi mdi-information-outline text-2xl"></span>
+        <span class="toast-text w-full">Failed to perform request!</span>
+        <button class="cursor-pointer dismiss-button" title="Dismiss" data-toast-id="" data-toast-text="" onclick="dismiss_error(this.getAttribute('data-toast-id'));">
+            <span class="mdi mdi-close-circle text-xl mx-2"></span>
+        </button>
+    </div>
+</template>
+
+<template id="debug_toast_template">
+    <div class="error_toast alert bg-primary text-primary-content overflow-hidden relative p-2 border-0 flex items-center gap-1" data-pause-timer-countdown="false" onmouseenter="_error_toast_pause(this);" onmouseleave="_error_toast_continue(this);">
+        <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress>
+        <span class="mdi mdi-information-outline text-2xl me-2"></span>
+        <span class="toast-text w-full">Failed to perform request!</span>
+        <button class="cursor-pointer dismiss-button" title="Dismiss" data-toast-id="" data-toast-text="" onclick="dismiss_error(this.getAttribute('data-toast-id'));">
+            <span class="mdi mdi-close-circle text-xl mx-2"></span>
+        </button>
+    </div>
+</template>
+
+
+
+<div id="ws_connection_in_progress_notification" class="hidden">
+    <div class="flex flex-col gap-2 md:toast md:bottom-4 md:top-auto md:toast-end relative md:fixed md:z-10 w-full">
+        <div class="error_toast alert alert-error overflow-hidden relative p-2 border-0 flex items-center gap-1" data-pause-timer-countdown="false" data-error-source="1" data-timeout="0">
+            <progress class="timeout_progress hidden w-full progress h-1 overflow-hidden m-0 rounded-box absolute top-0 left-0" value="100" max="100"></progress>
+            <span class="loading loading-spinner text-neutral"></span>
+            <!-- <span class="mdi mdi-information-outline text-2xl me-2"></span> -->
+            <span class="toast-text w-full">Connecting to MQTTManager...</span>
+            <button class="btn btn-sm btn-circle cursor-pointer" title="Restart MQTTManager" hx-post="{{ ingress_path }}{% url 'restart_mqtt_manager' %}" hx-swap="none" data-toast-id="" data-toast-text="">
+                <span class="mdi mdi-restart text-xl mx-2"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="error_toast_container" class="flex flex-col gap-2 md:toast md:bottom-4 md:top-auto md:toast-end relative md:fixed md:z-10 w-full">
+</div>
+
+<!-- Javascript needed to create and otherwise handle error toasts -->
+<script>
+
+
+let _error_toast_counter = 0;
+let _error_toast_interval_id = null;
+
+const ERROR_TOAST_LEVEL_ERROR = 0;
+const ERROR_TOAST_LEVEL_WARNING = 1;
+const ERROR_TOAST_LEVEL_INFO = 2;
+const ERROR_TOAST_LEVEL_DEBUG = 3;
+
+const ERROR_TOAST_SOURCE_MANAGER = 0;
+const ERROR_TOAST_SOURCE_WEB_INTERFACE = 1;
+
+// Show a new error toast.
+// @param level: The level of the error toast as an integer, help values exists as ERROR_TOAST_LEVEL_ERROR through ERROR_TOAST_LEVEL_DEBUG
+// @param error_text: The text of the error toast.
+// @param error_source: The source of the error toast, help values exists as ERROR_TOAST_SOURCE_MANAGER and ERROR_TOAST_SOURCE_WEB_INTERFACE
+// @param timeout: The timeout of the error toast. A value of 0 means the toast will not automatically close.
+function show_error_toast(level, error_text, error_source, timeout = 0) {
+  _error_toast_counter++;
+  var error_toast_id = `error-toast-${_error_toast_counter}`;
+
+  if(level == ERROR_TOAST_LEVEL_ERROR) { // Error as per C++ enum ActiveWarningLevel
+    var new_toast = document.getElementById("error_toast_template").content.cloneNode(true);
+  } else if (level == ERROR_TOAST_LEVEL_WARNING) { // Warning as per C++ enum ActiveWarningLevel
+    var new_toast = document.getElementById("warning_toast_template").content.cloneNode(true);
+  } else if (level == ERROR_TOAST_LEVEL_INFO) { // Info as per C++ enum ActiveWarningLevel
+    var new_toast = document.getElementById("info_toast_template").content.cloneNode(true);
+  } else if (level == ERROR_TOAST_LEVEL_DEBUG) { // Debug as per C++ enum ActiveWarningLevel
+    var new_toast = document.getElementById("debug_toast_template").content.cloneNode(true);
+  } else {
+    var new_toast = document.getElementById("error_toast_template").content.cloneNode(true);
+    error_text = "Unknown error level" + level + "!";
+  }
+  new_toast.querySelector('.alert').setAttribute('data-error-source', error_source);
+  new_toast.querySelector('.alert').id = error_toast_id;
+  new_toast.querySelector('.dismiss-button').setAttribute("data-toast-id", error_toast_id);
+  new_toast.querySelector('.dismiss-button').setAttribute("data-toast-text", error_text);
+  new_toast.querySelector('.toast-text').innerHTML = error_text;
+  new_toast.querySelector('.alert').setAttribute('data-timeout', timeout);
+
+  if(timeout > 0) {
+    new_toast.querySelector('.timeout_progress').classList.remove('hidden');
+    new_toast.querySelector('.timeout_progress').setAttribute('max', timeout);
+    new_toast.querySelector('.timeout_progress').setAttribute('value', timeout);
+    _start_error_toast_timeout_timer();
+  }
+
+  document.getElementById("error_toast_container").appendChild(new_toast);
+}
+
+function remove_error_toast_element_by_id(toast_id) {
+  let toast_container = document.getElementById(toast_id);
+  if(toast_container) {
+    toast_container.remove();
+  } else {
+    console.error("Tried to remove error toast with ID '" + toast_id + "' but no source error toast was found.");
+  }
+}
+
+function dismiss_error(toast_id) {
+  let toast_container = document.getElementById(toast_id);
+  if(toast_container.getAttribute('data-error-source') == ERROR_TOAST_SOURCE_WEB_INTERFACE) {
+    remove_error_toast_element_by_id(toast_id);
+  } else if(toast_container.getAttribute('data-error-source') == ERROR_TOAST_SOURCE_MANAGER) {
+    stomp_send("mqttmanager/warnings/dismiss", toast_container.querySelector(".toast-text").innerHTML);
+  } else {
+    console.error("Unknown error source: " + toast_container.getAttribute('data-error-source'));
+  }
+}
+
+function _error_toast_pause(toast) {
+  toast.setAttribute('data-pause-timer-countdown', 'true');
+}
+
+function _error_toast_continue(toast) {
+  toast.setAttribute('data-pause-timer-countdown', 'false');
+}
+
+function _start_error_toast_timeout_timer() {
+  // Only start timer if none already exists
+  if(_error_toast_interval_id == null) {
+    _error_toast_interval_id = setInterval(() => {
+      let elements = $(".error_toast[data-timeout!=0]");
+      if(elements.length > 0) {
+        elements.each((index, error_toast) => {
+          // Verify that element is not paused, if it is, skip it
+          if(error_toast.getAttribute('data-pause-timer-countdown') == 'true') {
+            return;
+          }
+
+          let progress_element = error_toast.querySelector('.timeout_progress');
+          progress_element.setAttribute('value', progress_element.getAttribute('value') - 25);
+
+          if(progress_element.getAttribute('value') <= 0) {
+            dismiss_error(error_toast.getAttribute('id'));
+          }
+        })
+      } else {
+        _stop_error_toast_timeout_timer();
+      }
+    }, 25);
+  }
+}
+
+function _stop_error_toast_timeout_timer() {
+  if(_error_toast_interval_id != null) {
+    clearInterval(_error_toast_interval_id);
+    _error_toast_interval_id = null;
+  }
+}
+
+// show_error_toast(ERROR_TOAST_LEVEL_INFO, "Test info toast.", ERROR_TOAST_SOURCE_WEB_INTERFACE, 0);
+// show_error_toast(ERROR_TOAST_LEVEL_INFO, "Test info toast with timeout.", ERROR_TOAST_SOURCE_WEB_INTERFACE, 10000);
+</script>

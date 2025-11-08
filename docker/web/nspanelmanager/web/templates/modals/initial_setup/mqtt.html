@@ -1,0 +1,95 @@
+{% load static %}
+<dialog id="welcome_modal" class="modal" hx-swap-oob="true">
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        <div class="flex justify-center mb-2">
+            <ul class="steps">
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_welcome' %}" hx-swap="none" class="step step-primary cursor-pointer">Welcome</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_manager_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">Manager</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_mqtt_settings' %}" hx-swap="none" class="step step-primary cursor-pointer">MQTT</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_home_assistant_settings' %}" hx-swap="none" class="step cursor-pointer">Home Assistant</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_openhab_settings' %}" hx-swap="none" class="step cursor-pointer">OpenHAB</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_finished' %}" hx-swap="none" class="step cursor-pointer">Finish</li>
+            </ul>
+        </div>
+
+        <hr class="w-full absolute left-0 border-base-content">
+
+        <span class="block mb-2 text-xl w-full text-center">MQTT Settings</span>
+
+        <form hx-post="{{ ingress_path }}{% url 'htmx_initial_setup_mqtt_settings' %}">
+            {% csrf_token %}
+            <!-- MQTT address -->
+            <div class="mb-2">
+                <label for="mqtt_server" class="block mb-1 text-sm font-medium">MQTT server</label>
+                <div class="flex flex-row-reverse">
+                    <input class="outline-none rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                    type="text" class="input" id="mqtt_server" name="mqtt_server" value="{{ mqtt_server }}" required>
+                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                        <span class="mdi mdi-home"></span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- MQTT port -->
+            <div class="mb-2">
+                <label for="mqtt_port" class="block mb-1 text-sm font-medium">MQTT port</label>
+                <div class="flex flex-row-reverse">
+                    <input class="outline-none rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                    type="number" class="input" id="mqtt_port" name="mqtt_port" value="{{ mqtt_port }}" required>
+                    <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                        <span class="mdi mdi-numeric"></span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap md:flex-nowrap justify-between items-center">
+                <!-- MQTT username -->
+                <div class="mb-2 w-full me-1">
+                    <label for="mqtt_username" class="block mb-1 text-sm font-medium">MQTT username</label>
+                    <div class="flex flex-row-reverse w-full">
+                        <input class="outline-none rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                        type="text" class="input" id="mqtt_username" name="mqtt_username" value="{{ mqtt_username }}">
+                        <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                            <span class="mdi mdi-account"></span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- MQTT password -->
+                <div class="mb-2 w-full">
+                    <label for="mqtt_password" class="block mb-1 text-sm font-medium">MQTT password</label>
+                    <div class="flex flex-row-reverse w-full">
+                        <input class="outline-none rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                        type="password" class="input" id="mqtt_password" name="mqtt_password" value="{{ mqtt_password }}">
+                        <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                            <span class="mdi mdi-account-key"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-4">
+                <button type="button" class="btn btn-neutral me-2" hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_manager_settings' %}">Back</button>
+                <button type="submit" class="btn btn-success">Next</button>
+            </div>
+        </form>
+
+    </div>
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+    <script>
+    htmx.on("htmx:afterSwap", (e) => {
+      if(e.detail.elt.id == "welcome_modal") {
+        welcome_modal.showModal();
+      }
+    });
+    </script>
+</dialog>

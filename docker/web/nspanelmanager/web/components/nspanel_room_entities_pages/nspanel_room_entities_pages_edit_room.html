@@ -1,0 +1,37 @@
+<div id="room_{{ room.id }}_entities_pages_is_scenes_{{ is_scenes_pages }}" hx-swap-oob="true">
+    {% if entity_pages|length > 0 %}
+        <!-- <ul class="mt-4 grid md:grid-cols-2 lg:grid-cols-3 gap-12 nspanel-entities-pages"> -->
+        <form id="htmx_form_save_entities_pages_order" hx-post="{{ ingress_path }}{% url 'htmx_partial_move_entities_pages' %}" hx-swap="none" hx-indicator="#modal_loading" hx-trigger="reordered">
+            <input type="hidden" name="htmx_form_save_entities_pages_order_field" id="htmx_form_save_entities_pages_order_field" value="">
+        </form>
+        <ul class="list-none w-full nspanel-entities-pages" data-is-scenes-page="{{ is_scenes_pages }}">
+            {% for entity_page in entity_pages %}
+                {% component "nspanel_entities_page" id=entity_page.id page=entity_page total_num_entity_pages=num_entity_pages %}{% endcomponent %}
+            {% endfor %}
+        </ul>
+    {% else %}
+        <span class="flex items-center justify-center italic">No entity pages added yet.</span>
+    {% endif %}
+
+    <script>
+      $(".nspanel-entities-pages[data-is-scenes-page={{ is_scenes_pages }}]").sortable({
+        handle: ".nspanel-entities-page-move-handle",
+        placeholder: "bg-base-200 float-left m-2 rounded-box p-3 w-full max-w-[24rem] aspect-square indicator nspanel-entities-page border border-dashed border-2 border-info",
+        update: function(event, ui) {
+          // 'update' called ie. the order of elements in the DOM has changed. Update border fields and send HTMX request for new
+          var entities_pages_order = {"pages": [
+            // Append entity pages in the order they are displayed.
+          ]}
+          $(".nspanel-entities-page[data-is-scenes-page={{ is_scenes_pages }}]").each((index, element) => {
+            entities_pages_order.pages.push($(element).data('page-id'));
+          })
+          $("#htmx_form_save_entities_pages_order_field").val(JSON.stringify(entities_pages_order)); // Clear any existin value
+
+          htmx.trigger(document.getElementById('htmx_form_save_entities_pages_order'), "reordered", {});
+        }
+      });
+      $(".nspanel-entities-pages[data-is-scenes-page={{ is_scenes_pages }}]").disableSelection();
+
+      attach_cursor_change_events();
+    </script>
+</div>
