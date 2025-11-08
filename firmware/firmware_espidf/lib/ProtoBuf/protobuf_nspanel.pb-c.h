@@ -33,10 +33,7 @@ typedef struct NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage NSPanelMQ
 typedef struct NSPanelMQTTManagerCommand__SaveSceneCommand NSPanelMQTTManagerCommand__SaveSceneCommand;
 typedef struct NSPanelMQTTManagerCommand__ButtonPressed NSPanelMQTTManagerCommand__ButtonPressed;
 typedef struct NSPanelMQTTManagerCommand__ThermostatTemperatureCommand NSPanelMQTTManagerCommand__ThermostatTemperatureCommand;
-typedef struct NSPanelMQTTManagerCommand__ThermostatModeCommand NSPanelMQTTManagerCommand__ThermostatModeCommand;
-typedef struct NSPanelMQTTManagerCommand__ThermostatSwingCommand NSPanelMQTTManagerCommand__ThermostatSwingCommand;
-typedef struct NSPanelMQTTManagerCommand__ThermostatFanModeCommand NSPanelMQTTManagerCommand__ThermostatFanModeCommand;
-typedef struct NSPanelMQTTManagerCommand__ThermostatPresetModeCommand NSPanelMQTTManagerCommand__ThermostatPresetModeCommand;
+typedef struct NSPanelMQTTManagerCommand__ThermostatCommand NSPanelMQTTManagerCommand__ThermostatCommand;
 
 
 /* --- enums --- */
@@ -429,48 +426,16 @@ struct  NSPanelMQTTManagerCommand__ThermostatTemperatureCommand
     , 0, 0 }
 
 
-struct  NSPanelMQTTManagerCommand__ThermostatModeCommand
+struct  NSPanelMQTTManagerCommand__ThermostatCommand
 {
   ProtobufCMessage base;
   int32_t thermostat_id;
-  char *mode;
+  char *option;
+  char *new_value;
 };
-#define NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_MODE_COMMAND__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__thermostat_mode_command__descriptor) \
-    , 0, (char *)protobuf_c_empty_string }
-
-
-struct  NSPanelMQTTManagerCommand__ThermostatSwingCommand
-{
-  ProtobufCMessage base;
-  int32_t thermostat_id;
-  char *swing_mode;
-};
-#define NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_SWING_COMMAND__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__thermostat_swing_command__descriptor) \
-    , 0, (char *)protobuf_c_empty_string }
-
-
-struct  NSPanelMQTTManagerCommand__ThermostatFanModeCommand
-{
-  ProtobufCMessage base;
-  int32_t thermostat_id;
-  char *fan_mode;
-};
-#define NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_FAN_MODE_COMMAND__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__thermostat_fan_mode_command__descriptor) \
-    , 0, (char *)protobuf_c_empty_string }
-
-
-struct  NSPanelMQTTManagerCommand__ThermostatPresetModeCommand
-{
-  ProtobufCMessage base;
-  int32_t thermostat_id;
-  char *preset_mode;
-};
-#define NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_PRESET_MODE_COMMAND__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__thermostat_preset_mode_command__descriptor) \
-    , 0, (char *)protobuf_c_empty_string }
+#define NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_COMMAND__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__thermostat_command__descriptor) \
+    , 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
 typedef enum {
@@ -482,10 +447,7 @@ typedef enum {
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_SAVE_SCENE_COMMAND = 5,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_BUTTON_PRESSED = 6,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_TEMPERATURE_COMMAND = 7,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_MODE_COMMAND = 8,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_SWING_COMMAND = 9,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_FAN_MODE_COMMAND = 10,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_PRESET_MODE_COMMAND = 11
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_COMMAND = 8
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__CASE)
 } NSPanelMQTTManagerCommand__CommandDataCase;
 
@@ -505,10 +467,7 @@ struct  NSPanelMQTTManagerCommand
     NSPanelMQTTManagerCommand__SaveSceneCommand *save_scene_command;
     NSPanelMQTTManagerCommand__ButtonPressed *button_pressed;
     NSPanelMQTTManagerCommand__ThermostatTemperatureCommand *thermostat_temperature_command;
-    NSPanelMQTTManagerCommand__ThermostatModeCommand *thermostat_mode_command;
-    NSPanelMQTTManagerCommand__ThermostatSwingCommand *thermostat_swing_command;
-    NSPanelMQTTManagerCommand__ThermostatFanModeCommand *thermostat_fan_mode_command;
-    NSPanelMQTTManagerCommand__ThermostatPresetModeCommand *thermostat_preset_mode_command;
+    NSPanelMQTTManagerCommand__ThermostatCommand *thermostat_command;
   };
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__INIT \
@@ -679,18 +638,9 @@ void   nspanel_mqttmanager_command__button_pressed__init
 /* NSPanelMQTTManagerCommand__ThermostatTemperatureCommand methods */
 void   nspanel_mqttmanager_command__thermostat_temperature_command__init
                      (NSPanelMQTTManagerCommand__ThermostatTemperatureCommand         *message);
-/* NSPanelMQTTManagerCommand__ThermostatModeCommand methods */
-void   nspanel_mqttmanager_command__thermostat_mode_command__init
-                     (NSPanelMQTTManagerCommand__ThermostatModeCommand         *message);
-/* NSPanelMQTTManagerCommand__ThermostatSwingCommand methods */
-void   nspanel_mqttmanager_command__thermostat_swing_command__init
-                     (NSPanelMQTTManagerCommand__ThermostatSwingCommand         *message);
-/* NSPanelMQTTManagerCommand__ThermostatFanModeCommand methods */
-void   nspanel_mqttmanager_command__thermostat_fan_mode_command__init
-                     (NSPanelMQTTManagerCommand__ThermostatFanModeCommand         *message);
-/* NSPanelMQTTManagerCommand__ThermostatPresetModeCommand methods */
-void   nspanel_mqttmanager_command__thermostat_preset_mode_command__init
-                     (NSPanelMQTTManagerCommand__ThermostatPresetModeCommand         *message);
+/* NSPanelMQTTManagerCommand__ThermostatCommand methods */
+void   nspanel_mqttmanager_command__thermostat_command__init
+                     (NSPanelMQTTManagerCommand__ThermostatCommand         *message);
 /* NSPanelMQTTManagerCommand methods */
 void   nspanel_mqttmanager_command__init
                      (NSPanelMQTTManagerCommand         *message);
@@ -763,17 +713,8 @@ typedef void (*NSPanelMQTTManagerCommand__ButtonPressed_Closure)
 typedef void (*NSPanelMQTTManagerCommand__ThermostatTemperatureCommand_Closure)
                  (const NSPanelMQTTManagerCommand__ThermostatTemperatureCommand *message,
                   void *closure_data);
-typedef void (*NSPanelMQTTManagerCommand__ThermostatModeCommand_Closure)
-                 (const NSPanelMQTTManagerCommand__ThermostatModeCommand *message,
-                  void *closure_data);
-typedef void (*NSPanelMQTTManagerCommand__ThermostatSwingCommand_Closure)
-                 (const NSPanelMQTTManagerCommand__ThermostatSwingCommand *message,
-                  void *closure_data);
-typedef void (*NSPanelMQTTManagerCommand__ThermostatFanModeCommand_Closure)
-                 (const NSPanelMQTTManagerCommand__ThermostatFanModeCommand *message,
-                  void *closure_data);
-typedef void (*NSPanelMQTTManagerCommand__ThermostatPresetModeCommand_Closure)
-                 (const NSPanelMQTTManagerCommand__ThermostatPresetModeCommand *message,
+typedef void (*NSPanelMQTTManagerCommand__ThermostatCommand_Closure)
+                 (const NSPanelMQTTManagerCommand__ThermostatCommand *message,
                   void *closure_data);
 typedef void (*NSPanelMQTTManagerCommand_Closure)
                  (const NSPanelMQTTManagerCommand *message,
@@ -807,10 +748,7 @@ extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__toggle_enti
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__save_scene_command__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__button_pressed__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_temperature_command__descriptor;
-extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_mode_command__descriptor;
-extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_swing_command__descriptor;
-extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_fan_mode_command__descriptor;
-extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_preset_mode_command__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_command__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_mqttmanager_command__affect_lights_options__descriptor;
 
 PROTOBUF_C__END_DECLS

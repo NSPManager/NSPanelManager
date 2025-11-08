@@ -81,13 +81,15 @@ struct  NSPanelEntityState__Thermostat
   int32_t thermostat_id;
   char *name;
   float current_temperature;
+  protobuf_c_boolean has_current_temperature;
+  float set_temperature;
   float step_size;
   size_t n_options;
   NSPanelEntityState__Thermostat__ThermostatOption **options;
 };
 #define NSPANEL_ENTITY_STATE__THERMOSTAT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_entity_state__thermostat__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, 0, 0, 0,NULL }
+    , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0,NULL }
 
 
 typedef enum {

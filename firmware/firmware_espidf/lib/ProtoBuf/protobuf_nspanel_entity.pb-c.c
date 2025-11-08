@@ -374,7 +374,7 @@ const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__thermostat_op
   (ProtobufCMessageInit) nspanel_entity_state__thermostat__thermostat_option__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor nspanel_entity_state__thermostat__field_descriptors[5] =
+static const ProtobufCFieldDescriptor nspanel_entity_state__thermostat__field_descriptors[7] =
 {
   {
     "thermostat_id",
@@ -413,8 +413,32 @@ static const ProtobufCFieldDescriptor nspanel_entity_state__thermostat__field_de
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "step_size",
+    "has_current_temperature",
     4,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__Thermostat, has_current_temperature),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "set_temperature",
+    5,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_FLOAT,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__Thermostat, set_temperature),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "step_size",
+    6,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_FLOAT,
     0,   /* quantifier_offset */
@@ -426,7 +450,7 @@ static const ProtobufCFieldDescriptor nspanel_entity_state__thermostat__field_de
   },
   {
     "options",
-    5,
+    7,
     PROTOBUF_C_LABEL_REPEATED,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(NSPanelEntityState__Thermostat, n_options),
@@ -439,15 +463,17 @@ static const ProtobufCFieldDescriptor nspanel_entity_state__thermostat__field_de
 };
 static const unsigned nspanel_entity_state__thermostat__field_indices_by_name[] = {
   2,   /* field[2] = current_temperature */
+  3,   /* field[3] = has_current_temperature */
   1,   /* field[1] = name */
-  4,   /* field[4] = options */
-  3,   /* field[3] = step_size */
+  6,   /* field[6] = options */
+  4,   /* field[4] = set_temperature */
+  5,   /* field[5] = step_size */
   0,   /* field[0] = thermostat_id */
 };
 static const ProtobufCIntRange nspanel_entity_state__thermostat__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 5 }
+  { 0, 7 }
 };
 const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__descriptor =
 {
@@ -457,7 +483,7 @@ const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__descriptor =
   "NSPanelEntityState__Thermostat",
   "",
   sizeof(NSPanelEntityState__Thermostat),
-  5,
+  7,
   nspanel_entity_state__thermostat__field_descriptors,
   nspanel_entity_state__thermostat__field_indices_by_name,
   1,  nspanel_entity_state__thermostat__number_ranges,

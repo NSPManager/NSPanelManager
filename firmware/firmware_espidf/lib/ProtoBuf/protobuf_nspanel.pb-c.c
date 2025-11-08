@@ -382,28 +382,10 @@ void   nspanel_mqttmanager_command__thermostat_temperature_command__init
   static const NSPanelMQTTManagerCommand__ThermostatTemperatureCommand init_value = NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_TEMPERATURE_COMMAND__INIT;
   *message = init_value;
 }
-void   nspanel_mqttmanager_command__thermostat_mode_command__init
-                     (NSPanelMQTTManagerCommand__ThermostatModeCommand         *message)
+void   nspanel_mqttmanager_command__thermostat_command__init
+                     (NSPanelMQTTManagerCommand__ThermostatCommand         *message)
 {
-  static const NSPanelMQTTManagerCommand__ThermostatModeCommand init_value = NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_MODE_COMMAND__INIT;
-  *message = init_value;
-}
-void   nspanel_mqttmanager_command__thermostat_swing_command__init
-                     (NSPanelMQTTManagerCommand__ThermostatSwingCommand         *message)
-{
-  static const NSPanelMQTTManagerCommand__ThermostatSwingCommand init_value = NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_SWING_COMMAND__INIT;
-  *message = init_value;
-}
-void   nspanel_mqttmanager_command__thermostat_fan_mode_command__init
-                     (NSPanelMQTTManagerCommand__ThermostatFanModeCommand         *message)
-{
-  static const NSPanelMQTTManagerCommand__ThermostatFanModeCommand init_value = NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_FAN_MODE_COMMAND__INIT;
-  *message = init_value;
-}
-void   nspanel_mqttmanager_command__thermostat_preset_mode_command__init
-                     (NSPanelMQTTManagerCommand__ThermostatPresetModeCommand         *message)
-{
-  static const NSPanelMQTTManagerCommand__ThermostatPresetModeCommand init_value = NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_PRESET_MODE_COMMAND__INIT;
+  static const NSPanelMQTTManagerCommand__ThermostatCommand init_value = NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_COMMAND__INIT;
   *message = init_value;
 }
 void   nspanel_mqttmanager_command__init
@@ -2624,7 +2606,7 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_tempera
   (ProtobufCMessageInit) nspanel_mqttmanager_command__thermostat_temperature_command__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__thermostat_mode_command__field_descriptors[2] =
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__thermostat_command__field_descriptors[3] =
 {
   {
     "thermostat_id",
@@ -2632,200 +2614,60 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__thermostat_mo
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
-    offsetof(NSPanelMQTTManagerCommand__ThermostatModeCommand, thermostat_id),
+    offsetof(NSPanelMQTTManagerCommand__ThermostatCommand, thermostat_id),
     NULL,
     NULL,
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "mode",
+    "option",
     2,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
-    offsetof(NSPanelMQTTManagerCommand__ThermostatModeCommand, mode),
+    offsetof(NSPanelMQTTManagerCommand__ThermostatCommand, option),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "new_value",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__ThermostatCommand, new_value),
     NULL,
     &protobuf_c_empty_string,
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
 };
-static const unsigned nspanel_mqttmanager_command__thermostat_mode_command__field_indices_by_name[] = {
-  1,   /* field[1] = mode */
+static const unsigned nspanel_mqttmanager_command__thermostat_command__field_indices_by_name[] = {
+  2,   /* field[2] = new_value */
+  1,   /* field[1] = option */
   0,   /* field[0] = thermostat_id */
 };
-static const ProtobufCIntRange nspanel_mqttmanager_command__thermostat_mode_command__number_ranges[1 + 1] =
+static const ProtobufCIntRange nspanel_mqttmanager_command__thermostat_command__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 2 }
+  { 0, 3 }
 };
-const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_mode_command__descriptor =
+const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_command__descriptor =
 {
   PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
-  "NSPanelMQTTManagerCommand.ThermostatModeCommand",
-  "ThermostatModeCommand",
-  "NSPanelMQTTManagerCommand__ThermostatModeCommand",
+  "NSPanelMQTTManagerCommand.ThermostatCommand",
+  "ThermostatCommand",
+  "NSPanelMQTTManagerCommand__ThermostatCommand",
   "",
-  sizeof(NSPanelMQTTManagerCommand__ThermostatModeCommand),
-  2,
-  nspanel_mqttmanager_command__thermostat_mode_command__field_descriptors,
-  nspanel_mqttmanager_command__thermostat_mode_command__field_indices_by_name,
-  1,  nspanel_mqttmanager_command__thermostat_mode_command__number_ranges,
-  (ProtobufCMessageInit) nspanel_mqttmanager_command__thermostat_mode_command__init,
-  NULL,NULL,NULL    /* reserved[123] */
-};
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__thermostat_swing_command__field_descriptors[2] =
-{
-  {
-    "thermostat_id",
-    1,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_INT32,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelMQTTManagerCommand__ThermostatSwingCommand, thermostat_id),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "swing_mode",
-    2,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_STRING,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelMQTTManagerCommand__ThermostatSwingCommand, swing_mode),
-    NULL,
-    &protobuf_c_empty_string,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-};
-static const unsigned nspanel_mqttmanager_command__thermostat_swing_command__field_indices_by_name[] = {
-  1,   /* field[1] = swing_mode */
-  0,   /* field[0] = thermostat_id */
-};
-static const ProtobufCIntRange nspanel_mqttmanager_command__thermostat_swing_command__number_ranges[1 + 1] =
-{
-  { 1, 0 },
-  { 0, 2 }
-};
-const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_swing_command__descriptor =
-{
-  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
-  "NSPanelMQTTManagerCommand.ThermostatSwingCommand",
-  "ThermostatSwingCommand",
-  "NSPanelMQTTManagerCommand__ThermostatSwingCommand",
-  "",
-  sizeof(NSPanelMQTTManagerCommand__ThermostatSwingCommand),
-  2,
-  nspanel_mqttmanager_command__thermostat_swing_command__field_descriptors,
-  nspanel_mqttmanager_command__thermostat_swing_command__field_indices_by_name,
-  1,  nspanel_mqttmanager_command__thermostat_swing_command__number_ranges,
-  (ProtobufCMessageInit) nspanel_mqttmanager_command__thermostat_swing_command__init,
-  NULL,NULL,NULL    /* reserved[123] */
-};
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__thermostat_fan_mode_command__field_descriptors[2] =
-{
-  {
-    "thermostat_id",
-    1,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_INT32,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelMQTTManagerCommand__ThermostatFanModeCommand, thermostat_id),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "fan_mode",
-    2,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_STRING,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelMQTTManagerCommand__ThermostatFanModeCommand, fan_mode),
-    NULL,
-    &protobuf_c_empty_string,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-};
-static const unsigned nspanel_mqttmanager_command__thermostat_fan_mode_command__field_indices_by_name[] = {
-  1,   /* field[1] = fan_mode */
-  0,   /* field[0] = thermostat_id */
-};
-static const ProtobufCIntRange nspanel_mqttmanager_command__thermostat_fan_mode_command__number_ranges[1 + 1] =
-{
-  { 1, 0 },
-  { 0, 2 }
-};
-const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_fan_mode_command__descriptor =
-{
-  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
-  "NSPanelMQTTManagerCommand.ThermostatFanModeCommand",
-  "ThermostatFanModeCommand",
-  "NSPanelMQTTManagerCommand__ThermostatFanModeCommand",
-  "",
-  sizeof(NSPanelMQTTManagerCommand__ThermostatFanModeCommand),
-  2,
-  nspanel_mqttmanager_command__thermostat_fan_mode_command__field_descriptors,
-  nspanel_mqttmanager_command__thermostat_fan_mode_command__field_indices_by_name,
-  1,  nspanel_mqttmanager_command__thermostat_fan_mode_command__number_ranges,
-  (ProtobufCMessageInit) nspanel_mqttmanager_command__thermostat_fan_mode_command__init,
-  NULL,NULL,NULL    /* reserved[123] */
-};
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__thermostat_preset_mode_command__field_descriptors[2] =
-{
-  {
-    "thermostat_id",
-    1,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_INT32,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelMQTTManagerCommand__ThermostatPresetModeCommand, thermostat_id),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "preset_mode",
-    2,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_STRING,
-    0,   /* quantifier_offset */
-    offsetof(NSPanelMQTTManagerCommand__ThermostatPresetModeCommand, preset_mode),
-    NULL,
-    &protobuf_c_empty_string,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-};
-static const unsigned nspanel_mqttmanager_command__thermostat_preset_mode_command__field_indices_by_name[] = {
-  1,   /* field[1] = preset_mode */
-  0,   /* field[0] = thermostat_id */
-};
-static const ProtobufCIntRange nspanel_mqttmanager_command__thermostat_preset_mode_command__number_ranges[1 + 1] =
-{
-  { 1, 0 },
-  { 0, 2 }
-};
-const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_preset_mode_command__descriptor =
-{
-  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
-  "NSPanelMQTTManagerCommand.ThermostatPresetModeCommand",
-  "ThermostatPresetModeCommand",
-  "NSPanelMQTTManagerCommand__ThermostatPresetModeCommand",
-  "",
-  sizeof(NSPanelMQTTManagerCommand__ThermostatPresetModeCommand),
-  2,
-  nspanel_mqttmanager_command__thermostat_preset_mode_command__field_descriptors,
-  nspanel_mqttmanager_command__thermostat_preset_mode_command__field_indices_by_name,
-  1,  nspanel_mqttmanager_command__thermostat_preset_mode_command__number_ranges,
-  (ProtobufCMessageInit) nspanel_mqttmanager_command__thermostat_preset_mode_command__init,
+  sizeof(NSPanelMQTTManagerCommand__ThermostatCommand),
+  3,
+  nspanel_mqttmanager_command__thermostat_command__field_descriptors,
+  nspanel_mqttmanager_command__thermostat_command__field_indices_by_name,
+  1,  nspanel_mqttmanager_command__thermostat_command__number_ranges,
+  (ProtobufCMessageInit) nspanel_mqttmanager_command__thermostat_command__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
 static const ProtobufCEnumValue nspanel_mqttmanager_command__affect_lights_options__enum_values_by_number[3] =
@@ -2858,7 +2700,7 @@ const ProtobufCEnumDescriptor nspanel_mqttmanager_command__affect_lights_options
   nspanel_mqttmanager_command__affect_lights_options__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[12] =
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[9] =
 {
   {
     "first_page_turn_on",
@@ -2945,49 +2787,13 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descrip
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "thermostat_mode_command",
+    "thermostat_command",
     8,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(NSPanelMQTTManagerCommand, command_data_case),
-    offsetof(NSPanelMQTTManagerCommand, thermostat_mode_command),
-    &nspanel_mqttmanager_command__thermostat_mode_command__descriptor,
-    NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "thermostat_swing_command",
-    9,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_MESSAGE,
-    offsetof(NSPanelMQTTManagerCommand, command_data_case),
-    offsetof(NSPanelMQTTManagerCommand, thermostat_swing_command),
-    &nspanel_mqttmanager_command__thermostat_swing_command__descriptor,
-    NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "thermostat_fan_mode_command",
-    10,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_MESSAGE,
-    offsetof(NSPanelMQTTManagerCommand, command_data_case),
-    offsetof(NSPanelMQTTManagerCommand, thermostat_fan_mode_command),
-    &nspanel_mqttmanager_command__thermostat_fan_mode_command__descriptor,
-    NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "thermostat_preset_mode_command",
-    11,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_MESSAGE,
-    offsetof(NSPanelMQTTManagerCommand, command_data_case),
-    offsetof(NSPanelMQTTManagerCommand, thermostat_preset_mode_command),
-    &nspanel_mqttmanager_command__thermostat_preset_mode_command__descriptor,
+    offsetof(NSPanelMQTTManagerCommand, thermostat_command),
+    &nspanel_mqttmanager_command__thermostat_command__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
@@ -3010,20 +2816,17 @@ static const unsigned nspanel_mqttmanager_command__field_indices_by_name[] = {
   1,   /* field[1] = first_page_turn_off */
   0,   /* field[0] = first_page_turn_on */
   2,   /* field[2] = light_command */
-  11,   /* field[11] = nspanel_id */
+  8,   /* field[8] = nspanel_id */
   4,   /* field[4] = save_scene_command */
-  9,   /* field[9] = thermostat_fan_mode_command */
-  7,   /* field[7] = thermostat_mode_command */
-  10,   /* field[10] = thermostat_preset_mode_command */
-  8,   /* field[8] = thermostat_swing_command */
+  7,   /* field[7] = thermostat_command */
   6,   /* field[6] = thermostat_temperature_command */
   3,   /* field[3] = toggle_entity_from_entities_page */
 };
 static const ProtobufCIntRange nspanel_mqttmanager_command__number_ranges[2 + 1] =
 {
   { 1, 0 },
-  { 100, 11 },
-  { 0, 12 }
+  { 100, 8 },
+  { 0, 9 }
 };
 const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
 {
@@ -3033,7 +2836,7 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
   "NSPanelMQTTManagerCommand",
   "",
   sizeof(NSPanelMQTTManagerCommand),
-  12,
+  9,
   nspanel_mqttmanager_command__field_descriptors,
   nspanel_mqttmanager_command__field_indices_by_name,
   2,  nspanel_mqttmanager_command__number_ranges,
