@@ -488,6 +488,8 @@ void ThermostatEntity::command_callback(NSPanelMQTTManagerCommand &command) {
         SPDLOG_ERROR("Thermostat {}::{} received command to set set option {} to value {} but that value is not valid.", this->_id, this->_name, thermostat_command.option(), thermostat_command.new_value());
       }
     }
+  } else if (command.has_thermostat_temperature_command() && command.thermostat_temperature_command().thermostat_id() == this->_id) {
+    this->set_temperature(command.thermostat_temperature_command().temperature());
   }
 }
 
