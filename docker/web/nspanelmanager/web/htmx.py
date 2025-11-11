@@ -22,13 +22,32 @@ import environ
 from time import sleep
 
 from web.views import get_base_data
-from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages import NSPanelRoomEntitiesPages
+from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages import (
+    NSPanelRoomEntitiesPages,
+)
 from web.components.rooms_list.rooms_list import RoomsList
 
-from .models import NSPanel, Room, RoomEntitiesPage, Settings, Scene, RelayGroup, RelayGroupBinding, Entity, Message
+from .models import (
+    NSPanel,
+    Room,
+    RoomEntitiesPage,
+    Settings,
+    Scene,
+    RelayGroup,
+    RelayGroupBinding,
+    Entity,
+    Message,
+)
 from .apps import start_mqtt_manager, send_mqttmanager_reload_command
-from web.settings_helper import delete_nspanel_setting, get_setting_with_default, set_setting_value, get_nspanel_setting_with_default, set_nspanel_setting_value
+from web.settings_helper import (
+    delete_nspanel_setting,
+    get_setting_with_default,
+    set_setting_value,
+    get_nspanel_setting_with_default,
+    set_nspanel_setting_value,
+)
 from web.views import get_file_md5sum, relay_groups
+
 
 def partial_index_nspanels_section(request):
     if get_setting_with_default("use_fahrenheit") == "True":
@@ -43,21 +62,20 @@ def partial_index_nspanels_section(request):
         nspanels.append(panel_info)
 
     data = {
-        'nspanels': nspanels,
-        'temperature_unit': temperature_unit,
+        "nspanels": nspanels,
+        "temperature_unit": temperature_unit,
     }
 
-    return render(request, 'index_htmx_nspanels_section.html', data)
+    return render(request, "index_htmx_nspanels_section.html", data)
+
 
 def partial_nspanel_index_view(request, nspanel_id):
     try:
-        if request.method == 'GET':
+        if request.method == "GET":
             data = {
-                "nspanel": {
-                    "data": NSPanel.objects.get(id=nspanel_id)
-                },
+                "nspanel": {"data": NSPanel.objects.get(id=nspanel_id)},
             }
-            return render(request, 'partial/nspanel_index_view_htmx.html', data)
+            return render(request, "partial/nspanel_index_view_htmx.html", data)
         else:
             return JsonResponse({"status": "error"}, status=405)
     except Exception as ex:
@@ -81,7 +99,7 @@ def unblock_nspanel(request, nspanel_id):
 @csrf_exempt
 def nspanel_accept_register_request(request, nspanel_id):
     try:
-        if request.method == 'POST':
+        if request.method == "POST":
             nspanel = NSPanel.objects.get(id=nspanel_id)
             nspanel.denied = False
             nspanel.accepted = True
@@ -101,7 +119,7 @@ def nspanel_accept_register_request(request, nspanel_id):
 @csrf_exempt
 def nspanel_deny_register_request(request, nspanel_id):
     try:
-        if request.method == 'POST':
+        if request.method == "POST":
             nspanel = NSPanel.objects.get(id=nspanel_id)
             nspanel.denied = True
             nspanel.save()
@@ -121,7 +139,7 @@ def nspanel_deny_register_request(request, nspanel_id):
 @csrf_exempt
 def nspanel_delete(request, nspanel_id):
     try:
-        if request.method == 'DELETE':
+        if request.method == "DELETE":
             nspanel = NSPanel.objects.get(id=nspanel_id)
             nspanel.delete()
             response = HttpResponse("", status=200)
@@ -135,19 +153,54 @@ def nspanel_delete(request, nspanel_id):
 
 
 def select_room_temperature_sensor_provider(request, room_id):
-    if (get_setting_with_default("home_assistant_address") == "" or get_setting_with_default("home_assistant_token") == "") and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
+    if (
+        (
+            get_setting_with_default("home_assistant_address") == ""
+            or get_setting_with_default("home_assistant_token") == ""
+        )
+        and get_setting_with_default("openhab_address") != ""
+        and get_setting_with_default("openhab_token") != ""
+    ):
         # OpenHAB connection configured but not Home Assistant. Skip selecting source:
-        return redirect('htmx_partial_select_room_temperature_sensor_from_list', entity_source="openhab", room_id=room_id)
-    elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and (get_setting_with_default("openhab_address") == "" or get_setting_with_default("openhab_token") == ""):
+        return redirect(
+            "htmx_partial_select_room_temperature_sensor_from_list",
+            entity_source="openhab",
+            room_id=room_id,
+        )
+    elif (
+        get_setting_with_default("home_assistant_address") != ""
+        and get_setting_with_default("home_assistant_token") != ""
+        and (
+            get_setting_with_default("openhab_address") == ""
+            or get_setting_with_default("openhab_token") == ""
+        )
+    ):
         # OpenHAB connection not configured but Home Assistant is. Skip selecting source:
-        return redirect('htmx_partial_select_room_temperature_sensor_from_list', entity_source="home_assistant", room_id=room_id)
-    elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
-        return render(request, 'partial/select_room_temperature_sensor_provider.html', {'room_id': room_id})
+        return redirect(
+            "htmx_partial_select_room_temperature_sensor_from_list",
+            entity_source="home_assistant",
+            room_id=room_id,
+        )
+    elif (
+        get_setting_with_default("home_assistant_address") != ""
+        and get_setting_with_default("home_assistant_token") != ""
+        and get_setting_with_default("openhab_address") != ""
+        and get_setting_with_default("openhab_token") != ""
+    ):
+        return render(
+            request,
+            "partial/select_room_temperature_sensor_provider.html",
+            {"room_id": room_id},
+        )
     else:
-        return JsonResponse({
-            "status": "error",
-            "text": "Unknown sources configured. Check configuration for Home Assistant and/or OpenHAB in settings."
-        }, status=500)
+        return JsonResponse(
+            {
+                "status": "error",
+                "text": "Unknown sources configured. Check configuration for Home Assistant and/or OpenHAB in settings.",
+            },
+            status=500,
+        )
+
 
 def select_room_temperature_sensor_from_list(request, entity_source, room_id):
     data = {
@@ -156,54 +209,88 @@ def select_room_temperature_sensor_from_list(request, entity_source, room_id):
     }
 
     if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["sensor"]})
+        ha_items = web.home_assistant_api.get_all_home_assistant_items(
+            {"type": ["sensor"]}
+        )
         if len(ha_items["errors"]) == 0:
             data["entities"] = ha_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from Home Assistant!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
     elif data["entity_source"] == "openhab":
         openhab_items = web.openhab_api.get_all_openhab_items()
         if len(openhab_items["errors"]) == 0:
             data["entities"] = openhab_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from OpenHAB!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from OpenHAB!"},
+                status=500,
+            )
     else:
         logging.error("Unknown entity source! Source: " + data["entity_source"])
 
     return render(request, "partial/select_room_temperature_sensor.html", data)
 
 
-
 def select_room_temperature_sensor(request):
-    return render(request, 'partial/select_room_temperature_sensor.html')
+    return render(request, "partial/select_room_temperature_sensor.html")
 
 
 def select_weather_location(request):
-    return render(request, 'partial/select_weather_location.html')
+    return render(request, "partial/select_weather_location.html")
+
 
 def select_weather_outside_temperature_sensor(request):
-    return render(request, 'partial/select_weather_outside_temperature_sensor.html')
+    return render(request, "partial/select_weather_outside_temperature_sensor.html")
+
 
 def select_weather_outside_temperature_sensor_provider(request):
-    if (get_setting_with_default("home_assistant_address") == "" or get_setting_with_default("home_assistant_token") == "") and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
+    if (
+        (
+            get_setting_with_default("home_assistant_address") == ""
+            or get_setting_with_default("home_assistant_token") == ""
+        )
+        and get_setting_with_default("openhab_address") != ""
+        and get_setting_with_default("openhab_token") != ""
+    ):
         # OpenHAB connection configured but not Home Assistant. Skip selecting source:
-        return redirect('htmx_partial_select_weather_outside_temperature_sensor_from_list', entity_source="openhab")
-    elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and (get_setting_with_default("openhab_address") == "" or get_setting_with_default("openhab_token") == ""):
+        return redirect(
+            "htmx_partial_select_weather_outside_temperature_sensor_from_list",
+            entity_source="openhab",
+        )
+    elif (
+        get_setting_with_default("home_assistant_address") != ""
+        and get_setting_with_default("home_assistant_token") != ""
+        and (
+            get_setting_with_default("openhab_address") == ""
+            or get_setting_with_default("openhab_token") == ""
+        )
+    ):
         # OpenHAB connection not configured but Home Assistant is. Skip selecting source:
-        return redirect('htmx_partial_select_weather_outside_temperature_sensor_from_list', entity_source="home_assistant")
-    elif get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "" and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
-        return render(request, 'partial/select_weather_outside_temperature_sensor_provider.html')
+        return redirect(
+            "htmx_partial_select_weather_outside_temperature_sensor_from_list",
+            entity_source="home_assistant",
+        )
+    elif (
+        get_setting_with_default("home_assistant_address") != ""
+        and get_setting_with_default("home_assistant_token") != ""
+        and get_setting_with_default("openhab_address") != ""
+        and get_setting_with_default("openhab_token") != ""
+    ):
+        return render(
+            request, "partial/select_weather_outside_temperature_sensor_provider.html"
+        )
     else:
-        return JsonResponse({
-            "status": "error",
-            "text": "Unknown sources configured. Check configuration for Home Assistant and/or OpenHAB in settings."
-        }, status=500)
+        return JsonResponse(
+            {
+                "status": "error",
+                "text": "Unknown sources configured. Check configuration for Home Assistant and/or OpenHAB in settings.",
+            },
+            status=500,
+        )
+
 
 def select_weather_outside_temperature_sensor_from_list(request, entity_source):
     data = {
@@ -212,49 +299,55 @@ def select_weather_outside_temperature_sensor_from_list(request, entity_source):
     }
 
     if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["sensor"]})
+        ha_items = web.home_assistant_api.get_all_home_assistant_items(
+            {"type": ["sensor"]}
+        )
         if len(ha_items["errors"]) == 0:
             data["entities"] = ha_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from Home Assistant!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
     elif data["entity_source"] == "openhab":
         openhab_items = web.openhab_api.get_all_openhab_items()
         if len(openhab_items["errors"]) == 0:
             data["entities"] = openhab_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from OpenHAB!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from OpenHAB!"},
+                status=500,
+            )
     else:
         logging.error("Unknown entity source! Source: " + data["entity_source"])
 
-    return render(request, "partial/select_weather_outside_temperature_sensor.html", data)
+    return render(
+        request, "partial/select_weather_outside_temperature_sensor.html", data
+    )
+
 
 @csrf_exempt
 def interface_theme(request):
-    new_theme = request.POST.get('theme-dropdown')
+    new_theme = request.POST.get("theme-dropdown")
     set_setting_value("theme", new_theme)
     return JsonResponse({"status": "OK"}, status=200)
 
 
 def relay_group_create_new_modal(request):
-    return render(request, 'modals/relay_groups/create_or_edit_relay_group_modal.html')
+    return render(request, "modals/relay_groups/create_or_edit_relay_group_modal.html")
 
 
 def relay_group_edit_modal(request, relay_group_id):
-    data = {
-        'relay_group': RelayGroup.objects.get(id=relay_group_id)
-    }
-    return render(request, 'modals/relay_groups/create_or_edit_relay_group_modal.html', data)
+    data = {"relay_group": RelayGroup.objects.get(id=relay_group_id)}
+    return render(
+        request, "modals/relay_groups/create_or_edit_relay_group_modal.html", data
+    )
+
 
 def relay_group_save(request):
     if request.method == "POST":
         if "relay_group_id" in request.POST:
-            rg = RelayGroup.objects.get(id=request.POST['relay_group_id'])
+            rg = RelayGroup.objects.get(id=request.POST["relay_group_id"])
         else:
             rg = RelayGroup()
         rg.friendly_name = request.POST["name"]
@@ -282,7 +375,7 @@ def relay_group_add_relay_modal(request, relay_group_id):
         "nspanels": NSPanel.objects.filter(accepted=True, denied=False),
         "relay_group_id": relay_group_id,
     }
-    return render(request, 'modals/relay_groups/add_relay_modal.html', data)
+    return render(request, "modals/relay_groups/add_relay_modal.html", data)
 
 
 def relay_group_add_relay(request, relay_group_id):
@@ -291,7 +384,12 @@ def relay_group_add_relay(request, relay_group_id):
         nspanel = NSPanel.objects.get(id=request.POST["nspanel_id"])
         relay_num = request.POST["relay_selection"]
 
-        exists = RelayGroupBinding.objects.filter(nspanel=nspanel, relay_num=relay_num, relay_group=rg).count() > 0
+        exists = (
+            RelayGroupBinding.objects.filter(
+                nspanel=nspanel, relay_num=relay_num, relay_group=rg
+            ).count()
+            > 0
+        )
         if not exists:
             binding = RelayGroupBinding()
             binding.relay_group = rg
@@ -330,21 +428,31 @@ def handle_entity_modal_result(request):
     elif request.session["action"] == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE":
         return create_or_update_scene_entity(request)
     else:
-        return JsonResponse({
-            "status": "error",
-            "text": "Unknown action! Action: " + request.session["action"]
-        }, status=500)
+        return JsonResponse(
+            {
+                "status": "error",
+                "text": "Unknown action! Action: " + request.session["action"],
+            },
+            status=500,
+        )
 
 
 def handle_entity_modal_entity_selected(request, entity):
-    entity_data = json.loads(base64.b64decode(entity).decode('utf-8'))
+    entity_data = json.loads(base64.b64decode(entity).decode("utf-8"))
 
     if request.session["action"] == "ADD_LIGHT_TO_ROOM":
         return partial_entity_add_light_entity(request, json.dumps(entity_data))
     elif request.session["action"] == "ADD_SWITCH_TO_ROOM":
         return partial_entity_add_switch_entity(request, json.dumps(entity_data))
     else:
-        return JsonResponse({"status": "error", "text": "Unknown entity type! Type: " + entity_data["entity_type"]}, status=500)
+        return JsonResponse(
+            {
+                "status": "error",
+                "text": "Unknown entity type! Type: " + entity_data["entity_type"],
+            },
+            status=500,
+        )
+
 
 def partial_select_new_entity_item_list(request, action, action_args):
     # This is used in the last step of adding an entity to call the correct
@@ -352,13 +460,14 @@ def partial_select_new_entity_item_list(request, action, action_args):
     request.session["action"] = action
     request.session["action_args"] = action_args
     # TODO: Move "get_all_available_entities" from api.py to seperate files
-    data = {
-        "entities": get_all_available_entities(request)
-    }
-    return render(request, 'partial/select_entity/entity_list.html', data)
+    data = {"entities": get_all_available_entities(request)}
+    return render(request, "partial/select_entity/entity_list.html", data)
+
 
 def partial_entity_add_light_entity(request):
     # TODO: Move "get_all_available_entities" from api.py to seperate files
+    import web.homey_api
+
     data = {
         "entity_source": request.session["entity_source"],
         "control_mode": "",
@@ -368,60 +477,85 @@ def partial_entity_add_light_entity(request):
         "openhab_item_color_temperature": "",
         "openhab_item_color": "",
         "home_assistant_item": "",
-        "controlled_by_nspanel_main_page": True, # By default when adding a light. Make it controlled by the NSPanel main page.
+        "homey_item": "",
+        "controlled_by_nspanel_main_page": True,  # By default when adding a light. Make it controlled by the NSPanel main page.
         "openhab_items": [],
         "home_assistant_items": [],
+        "homey_items": [],
     }
 
     if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["light", "switch"]})
+        ha_items = web.home_assistant_api.get_all_home_assistant_items(
+            {"type": ["light", "switch"]}
+        )
         if len(ha_items["errors"]) == 0:
             data["home_assistant_items"] = ha_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from Home Assistant!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
     elif data["entity_source"] == "openhab":
         openhab_items = web.openhab_api.get_all_openhab_items()
         if len(openhab_items["errors"]) == 0:
             data["openhab_items"] = openhab_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from OpenHAB!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from OpenHAB!"},
+                status=500,
+            )
+    elif data["entity_source"] == "homey":
+        homey_devices = web.homey_api.get_all_homey_devices()
+        if len(homey_devices["errors"]) == 0:
+            data["homey_items"] = homey_devices["items"]
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Homey!"},
+                status=500,
+            )
     else:
         logging.error("Unknown entity source! Source: " + data["entity_source"])
 
-    return render(request, 'partial/select_entity/entity_add_or_edit_light_to_room.html', data)
+    return render(
+        request, "partial/select_entity/entity_add_or_edit_light_to_room.html", data
+    )
 
 
 def partial_entity_edit_light_entity(request, light_id):
+    import web.homey_api
+
     light = Entity.objects.get(id=light_id)
 
     request.session["action"] = "ADD_LIGHT_TO_ROOM"
-    request.session["action_args"] = json.dumps({
-        "entity_id": light_id,
-        "room_id": light.room.id,
-        "page_id": light.entities_page.id,
-        "page_slot": light.room_view_position,
-    })
+    request.session["action_args"] = json.dumps(
+        {
+            "entity_id": light_id,
+            "room_id": light.room.id,
+            "page_id": light.entities_page.id,
+            "page_slot": light.room_view_position,
+        }
+    )
 
     entity_data = light.entity_data
     data = {
         "light": light,
         "entity_name": light.friendly_name,
         "entity_source": entity_data["controller"],
-        "controlled_by_nspanel_main_page": entity_data.get("controlled_by_nspanel_main_page", True),
+        "controlled_by_nspanel_main_page": entity_data.get(
+            "controlled_by_nspanel_main_page", True
+        ),
         "can_color_temperature": entity_data.get("can_color_temperature", False),
         "can_rgb": entity_data.get("can_rgb", False),
         "home_assistant_item": entity_data.get("home_assistant_name", ""),
-        "openhab_brightness_item": "", # Set below
-        "openhab_color_temperature_item": entity_data.get("openhab_item_color_temp", ""),
+        "homey_item": entity_data.get("homey_device_id", ""),
+        "openhab_brightness_item": "",  # Set below
+        "openhab_color_temperature_item": entity_data.get(
+            "openhab_item_color_temp", ""
+        ),
         "openhab_rgb_item": entity_data.get("openhab_item_rgb", ""),
         "openhab_items": [],
         "home_assistant_items": [],
+        "homey_items": [],
     }
 
     if entity_data.get("can_dim", False):
@@ -432,183 +566,338 @@ def partial_entity_edit_light_entity(request, light_id):
         data["openhab_brightness_item"] = entity_data.get("openhab_item_switch", "")
 
     if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["light", "switch"]})
+        ha_items = web.home_assistant_api.get_all_home_assistant_items(
+            {"type": ["light", "switch"]}
+        )
         if len(ha_items["errors"]) == 0:
             data["home_assistant_items"] = ha_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from Home Assistant!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
     elif data["entity_source"] == "openhab":
         openhab_items = web.openhab_api.get_all_openhab_items()
         if len(openhab_items["errors"]) > 0:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to fetch OpenHAB items. Check logs for more information."
-            }, status=500)
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "text": "Failed to fetch OpenHAB items. Check logs for more information.",
+                },
+                status=500,
+            )
         else:
             data["openhab_items"] = openhab_items["items"]
+    elif data["entity_source"] == "homey":
+        homey_devices = web.homey_api.get_all_homey_devices()
+        if len(homey_devices["errors"]) == 0:
+            data["homey_items"] = homey_devices["items"]
+            # Create homey_device_names mapping for JavaScript
+            homey_device_names = {}
+            for device in homey_devices["items"]:
+                homey_device_names[device["item_id"]] = device.get("label", "")
+            data["homey_device_names"] = json.dumps(homey_device_names)
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Homey!"},
+                status=500,
+            )
 
-    return render(request, 'partial/select_entity/entity_add_or_edit_light_to_room.html', data)
+    return render(
+        request, "partial/select_entity/entity_add_or_edit_light_to_room.html", data
+    )
 
 
 def partial_entity_add_switch_entity(request):
+    import web.homey_api
+
     data = {
         "entity_source": request.session["entity_source"],
         "openhab_item": "",
         "home_assistant_item": "",
-        "controlled_by_nspanel_main_page": True, # By default when adding a light. Make it controlled by the NSPanel main page.
+        "homey_item": "",
+        "controlled_by_nspanel_main_page": True,  # By default when adding a light. Make it controlled by the NSPanel main page.
         "openhab_items": [],
         "home_assistant_items": [],
+        "homey_items": [],
     }
 
     if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["switch", "input_boolean"]})
+        ha_items = web.home_assistant_api.get_all_home_assistant_items(
+            {"type": ["switch", "input_boolean"]}
+        )
         if len(ha_items["errors"]) == 0:
             data["home_assistant_items"] = ha_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from Home Assistant!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
     elif data["entity_source"] == "openhab":
         openhab_items = web.openhab_api.get_all_openhab_items()
         if len(openhab_items["errors"]) == 0:
             data["openhab_items"] = openhab_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from OpenHAB!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from OpenHAB!"},
+                status=500,
+            )
+    elif data["entity_source"] == "homey":
+        homey_devices = web.homey_api.get_all_homey_devices()
+        if len(homey_devices["errors"]) == 0:
+            data["homey_items"] = homey_devices["items"]
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Homey!"},
+                status=500,
+            )
     else:
         logging.error("Unknown entity source! Source: " + data["entity_source"])
 
-    return render(request, 'partial/select_entity/entity_add_or_edit_switch_to_room.html', data)
+    return render(
+        request, "partial/select_entity/entity_add_or_edit_switch_to_room.html", data
+    )
 
 
 def partial_entity_add_button_entity(request):
+    import web.homey_api
+
     data = {
         "entity_source": request.session["entity_source"],
         "openhab_item": "",
         "home_assistant_item": "",
-        "controlled_by_nspanel_main_page": True, # By default when adding a light. Make it controlled by the NSPanel main page.
+        "homey_item": "",
+        "controlled_by_nspanel_main_page": True,  # By default when adding a light. Make it controlled by the NSPanel main page.
         "openhab_items": [],
         "home_assistant_items": [],
+        "homey_items": [],
     }
 
     if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["button", "input_button"]})
+        ha_items = web.home_assistant_api.get_all_home_assistant_items(
+            {"type": ["button", "input_button"]}
+        )
         if len(ha_items["errors"]) == 0:
             data["home_assistant_items"] = ha_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from Home Assistant!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
+    elif data["entity_source"] == "homey":
+        homey_devices = web.homey_api.get_all_homey_devices()
+        if len(homey_devices["errors"]) == 0:
+            data["homey_items"] = homey_devices["items"]
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Homey!"},
+                status=500,
+            )
     else:
         logging.error("Unknown entity source! Source: " + data["entity_source"])
 
-    return render(request, 'partial/select_entity/entity_add_or_edit_button_to_room.html', data)
+    return render(
+        request, "partial/select_entity/entity_add_or_edit_button_to_room.html", data
+    )
 
 
 def partial_entity_add_thermostat_entity(request):
+    import web.homey_api
+
     data = get_base_data(request)
     data |= {
         "entity_source": request.session["entity_source"],
         "openhab_item": "",
         "home_assistant_item": "",
+        "homey_item": "",
         "openhab_items": [],
         "home_assistant_items": [],
+        "homey_items": [],
     }
 
     if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["climate"]})
+        ha_items = web.home_assistant_api.get_all_home_assistant_items(
+            {"type": ["climate"]}
+        )
         if len(ha_items["errors"]) == 0:
             data["home_assistant_items"] = ha_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from Home Assistant!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
     elif data["entity_source"] == "openhab":
         openhab_items = web.openhab_api.get_all_openhab_items()
         if len(openhab_items["errors"]) == 0:
             data["openhab_items"] = openhab_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from OpenHAB!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from OpenHAB!"},
+                status=500,
+            )
+    elif data["entity_source"] == "homey":
+        homey_devices = web.homey_api.get_all_homey_devices()
+        if len(homey_devices["errors"]) == 0:
+            # Filter for devices with thermostat capabilities
+            thermostat_devices = []
+            for device in homey_devices["items"]:
+                capabilities = device.get("capabilities", [])
+                if (
+                    "target_temperature" in capabilities
+                    or "measure_temperature" in capabilities
+                ):
+                    thermostat_devices.append(device)
+            data["homey_items"] = thermostat_devices
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Homey!"},
+                status=500,
+            )
     else:
         logging.error("Unknown entity source! Source: " + data["entity_source"])
 
-    return render(request, 'partial/select_entity/entity_add_or_edit_thermostat_to_room.html', data)
+    return render(
+        request,
+        "partial/select_entity/entity_add_or_edit_thermostat_to_room.html",
+        data,
+    )
 
 
 def partial_entity_edit_switch_entity(request, switch_id):
+    import web.homey_api
+
     switch = Entity.objects.get(id=switch_id)
 
     request.session["action"] = "ADD_SWITCH_TO_ROOM"
-    request.session["action_args"] = json.dumps({
-        "entity_id": switch_id,
-        "room_id": switch.room.id,
-        "page_id": switch.entities_page.id,
-        "page_slot": switch.room_view_position,
-    })
+    request.session["action_args"] = json.dumps(
+        {
+            "entity_id": switch_id,
+            "room_id": switch.room.id,
+            "page_id": switch.entities_page.id,
+            "page_slot": switch.room_view_position,
+        }
+    )
 
+    entity_data = switch.entity_data
     data = {
         "light": switch,
         "edit_light_id": switch_id,
+        "entity_source": entity_data["controller"],
         "entity": {
             "name": switch.friendly_name,
         },
+        "backend_name": entity_data.get("home_assistant_name", "")
+        or entity_data.get("openhab_item_switch", ""),
+        "homey_item": entity_data.get("homey_device_id", ""),
+        "home_assistant_items": [],
+        "openhab_items": [],
+        "homey_items": [],
     }
-    return render(request, "partial/select_entity/entity_add_or_edit_switch_to_room.html", data)
 
-
-def partial_entity_edit_button_entity(request, button_id):
-    button = Entity.objects.get(id=button_id)
-
-    request.session["action"] = "ADD_BUTTON_TO_ROOM"
-    request.session["action_args"] = json.dumps({
-        "entity_id": button_id,
-        "room_id": button.room.id,
-        "page_id": button.entities_page.id,
-        "page_slot": button.room_view_position,
-    })
-
-    data = {
-        "button": button,
-        "edit_button_id": button_id,
-        "entity_source": button.entity_data["controller"],
-        "entity": {
-            "name": button.friendly_name,
-        },
-    }
     if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["button", "input_button"]})
+        ha_items = web.home_assistant_api.get_all_home_assistant_items(
+            {"type": ["switch", "input_boolean"]}
+        )
         if len(ha_items["errors"]) == 0:
             data["home_assistant_items"] = ha_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from Home Assistant!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
+    elif data["entity_source"] == "openhab":
+        openhab_items = web.openhab_api.get_all_openhab_items()
+        if len(openhab_items["errors"]) == 0:
+            data["openhab_items"] = openhab_items["items"]
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from OpenHAB!"},
+                status=500,
+            )
+    elif data["entity_source"] == "homey":
+        homey_devices = web.homey_api.get_all_homey_devices()
+        if len(homey_devices["errors"]) == 0:
+            data["homey_items"] = homey_devices["items"]
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Homey!"},
+                status=500,
+            )
 
-    return render(request, "partial/select_entity/entity_add_or_edit_button_to_room.html", data)
+    return render(
+        request, "partial/select_entity/entity_add_or_edit_switch_to_room.html", data
+    )
+
+
+def partial_entity_edit_button_entity(request, button_id):
+    import web.homey_api
+
+    button = Entity.objects.get(id=button_id)
+
+    request.session["action"] = "ADD_BUTTON_TO_ROOM"
+    request.session["action_args"] = json.dumps(
+        {
+            "entity_id": button_id,
+            "room_id": button.room.id,
+            "page_id": button.entities_page.id,
+            "page_slot": button.room_view_position,
+        }
+    )
+
+    entity_data = button.entity_data
+    data = {
+        "button": button,
+        "edit_button_id": button_id,
+        "entity_source": entity_data["controller"],
+        "entity": {
+            "name": button.friendly_name,
+        },
+        "backend_name": entity_data.get("home_assistant_name", ""),
+        "homey_item": entity_data.get("homey_device_id", ""),
+        "home_assistant_items": [],
+        "homey_items": [],
+    }
+
+    if data["entity_source"] == "home_assistant":
+        ha_items = web.home_assistant_api.get_all_home_assistant_items(
+            {"type": ["button", "input_button"]}
+        )
+        if len(ha_items["errors"]) == 0:
+            data["home_assistant_items"] = ha_items["items"]
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
+    elif data["entity_source"] == "homey":
+        homey_devices = web.homey_api.get_all_homey_devices()
+        if len(homey_devices["errors"]) == 0:
+            data["homey_items"] = homey_devices["items"]
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Homey!"},
+                status=500,
+            )
+
+    return render(
+        request, "partial/select_entity/entity_add_or_edit_button_to_room.html", data
+    )
 
 
 def partial_entity_edit_thermostat_entity(request, thermostat_id):
+    import web.homey_api
+
     thermostat = Entity.objects.get(id=thermostat_id)
 
     request.session["action"] = "ADD_THERMOSTAT_TO_ROOM"
-    request.session["action_args"] = json.dumps({
-        "entity_id": thermostat_id,
-        "room_id": thermostat.room.id,
-        "page_id": thermostat.entities_page.id,
-        "page_slot": thermostat.room_view_position,
-    })
+    request.session["action_args"] = json.dumps(
+        {
+            "entity_id": thermostat_id,
+            "room_id": thermostat.room.id,
+            "page_id": thermostat.entities_page.id,
+            "page_slot": thermostat.room_view_position,
+        }
+    )
 
     data = get_base_data(request)
     data |= {
@@ -620,25 +909,49 @@ def partial_entity_edit_thermostat_entity(request, thermostat_id):
         },
     }
     if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["climate"]})
+        ha_items = web.home_assistant_api.get_all_home_assistant_items(
+            {"type": ["climate"]}
+        )
         if len(ha_items["errors"]) == 0:
             data["home_assistant_items"] = ha_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from Home Assistant!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
     elif data["entity_source"] == "openhab":
         openhab_items = web.openhab_api.get_all_openhab_items()
         if len(openhab_items["errors"]) == 0:
             data["openhab_items"] = openhab_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from OpenHAB!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from OpenHAB!"},
+                status=500,
+            )
+    elif data["entity_source"] == "homey":
+        homey_devices = web.homey_api.get_all_homey_devices()
+        if len(homey_devices["errors"]) == 0:
+            # Filter for devices with thermostat capabilities
+            thermostat_devices = []
+            for device in homey_devices["items"]:
+                capabilities = device.get("capabilities", [])
+                if (
+                    "target_temperature" in capabilities
+                    or "measure_temperature" in capabilities
+                ):
+                    thermostat_devices.append(device)
+            data["homey_items"] = thermostat_devices
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Homey!"},
+                status=500,
+            )
 
-    return render(request, "partial/select_entity/entity_add_or_edit_thermostat_to_room.html", data)
+    return render(
+        request,
+        "partial/select_entity/entity_add_or_edit_thermostat_to_room.html",
+        data,
+    )
 
 
 def partial_entity_edit_scene_entity(request, scene_id):
@@ -668,36 +981,53 @@ def partial_entity_edit_scene_entity(request, scene_id):
 
 def partial_entity_add_scene_entity(request):
     # TODO: Move "get_all_available_entities" from api.py to seperate files
+    import web.homey_api
+
     data = {
         "entity_source": request.session["entity_source"],
         "openhab_item": "",
         "home_assistant_item": "",
+        "homey_item": "",
         "openhab_items": [],
         "home_assistant_items": [],
+        "homey_items": [],
     }
 
     if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["scene"]})
+        ha_items = web.home_assistant_api.get_all_home_assistant_items(
+            {"type": ["scene"]}
+        )
         if len(ha_items["errors"]) == 0:
             data["home_assistant_items"] = ha_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from Home Assistant!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
     elif data["entity_source"] == "openhab":
         openhab_items = web.openhab_api.get_all_openhab_scenes()
         if len(openhab_items["errors"]) == 0:
             data["openhab_items"] = openhab_items["items"]
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "Failed to get items from OpenHAB!"
-            }, status=500)
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from OpenHAB!"},
+                status=500,
+            )
+    elif data["entity_source"] == "homey":
+        homey_flows = web.homey_api.get_all_homey_flows()
+        homey_moods = web.homey_api.get_all_homey_moods()
+        homey_items = []
+
+        if len(homey_flows["errors"]) == 0:
+            homey_items.extend(homey_flows["items"])
+        if len(homey_moods["errors"]) == 0:
+            homey_items.extend(homey_moods["items"])
+
+        data["homey_items"] = homey_items
     else:
         logging.error("Unknown entity source! Source: " + data["entity_source"])
 
-    return render(request, 'partial/select_entity/entity_add_or_edit_scene.html', data)
+    return render(request, "partial/select_entity/entity_add_or_edit_scene.html", data)
 
 
 @csrf_exempt
@@ -707,12 +1037,12 @@ def partial_remove_entity_from_page_slot(request, page_id, slot_id):
     # Check for light in given slot
     entities = page.entity_set.filter(room_view_position=slot_id).all()
     if entities.count() > 0:
-        entities.delete();
+        entities.delete()
         send_mqttmanager_reload_command()
 
     entities = page.scene_set.filter(room_view_position=slot_id).all()
     if entities.count() > 0:
-        entities.delete();
+        entities.delete()
         send_mqttmanager_reload_command()
 
     room_id = 0
@@ -720,24 +1050,32 @@ def partial_remove_entity_from_page_slot(request, page_id, slot_id):
         room_id = page.room.id
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=room_id, is_scenes_pages=page.is_scenes_page, is_global_scenes_page=(page.room is None))
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=room_id,
+        is_scenes_pages=page.is_scenes_page,
+        is_global_scenes_page=(page.room is None),
+    )
 
 
 @csrf_exempt
-def partial_add_entities_page_to_room(request, room_id, is_scenes_page, is_global_scenes_page):
+def partial_add_entities_page_to_room(
+    request, room_id, is_scenes_page, is_global_scenes_page
+):
     data = {
         "room_id": room_id,
         "is_scenes_page": is_scenes_page,
         "is_global_scenes_page": is_global_scenes_page,
     }
-    return render(request, 'partial/add_entities_page_to_room.html', data)
+    return render(request, "partial/add_entities_page_to_room.html", data)
 
 
 def partial_edit_entities_page(request, page_id):
     data = {
         "page_id": page_id,
     }
-    return render(request, 'partial/edit_entities_page.html', data)
+    return render(request, "partial/edit_entities_page.html", data)
 
 
 def partial_save_edit_entities_page(request, page_id, page_type):
@@ -750,7 +1088,13 @@ def partial_save_edit_entities_page(request, page_id, page_type):
         room_id = page.room.id
     send_mqttmanager_reload_command()
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=room_id, is_scenes_pages=page.is_scenes_page, is_global_scenes_page=(page.room is None))
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=room_id,
+        is_scenes_pages=page.is_scenes_page,
+        is_global_scenes_page=(page.room is None),
+    )
 
 
 def get_entity_in_page_slot(page_id, slot_id):
@@ -768,7 +1112,9 @@ def get_entity_in_page_slot(page_id, slot_id):
 
 @csrf_exempt
 def partial_move_entity(request):
-    existing_entity_in_slot = get_entity_in_page_slot(request.POST["page_id"], request.POST["slot_id"])
+    existing_entity_in_slot = get_entity_in_page_slot(
+        request.POST["page_id"], request.POST["slot_id"]
+    )
     new_entity_in_slot = None
     if request.POST["new_entity_type"] == "Scene":
         new_entity_in_slot = Scene.objects.get(id=request.POST["new_entity_id"])
@@ -776,18 +1122,21 @@ def partial_move_entity(request):
         try:
             new_entity_in_slot = Entity.objects.get(id=request.POST["new_entity_id"])
         except Exception as e:
-            return JsonResponse({
-                "status": "error",
-                "text": "Did not find existing entity to move!"
-            })
+            return JsonResponse(
+                {"status": "error", "text": "Did not find existing entity to move!"}
+            )
 
     if existing_entity_in_slot:
         # Swap the existing entity place with the new entity to be put on that slot
         existing_entity_in_slot.entities_page = new_entity_in_slot.entities_page
-        existing_entity_in_slot.room_view_position = new_entity_in_slot.room_view_position
+        existing_entity_in_slot.room_view_position = (
+            new_entity_in_slot.room_view_position
+        )
         existing_entity_in_slot.save()
 
-    new_entity_in_slot.entities_page = RoomEntitiesPage.objects.get(id=request.POST["page_id"])
+    new_entity_in_slot.entities_page = RoomEntitiesPage.objects.get(
+        id=request.POST["page_id"]
+    )
     new_entity_in_slot.room_view_position = request.POST["slot_id"]
     new_entity_in_slot.save()
     send_mqttmanager_reload_command()
@@ -800,12 +1149,21 @@ def partial_move_entity(request):
         is_global_scenes_page = False
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request, view='edit_room', room_id=room_id, is_scenes_pages=new_entity_in_slot.entities_page.is_scenes_page, is_global_scenes_page=is_global_scenes_page)
+    return entities_pages.get(
+        request,
+        view="edit_room",
+        room_id=room_id,
+        is_scenes_pages=new_entity_in_slot.entities_page.is_scenes_page,
+        is_global_scenes_page=is_global_scenes_page,
+    )
+
 
 @csrf_exempt
 def partial_move_entities_pages(request):
     if "htmx_form_save_entities_pages_order_field" in request.POST:
-        json_data = json.loads(request.POST["htmx_form_save_entities_pages_order_field"])
+        json_data = json.loads(
+            request.POST["htmx_form_save_entities_pages_order_field"]
+        )
         if "pages" in json_data:
             if len(json_data["pages"]) > 0:
                 entity_page = RoomEntitiesPage.objects.get(id=json_data["pages"][0])
@@ -821,70 +1179,107 @@ def partial_move_entities_pages(request):
                     page.save()
                 send_mqttmanager_reload_command()
                 entities_pages = NSPanelRoomEntitiesPages()
-                return entities_pages.get(request, view='edit_room', room_id=room_id, is_scenes_pages=entity_page.is_scenes_page, is_global_scenes_page=is_global_scenes_pages)
+                return entities_pages.get(
+                    request,
+                    view="edit_room",
+                    room_id=room_id,
+                    is_scenes_pages=entity_page.is_scenes_page,
+                    is_global_scenes_page=is_global_scenes_pages,
+                )
             else:
-                return JsonResponse({
-                    "status": "error",
-                    "text": "'pages' field empty in request POST-data."
-                }, status=500)
+                return JsonResponse(
+                    {
+                        "status": "error",
+                        "text": "'pages' field empty in request POST-data.",
+                    },
+                    status=500,
+                )
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "'pages' field not available in JSON-data."
-            }, status=500)
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "text": "'pages' field not available in JSON-data.",
+                },
+                status=500,
+            )
     else:
-        return JsonResponse({
-            "status": "error",
-            "text": "'htmx_form_save_entities_pages_order_field' field not available in request POST-data."
-        }, status=500)
-
-
-
-@csrf_exempt
-def partial_add_entity_to_entities_page_select_entity_type(request, action, action_args):
-    data = {
-        "action": action,
-        "action_args": action_args
-    }
-    return render(request, 'partial/add_entity_to_entities_page_select_entity_type.html', data)
+        return JsonResponse(
+            {
+                "status": "error",
+                "text": "'htmx_form_save_entities_pages_order_field' field not available in request POST-data.",
+            },
+            status=500,
+        )
 
 
 @csrf_exempt
-def partial_add_entity_to_entities_page_select_entity_source(request, action, action_args):
+def partial_add_entity_to_entities_page_select_entity_type(
+    request, action, action_args
+):
+    data = {"action": action, "action_args": action_args}
+    return render(
+        request, "partial/add_entity_to_entities_page_select_entity_type.html", data
+    )
+
+
+@csrf_exempt
+def partial_add_entity_to_entities_page_select_entity_source(
+    request, action, action_args
+):
     request.session["action"] = action
     request.session["action_args"] = action_args
 
     is_home_assistant_configured = False
     is_openhab_configured = False
-    if get_setting_with_default("home_assistant_address") != "" and get_setting_with_default("home_assistant_token") != "":
+    is_homey_configured = False
+    if (
+        get_setting_with_default("home_assistant_address") != ""
+        and get_setting_with_default("home_assistant_token") != ""
+    ):
         is_home_assistant_configured = True
-    if get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
+    if (
+        get_setting_with_default("openhab_address") != ""
+        and get_setting_with_default("openhab_token") != ""
+    ):
         is_openhab_configured = True
+    if (
+        get_setting_with_default("homey_address") != ""
+        and get_setting_with_default("homey_token") != ""
+    ):
+        is_homey_configured = True
 
     data = {
         "action": action,
         "action_args": action_args,
         "is_home_assistant_configured": is_home_assistant_configured,
         "is_openhab_configured": is_openhab_configured,
+        "is_homey_configured": is_homey_configured,
         "home_assistant_supported_entity_types": [
             "ADD_LIGHT_TO_ROOM",
             "ADD_SWITCH_TO_ROOM",
             "ADD_BUTTON_TO_ROOM",
             "ADD_THERMOSTAT_TO_ROOM",
-            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE"
+            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE",
         ],
         "openhab_supported_entity_types": [
             "ADD_LIGHT_TO_ROOM",
             "ADD_SWITCH_TO_ROOM",
             "ADD_THERMOSTAT_TO_ROOM",
-            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE"
+            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE",
         ],
-        "manual_supported_entity_types": [
-            "ADD_BUTTON_TO_ROOM"
-        ]
+        "homey_supported_entity_types": [
+            "ADD_LIGHT_TO_ROOM",
+            "ADD_SWITCH_TO_ROOM",
+            "ADD_BUTTON_TO_ROOM",
+            "ADD_THERMOSTAT_TO_ROOM",
+            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE",
+        ],
+        "manual_supported_entity_types": ["ADD_BUTTON_TO_ROOM"],
     }
 
-    return render(request, 'partial/add_entity_to_entities_page_select_entity_source.html', data)
+    return render(
+        request, "partial/add_entity_to_entities_page_select_entity_source.html", data
+    )
 
 
 @csrf_exempt
@@ -901,10 +1296,13 @@ def partial_add_entity_to_entities_page_config_modal(request, entity_source):
     elif request.session["action"] == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE":
         return partial_entity_add_scene_entity(request)
     else:
-        return JsonResponse({
-            "status": "error",
-            "text": "Unknown action! Action: " + request.session["action"]
-        }, status=500)
+        return JsonResponse(
+            {
+                "status": "error",
+                "text": "Unknown action! Action: " + request.session["action"],
+            },
+            status=500,
+        )
 
 
 @csrf_exempt
@@ -919,27 +1317,44 @@ def partial_delete_entities_page(request, page_id):
     page.delete()
 
     # Recalculate entity page order
-    for index, entity_page in enumerate(RoomEntitiesPage.objects.filter(room=page.room, is_scenes_page=page.is_scenes_page).order_by('display_order'), start=0):
+    for index, entity_page in enumerate(
+        RoomEntitiesPage.objects.filter(
+            room=page.room, is_scenes_page=page.is_scenes_page
+        ).order_by("display_order"),
+        start=0,
+    ):
         entity_page.display_order = index
         entity_page.save()
 
     send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=room_id, is_scenes_pages=page.is_scenes_page, is_global_scenes_page=is_global_scenes_page)
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=room_id,
+        is_scenes_pages=page.is_scenes_page,
+        is_global_scenes_page=is_global_scenes_page,
+    )
 
 
-def create_entities_page_in_room(request, room_id, page_type, is_scenes_page, is_global_scenes_page):
+def create_entities_page_in_room(
+    request, room_id, page_type, is_scenes_page, is_global_scenes_page
+):
     entity_page = RoomEntitiesPage()
     entity_page.is_scenes_page = is_scenes_page == "True"
     entity_page.is_global_scenes_page = is_global_scenes_page == "True"
     if entity_page.is_global_scenes_page:
         entity_page.room = None
-        entity_page.display_order = RoomEntitiesPage.objects.filter(room=None, is_scenes_page=is_scenes_page).count()
+        entity_page.display_order = RoomEntitiesPage.objects.filter(
+            room=None, is_scenes_page=is_scenes_page
+        ).count()
     else:
         room = Room.objects.get(id=room_id)
         entity_page.room = room
-        entity_page.display_order = RoomEntitiesPage.objects.filter(room=room, is_scenes_page=is_scenes_page).count()
+        entity_page.display_order = RoomEntitiesPage.objects.filter(
+            room=room, is_scenes_page=is_scenes_page
+        ).count()
 
     if page_type == 4:
         entity_page.page_type = 4
@@ -954,10 +1369,16 @@ def create_entities_page_in_room(request, room_id, page_type, is_scenes_page, is
         entity_page.save()
         send_mqttmanager_reload_command()
     else:
-        print(F"ERROR! Unknown page type {page_type}")
+        print(f"ERROR! Unknown page type {page_type}")
     # Return new partial HTMX update of all entities pages in this room
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=room_id, is_scenes_pages=entity_page.is_scenes_page, is_global_scenes_page=(entity_page.room == None))
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=room_id,
+        is_scenes_pages=entity_page.is_scenes_page,
+        is_global_scenes_page=(entity_page.room == None),
+    )
 
 
 @csrf_exempt
@@ -974,20 +1395,29 @@ def partial_reorder_rooms(request):
                 rooms_list = RoomsList()
                 return rooms_list.get(request)
             else:
-                return JsonResponse({
-                    "status": "error",
-                    "text": "'pages' field empty in request POST-data."
-                }, status=500)
+                return JsonResponse(
+                    {
+                        "status": "error",
+                        "text": "'pages' field empty in request POST-data.",
+                    },
+                    status=500,
+                )
         else:
-            return JsonResponse({
-                "status": "error",
-                "text": "'rooms' field not available in JSON-data."
-            }, status=500)
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "text": "'rooms' field not available in JSON-data.",
+                },
+                status=500,
+            )
     else:
-        return JsonResponse({
-            "status": "error",
-            "text": "'htmx_form_save_rooms_order_field' field not available in request POST-data."
-        }, status=500)
+        return JsonResponse(
+            {
+                "status": "error",
+                "text": "'htmx_form_save_rooms_order_field' field not available in request POST-data.",
+            },
+            status=500,
+        )
 
 
 def partial_select_new_outside_temperature_sensor(request):
@@ -995,28 +1425,35 @@ def partial_select_new_outside_temperature_sensor(request):
     data = {
         "entities": get_all_available_entities(request),
     }
-    return render(request, 'partial/select_entity/entity_list_select_outside_temperature_sensor.html', data)
+    return render(
+        request,
+        "partial/select_entity/entity_list_select_outside_temperature_sensor.html",
+        data,
+    )
 
 
 # When creating a new or updating an existing light entity this will take care of the actual creation/updating of the model
 # in the database.
 def create_or_update_light_entity(request):
-    action_args = json.loads(request.session["action_args"]) # Loads arguments set when first starting process of adding/updating entity
+    action_args = json.loads(
+        request.session["action_args"]
+    )  # Loads arguments set when first starting process of adding/updating entity
 
     entity_data = {
-        'controller': request.session["entity_source"],
-        'home_assistant_name': '',
-        'openhab_name': '',
-        'openhab_control_mode': '',
-        'openhab_item_switch': '',
-        'openhab_item_dimmer': '',
-        'openhab_item_color_temp': '',
-        'openhab_item_rgb': '',
-        'can_dim': False,
-        'can_color_temperature': False,
-        'can_rgb': False,
-        'is_ceiling_light': False,
-        'controlled_by_nspanel_main_page': True,
+        "controller": request.session["entity_source"],
+        "home_assistant_name": "",
+        "openhab_name": "",
+        "openhab_control_mode": "",
+        "openhab_item_switch": "",
+        "openhab_item_dimmer": "",
+        "openhab_item_color_temp": "",
+        "openhab_item_rgb": "",
+        "homey_device_id": "",
+        "can_dim": False,
+        "can_color_temperature": False,
+        "can_rgb": False,
+        "is_ceiling_light": False,
+        "controlled_by_nspanel_main_page": True,
     }
     if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
         new_light = Entity.objects.get(id=int(action_args["entity_id"]))
@@ -1026,58 +1463,84 @@ def create_or_update_light_entity(request):
         new_light.entity_type = Entity.EntityType.LIGHT
 
     if entity_data["controller"] == "home_assistant":
-        entity_data['home_assistant_name'] = request.POST["home_assistant_item"]
+        entity_data["home_assistant_name"] = request.POST["home_assistant_item"]
+    elif entity_data["controller"] == "homey":
+        # For Homey, just store the device ID
+        if "homey_item" in request.POST:
+            entity_data["homey_device_id"] = request.POST["homey_item"]
+            # Note: capabilities are determined from the form fields below
+
     new_light.friendly_name = request.POST["add_new_light_name"]
     new_light.room = Room.objects.get(id=int(action_args["room_id"]))
-    new_light.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+    new_light.entities_page = RoomEntitiesPage.objects.get(
+        id=int(action_args["page_id"])
+    )
     new_light.room_view_position = int(action_args["page_slot"])
 
-    entity_data['controlled_by_nspanel_main_page'] = "controlled_by_nspanel_main_page" in request.POST
-    entity_data['is_ceiling_light'] = request.POST["light_type"] == "ceiling"
+    entity_data["controlled_by_nspanel_main_page"] = (
+        "controlled_by_nspanel_main_page" in request.POST
+    )
+    entity_data["is_ceiling_light"] = request.POST["light_type"] == "ceiling"
 
+    # Process control mode for all controllers
     if request.POST["light_control_mode"] == "dimmer":
-        entity_data['can_dim'] = True
-        entity_data['openhab_control_mode'] = "dimmer"
+        entity_data["can_dim"] = True
         if entity_data["controller"] == "openhab":
-            entity_data['openhab_item_dimmer'] = request.POST["openhab_dimming_item"]
+            entity_data["openhab_control_mode"] = "dimmer"
+            entity_data["openhab_item_dimmer"] = request.POST["openhab_dimming_item"]
     else:
-        entity_data['openhab_control_mode'] = "switch"
-        entity_data['can_dim'] = False
+        entity_data["can_dim"] = False
         if entity_data["controller"] == "openhab":
-            entity_data['openhab_item_switch'] = request.POST["openhab_dimming_item"]
+            entity_data["openhab_control_mode"] = "switch"
+            entity_data["openhab_item_switch"] = request.POST["openhab_dimming_item"]
 
+    # Process color temperature capability for all controllers
     if "color_temperature" in request.POST:
-        entity_data['can_color_temperature'] = True
+        entity_data["can_color_temperature"] = True
         if entity_data["controller"] == "openhab":
-            entity_data['openhab_item_color_temp'] = request.POST["openhab_color_temperature_item"]
+            entity_data["openhab_item_color_temp"] = request.POST[
+                "openhab_color_temperature_item"
+            ]
     else:
-        entity_data['can_color_temperature'] = False
-        entity_data['openhab_item_color_temp'] = ""
+        entity_data["can_color_temperature"] = False
+        if entity_data["controller"] == "openhab":
+            entity_data["openhab_item_color_temp"] = ""
 
+    # Process RGB capability for all controllers
     if "rgb" in request.POST:
-        entity_data['can_rgb'] = True
+        entity_data["can_rgb"] = True
         if entity_data["controller"] == "openhab":
-            entity_data['openhab_item_rgb'] = request.POST["openhab_rgb_item"]
+            entity_data["openhab_item_rgb"] = request.POST["openhab_rgb_item"]
     else:
-        entity_data['can_rgb'] = False
-        entity_data['openhab_item_rgb'] = ""
+        entity_data["can_rgb"] = False
+        if entity_data["controller"] == "openhab":
+            entity_data["openhab_item_rgb"] = ""
 
     new_light.entity_data = entity_data
     new_light.save()
     send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=new_light.room.id, is_scenes_pages=False, is_global_scenes_page=False)
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=new_light.room.id,
+        is_scenes_pages=False,
+        is_global_scenes_page=False,
+    )
 
 
 def create_or_update_switch_entity(request):
-    action_args = json.loads(request.session["action_args"]) # Loads arguments set when first starting process of adding/updating entity
+    action_args = json.loads(
+        request.session["action_args"]
+    )  # Loads arguments set when first starting process of adding/updating entity
 
     entity_data = {
-        'controller': request.session["entity_source"],
-        'home_assistant_name': '',
-        'openhab_name': '',
-        'openhab_item_switch': '',
+        "controller": request.session["entity_source"],
+        "home_assistant_name": "",
+        "openhab_name": "",
+        "openhab_item_switch": "",
+        "homey_device_id": "",
     }
     if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
         new_switch = Entity.objects.get(id=int(action_args["entity_id"]))
@@ -1087,12 +1550,17 @@ def create_or_update_switch_entity(request):
         new_switch.entity_type = Entity.EntityType.SWITCH
         # Only set once, during initial creation:
         new_switch.room = Room.objects.get(id=int(action_args["room_id"]))
-        new_switch.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+        new_switch.entities_page = RoomEntitiesPage.objects.get(
+            id=int(action_args["page_id"])
+        )
         new_switch.room_view_position = int(action_args["page_slot"])
-        if entity_data['controller'] == "home_assistant":
-            entity_data['home_assistant_name'] = request.POST["backend_name"]
-        elif entity_data['controller'] == "openhab":
-            entity_data['openhab_item_switch'] = request.POST["backend_name"]
+        if entity_data["controller"] == "home_assistant":
+            entity_data["home_assistant_name"] = request.POST["backend_name"]
+        elif entity_data["controller"] == "openhab":
+            entity_data["openhab_item_switch"] = request.POST["backend_name"]
+        elif entity_data["controller"] == "homey":
+            if "homey_item" in request.POST:
+                entity_data["homey_device_id"] = request.POST["homey_item"]
 
     new_switch.friendly_name = request.POST["light_name"]
     new_switch.entity_data = entity_data
@@ -1100,17 +1568,26 @@ def create_or_update_switch_entity(request):
     send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=new_switch.room.id, is_scenes_pages=False, is_global_scenes_page=False)
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=new_switch.room.id,
+        is_scenes_pages=False,
+        is_global_scenes_page=False,
+    )
 
 
 def create_or_update_button_entity(request):
-    action_args = json.loads(request.session["action_args"]) # Loads arguments set when first starting process of adding/updating entity
+    action_args = json.loads(
+        request.session["action_args"]
+    )  # Loads arguments set when first starting process of adding/updating entity
 
     entity_data = {
-        'controller': request.session["entity_source"],
-        'home_assistant_name': '',
-        'mqtt_topic': '', # Used in case of controller = manual
-        'mqtt_payload': '', # Used in case of controller = manual
+        "controller": request.session["entity_source"],
+        "home_assistant_name": "",
+        "homey_device_id": "",
+        "mqtt_topic": "",  # Used in case of controller = manual
+        "mqtt_payload": "",  # Used in case of controller = manual
     }
     if "entity_id" in action_args and int(action_args["entity_id"]):
         new_button = Entity.objects.get(id=int(action_args["entity_id"]))
@@ -1120,28 +1597,43 @@ def create_or_update_button_entity(request):
         new_button.entity_type = Entity.EntityType.BUTTON
         # Only set once, during initial creation:
         new_button.room = Room.objects.get(id=int(action_args["room_id"]))
-        new_button.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+        new_button.entities_page = RoomEntitiesPage.objects.get(
+            id=int(action_args["page_id"])
+        )
         new_button.room_view_position = int(action_args["page_slot"])
 
-    if entity_data['controller'] == "home_assistant":
-        entity_data['home_assistant_name'] = request.POST["backend_name"]
-    elif entity_data['controller'] == "nspm":
-        entity_data['mqtt_topic'] = request.POST["mqtt_topic"]
-        entity_data['mqtt_payload'] = request.POST["mqtt_payload"]
+    if entity_data["controller"] == "home_assistant":
+        entity_data["home_assistant_name"] = request.POST["backend_name"]
+    elif entity_data["controller"] == "homey":
+        if "homey_item" in request.POST:
+            entity_data["homey_device_id"] = request.POST["homey_item"]
+    elif entity_data["controller"] == "nspm":
+        entity_data["mqtt_topic"] = request.POST["mqtt_topic"]
+        entity_data["mqtt_payload"] = request.POST["mqtt_payload"]
     new_button.friendly_name = request.POST["light_name"]
     new_button.entity_data = entity_data
     new_button.save()
     send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=new_button.room.id, is_scenes_pages=False, is_global_scenes_page=False)
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=new_button.room.id,
+        is_scenes_pages=False,
+        is_global_scenes_page=False,
+    )
+
 
 def create_or_update_thermostat_entity(request):
-    action_args = json.loads(request.session["action_args"]) # Loads arguments set when first starting process of adding/updating entity
+    action_args = json.loads(
+        request.session["action_args"]
+    )  # Loads arguments set when first starting process of adding/updating entity
 
     entity_data = {
-        'controller': request.session["entity_source"],
-        'home_assistant_name': '',
+        "controller": request.session["entity_source"],
+        "home_assistant_name": "",
+        "homey_device_id": "",
     }
     if "entity_id" in action_args and int(action_args["entity_id"]):
         new_thermostat = Entity.objects.get(id=int(action_args["entity_id"]))
@@ -1151,74 +1643,109 @@ def create_or_update_thermostat_entity(request):
         new_thermostat.entity_type = Entity.EntityType.THERMOSTAT
         # Only set once, during initial creation:
         new_thermostat.room = Room.objects.get(id=int(action_args["room_id"]))
-        new_thermostat.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+        new_thermostat.entities_page = RoomEntitiesPage.objects.get(
+            id=int(action_args["page_id"])
+        )
         new_thermostat.room_view_position = int(action_args["page_slot"])
 
-    if entity_data['controller'] == "home_assistant":
-        entity_data['home_assistant_name'] = request.POST["backend_name"]
-    elif entity_data['controller'] == "openhab":
-        entity_data['openhab_temperature_item'] = request.POST["temperature_item"]
-        entity_data['openhab_step_size'] = request.POST["step_size"]
-        entity_data['openhab_fan_mode_item'] = request.POST["fan_mode_item"]
-        entity_data['openhab_hvac_mode_item'] = request.POST["hvac_mode_item"]
-        entity_data['openhab_preset_item'] = request.POST["preset_item"]
-        entity_data['openhab_swing_item'] = request.POST["swing_item"]
-        entity_data['openhab_swingh_item'] = request.POST["swingh_item"]
+    if entity_data["controller"] == "home_assistant":
+        entity_data["home_assistant_name"] = request.POST["backend_name"]
+    elif entity_data["controller"] == "openhab":
+        entity_data["openhab_temperature_item"] = request.POST["temperature_item"]
+        entity_data["openhab_step_size"] = request.POST["step_size"]
+        entity_data["openhab_fan_mode_item"] = request.POST["fan_mode_item"]
+        entity_data["openhab_hvac_mode_item"] = request.POST["hvac_mode_item"]
+        entity_data["openhab_preset_item"] = request.POST["preset_item"]
+        entity_data["openhab_swing_item"] = request.POST["swing_item"]
+        entity_data["openhab_swingh_item"] = request.POST["swingh_item"]
+    elif entity_data["controller"] == "homey":
+        if "homey_item" in request.POST:
+            entity_data["homey_device_id"] = request.POST["homey_item"]
 
     # Loop over all options starting with fan_mode_option_
     fan_modes = []
     for option in request.POST:
-        if option.startswith("fan_mode_option_") and not option.endswith("_icon") and not option.endswith("_label"):
-            fan_modes.append({
-                "value": request.POST[option],
-                "icon": request.POST[option + "_icon"],
-                "label": request.POST[option + "_label"]
-            })
-    entity_data['fan_modes'] = fan_modes
+        if (
+            option.startswith("fan_mode_option_")
+            and not option.endswith("_icon")
+            and not option.endswith("_label")
+        ):
+            fan_modes.append(
+                {
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"],
+                    "label": request.POST[option + "_label"],
+                }
+            )
+    entity_data["fan_modes"] = fan_modes
 
     # Loop over all options starting with hvac_mode_option_
     hvac_modes = []
     for option in request.POST:
-        if option.startswith("hvac_mode_option_") and not option.endswith("_icon") and not option.endswith("_label"):
-            hvac_modes.append({
-                "value": request.POST[option],
-                "icon": request.POST[option + "_icon"],
-                "label": request.POST[option + "_label"]
-            })
-    entity_data['hvac_modes'] = hvac_modes
+        if (
+            option.startswith("hvac_mode_option_")
+            and not option.endswith("_icon")
+            and not option.endswith("_label")
+        ):
+            hvac_modes.append(
+                {
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"],
+                    "label": request.POST[option + "_label"],
+                }
+            )
+    entity_data["hvac_modes"] = hvac_modes
 
     # Loop over all options starting with preset_option_
     preset_modes = []
     for option in request.POST:
-        if option.startswith("preset_option_") and not option.endswith("_icon") and not option.endswith("_label"):
-            preset_modes.append({
-                "value": request.POST[option],
-                "icon": request.POST[option + "_icon"],
-                "label": request.POST[option + "_label"]
-            })
-    entity_data['preset_modes'] = preset_modes
+        if (
+            option.startswith("preset_option_")
+            and not option.endswith("_icon")
+            and not option.endswith("_label")
+        ):
+            preset_modes.append(
+                {
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"],
+                    "label": request.POST[option + "_label"],
+                }
+            )
+    entity_data["preset_modes"] = preset_modes
 
     # Loop over all options starting with swing_option
     swing_modes = []
     for option in request.POST:
-        if option.startswith("swing_option_") and not option.endswith("_icon") and not option.endswith("_label"):
-            swing_modes.append({
-                "value": request.POST[option],
-                "icon": request.POST[option + "_icon"],
-                "label": request.POST[option + "_label"]
-            })
-    entity_data['swing_modes'] = swing_modes
+        if (
+            option.startswith("swing_option_")
+            and not option.endswith("_icon")
+            and not option.endswith("_label")
+        ):
+            swing_modes.append(
+                {
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"],
+                    "label": request.POST[option + "_label"],
+                }
+            )
+    entity_data["swing_modes"] = swing_modes
 
     # Loop over all options starting with swingh_option
     swingh_modes = []
     for option in request.POST:
-        if option.startswith("swingh_option_") and not option.endswith("_icon") and not option.endswith("_label"):
-            swingh_modes.append({
-                "value": request.POST[option],
-                "icon": request.POST[option + "_icon"],
-                "label": request.POST[option + "_label"]
-            })
-    entity_data['swingh_modes'] = swingh_modes
+        if (
+            option.startswith("swingh_option_")
+            and not option.endswith("_icon")
+            and not option.endswith("_label")
+        ):
+            swingh_modes.append(
+                {
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"],
+                    "label": request.POST[option + "_label"],
+                }
+            )
+    entity_data["swingh_modes"] = swingh_modes
 
     new_thermostat.friendly_name = request.POST["friendly_name"]
     new_thermostat.entity_data = entity_data
@@ -1226,11 +1753,19 @@ def create_or_update_thermostat_entity(request):
     send_mqttmanager_reload_command()
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=new_thermostat.room.id, is_scenes_pages=False, is_global_scenes_page=False)
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=new_thermostat.room.id,
+        is_scenes_pages=False,
+        is_global_scenes_page=False,
+    )
 
 
 def create_or_update_scene_entity(request):
-    action_args = json.loads(request.session["action_args"]) # Loads arguments set when first starting process of adding/updating entity
+    action_args = json.loads(
+        request.session["action_args"]
+    )  # Loads arguments set when first starting process of adding/updating entity
 
     if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
         new_scene = Scene.objects.get(id=int(action_args["entity_id"]))
@@ -1240,11 +1775,13 @@ def create_or_update_scene_entity(request):
             new_scene.room = Room.objects.get(id=int(action_args["room_id"]))
         else:
             new_scene.room = None
-        new_scene.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+        new_scene.entities_page = RoomEntitiesPage.objects.get(
+            id=int(action_args["page_id"])
+        )
         new_scene.room_view_position = int(action_args["page_slot"])
         new_scene.scene_type = request.session["entity_source"]
         if new_scene.scene_type == "nspanelmanager":
-            pass # Do nothing, this is one of our own scenes.
+            pass  # Do nothing, this is one of our own scenes.
         elif new_scene.scene_type == "home_assistant":
             new_scene.backend_name = request.POST["backend_name"]
         elif new_scene.scene_type == "openhab":
@@ -1259,11 +1796,17 @@ def create_or_update_scene_entity(request):
         room_id = new_scene.room.id
 
     entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(request=request, view="edit_room", room_id=room_id, is_scenes_pages=True, is_global_scenes_page=(new_scene.room == None))
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=room_id,
+        is_scenes_pages=True,
+        is_global_scenes_page=(new_scene.room == None),
+    )
 
 
 def initial_setup_welcome(request):
-    return render(request, 'modals/initial_setup/welcome.html')
+    return render(request, "modals/initial_setup/welcome.html")
 
 
 @csrf_exempt
@@ -1282,13 +1825,13 @@ def initial_setup_manager_settings(request):
             "mqtt_username": get_setting_with_default("mqtt_username"),
             "mqtt_password": get_setting_with_default("mqtt_password"),
         }
-        return render(request, 'modals/initial_setup/mqtt.html', data)
+        return render(request, "modals/initial_setup/mqtt.html", data)
     elif request.method == "GET":
         data = {
             "manager_address": get_setting_with_default("manager_address"),
             "manager_port": get_setting_with_default("manager_port"),
         }
-        return render(request, 'modals/initial_setup/manager_settings.html', data)
+        return render(request, "modals/initial_setup/manager_settings.html", data)
 
 
 @csrf_exempt
@@ -1307,11 +1850,16 @@ def initial_setup_mqtt_settings(request):
         # Save settings succesfully, return the next view in the setup guide. Home Assistant:
         environment = environ.Env()
         data = {
-            "home_assistant_address": get_setting_with_default("home_assistant_address"),
+            "home_assistant_address": get_setting_with_default(
+                "home_assistant_address"
+            ),
             "home_assistant_token": get_setting_with_default("home_assistant_token"),
-            "is_home_assistant_addon": ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
+            "is_home_assistant_addon": (
+                "IS_HOME_ASSISTANT_ADDON" in environment
+                and environment("IS_HOME_ASSISTANT_ADDON") == "true"
+            ),
         }
-        return render(request, 'modals/initial_setup/home_assistant.html', data)
+        return render(request, "modals/initial_setup/home_assistant.html", data)
     elif request.method == "GET":
         data = {
             "mqtt_server": get_setting_with_default("mqtt_server"),
@@ -1319,16 +1867,20 @@ def initial_setup_mqtt_settings(request):
             "mqtt_username": get_setting_with_default("mqtt_username"),
             "mqtt_password": get_setting_with_default("mqtt_password"),
         }
-        return render(request, 'modals/initial_setup/mqtt.html', data)
+        return render(request, "modals/initial_setup/mqtt.html", data)
 
 
 @csrf_exempt
 def initial_setup_home_assistant_settings(request):
     if request.method == "POST":
         if "home_assistant_address" in request.POST:
-            set_setting_value("home_assistant_address", request.POST["home_assistant_address"])
+            set_setting_value(
+                "home_assistant_address", request.POST["home_assistant_address"]
+            )
         if "home_assistant_token" in request.POST:
-            set_setting_value("home_assistant_token", request.POST["home_assistant_token"])
+            set_setting_value(
+                "home_assistant_token", request.POST["home_assistant_token"]
+            )
         send_mqttmanager_reload_command()
 
         # Save settings succesfully, return the next view in the setup guide. OpenHAB:
@@ -1336,15 +1888,20 @@ def initial_setup_home_assistant_settings(request):
             "openhab_address": get_setting_with_default("openhab_address"),
             "openhab_token": get_setting_with_default("openhab_token"),
         }
-        return render(request, 'modals/initial_setup/openhab.html', data)
+        return render(request, "modals/initial_setup/openhab.html", data)
     elif request.method == "GET":
         environment = environ.Env()
         data = {
-            "home_assistant_address": get_setting_with_default("home_assistant_address"),
+            "home_assistant_address": get_setting_with_default(
+                "home_assistant_address"
+            ),
             "home_assistant_token": get_setting_with_default("home_assistant_token"),
-            "is_home_assistant_addon": ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true")
+            "is_home_assistant_addon": (
+                "IS_HOME_ASSISTANT_ADDON" in environment
+                and environment("IS_HOME_ASSISTANT_ADDON") == "true"
+            ),
         }
-        return render(request, 'modals/initial_setup/home_assistant.html', data)
+        return render(request, "modals/initial_setup/home_assistant.html", data)
 
 
 @csrf_exempt
@@ -1356,24 +1913,48 @@ def initial_setup_openhab_settings(request):
             set_setting_value("openhab_token", request.POST["openhab_token"])
         send_mqttmanager_reload_command()
 
-        # Save settings succesfully, return the next view in the setup guide. Finished:
-        return render(request, 'modals/initial_setup/finished.html')
+        # Save settings succesfully, return the next view in the setup guide. Homey:
+        data = {
+            "homey_address": get_setting_with_default("homey_address"),
+            "homey_token": get_setting_with_default("homey_token"),
+        }
+        return render(request, "modals/initial_setup/homey.html", data)
     elif request.method == "GET":
         data = {
             "openhab_address": get_setting_with_default("openhab_address"),
             "openhab_token": get_setting_with_default("openhab_token"),
         }
-        return render(request, 'modals/initial_setup/openhab.html', data)
+        return render(request, "modals/initial_setup/openhab.html", data)
+
+
+@csrf_exempt
+def initial_setup_homey_settings(request):
+    if request.method == "POST":
+        if "homey_address" in request.POST:
+            set_setting_value("homey_address", request.POST["homey_address"])
+        if "homey_token" in request.POST:
+            set_setting_value("homey_token", request.POST["homey_token"])
+        send_mqttmanager_reload_command()
+
+        # Save settings succesfully, return the next view in the setup guide. Finished:
+        return render(request, "modals/initial_setup/finished.html")
+    elif request.method == "GET":
+        data = {
+            "homey_address": get_setting_with_default("homey_address"),
+            "homey_token": get_setting_with_default("homey_token"),
+        }
+        return render(request, "modals/initial_setup/homey.html", data)
 
 
 def initial_setup_finished(request):
-    return render(request, 'modals/initial_setup/finished.html')
+    return render(request, "modals/initial_setup/finished.html")
 
 
 def show_messages(request):
     data = get_base_data(request)
     data["messages"] = Message.objects.all()
-    return render(request, 'partial/show_messages.html', data)
+    return render(request, "partial/show_messages.html", data)
+
 
 def mark_message_read(request, message_id):
     try:
@@ -1382,7 +1963,4 @@ def mark_message_read(request, message_id):
         message.save()
         return show_messages(request)
     except Exception as e:
-        return JsonResponse({
-            "status": "error",
-            "text": str(e)
-        }, status=500)
+        return JsonResponse({"status": "error", "text": str(e)}, status=500)

@@ -4,7 +4,7 @@
 <dialog id="modal" class="modal configure-hvac-modal" hx-swap-oob="true">
     <div class="modal-box w-156 max-w-none">
         <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            <button class="absolute btn btn-sm btn-circle btn-ghost right-2 top-2">✕</button>
         </form>
 
         <form hx-post="{{ ingress_path }}{% url 'htmx_handle_entity_modal_result' %}" hx-indicator="#modal_loading" onsubmit="modal.close();">
@@ -17,7 +17,7 @@
                     Configure button
                 </h3>
                 <!-- Modal content -->
-                <div class="p-4 md:p-5 space-y-4">
+                <div class="p-4 space-y-4 md:p-5">
                     <!-- Common controls -->
                     <div class="">
                         <!-- Name -->
@@ -41,7 +41,7 @@
 
                     {% if entity_source == "home_assistant" %}
                         <div class="mt-4">
-                            {% component "item_select" name="backend_name" label="Home Assistant item" items=home_assistant_items selected=thermostat.entity_data.home_assistant_name %}{% endcomponent %}
+                            {% component "item_select" name="backend_name" label="Thermostat" items=home_assistant_items selected=thermostat.entity_data.home_assistant_name %}{% endcomponent %}
                         </div>
                         <div class="mt-2">
                             <button type="button" class="btn btn-primary btn-block" onclick="load_ha_thermostat_options()">
@@ -50,11 +50,17 @@
                         </div>
                     {% endif %}
 
+                    {% if entity_source == "homey" %}
+                        <div class="mt-4">
+                            {% component "item_select" name="homey_item" label="Device" items=homey_items selected=homey_item %}{% endcomponent %}
+                        </div>
+                    {% endif %}
+
                     {% if entity_source == "openhab" %}
-                    <div class="mt-4 border-1 border-primary rounded-box p-4">
+                    <div class="p-4 mt-4 border-1 border-primary rounded-box">
                         {% component "item_select" name="temperature_item" label="Temperature item" items=openhab_items selected=thermostat.entity_data.openhab_temperature_item %}{% endcomponent %}
                         <!-- Step size -->
-                        <div class="mb-4 w-full md:me-1">
+                        <div class="w-full mb-4 md:me-1">
                             <label for="step_size" class="block mb-1 text-sm font-medium">Step size</label>
                             <div class="flex flex-row-reverse">
                                 <input class="outline-none rounded-e-field bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
@@ -72,20 +78,20 @@
                         <div class="mb-2 input_field_option" id="option_name_1">
                             <div class="flex flex-row-reverse">
                                 <!--Delete button-->
-                                <button type="button" title="Delete" data-option_name="option_name_1" id="delete_button" onclick="delete_option_field(this);" class="inline-flex hover:bg-error hover:text-error-content cursor-pointer items-center px-3 text-sm border border-neutral rounded-e-md rounded-s-0 peer-focus/search_text:border-accent">
+                                <button type="button" title="Delete" data-option_name="option_name_1" id="delete_button" onclick="delete_option_field(this);" class="inline-flex items-center px-3 text-sm border cursor-pointer hover:bg-error hover:text-error-content border-neutral rounded-e-md rounded-s-0 peer-focus/search_text:border-accent">
                                     <span class="mdi mdi-delete"></span>
                                 </button>
                                 <!--Select icon dropdown-->
                                 <details class="dropdown dropdown-end" id="dropdown_icon_selector">
-                                    <summary id="icon_selector_button" class="btn border-t border-b border-neutral rounded-none bg-base-100 hover:bg-info hover:text-info-content font-nspm-mdi">+</summary>
+                                    <summary id="icon_selector_button" class="border-t border-b rounded-none btn border-neutral bg-base-100 hover:bg-info hover:text-info-content font-nspm-mdi">+</summary>
                                     <input type="hidden" value="" id="icon_selector_value">
-                                    <div class="dropdown-content bg-base-100 rounded-box rounded-tr-none w-56 border border-primary">
-                                        <div class="flex justify-center pb-1 mb-2 mt-1 border-b border-primary">
+                                    <div class="w-56 border rounded-tr-none dropdown-content bg-base-100 rounded-box border-primary">
+                                        <div class="flex justify-center pb-1 mt-1 mb-2 border-b border-primary">
                                             <span class="text-sm">Select Icon</span>
                                         </div>
-                                        <div class="grid grid-cols-4 w-full">
+                                        <div class="grid w-full grid-cols-4">
                                         {% for icon in icons %}
-                                            <button type="button" title="{{ icon.name }}" class="btn btn-ghost rounded-none hover:btn-info icon-select-button" data-icon_value="{{ icon.icon }}" onclick="select_icon(this);">
+                                            <button type="button" title="{{ icon.name }}" class="rounded-none btn btn-ghost hover:btn-info icon-select-button" data-icon_value="{{ icon.icon }}" onclick="select_icon(this);">
                                                 <span class="font-nspm-mdi">{{ icon.icon }}</span>
                                             </button>
                                         {% endfor %}
@@ -111,61 +117,61 @@
                         </div>
                     </template>
 
-                    <div class="mt-4 border-1 border-primary rounded-box p-4">
+                    <div class="p-4 mt-4 border-1 border-primary rounded-box">
                         {% if entity_source == "openhab" %}
                             {% component "item_select" name="fan_mode_item" label="Fan mode item" items=openhab_items selected=thermostat.entity_data.openhab_fan_mode_item %}{% endcomponent %}
                         {% endif %}
                         <div id="fan_mode_options" class="{% if entity_source == "openhab" %}mt-4{% endif %}">
                             <div class="flex items-center justify-between w-full mb-1">
-                                <span class="input_field_label block mb-2 text-sm font-medium">Fan modes</span>
+                                <span class="block mb-2 text-sm font-medium input_field_label">Fan modes</span>
                                 <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add fan mode" onclick="add_option_field('fan_mode_options', 'fan_mode_option');">+</button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-4 border-1 border-primary rounded-box p-4">
+                    <div class="p-4 mt-4 border-1 border-primary rounded-box">
                         {% if entity_source == "openhab" %}
                             {% component "item_select" name="hvac_mode_item" label="Mode item" items=openhab_items selected=thermostat.entity_data.openhab_hvac_mode_item %}{% endcomponent %}
                         {% endif %}
                         <div id="hvac_mode_options" class="{% if entity_source == "openhab" %}mt-4{% endif %}">
                             <div class="flex items-center justify-between w-full mb-1">
-                                <span class="input_field_label block mb-2 text-sm font-medium">Modes</span>
+                                <span class="block mb-2 text-sm font-medium input_field_label">Modes</span>
                                 <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add mode" onclick="add_option_field('hvac_mode_options', 'hvac_mode_option');">+</button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-4 border-1 border-primary rounded-box p-4">
+                    <div class="p-4 mt-4 border-1 border-primary rounded-box">
                         {% if entity_source == "openhab" %}
                             {% component "item_select" name="preset_item" label="Preset item" items=openhab_items selected=thermostat.entity_data.openhab_preset_item %}{% endcomponent %}
                         {% endif %}
                         <div id="preset_options" class="{% if entity_source == "openhab" %}mt-4{% endif %}">
                             <div class="flex items-center justify-between w-full mb-1">
-                                <span class="input_field_label block mb-2 text-sm font-medium">Presets</span>
+                                <span class="block mb-2 text-sm font-medium input_field_label">Presets</span>
                                 <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add preset" onclick="add_option_field('preset_options', 'preset_option');">+</button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-4 border-1 border-primary rounded-box p-4">
+                    <div class="p-4 mt-4 border-1 border-primary rounded-box">
                         {% if entity_source == "openhab" %}
                             {% component "item_select" name="swing_item" label="Swing item" items=openhab_items selected=thermostat.entity_data.openhab_swing_item %}{% endcomponent %}
                         {% endif %}
                         <div id="swing_options" class="{% if entity_source == "openhab" %}mt-4{% endif %}">
                             <div class="flex items-center justify-between w-full mb-1">
-                                <span class="input_field_label block mb-2 text-sm font-medium">Swing options</span>
+                                <span class="block mb-2 text-sm font-medium input_field_label">Swing options</span>
                                 <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add swing option" onclick="add_option_field('swing_options', 'swing_option');">+</button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-4 border-1 border-primary rounded-box p-4">
+                    <div class="p-4 mt-4 border-1 border-primary rounded-box">
                         {% if entity_source == "openhab" %}
                             {% component "item_select" name="swingh_item" label="Horizontal swing item" items=openhab_items selected=thermostat.entity_data.openhab_swingh_item %}{% endcomponent %}
                         {% endif %}
                         <div id="swingh_options" class="{% if entity_source == "openhab" %}mt-4{% endif %}">
                             <div class="flex items-center justify-between w-full mb-1">
-                                <span class="input_field_label block mb-2 text-sm font-medium">Horizontal swing options</span>
+                                <span class="block mb-2 text-sm font-medium input_field_label">Horizontal swing options</span>
                                 <button type="button" class="btn btn-xs btn-circle btn-success me-2.5" title="Add horizontal swing option" onclick="add_option_field('swingh_options', 'swingh_option');">+</button>
                             </div>
                         </div>
@@ -173,7 +179,7 @@
 
                 </div>
                 <!-- Modal footer -->
-                <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <div class="flex items-center justify-end p-4 border-t border-gray-200 rounded-b md:p-5 dark:border-gray-600">
                     <button type="submit" class="btn btn-info">Save</button>
                 </div>
             </div>

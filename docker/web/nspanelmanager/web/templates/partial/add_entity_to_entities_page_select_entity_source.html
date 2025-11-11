@@ -1,52 +1,98 @@
 <dialog id="modal" class="modal" hx-swap-oob="true">
-    <div class="modal-box">
-        <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-        </form>
-
-        <div class="flex justify-center mb-4 duration-500 transition-transform ease-linear">
-            <ul class="steps">
-                <li class="step step-primary">Select type</li>
-                <li class="step step-primary">Select source</li>
-                <li class="step">Configure entity</li>
-            </ul>
-        </div>
-
-        <div class="flex justify-center">
-            <div class="join">
-                {% if not is_home_assistant_configured and not is_openhab_configured %}
-                    <span class="text-error font-bold">Neither Home Assistant or OpenHAB configured!</span>
-                {% endif %}
-                {% if is_home_assistant_configured %}
-                    {% if action in home_assistant_supported_entity_types %}
-                        <button class="join-item btn btn-lg btn-info" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_config" entity_source="home_assistant" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">Home Assistant</button>
-                    {% endif %}
-                {% endif %}
-                {% if is_openhab_configured %}
-                    {% if action in openhab_supported_entity_types %}
-                        <button class="join-item btn btn-lg btn-warning" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_config" entity_source="openhab" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">OpenHAB</button>
-                    {% endif %}
-                {% endif %}
-                {% if action == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE" %}
-                    <button class="join-item btn btn-lg btn-secondary text-secondary-content" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_config" entity_source="nspm_scene" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">NSPM Scene</button>
-                {% endif %}
-                {% if action in manual_supported_entity_types %}
-                    <button class="join-item btn btn-lg btn-secondary text-secondary-content" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_config" entity_source="nspm" %}' hx-swap="none" hx-indicator="#modal_loading" onclick="modal.close();">NSPM</button>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Backdrop that closes dialog/modal on click -->
-    <form method="dialog" class="modal-backdrop">
-        <button>close</button>
+  <div class="modal-box">
+    <form method="dialog">
+      <button class="absolute btn btn-sm btn-circle btn-ghost right-2 top-2">
+        ✕
+      </button>
     </form>
 
-    <script>
+    <div
+      class="flex justify-center mb-4 transition-transform duration-500 ease-linear"
+    >
+      <ul class="steps">
+        <li class="step step-primary">Select type</li>
+        <li class="step step-primary">Select source</li>
+        <li class="step">Configure entity</li>
+      </ul>
+    </div>
+
+    <div class="flex justify-center">
+      <div class="join">
+        {% if not is_home_assistant_configured and not is_openhab_configured and
+        not is_homey_configured %}
+        <span class="font-bold text-error"
+          >No smart home system configured! Please configure Home Assistant,
+          OpenHAB, or Homey in Settings.</span
+        >
+        {% endif %} {% if is_home_assistant_configured %} {% if action in
+        home_assistant_supported_entity_types %}
+        <button
+          class="join-item btn btn-lg btn-info"
+          hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_config" entity_source="home_assistant" %}'
+          hx-swap="none"
+          hx-indicator="#modal_loading"
+          onclick="modal.close();"
+        >
+          Home Assistant
+        </button>
+        {% endif %} {% endif %} {% if is_openhab_configured %} {% if action in
+        openhab_supported_entity_types %}
+        <button
+          class="join-item btn btn-lg btn-warning"
+          hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_config" entity_source="openhab" %}'
+          hx-swap="none"
+          hx-indicator="#modal_loading"
+          onclick="modal.close();"
+        >
+          OpenHAB
+        </button>
+        {% endif %} {% endif %} {% if is_homey_configured %} {% if action in
+        homey_supported_entity_types %}
+        <button
+          class="join-item btn btn-lg btn-success"
+          hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_config" entity_source="homey" %}'
+          hx-swap="none"
+          hx-indicator="#modal_loading"
+          onclick="modal.close();"
+        >
+          Homey
+        </button>
+        {% endif %} {% endif %} {% if action ==
+        "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE" %}
+        <button
+          class="join-item btn btn-lg btn-secondary text-secondary-content"
+          hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_config" entity_source="nspm_scene" %}'
+          hx-swap="none"
+          hx-indicator="#modal_loading"
+          onclick="modal.close();"
+        >
+          NSPM Scene
+        </button>
+        {% endif %} {% if action in manual_supported_entity_types %}
+        <button
+          class="join-item btn btn-lg btn-secondary text-secondary-content"
+          hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_config" entity_source="nspm" %}'
+          hx-swap="none"
+          hx-indicator="#modal_loading"
+          onclick="modal.close();"
+        >
+          NSPM
+        </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Backdrop that closes dialog/modal on click -->
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+
+  <script>
     htmx.on("htmx:afterSwap", (e) => {
-      if(e.detail.elt.id == "modal") {
+      if (e.detail.elt.id == "modal") {
         modal.showModal();
       }
     });
-    </script>
+  </script>
 </dialog>
