@@ -45,9 +45,17 @@ void ButtonEntity::reload_config() {
     std::string controller = entity_data["controller"];
     if (controller.compare("home_assistant") == 0) {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
-    } else if (controller.compare("nspm") == 0) {
+    }
+    else if (controller.compare("homey") == 0)
+    {
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOMEY;
+    }
+    else if (controller.compare("nspm") == 0)
+    {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::NSPM;
-    } else {
+    }
+    else
+    {
       SPDLOG_ERROR("Got unknown controller ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(controller), this->_id, this->_name);
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
     }

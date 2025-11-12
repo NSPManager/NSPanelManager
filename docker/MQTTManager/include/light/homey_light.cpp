@@ -2,6 +2,8 @@
 #include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "light/light.hpp"
+#include "web_helper/WebHelper.hpp"
+#include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include <boost/bind.hpp>
 #include <boost/exception/diagnostic_information.hpp>
@@ -85,8 +87,8 @@ void HomeyLight::_send_capability_update(const std::string &capability, nlohmann
     SPDLOG_DEBUG("Homey light {}::{} sending capability {} = {}", this->_id, this->_name, capability, value.dump());
 
     // Get Homey connection settings
-    auto homey_address = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::HOMEY_ADDRESS, "");
-    auto homey_token = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::HOMEY_TOKEN, "");
+    auto homey_address = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::HOMEY_ADDRESS);
+    auto homey_token = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::HOMEY_TOKEN);
 
     if (homey_address.empty() || homey_token.empty())
     {
@@ -102,14 +104,25 @@ void HomeyLight::_send_capability_update(const std::string &capability, nlohmann
     request_body["value"] = value;
 
     // Send HTTP PUT request with bearer token authentication
+    // Note: WebHelper only supports GET and POST, so we use POST for capability updates
     try
     {
-        std::vector<std::string> headers = {
-            fmt::format("Authorization: Bearer {}", homey_token),
-            "Content-Type: application/json"};
+        std::list<const char *> headers = {
+            fmt::format("Authorization: Bearer {}", homey_token,
+                        "Content-Type: application/json")
+                .c_str()};
 
-        std::string response = WebHelper::send_authorized_request(url, request_body.dump(), headers, WebHelper::HTTP_METHOD::PUT);
-        SPDLOG_DEBUG("Homey light {}::{} capability {} update response: {}", this->_id, this->_name, capability, response);
+        std::string response_data;
+        std::string post_data = request_body.dump();
+
+        if (WebHelper::perform_post_request(&url, &response_data, &headers, &post_data))
+        {
+            SPDLOG_DEBUG("Homey light {}::{} capability {} update response: {}", this->_id, this->_name, capability, response_data);
+        }
+        else
+        {
+            SPDLOG_ERROR("Failed to send capability update to Homey for light {}::{}", this->_id, this->_name);
+        }
     }
     catch (const std::exception &e)
     {

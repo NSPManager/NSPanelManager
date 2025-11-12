@@ -23,7 +23,8 @@ enum LightTurnOnBehaviour {
   RESTORE_PREVIOUS,
 };
 
-enum MQTT_MANAGER_SETTING {
+enum MQTT_MANAGER_SETTING
+{
   BUTTON_LONG_PRESS_TIME,
   CLOCK_US_STYLE,
   COLOR_TEMP_MAX,
@@ -33,6 +34,8 @@ enum MQTT_MANAGER_SETTING {
   IS_HOME_ASSISTANT_ADDON,
   HOME_ASSISTANT_ADDRESS,
   HOME_ASSISTANT_TOKEN,
+  HOMEY_ADDRESS,
+  HOMEY_TOKEN,
   LOCATION_LATITUDE,
   LOCATION_LONGITUDE,
   MANAGER_ADDRESS,
@@ -189,6 +192,8 @@ private:
       {MQTT_MANAGER_SETTING::DATE_FORMAT, {"date_format", "%a %d/%m %Y"}},
       {MQTT_MANAGER_SETTING::HOME_ASSISTANT_ADDRESS, {"home_assistant_address", ""}},
       {MQTT_MANAGER_SETTING::HOME_ASSISTANT_TOKEN, {"home_assistant_token", ""}},
+      {MQTT_MANAGER_SETTING::HOMEY_ADDRESS, {"homey_address", ""}},
+      {MQTT_MANAGER_SETTING::HOMEY_TOKEN, {"homey_token", ""}},
       {MQTT_MANAGER_SETTING::LOCATION_LATITUDE, {"location_latitude", ""}},
       {MQTT_MANAGER_SETTING::LOCATION_LONGITUDE, {"location_longitude", ""}},
       {MQTT_MANAGER_SETTING::MANAGER_ADDRESS, {"manager_address", ""}},

@@ -4,7 +4,8 @@
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_nspanel.pb.h"
 #include "thermostat/thermostat.hpp"
-#include "web_helper/web_helper.hpp"
+#include "web_helper/WebHelper.hpp"
+#include <homey_manager/homey_manager.hpp>
 #include <cstdint>
 #include <fmt/core.h>
 #include <nlohmann/json.hpp>
@@ -67,14 +68,24 @@ void HomeyThermostat::_send_capability_update(const std::string &capability, con
     request_body["value"] = value;
 
     std::string url = fmt::format("http://{}/api/device/{}/capability/{}", homey_address, this->_homey_device_id, capability);
-    std::vector<std::string> headers = {
-        fmt::format("Authorization: Bearer {}", homey_token),
-        "Content-Type: application/json"};
+    std::list<const char *> headers = {
+        fmt::format("Authorization: Bearer {}", homey_token,
+                    "Content-Type: application/json")
+            .c_str()};
+
+    std::string response_data;
+    std::string post_data = request_body.dump();
 
     try
     {
-        std::string response = WebHelper::send_authorized_request(url, request_body.dump(), headers, WebHelper::HTTP_METHOD::PUT);
-        SPDLOG_DEBUG("Thermostat {}::{} sent {} update to Homey: {}", this->_id, this->_name, capability, value.dump());
+        if (WebHelper::perform_post_request(&url, &response_data, &headers, &post_data))
+        {
+            SPDLOG_DEBUG("Thermostat {}::{} sent {} update to Homey: {}", this->_id, this->_name, capability, value.dump());
+        }
+        else
+        {
+            SPDLOG_ERROR("Failed to send {} update to Homey for thermostat {}::{}", capability, this->_id, this->_name);
+        }
     }
     catch (const std::exception &e)
     {
@@ -97,33 +108,10 @@ void HomeyThermostat::send_state_update_to_controller()
 
 void HomeyThermostat::command_callback(NSPanelMQTTManagerCommand &command)
 {
-    // Handle commands from NSPanel via MQTT
-    if (!command.has_thermostat_command())
-    {
-        SPDLOG_WARN("Thermostat {}::{} received command without thermostat_command", this->_id, this->_name);
-        return;
-    }
+    // This method is handled by the base class ThermostatEntity::command_callback
+    // which processes thermostat commands and calls our overridden methods like
+    // set_temperature(), set_mode(), etc. which in turn call send_state_update_to_controller()
 
-    const NSPanelMQTTManagerCommand_ThermostatCommand &thermostat_cmd = command.thermostat_command();
-
-    // Handle temperature change
-    if (thermostat_cmd.has_temperature())
-    {
-        float new_temperature = thermostat_cmd.temperature();
-        SPDLOG_DEBUG("Thermostat {}::{} received temperature command: {}", this->_id, this->_name, new_temperature);
-        this->set_temperature(new_temperature);
-        this->send_state_update_to_controller();
-    }
-
-    // Handle mode changes if provided
-    if (thermostat_cmd.has_mode())
-    {
-        std::string new_mode = thermostat_cmd.mode();
-        SPDLOG_DEBUG("Thermostat {}::{} received mode command: {}", this->_id, this->_name, new_mode);
-        this->set_mode(new_mode);
-        this->send_state_update_to_controller();
-    }
-
-    // Send updated state to NSPanel
-    this->send_state_update_to_nspanel();
+    // The base class handles the command parsing, so we don't need to implement it here
+    ThermostatEntity::command_callback(command);
 }

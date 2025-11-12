@@ -1,7 +1,7 @@
 #ifndef MQTT_MANAGER_HOMEY_BUTTON
 #define MQTT_MANAGER_HOMEY_BUTTON
 
-#include "button_entity.hpp"
+#include "button.hpp"
 #include <string>
 
 class HomeyButton : public ButtonEntity

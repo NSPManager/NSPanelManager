@@ -88,7 +88,13 @@ void Light::reload_config() {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
     } else if (controller.compare("openhab") == 0) {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
-    } else {
+    }
+    else if (controller.compare("homey") == 0)
+    {
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOMEY;
+    }
+    else
+    {
       SPDLOG_ERROR("Got unknown type ({}) for light {}::{}. Will default to HOME_ASSISTANT.", controller, this->_id, this->_name);
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
     }

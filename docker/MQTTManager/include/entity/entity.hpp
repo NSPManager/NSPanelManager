@@ -13,11 +13,13 @@ enum MQTT_MANAGER_ENTITY_TYPE {
   SCENE,
 };
 
-enum MQTT_MANAGER_ENTITY_CONTROLLER {
+enum MQTT_MANAGER_ENTITY_CONTROLLER
+{
   NONE,           // None is only used to indicate that an entity is not set.
   NSPM,           // We control the entity using the NSPanel Manager.
   HOME_ASSISTANT, // Home assistant is the owner of this entity.
-  OPENHAB         // OpenHAB is the owner of this entity.
+  OPENHAB,        // OpenHAB is the owner of this entity.
+  HOMEY,          // Homey is the owner of this entity.
 };
 
 class MqttManagerEntity {

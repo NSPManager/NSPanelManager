@@ -1,7 +1,7 @@
 #ifndef MQTT_MANAGER_HOMEY_SWITCH
 #define MQTT_MANAGER_HOMEY_SWITCH
 
-#include "switch_entity.hpp"
+#include "switch.hpp"
 #include <string>
 
 class HomeySwitch : public SwitchEntity
