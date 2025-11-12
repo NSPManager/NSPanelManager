@@ -22,12 +22,12 @@
                 <div class="">
                     {% if entity_source == "home_assistant" %}
                         <div class="">
-                            {% component "item_select" name="home_assistant_item" label="Home Assistant Entity" items=home_assistant_items selected=home_assistant_item %}{% endcomponent %}
+                          {% component "item_select" name="home_assistant_item" label="Home Assistant Entity" items=home_assistant_items selected=home_assistant_item %}{% endcomponent %}
                         </div>
-                    {% endif %}
-
-                    {% if entity_source == "homey" %}
+                        {% endif %}
+                        {% if entity_source == "homey" %}
                         <div class="">
+                          <input type="hidden" name="backend_name" id="homey_backend_name" value="homey" />
                             {% component "item_select" name="homey_item" label="Homey Device" items=homey_items selected=homey_item %}{% endcomponent %}
                         </div>
                         <!-- Store capabilities data for JavaScript -->
@@ -196,6 +196,8 @@
           if (deviceNamesDataEl.length) {
             const deviceNamesData = JSON.parse(deviceNamesDataEl.text());
             const deviceName = deviceNamesData[selectedValue];
+
+            $('#homey_backend_name').val(selectedValue);
             if (deviceName) {
               $('#add_new_light_name').val(deviceName);
             }

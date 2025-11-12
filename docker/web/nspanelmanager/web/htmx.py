@@ -1786,6 +1786,8 @@ def create_or_update_scene_entity(request):
             new_scene.backend_name = request.POST["backend_name"]
         elif new_scene.scene_type == "openhab":
             new_scene.backend_name = request.POST["backend_name"]
+        elif new_scene.scene_type == "homey":
+            new_scene.backend_name = request.POST["backend_name"]
 
     new_scene.friendly_name = request.POST["scene_name"]
     new_scene.save()

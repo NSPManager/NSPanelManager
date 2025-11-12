@@ -34,6 +34,7 @@
 
                     {% if entity_source == "homey" %}
                         <div class="">
+                            <input type="hidden" name="backend_name" id="homey_backend_name" value="homey" />
                             {% component "item_select" name="homey_item" label="Homey Flow" items=homey_items selected=homey_item %}{% endcomponent %}
                         </div>
                         <!-- Store flow names for auto-population -->
@@ -86,11 +87,18 @@
       
       if (flowNamesDataEl.length && selectedValue) {
         try {
-          const flowNamesData = JSON.parse(flowNamesDataEl.text());
-          const flowName = flowNamesData[selectedValue];
-          if (flowName) {
-            $('#scene_name').val(flowName);
-          }
+            const flowNamesData = JSON.parse(flowNamesDataEl.text());
+            const flowName = flowNamesData[selectedValue];
+
+            if (flowName.startsWith("[F]")) {
+                $('#homey_backend_name').val("homey_flow_" + selectedValue);
+            }
+            if(flowName.startsWith("[M]")) {
+                $('#homey_backend_name').val("homey_mood_" + selectedValue);
+            }
+            if (flowName) {
+                $('#scene_name').val(flowName);
+            }
         } catch (e) {
           console.error('Error parsing Homey flow names data:', e);
         }

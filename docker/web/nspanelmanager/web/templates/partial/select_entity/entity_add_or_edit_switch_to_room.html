@@ -39,19 +39,23 @@
         <h3 class="text-xl font-semibold">Configure switch</h3>
         <!-- Modal content -->
         <div class="p-4 space-y-4 md:p-5">
-          {% if entity_source == "homey" %}
-          <script id="homey_device_names" type="application/json">
-            {{ homey_device_names|safe }}
-          </script>
-          {% endif %}
 
           <!-- Common controls -->
           <div class="">
             {% if entity_source == "homey" %}
             <div class="mt-4">
+              <input type="hidden" name="backend_name" id="homey_backend_name" value="homey" />
               {% component "item_select" name="homey_item" label="Device"
               items=homey_items selected=homey_item %}{% endcomponent %}
             </div>
+            <!-- Store device names for auto-population -->
+            <script id="homey-device-names-data" type="application/json">
+            {
+                {% for item in homey_items %}
+                "{{ item.item_id }}": "{{ item.label }}"{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            }
+            </script>
             {% endif %}
 
             <!-- Name -->
@@ -116,27 +120,27 @@
   <script>
     // Auto-populate name field when Homey device is selected
     function populateNameFromHomeyDevice() {
-      // Wait a bit to ensure DOM is updated
-      setTimeout(() => {
-        const selectedElement = document.querySelector(
-          ".item_select_homey_item_option_selected"
-        );
-        if (selectedElement) {
-          const deviceNamesData = document.getElementById("homey_device_names");
-          if (deviceNamesData) {
-            try {
-              const deviceNames = JSON.parse(deviceNamesData.textContent);
-              const deviceId = selectedElement.getAttribute("value");
-              const deviceName = deviceNames[deviceId];
-              if (deviceName) {
-                document.getElementById("light_name").value = deviceName;
-              }
-            } catch (e) {
-              console.error("Error parsing device names:", e);
+
+      const selectedValue = $('#item_select_homey_item_input').val();
+      const deviceNamesDataEl = $('#homey-device-names-data');
+
+      if (selectedValue) {
+        try {
+          // Auto-populate device name
+          if (deviceNamesDataEl.length) {
+            const deviceNamesData = JSON.parse(deviceNamesDataEl.text());
+            const deviceName = deviceNamesData[selectedValue];
+
+            $('#homey_backend_name').val(selectedValue);
+            if (deviceName) {
+              $('#light_name').val(deviceName);
             }
           }
+
+        } catch (e) {
+          console.error('Error parsing device names:', e);
         }
-      }, 50);
+      }
     }
 
     // Open dialog using Javascript as to make it possible to close again
@@ -144,23 +148,21 @@
       if (e.detail.elt.id == "modal") {
         modal.showModal();
 
-        // Add event listeners for Homey device selection if present
-        const homeyInput = document.getElementById(
-          "item_select_homey_item_input"
-        );
-        if (homeyInput) {
-          // Listen for input changes
-          homeyInput.addEventListener("input", populateNameFromHomeyDevice);
+        // Listen for Homey device selection changes
+        // The item_select component creates an input with id: item_select_{{ name }}_input
+        $("#item_select_homey_item_input").on('input', populateNameFromHomeyDevice);
 
-          // Listen for clicks on dropdown options using event delegation
-          document.addEventListener("click", function (event) {
-            if (
-              event.target.classList.contains("item_select_homey_item_option")
-            ) {
-              populateNameFromHomeyDevice();
-            }
-          });
-        }
+        // Also listen for clicks on the dropdown options
+        $(document).on('click', '.item_select_homey_item_option', function() {
+          // Get the device name from the clicked element's label attribute
+          const deviceLabel = $(this).data('label');
+          if (deviceLabel) {
+            // Extract just the device name (before the device ID in parentheses)
+            const deviceName = deviceLabel.split(' (')[0];
+            $('#light_name').val(deviceName);
+          }
+          setTimeout(populateNameFromHomeyDevice, 100); // Small delay to ensure value is set
+        });
       }
     });
   </script>
