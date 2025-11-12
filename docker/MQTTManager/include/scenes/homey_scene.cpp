@@ -39,10 +39,13 @@ void HomeyScene::reload_config()
             this->_room_id = *scene_config.room_id;
         }
 
-        // Validate backend_name is not empty
+        // Validate backend_name is not empty - skip scenes that aren't properly configured as Homey scenes
         if (backend_name.empty())
         {
-            SPDLOG_ERROR("Empty backend_name for Homey scene {}::{}. Expected 'homey_flow_<id>' or 'homey_mood_<id>'", this->_id, this->_name);
+            SPDLOG_WARN("Scene {}::{} is marked as 'homey' type but has empty backend_name. This scene may be incorrectly classified. Skipping Homey initialization.", this->_id, this->_name);
+            // Set defaults to prevent crashes
+            this->_homey_scene_type = HOMEY_SCENE_TYPE::HOMEY_FLOW;
+            this->_homey_id = "";
             return;
         }
 
@@ -90,6 +93,13 @@ void HomeyScene::reload_config()
 
 void HomeyScene::activate()
 {
+    // Don't try to activate scenes that weren't properly configured as Homey scenes
+    if (this->_homey_id.empty())
+    {
+        SPDLOG_WARN("Cannot activate scene {}::{} - it was not properly configured as a Homey scene", this->_id, this->_name);
+        return;
+    }
+
     SPDLOG_DEBUG("Activating Homey scene {}::{}, type: {}, ID: {}",
                  this->_id,
                  this->_name,
