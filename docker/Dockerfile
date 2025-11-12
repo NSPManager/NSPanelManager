@@ -9,16 +9,28 @@ SHELL ["/bin/bash", "-c"]
 RUN echo "Running on $BUILDPLATFORM, building for $TARGETPLATFORM"
 COPY MQTTManager/ /MQTTManager/
 
+# Create config.site to skip problematic configure tests
+RUN echo 'ac_cv_func_getcwd_path_max=yes' > /etc/config.site
+ENV CONFIG_SITE=/etc/config.site
+
 # Only build MQTTManager during Docker build if is is not a devel mode.
-RUN if [ "$IS_DEVEL" != "yes" ]; then apt-get update \
-    && apt-get -y install cmake build-essential curl \
-    && pip install -U conan; fi
+RUN if [ "$IS_DEVEL" != "yes" ]; then \ 
+    apt-get update \
+    && apt-get -y install cmake build-essential curl m4 \
+    && pip install -U conan; \
+    fi
 
-RUN if [ "$IS_DEVEL" != "yes" ]; then conan profile detect --force && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf \
+RUN if [ "$IS_DEVEL" != "yes" ]; then \ 
+    conan profile detect --force && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf \
     && sed -i "s|cppstd=gnu14|cppstd=gnu23|g" /root/.conan2/profiles/default \
-    && sed -i "s|build_type=Release|build_type=Debug|g" /root/.conan2/profiles/default; fi
+    && sed -i "s|build_type=Release|build_type=Debug|g" /root/.conan2/profiles/default; \
+    fi
 
-RUN if [ -z "$no_mqttmanager_build" ]; then /bin/bash /MQTTManager/compile_mqttmanager.sh --target-platform "$TARGETPLATFORM" --strip; else echo "Not building MQTTManager."; fi
+RUN if [ -z "$no_mqttmanager_build" ]; then \
+    /bin/bash /MQTTManager/compile_mqttmanager.sh --target-platform "$TARGETPLATFORM" --strip; \
+    else \
+    echo "Not building MQTTManager."; \
+    fi
 
 FROM python:3.12.5-bookworm
 ARG no_mqttmanager_build
@@ -36,7 +48,7 @@ COPY --from=build /MQTTManager/build /MQTTManager/build
 RUN apt-get update && apt-get -y upgrade
 
 # Install software needed to build the manager
-RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get install -y --no-install-recommends cmake build-essential gdb curl npm postgresql-client curl inotify-tools net-tools build-essential protobuf-c-compiler \
+RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get install -y --no-install-recommends cmake build-essential gdb curl npm postgresql-client curl inotify-tools net-tools build-essential protobuf-c-compiler m4 \
     && pip install conan conan-check-updates && conan profile detect --force \
     && echo 'core.cache:storage_path=/MQTTManager/conan_cache/' > ~/.conan2/global.conf \
     && sed -i "s|cppstd=gnu17|cppstd=gnu23|g" /root/.conan2/profiles/default \
