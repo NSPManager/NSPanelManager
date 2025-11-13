@@ -108,6 +108,38 @@ bool HomeyLight::_has_capability(const std::string &capability)
     return std::find(this->_capabilities.begin(), this->_capabilities.end(), capability) != this->_capabilities.end();
 }
 
+float HomeyLight::_kelvin_to_homey_temperature(uint32_t kelvin)
+{
+    // Define typical color temperature range for lights
+    const uint32_t MIN_KELVIN = 2700; // Warm white (yellowish) - maps to 1.0 in Homey
+    const uint32_t MAX_KELVIN = 6500; // Cool white (daylight) - maps to 0.0 in Homey
+
+    // Clamp kelvin value to our range
+    uint32_t clamped_kelvin = std::max(MIN_KELVIN, std::min(MAX_KELVIN, kelvin));
+
+    // Convert to 0.0-1.0 scale (inverted: higher Kelvin = lower value)
+    // 1.0 = MIN_KELVIN (warm/yellowish), 0.0 = MAX_KELVIN (cool/daylight)
+    float normalized = 1.0f - (float)(clamped_kelvin - MIN_KELVIN) / (float)(MAX_KELVIN - MIN_KELVIN);
+
+    return normalized;
+}
+
+uint32_t HomeyLight::_homey_temperature_to_kelvin(float homey_value)
+{
+    // Define typical color temperature range for lights
+    const uint32_t MIN_KELVIN = 2700; // Warm white (yellowish) - maps to 1.0 in Homey
+    const uint32_t MAX_KELVIN = 6500; // Cool white (daylight) - maps to 0.0 in Homey
+
+    // Clamp homey_value to 0.0-1.0 range
+    float clamped_value = std::max(0.0f, std::min(1.0f, homey_value));
+
+    // Convert from 0.0-1.0 scale to Kelvin (inverted: higher value = lower Kelvin)
+    // 1.0 = MIN_KELVIN (warm), 0.0 = MAX_KELVIN (cool)
+    uint32_t kelvin = MIN_KELVIN + (uint32_t)((1.0f - clamped_value) * (MAX_KELVIN - MIN_KELVIN));
+
+    return kelvin;
+}
+
 void HomeyLight::_send_capability_update(const std::string &capability, nlohmann::json value)
 {
     SPDLOG_DEBUG("Homey light {}::{} sending capability {} = {}", this->_id, this->_name, capability, value.dump());
@@ -192,7 +224,9 @@ void HomeyLight::send_state_update_to_controller()
         {
             if (this->_has_capability("light_temperature") && this->_requested_color_temperature != this->_current_color_temperature)
             {
-                this->_send_capability_update("light_temperature", this->_requested_color_temperature);
+                // Convert Kelvin to Homey's 0.0-1.0 scale (inverted)
+                float homey_temperature = this->_kelvin_to_homey_temperature(this->_requested_color_temperature);
+                this->_send_capability_update("light_temperature", homey_temperature);
 
                 if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE))
                 {
@@ -308,7 +342,9 @@ void HomeyLight::homey_event_callback(nlohmann::json data)
         {
             if (capabilities["light_temperature"].contains("value") && !capabilities["light_temperature"]["value"].is_null())
             {
-                uint32_t new_temp = capabilities["light_temperature"]["value"];
+                // Homey sends normalized value (0.0-1.0), convert to Kelvin
+                float homey_temp_value = capabilities["light_temperature"]["value"];
+                uint32_t new_temp = this->_homey_temperature_to_kelvin(homey_temp_value);
 
                 if (new_temp != this->_current_color_temperature)
                 {

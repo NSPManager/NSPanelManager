@@ -20,6 +20,10 @@ private:
     // Helper methods for capability control
     void _send_capability_update(const std::string &capability, nlohmann::json value);
     bool _has_capability(const std::string &capability);
+    
+    // Color temperature conversion methods
+    float _kelvin_to_homey_temperature(uint32_t kelvin);
+    uint32_t _homey_temperature_to_kelvin(float homey_value);
 };
 
 #endif // !MQTT_MANAGER_HOMEY_LIGHT

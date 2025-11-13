@@ -56,7 +56,7 @@ HomeyButton::~HomeyButton()
 
 void HomeyButton::send_state_update_to_controller()
 {
-    SPDLOG_DEBUG("Homey button {}::{} send_state_update_to_controller (trigger button press)", this->_id, this->_name);
+    SPDLOG_DEBUG("Homey button {}::{} send_state_update_to_controller (trigger button press). State: {}", this->_id, this->_name, this->_requested_state);
 
     // Get Homey connection settings
     auto homey_address = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::HOMEY_ADDRESS);
@@ -73,7 +73,7 @@ void HomeyButton::send_state_update_to_controller()
 
     // Create request body - button trigger uses null value
     nlohmann::json request_body;
-    request_body["value"] = nullptr;
+    request_body["value"] = this->_requested_state;
 
     // Send HTTP PUT request with bearer token authentication
     try
