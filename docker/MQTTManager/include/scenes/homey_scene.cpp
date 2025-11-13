@@ -136,10 +136,11 @@ void HomeyScene::activate()
     // Send HTTP POST request with bearer token authentication
     try
     {
+        // Create header strings with proper lifetime management
+        std::string auth_header = fmt::format("Authorization: Bearer {}", homey_token);
         std::list<const char *> headers = {
-            fmt::format("Authorization: Bearer {}", homey_token,
-                        "Content-Type: application/json")
-                .c_str()};
+            auth_header.c_str(),
+            "Content-Type: application/json"};
 
         std::string response_data;
         std::string post_data = request_body.dump();
