@@ -129,7 +129,7 @@ void HomeyScene::activate()
     else
     {
         // For Moods: Similar trigger endpoint
-        url = fmt::format("http://{}/api/manager/mood/mood/{}/activate", homey_address, this->_homey_id);
+        url = fmt::format("http://{}/api/manager/moods/mood/{}/activate", homey_address, this->_homey_id);
         request_body = nlohmann::json::object();
     }
 
