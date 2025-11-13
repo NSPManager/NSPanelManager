@@ -58,15 +58,41 @@ HomeyLight::HomeyLight(uint32_t light_id) : Light(light_id)
         return;
     }
 
-    if (entity_data.contains("capabilities") && entity_data["capabilities"].is_array())
+    // Map database boolean fields to Homey capabilities
+    // Always include onoff capability for lights
+    this->_capabilities.push_back("onoff");
+
+    // Map can_dim to dim capability
+    if (entity_data.contains("can_dim") && entity_data["can_dim"].is_boolean() && entity_data["can_dim"])
     {
-        for (const auto &cap : entity_data["capabilities"])
-        {
-            this->_capabilities.push_back(cap);
-        }
+        this->_capabilities.push_back("dim");
+    }
+
+    // Map can_color_temperature to light_temperature capability
+    if (entity_data.contains("can_color_temperature") && entity_data["can_color_temperature"].is_boolean() && entity_data["can_color_temperature"])
+    {
+        this->_capabilities.push_back("light_temperature");
+    }
+
+    // Map can_rgb to light_hue and light_saturation capabilities
+    if (entity_data.contains("can_rgb") && entity_data["can_rgb"].is_boolean() && entity_data["can_rgb"])
+    {
+        this->_capabilities.push_back("light_hue");
+        this->_capabilities.push_back("light_saturation");
     }
 
     SPDLOG_DEBUG("Loaded Homey light {}::{}, device ID: {}", this->_id, this->_name, this->_homey_device_id);
+
+    // Debug log the mapped capabilities
+    std::string capabilities_str;
+    for (const auto &cap : this->_capabilities)
+    {
+        if (!capabilities_str.empty())
+            capabilities_str += ", ";
+        capabilities_str += cap;
+    }
+    SPDLOG_DEBUG("Homey light {}::{} capabilities: [{}]", this->_id, this->_name, capabilities_str);
+
     HomeyManager::attach_event_observer(this->_homey_device_id, boost::bind(&HomeyLight::homey_event_callback, this, _1));
 
     this->send_state_update_to_nspanel(); // Send initial state to NSPanel
