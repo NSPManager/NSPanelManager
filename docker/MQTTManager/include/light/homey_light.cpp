@@ -106,10 +106,11 @@ void HomeyLight::_send_capability_update(const std::string &capability, nlohmann
     // Send HTTP PUT request with bearer token authentication
     try
     {
+        // Create header strings with proper lifetime management
+        std::string auth_header = fmt::format("Authorization: Bearer {}", homey_token);
         std::list<const char *> headers = {
-            fmt::format("Authorization: Bearer {}", homey_token.c_str(),
-                        "Content-Type: application/json")
-                .c_str()};
+            auth_header.c_str(),
+            "Content-Type: application/json"};
 
         std::string response_data;
         std::string put_data = request_body.dump();

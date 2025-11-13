@@ -68,10 +68,12 @@ void HomeyThermostat::_send_capability_update(const std::string &capability, con
     request_body["value"] = value;
 
     std::string url = fmt::format("http://{}/api/manager/devices/device/{}/capability/{}", homey_address, this->_homey_device_id, capability);
+
+    // Create header strings with proper lifetime management
+    std::string auth_header = fmt::format("Authorization: Bearer {}", homey_token);
     std::list<const char *> headers = {
-        fmt::format("Authorization: Bearer {}", homey_token.c_str(),
-                    "Content-Type: application/json")
-            .c_str()};
+        auth_header.c_str(),
+        "Content-Type: application/json"};
 
     std::string response_data;
     std::string put_data = request_body.dump();
