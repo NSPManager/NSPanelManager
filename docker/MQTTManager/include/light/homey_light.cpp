@@ -96,8 +96,8 @@ void HomeyLight::_send_capability_update(const std::string &capability, nlohmann
         return;
     }
 
-    // Construct URL: http://{homey_address}/api/device/{device_id}/capability/{capability}
-    std::string url = fmt::format("http://{}/api/device/{}/capability/{}", homey_address, this->_homey_device_id, capability);
+    // Construct URL: http://{homey_address}/api/manager/devices/device/{device_id}/capability/{capability}
+    std::string url = fmt::format("http://{}/api/manager/devices/device/{}/capability/{}", homey_address, this->_homey_device_id, capability);
 
     // Create request body with capability value
     nlohmann::json request_body;

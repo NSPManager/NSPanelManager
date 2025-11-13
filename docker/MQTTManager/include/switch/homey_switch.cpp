@@ -67,8 +67,8 @@ void HomeySwitch::send_state_update_to_controller()
         return;
     }
 
-    // Construct URL: http://{homey_address}/api/device/{device_id}/capability/onoff
-    std::string url = fmt::format("http://{}/api/device/{}/capability/onoff", homey_address, this->_homey_device_id);
+    // Construct URL: http://{homey_address}/api/manager/devices/device/{device_id}/capability/onoff
+    std::string url = fmt::format("http://{}/api/manager/devices/device/{}/capability/onoff", homey_address, this->_homey_device_id);
 
     // Create request body with state value
     nlohmann::json request_body;

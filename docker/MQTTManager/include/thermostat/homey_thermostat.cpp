@@ -67,7 +67,7 @@ void HomeyThermostat::_send_capability_update(const std::string &capability, con
     nlohmann::json request_body;
     request_body["value"] = value;
 
-    std::string url = fmt::format("http://{}/api/device/{}/capability/{}", homey_address, this->_homey_device_id, capability);
+    std::string url = fmt::format("http://{}/api/manager/devices/device/{}/capability/{}", homey_address, this->_homey_device_id, capability);
     std::list<const char *> headers = {
         fmt::format("Authorization: Bearer {}", homey_token.c_str(),
                     "Content-Type: application/json")

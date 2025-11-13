@@ -68,8 +68,8 @@ void HomeyButton::send_state_update_to_controller()
         return;
     }
 
-    // Construct URL: http://{homey_address}/api/device/{device_id}/capability/button
-    std::string url = fmt::format("http://{}/api/device/{}/capability/button", homey_address, this->_homey_device_id);
+    // Construct URL: http://{homey_address}/api/manager/devices/device/{device_id}/capability/button
+    std::string url = fmt::format("http://{}/api/manager/devices/device/{}/capability/button", homey_address, this->_homey_device_id);
 
     // Create request body - button trigger uses null value
     nlohmann::json request_body;
