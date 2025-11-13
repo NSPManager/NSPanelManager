@@ -4,6 +4,7 @@ mkdir -p data
 NOSTRIP=""
 PORT="8000"
 TARGETPLATFORM=""
+VOLUME="$(pwd)/data/"
 
 while true; do
   case "$1" in
@@ -17,6 +18,10 @@ while true; do
     ;;
   --target-platform)
     TARGETPLATFORM="$2"
+    shift 2
+    ;;
+  --volume)
+    VOLUME="$2"
     shift 2
     ;;
   *) break ;;
@@ -38,5 +43,5 @@ else
 fi
 
 if [ "$?" == 0 ]; then
-  docker run --name nspanelmanager -v /etc/timezone:/etc/timezone:ro -v "$(pwd)/data/":"/data/" -d -p ${PORT}:8000 -p 8001:8001 nspanelmanager
+  docker run --name nspanelmanager -v /etc/timezone:/etc/timezone:ro -v "${VOLUME}":"/data/" -d -p ${PORT}:8000 -p 8001:8001 nspanelmanager
 fi
