@@ -226,6 +226,8 @@ void HomeyLight::send_state_update_to_controller()
             {
                 // Convert Kelvin to Homey's 0.0-1.0 scale (inverted)
                 float homey_temperature = this->_kelvin_to_homey_temperature(this->_requested_color_temperature);
+
+                this->_send_capability_update("light_mode", "temperature");
                 this->_send_capability_update("light_temperature", homey_temperature);
 
                 if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE))
@@ -242,6 +244,8 @@ void HomeyLight::send_state_update_to_controller()
             {
                 // Homey expects hue as 0.0 to 1.0 (representing 0-360 degrees)
                 float hue_value = (float)this->_requested_hue / 360.0;
+
+                this->_send_capability_update("light_mode", "color");
                 this->_send_capability_update("light_hue", hue_value);
 
                 if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE))

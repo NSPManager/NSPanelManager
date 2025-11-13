@@ -233,7 +233,9 @@ def get_all_homey_moods():
     try:
         # Try to get moods via the manager endpoint
         homey_api_address = (
-            "http://" + get_setting_with_default("homey_address") + "/api/manager/mood"
+            "http://"
+            + get_setting_with_default("homey_address")
+            + "/api/manager/moods/mood"
         )
         logging.debug("Trying to get Homey moods via api address: " + homey_api_address)
 
