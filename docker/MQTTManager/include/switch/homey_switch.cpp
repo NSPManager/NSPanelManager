@@ -74,18 +74,18 @@ void HomeySwitch::send_state_update_to_controller()
     nlohmann::json request_body;
     request_body["value"] = this->_requested_state;
 
-    // Send HTTP POST request with bearer token authentication
+    // Send HTTP PUT request with bearer token authentication
     try
     {
         std::list<const char *> headers = {
-            fmt::format("Authorization: Bearer {}", homey_token,
+            fmt::format("Authorization: Bearer {}", homey_token.c_str(),
                         "Content-Type: application/json")
                 .c_str()};
 
         std::string response_data;
-        std::string post_data = request_body.dump();
+        std::string put_data = request_body.dump();
 
-        if (WebHelper::perform_post_request(&url, &response_data, &headers, &post_data))
+        if (WebHelper::perform_put_request(&url, &response_data, &headers, &put_data))
         {
             SPDLOG_DEBUG("Homey switch {}::{} state update response: {}", this->_id, this->_name, response_data);
 

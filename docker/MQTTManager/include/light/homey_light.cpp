@@ -104,18 +104,17 @@ void HomeyLight::_send_capability_update(const std::string &capability, nlohmann
     request_body["value"] = value;
 
     // Send HTTP PUT request with bearer token authentication
-    // Note: WebHelper only supports GET and POST, so we use POST for capability updates
     try
     {
         std::list<const char *> headers = {
-            fmt::format("Authorization: Bearer {}", homey_token,
+            fmt::format("Authorization: Bearer {}", homey_token.c_str(),
                         "Content-Type: application/json")
                 .c_str()};
 
         std::string response_data;
-        std::string post_data = request_body.dump();
+        std::string put_data = request_body.dump();
 
-        if (WebHelper::perform_post_request(&url, &response_data, &headers, &post_data))
+        if (WebHelper::perform_put_request(&url, &response_data, &headers, &put_data))
         {
             SPDLOG_DEBUG("Homey light {}::{} capability {} update response: {}", this->_id, this->_name, capability, response_data);
         }

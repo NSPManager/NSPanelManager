@@ -69,16 +69,16 @@ void HomeyThermostat::_send_capability_update(const std::string &capability, con
 
     std::string url = fmt::format("http://{}/api/device/{}/capability/{}", homey_address, this->_homey_device_id, capability);
     std::list<const char *> headers = {
-        fmt::format("Authorization: Bearer {}", homey_token,
+        fmt::format("Authorization: Bearer {}", homey_token.c_str(),
                     "Content-Type: application/json")
             .c_str()};
 
     std::string response_data;
-    std::string post_data = request_body.dump();
+    std::string put_data = request_body.dump();
 
     try
     {
-        if (WebHelper::perform_post_request(&url, &response_data, &headers, &post_data))
+        if (WebHelper::perform_put_request(&url, &response_data, &headers, &put_data))
         {
             SPDLOG_DEBUG("Thermostat {}::{} sent {} update to Homey: {}", this->_id, this->_name, capability, value.dump());
         }
