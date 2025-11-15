@@ -3,7 +3,7 @@
 
 # NSPanelManager
 
-Standardised Smart Home control for Home Assistant and Openhab users using the original Sonoff NSPanel.
+Standardised Smart Home control for Home Assistant, Openhab and Athom Homey Pro users using the original Sonoff NSPanel.
 
 NSPanel Manager is a custom software solution for the Sonoff NSPanel (not the NSPanel pro).
 The software is designed to be easy to use on a day-to-day basis and to easily manage multiple NSPanels around

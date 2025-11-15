@@ -508,18 +508,18 @@ ws://{homey_address}/api/manager/devices/device?token={api_key}
 
 ## 6. Capability Mapping
 
-| Homey Capability      | NSPanel Feature | Data Type       | Range               |
-| --------------------- | --------------- | --------------- | ------------------- |
-| `onoff`               | On/Off toggle   | Boolean         | true/false          |
-| `dim`                 | Brightness      | Float (decimal) | 0.0 - 1.0 → 0-100%  |
-| `light_hue`           | Hue             | Float           | 0.0 - 1.0 → 0-360°  |
-| `light_saturation`    | Saturation      | Float           | 0.0 - 1.0 → 0-100%  |
-| `light_temperature`   | Color Temp      | Integer         | Kelvin (1000-10000) |
-| `light_mode`          | Light Mode      | String          | (mode-specific)     |
-| `button`              | Button Press    | (trigger)       | (event-based)       |
-| `target_temperature`  | Target Temp     | Float           | (°C)                |
-| `measure_temperature` | Current Temp    | Float           | (°C)                |
-| `thermostat_mode`     | Thermostat Mode | String          | (heat/cool/auto)    |
+| Homey Capability      | NSPanel Feature | Data Type       | Range                           |
+| --------------------- | --------------- | --------------- | ------------------------------- |
+| `onoff`               | On/Off toggle   | Boolean         | true/false                      |
+| `dim`                 | Brightness      | Float (decimal) | 0.0 - 1.0 → 0-100%              |
+| `light_hue`           | Hue             | Float           | 0.0 - 1.0 → 0-360°              |
+| `light_saturation`    | Saturation      | Float           | 0.0 - 1.0 → 0-100%              |
+| `light_temperature`   | Color Temp      | Integer         | 0.0 - 1.0 → Kelvin (1000-10000) |
+| `light_mode`          | Light Mode      | String          | (mode-specific)                 |
+| `button`              | Button Press    | (trigger)       | (event-based)                   |
+| `target_temperature`  | Target Temp     | Float           | (°C)                            |
+| `measure_temperature` | Current Temp    | Float           | (°C)                            |
+| `thermostat_mode`     | Thermostat Mode | String          | (heat/cool/auto)                |
 
 ---
 
@@ -561,7 +561,7 @@ Uses existing Entity and Scene tables with controller field in entity_data JSON.
   "controller": "homey",
   "homey_device_id": "<uuid>",
   "homey_device_name": "<name>",
-  "capabilities": ["button"]
+  "capabilities": ["onoff"]
 }
 ```
 
