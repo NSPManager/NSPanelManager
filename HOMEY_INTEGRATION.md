@@ -10,7 +10,7 @@ This document outlines the comprehensive integration of Homey Web API into NSPan
 ### 1.1 Supported Entities
 - **Lights**: Devices with capabilities `onoff`, `dim`, `light_hue`, `light_saturation`, `light_temperature`, `light_mode`
 - **Switches**: Devices with capability `onoff`
-- **Buttons**: Devices with capability `button`
+- **Buttons**: Devices with capability `onoff`
 - **Thermostats**: Devices with capabilities `target_temperature`, `measure_temperature`, `thermostat_mode`
 - **Scenes**: Homey Flows (prefixed with `[F]`) and Moods (prefixed with `[M]`)
 
@@ -182,7 +182,7 @@ Button:
 {
   "controller": "homey",
   "homey_device_id": "device-uuid",
-  "capabilities": ["button"]
+  "capabilities": ["onoff"]
 }
 ```
 
@@ -200,7 +200,7 @@ Scene:
 {
   "controller": "homey",
   "homey_id": "flow-or-mood-uuid",
-  "homey_type": "flow"
+  "homey_type": "flow" // or "mood"
 }
 ```
 
@@ -468,6 +468,10 @@ Headers: Authorization: Bearer {api_key}
 
 #### Get All Moods
 Access via devices or dedicated mood endpoints.
+```
+GET http://{homey_address}/api/manager/moods/mood
+Headers: Authorization: Bearer {api_key}
+```
 
 #### Trigger Device Capability (for control)
 ```
@@ -479,6 +483,12 @@ Body: { "value": <capability_value> }
 #### Trigger Flow
 ```
 POST http://{homey_address}/api/manager/flow/flow/{flow_id}/trigger
+Headers: Authorization: Bearer {api_key}
+```
+
+#### Trigger Mood
+```
+POST http://{homey_address}/api/manager/moods/mood/{mood_id}/set
 Headers: Authorization: Bearer {api_key}
 ```
 
