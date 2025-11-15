@@ -16,9 +16,15 @@
 #include <string>
 #include <unistd.h>
 
-ButtonEntity::ButtonEntity(uint32_t light_id) {
-  this->_id = light_id;
+ButtonEntity::ButtonEntity(uint32_t button_id)
+{
+  this->_id = button_id;
   this->reload_config();
+
+  // Build MQTT Topics
+  std::string mqtt_base_topic = fmt::format("nspanel/entities/button/{}/", this->_id);
+  this->_current_state = false;
+  this->_requested_state = false;
 
   CommandManager::attach_callback(boost::bind(&ButtonEntity::command_callback, this, _1));
 
@@ -45,9 +51,17 @@ void ButtonEntity::reload_config() {
     std::string controller = entity_data["controller"];
     if (controller.compare("home_assistant") == 0) {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
-    } else if (controller.compare("nspm") == 0) {
+    }
+    else if (controller.compare("homey") == 0)
+    {
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOMEY;
+    }
+    else if (controller.compare("nspm") == 0)
+    {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::NSPM;
-    } else {
+    }
+    else
+    {
       SPDLOG_ERROR("Got unknown controller ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(controller), this->_id, this->_name);
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
     }
@@ -104,7 +118,12 @@ bool ButtonEntity::can_toggle() {
 }
 
 void ButtonEntity::toggle() {
+  this->_requested_state = !this->_requested_state;
   this->send_state_update_to_controller();
+  if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE))
+  {
+    this->_current_state = !this->_current_state;
+  }
 }
 
 std::string_view ButtonEntity::get_icon() {

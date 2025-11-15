@@ -130,6 +130,19 @@ else
   BUILD_SHARED_LIBS=OFF
 fi
 
+# Workaround: Patch m4's configure script to skip getcwd test
+echo 'ac_cv_func_getcwd_path_max=yes' > /etc/config.site
+export CONFIG_SITE=/etc/config.site
+
+if [[ "$(uname)" == "Darwin" ]]; then
+  echo "🔧 Patching m4's configure script to skip getcwd test (avoiding hang on macOS)..."
+  find /MQTTManager/conan_cache -type f -path "*/src/configure" -exec grep -q "checking whether getcwd handles long file names properly" {} \; -exec sed -i '' '/checking whether getcwd handles long file names properly/ a\
+gl_cv_func_getcwd_path_max=yes\
+' {} \;
+else
+  echo "✅ Skipping m4 patch (not macOS)"
+fi
+
 echo "Conan profile: "
 cat /root/.conan2/profiles/default
 

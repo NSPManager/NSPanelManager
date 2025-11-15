@@ -5,6 +5,7 @@
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "openhab_manager/openhab_manager.hpp"
+#include "homey_manager/homey_manager.hpp"
 #include "protobuf/protobuf_nspanel.pb.h"
 #include "room/room_entities_page.hpp"
 #include <algorithm>
@@ -61,7 +62,13 @@ void Room::reload_config() {
           temperature_sensor_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
         } else if (db_room.room_temp_provider.compare("openhab") == 0) {
           temperature_sensor_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
-        } else {
+        }
+        else if (db_room.room_temp_provider.compare("homey") == 0)
+        {
+          temperature_sensor_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOMEY;
+        }
+        else
+        {
           SPDLOG_ERROR("Got unknown temperature provider for room temperature sensor. Provider '{}' is not suppored!", db_room.room_temp_provider);
         }
 
@@ -71,9 +78,17 @@ void Room::reload_config() {
             // We have not subscribed to any temperature sensor so there is nothing to unsubscribe from.
           } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT) {
             HomeAssistantManager::detach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
-          } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB) {
+          }
+          else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::HOMEY)
+          {
+            HomeyManager::detach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
+          }
+          else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB)
+          {
             OpenhabManager::detach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
-          } else {
+          }
+          else
+          {
             SPDLOG_ERROR("Got unknown temperature provider for room temperature sensor. Provider '{}' is not suppored!", static_cast<int>(this->_room_temp_provider));
           }
 
@@ -84,7 +99,13 @@ void Room::reload_config() {
             HomeAssistantManager::attach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
           } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB) {
             OpenhabManager::attach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
-          } else {
+          }
+          else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::HOMEY)
+          {
+            HomeyManager::attach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
+          }
+          else
+          {
             SPDLOG_ERROR("Got unknown temperature provider for room temperature sensor. Provider '{}' is not suppored!", static_cast<int>(this->_room_temp_provider));
           }
         }
@@ -95,6 +116,8 @@ void Room::reload_config() {
           HomeAssistantManager::detach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
         } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB) {
           OpenhabManager::detach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
+        } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::HOMEY) {
+          HomeyManager::detach_event_observer(this->_room_temp_sensor, boost::bind(&Room::_room_temperature_state_change_callback, this, _1));
         } else {
           SPDLOG_ERROR("Got unknown temperature provider for room temperature sensor. Provider '{}' is not suppored!", static_cast<int>(this->_room_temp_provider));
         }
@@ -251,6 +274,10 @@ bool Room::has_temperature_sensor() {
   if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT && !this->_room_temp_sensor.empty()) {
     return true;
   } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB && !this->_room_temp_sensor.empty()) {
+    return true;
+  }
+  else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::HOMEY && !this->_room_temp_sensor.empty())
+  {
     return true;
   }
   return false;
@@ -552,8 +579,49 @@ void Room::_room_temperature_state_change_callback(nlohmann::json data) {
         MQTT_Manager::publish(this->_mqtt_temperature_state_topic, temperature, true);
         return;
       }
+    }
+    else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::HOMEY)
+    {
+      if (!data.contains("event")) [[unlikely]]
+      {
+        SPDLOG_ERROR("Homey room temperature sensor state change callback received invalid data. No 'event' key found.");
+        return;
+      }
 
-    } else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB) {
+      if (!data["event"].contains("data")) [[unlikely]]
+      {
+        SPDLOG_ERROR("Homey room temperature sensor state change callback received invalid data. No 'data' key found.");
+        return;
+      }
+
+      if (!data["event"]["data"].contains("new_state")) [[unlikely]]
+      {
+        SPDLOG_ERROR("Homey room temperature sensor state change callback received invalid data. No 'new_state' key found.");
+        return;
+      }
+
+      if (!data["event"]["data"]["new_state"].contains("state")) [[unlikely]]
+      {
+        SPDLOG_ERROR("Homey room temperature sensor state change callback received invalid data. No 'state' key found.");
+        return;
+      }
+
+      try
+      {
+        float temperature = std::stof(data["event"]["data"]["new_state"]["state"].get<std::string>());
+        this->_last_room_temperature_value = temperature;
+        MQTT_Manager::publish(this->_mqtt_temperature_state_topic, fmt::format("{:.1f}", temperature), true);
+      }
+      catch (const std::invalid_argument &e)
+      {
+        SPDLOG_WARN("Failed to convert temperature to float. Will send raw string to panel.: {}", e.what());
+        std::string temperature = data["event"]["data"]["new_state"]["state"].get<std::string>();
+        MQTT_Manager::publish(this->_mqtt_temperature_state_topic, temperature, true);
+        return;
+      }
+    }
+    else if (this->_room_temp_provider == MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB)
+    {
       if (!data.contains("type")) {
         SPDLOG_ERROR("OpenHAB room temperature sensor state change callback received invalid data. No 'type' key found.");
         return;
@@ -609,7 +677,9 @@ void Room::_room_temperature_state_change_callback(nlohmann::json data) {
           return;
         }
       }
-    } else {
+    }
+    else
+    {
       SPDLOG_ERROR("Unsupported controller set when processing room temperature sensor callback!");
     }
   } catch (const std::exception &e) {

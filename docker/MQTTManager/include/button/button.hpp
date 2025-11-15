@@ -35,6 +35,11 @@ public:
   uint16_t get_id();
 
   /**
+   * Get the on/off state of the switch.
+   */
+  bool get_state();
+
+  /**
    * Get the friendly name for the button.
    */
   std::string get_name();
@@ -95,6 +100,9 @@ protected:
   uint8_t _entity_page_slot;
   std::mutex _entity_data_mutex;
   nlohmann::json _entity_data;
+
+  bool _current_state;
+  bool _requested_state;
 
   boost::signals2::signal<void(ButtonEntity *)> _button_destroyed_callbacks;
 };

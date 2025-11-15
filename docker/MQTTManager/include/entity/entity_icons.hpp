@@ -1,6 +1,7 @@
 #include <cstdint>
 
-class EntityIcons {
+class EntityIcons
+{
 public:
   // Entity Icons
   static constexpr const char *entity_icon_switch_on = "s";
@@ -11,6 +12,7 @@ public:
   static constexpr const char *save_icon = "w";
   static constexpr const char *home_assistant_icon = "x";
   static constexpr const char *openhab_icon = "y";
+  static constexpr const char *homey_icon = "{";
 
   // Thermostat Icons
   static constexpr const char *heating = "!";
@@ -37,7 +39,8 @@ public:
   static constexpr const char *fan3 = "6";
 };
 
-class GUI_Colors {
+class GUI_Colors
+{
 public:
   static constexpr const uint16_t icon_color_off = 65535;
   static constexpr const uint16_t icon_color_on = 65024;

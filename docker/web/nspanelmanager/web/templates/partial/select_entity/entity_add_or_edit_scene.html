@@ -1,7 +1,7 @@
 <dialog id="modal" class="modal" hx-swap-oob="true">
     <div class="modal-box">
         <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            <button class="absolute btn btn-sm btn-circle btn-ghost right-2 top-2">✕</button>
         </form>
 
         <div class="flex justify-center mb-4">
@@ -17,11 +17,38 @@
             <!-- Modal content -->
             <div class="">
                 <!-- Modal content -->
-                <div class="p-4 md:p-5 space-y-4">
+                <div class="p-4 space-y-4 md:p-5">
                 <!-- Common controls -->
                 <div class="">
+                    {% if entity_source == "home_assistant" %}
+                        <div class="">
+                            {% component "item_select" name="backend_name" label="Scene" items=home_assistant_items selected=backend_name %}{% endcomponent %}
+                        </div>
+                    {% endif %}
+
+                    {% if entity_source == "openhab" %}
+                        <div class="">
+                            {% component "item_select" name="backend_name" label="Scene" items=openhab_items selected=backend_name %}{% endcomponent %}
+                        </div>
+                    {% endif %}
+
+                    {% if entity_source == "homey" %}
+                        <div class="">
+                            <input type="hidden" name="backend_name" id="homey_backend_name" value="homey" />
+                            {% component "item_select" name="homey_item" label="Homey Flow" items=homey_items selected=homey_item %}{% endcomponent %}
+                        </div>
+                        <!-- Store flow names for auto-population -->
+                        <script id="homey-flow-names-data" type="application/json">
+                        {
+                            {% for item in homey_items %}
+                            "{{ item.item_id }}": "{{ item.label }}"{% if not forloop.last %},{% endif %}
+                            {% endfor %}
+                        }
+                        </script>
+                    {% endif %}
+
                     <!-- Name -->
-                    <div class="">
+                    <div class="mt-4">
                         <label for="add_new_light_name" class="block mb-2 text-sm font-medium">Name</label>
                         <div class="flex flex-row-reverse">
                         <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
@@ -36,25 +63,12 @@
                         </span>
                         </div>
                     </div>
-
-                    {% if entity_source == "home_assistant" %}
-                        <div class="mt-4">
-                            {% component "item_select" name="backend_name" label="Home Assistant Scene" items=home_assistant_items selected=backend_name %}{% endcomponent %}
-                        </div>
-                    {% endif %}
-
-                    {% if entity_source == "openhab" %}
-                        <!-- Brightness item selector -->
-                        <div class="mt-4">
-                            {% component "item_select" name="backend_name" label="OpenHAB Scene" items=openhab_items selected=backend_name %}{% endcomponent %}
-                        </div>
-                    {% endif %}
                 </div>
 
 
                 </div>
                 <!-- Modal footer -->
-                <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <div class="flex items-center justify-end p-4 border-t border-gray-200 rounded-b md:p-5 dark:border-gray-600">
                     <button type="submit" class="btn btn-info">Save</button>
                 </div>
             </div>
@@ -66,32 +80,44 @@
     </form>
 
     <script>
-    function update_color_temp_shown() {
-      if ($('#color_temperature').prop("checked")) {
-        $("#openhab_color_temperature_item_selector").show();
-      } else {
-        $("#openhab_color_temperature_item_selector").hide();
-      }
-    }
+    // Auto-populate Name field when Homey flow is selected
+    function update_homey_flow_name() {
+      const selectedValue = $('#item_select_homey_item_input').val();
+      const flowNamesDataEl = $('#homey-flow-names-data');
+      
+      if (flowNamesDataEl.length && selectedValue) {
+        try {
+            const flowNamesData = JSON.parse(flowNamesDataEl.text());
+            const flowName = flowNamesData[selectedValue];
 
-    function update_rgb_shown() {
-      if ($('#rgb').prop("checked")) {
-        $("#openhab_rgb_item_selector").show();
-      } else {
-        $("#openhab_rgb_item_selector").hide();
+            if (flowName.startsWith("[F]")) {
+                $('#homey_backend_name').val("homey_flow_" + selectedValue);
+            }
+            if(flowName.startsWith("[M]")) {
+                $('#homey_backend_name').val("homey_mood_" + selectedValue);
+            }
+            if (flowName) {
+                $('#scene_name').val(flowName);
+            }
+        } catch (e) {
+          console.error('Error parsing Homey flow names data:', e);
+        }
       }
     }
 
     // Open dialog using Javascript as to make it possible to close again
-    update_color_temp_shown();
-    update_rgb_shown();
     htmx.on("htmx:afterSwap", (e) => {
       if(e.detail.elt.id == "modal") {
         modal.showModal();
       }
     });
 
-    $("#color_temperature").click(update_color_temp_shown);
-    $("#rgb").click(update_rgb_shown);
+    // Listen for Homey flow selection changes
+    $("#item_select_homey_item_input").on('input', update_homey_flow_name);
+    
+    // Also listen for clicks on the dropdown options
+    $(document).on('click', '.item_select_homey_item_option', function() {
+      setTimeout(update_homey_flow_name, 100); // Small delay to ensure value is set
+    });
     </script>
 </dialog>

@@ -25,10 +25,10 @@ ThermostatEntity::ThermostatEntity(uint32_t light_id) {
   this->reload_config();
 
   // Build MQTT Topics
-  std::string mqtt_base_topic = fmt::format("nspanel/entities/light/{}/", this->_id);
+  std::string mqtt_base_topic = fmt::format("nspanel/entities/thermostat/{}/", this->_id);
   CommandManager::attach_callback(boost::bind(&ThermostatEntity::command_callback, this, _1));
 
-  SPDLOG_DEBUG("Switch {}::{} base loaded.", this->_id, this->_name);
+  SPDLOG_DEBUG("Thermostat {}::{} base loaded.", this->_id, this->_name);
 }
 
 uint16_t ThermostatEntity::get_room_id() {
@@ -36,22 +36,28 @@ uint16_t ThermostatEntity::get_room_id() {
 }
 
 void ThermostatEntity::reload_config() {
-  auto switch_entity = database_manager::database.get<database_manager::Entity>(this->_id);
-  this->_name = switch_entity.friendly_name;
-  SPDLOG_DEBUG("Loading switch {}::{}.", this->_id, this->_name);
+  auto thermostat_entity = database_manager::database.get<database_manager::Entity>(this->_id);
+  this->_name = thermostat_entity.friendly_name;
+  SPDLOG_DEBUG("Loading thermostat {}::{}.", this->_id, this->_name);
 
-  this->_room_id = switch_entity.room_id;
-  this->_entity_page_id = switch_entity.entities_page_id;
-  this->_entity_page_slot = switch_entity.room_view_position;
+  this->_room_id = thermostat_entity.room_id;
+  this->_entity_page_id = thermostat_entity.entities_page_id;
+  this->_entity_page_slot = thermostat_entity.room_view_position;
 
-  nlohmann::json entity_data = switch_entity.get_entity_data_json();
+  nlohmann::json entity_data = thermostat_entity.get_entity_data_json();
   if (entity_data.contains("controller")) {
     std::string controller = entity_data["controller"];
     if (controller.compare("home_assistant") == 0) {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
     } else if (controller.compare("openhab") == 0) {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
-    } else {
+    }
+    else if (controller.compare("homey") == 0)
+    {
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOMEY;
+    }
+    else
+    {
       SPDLOG_ERROR("Got unknown controller ({}) for light {}::{}. Will default to HOME_ASSISTANT.", std::string(controller), this->_id, this->_name);
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
     }

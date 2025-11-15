@@ -1,12 +1,22 @@
 #!/bin/bash
 
 TARGETPLATFORM=""
+PORT="8000"
+DATA_VOLUME="$(pwd)/data"
 
 while true; do
   case "$1" in
   --target-platform)
     TARGETPLATFORM="$2"
-    shift
+    shift 2
+    ;;
+  --port)
+    PORT="$2"
+    shift 2
+    ;;
+  --data-volume)
+    DATA_VOLUME="$2"
+    shift 2
     ;;
   *) break ;;
   esac
@@ -32,6 +42,6 @@ else
   docker buildx build --platform "$TARGETPLATFORM" --build-arg no_mqttmanager_build=yes --build-arg IS_DEVEL=yes -t nspanelmanager .
 fi
 if [ "$?" == 0 ]; then
-  docker run --rm --name nspanelmanager --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --mac-address 02:42:ac:11:ff:ff -it -v /etc/timezone:/etc/timezone:ro -v "$(pwd)/web":/usr/src/app/ -v "$(pwd)/data":/data/ -v "$(pwd)/MQTTManager/":/MQTTManager/ -v "$(pwd)/nginx/sites-templates/":/etc/nginx/sites-templates/ -v "$(pwd)/nginx/sites-enabled/":/etc/nginx/sites-enabled/ -v "$(pwd)/HMI_files/":/usr/src/app/nspanelmanager/HMI_files/ -v "$(pwd)/../":/full_git/ -p 8000:8000 nspanelmanager /bin/bash
+  docker run --rm --name nspanelmanager --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --mac-address 02:42:ac:11:ff:ff -it -v /etc/timezone:/etc/timezone:ro -v "$(pwd)/web":/usr/src/app/ -v "${DATA_VOLUME}":/data/ -v "$(pwd)/MQTTManager/":/MQTTManager/ -v "$(pwd)/nginx/sites-templates/":/etc/nginx/sites-templates/ -v "$(pwd)/nginx/sites-enabled/":/etc/nginx/sites-enabled/ -v "$(pwd)/HMI_files/":/usr/src/app/nspanelmanager/HMI_files/ -v "$(pwd)/../":/full_git/ -p ${PORT}:8000 nspanelmanager /bin/bash
   docker rmi nspanelmanager
 fi

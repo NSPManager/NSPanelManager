@@ -1,7 +1,7 @@
 <dialog id="modal" class="modal" hx-swap-oob="true">
     <div class="modal-box">
         <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            <button class="absolute btn btn-sm btn-circle btn-ghost right-2 top-2">✕</button>
         </form>
 
         <form hx-post="{{ ingress_path }}{% url 'htmx_handle_entity_modal_result' %}" hx-indicator="#modal_loading" onsubmit="modal.close();">
@@ -14,12 +14,29 @@
                     Configure button
                 </h3>
                 <!-- Modal content -->
-                <div class="p-4 md:p-5 space-y-4">
+                <div class="p-4 space-y-4 md:p-5">
+
+
                 <!-- Common controls -->
                 <div class="">
+                    {% if entity_source == "homey" %}
+                    <div class="mt-4">
+                      <input type="hidden" name="backend_name" id="homey_backend_name" value="homey" />
+                        {% component "item_select" name="homey_item" label="Device" items=homey_items selected=homey_item %}{% endcomponent %}
+                    </div>
+                    <!-- Store device names for auto-population -->
+                    <script id="homey-device-names-data" type="application/json">
+                    {
+                        {% for item in homey_items %}
+                        "{{ item.item_id }}": "{{ item.label }}"{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    }
+                    </script>
+                    {% endif %}
+
                     <!-- Name -->
-                    <div class="">
-                        <label for="add_new_light_name" class="block mb-2 text-sm font-medium">Name</label>
+                    <div class="mt-4">
+                        <label for="light_name" class="block mb-2 text-sm font-medium">Name</label>
                         <div class="flex flex-row-reverse">
                         <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                         type="text" class="input" name="light_name" id="light_name" value="{{ entity.name }}">
@@ -33,14 +50,13 @@
                         </span>
                         </div>
                     </div>
-                </div>
 
-
-                {% if entity_source == "home_assistant" %}
+                    {% if entity_source == "home_assistant" %}
                     <div class="mt-4">
-                        {% component "item_select" name="backend_name" label="Home Assistant item" items=home_assistant_items selected=button.entity_data.home_assistant_name %}{% endcomponent %}
+                        {% component "item_select" name="backend_name" label="Button" items=home_assistant_items selected=button.entity_data.home_assistant_name %}{% endcomponent %}
                     </div>
-                {% endif %}
+                    {% endif %}
+                </div>
 
                 {% if entity_source == "nspm" %}
                 <!-- MQTT Topic -->
@@ -83,7 +99,7 @@
 
                 </div>
                 <!-- Modal footer -->
-                <div class="flex justify-end items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <div class="flex items-center justify-end p-4 border-t border-gray-200 rounded-b md:p-5 dark:border-gray-600">
                     <button type="submit" class="btn btn-info">Save</button>
                 </div>
             </div>
@@ -95,10 +111,51 @@
     </form>
 
     <script>
+    // Auto-populate name field when Homey device is selected
+    function populateNameFromHomeyDevice() {
+
+      const selectedValue = $('#item_select_homey_item_input').val();
+      const deviceNamesDataEl = $('#homey-device-names-data');
+
+      if (selectedValue) {
+        try {
+          // Auto-populate device name
+          if (deviceNamesDataEl.length) {
+            const deviceNamesData = JSON.parse(deviceNamesDataEl.text());
+            const deviceName = deviceNamesData[selectedValue];
+
+            $('#homey_backend_name').val(selectedValue);
+            if (deviceName) {
+              $('#light_name').val(deviceName);
+            }
+          }
+
+        } catch (e) {
+          console.error('Error parsing device names:', e);
+        }
+      }
+    }
+
     // Open dialog using Javascript as to make it possible to close again
     htmx.on("htmx:afterSwap", (e) => {
       if(e.detail.elt.id == "modal") {
         modal.showModal();
+
+        // Listen for Homey device selection changes
+        // The item_select component creates an input with id: item_select_{{ name }}_input
+        $("#item_select_homey_item_input").on('input', populateNameFromHomeyDevice);
+
+        // Also listen for clicks on the dropdown options
+        $(document).on('click', '.item_select_homey_item_option', function() {
+          // Get the device name from the clicked element's label attribute
+          const deviceLabel = $(this).data('label');
+          if (deviceLabel) {
+            // Extract just the device name (before the device ID in parentheses)
+            const deviceName = deviceLabel.split(' (')[0];
+            $('#light_name').val(deviceName);
+          }
+          setTimeout(populateNameFromHomeyDevice, 100); // Small delay to ensure value is set
+        });
       }
     });
     </script>
