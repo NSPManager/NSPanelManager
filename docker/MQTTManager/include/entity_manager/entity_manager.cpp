@@ -17,6 +17,7 @@
 #include "scenes/scene.hpp"
 #include "switch/switch.hpp"
 #include "thermostat/home_assistant_thermostat.hpp"
+#include "thermostat/openhab_thermostat.hpp"
 #include "web_helper/WebHelper.hpp"
 #include "websocket_server/websocket_server.hpp"
 #include <algorithm>
@@ -285,10 +286,9 @@ void EntityManager::load_thermostats() {
             SPDLOG_INFO("Thermostat {}::{} was found in database but not in config. Creating thermostat.", thermostat_entity->get_id(), thermostat_entity->get_name());
             EntityManager::_entities.push_back(thermostat_entity);
           } else if (controller.compare("openhab") == 0) {
-            // std::shared_ptr<ButtonEntity> button_entity = std::shared_ptr<ButtonEntity>(new NSPMButton(thermostat_settings.id));
-            // SPDLOG_INFO("Button {}::{} was found in database but not in config. Creating button.", button_entity->get_id(), button_entity->get_name());
-            // EntityManager::_entities.push_back(button_entity);
-            SPDLOG_ERROR("TODO: Implement OpenHAB thermostat.");
+            std::shared_ptr<ThermostatEntity> thermostat_entity = std::shared_ptr<ThermostatEntity>(new OpenhabThermostat(thermostat_settings.id));
+            SPDLOG_INFO("Thermostat {}::{} was found in database but not in config. Creating thermostat.", thermostat_entity->get_id(), thermostat_entity->get_name());
+            EntityManager::_entities.push_back(thermostat_entity);
           } else {
             SPDLOG_ERROR("Unknown thermostat type '{}'. Will ignore entity.", controller);
           }

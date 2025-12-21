@@ -50,6 +50,30 @@ HomeAssistantThermostat::~HomeAssistantThermostat() {
   HomeAssistantManager::detach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantThermostat::home_assistant_event_callback, this, _1));
 }
 
+void HomeAssistantThermostat::reload_config() {
+  ThermostatEntity::reload_config();
+  HomeAssistantManager::detach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantThermostat::home_assistant_event_callback, this, _1));
+
+  nlohmann::json entity_data;
+  try {
+    auto thermostat = database_manager::database.get<database_manager::Entity>(this->_id);
+    entity_data = thermostat.get_entity_data_json();
+  } catch (const std::exception &e) {
+    SPDLOG_ERROR("Failed to load thermostat {}: {}", this->_id, e.what());
+    return;
+  }
+
+  if (entity_data.contains("home_assistant_name")) {
+    this->_home_assistant_name = entity_data["home_assistant_name"];
+  } else {
+    SPDLOG_ERROR("No home assistant name defined for Thermostat {}::{}", this->_id, this->_name);
+    return;
+  }
+
+  // Reattach event observer in case entity has changed.
+  HomeAssistantManager::attach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantThermostat::home_assistant_event_callback, this, _1));
+}
+
 void HomeAssistantThermostat::send_state_update_to_controller() {
   if (this->_requested_mode != this->_current_mode) {
     nlohmann::json command = {

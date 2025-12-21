@@ -12,7 +12,7 @@
 #include <string_view>
 
 struct ThermostatOptionHolder {
-  std::string value;
+  std::string value = "";
   std::string icon;
   std::string label;
 

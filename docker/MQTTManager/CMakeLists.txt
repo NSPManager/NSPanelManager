@@ -97,10 +97,10 @@ set_target_properties(MQTTManager_Button PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUD
 target_include_directories(MQTTManager_Button PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTTManager_Button MQTTManager_HomeAssistantManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
 
-add_library(MQTTManager_Thermostat STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/thermostat.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/thermostat.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/home_assistant_thermostat.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/home_assistant_thermostat.cpp)
+add_library(MQTTManager_Thermostat STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/thermostat.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/thermostat.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/home_assistant_thermostat.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/home_assistant_thermostat.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/openhab_thermostat.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/openhab_thermostat.cpp)
 set_target_properties(MQTTManager_Thermostat PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/thermostat.hpp)
 target_include_directories(MQTTManager_Thermostat PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Thermostat MQTTManager_HomeAssistantManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
+target_link_libraries(MQTTManager_Thermostat MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
 
 add_library(MQTTManager_Switch STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/switch.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/home_assistant_switch.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/home_assistant_switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/openhab_switch.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/openhab_switch.hpp)
 set_target_properties(MQTTManager_Switch PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/home_assistant_switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/openhab_switch.hpp)

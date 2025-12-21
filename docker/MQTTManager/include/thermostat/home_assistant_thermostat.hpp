@@ -7,6 +7,7 @@ class HomeAssistantThermostat : public ThermostatEntity {
 public:
   HomeAssistantThermostat(uint32_t thermostat_id);
   ~HomeAssistantThermostat();
+  void reload_config();
   void send_state_update_to_controller();
   void home_assistant_event_callback(nlohmann::json event_data);
   void command_callback(NSPanelMQTTManagerCommand &command);
