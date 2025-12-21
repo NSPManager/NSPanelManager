@@ -566,7 +566,7 @@ void OpenhabThermostat::openhab_swing_event_callback(nlohmann::json data) {
         if (new_swing_mode != this->_supported_swing_modes.end()) {
           this->_current_swing_mode = *new_swing_mode;
           this->_requested_swing_mode = *new_swing_mode;
-          this->_last_preset_change = CurrentTimeMilliseconds();
+          this->_last_swing_change = CurrentTimeMilliseconds();
           this->send_state_update_to_nspanel();
           this->_signal_entity_changed();
           SPDLOG_DEBUG("Thermostat {}::{} got new swing mode: {}", this->_id, this->_name, new_swing_mode->value);
@@ -594,7 +594,7 @@ void OpenhabThermostat::openhab_swingh_event_callback(nlohmann::json data) {
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_swingh_item) == 0) {
       // We only care about the first event from Openhab, ignore the rest but still indicate that event was handled so the manager stops looping over all entities.
-      if (CurrentTimeMilliseconds() >= this->_last_swing_change + 1000) {
+      if (CurrentTimeMilliseconds() >= this->_last_swingh_change + 1000) {
         if (payload["value"].is_null()) { // Got state but state is NULL, ignore.
           return;
         } else if (payload["value"].is_string() && std::string(payload["value"]).compare("NULL") == 0) {
@@ -612,7 +612,7 @@ void OpenhabThermostat::openhab_swingh_event_callback(nlohmann::json data) {
           if (new_horizontal_swing != this->_supported_swingh_modes.end()) {
             this->_current_swingh_mode = *new_horizontal_swing;
             this->_requested_swingh_mode = *new_horizontal_swing;
-            this->_last_swing_change = CurrentTimeMilliseconds();
+            this->_last_swingh_change = CurrentTimeMilliseconds();
             this->send_state_update_to_nspanel();
             this->_signal_entity_changed();
             SPDLOG_DEBUG("Thermostat {}::{} got new horizontal swing mode: {}", this->_id, this->_name, new_horizontal_swing->value);
@@ -643,7 +643,7 @@ void OpenhabThermostat::openhab_swingh_event_callback(nlohmann::json data) {
         if (new_swing_mode != this->_supported_swingh_modes.end()) {
           this->_current_swingh_mode = *new_swing_mode;
           this->_requested_swingh_mode = *new_swing_mode;
-          this->_last_preset_change = CurrentTimeMilliseconds();
+          this->_last_swingh_change = CurrentTimeMilliseconds();
           this->send_state_update_to_nspanel();
           this->_signal_entity_changed();
           SPDLOG_DEBUG("Thermostat {}::{} got new horizontal swing mode: {}", this->_id, this->_name, new_swing_mode->value);
