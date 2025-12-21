@@ -108,6 +108,7 @@ void OpenhabThermostat::reload_config() {
 void OpenhabThermostat::send_state_update_to_controller() {
   nlohmann::json service_data;
   service_data["type"] = "ItemCommandEvent";
+  bool send_state_update = false;
 
   if (this->_requested_mode != this->_current_mode) {
     service_data["topic"] = fmt::format("openhab/items/{}/command", this->_openhab_mode_item);
@@ -119,6 +120,7 @@ void OpenhabThermostat::send_state_update_to_controller() {
     if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
       this->_current_mode = this->_requested_mode;
       this->_entity_changed_callbacks(this);
+      send_state_update = true;
     }
     OpenhabManager::send_json(service_data);
   }
@@ -133,6 +135,7 @@ void OpenhabThermostat::send_state_update_to_controller() {
     if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
       this->_current_fan_mode = this->_requested_fan_mode;
       this->_entity_changed_callbacks(this);
+      send_state_update = true;
     }
     OpenhabManager::send_json(service_data);
   }
@@ -147,6 +150,7 @@ void OpenhabThermostat::send_state_update_to_controller() {
     if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
       this->_current_preset = this->_requested_preset;
       this->_entity_changed_callbacks(this);
+      send_state_update = true;
     }
     OpenhabManager::send_json(service_data);
   }
@@ -161,6 +165,7 @@ void OpenhabThermostat::send_state_update_to_controller() {
     if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
       this->_current_swing_mode = this->_requested_swing_mode;
       this->_entity_changed_callbacks(this);
+      send_state_update = true;
     }
     OpenhabManager::send_json(service_data);
   }
@@ -175,6 +180,7 @@ void OpenhabThermostat::send_state_update_to_controller() {
     if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
       this->_current_swingh_mode = this->_requested_swingh_mode;
       this->_entity_changed_callbacks(this);
+      send_state_update = true;
     }
     OpenhabManager::send_json(service_data);
   }
@@ -184,13 +190,18 @@ void OpenhabThermostat::send_state_update_to_controller() {
     // payload_data["type"] = "string";
     nlohmann::json payload_data;
     payload_data["value"] = this->_requested_temperature;
-    payload_data["type"] = "Number";
+    payload_data["type"] = "Decimal";
     service_data["payload"] = payload_data.dump();
     if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
       this->_current_temperature = this->_requested_temperature;
       this->_entity_changed_callbacks(this);
+      send_state_update = true;
     }
     OpenhabManager::send_json(service_data);
+  }
+
+  if (send_state_update) {
+    this->send_state_update_to_nspanel();
   }
 }
 

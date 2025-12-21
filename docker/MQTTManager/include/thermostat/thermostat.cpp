@@ -99,6 +99,7 @@ void ThermostatEntity::reload_config() {
     if (!this->_supported_fan_modes.empty() && this->_current_fan_mode.value.empty()) {
       SPDLOG_WARN("Thermostat {}::{} fan mode not set, will default to: {}.", this->_id, this->_name, this->_supported_fan_modes[0].label);
       this->_current_fan_mode = this->_supported_fan_modes[0];
+      this->_requested_fan_mode = this->_supported_fan_modes[0];
     }
   }
 
@@ -129,6 +130,7 @@ void ThermostatEntity::reload_config() {
     if (!this->_supported_modes.empty() && this->_current_mode.value.empty()) {
       SPDLOG_WARN("Thermostat {}::{} mode not set, will default to: {}.", this->_id, this->_name, this->_supported_modes[0].label);
       this->_current_mode = this->_supported_modes[0];
+      this->_requested_mode = this->_supported_modes[0];
     }
   }
 
@@ -159,6 +161,7 @@ void ThermostatEntity::reload_config() {
     if (!this->_supported_presets.empty() && this->_current_preset.value.empty()) {
       SPDLOG_WARN("Thermostat {}::{} preset mode not set, will default to: {}.", this->_id, this->_name, this->_supported_presets[0].label);
       this->_current_preset = this->_supported_presets[0];
+      this->_requested_preset = this->_supported_presets[0];
     }
   }
 
@@ -188,6 +191,7 @@ void ThermostatEntity::reload_config() {
       if (!this->_supported_swing_modes.empty() && this->_current_swing_mode.value.empty()) {
         SPDLOG_WARN("Thermostat {}::{} swing mode not set, will default to: {}.", this->_id, this->_name, this->_supported_swing_modes[0].label);
         this->_current_swing_mode = this->_supported_swing_modes[0];
+        this->_requested_swing_mode = this->_supported_swing_modes[0];
       }
     }
   }
@@ -219,6 +223,7 @@ void ThermostatEntity::reload_config() {
     if (!this->_supported_swingh_modes.empty() && this->_current_swingh_mode.value.empty()) {
       SPDLOG_WARN("Thermostat {}::{} horizontal swing mode not set, will default to: {}.", this->_id, this->_name, this->_supported_swingh_modes[0].label);
       this->_current_swingh_mode = this->_supported_swingh_modes[0];
+      this->_requested_swingh_mode = this->_supported_swingh_modes[0];
     }
   }
 }
