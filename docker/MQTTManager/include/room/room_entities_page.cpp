@@ -219,6 +219,8 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_pco2(thermostat->get_icon_active_color());
       entity_slot->set_can_save_scene(false); // Entity is not a scene.
       entity_slot->set_mqtt_state_topic(thermostat->get_mqtt_state_topic());
+
+      SPDLOG_DEBUG("Thermostat icon: {}", entity_slot->icon());
     } else {
       SPDLOG_ERROR("Unknown entity type {} while processing EntityWrapper while building NSPanelRoomEntitiesPage protobuf object.", (int)entity->get_type());
     }
