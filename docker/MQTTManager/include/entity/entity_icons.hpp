@@ -14,7 +14,7 @@ public:
 
   // Thermostat Icons
   static constexpr const char *heating = "!";
-  static constexpr const char *cooling = "\"";
+  static constexpr const char *cooling = " "; // Was originally " but that causes issues when sending the .txt command to Nextion.
   static constexpr const char *hot_cold = "#";
   static constexpr const char *thermostat_auto = "$";
   static constexpr const char *dry = "%";
