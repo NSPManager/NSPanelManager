@@ -94,7 +94,7 @@ def get_base_data(request):
             },
             {
                 "name": "Cooling",
-                "icon": " ",
+                "icon": "7",
             },
             {
                 "name": "Hot/Cold",
@@ -175,6 +175,14 @@ def get_base_data(request):
             {
                 "name": "Fan 3",
                 "icon": "6",
+            },
+            {
+                "name": "Thermostat",
+                "icon": "8",
+            },
+            {
+                "name": "Off",
+                "icon": "h",
             },
         ],
     }
