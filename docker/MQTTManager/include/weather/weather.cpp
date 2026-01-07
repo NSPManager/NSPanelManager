@@ -45,7 +45,7 @@ void MQTTManagerWeather::_run_weather_thread() {
 void MQTTManagerWeather::reload_config() {
   std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
   if (MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::OUTSIDE_TEMP_SENSOR_PROVIDER).compare("home_assistant") == 0) {
-    OpenhabManager::detach_event_observer(MQTTManagerWeather::_outside_temperature_sensor_provider, &MQTTManagerWeather::openhab_temp_sensor_callback);
+    OpenhabManager::detach_event_observer(MQTTManagerWeather::_outside_temperature_sensor_entity_id, &MQTTManagerWeather::openhab_temp_sensor_callback);
     MQTTManagerWeather::_outside_temperature_sensor_entity_id = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::OUTSIDE_TEMP_SENSOR_ENTITY_ID);
     HomeAssistantManager::attach_event_observer(MQTTManagerWeather::_outside_temperature_sensor_entity_id, &MQTTManagerWeather::home_assistant_event_callback);
     SPDLOG_INFO("Will load outside temperature from Home Assistant sensor {}", MQTTManagerWeather::_outside_temperature_sensor_entity_id);

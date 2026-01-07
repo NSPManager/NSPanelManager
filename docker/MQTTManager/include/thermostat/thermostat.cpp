@@ -546,30 +546,7 @@ void ThermostatEntity::toggle() {
 }
 
 std::string_view ThermostatEntity::get_icon() {
-  if (!this->_current_mode.value.empty()) {
-    // Current value is not empty ie. current value has been set. Use icon from current mode.
-    SPDLOG_DEBUG("Thermostat {}::{} using icon from current mode. Icon: {} (0x{:X})", this->_id, this->_name, this->_current_mode.icon, this->_current_mode.icon[0]);
-    return this->_current_mode.icon;
-  } else {
-    // Unknown mode, simply return icon for entity type.
-    switch (this->_controller) {
-    case MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT:
-      return EntityIcons::home_assistant_icon;
-      break;
-    case MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB:
-      return EntityIcons::openhab_icon;
-      break;
-    case MQTT_MANAGER_ENTITY_CONTROLLER::NSPM:
-      return EntityIcons::fan; // This shouldn't be possible. Simple use a fan icon.
-      break;
-    case MQTT_MANAGER_ENTITY_CONTROLLER::NONE:
-      return EntityIcons::fan; // This shouldn't be possible. Simple use a fan icon.
-      break;
-    default:
-      return EntityIcons::fan; // This shouldn't be possible. Simple use a fan icon.
-      break;
-    }
-  }
+  return EntityIcons::thermostat;
 }
 
 uint16_t ThermostatEntity::get_icon_color() {

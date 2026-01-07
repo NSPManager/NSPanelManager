@@ -7,7 +7,7 @@ stomp_subscribe("nspanel/{{ nspanel.data.mac_address }}/status", (frame) => {
 </script>
 
 <div id="nspanel_container-{{ nspanel.data.id }}">
-    <div class="text-base-content rounded-b-box rounded-t-field overflow-hidden nspanel-box bg-base-100 shadow-xl" id="panel_status_box-{{ nspanel.data.id }}">
+    <div class="text-base-content rounded-b-box rounded-t-field overflow-hidden nspanel-box bg-base-100 shadow-xl hover:ring-2 hover:ring-accent/50" id="panel_status_box-{{ nspanel.data.id }}">
     <div class="">
         {% component "nspanel_status_header" id=nspanel.data.id %}{% endcomponent %}
     </div>

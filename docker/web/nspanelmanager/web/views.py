@@ -93,7 +93,7 @@ def get_base_data(request):
                 "icon": "!",
             },
             {
-                "name": "Cooling",
+                "name": "Thermostat",
                 "icon": "7",
             },
             {
@@ -177,7 +177,7 @@ def get_base_data(request):
                 "icon": "6",
             },
             {
-                "name": "Thermostat",
+                "name": "Cooling",
                 "icon": "8",
             },
             {

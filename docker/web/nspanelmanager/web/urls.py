@@ -45,6 +45,7 @@ urlpatterns = [
     path('api/get_scenes', api.get_scenes, name='get_scenes'),
     path('api/restart_mqtt_manager', api.restart_mqtt_manager, name='restart_mqtt_manager'),
     path('api/save_theme', api.save_theme, name='save_theme'),
+    #path('api/get_album_cover', api.get_album_cover, name='get_album_cover'),
 
     #####################
     ### Rest API URLs ###
