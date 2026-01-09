@@ -89,16 +89,24 @@ def get_base_data(request):
         "has_unread_messages": Message.objects.filter(read=False).exists(),
         "icons": [
             {
+                "name": "Off",
+                "icon": "h",
+            },
+            {
                 "name": "Heating",
                 "icon": "!",
             },
             {
-                "name": "Thermostat",
-                "icon": "7",
+                "name": "Cooling",
+                "icon": "8",
             },
             {
                 "name": "Hot/Cold",
                 "icon": "#",
+            },
+            {
+                "name": "Thermostat",
+                "icon": "7",
             },
             {
                 "name": "Thermostat Auto",
@@ -175,14 +183,6 @@ def get_base_data(request):
             {
                 "name": "Fan 3",
                 "icon": "6",
-            },
-            {
-                "name": "Cooling",
-                "icon": "8",
-            },
-            {
-                "name": "Off",
-                "icon": "h",
             },
         ],
     }

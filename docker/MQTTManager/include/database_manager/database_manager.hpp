@@ -30,9 +30,9 @@ struct NSPanel {
   std::string friendly_name;
   int room_id = 0;
   std::string version;
-  std::optional<uint64_t> button1_detached_mode_light_id = 0;
+  std::optional<uint64_t> button1_detached_mode_entity_id = 0;
   int button1_mode = 0;
-  std::optional<uint64_t> button2_detached_mode_light_id = 0;
+  std::optional<uint64_t> button2_detached_mode_entity_id = 0;
   int button2_mode = 0;
   std::string md5_data_file;
   std::string md5_firmware;
@@ -128,9 +128,9 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("mac_address", &NSPanel::mac_address),
                                                                               sqlite_orm::make_column("room_id", &NSPanel::room_id),
                                                                               sqlite_orm::make_column("version", &NSPanel::version),
-                                                                              sqlite_orm::make_column("button1_detached_mode_light_id", &NSPanel::button1_detached_mode_light_id),
+                                                                              sqlite_orm::make_column("button1_detached_mode_entity_id", &NSPanel::button1_detached_mode_entity_id),
                                                                               sqlite_orm::make_column("button1_mode", &NSPanel::button1_mode),
-                                                                              sqlite_orm::make_column("button2_detached_mode_light_id", &NSPanel::button2_detached_mode_light_id),
+                                                                              sqlite_orm::make_column("button2_detached_mode_entity_id", &NSPanel::button2_detached_mode_entity_id),
                                                                               sqlite_orm::make_column("button2_mode", &NSPanel::button2_mode),
                                                                               sqlite_orm::make_column("md5_data_file", &NSPanel::md5_data_file),
                                                                               sqlite_orm::make_column("md5_firmware", &NSPanel::md5_firmware),

@@ -22,6 +22,7 @@
 #include <ctime>
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <entity/entity.hpp>
 #include <exception>
 #include <fmt/chrono.h>
 #include <fmt/core.h>
@@ -69,9 +70,9 @@ std::shared_ptr<NSPanel> NSPanel::create_from_discovery_request(nlohmann::json r
     panel_data.friendly_name = request_data.at("friendly_name").get<std::string>();
     panel_data.room_id = db_room[0].id;
     panel_data.version = request_data.at("version").get<std::string>();
-    panel_data.button1_detached_mode_light_id = std::nullopt;
+    panel_data.button1_detached_mode_entity_id = std::nullopt;
     panel_data.button1_mode = 0;
-    panel_data.button2_detached_mode_light_id = std::nullopt;
+    panel_data.button2_detached_mode_entity_id = std::nullopt;
     panel_data.button2_mode = 0;
     panel_data.md5_data_file = request_data.at("md5_data_file").get<std::string>();
     panel_data.md5_firmware = request_data.at("md5_firmware").get<std::string>();
@@ -1321,18 +1322,19 @@ void NSPanel::set_relay_state(uint8_t relay, bool state) {
 void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
   if (command.has_button_pressed()) {
     if (command.nspanel_id() == this->_id) {
-      // TODO: Handle button press
       SPDLOG_DEBUG("NSPanel {}::{} got button {} press,", this->_id, this->_name, command.button_pressed().button_id());
 
       if (command.button_pressed().button_id() == 1) {
         ButtonMode button_mode = static_cast<ButtonMode>(this->_settings.button1_mode);
         switch (button_mode) {
         case ButtonMode::DETACHED: {
-          if (this->_settings.button1_detached_mode_light_id.has_value()) {
-            auto light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, this->_settings.button1_detached_mode_light_id.value());
-            if (light)
-              (*light)->toggle();
-            else
+          if (this->_settings.button1_detached_mode_entity_id.has_value()) {
+            auto entity = EntityManager::get_entity_by_id<MqttManagerEntity>(MQTT_MANAGER_ENTITY_TYPE::ANY, this->_settings.button1_detached_mode_entity_id.value());
+            if (entity) {
+              if ((*entity)->can_toggle()) {
+                (*entity)->toggle();
+              }
+            } else
               SPDLOG_ERROR("Tried to toggle detached light via panel but no light was was found with configured ID.");
           } else {
             SPDLOG_ERROR("Tried to toggle detached light via panel but no light was configured for button.");
@@ -1355,11 +1357,13 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
         ButtonMode button_mode = static_cast<ButtonMode>(this->_settings.button2_mode);
         switch (button_mode) {
         case ButtonMode::DETACHED: {
-          if (this->_settings.button2_detached_mode_light_id.has_value()) {
-            auto light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, this->_settings.button2_detached_mode_light_id.value());
-            if (light)
-              (*light)->toggle();
-            else
+          if (this->_settings.button2_detached_mode_entity_id.has_value()) {
+            auto entity = EntityManager::get_entity_by_id<MqttManagerEntity>(MQTT_MANAGER_ENTITY_TYPE::ANY, this->_settings.button2_detached_mode_entity_id.value());
+            if (entity) {
+              if ((*entity)->can_toggle()) {
+                (*entity)->toggle();
+              }
+            } else
               SPDLOG_ERROR("Tried to toggle detached light via panel but no light was was found with configured ID.");
           } else {
             SPDLOG_ERROR("Tried to toggle detached light via panel but no light was configured for button.");

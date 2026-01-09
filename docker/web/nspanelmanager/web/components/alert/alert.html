@@ -1,20 +1,20 @@
 {% if level == "info" %}
-<div role="alert" class="alert alert-info">
+<div role="alert" class="{{ style }} alert-info">
   <span class="mdi mdi-information-outline text-2xl"></span>
   <span>{{ text }}</span>
 </div>
 {% elif level == "warning" %}
-<div role="alert" class="alert alert-warning">
+<div role="alert" class="{{ style }} alert-warning">
     <span class="mdi mdi-alert-circle-outline text-2xl"></span>
   <span>{{ text }}</span>
 </div>
 {% elif level == "error" %}
-<div role="alert" class="alert alert-error">
+<div role="alert" class="{{ style }} alert-error">
   <span class="mdi mdi-alert-circle-outline text-2xl"></span>
   <span>{{ text }}</span>
 </div>
 {% else %}
-<div role="alert" class="alert">
+<div role="alert" class="{{ style }} alert">
   <span class="mdi mdi-alert-circle-outline text-2xl"></span>
   <span>{{ text }}</span>
 </div>
