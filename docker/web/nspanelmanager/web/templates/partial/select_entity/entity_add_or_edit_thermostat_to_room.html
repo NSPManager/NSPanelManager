@@ -14,7 +14,7 @@
             <div class="">
                 <!-- Modal header -->
                 <h3 class="text-xl font-semibold">
-                    Configure button
+                    Configure thermostat/climate
                 </h3>
                 <!-- Modal content -->
                 <div class="p-4 md:p-5 space-y-4">
@@ -41,7 +41,7 @@
 
                     {% if entity_source == "home_assistant" %}
                         <div class="mt-4">
-                            {% component "item_select" name="backend_name" label="Home Assistant item" items=home_assistant_items selected=thermostat.entity_data.home_assistant_name %}{% endcomponent %}
+                            {% component "item_select" name="backend_name" label="Home Assistant entity" items=home_assistant_items selected=thermostat.entity_data.home_assistant_name %}{% endcomponent %}
                         </div>
                         <div class="mt-2">
                             <button type="button" class="btn btn-primary btn-block" onclick="load_ha_thermostat_options()">
@@ -77,7 +77,7 @@
                                 </button>
                                 <!--Select icon dropdown-->
                                 <details class="dropdown dropdown-end" id="dropdown_icon_selector">
-                                    <summary id="icon_selector_button" class="btn border-t border-b border-neutral rounded-none bg-base-100 hover:bg-info hover:text-info-content font-nspm-mdi">+</summary>
+                                    <summary id="icon_selector_button" class="btn h-full border-y border-x-0 border-neutral rounded-none bg-base-100 hover:bg-info hover:text-info-content font-nspm-mdi">+</summary>
                                     <input type="hidden" value="" id="icon_selector_value">
                                     <div class="dropdown-content bg-base-100 rounded-box rounded-tr-none w-56 border border-primary">
                                         <div class="flex justify-center pb-1 mb-2 mt-1 border-b border-primary">
@@ -93,10 +93,10 @@
                                     </div>
                                 </details>
                                 <!--Label field-->
-                                <input class="outline-none rounded-none bg-base-300 border-neutral border border-y-1 focus:ring-0 peer-focus/search_text:border-accent focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
+                                <input class="outline-none rounded-none bg-base-300 border-neutral border-y border-r focus:ring-0 peer-focus/search_text:border-accent focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                                 type="text" id="input_label" value="" title="Mode label" placeholder="Mode label">
                                 <!--Mode field-->
-                                <input class="outline-none rounded-none bg-base-300 border-neutral border border-y-1 focus:ring-0 peer-focus/search_text:border-accent focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
+                                <input class="outline-none rounded-none bg-base-300 border-neutral border-y border-r focus:ring-0 peer-focus/search_text:border-accent focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                                 type="text" id="input_value" value="" title="Mode value" placeholder="Mode value">
                                 <!--Option left icon-->
                                 <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/search_text:border-accent">

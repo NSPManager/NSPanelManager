@@ -54,7 +54,7 @@
                                 <label for="light_type_ceiling" class="w-full py-3 ms-2 text-sm font-medium">Ceiling</label>
                             </div>
                             </li>
-                            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                            <li class="w-full border-t sm:border-t-0 border-neutral">
                             <div class="flex items-center ps-3">
                                 <input id="light_type_table" type="radio" name="light_type" value="table" class="w-4 h-4 radio radio-accent" {% if not light.entity_data.is_ceiling_light %}checked{% endif %} required>
                                 <label for="light_type_table" class="w-full py-3 ms-2 text-sm font-medium">Table</label>
@@ -74,7 +74,7 @@
                                 <label for="light_control_mode_dimmer" class="w-full py-3 ms-2 text-sm font-medium">Dimmable</label>
                             </div>
                             </li>
-                            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                            <li class="w-full border-t sm:border-t-0 border-neutral">
                             <div class="flex items-center ps-3">
                                 <input id="light_control_mode_switch" type="radio" name="light_control_mode" value="switch" class="w-4 h-4 radio radio-accent" {% if control_mode == "switch" %}checked{% endif %} required>
                                 <label for="light_control_mode_switch" class="w-full py-3 ms-2 text-sm font-medium">On/Off</label>
@@ -101,7 +101,7 @@
                                 <label for="color_temperature" class="w-full py-3 ms-2 text-sm font-medium">Color temperature</label>
                             </div>
                         </li>
-                        <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                        <li class="w-full border-t sm:border-t-0 border-neutral">
                             <div class="flex items-center ps-3">
                             <input id="rgb" type="checkbox" name="rgb" class="w-4 h-4 checkbox checkbox-accent" {% if can_rgb %}checked{% endif %}>
                             <label for="rgb" class="w-full py-3 ms-2 text-sm font-medium">RGB</label>
