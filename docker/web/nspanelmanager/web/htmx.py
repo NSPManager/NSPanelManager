@@ -1424,7 +1424,6 @@ def create_or_update_thermostat_entity(request):
 
     entity_data = {
         "controller": request.session["entity_source"],
-        "home_assistant_name": "",
     }
     if "entity_id" in action_args and int(action_args["entity_id"]):
         new_thermostat = Entity.objects.get(id=int(action_args["entity_id"]))
