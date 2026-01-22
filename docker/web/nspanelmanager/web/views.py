@@ -9,6 +9,7 @@ from django.forms.models import model_to_dict
 from django.shortcuts import Http404, HttpResponse, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from requests import delete
+from django.template.defaulttags import register
 
 from web.openhab_api import get_all_openhab_items
 from web.settings_helper import (
@@ -381,33 +382,21 @@ def edit_nspanel(request, panel_id: int):
         "temperature_calibration": get_nspanel_setting_with_default(
             panel_id, "temperature_calibration", 0
         ),
-        "button1_custom_mqtt_topic": get_nspanel_setting_with_default(
-            panel_id, "button1_mqtt_topic", ""
-        ),
-        "button1_custom_mqtt_payload": get_nspanel_setting_with_default(
-            panel_id, "button1_mqtt_payload", ""
-        ),
-        "button2_custom_mqtt_topic": get_nspanel_setting_with_default(
-            panel_id, "button2_mqtt_topic", ""
-        ),
-        "button2_custom_mqtt_payload": get_nspanel_setting_with_default(
-            panel_id, "button2_mqtt_payload", ""
-        ),
-        "button1_relay_lower_temperature": get_nspanel_setting_with_default(
-            panel_id, "button1_relay_lower_temperature", ""
-        ),
-        "button1_relay_upper_temperature": get_nspanel_setting_with_default(
-            panel_id, "button1_relay_upper_temperature", ""
-        ),
-        "button2_relay_lower_temperature": get_nspanel_setting_with_default(
-            panel_id, "button2_relay_lower_temperature", ""
-        ),
-        "button2_relay_upper_temperature": get_nspanel_setting_with_default(
-            panel_id, "button2_relay_upper_temperature", ""
-        ),
         "default_page": get_nspanel_setting_with_default(panel_id, "default_page", "0"),
     }
-
+    for button in ["button1", "button2","button1_long", "button2_long"]:
+        key = f"{button}_custom_mqtt_topic"
+        settings[key] = get_nspanel_setting_with_default(panel_id, key, "")
+        
+        key = f"{button}_custom_mqtt_payload"
+        settings[key] = get_nspanel_setting_with_default(panel_id, key, "")
+        
+        key = f"{button}_relay_lower_temperature"
+        settings[key] = get_nspanel_setting_with_default(panel_id, key, "")
+  
+        key = f"{button}_relay_upper_temperature"
+        settings[key] = get_nspanel_setting_with_default(panel_id, key, "")
+  
     nspanel = NSPanel.objects.get(id=panel_id)
     panel_info = {}
     panel_info["data"] = nspanel
@@ -426,52 +415,28 @@ def edit_nspanel(request, panel_id: int):
     return render(request, "edit_nspanel.html", data)
 
 
+def evaluate_button_state(button, panel_id, panel: NSPanel, request):
+    setattr(panel, f"{button}_mode", request.POST[f"{button}_mode"])
+    if request.POST[f"{button}_mode"] == "1":  # Detached mode
+        setattr(panel,f"{button}_detached_mode_light", Entity.objects.get(id=request.POST[f"{button}_detached_mode_light"]))
+    else:
+        setattr(panel,f"{button}_detached_mode_light", None)
+
+    if request.POST[f"{button}_mode"] == "2":  # Custom MQTT Mode
+        set_nspanel_setting_value(panel_id, f"{button}_custom_mqtt_topic", request.POST[f"{button}_custom_mqtt_topic"])
+        set_nspanel_setting_value(panel_id,f"{button}_custom_mqtt_payload",request.POST[f"{button}_custom_mqtt_payload"])
+    else:
+        delete_nspanel_setting(panel_id, f"{button}_custom_mqtt_topic")
+        delete_nspanel_setting(panel_id, f"{button}_custom_mqtt_payload")
+   
+
+
 def save_panel_settings(request, panel_id: int):
     panel = NSPanel.objects.get(id=panel_id)
     panel.room = Room.objects.get(id=request.POST["room_id"])
     panel.friendly_name = request.POST["name"]
-    panel.button1_mode = request.POST["button1_mode"]
-    if request.POST["button1_mode"] == "1":  # Detached mode
-        panel.button1_detached_mode_light = Entity.objects.get(
-            id=request.POST["button1_detached_mode_light"]
-        )
-    else:
-        panel.button1_detached_mode_light = None
-
-    if request.POST["button1_mode"] == "2":  # Custom MQTT Mode
-        set_nspanel_setting_value(
-            panel_id, "button1_mqtt_topic", request.POST["button1_custom_mqtt_topic"]
-        )
-        set_nspanel_setting_value(
-            panel_id,
-            "button1_mqtt_payload",
-            request.POST["button1_custom_mqtt_payload"],
-        )
-    else:
-        delete_nspanel_setting(panel_id, "button1_mqtt_topic")
-        delete_nspanel_setting(panel_id, "button1_mqtt_payload")
-
-    panel.button2_mode = request.POST["button2_mode"]
-    if request.POST["button2_mode"] == "1":  # Detached mode
-        panel.button2_detached_mode_light = Entity.objects.get(
-            id=request.POST["button2_detached_mode_light"]
-        )
-    else:
-        panel.button2_detached_mode_light = None
-
-    if request.POST["button2_mode"] == "2":  # Custom MQTT Mode
-        set_nspanel_setting_value(
-            panel_id, "button2_mqtt_topic", request.POST["button2_custom_mqtt_topic"]
-        )
-        set_nspanel_setting_value(
-            panel_id,
-            "button2_mqtt_payload",
-            request.POST["button2_custom_mqtt_payload"],
-        )
-    else:
-        delete_nspanel_setting(panel_id, "button2_mqtt_topic")
-        delete_nspanel_setting(panel_id, "button2_mqtt_payload")
-
+    for button in ["button1", "button2"]:
+        evaluate_button_state (button, panel_id, panel, request)
     if request.POST["screen_dim_level"].strip():
         set_nspanel_setting_value(
             panel_id, "screen_dim_level", request.POST["screen_dim_level"]
@@ -809,6 +774,16 @@ def save_new_merged_flash(request):
 
 
 # TODO: Make exempt only when Debug = true
+
+# register template custom filter which allows dict access
+@register.filter
+def get_item(dictionary, key):
+    try:
+        return dictionary.get(key)
+    except Exception as e:
+        if type(e) != AttributeError:
+            raise e
+    return getattr(dictionary,key)
 
 
 def get_client_ip(request):
