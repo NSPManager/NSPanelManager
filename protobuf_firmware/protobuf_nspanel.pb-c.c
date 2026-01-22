@@ -1177,7 +1177,7 @@ const ProtobufCEnumDescriptor nspanel_status_report__state__descriptor =
   nspanel_status_report__state__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_status_report__field_descriptors[11] =
+static const ProtobufCFieldDescriptor nspanel_status_report__field_descriptors[12] =
 {
   {
     "nspanel_state",
@@ -1311,6 +1311,18 @@ static const ProtobufCFieldDescriptor nspanel_status_report__field_descriptors[1
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "version",
+    12,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelStatusReport, version),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_status_report__field_indices_by_name[] = {
   3,   /* field[3] = heap_used_pct */
@@ -1323,12 +1335,13 @@ static const unsigned nspanel_status_report__field_indices_by_name[] = {
   2,   /* field[2] = rssi */
   5,   /* field[5] = temperature */
   1,   /* field[1] = update_progress */
+  11,   /* field[11] = version */
   7,   /* field[7] = warnings */
 };
 static const ProtobufCIntRange nspanel_status_report__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 11 }
+  { 0, 12 }
 };
 const ProtobufCMessageDescriptor nspanel_status_report__descriptor =
 {
@@ -1338,7 +1351,7 @@ const ProtobufCMessageDescriptor nspanel_status_report__descriptor =
   "NSPanelStatusReport",
   "",
   sizeof(NSPanelStatusReport),
-  11,
+  12,
   nspanel_status_report__field_descriptors,
   nspanel_status_report__field_indices_by_name,
   1,  nspanel_status_report__number_ranges,

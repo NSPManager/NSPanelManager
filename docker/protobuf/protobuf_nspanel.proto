@@ -113,6 +113,7 @@ message NSPanelStatusReport {
     string md5_firmware = 9;
     string md5_littlefs = 10;
     string md5_tft_gui = 11;
+    string version = 12;
 }
 
 message NSPanelLightStatus {

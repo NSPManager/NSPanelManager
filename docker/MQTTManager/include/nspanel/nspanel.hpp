@@ -179,6 +179,7 @@ private:
   std::mutex _settings_mutex;          // Mutex to only allow access to _settings for one thread at the time
   std::string _mac;
   std::string _name;
+  std::string _version;
   bool _is_us_panel;
   enum US_PANEL_ORIENTATION {
     LANDSCAPE_LEFT,

@@ -3944,6 +3944,7 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
     kMd5FirmwareFieldNumber = 9,
     kMd5LittlefsFieldNumber = 10,
     kMd5TftGuiFieldNumber = 11,
+    kVersionFieldNumber = 12,
     kNspanelStateFieldNumber = 1,
     kUpdateProgressFieldNumber = 2,
     kRssiFieldNumber = 3,
@@ -4047,6 +4048,22 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
   std::string* _internal_mutable_md5_tft_gui();
 
   public:
+  // string version = 12;
+  void clear_version() ;
+  const std::string& version() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_version(Arg_&& arg, Args_... args);
+  std::string* mutable_version();
+  PROTOBUF_NODISCARD std::string* release_version();
+  void set_allocated_version(std::string* value);
+
+  private:
+  const std::string& _internal_version() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_version(
+      const std::string& value);
+  std::string* _internal_mutable_version();
+
+  public:
   // .NSPanelStatusReport.state nspanel_state = 1;
   void clear_nspanel_state() ;
   ::NSPanelStatusReport_state nspanel_state() const;
@@ -4102,8 +4119,8 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 11, 1,
-      92, 2>
+      4, 12, 1,
+      99, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -4129,6 +4146,7 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
     ::google::protobuf::internal::ArenaStringPtr md5_firmware_;
     ::google::protobuf::internal::ArenaStringPtr md5_littlefs_;
     ::google::protobuf::internal::ArenaStringPtr md5_tft_gui_;
+    ::google::protobuf::internal::ArenaStringPtr version_;
     int nspanel_state_;
     ::int32_t update_progress_;
     ::int32_t rssi_;
@@ -7022,6 +7040,56 @@ inline void NSPanelStatusReport::set_allocated_md5_tft_gui(std::string* value) {
         }
   #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:NSPanelStatusReport.md5_tft_gui)
+}
+
+// string version = 12;
+inline void NSPanelStatusReport::clear_version() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.version_.ClearToEmpty();
+}
+inline const std::string& NSPanelStatusReport::version() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelStatusReport.version)
+  return _internal_version();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelStatusReport::set_version(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.version_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelStatusReport.version)
+}
+inline std::string* NSPanelStatusReport::mutable_version() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_version();
+  // @@protoc_insertion_point(field_mutable:NSPanelStatusReport.version)
+  return _s;
+}
+inline const std::string& NSPanelStatusReport::_internal_version() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.version_.Get();
+}
+inline void NSPanelStatusReport::_internal_set_version(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.version_.Set(value, GetArena());
+}
+inline std::string* NSPanelStatusReport::_internal_mutable_version() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.version_.Mutable( GetArena());
+}
+inline std::string* NSPanelStatusReport::release_version() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelStatusReport.version)
+  return _impl_.version_.Release();
+}
+inline void NSPanelStatusReport::set_allocated_version(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.version_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.version_.IsDefault()) {
+          _impl_.version_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelStatusReport.version)
 }
 
 // -------------------------------------------------------------------

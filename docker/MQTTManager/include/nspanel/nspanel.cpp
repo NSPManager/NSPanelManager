@@ -579,6 +579,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         this->_rssi = report.rssi();
         this->_heap_used_pct = report.heap_used_pct();
         this->_temperature = report.temperature();
+        this->_version = report.version();
         this->_current_firmware_md5_checksum = report.md5_firmware();
         this->_current_littlefs_md5_checksum = report.md5_littlefs();
         this->_current_tft_md5_checksum = report.md5_tft_gui();
@@ -796,6 +797,8 @@ void NSPanel::send_websocket_status_update() {
   nlohmann::json status_data = {
       {"id", this->_id},
       {"name", this->_name},
+      {"version", this->_version},
+      {"firmware_md5", this->_current_firmware_md5_checksum},
       {"ip_address", this->_ip_address},
       {"rssi", this->_rssi},
       {"temperature", this->_temperature},
@@ -1040,6 +1043,7 @@ nlohmann::json NSPanel::get_websocket_json_representation() {
     data["nspanel_id"] = this->_id;
   }
   data["name"] = this->_name;
+  data["version"] = this->_version;
   data["rssi"] = this->_rssi;
   data["heap_used_pct"] = this->_heap_used_pct;
   data["mac_address"] = send_mac;
@@ -1171,6 +1175,7 @@ void NSPanel::register_to_home_assistant() {
   base_json["device"]["manufacturer"] = "Sonoff";
   base_json["device"]["model"] = "NSPanel";
   base_json["device"]["name"] = this->_name;
+  base_json["device"]["version"] = this->_version;
   base_json["availability"] = nlohmann::json();
   base_json["availability"]["topic"] = this->_mqtt_status_topic;
   base_json["availability"]["value_template"] = "{{ value_json.state }}";

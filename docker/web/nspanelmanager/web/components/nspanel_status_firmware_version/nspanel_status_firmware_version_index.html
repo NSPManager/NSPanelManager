@@ -1,0 +1,49 @@
+<script type="module">
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
+
+  stomp_subscribe("nspanel/{{ nspanel.mac_address }}/status", (message) => {
+    var element = document.getElementById(`nspanel-firmware-version-{{ nspanel.id }}`);
+    var data = JSON.parse(message.body);
+    element.state = data.state;
+    element.firmware_version = data.version;
+    element.firmware_md5 = data.firmware_md5;
+  })
+
+  define({
+    tag: "nspanel-firmware-version",
+    nspanel_id: '',
+    state: '',
+    firmware_version: '',
+    firmware_md5: '',
+    render: ({id, nspanel_id, state, firmware_version, firmware_md5}) => {
+      if (state == "offline" || state == "unknown") {
+        return html`
+           <div class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-memory"></i>
+                </span>
+                Fw ver: <span id="firmware-version-${nspanel_id}" class="text-sm">?</span>
+                Fw md5: <span id="firmware-md5-${nspanel_id}" class="text-sm">?</span>
+            </div>
+        `;
+      } else {
+        return html`
+       <div class="icon-text">
+              <span class="icon me-1">
+                  <i class="mdi mdi-source-branch"></i>
+              </span>
+              <span class="text-sm" style="display:inline-block;">Fw ver:  </span><span id="firmware-version-${nspanel_id}" class="text-sm" style="vertical-align: text-bottom;overflow: hidden;white-space:nowrap; text-overflow:ellipsis; width:6em; display:inline-block;">${firmware_version}</span>
+          </div>
+          <div class="icon-text">
+              <span class="icon me-1">
+                  <i class="mdi mdi-source-branch"></i>
+              </span>
+              <span class="text-sm" style="display:inline-block;">Fw md5: </span><span id="firmware-md5-${nspanel_id}" class="text-sm" style="vertical-align: text-bottom;overflow: hidden;white-space:nowrap; text-overflow:ellipsis; width:6em; display:inline-block;">${firmware_md5}</span>
+          </div>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-firmware-version id="nspanel-firmware-version-{{ nspanel.id }}" nspanel_id="{{ nspanel.id }}" state="" firmware_version="" firmware_md5=""></nspanel-firmware-version>
