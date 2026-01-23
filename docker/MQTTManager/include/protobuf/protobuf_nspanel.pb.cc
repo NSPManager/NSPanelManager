@@ -321,6 +321,25 @@ struct NSPanelMQTTManagerCommand_ButtonPressedDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelMQTTManagerCommand_ButtonPressedDefaultTypeInternal _NSPanelMQTTManagerCommand_ButtonPressed_default_instance_;
 
+inline constexpr NSPanelMQTTManagerCommand_ButtonLongPressed::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : button_id_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_ButtonLongPressed::NSPanelMQTTManagerCommand_ButtonLongPressed(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct NSPanelMQTTManagerCommand_ButtonLongPressedDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_ButtonLongPressedDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~NSPanelMQTTManagerCommand_ButtonLongPressedDefaultTypeInternal() {}
+  union {
+    NSPanelMQTTManagerCommand_ButtonLongPressed _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelMQTTManagerCommand_ButtonLongPressedDefaultTypeInternal _NSPanelMQTTManagerCommand_ButtonLongPressed_default_instance_;
+
 inline constexpr NSPanelLightStatus::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : name_(
@@ -537,6 +556,8 @@ inline constexpr NSPanelConfig::Impl_::Impl_(
         temperature_calibration_{0},
         button1_mode_{static_cast< ::NSPanelConfig_NSPanelButtonMode >(0)},
         button2_mode_{static_cast< ::NSPanelConfig_NSPanelButtonMode >(0)},
+        button1_long_mode_{static_cast< ::NSPanelConfig_NSPanelButtonMode >(0)},
+        button2_long_mode_{static_cast< ::NSPanelConfig_NSPanelButtonMode >(0)},
         raise_light_level_to_100_above_{0},
         nspanel_id_{0},
         optimistic_mode_{false},
@@ -609,6 +630,8 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.temperature_calibration_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.button1_mode_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.button2_mode_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.button1_long_mode_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.button2_long_mode_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.global_scene_entity_page_ids_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.optimistic_mode_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.raise_light_level_to_100_above_),
@@ -819,6 +842,15 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ButtonPressed, _impl_.button_id_),
         ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ButtonLongPressed, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ButtonLongPressed, _impl_.button_id_),
+        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand, _internal_metadata_),
         ~0u,  // no _extensions_
         ~0u,  // no _oneof_case_
@@ -855,6 +887,7 @@ const ::uint32_t
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
+        ::_pbi::kInvalidFieldOffsetTag,
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand, _impl_.nspanel_id_),
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand, _impl_.CommandData_),
 };
@@ -863,23 +896,24 @@ static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::NSPanelConfig_RoomInfo)},
         {11, -1, -1, sizeof(::NSPanelConfig)},
-        {55, -1, -1, sizeof(::NSPanelWarning)},
-        {65, -1, -1, sizeof(::NSPanelStatusReport)},
-        {85, -1, -1, sizeof(::NSPanelLightStatus)},
-        {103, -1, -1, sizeof(::NSPanelRoomEntitiesPage_EntitySlot)},
-        {118, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
-        {130, -1, -1, sizeof(::NSPanelRoomStatus)},
-        {151, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
-        {164, -1, -1, sizeof(::NSPanelWeatherUpdate)},
-        {180, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
-        {195, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
-        {205, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
-        {222, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
-        {232, -1, -1, sizeof(::NSPanelMQTTManagerCommand_SaveSceneCommand)},
-        {242, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonPressed)},
-        {251, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand)},
-        {261, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatCommand)},
-        {272, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {57, -1, -1, sizeof(::NSPanelWarning)},
+        {67, -1, -1, sizeof(::NSPanelStatusReport)},
+        {87, -1, -1, sizeof(::NSPanelLightStatus)},
+        {105, -1, -1, sizeof(::NSPanelRoomEntitiesPage_EntitySlot)},
+        {120, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
+        {132, -1, -1, sizeof(::NSPanelRoomStatus)},
+        {153, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
+        {166, -1, -1, sizeof(::NSPanelWeatherUpdate)},
+        {182, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
+        {197, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
+        {207, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
+        {224, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
+        {234, -1, -1, sizeof(::NSPanelMQTTManagerCommand_SaveSceneCommand)},
+        {244, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonPressed)},
+        {253, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonLongPressed)},
+        {262, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand)},
+        {272, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatCommand)},
+        {283, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelConfig_RoomInfo_default_instance_._instance,
@@ -898,13 +932,14 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_SaveSceneCommand_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_ButtonPressed_default_instance_._instance,
+    &::_NSPanelMQTTManagerCommand_ButtonLongPressed_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_ThermostatTemperatureCommand_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_ThermostatCommand_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_default_instance_._instance,
 };
 const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\026protobuf_nspanel.proto\"\216\r\n\rNSPanelConf"
+    "\n\026protobuf_nspanel.proto\"\210\016\n\rNSPanelConf"
     "ig\022\014\n\004name\030\001 \001(\t\022\024\n\014default_room\030\002 \001(\005\0227"
     "\n\014default_page\030\003 \001(\0162!.NSPanelConfig.NSP"
     "anelDefaultPage\022&\n\036screensaver_activatio"
@@ -925,131 +960,137 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "temperature_calibration\030\025 \001(\005\0226\n\014button1"
     "_mode\030\026 \001(\0162 .NSPanelConfig.NSPanelButto"
     "nMode\0226\n\014button2_mode\030\031 \001(\0162 .NSPanelCon"
-    "fig.NSPanelButtonMode\022$\n\034global_scene_en"
-    "tity_page_ids\030\036 \003(\005\022\027\n\017optimistic_mode\030\037"
-    " \001(\010\022&\n\036raise_light_level_to_100_above\030 "
-    " \001(\005\022\022\n\nnspanel_id\030! \001(\005\022\032\n\022relay1_relay"
-    "_group\030# \003(\005\022\032\n\022relay2_relay_group\030% \003(\005"
-    "\022\037\n\027default_light_brightess\030& \001(\005\022\036\n\026loc"
-    "ked_to_default_room\030\' \001(\010\022,\n$inside_temp"
-    "erature_sensor_mqtt_topic\030( \001(\t\022!\n\031butto"
-    "n1_lower_temperature\030) \001(\005\022!\n\031button1_up"
-    "per_temperature\030* \001(\005\022!\n\031button2_lower_t"
-    "emperature\030+ \001(\005\022!\n\031button2_upper_temper"
-    "ature\030, \001(\005\032L\n\010RoomInfo\022\017\n\007room_id\030\001 \001(\005"
-    "\022\027\n\017entity_page_ids\030\002 \003(\005\022\026\n\016scene_page_"
-    "ids\030\003 \003(\005\"8\n\022NSPanelDefaultPage\022\010\n\004HOME\020"
-    "\000\022\n\n\006SCENES\020\001\022\014\n\010ENTITIES\020\002\"\250\001\n\026NSPanelS"
-    "creensaverMode\022\033\n\027WEATHER_WITH_BACKGROUN"
-    "D\020\000\022\036\n\032WEATHER_WITHOUT_BACKGROUND\020\001\022\034\n\030D"
-    "ATETIME_WITH_BACKGROUND\020\003\022\037\n\033DATETIME_WI"
-    "THOUT_BACKGROUND\020\004\022\022\n\016NO_SCREENSAVER\020\005\"i"
-    "\n\021NSPanelButtonMode\022\n\n\006DIRECT\020\000\022\n\n\006FOLLO"
-    "W\020\001\022\022\n\016NOTIFY_MANAGER\020\002\022\023\n\017THERMOSTAT_HE"
-    "AT\020\003\022\023\n\017THERMOSTAT_COOL\020\004\"C\n\016NSPanelWarn"
-    "ing\022#\n\005level\030\001 \001(\0162\024.NSPanelWarningLevel"
-    "\022\014\n\004text\030\002 \001(\t\"\233\003\n\023NSPanelStatusReport\0221"
-    "\n\rnspanel_state\030\001 \001(\0162\032.NSPanelStatusRep"
-    "ort.state\022\027\n\017update_progress\030\002 \001(\005\022\014\n\004rs"
-    "si\030\003 \001(\005\022\025\n\rheap_used_pct\030\004 \001(\005\022\023\n\013mac_a"
-    "ddress\030\005 \001(\t\022\023\n\013temperature\030\006 \001(\002\022\022\n\nip_"
-    "address\030\007 \001(\t\022!\n\010warnings\030\010 \003(\0132\017.NSPane"
-    "lWarning\022\024\n\014md5_firmware\030\t \001(\t\022\024\n\014md5_li"
-    "ttlefs\030\n \001(\t\022\023\n\013md5_tft_gui\030\013 \001(\t\022\017\n\007ver"
-    "sion\030\014 \001(\t\"`\n\005state\022\n\n\006ONLINE\020\000\022\013\n\007OFFLI"
-    "NE\020\001\022\020\n\014UPDATING_TFT\020\002\022\025\n\021UPDATING_FIRMW"
-    "ARE\020\003\022\025\n\021UPDATING_LITTLEFS\020\004\"\325\001\n\022NSPanel"
-    "LightStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\017\n"
-    "\007can_dim\030\003 \001(\010\022\035\n\025can_color_temperature\030"
-    "\004 \001(\010\022\017\n\007can_rgb\030\005 \001(\010\022\023\n\013light_level\030\006 "
-    "\001(\005\022\022\n\ncolor_temp\030\007 \001(\005\022\013\n\003hue\030\010 \001(\005\022\022\n\n"
-    "saturation\030\t \001(\005\022\032\n\022room_view_position\030\n"
-    " \001(\005\"\230\002\n\027NSPanelRoomEntitiesPage\022\n\n\002id\030\001"
-    " \001(\005\022\021\n\tpage_type\030\002 \001(\005\022\023\n\013header_text\030\003"
-    " \001(\t\0225\n\010entities\030\004 \003(\0132#.NSPanelRoomEnti"
-    "tiesPage.EntitySlot\032\221\001\n\nEntitySlot\022\032\n\022ro"
-    "om_view_position\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\014\n\004"
-    "icon\030\003 \001(\t\022\013\n\003pco\030\004 \001(\005\022\014\n\004pco2\030\005 \001(\005\022\026\n"
-    "\016can_save_scene\030\006 \001(\010\022\030\n\020mqtt_state_topi"
-    "c\030\007 \001(\t\"\226\003\n\021NSPanelRoomStatus\022\n\n\002id\030\001 \001("
-    "\005\022\014\n\004name\030\002 \001(\t\022\031\n\021average_dim_level\030\003 \001"
-    "(\005\022 \n\030ceiling_lights_dim_level\030\004 \001(\005\022\036\n\026"
-    "table_lights_dim_level\030\005 \001(\005\022!\n\031average_"
-    "color_temperature\030\006 \001(\005\022.\n&ceiling_light"
-    "s_color_temperature_value\030\007 \001(\005\022,\n$table"
-    "_lights_color_temperature_value\030\010 \001(\005\022\032\n"
-    "\022num_ceiling_lights\030\t \001(\005\022\030\n\020num_table_l"
-    "ights\030\n \001(\005\022\035\n\025num_ceiling_lights_on\030\013 \001"
-    "(\005\022\033\n\023num_table_lights_on\030\014 \001(\005\022\027\n\017entit"
-    "y_page_ids\030\r \003(\005\"\277\003\n\024NSPanelWeatherUpdat"
-    "e\022:\n\016forecast_items\030\001 \003(\0132\".NSPanelWeath"
-    "erUpdate.ForecastItem\022\034\n\024current_weather"
-    "_icon\030\002 \001(\t\022\"\n\032current_temperature_strin"
-    "g\030\003 \001(\t\022\"\n\032current_maxmin_temperature\030\004 "
-    "\001(\t\022\033\n\023current_wind_string\030\005 \001(\t\022\026\n\016sunr"
-    "ise_string\030\006 \001(\t\022\025\n\rsunset_string\030\007 \001(\t\022"
-    "$\n\034current_precipitation_string\030\010 \001(\t\032\222\001"
-    "\n\014ForecastItem\022\024\n\014weather_icon\030\001 \001(\t\022\034\n\024"
-    "precipitation_string\030\002 \001(\t\022!\n\031temperatur"
-    "e_maxmin_string\030\003 \001(\t\022\023\n\013wind_string\030\004 \001"
-    "(\t\022\026\n\016display_string\030\005 \001(\t\"\227\r\n\031NSPanelMQ"
-    "TTManagerCommand\022M\n\022first_page_turn_on\030\001"
-    " \001(\0132/.NSPanelMQTTManagerCommand.FirstPa"
-    "geTurnLightOnH\000\022O\n\023first_page_turn_off\030\002"
-    " \001(\01320.NSPanelMQTTManagerCommand.FirstPa"
-    "geTurnLightOffH\000\022@\n\rlight_command\030\003 \001(\0132"
-    "\'.NSPanelMQTTManagerCommand.LightCommand"
-    "H\000\022c\n toggle_entity_from_entities_page\030\004"
-    " \001(\01327.NSPanelMQTTManagerCommand.ToggleE"
-    "ntityFromEntitiesPageH\000\022I\n\022save_scene_co"
-    "mmand\030\005 \001(\0132+.NSPanelMQTTManagerCommand."
-    "SaveSceneCommandH\000\022B\n\016button_pressed\030\006 \001"
-    "(\0132(.NSPanelMQTTManagerCommand.ButtonPre"
-    "ssedH\000\022a\n\036thermostat_temperature_command"
-    "\030\007 \001(\01327.NSPanelMQTTManagerCommand.Therm"
-    "ostatTemperatureCommandH\000\022J\n\022thermostat_"
-    "command\030\010 \001(\0132,.NSPanelMQTTManagerComman"
-    "d.ThermostatCommandH\000\022\022\n\nnspanel_id\030d \001("
-    "\005\032\372\001\n\024FirstPageTurnLightOn\022E\n\raffect_lig"
-    "hts\030\001 \001(\0162..NSPanelMQTTManagerCommand.Af"
-    "fectLightsOptions\022\037\n\027brightness_slider_v"
-    "alue\030\002 \001(\005\022\033\n\023kelvin_slider_value\030\003 \001(\005\022"
-    "\025\n\rselected_room\030\004 \001(\005\022\016\n\006global\030\005 \001(\010\022\034"
-    "\n\024has_brightness_value\030\006 \001(\010\022\030\n\020has_kelv"
-    "in_value\030\007 \001(\010\032n\n\025FirstPageTurnLightOff\022"
-    "E\n\raffect_lights\030\001 \001(\0162..NSPanelMQTTMana"
-    "gerCommand.AffectLightsOptions\022\016\n\006global"
-    "\030\002 \001(\010\032\321\001\n\014LightCommand\022\021\n\tlight_ids\030\001 \003"
-    "(\005\022\026\n\016has_brightness\030\002 \001(\010\022\022\n\nbrightness"
-    "\030\003 \001(\005\022\035\n\025has_color_temperature\030\004 \001(\010\022\031\n"
-    "\021color_temperature\030\005 \001(\005\022\017\n\007has_hue\030\006 \001("
-    "\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016has_saturation\030\010 \001(\010\022\022"
-    "\n\nsaturation\030\t \001(\005\032K\n\034ToggleEntityFromEn"
-    "titiesPage\022\026\n\016entity_page_id\030\001 \001(\005\022\023\n\013en"
-    "tity_slot\030\002 \001(\005\032\?\n\020SaveSceneCommand\022\026\n\016e"
-    "ntity_page_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001(\005"
-    "\032\"\n\rButtonPressed\022\021\n\tbutton_id\030\002 \001(\005\032J\n\034"
-    "ThermostatTemperatureCommand\022\025\n\rthermost"
-    "at_id\030\001 \001(\005\022\023\n\013temperature\030\002 \001(\002\032M\n\021Ther"
-    "mostatCommand\022\025\n\rthermostat_id\030\001 \001(\005\022\016\n\006"
-    "option\030\002 \001(\t\022\021\n\tnew_value\030\003 \001(\t\"D\n\023Affec"
-    "tLightsOptions\022\007\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020"
-    "\001\022\022\n\016CEILING_LIGHTS\020\002B\r\n\013CommandData*[\n\023"
-    "NSPanelWarningLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ERR"
-    "OR\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t"
-    "\n\005TRACE\020\005b\006proto3"
+    "fig.NSPanelButtonMode\022;\n\021button1_long_mo"
+    "de\030\033 \001(\0162 .NSPanelConfig.NSPanelButtonMo"
+    "de\022;\n\021button2_long_mode\030\035 \001(\0162 .NSPanelC"
+    "onfig.NSPanelButtonMode\022$\n\034global_scene_"
+    "entity_page_ids\030\036 \003(\005\022\027\n\017optimistic_mode"
+    "\030\037 \001(\010\022&\n\036raise_light_level_to_100_above"
+    "\030  \001(\005\022\022\n\nnspanel_id\030! \001(\005\022\032\n\022relay1_rel"
+    "ay_group\030# \003(\005\022\032\n\022relay2_relay_group\030% \003"
+    "(\005\022\037\n\027default_light_brightess\030& \001(\005\022\036\n\026l"
+    "ocked_to_default_room\030\' \001(\010\022,\n$inside_te"
+    "mperature_sensor_mqtt_topic\030( \001(\t\022!\n\031but"
+    "ton1_lower_temperature\030) \001(\005\022!\n\031button1_"
+    "upper_temperature\030* \001(\005\022!\n\031button2_lower"
+    "_temperature\030+ \001(\005\022!\n\031button2_upper_temp"
+    "erature\030, \001(\005\032L\n\010RoomInfo\022\017\n\007room_id\030\001 \001"
+    "(\005\022\027\n\017entity_page_ids\030\002 \003(\005\022\026\n\016scene_pag"
+    "e_ids\030\003 \003(\005\"8\n\022NSPanelDefaultPage\022\010\n\004HOM"
+    "E\020\000\022\n\n\006SCENES\020\001\022\014\n\010ENTITIES\020\002\"\250\001\n\026NSPane"
+    "lScreensaverMode\022\033\n\027WEATHER_WITH_BACKGRO"
+    "UND\020\000\022\036\n\032WEATHER_WITHOUT_BACKGROUND\020\001\022\034\n"
+    "\030DATETIME_WITH_BACKGROUND\020\003\022\037\n\033DATETIME_"
+    "WITHOUT_BACKGROUND\020\004\022\022\n\016NO_SCREENSAVER\020\005"
+    "\"i\n\021NSPanelButtonMode\022\n\n\006DIRECT\020\000\022\n\n\006FOL"
+    "LOW\020\001\022\022\n\016NOTIFY_MANAGER\020\002\022\023\n\017THERMOSTAT_"
+    "HEAT\020\003\022\023\n\017THERMOSTAT_COOL\020\004\"C\n\016NSPanelWa"
+    "rning\022#\n\005level\030\001 \001(\0162\024.NSPanelWarningLev"
+    "el\022\014\n\004text\030\002 \001(\t\"\233\003\n\023NSPanelStatusReport"
+    "\0221\n\rnspanel_state\030\001 \001(\0162\032.NSPanelStatusR"
+    "eport.state\022\027\n\017update_progress\030\002 \001(\005\022\014\n\004"
+    "rssi\030\003 \001(\005\022\025\n\rheap_used_pct\030\004 \001(\005\022\023\n\013mac"
+    "_address\030\005 \001(\t\022\023\n\013temperature\030\006 \001(\002\022\022\n\ni"
+    "p_address\030\007 \001(\t\022!\n\010warnings\030\010 \003(\0132\017.NSPa"
+    "nelWarning\022\024\n\014md5_firmware\030\t \001(\t\022\024\n\014md5_"
+    "littlefs\030\n \001(\t\022\023\n\013md5_tft_gui\030\013 \001(\t\022\017\n\007v"
+    "ersion\030\014 \001(\t\"`\n\005state\022\n\n\006ONLINE\020\000\022\013\n\007OFF"
+    "LINE\020\001\022\020\n\014UPDATING_TFT\020\002\022\025\n\021UPDATING_FIR"
+    "MWARE\020\003\022\025\n\021UPDATING_LITTLEFS\020\004\"\325\001\n\022NSPan"
+    "elLightStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022"
+    "\017\n\007can_dim\030\003 \001(\010\022\035\n\025can_color_temperatur"
+    "e\030\004 \001(\010\022\017\n\007can_rgb\030\005 \001(\010\022\023\n\013light_level\030"
+    "\006 \001(\005\022\022\n\ncolor_temp\030\007 \001(\005\022\013\n\003hue\030\010 \001(\005\022\022"
+    "\n\nsaturation\030\t \001(\005\022\032\n\022room_view_position"
+    "\030\n \001(\005\"\230\002\n\027NSPanelRoomEntitiesPage\022\n\n\002id"
+    "\030\001 \001(\005\022\021\n\tpage_type\030\002 \001(\005\022\023\n\013header_text"
+    "\030\003 \001(\t\0225\n\010entities\030\004 \003(\0132#.NSPanelRoomEn"
+    "titiesPage.EntitySlot\032\221\001\n\nEntitySlot\022\032\n\022"
+    "room_view_position\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\014"
+    "\n\004icon\030\003 \001(\t\022\013\n\003pco\030\004 \001(\005\022\014\n\004pco2\030\005 \001(\005\022"
+    "\026\n\016can_save_scene\030\006 \001(\010\022\030\n\020mqtt_state_to"
+    "pic\030\007 \001(\t\"\226\003\n\021NSPanelRoomStatus\022\n\n\002id\030\001 "
+    "\001(\005\022\014\n\004name\030\002 \001(\t\022\031\n\021average_dim_level\030\003"
+    " \001(\005\022 \n\030ceiling_lights_dim_level\030\004 \001(\005\022\036"
+    "\n\026table_lights_dim_level\030\005 \001(\005\022!\n\031averag"
+    "e_color_temperature\030\006 \001(\005\022.\n&ceiling_lig"
+    "hts_color_temperature_value\030\007 \001(\005\022,\n$tab"
+    "le_lights_color_temperature_value\030\010 \001(\005\022"
+    "\032\n\022num_ceiling_lights\030\t \001(\005\022\030\n\020num_table"
+    "_lights\030\n \001(\005\022\035\n\025num_ceiling_lights_on\030\013"
+    " \001(\005\022\033\n\023num_table_lights_on\030\014 \001(\005\022\027\n\017ent"
+    "ity_page_ids\030\r \003(\005\"\277\003\n\024NSPanelWeatherUpd"
+    "ate\022:\n\016forecast_items\030\001 \003(\0132\".NSPanelWea"
+    "therUpdate.ForecastItem\022\034\n\024current_weath"
+    "er_icon\030\002 \001(\t\022\"\n\032current_temperature_str"
+    "ing\030\003 \001(\t\022\"\n\032current_maxmin_temperature\030"
+    "\004 \001(\t\022\033\n\023current_wind_string\030\005 \001(\t\022\026\n\016su"
+    "nrise_string\030\006 \001(\t\022\025\n\rsunset_string\030\007 \001("
+    "\t\022$\n\034current_precipitation_string\030\010 \001(\t\032"
+    "\222\001\n\014ForecastItem\022\024\n\014weather_icon\030\001 \001(\t\022\034"
+    "\n\024precipitation_string\030\002 \001(\t\022!\n\031temperat"
+    "ure_maxmin_string\030\003 \001(\t\022\023\n\013wind_string\030\004"
+    " \001(\t\022\026\n\016display_string\030\005 \001(\t\"\213\016\n\031NSPanel"
+    "MQTTManagerCommand\022M\n\022first_page_turn_on"
+    "\030\001 \001(\0132/.NSPanelMQTTManagerCommand.First"
+    "PageTurnLightOnH\000\022O\n\023first_page_turn_off"
+    "\030\002 \001(\01320.NSPanelMQTTManagerCommand.First"
+    "PageTurnLightOffH\000\022@\n\rlight_command\030\003 \001("
+    "\0132\'.NSPanelMQTTManagerCommand.LightComma"
+    "ndH\000\022c\n toggle_entity_from_entities_page"
+    "\030\004 \001(\01327.NSPanelMQTTManagerCommand.Toggl"
+    "eEntityFromEntitiesPageH\000\022I\n\022save_scene_"
+    "command\030\005 \001(\0132+.NSPanelMQTTManagerComman"
+    "d.SaveSceneCommandH\000\022B\n\016button_pressed\030\006"
+    " \001(\0132(.NSPanelMQTTManagerCommand.ButtonP"
+    "ressedH\000\022J\n\022button_longpressed\030\007 \001(\0132,.N"
+    "SPanelMQTTManagerCommand.ButtonLongPress"
+    "edH\000\022a\n\036thermostat_temperature_command\030\010"
+    " \001(\01327.NSPanelMQTTManagerCommand.Thermos"
+    "tatTemperatureCommandH\000\022J\n\022thermostat_co"
+    "mmand\030\t \001(\0132,.NSPanelMQTTManagerCommand."
+    "ThermostatCommandH\000\022\022\n\nnspanel_id\030d \001(\005\032"
+    "\372\001\n\024FirstPageTurnLightOn\022E\n\raffect_light"
+    "s\030\001 \001(\0162..NSPanelMQTTManagerCommand.Affe"
+    "ctLightsOptions\022\037\n\027brightness_slider_val"
+    "ue\030\002 \001(\005\022\033\n\023kelvin_slider_value\030\003 \001(\005\022\025\n"
+    "\rselected_room\030\004 \001(\005\022\016\n\006global\030\005 \001(\010\022\034\n\024"
+    "has_brightness_value\030\006 \001(\010\022\030\n\020has_kelvin"
+    "_value\030\007 \001(\010\032n\n\025FirstPageTurnLightOff\022E\n"
+    "\raffect_lights\030\001 \001(\0162..NSPanelMQTTManage"
+    "rCommand.AffectLightsOptions\022\016\n\006global\030\002"
+    " \001(\010\032\321\001\n\014LightCommand\022\021\n\tlight_ids\030\001 \003(\005"
+    "\022\026\n\016has_brightness\030\002 \001(\010\022\022\n\nbrightness\030\003"
+    " \001(\005\022\035\n\025has_color_temperature\030\004 \001(\010\022\031\n\021c"
+    "olor_temperature\030\005 \001(\005\022\017\n\007has_hue\030\006 \001(\010\022"
+    "\013\n\003hue\030\007 \001(\005\022\026\n\016has_saturation\030\010 \001(\010\022\022\n\n"
+    "saturation\030\t \001(\005\032K\n\034ToggleEntityFromEnti"
+    "tiesPage\022\026\n\016entity_page_id\030\001 \001(\005\022\023\n\013enti"
+    "ty_slot\030\002 \001(\005\032\?\n\020SaveSceneCommand\022\026\n\016ent"
+    "ity_page_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001(\005\032\""
+    "\n\rButtonPressed\022\021\n\tbutton_id\030\002 \001(\005\032&\n\021Bu"
+    "ttonLongPressed\022\021\n\tbutton_id\030\002 \001(\005\032J\n\034Th"
+    "ermostatTemperatureCommand\022\025\n\rthermostat"
+    "_id\030\001 \001(\005\022\023\n\013temperature\030\002 \001(\002\032M\n\021Thermo"
+    "statCommand\022\025\n\rthermostat_id\030\001 \001(\005\022\016\n\006op"
+    "tion\030\002 \001(\t\022\021\n\tnew_value\030\003 \001(\t\"D\n\023AffectL"
+    "ightsOptions\022\007\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020\001\022"
+    "\022\n\016CEILING_LIGHTS\020\002B\r\n\013CommandData*[\n\023NS"
+    "PanelWarningLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ERROR"
+    "\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n\005"
+    "TRACE\020\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    5337,
+    5575,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
     nullptr,
     0,
-    19,
+    20,
     schemas,
     file_default_instances,
     TableStruct_protobuf_5fnspanel_2eproto::offsets,
@@ -1533,15 +1574,15 @@ NSPanelConfig::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<5, 36, 1, 94, 7> NSPanelConfig::_table_ = {
+const ::_pbi::TcParseTable<5, 38, 1, 94, 7> NSPanelConfig::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
     44, 248,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    515899392,  // skipmap
+    180355072,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    36,  // num_field_entries
+    38,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelConfig_default_instance_._instance,
@@ -1630,13 +1671,15 @@ const ::_pbi::TcParseTable<5, 36, 1, 94, 7> NSPanelConfig::_table_ = {
     // int32 button1_upper_temperature = 42;
     {::_pbi::TcParser::FastV32S2,
      {720, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_upper_temperature_)}},
-    // int32 button2_lower_temperature = 43;
+    // .NSPanelConfig.NSPanelButtonMode button1_long_mode = 27;
     {::_pbi::TcParser::FastV32S2,
-     {728, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_lower_temperature_)}},
+     {472, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_long_mode_)}},
     // int32 button2_upper_temperature = 44;
     {::_pbi::TcParser::FastV32S2,
      {736, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_upper_temperature_)}},
-    {::_pbi::TcParser::MiniParse, {}},
+    // .NSPanelConfig.NSPanelButtonMode button2_long_mode = 29;
+    {::_pbi::TcParser::FastV32S2,
+     {488, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_long_mode_)}},
     // repeated int32 global_scene_entity_page_ids = 30;
     {::_pbi::TcParser::FastV32P2,
      {498, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.global_scene_entity_page_ids_)}},
@@ -1645,7 +1688,7 @@ const ::_pbi::TcParseTable<5, 36, 1, 94, 7> NSPanelConfig::_table_ = {
      {504, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.optimistic_mode_)}},
   }}, {{
     33, 0, 1,
-    61450, 26,
+    61450, 28,
     65535, 65535
   }}, {{
     // string name = 1;
@@ -1717,6 +1760,12 @@ const ::_pbi::TcParseTable<5, 36, 1, 94, 7> NSPanelConfig::_table_ = {
     // .NSPanelConfig.NSPanelButtonMode button2_mode = 25;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // .NSPanelConfig.NSPanelButtonMode button1_long_mode = 27;
+    {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_long_mode_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // .NSPanelConfig.NSPanelButtonMode button2_long_mode = 29;
+    {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_long_mode_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
     // repeated int32 global_scene_entity_page_ids = 30;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.global_scene_entity_page_ids_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
@@ -1759,7 +1808,7 @@ const ::_pbi::TcParseTable<5, 36, 1, 94, 7> NSPanelConfig::_table_ = {
   }}, {{
     {::_pbi::TcParser::GetTable<::NSPanelConfig_RoomInfo>()},
   }}, {{
-    "\15\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\44\0\0\0\0\0\0\0"
+    "\15\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\44\0\0\0\0\0"
     "NSPanelConfig"
     "name"
     "inside_temperature_sensor_mqtt_topic"
@@ -1956,6 +2005,20 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
         25, this->_internal_button2_mode(), target);
+  }
+
+  // .NSPanelConfig.NSPanelButtonMode button1_long_mode = 27;
+  if (this->_internal_button1_long_mode() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        27, this->_internal_button1_long_mode(), target);
+  }
+
+  // .NSPanelConfig.NSPanelButtonMode button2_long_mode = 29;
+  if (this->_internal_button2_long_mode() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        29, this->_internal_button2_long_mode(), target);
   }
 
   // repeated int32 global_scene_entity_page_ids = 30;
@@ -2248,6 +2311,18 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_button2_mode());
   }
 
+  // .NSPanelConfig.NSPanelButtonMode button1_long_mode = 27;
+  if (this->_internal_button1_long_mode() != 0) {
+    total_size += 2 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_button1_long_mode());
+  }
+
+  // .NSPanelConfig.NSPanelButtonMode button2_long_mode = 29;
+  if (this->_internal_button2_long_mode() != 0) {
+    total_size += 2 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_button2_long_mode());
+  }
+
   // int32 raise_light_level_to_100_above = 32;
   if (this->_internal_raise_light_level_to_100_above() != 0) {
     total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
@@ -2385,6 +2460,12 @@ void NSPanelConfig::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::g
   }
   if (from._internal_button2_mode() != 0) {
     _this->_impl_.button2_mode_ = from._impl_.button2_mode_;
+  }
+  if (from._internal_button1_long_mode() != 0) {
+    _this->_impl_.button1_long_mode_ = from._impl_.button1_long_mode_;
+  }
+  if (from._internal_button2_long_mode() != 0) {
+    _this->_impl_.button2_long_mode_ = from._impl_.button2_long_mode_;
   }
   if (from._internal_raise_light_level_to_100_above() != 0) {
     _this->_impl_.raise_light_level_to_100_above_ = from._impl_.raise_light_level_to_100_above_;
@@ -6952,6 +7033,178 @@ void NSPanelMQTTManagerCommand_ButtonPressed::InternalSwap(NSPanelMQTTManagerCom
 }
 // ===================================================================
 
+class NSPanelMQTTManagerCommand_ButtonLongPressed::_Internal {
+ public:
+};
+
+NSPanelMQTTManagerCommand_ButtonLongPressed::NSPanelMQTTManagerCommand_ButtonLongPressed(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:NSPanelMQTTManagerCommand.ButtonLongPressed)
+}
+NSPanelMQTTManagerCommand_ButtonLongPressed::NSPanelMQTTManagerCommand_ButtonLongPressed(
+    ::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_ButtonLongPressed& from)
+    : NSPanelMQTTManagerCommand_ButtonLongPressed(arena) {
+  MergeFrom(from);
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_ButtonLongPressed::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0} {}
+
+inline void NSPanelMQTTManagerCommand_ButtonLongPressed::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.button_id_ = {};
+}
+NSPanelMQTTManagerCommand_ButtonLongPressed::~NSPanelMQTTManagerCommand_ButtonLongPressed() {
+  // @@protoc_insertion_point(destructor:NSPanelMQTTManagerCommand.ButtonLongPressed)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void NSPanelMQTTManagerCommand_ButtonLongPressed::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+NSPanelMQTTManagerCommand_ButtonLongPressed::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ButtonLongPressed, _impl_._cached_size_),
+              false,
+          },
+          &NSPanelMQTTManagerCommand_ButtonLongPressed::MergeImpl,
+          &NSPanelMQTTManagerCommand_ButtonLongPressed::kDescriptorMethods,
+          &descriptor_table_protobuf_5fnspanel_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 0, 2> NSPanelMQTTManagerCommand_ButtonLongPressed::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    2, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967293,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_NSPanelMQTTManagerCommand_ButtonLongPressed_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ButtonLongPressed>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // int32 button_id = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_ButtonLongPressed, _impl_.button_id_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ButtonLongPressed, _impl_.button_id_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 button_id = 2;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ButtonLongPressed, _impl_.button_id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+
+PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_ButtonLongPressed::Clear() {
+// @@protoc_insertion_point(message_clear_start:NSPanelMQTTManagerCommand.ButtonLongPressed)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.button_id_ = 0;
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* NSPanelMQTTManagerCommand_ButtonLongPressed::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:NSPanelMQTTManagerCommand.ButtonLongPressed)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // int32 button_id = 2;
+  if (this->_internal_button_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<2>(
+            stream, this->_internal_button_id(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:NSPanelMQTTManagerCommand.ButtonLongPressed)
+  return target;
+}
+
+::size_t NSPanelMQTTManagerCommand_ButtonLongPressed::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:NSPanelMQTTManagerCommand.ButtonLongPressed)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // int32 button_id = 2;
+  if (this->_internal_button_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_button_id());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void NSPanelMQTTManagerCommand_ButtonLongPressed::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<NSPanelMQTTManagerCommand_ButtonLongPressed*>(&to_msg);
+  auto& from = static_cast<const NSPanelMQTTManagerCommand_ButtonLongPressed&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelMQTTManagerCommand.ButtonLongPressed)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_button_id() != 0) {
+    _this->_impl_.button_id_ = from._impl_.button_id_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void NSPanelMQTTManagerCommand_ButtonLongPressed::CopyFrom(const NSPanelMQTTManagerCommand_ButtonLongPressed& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelMQTTManagerCommand.ButtonLongPressed)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void NSPanelMQTTManagerCommand_ButtonLongPressed::InternalSwap(NSPanelMQTTManagerCommand_ButtonLongPressed* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+        swap(_impl_.button_id_, other->_impl_.button_id_);
+}
+
+::google::protobuf::Metadata NSPanelMQTTManagerCommand_ButtonLongPressed::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 class NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::_Internal {
  public:
 };
@@ -7506,6 +7759,19 @@ void NSPanelMQTTManagerCommand::set_allocated_button_pressed(::NSPanelMQTTManage
   }
   // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.button_pressed)
 }
+void NSPanelMQTTManagerCommand::set_allocated_button_longpressed(::NSPanelMQTTManagerCommand_ButtonLongPressed* button_longpressed) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_CommandData();
+  if (button_longpressed) {
+    ::google::protobuf::Arena* submessage_arena = button_longpressed->GetArena();
+    if (message_arena != submessage_arena) {
+      button_longpressed = ::google::protobuf::internal::GetOwnedMessage(message_arena, button_longpressed, submessage_arena);
+    }
+    set_has_button_longpressed();
+    _impl_.CommandData_.button_longpressed_ = button_longpressed;
+  }
+  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.button_longpressed)
+}
 void NSPanelMQTTManagerCommand::set_allocated_thermostat_temperature_command(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand* thermostat_temperature_command) {
   ::google::protobuf::Arena* message_arena = GetArena();
   clear_CommandData();
@@ -7574,6 +7840,9 @@ NSPanelMQTTManagerCommand::NSPanelMQTTManagerCommand(
         break;
       case kButtonPressed:
         _impl_.CommandData_.button_pressed_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_ButtonPressed>(arena, *from._impl_.CommandData_.button_pressed_);
+        break;
+      case kButtonLongpressed:
+        _impl_.CommandData_.button_longpressed_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_ButtonLongPressed>(arena, *from._impl_.CommandData_.button_longpressed_);
         break;
       case kThermostatTemperatureCommand:
         _impl_.CommandData_.thermostat_temperature_command_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand>(arena, *from._impl_.CommandData_.thermostat_temperature_command_);
@@ -7661,6 +7930,14 @@ void NSPanelMQTTManagerCommand::clear_CommandData() {
       }
       break;
     }
+    case kButtonLongpressed: {
+      if (GetArena() == nullptr) {
+        delete _impl_.CommandData_.button_longpressed_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.button_longpressed_);
+      }
+      break;
+    }
     case kThermostatTemperatureCommand: {
       if (GetArena() == nullptr) {
         delete _impl_.CommandData_.thermostat_temperature_command_;
@@ -7706,16 +7983,16 @@ NSPanelMQTTManagerCommand::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 9, 8, 0, 7> NSPanelMQTTManagerCommand::_table_ = {
+const ::_pbi::TcParseTable<0, 10, 9, 0, 7> NSPanelMQTTManagerCommand::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
     100, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967040,  // skipmap
+    4294966784,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    9,  // num_field_entries
-    8,  // num_aux_entries
+    10,  // num_field_entries
+    9,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelMQTTManagerCommand_default_instance_._instance,
     nullptr,  // post_loop_handler
@@ -7729,7 +8006,7 @@ const ::_pbi::TcParseTable<0, 9, 8, 0, 7> NSPanelMQTTManagerCommand::_table_ = {
      {1696, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.nspanel_id_)}},
   }}, {{
     100, 0, 1,
-    65534, 8,
+    65534, 9,
     65535, 65535
   }}, {{
     // .NSPanelMQTTManagerCommand.FirstPageTurnLightOn first_page_turn_on = 1;
@@ -7750,11 +8027,14 @@ const ::_pbi::TcParseTable<0, 9, 8, 0, 7> NSPanelMQTTManagerCommand::_table_ = {
     // .NSPanelMQTTManagerCommand.ButtonPressed button_pressed = 6;
     {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.button_pressed_), _Internal::kOneofCaseOffset + 0, 5,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
-    // .NSPanelMQTTManagerCommand.ThermostatTemperatureCommand thermostat_temperature_command = 7;
-    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.thermostat_temperature_command_), _Internal::kOneofCaseOffset + 0, 6,
+    // .NSPanelMQTTManagerCommand.ButtonLongPressed button_longpressed = 7;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.button_longpressed_), _Internal::kOneofCaseOffset + 0, 6,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
-    // .NSPanelMQTTManagerCommand.ThermostatCommand thermostat_command = 8;
-    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.thermostat_command_), _Internal::kOneofCaseOffset + 0, 7,
+    // .NSPanelMQTTManagerCommand.ThermostatTemperatureCommand thermostat_temperature_command = 8;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.thermostat_temperature_command_), _Internal::kOneofCaseOffset + 0, 7,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .NSPanelMQTTManagerCommand.ThermostatCommand thermostat_command = 9;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.thermostat_command_), _Internal::kOneofCaseOffset + 0, 8,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
     // int32 nspanel_id = 100;
     {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.nspanel_id_), 0, 0,
@@ -7766,6 +8046,7 @@ const ::_pbi::TcParseTable<0, 9, 8, 0, 7> NSPanelMQTTManagerCommand::_table_ = {
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage>()},
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_SaveSceneCommand>()},
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ButtonPressed>()},
+    {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ButtonLongPressed>()},
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand>()},
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ThermostatCommand>()},
   }}, {{
@@ -7822,14 +8103,19 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand::Clear() {
           6, *_impl_.CommandData_.button_pressed_, _impl_.CommandData_.button_pressed_->GetCachedSize(), target, stream);
       break;
     }
+    case kButtonLongpressed: {
+      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+          7, *_impl_.CommandData_.button_longpressed_, _impl_.CommandData_.button_longpressed_->GetCachedSize(), target, stream);
+      break;
+    }
     case kThermostatTemperatureCommand: {
       target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-          7, *_impl_.CommandData_.thermostat_temperature_command_, _impl_.CommandData_.thermostat_temperature_command_->GetCachedSize(), target, stream);
+          8, *_impl_.CommandData_.thermostat_temperature_command_, _impl_.CommandData_.thermostat_temperature_command_->GetCachedSize(), target, stream);
       break;
     }
     case kThermostatCommand: {
       target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-          8, *_impl_.CommandData_.thermostat_command_, _impl_.CommandData_.thermostat_command_->GetCachedSize(), target, stream);
+          9, *_impl_.CommandData_.thermostat_command_, _impl_.CommandData_.thermostat_command_->GetCachedSize(), target, stream);
       break;
     }
     default:
@@ -7902,13 +8188,19 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand::Clear() {
           1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.button_pressed_);
       break;
     }
-    // .NSPanelMQTTManagerCommand.ThermostatTemperatureCommand thermostat_temperature_command = 7;
+    // .NSPanelMQTTManagerCommand.ButtonLongPressed button_longpressed = 7;
+    case kButtonLongpressed: {
+      total_size +=
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.button_longpressed_);
+      break;
+    }
+    // .NSPanelMQTTManagerCommand.ThermostatTemperatureCommand thermostat_temperature_command = 8;
     case kThermostatTemperatureCommand: {
       total_size +=
           1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.thermostat_temperature_command_);
       break;
     }
-    // .NSPanelMQTTManagerCommand.ThermostatCommand thermostat_command = 8;
+    // .NSPanelMQTTManagerCommand.ThermostatCommand thermostat_command = 9;
     case kThermostatCommand: {
       total_size +=
           1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.thermostat_command_);
@@ -7996,6 +8288,15 @@ void NSPanelMQTTManagerCommand::MergeImpl(::google::protobuf::MessageLite& to_ms
               ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_ButtonPressed>(arena, *from._impl_.CommandData_.button_pressed_);
         } else {
           _this->_impl_.CommandData_.button_pressed_->MergeFrom(from._internal_button_pressed());
+        }
+        break;
+      }
+      case kButtonLongpressed: {
+        if (oneof_needs_init) {
+          _this->_impl_.CommandData_.button_longpressed_ =
+              ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_ButtonLongPressed>(arena, *from._impl_.CommandData_.button_longpressed_);
+        } else {
+          _this->_impl_.CommandData_.button_longpressed_->MergeFrom(from._internal_button_longpressed());
         }
         break;
       }

@@ -166,7 +166,7 @@ $(document).ready(() => {
       });
     });
     
-  for(let button of ["button1", "button2" ]) {
+  for(let button of ["button1", "button2" ,"button1_long" ,"button2_long"]) {
     update_shown_elements(button);
     $(`#${button}_mode`).change(() => update_shown_elements(button));
     $(`#${button}_detached_mode_room`).change(() => update_shown_elements(button));

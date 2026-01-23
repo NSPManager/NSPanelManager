@@ -61,6 +61,14 @@ class NSPanel(models.Model):
     button2_detached_mode_entity = models.ForeignKey(
         "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+"
     )
+    button1_long_mode = models.IntegerField(default=0)
+    button1_long_detached_mode_entity = models.ForeignKey(
+        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+"
+    )
+    button2_long_mode = models.IntegerField(default=0)
+    button2_long_detached_mode_entity = models.ForeignKey(
+        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+"
+    )
     md5_firmware = models.CharField(max_length=64, default="")
     md5_data_file = models.CharField(max_length=64, default="")
     md5_tft_file = models.CharField(max_length=64, default="")

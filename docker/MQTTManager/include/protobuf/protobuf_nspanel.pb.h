@@ -62,6 +62,9 @@ extern NSPanelLightStatusDefaultTypeInternal _NSPanelLightStatus_default_instanc
 class NSPanelMQTTManagerCommand;
 struct NSPanelMQTTManagerCommandDefaultTypeInternal;
 extern NSPanelMQTTManagerCommandDefaultTypeInternal _NSPanelMQTTManagerCommand_default_instance_;
+class NSPanelMQTTManagerCommand_ButtonLongPressed;
+struct NSPanelMQTTManagerCommand_ButtonLongPressedDefaultTypeInternal;
+extern NSPanelMQTTManagerCommand_ButtonLongPressedDefaultTypeInternal _NSPanelMQTTManagerCommand_ButtonLongPressed_default_instance_;
 class NSPanelMQTTManagerCommand_ButtonPressed;
 struct NSPanelMQTTManagerCommand_ButtonPressedDefaultTypeInternal;
 extern NSPanelMQTTManagerCommand_ButtonPressedDefaultTypeInternal _NSPanelMQTTManagerCommand_ButtonPressed_default_instance_;
@@ -1598,7 +1601,7 @@ class NSPanelMQTTManagerCommand_ThermostatTemperatureCommand final : public ::go
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ThermostatTemperatureCommand*>(
         &_NSPanelMQTTManagerCommand_ThermostatTemperatureCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 16;
+  static constexpr int kIndexInFileMessages = 17;
   friend void swap(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand& a, NSPanelMQTTManagerCommand_ThermostatTemperatureCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand* other) {
     if (other == this) return;
@@ -1781,7 +1784,7 @@ class NSPanelMQTTManagerCommand_ThermostatCommand final : public ::google::proto
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ThermostatCommand*>(
         &_NSPanelMQTTManagerCommand_ThermostatCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 17;
+  static constexpr int kIndexInFileMessages = 18;
   friend void swap(NSPanelMQTTManagerCommand_ThermostatCommand& a, NSPanelMQTTManagerCommand_ThermostatCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ThermostatCommand* other) {
     if (other == this) return;
@@ -2980,6 +2983,177 @@ class NSPanelMQTTManagerCommand_ButtonPressed final : public ::google::protobuf:
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const NSPanelMQTTManagerCommand_ButtonPressed& from_msg);
+    ::int32_t button_id_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
+};
+// -------------------------------------------------------------------
+
+class NSPanelMQTTManagerCommand_ButtonLongPressed final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:NSPanelMQTTManagerCommand.ButtonLongPressed) */ {
+ public:
+  inline NSPanelMQTTManagerCommand_ButtonLongPressed() : NSPanelMQTTManagerCommand_ButtonLongPressed(nullptr) {}
+  ~NSPanelMQTTManagerCommand_ButtonLongPressed() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_ButtonLongPressed(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline NSPanelMQTTManagerCommand_ButtonLongPressed(const NSPanelMQTTManagerCommand_ButtonLongPressed& from) : NSPanelMQTTManagerCommand_ButtonLongPressed(nullptr, from) {}
+  inline NSPanelMQTTManagerCommand_ButtonLongPressed(NSPanelMQTTManagerCommand_ButtonLongPressed&& from) noexcept
+      : NSPanelMQTTManagerCommand_ButtonLongPressed(nullptr, std::move(from)) {}
+  inline NSPanelMQTTManagerCommand_ButtonLongPressed& operator=(const NSPanelMQTTManagerCommand_ButtonLongPressed& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline NSPanelMQTTManagerCommand_ButtonLongPressed& operator=(NSPanelMQTTManagerCommand_ButtonLongPressed&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const NSPanelMQTTManagerCommand_ButtonLongPressed& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const NSPanelMQTTManagerCommand_ButtonLongPressed* internal_default_instance() {
+    return reinterpret_cast<const NSPanelMQTTManagerCommand_ButtonLongPressed*>(
+        &_NSPanelMQTTManagerCommand_ButtonLongPressed_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 16;
+  friend void swap(NSPanelMQTTManagerCommand_ButtonLongPressed& a, NSPanelMQTTManagerCommand_ButtonLongPressed& b) { a.Swap(&b); }
+  inline void Swap(NSPanelMQTTManagerCommand_ButtonLongPressed* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(NSPanelMQTTManagerCommand_ButtonLongPressed* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  NSPanelMQTTManagerCommand_ButtonLongPressed* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<NSPanelMQTTManagerCommand_ButtonLongPressed>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const NSPanelMQTTManagerCommand_ButtonLongPressed& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const NSPanelMQTTManagerCommand_ButtonLongPressed& from) { NSPanelMQTTManagerCommand_ButtonLongPressed::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(NSPanelMQTTManagerCommand_ButtonLongPressed* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "NSPanelMQTTManagerCommand.ButtonLongPressed"; }
+
+ protected:
+  explicit NSPanelMQTTManagerCommand_ButtonLongPressed(::google::protobuf::Arena* arena);
+  NSPanelMQTTManagerCommand_ButtonLongPressed(::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_ButtonLongPressed& from);
+  NSPanelMQTTManagerCommand_ButtonLongPressed(::google::protobuf::Arena* arena, NSPanelMQTTManagerCommand_ButtonLongPressed&& from) noexcept
+      : NSPanelMQTTManagerCommand_ButtonLongPressed(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kButtonIdFieldNumber = 2,
+  };
+  // int32 button_id = 2;
+  void clear_button_id() ;
+  ::int32_t button_id() const;
+  void set_button_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_button_id() const;
+  void _internal_set_button_id(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:NSPanelMQTTManagerCommand.ButtonLongPressed)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 0,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_NSPanelMQTTManagerCommand_ButtonLongPressed_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const NSPanelMQTTManagerCommand_ButtonLongPressed& from_msg);
     ::int32_t button_id_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -4439,15 +4613,16 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
     kToggleEntityFromEntitiesPage = 4,
     kSaveSceneCommand = 5,
     kButtonPressed = 6,
-    kThermostatTemperatureCommand = 7,
-    kThermostatCommand = 8,
+    kButtonLongpressed = 7,
+    kThermostatTemperatureCommand = 8,
+    kThermostatCommand = 9,
     COMMANDDATA_NOT_SET = 0,
   };
   static inline const NSPanelMQTTManagerCommand* internal_default_instance() {
     return reinterpret_cast<const NSPanelMQTTManagerCommand*>(
         &_NSPanelMQTTManagerCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 18;
+  static constexpr int kIndexInFileMessages = 19;
   friend void swap(NSPanelMQTTManagerCommand& a, NSPanelMQTTManagerCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand* other) {
     if (other == this) return;
@@ -4519,6 +4694,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   using ToggleEntityFromEntitiesPage = NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage;
   using SaveSceneCommand = NSPanelMQTTManagerCommand_SaveSceneCommand;
   using ButtonPressed = NSPanelMQTTManagerCommand_ButtonPressed;
+  using ButtonLongPressed = NSPanelMQTTManagerCommand_ButtonLongPressed;
   using ThermostatTemperatureCommand = NSPanelMQTTManagerCommand_ThermostatTemperatureCommand;
   using ThermostatCommand = NSPanelMQTTManagerCommand_ThermostatCommand;
   using AffectLightsOptions = NSPanelMQTTManagerCommand_AffectLightsOptions;
@@ -4551,8 +4727,9 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
     kToggleEntityFromEntitiesPageFieldNumber = 4,
     kSaveSceneCommandFieldNumber = 5,
     kButtonPressedFieldNumber = 6,
-    kThermostatTemperatureCommandFieldNumber = 7,
-    kThermostatCommandFieldNumber = 8,
+    kButtonLongpressedFieldNumber = 7,
+    kThermostatTemperatureCommandFieldNumber = 8,
+    kThermostatCommandFieldNumber = 9,
   };
   // int32 nspanel_id = 100;
   void clear_nspanel_id() ;
@@ -4678,7 +4855,26 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   ::NSPanelMQTTManagerCommand_ButtonPressed* _internal_mutable_button_pressed();
 
   public:
-  // .NSPanelMQTTManagerCommand.ThermostatTemperatureCommand thermostat_temperature_command = 7;
+  // .NSPanelMQTTManagerCommand.ButtonLongPressed button_longpressed = 7;
+  bool has_button_longpressed() const;
+  private:
+  bool _internal_has_button_longpressed() const;
+
+  public:
+  void clear_button_longpressed() ;
+  const ::NSPanelMQTTManagerCommand_ButtonLongPressed& button_longpressed() const;
+  PROTOBUF_NODISCARD ::NSPanelMQTTManagerCommand_ButtonLongPressed* release_button_longpressed();
+  ::NSPanelMQTTManagerCommand_ButtonLongPressed* mutable_button_longpressed();
+  void set_allocated_button_longpressed(::NSPanelMQTTManagerCommand_ButtonLongPressed* value);
+  void unsafe_arena_set_allocated_button_longpressed(::NSPanelMQTTManagerCommand_ButtonLongPressed* value);
+  ::NSPanelMQTTManagerCommand_ButtonLongPressed* unsafe_arena_release_button_longpressed();
+
+  private:
+  const ::NSPanelMQTTManagerCommand_ButtonLongPressed& _internal_button_longpressed() const;
+  ::NSPanelMQTTManagerCommand_ButtonLongPressed* _internal_mutable_button_longpressed();
+
+  public:
+  // .NSPanelMQTTManagerCommand.ThermostatTemperatureCommand thermostat_temperature_command = 8;
   bool has_thermostat_temperature_command() const;
   private:
   bool _internal_has_thermostat_temperature_command() const;
@@ -4697,7 +4893,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   ::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand* _internal_mutable_thermostat_temperature_command();
 
   public:
-  // .NSPanelMQTTManagerCommand.ThermostatCommand thermostat_command = 8;
+  // .NSPanelMQTTManagerCommand.ThermostatCommand thermostat_command = 9;
   bool has_thermostat_command() const;
   private:
   bool _internal_has_thermostat_command() const;
@@ -4727,13 +4923,14 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   void set_has_toggle_entity_from_entities_page();
   void set_has_save_scene_command();
   void set_has_button_pressed();
+  void set_has_button_longpressed();
   void set_has_thermostat_temperature_command();
   void set_has_thermostat_command();
   inline bool has_CommandData() const;
   inline void clear_has_CommandData();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 9, 8,
+      0, 10, 9,
       0, 7>
       _table_;
 
@@ -4764,6 +4961,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
       ::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* toggle_entity_from_entities_page_;
       ::NSPanelMQTTManagerCommand_SaveSceneCommand* save_scene_command_;
       ::NSPanelMQTTManagerCommand_ButtonPressed* button_pressed_;
+      ::NSPanelMQTTManagerCommand_ButtonLongPressed* button_longpressed_;
       ::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand* thermostat_temperature_command_;
       ::NSPanelMQTTManagerCommand_ThermostatCommand* thermostat_command_;
     } CommandData_;
@@ -4992,6 +5190,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kTemperatureCalibrationFieldNumber = 21,
     kButton1ModeFieldNumber = 22,
     kButton2ModeFieldNumber = 25,
+    kButton1LongModeFieldNumber = 27,
+    kButton2LongModeFieldNumber = 29,
     kRaiseLightLevelTo100AboveFieldNumber = 32,
     kNspanelIdFieldNumber = 33,
     kOptimisticModeFieldNumber = 31,
@@ -5315,6 +5515,26 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_button2_mode(::NSPanelConfig_NSPanelButtonMode value);
 
   public:
+  // .NSPanelConfig.NSPanelButtonMode button1_long_mode = 27;
+  void clear_button1_long_mode() ;
+  ::NSPanelConfig_NSPanelButtonMode button1_long_mode() const;
+  void set_button1_long_mode(::NSPanelConfig_NSPanelButtonMode value);
+
+  private:
+  ::NSPanelConfig_NSPanelButtonMode _internal_button1_long_mode() const;
+  void _internal_set_button1_long_mode(::NSPanelConfig_NSPanelButtonMode value);
+
+  public:
+  // .NSPanelConfig.NSPanelButtonMode button2_long_mode = 29;
+  void clear_button2_long_mode() ;
+  ::NSPanelConfig_NSPanelButtonMode button2_long_mode() const;
+  void set_button2_long_mode(::NSPanelConfig_NSPanelButtonMode value);
+
+  private:
+  ::NSPanelConfig_NSPanelButtonMode _internal_button2_long_mode() const;
+  void _internal_set_button2_long_mode(::NSPanelConfig_NSPanelButtonMode value);
+
+  public:
   // int32 raise_light_level_to_100_above = 32;
   void clear_raise_light_level_to_100_above() ;
   ::int32_t raise_light_level_to_100_above() const;
@@ -5410,7 +5630,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 36, 1,
+      5, 38, 1,
       94, 7>
       _table_;
 
@@ -5461,6 +5681,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
     ::int32_t temperature_calibration_;
     int button1_mode_;
     int button2_mode_;
+    int button1_long_mode_;
+    int button2_long_mode_;
     ::int32_t raise_light_level_to_100_above_;
     ::int32_t nspanel_id_;
     bool optimistic_mode_;
@@ -6168,6 +6390,50 @@ inline ::NSPanelConfig_NSPanelButtonMode NSPanelConfig::_internal_button2_mode()
 inline void NSPanelConfig::_internal_set_button2_mode(::NSPanelConfig_NSPanelButtonMode value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button2_mode_ = value;
+}
+
+// .NSPanelConfig.NSPanelButtonMode button1_long_mode = 27;
+inline void NSPanelConfig::clear_button1_long_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_long_mode_ = 0;
+}
+inline ::NSPanelConfig_NSPanelButtonMode NSPanelConfig::button1_long_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button1_long_mode)
+  return _internal_button1_long_mode();
+}
+inline void NSPanelConfig::set_button1_long_mode(::NSPanelConfig_NSPanelButtonMode value) {
+  _internal_set_button1_long_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button1_long_mode)
+}
+inline ::NSPanelConfig_NSPanelButtonMode NSPanelConfig::_internal_button1_long_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelConfig_NSPanelButtonMode>(_impl_.button1_long_mode_);
+}
+inline void NSPanelConfig::_internal_set_button1_long_mode(::NSPanelConfig_NSPanelButtonMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_long_mode_ = value;
+}
+
+// .NSPanelConfig.NSPanelButtonMode button2_long_mode = 29;
+inline void NSPanelConfig::clear_button2_long_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_long_mode_ = 0;
+}
+inline ::NSPanelConfig_NSPanelButtonMode NSPanelConfig::button2_long_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button2_long_mode)
+  return _internal_button2_long_mode();
+}
+inline void NSPanelConfig::set_button2_long_mode(::NSPanelConfig_NSPanelButtonMode value) {
+  _internal_set_button2_long_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button2_long_mode)
+}
+inline ::NSPanelConfig_NSPanelButtonMode NSPanelConfig::_internal_button2_long_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelConfig_NSPanelButtonMode>(_impl_.button2_long_mode_);
+}
+inline void NSPanelConfig::_internal_set_button2_long_mode(::NSPanelConfig_NSPanelButtonMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_long_mode_ = value;
 }
 
 // repeated int32 global_scene_entity_page_ids = 30;
@@ -9286,6 +9552,32 @@ inline void NSPanelMQTTManagerCommand_ButtonPressed::_internal_set_button_id(::i
 
 // -------------------------------------------------------------------
 
+// NSPanelMQTTManagerCommand_ButtonLongPressed
+
+// int32 button_id = 2;
+inline void NSPanelMQTTManagerCommand_ButtonLongPressed::clear_button_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button_id_ = 0;
+}
+inline ::int32_t NSPanelMQTTManagerCommand_ButtonLongPressed::button_id() const {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.ButtonLongPressed.button_id)
+  return _internal_button_id();
+}
+inline void NSPanelMQTTManagerCommand_ButtonLongPressed::set_button_id(::int32_t value) {
+  _internal_set_button_id(value);
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.ButtonLongPressed.button_id)
+}
+inline ::int32_t NSPanelMQTTManagerCommand_ButtonLongPressed::_internal_button_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button_id_;
+}
+inline void NSPanelMQTTManagerCommand_ButtonLongPressed::_internal_set_button_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button_id_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // NSPanelMQTTManagerCommand_ThermostatTemperatureCommand
 
 // int32 thermostat_id = 1;
@@ -9936,7 +10228,86 @@ inline ::NSPanelMQTTManagerCommand_ButtonPressed* NSPanelMQTTManagerCommand::mut
   return _msg;
 }
 
-// .NSPanelMQTTManagerCommand.ThermostatTemperatureCommand thermostat_temperature_command = 7;
+// .NSPanelMQTTManagerCommand.ButtonLongPressed button_longpressed = 7;
+inline bool NSPanelMQTTManagerCommand::has_button_longpressed() const {
+  return CommandData_case() == kButtonLongpressed;
+}
+inline bool NSPanelMQTTManagerCommand::_internal_has_button_longpressed() const {
+  return CommandData_case() == kButtonLongpressed;
+}
+inline void NSPanelMQTTManagerCommand::set_has_button_longpressed() {
+  _impl_._oneof_case_[0] = kButtonLongpressed;
+}
+inline void NSPanelMQTTManagerCommand::clear_button_longpressed() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (CommandData_case() == kButtonLongpressed) {
+    if (GetArena() == nullptr) {
+      delete _impl_.CommandData_.button_longpressed_;
+    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.button_longpressed_);
+    }
+    clear_has_CommandData();
+  }
+}
+inline ::NSPanelMQTTManagerCommand_ButtonLongPressed* NSPanelMQTTManagerCommand::release_button_longpressed() {
+  // @@protoc_insertion_point(field_release:NSPanelMQTTManagerCommand.button_longpressed)
+  if (CommandData_case() == kButtonLongpressed) {
+    clear_has_CommandData();
+    auto* temp = _impl_.CommandData_.button_longpressed_;
+    if (GetArena() != nullptr) {
+      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.CommandData_.button_longpressed_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::NSPanelMQTTManagerCommand_ButtonLongPressed& NSPanelMQTTManagerCommand::_internal_button_longpressed() const {
+  return CommandData_case() == kButtonLongpressed ? *_impl_.CommandData_.button_longpressed_ : reinterpret_cast<::NSPanelMQTTManagerCommand_ButtonLongPressed&>(::_NSPanelMQTTManagerCommand_ButtonLongPressed_default_instance_);
+}
+inline const ::NSPanelMQTTManagerCommand_ButtonLongPressed& NSPanelMQTTManagerCommand::button_longpressed() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.button_longpressed)
+  return _internal_button_longpressed();
+}
+inline ::NSPanelMQTTManagerCommand_ButtonLongPressed* NSPanelMQTTManagerCommand::unsafe_arena_release_button_longpressed() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:NSPanelMQTTManagerCommand.button_longpressed)
+  if (CommandData_case() == kButtonLongpressed) {
+    clear_has_CommandData();
+    auto* temp = _impl_.CommandData_.button_longpressed_;
+    _impl_.CommandData_.button_longpressed_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void NSPanelMQTTManagerCommand::unsafe_arena_set_allocated_button_longpressed(::NSPanelMQTTManagerCommand_ButtonLongPressed* value) {
+  // We rely on the oneof clear method to free the earlier contents
+  // of this oneof. We can directly use the pointer we're given to
+  // set the new value.
+  clear_CommandData();
+  if (value) {
+    set_has_button_longpressed();
+    _impl_.CommandData_.button_longpressed_ = value;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:NSPanelMQTTManagerCommand.button_longpressed)
+}
+inline ::NSPanelMQTTManagerCommand_ButtonLongPressed* NSPanelMQTTManagerCommand::_internal_mutable_button_longpressed() {
+  if (CommandData_case() != kButtonLongpressed) {
+    clear_CommandData();
+    set_has_button_longpressed();
+    _impl_.CommandData_.button_longpressed_ =
+        ::google::protobuf::Message::DefaultConstruct<::NSPanelMQTTManagerCommand_ButtonLongPressed>(GetArena());
+  }
+  return _impl_.CommandData_.button_longpressed_;
+}
+inline ::NSPanelMQTTManagerCommand_ButtonLongPressed* NSPanelMQTTManagerCommand::mutable_button_longpressed() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::NSPanelMQTTManagerCommand_ButtonLongPressed* _msg = _internal_mutable_button_longpressed();
+  // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.button_longpressed)
+  return _msg;
+}
+
+// .NSPanelMQTTManagerCommand.ThermostatTemperatureCommand thermostat_temperature_command = 8;
 inline bool NSPanelMQTTManagerCommand::has_thermostat_temperature_command() const {
   return CommandData_case() == kThermostatTemperatureCommand;
 }
@@ -10015,7 +10386,7 @@ inline ::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand* NSPanelMQTTMana
   return _msg;
 }
 
-// .NSPanelMQTTManagerCommand.ThermostatCommand thermostat_command = 8;
+// .NSPanelMQTTManagerCommand.ThermostatCommand thermostat_command = 9;
 inline bool NSPanelMQTTManagerCommand::has_thermostat_command() const {
   return CommandData_case() == kThermostatCommand;
 }

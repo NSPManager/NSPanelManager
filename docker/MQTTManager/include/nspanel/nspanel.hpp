@@ -34,9 +34,21 @@ struct NSPanelWarningWebsocketRepresentation {
   std::string text;
 };
 
+
 class NSPanel {
+
 public:
   NSPanel(uint32_t panel_id);
+
+
+  enum ButtonMode {
+  DIRECT,
+  DETACHED,
+  MQTT_PAYLOAD,
+  FOLLOW,
+  THERMOSTAT_HEATING,
+  THERMOSTAT_COOLING,
+  };
 
   /*
    * Build a new NSPanel object from a discovery request and add it to the database as pending.
@@ -155,6 +167,12 @@ public:
    */
   void command_callback(NSPanelMQTTManagerCommand &command);
 
+
+  /*
+   * handle button presses
+   */
+  void handle_button_pressed_command_callback(ButtonMode button_mode, std::optional<uint64_t> entity_id, std::string topic,std::string payload );
+  
   /**
    * When an IPC request for NSPanel status comes in handle it and send the response back
    */
@@ -202,14 +220,7 @@ private:
   std::string _current_littlefs_md5_checksum;
   std::string _current_tft_md5_checksum;
 
-  enum ButtonMode {
-    DIRECT,
-    DETACHED,
-    MQTT_PAYLOAD,
-    FOLLOW,
-    THERMOSTAT_HEATING,
-    THERMOSTAT_COOLING,
-  };
+
 
   // MQTT Stuff:
   // Wether or not relay1 should be registered to Home Assistant as a switch or light.

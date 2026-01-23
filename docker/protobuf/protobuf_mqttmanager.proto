@@ -53,27 +53,37 @@ message NSPanelSettings {
     NSPanelButtonMode button1_mode = 27;
     NSPanelButtonMode button2_mode = 28;
 
-    optional string button1_mqtt_topic = 29;
-    optional string button2_mqtt_topic = 30;
-    optional string button1_mqtt_payload = 31;
-    optional string button2_mqtt_payload = 32;
-    optional int32 button1_detached_light_id = 33;
-    optional int32 button2_detached_light_id = 34;
+    NSPanelButtonMode button1_long_mode = 29;
+    NSPanelButtonMode button2_long_mode = 30;
 
-    bool denied = 45;
-    bool accepted = 46;
-    repeated int32 rooms = 47;
-    repeated int32 scenes = 48;
-    string ip_address = 49;
+    optional string button1_mqtt_topic = 31;
+    optional string button2_mqtt_topic = 32;
+    optional string button1_mqtt_payload = 33;
+    optional string button2_mqtt_payload = 34;
+    optional int32 button1_detached_light_id = 35;
+    optional int32 button2_detached_light_id = 36;
+
+    optional string button1_long_mqtt_topic = 37;
+    optional string button2_long_mqtt_topic = 38;
+    optional string button1_long_mqtt_payload = 39;
+    optional string button2_long_mqtt_payload = 40;
+    optional int32 button1_long_detached_light_id = 41;
+    optional int32 button2_long_detached_light_id = 42;
+
+    bool denied = 49;
+    bool accepted = 50;
+    repeated int32 rooms = 51;
+    repeated int32 scenes = 52;
+    string ip_address = 53;
 
     enum RelayRegisterType {
         SWITCH = 0;
         LIGHT = 1;
     }
-    RelayRegisterType relay1_register_type = 50;
-    RelayRegisterType relay2_register_type = 51;
+    RelayRegisterType relay1_register_type = 54;
+    RelayRegisterType relay2_register_type = 55;
 
-    int32 default_room = 52;
+    int32 default_room = 56;
 }
 
 message MultipleNSPanelsSettings {

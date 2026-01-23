@@ -384,19 +384,19 @@ def edit_nspanel(request, panel_id: int):
         ),
         "default_page": get_nspanel_setting_with_default(panel_id, "default_page", "0"),
     }
-    for button in ["button1", "button2","button1_long", "button2_long"]:
+    for button in ["button1", "button2", "button1_long", "button2_long"]:
         key = f"{button}_custom_mqtt_topic"
         settings[key] = get_nspanel_setting_with_default(panel_id, key, "")
-        
+
         key = f"{button}_custom_mqtt_payload"
         settings[key] = get_nspanel_setting_with_default(panel_id, key, "")
-        
+
         key = f"{button}_relay_lower_temperature"
         settings[key] = get_nspanel_setting_with_default(panel_id, key, "")
-  
+
         key = f"{button}_relay_upper_temperature"
         settings[key] = get_nspanel_setting_with_default(panel_id, key, "")
-  
+
     nspanel = NSPanel.objects.get(id=panel_id)
     panel_info = {}
     panel_info["data"] = nspanel
@@ -418,9 +418,9 @@ def edit_nspanel(request, panel_id: int):
 def evaluate_button_state(button, panel_id, panel: NSPanel, request):
     setattr(panel, f"{button}_mode", request.POST[f"{button}_mode"])
     if request.POST[f"{button}_mode"] == "1":  # Detached mode
-        setattr(panel,f"{button}_detached_mode_light", Entity.objects.get(id=request.POST[f"{button}_detached_mode_light"]))
+        setattr(panel, f"{button}_detached_mode_light", Entity.objects.get(id=request.POST[f"{button}_detached_mode_light"]))
     else:
-        setattr(panel,f"{button}_detached_mode_light", None)
+        setattr(panel, f"{button}_detached_mode_light", None)
 
     if request.POST[f"{button}_mode"] == "2":  # Custom MQTT Mode
         set_nspanel_setting_value(panel_id, f"{button}_custom_mqtt_topic", request.POST[f"{button}_custom_mqtt_topic"])
@@ -428,15 +428,15 @@ def evaluate_button_state(button, panel_id, panel: NSPanel, request):
     else:
         delete_nspanel_setting(panel_id, f"{button}_custom_mqtt_topic")
         delete_nspanel_setting(panel_id, f"{button}_custom_mqtt_payload")
-   
 
 
 def save_panel_settings(request, panel_id: int):
     panel = NSPanel.objects.get(id=panel_id)
     panel.room = Room.objects.get(id=request.POST["room_id"])
     panel.friendly_name = request.POST["name"]
-    for button in ["button1", "button2"]:
-        evaluate_button_state (button, panel_id, panel, request)
+    for button in ["button1", "button2", "button1_long", "button2_long"]:
+        evaluate_button_state(button, panel_id, panel, request)
+
     if request.POST["screen_dim_level"].strip():
         set_nspanel_setting_value(
             panel_id, "screen_dim_level", request.POST["screen_dim_level"]
@@ -783,7 +783,7 @@ def get_item(dictionary, key):
     except Exception as e:
         if type(e) != AttributeError:
             raise e
-    return getattr(dictionary,key)
+    return getattr(dictionary, key)
 
 
 def get_client_ip(request):

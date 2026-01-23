@@ -74,6 +74,10 @@ std::shared_ptr<NSPanel> NSPanel::create_from_discovery_request(nlohmann::json r
     panel_data.button1_mode = 0;
     panel_data.button2_detached_mode_entity_id = std::nullopt;
     panel_data.button2_mode = 0;
+    panel_data.button1_long_detached_mode_entity_id = std::nullopt;
+    panel_data.button1_long_mode = 0;
+    panel_data.button2_long_detached_mode_entity_id = std::nullopt;
+    panel_data.button2_long_mode = 0;
     panel_data.md5_data_file = request_data.at("md5_data_file").get<std::string>();
     panel_data.md5_firmware = request_data.at("md5_firmware").get<std::string>();
     panel_data.md5_tft_file = request_data.at("md5_tft_file").get<std::string>();
@@ -304,6 +308,32 @@ void NSPanel::send_config() {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
   } else {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
+  }
+
+  ButtonMode b1_long_mode = static_cast<ButtonMode>(this->_settings.button1_long_mode);
+  if (b1_long_mode == ButtonMode::DIRECT) {
+    config.set_button1_long_mode(NSPanelConfig_NSPanelButtonMode_DIRECT);
+  } else if (b1_long_mode == ButtonMode::FOLLOW) {
+    config.set_button1_long_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
+  } else if (b1_long_mode == ButtonMode::THERMOSTAT_HEATING) {
+    config.set_button1_long_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
+  } else if (b1_long_mode == ButtonMode::THERMOSTAT_COOLING) {
+    config.set_button1_long_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
+  } else {
+    config.set_button1_long_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
+  }
+
+  ButtonMode b2_long_mode = static_cast<ButtonMode>(this->_settings.button2_long_mode);
+  if (b2_long_mode == ButtonMode::DIRECT) {
+    config.set_button2_long_mode(NSPanelConfig_NSPanelButtonMode_DIRECT);
+  } else if (b2_long_mode == ButtonMode::FOLLOW) {
+    config.set_button2_long_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
+  } else if (b2_long_mode == ButtonMode::THERMOSTAT_HEATING) {
+    config.set_button2_long_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
+  } else if (b2_long_mode == ButtonMode::THERMOSTAT_COOLING) {
+    config.set_button2_long_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
+  } else {
+    config.set_button2_long_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
 
   config.set_optimistic_mode(MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE));
@@ -1330,40 +1360,36 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
       SPDLOG_DEBUG("NSPanel {}::{} got button {} press,", this->_id, this->_name, command.button_pressed().button_id());
 
       if (command.button_pressed().button_id() == 1) {
-        ButtonMode button_mode = static_cast<ButtonMode>(this->_settings.button1_mode);
-        switch (button_mode) {
-        case ButtonMode::DETACHED: {
-          if (this->_settings.button1_detached_mode_entity_id.has_value()) {
-            auto entity = EntityManager::get_entity_by_id<MqttManagerEntity>(MQTT_MANAGER_ENTITY_TYPE::ANY, this->_settings.button1_detached_mode_entity_id.value());
-            if (entity) {
-              if ((*entity)->can_toggle()) {
-                (*entity)->toggle();
-              }
-            } else
-              SPDLOG_ERROR("Tried to toggle detached light via panel but no light was was found with configured ID.");
-          } else {
-            SPDLOG_ERROR("Tried to toggle detached light via panel but no light was configured for button.");
-          }
-          break;
-        }
-
-        case ButtonMode::MQTT_PAYLOAD: {
-          std::string topic = this->_get_nspanel_setting_with_default("button1_mqtt_topic", "");
-          std::string payload = this->_get_nspanel_setting_with_default("button1_mqtt_payload", "");
-          MQTT_Manager::publish(topic, payload);
-          break;
-        }
-
-        default:
-          SPDLOG_WARN("Unknown button mode triggered from panel.");
-          break;
-        }
+       handle_button_pressed_command_callback( static_cast<ButtonMode>(this->_settings.button1_mode), this->_settings.button1_detached_mode_entity_id, 
+                                              this->_get_nspanel_setting_with_default("button1_mqtt_topic", ""), this->_get_nspanel_setting_with_default("button1_mqtt_payload", ""));
       } else if (command.button_pressed().button_id() == 2) {
-        ButtonMode button_mode = static_cast<ButtonMode>(this->_settings.button2_mode);
+        handle_button_pressed_command_callback( static_cast<ButtonMode>(this->_settings.button2_mode), this->_settings.button2_detached_mode_entity_id, 
+                                              this->_get_nspanel_setting_with_default("button2_mqtt_topic", ""), this->_get_nspanel_setting_with_default("button2_mqtt_payload", ""));
+        
+      }
+    }
+  }
+  if (command.has_button_longpressed()) {
+    if (command.nspanel_id() == this->_id) {
+      SPDLOG_DEBUG("NSPanel {}::{} got button {} longpress,", this->_id, this->_name, command.button_longpressed().button_id());
+
+      if (command.button_longpressed().button_id() == 1) {
+       handle_button_pressed_command_callback( static_cast<ButtonMode>(this->_settings.button1_long_mode), this->_settings.button1_long_detached_mode_entity_id, 
+                                              this->_get_nspanel_setting_with_default("button1_long_mqtt_topic", ""), this->_get_nspanel_setting_with_default("button1_long_mqtt_payload", ""));
+      } else if (command.button_longpressed().button_id() == 2) {
+        handle_button_pressed_command_callback( static_cast<ButtonMode>(this->_settings.button2_long_mode), this->_settings.button2_long_detached_mode_entity_id, 
+                                              this->_get_nspanel_setting_with_default("button2_long_mqtt_topic", ""), this->_get_nspanel_setting_with_default("button2_long_mqtt_payload", ""));
+        
+      }
+    }
+  }
+}
+
+void NSPanel::handle_button_pressed_command_callback(ButtonMode button_mode, std::optional<uint64_t> entity_id, std::string topic,std::string payload ) {
         switch (button_mode) {
         case ButtonMode::DETACHED: {
-          if (this->_settings.button2_detached_mode_entity_id.has_value()) {
-            auto entity = EntityManager::get_entity_by_id<MqttManagerEntity>(MQTT_MANAGER_ENTITY_TYPE::ANY, this->_settings.button2_detached_mode_entity_id.value());
+          if (entity_id.has_value()) {
+            auto entity = EntityManager::get_entity_by_id<MqttManagerEntity>(MQTT_MANAGER_ENTITY_TYPE::ANY, entity_id.value());
             if (entity) {
               if ((*entity)->can_toggle()) {
                 (*entity)->toggle();
@@ -1377,8 +1403,6 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
         }
 
         case ButtonMode::MQTT_PAYLOAD: {
-          std::string topic = this->_get_nspanel_setting_with_default("button2_mqtt_topic", "");
-          std::string payload = this->_get_nspanel_setting_with_default("button2_mqtt_payload", "");
           MQTT_Manager::publish(topic, payload);
           break;
         }
@@ -1388,9 +1412,6 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
           break;
         }
       }
-    }
-  }
-}
 
 void NSPanel::handle_stomp_command_callback(StompFrame frame) {
   if (frame.body.compare("reboot") == 0) {

@@ -58,6 +58,9 @@ message NSPanelConfig {
     NSPanelButtonMode button1_mode = 22;
     NSPanelButtonMode button2_mode = 25;
 
+    NSPanelButtonMode button1_long_mode = 27;
+    NSPanelButtonMode button2_long_mode = 29;
+
     repeated int32 global_scene_entity_page_ids = 30;
     bool optimistic_mode = 31;
     int32 raise_light_level_to_100_above = 32;
@@ -236,6 +239,10 @@ message NSPanelMQTTManagerCommand {
         int32 button_id = 2;
     }
 
+    message ButtonLongPressed {
+        int32 button_id = 2;
+    }
+
     message ThermostatTemperatureCommand {
         int32 thermostat_id = 1;
         float temperature = 2;
@@ -254,9 +261,10 @@ message NSPanelMQTTManagerCommand {
         ToggleEntityFromEntitiesPage toggle_entity_from_entities_page = 4;
         SaveSceneCommand save_scene_command = 5;
         ButtonPressed button_pressed = 6;
+        ButtonLongPressed button_longpressed = 7;
 
-        ThermostatTemperatureCommand thermostat_temperature_command = 7;
-        ThermostatCommand thermostat_command = 8;
+        ThermostatTemperatureCommand thermostat_temperature_command = 8;
+        ThermostatCommand thermostat_command = 9;
     }
 
 
