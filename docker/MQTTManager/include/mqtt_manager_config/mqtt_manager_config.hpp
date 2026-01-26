@@ -18,6 +18,8 @@
 #include <gtest/gtest.h>
 #endif
 
+#define PREPEND_HMI_LOCATION(file) "/usr/src/app/nspanelmanager" file
+
 enum LightTurnOnBehaviour {
   COLOR_TEMPERATURE,
   RESTORE_PREVIOUS,
