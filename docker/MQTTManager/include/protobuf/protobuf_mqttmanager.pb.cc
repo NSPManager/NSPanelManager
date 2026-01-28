@@ -49,6 +49,18 @@ inline constexpr NSPanelSettings::Impl_::Impl_(
         button2_mqtt_payload_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
+        button1_long_mqtt_topic_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        button2_long_mqtt_topic_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        button1_long_mqtt_payload_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        button2_long_mqtt_payload_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
         ip_address_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
@@ -72,12 +84,20 @@ inline constexpr NSPanelSettings::Impl_::Impl_(
         relay1_default_mode_{false},
         temperature_calibration_{0},
         button1_mode_{static_cast< ::NSPanelSettings_NSPanelButtonMode >(0)},
+        button1_fallback_{static_cast< ::NSPanelSettings_NSPanelButtonFallbackMode >(0)},
         button2_mode_{static_cast< ::NSPanelSettings_NSPanelButtonMode >(0)},
+        button2_fallback_{static_cast< ::NSPanelSettings_NSPanelButtonFallbackMode >(0)},
+        button1_long_mode_{static_cast< ::NSPanelSettings_NSPanelButtonMode >(0)},
+        button1_long_fallback_{static_cast< ::NSPanelSettings_NSPanelButtonFallbackMode >(0)},
+        button2_long_mode_{static_cast< ::NSPanelSettings_NSPanelButtonMode >(0)},
+        button2_long_fallback_{static_cast< ::NSPanelSettings_NSPanelButtonFallbackMode >(0)},
         button1_detached_light_id_{0},
-        button2_detached_light_id_{0},
         relay2_default_mode_{false},
         denied_{false},
         accepted_{false},
+        button2_detached_light_id_{0},
+        button1_long_detached_light_id_{0},
+        button2_long_detached_light_id_{0},
         relay1_register_type_{static_cast< ::NSPanelSettings_RelayRegisterType >(0)},
         relay2_register_type_{static_cast< ::NSPanelSettings_RelayRegisterType >(0)},
         default_room_{0} {}
@@ -114,7 +134,7 @@ struct MultipleNSPanelsSettingsDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MultipleNSPanelsSettingsDefaultTypeInternal _MultipleNSPanelsSettings_default_instance_;
-static const ::_pb::EnumDescriptor* file_level_enum_descriptors_protobuf_5fmqttmanager_2eproto[4];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_protobuf_5fmqttmanager_2eproto[5];
 static constexpr const ::_pb::ServiceDescriptor**
     file_level_service_descriptors_protobuf_5fmqttmanager_2eproto = nullptr;
 const ::uint32_t
@@ -151,13 +171,25 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.relay2_default_mode_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.temperature_calibration_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button1_mode_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button1_fallback_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button2_mode_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button2_fallback_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button1_long_mode_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button1_long_fallback_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button2_long_mode_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button2_long_fallback_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button1_mqtt_topic_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button2_mqtt_topic_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button1_mqtt_payload_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button2_mqtt_payload_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button1_detached_light_id_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button2_detached_light_id_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button1_long_mqtt_topic_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button2_long_mqtt_topic_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button1_long_mqtt_payload_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button2_long_mqtt_payload_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button1_long_detached_light_id_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.button2_long_detached_light_id_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.denied_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.accepted_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.rooms_),
@@ -166,7 +198,13 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.relay1_register_type_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.relay2_register_type_),
         PROTOBUF_FIELD_OFFSET(::NSPanelSettings, _impl_.default_room_),
-        4,
+        8,
+        ~0u,
+        ~0u,
+        ~0u,
+        ~0u,
+        ~0u,
+        ~0u,
         ~0u,
         ~0u,
         ~0u,
@@ -194,8 +232,14 @@ const ::uint32_t
         1,
         2,
         3,
+        9,
+        10,
+        4,
         5,
         6,
+        7,
+        11,
+        12,
         ~0u,
         ~0u,
         ~0u,
@@ -217,8 +261,8 @@ const ::uint32_t
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, 46, -1, sizeof(::NSPanelSettings)},
-        {84, -1, -1, sizeof(::MultipleNSPanelsSettings)},
+        {0, 58, -1, sizeof(::NSPanelSettings)},
+        {108, -1, -1, sizeof(::MultipleNSPanelsSettings)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelSettings_default_instance_._instance,
@@ -227,7 +271,7 @@ static const ::_pb::Message* const file_default_instances[] = {
 const char descriptor_table_protodef_protobuf_5fmqttmanager_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\032protobuf_mqttmanager.proto\032\026protobuf_f"
-    "ormats.proto\"\246\016\n\017NSPanelSettings\022\017\n\002id\030\001"
+    "ormats.proto\"\307\025\n\017NSPanelSettings\022\017\n\002id\030\001"
     " \001(\005H\000\210\001\001\022\023\n\013mac_address\030\002 \001(\t\022\014\n\004name\030\003"
     " \001(\t\022\014\n\004home\030\004 \001(\005\0229\n\014default_page\030\005 \001(\016"
     "2#.NSPanelSettings.NSPanelDefaultPage\022 \n"
@@ -245,36 +289,60 @@ const char descriptor_table_protodef_protobuf_5fmqttmanager_2eproto[] ABSL_ATTRI
     "to_default_room\030\026 \001(\010\022\026\n\016reverse_relays\030"
     "\027 \001(\010\022\033\n\023relay1_default_mode\030\030 \001(\010\022\033\n\023re"
     "lay2_default_mode\030\031 \001(\010\022\037\n\027temperature_c"
-    "alibration\030\032 \001(\005\0228\n\014button1_mode\030\033 \001(\0162\""
-    ".NSPanelSettings.NSPanelButtonMode\0228\n\014bu"
-    "tton2_mode\030\034 \001(\0162\".NSPanelSettings.NSPan"
-    "elButtonMode\022\037\n\022button1_mqtt_topic\030\035 \001(\t"
-    "H\001\210\001\001\022\037\n\022button2_mqtt_topic\030\036 \001(\tH\002\210\001\001\022!"
-    "\n\024button1_mqtt_payload\030\037 \001(\tH\003\210\001\001\022!\n\024but"
-    "ton2_mqtt_payload\030  \001(\tH\004\210\001\001\022&\n\031button1_"
-    "detached_light_id\030! \001(\005H\005\210\001\001\022&\n\031button2_"
-    "detached_light_id\030\" \001(\005H\006\210\001\001\022\016\n\006denied\030-"
-    " \001(\010\022\020\n\010accepted\030. \001(\010\022\r\n\005rooms\030/ \003(\005\022\016\n"
-    "\006scenes\0300 \003(\005\022\022\n\nip_address\0301 \001(\t\022@\n\024rel"
-    "ay1_register_type\0302 \001(\0162\".NSPanelSetting"
-    "s.RelayRegisterType\022@\n\024relay2_register_t"
-    "ype\0303 \001(\0162\".NSPanelSettings.RelayRegiste"
-    "rType\022\024\n\014default_room\0304 \001(\005\"C\n\022NSPanelDe"
-    "faultPage\022\r\n\tMAIN_PAGE\020\000\022\017\n\013SCENES_PAGE\020"
-    "\001\022\r\n\tROOM_PAGE\020\002\"\250\001\n\026NSPanelScreensaverM"
-    "ode\022\033\n\027WEATHER_WITH_BACKGROUND\020\000\022\036\n\032WEAT"
-    "HER_WITHOUT_BACKGROUND\020\001\022\034\n\030DATETIME_WIT"
-    "H_BACKGROUND\020\003\022\037\n\033DATETIME_WITHOUT_BACKG"
-    "ROUND\020\004\022\022\n\016NO_SCREENSAVER\020\005\"Y\n\021NSPanelBu"
-    "ttonMode\022\017\n\013DIRECT_MODE\020\000\022\021\n\rDETACHED_MO"
-    "DE\020\001\022\017\n\013CUSTOM_MQTT\020\002\022\017\n\013FOLLOW_MODE\020\003\"*"
-    "\n\021RelayRegisterType\022\n\n\006SWITCH\020\000\022\t\n\005LIGHT"
-    "\020\001B\005\n\003_idB\025\n\023_button1_mqtt_topicB\025\n\023_but"
-    "ton2_mqtt_topicB\027\n\025_button1_mqtt_payload"
-    "B\027\n\025_button2_mqtt_payloadB\034\n\032_button1_de"
-    "tached_light_idB\034\n\032_button2_detached_lig"
-    "ht_id\">\n\030MultipleNSPanelsSettings\022\"\n\010nsp"
-    "anels\030\001 \003(\0132\020.NSPanelSettingsb\006proto3"
+    "alibration\030\032 \001(\005\0228\n\014button1_mode\030\036 \001(\0162\""
+    ".NSPanelSettings.NSPanelButtonMode\022D\n\020bu"
+    "tton1_fallback\030\037 \001(\0162*.NSPanelSettings.N"
+    "SPanelButtonFallbackMode\0228\n\014button2_mode"
+    "\030  \001(\0162\".NSPanelSettings.NSPanelButtonMo"
+    "de\022D\n\020button2_fallback\030! \001(\0162*.NSPanelSe"
+    "ttings.NSPanelButtonFallbackMode\022=\n\021butt"
+    "on1_long_mode\030\" \001(\0162\".NSPanelSettings.NS"
+    "PanelButtonMode\022I\n\025button1_long_fallback"
+    "\030# \001(\0162*.NSPanelSettings.NSPanelButtonFa"
+    "llbackMode\022=\n\021button2_long_mode\030$ \001(\0162\"."
+    "NSPanelSettings.NSPanelButtonMode\022I\n\025but"
+    "ton2_long_fallback\030% \001(\0162*.NSPanelSettin"
+    "gs.NSPanelButtonFallbackMode\022\037\n\022button1_"
+    "mqtt_topic\030& \001(\tH\001\210\001\001\022\037\n\022button2_mqtt_to"
+    "pic\030\' \001(\tH\002\210\001\001\022!\n\024button1_mqtt_payload\030("
+    " \001(\tH\003\210\001\001\022!\n\024button2_mqtt_payload\030) \001(\tH"
+    "\004\210\001\001\022&\n\031button1_detached_light_id\030* \001(\005H"
+    "\005\210\001\001\022&\n\031button2_detached_light_id\030+ \001(\005H"
+    "\006\210\001\001\022$\n\027button1_long_mqtt_topic\030, \001(\tH\007\210"
+    "\001\001\022$\n\027button2_long_mqtt_topic\030- \001(\tH\010\210\001\001"
+    "\022&\n\031button1_long_mqtt_payload\030. \001(\tH\t\210\001\001"
+    "\022&\n\031button2_long_mqtt_payload\030/ \001(\tH\n\210\001\001"
+    "\022+\n\036button1_long_detached_light_id\0300 \001(\005"
+    "H\013\210\001\001\022+\n\036button2_long_detached_light_id\030"
+    "1 \001(\005H\014\210\001\001\022\016\n\006denied\0302 \001(\010\022\020\n\010accepted\0303"
+    " \001(\010\022\r\n\005rooms\0304 \003(\005\022\016\n\006scenes\0305 \003(\005\022\022\n\ni"
+    "p_address\0306 \001(\t\022@\n\024relay1_register_type\030"
+    "7 \001(\0162\".NSPanelSettings.RelayRegisterTyp"
+    "e\022@\n\024relay2_register_type\0308 \001(\0162\".NSPane"
+    "lSettings.RelayRegisterType\022\024\n\014default_r"
+    "oom\0309 \001(\005\"C\n\022NSPanelDefaultPage\022\r\n\tMAIN_"
+    "PAGE\020\000\022\017\n\013SCENES_PAGE\020\001\022\r\n\tROOM_PAGE\020\002\"\250"
+    "\001\n\026NSPanelScreensaverMode\022\033\n\027WEATHER_WIT"
+    "H_BACKGROUND\020\000\022\036\n\032WEATHER_WITHOUT_BACKGR"
+    "OUND\020\001\022\034\n\030DATETIME_WITH_BACKGROUND\020\003\022\037\n\033"
+    "DATETIME_WITHOUT_BACKGROUND\020\004\022\022\n\016NO_SCRE"
+    "ENSAVER\020\005\"Y\n\021NSPanelButtonMode\022\017\n\013DIRECT"
+    "_MODE\020\000\022\021\n\rDETACHED_MODE\020\001\022\017\n\013CUSTOM_MQT"
+    "T\020\002\022\017\n\013FOLLOW_MODE\020\003\"O\n\031NSPanelButtonFal"
+    "lbackMode\022\014\n\010DISABLED\020\000\022\021\n\rTOGGLE_RELAY1"
+    "\020\001\022\021\n\rTOGLLE_RELAY2\020\002\"*\n\021RelayRegisterTy"
+    "pe\022\n\n\006SWITCH\020\000\022\t\n\005LIGHT\020\001B\005\n\003_idB\025\n\023_but"
+    "ton1_mqtt_topicB\025\n\023_button2_mqtt_topicB\027"
+    "\n\025_button1_mqtt_payloadB\027\n\025_button2_mqtt"
+    "_payloadB\034\n\032_button1_detached_light_idB\034"
+    "\n\032_button2_detached_light_idB\032\n\030_button1"
+    "_long_mqtt_topicB\032\n\030_button2_long_mqtt_t"
+    "opicB\034\n\032_button1_long_mqtt_payloadB\034\n\032_b"
+    "utton2_long_mqtt_payloadB!\n\037_button1_lon"
+    "g_detached_light_idB!\n\037_button2_long_det"
+    "ached_light_id\">\n\030MultipleNSPanelsSettin"
+    "gs\022\"\n\010nspanels\030\001 \003(\0132\020.NSPanelSettingsb\006"
+    "proto3"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_protobuf_5fmqttmanager_2eproto_deps[1] =
     {
@@ -284,7 +352,7 @@ static ::absl::once_flag descriptor_table_protobuf_5fmqttmanager_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fmqttmanager_2eproto = {
     false,
     false,
-    1957,
+    2886,
     descriptor_table_protodef_protobuf_5fmqttmanager_2eproto,
     "protobuf_mqttmanager.proto",
     &descriptor_table_protobuf_5fmqttmanager_2eproto_once,
@@ -363,9 +431,30 @@ constexpr int NSPanelSettings::NSPanelButtonMode_ARRAYSIZE;
 
 #endif  // (__cplusplus < 201703) &&
         // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
-const ::google::protobuf::EnumDescriptor* NSPanelSettings_RelayRegisterType_descriptor() {
+const ::google::protobuf::EnumDescriptor* NSPanelSettings_NSPanelButtonFallbackMode_descriptor() {
   ::google::protobuf::internal::AssignDescriptors(&descriptor_table_protobuf_5fmqttmanager_2eproto);
   return file_level_enum_descriptors_protobuf_5fmqttmanager_2eproto[3];
+}
+PROTOBUF_CONSTINIT const uint32_t NSPanelSettings_NSPanelButtonFallbackMode_internal_data_[] = {
+    196608u, 0u, };
+bool NSPanelSettings_NSPanelButtonFallbackMode_IsValid(int value) {
+  return 0 <= value && value <= 2;
+}
+#if (__cplusplus < 201703) && \
+  (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
+
+constexpr NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings::DISABLED;
+constexpr NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings::TOGGLE_RELAY1;
+constexpr NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings::TOGLLE_RELAY2;
+constexpr NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings::NSPanelButtonFallbackMode_MIN;
+constexpr NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings::NSPanelButtonFallbackMode_MAX;
+constexpr int NSPanelSettings::NSPanelButtonFallbackMode_ARRAYSIZE;
+
+#endif  // (__cplusplus < 201703) &&
+        // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
+const ::google::protobuf::EnumDescriptor* NSPanelSettings_RelayRegisterType_descriptor() {
+  ::google::protobuf::internal::AssignDescriptors(&descriptor_table_protobuf_5fmqttmanager_2eproto);
+  return file_level_enum_descriptors_protobuf_5fmqttmanager_2eproto[4];
 }
 PROTOBUF_CONSTINIT const uint32_t NSPanelSettings_RelayRegisterType_internal_data_[] = {
     131072u, 0u, };
@@ -413,6 +502,10 @@ inline PROTOBUF_NDEBUG_INLINE NSPanelSettings::Impl_::Impl_(
         button2_mqtt_topic_(arena, from.button2_mqtt_topic_),
         button1_mqtt_payload_(arena, from.button1_mqtt_payload_),
         button2_mqtt_payload_(arena, from.button2_mqtt_payload_),
+        button1_long_mqtt_topic_(arena, from.button1_long_mqtt_topic_),
+        button2_long_mqtt_topic_(arena, from.button2_long_mqtt_topic_),
+        button1_long_mqtt_payload_(arena, from.button1_long_mqtt_payload_),
+        button2_long_mqtt_payload_(arena, from.button2_long_mqtt_payload_),
         ip_address_(arena, from.ip_address_) {}
 
 NSPanelSettings::NSPanelSettings(
@@ -448,6 +541,10 @@ inline PROTOBUF_NDEBUG_INLINE NSPanelSettings::Impl_::Impl_(
         button2_mqtt_topic_(arena),
         button1_mqtt_payload_(arena),
         button2_mqtt_payload_(arena),
+        button1_long_mqtt_topic_(arena),
+        button2_long_mqtt_topic_(arena),
+        button1_long_mqtt_payload_(arena),
+        button2_long_mqtt_payload_(arena),
         ip_address_(arena) {}
 
 inline void NSPanelSettings::SharedCtor(::_pb::Arena* arena) {
@@ -472,6 +569,10 @@ inline void NSPanelSettings::SharedDtor() {
   _impl_.button2_mqtt_topic_.Destroy();
   _impl_.button1_mqtt_payload_.Destroy();
   _impl_.button2_mqtt_payload_.Destroy();
+  _impl_.button1_long_mqtt_topic_.Destroy();
+  _impl_.button2_long_mqtt_topic_.Destroy();
+  _impl_.button1_long_mqtt_payload_.Destroy();
+  _impl_.button2_long_mqtt_payload_.Destroy();
   _impl_.ip_address_.Destroy();
   _impl_.~Impl_();
 }
@@ -497,15 +598,15 @@ NSPanelSettings::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<5, 38, 0, 157, 9> NSPanelSettings::_table_ = {
+const ::_pbi::TcParseTable<5, 50, 0, 269, 9> NSPanelSettings::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_._has_bits_),
     0, // no _extensions_
-    52, 248,  // max_field_number, fast_idx_mask
+    57, 248,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    8640,  // skipmap
+    469770688,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    38,  // num_field_entries
+    50,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_NSPanelSettings_default_instance_._instance,
@@ -517,8 +618,8 @@ const ::_pbi::TcParseTable<5, 38, 0, 157, 9> NSPanelSettings::_table_ = {
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
     // optional int32 id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelSettings, _impl_.id_), 4>(),
-     {8, 4, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.id_)}},
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelSettings, _impl_.id_), 8>(),
+     {8, 8, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.id_)}},
     // string mac_address = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.mac_address_)}},
@@ -586,28 +687,28 @@ const ::_pbi::TcParseTable<5, 38, 0, 157, 9> NSPanelSettings::_table_ = {
     // int32 temperature_calibration = 26;
     {::_pbi::TcParser::FastV32S2,
      {464, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.temperature_calibration_)}},
-    // .NSPanelSettings.NSPanelButtonMode button1_mode = 27;
+    // optional int32 button2_detached_light_id = 43;
     {::_pbi::TcParser::FastV32S2,
-     {472, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_mode_)}},
-    // .NSPanelSettings.NSPanelButtonMode button2_mode = 28;
+     {728, 10, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_detached_light_id_)}},
+    // optional string button1_long_mqtt_topic = 44;
+    {::_pbi::TcParser::FastUS2,
+     {738, 4, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_long_mqtt_topic_)}},
+    // optional string button2_long_mqtt_topic = 45;
+    {::_pbi::TcParser::FastUS2,
+     {746, 5, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_long_mqtt_topic_)}},
+    // .NSPanelSettings.NSPanelButtonMode button1_mode = 30;
     {::_pbi::TcParser::FastV32S2,
-     {480, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_mode_)}},
-    // optional string button1_mqtt_topic = 29;
-    {::_pbi::TcParser::FastUS2,
-     {490, 0, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_mqtt_topic_)}},
-    // optional string button2_mqtt_topic = 30;
-    {::_pbi::TcParser::FastUS2,
-     {498, 1, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_mqtt_topic_)}},
-    // optional string button1_mqtt_payload = 31;
-    {::_pbi::TcParser::FastUS2,
-     {506, 2, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_mqtt_payload_)}},
+     {496, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_mode_)}},
+    // .NSPanelSettings.NSPanelButtonFallbackMode button1_fallback = 31;
+    {::_pbi::TcParser::FastV32S2,
+     {504, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_fallback_)}},
   }}, {{
     33, 0, 2,
-    4092, 28, 65520, 34,
+    0, 25, 65024, 41,
     65535, 65535
   }}, {{
     // optional int32 id = 1;
-    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.id_), _Internal::kHasBitsOffset + 4, 0,
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.id_), _Internal::kHasBitsOffset + 8, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // string mac_address = 2;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.mac_address_), -1, 0,
@@ -672,58 +773,94 @@ const ::_pbi::TcParseTable<5, 38, 0, 157, 9> NSPanelSettings::_table_ = {
     // int32 temperature_calibration = 26;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.temperature_calibration_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // .NSPanelSettings.NSPanelButtonMode button1_mode = 27;
+    // .NSPanelSettings.NSPanelButtonMode button1_mode = 30;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_mode_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
-    // .NSPanelSettings.NSPanelButtonMode button2_mode = 28;
+    // .NSPanelSettings.NSPanelButtonFallbackMode button1_fallback = 31;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_fallback_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // .NSPanelSettings.NSPanelButtonMode button2_mode = 32;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_mode_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
-    // optional string button1_mqtt_topic = 29;
+    // .NSPanelSettings.NSPanelButtonFallbackMode button2_fallback = 33;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_fallback_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // .NSPanelSettings.NSPanelButtonMode button1_long_mode = 34;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_long_mode_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // .NSPanelSettings.NSPanelButtonFallbackMode button1_long_fallback = 35;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_long_fallback_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // .NSPanelSettings.NSPanelButtonMode button2_long_mode = 36;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_long_mode_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // .NSPanelSettings.NSPanelButtonFallbackMode button2_long_fallback = 37;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_long_fallback_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // optional string button1_mqtt_topic = 38;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_mqtt_topic_), _Internal::kHasBitsOffset + 0, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // optional string button2_mqtt_topic = 30;
+    // optional string button2_mqtt_topic = 39;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_mqtt_topic_), _Internal::kHasBitsOffset + 1, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // optional string button1_mqtt_payload = 31;
+    // optional string button1_mqtt_payload = 40;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_mqtt_payload_), _Internal::kHasBitsOffset + 2, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // optional string button2_mqtt_payload = 32;
+    // optional string button2_mqtt_payload = 41;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_mqtt_payload_), _Internal::kHasBitsOffset + 3, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // optional int32 button1_detached_light_id = 33;
-    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_detached_light_id_), _Internal::kHasBitsOffset + 5, 0,
+    // optional int32 button1_detached_light_id = 42;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_detached_light_id_), _Internal::kHasBitsOffset + 9, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // optional int32 button2_detached_light_id = 34;
-    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_detached_light_id_), _Internal::kHasBitsOffset + 6, 0,
+    // optional int32 button2_detached_light_id = 43;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_detached_light_id_), _Internal::kHasBitsOffset + 10, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // bool denied = 45;
+    // optional string button1_long_mqtt_topic = 44;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_long_mqtt_topic_), _Internal::kHasBitsOffset + 4, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // optional string button2_long_mqtt_topic = 45;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_long_mqtt_topic_), _Internal::kHasBitsOffset + 5, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // optional string button1_long_mqtt_payload = 46;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_long_mqtt_payload_), _Internal::kHasBitsOffset + 6, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // optional string button2_long_mqtt_payload = 47;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_long_mqtt_payload_), _Internal::kHasBitsOffset + 7, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // optional int32 button1_long_detached_light_id = 48;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button1_long_detached_light_id_), _Internal::kHasBitsOffset + 11, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // optional int32 button2_long_detached_light_id = 49;
+    {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.button2_long_detached_light_id_), _Internal::kHasBitsOffset + 12, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // bool denied = 50;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.denied_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // bool accepted = 46;
+    // bool accepted = 51;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.accepted_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // repeated int32 rooms = 47;
+    // repeated int32 rooms = 52;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.rooms_), -1, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
-    // repeated int32 scenes = 48;
+    // repeated int32 scenes = 53;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.scenes_), -1, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
-    // string ip_address = 49;
+    // string ip_address = 54;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.ip_address_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // .NSPanelSettings.RelayRegisterType relay1_register_type = 50;
+    // .NSPanelSettings.RelayRegisterType relay1_register_type = 55;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.relay1_register_type_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
-    // .NSPanelSettings.RelayRegisterType relay2_register_type = 51;
+    // .NSPanelSettings.RelayRegisterType relay2_register_type = 56;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.relay2_register_type_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
-    // int32 default_room = 52;
+    // int32 default_room = 57;
     {PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.default_room_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
-    "\17\0\13\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\22\22\24\24\0\0\0\0\0\0\12\0\0\0\0"
+    "\17\0\13\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\22\22\24\24\0\0\27\27\31\31\0\0\0\0\0\0\12\0\0\0\0\0\0\0\0"
     "NSPanelSettings"
     "mac_address"
     "name"
@@ -731,6 +868,10 @@ const ::_pbi::TcParseTable<5, 38, 0, 157, 9> NSPanelSettings::_table_ = {
     "button2_mqtt_topic"
     "button1_mqtt_payload"
     "button2_mqtt_payload"
+    "button1_long_mqtt_topic"
+    "button2_long_mqtt_topic"
+    "button1_long_mqtt_payload"
+    "button2_long_mqtt_payload"
     "ip_address"
   }},
 };
@@ -747,7 +888,7 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
   _impl_.mac_address_.ClearToEmpty();
   _impl_.name_.ClearToEmpty();
   cached_has_bits = _impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x000000ffu) {
     if (cached_has_bits & 0x00000001u) {
       _impl_.button1_mqtt_topic_.ClearNonDefaultToEmpty();
     }
@@ -760,20 +901,36 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
     if (cached_has_bits & 0x00000008u) {
       _impl_.button2_mqtt_payload_.ClearNonDefaultToEmpty();
     }
+    if (cached_has_bits & 0x00000010u) {
+      _impl_.button1_long_mqtt_topic_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000020u) {
+      _impl_.button2_long_mqtt_topic_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000040u) {
+      _impl_.button1_long_mqtt_payload_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000080u) {
+      _impl_.button2_long_mqtt_payload_.ClearNonDefaultToEmpty();
+    }
   }
   _impl_.ip_address_.ClearToEmpty();
   _impl_.id_ = 0;
   ::memset(&_impl_.home_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.button2_mode_) -
-      reinterpret_cast<char*>(&_impl_.home_)) + sizeof(_impl_.button2_mode_));
-  if (cached_has_bits & 0x00000060u) {
-    ::memset(&_impl_.button1_detached_light_id_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.button2_detached_light_id_) -
-        reinterpret_cast<char*>(&_impl_.button1_detached_light_id_)) + sizeof(_impl_.button2_detached_light_id_));
-  }
+      reinterpret_cast<char*>(&_impl_.button2_long_fallback_) -
+      reinterpret_cast<char*>(&_impl_.home_)) + sizeof(_impl_.button2_long_fallback_));
+  _impl_.button1_detached_light_id_ = 0;
   ::memset(&_impl_.relay2_default_mode_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.accepted_) -
+      reinterpret_cast<char*>(&_impl_.relay2_default_mode_)) + sizeof(_impl_.accepted_));
+  if (cached_has_bits & 0x00001c00u) {
+    ::memset(&_impl_.button2_detached_light_id_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.button2_long_detached_light_id_) -
+        reinterpret_cast<char*>(&_impl_.button2_detached_light_id_)) + sizeof(_impl_.button2_long_detached_light_id_));
+  }
+  ::memset(&_impl_.relay1_register_type_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.default_room_) -
-      reinterpret_cast<char*>(&_impl_.relay2_default_mode_)) + sizeof(_impl_.default_room_));
+      reinterpret_cast<char*>(&_impl_.relay1_register_type_)) + sizeof(_impl_.default_room_));
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -787,7 +944,7 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
 
   cached_has_bits = _impl_._has_bits_[0];
   // optional int32 id = 1;
-  if (cached_has_bits & 0x00000010u) {
+  if (cached_has_bits & 0x00000100u) {
     target = ::google::protobuf::internal::WireFormatLite::
         WriteInt32ToArrayWithField<1>(
             stream, this->_internal_id(), target);
@@ -942,125 +1099,213 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
         26, this->_internal_temperature_calibration(), target);
   }
 
-  // .NSPanelSettings.NSPanelButtonMode button1_mode = 27;
+  // .NSPanelSettings.NSPanelButtonMode button1_mode = 30;
   if (this->_internal_button1_mode() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-        27, this->_internal_button1_mode(), target);
+        30, this->_internal_button1_mode(), target);
   }
 
-  // .NSPanelSettings.NSPanelButtonMode button2_mode = 28;
+  // .NSPanelSettings.NSPanelButtonFallbackMode button1_fallback = 31;
+  if (this->_internal_button1_fallback() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        31, this->_internal_button1_fallback(), target);
+  }
+
+  // .NSPanelSettings.NSPanelButtonMode button2_mode = 32;
   if (this->_internal_button2_mode() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-        28, this->_internal_button2_mode(), target);
+        32, this->_internal_button2_mode(), target);
   }
 
-  // optional string button1_mqtt_topic = 29;
+  // .NSPanelSettings.NSPanelButtonFallbackMode button2_fallback = 33;
+  if (this->_internal_button2_fallback() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        33, this->_internal_button2_fallback(), target);
+  }
+
+  // .NSPanelSettings.NSPanelButtonMode button1_long_mode = 34;
+  if (this->_internal_button1_long_mode() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        34, this->_internal_button1_long_mode(), target);
+  }
+
+  // .NSPanelSettings.NSPanelButtonFallbackMode button1_long_fallback = 35;
+  if (this->_internal_button1_long_fallback() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        35, this->_internal_button1_long_fallback(), target);
+  }
+
+  // .NSPanelSettings.NSPanelButtonMode button2_long_mode = 36;
+  if (this->_internal_button2_long_mode() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        36, this->_internal_button2_long_mode(), target);
+  }
+
+  // .NSPanelSettings.NSPanelButtonFallbackMode button2_long_fallback = 37;
+  if (this->_internal_button2_long_fallback() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        37, this->_internal_button2_long_fallback(), target);
+  }
+
+  // optional string button1_mqtt_topic = 38;
   if (cached_has_bits & 0x00000001u) {
     const std::string& _s = this->_internal_button1_mqtt_topic();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelSettings.button1_mqtt_topic");
-    target = stream->WriteStringMaybeAliased(29, _s, target);
+    target = stream->WriteStringMaybeAliased(38, _s, target);
   }
 
-  // optional string button2_mqtt_topic = 30;
+  // optional string button2_mqtt_topic = 39;
   if (cached_has_bits & 0x00000002u) {
     const std::string& _s = this->_internal_button2_mqtt_topic();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelSettings.button2_mqtt_topic");
-    target = stream->WriteStringMaybeAliased(30, _s, target);
+    target = stream->WriteStringMaybeAliased(39, _s, target);
   }
 
-  // optional string button1_mqtt_payload = 31;
+  // optional string button1_mqtt_payload = 40;
   if (cached_has_bits & 0x00000004u) {
     const std::string& _s = this->_internal_button1_mqtt_payload();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelSettings.button1_mqtt_payload");
-    target = stream->WriteStringMaybeAliased(31, _s, target);
+    target = stream->WriteStringMaybeAliased(40, _s, target);
   }
 
-  // optional string button2_mqtt_payload = 32;
+  // optional string button2_mqtt_payload = 41;
   if (cached_has_bits & 0x00000008u) {
     const std::string& _s = this->_internal_button2_mqtt_payload();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelSettings.button2_mqtt_payload");
-    target = stream->WriteStringMaybeAliased(32, _s, target);
+    target = stream->WriteStringMaybeAliased(41, _s, target);
   }
 
-  // optional int32 button1_detached_light_id = 33;
+  // optional int32 button1_detached_light_id = 42;
+  if (cached_has_bits & 0x00000200u) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        42, this->_internal_button1_detached_light_id(), target);
+  }
+
+  // optional int32 button2_detached_light_id = 43;
+  if (cached_has_bits & 0x00000400u) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        43, this->_internal_button2_detached_light_id(), target);
+  }
+
+  // optional string button1_long_mqtt_topic = 44;
+  if (cached_has_bits & 0x00000010u) {
+    const std::string& _s = this->_internal_button1_long_mqtt_topic();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelSettings.button1_long_mqtt_topic");
+    target = stream->WriteStringMaybeAliased(44, _s, target);
+  }
+
+  // optional string button2_long_mqtt_topic = 45;
   if (cached_has_bits & 0x00000020u) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
-        33, this->_internal_button1_detached_light_id(), target);
+    const std::string& _s = this->_internal_button2_long_mqtt_topic();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelSettings.button2_long_mqtt_topic");
+    target = stream->WriteStringMaybeAliased(45, _s, target);
   }
 
-  // optional int32 button2_detached_light_id = 34;
+  // optional string button1_long_mqtt_payload = 46;
   if (cached_has_bits & 0x00000040u) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
-        34, this->_internal_button2_detached_light_id(), target);
+    const std::string& _s = this->_internal_button1_long_mqtt_payload();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelSettings.button1_long_mqtt_payload");
+    target = stream->WriteStringMaybeAliased(46, _s, target);
   }
 
-  // bool denied = 45;
+  // optional string button2_long_mqtt_payload = 47;
+  if (cached_has_bits & 0x00000080u) {
+    const std::string& _s = this->_internal_button2_long_mqtt_payload();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelSettings.button2_long_mqtt_payload");
+    target = stream->WriteStringMaybeAliased(47, _s, target);
+  }
+
+  // optional int32 button1_long_detached_light_id = 48;
+  if (cached_has_bits & 0x00000800u) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        48, this->_internal_button1_long_detached_light_id(), target);
+  }
+
+  // optional int32 button2_long_detached_light_id = 49;
+  if (cached_has_bits & 0x00001000u) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        49, this->_internal_button2_long_detached_light_id(), target);
+  }
+
+  // bool denied = 50;
   if (this->_internal_denied() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        45, this->_internal_denied(), target);
+        50, this->_internal_denied(), target);
   }
 
-  // bool accepted = 46;
+  // bool accepted = 51;
   if (this->_internal_accepted() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
-        46, this->_internal_accepted(), target);
+        51, this->_internal_accepted(), target);
   }
 
-  // repeated int32 rooms = 47;
+  // repeated int32 rooms = 52;
   {
     int byte_size = _impl_._rooms_cached_byte_size_.Get();
     if (byte_size > 0) {
       target = stream->WriteInt32Packed(
-          47, _internal_rooms(), byte_size, target);
+          52, _internal_rooms(), byte_size, target);
     }
   }
 
-  // repeated int32 scenes = 48;
+  // repeated int32 scenes = 53;
   {
     int byte_size = _impl_._scenes_cached_byte_size_.Get();
     if (byte_size > 0) {
       target = stream->WriteInt32Packed(
-          48, _internal_scenes(), byte_size, target);
+          53, _internal_scenes(), byte_size, target);
     }
   }
 
-  // string ip_address = 49;
+  // string ip_address = 54;
   if (!this->_internal_ip_address().empty()) {
     const std::string& _s = this->_internal_ip_address();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelSettings.ip_address");
-    target = stream->WriteStringMaybeAliased(49, _s, target);
+    target = stream->WriteStringMaybeAliased(54, _s, target);
   }
 
-  // .NSPanelSettings.RelayRegisterType relay1_register_type = 50;
+  // .NSPanelSettings.RelayRegisterType relay1_register_type = 55;
   if (this->_internal_relay1_register_type() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-        50, this->_internal_relay1_register_type(), target);
+        55, this->_internal_relay1_register_type(), target);
   }
 
-  // .NSPanelSettings.RelayRegisterType relay2_register_type = 51;
+  // .NSPanelSettings.RelayRegisterType relay2_register_type = 56;
   if (this->_internal_relay2_register_type() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-        51, this->_internal_relay2_register_type(), target);
+        56, this->_internal_relay2_register_type(), target);
   }
 
-  // int32 default_room = 52;
+  // int32 default_room = 57;
   if (this->_internal_default_room() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteInt32ToArray(
-        52, this->_internal_default_room(), target);
+        57, this->_internal_default_room(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1081,7 +1326,7 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
   (void) cached_has_bits;
 
   ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
-  // repeated int32 rooms = 47;
+  // repeated int32 rooms = 52;
   {
     std::size_t data_size = ::_pbi::WireFormatLite::Int32Size(
         this->_internal_rooms())
@@ -1094,7 +1339,7 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
     ;
     total_size += tag_size + data_size;
   }
-  // repeated int32 scenes = 48;
+  // repeated int32 scenes = 53;
   {
     std::size_t data_size = ::_pbi::WireFormatLite::Int32Size(
         this->_internal_scenes())
@@ -1120,40 +1365,64 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
   }
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
-    // optional string button1_mqtt_topic = 29;
+  if (cached_has_bits & 0x000000ffu) {
+    // optional string button1_mqtt_topic = 38;
     if (cached_has_bits & 0x00000001u) {
       total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                       this->_internal_button1_mqtt_topic());
     }
 
-    // optional string button2_mqtt_topic = 30;
+    // optional string button2_mqtt_topic = 39;
     if (cached_has_bits & 0x00000002u) {
       total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                       this->_internal_button2_mqtt_topic());
     }
 
-    // optional string button1_mqtt_payload = 31;
+    // optional string button1_mqtt_payload = 40;
     if (cached_has_bits & 0x00000004u) {
       total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                       this->_internal_button1_mqtt_payload());
     }
 
-    // optional string button2_mqtt_payload = 32;
+    // optional string button2_mqtt_payload = 41;
     if (cached_has_bits & 0x00000008u) {
       total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                       this->_internal_button2_mqtt_payload());
     }
 
+    // optional string button1_long_mqtt_topic = 44;
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_button1_long_mqtt_topic());
+    }
+
+    // optional string button2_long_mqtt_topic = 45;
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_button2_long_mqtt_topic());
+    }
+
+    // optional string button1_long_mqtt_payload = 46;
+    if (cached_has_bits & 0x00000040u) {
+      total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_button1_long_mqtt_payload());
+    }
+
+    // optional string button2_long_mqtt_payload = 47;
+    if (cached_has_bits & 0x00000080u) {
+      total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_button2_long_mqtt_payload());
+    }
+
   }
-  // string ip_address = 49;
+  // string ip_address = 54;
   if (!this->_internal_ip_address().empty()) {
     total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_ip_address());
   }
 
   // optional int32 id = 1;
-  if (cached_has_bits & 0x00000010u) {
+  if (cached_has_bits & 0x00000100u) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
         this->_internal_id());
   }
@@ -1262,60 +1531,108 @@ PROTOBUF_NOINLINE void NSPanelSettings::Clear() {
                                     this->_internal_temperature_calibration());
   }
 
-  // .NSPanelSettings.NSPanelButtonMode button1_mode = 27;
+  // .NSPanelSettings.NSPanelButtonMode button1_mode = 30;
   if (this->_internal_button1_mode() != 0) {
     total_size += 2 +
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_button1_mode());
   }
 
-  // .NSPanelSettings.NSPanelButtonMode button2_mode = 28;
+  // .NSPanelSettings.NSPanelButtonFallbackMode button1_fallback = 31;
+  if (this->_internal_button1_fallback() != 0) {
+    total_size += 2 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_button1_fallback());
+  }
+
+  // .NSPanelSettings.NSPanelButtonMode button2_mode = 32;
   if (this->_internal_button2_mode() != 0) {
     total_size += 2 +
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_button2_mode());
   }
 
-  if (cached_has_bits & 0x00000060u) {
-    // optional int32 button1_detached_light_id = 33;
-    if (cached_has_bits & 0x00000020u) {
-      total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
-                                      this->_internal_button1_detached_light_id());
-    }
-
-    // optional int32 button2_detached_light_id = 34;
-    if (cached_has_bits & 0x00000040u) {
-      total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
-                                      this->_internal_button2_detached_light_id());
-    }
-
+  // .NSPanelSettings.NSPanelButtonFallbackMode button2_fallback = 33;
+  if (this->_internal_button2_fallback() != 0) {
+    total_size += 2 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_button2_fallback());
   }
+
+  // .NSPanelSettings.NSPanelButtonMode button1_long_mode = 34;
+  if (this->_internal_button1_long_mode() != 0) {
+    total_size += 2 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_button1_long_mode());
+  }
+
+  // .NSPanelSettings.NSPanelButtonFallbackMode button1_long_fallback = 35;
+  if (this->_internal_button1_long_fallback() != 0) {
+    total_size += 2 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_button1_long_fallback());
+  }
+
+  // .NSPanelSettings.NSPanelButtonMode button2_long_mode = 36;
+  if (this->_internal_button2_long_mode() != 0) {
+    total_size += 2 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_button2_long_mode());
+  }
+
+  // .NSPanelSettings.NSPanelButtonFallbackMode button2_long_fallback = 37;
+  if (this->_internal_button2_long_fallback() != 0) {
+    total_size += 2 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_button2_long_fallback());
+  }
+
+  // optional int32 button1_detached_light_id = 42;
+  if (cached_has_bits & 0x00000200u) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_button1_detached_light_id());
+  }
+
   // bool relay2_default_mode = 25;
   if (this->_internal_relay2_default_mode() != 0) {
     total_size += 3;
   }
 
-  // bool denied = 45;
+  // bool denied = 50;
   if (this->_internal_denied() != 0) {
     total_size += 3;
   }
 
-  // bool accepted = 46;
+  // bool accepted = 51;
   if (this->_internal_accepted() != 0) {
     total_size += 3;
   }
 
-  // .NSPanelSettings.RelayRegisterType relay1_register_type = 50;
+  if (cached_has_bits & 0x00001c00u) {
+    // optional int32 button2_detached_light_id = 43;
+    if (cached_has_bits & 0x00000400u) {
+      total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                      this->_internal_button2_detached_light_id());
+    }
+
+    // optional int32 button1_long_detached_light_id = 48;
+    if (cached_has_bits & 0x00000800u) {
+      total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                      this->_internal_button1_long_detached_light_id());
+    }
+
+    // optional int32 button2_long_detached_light_id = 49;
+    if (cached_has_bits & 0x00001000u) {
+      total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                      this->_internal_button2_long_detached_light_id());
+    }
+
+  }
+  // .NSPanelSettings.RelayRegisterType relay1_register_type = 55;
   if (this->_internal_relay1_register_type() != 0) {
     total_size += 2 +
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_relay1_register_type());
   }
 
-  // .NSPanelSettings.RelayRegisterType relay2_register_type = 51;
+  // .NSPanelSettings.RelayRegisterType relay2_register_type = 56;
   if (this->_internal_relay2_register_type() != 0) {
     total_size += 2 +
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_relay2_register_type());
   }
 
-  // int32 default_room = 52;
+  // int32 default_room = 57;
   if (this->_internal_default_room() != 0) {
     total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
                                     this->_internal_default_room());
@@ -1342,7 +1659,7 @@ void NSPanelSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const :
     _this->_internal_set_name(from._internal_name());
   }
   cached_has_bits = from._impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x000000ffu) {
     if (cached_has_bits & 0x00000001u) {
       _this->_internal_set_button1_mqtt_topic(from._internal_button1_mqtt_topic());
     }
@@ -1355,11 +1672,23 @@ void NSPanelSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const :
     if (cached_has_bits & 0x00000008u) {
       _this->_internal_set_button2_mqtt_payload(from._internal_button2_mqtt_payload());
     }
+    if (cached_has_bits & 0x00000010u) {
+      _this->_internal_set_button1_long_mqtt_topic(from._internal_button1_long_mqtt_topic());
+    }
+    if (cached_has_bits & 0x00000020u) {
+      _this->_internal_set_button2_long_mqtt_topic(from._internal_button2_long_mqtt_topic());
+    }
+    if (cached_has_bits & 0x00000040u) {
+      _this->_internal_set_button1_long_mqtt_payload(from._internal_button1_long_mqtt_payload());
+    }
+    if (cached_has_bits & 0x00000080u) {
+      _this->_internal_set_button2_long_mqtt_payload(from._internal_button2_long_mqtt_payload());
+    }
   }
   if (!from._internal_ip_address().empty()) {
     _this->_internal_set_ip_address(from._internal_ip_address());
   }
-  if (cached_has_bits & 0x00000010u) {
+  if (cached_has_bits & 0x00000100u) {
     _this->_impl_.id_ = from._impl_.id_;
   }
   if (from._internal_home() != 0) {
@@ -1419,16 +1748,29 @@ void NSPanelSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const :
   if (from._internal_button1_mode() != 0) {
     _this->_impl_.button1_mode_ = from._impl_.button1_mode_;
   }
+  if (from._internal_button1_fallback() != 0) {
+    _this->_impl_.button1_fallback_ = from._impl_.button1_fallback_;
+  }
   if (from._internal_button2_mode() != 0) {
     _this->_impl_.button2_mode_ = from._impl_.button2_mode_;
   }
-  if (cached_has_bits & 0x00000060u) {
-    if (cached_has_bits & 0x00000020u) {
-      _this->_impl_.button1_detached_light_id_ = from._impl_.button1_detached_light_id_;
-    }
-    if (cached_has_bits & 0x00000040u) {
-      _this->_impl_.button2_detached_light_id_ = from._impl_.button2_detached_light_id_;
-    }
+  if (from._internal_button2_fallback() != 0) {
+    _this->_impl_.button2_fallback_ = from._impl_.button2_fallback_;
+  }
+  if (from._internal_button1_long_mode() != 0) {
+    _this->_impl_.button1_long_mode_ = from._impl_.button1_long_mode_;
+  }
+  if (from._internal_button1_long_fallback() != 0) {
+    _this->_impl_.button1_long_fallback_ = from._impl_.button1_long_fallback_;
+  }
+  if (from._internal_button2_long_mode() != 0) {
+    _this->_impl_.button2_long_mode_ = from._impl_.button2_long_mode_;
+  }
+  if (from._internal_button2_long_fallback() != 0) {
+    _this->_impl_.button2_long_fallback_ = from._impl_.button2_long_fallback_;
+  }
+  if (cached_has_bits & 0x00000200u) {
+    _this->_impl_.button1_detached_light_id_ = from._impl_.button1_detached_light_id_;
   }
   if (from._internal_relay2_default_mode() != 0) {
     _this->_impl_.relay2_default_mode_ = from._impl_.relay2_default_mode_;
@@ -1438,6 +1780,17 @@ void NSPanelSettings::MergeImpl(::google::protobuf::MessageLite& to_msg, const :
   }
   if (from._internal_accepted() != 0) {
     _this->_impl_.accepted_ = from._impl_.accepted_;
+  }
+  if (cached_has_bits & 0x00001c00u) {
+    if (cached_has_bits & 0x00000400u) {
+      _this->_impl_.button2_detached_light_id_ = from._impl_.button2_detached_light_id_;
+    }
+    if (cached_has_bits & 0x00000800u) {
+      _this->_impl_.button1_long_detached_light_id_ = from._impl_.button1_long_detached_light_id_;
+    }
+    if (cached_has_bits & 0x00001000u) {
+      _this->_impl_.button2_long_detached_light_id_ = from._impl_.button2_long_detached_light_id_;
+    }
   }
   if (from._internal_relay1_register_type() != 0) {
     _this->_impl_.relay1_register_type_ = from._impl_.relay1_register_type_;
@@ -1474,6 +1827,10 @@ void NSPanelSettings::InternalSwap(NSPanelSettings* PROTOBUF_RESTRICT other) {
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.button2_mqtt_topic_, &other->_impl_.button2_mqtt_topic_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.button1_mqtt_payload_, &other->_impl_.button1_mqtt_payload_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.button2_mqtt_payload_, &other->_impl_.button2_mqtt_payload_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.button1_long_mqtt_topic_, &other->_impl_.button1_long_mqtt_topic_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.button2_long_mqtt_topic_, &other->_impl_.button2_long_mqtt_topic_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.button1_long_mqtt_payload_, &other->_impl_.button1_long_mqtt_payload_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.button2_long_mqtt_payload_, &other->_impl_.button2_long_mqtt_payload_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.ip_address_, &other->_impl_.ip_address_, arena);
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(NSPanelSettings, _impl_.default_room_)

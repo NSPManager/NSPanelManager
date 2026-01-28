@@ -1,0 +1,187 @@
+<!-- {{ button_name }} -->
+<div class="flex-auto pr-1 max-w-6/12" style="border-radius: 5px; border: 1px solid black; margin:0px 2px 0px 2px; padding:5px;">
+    <label for="{{ button }}_mode" class="block mb-2 text-sm font-medium">{{ button_name }} mode</label>
+    <div class="flex flex-row-reverse">
+        <select name="{{ button }}_mode" id="{{ button }}_mode" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
+            {% with button_mode=button|add:"_mode" %}
+            <option value="0" {% if panel_info.data|get_item:button_mode == 0 %}selected{% endif %}>Direct mode</option>
+            <option value="1" {% if panel_info.data|get_item:button_mode == 1 %}selected{% endif %}>Detached mode</option>
+            <option value="2" {% if panel_info.data|get_item:button_mode == 2 %}selected{% endif %}>Custom MQTT</option>
+            <option value="3" {% if panel_info.data|get_item:button_mode == 3 %}selected{% endif %}>Follow mode</option>
+            <option value="4" {% if panel_info.data|get_item:button_mode == 4 %}selected{% endif %}>Thermostat (heating) mode</option>
+            <option value="5" {% if panel_info.data|get_item:button_mode == 5 %}selected{% endif %}>Thermostat (cooling) mode</option>
+            {% endwith %}
+        </select>
+        <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/default_page:border-accent">
+        <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <title>{{ button_name }} mode</title>
+            <path
+            d="M13 5C15.21 5 17 6.79 17 9C17 10.5 16.2 11.77 15 12.46V11.24C15.61 10.69 16 9.89 16 9C16 7.34 14.66 6 13 6S10 7.34 10 9C10 9.89 10.39 10.69 11 11.24V12.46C9.8 11.77 9 10.5 9 9C9 6.79 10.79 5 13 5M20 20.5C19.97 21.32 19.32 21.97 18.5 22H13C12.62 22 12.26 21.85 12 21.57L8 17.37L8.74 16.6C8.93 16.39 9.2 16.28 9.5 16.28H9.7L12 18V9C12 8.45 12.45 8 13 8S14 8.45 14 9V13.47L15.21 13.6L19.15 15.79C19.68 16.03 20 16.56 20 17.14V20.5M20 2H4C2.9 2 2 2.9 2 4V12C2 13.11 2.9 14 4 14H8V12L4 12L4 4H20L20 12H18V14H20V13.96L20.04 14C21.13 14 22 13.09 22 12V4C22 2.9 21.11 2 20 2Z" />
+        </svg>
+        </span>
+    </div>
+
+    <!-- {{ button_name }} detached mode -->
+    <div id="{{ button }}_detached_mode_controls" class="hidden mt-2">
+        {% component "alert" style="alert alert-soft" level="info" text="Please note that not all entity types can be toggled." %}{% endcomponent %}
+        <label for="{{ button }}_detached_mode_entity_room" class="block mt-2 text-sm font-medium">Room</label>
+        <div class="flex flex-row-reverse">
+            <select name="{{ button }}_detached_mode_room" id="{{ button }}_detached_mode_room" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
+            {% for room in rooms %}
+                {% with mode=button|add:"_detached_mode_entity" %}
+                {% if panel_info.data|get_item:mode.room == room %}
+                <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
+                {% else %}
+                <option value="{{ room.id }}">{{ room.friendly_name }}</option>
+                {% endif %}
+                {% endwith %}
+            {% endfor %}
+            </select>
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/default_page:border-accent">
+            <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>Room</title>
+                <path
+                d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+            </svg>
+            </span>
+        </div>
+
+        <label for="{{ button }}_detached_mode_entity" class="block mt-2 text-sm font-medium">Entity</label>
+        <div class="flex flex-row-reverse">
+            <select name="{{ button }}_detached_mode_entity" id="{{ button }}_detached_mode_entity" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
+                {% for room in rooms %}
+                    {% for entity in room.entity_set.all %}
+                    {% with mode=button|add:"_detached_mode_entity" %}
+                        {% if panel_info.data|get_item:mode == entity %}
+                        <argh node> </argh>
+                        <option class="{{ button }}_detached_mode_entity_option" data-room-id="{{ room.id }}" value="{{ entity.id }}" selected>{{ entity.friendly_name }}</option>
+                        {% else %}
+                        <good></good>
+                        <option class="{{ button }}_detached_mode_entity_option" data-room-id="{{ room.id }}" value="{{ entity.id }}">{{ entity.friendly_name }}</option>
+                        {% endif %}
+                    {% endwith %}
+                    {% endfor %}
+                {% endfor %}
+            </select>
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/default_page:border-accent">
+            <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>Entity</title>
+                <path
+                d="M13 5C15.21 5 17 6.79 17 9C17 10.5 16.2 11.77 15 12.46V11.24C15.61 10.69 16 9.89 16 9C16 7.34 14.66 6 13 6S10 7.34 10 9C10 9.89 10.39 10.69 11 11.24V12.46C9.8 11.77 9 10.5 9 9C9 6.79 10.79 5 13 5M20 20.5C19.97 21.32 19.32 21.97 18.5 22H13C12.62 22 12.26 21.85 12 21.57L8 17.37L8.74 16.6C8.93 16.39 9.2 16.28 9.5 16.28H9.7L12 18V9C12 8.45 12.45 8 13 8S14 8.45 14 9V13.47L15.21 13.6L19.15 15.79C19.68 16.03 20 16.56 20 17.14V20.5M20 2H4C2.9 2 2 2.9 2 4V12C2 13.11 2.9 14 4 14H8V12L4 12L4 4H20L20 12H18V14H20V13.96L20.04 14C21.13 14 22 13.09 22 12V4C22 2.9 21.11 2 20 2Z" />
+            </svg>
+            </span>
+        </div>
+    </div>
+
+
+    <!-- {{ button_name }} MQTT mode -->
+    <div id="{{ button }}_mqtt_mode_controls" class="hidden">
+        <div class="">
+        <label for="{{ button }}_custom_mqtt_topic" class="block mb-2 text-sm font-medium">{{ button_name }} MQTT topic name</label>
+        <div class="flex flex-row-reverse">
+            {% with topic=button|add:"_custom_mqtt_topic" %}
+            <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+            type="text" class="input" name="{{ button }}_custom_mqtt_topic" value="{{ settings|get_item:topic }}">
+            {% endwith %}
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+            <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>{{ button_name }} MQTT topic</title>
+                <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
+                4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
+                7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
+            </svg>
+            </span>
+        </div>
+        </div>
+
+        <div class="">
+        <label for="{{ button }}_custom_mqtt_payload" class="block mb-2 text-sm font-medium">{{ button_name }} MQTT payload</label>
+        <div class="flex flex-row-reverse">
+            {% with topic=button|add:"_custom_mqtt_payload" %}
+            <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+            type="text" class="input" name="{{ button }}_custom_mqtt_payload" value="{{ settings|get_item:topic }}">
+            {% endwith %}
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+            <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>{{ button_name }} MQTT payload</title>
+                <path d="M7,9A2,2 0 0,1 5,7A2,2 0 0,1 7,5A2,2 0 0,1 9,7A2,2 0 0,1 7,9M20,3H4A1,1 0 0,0 3,4V10A1,1 0 0,0
+                4,11H20A1,1 0 0,0 21,10V4A1,1 0 0,0 20,3M7,19A2,2 0 0,1 5,17A2,2 0 0,1 7,15A2,2 0 0,1 9,17A2,2 0 0,1
+                7,19M20,13H4A1,1 0 0,0 3,14V20A1,1 0 0,0 4,21H20A1,1 0 0,0 21,20V14A1,1 0 0,0 20,13Z"></path>
+            </svg>
+            </span>
+        </div>
+        </div>
+    </div>
+
+    <!-- {{ button_name }} Thermostat mode -->
+    <div id="{{ button }}_thermostat_mode_controls" class="hidden">
+        <div class="mt-2">
+            {% component "alert" level="warning" text="We are not responsible for any damages caused by the use of this setting. Be aware that the panel can hang and therefore not react to temperature changes." %}{% endcomponent %}
+        </div>
+        <div class="mt-2">
+            {% component "alert" level="info" text="The thermostat mode only uses the internal temperature sensor as to not be affected by any sensor not reporting temperature back to the panel for any reason." %}{% endcomponent %}
+        </div>
+        <div class="mt-2 mb-2">
+            {% component "alert" level="info" text="Be aware that the panel may warm by having the relay activated and may therefore skew the temperature readings." %}{% endcomponent %}
+        </div>
+
+        <div class="">
+        <label for="{{ button }}_relay_lower_temperature" class="block mb-2 text-sm font-medium">Relay 1 lower temperature</label>
+        <div class="flex flex-row-reverse">
+            {% with topic=button|add:"_relay_lower_temperature" %}
+            <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+            type="text" class="input" name="{{ button }}_relay_lower_temperature" value="{{ settings|get_item:topic }}">
+            {% endwith %}
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                <span class="mdi mdi-thermometer"></span>
+            </span>
+        </div>
+        </div>
+
+        <div class="">
+        <label for="{{ button }}_relay_upper_temperature" class="block mb-2 text-sm font-medium">Relay 1 upper temperature</label>
+        <div class="flex flex-row-reverse">
+            {% with topic=button|add:"_relay_upper_temperature" %}
+            <input class="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+            type="text" class="input" name="{{ button }}_relay_upper_temperature" value="{{ settings|get_item:topic }}">
+            {% endwith %}
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">
+                <span class="mdi mdi-thermometer"></span>
+            </span>
+        </div>
+        </div>
+    </div>
+
+    <div id="{{ button }}_fallback_mode_controls" class="hidden">
+        <label for="{{button_name}}_fallback_disabled" class="block mt-2 text-sm font-medium">Fallback if MQTT unavailable</label>
+        <ul class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex bg-base-300">
+             {% with button_fallback_mode=button|add:"_fallback_mode" %}
+            <li class="w-full sm:border-b-0 sm:border-r border-neutral">
+            <div class="flex items-center ps-3">
+                <input id="{{button_name}}_fallback_disabled" type="radio" name="{{button}}_fallback_mode" value="0"
+                {% if settings|get_item:button_fallback_mode == "0" %}checked{% endif %}
+                class="w-4 h-4 radio radio-accent">
+                <label for=""{{button_name}}_fallback_disabled" "
+                class="w-full py-3 ms-2 text-sm font-medium">Off</label>
+            </div>
+            </li>
+            <li class="w-full sm:border-b-0 sm:border-r border-neutral">
+            <div class="flex items-center ps-3">
+                <input id="{{button_name}}_fallback_r1" type="radio" name="{{button}}_fallback_mode" value="1"
+                {% if settings|get_item:button_fallback_mode == "1" %}checked{% endif %}
+                class="w-4 h-4 radio radio-accent">
+                <label for="{{button_name}}_fallback_r1" class="w-full py-3 ms-2 text-sm font-medium">Toggle Relay1</label>
+            </div>
+            </li>
+            <li class="w-full border-t sm:border-t-0 border-neutral">
+            <div class="flex items-center ps-3">
+                <input id="{{button_name}}_fallback_r2" type="radio" name="{{button}}_fallback_mode" value="2"
+                {% if settings|get_item:button_fallback_mode == "2" %}checked{% endif %}
+                class="w-4 h-4 radio radio-accent">
+                <label for="{{button_name}}_fallback_r1" class="w-full py-3 ms-2 text-sm font-medium">Toggle Relay2</label>
+            </div>
+            </li>
+            {% endwith %}
+        </ul>
+    </div>
+</div>

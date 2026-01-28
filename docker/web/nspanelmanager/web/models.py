@@ -54,11 +54,23 @@ class NSPanel(models.Model):
     version = models.CharField(max_length=15, default="")
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     button1_mode = models.IntegerField(default=0)
+    button1_fallback_mode = models.IntegerField(default=0)
     button1_detached_mode_entity = models.ForeignKey(
         "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+"
     )
     button2_mode = models.IntegerField(default=0)
+    button2_fallback_mode = models.IntegerField(default=0)
     button2_detached_mode_entity = models.ForeignKey(
+        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+"
+    )
+    button1_long_mode = models.IntegerField(default=0)
+    button1_long_fallback_mode = models.IntegerField(default=0)
+    button1_long_detached_mode_entity = models.ForeignKey(
+        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+"
+    )
+    button2_long_mode = models.IntegerField(default=0)
+    button2_long_fallback_mode = models.IntegerField(default=0)
+    button2_long_detached_mode_entity = models.ForeignKey(
         "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+"
     )
     md5_firmware = models.CharField(max_length=64, default="")

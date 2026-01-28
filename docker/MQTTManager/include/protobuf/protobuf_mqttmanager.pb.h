@@ -167,6 +167,40 @@ inline bool NSPanelSettings_NSPanelButtonMode_Parse(absl::string_view name, NSPa
   return ::google::protobuf::internal::ParseNamedEnum<NSPanelSettings_NSPanelButtonMode>(
       NSPanelSettings_NSPanelButtonMode_descriptor(), name, value);
 }
+enum NSPanelSettings_NSPanelButtonFallbackMode : int {
+  NSPanelSettings_NSPanelButtonFallbackMode_DISABLED = 0,
+  NSPanelSettings_NSPanelButtonFallbackMode_TOGGLE_RELAY1 = 1,
+  NSPanelSettings_NSPanelButtonFallbackMode_TOGLLE_RELAY2 = 2,
+  NSPanelSettings_NSPanelButtonFallbackMode_NSPanelSettings_NSPanelButtonFallbackMode_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::min(),
+  NSPanelSettings_NSPanelButtonFallbackMode_NSPanelSettings_NSPanelButtonFallbackMode_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::max(),
+};
+
+bool NSPanelSettings_NSPanelButtonFallbackMode_IsValid(int value);
+extern const uint32_t NSPanelSettings_NSPanelButtonFallbackMode_internal_data_[];
+constexpr NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings_NSPanelButtonFallbackMode_NSPanelButtonFallbackMode_MIN = static_cast<NSPanelSettings_NSPanelButtonFallbackMode>(0);
+constexpr NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings_NSPanelButtonFallbackMode_NSPanelButtonFallbackMode_MAX = static_cast<NSPanelSettings_NSPanelButtonFallbackMode>(2);
+constexpr int NSPanelSettings_NSPanelButtonFallbackMode_NSPanelButtonFallbackMode_ARRAYSIZE = 2 + 1;
+const ::google::protobuf::EnumDescriptor*
+NSPanelSettings_NSPanelButtonFallbackMode_descriptor();
+template <typename T>
+const std::string& NSPanelSettings_NSPanelButtonFallbackMode_Name(T value) {
+  static_assert(std::is_same<T, NSPanelSettings_NSPanelButtonFallbackMode>::value ||
+                    std::is_integral<T>::value,
+                "Incorrect type passed to NSPanelButtonFallbackMode_Name().");
+  return NSPanelSettings_NSPanelButtonFallbackMode_Name(static_cast<NSPanelSettings_NSPanelButtonFallbackMode>(value));
+}
+template <>
+inline const std::string& NSPanelSettings_NSPanelButtonFallbackMode_Name(NSPanelSettings_NSPanelButtonFallbackMode value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelSettings_NSPanelButtonFallbackMode_descriptor,
+                                                 0, 2>(
+      static_cast<int>(value));
+}
+inline bool NSPanelSettings_NSPanelButtonFallbackMode_Parse(absl::string_view name, NSPanelSettings_NSPanelButtonFallbackMode* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<NSPanelSettings_NSPanelButtonFallbackMode>(
+      NSPanelSettings_NSPanelButtonFallbackMode_descriptor(), name, value);
+}
 enum NSPanelSettings_RelayRegisterType : int {
   NSPanelSettings_RelayRegisterType_SWITCH = 0,
   NSPanelSettings_RelayRegisterType_LIGHT = 1,
@@ -390,6 +424,26 @@ class NSPanelSettings final : public ::google::protobuf::Message
   static inline bool NSPanelButtonMode_Parse(absl::string_view name, NSPanelButtonMode* value) {
     return NSPanelSettings_NSPanelButtonMode_Parse(name, value);
   }
+  using NSPanelButtonFallbackMode = NSPanelSettings_NSPanelButtonFallbackMode;
+  static constexpr NSPanelButtonFallbackMode DISABLED = NSPanelSettings_NSPanelButtonFallbackMode_DISABLED;
+  static constexpr NSPanelButtonFallbackMode TOGGLE_RELAY1 = NSPanelSettings_NSPanelButtonFallbackMode_TOGGLE_RELAY1;
+  static constexpr NSPanelButtonFallbackMode TOGLLE_RELAY2 = NSPanelSettings_NSPanelButtonFallbackMode_TOGLLE_RELAY2;
+  static inline bool NSPanelButtonFallbackMode_IsValid(int value) {
+    return NSPanelSettings_NSPanelButtonFallbackMode_IsValid(value);
+  }
+  static constexpr NSPanelButtonFallbackMode NSPanelButtonFallbackMode_MIN = NSPanelSettings_NSPanelButtonFallbackMode_NSPanelButtonFallbackMode_MIN;
+  static constexpr NSPanelButtonFallbackMode NSPanelButtonFallbackMode_MAX = NSPanelSettings_NSPanelButtonFallbackMode_NSPanelButtonFallbackMode_MAX;
+  static constexpr int NSPanelButtonFallbackMode_ARRAYSIZE = NSPanelSettings_NSPanelButtonFallbackMode_NSPanelButtonFallbackMode_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor* NSPanelButtonFallbackMode_descriptor() {
+    return NSPanelSettings_NSPanelButtonFallbackMode_descriptor();
+  }
+  template <typename T>
+  static inline const std::string& NSPanelButtonFallbackMode_Name(T value) {
+    return NSPanelSettings_NSPanelButtonFallbackMode_Name(value);
+  }
+  static inline bool NSPanelButtonFallbackMode_Parse(absl::string_view name, NSPanelButtonFallbackMode* value) {
+    return NSPanelSettings_NSPanelButtonFallbackMode_Parse(name, value);
+  }
   using RelayRegisterType = NSPanelSettings_RelayRegisterType;
   static constexpr RelayRegisterType SWITCH = NSPanelSettings_RelayRegisterType_SWITCH;
   static constexpr RelayRegisterType LIGHT = NSPanelSettings_RelayRegisterType_LIGHT;
@@ -412,15 +466,19 @@ class NSPanelSettings final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kRoomsFieldNumber = 47,
-    kScenesFieldNumber = 48,
+    kRoomsFieldNumber = 52,
+    kScenesFieldNumber = 53,
     kMacAddressFieldNumber = 2,
     kNameFieldNumber = 3,
-    kButton1MqttTopicFieldNumber = 29,
-    kButton2MqttTopicFieldNumber = 30,
-    kButton1MqttPayloadFieldNumber = 31,
-    kButton2MqttPayloadFieldNumber = 32,
-    kIpAddressFieldNumber = 49,
+    kButton1MqttTopicFieldNumber = 38,
+    kButton2MqttTopicFieldNumber = 39,
+    kButton1MqttPayloadFieldNumber = 40,
+    kButton2MqttPayloadFieldNumber = 41,
+    kButton1LongMqttTopicFieldNumber = 44,
+    kButton2LongMqttTopicFieldNumber = 45,
+    kButton1LongMqttPayloadFieldNumber = 46,
+    kButton2LongMqttPayloadFieldNumber = 47,
+    kIpAddressFieldNumber = 54,
     kIdFieldNumber = 1,
     kHomeFieldNumber = 4,
     kDefaultPageFieldNumber = 5,
@@ -440,18 +498,26 @@ class NSPanelSettings final : public ::google::protobuf::Message
     kReverseRelaysFieldNumber = 23,
     kRelay1DefaultModeFieldNumber = 24,
     kTemperatureCalibrationFieldNumber = 26,
-    kButton1ModeFieldNumber = 27,
-    kButton2ModeFieldNumber = 28,
-    kButton1DetachedLightIdFieldNumber = 33,
-    kButton2DetachedLightIdFieldNumber = 34,
+    kButton1ModeFieldNumber = 30,
+    kButton1FallbackFieldNumber = 31,
+    kButton2ModeFieldNumber = 32,
+    kButton2FallbackFieldNumber = 33,
+    kButton1LongModeFieldNumber = 34,
+    kButton1LongFallbackFieldNumber = 35,
+    kButton2LongModeFieldNumber = 36,
+    kButton2LongFallbackFieldNumber = 37,
+    kButton1DetachedLightIdFieldNumber = 42,
     kRelay2DefaultModeFieldNumber = 25,
-    kDeniedFieldNumber = 45,
-    kAcceptedFieldNumber = 46,
-    kRelay1RegisterTypeFieldNumber = 50,
-    kRelay2RegisterTypeFieldNumber = 51,
-    kDefaultRoomFieldNumber = 52,
+    kDeniedFieldNumber = 50,
+    kAcceptedFieldNumber = 51,
+    kButton2DetachedLightIdFieldNumber = 43,
+    kButton1LongDetachedLightIdFieldNumber = 48,
+    kButton2LongDetachedLightIdFieldNumber = 49,
+    kRelay1RegisterTypeFieldNumber = 55,
+    kRelay2RegisterTypeFieldNumber = 56,
+    kDefaultRoomFieldNumber = 57,
   };
-  // repeated int32 rooms = 47;
+  // repeated int32 rooms = 52;
   int rooms_size() const;
   private:
   int _internal_rooms_size() const;
@@ -469,7 +535,7 @@ class NSPanelSettings final : public ::google::protobuf::Message
   ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_rooms();
 
   public:
-  // repeated int32 scenes = 48;
+  // repeated int32 scenes = 53;
   int scenes_size() const;
   private:
   int _internal_scenes_size() const;
@@ -519,7 +585,7 @@ class NSPanelSettings final : public ::google::protobuf::Message
   std::string* _internal_mutable_name();
 
   public:
-  // optional string button1_mqtt_topic = 29;
+  // optional string button1_mqtt_topic = 38;
   bool has_button1_mqtt_topic() const;
   void clear_button1_mqtt_topic() ;
   const std::string& button1_mqtt_topic() const;
@@ -536,7 +602,7 @@ class NSPanelSettings final : public ::google::protobuf::Message
   std::string* _internal_mutable_button1_mqtt_topic();
 
   public:
-  // optional string button2_mqtt_topic = 30;
+  // optional string button2_mqtt_topic = 39;
   bool has_button2_mqtt_topic() const;
   void clear_button2_mqtt_topic() ;
   const std::string& button2_mqtt_topic() const;
@@ -553,7 +619,7 @@ class NSPanelSettings final : public ::google::protobuf::Message
   std::string* _internal_mutable_button2_mqtt_topic();
 
   public:
-  // optional string button1_mqtt_payload = 31;
+  // optional string button1_mqtt_payload = 40;
   bool has_button1_mqtt_payload() const;
   void clear_button1_mqtt_payload() ;
   const std::string& button1_mqtt_payload() const;
@@ -570,7 +636,7 @@ class NSPanelSettings final : public ::google::protobuf::Message
   std::string* _internal_mutable_button1_mqtt_payload();
 
   public:
-  // optional string button2_mqtt_payload = 32;
+  // optional string button2_mqtt_payload = 41;
   bool has_button2_mqtt_payload() const;
   void clear_button2_mqtt_payload() ;
   const std::string& button2_mqtt_payload() const;
@@ -587,7 +653,75 @@ class NSPanelSettings final : public ::google::protobuf::Message
   std::string* _internal_mutable_button2_mqtt_payload();
 
   public:
-  // string ip_address = 49;
+  // optional string button1_long_mqtt_topic = 44;
+  bool has_button1_long_mqtt_topic() const;
+  void clear_button1_long_mqtt_topic() ;
+  const std::string& button1_long_mqtt_topic() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_button1_long_mqtt_topic(Arg_&& arg, Args_... args);
+  std::string* mutable_button1_long_mqtt_topic();
+  PROTOBUF_NODISCARD std::string* release_button1_long_mqtt_topic();
+  void set_allocated_button1_long_mqtt_topic(std::string* value);
+
+  private:
+  const std::string& _internal_button1_long_mqtt_topic() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_button1_long_mqtt_topic(
+      const std::string& value);
+  std::string* _internal_mutable_button1_long_mqtt_topic();
+
+  public:
+  // optional string button2_long_mqtt_topic = 45;
+  bool has_button2_long_mqtt_topic() const;
+  void clear_button2_long_mqtt_topic() ;
+  const std::string& button2_long_mqtt_topic() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_button2_long_mqtt_topic(Arg_&& arg, Args_... args);
+  std::string* mutable_button2_long_mqtt_topic();
+  PROTOBUF_NODISCARD std::string* release_button2_long_mqtt_topic();
+  void set_allocated_button2_long_mqtt_topic(std::string* value);
+
+  private:
+  const std::string& _internal_button2_long_mqtt_topic() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_button2_long_mqtt_topic(
+      const std::string& value);
+  std::string* _internal_mutable_button2_long_mqtt_topic();
+
+  public:
+  // optional string button1_long_mqtt_payload = 46;
+  bool has_button1_long_mqtt_payload() const;
+  void clear_button1_long_mqtt_payload() ;
+  const std::string& button1_long_mqtt_payload() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_button1_long_mqtt_payload(Arg_&& arg, Args_... args);
+  std::string* mutable_button1_long_mqtt_payload();
+  PROTOBUF_NODISCARD std::string* release_button1_long_mqtt_payload();
+  void set_allocated_button1_long_mqtt_payload(std::string* value);
+
+  private:
+  const std::string& _internal_button1_long_mqtt_payload() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_button1_long_mqtt_payload(
+      const std::string& value);
+  std::string* _internal_mutable_button1_long_mqtt_payload();
+
+  public:
+  // optional string button2_long_mqtt_payload = 47;
+  bool has_button2_long_mqtt_payload() const;
+  void clear_button2_long_mqtt_payload() ;
+  const std::string& button2_long_mqtt_payload() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_button2_long_mqtt_payload(Arg_&& arg, Args_... args);
+  std::string* mutable_button2_long_mqtt_payload();
+  PROTOBUF_NODISCARD std::string* release_button2_long_mqtt_payload();
+  void set_allocated_button2_long_mqtt_payload(std::string* value);
+
+  private:
+  const std::string& _internal_button2_long_mqtt_payload() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_button2_long_mqtt_payload(
+      const std::string& value);
+  std::string* _internal_mutable_button2_long_mqtt_payload();
+
+  public:
+  // string ip_address = 54;
   void clear_ip_address() ;
   const std::string& ip_address() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -794,7 +928,7 @@ class NSPanelSettings final : public ::google::protobuf::Message
   void _internal_set_temperature_calibration(::int32_t value);
 
   public:
-  // .NSPanelSettings.NSPanelButtonMode button1_mode = 27;
+  // .NSPanelSettings.NSPanelButtonMode button1_mode = 30;
   void clear_button1_mode() ;
   ::NSPanelSettings_NSPanelButtonMode button1_mode() const;
   void set_button1_mode(::NSPanelSettings_NSPanelButtonMode value);
@@ -804,7 +938,17 @@ class NSPanelSettings final : public ::google::protobuf::Message
   void _internal_set_button1_mode(::NSPanelSettings_NSPanelButtonMode value);
 
   public:
-  // .NSPanelSettings.NSPanelButtonMode button2_mode = 28;
+  // .NSPanelSettings.NSPanelButtonFallbackMode button1_fallback = 31;
+  void clear_button1_fallback() ;
+  ::NSPanelSettings_NSPanelButtonFallbackMode button1_fallback() const;
+  void set_button1_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value);
+
+  private:
+  ::NSPanelSettings_NSPanelButtonFallbackMode _internal_button1_fallback() const;
+  void _internal_set_button1_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value);
+
+  public:
+  // .NSPanelSettings.NSPanelButtonMode button2_mode = 32;
   void clear_button2_mode() ;
   ::NSPanelSettings_NSPanelButtonMode button2_mode() const;
   void set_button2_mode(::NSPanelSettings_NSPanelButtonMode value);
@@ -814,7 +958,57 @@ class NSPanelSettings final : public ::google::protobuf::Message
   void _internal_set_button2_mode(::NSPanelSettings_NSPanelButtonMode value);
 
   public:
-  // optional int32 button1_detached_light_id = 33;
+  // .NSPanelSettings.NSPanelButtonFallbackMode button2_fallback = 33;
+  void clear_button2_fallback() ;
+  ::NSPanelSettings_NSPanelButtonFallbackMode button2_fallback() const;
+  void set_button2_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value);
+
+  private:
+  ::NSPanelSettings_NSPanelButtonFallbackMode _internal_button2_fallback() const;
+  void _internal_set_button2_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value);
+
+  public:
+  // .NSPanelSettings.NSPanelButtonMode button1_long_mode = 34;
+  void clear_button1_long_mode() ;
+  ::NSPanelSettings_NSPanelButtonMode button1_long_mode() const;
+  void set_button1_long_mode(::NSPanelSettings_NSPanelButtonMode value);
+
+  private:
+  ::NSPanelSettings_NSPanelButtonMode _internal_button1_long_mode() const;
+  void _internal_set_button1_long_mode(::NSPanelSettings_NSPanelButtonMode value);
+
+  public:
+  // .NSPanelSettings.NSPanelButtonFallbackMode button1_long_fallback = 35;
+  void clear_button1_long_fallback() ;
+  ::NSPanelSettings_NSPanelButtonFallbackMode button1_long_fallback() const;
+  void set_button1_long_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value);
+
+  private:
+  ::NSPanelSettings_NSPanelButtonFallbackMode _internal_button1_long_fallback() const;
+  void _internal_set_button1_long_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value);
+
+  public:
+  // .NSPanelSettings.NSPanelButtonMode button2_long_mode = 36;
+  void clear_button2_long_mode() ;
+  ::NSPanelSettings_NSPanelButtonMode button2_long_mode() const;
+  void set_button2_long_mode(::NSPanelSettings_NSPanelButtonMode value);
+
+  private:
+  ::NSPanelSettings_NSPanelButtonMode _internal_button2_long_mode() const;
+  void _internal_set_button2_long_mode(::NSPanelSettings_NSPanelButtonMode value);
+
+  public:
+  // .NSPanelSettings.NSPanelButtonFallbackMode button2_long_fallback = 37;
+  void clear_button2_long_fallback() ;
+  ::NSPanelSettings_NSPanelButtonFallbackMode button2_long_fallback() const;
+  void set_button2_long_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value);
+
+  private:
+  ::NSPanelSettings_NSPanelButtonFallbackMode _internal_button2_long_fallback() const;
+  void _internal_set_button2_long_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value);
+
+  public:
+  // optional int32 button1_detached_light_id = 42;
   bool has_button1_detached_light_id() const;
   void clear_button1_detached_light_id() ;
   ::int32_t button1_detached_light_id() const;
@@ -823,17 +1017,6 @@ class NSPanelSettings final : public ::google::protobuf::Message
   private:
   ::int32_t _internal_button1_detached_light_id() const;
   void _internal_set_button1_detached_light_id(::int32_t value);
-
-  public:
-  // optional int32 button2_detached_light_id = 34;
-  bool has_button2_detached_light_id() const;
-  void clear_button2_detached_light_id() ;
-  ::int32_t button2_detached_light_id() const;
-  void set_button2_detached_light_id(::int32_t value);
-
-  private:
-  ::int32_t _internal_button2_detached_light_id() const;
-  void _internal_set_button2_detached_light_id(::int32_t value);
 
   public:
   // bool relay2_default_mode = 25;
@@ -846,7 +1029,7 @@ class NSPanelSettings final : public ::google::protobuf::Message
   void _internal_set_relay2_default_mode(bool value);
 
   public:
-  // bool denied = 45;
+  // bool denied = 50;
   void clear_denied() ;
   bool denied() const;
   void set_denied(bool value);
@@ -856,7 +1039,7 @@ class NSPanelSettings final : public ::google::protobuf::Message
   void _internal_set_denied(bool value);
 
   public:
-  // bool accepted = 46;
+  // bool accepted = 51;
   void clear_accepted() ;
   bool accepted() const;
   void set_accepted(bool value);
@@ -866,7 +1049,40 @@ class NSPanelSettings final : public ::google::protobuf::Message
   void _internal_set_accepted(bool value);
 
   public:
-  // .NSPanelSettings.RelayRegisterType relay1_register_type = 50;
+  // optional int32 button2_detached_light_id = 43;
+  bool has_button2_detached_light_id() const;
+  void clear_button2_detached_light_id() ;
+  ::int32_t button2_detached_light_id() const;
+  void set_button2_detached_light_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_button2_detached_light_id() const;
+  void _internal_set_button2_detached_light_id(::int32_t value);
+
+  public:
+  // optional int32 button1_long_detached_light_id = 48;
+  bool has_button1_long_detached_light_id() const;
+  void clear_button1_long_detached_light_id() ;
+  ::int32_t button1_long_detached_light_id() const;
+  void set_button1_long_detached_light_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_button1_long_detached_light_id() const;
+  void _internal_set_button1_long_detached_light_id(::int32_t value);
+
+  public:
+  // optional int32 button2_long_detached_light_id = 49;
+  bool has_button2_long_detached_light_id() const;
+  void clear_button2_long_detached_light_id() ;
+  ::int32_t button2_long_detached_light_id() const;
+  void set_button2_long_detached_light_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_button2_long_detached_light_id() const;
+  void _internal_set_button2_long_detached_light_id(::int32_t value);
+
+  public:
+  // .NSPanelSettings.RelayRegisterType relay1_register_type = 55;
   void clear_relay1_register_type() ;
   ::NSPanelSettings_RelayRegisterType relay1_register_type() const;
   void set_relay1_register_type(::NSPanelSettings_RelayRegisterType value);
@@ -876,7 +1092,7 @@ class NSPanelSettings final : public ::google::protobuf::Message
   void _internal_set_relay1_register_type(::NSPanelSettings_RelayRegisterType value);
 
   public:
-  // .NSPanelSettings.RelayRegisterType relay2_register_type = 51;
+  // .NSPanelSettings.RelayRegisterType relay2_register_type = 56;
   void clear_relay2_register_type() ;
   ::NSPanelSettings_RelayRegisterType relay2_register_type() const;
   void set_relay2_register_type(::NSPanelSettings_RelayRegisterType value);
@@ -886,7 +1102,7 @@ class NSPanelSettings final : public ::google::protobuf::Message
   void _internal_set_relay2_register_type(::NSPanelSettings_RelayRegisterType value);
 
   public:
-  // int32 default_room = 52;
+  // int32 default_room = 57;
   void clear_default_room() ;
   ::int32_t default_room() const;
   void set_default_room(::int32_t value);
@@ -901,8 +1117,8 @@ class NSPanelSettings final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 38, 0,
-      157, 9>
+      5, 50, 0,
+      269, 9>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -934,6 +1150,10 @@ class NSPanelSettings final : public ::google::protobuf::Message
     ::google::protobuf::internal::ArenaStringPtr button2_mqtt_topic_;
     ::google::protobuf::internal::ArenaStringPtr button1_mqtt_payload_;
     ::google::protobuf::internal::ArenaStringPtr button2_mqtt_payload_;
+    ::google::protobuf::internal::ArenaStringPtr button1_long_mqtt_topic_;
+    ::google::protobuf::internal::ArenaStringPtr button2_long_mqtt_topic_;
+    ::google::protobuf::internal::ArenaStringPtr button1_long_mqtt_payload_;
+    ::google::protobuf::internal::ArenaStringPtr button2_long_mqtt_payload_;
     ::google::protobuf::internal::ArenaStringPtr ip_address_;
     ::int32_t id_;
     ::int32_t home_;
@@ -955,12 +1175,20 @@ class NSPanelSettings final : public ::google::protobuf::Message
     bool relay1_default_mode_;
     ::int32_t temperature_calibration_;
     int button1_mode_;
+    int button1_fallback_;
     int button2_mode_;
+    int button2_fallback_;
+    int button1_long_mode_;
+    int button1_long_fallback_;
+    int button2_long_mode_;
+    int button2_long_fallback_;
     ::int32_t button1_detached_light_id_;
-    ::int32_t button2_detached_light_id_;
     bool relay2_default_mode_;
     bool denied_;
     bool accepted_;
+    ::int32_t button2_detached_light_id_;
+    ::int32_t button1_long_detached_light_id_;
+    ::int32_t button2_long_detached_light_id_;
     int relay1_register_type_;
     int relay2_register_type_;
     ::int32_t default_room_;
@@ -1166,13 +1394,13 @@ class MultipleNSPanelsSettings final : public ::google::protobuf::Message
 
 // optional int32 id = 1;
 inline bool NSPanelSettings::has_id() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
 inline void NSPanelSettings::clear_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.id_ = 0;
-  _impl_._has_bits_[0] &= ~0x00000010u;
+  _impl_._has_bits_[0] &= ~0x00000100u;
 }
 inline ::int32_t NSPanelSettings::id() const {
   // @@protoc_insertion_point(field_get:NSPanelSettings.id)
@@ -1180,7 +1408,7 @@ inline ::int32_t NSPanelSettings::id() const {
 }
 inline void NSPanelSettings::set_id(::int32_t value) {
   _internal_set_id(value);
-  _impl_._has_bits_[0] |= 0x00000010u;
+  _impl_._has_bits_[0] |= 0x00000100u;
   // @@protoc_insertion_point(field_set:NSPanelSettings.id)
 }
 inline ::int32_t NSPanelSettings::_internal_id() const {
@@ -1710,7 +1938,7 @@ inline void NSPanelSettings::_internal_set_temperature_calibration(::int32_t val
   _impl_.temperature_calibration_ = value;
 }
 
-// .NSPanelSettings.NSPanelButtonMode button1_mode = 27;
+// .NSPanelSettings.NSPanelButtonMode button1_mode = 30;
 inline void NSPanelSettings::clear_button1_mode() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button1_mode_ = 0;
@@ -1732,7 +1960,29 @@ inline void NSPanelSettings::_internal_set_button1_mode(::NSPanelSettings_NSPane
   _impl_.button1_mode_ = value;
 }
 
-// .NSPanelSettings.NSPanelButtonMode button2_mode = 28;
+// .NSPanelSettings.NSPanelButtonFallbackMode button1_fallback = 31;
+inline void NSPanelSettings::clear_button1_fallback() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_fallback_ = 0;
+}
+inline ::NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings::button1_fallback() const {
+  // @@protoc_insertion_point(field_get:NSPanelSettings.button1_fallback)
+  return _internal_button1_fallback();
+}
+inline void NSPanelSettings::set_button1_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value) {
+  _internal_set_button1_fallback(value);
+  // @@protoc_insertion_point(field_set:NSPanelSettings.button1_fallback)
+}
+inline ::NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings::_internal_button1_fallback() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelSettings_NSPanelButtonFallbackMode>(_impl_.button1_fallback_);
+}
+inline void NSPanelSettings::_internal_set_button1_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_fallback_ = value;
+}
+
+// .NSPanelSettings.NSPanelButtonMode button2_mode = 32;
 inline void NSPanelSettings::clear_button2_mode() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button2_mode_ = 0;
@@ -1754,7 +2004,117 @@ inline void NSPanelSettings::_internal_set_button2_mode(::NSPanelSettings_NSPane
   _impl_.button2_mode_ = value;
 }
 
-// optional string button1_mqtt_topic = 29;
+// .NSPanelSettings.NSPanelButtonFallbackMode button2_fallback = 33;
+inline void NSPanelSettings::clear_button2_fallback() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_fallback_ = 0;
+}
+inline ::NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings::button2_fallback() const {
+  // @@protoc_insertion_point(field_get:NSPanelSettings.button2_fallback)
+  return _internal_button2_fallback();
+}
+inline void NSPanelSettings::set_button2_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value) {
+  _internal_set_button2_fallback(value);
+  // @@protoc_insertion_point(field_set:NSPanelSettings.button2_fallback)
+}
+inline ::NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings::_internal_button2_fallback() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelSettings_NSPanelButtonFallbackMode>(_impl_.button2_fallback_);
+}
+inline void NSPanelSettings::_internal_set_button2_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_fallback_ = value;
+}
+
+// .NSPanelSettings.NSPanelButtonMode button1_long_mode = 34;
+inline void NSPanelSettings::clear_button1_long_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_long_mode_ = 0;
+}
+inline ::NSPanelSettings_NSPanelButtonMode NSPanelSettings::button1_long_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelSettings.button1_long_mode)
+  return _internal_button1_long_mode();
+}
+inline void NSPanelSettings::set_button1_long_mode(::NSPanelSettings_NSPanelButtonMode value) {
+  _internal_set_button1_long_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelSettings.button1_long_mode)
+}
+inline ::NSPanelSettings_NSPanelButtonMode NSPanelSettings::_internal_button1_long_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelSettings_NSPanelButtonMode>(_impl_.button1_long_mode_);
+}
+inline void NSPanelSettings::_internal_set_button1_long_mode(::NSPanelSettings_NSPanelButtonMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_long_mode_ = value;
+}
+
+// .NSPanelSettings.NSPanelButtonFallbackMode button1_long_fallback = 35;
+inline void NSPanelSettings::clear_button1_long_fallback() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_long_fallback_ = 0;
+}
+inline ::NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings::button1_long_fallback() const {
+  // @@protoc_insertion_point(field_get:NSPanelSettings.button1_long_fallback)
+  return _internal_button1_long_fallback();
+}
+inline void NSPanelSettings::set_button1_long_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value) {
+  _internal_set_button1_long_fallback(value);
+  // @@protoc_insertion_point(field_set:NSPanelSettings.button1_long_fallback)
+}
+inline ::NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings::_internal_button1_long_fallback() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelSettings_NSPanelButtonFallbackMode>(_impl_.button1_long_fallback_);
+}
+inline void NSPanelSettings::_internal_set_button1_long_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_long_fallback_ = value;
+}
+
+// .NSPanelSettings.NSPanelButtonMode button2_long_mode = 36;
+inline void NSPanelSettings::clear_button2_long_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_long_mode_ = 0;
+}
+inline ::NSPanelSettings_NSPanelButtonMode NSPanelSettings::button2_long_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelSettings.button2_long_mode)
+  return _internal_button2_long_mode();
+}
+inline void NSPanelSettings::set_button2_long_mode(::NSPanelSettings_NSPanelButtonMode value) {
+  _internal_set_button2_long_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelSettings.button2_long_mode)
+}
+inline ::NSPanelSettings_NSPanelButtonMode NSPanelSettings::_internal_button2_long_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelSettings_NSPanelButtonMode>(_impl_.button2_long_mode_);
+}
+inline void NSPanelSettings::_internal_set_button2_long_mode(::NSPanelSettings_NSPanelButtonMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_long_mode_ = value;
+}
+
+// .NSPanelSettings.NSPanelButtonFallbackMode button2_long_fallback = 37;
+inline void NSPanelSettings::clear_button2_long_fallback() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_long_fallback_ = 0;
+}
+inline ::NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings::button2_long_fallback() const {
+  // @@protoc_insertion_point(field_get:NSPanelSettings.button2_long_fallback)
+  return _internal_button2_long_fallback();
+}
+inline void NSPanelSettings::set_button2_long_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value) {
+  _internal_set_button2_long_fallback(value);
+  // @@protoc_insertion_point(field_set:NSPanelSettings.button2_long_fallback)
+}
+inline ::NSPanelSettings_NSPanelButtonFallbackMode NSPanelSettings::_internal_button2_long_fallback() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelSettings_NSPanelButtonFallbackMode>(_impl_.button2_long_fallback_);
+}
+inline void NSPanelSettings::_internal_set_button2_long_fallback(::NSPanelSettings_NSPanelButtonFallbackMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_long_fallback_ = value;
+}
+
+// optional string button1_mqtt_topic = 38;
 inline bool NSPanelSettings::has_button1_mqtt_topic() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -1825,7 +2185,7 @@ inline void NSPanelSettings::set_allocated_button1_mqtt_topic(std::string* value
   // @@protoc_insertion_point(field_set_allocated:NSPanelSettings.button1_mqtt_topic)
 }
 
-// optional string button2_mqtt_topic = 30;
+// optional string button2_mqtt_topic = 39;
 inline bool NSPanelSettings::has_button2_mqtt_topic() const {
   bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
   return value;
@@ -1896,7 +2256,7 @@ inline void NSPanelSettings::set_allocated_button2_mqtt_topic(std::string* value
   // @@protoc_insertion_point(field_set_allocated:NSPanelSettings.button2_mqtt_topic)
 }
 
-// optional string button1_mqtt_payload = 31;
+// optional string button1_mqtt_payload = 40;
 inline bool NSPanelSettings::has_button1_mqtt_payload() const {
   bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
   return value;
@@ -1967,7 +2327,7 @@ inline void NSPanelSettings::set_allocated_button1_mqtt_payload(std::string* val
   // @@protoc_insertion_point(field_set_allocated:NSPanelSettings.button1_mqtt_payload)
 }
 
-// optional string button2_mqtt_payload = 32;
+// optional string button2_mqtt_payload = 41;
 inline bool NSPanelSettings::has_button2_mqtt_payload() const {
   bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
   return value;
@@ -2038,15 +2398,15 @@ inline void NSPanelSettings::set_allocated_button2_mqtt_payload(std::string* val
   // @@protoc_insertion_point(field_set_allocated:NSPanelSettings.button2_mqtt_payload)
 }
 
-// optional int32 button1_detached_light_id = 33;
+// optional int32 button1_detached_light_id = 42;
 inline bool NSPanelSettings::has_button1_detached_light_id() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
 inline void NSPanelSettings::clear_button1_detached_light_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button1_detached_light_id_ = 0;
-  _impl_._has_bits_[0] &= ~0x00000020u;
+  _impl_._has_bits_[0] &= ~0x00000200u;
 }
 inline ::int32_t NSPanelSettings::button1_detached_light_id() const {
   // @@protoc_insertion_point(field_get:NSPanelSettings.button1_detached_light_id)
@@ -2054,7 +2414,7 @@ inline ::int32_t NSPanelSettings::button1_detached_light_id() const {
 }
 inline void NSPanelSettings::set_button1_detached_light_id(::int32_t value) {
   _internal_set_button1_detached_light_id(value);
-  _impl_._has_bits_[0] |= 0x00000020u;
+  _impl_._has_bits_[0] |= 0x00000200u;
   // @@protoc_insertion_point(field_set:NSPanelSettings.button1_detached_light_id)
 }
 inline ::int32_t NSPanelSettings::_internal_button1_detached_light_id() const {
@@ -2066,15 +2426,15 @@ inline void NSPanelSettings::_internal_set_button1_detached_light_id(::int32_t v
   _impl_.button1_detached_light_id_ = value;
 }
 
-// optional int32 button2_detached_light_id = 34;
+// optional int32 button2_detached_light_id = 43;
 inline bool NSPanelSettings::has_button2_detached_light_id() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
 inline void NSPanelSettings::clear_button2_detached_light_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button2_detached_light_id_ = 0;
-  _impl_._has_bits_[0] &= ~0x00000040u;
+  _impl_._has_bits_[0] &= ~0x00000400u;
 }
 inline ::int32_t NSPanelSettings::button2_detached_light_id() const {
   // @@protoc_insertion_point(field_get:NSPanelSettings.button2_detached_light_id)
@@ -2082,7 +2442,7 @@ inline ::int32_t NSPanelSettings::button2_detached_light_id() const {
 }
 inline void NSPanelSettings::set_button2_detached_light_id(::int32_t value) {
   _internal_set_button2_detached_light_id(value);
-  _impl_._has_bits_[0] |= 0x00000040u;
+  _impl_._has_bits_[0] |= 0x00000400u;
   // @@protoc_insertion_point(field_set:NSPanelSettings.button2_detached_light_id)
 }
 inline ::int32_t NSPanelSettings::_internal_button2_detached_light_id() const {
@@ -2094,7 +2454,347 @@ inline void NSPanelSettings::_internal_set_button2_detached_light_id(::int32_t v
   _impl_.button2_detached_light_id_ = value;
 }
 
-// bool denied = 45;
+// optional string button1_long_mqtt_topic = 44;
+inline bool NSPanelSettings::has_button1_long_mqtt_topic() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline void NSPanelSettings::clear_button1_long_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_long_mqtt_topic_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000010u;
+}
+inline const std::string& NSPanelSettings::button1_long_mqtt_topic() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelSettings.button1_long_mqtt_topic)
+  return _internal_button1_long_mqtt_topic();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelSettings::set_button1_long_mqtt_topic(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000010u;
+  _impl_.button1_long_mqtt_topic_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelSettings.button1_long_mqtt_topic)
+}
+inline std::string* NSPanelSettings::mutable_button1_long_mqtt_topic() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_button1_long_mqtt_topic();
+  // @@protoc_insertion_point(field_mutable:NSPanelSettings.button1_long_mqtt_topic)
+  return _s;
+}
+inline const std::string& NSPanelSettings::_internal_button1_long_mqtt_topic() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button1_long_mqtt_topic_.Get();
+}
+inline void NSPanelSettings::_internal_set_button1_long_mqtt_topic(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000010u;
+  _impl_.button1_long_mqtt_topic_.Set(value, GetArena());
+}
+inline std::string* NSPanelSettings::_internal_mutable_button1_long_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000010u;
+  return _impl_.button1_long_mqtt_topic_.Mutable( GetArena());
+}
+inline std::string* NSPanelSettings::release_button1_long_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelSettings.button1_long_mqtt_topic)
+  if ((_impl_._has_bits_[0] & 0x00000010u) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000010u;
+  auto* released = _impl_.button1_long_mqtt_topic_.Release();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.button1_long_mqtt_topic_.Set("", GetArena());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return released;
+}
+inline void NSPanelSettings::set_allocated_button1_long_mqtt_topic(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000010u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000010u;
+  }
+  _impl_.button1_long_mqtt_topic_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.button1_long_mqtt_topic_.IsDefault()) {
+          _impl_.button1_long_mqtt_topic_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelSettings.button1_long_mqtt_topic)
+}
+
+// optional string button2_long_mqtt_topic = 45;
+inline bool NSPanelSettings::has_button2_long_mqtt_topic() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline void NSPanelSettings::clear_button2_long_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_long_mqtt_topic_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000020u;
+}
+inline const std::string& NSPanelSettings::button2_long_mqtt_topic() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelSettings.button2_long_mqtt_topic)
+  return _internal_button2_long_mqtt_topic();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelSettings::set_button2_long_mqtt_topic(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000020u;
+  _impl_.button2_long_mqtt_topic_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelSettings.button2_long_mqtt_topic)
+}
+inline std::string* NSPanelSettings::mutable_button2_long_mqtt_topic() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_button2_long_mqtt_topic();
+  // @@protoc_insertion_point(field_mutable:NSPanelSettings.button2_long_mqtt_topic)
+  return _s;
+}
+inline const std::string& NSPanelSettings::_internal_button2_long_mqtt_topic() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button2_long_mqtt_topic_.Get();
+}
+inline void NSPanelSettings::_internal_set_button2_long_mqtt_topic(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000020u;
+  _impl_.button2_long_mqtt_topic_.Set(value, GetArena());
+}
+inline std::string* NSPanelSettings::_internal_mutable_button2_long_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000020u;
+  return _impl_.button2_long_mqtt_topic_.Mutable( GetArena());
+}
+inline std::string* NSPanelSettings::release_button2_long_mqtt_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelSettings.button2_long_mqtt_topic)
+  if ((_impl_._has_bits_[0] & 0x00000020u) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000020u;
+  auto* released = _impl_.button2_long_mqtt_topic_.Release();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.button2_long_mqtt_topic_.Set("", GetArena());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return released;
+}
+inline void NSPanelSettings::set_allocated_button2_long_mqtt_topic(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000020u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000020u;
+  }
+  _impl_.button2_long_mqtt_topic_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.button2_long_mqtt_topic_.IsDefault()) {
+          _impl_.button2_long_mqtt_topic_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelSettings.button2_long_mqtt_topic)
+}
+
+// optional string button1_long_mqtt_payload = 46;
+inline bool NSPanelSettings::has_button1_long_mqtt_payload() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline void NSPanelSettings::clear_button1_long_mqtt_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_long_mqtt_payload_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000040u;
+}
+inline const std::string& NSPanelSettings::button1_long_mqtt_payload() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelSettings.button1_long_mqtt_payload)
+  return _internal_button1_long_mqtt_payload();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelSettings::set_button1_long_mqtt_payload(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000040u;
+  _impl_.button1_long_mqtt_payload_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelSettings.button1_long_mqtt_payload)
+}
+inline std::string* NSPanelSettings::mutable_button1_long_mqtt_payload() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_button1_long_mqtt_payload();
+  // @@protoc_insertion_point(field_mutable:NSPanelSettings.button1_long_mqtt_payload)
+  return _s;
+}
+inline const std::string& NSPanelSettings::_internal_button1_long_mqtt_payload() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button1_long_mqtt_payload_.Get();
+}
+inline void NSPanelSettings::_internal_set_button1_long_mqtt_payload(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000040u;
+  _impl_.button1_long_mqtt_payload_.Set(value, GetArena());
+}
+inline std::string* NSPanelSettings::_internal_mutable_button1_long_mqtt_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000040u;
+  return _impl_.button1_long_mqtt_payload_.Mutable( GetArena());
+}
+inline std::string* NSPanelSettings::release_button1_long_mqtt_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelSettings.button1_long_mqtt_payload)
+  if ((_impl_._has_bits_[0] & 0x00000040u) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000040u;
+  auto* released = _impl_.button1_long_mqtt_payload_.Release();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.button1_long_mqtt_payload_.Set("", GetArena());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return released;
+}
+inline void NSPanelSettings::set_allocated_button1_long_mqtt_payload(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000040u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000040u;
+  }
+  _impl_.button1_long_mqtt_payload_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.button1_long_mqtt_payload_.IsDefault()) {
+          _impl_.button1_long_mqtt_payload_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelSettings.button1_long_mqtt_payload)
+}
+
+// optional string button2_long_mqtt_payload = 47;
+inline bool NSPanelSettings::has_button2_long_mqtt_payload() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline void NSPanelSettings::clear_button2_long_mqtt_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_long_mqtt_payload_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000080u;
+}
+inline const std::string& NSPanelSettings::button2_long_mqtt_payload() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelSettings.button2_long_mqtt_payload)
+  return _internal_button2_long_mqtt_payload();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelSettings::set_button2_long_mqtt_payload(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000080u;
+  _impl_.button2_long_mqtt_payload_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelSettings.button2_long_mqtt_payload)
+}
+inline std::string* NSPanelSettings::mutable_button2_long_mqtt_payload() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_button2_long_mqtt_payload();
+  // @@protoc_insertion_point(field_mutable:NSPanelSettings.button2_long_mqtt_payload)
+  return _s;
+}
+inline const std::string& NSPanelSettings::_internal_button2_long_mqtt_payload() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button2_long_mqtt_payload_.Get();
+}
+inline void NSPanelSettings::_internal_set_button2_long_mqtt_payload(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000080u;
+  _impl_.button2_long_mqtt_payload_.Set(value, GetArena());
+}
+inline std::string* NSPanelSettings::_internal_mutable_button2_long_mqtt_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000080u;
+  return _impl_.button2_long_mqtt_payload_.Mutable( GetArena());
+}
+inline std::string* NSPanelSettings::release_button2_long_mqtt_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelSettings.button2_long_mqtt_payload)
+  if ((_impl_._has_bits_[0] & 0x00000080u) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000080u;
+  auto* released = _impl_.button2_long_mqtt_payload_.Release();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.button2_long_mqtt_payload_.Set("", GetArena());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return released;
+}
+inline void NSPanelSettings::set_allocated_button2_long_mqtt_payload(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000080u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000080u;
+  }
+  _impl_.button2_long_mqtt_payload_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.button2_long_mqtt_payload_.IsDefault()) {
+          _impl_.button2_long_mqtt_payload_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelSettings.button2_long_mqtt_payload)
+}
+
+// optional int32 button1_long_detached_light_id = 48;
+inline bool NSPanelSettings::has_button1_long_detached_light_id() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline void NSPanelSettings::clear_button1_long_detached_light_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_long_detached_light_id_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000800u;
+}
+inline ::int32_t NSPanelSettings::button1_long_detached_light_id() const {
+  // @@protoc_insertion_point(field_get:NSPanelSettings.button1_long_detached_light_id)
+  return _internal_button1_long_detached_light_id();
+}
+inline void NSPanelSettings::set_button1_long_detached_light_id(::int32_t value) {
+  _internal_set_button1_long_detached_light_id(value);
+  _impl_._has_bits_[0] |= 0x00000800u;
+  // @@protoc_insertion_point(field_set:NSPanelSettings.button1_long_detached_light_id)
+}
+inline ::int32_t NSPanelSettings::_internal_button1_long_detached_light_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button1_long_detached_light_id_;
+}
+inline void NSPanelSettings::_internal_set_button1_long_detached_light_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_long_detached_light_id_ = value;
+}
+
+// optional int32 button2_long_detached_light_id = 49;
+inline bool NSPanelSettings::has_button2_long_detached_light_id() const {
+  bool value = (_impl_._has_bits_[0] & 0x00001000u) != 0;
+  return value;
+}
+inline void NSPanelSettings::clear_button2_long_detached_light_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_long_detached_light_id_ = 0;
+  _impl_._has_bits_[0] &= ~0x00001000u;
+}
+inline ::int32_t NSPanelSettings::button2_long_detached_light_id() const {
+  // @@protoc_insertion_point(field_get:NSPanelSettings.button2_long_detached_light_id)
+  return _internal_button2_long_detached_light_id();
+}
+inline void NSPanelSettings::set_button2_long_detached_light_id(::int32_t value) {
+  _internal_set_button2_long_detached_light_id(value);
+  _impl_._has_bits_[0] |= 0x00001000u;
+  // @@protoc_insertion_point(field_set:NSPanelSettings.button2_long_detached_light_id)
+}
+inline ::int32_t NSPanelSettings::_internal_button2_long_detached_light_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button2_long_detached_light_id_;
+}
+inline void NSPanelSettings::_internal_set_button2_long_detached_light_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_long_detached_light_id_ = value;
+}
+
+// bool denied = 50;
 inline void NSPanelSettings::clear_denied() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.denied_ = false;
@@ -2116,7 +2816,7 @@ inline void NSPanelSettings::_internal_set_denied(bool value) {
   _impl_.denied_ = value;
 }
 
-// bool accepted = 46;
+// bool accepted = 51;
 inline void NSPanelSettings::clear_accepted() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.accepted_ = false;
@@ -2138,7 +2838,7 @@ inline void NSPanelSettings::_internal_set_accepted(bool value) {
   _impl_.accepted_ = value;
 }
 
-// repeated int32 rooms = 47;
+// repeated int32 rooms = 52;
 inline int NSPanelSettings::_internal_rooms_size() const {
   return _internal_rooms().size();
 }
@@ -2183,7 +2883,7 @@ inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelSettings::_internal_
   return &_impl_.rooms_;
 }
 
-// repeated int32 scenes = 48;
+// repeated int32 scenes = 53;
 inline int NSPanelSettings::_internal_scenes_size() const {
   return _internal_scenes().size();
 }
@@ -2228,7 +2928,7 @@ inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelSettings::_internal_
   return &_impl_.scenes_;
 }
 
-// string ip_address = 49;
+// string ip_address = 54;
 inline void NSPanelSettings::clear_ip_address() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.ip_address_.ClearToEmpty();
@@ -2278,7 +2978,7 @@ inline void NSPanelSettings::set_allocated_ip_address(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:NSPanelSettings.ip_address)
 }
 
-// .NSPanelSettings.RelayRegisterType relay1_register_type = 50;
+// .NSPanelSettings.RelayRegisterType relay1_register_type = 55;
 inline void NSPanelSettings::clear_relay1_register_type() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.relay1_register_type_ = 0;
@@ -2300,7 +3000,7 @@ inline void NSPanelSettings::_internal_set_relay1_register_type(::NSPanelSetting
   _impl_.relay1_register_type_ = value;
 }
 
-// .NSPanelSettings.RelayRegisterType relay2_register_type = 51;
+// .NSPanelSettings.RelayRegisterType relay2_register_type = 56;
 inline void NSPanelSettings::clear_relay2_register_type() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.relay2_register_type_ = 0;
@@ -2322,7 +3022,7 @@ inline void NSPanelSettings::_internal_set_relay2_register_type(::NSPanelSetting
   _impl_.relay2_register_type_ = value;
 }
 
-// int32 default_room = 52;
+// int32 default_room = 57;
 inline void NSPanelSettings::clear_default_room() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.default_room_ = 0;
@@ -2424,6 +3124,12 @@ struct is_proto_enum<::NSPanelSettings_NSPanelButtonMode> : std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor<::NSPanelSettings_NSPanelButtonMode>() {
   return ::NSPanelSettings_NSPanelButtonMode_descriptor();
+}
+template <>
+struct is_proto_enum<::NSPanelSettings_NSPanelButtonFallbackMode> : std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor<::NSPanelSettings_NSPanelButtonFallbackMode>() {
+  return ::NSPanelSettings_NSPanelButtonFallbackMode_descriptor();
 }
 template <>
 struct is_proto_enum<::NSPanelSettings_RelayRegisterType> : std::true_type {};

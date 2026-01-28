@@ -324,13 +324,13 @@ def get_nspanel_config(request):
             nspanel.id, "button2_mqtt_payload", ""
         )
 
-        if nspanel.button1_detached_mode_light:
-            base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
+        if nspanel.button1_detached_mode_entity:
+            base["button1_detached_light"] = nspanel.button1_detached_mode_entity.id
         else:
-            base["button1_detached_mode_light"] = -1
+            base["button1_detached_mode_entity"] = -1
 
-        if nspanel.button2_detached_mode_light:
-            base["button2_detached_light"] = nspanel.button2_detached_mode_light.id
+        if nspanel.button2_detached_mode_entity:
+            base["button2_detached_light"] = nspanel.button2_detached_mode_entity.id
         else:
             base["button2_detached_light"] = -1
         base["rooms"] = []
