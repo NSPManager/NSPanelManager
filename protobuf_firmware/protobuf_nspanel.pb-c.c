@@ -376,6 +376,12 @@ void   nspanel_mqttmanager_command__button_pressed__init
   static const NSPanelMQTTManagerCommand__ButtonPressed init_value = NSPANEL_MQTTMANAGER_COMMAND__BUTTON_PRESSED__INIT;
   *message = init_value;
 }
+void   nspanel_mqttmanager_command__button_long_pressed__init
+                     (NSPanelMQTTManagerCommand__ButtonLongPressed         *message)
+{
+  static const NSPanelMQTTManagerCommand__ButtonLongPressed init_value = NSPANEL_MQTTMANAGER_COMMAND__BUTTON_LONG_PRESSED__INIT;
+  *message = init_value;
+}
 void   nspanel_mqttmanager_command__thermostat_temperature_command__init
                      (NSPanelMQTTManagerCommand__ThermostatTemperatureCommand         *message)
 {
@@ -595,7 +601,7 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_button_mode__descriptor =
   nspanel_config__nspanel_button_mode__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[36] =
+static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
 {
   {
     "name",
@@ -874,6 +880,30 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[36] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
+    "button1_long_mode",
+    27,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button1_long_mode),
+    &nspanel_config__nspanel_button_mode__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "button2_long_mode",
+    29,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button2_long_mode),
+    &nspanel_config__nspanel_button_mode__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
     "global_scene_entity_page_ids",
     30,
     PROTOBUF_C_LABEL_REPEATED,
@@ -1031,30 +1061,32 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[36] =
   },
 };
 static const unsigned nspanel_config__field_indices_by_name[] = {
-  32,   /* field[32] = button1_lower_temperature */
+  23,   /* field[23] = button1_long_mode */
+  34,   /* field[34] = button1_lower_temperature */
   21,   /* field[21] = button1_mode */
-  33,   /* field[33] = button1_upper_temperature */
-  34,   /* field[34] = button2_lower_temperature */
+  35,   /* field[35] = button1_upper_temperature */
+  24,   /* field[24] = button2_long_mode */
+  36,   /* field[36] = button2_lower_temperature */
   22,   /* field[22] = button2_mode */
-  35,   /* field[35] = button2_upper_temperature */
+  37,   /* field[37] = button2_upper_temperature */
   5,   /* field[5] = button_long_press_time */
   13,   /* field[13] = clock_us_style */
-  29,   /* field[29] = default_light_brightess */
+  31,   /* field[31] = default_light_brightess */
   2,   /* field[2] = default_page */
   1,   /* field[1] = default_room */
-  23,   /* field[23] = global_scene_entity_page_ids */
-  31,   /* field[31] = inside_temperature_sensor_mqtt_topic */
+  25,   /* field[25] = global_scene_entity_page_ids */
+  33,   /* field[33] = inside_temperature_sensor_mqtt_topic */
   15,   /* field[15] = is_us_panel */
-  30,   /* field[30] = locked_to_default_room */
+  32,   /* field[32] = locked_to_default_room */
   4,   /* field[4] = min_button_push_time */
   0,   /* field[0] = name */
-  26,   /* field[26] = nspanel_id */
-  24,   /* field[24] = optimistic_mode */
-  25,   /* field[25] = raise_light_level_to_100_above */
+  28,   /* field[28] = nspanel_id */
+  26,   /* field[26] = optimistic_mode */
+  27,   /* field[27] = raise_light_level_to_100_above */
   18,   /* field[18] = relay1_default_mode */
-  27,   /* field[27] = relay1_relay_group */
+  29,   /* field[29] = relay1_relay_group */
   19,   /* field[19] = relay2_default_mode */
-  28,   /* field[28] = relay2_relay_group */
+  30,   /* field[30] = relay2_relay_group */
   17,   /* field[17] = reverse_relays */
   16,   /* field[16] = room_infos */
   8,   /* field[8] = screen_dim_level */
@@ -1068,14 +1100,15 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
   20,   /* field[20] = temperature_calibration */
   14,   /* field[14] = use_fahrenheit */
 };
-static const ProtobufCIntRange nspanel_config__number_ranges[5 + 1] =
+static const ProtobufCIntRange nspanel_config__number_ranges[6 + 1] =
 {
   { 1, 0 },
   { 25, 22 },
-  { 30, 23 },
-  { 35, 27 },
-  { 37, 28 },
-  { 0, 36 }
+  { 27, 23 },
+  { 29, 24 },
+  { 35, 29 },
+  { 37, 30 },
+  { 0, 38 }
 };
 const ProtobufCMessageDescriptor nspanel_config__descriptor =
 {
@@ -1085,10 +1118,10 @@ const ProtobufCMessageDescriptor nspanel_config__descriptor =
   "NSPanelConfig",
   "",
   sizeof(NSPanelConfig),
-  36,
+  38,
   nspanel_config__field_descriptors,
   nspanel_config__field_indices_by_name,
-  5,  nspanel_config__number_ranges,
+  6,  nspanel_config__number_ranges,
   (ProtobufCMessageInit) nspanel_config__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
@@ -1177,7 +1210,7 @@ const ProtobufCEnumDescriptor nspanel_status_report__state__descriptor =
   nspanel_status_report__state__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_status_report__field_descriptors[11] =
+static const ProtobufCFieldDescriptor nspanel_status_report__field_descriptors[12] =
 {
   {
     "nspanel_state",
@@ -1311,6 +1344,18 @@ static const ProtobufCFieldDescriptor nspanel_status_report__field_descriptors[1
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "version",
+    12,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelStatusReport, version),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_status_report__field_indices_by_name[] = {
   3,   /* field[3] = heap_used_pct */
@@ -1323,12 +1368,13 @@ static const unsigned nspanel_status_report__field_indices_by_name[] = {
   2,   /* field[2] = rssi */
   5,   /* field[5] = temperature */
   1,   /* field[1] = update_progress */
+  11,   /* field[11] = version */
   7,   /* field[7] = warnings */
 };
 static const ProtobufCIntRange nspanel_status_report__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 11 }
+  { 0, 12 }
 };
 const ProtobufCMessageDescriptor nspanel_status_report__descriptor =
 {
@@ -1338,7 +1384,7 @@ const ProtobufCMessageDescriptor nspanel_status_report__descriptor =
   "NSPanelStatusReport",
   "",
   sizeof(NSPanelStatusReport),
-  11,
+  12,
   nspanel_status_report__field_descriptors,
   nspanel_status_report__field_indices_by_name,
   1,  nspanel_status_report__number_ranges,
@@ -2555,6 +2601,44 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__button_pressed__de
   (ProtobufCMessageInit) nspanel_mqttmanager_command__button_pressed__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__button_long_pressed__field_descriptors[1] =
+{
+  {
+    "button_id",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__ButtonLongPressed, button_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_mqttmanager_command__button_long_pressed__field_indices_by_name[] = {
+  0,   /* field[0] = button_id */
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__button_long_pressed__number_ranges[1 + 1] =
+{
+  { 2, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor nspanel_mqttmanager_command__button_long_pressed__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand.ButtonLongPressed",
+  "ButtonLongPressed",
+  "NSPanelMQTTManagerCommand__ButtonLongPressed",
+  "",
+  sizeof(NSPanelMQTTManagerCommand__ButtonLongPressed),
+  1,
+  nspanel_mqttmanager_command__button_long_pressed__field_descriptors,
+  nspanel_mqttmanager_command__button_long_pressed__field_indices_by_name,
+  1,  nspanel_mqttmanager_command__button_long_pressed__number_ranges,
+  (ProtobufCMessageInit) nspanel_mqttmanager_command__button_long_pressed__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
 static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__thermostat_temperature_command__field_descriptors[2] =
 {
   {
@@ -2700,7 +2784,7 @@ const ProtobufCEnumDescriptor nspanel_mqttmanager_command__affect_lights_options
   nspanel_mqttmanager_command__affect_lights_options__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[9] =
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[10] =
 {
   {
     "first_page_turn_on",
@@ -2775,8 +2859,20 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descrip
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "thermostat_temperature_command",
+    "button_longpressed",
     7,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(NSPanelMQTTManagerCommand, command_data_case),
+    offsetof(NSPanelMQTTManagerCommand, button_longpressed),
+    &nspanel_mqttmanager_command__button_long_pressed__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "thermostat_temperature_command",
+    8,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(NSPanelMQTTManagerCommand, command_data_case),
@@ -2788,7 +2884,7 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descrip
   },
   {
     "thermostat_command",
-    8,
+    9,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(NSPanelMQTTManagerCommand, command_data_case),
@@ -2812,21 +2908,22 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descrip
   },
 };
 static const unsigned nspanel_mqttmanager_command__field_indices_by_name[] = {
+  6,   /* field[6] = button_longpressed */
   5,   /* field[5] = button_pressed */
   1,   /* field[1] = first_page_turn_off */
   0,   /* field[0] = first_page_turn_on */
   2,   /* field[2] = light_command */
-  8,   /* field[8] = nspanel_id */
+  9,   /* field[9] = nspanel_id */
   4,   /* field[4] = save_scene_command */
-  7,   /* field[7] = thermostat_command */
-  6,   /* field[6] = thermostat_temperature_command */
+  8,   /* field[8] = thermostat_command */
+  7,   /* field[7] = thermostat_temperature_command */
   3,   /* field[3] = toggle_entity_from_entities_page */
 };
 static const ProtobufCIntRange nspanel_mqttmanager_command__number_ranges[2 + 1] =
 {
   { 1, 0 },
-  { 100, 8 },
-  { 0, 9 }
+  { 100, 9 },
+  { 0, 10 }
 };
 const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
 {
@@ -2836,7 +2933,7 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
   "NSPanelMQTTManagerCommand",
   "",
   sizeof(NSPanelMQTTManagerCommand),
-  9,
+  10,
   nspanel_mqttmanager_command__field_descriptors,
   nspanel_mqttmanager_command__field_indices_by_name,
   2,  nspanel_mqttmanager_command__number_ranges,

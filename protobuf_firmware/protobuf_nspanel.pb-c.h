@@ -32,6 +32,7 @@ typedef struct NSPanelMQTTManagerCommand__LightCommand NSPanelMQTTManagerCommand
 typedef struct NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage;
 typedef struct NSPanelMQTTManagerCommand__SaveSceneCommand NSPanelMQTTManagerCommand__SaveSceneCommand;
 typedef struct NSPanelMQTTManagerCommand__ButtonPressed NSPanelMQTTManagerCommand__ButtonPressed;
+typedef struct NSPanelMQTTManagerCommand__ButtonLongPressed NSPanelMQTTManagerCommand__ButtonLongPressed;
 typedef struct NSPanelMQTTManagerCommand__ThermostatTemperatureCommand NSPanelMQTTManagerCommand__ThermostatTemperatureCommand;
 typedef struct NSPanelMQTTManagerCommand__ThermostatCommand NSPanelMQTTManagerCommand__ThermostatCommand;
 
@@ -137,6 +138,8 @@ struct  NSPanelConfig
   int32_t temperature_calibration;
   NSPanelConfig__NSPanelButtonMode button1_mode;
   NSPanelConfig__NSPanelButtonMode button2_mode;
+  NSPanelConfig__NSPanelButtonMode button1_long_mode;
+  NSPanelConfig__NSPanelButtonMode button2_long_mode;
   size_t n_global_scene_entity_page_ids;
   int32_t *global_scene_entity_page_ids;
   protobuf_c_boolean optimistic_mode;
@@ -174,7 +177,7 @@ struct  NSPanelConfig
 };
 #define NSPANEL_CONFIG__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
-    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0 }
+    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0 }
 
 
 struct  NSPanelWarning
@@ -203,10 +206,11 @@ struct  NSPanelStatusReport
   char *md5_firmware;
   char *md5_littlefs;
   char *md5_tft_gui;
+  char *version;
 };
 #define NSPANEL_STATUS_REPORT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_status_report__descriptor) \
-    , NSPANEL_STATUS_REPORT__STATE__ONLINE, 0, 0, 0, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, 0,NULL, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
+    , NSPANEL_STATUS_REPORT__STATE__ONLINE, 0, 0, 0, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, 0,NULL, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
 struct  NSPanelLightStatus
@@ -415,6 +419,16 @@ struct  NSPanelMQTTManagerCommand__ButtonPressed
     , 0 }
 
 
+struct  NSPanelMQTTManagerCommand__ButtonLongPressed
+{
+  ProtobufCMessage base;
+  int32_t button_id;
+};
+#define NSPANEL_MQTTMANAGER_COMMAND__BUTTON_LONG_PRESSED__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__button_long_pressed__descriptor) \
+    , 0 }
+
+
 struct  NSPanelMQTTManagerCommand__ThermostatTemperatureCommand
 {
   ProtobufCMessage base;
@@ -446,8 +460,9 @@ typedef enum {
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_TOGGLE_ENTITY_FROM_ENTITIES_PAGE = 4,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_SAVE_SCENE_COMMAND = 5,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_BUTTON_PRESSED = 6,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_TEMPERATURE_COMMAND = 7,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_COMMAND = 8
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_BUTTON_LONGPRESSED = 7,
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_TEMPERATURE_COMMAND = 8,
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_COMMAND = 9
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__CASE)
 } NSPanelMQTTManagerCommand__CommandDataCase;
 
@@ -466,6 +481,7 @@ struct  NSPanelMQTTManagerCommand
     NSPanelMQTTManagerCommand__ToggleEntityFromEntitiesPage *toggle_entity_from_entities_page;
     NSPanelMQTTManagerCommand__SaveSceneCommand *save_scene_command;
     NSPanelMQTTManagerCommand__ButtonPressed *button_pressed;
+    NSPanelMQTTManagerCommand__ButtonLongPressed *button_longpressed;
     NSPanelMQTTManagerCommand__ThermostatTemperatureCommand *thermostat_temperature_command;
     NSPanelMQTTManagerCommand__ThermostatCommand *thermostat_command;
   };
@@ -635,6 +651,9 @@ void   nspanel_mqttmanager_command__save_scene_command__init
 /* NSPanelMQTTManagerCommand__ButtonPressed methods */
 void   nspanel_mqttmanager_command__button_pressed__init
                      (NSPanelMQTTManagerCommand__ButtonPressed         *message);
+/* NSPanelMQTTManagerCommand__ButtonLongPressed methods */
+void   nspanel_mqttmanager_command__button_long_pressed__init
+                     (NSPanelMQTTManagerCommand__ButtonLongPressed         *message);
 /* NSPanelMQTTManagerCommand__ThermostatTemperatureCommand methods */
 void   nspanel_mqttmanager_command__thermostat_temperature_command__init
                      (NSPanelMQTTManagerCommand__ThermostatTemperatureCommand         *message);
@@ -710,6 +729,9 @@ typedef void (*NSPanelMQTTManagerCommand__SaveSceneCommand_Closure)
 typedef void (*NSPanelMQTTManagerCommand__ButtonPressed_Closure)
                  (const NSPanelMQTTManagerCommand__ButtonPressed *message,
                   void *closure_data);
+typedef void (*NSPanelMQTTManagerCommand__ButtonLongPressed_Closure)
+                 (const NSPanelMQTTManagerCommand__ButtonLongPressed *message,
+                  void *closure_data);
 typedef void (*NSPanelMQTTManagerCommand__ThermostatTemperatureCommand_Closure)
                  (const NSPanelMQTTManagerCommand__ThermostatTemperatureCommand *message,
                   void *closure_data);
@@ -747,6 +769,7 @@ extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__light_comma
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__toggle_entity_from_entities_page__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__save_scene_command__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__button_pressed__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__button_long_pressed__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_temperature_command__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_command__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_mqttmanager_command__affect_lights_options__descriptor;

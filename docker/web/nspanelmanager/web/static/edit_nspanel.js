@@ -39,138 +39,77 @@ function push_log_message_to_view(data) {
   $("#log_body").prepend(add_html);
 }
 
-function update_shown_elements() {
-  $("#button1_detached_mode_controls").addClass("hidden");
-  $("#button2_detached_mode_controls").addClass("hidden");
-  $("#button1_detached_mode_light").addClass("hidden");
-  $("#button2_detached_mode_light").addClass("hidden");
-  $("#button1_mqtt_mode_controls").addClass("hidden");
-  $("#button2_mqtt_mode_controls").addClass("hidden");
-  $("#button1_thermostat_mode_controls").addClass("hidden");
-  $("#button2_thermostat_mode_controls").addClass("hidden");
-  $("#button1_detached_mode_light").prop("required", false);
-  $("#button2_detached_mode_light").prop("required", false);
-  $("#button1_relay_lower_temperature").prop("required", false);
-  $("#button1_relay_upper_temperature").prop("required", false);
-  $("#button2_relay_lower_temperature").prop("required", false);
-  $("#button2_relay_upper_temperature").prop("required", false);
+function update_shown_elements(button) {
+  $(`#${button}_detached_mode_controls`).addClass("hidden");
+  $(`#${button}_detached_mode_light`).addClass("hidden");
+  $(`#${button}_mqtt_mode_controls`).addClass("hidden");
+  $(`#${button}_thermostat_mode_controls`).addClass("hidden");
+  $(`#${button}_detached_mode_light`).prop("required", false);
+  $(`#${button}_relay_lower_temperature`).prop("required", false);
+  $(`#${button}_relay_upper_temperature`).prop("required", false);
 
-  if ($("#button1_mode").val() == 0) {
+  if ($(`#${button}_mode`).val() == 0) {
     // Direct mode
-  } else if ($("#button1_mode").val() == 1) {
+  } else if ($(`#${button}_mode`).val() == 1) {
     // Detached mode
-    $("#button1_detached_mode_controls").removeClass("hidden");
-    $("#button1_detached_mode_light").prop("required", true);
-    $("#button1_detached_mode_light").removeClass("hidden");
-  } else if ($("#button1_mode").val() == 2) {
+    $(`#${button}_detached_mode_controls`).removeClass("hidden");
+    $(`#${button}_detached_mode_light`).prop("required", true);
+    $(`#${button}_detached_mode_light`).removeClass("hidden");
+  } else if ($(`#${button}_mode`).val() == 2) {
     // MQTT mode
-    $("#button1_mqtt_mode_controls").removeClass("hidden");
-  } else if ($("#button1_mode").val() == 3) {
+    $(`#${button}_mqtt_mode_controls`).removeClass("hidden");
+  } else if ($(`#${button}_mode`).val() == 3) {
     // Follow mode
-  } else if ($("#button1_mode").val() == 4 || $("#button1_mode").val() == 5) {
+  } else if ($(`#${button}_mode`).val() == 4 || $(`#${button}_mode`).val() == 5) {
     // Thermostat mode
-    $("#button1_thermostat_mode_controls").removeClass("hidden");
-    $("#button1_relay_lower_temperature").prop("required", true);
-    $("#button1_relay_upper_temperature").prop("required", true);
-  }
-
-  if ($("#button2_mode").val() == 0) {
-    // Direct mode
-  } else if ($("#button2_mode").val() == 1) {
-    // Detached mode
-    $("#button2_detached_mode_controls").removeClass("hidden");
-    $("#button2_detached_mode_light").prop("required", true);
-    $("#button2_detached_mode_light").removeClass("hidden");
-  } else if ($("#button2_mode").val() == 2) {
-    // MQTT mode
-    $("#button2_mqtt_mode_controls").removeClass("hidden");
-  } else if ($("#button2_mode").val() == 3) {
-    // Follow mode
-  } else if ($("#button2_mode").val() == 4 || $("#button2_mode").val() == 5) {
-    // Thermostat mode
-    $("#button2_thermostat_mode_controls").removeClass("hidden");
-    $("#button2_relay_lower_temperature").prop("required", true);
-    $("#button2_relay_upper_temperature").prop("required", true);
+    $(`#${button}_thermostat_mode_controls`).removeClass("hidden");
+    $(`#${button}_relay_lower_temperature`).prop("required", true);
+    $(`#${button}_relay_upper_temperature`).prop("required", true);
   }
 
   // Update shown lights depending on selected room
-  var button1_selected_room_id = $("#button1_detached_mode_room").val();
+  var selected_room_id = $(`#${button}_detached_mode_room`).val();
   $(
-    ".button1_detached_mode_light_option[data-room-id='" +
-      button1_selected_room_id +
+    `.${button}_detached_mode_light_option[data-room-id='` +
+      selected_room_id +
       "']",
   ).show();
   $(
-    ".button1_detached_mode_light_option[data-room-id!='" +
-      button1_selected_room_id +
+    `.${button}_detached_mode_light_option[data-room-id!='` +
+      selected_room_id +
       "']",
   ).hide();
 
   // Check if selected button1_detached_mode_light option is visible, if not, select the first of the options.
   if (
     $(
-      ".button1_detached_mode_light_option[data-room-id='" +
-        button1_selected_room_id +
+      `.${button}_detached_mode_light_option[data-room-id='` +
+        selected_room_id +
         "']:selected",
     ).length == 0
   ) {
-    var button1_detached_light_first_value = $(
-      ".button1_detached_mode_light_option[data-room-id='" +
-        button1_selected_room_id +
+    var detached_light_first_value = $(
+      `.${button}_detached_mode_light_option[data-room-id='` +
+        selected_room_id +
         "']:first",
     ).val();
-    if (button1_detached_light_first_value) {
+    if (detached_light_first_value) {
       console.log(
-        "Selected option for button1 detached light is no longer accessible in selected room, will select '",
-        button1_detached_light_first_value,
+        `Selected option for ${button} detached light is no longer accessible in selected room, will select '`,
+        detached_light_first_value,
         "' instead.",
       );
-      $("#button1_detached_mode_light")
-        .val(button1_detached_light_first_value)
+      $(`#${button}_detached_mode_light`)
+        .val(detached_light_first_value)
         .change();
     } else {
-      $("#button1_detached_mode_light").val("").change();
+      $(`#${button}_detached_mode_light`).val("").change();
     }
   }
 
-  var button2_selected_room_id = $("#button2_detached_mode_room").val();
-  $(
-    ".button2_detached_mode_light_option[data-room-id='" +
-      button2_selected_room_id +
-      "']",
-  ).show();
-  $(
-    ".button2_detached_mode_light_option[data-room-id!='" +
-      button2_selected_room_id +
-      "']",
-  ).hide();
+}
 
-  // Check if selected button2_detached_mode_light option is visible, if not, select the first of the options.
-  if (
-    $(
-      ".button2_detached_mode_light_option[data-room-id='" +
-        button2_selected_room_id +
-        "']:selected",
-    ).length == 0
-  ) {
-    var button2_detached_light_first_value = $(
-      ".button2_detached_mode_light_option[data-room-id='" +
-        button2_selected_room_id +
-        "']:first",
-    ).val();
-    if (button2_detached_light_first_value) {
-      console.log(
-        "Selected option for button2 detached light is no longer accessible in selected room, will select '",
-        button2_detached_light_first_value,
-        "' instead.",
-      );
-      $("#button2_detached_mode_light")
-        .val(button2_detached_light_first_value)
-        .change();
-    } else {
-      $("#button2_detached_mode_light").val("").change();
-    }
-  }
+function update_screeensave_mode() {
 
   // Update if screensaver outside temperature setting is available or not.
   var screensaver_mode = $("#screensaver_mode").val();
@@ -226,13 +165,13 @@ $(document).ready(() => {
         }
       });
     });
-  update_shown_elements();
-
-  $("#button1_mode").change(update_shown_elements);
-  $("#button2_mode").change(update_shown_elements);
-  $("#screensaver_mode").change(update_shown_elements);
-  $("#button1_detached_mode_room").change(update_shown_elements);
-  $("#button2_detached_mode_room").change(update_shown_elements);
+    
+  for(let button of ["button1", "button2" ,"button1_long" ,"button2_long"]) {
+    update_shown_elements(button);
+    $(`#${button}_mode`).change(() => update_shown_elements(button));
+    $(`#${button}_detached_mode_room`).change(() => update_shown_elements(button));
+  }
+  $("#screensaver_mode").change(update_screeensave_mode);
 
   $("#panel_type").on("change", update_nspanel_example_view);
   update_nspanel_example_view(); // Update once manually depending on selected choice.
