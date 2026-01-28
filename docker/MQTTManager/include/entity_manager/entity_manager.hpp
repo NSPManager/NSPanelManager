@@ -137,7 +137,7 @@ public:
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     auto rit = EntityManager::_entities.cbegin();
     while (rit != EntityManager::_entities.cend()) {
-      if ((type != MQTT_MANAGER_ENTITY_TYPE::ANY && (*rit)->get_type() == type) && (*rit)->get_id() == id) {
+      if ((type == MQTT_MANAGER_ENTITY_TYPE::ANY || (*rit)->get_type() == type) && (*rit)->get_id() == id) {
         return std::static_pointer_cast<EntityClass>(*rit);
       } else {
         ++rit;
