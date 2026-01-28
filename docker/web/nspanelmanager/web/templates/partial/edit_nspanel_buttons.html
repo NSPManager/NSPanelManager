@@ -24,11 +24,11 @@
     <!-- {{ button_name }} detached mode -->
     <div id="{{ button }}_detached_mode_controls" class="hidden mt-2">
         {% component "alert" style="alert alert-soft" level="info" text="Please note that not all entity types can be toggled." %}{% endcomponent %}
-        <label for="{{ button }}_detached_mode_light_room" class="block mt-2 text-sm font-medium">Room</label>
+        <label for="{{ button }}_detached_mode_entity_room" class="block mt-2 text-sm font-medium">Room</label>
         <div class="flex flex-row-reverse">
             <select name="{{ button }}_detached_mode_room" id="{{ button }}_detached_mode_room" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
             {% for room in rooms %}
-                {% with mode=button|add:"_detached_mode_light" %}
+                {% with mode=button|add:"_detached_mode_entity" %}
                 {% if panel_info.data|get_item:mode.room == room %}
                 <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
                 {% else %}
@@ -46,16 +46,18 @@
             </span>
         </div>
 
-        <label for="{{ button }}_detached_mode_light" class="block mt-2 text-sm font-medium">Entity</label>
+        <label for="{{ button }}_detached_mode_entity" class="block mt-2 text-sm font-medium">Entity</label>
         <div class="flex flex-row-reverse">
-            <select name="{{ button }}_detached_mode_light" id="{{ button }}_detached_mode_light" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
+            <select name="{{ button }}_detached_mode_entity" id="{{ button }}_detached_mode_entity" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
                 {% for room in rooms %}
                     {% for entity in room.entity_set.all %}
-                    {% with mode=button|add:"_detached_mode_light" %}
+                    {% with mode=button|add:"_detached_mode_entity" %}
                         {% if panel_info.data|get_item:mode == entity %}
-                        <option class="{{ button }}_detached_mode_light_option" data-room-id="{{ room.id }}" value="{{ entity.id }}" selected>{{ entity.friendly_name }}</option>
+                        <argh node> </argh>
+                        <option class="{{ button }}_detached_mode_entity_option" data-room-id="{{ room.id }}" value="{{ entity.id }}" selected>{{ entity.friendly_name }}</option>
                         {% else %}
-                        <option class="{{ button }}_detached_mode_light_option" data-room-id="{{ room.id }}" value="{{ entity.id }}">{{ entity.friendly_name }}</option>
+                        <good></good>
+                        <option class="{{ button }}_detached_mode_entity_option" data-room-id="{{ room.id }}" value="{{ entity.id }}">{{ entity.friendly_name }}</option>
                         {% endif %}
                     {% endwith %}
                     {% endfor %}

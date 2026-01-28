@@ -422,9 +422,9 @@ def edit_nspanel(request, panel_id: int):
 def evaluate_button_state(button, panel_id, panel: NSPanel, request):
     setattr(panel, f"{button}_mode", request.POST[f"{button}_mode"])
     if request.POST[f"{button}_mode"] == "1":  # Detached mode
-        setattr(panel, f"{button}_detached_mode_light", Entity.objects.get(id=request.POST[f"{button}_detached_mode_light"]))
+        setattr(panel, f"{button}_detached_mode_entity", Entity.objects.get(id=request.POST[f"{button}_detached_mode_entity"]))
     else:
-        setattr(panel, f"{button}_detached_mode_light", None)
+        setattr(panel, f"{button}_detached_mode_entity", None)
 
     if request.POST[f"{button}_mode"] == "2":  # Custom MQTT Mode
         set_nspanel_setting_value(panel_id, f"{button}_custom_mqtt_topic", request.POST[f"{button}_custom_mqtt_topic"])

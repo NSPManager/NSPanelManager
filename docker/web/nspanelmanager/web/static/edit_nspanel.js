@@ -41,10 +41,10 @@ function push_log_message_to_view(data) {
 
 function update_shown_elements(button) {
   $(`#${button}_detached_mode_controls`).addClass("hidden");
-  $(`#${button}_detached_mode_light`).addClass("hidden");
+  $(`#${button}_detached_mode_entity`).addClass("hidden");
   $(`#${button}_mqtt_mode_controls`).addClass("hidden");
   $(`#${button}_thermostat_mode_controls`).addClass("hidden");
-  $(`#${button}_detached_mode_light`).prop("required", false);
+  $(`#${button}_detached_mode_entity`).prop("required", false);
   $(`#${button}_relay_lower_temperature`).prop("required", false);
   $(`#${button}_relay_upper_temperature`).prop("required", false);
 
@@ -53,8 +53,8 @@ function update_shown_elements(button) {
   } else if ($(`#${button}_mode`).val() == 1) {
     // Detached mode
     $(`#${button}_detached_mode_controls`).removeClass("hidden");
-    $(`#${button}_detached_mode_light`).prop("required", true);
-    $(`#${button}_detached_mode_light`).removeClass("hidden");
+    $(`#${button}_detached_mode_entity`).prop("required", true);
+    $(`#${button}_detached_mode_entity`).removeClass("hidden");
   } else if ($(`#${button}_mode`).val() == 2) {
     // MQTT mode
     $(`#${button}_mqtt_mode_controls`).removeClass("hidden");
@@ -78,28 +78,28 @@ function update_shown_elements(button) {
   // Update shown lights depending on selected room
   var selected_room_id = $(`#${button}_detached_mode_room`).val();
   $(
-    `.${button}_detached_mode_light_option[data-room-id='` +
-      selected_room_id +
-      "']",
+    `.${button}_detached_mode_entity_option[data-room-id='` +
+    selected_room_id +
+    "']",
   ).show();
   $(
-    `.${button}_detached_mode_light_option[data-room-id!='` +
-      selected_room_id +
-      "']",
+    `.${button}_detached_mode_entity_option[data-room-id!='` +
+    selected_room_id +
+    "']",
   ).hide();
 
-  // Check if selected button1_detached_mode_light option is visible, if not, select the first of the options.
+  // Check if selected button1_detached_mode_entity option is visible, if not, select the first of the options.
   if (
     $(
-      `.${button}_detached_mode_light_option[data-room-id='` +
-        selected_room_id +
-        "']:selected",
+      `.${button}_detached_mode_entity_option[data-room-id='` +
+      selected_room_id +
+      "']:selected",
     ).length == 0
   ) {
     var detached_light_first_value = $(
-      `.${button}_detached_mode_light_option[data-room-id='` +
-        selected_room_id +
-        "']:first",
+      `.${button}_detached_mode_entity_option[data-room-id='` +
+      selected_room_id +
+      "']:first",
     ).val();
     if (detached_light_first_value) {
       console.log(
@@ -107,13 +107,15 @@ function update_shown_elements(button) {
         detached_light_first_value,
         "' instead.",
       );
-      $(`#${button}_detached_mode_light`)
+      $(`#${button}_detached_mode_entity`)
         .val(detached_light_first_value)
         .change();
     } else {
-      $(`#${button}_detached_mode_light`).val("").change();
+      $(`#${button}_detached_mode_entity`).val("").change();
     }
   }
+
+
 
 }
 
