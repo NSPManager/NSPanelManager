@@ -1,5 +1,5 @@
-<!-- Button 1 -->
-<div class="flex-auto pr-1 max-w-6/12">
+<!-- {{ button_name }} -->
+<div class="flex-auto pr-1 max-w-6/12" style="border-radius: 5px; border: 1px solid black; margin:0px 2px 0px 2px; padding:5px;">
     <label for="{{ button }}_mode" class="block mb-2 text-sm font-medium">{{ button_name }} mode</label>
     <div class="flex flex-row-reverse">
         <select name="{{ button }}_mode" id="{{ button }}_mode" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
@@ -21,7 +21,7 @@
         </span>
     </div>
 
-    <!-- Button 1 detached mode -->
+    <!-- {{ button_name }} detached mode -->
     <div id="{{ button }}_detached_mode_controls" class="hidden mt-2">
         {% component "alert" style="alert alert-soft" level="info" text="Please note that not all entity types can be toggled." %}{% endcomponent %}
         <label for="{{ button }}_detached_mode_light_room" class="block mt-2 text-sm font-medium">Room</label>
@@ -72,7 +72,7 @@
     </div>
 
 
-    <!-- Button 1 MQTT mode -->
+    <!-- {{ button_name }} MQTT mode -->
     <div id="{{ button }}_mqtt_mode_controls" class="hidden">
         <div class="">
         <label for="{{ button }}_custom_mqtt_topic" class="block mb-2 text-sm font-medium">{{ button_name }} MQTT topic name</label>
@@ -111,7 +111,7 @@
         </div>
     </div>
 
-    <!-- Button 1 Thermostat mode -->
+    <!-- {{ button_name }} Thermostat mode -->
     <div id="{{ button }}_thermostat_mode_controls" class="hidden">
         <div class="mt-2">
             {% component "alert" level="warning" text="We are not responsible for any damages caused by the use of this setting. Be aware that the panel can hang and therefore not react to temperature changes." %}{% endcomponent %}
