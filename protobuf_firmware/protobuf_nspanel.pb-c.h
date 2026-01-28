@@ -68,6 +68,12 @@ typedef enum _NSPanelConfig__NSPanelButtonMode {
   NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__THERMOSTAT_COOL = 4
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_CONFIG__NSPANEL_BUTTON_MODE)
 } NSPanelConfig__NSPanelButtonMode;
+typedef enum _NSPanelConfig__NSPanelButtonFallbackMode {
+  NSPANEL_CONFIG__NSPANEL_BUTTON_FALLBACK_MODE__DISABLED = 0,
+  NSPANEL_CONFIG__NSPANEL_BUTTON_FALLBACK_MODE__TOGGLE_RELAY1 = 1,
+  NSPANEL_CONFIG__NSPANEL_BUTTON_FALLBACK_MODE__TOGLLE_RELAY2 = 2
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_CONFIG__NSPANEL_BUTTON_FALLBACK_MODE)
+} NSPanelConfig__NSPanelButtonFallbackMode;
 typedef enum _NSPanelStatusReport__State {
   NSPANEL_STATUS_REPORT__STATE__ONLINE = 0,
   NSPANEL_STATUS_REPORT__STATE__OFFLINE = 1,
@@ -137,9 +143,13 @@ struct  NSPanelConfig
   protobuf_c_boolean relay2_default_mode;
   int32_t temperature_calibration;
   NSPanelConfig__NSPanelButtonMode button1_mode;
+  NSPanelConfig__NSPanelButtonFallbackMode button1_fallback_mode;
   NSPanelConfig__NSPanelButtonMode button2_mode;
+  NSPanelConfig__NSPanelButtonFallbackMode button2_fallback_mode;
   NSPanelConfig__NSPanelButtonMode button1_long_mode;
+  NSPanelConfig__NSPanelButtonFallbackMode button1_long_fallback_mode;
   NSPanelConfig__NSPanelButtonMode button2_long_mode;
+  NSPanelConfig__NSPanelButtonFallbackMode button2_long_fallback_mode;
   size_t n_global_scene_entity_page_ids;
   int32_t *global_scene_entity_page_ids;
   protobuf_c_boolean optimistic_mode;
@@ -177,7 +187,7 @@ struct  NSPanelConfig
 };
 #define NSPANEL_CONFIG__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
-    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0 }
+    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_FALLBACK_MODE__DISABLED, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_FALLBACK_MODE__DISABLED, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_FALLBACK_MODE__DISABLED, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_FALLBACK_MODE__DISABLED, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0 }
 
 
 struct  NSPanelWarning
@@ -753,6 +763,7 @@ extern const ProtobufCMessageDescriptor nspanel_config__room_info__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_default_page__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_screensaver_mode__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_button_mode__descriptor;
+extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_button_fallback_mode__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_warning__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_status_report__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_status_report__state__descriptor;

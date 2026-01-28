@@ -72,12 +72,16 @@ std::shared_ptr<NSPanel> NSPanel::create_from_discovery_request(nlohmann::json r
     panel_data.version = request_data.at("version").get<std::string>();
     panel_data.button1_detached_mode_entity_id = std::nullopt;
     panel_data.button1_mode = 0;
+    panel_data.button1_fallback_mode = 0;
     panel_data.button2_detached_mode_entity_id = std::nullopt;
     panel_data.button2_mode = 0;
+    panel_data.button2_fallback_mode = 0;
     panel_data.button1_long_detached_mode_entity_id = std::nullopt;
     panel_data.button1_long_mode = 0;
+    panel_data.button1_long_fallback_mode = 0;
     panel_data.button2_long_detached_mode_entity_id = std::nullopt;
     panel_data.button2_long_mode = 0;
+    panel_data.button2_long_fallback_mode = 0;
     panel_data.md5_data_file = request_data.at("md5_data_file").get<std::string>();
     panel_data.md5_firmware = request_data.at("md5_firmware").get<std::string>();
     panel_data.md5_tft_file = request_data.at("md5_tft_file").get<std::string>();
@@ -280,6 +284,11 @@ void NSPanel::send_config() {
   config.set_button1_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_upper_temperature", "0")));
   config.set_button2_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_lower_temperature", "0")));
   config.set_button2_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_upper_temperature", "0")));
+  config.set_button1_fallback_mode(static_cast<NSPanelConfig_NSPanelButtonFallbackMode>(std::stoi(this->_get_nspanel_setting_with_default("button1_fallback_mode", "0"))));
+  config.set_button2_fallback_mode(static_cast<NSPanelConfig_NSPanelButtonFallbackMode>(std::stoi(this->_get_nspanel_setting_with_default("button2_fallback_mode", "0"))));
+  config.set_button1_long_fallback_mode(static_cast<NSPanelConfig_NSPanelButtonFallbackMode>(std::stoi(this->_get_nspanel_setting_with_default("button1_long_fallback_mode", "0"))));
+  config.set_button2_long_fallback_mode(static_cast<NSPanelConfig_NSPanelButtonFallbackMode>(std::stoi(this->_get_nspanel_setting_with_default("button2_long_fallback_mode", "0"))));
+
   if ((*default_room)->has_temperature_sensor()) {
     config.set_inside_temperature_sensor_mqtt_topic((*default_room)->get_temperature_sensor_mqtt_topic());
   }

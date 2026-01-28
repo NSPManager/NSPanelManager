@@ -221,6 +221,40 @@ inline bool NSPanelConfig_NSPanelButtonMode_Parse(absl::string_view name, NSPane
   return ::google::protobuf::internal::ParseNamedEnum<NSPanelConfig_NSPanelButtonMode>(
       NSPanelConfig_NSPanelButtonMode_descriptor(), name, value);
 }
+enum NSPanelConfig_NSPanelButtonFallbackMode : int {
+  NSPanelConfig_NSPanelButtonFallbackMode_DISABLED = 0,
+  NSPanelConfig_NSPanelButtonFallbackMode_TOGGLE_RELAY1 = 1,
+  NSPanelConfig_NSPanelButtonFallbackMode_TOGLLE_RELAY2 = 2,
+  NSPanelConfig_NSPanelButtonFallbackMode_NSPanelConfig_NSPanelButtonFallbackMode_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::min(),
+  NSPanelConfig_NSPanelButtonFallbackMode_NSPanelConfig_NSPanelButtonFallbackMode_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::max(),
+};
+
+bool NSPanelConfig_NSPanelButtonFallbackMode_IsValid(int value);
+extern const uint32_t NSPanelConfig_NSPanelButtonFallbackMode_internal_data_[];
+constexpr NSPanelConfig_NSPanelButtonFallbackMode NSPanelConfig_NSPanelButtonFallbackMode_NSPanelButtonFallbackMode_MIN = static_cast<NSPanelConfig_NSPanelButtonFallbackMode>(0);
+constexpr NSPanelConfig_NSPanelButtonFallbackMode NSPanelConfig_NSPanelButtonFallbackMode_NSPanelButtonFallbackMode_MAX = static_cast<NSPanelConfig_NSPanelButtonFallbackMode>(2);
+constexpr int NSPanelConfig_NSPanelButtonFallbackMode_NSPanelButtonFallbackMode_ARRAYSIZE = 2 + 1;
+const ::google::protobuf::EnumDescriptor*
+NSPanelConfig_NSPanelButtonFallbackMode_descriptor();
+template <typename T>
+const std::string& NSPanelConfig_NSPanelButtonFallbackMode_Name(T value) {
+  static_assert(std::is_same<T, NSPanelConfig_NSPanelButtonFallbackMode>::value ||
+                    std::is_integral<T>::value,
+                "Incorrect type passed to NSPanelButtonFallbackMode_Name().");
+  return NSPanelConfig_NSPanelButtonFallbackMode_Name(static_cast<NSPanelConfig_NSPanelButtonFallbackMode>(value));
+}
+template <>
+inline const std::string& NSPanelConfig_NSPanelButtonFallbackMode_Name(NSPanelConfig_NSPanelButtonFallbackMode value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelConfig_NSPanelButtonFallbackMode_descriptor,
+                                                 0, 2>(
+      static_cast<int>(value));
+}
+inline bool NSPanelConfig_NSPanelButtonFallbackMode_Parse(absl::string_view name, NSPanelConfig_NSPanelButtonFallbackMode* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<NSPanelConfig_NSPanelButtonFallbackMode>(
+      NSPanelConfig_NSPanelButtonFallbackMode_descriptor(), name, value);
+}
 enum NSPanelStatusReport_state : int {
   NSPanelStatusReport_state_ONLINE = 0,
   NSPanelStatusReport_state_OFFLINE = 1,
@@ -5160,6 +5194,26 @@ class NSPanelConfig final : public ::google::protobuf::Message
   static inline bool NSPanelButtonMode_Parse(absl::string_view name, NSPanelButtonMode* value) {
     return NSPanelConfig_NSPanelButtonMode_Parse(name, value);
   }
+  using NSPanelButtonFallbackMode = NSPanelConfig_NSPanelButtonFallbackMode;
+  static constexpr NSPanelButtonFallbackMode DISABLED = NSPanelConfig_NSPanelButtonFallbackMode_DISABLED;
+  static constexpr NSPanelButtonFallbackMode TOGGLE_RELAY1 = NSPanelConfig_NSPanelButtonFallbackMode_TOGGLE_RELAY1;
+  static constexpr NSPanelButtonFallbackMode TOGLLE_RELAY2 = NSPanelConfig_NSPanelButtonFallbackMode_TOGLLE_RELAY2;
+  static inline bool NSPanelButtonFallbackMode_IsValid(int value) {
+    return NSPanelConfig_NSPanelButtonFallbackMode_IsValid(value);
+  }
+  static constexpr NSPanelButtonFallbackMode NSPanelButtonFallbackMode_MIN = NSPanelConfig_NSPanelButtonFallbackMode_NSPanelButtonFallbackMode_MIN;
+  static constexpr NSPanelButtonFallbackMode NSPanelButtonFallbackMode_MAX = NSPanelConfig_NSPanelButtonFallbackMode_NSPanelButtonFallbackMode_MAX;
+  static constexpr int NSPanelButtonFallbackMode_ARRAYSIZE = NSPanelConfig_NSPanelButtonFallbackMode_NSPanelButtonFallbackMode_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor* NSPanelButtonFallbackMode_descriptor() {
+    return NSPanelConfig_NSPanelButtonFallbackMode_descriptor();
+  }
+  template <typename T>
+  static inline const std::string& NSPanelButtonFallbackMode_Name(T value) {
+    return NSPanelConfig_NSPanelButtonFallbackMode_Name(value);
+  }
+  static inline bool NSPanelButtonFallbackMode_Parse(absl::string_view name, NSPanelButtonFallbackMode* value) {
+    return NSPanelConfig_NSPanelButtonFallbackMode_Parse(name, value);
+  }
 
   // accessors -------------------------------------------------------
   enum : int {
@@ -5189,9 +5243,13 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kRelay2DefaultModeFieldNumber = 20,
     kTemperatureCalibrationFieldNumber = 21,
     kButton1ModeFieldNumber = 22,
-    kButton2ModeFieldNumber = 25,
-    kButton1LongModeFieldNumber = 27,
-    kButton2LongModeFieldNumber = 29,
+    kButton1FallbackModeFieldNumber = 23,
+    kButton2ModeFieldNumber = 24,
+    kButton2FallbackModeFieldNumber = 25,
+    kButton1LongModeFieldNumber = 26,
+    kButton1LongFallbackModeFieldNumber = 27,
+    kButton2LongModeFieldNumber = 28,
+    kButton2LongFallbackModeFieldNumber = 29,
     kRaiseLightLevelTo100AboveFieldNumber = 32,
     kNspanelIdFieldNumber = 33,
     kOptimisticModeFieldNumber = 31,
@@ -5505,7 +5563,17 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_button1_mode(::NSPanelConfig_NSPanelButtonMode value);
 
   public:
-  // .NSPanelConfig.NSPanelButtonMode button2_mode = 25;
+  // .NSPanelConfig.NSPanelButtonFallbackMode button1_fallback_mode = 23;
+  void clear_button1_fallback_mode() ;
+  ::NSPanelConfig_NSPanelButtonFallbackMode button1_fallback_mode() const;
+  void set_button1_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value);
+
+  private:
+  ::NSPanelConfig_NSPanelButtonFallbackMode _internal_button1_fallback_mode() const;
+  void _internal_set_button1_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value);
+
+  public:
+  // .NSPanelConfig.NSPanelButtonMode button2_mode = 24;
   void clear_button2_mode() ;
   ::NSPanelConfig_NSPanelButtonMode button2_mode() const;
   void set_button2_mode(::NSPanelConfig_NSPanelButtonMode value);
@@ -5515,7 +5583,17 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_button2_mode(::NSPanelConfig_NSPanelButtonMode value);
 
   public:
-  // .NSPanelConfig.NSPanelButtonMode button1_long_mode = 27;
+  // .NSPanelConfig.NSPanelButtonFallbackMode button2_fallback_mode = 25;
+  void clear_button2_fallback_mode() ;
+  ::NSPanelConfig_NSPanelButtonFallbackMode button2_fallback_mode() const;
+  void set_button2_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value);
+
+  private:
+  ::NSPanelConfig_NSPanelButtonFallbackMode _internal_button2_fallback_mode() const;
+  void _internal_set_button2_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value);
+
+  public:
+  // .NSPanelConfig.NSPanelButtonMode button1_long_mode = 26;
   void clear_button1_long_mode() ;
   ::NSPanelConfig_NSPanelButtonMode button1_long_mode() const;
   void set_button1_long_mode(::NSPanelConfig_NSPanelButtonMode value);
@@ -5525,7 +5603,17 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_button1_long_mode(::NSPanelConfig_NSPanelButtonMode value);
 
   public:
-  // .NSPanelConfig.NSPanelButtonMode button2_long_mode = 29;
+  // .NSPanelConfig.NSPanelButtonFallbackMode button1_long_fallback_mode = 27;
+  void clear_button1_long_fallback_mode() ;
+  ::NSPanelConfig_NSPanelButtonFallbackMode button1_long_fallback_mode() const;
+  void set_button1_long_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value);
+
+  private:
+  ::NSPanelConfig_NSPanelButtonFallbackMode _internal_button1_long_fallback_mode() const;
+  void _internal_set_button1_long_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value);
+
+  public:
+  // .NSPanelConfig.NSPanelButtonMode button2_long_mode = 28;
   void clear_button2_long_mode() ;
   ::NSPanelConfig_NSPanelButtonMode button2_long_mode() const;
   void set_button2_long_mode(::NSPanelConfig_NSPanelButtonMode value);
@@ -5533,6 +5621,16 @@ class NSPanelConfig final : public ::google::protobuf::Message
   private:
   ::NSPanelConfig_NSPanelButtonMode _internal_button2_long_mode() const;
   void _internal_set_button2_long_mode(::NSPanelConfig_NSPanelButtonMode value);
+
+  public:
+  // .NSPanelConfig.NSPanelButtonFallbackMode button2_long_fallback_mode = 29;
+  void clear_button2_long_fallback_mode() ;
+  ::NSPanelConfig_NSPanelButtonFallbackMode button2_long_fallback_mode() const;
+  void set_button2_long_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value);
+
+  private:
+  ::NSPanelConfig_NSPanelButtonFallbackMode _internal_button2_long_fallback_mode() const;
+  void _internal_set_button2_long_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value);
 
   public:
   // int32 raise_light_level_to_100_above = 32;
@@ -5630,8 +5728,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 38, 1,
-      94, 7>
+      5, 42, 1,
+      102, 7>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -5680,9 +5778,13 @@ class NSPanelConfig final : public ::google::protobuf::Message
     bool relay2_default_mode_;
     ::int32_t temperature_calibration_;
     int button1_mode_;
+    int button1_fallback_mode_;
     int button2_mode_;
+    int button2_fallback_mode_;
     int button1_long_mode_;
+    int button1_long_fallback_mode_;
     int button2_long_mode_;
+    int button2_long_fallback_mode_;
     ::int32_t raise_light_level_to_100_above_;
     ::int32_t nspanel_id_;
     bool optimistic_mode_;
@@ -6370,7 +6472,29 @@ inline void NSPanelConfig::_internal_set_button1_mode(::NSPanelConfig_NSPanelBut
   _impl_.button1_mode_ = value;
 }
 
-// .NSPanelConfig.NSPanelButtonMode button2_mode = 25;
+// .NSPanelConfig.NSPanelButtonFallbackMode button1_fallback_mode = 23;
+inline void NSPanelConfig::clear_button1_fallback_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_fallback_mode_ = 0;
+}
+inline ::NSPanelConfig_NSPanelButtonFallbackMode NSPanelConfig::button1_fallback_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button1_fallback_mode)
+  return _internal_button1_fallback_mode();
+}
+inline void NSPanelConfig::set_button1_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value) {
+  _internal_set_button1_fallback_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button1_fallback_mode)
+}
+inline ::NSPanelConfig_NSPanelButtonFallbackMode NSPanelConfig::_internal_button1_fallback_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelConfig_NSPanelButtonFallbackMode>(_impl_.button1_fallback_mode_);
+}
+inline void NSPanelConfig::_internal_set_button1_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_fallback_mode_ = value;
+}
+
+// .NSPanelConfig.NSPanelButtonMode button2_mode = 24;
 inline void NSPanelConfig::clear_button2_mode() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button2_mode_ = 0;
@@ -6392,7 +6516,29 @@ inline void NSPanelConfig::_internal_set_button2_mode(::NSPanelConfig_NSPanelBut
   _impl_.button2_mode_ = value;
 }
 
-// .NSPanelConfig.NSPanelButtonMode button1_long_mode = 27;
+// .NSPanelConfig.NSPanelButtonFallbackMode button2_fallback_mode = 25;
+inline void NSPanelConfig::clear_button2_fallback_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_fallback_mode_ = 0;
+}
+inline ::NSPanelConfig_NSPanelButtonFallbackMode NSPanelConfig::button2_fallback_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button2_fallback_mode)
+  return _internal_button2_fallback_mode();
+}
+inline void NSPanelConfig::set_button2_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value) {
+  _internal_set_button2_fallback_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button2_fallback_mode)
+}
+inline ::NSPanelConfig_NSPanelButtonFallbackMode NSPanelConfig::_internal_button2_fallback_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelConfig_NSPanelButtonFallbackMode>(_impl_.button2_fallback_mode_);
+}
+inline void NSPanelConfig::_internal_set_button2_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_fallback_mode_ = value;
+}
+
+// .NSPanelConfig.NSPanelButtonMode button1_long_mode = 26;
 inline void NSPanelConfig::clear_button1_long_mode() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button1_long_mode_ = 0;
@@ -6414,7 +6560,29 @@ inline void NSPanelConfig::_internal_set_button1_long_mode(::NSPanelConfig_NSPan
   _impl_.button1_long_mode_ = value;
 }
 
-// .NSPanelConfig.NSPanelButtonMode button2_long_mode = 29;
+// .NSPanelConfig.NSPanelButtonFallbackMode button1_long_fallback_mode = 27;
+inline void NSPanelConfig::clear_button1_long_fallback_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_long_fallback_mode_ = 0;
+}
+inline ::NSPanelConfig_NSPanelButtonFallbackMode NSPanelConfig::button1_long_fallback_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button1_long_fallback_mode)
+  return _internal_button1_long_fallback_mode();
+}
+inline void NSPanelConfig::set_button1_long_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value) {
+  _internal_set_button1_long_fallback_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button1_long_fallback_mode)
+}
+inline ::NSPanelConfig_NSPanelButtonFallbackMode NSPanelConfig::_internal_button1_long_fallback_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelConfig_NSPanelButtonFallbackMode>(_impl_.button1_long_fallback_mode_);
+}
+inline void NSPanelConfig::_internal_set_button1_long_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_long_fallback_mode_ = value;
+}
+
+// .NSPanelConfig.NSPanelButtonMode button2_long_mode = 28;
 inline void NSPanelConfig::clear_button2_long_mode() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button2_long_mode_ = 0;
@@ -6434,6 +6602,28 @@ inline ::NSPanelConfig_NSPanelButtonMode NSPanelConfig::_internal_button2_long_m
 inline void NSPanelConfig::_internal_set_button2_long_mode(::NSPanelConfig_NSPanelButtonMode value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button2_long_mode_ = value;
+}
+
+// .NSPanelConfig.NSPanelButtonFallbackMode button2_long_fallback_mode = 29;
+inline void NSPanelConfig::clear_button2_long_fallback_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_long_fallback_mode_ = 0;
+}
+inline ::NSPanelConfig_NSPanelButtonFallbackMode NSPanelConfig::button2_long_fallback_mode() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button2_long_fallback_mode)
+  return _internal_button2_long_fallback_mode();
+}
+inline void NSPanelConfig::set_button2_long_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value) {
+  _internal_set_button2_long_fallback_mode(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button2_long_fallback_mode)
+}
+inline ::NSPanelConfig_NSPanelButtonFallbackMode NSPanelConfig::_internal_button2_long_fallback_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelConfig_NSPanelButtonFallbackMode>(_impl_.button2_long_fallback_mode_);
+}
+inline void NSPanelConfig::_internal_set_button2_long_fallback_mode(::NSPanelConfig_NSPanelButtonFallbackMode value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_long_fallback_mode_ = value;
 }
 
 // repeated int32 global_scene_entity_page_ids = 30;
@@ -10523,6 +10713,12 @@ struct is_proto_enum<::NSPanelConfig_NSPanelButtonMode> : std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor<::NSPanelConfig_NSPanelButtonMode>() {
   return ::NSPanelConfig_NSPanelButtonMode_descriptor();
+}
+template <>
+struct is_proto_enum<::NSPanelConfig_NSPanelButtonFallbackMode> : std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor<::NSPanelConfig_NSPanelButtonFallbackMode>() {
+  return ::NSPanelConfig_NSPanelButtonFallbackMode_descriptor();
 }
 template <>
 struct is_proto_enum<::NSPanelStatusReport_state> : std::true_type {};

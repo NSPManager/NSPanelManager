@@ -50,40 +50,49 @@ message NSPanelSettings {
         CUSTOM_MQTT = 2;
         FOLLOW_MODE = 3;
     }
-    NSPanelButtonMode button1_mode = 27;
-    NSPanelButtonMode button2_mode = 28;
+    enum NSPanelButtonFallbackMode {
+        DISABLED=0;
+        TOGGLE_RELAY1 = 1;
+        TOGLLE_RELAY2 = 2;
+    }
+    NSPanelButtonMode button1_mode = 30;
+    NSPanelButtonFallbackMode button1_fallback = 31;
+    NSPanelButtonMode button2_mode = 32;
+    NSPanelButtonFallbackMode button2_fallback = 33;
 
-    NSPanelButtonMode button1_long_mode = 29;
-    NSPanelButtonMode button2_long_mode = 30;
+    NSPanelButtonMode button1_long_mode = 34;
+    NSPanelButtonFallbackMode button1_long_fallback = 35;
+    NSPanelButtonMode button2_long_mode = 36;
+    NSPanelButtonFallbackMode button2_long_fallback = 37;
 
-    optional string button1_mqtt_topic = 31;
-    optional string button2_mqtt_topic = 32;
-    optional string button1_mqtt_payload = 33;
-    optional string button2_mqtt_payload = 34;
-    optional int32 button1_detached_light_id = 35;
-    optional int32 button2_detached_light_id = 36;
+    optional string button1_mqtt_topic = 38;
+    optional string button2_mqtt_topic = 39;
+    optional string button1_mqtt_payload = 40;
+    optional string button2_mqtt_payload = 41;
+    optional int32 button1_detached_light_id = 42;
+    optional int32 button2_detached_light_id = 43;
 
-    optional string button1_long_mqtt_topic = 37;
-    optional string button2_long_mqtt_topic = 38;
-    optional string button1_long_mqtt_payload = 39;
-    optional string button2_long_mqtt_payload = 40;
-    optional int32 button1_long_detached_light_id = 41;
-    optional int32 button2_long_detached_light_id = 42;
+    optional string button1_long_mqtt_topic = 44;
+    optional string button2_long_mqtt_topic = 45;
+    optional string button1_long_mqtt_payload = 46;
+    optional string button2_long_mqtt_payload = 47;
+    optional int32 button1_long_detached_light_id = 48;
+    optional int32 button2_long_detached_light_id = 49;
 
-    bool denied = 49;
-    bool accepted = 50;
-    repeated int32 rooms = 51;
-    repeated int32 scenes = 52;
-    string ip_address = 53;
+    bool denied = 50;
+    bool accepted = 51;
+    repeated int32 rooms = 52;
+    repeated int32 scenes = 53;
+    string ip_address = 54;
 
     enum RelayRegisterType {
         SWITCH = 0;
         LIGHT = 1;
     }
-    RelayRegisterType relay1_register_type = 54;
-    RelayRegisterType relay2_register_type = 55;
+    RelayRegisterType relay1_register_type = 55;
+    RelayRegisterType relay2_register_type = 56;
 
-    int32 default_room = 56;
+    int32 default_room = 57;
 }
 
 message MultipleNSPanelsSettings {

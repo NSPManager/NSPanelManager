@@ -601,7 +601,37 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_button_mode__descriptor =
   nspanel_config__nspanel_button_mode__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
+static const ProtobufCEnumValue nspanel_config__nspanel_button_fallback_mode__enum_values_by_number[3] =
+{
+  { "DISABLED", "NSPANEL_CONFIG__NSPANEL_BUTTON_FALLBACK_MODE__DISABLED", 0 },
+  { "TOGGLE_RELAY1", "NSPANEL_CONFIG__NSPANEL_BUTTON_FALLBACK_MODE__TOGGLE_RELAY1", 1 },
+  { "TOGLLE_RELAY2", "NSPANEL_CONFIG__NSPANEL_BUTTON_FALLBACK_MODE__TOGLLE_RELAY2", 2 },
+};
+static const ProtobufCIntRange nspanel_config__nspanel_button_fallback_mode__value_ranges[] = {
+{0, 0},{0, 3}
+};
+static const ProtobufCEnumValueIndex nspanel_config__nspanel_button_fallback_mode__enum_values_by_name[3] =
+{
+  { "DISABLED", 0 },
+  { "TOGGLE_RELAY1", 1 },
+  { "TOGLLE_RELAY2", 2 },
+};
+const ProtobufCEnumDescriptor nspanel_config__nspanel_button_fallback_mode__descriptor =
+{
+  PROTOBUF_C__ENUM_DESCRIPTOR_MAGIC,
+  "NSPanelConfig.NSPanelButtonFallbackMode",
+  "NSPanelButtonFallbackMode",
+  "NSPanelConfig__NSPanelButtonFallbackMode",
+  "",
+  3,
+  nspanel_config__nspanel_button_fallback_mode__enum_values_by_number,
+  3,
+  nspanel_config__nspanel_button_fallback_mode__enum_values_by_name,
+  1,
+  nspanel_config__nspanel_button_fallback_mode__value_ranges,
+  NULL,NULL,NULL,NULL   /* reserved[1234] */
+};
+static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[42] =
 {
   {
     "name",
@@ -868,8 +898,20 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
+    "button1_fallback_mode",
+    23,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button1_fallback_mode),
+    &nspanel_config__nspanel_button_fallback_mode__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
     "button2_mode",
-    25,
+    24,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_ENUM,
     0,   /* quantifier_offset */
@@ -880,8 +922,20 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
+    "button2_fallback_mode",
+    25,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button2_fallback_mode),
+    &nspanel_config__nspanel_button_fallback_mode__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
     "button1_long_mode",
-    27,
+    26,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_ENUM,
     0,   /* quantifier_offset */
@@ -892,13 +946,37 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
+    "button1_long_fallback_mode",
+    27,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button1_long_fallback_mode),
+    &nspanel_config__nspanel_button_fallback_mode__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
     "button2_long_mode",
-    29,
+    28,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_ENUM,
     0,   /* quantifier_offset */
     offsetof(NSPanelConfig, button2_long_mode),
     &nspanel_config__nspanel_button_mode__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "button2_long_fallback_mode",
+    29,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button2_long_fallback_mode),
+    &nspanel_config__nspanel_button_fallback_mode__descriptor,
     NULL,
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
@@ -1061,32 +1139,36 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
   },
 };
 static const unsigned nspanel_config__field_indices_by_name[] = {
-  23,   /* field[23] = button1_long_mode */
-  34,   /* field[34] = button1_lower_temperature */
+  22,   /* field[22] = button1_fallback_mode */
+  26,   /* field[26] = button1_long_fallback_mode */
+  25,   /* field[25] = button1_long_mode */
+  38,   /* field[38] = button1_lower_temperature */
   21,   /* field[21] = button1_mode */
-  35,   /* field[35] = button1_upper_temperature */
-  24,   /* field[24] = button2_long_mode */
-  36,   /* field[36] = button2_lower_temperature */
-  22,   /* field[22] = button2_mode */
-  37,   /* field[37] = button2_upper_temperature */
+  39,   /* field[39] = button1_upper_temperature */
+  24,   /* field[24] = button2_fallback_mode */
+  28,   /* field[28] = button2_long_fallback_mode */
+  27,   /* field[27] = button2_long_mode */
+  40,   /* field[40] = button2_lower_temperature */
+  23,   /* field[23] = button2_mode */
+  41,   /* field[41] = button2_upper_temperature */
   5,   /* field[5] = button_long_press_time */
   13,   /* field[13] = clock_us_style */
-  31,   /* field[31] = default_light_brightess */
+  35,   /* field[35] = default_light_brightess */
   2,   /* field[2] = default_page */
   1,   /* field[1] = default_room */
-  25,   /* field[25] = global_scene_entity_page_ids */
-  33,   /* field[33] = inside_temperature_sensor_mqtt_topic */
+  29,   /* field[29] = global_scene_entity_page_ids */
+  37,   /* field[37] = inside_temperature_sensor_mqtt_topic */
   15,   /* field[15] = is_us_panel */
-  32,   /* field[32] = locked_to_default_room */
+  36,   /* field[36] = locked_to_default_room */
   4,   /* field[4] = min_button_push_time */
   0,   /* field[0] = name */
-  28,   /* field[28] = nspanel_id */
-  26,   /* field[26] = optimistic_mode */
-  27,   /* field[27] = raise_light_level_to_100_above */
+  32,   /* field[32] = nspanel_id */
+  30,   /* field[30] = optimistic_mode */
+  31,   /* field[31] = raise_light_level_to_100_above */
   18,   /* field[18] = relay1_default_mode */
-  29,   /* field[29] = relay1_relay_group */
+  33,   /* field[33] = relay1_relay_group */
   19,   /* field[19] = relay2_default_mode */
-  30,   /* field[30] = relay2_relay_group */
+  34,   /* field[34] = relay2_relay_group */
   17,   /* field[17] = reverse_relays */
   16,   /* field[16] = room_infos */
   8,   /* field[8] = screen_dim_level */
@@ -1100,15 +1182,12 @@ static const unsigned nspanel_config__field_indices_by_name[] = {
   20,   /* field[20] = temperature_calibration */
   14,   /* field[14] = use_fahrenheit */
 };
-static const ProtobufCIntRange nspanel_config__number_ranges[6 + 1] =
+static const ProtobufCIntRange nspanel_config__number_ranges[3 + 1] =
 {
   { 1, 0 },
-  { 25, 22 },
-  { 27, 23 },
-  { 29, 24 },
-  { 35, 29 },
-  { 37, 30 },
-  { 0, 38 }
+  { 35, 33 },
+  { 37, 34 },
+  { 0, 42 }
 };
 const ProtobufCMessageDescriptor nspanel_config__descriptor =
 {
@@ -1118,10 +1197,10 @@ const ProtobufCMessageDescriptor nspanel_config__descriptor =
   "NSPanelConfig",
   "",
   sizeof(NSPanelConfig),
-  38,
+  42,
   nspanel_config__field_descriptors,
   nspanel_config__field_indices_by_name,
-  6,  nspanel_config__number_ranges,
+  3,  nspanel_config__number_ranges,
   (ProtobufCMessageInit) nspanel_config__init,
   NULL,NULL,NULL    /* reserved[123] */
 };

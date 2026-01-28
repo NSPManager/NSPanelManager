@@ -397,6 +397,10 @@ def edit_nspanel(request, panel_id: int):
         key = f"{button}_relay_upper_temperature"
         settings[key] = get_nspanel_setting_with_default(panel_id, key, "")
 
+        key = f"{button}_fallback_mode"
+        settings[key] = get_nspanel_setting_with_default(panel_id, key, "0")
+
+
     nspanel = NSPanel.objects.get(id=panel_id)
     panel_info = {}
     panel_info["data"] = nspanel
@@ -428,6 +432,8 @@ def evaluate_button_state(button, panel_id, panel: NSPanel, request):
     else:
         delete_nspanel_setting(panel_id, f"{button}_custom_mqtt_topic")
         delete_nspanel_setting(panel_id, f"{button}_custom_mqtt_payload")
+    set_nspanel_setting_value(panel_id, f"{button}_fallback_mode", request.POST[f"{button}_fallback_mode"])
+    
 
 
 def save_panel_settings(request, panel_id: int):

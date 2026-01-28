@@ -55,11 +55,22 @@ message NSPanelConfig {
         THERMOSTAT_HEAT = 3;
         THERMOSTAT_COOL = 4;
     };
-    NSPanelButtonMode button1_mode = 22;
-    NSPanelButtonMode button2_mode = 25;
 
-    NSPanelButtonMode button1_long_mode = 27;
-    NSPanelButtonMode button2_long_mode = 29;
+    enum NSPanelButtonFallbackMode {
+        DISABLED=0;
+        TOGGLE_RELAY1 = 1;
+        TOGLLE_RELAY2 = 2;
+    }
+
+    NSPanelButtonMode button1_mode = 22;
+    NSPanelButtonFallbackMode button1_fallback_mode = 23;
+    NSPanelButtonMode button2_mode = 24;
+    NSPanelButtonFallbackMode button2_fallback_mode = 25;
+
+    NSPanelButtonMode button1_long_mode = 26;
+    NSPanelButtonFallbackMode button1_long_fallback_mode = 27;
+    NSPanelButtonMode button2_long_mode = 28;
+    NSPanelButtonFallbackMode button2_long_fallback_mode = 29;
 
     repeated int32 global_scene_entity_page_ids = 30;
     bool optimistic_mode = 31;

@@ -67,6 +67,14 @@ function update_shown_elements(button) {
     $(`#${button}_relay_upper_temperature`).prop("required", true);
   }
 
+  // show/hide fallback mode
+  if ($(`#${button}_mode`).val() == 0) {
+    // Direct mode does not have fallback mode
+    $(`#${button}_fallback_mode_controls`).addClass("hidden");
+  } else {
+    $(`#${button}_fallback_mode_controls`).removeClass("hidden");
+  }
+
   // Update shown lights depending on selected room
   var selected_room_id = $(`#${button}_detached_mode_room`).val();
   $(
@@ -165,8 +173,8 @@ $(document).ready(() => {
         }
       });
     });
-    
-  for(let button of ["button1", "button2" ,"button1_long" ,"button2_long"]) {
+
+  for (let button of ["button1", "button2", "button1_long", "button2_long"]) {
     update_shown_elements(button);
     $(`#${button}_mode`).change(() => update_shown_elements(button));
     $(`#${button}_detached_mode_room`).change(() => update_shown_elements(button));
