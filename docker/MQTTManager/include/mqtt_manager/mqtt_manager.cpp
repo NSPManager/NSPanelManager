@@ -34,10 +34,11 @@ inline bool file_exists(const char *name) {
 void MQTT_Manager::init() {
   MQTT_Manager::reload_config(); // This will also start a new thread to handle MQTT messages.
   WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
+
+  WebsocketServer::attach_stomp_global_callback(MQTT_Manager::_process_stomp_message);
 }
 
 void MQTT_Manager::connect() {
-
   if (!MQTT_Manager::_process_messages_thread.joinable()) {
     SPDLOG_INFO("Starting MQTT message processing thread.");
     MQTT_Manager::_process_messages_thread = std::thread(MQTT_Manager::_process_mqtt_messages);
@@ -292,6 +293,10 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
     if (MQTT_Manager::is_connected()) {
       SPDLOG_TRACE("Publising '{}' -> '{}'", topic, payload);
       MQTT_Manager::_mqtt_client->publish(msg);
+
+      // Replicate messages into the websocket STOMP topics.
+      WebsocketServer::set_stomp_topic_retained(fmt::format("mqtt/{}", topic), retain);
+      WebsocketServer::update_stomp_topic_value(fmt::format("mqtt/{}", topic), payload);
     } else {
       MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
     }
@@ -303,6 +308,9 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
 void MQTT_Manager::publish_protobuf(const std::string &topic, google::protobuf::Message &payload, bool retain) {
   std::string payload_string;
   if (payload.SerializeToString(&payload_string)) {
+    // Replicate messages into the websocket STOMP topics.
+    WebsocketServer::set_stomp_topic_retained(fmt::format("mqtt/{}", topic), retain);
+    WebsocketServer::update_stomp_topic_value(fmt::format("mqtt/{}", topic), payload_string);
     MQTT_Manager::publish(topic, payload_string, retain);
   } else {
     SPDLOG_ERROR("Tried to send message to topic '{}' but serialization of protobuf object failed.", topic);
@@ -323,5 +331,14 @@ void MQTT_Manager::clear_retain(const std::string &topic) {
     } else {
       MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
     }
+  }
+}
+
+void MQTT_Manager::_process_stomp_message(StompFrame frame) {
+  std::string topic = frame.headers["destination"];
+  std::string payload = frame.body;
+
+  if (MQTT_Manager::_mqtt_callbacks.count(topic) > 0) {
+    MQTT_Manager::_mqtt_callbacks[topic](topic, payload);
   }
 }

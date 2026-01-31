@@ -10,6 +10,8 @@
 #include <fmt/core.h>
 #include <ixwebsocket/IXConnectionState.h>
 #include <ixwebsocket/IXWebSocket.h>
+#include <ixwebsocket/IXWebSocketCloseConstants.h>
+#include <ixwebsocket/IXWebSocketHandshake.h>
 #include <ixwebsocket/IXWebSocketHttpHeaders.h>
 #include <ixwebsocket/IXWebSocketMessageType.h>
 #include <ixwebsocket/IXWebSocketPerMessageDeflate.h>
@@ -244,6 +246,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
             }
 
             std::lock_guard<std::mutex> lock_guard_callbacks(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
+            WebsocketServer::_on_global_stomp_send_message_callbacks(*frame);
             if (WebsocketServer::_on_stomp_send_message_callbacks.count(frame->headers["destination"]) > 0) {
               SPDLOG_DEBUG("Received STOMP SEND command for existing topic, setting topic '{}' to value '{}'", frame->headers["destination"], frame->body);
               WebsocketServer::_on_stomp_send_message_callbacks[frame->headers["destination"]](frame.value());

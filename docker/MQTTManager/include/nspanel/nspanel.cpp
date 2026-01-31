@@ -1150,10 +1150,11 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
       response["config_topic"] = this->_mqtt_config_topic;
       std::string reply_topic = fmt::format("nspanel/{}/command", std::string(register_request_payload.at("friendly_name")));
       MQTT_Manager::publish(reply_topic, response.dump());
+      reply_topic = fmt::format("nspanel/{}/command", this->_mac);
+      MQTT_Manager::publish(reply_topic, response.dump());
 
       SPDLOG_TRACE("Sending websocket update for NSPanel {}::{} state change.", this->_id, this->_name);
       nlohmann::json data = nlohmann::json::parse(response_data);
-
     } else {
       SPDLOG_INFO("NSPanel {}::{} has yet to be accepted. Will not answer request.", this->_id, this->_name);
     }
