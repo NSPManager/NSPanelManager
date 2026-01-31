@@ -432,11 +432,11 @@ def save_panel_settings(request, panel_id: int):
     panel.friendly_name = request.POST["name"]
     panel.button1_mode = request.POST["button1_mode"]
     if request.POST["button1_mode"] == "1":  # Detached mode
-        panel.button1_detached_mode_light = Entity.objects.get(
+        panel.button1_detached_mode_entity = Entity.objects.get(
             id=request.POST["button1_detached_mode_light"]
         )
     else:
-        panel.button1_detached_mode_light = None
+        panel.button1_detached_mode_entity = None
 
     if request.POST["button1_mode"] == "2":  # Custom MQTT Mode
         set_nspanel_setting_value(
@@ -453,11 +453,11 @@ def save_panel_settings(request, panel_id: int):
 
     panel.button2_mode = request.POST["button2_mode"]
     if request.POST["button2_mode"] == "1":  # Detached mode
-        panel.button2_detached_mode_light = Entity.objects.get(
+        panel.button2_detached_mode_entity = Entity.objects.get(
             id=request.POST["button2_detached_mode_light"]
         )
     else:
-        panel.button2_detached_mode_light = None
+        panel.button2_detached_mode_entity = None
 
     if request.POST["button2_mode"] == "2":  # Custom MQTT Mode
         set_nspanel_setting_value(

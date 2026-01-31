@@ -368,7 +368,7 @@
                 <div class="flex flex-row-reverse">
                   <select name="button1_detached_mode_room" id="button1_detached_mode_room" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
                     {% for room in rooms %}
-                      {% if panel_info.data.button1_detached_mode_light.room == room %}
+                      {% if panel_info.data.button1_detached_mode_entity.room == room %}
                           <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
                       {% else %}
                           <option value="{{ room.id }}">{{ room.friendly_name }}</option>
@@ -389,7 +389,7 @@
                     <select name="button1_detached_mode_light" id="button1_detached_mode_light" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
                         {% for room in rooms %}
                           {% for entity in room.entity_set.all %}
-                            {% if panel_info.data.button1_detached_mode_light == entity %}
+                            {% if panel_info.data.button1_detached_mode_entity == entity %}
                             <option class="button1_detached_mode_light_option" data-room-id="{{ room.id }}" value="{{ entity.id }}" selected>{{ entity.friendly_name }}</option>
                             {% else %}
                             <option class="button1_detached_mode_light_option" data-room-id="{{ room.id }}" value="{{ entity.id }}">{{ entity.friendly_name }}</option>
@@ -508,7 +508,7 @@
                 <div class="flex flex-row-reverse">
                   <select name="button2_detached_mode_light" id="button2_detached_mode_room" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
                     {% for room in rooms %}
-                      {% if panel_info.data.button2_detached_mode_light.room == room %}
+                      {% if panel_info.data.button2_detached_mode_entity.room == room %}
                           <option value="{{ room.id }}" selected>{{ room.friendly_name }}</option>
                       {% else %}
                           <option value="{{ room.id }}">{{ room.friendly_name }}</option>
@@ -529,7 +529,7 @@
                     <select name="button2_detached_mode_light" id="button2_detached_mode_light" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/default_page">
                         {% for room in rooms %}
                           {% for entity in room.entity_set.all %}
-                            {% if panel_info.data.button2_detached_mode_light == entity %}
+                            {% if panel_info.data.button2_detached_mode_entity == entity %}
                             <option class="button2_detached_mode_light_option" data-room-id="{{ room.id }}" value="{{ entity.id }}" selected>{{ entity.friendly_name }}</option>
                             {% else %}
                             <option class="button2_detached_mode_light_option" data-room-id="{{ room.id }}" value="{{ entity.id }}">{{ entity.friendly_name }}</option>
