@@ -529,39 +529,23 @@ def save_panel_settings(request, panel_id: int):
             float(request.POST.get("temperature_calibration", 0)),
         )
 
-    set_nspanel_setting_value(
-        panel_id, "relay1_default_mode", request.POST["relay1_default_mode"]
-    )
-    set_nspanel_setting_value(
-        panel_id, "relay2_default_mode", request.POST["relay2_default_mode"]
-    )
+    set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
+    set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
     set_nspanel_setting_value(panel_id, "default_page", request.POST["default_page"])
-    set_nspanel_setting_value(
-        panel_id, "lock_to_default_room", request.POST["lock_to_default_room"]
-    )
-    set_nspanel_setting_value(
-        panel_id, "reverse_relays", request.POST["reverse_relays"]
-    )
-    set_nspanel_setting_value(
-        panel_id,
-        "button1_relay_lower_temperature",
-        request.POST["button1_relay_lower_temperature"],
-    )
-    set_nspanel_setting_value(
-        panel_id,
-        "button1_relay_upper_temperature",
-        request.POST["button1_relay_upper_temperature"],
-    )
-    set_nspanel_setting_value(
-        panel_id,
-        "button2_relay_lower_temperature",
-        request.POST["button2_relay_lower_temperature"],
-    )
-    set_nspanel_setting_value(
-        panel_id,
-        "button2_relay_upper_temperature",
-        request.POST["button2_relay_upper_temperature"],
-    )
+    set_nspanel_setting_value(panel_id, "lock_to_default_room", request.POST["lock_to_default_room"])
+    set_nspanel_setting_value(panel_id, "reverse_relays", request.POST["reverse_relays"])
+
+    if request.POST["button1_relay_lower_temperature"].strip():
+        set_nspanel_setting_value(panel_id, "button1_relay_lower_temperature", request.POST["button1_relay_lower_temperature"])
+
+    if request.POST["button1_relay_upper_temperature"].strip():
+        set_nspanel_setting_value(panel_id, "button1_relay_upper_temperature", request.POST["button1_relay_upper_temperature"])
+
+    if request.POST["button2_relay_lower_temperature"].strip():
+        set_nspanel_setting_value(panel_id, "button2_relay_lower_temperature", request.POST["button2_relay_lower_temperature"])
+
+    if request.POST["button2_relay_upper_temperature"].strip():
+        set_nspanel_setting_value(panel_id, "button2_relay_upper_temperature", request.POST["button2_relay_upper_temperature"])
 
     if request.POST["panel_type"] == "eu":
         set_nspanel_setting_value(panel_id, "is_us_panel", "False")
