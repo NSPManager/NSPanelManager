@@ -1,5 +1,6 @@
 #include "mqtt_manager.hpp"
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/signals2.hpp>
 #include <boost/stacktrace/stacktrace.hpp>
@@ -336,6 +337,7 @@ void MQTT_Manager::clear_retain(const std::string &topic) {
 
 void MQTT_Manager::_process_stomp_message(StompFrame frame) {
   std::string topic = frame.headers["destination"];
+  boost::algorithm::replace_all(topic, "mqtt/", "");
   std::string payload = frame.body;
 
   if (MQTT_Manager::_mqtt_callbacks.count(topic) > 0) {
