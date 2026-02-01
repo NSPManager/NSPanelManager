@@ -1341,9 +1341,9 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
                 (*entity)->toggle();
               }
             } else
-              SPDLOG_ERROR("Tried to toggle detached light via panel but no light was was found with configured ID.");
+              SPDLOG_ERROR("Tried to toggle detached entity via panel but no entity was found with configured ID '{}'.", this->_settings.button1_detached_mode_entity_id.value());
           } else {
-            SPDLOG_ERROR("Tried to toggle detached light via panel but no light was configured for button.");
+            SPDLOG_ERROR("Tried to toggle detached entity via panel but no entity was configured for button.");
           }
           break;
         }
@@ -1370,9 +1370,9 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
                 (*entity)->toggle();
               }
             } else
-              SPDLOG_ERROR("Tried to toggle detached light via panel but no light was was found with configured ID.");
+              SPDLOG_ERROR("Tried to toggle detached entity via panel but no entity was found with configured ID '{}'.", this->_settings.button2_detached_mode_entity_id.value());
           } else {
-            SPDLOG_ERROR("Tried to toggle detached light via panel but no light was configured for button.");
+            SPDLOG_ERROR("Tried to toggle detached entity via panel but no entity was configured for button.");
           }
           break;
         }

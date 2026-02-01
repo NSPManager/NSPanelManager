@@ -247,13 +247,13 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
 
             std::lock_guard<std::mutex> lock_guard_callbacks(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
             WebsocketServer::_on_global_stomp_send_message_callbacks(*frame);
-            if (WebsocketServer::_on_stomp_send_message_callbacks.count(frame->headers["destination"]) > 0) {
+            if (WebsocketServer::_on_stomp_send_message_callbacks.count(frame->headers["destination"]) > 0) [[likely]] {
               SPDLOG_DEBUG("Received STOMP SEND command for existing topic, setting topic '{}' to value '{}'", frame->headers["destination"], frame->body);
               WebsocketServer::_on_stomp_send_message_callbacks[frame->headers["destination"]](frame.value());
               return;
+            } else {
+              SPDLOG_WARN("Received STOMP SEND command for unknown topic. Will not publish, topic '{}', value '{}'", frame->headers["destination"], frame->body);
             }
-
-            SPDLOG_WARN("Received STOMP SEND command for unknown topic. Will not publish, topic '{}', value '{}'", frame->headers["destination"], frame->body);
           } else {
             SPDLOG_WARN("Received unknown STOMP frame type {}.", static_cast<int>(frame->type));
           }
