@@ -41,6 +41,8 @@ public:
       data = OpenhabManager::_fetch_item_state_via_rest(item);
       if (data.length() > 0) {
         SPDLOG_TRACE("Creating ItemStateFetched event.");
+        SPDLOG_DEBUG("Fetched payload from OpenHAB. Payload:");
+        SPDLOG_DEBUG(data);
         nlohmann::json update_data;
         update_data["type"] = "ItemStateFetched";
         update_data["payload"] = nlohmann::json::parse(data);
