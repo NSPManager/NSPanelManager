@@ -7,6 +7,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <cstddef>
+#include <exception>
 #include <fmt/core.h>
 #include <ixwebsocket/IXConnectionState.h>
 #include <ixwebsocket/IXWebSocket.h>
@@ -423,7 +424,7 @@ void WebsocketServer::send_stomp_frame(StompFrame &frame, ix::WebSocket &websock
   }
 
   // TODO: Make content-type adjustable
-  frame.headers["content-type"] = "text/plain;charset=utf-8";
+  frame.headers["content-type"] = "text/plain";
 
   for (auto &header : frame.headers) {
     message.append(header.first);
@@ -437,7 +438,11 @@ void WebsocketServer::send_stomp_frame(StompFrame &frame, ix::WebSocket &websock
   message.push_back('\0');
   message.push_back('\n');
 
-  websocket.send(message);
+  try {
+    websocket.send(message);
+  } catch (std::exception &ex) {
+    SPDLOG_ERROR("Failed to send message over websocket. Error: {}", ex.what());
+  }
 }
 
 void WebsocketServer::attach_message_callback(std::function<bool(std::string &message, std::string *response_buf)> callback) {

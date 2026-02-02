@@ -1,6 +1,7 @@
 #include "mqtt_manager.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/beast/core/detail/base64.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/signals2.hpp>
 #include <boost/stacktrace/stacktrace.hpp>
@@ -309,10 +310,20 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
 void MQTT_Manager::publish_protobuf(const std::string &topic, google::protobuf::Message &payload, bool retain) {
   std::string payload_string;
   if (payload.SerializeToString(&payload_string)) {
+    MQTT_Manager::publish(topic, payload_string, retain);
+
     // Replicate messages into the websocket STOMP topics.
     WebsocketServer::set_stomp_topic_retained(fmt::format("mqtt/{}", topic), retain);
-    WebsocketServer::update_stomp_topic_value(fmt::format("mqtt/{}", topic), payload_string);
-    MQTT_Manager::publish(topic, payload_string, retain);
+    // Convert payload to base64 as to be able to send it over the websocket.
+    std::size_t encoded_size = (payload_string.size() + 2) / 3 * 4;
+    std::vector<char> encoded_buffer(encoded_size);
+    // Encode the string
+    std::size_t written = boost::beast::detail::base64::encode(
+        encoded_buffer.data(),
+        payload_string.data(),
+        payload_string.size());
+    encoded_buffer.resize(written);
+    WebsocketServer::update_stomp_topic_value(fmt::format("mqtt/{}", topic), std::string(encoded_buffer.begin(), encoded_buffer.end()));
   } else {
     SPDLOG_ERROR("Tried to send message to topic '{}' but serialization of protobuf object failed.", topic);
   }
