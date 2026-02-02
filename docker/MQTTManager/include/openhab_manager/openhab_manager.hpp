@@ -37,15 +37,20 @@ public:
     OpenhabManager::_openhab_item_observers[item].connect(callback);
 
     std::string data;
+    data = OpenhabManager::_fetch_item_state_via_rest(item);
+    nlohmann::json update_data;
+    update_data["type"] = "ItemStateFetched";
     try {
-      data = OpenhabManager::_fetch_item_state_via_rest(item);
+      update_data["payload"] = nlohmann::json::parse(data);
+    } catch (std::exception &e) {
+      SPDLOG_ERROR("Failed to parse JSON payload from OpenHAB REST API. Will not propegate status. Diagnostic information: {}", boost::diagnostic_information(e, true));
+      SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+      SPDLOG_ERROR("Payload data: {}", data);
+      return;
+    }
+    try {
       if (data.length() > 0) {
         SPDLOG_TRACE("Creating ItemStateFetched event.");
-        SPDLOG_DEBUG("Fetched payload from OpenHAB. Payload:");
-        SPDLOG_DEBUG(data);
-        nlohmann::json update_data;
-        update_data["type"] = "ItemStateFetched";
-        update_data["payload"] = nlohmann::json::parse(data);
         SPDLOG_TRACE("ItemStateFetched event created. Updating observer for item {}.", item);
         OpenhabManager::_openhab_item_observers[item](update_data);
       } else {
