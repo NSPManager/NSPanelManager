@@ -115,8 +115,8 @@ void OpenhabSwitch::openhab_event_callback(nlohmann::json data) {
   } else if (std::string(data["type"]).compare("ItemStateFetched") == 0) {
     SPDLOG_TRACE("OpenHAB light {}::{} Got initial data from OpenHAB via custom ItemStateFetched event.", this->_id, this->_name);
     if (this->_openhab_on_off_item.compare(data["payload"]["name"]) == 0) {
-      if (data["payload"]["state"].is_string()) {
-        nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
+      nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
+      if (payload["state"].is_string()) {
         bool state = std::string(payload["state"]).compare("ON") == 0;
         SPDLOG_DEBUG("Switch {}::{} got new state {}, current state: {}.", this->_id, this->_name, state, this->_current_state);
         if (state != this->_current_state) {
