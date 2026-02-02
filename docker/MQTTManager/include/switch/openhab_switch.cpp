@@ -92,6 +92,9 @@ void OpenhabSwitch::openhab_event_callback(nlohmann::json data) {
       return;
     }
 
+    SPDLOG_DEBUG("Switch received callback payload:");
+    SPDLOG_DEBUG(data.dump(2));
+
     std::string topic_item = topic_parts[2];
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_on_off_item) == 0) {
