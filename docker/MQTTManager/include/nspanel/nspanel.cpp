@@ -68,15 +68,20 @@ std::shared_ptr<NSPanel> NSPanel::create_from_discovery_request(nlohmann::json r
     database_manager::NSPanel panel_data;
     panel_data.mac_address = request_data.at("mac_origin").get<std::string>();
     panel_data.friendly_name = request_data.at("friendly_name").get<std::string>();
-    std::string nspanel_model = request_data.at("model").get<std::string>();
-    if (nspanel_model.compare("sonoff") == 0) {
-      panel_data.model = "sonoff";
-    } else if (nspanel_model.compare("custom") == 0) {
-      panel_data.model = "custom";
-    } else if (nspanel_model.compare("web") == 0) {
-      panel_data.model = "web";
+    if (request_data.contains("model")) {
+      std::string nspanel_model = request_data.at("model").get<std::string>();
+      if (nspanel_model.compare("sonoff") == 0) {
+        panel_data.model = "sonoff";
+      } else if (nspanel_model.compare("custom") == 0) {
+        panel_data.model = "custom";
+      } else if (nspanel_model.compare("web") == 0) {
+        panel_data.model = "web";
+      } else {
+        SPDLOG_WARN("Failed to parse panel model for NSPanel {}. Got value '{}'. Will assume sonoff.", panel_data.friendly_name, panel_data.model);
+        panel_data.model = "sonoff";
+      }
     } else {
-      SPDLOG_WARN("Failed to prase panel model for NSPanel {}::{}. Got value '{}'. Will assume sonoff.", panel_data.model, panel_data.id, panel_data.friendly_name);
+      SPDLOG_WARN("No model field set in request request for NSPanel {}. Got value '{}'. Will assume sonoff.", panel_data.friendly_name, panel_data.model);
       panel_data.model = "sonoff";
     }
     panel_data.room_id = db_room[0].id;
@@ -223,6 +228,8 @@ void NSPanel::reload_config() {
       this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_mac);
       this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_mac);
       this->_mqtt_temperature_topic = fmt::format("nspanel/{}/temperature", this->_mac);
+      this->_mqtt_humidity_topic = fmt::format("nspanel/{}/humidity", this->_mac);
+      this->_mqtt_pressure_topic = fmt::format("nspanel/{}/pressure", this->_mac);
 
       this->_mqtt_topic_home_page_status = fmt::format("nspanel/{}/home_page", this->_mac);
       this->_mqtt_topic_home_page_all_rooms_status = fmt::format("nspanel/{}/home_page_all", this->_mac);
@@ -589,18 +596,6 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
     } else if (topic.compare(this->_mqtt_status_report_topic) == 0 || topic.compare(fmt::format("nspanel/{}/status_report", this->_name)) == 0) { // TODO: Remove and only use MAC-based topic after 2.0 is stable.
       NSPanelStatusReport report;
       if (report.ParseFromString(payload)) {
-        // Successfully received a new type of status report in protobuf format. This means that we have successfully updated to 2.0 firmware. Remove old MQTT topic retains:
-        // TODO: Remove once 2.0 is stable release
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/status", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/status_report", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/log", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/r1_state", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/r2_state", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/screen_state", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/temperature_state", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/command", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}", this->_name));
-
         SPDLOG_DEBUG("Got new status report from NSPanel {}::{}", this->_id, this->_name);
         this->_ip_address = report.ip_address();
         this->_rssi = report.rssi();
@@ -609,6 +604,14 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         this->_current_firmware_md5_checksum = report.md5_firmware();
         this->_current_littlefs_md5_checksum = report.md5_littlefs();
         this->_current_tft_md5_checksum = report.md5_tft_gui();
+
+        if (report.has_humidity()) {
+          this->_humidity = report.humidity();
+        }
+
+        if (report.has_pressure()) {
+          this->_pressure = report.pressure();
+        }
 
         switch (report.nspanel_state()) {
         case NSPanelStatusReport_state::NSPanelStatusReport_state_ONLINE:
@@ -665,6 +668,12 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
 
         // Received new temperature from status report, send out on temperature topic:
         MQTT_Manager::publish(this->_mqtt_temperature_topic, fmt::format("{:.1f}", this->_temperature));
+        if (report.has_humidity()) {
+          MQTT_Manager::publish(this->_mqtt_humidity_topic, fmt::format("{:.1f}", this->_humidity));
+        }
+        if (report.has_pressure()) {
+          MQTT_Manager::publish(this->_mqtt_pressure_topic, fmt::format("{:.1f}", this->_pressure));
+        }
         this->send_websocket_status_update();
       } else {
         SPDLOG_ERROR("Failed to parse NSPanelStatusReport from string as protobuf. Will try JSON.");
@@ -826,6 +835,8 @@ void NSPanel::send_websocket_status_update() {
       {"ip_address", this->_ip_address},
       {"rssi", this->_rssi},
       {"temperature", this->_temperature},
+      {"humidity", this->_humidity},
+      {"pressure", this->_pressure},
       {"ram_usage", this->_heap_used_pct},
       {"update_progress", this->_update_progress},
   };

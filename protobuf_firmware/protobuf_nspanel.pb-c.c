@@ -1177,7 +1177,7 @@ const ProtobufCEnumDescriptor nspanel_status_report__state__descriptor =
   nspanel_status_report__state__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_status_report__field_descriptors[11] =
+static const ProtobufCFieldDescriptor nspanel_status_report__field_descriptors[15] =
 {
   {
     "nspanel_state",
@@ -1311,15 +1311,67 @@ static const ProtobufCFieldDescriptor nspanel_status_report__field_descriptors[1
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "has_humidity",
+    12,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelStatusReport, has_humidity),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "humidity",
+    13,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_FLOAT,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelStatusReport, humidity),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "has_pressure",
+    14,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelStatusReport, has_pressure),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "pressure",
+    15,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_FLOAT,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelStatusReport, pressure),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_status_report__field_indices_by_name[] = {
+  11,   /* field[11] = has_humidity */
+  13,   /* field[13] = has_pressure */
   3,   /* field[3] = heap_used_pct */
+  12,   /* field[12] = humidity */
   6,   /* field[6] = ip_address */
   4,   /* field[4] = mac_address */
   8,   /* field[8] = md5_firmware */
   9,   /* field[9] = md5_littlefs */
   10,   /* field[10] = md5_tft_gui */
   0,   /* field[0] = nspanel_state */
+  14,   /* field[14] = pressure */
   2,   /* field[2] = rssi */
   5,   /* field[5] = temperature */
   1,   /* field[1] = update_progress */
@@ -1328,7 +1380,7 @@ static const unsigned nspanel_status_report__field_indices_by_name[] = {
 static const ProtobufCIntRange nspanel_status_report__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 11 }
+  { 0, 15 }
 };
 const ProtobufCMessageDescriptor nspanel_status_report__descriptor =
 {
@@ -1338,7 +1390,7 @@ const ProtobufCMessageDescriptor nspanel_status_report__descriptor =
   "NSPanelStatusReport",
   "",
   sizeof(NSPanelStatusReport),
-  11,
+  15,
   nspanel_status_report__field_descriptors,
   nspanel_status_report__field_indices_by_name,
   1,  nspanel_status_report__number_ranges,

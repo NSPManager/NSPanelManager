@@ -203,10 +203,14 @@ struct  NSPanelStatusReport
   char *md5_firmware;
   char *md5_littlefs;
   char *md5_tft_gui;
+  protobuf_c_boolean has_humidity;
+  float humidity;
+  protobuf_c_boolean has_pressure;
+  float pressure;
 };
 #define NSPANEL_STATUS_REPORT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_status_report__descriptor) \
-    , NSPANEL_STATUS_REPORT__STATE__ONLINE, 0, 0, 0, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, 0,NULL, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
+    , NSPANEL_STATUS_REPORT__STATE__ONLINE, 0, 0, 0, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, 0,NULL, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, 0 }
 
 
 struct  NSPanelLightStatus

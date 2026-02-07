@@ -437,6 +437,10 @@ inline constexpr NSPanelStatusReport::Impl_::Impl_(
         rssi_{0},
         heap_used_pct_{0},
         temperature_{0},
+        humidity_{0},
+        has_humidity_{false},
+        has_pressure_{false},
+        pressure_{0},
         _cached_size_{0} {}
 
 template <typename>
@@ -648,6 +652,10 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.md5_firmware_),
         PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.md5_littlefs_),
         PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.md5_tft_gui_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.has_humidity_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.humidity_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.has_pressure_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.pressure_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelLightStatus, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -861,21 +869,21 @@ static const ::_pbi::MigrationSchema
         {11, -1, -1, sizeof(::NSPanelConfig)},
         {55, -1, -1, sizeof(::NSPanelWarning)},
         {65, -1, -1, sizeof(::NSPanelStatusReport)},
-        {84, -1, -1, sizeof(::NSPanelLightStatus)},
-        {102, -1, -1, sizeof(::NSPanelRoomEntitiesPage_EntitySlot)},
-        {117, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
-        {129, -1, -1, sizeof(::NSPanelRoomStatus)},
-        {150, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
-        {163, -1, -1, sizeof(::NSPanelWeatherUpdate)},
-        {179, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
-        {194, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
-        {204, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
-        {221, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
-        {231, -1, -1, sizeof(::NSPanelMQTTManagerCommand_SaveSceneCommand)},
-        {241, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonPressed)},
-        {250, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand)},
-        {260, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatCommand)},
-        {271, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {88, -1, -1, sizeof(::NSPanelLightStatus)},
+        {106, -1, -1, sizeof(::NSPanelRoomEntitiesPage_EntitySlot)},
+        {121, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
+        {133, -1, -1, sizeof(::NSPanelRoomStatus)},
+        {154, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
+        {167, -1, -1, sizeof(::NSPanelWeatherUpdate)},
+        {183, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
+        {198, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
+        {208, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
+        {225, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
+        {235, -1, -1, sizeof(::NSPanelMQTTManagerCommand_SaveSceneCommand)},
+        {245, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonPressed)},
+        {254, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand)},
+        {264, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatCommand)},
+        {275, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelConfig_RoomInfo_default_instance_._instance,
@@ -944,14 +952,16 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "W\020\001\022\022\n\016NOTIFY_MANAGER\020\002\022\023\n\017THERMOSTAT_HE"
     "AT\020\003\022\023\n\017THERMOSTAT_COOL\020\004\"C\n\016NSPanelWarn"
     "ing\022#\n\005level\030\001 \001(\0162\024.NSPanelWarningLevel"
-    "\022\014\n\004text\030\002 \001(\t\"\212\003\n\023NSPanelStatusReport\0221"
+    "\022\014\n\004text\030\002 \001(\t\"\332\003\n\023NSPanelStatusReport\0221"
     "\n\rnspanel_state\030\001 \001(\0162\032.NSPanelStatusRep"
     "ort.state\022\027\n\017update_progress\030\002 \001(\005\022\014\n\004rs"
     "si\030\003 \001(\005\022\025\n\rheap_used_pct\030\004 \001(\005\022\023\n\013mac_a"
     "ddress\030\005 \001(\t\022\023\n\013temperature\030\006 \001(\002\022\022\n\nip_"
     "address\030\007 \001(\t\022!\n\010warnings\030\010 \003(\0132\017.NSPane"
     "lWarning\022\024\n\014md5_firmware\030\t \001(\t\022\024\n\014md5_li"
-    "ttlefs\030\n \001(\t\022\023\n\013md5_tft_gui\030\013 \001(\t\"`\n\005sta"
+    "ttlefs\030\n \001(\t\022\023\n\013md5_tft_gui\030\013 \001(\t\022\024\n\014has"
+    "_humidity\030\014 \001(\010\022\020\n\010humidity\030\r \001(\002\022\024\n\014has"
+    "_pressure\030\016 \001(\010\022\020\n\010pressure\030\017 \001(\002\"`\n\005sta"
     "te\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE\020\001\022\020\n\014UPDATING_"
     "TFT\020\002\022\025\n\021UPDATING_FIRMWARE\020\003\022\025\n\021UPDATING"
     "_LITTLEFS\020\004\"\325\001\n\022NSPanelLightStatus\022\n\n\002id"
@@ -1038,7 +1048,7 @@ static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    5320,
+    5400,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
@@ -2695,9 +2705,9 @@ NSPanelStatusReport::NSPanelStatusReport(
                offsetof(Impl_, nspanel_state_),
            reinterpret_cast<const char *>(&from._impl_) +
                offsetof(Impl_, nspanel_state_),
-           offsetof(Impl_, temperature_) -
+           offsetof(Impl_, pressure_) -
                offsetof(Impl_, nspanel_state_) +
-               sizeof(Impl_::temperature_));
+               sizeof(Impl_::pressure_));
 
   // @@protoc_insertion_point(copy_constructor:NSPanelStatusReport)
 }
@@ -2717,9 +2727,9 @@ inline void NSPanelStatusReport::SharedCtor(::_pb::Arena* arena) {
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, nspanel_state_),
            0,
-           offsetof(Impl_, temperature_) -
+           offsetof(Impl_, pressure_) -
                offsetof(Impl_, nspanel_state_) +
-               sizeof(Impl_::temperature_));
+               sizeof(Impl_::pressure_));
 }
 NSPanelStatusReport::~NSPanelStatusReport() {
   // @@protoc_insertion_point(destructor:NSPanelStatusReport)
@@ -2757,15 +2767,15 @@ NSPanelStatusReport::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<4, 11, 1, 92, 2> NSPanelStatusReport::_table_ = {
+const ::_pbi::TcParseTable<4, 15, 1, 92, 2> NSPanelStatusReport::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    11, 120,  // max_field_number, fast_idx_mask
+    15, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294965248,  // skipmap
+    4294934528,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    11,  // num_field_entries
+    15,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelStatusReport_default_instance_._instance,
@@ -2809,10 +2819,18 @@ const ::_pbi::TcParseTable<4, 11, 1, 92, 2> NSPanelStatusReport::_table_ = {
     // string md5_tft_gui = 11;
     {::_pbi::TcParser::FastUS1,
      {90, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.md5_tft_gui_)}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
+    // bool has_humidity = 12;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelStatusReport, _impl_.has_humidity_), 63>(),
+     {96, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.has_humidity_)}},
+    // float humidity = 13;
+    {::_pbi::TcParser::FastF32S1,
+     {109, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.humidity_)}},
+    // bool has_pressure = 14;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelStatusReport, _impl_.has_pressure_), 63>(),
+     {112, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.has_pressure_)}},
+    // float pressure = 15;
+    {::_pbi::TcParser::FastF32S1,
+     {125, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.pressure_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -2849,6 +2867,18 @@ const ::_pbi::TcParseTable<4, 11, 1, 92, 2> NSPanelStatusReport::_table_ = {
     // string md5_tft_gui = 11;
     {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.md5_tft_gui_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // bool has_humidity = 12;
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.has_humidity_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // float humidity = 13;
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.humidity_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kFloat)},
+    // bool has_pressure = 14;
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.has_pressure_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // float pressure = 15;
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.pressure_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kFloat)},
   }}, {{
     {::_pbi::TcParser::GetTable<::NSPanelWarning>()},
   }}, {{
@@ -2876,8 +2906,8 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
   _impl_.md5_littlefs_.ClearToEmpty();
   _impl_.md5_tft_gui_.ClearToEmpty();
   ::memset(&_impl_.nspanel_state_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.temperature_) -
-      reinterpret_cast<char*>(&_impl_.nspanel_state_)) + sizeof(_impl_.temperature_));
+      reinterpret_cast<char*>(&_impl_.pressure_) -
+      reinterpret_cast<char*>(&_impl_.nspanel_state_)) + sizeof(_impl_.pressure_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -2979,6 +3009,44 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
     target = stream->WriteStringMaybeAliased(11, _s, target);
   }
 
+  // bool has_humidity = 12;
+  if (this->_internal_has_humidity() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        12, this->_internal_has_humidity(), target);
+  }
+
+  // float humidity = 13;
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_humidity = this->_internal_humidity();
+  ::uint32_t raw_humidity;
+  memcpy(&raw_humidity, &tmp_humidity, sizeof(tmp_humidity));
+  if (raw_humidity != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(
+        13, this->_internal_humidity(), target);
+  }
+
+  // bool has_pressure = 14;
+  if (this->_internal_has_pressure() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        14, this->_internal_has_pressure(), target);
+  }
+
+  // float pressure = 15;
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_pressure = this->_internal_pressure();
+  ::uint32_t raw_pressure;
+  memcpy(&raw_pressure, &tmp_pressure, sizeof(tmp_pressure));
+  if (raw_pressure != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(
+        15, this->_internal_pressure(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -3066,6 +3134,36 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
     total_size += 5;
   }
 
+  // float humidity = 13;
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_humidity = this->_internal_humidity();
+  ::uint32_t raw_humidity;
+  memcpy(&raw_humidity, &tmp_humidity, sizeof(tmp_humidity));
+  if (raw_humidity != 0) {
+    total_size += 5;
+  }
+
+  // bool has_humidity = 12;
+  if (this->_internal_has_humidity() != 0) {
+    total_size += 2;
+  }
+
+  // bool has_pressure = 14;
+  if (this->_internal_has_pressure() != 0) {
+    total_size += 2;
+  }
+
+  // float pressure = 15;
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_pressure = this->_internal_pressure();
+  ::uint32_t raw_pressure;
+  memcpy(&raw_pressure, &tmp_pressure, sizeof(tmp_pressure));
+  if (raw_pressure != 0) {
+    total_size += 5;
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -3115,6 +3213,28 @@ void NSPanelStatusReport::MergeImpl(::google::protobuf::MessageLite& to_msg, con
   if (raw_temperature != 0) {
     _this->_impl_.temperature_ = from._impl_.temperature_;
   }
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_humidity = from._internal_humidity();
+  ::uint32_t raw_humidity;
+  memcpy(&raw_humidity, &tmp_humidity, sizeof(tmp_humidity));
+  if (raw_humidity != 0) {
+    _this->_impl_.humidity_ = from._impl_.humidity_;
+  }
+  if (from._internal_has_humidity() != 0) {
+    _this->_impl_.has_humidity_ = from._impl_.has_humidity_;
+  }
+  if (from._internal_has_pressure() != 0) {
+    _this->_impl_.has_pressure_ = from._impl_.has_pressure_;
+  }
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_pressure = from._internal_pressure();
+  ::uint32_t raw_pressure;
+  memcpy(&raw_pressure, &tmp_pressure, sizeof(tmp_pressure));
+  if (raw_pressure != 0) {
+    _this->_impl_.pressure_ = from._impl_.pressure_;
+  }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -3138,8 +3258,8 @@ void NSPanelStatusReport::InternalSwap(NSPanelStatusReport* PROTOBUF_RESTRICT ot
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.md5_littlefs_, &other->_impl_.md5_littlefs_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.md5_tft_gui_, &other->_impl_.md5_tft_gui_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.temperature_)
-      + sizeof(NSPanelStatusReport::_impl_.temperature_)
+      PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.pressure_)
+      + sizeof(NSPanelStatusReport::_impl_.pressure_)
       - PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.nspanel_state_)>(
           reinterpret_cast<char*>(&_impl_.nspanel_state_),
           reinterpret_cast<char*>(&other->_impl_.nspanel_state_));

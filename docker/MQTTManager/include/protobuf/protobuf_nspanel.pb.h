@@ -3949,6 +3949,10 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
     kRssiFieldNumber = 3,
     kHeapUsedPctFieldNumber = 4,
     kTemperatureFieldNumber = 6,
+    kHumidityFieldNumber = 13,
+    kHasHumidityFieldNumber = 12,
+    kHasPressureFieldNumber = 14,
+    kPressureFieldNumber = 15,
   };
   // repeated .NSPanelWarning warnings = 8;
   int warnings_size() const;
@@ -4097,12 +4101,52 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
   void _internal_set_temperature(float value);
 
   public:
+  // float humidity = 13;
+  void clear_humidity() ;
+  float humidity() const;
+  void set_humidity(float value);
+
+  private:
+  float _internal_humidity() const;
+  void _internal_set_humidity(float value);
+
+  public:
+  // bool has_humidity = 12;
+  void clear_has_humidity() ;
+  bool has_humidity() const;
+  void set_has_humidity(bool value);
+
+  private:
+  bool _internal_has_humidity() const;
+  void _internal_set_has_humidity(bool value);
+
+  public:
+  // bool has_pressure = 14;
+  void clear_has_pressure() ;
+  bool has_pressure() const;
+  void set_has_pressure(bool value);
+
+  private:
+  bool _internal_has_pressure() const;
+  void _internal_set_has_pressure(bool value);
+
+  public:
+  // float pressure = 15;
+  void clear_pressure() ;
+  float pressure() const;
+  void set_pressure(float value);
+
+  private:
+  float _internal_pressure() const;
+  void _internal_set_pressure(float value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelStatusReport)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 11, 1,
+      4, 15, 1,
       92, 2>
       _table_;
 
@@ -4134,6 +4178,10 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
     ::int32_t rssi_;
     ::int32_t heap_used_pct_;
     float temperature_;
+    float humidity_;
+    bool has_humidity_;
+    bool has_pressure_;
+    float pressure_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -7022,6 +7070,94 @@ inline void NSPanelStatusReport::set_allocated_md5_tft_gui(std::string* value) {
         }
   #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:NSPanelStatusReport.md5_tft_gui)
+}
+
+// bool has_humidity = 12;
+inline void NSPanelStatusReport::clear_has_humidity() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_humidity_ = false;
+}
+inline bool NSPanelStatusReport::has_humidity() const {
+  // @@protoc_insertion_point(field_get:NSPanelStatusReport.has_humidity)
+  return _internal_has_humidity();
+}
+inline void NSPanelStatusReport::set_has_humidity(bool value) {
+  _internal_set_has_humidity(value);
+  // @@protoc_insertion_point(field_set:NSPanelStatusReport.has_humidity)
+}
+inline bool NSPanelStatusReport::_internal_has_humidity() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_humidity_;
+}
+inline void NSPanelStatusReport::_internal_set_has_humidity(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_humidity_ = value;
+}
+
+// float humidity = 13;
+inline void NSPanelStatusReport::clear_humidity() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.humidity_ = 0;
+}
+inline float NSPanelStatusReport::humidity() const {
+  // @@protoc_insertion_point(field_get:NSPanelStatusReport.humidity)
+  return _internal_humidity();
+}
+inline void NSPanelStatusReport::set_humidity(float value) {
+  _internal_set_humidity(value);
+  // @@protoc_insertion_point(field_set:NSPanelStatusReport.humidity)
+}
+inline float NSPanelStatusReport::_internal_humidity() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.humidity_;
+}
+inline void NSPanelStatusReport::_internal_set_humidity(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.humidity_ = value;
+}
+
+// bool has_pressure = 14;
+inline void NSPanelStatusReport::clear_has_pressure() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_pressure_ = false;
+}
+inline bool NSPanelStatusReport::has_pressure() const {
+  // @@protoc_insertion_point(field_get:NSPanelStatusReport.has_pressure)
+  return _internal_has_pressure();
+}
+inline void NSPanelStatusReport::set_has_pressure(bool value) {
+  _internal_set_has_pressure(value);
+  // @@protoc_insertion_point(field_set:NSPanelStatusReport.has_pressure)
+}
+inline bool NSPanelStatusReport::_internal_has_pressure() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_pressure_;
+}
+inline void NSPanelStatusReport::_internal_set_has_pressure(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_pressure_ = value;
+}
+
+// float pressure = 15;
+inline void NSPanelStatusReport::clear_pressure() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pressure_ = 0;
+}
+inline float NSPanelStatusReport::pressure() const {
+  // @@protoc_insertion_point(field_get:NSPanelStatusReport.pressure)
+  return _internal_pressure();
+}
+inline void NSPanelStatusReport::set_pressure(float value) {
+  _internal_set_pressure(value);
+  // @@protoc_insertion_point(field_set:NSPanelStatusReport.pressure)
+}
+inline float NSPanelStatusReport::_internal_pressure() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pressure_;
+}
+inline void NSPanelStatusReport::_internal_set_pressure(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pressure_ = value;
 }
 
 // -------------------------------------------------------------------

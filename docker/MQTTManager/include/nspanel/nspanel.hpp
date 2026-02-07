@@ -193,6 +193,8 @@ private:
   std::string _ip_address;
   int16_t _rssi;
   float _temperature;
+  float _humidity;
+  float _pressure;
   uint8_t _heap_used_pct;
   uint8_t _update_progress;
   MQTT_MANAGER_NSPANEL_STATE _state;
@@ -238,6 +240,10 @@ private:
   std::string _mqtt_status_report_topic;
   // The topic to send out temperature in raw format instead of encoded in protobuf status report
   std::string _mqtt_temperature_topic;
+  // The topic to send out humidity in raw format instead of encoded in protobuf status report
+  std::string _mqtt_humidity_topic;
+  // The topic to send out pressure in raw format instead of encoded in protobuf status report
+  std::string _mqtt_pressure_topic;
   // The topic to send commands to panel to via MQTT
   std::string _mqtt_command_topic;
   // Home Assistant MQTT registration topics:

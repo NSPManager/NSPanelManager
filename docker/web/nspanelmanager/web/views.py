@@ -996,11 +996,27 @@ def download_tft(request, panel_id):
 
 
 def checksum_firmware(request):
-    return HttpResponse(get_file_md5sum("firmware.bin"))
+    if "model" in request.GET:
+        model = request.GET["model"]
+        if model != "sonoff" and model != "custom":
+            return HttpResponse("ERROR! Unknown model!", status=400)
+    else:
+        # As model was not specified, default to sonoff as that was the original model
+        model = "sonoff"
+
+    return HttpResponse(get_file_md5sum(f"firmware/{model}/firmware.bin"))
 
 
 def checksum_data_file(request):
-    return HttpResponse(get_file_md5sum("data_file.bin"))
+    if "model" in request.GET:
+        model = request.GET["model"]
+        if model != "sonoff" and model != "custom":
+            return HttpResponse("ERROR! Unknown model!", status=400)
+    else:
+        # As model was not specified, default to sonoff as that was the original model
+        model = "sonoff"
+
+    return HttpResponse(get_file_md5sum(f"firmware/{model}/data_file.bin"))
 
 
 def checksum_tft_file(request, panel_id):
