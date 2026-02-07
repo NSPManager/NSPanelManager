@@ -143,9 +143,8 @@ public:
         } else if ((*rit)->get_type() == type) {
           return std::static_pointer_cast<EntityClass>(*rit);
         }
-      } else {
-        ++rit;
       }
+      ++rit;
     }
     return std::unexpected(EntityError::NOT_FOUND);
   }
