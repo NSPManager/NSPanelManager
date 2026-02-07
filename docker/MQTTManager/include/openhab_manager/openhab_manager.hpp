@@ -38,6 +38,11 @@ public:
 
     std::string data;
     data = OpenhabManager::_fetch_item_state_via_rest(item);
+    if (data.empty()) {
+      SPDLOG_WARN("Failed to fetch item state for '{}'. Will not be able to update items current state.", item);
+      return;
+    }
+
     nlohmann::json update_data;
     update_data["type"] = "ItemStateFetched";
     try {

@@ -367,21 +367,23 @@ void EntityManager::load_scenes() {
     if (existing_scene) [[likely]] {
       (*existing_scene)->reload_config();
     } else {
-      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
 
       try {
         auto scene_settings = database_manager::database.get<database_manager::Scene>(scene_id);
         if (scene_settings.scene_type.compare("home_assistant") == 0) {
           std::shared_ptr<HomeAssistantScene> scene = std::shared_ptr<HomeAssistantScene>(new HomeAssistantScene(scene_settings.id));
           SPDLOG_INFO("Scene {}::{} was found in database but not in config. Creating scene.", scene->get_id(), scene->get_name());
+          std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
           EntityManager::_entities.push_back(scene);
         } else if (scene_settings.scene_type.compare("openhab") == 0) {
           std::shared_ptr<OpenhabScene> scene = std::shared_ptr<OpenhabScene>(new OpenhabScene(scene_settings.id));
           SPDLOG_INFO("Scene {}::{} was found in database but not in config. Creating scene.", scene->get_id(), scene->get_name());
+          std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
           EntityManager::_entities.push_back(scene);
         } else if (scene_settings.scene_type.compare("nspm_scene") == 0) {
           std::shared_ptr<NSPMScene> scene = std::shared_ptr<NSPMScene>(new NSPMScene(scene_settings.id));
           SPDLOG_INFO("Scene {}::{} was found in database but not in config. Creating scene.", scene->get_id(), scene->get_name());
+          std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
           EntityManager::_entities.push_back(scene);
         } else {
           SPDLOG_ERROR("Unknown scene type '{}'. Will ignore entity.", scene_settings.scene_type);

@@ -140,7 +140,7 @@ public:
       if ((*rit)->get_id() == id) {
         if (type == MQTT_MANAGER_ENTITY_TYPE::ANY) {
           return std::static_pointer_cast<EntityClass>(*rit);
-        } else if ((*rit)->get_type() == type && (*rit)->get_id() == id) {
+        } else if ((*rit)->get_type() == type) {
           return std::static_pointer_cast<EntityClass>(*rit);
         }
       } else {
