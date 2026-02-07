@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/uuid/random_generator.hpp>
@@ -253,7 +254,9 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
               WebsocketServer::_on_stomp_send_message_callbacks[frame->headers["destination"]](frame.value());
               return;
             } else {
-              SPDLOG_WARN("Received STOMP SEND command for unknown topic. Will not publish, topic '{}', value '{}'", frame->headers["destination"], frame->body);
+              if (!boost::algorithm::starts_with(frame->headers["destination"], "mqtt/")) { //  If the string starts with "mqtt/" it was ment for the global callback. Do not warn in case an attached callback does not exist.
+                SPDLOG_WARN("Received STOMP SEND command for unknown topic. Will not publish, topic '{}', value '{}'", frame->headers["destination"], frame->body);
+              }
             }
           } else {
             SPDLOG_WARN("Received unknown STOMP frame type {}.", static_cast<int>(frame->type));
