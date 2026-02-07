@@ -5,6 +5,7 @@
 #include "spdlog/sinks/ansicolor_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "websocket_server/websocket_server.hpp"
+#include "nextion_image_server/nextion_image_server.hpp"
 #include <boost/algorithm/minmax.hpp>
 #include <cassert>
 #include <chrono>
@@ -204,9 +205,13 @@ int main(int argc, char *argv[]) {
   std::thread openhab_manager_thread;
   std::thread websocket_server_thread;
   std::thread time_and_date_thread;
+  std::thread nextion_image_server_thread;
 
   SPDLOG_INFO("Starting Websocket Server on port 8002.");
   websocket_server_thread = std::thread(WebsocketServer::start);
+
+  SPDLOG_INFO("Starting Nextion Image Server on port 8003.");
+  nextion_image_server_thread = std::thread(NextionImageServer::start);
 
   SPDLOG_INFO("Config loaded. Starting components.");
 
