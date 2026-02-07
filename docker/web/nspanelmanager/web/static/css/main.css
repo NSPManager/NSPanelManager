@@ -5763,9 +5763,6 @@
   .max-w-4xl {
     max-width: var(--container-4xl);
   }
-  .max-w-6 {
-    max-width: calc(var(--spacing) * 6);
-  }
   .max-w-6\/12 {
     max-width: calc(6/12 * 100%);
   }
@@ -7671,9 +7668,6 @@
     --size: calc(var(--size-selector, 0.25rem) * 4);
     font-size: 0.625rem;
     padding-inline: calc(0.25rem * 2 - var(--border));
-  }
-  .px-0 {
-    padding-inline: calc(var(--spacing) * 0);
   }
   .px-0\.5 {
     padding-inline: calc(var(--spacing) * 0.5);
@@ -9831,21 +9825,6 @@
       }
     }
   }
-  .hover\:ring-2 {
-    &:hover {
-      @media (hover: hover) {
-        --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentColor);
-        box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-      }
-    }
-  }
-  .hover\:ring-accent\/50 {
-    &:hover {
-      @media (hover: hover) {
-        --tw-ring-color: color-mix(in oklab, var(--color-accent) 50%, transparent);
-      }
-    }
-  }
   .hover\:outline-1 {
     &:hover {
       @media (hover: hover) {
@@ -10091,22 +10070,10 @@
       width: calc(3/4 * 100%);
     }
   }
-  .sm\:border-t {
-    @media (width >= 40rem) {
-      border-top-style: var(--tw-border-style);
-      border-top-width: 1px;
-    }
-  }
   .sm\:border-t-0 {
     @media (width >= 40rem) {
       border-top-style: var(--tw-border-style);
       border-top-width: 0px;
-    }
-  }
-  .sm\:border-t-1 {
-    @media (width >= 40rem) {
-      border-top-style: var(--tw-border-style);
-      border-top-width: 1px;
     }
   }
   .sm\:border-r {
@@ -10332,18 +10299,6 @@
     @media (width >= 48rem) {
       border-style: var(--tw-border-style);
       border-width: 0px;
-    }
-  }
-  .md\:border-t-0 {
-    @media (width >= 48rem) {
-      border-top-style: var(--tw-border-style);
-      border-top-width: 0px;
-    }
-  }
-  .md\:border-t-1 {
-    @media (width >= 48rem) {
-      border-top-style: var(--tw-border-style);
-      border-top-width: 1px;
     }
   }
   .md\:p-0 {
