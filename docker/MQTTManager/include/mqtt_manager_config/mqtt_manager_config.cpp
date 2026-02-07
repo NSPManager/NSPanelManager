@@ -166,23 +166,45 @@ void MqttManagerConfig::update_firmware_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
   SPDLOG_INFO("Updating/calculating MD5 checksums for all firmware files.");
 
-  auto firmware_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware.bin");
+  // Update firmware checksum
+  auto firmware_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware/sonoff/firmware.bin");
   if (firmware_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_firmware = firmware_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for firmware was not able to be calculated.");
+    MqttManagerConfig::_md5_checksum_firmware_sonoff = firmware_checksum.value();
+    WebsocketServer::remove_warning("MD5 checksum for sonoff firmware was not able to be calculated.");
     SPDLOG_INFO("Firmware checksum: {}", firmware_checksum.value());
   } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for firmware was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for firmware!");
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for sonoff firmware was not able to be calculated.");
+    SPDLOG_ERROR("Failed to calculate checksum for sonoff firmware!");
   }
 
-  auto littlefs_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/data_file.bin");
+  firmware_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware/custom/firmware.bin");
+  if (firmware_checksum.has_value()) {
+    MqttManagerConfig::_md5_checksum_firmware_custom = firmware_checksum.value();
+    WebsocketServer::remove_warning("MD5 checksum for custom firmware was not able to be calculated.");
+    SPDLOG_INFO("Firmware checksum: {}", firmware_checksum.value());
+  } else {
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for custom firmware was not able to be calculated.");
+    SPDLOG_ERROR("Failed to calculate checksum for custom firmware!");
+  }
+
+  // Update LittleFS checksum
+  auto littlefs_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware/sonoff/data_file.bin");
   if (littlefs_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_littlefs = littlefs_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for littlefs/data file was not able to be calculated.");
+    MqttManagerConfig::_md5_checksum_littlefs_sonoff = littlefs_checksum.value();
+    WebsocketServer::remove_warning("MD5 checksum for sonoff littlefs/data file was not able to be calculated.");
     SPDLOG_INFO("LittleFS checksum: {}", littlefs_checksum.value());
   } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for littlefs/data file was not able to be calculated.");
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for sonoff littlefs/data file was not able to be calculated.");
+    SPDLOG_ERROR("Failed to calculate checksum for LittleFS!");
+  }
+
+  littlefs_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware/custom/data_file.bin");
+  if (littlefs_checksum.has_value()) {
+    MqttManagerConfig::_md5_checksum_littlefs_custom = littlefs_checksum.value();
+    WebsocketServer::remove_warning("MD5 checksum for custom littlefs/data file was not able to be calculated.");
+    SPDLOG_INFO("LittleFS checksum: {}", littlefs_checksum.value());
+  } else {
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for custom littlefs/data file was not able to be calculated.");
     SPDLOG_ERROR("Failed to calculate checksum for LittleFS!");
   }
 }
@@ -362,20 +384,36 @@ std::optional<std::string> MqttManagerConfig::_get_file_md5_checksum(std::string
   return boost::algorithm::to_lower_copy(ss.str()); // Convert to lowercase as the md5 checksum calculated in Django is calculated with lower case latters.
 }
 
-std::expected<std::string, bool> MqttManagerConfig::get_firmware_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_firmware_sonoff_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_firmware.empty()) {
+  if (MqttManagerConfig::_md5_checksum_firmware_sonoff.empty()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_firmware;
+  return MqttManagerConfig::_md5_checksum_firmware_sonoff;
 }
 
-std::expected<std::string, bool> MqttManagerConfig::get_littlefs_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_firmware_custom_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_littlefs.empty()) {
+  if (MqttManagerConfig::_md5_checksum_firmware_custom.empty()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_littlefs;
+  return MqttManagerConfig::_md5_checksum_firmware_custom;
+}
+
+std::expected<std::string, bool> MqttManagerConfig::get_littlefs_sonoff_checksum() {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_littlefs_sonoff.empty()) {
+    return std::unexpected(false);
+  }
+  return MqttManagerConfig::_md5_checksum_littlefs_sonoff;
+}
+
+std::expected<std::string, bool> MqttManagerConfig::get_littlefs_custom_checksum() {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_littlefs_custom.empty()) {
+    return std::unexpected(false);
+  }
+  return MqttManagerConfig::_md5_checksum_littlefs_custom;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_eu_tft1_checksum() {

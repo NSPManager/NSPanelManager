@@ -28,6 +28,7 @@ struct NSPanel {
   int id = 0;
   std::string mac_address;
   std::string friendly_name;
+  std::string model;
   int room_id = 0;
   std::string version;
   std::optional<uint64_t> button1_detached_mode_entity_id = 0;
@@ -126,6 +127,7 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("id", &NSPanel::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("friendly_name", &NSPanel::friendly_name),
                                                                               sqlite_orm::make_column("mac_address", &NSPanel::mac_address),
+                                                                              sqlite_orm::make_column("model", &NSPanel::model),
                                                                               sqlite_orm::make_column("room_id", &NSPanel::room_id),
                                                                               sqlite_orm::make_column("version", &NSPanel::version),
                                                                               sqlite_orm::make_column("button1_detached_mode_entity_id", &NSPanel::button1_detached_mode_entity_id),

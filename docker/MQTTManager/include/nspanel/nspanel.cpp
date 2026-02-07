@@ -68,6 +68,17 @@ std::shared_ptr<NSPanel> NSPanel::create_from_discovery_request(nlohmann::json r
     database_manager::NSPanel panel_data;
     panel_data.mac_address = request_data.at("mac_origin").get<std::string>();
     panel_data.friendly_name = request_data.at("friendly_name").get<std::string>();
+    std::string nspanel_model = request_data.at("model").get<std::string>();
+    if (nspanel_model.compare("sonoff") == 0) {
+      panel_data.model = "sonoff";
+    } else if (nspanel_model.compare("custom") == 0) {
+      panel_data.model = "custom";
+    } else if (nspanel_model.compare("web") == 0) {
+      panel_data.model = "web";
+    } else {
+      SPDLOG_WARN("Failed to prase panel model for NSPanel {}::{}. Got value '{}'. Will assume sonoff.", panel_data.model, panel_data.id, panel_data.friendly_name);
+      panel_data.model = "sonoff";
+    }
     panel_data.room_id = db_room[0].id;
     panel_data.version = request_data.at("version").get<std::string>();
     panel_data.button1_detached_mode_entity_id = std::nullopt;
@@ -109,6 +120,17 @@ void NSPanel::reload_config() {
     this->_settings = panel_settings;
     this->_has_registered_to_manager = true; // We managed to get the object in above statement and did not throw, ie. has been registered in manager and has an ID in DB.
     this->_mac = panel_settings.mac_address;
+    if (panel_settings.model.compare("sonoff") == 0) {
+      this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
+    } else if (panel_settings.model.compare("custom") == 0) {
+      this->_model = MQTT_MANAGER_NSPANEL_MODEL::CUSTOM;
+    } else if (panel_settings.model.compare("web") == 0) {
+      this->_model = MQTT_MANAGER_NSPANEL_MODEL::WEB;
+    } else {
+      SPDLOG_ERROR("Failed to prase panel model for NSPanel {}::{}. Got value '{}'. Will assume sonoff.", panel_settings.model, panel_settings.id, panel_settings.friendly_name);
+      this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
+    }
+
     this->_is_us_panel = this->_get_nspanel_setting_with_default("is_us_panel", "False").compare("True") == 0;
     std::string us_panel_orientation = this->_get_nspanel_setting_with_default("us_panel_orientation", "vertical");
     if (us_panel_orientation.compare("vertical") == 0) {
@@ -868,23 +890,49 @@ void NSPanel::send_websocket_status_update() {
 }
 
 bool NSPanel::has_firmware_update() {
-  auto file_checksum = MqttManagerConfig::get_firmware_checksum();
-  if (file_checksum) {
-    return this->_current_firmware_md5_checksum.compare(*file_checksum) != 0;
-  } else {
-    SPDLOG_ERROR("Failed to get checksum for firmware file!");
-    return false;
+  std::string file_checksum = "";
+  if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::SONOFF) {
+    auto result = MqttManagerConfig::get_firmware_sonoff_checksum();
+    if (result) {
+      file_checksum = *result;
+    } else {
+      SPDLOG_ERROR("Failed to get checksum for sonoff firmware!");
+      return false;
+    }
+  } else if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::CUSTOM) {
+    auto result = MqttManagerConfig::get_firmware_custom_checksum();
+    if (result) {
+      file_checksum = *result;
+    } else {
+      SPDLOG_ERROR("Failed to get checksum for custom firmware!");
+      return false;
+    }
   }
+
+  return this->_current_firmware_md5_checksum.compare(file_checksum) != 0;
 }
 
 bool NSPanel::has_littlefs_update() {
-  auto file_checksum = MqttManagerConfig::get_littlefs_checksum();
-  if (file_checksum) {
-    return this->_current_littlefs_md5_checksum.compare(*file_checksum) != 0;
-  } else {
-    SPDLOG_ERROR("Failed to get checksum for littlefs file!");
-    return false;
+  std::string file_checksum = "";
+  if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::SONOFF) {
+    auto result = MqttManagerConfig::get_littlefs_sonoff_checksum();
+    if (result) {
+      file_checksum = *result;
+    } else {
+      SPDLOG_ERROR("Failed to get checksum for sonoff LittleFS!");
+      return false;
+    }
+  } else if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::CUSTOM) {
+    auto result = MqttManagerConfig::get_littlefs_custom_checksum();
+    if (result) {
+      file_checksum = *result;
+    } else {
+      SPDLOG_ERROR("Failed to get checksum for custom LittleFS!");
+      return false;
+    }
   }
+
+  return this->_current_littlefs_md5_checksum.compare(file_checksum) != 0;
 }
 
 bool NSPanel::has_tft_update() {

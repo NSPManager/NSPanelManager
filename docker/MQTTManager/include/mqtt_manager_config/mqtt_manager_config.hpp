@@ -114,8 +114,10 @@ public:
   static void update_firmware_checksum();
   static void update_tft_checksums();
 
-  static std::expected<std::string, bool> get_firmware_checksum();
-  static std::expected<std::string, bool> get_littlefs_checksum();
+  static std::expected<std::string, bool> get_firmware_sonoff_checksum();
+  static std::expected<std::string, bool> get_firmware_custom_checksum();
+  static std::expected<std::string, bool> get_littlefs_sonoff_checksum();
+  static std::expected<std::string, bool> get_littlefs_custom_checksum();
   static std::expected<std::string, bool> get_eu_tft1_checksum();
   static std::expected<std::string, bool> get_eu_tft2_checksum();
   static std::expected<std::string, bool> get_eu_tft3_checksum();
@@ -159,8 +161,10 @@ private:
 
   static std::optional<std::string> _get_file_md5_checksum(std::string file_path);
   static inline std::mutex _md5_checksum_files_mutex;
-  static inline std::string _md5_checksum_firmware;
-  static inline std::string _md5_checksum_littlefs;
+  static inline std::string _md5_checksum_firmware_sonoff;
+  static inline std::string _md5_checksum_firmware_custom;
+  static inline std::string _md5_checksum_littlefs_sonoff;
+  static inline std::string _md5_checksum_littlefs_custom;
   static inline std::string _md5_checksum_eu_tft1;
   static inline std::string _md5_checksum_eu_tft2;
   static inline std::string _md5_checksum_eu_tft3;

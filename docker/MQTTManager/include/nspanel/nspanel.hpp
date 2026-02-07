@@ -1,10 +1,7 @@
 #ifndef MQTT_MANAGER_NSPANEL
 #define MQTT_MANAGER_NSPANEL
-#include "entity/entity.hpp"
-#include "protobuf_mqttmanager.pb.h"
 #include "protobuf_nspanel.pb.h"
 #include "websocket_server/websocket_server.hpp"
-#include <atomic>
 #include <command_manager/command_manager.hpp>
 #include <cstdint>
 #include <database_manager/database_manager.hpp>
@@ -13,7 +10,6 @@
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <string>
-#include <unordered_map>
 
 class Room; // Forward declare "Room" as to avoid dependancy loops in CMake
 
@@ -27,6 +23,12 @@ enum MQTT_MANAGER_NSPANEL_STATE {
   UPDATING_TFT,
   AWAITING_ACCEPT,
   DENIED
+};
+
+enum MQTT_MANAGER_NSPANEL_MODEL {
+  SONOFF,
+  CUSTOM,
+  WEB,
 };
 
 struct NSPanelWarningWebsocketRepresentation {
@@ -177,8 +179,9 @@ private:
   uint32_t _id;
   database_manager::NSPanel _settings; // Settings loaded from database
   std::mutex _settings_mutex;          // Mutex to only allow access to _settings for one thread at the time
-  std::string _mac;
-  std::string _name;
+  std::string _mac;                    // MAC address of the NSPanel.
+  MQTT_MANAGER_NSPANEL_MODEL _model;   // The model of the NSPanel.
+  std::string _name;                   // Friendly name of the NSPanel.
   bool _is_us_panel;
   enum US_PANEL_ORIENTATION {
     LANDSCAPE_LEFT,

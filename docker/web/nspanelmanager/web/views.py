@@ -9,6 +9,7 @@ from django.forms.models import model_to_dict
 from django.shortcuts import Http404, HttpResponse, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from requests import delete
+from requests.sessions import Request
 
 from web.openhab_api import get_all_openhab_items
 from web.settings_helper import (
@@ -529,23 +530,47 @@ def save_panel_settings(request, panel_id: int):
             float(request.POST.get("temperature_calibration", 0)),
         )
 
-    set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
-    set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
+    set_nspanel_setting_value(
+        panel_id, "relay1_default_mode", request.POST["relay1_default_mode"]
+    )
+    set_nspanel_setting_value(
+        panel_id, "relay2_default_mode", request.POST["relay2_default_mode"]
+    )
     set_nspanel_setting_value(panel_id, "default_page", request.POST["default_page"])
-    set_nspanel_setting_value(panel_id, "lock_to_default_room", request.POST["lock_to_default_room"])
-    set_nspanel_setting_value(panel_id, "reverse_relays", request.POST["reverse_relays"])
+    set_nspanel_setting_value(
+        panel_id, "lock_to_default_room", request.POST["lock_to_default_room"]
+    )
+    set_nspanel_setting_value(
+        panel_id, "reverse_relays", request.POST["reverse_relays"]
+    )
 
     if request.POST["button1_relay_lower_temperature"].strip():
-        set_nspanel_setting_value(panel_id, "button1_relay_lower_temperature", request.POST["button1_relay_lower_temperature"])
+        set_nspanel_setting_value(
+            panel_id,
+            "button1_relay_lower_temperature",
+            request.POST["button1_relay_lower_temperature"],
+        )
 
     if request.POST["button1_relay_upper_temperature"].strip():
-        set_nspanel_setting_value(panel_id, "button1_relay_upper_temperature", request.POST["button1_relay_upper_temperature"])
+        set_nspanel_setting_value(
+            panel_id,
+            "button1_relay_upper_temperature",
+            request.POST["button1_relay_upper_temperature"],
+        )
 
     if request.POST["button2_relay_lower_temperature"].strip():
-        set_nspanel_setting_value(panel_id, "button2_relay_lower_temperature", request.POST["button2_relay_lower_temperature"])
+        set_nspanel_setting_value(
+            panel_id,
+            "button2_relay_lower_temperature",
+            request.POST["button2_relay_lower_temperature"],
+        )
 
     if request.POST["button2_relay_upper_temperature"].strip():
-        set_nspanel_setting_value(panel_id, "button2_relay_upper_temperature", request.POST["button2_relay_upper_temperature"])
+        set_nspanel_setting_value(
+            panel_id,
+            "button2_relay_upper_temperature",
+            request.POST["button2_relay_upper_temperature"],
+        )
 
     if request.POST["panel_type"] == "eu":
         set_nspanel_setting_value(panel_id, "is_us_panel", "False")
@@ -761,10 +786,16 @@ def save_settings(request):
 @csrf_exempt
 def save_new_firmware(request):
     if request.method == "POST":
-        uploaded_file = request.FILES["firmware"]
+        if "model" not in request.POST:
+            print("Missing 'model' parameter")
+            return redirect("/")
+
         fs = FileSystemStorage()
-        fs.delete("firmware.bin")
-        fs.save("firmware.bin", uploaded_file)
+        # Delete old firmware file:
+        fs.delete(f"firmware/{request.POST['model']}/firmware.bin")
+
+        uploaded_file = request.FILES["firmware"]
+        fs.save(f"firmware/{request.POST['model']}/firmware.bin", uploaded_file)
         send_mqttmanager_reload_command()
     return redirect("/")
 
@@ -773,10 +804,16 @@ def save_new_firmware(request):
 @csrf_exempt
 def save_new_data_file(request):
     if request.method == "POST":
-        uploaded_file = request.FILES["data_file"]
+        if "model" not in request.POST:
+            print("Missing 'model' parameter")
+            return redirect("/")
+
         fs = FileSystemStorage()
-        fs.delete("data_file.bin")
-        fs.save("data_file.bin", uploaded_file)
+        # Delete old firmware file:
+        fs.delete(f"firmware/{request.POST['model']}/data_file.bin")
+
+        uploaded_file = request.FILES["data_file"]
+        fs.save(f"firmware/{request.POST['model']}/data_file.bin", uploaded_file)
         send_mqttmanager_reload_command()
     return redirect("/")
 
@@ -784,24 +821,21 @@ def save_new_data_file(request):
 @csrf_exempt
 def save_new_merged_flash(request):
     if request.method == "POST":
-        uploaded_file = request.FILES["bin"]
+        if "model" not in request.POST:
+            print("Missing 'model' parameter")
+            return redirect("/")
+
         fs = FileSystemStorage()
-        fs.delete("merged_flash.bin")
-        fs.save("merged_flash.bin", uploaded_file)
+        # Delete old firmware file:
+        fs.delete(f"firmware/{request.POST['model']}/merged_flash.bin")
+
+        uploaded_file = request.FILES["bin"]
+        fs.save(f"firmware/{request.POST['model']}/merged_flash.bin", uploaded_file)
         # send_mqttmanager_reload_command() # Manager does not keep track of checksum for merged_flash.bin. Do not send reload command.
     return redirect("/")
 
 
 # TODO: Make exempt only when Debug = true
-
-
-def get_client_ip(request):
-    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(",")[-1]
-    else:
-        ip = request.META.get("REMOTE_ADDR")
-    return ip
 
 
 @csrf_exempt
@@ -857,9 +891,17 @@ def save_new_tft_file(request):
 
 
 def download_firmware(request):
+    if "model" in request.GET:
+        model = request.GET["model"]
+        if model != "sonoff" and model != "custom":
+            return HttpResponse("ERROR! Unknown model!", status=400)
+    else:
+        # As model was not specified, default to sonoff as that was the original model
+        model = "sonoff"
+
     fs = FileSystemStorage()
     if "Range" in request.headers and request.headers["Range"].startswith("bytes="):
-        data = fs.open("firmware.bin").read()
+        data = fs.open(f"firmware/{model}/firmware.bin").read()
         parts = request.headers["Range"][6:].split("-")
         print(f"Received request for partial firmware download. Parts: {parts}")
 
@@ -877,11 +919,20 @@ def download_firmware(request):
 
     else:
         return HttpResponse(
-            fs.open("firmware.bin").read(), content_type="application/octet-stream"
+            fs.open(f"firmware/{model}/firmware.bin").read(),
+            content_type="application/octet-stream",
         )
 
 
 def download_data_file(request):
+    if "model" in request.GET:
+        model = request.GET["model"]
+        if model != "sonoff" and model != "custom":
+            return HttpResponse("ERROR! Unknown model!", status=400)
+    else:
+        # As model was not specified, default to sonoff as that was the original model
+        model = "sonoff"
+
     fs = FileSystemStorage()
     if "Range" in request.headers and request.headers["Range"].startswith("bytes="):
         parts = request.headers["Range"][6:].split("-")
@@ -890,13 +941,14 @@ def download_data_file(request):
         print(
             f"Received request for partial LittleFS download. Start: {range_start}, end: {range_end}"
         )
-        data = fs.open("data_file.bin").read()
+        data = fs.open(f"firmware/{model}/data_file.bin").read()
         return HttpResponse(
             data[range_start:range_end], content_type="application/octet-stream"
         )
     else:
         return HttpResponse(
-            fs.open("data_file.bin").read(), content_type="application/octet-stream"
+            fs.open(f"firmware/{model}/data_file.bin").read(),
+            content_type="application/octet-stream",
         )
 
 

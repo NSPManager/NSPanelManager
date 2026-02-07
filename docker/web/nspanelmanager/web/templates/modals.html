@@ -12,6 +12,24 @@
         <h3 class="text-lg font-semibold mb-2">Upload firmware</h3>
         {% component "alert" level="warning" text="This functionality is only ment to be used to upload new files from developers or if you really know what you are doing. Uploading incorrect or corrupt files here can cause your NSPanels to not function properly and require a reflash." %}{% endcomponent %}
 
+        <!-- Firmware file type -->
+        <div class="mt-4">
+          <label for="firmware_type" class="block mb-2 text-sm font-medium">Board model</label>
+          <div class="flex flex-row-reverse">
+            <select name="firmware_type" id="firmware_type" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id">
+              <option value="sonoff">Sonoff original NSPanel</option>
+              <option value="custom">Custom board firmware</option>
+            </select>
+            <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/room_id:border-accent">
+              <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>Board model</title>
+                <path
+                  d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+              </svg>
+            </span>
+          </div>
+        </div>
+
         <div id="firmware_dragdrop_target" class="py-4">
           <div class="flex items-center justify-center w-full">
             <label for="firmware" class="flex flex-col items-center justify-center w-full h-64 border-2 border-neutral hover:bg-base-300 border-dashed rounded-box cursor-pointer">
@@ -48,6 +66,22 @@
           <h3 class="text-lg font-semibold mb-2">Upload data file</h3>
           {% component "alert" level="warning" text="This functionality is only ment to be used to upload new files from developers or if you really know what you are doing. Uploading incorrect or corrupt files here can cause your NSPanels to not function properly and require a reflash." %}{% endcomponent %}
 
+          <div class="mt-4">
+            <label for="littlefs_type" class="block mb-2 text-sm font-medium">Board model</label>
+            <div class="flex flex-row-reverse">
+              <select name="littlefs_type" id="littlefs_type" class="rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/room_id">
+                <option value="sonoff">Sonoff original NSPanel</option>
+                <option value="custom">Custom board firmware</option>
+              </select>
+              <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/room_id:border-accent">
+                <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <title>Board model</title>
+                  <path
+                    d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+                </svg>
+              </span>
+            </div>
+          </div>
 
           <div id="data_file_dragdrop_target" class="py-4">
             <div class="flex items-center justify-center w-full">

@@ -49,9 +49,15 @@ class RoomEntitiesPage(models.Model):
 
 
 class NSPanel(models.Model):
+    class NSPanelModel(models.TextChoices):
+        SONOFF = "sonoff"
+        CUSTOM = "custom"
+        WEB = "web"
+
     mac_address = models.CharField(max_length=17)
     friendly_name = models.CharField(max_length=100)
     version = models.CharField(max_length=15, default="")
+    model = models.CharField(max_length=32, choices=NSPanelModel.choices)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     button1_mode = models.IntegerField(default=0)
     button1_detached_mode_entity = models.ForeignKey(
