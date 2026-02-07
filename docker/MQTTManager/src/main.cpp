@@ -1,11 +1,11 @@
 #include "command_manager/command_manager.hpp"
 #include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
+#include "nextion_image_server/nextion_image_server.hpp"
 #include "openhab_manager/openhab_manager.hpp"
 #include "spdlog/sinks/ansicolor_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "websocket_server/websocket_server.hpp"
-#include "nextion_image_server/nextion_image_server.hpp"
 #include <boost/algorithm/minmax.hpp>
 #include <cassert>
 #include <chrono>
@@ -118,7 +118,6 @@ void publish_time_and_date() {
 }
 
 int main(int argc, char *argv[]) {
-
 // If we are in test mode, don't start the MQTTManager. Simply run all test then exit.
 #if defined(TEST_MODE) && TEST_MODE == 1
   database_manager::init();

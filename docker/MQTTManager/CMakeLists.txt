@@ -32,6 +32,12 @@ find_package(SqliteOrm REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Boost REQUIRED COMPONENTS signals2 stacktrace_backtrace)
 
+# Load Magick++
+add_definitions( -DMAGICKCORE_QUANTUM_DEPTH=16 )
+add_definitions( -DMAGICKCORE_HDRI_ENABLE=0 )
+find_package(ImageMagick COMPONENTS Magick++)
+include_directories(${ImageMagick_INCLUDE_DIRS})
+
 # Load CMake google test module
 include(GoogleTest)
 
@@ -65,7 +71,7 @@ target_link_libraries(MQTTManager_WebsocketServer ixwebsocket::ixwebsocket spdlo
 add_library(MQTTManager_NextionImageServer STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/nextion_image_server/nextion_image_server.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/nextion_image_server/nextion_image_server.hpp)
 set_target_properties(MQTTManager_NextionImageServer PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/nextion_image_server/nextion_image_server.hpp)
 target_include_directories(MQTTManager_NextionImageServer PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_NextionImageServer ixwebsocket::ixwebsocket spdlog::spdlog nlohmann_json::nlohmann_json Boost::boost gtest::gtest)
+target_link_libraries(MQTTManager_NextionImageServer ${ImageMagick_LIBRARIES}  ixwebsocket::ixwebsocket spdlog::spdlog nlohmann_json::nlohmann_json Boost::boost gtest::gtest)
 
 add_library(MQTT_Manager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.hpp)
 set_target_properties(MQTT_Manager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.hpp)
