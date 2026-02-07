@@ -891,26 +891,31 @@
       <div>
         <span class="font-medium text-lg">Status</span>
         <div class="block mt-2 rounded-lg bg-base-100 shadow-lg">
-          <div class="p-3 border-solid border-b-2 border-base-300">
+          <div class="p-3 {% if panel_info.data.model != 'web' %}border-solid border-b-2 border-base-300{% endif %}">
             {% component "nspanel_status_text" id=panel_info.data.id  %}{% endcomponent %}
           </div>
           {% component "nspanel_update_progress" id=panel_info.data.id %}{% endcomponent %}
-          <div class="p-3 border-solid border-b-2 border-base-300">
-            {% component "nspanel_status_wifi_signal_strength" id=panel_info.data.id %}{% endcomponent %}
-          </div>
-          <div class="p-3 border-solid border-b-2 border-base-300">
-            {% component "nspanel_status_ram_usage" id=panel_info.data.id %}{% endcomponent %}
-          </div>
-          <div class="p-3 {% if panel_info.data.model == 'custom' %}border-solid border-b-2 border-base-300{% endif %}">
-            {% component "nspanel_status_temperature" id=panel_info.data.id %}{% endcomponent %}
-          </div>
-          {% if panel_info.data.model == "custom" %}
+          {% if panel_info.data.model != 'web' %}
             <div class="p-3 border-solid border-b-2 border-base-300">
-              {% component "nspanel_status_humidity" id=panel_info.data.id %}{% endcomponent %}
+                {% component "nspanel_status_wifi_signal_strength" id=panel_info.data.id %}{% endcomponent %}
             </div>
-            <div class="p-3">
-              {% component "nspanel_status_pressure" id=panel_info.data.id %}{% endcomponent %}
+            <div class="p-3 border-solid border-b-2 border-base-300">
+                {% component "nspanel_status_ram_usage" id=panel_info.data.id %}{% endcomponent %}
             </div>
+            <div class="p-3 {% if panel_info.data.model == 'custom' %}border-solid border-b-2 border-base-300{% endif %}">
+                {% component "nspanel_status_temperature" id=panel_info.data.id %}{% endcomponent %}
+            </div>
+            {% if panel_info.data.model == "custom" %}
+                <div class="p-3 border-solid border-b-2 border-base-300">
+                    {% component "nspanel_status_humidity" id=panel_info.data.id %}{% endcomponent %}
+                </div>
+                <div class="p-3 border-solid border-b-2 border-base-300">
+                    {% component "nspanel_status_pressure" id=panel_info.data.id %}{% endcomponent %}
+                </div>
+                <div class="p-3">
+                    {% component "nspanel_status_light" id=panel_info.data.id %}{% endcomponent %}
+                </div>
+            {% endif %}
           {% endif %}
         </div>
       </div>
