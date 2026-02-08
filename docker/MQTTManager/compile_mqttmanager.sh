@@ -141,7 +141,9 @@ cd build
 source $BUILD_TYPE/generators/conanbuild.sh
 cmake .. -DCMAKE_TOOLCHAIN_FILE=$BUILD_TYPE/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
 cmake --build . --config $BUILD_TYPE -j $(nproc)
-sed -i "s|/MQTTManager/|/home/tim/NSPanelManager/docker/MQTTManager/|g" compile_commands.json
+if [ -f /MQTTManager/fix_compile_commands_path.sh ]; then
+  source /MQTTManager/fix_compile_commands_path.sh
+fi
 cp compile_commands.json ../
 
 if [ "$STRIP" == "1" ]; then
