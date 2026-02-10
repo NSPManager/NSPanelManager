@@ -41,15 +41,6 @@ public:
   NSPanel(uint32_t panel_id);
 
 
-  enum ButtonMode {
-  DIRECT,
-  DETACHED,
-  MQTT_PAYLOAD,
-  FOLLOW,
-  THERMOSTAT_HEATING,
-  THERMOSTAT_COOLING,
-  };
-
   /*
    * Build a new NSPanel object from a discovery request and add it to the database as pending.
    * Returns a shared_ptr to the new NSPanel object if successful, otherwill nullptr.
@@ -171,7 +162,7 @@ public:
   /*
    * handle button presses
    */
-  void handle_button_pressed_command_callback(ButtonMode button_mode, std::optional<uint64_t> entity_id, std::string topic,std::string payload );
+  void handle_button_pressed_command_callback(NSPanelConfig::NSPanelButtonMode  button_mode, std::optional<uint64_t> entity_id, std::string topic,std::string payload );
   
   /**
    * When an IPC request for NSPanel status comes in handle it and send the response back

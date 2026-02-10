@@ -13,21 +13,21 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='nspanel',
             name='button1_fallback_mode',
-            field=models.IntegerField(default=0),
+            field=models.IntegerField(default=0, null=True),
         ),
         migrations.AddField(
             model_name='nspanel',
             name='button1_long_fallback_mode',
-            field=models.IntegerField(default=0),
+            field=models.IntegerField(default=0, null=True),
         ),
         migrations.AddField(
             model_name='nspanel',
             name='button2_fallback_mode',
-            field=models.IntegerField(default=0),
+            field=models.IntegerField(default=0, null=True),
         ),
         migrations.AddField(
             model_name='nspanel',
             name='button2_long_fallback_mode',
-            field=models.IntegerField(default=0),
+            field=models.IntegerField(default=0, null=True),
         ),
     ]

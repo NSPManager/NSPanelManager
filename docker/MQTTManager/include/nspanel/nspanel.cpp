@@ -293,53 +293,53 @@ void NSPanel::send_config() {
     config.set_inside_temperature_sensor_mqtt_topic((*default_room)->get_temperature_sensor_mqtt_topic());
   }
 
-  ButtonMode b1_mode = static_cast<ButtonMode>(this->_settings.button1_mode);
-  if (b1_mode == ButtonMode::DIRECT) {
+   NSPanelConfig::NSPanelButtonMode b1_mode = static_cast< NSPanelConfig::NSPanelButtonMode>(this->_settings.button1_mode);
+  if (b1_mode == NSPanelConfig::DIRECT) {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_DIRECT);
-  } else if (b1_mode == ButtonMode::FOLLOW) {
+  } else if (b1_mode == NSPanelConfig::FOLLOW) {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
-  } else if (b1_mode == ButtonMode::THERMOSTAT_HEATING) {
+  } else if (b1_mode ==  NSPanelConfig::THERMOSTAT_HEAT) {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
-  } else if (b1_mode == ButtonMode::THERMOSTAT_COOLING) {
+  } else if (b1_mode ==  NSPanelConfig::THERMOSTAT_COOL) {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
   } else {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
 
-  ButtonMode b2_mode = static_cast<ButtonMode>(this->_settings.button2_mode);
-  if (b2_mode == ButtonMode::DIRECT) {
+   NSPanelConfig::NSPanelButtonMode b2_mode = static_cast< NSPanelConfig::NSPanelButtonMode>(this->_settings.button2_mode);
+  if (b2_mode ==  NSPanelConfig::DIRECT) {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_DIRECT);
-  } else if (b2_mode == ButtonMode::FOLLOW) {
+  } else if (b2_mode ==  NSPanelConfig::FOLLOW) {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
-  } else if (b2_mode == ButtonMode::THERMOSTAT_HEATING) {
+  } else if (b2_mode ==  NSPanelConfig::THERMOSTAT_HEAT) {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
-  } else if (b2_mode == ButtonMode::THERMOSTAT_COOLING) {
+  } else if (b2_mode ==  NSPanelConfig::THERMOSTAT_COOL) {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
   } else {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
 
-  ButtonMode b1_long_mode = static_cast<ButtonMode>(this->_settings.button1_long_mode);
-  if (b1_long_mode == ButtonMode::DIRECT) {
+   NSPanelConfig::NSPanelButtonMode b1_long_mode = static_cast< NSPanelConfig::NSPanelButtonMode>(this->_settings.button1_long_mode);
+  if (b1_long_mode ==  NSPanelConfig::DIRECT) {
     config.set_button1_long_mode(NSPanelConfig_NSPanelButtonMode_DIRECT);
-  } else if (b1_long_mode == ButtonMode::FOLLOW) {
+  } else if (b1_long_mode ==  NSPanelConfig::FOLLOW) {
     config.set_button1_long_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
-  } else if (b1_long_mode == ButtonMode::THERMOSTAT_HEATING) {
+  } else if (b1_long_mode ==  NSPanelConfig::THERMOSTAT_HEAT) {
     config.set_button1_long_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
-  } else if (b1_long_mode == ButtonMode::THERMOSTAT_COOLING) {
+  } else if (b1_long_mode ==  NSPanelConfig::THERMOSTAT_COOL) {
     config.set_button1_long_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
   } else {
     config.set_button1_long_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
 
-  ButtonMode b2_long_mode = static_cast<ButtonMode>(this->_settings.button2_long_mode);
-  if (b2_long_mode == ButtonMode::DIRECT) {
+   NSPanelConfig::NSPanelButtonMode b2_long_mode = static_cast< NSPanelConfig::NSPanelButtonMode>(this->_settings.button2_long_mode);
+  if (b2_long_mode ==  NSPanelConfig::DIRECT) {
     config.set_button2_long_mode(NSPanelConfig_NSPanelButtonMode_DIRECT);
-  } else if (b2_long_mode == ButtonMode::FOLLOW) {
+  } else if (b2_long_mode ==  NSPanelConfig::FOLLOW) {
     config.set_button2_long_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
-  } else if (b2_long_mode == ButtonMode::THERMOSTAT_HEATING) {
+  } else if (b2_long_mode ==  NSPanelConfig::THERMOSTAT_HEAT) {
     config.set_button2_long_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
-  } else if (b2_long_mode == ButtonMode::THERMOSTAT_COOLING) {
+  } else if (b2_long_mode ==  NSPanelConfig::THERMOSTAT_COOL) {
     config.set_button2_long_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
   } else {
     config.set_button2_long_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
@@ -1235,7 +1235,7 @@ void NSPanel::register_to_home_assistant() {
   MQTT_Manager::publish(this->_mqtt_sensor_temperature_topic, temperature_sensor_data_str, true);
 
   // Register relay1
-  if (this->_register_relay1_as_light == NSPanelSettings::RelayRegisterType::NSPanelSettings_RelayRegisterType_SWITCH) {
+  if (this->_register_relay1_as_light ==  NSPanelSettings::RelayRegisterType::NSPanelSettings_RelayRegisterType_SWITCH) {
     nlohmann::json relay1_data = nlohmann::json(base_json);
     relay1_data["device_class"] = "switch";
     relay1_data["name"] = "Relay 1";
@@ -1267,7 +1267,7 @@ void NSPanel::register_to_home_assistant() {
   }
 
   // Register relay2
-  if (this->_register_relay2_as_light == NSPanelSettings::RelayRegisterType::NSPanelSettings_RelayRegisterType_SWITCH) {
+  if (this->_register_relay2_as_light ==  NSPanelSettings::RelayRegisterType::NSPanelSettings_RelayRegisterType_SWITCH) {
     nlohmann::json relay2_data = nlohmann::json(base_json);
     relay2_data["device_class"] = "switch";
     relay2_data["name"] = "Relay 2";
@@ -1369,10 +1369,10 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
       SPDLOG_DEBUG("NSPanel {}::{} got button {} press,", this->_id, this->_name, command.button_pressed().button_id());
 
       if (command.button_pressed().button_id() == 1) {
-       handle_button_pressed_command_callback( static_cast<ButtonMode>(this->_settings.button1_mode), this->_settings.button1_detached_mode_entity_id, 
+       handle_button_pressed_command_callback( static_cast<NSPanelConfig::NSPanelButtonMode>(this->_settings.button1_mode), this->_settings.button1_detached_mode_entity_id, 
                                               this->_get_nspanel_setting_with_default("button1_mqtt_topic", ""), this->_get_nspanel_setting_with_default("button1_mqtt_payload", ""));
       } else if (command.button_pressed().button_id() == 2) {
-        handle_button_pressed_command_callback( static_cast<ButtonMode>(this->_settings.button2_mode), this->_settings.button2_detached_mode_entity_id, 
+        handle_button_pressed_command_callback( static_cast<NSPanelConfig::NSPanelButtonMode>(this->_settings.button2_mode), this->_settings.button2_detached_mode_entity_id, 
                                               this->_get_nspanel_setting_with_default("button2_mqtt_topic", ""), this->_get_nspanel_setting_with_default("button2_mqtt_payload", ""));
         
       }
@@ -1383,10 +1383,10 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
       SPDLOG_DEBUG("NSPanel {}::{} got button {} longpress,", this->_id, this->_name, command.button_longpressed().button_id());
 
       if (command.button_longpressed().button_id() == 1) {
-       handle_button_pressed_command_callback( static_cast<ButtonMode>(this->_settings.button1_long_mode), this->_settings.button1_long_detached_mode_entity_id, 
+       handle_button_pressed_command_callback( static_cast<NSPanelConfig::NSPanelButtonMode>(this->_settings.button1_long_mode), this->_settings.button1_long_detached_mode_entity_id, 
                                               this->_get_nspanel_setting_with_default("button1_long_mqtt_topic", ""), this->_get_nspanel_setting_with_default("button1_long_mqtt_payload", ""));
       } else if (command.button_longpressed().button_id() == 2) {
-        handle_button_pressed_command_callback( static_cast<ButtonMode>(this->_settings.button2_long_mode), this->_settings.button2_long_detached_mode_entity_id, 
+        handle_button_pressed_command_callback( static_cast<NSPanelConfig::NSPanelButtonMode>(this->_settings.button2_long_mode), this->_settings.button2_long_detached_mode_entity_id, 
                                               this->_get_nspanel_setting_with_default("button2_long_mqtt_topic", ""), this->_get_nspanel_setting_with_default("button2_long_mqtt_payload", ""));
         
       }
@@ -1394,9 +1394,9 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
   }
 }
 
-void NSPanel::handle_button_pressed_command_callback(ButtonMode button_mode, std::optional<uint64_t> entity_id, std::string topic,std::string payload ) {
+void NSPanel::handle_button_pressed_command_callback(NSPanelConfig::NSPanelButtonMode button_mode, std::optional<uint64_t> entity_id, std::string topic,std::string payload ) {
         switch (button_mode) {
-        case ButtonMode::DETACHED: {
+        case  NSPanelSettings::DETACHED_MODE: {
           if (entity_id.has_value()) {
             auto entity = EntityManager::get_entity_by_id<MqttManagerEntity>(MQTT_MANAGER_ENTITY_TYPE::ANY, entity_id.value());
             if (entity) {
@@ -1411,7 +1411,7 @@ void NSPanel::handle_button_pressed_command_callback(ButtonMode button_mode, std
           break;
         }
 
-        case ButtonMode::MQTT_PAYLOAD: {
+        case  NSPanelSettings::CUSTOM_MQTT: {
           MQTT_Manager::publish(topic, payload);
           break;
         }
