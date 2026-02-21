@@ -312,15 +312,7 @@ void ThermostatEntity::send_state_update_to_nspanel() {
     if (room_temp) {
       th_status->set_current_temperature(*room_temp);
       th_status->set_has_current_temperature(true);
-    } else {
-      SPDLOG_ERROR("Failed to get room temperature from room {}::{} while trying to send state update for thermostat {}::{}. Will send temperature thermostat set temp as room temp. Got message: {}", (*room)->get_id(), (*room)->get_name(), this->_id, this->_name, room_temp.error());
-      th_status->set_current_temperature(this->_current_temperature);
-      th_status->set_has_current_temperature(true);
     }
-  } else {
-    SPDLOG_WARN("Failed to get room with id {} or room has not temperature sensor. Will send state update for thermostat {}::{} with current room temperature set temp as thermostat set point.", this->_room_id, this->_id, this->_name);
-    th_status->set_current_temperature(this->_current_temperature);
-    th_status->set_has_current_temperature(true);
   }
 
   if (!this->_supported_modes.empty()) {

@@ -4,8 +4,6 @@
 #include <boost/beast/core/detail/base64.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/signals2.hpp>
-#include <boost/stacktrace/stacktrace.hpp>
-#include <cctype>
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
