@@ -199,7 +199,6 @@ void HomeAssistantLight::home_assistant_event_callback(nlohmann::json data) {
             }
             this->_current_state = false;
             this->_requested_state = false;
-            this->_requested_brightness = 0;
           } else {
             SPDLOG_ERROR("Unknown entity state: {}", new_state);
           }
