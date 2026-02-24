@@ -1,15 +1,19 @@
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <cstddef>
+#include <exception>
 #include <fmt/core.h>
 #include <ixwebsocket/IXConnectionState.h>
 #include <ixwebsocket/IXWebSocket.h>
+#include <ixwebsocket/IXWebSocketCloseConstants.h>
+#include <ixwebsocket/IXWebSocketHandshake.h>
 #include <ixwebsocket/IXWebSocketHttpHeaders.h>
 #include <ixwebsocket/IXWebSocketMessageType.h>
 #include <ixwebsocket/IXWebSocketPerMessageDeflate.h>
@@ -244,13 +248,16 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
             }
 
             std::lock_guard<std::mutex> lock_guard_callbacks(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
-            if (WebsocketServer::_on_stomp_send_message_callbacks.count(frame->headers["destination"]) > 0) {
+            WebsocketServer::_on_global_stomp_send_message_callbacks(*frame);
+            if (WebsocketServer::_on_stomp_send_message_callbacks.count(frame->headers["destination"]) > 0) [[likely]] {
               SPDLOG_DEBUG("Received STOMP SEND command for existing topic, setting topic '{}' to value '{}'", frame->headers["destination"], frame->body);
               WebsocketServer::_on_stomp_send_message_callbacks[frame->headers["destination"]](frame.value());
               return;
+            } else {
+              if (!boost::algorithm::starts_with(frame->headers["destination"], "mqtt/")) { //  If the string starts with "mqtt/" it was ment for the global callback. Do not warn in case an attached callback does not exist.
+                SPDLOG_WARN("Received STOMP SEND command for unknown topic. Will not publish, topic '{}', value '{}'", frame->headers["destination"], frame->body);
+              }
             }
-
-            SPDLOG_WARN("Received STOMP SEND command for unknown topic. Will not publish, topic '{}', value '{}'", frame->headers["destination"], frame->body);
           } else {
             SPDLOG_WARN("Received unknown STOMP frame type {}.", static_cast<int>(frame->type));
           }
@@ -271,7 +278,6 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::string value) {
   std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-  SPDLOG_DEBUG("Updating stomp topic value '{}'", topic_name);
   for (auto &topic : WebsocketServer::_stomp_topics) {
     if (topic->get_name().compare(topic_name) == 0) {
       topic->update_value(value);
@@ -282,7 +288,6 @@ void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::stri
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, nlohmann::json &value) {
   std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-  SPDLOG_DEBUG("Updating stomp topic JSON '{}'", topic_name);
   for (auto &topic : WebsocketServer::_stomp_topics) {
     if (topic->get_name().compare(topic_name) == 0) {
       topic->update_value(value);
@@ -422,7 +427,7 @@ void WebsocketServer::send_stomp_frame(StompFrame &frame, ix::WebSocket &websock
   }
 
   // TODO: Make content-type adjustable
-  frame.headers["content-type"] = "text/plain;charset=utf-8";
+  frame.headers["content-type"] = "text/plain";
 
   for (auto &header : frame.headers) {
     message.append(header.first);
@@ -436,7 +441,11 @@ void WebsocketServer::send_stomp_frame(StompFrame &frame, ix::WebSocket &websock
   message.push_back('\0');
   message.push_back('\n');
 
-  websocket.send(message);
+  try {
+    websocket.send(message);
+  } catch (std::exception &ex) {
+    SPDLOG_ERROR("Failed to send message over websocket. Error: {}", ex.what());
+  }
 }
 
 void WebsocketServer::attach_message_callback(std::function<bool(std::string &message, std::string *response_buf)> callback) {

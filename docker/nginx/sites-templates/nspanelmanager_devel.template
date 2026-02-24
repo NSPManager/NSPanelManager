@@ -14,6 +14,11 @@ upstream mqttmanager {
   server 127.0.0.1:8002;
 }
 
+upstream nextion_img {
+  server 127.0.0.1:8003;    
+}
+
+
 # configuration of the server
 server {
     # the port your site will be served on
@@ -31,6 +36,10 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
         proxy_set_header Host $host;}
+
+    location /nextion-img {
+        proxy_pass  http://nextion_img;
+    }
 
 
     location /{

@@ -14,7 +14,7 @@ public:
 
   // Thermostat Icons
   static constexpr const char *heating = "!";
-  static constexpr const char *cooling = "\"";
+  static constexpr const char *cooling = "8"; // Was originally " but that causes issues when sending the .txt command to Nextion.
   static constexpr const char *hot_cold = "#";
   static constexpr const char *thermostat_auto = "$";
   static constexpr const char *dry = "%";
@@ -35,6 +35,8 @@ public:
   static constexpr const char *fan1 = "4";
   static constexpr const char *fan2 = "5";
   static constexpr const char *fan3 = "6";
+  static constexpr const char *thermostat = "7";
+  static constexpr const char *OFF = "h";
 };
 
 class GUI_Colors {

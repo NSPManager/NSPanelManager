@@ -1,9 +1,9 @@
 #include "mqtt_manager.hpp"
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/beast/core/detail/base64.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/signals2.hpp>
-#include <boost/stacktrace/stacktrace.hpp>
-#include <cctype>
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
@@ -34,10 +34,11 @@ inline bool file_exists(const char *name) {
 void MQTT_Manager::init() {
   MQTT_Manager::reload_config(); // This will also start a new thread to handle MQTT messages.
   WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
+
+  WebsocketServer::attach_stomp_global_callback(MQTT_Manager::_process_stomp_message);
 }
 
 void MQTT_Manager::connect() {
-
   if (!MQTT_Manager::_process_messages_thread.joinable()) {
     SPDLOG_INFO("Starting MQTT message processing thread.");
     MQTT_Manager::_process_messages_thread = std::thread(MQTT_Manager::_process_mqtt_messages);
@@ -89,10 +90,10 @@ void MQTT_Manager::reload_config() {
   std::string password = "";
   {
     std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_settings_mutex);
-    address = MqttManagerConfig::get_setting_with_default("mqtt_server", "");
-    port = std::stoi(MqttManagerConfig::get_setting_with_default("mqtt_port", "1883"));
-    username = MqttManagerConfig::get_setting_with_default("mqtt_username", "");
-    password = MqttManagerConfig::get_setting_with_default("mqtt_password", "");
+    address = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MQTT_SERVER);
+    port = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MQTT_PORT);
+    username = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MQTT_USERNAME);
+    password = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MQTT_PASSWORD);
   }
 
   if (MQTT_Manager::_mqtt_address.compare(address) != 0 ||
@@ -185,12 +186,16 @@ void MQTT_Manager::_reconnect_mqtt_client() {
 
       MQTT_Manager::_mqtt_client = new mqtt::client(connection_url, mqtt_client_name.c_str());
 
+      auto last_will = mqtt::message(fmt::format("nspanel/mqttmanager_{}/status/status", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)),
+                                     "offline", 1, true);
+
       auto connOpts = mqtt::connect_options_builder()
                           .user_name(MQTT_Manager::_mqtt_username)
                           .password(MQTT_Manager::_mqtt_password)
                           .keep_alive_interval(std::chrono::seconds(30))
                           .automatic_reconnect(std::chrono::seconds(2), std::chrono::seconds(10))
                           .clean_session(false)
+                          .will(std::move(last_will))
                           .finalize();
 
       MQTT_Manager::_stop_consuming = false;
@@ -207,7 +212,10 @@ void MQTT_Manager::_reconnect_mqtt_client() {
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
   }
   WebsocketServer::remove_warning("MQTT not connected.");
-  SPDLOG_INFO("Established connection to MQTT server.");
+  SPDLOG_INFO("Established connection to MQTT server. Sending updated MQTT status.");
+
+  MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/status", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)),
+                        "online", true);
 
   try {
     SPDLOG_DEBUG("Subscribing to registered MQTT topics.");
@@ -285,6 +293,10 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
     if (MQTT_Manager::is_connected()) {
       SPDLOG_TRACE("Publising '{}' -> '{}'", topic, payload);
       MQTT_Manager::_mqtt_client->publish(msg);
+
+      // Replicate messages into the websocket STOMP topics.
+      WebsocketServer::set_stomp_topic_retained(fmt::format("mqtt/{}", topic), retain);
+      WebsocketServer::update_stomp_topic_value(fmt::format("mqtt/{}", topic), payload);
     } else {
       MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
     }
@@ -296,7 +308,20 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
 void MQTT_Manager::publish_protobuf(const std::string &topic, google::protobuf::Message &payload, bool retain) {
   std::string payload_string;
   if (payload.SerializeToString(&payload_string)) {
-    MQTT_Manager::publish(topic, payload_string.c_str(), retain);
+    MQTT_Manager::publish(topic, payload_string, retain);
+
+    // Replicate messages into the websocket STOMP topics.
+    WebsocketServer::set_stomp_topic_retained(fmt::format("mqtt/{}", topic), retain);
+    // Convert payload to base64 as to be able to send it over the websocket.
+    std::size_t encoded_size = (payload_string.size() + 2) / 3 * 4;
+    std::vector<char> encoded_buffer(encoded_size);
+    // Encode the string
+    std::size_t written = boost::beast::detail::base64::encode(
+        encoded_buffer.data(),
+        payload_string.data(),
+        payload_string.size());
+    encoded_buffer.resize(written);
+    WebsocketServer::update_stomp_topic_value(fmt::format("mqtt/{}", topic), std::string(encoded_buffer.begin(), encoded_buffer.end()));
   } else {
     SPDLOG_ERROR("Tried to send message to topic '{}' but serialization of protobuf object failed.", topic);
   }
@@ -316,5 +341,15 @@ void MQTT_Manager::clear_retain(const std::string &topic) {
     } else {
       MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
     }
+  }
+}
+
+void MQTT_Manager::_process_stomp_message(StompFrame frame) {
+  std::string topic = frame.headers["destination"];
+  boost::algorithm::replace_all(topic, "mqtt/", "");
+  std::string payload = frame.body;
+
+  if (MQTT_Manager::_mqtt_callbacks.count(topic) > 0) {
+    MQTT_Manager::_mqtt_callbacks[topic](topic, payload);
   }
 }

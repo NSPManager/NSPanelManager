@@ -1,4 +1,5 @@
 #include "mqtt_manager_config.hpp"
+#include "light/light.hpp"
 #include "openssl/evp.h"
 #include "web_helper/WebHelper.hpp"
 #include <boost/algorithm/string/case_conv.hpp>
@@ -7,14 +8,12 @@
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/stacktrace/stacktrace_fwd.hpp>
-#include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <database_manager/database_manager.hpp>
-#include <exception>
 #include <fmt/core.h>
 #include <fstream>
 #include <mutex>
@@ -31,11 +30,6 @@
 #include <string>
 #include <websocket_server/websocket_server.hpp>
 
-MqttManagerSettingsHolder MqttManagerConfig::get_settings() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_settings_mutex);
-  return MqttManagerConfig::_settings;
-}
-
 void MqttManagerConfig::load() {
   SPDLOG_TRACE("Loading timezone from /etc/timezone.");
   // Begin by loading timezone
@@ -48,98 +42,169 @@ void MqttManagerConfig::load() {
   MqttManagerConfig::timezone = timezone_str;
   SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
 
+  SPDLOG_DEBUG("Clearing config values cache.");
+  MqttManagerConfig::_settings_values_cache.clear();
+
   {
     SPDLOG_INFO("Loading MQTT Manager settings.");
     std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_settings_mutex);
 
-    MqttManagerConfig::_settings.manager_address = MqttManagerConfig::get_setting_with_default("manager_address", "");
-    MqttManagerConfig::_settings.manager_port = std::stoi(MqttManagerConfig::get_setting_with_default("manager_port", "8000"));
-    MqttManagerConfig::_settings.color_temp_min = std::stoi(MqttManagerConfig::get_setting_with_default("color_temp_min", "2000"));
-    MqttManagerConfig::_settings.color_temp_max = std::stoi(MqttManagerConfig::get_setting_with_default("color_temp_max", "6000"));
-    MqttManagerConfig::_settings.reverse_color_temperature_slider = MqttManagerConfig::get_setting_with_default("reverse_color_temp", "False").compare("True") == 0;
-    MqttManagerConfig::_settings.date_format = MqttManagerConfig::get_setting_with_default("date_format", "%a %d/%m/ %Y");
-    MqttManagerConfig::_settings.clock_24_hour_format = MqttManagerConfig::get_setting_with_default("clock_us_style", "False").compare("False") == 0;
-    MqttManagerConfig::_settings.optimistic_mode = MqttManagerConfig::get_setting_with_default("optimistic_mode", "True").compare("True") == 0;
-    MqttManagerConfig::_settings.mqtt_wait_time = std::stoi(MqttManagerConfig::get_setting_with_default("mqtt_wait_time", "1000"));
-
     const char *is_home_assistant_addon = std::getenv("IS_HOME_ASSISTANT_ADDON");
     if (is_home_assistant_addon != nullptr) {
       if (std::string(is_home_assistant_addon).compare("true") == 0) {
-        MqttManagerConfig::_settings.is_home_assistant_addon = true;
+        MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::IS_HOME_ASSISTANT_ADDON, "true");
       } else {
-        MqttManagerConfig::_settings.is_home_assistant_addon = false;
+        MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::IS_HOME_ASSISTANT_ADDON, "false");
       }
     } else {
-      MqttManagerConfig::_settings.is_home_assistant_addon = false;
+      MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::IS_HOME_ASSISTANT_ADDON, "false");
     }
 
-    std::string turn_on_bevaiour = MqttManagerConfig::get_setting_with_default("turn_on_behaviour", "color_temp");
+    std::string turn_on_bevaiour = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::TURN_ON_BEHAVIOR);
     if (turn_on_bevaiour.compare("color_temp") == 0) {
-      MqttManagerConfig::_settings.light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
+      MqttManagerConfig::_light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
     } else if (turn_on_bevaiour.compare("restore") == 0) {
-      MqttManagerConfig::_settings.light_turn_on_behaviour = LightTurnOnBehaviour::RESTORE_PREVIOUS;
+      MqttManagerConfig::_light_turn_on_behaviour = LightTurnOnBehaviour::RESTORE_PREVIOUS;
     } else {
       SPDLOG_WARN("Failed to determine turn on bevaiour for lights, assuming color temp. Value set: {}", turn_on_bevaiour);
-      MqttManagerConfig::_settings.light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
+      MqttManagerConfig::_light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
     }
   }
 
   MqttManagerConfig::update_firmware_checksum();
   MqttManagerConfig::update_tft_checksums();
 
+  MqttManagerConfig::populate_default_and_clean();
+
   // Notify all listeners that the config has been loaded
   MqttManagerConfig::_config_loaded_listeners();
 }
 
-std::string MqttManagerConfig::get_setting_with_default(std::string key, std::string default_value) {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_database_access_mutex);
-  try {
-    auto result = database_manager::database.get_all<database_manager::SettingHolder>(sqlite_orm::where(sqlite_orm::c(&database_manager::SettingHolder::name) == key));
-    if (result.size() > 0) [[likely]] {
-      SPDLOG_TRACE("Found setting {} with value {}", key, result[0].value);
-      return result[0].value;
-    } else {
-      SPDLOG_TRACE("Did not find setting {}. Returning default:   {}", key, default_value);
-      return default_value;
+void MqttManagerConfig::populate_default_and_clean() {
+  auto settings = database_manager::database.get_all<database_manager::SettingHolder>();
+  // Check for set settings that are invalid/unused.
+  for (const auto &setting : settings) {
+    bool found = false;
+    for (const auto &setting_pair : MqttManagerConfig::_setting_key_map) {
+      if (setting_pair.second.first == setting.name) {
+        found = true;
+        break;
+      }
     }
-  } catch (std::exception &ex) {
-    SPDLOG_ERROR("Caught exception while trying to access database to retrieve setting {}. Exception: {}", key, boost::diagnostic_information(ex));
+    // Cleanup old setting.
+    if (!found) {
+      SPDLOG_WARN("Removing invalid setting {} from DB.", setting.name);
+      database_manager::database.remove<database_manager::SettingHolder>(setting.id);
+    }
   }
-  SPDLOG_TRACE("Did not find setting {}. Returning default:   {}", key, default_value);
-  return default_value;
+
+  // Check if all default settings are set.
+  for (const auto &setting : MqttManagerConfig::_setting_key_map) {
+    bool found = false;
+    for (const auto &setting_pair : settings) {
+      if (setting_pair.name == setting.second.first) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      SPDLOG_INFO("Setting {} not found in DB. Setting default value: '{}'.", setting.second.first, setting.second.second);
+      database_manager::SettingHolder new_setting;
+      new_setting.name = setting.second.first;
+      new_setting.value = setting.second.second;
+      database_manager::database.insert(new_setting);
+    }
+  }
+}
+
+void MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING key, std::string value) {
+  std::string setting_db_key = MqttManagerConfig::_setting_key_map[key].first;
+  SPDLOG_DEBUG("Setting '{}' to value '{}'", setting_db_key, value);
+
+  auto result = database_manager::database.get_all<database_manager::SettingHolder>(sqlite_orm::where(sqlite_orm::c(&database_manager::SettingHolder::name) == setting_db_key));
+  if (!result.empty()) {
+    result[0].value = value;
+    SPDLOG_DEBUG("Set settings key '{}' to value '{}'", setting_db_key, value);
+    database_manager::database.update(result[0]);
+  } else {
+    SPDLOG_ERROR("Failed to find existing setting for key '{}'. Will create a new key.", setting_db_key);
+    database_manager::SettingHolder setting;
+    setting.name = setting_db_key;
+    setting.value = value;
+    database_manager::database.insert(setting);
+  }
+
+  MqttManagerConfig::_settings_values_cache[key] = value;
 }
 
 void MqttManagerConfig::set_nspanel_setting_value(int32_t nspanel_id, std::string key, std::string value) {
+  using namespace sqlite_orm;
   SPDLOG_DEBUG("Setting '{}' to value '{}' for NSPanel with ID {}", key, value, nspanel_id);
 
-  database_manager::NSPanelSettingHolder setting;
-  setting.nspanel_id = nspanel_id;
-  setting.name = key;
-  setting.value = value;
-  database_manager::database.insert(setting);
+  auto result = database_manager::database.get_all<database_manager::NSPanelSettingHolder>(sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanelSettingHolder::name) = key) and sqlite_orm::c(&database_manager::NSPanelSettingHolder::nspanel_id) == nspanel_id);
+  if (!result.empty()) {
+    result[0].value = value;
+    database_manager::database.update(result[0]);
+  } else {
+    database_manager::NSPanelSettingHolder setting;
+    setting.nspanel_id = nspanel_id;
+    setting.name = key;
+    setting.value = value;
+    database_manager::database.insert(setting);
+  }
+}
+
+bool MqttManagerConfig::is_home_assistant_addon() {
+  return MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::IS_HOME_ASSISTANT_ADDON);
+}
+
+LightTurnOnBehaviour MqttManagerConfig::get_light_turn_on_behaviour() {
+  return MqttManagerConfig::_light_turn_on_behaviour;
 }
 
 void MqttManagerConfig::update_firmware_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
   SPDLOG_INFO("Updating/calculating MD5 checksums for all firmware files.");
 
-  auto firmware_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware.bin");
+  // Update firmware checksum
+  auto firmware_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware/sonoff/firmware.bin");
   if (firmware_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_firmware = firmware_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for firmware was not able to be calculated.");
+    MqttManagerConfig::_md5_checksum_firmware_sonoff = firmware_checksum.value();
+    WebsocketServer::remove_warning("MD5 checksum for sonoff firmware was not able to be calculated.");
     SPDLOG_INFO("Firmware checksum: {}", firmware_checksum.value());
   } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for firmware was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for firmware!");
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for sonoff firmware was not able to be calculated.");
+    SPDLOG_ERROR("Failed to calculate checksum for sonoff firmware!");
   }
 
-  auto littlefs_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/data_file.bin");
+  firmware_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware/custom/firmware.bin");
+  if (firmware_checksum.has_value()) {
+    MqttManagerConfig::_md5_checksum_firmware_custom = firmware_checksum.value();
+    WebsocketServer::remove_warning("MD5 checksum for custom firmware was not able to be calculated.");
+    SPDLOG_INFO("Firmware checksum: {}", firmware_checksum.value());
+  } else {
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for custom firmware was not able to be calculated.");
+    SPDLOG_ERROR("Failed to calculate checksum for custom firmware!");
+  }
+
+  // Update LittleFS checksum
+  auto littlefs_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware/sonoff/data_file.bin");
   if (littlefs_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_littlefs = littlefs_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for littlefs/data file was not able to be calculated.");
+    MqttManagerConfig::_md5_checksum_littlefs_sonoff = littlefs_checksum.value();
+    WebsocketServer::remove_warning("MD5 checksum for sonoff littlefs/data file was not able to be calculated.");
     SPDLOG_INFO("LittleFS checksum: {}", littlefs_checksum.value());
   } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for littlefs/data file was not able to be calculated.");
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for sonoff littlefs/data file was not able to be calculated.");
+    SPDLOG_ERROR("Failed to calculate checksum for LittleFS!");
+  }
+
+  littlefs_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware/custom/data_file.bin");
+  if (littlefs_checksum.has_value()) {
+    MqttManagerConfig::_md5_checksum_littlefs_custom = littlefs_checksum.value();
+    WebsocketServer::remove_warning("MD5 checksum for custom littlefs/data file was not able to be calculated.");
+    SPDLOG_INFO("LittleFS checksum: {}", littlefs_checksum.value());
+  } else {
+    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for custom littlefs/data file was not able to be calculated.");
     SPDLOG_ERROR("Failed to calculate checksum for LittleFS!");
   }
 }
@@ -319,20 +384,36 @@ std::optional<std::string> MqttManagerConfig::_get_file_md5_checksum(std::string
   return boost::algorithm::to_lower_copy(ss.str()); // Convert to lowercase as the md5 checksum calculated in Django is calculated with lower case latters.
 }
 
-std::expected<std::string, bool> MqttManagerConfig::get_firmware_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_firmware_sonoff_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_firmware.empty()) {
+  if (MqttManagerConfig::_md5_checksum_firmware_sonoff.empty()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_firmware;
+  return MqttManagerConfig::_md5_checksum_firmware_sonoff;
 }
 
-std::expected<std::string, bool> MqttManagerConfig::get_littlefs_checksum() {
+std::expected<std::string, bool> MqttManagerConfig::get_firmware_custom_checksum() {
   std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_littlefs.empty()) {
+  if (MqttManagerConfig::_md5_checksum_firmware_custom.empty()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_littlefs;
+  return MqttManagerConfig::_md5_checksum_firmware_custom;
+}
+
+std::expected<std::string, bool> MqttManagerConfig::get_littlefs_sonoff_checksum() {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_littlefs_sonoff.empty()) {
+    return std::unexpected(false);
+  }
+  return MqttManagerConfig::_md5_checksum_littlefs_sonoff;
+}
+
+std::expected<std::string, bool> MqttManagerConfig::get_littlefs_custom_checksum() {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
+  if (MqttManagerConfig::_md5_checksum_littlefs_custom.empty()) {
+    return std::unexpected(false);
+  }
+  return MqttManagerConfig::_md5_checksum_littlefs_custom;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_eu_tft1_checksum() {
@@ -430,3 +511,25 @@ std::expected<std::string, bool> MqttManagerConfig::get_us_horizontal_mirrored_t
   }
   return MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft4;
 }
+
+// TESTING
+#if defined(TEST_MODE) && TEST_MODE == 1
+#include <gtest/gtest.h>
+
+TEST(MqttManagerConfigTest, verify_all_settings_exists_and_have_db_key) {
+  for (int i = 0; i < static_cast<int>(MQTT_MANAGER_SETTING::LAST); i++) {
+    MQTT_MANAGER_SETTING setting = static_cast<MQTT_MANAGER_SETTING>(i);
+    bool found = MqttManagerConfig::_setting_key_map.contains(setting);
+    EXPECT_TRUE(found) << "Setting (enum value) " << i << " not found in the settings list. Cannot test if it has a setting key.";
+    if (found) {
+      EXPECT_TRUE(!MqttManagerConfig::_setting_key_map[setting].first.empty()) << "Setting (enum value) " << i << " does not name a DB key.";
+    }
+  }
+}
+
+TEST(MqttManagerConfigTest, verify_settings_cache_is_used) {
+  bool value = MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::CLOCK_US_STYLE);
+  EXPECT_TRUE(MqttManagerConfig::_settings_values_cache.contains(MQTT_MANAGER_SETTING::CLOCK_US_STYLE));
+}
+
+#endif

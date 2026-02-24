@@ -19,6 +19,8 @@ class CompressorRecipe(ConanFile):
         self.requires("boost/1.84.0")
         self.requires("protobuf/5.27.0")
         self.requires("sqlite_orm/1.9.1")
+        # Testing tools:
+        self.requires("gtest/1.16.0")
 
     def configure(self):
         self.options["boost"].without_stacktrace = False

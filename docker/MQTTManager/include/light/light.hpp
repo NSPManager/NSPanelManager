@@ -216,18 +216,18 @@ protected:
   bool _can_rgb;
 
   bool _current_state;
-  uint8_t _current_brightness;
-  uint16_t _current_color_temperature;
-  uint16_t _current_hue;
-  uint8_t _current_saturation;
-  MQTT_MANAGER_LIGHT_MODE _current_mode;
-  MQTT_MANAGER_LIGHT_TYPE _light_type;
+  uint8_t _current_brightness = 0;
+  uint16_t _current_color_temperature = 0;
+  uint16_t _current_hue = 0;
+  uint8_t _current_saturation = 0;
+  MQTT_MANAGER_LIGHT_MODE _current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
+  MQTT_MANAGER_LIGHT_TYPE _light_type = MQTT_MANAGER_LIGHT_TYPE::CEILING;
 
-  bool _requested_state;
-  uint8_t _requested_brightness;
-  uint16_t _requested_color_temperature;
-  uint16_t _requested_hue;
-  uint8_t _requested_saturation;
+  bool _requested_state = false;
+  uint8_t _requested_brightness = 0;
+  uint16_t _requested_color_temperature = 0;
+  uint16_t _requested_hue = 0;
+  uint8_t _requested_saturation = 0;
   NSPanelEntityState _last_entity_state;
   MQTT_MANAGER_LIGHT_MODE _requested_mode;
 

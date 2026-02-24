@@ -45,6 +45,9 @@ RUN if [ "$IS_DEVEL" == "yes" ]; then apt-get install -y --no-install-recommends
     #&& rm -rf /var/lib/apt/lists/*
     ; fi
 
+# Install ImageMagick to be able to process images and send them to the NSPanel
+RUN apt-get install -y libmagick++-dev
+
 RUN apt-get install -y nginx
 RUN pip install --no-cache-dir -r requirements.txt
 

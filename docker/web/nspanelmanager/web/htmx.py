@@ -16,6 +16,7 @@ from django.template import RequestContext
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from requests import delete
+from requests.sessions import Request
 
 import web.home_assistant_api
 import web.openhab_api
@@ -421,6 +422,8 @@ def handle_entity_modal_result(request):
         return create_or_update_switch_entity(request)
     elif request.session["action"] == "ADD_BUTTON_TO_ROOM":
         return create_or_update_button_entity(request)
+    elif request.session["action"] == "ADD_THERMOSTAT_TO_ROOM":
+        return create_or_update_thermostat_entity(request)
     elif request.session["action"] == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE":
         return create_or_update_scene_entity(request)
     else:
@@ -640,6 +643,46 @@ def partial_entity_add_button_entity(request):
     )
 
 
+def partial_entity_add_thermostat_entity(request):
+    data = get_base_data(request)
+    data |= {
+        "entity_source": request.session["entity_source"],
+        "openhab_item": "",
+        "home_assistant_item": "",
+        "openhab_items": [],
+        "home_assistant_items": [],
+    }
+
+    if data["entity_source"] == "home_assistant":
+        ha_items = web.home_assistant_api.get_all_home_assistant_items(
+            {"type": ["climate"]}
+        )
+        if len(ha_items["errors"]) == 0:
+            data["home_assistant_items"] = ha_items["items"]
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
+    elif data["entity_source"] == "openhab":
+        openhab_items = web.openhab_api.get_all_openhab_items()
+        if len(openhab_items["errors"]) == 0:
+            data["openhab_items"] = openhab_items["items"]
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from OpenHAB!"},
+                status=500,
+            )
+    else:
+        logging.error("Unknown entity source! Source: " + data["entity_source"])
+
+    return render(
+        request,
+        "partial/select_entity/entity_add_or_edit_thermostat_to_room.html",
+        data,
+    )
+
+
 def partial_entity_edit_switch_entity(request, switch_id):
     switch = Entity.objects.get(id=switch_id)
 
@@ -700,6 +743,56 @@ def partial_entity_edit_button_entity(request, button_id):
 
     return render(
         request, "partial/select_entity/entity_add_or_edit_button_to_room.html", data
+    )
+
+
+def partial_entity_edit_thermostat_entity(request, thermostat_id):
+    thermostat = Entity.objects.get(id=thermostat_id)
+
+    request.session["action"] = "ADD_THERMOSTAT_TO_ROOM"
+    request.session["action_args"] = json.dumps(
+        {
+            "entity_id": thermostat_id,
+            "room_id": thermostat.room.id,
+            "page_id": thermostat.entities_page.id,
+            "page_slot": thermostat.room_view_position,
+        }
+    )
+
+    data = get_base_data(request)
+    data |= {
+        "thermostat": thermostat,
+        "edit_thermostat_id": thermostat_id,
+        "entity_source": thermostat.entity_data["controller"],
+        "entity": {
+            "name": thermostat.friendly_name,
+        },
+    }
+    if data["entity_source"] == "home_assistant":
+        ha_items = web.home_assistant_api.get_all_home_assistant_items(
+            {"type": ["climate"]}
+        )
+        if len(ha_items["errors"]) == 0:
+            data["home_assistant_items"] = ha_items["items"]
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
+    elif data["entity_source"] == "openhab":
+        openhab_items = web.openhab_api.get_all_openhab_items()
+        if len(openhab_items["errors"]) == 0:
+            data["openhab_items"] = openhab_items["items"]
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from OpenHAB!"},
+                status=500,
+            )
+
+    return render(
+        request,
+        "partial/select_entity/entity_add_or_edit_thermostat_to_room.html",
+        data,
     )
 
 
@@ -985,12 +1078,14 @@ def partial_add_entity_to_entities_page_select_entity_source(
             "ADD_LIGHT_TO_ROOM",
             "ADD_SWITCH_TO_ROOM",
             "ADD_BUTTON_TO_ROOM",
-            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE",
+            "ADD_THERMOSTAT_TO_ROOM",
+            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGEADD_SCENE_TO_NSPANEL_ENTITY_PAGE",
         ],
         "openhab_supported_entity_types": [
             "ADD_LIGHT_TO_ROOM",
             "ADD_SWITCH_TO_ROOM",
-            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE",
+            "ADD_THERMOSTAT_TO_ROOM",
+            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGEADD_SCENE_TO_NSPANEL_ENTITY_PAGE",
         ],
         "manual_supported_entity_types": ["ADD_BUTTON_TO_ROOM"],
     }
@@ -1009,6 +1104,8 @@ def partial_add_entity_to_entities_page_config_modal(request, entity_source):
         return partial_entity_add_switch_entity(request)
     elif request.session["action"] == "ADD_BUTTON_TO_ROOM":
         return partial_entity_add_button_entity(request)
+    elif request.session["action"] == "ADD_THERMOSTAT_TO_ROOM":
+        return partial_entity_add_thermostat_entity(request)
     elif request.session["action"] == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE":
         return partial_entity_add_scene_entity(request)
     else:
@@ -1300,14 +1397,11 @@ def create_or_update_button_entity(request):
         )
         new_button.room_view_position = int(action_args["page_slot"])
 
-    print("Entity data: ", entity_data)
-    print("TEST1")
     if entity_data["controller"] == "home_assistant":
         entity_data["home_assistant_name"] = request.POST["backend_name"]
     elif entity_data["controller"] == "nspm":
         entity_data["mqtt_topic"] = request.POST["mqtt_topic"]
         entity_data["mqtt_payload"] = request.POST["mqtt_payload"]
-    print("TEST2")
     new_button.friendly_name = request.POST["light_name"]
     new_button.entity_data = entity_data
     new_button.save()
@@ -1318,6 +1412,138 @@ def create_or_update_button_entity(request):
         request=request,
         view="edit_room",
         room_id=new_button.room.id,
+        is_scenes_pages=False,
+        is_global_scenes_page=False,
+    )
+
+
+def create_or_update_thermostat_entity(request):
+    action_args = json.loads(
+        request.session["action_args"]
+    )  # Loads arguments set when first starting process of adding/updating entity
+
+    entity_data = {
+        "controller": request.session["entity_source"],
+    }
+    if "entity_id" in action_args and int(action_args["entity_id"]):
+        new_thermostat = Entity.objects.get(id=int(action_args["entity_id"]))
+        entity_data = new_thermostat.entity_data
+    else:
+        new_thermostat = Entity()
+        new_thermostat.entity_type = Entity.EntityType.THERMOSTAT
+        # Only set once, during initial creation:
+        new_thermostat.room = Room.objects.get(id=int(action_args["room_id"]))
+        new_thermostat.entities_page = RoomEntitiesPage.objects.get(
+            id=int(action_args["page_id"])
+        )
+        new_thermostat.room_view_position = int(action_args["page_slot"])
+
+    if entity_data["controller"] == "home_assistant":
+        entity_data["home_assistant_name"] = request.POST["backend_name"]
+    elif entity_data["controller"] == "openhab":
+        entity_data["openhab_temperature_item"] = request.POST["temperature_item"]
+        entity_data["openhab_step_size"] = request.POST["step_size"]
+        entity_data["openhab_fan_mode_item"] = request.POST["fan_mode_item"]
+        entity_data["openhab_hvac_mode_item"] = request.POST["hvac_mode_item"]
+        entity_data["openhab_preset_item"] = request.POST["preset_item"]
+        entity_data["openhab_swing_item"] = request.POST["swing_item"]
+        entity_data["openhab_swingh_item"] = request.POST["swingh_item"]
+
+    # Loop over all options starting with fan_mode_option_
+    fan_modes = []
+    for option in request.POST:
+        if (
+            option.startswith("fan_mode_option_")
+            and not option.endswith("_icon")
+            and not option.endswith("_label")
+        ):
+            fan_modes.append(
+                {
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"],
+                    "label": request.POST[option + "_label"],
+                }
+            )
+    entity_data["fan_modes"] = fan_modes
+
+    # Loop over all options starting with hvac_mode_option_
+    hvac_modes = []
+    for option in request.POST:
+        if (
+            option.startswith("hvac_mode_option_")
+            and not option.endswith("_icon")
+            and not option.endswith("_label")
+        ):
+            hvac_modes.append(
+                {
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"],
+                    "label": request.POST[option + "_label"],
+                }
+            )
+    entity_data["hvac_modes"] = hvac_modes
+
+    # Loop over all options starting with preset_option_
+    preset_modes = []
+    for option in request.POST:
+        if (
+            option.startswith("preset_option_")
+            and not option.endswith("_icon")
+            and not option.endswith("_label")
+        ):
+            preset_modes.append(
+                {
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"],
+                    "label": request.POST[option + "_label"],
+                }
+            )
+    entity_data["preset_modes"] = preset_modes
+
+    # Loop over all options starting with swing_option
+    swing_modes = []
+    for option in request.POST:
+        if (
+            option.startswith("swing_option_")
+            and not option.endswith("_icon")
+            and not option.endswith("_label")
+        ):
+            swing_modes.append(
+                {
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"],
+                    "label": request.POST[option + "_label"],
+                }
+            )
+    entity_data["swing_modes"] = swing_modes
+
+    # Loop over all options starting with swingh_option
+    swingh_modes = []
+    for option in request.POST:
+        if (
+            option.startswith("swingh_option_")
+            and not option.endswith("_icon")
+            and not option.endswith("_label")
+        ):
+            swingh_modes.append(
+                {
+                    "value": request.POST[option],
+                    "icon": request.POST[option + "_icon"],
+                    "label": request.POST[option + "_label"],
+                }
+            )
+    entity_data["swingh_modes"] = swingh_modes
+
+    new_thermostat.friendly_name = request.POST["friendly_name"]
+    new_thermostat.entity_data = entity_data
+    new_thermostat.save()
+    send_mqttmanager_reload_command()
+
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=new_thermostat.room.id,
         is_scenes_pages=False,
         is_global_scenes_page=False,
     )

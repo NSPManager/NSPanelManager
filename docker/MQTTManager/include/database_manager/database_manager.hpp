@@ -1,7 +1,4 @@
 #pragma once
-#include "nlohmann/json.hpp"
-#include <csignal>
-#include <cstdlib>
 #include <memory>
 #include <nlohmann/json_fwd.hpp>
 #include <optional>
@@ -31,11 +28,12 @@ struct NSPanel {
   int id = 0;
   std::string mac_address;
   std::string friendly_name;
+  std::string model;
   int room_id = 0;
   std::string version;
-  std::optional<uint64_t> button1_detached_mode_light_id = 0;
+  std::optional<uint64_t> button1_detached_mode_entity_id = 0;
   int button1_mode = 0;
-  std::optional<uint64_t> button2_detached_mode_light_id = 0;
+  std::optional<uint64_t> button2_detached_mode_entity_id = 0;
   int button2_mode = 0;
   std::string md5_data_file;
   std::string md5_firmware;
@@ -105,7 +103,11 @@ struct Entity {
   void set_entity_data_json(const nlohmann::json &json);
 };
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+static inline auto database = sqlite_orm::make_storage("/tmp/nspanelmanager_db_test.sqlite3",
+#else
 static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.sqlite3",
+#endif
                                                        sqlite_orm::make_table("web_roomentitiespage",
                                                                               sqlite_orm::make_column("id", &RoomEntitiesPage::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("display_order", &RoomEntitiesPage::display_order),
@@ -125,11 +127,12 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("id", &NSPanel::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("friendly_name", &NSPanel::friendly_name),
                                                                               sqlite_orm::make_column("mac_address", &NSPanel::mac_address),
+                                                                              sqlite_orm::make_column("model", &NSPanel::model),
                                                                               sqlite_orm::make_column("room_id", &NSPanel::room_id),
                                                                               sqlite_orm::make_column("version", &NSPanel::version),
-                                                                              sqlite_orm::make_column("button1_detached_mode_light_id", &NSPanel::button1_detached_mode_light_id),
+                                                                              sqlite_orm::make_column("button1_detached_mode_entity_id", &NSPanel::button1_detached_mode_entity_id),
                                                                               sqlite_orm::make_column("button1_mode", &NSPanel::button1_mode),
-                                                                              sqlite_orm::make_column("button2_detached_mode_light_id", &NSPanel::button2_detached_mode_light_id),
+                                                                              sqlite_orm::make_column("button2_detached_mode_entity_id", &NSPanel::button2_detached_mode_entity_id),
                                                                               sqlite_orm::make_column("button2_mode", &NSPanel::button2_mode),
                                                                               sqlite_orm::make_column("md5_data_file", &NSPanel::md5_data_file),
                                                                               sqlite_orm::make_column("md5_firmware", &NSPanel::md5_firmware),
@@ -174,7 +177,36 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("room_id", &Entity::room_id)));
 
 static void init() {
+
+#if defined(TEST_MODE) && TEST_MODE == 1
+  SPDLOG_INFO("Running database /tmp/nspanelmanager_db_test.sqlite3 as it's in TEST_MODE. Syncing schema...");
+  auto result = database_manager::database.sync_schema();
+  SPDLOG_INFO("Sync schema result:");
+  for (auto &n : result) {
+    switch (n.second) {
+    case sqlite_orm::sync_schema_result::new_table_created:
+      SPDLOG_INFO("Created table {}", n.first);
+      break;
+    case sqlite_orm::sync_schema_result::already_in_sync:
+      SPDLOG_INFO("Table {} already in sync", n.first);
+      break;
+    case sqlite_orm::sync_schema_result::old_columns_removed:
+      SPDLOG_INFO("Removed old columns from table {}", n.first);
+      break;
+    case sqlite_orm::sync_schema_result::new_columns_added:
+      SPDLOG_INFO("Added new columns to table {}", n.first);
+      break;
+    case sqlite_orm::sync_schema_result::new_columns_added_and_old_columns_removed:
+      SPDLOG_INFO("Added new columns and removed old columns from table {}", n.first);
+      break;
+    case sqlite_orm::sync_schema_result::dropped_and_recreated:
+      SPDLOG_INFO("Dropped and recreated table {}", n.first);
+      break;
+    }
+  }
+#else
   database_manager::database.open_forever();
+#endif
 }
 
 }; // namespace database_manager

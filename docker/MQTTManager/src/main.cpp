@@ -1,6 +1,7 @@
 #include "command_manager/command_manager.hpp"
 #include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
+#include "nextion_image_server/nextion_image_server.hpp"
 #include "openhab_manager/openhab_manager.hpp"
 #include "spdlog/sinks/ansicolor_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
@@ -25,12 +26,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 #include <thread>
 #include <vector>
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+#include <gtest/gtest.h>
+#endif
+
 #define SIGUSR1 10
-std::string last_time_published;
-std::string last_date_published;
 
 void sigusr1_handler(int signal) {
   if (signal == SIGUSR1) {
@@ -62,10 +66,10 @@ void publish_time_and_date() {
     std::string date_str;
 
     std::time_t time = std::time({});
-    std::strftime(date_buffer, 100, MqttManagerConfig::get_settings().date_format.c_str(), std::localtime(&time));
+    std::strftime(date_buffer, 100, MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::DATE_FORMAT).c_str(), std::localtime(&time));
     date_str = date_buffer;
 
-    if (MqttManagerConfig::get_settings().clock_24_hour_format) {
+    if (!MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::CLOCK_US_STYLE)) [[likely]] {
       std::strftime(time_buffer, 20, "%H:%M", std::localtime(&time));
       time_str = time_buffer;
     } else {
@@ -74,26 +78,54 @@ void publish_time_and_date() {
       time_str = time_buffer;
     }
 
-    if (time_str.compare(last_time_published) != 0) {
-      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/time", MqttManagerConfig::get_settings().manager_address), time_buffer, true);
-      if (MqttManagerConfig::get_settings().clock_24_hour_format) {
-        MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_settings().manager_address), "", true);
-      } else {
-        MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_settings().manager_address), ampm_buffer, true);
+    MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/time", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), time_buffer, true);
+    if (!MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::CLOCK_US_STYLE)) [[likely]] {
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), "", true);
+    } else {
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), ampm_buffer, true);
+    }
+
+    MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/date", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), date_buffer, true);
+
+    // Sleep until next minute
+    auto t_now = std::chrono::system_clock::now();
+    auto t_now_c = std::chrono::system_clock::to_time_t(t_now);
+    std::tm next_minute_tm = *std::localtime(&t_now_c);
+    next_minute_tm.tm_sec = 1; // Always wait to minute change over and not the exact same second
+
+    next_minute_tm.tm_min++;
+    if (next_minute_tm.tm_min >= 60) { // We went over to next hour
+      next_minute_tm.tm_min = 0;
+      next_minute_tm.tm_hour++;
+      if (next_minute_tm.tm_hour >= 24) { // We went over to next day
+        next_minute_tm.tm_hour = 0;
+
+        // Handle day change
+        if (next_minute_tm.tm_mday >= 32) { // We went over to next month
+          next_minute_tm.tm_mday = 1;
+          next_minute_tm.tm_mon++;
+          if (next_minute_tm.tm_mon >= 12) { // We went over to next year
+            next_minute_tm.tm_mon = 0;
+            next_minute_tm.tm_year++;
+          }
+        }
       }
-      last_time_published = time_buffer;
     }
 
-    if (date_str.compare(last_date_published) != 0) {
-      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/date", MqttManagerConfig::get_settings().manager_address), date_buffer, true);
-      last_date_published = date_buffer;
-    }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    auto t_next_minute = std::chrono::system_clock::from_time_t(std::mktime(&next_minute_tm));
+    std::this_thread::sleep_until(t_next_minute);
   }
 }
 
-int main(void) {
+int main(int argc, char *argv[]) {
+// If we are in test mode, don't start the MQTTManager. Simply run all test then exit.
+#if defined(TEST_MODE) && TEST_MODE == 1
+  database_manager::init();
+
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+#endif
+
   SPDLOG_INFO("Starting MQTTManager.");
 
   std::filesystem::path log_partition_path = "/dev/shm/";
@@ -172,9 +204,13 @@ int main(void) {
   std::thread openhab_manager_thread;
   std::thread websocket_server_thread;
   std::thread time_and_date_thread;
+  std::thread nextion_image_server_thread;
 
   SPDLOG_INFO("Starting Websocket Server on port 8002.");
   websocket_server_thread = std::thread(WebsocketServer::start);
+
+  SPDLOG_INFO("Starting Nextion Image Server on port 8003.");
+  nextion_image_server_thread = std::thread(NextionImageServer::start);
 
   SPDLOG_INFO("Config loaded. Starting components.");
 

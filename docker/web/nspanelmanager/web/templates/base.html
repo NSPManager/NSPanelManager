@@ -25,11 +25,18 @@
   <link rel="stylesheet" href="{{ ingress_path }}{% static 'base.css' %}?refresh={% now 'U' %}?version={{ version }}">
   <link rel="stylesheet" href="{{ ingress_path }}{% static 'jquery-ui-1.14.1.custom/jquery-ui.min.css' %}?refresh={% now 'U' %}?version={{ version }}">
 
-  <script>
-  </script>
+  <style>
+  @font-face {
+      font-family: "nspm-mdi";
+      src: url("{% static 'MaterialDesignSmartHome_nspm_custom.ttf' %}");
 
+  }
 
-  <!-- <script type="module" src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"></script> -->
+  .font-nspm-mdi {
+      font-family: "nspm-mdi";
+  }
+  </style>
+
   {% block head %}
   {% endblock %}
   <title>NSPanelManager</title>

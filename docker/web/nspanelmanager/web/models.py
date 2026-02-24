@@ -1,8 +1,9 @@
-from logging import NullHandler
-from requests.models import default_hooks
-from django.db import models
 from datetime import datetime
+from logging import NullHandler
+
 import django.utils
+from django.db import models
+from requests.models import default_hooks
 
 
 class Settings(models.Model):
@@ -19,7 +20,7 @@ class NSPanelSettings(models.Model):
     value = models.CharField(max_length=255)
 
     def __str__(self) -> str:
-        return F"{self.nspanel.friendly_name}::{self.name}"
+        return f"{self.nspanel.friendly_name}::{self.name}"
 
 
 class Room(models.Model):
@@ -43,21 +44,29 @@ class Room(models.Model):
 class RoomEntitiesPage(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
     display_order = models.IntegerField()
-    page_type = models.IntegerField() # Is this page displaying 4, 8 or 12 entities?
+    page_type = models.IntegerField()  # Is this page displaying 4, 8 or 12 entities?
     is_scenes_page = models.BooleanField(default=False)
 
 
 class NSPanel(models.Model):
+    class NSPanelModel(models.TextChoices):
+        SONOFF = "sonoff"
+        CUSTOM = "custom"
+        WEB = "web"
+
     mac_address = models.CharField(max_length=17)
     friendly_name = models.CharField(max_length=100)
     version = models.CharField(max_length=15, default="")
+    model = models.CharField(max_length=32, choices=NSPanelModel.choices)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     button1_mode = models.IntegerField(default=0)
-    button1_detached_mode_light = models.ForeignKey(
-        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
+    button1_detached_mode_entity = models.ForeignKey(
+        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+"
+    )
     button2_mode = models.IntegerField(default=0)
-    button2_detached_mode_light = models.ForeignKey(
-        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
+    button2_detached_mode_entity = models.ForeignKey(
+        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+"
+    )
     md5_firmware = models.CharField(max_length=64, default="")
     md5_data_file = models.CharField(max_length=64, default="")
     md5_tft_file = models.CharField(max_length=64, default="")
@@ -66,6 +75,7 @@ class NSPanel(models.Model):
 
     def __str__(self) -> str:
         return self.friendly_name
+
 
 def _default_nspanel_status_data():
     pass
@@ -77,7 +87,9 @@ class RelayGroup(models.Model):
 
 
 class RelayGroupBinding(models.Model):
-    relay_group = models.ForeignKey(RelayGroup, on_delete=models.CASCADE, null=True, default=None)
+    relay_group = models.ForeignKey(
+        RelayGroup, on_delete=models.CASCADE, null=True, default=None
+    )
     nspanel = models.ForeignKey(NSPanel, on_delete=models.CASCADE)
     relay_num = models.IntegerField(default=1)
 
@@ -87,10 +99,13 @@ class Entity(models.Model):
         LIGHT = "light"
         SWITCH = "switch"
         BUTTON = "button"
+        THERMOSTAT = "thermostat"
 
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     friendly_name = models.CharField(max_length=255, default="")
-    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE, null=True)
+    entities_page = models.ForeignKey(
+        RoomEntitiesPage, on_delete=models.CASCADE, null=True
+    )
     room_view_position = models.IntegerField(default=0)
     entity_type = models.CharField(max_length=64, choices=EntityType)
     entity_data = models.JSONField(default=dict)
@@ -103,7 +118,9 @@ class Scene(models.Model):
     scene_type = models.CharField(max_length=64)
     room = models.ForeignKey(Room, null=True, blank=True, on_delete=models.CASCADE)
     room_view_position = models.IntegerField()
-    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE, null=True)
+    entities_page = models.ForeignKey(
+        RoomEntitiesPage, on_delete=models.CASCADE, null=True
+    )
 
 
 class LightState(models.Model):
@@ -114,6 +131,7 @@ class LightState(models.Model):
     color_temperature = models.IntegerField(default=4000)
     hue = models.IntegerField(default=0)
     saturation = models.IntegerField(default=0)
+
 
 class Message(models.Model):
     title = models.CharField(max_length=255)

@@ -1,7 +1,7 @@
 #!/bin/bash
 DEST_DIR_MQTTMANAGER=/MQTTManager/include/protobuf/
 DEST_DIR_DJANGO=/usr/src/app/nspanelmanager/web/protobuf/
-DEST_DIR_FIRMWARE=/full_git/firmware/firmware_espidf/lib/ProtoBuf/
+DEST_DIR_FIRMWARE=/full_git/protobuf_firmware/
 SRC_FILES=('protobuf_mqttmanager.proto' 'protobuf_general.proto' 'protobuf_formats.proto')
 
 for SRC_FILE in ${SRC_FILES[@]}; do

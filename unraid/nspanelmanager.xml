@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<Container version="2">
+    <Name>NSPanelManager</Name>
+    <Repository>nspanelmanager/nspanelmanager-amd64</Repository>
+    <Registry>https://hub.docker.com/r/nspanelmanager/nspanelmanager-amd64</Registry>
+    <Network>bridge</Network>
+    <MyIP/>
+    <Shell>sh</Shell>
+    <Privileged>false</Privileged>
+    <Support>https://forums.unraid.net/topic/184877-support-nspanel-manager/</Support>
+    <Project>https://nspanelmanager.com/</Project>
+    <Overview>NSPanel Manager is a custom software solution for the Sonoff NSPanel (not the NSPanel pro). The software is designed to be easy to use on a day-to-day basis and to easily manage multiple NSPanels around your home. The interface on the NSPanel itself has been designed to be intuitive to use for people of all ages and backgrounds.&#xD;
+        &#xD;
+        All the NSPanels that are installed with the NSPanel Manager solution communicate back to a Docker container that is used to manage the panels, NSPanel Manager specific solutions and also all communication back and forth to/from Home Assistant and/or OpenHAB.</Overview>
+    <Category>HomeAutomation:</Category>
+    <WebUI>http://[IP]:[PORT:8000]</WebUI>
+    <TemplateURL/>
+    <Icon>https://raw.githubusercontent.com/NSPManager/NSPanelManager/refs/heads/main/unraid/icon.png</Icon>
+    <ExtraParams/>
+    <PostArgs/>
+    <CPUset/>
+    <DateInstalled>1736861400</DateInstalled>
+    <DonateText/>
+    <DonateLink/>
+    <Requires/>
+    <Config Name="Web interface port" Target="8000" Default="8000" Mode="tcp" Description="" Type="Port" Display="always" Required="false" Mask="false">8000</Config>
+    <Config Name="Data directory" Target="/data" Default="/mnt/user/appdata/nspanelmanager" Mode="rw" Description="Directory that will contains the NSPanelManager data such as configuration, ..." Type="Path" Display="always" Required="false" Mask="false"/>
+</Container>

@@ -52,8 +52,8 @@ void Room::reload_config() {
       auto db_room = database_manager::database.get<database_manager::Room>(this->_id);
       this->_name = db_room.friendly_name;
       this->_display_order = db_room.display_order;
-      this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/state", MqttManagerConfig::get_settings().manager_address, this->_id);
-      this->_mqtt_temperature_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/temperature_state", MqttManagerConfig::get_settings().manager_address, this->_id);
+      this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/state", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS), this->_id);
+      this->_mqtt_temperature_state_topic = fmt::format("nspanel/mqttmanager_{}/room/{}/temperature_state", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS), this->_id);
 
       if (!db_room.room_temp_provider.empty() && !db_room.room_temp_sensor.empty()) {
         MQTT_MANAGER_ENTITY_CONTROLLER temperature_sensor_controller;
@@ -263,6 +263,13 @@ std::string Room::get_temperature_sensor_mqtt_topic() {
   return "";
 }
 
+std::expected<float, std::string> Room::get_temperature() {
+  if (!this->has_temperature_sensor()) {
+    return std::unexpected("No temperature sensor configured");
+  }
+  return this->_last_room_temperature_value;
+}
+
 void Room::page_changed_callback(RoomEntitiesPage *page) {
   this->_room_changed_callbacks(this);
   if (this->_send_status_updates) {
@@ -273,7 +280,7 @@ void Room::page_changed_callback(RoomEntitiesPage *page) {
 void Room::command_callback(NSPanelMQTTManagerCommand &command) {
   if (command.has_first_page_turn_on() && command.first_page_turn_on().selected_room() == this->_id && !command.first_page_turn_on().global()) {
     SPDLOG_DEBUG("Room {}:{} got command to turn lights on from first page.", this->_id, this->_name);
-    if (MqttManagerConfig::get_settings().optimistic_mode) {
+    if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
       SPDLOG_DEBUG("Optimistic mode enabled, will not send state updates via callbacks in room.");
       this->_send_status_updates = false;
     }
@@ -322,7 +329,7 @@ void Room::command_callback(NSPanelMQTTManagerCommand &command) {
       lights_list[i]->command_callback(cmd);
     }
 
-    if (MqttManagerConfig::get_settings().optimistic_mode) {
+    if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
       this->_send_room_state_update();
       this->_send_status_updates = true;
       SPDLOG_DEBUG("Optimistic mode enabled, reenabled send state updates via callbacks in room.");
@@ -437,9 +444,10 @@ void Room::_send_room_state_update() {
 
     if (num_kelvin_lights_total > 0) {
       float average_kelvin = (float)total_kelvin_level_all / num_kelvin_lights_total;
-      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
-      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
-      if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+      average_kelvin -= MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+      average_kelvin = std::max(average_kelvin, 0.0f);
+      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX) - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN))) * 100;
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::REVERSE_COLOR_TEMP)) {
         kelvin_pct = 100 - kelvin_pct;
       }
 
@@ -458,9 +466,9 @@ void Room::_send_room_state_update() {
 
     if (num_kelvin_lights_table > 0) {
       float average_kelvin = (float)total_kelvin_table / num_kelvin_lights_table;
-      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
-      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
-      if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+      average_kelvin -= MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX) - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN))) * 100;
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::REVERSE_COLOR_TEMP)) {
         kelvin_pct = 100 - kelvin_pct;
       }
 
@@ -480,9 +488,9 @@ void Room::_send_room_state_update() {
 
     if (num_kelvin_lights_ceiling > 0) {
       float average_kelvin = (float)total_kelvin_ceiling / num_kelvin_lights_ceiling;
-      average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
-      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
-      if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+      average_kelvin -= MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+      uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX) - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN))) * 100;
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::REVERSE_COLOR_TEMP)) {
         kelvin_pct = 100 - kelvin_pct;
       }
 
@@ -536,6 +544,7 @@ void Room::_room_temperature_state_change_callback(nlohmann::json data) {
 
       try {
         float temperature = std::stof(data["event"]["data"]["new_state"]["state"].get<std::string>());
+        this->_last_room_temperature_value = temperature;
         MQTT_Manager::publish(this->_mqtt_temperature_state_topic, fmt::format("{:.1f}", temperature), true);
       } catch (const std::invalid_argument &e) {
         SPDLOG_WARN("Failed to convert temperature to float. Will send raw string to panel.: {}", e.what());

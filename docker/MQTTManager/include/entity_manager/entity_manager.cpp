@@ -16,6 +16,8 @@
 #include "scenes/openhab_scene.hpp"
 #include "scenes/scene.hpp"
 #include "switch/switch.hpp"
+#include "thermostat/home_assistant_thermostat.hpp"
+#include "thermostat/openhab_thermostat.hpp"
 #include "web_helper/WebHelper.hpp"
 #include "websocket_server/websocket_server.hpp"
 #include <algorithm>
@@ -48,6 +50,7 @@
 #include <switch/openhab_switch.hpp>
 #include <switch/switch.hpp>
 #include <sys/types.h>
+#include <thermostat/thermostat.hpp>
 #include <thread>
 #include <vector>
 
@@ -84,6 +87,7 @@ void EntityManager::load_entities() {
 
   EntityManager::load_lights();
   EntityManager::load_buttons();
+  EntityManager::load_thermostats();
   EntityManager::load_switches();
   EntityManager::load_scenes();
   EntityManager::load_global_room_entities_pages();
@@ -253,6 +257,53 @@ void EntityManager::load_buttons() {
   SPDLOG_DEBUG("Loaded {} lights", button_ids.size());
 }
 
+void EntityManager::load_thermostats() {
+  auto thermostat_ids = database_manager::database.select(&database_manager::Entity::id, sqlite_orm::from<database_manager::Entity>(),
+                                                          sqlite_orm::where(sqlite_orm::glob(&database_manager::Entity::entity_type, "thermostat")));
+  SPDLOG_INFO("Loading {} thermostats.", thermostat_ids.size());
+
+  // Check if any existing thermostat has been removed.
+  EntityManager::_entities.erase(std::remove_if(EntityManager::_entities.begin(), EntityManager::_entities.end(), [&thermostat_ids](auto entity) {
+                                   return entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::THERMOSTAT && std::find_if(thermostat_ids.begin(), thermostat_ids.end(), [&entity](auto id) { return id == entity->get_id(); }) == thermostat_ids.end();
+                                 }),
+                                 EntityManager::_entities.end());
+
+  // Cause existing thermostats to reload config or add a new thermostat if it does not exist.
+  for (auto &thermostat_id : thermostat_ids) {
+    auto existing_thermostat = EntityManager::get_entity_by_id<ThermostatEntity>(MQTT_MANAGER_ENTITY_TYPE::THERMOSTAT, thermostat_id);
+    if (existing_thermostat) [[likely]] {
+      (*existing_thermostat)->reload_config();
+    } else {
+      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+
+      try {
+        auto thermostat_settings = database_manager::database.get<database_manager::Entity>(thermostat_id);
+        nlohmann::json entity_data = thermostat_settings.get_entity_data_json();
+        if (entity_data.contains("controller")) {
+          std::string controller = entity_data["controller"];
+          if (controller.compare("home_assistant") == 0) {
+            std::shared_ptr<ThermostatEntity> thermostat_entity = std::shared_ptr<ThermostatEntity>(new HomeAssistantThermostat(thermostat_settings.id));
+            SPDLOG_INFO("Thermostat {}::{} was found in database but not in config. Creating thermostat.", thermostat_entity->get_id(), thermostat_entity->get_name());
+            EntityManager::_entities.push_back(thermostat_entity);
+          } else if (controller.compare("openhab") == 0) {
+            std::shared_ptr<ThermostatEntity> thermostat_entity = std::shared_ptr<ThermostatEntity>(new OpenhabThermostat(thermostat_settings.id));
+            SPDLOG_INFO("Thermostat {}::{} was found in database but not in config. Creating thermostat.", thermostat_entity->get_id(), thermostat_entity->get_name());
+            EntityManager::_entities.push_back(thermostat_entity);
+          } else {
+            SPDLOG_ERROR("Unknown thermostat type '{}'. Will ignore entity.", controller);
+          }
+        } else {
+          SPDLOG_ERROR("Thermostat {}::{} does not define a controller!", thermostat_settings.id, thermostat_settings.friendly_name);
+        }
+      } catch (std::exception &e) {
+        SPDLOG_ERROR("Caught exception: {}", e.what());
+        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+      }
+    }
+  }
+  SPDLOG_DEBUG("Loaded {} thermostats", thermostat_ids.size());
+}
+
 void EntityManager::load_switches() {
   auto switch_ids = database_manager::database.select(&database_manager::Entity::id, sqlite_orm::from<database_manager::Entity>(),
                                                       sqlite_orm::where(sqlite_orm::glob(&database_manager::Entity::entity_type, "switch")));
@@ -316,21 +367,23 @@ void EntityManager::load_scenes() {
     if (existing_scene) [[likely]] {
       (*existing_scene)->reload_config();
     } else {
-      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
 
       try {
         auto scene_settings = database_manager::database.get<database_manager::Scene>(scene_id);
         if (scene_settings.scene_type.compare("home_assistant") == 0) {
           std::shared_ptr<HomeAssistantScene> scene = std::shared_ptr<HomeAssistantScene>(new HomeAssistantScene(scene_settings.id));
           SPDLOG_INFO("Scene {}::{} was found in database but not in config. Creating scene.", scene->get_id(), scene->get_name());
+          std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
           EntityManager::_entities.push_back(scene);
         } else if (scene_settings.scene_type.compare("openhab") == 0) {
           std::shared_ptr<OpenhabScene> scene = std::shared_ptr<OpenhabScene>(new OpenhabScene(scene_settings.id));
           SPDLOG_INFO("Scene {}::{} was found in database but not in config. Creating scene.", scene->get_id(), scene->get_name());
+          std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
           EntityManager::_entities.push_back(scene);
         } else if (scene_settings.scene_type.compare("nspm_scene") == 0) {
           std::shared_ptr<NSPMScene> scene = std::shared_ptr<NSPMScene>(new NSPMScene(scene_settings.id));
           SPDLOG_INFO("Scene {}::{} was found in database but not in config. Creating scene.", scene->get_id(), scene->get_name());
+          std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
           EntityManager::_entities.push_back(scene);
         } else {
           SPDLOG_ERROR("Unknown scene type '{}'. Will ignore entity.", scene_settings.scene_type);
@@ -440,7 +493,7 @@ void EntityManager::update_all_rooms_status() {
       });
     }
     // Wait until changes has settled as when a user changes light states in "All rooms" mode a burst of changes will occur from all rooms.
-    uint32_t backoff_time = std::stoi(MqttManagerConfig::get_setting_with_default("all_rooms_status_backoff_time", "250"));
+    uint32_t backoff_time = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::ALL_ROOMS_STATUS_BACKOFF_TIME);
     while (EntityManager::_last_room_update_time.load() + std::chrono::milliseconds(backoff_time) > std::chrono::system_clock::now()) {
       std::this_thread::sleep_for(EntityManager::_last_room_update_time.load() + std::chrono::milliseconds(backoff_time) - std::chrono::system_clock::now());
     }
@@ -529,9 +582,9 @@ void EntityManager::update_all_rooms_status() {
 
       if (num_kelvin_lights_total > 0) {
         float average_kelvin = (float)total_kelvin_level_all / num_kelvin_lights_total;
-        average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
-        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
-        if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+        average_kelvin -= MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX) - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN))) * 100;
+        if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::REVERSE_COLOR_TEMP)) {
           kelvin_pct = 100 - kelvin_pct;
         }
         all_rooms_status.set_average_color_temperature(kelvin_pct);
@@ -548,9 +601,9 @@ void EntityManager::update_all_rooms_status() {
 
       if (num_kelvin_lights_table > 0) {
         float average_kelvin = (float)total_kelvin_table / num_kelvin_lights_table;
-        average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
-        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
-        if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+        average_kelvin -= MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX) - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN))) * 100;
+        if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::REVERSE_COLOR_TEMP)) {
           kelvin_pct = 100 - kelvin_pct;
         }
 
@@ -568,10 +621,10 @@ void EntityManager::update_all_rooms_status() {
       all_rooms_status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling_on);
 
       if (num_kelvin_lights_ceiling > 0) {
-        float average_kelvin = (float)total_kelvin_ceiling / num_kelvin_lights_ceiling;
-        average_kelvin -= MqttManagerConfig::get_settings().color_temp_min;
-        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_settings().color_temp_max - MqttManagerConfig::get_settings().color_temp_min)) * 100;
-        if (MqttManagerConfig::get_settings().reverse_color_temperature_slider) {
+        float average_kelvin = (float)total_kelvin_table / num_kelvin_lights_table;
+        average_kelvin -= MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
+        uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX) - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN))) * 100;
+        if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::REVERSE_COLOR_TEMP)) {
           kelvin_pct = 100 - kelvin_pct;
         }
 
@@ -588,7 +641,7 @@ void EntityManager::update_all_rooms_status() {
     std::string all_rooms_status_string;
     if (all_rooms_status.SerializeToString(&all_rooms_status_string)) {
       SPDLOG_DEBUG("All rooms status updated. Waiting for next notify.");
-      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/all_rooms_status", MqttManagerConfig::get_settings().manager_address), all_rooms_status_string, true);
+      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/all_rooms_status", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), all_rooms_status_string, true);
       has_performed_initial_update = true;
     } else {
       SPDLOG_ERROR("Failed to serialize 'All rooms' status. Will try again next time there is a room status change.");
@@ -717,7 +770,7 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
 
               uint16_t average_light_brightness = total_light_brightness / room_entities.size();
               if (average_light_brightness == 0) {
-                average_light_brightness = std::stoi(MqttManagerConfig::get_setting_with_default("light_turn_on_brightness", "50"));
+                average_light_brightness = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::LIGHT_TURN_ON_BRIGHTNESS);
               }
 
               light_entity->set_brightness(average_light_brightness, false);

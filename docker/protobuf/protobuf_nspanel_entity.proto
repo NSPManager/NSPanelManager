@@ -22,7 +22,30 @@ message NSPanelEntityState {
         LightMode current_light_mode = 9;
     }
 
+    message Thermostat {
+        int32 thermostat_id = 1;
+        string name = 2;
+        float current_temperature = 3;
+        bool has_current_temperature = 4;
+        float set_temperature = 5;
+        float step_size = 6;
+
+        message ThermostatOption {
+            string name = 1;
+            string current_value = 2;
+            string current_icon = 3;
+            message ThermostatOptionValue {
+                string value = 1;
+                string icon = 2;
+            }
+
+            repeated ThermostatOptionValue options = 4;
+        }
+        repeated ThermostatOption options = 7;
+    }
+
     oneof entity {
         Light light = 1;
+        Thermostat thermostat = 2;
     }
 }

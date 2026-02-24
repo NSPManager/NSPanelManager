@@ -164,6 +164,51 @@ struct NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPageDefaultTypeInternal
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPageDefaultTypeInternal _NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage_default_instance_;
 
+inline constexpr NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : thermostat_id_{0},
+        temperature_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct NSPanelMQTTManagerCommand_ThermostatTemperatureCommandDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_ThermostatTemperatureCommandDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~NSPanelMQTTManagerCommand_ThermostatTemperatureCommandDefaultTypeInternal() {}
+  union {
+    NSPanelMQTTManagerCommand_ThermostatTemperatureCommand _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelMQTTManagerCommand_ThermostatTemperatureCommandDefaultTypeInternal _NSPanelMQTTManagerCommand_ThermostatTemperatureCommand_default_instance_;
+
+inline constexpr NSPanelMQTTManagerCommand_ThermostatCommand::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : option_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        new_value_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        thermostat_id_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_ThermostatCommand::NSPanelMQTTManagerCommand_ThermostatCommand(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct NSPanelMQTTManagerCommand_ThermostatCommandDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_ThermostatCommandDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~NSPanelMQTTManagerCommand_ThermostatCommandDefaultTypeInternal() {}
+  union {
+    NSPanelMQTTManagerCommand_ThermostatCommand _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelMQTTManagerCommand_ThermostatCommandDefaultTypeInternal _NSPanelMQTTManagerCommand_ThermostatCommand_default_instance_;
+
 inline constexpr NSPanelMQTTManagerCommand_SaveSceneCommand::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : entity_page_id_{0},
@@ -392,6 +437,10 @@ inline constexpr NSPanelStatusReport::Impl_::Impl_(
         rssi_{0},
         heap_used_pct_{0},
         temperature_{0},
+        humidity_{0},
+        has_humidity_{false},
+        has_pressure_{false},
+        pressure_{0},
         _cached_size_{0} {}
 
 template <typename>
@@ -494,6 +543,10 @@ inline constexpr NSPanelConfig::Impl_::Impl_(
         optimistic_mode_{false},
         locked_to_default_room_{false},
         default_light_brightess_{0},
+        button1_lower_temperature_{0},
+        button1_upper_temperature_{0},
+        button2_lower_temperature_{0},
+        button2_upper_temperature_{0},
         _cached_size_{0} {}
 
 template <typename>
@@ -566,6 +619,10 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.default_light_brightess_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.locked_to_default_room_),
         PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.inside_temperature_sensor_mqtt_topic_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.button1_lower_temperature_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.button1_upper_temperature_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.button2_lower_temperature_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelConfig, _impl_.button2_upper_temperature_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelWarning, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -595,6 +652,10 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.md5_firmware_),
         PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.md5_littlefs_),
         PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.md5_tft_gui_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.has_humidity_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.humidity_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.has_pressure_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelStatusReport, _impl_.pressure_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelLightStatus, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -762,6 +823,27 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ButtonPressed, _impl_.button_id_),
         ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand, _impl_.thermostat_id_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand, _impl_.temperature_),
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ThermostatCommand, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ThermostatCommand, _impl_.thermostat_id_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ThermostatCommand, _impl_.option_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_ThermostatCommand, _impl_.new_value_),
+        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand, _internal_metadata_),
         ~0u,  // no _extensions_
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand, _impl_._oneof_case_[0]),
@@ -769,6 +851,8 @@ const ::uint32_t
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
+        ::_pbi::kInvalidFieldOffsetTag,
+        ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
@@ -783,21 +867,23 @@ static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::NSPanelConfig_RoomInfo)},
         {11, -1, -1, sizeof(::NSPanelConfig)},
-        {51, -1, -1, sizeof(::NSPanelWarning)},
-        {61, -1, -1, sizeof(::NSPanelStatusReport)},
-        {80, -1, -1, sizeof(::NSPanelLightStatus)},
-        {98, -1, -1, sizeof(::NSPanelRoomEntitiesPage_EntitySlot)},
-        {113, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
-        {125, -1, -1, sizeof(::NSPanelRoomStatus)},
-        {146, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
-        {159, -1, -1, sizeof(::NSPanelWeatherUpdate)},
-        {175, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
-        {190, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
-        {200, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
-        {217, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
-        {227, -1, -1, sizeof(::NSPanelMQTTManagerCommand_SaveSceneCommand)},
-        {237, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonPressed)},
-        {246, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {55, -1, -1, sizeof(::NSPanelWarning)},
+        {65, -1, -1, sizeof(::NSPanelStatusReport)},
+        {88, -1, -1, sizeof(::NSPanelLightStatus)},
+        {106, -1, -1, sizeof(::NSPanelRoomEntitiesPage_EntitySlot)},
+        {121, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
+        {133, -1, -1, sizeof(::NSPanelRoomStatus)},
+        {154, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
+        {167, -1, -1, sizeof(::NSPanelWeatherUpdate)},
+        {183, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
+        {198, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
+        {208, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
+        {225, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
+        {235, -1, -1, sizeof(::NSPanelMQTTManagerCommand_SaveSceneCommand)},
+        {245, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonPressed)},
+        {254, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand)},
+        {264, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatCommand)},
+        {275, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelConfig_RoomInfo_default_instance_._instance,
@@ -816,11 +902,13 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_SaveSceneCommand_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_ButtonPressed_default_instance_._instance,
+    &::_NSPanelMQTTManagerCommand_ThermostatTemperatureCommand_default_instance_._instance,
+    &::_NSPanelMQTTManagerCommand_ThermostatCommand_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_default_instance_._instance,
 };
 const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\026protobuf_nspanel.proto\"\330\013\n\rNSPanelConf"
+    "\n\026protobuf_nspanel.proto\"\216\r\n\rNSPanelConf"
     "ig\022\014\n\004name\030\001 \001(\t\022\024\n\014default_room\030\002 \001(\005\0227"
     "\n\014default_page\030\003 \001(\0162!.NSPanelConfig.NSP"
     "anelDefaultPage\022&\n\036screensaver_activatio"
@@ -848,111 +936,125 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "_group\030# \003(\005\022\032\n\022relay2_relay_group\030% \003(\005"
     "\022\037\n\027default_light_brightess\030& \001(\005\022\036\n\026loc"
     "ked_to_default_room\030\' \001(\010\022,\n$inside_temp"
-    "erature_sensor_mqtt_topic\030( \001(\t\032L\n\010RoomI"
-    "nfo\022\017\n\007room_id\030\001 \001(\005\022\027\n\017entity_page_ids\030"
-    "\002 \003(\005\022\026\n\016scene_page_ids\030\003 \003(\005\"8\n\022NSPanel"
-    "DefaultPage\022\010\n\004HOME\020\000\022\n\n\006SCENES\020\001\022\014\n\010ENT"
-    "ITIES\020\002\"\250\001\n\026NSPanelScreensaverMode\022\033\n\027WE"
-    "ATHER_WITH_BACKGROUND\020\000\022\036\n\032WEATHER_WITHO"
-    "UT_BACKGROUND\020\001\022\034\n\030DATETIME_WITH_BACKGRO"
-    "UND\020\003\022\037\n\033DATETIME_WITHOUT_BACKGROUND\020\004\022\022"
-    "\n\016NO_SCREENSAVER\020\005\"\?\n\021NSPanelButtonMode\022"
-    "\n\n\006DIRECT\020\000\022\n\n\006FOLLOW\020\001\022\022\n\016NOTIFY_MANAGE"
-    "R\020\002\"C\n\016NSPanelWarning\022#\n\005level\030\001 \001(\0162\024.N"
-    "SPanelWarningLevel\022\014\n\004text\030\002 \001(\t\"\212\003\n\023NSP"
-    "anelStatusReport\0221\n\rnspanel_state\030\001 \001(\0162"
-    "\032.NSPanelStatusReport.state\022\027\n\017update_pr"
-    "ogress\030\002 \001(\005\022\014\n\004rssi\030\003 \001(\005\022\025\n\rheap_used_"
-    "pct\030\004 \001(\005\022\023\n\013mac_address\030\005 \001(\t\022\023\n\013temper"
-    "ature\030\006 \001(\002\022\022\n\nip_address\030\007 \001(\t\022!\n\010warni"
-    "ngs\030\010 \003(\0132\017.NSPanelWarning\022\024\n\014md5_firmwa"
-    "re\030\t \001(\t\022\024\n\014md5_littlefs\030\n \001(\t\022\023\n\013md5_tf"
-    "t_gui\030\013 \001(\t\"`\n\005state\022\n\n\006ONLINE\020\000\022\013\n\007OFFL"
-    "INE\020\001\022\020\n\014UPDATING_TFT\020\002\022\025\n\021UPDATING_FIRM"
-    "WARE\020\003\022\025\n\021UPDATING_LITTLEFS\020\004\"\325\001\n\022NSPane"
-    "lLightStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\017"
-    "\n\007can_dim\030\003 \001(\010\022\035\n\025can_color_temperature"
-    "\030\004 \001(\010\022\017\n\007can_rgb\030\005 \001(\010\022\023\n\013light_level\030\006"
-    " \001(\005\022\022\n\ncolor_temp\030\007 \001(\005\022\013\n\003hue\030\010 \001(\005\022\022\n"
-    "\nsaturation\030\t \001(\005\022\032\n\022room_view_position\030"
-    "\n \001(\005\"\230\002\n\027NSPanelRoomEntitiesPage\022\n\n\002id\030"
-    "\001 \001(\005\022\021\n\tpage_type\030\002 \001(\005\022\023\n\013header_text\030"
-    "\003 \001(\t\0225\n\010entities\030\004 \003(\0132#.NSPanelRoomEnt"
-    "itiesPage.EntitySlot\032\221\001\n\nEntitySlot\022\032\n\022r"
-    "oom_view_position\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\014\n"
-    "\004icon\030\003 \001(\t\022\013\n\003pco\030\004 \001(\005\022\014\n\004pco2\030\005 \001(\005\022\026"
-    "\n\016can_save_scene\030\006 \001(\010\022\030\n\020mqtt_state_top"
-    "ic\030\007 \001(\t\"\226\003\n\021NSPanelRoomStatus\022\n\n\002id\030\001 \001"
-    "(\005\022\014\n\004name\030\002 \001(\t\022\031\n\021average_dim_level\030\003 "
-    "\001(\005\022 \n\030ceiling_lights_dim_level\030\004 \001(\005\022\036\n"
-    "\026table_lights_dim_level\030\005 \001(\005\022!\n\031average"
-    "_color_temperature\030\006 \001(\005\022.\n&ceiling_ligh"
-    "ts_color_temperature_value\030\007 \001(\005\022,\n$tabl"
-    "e_lights_color_temperature_value\030\010 \001(\005\022\032"
-    "\n\022num_ceiling_lights\030\t \001(\005\022\030\n\020num_table_"
-    "lights\030\n \001(\005\022\035\n\025num_ceiling_lights_on\030\013 "
-    "\001(\005\022\033\n\023num_table_lights_on\030\014 \001(\005\022\027\n\017enti"
-    "ty_page_ids\030\r \003(\005\"\277\003\n\024NSPanelWeatherUpda"
-    "te\022:\n\016forecast_items\030\001 \003(\0132\".NSPanelWeat"
-    "herUpdate.ForecastItem\022\034\n\024current_weathe"
-    "r_icon\030\002 \001(\t\022\"\n\032current_temperature_stri"
-    "ng\030\003 \001(\t\022\"\n\032current_maxmin_temperature\030\004"
-    " \001(\t\022\033\n\023current_wind_string\030\005 \001(\t\022\026\n\016sun"
-    "rise_string\030\006 \001(\t\022\025\n\rsunset_string\030\007 \001(\t"
-    "\022$\n\034current_precipitation_string\030\010 \001(\t\032\222"
-    "\001\n\014ForecastItem\022\024\n\014weather_icon\030\001 \001(\t\022\034\n"
-    "\024precipitation_string\030\002 \001(\t\022!\n\031temperatu"
-    "re_maxmin_string\030\003 \001(\t\022\023\n\013wind_string\030\004 "
-    "\001(\t\022\026\n\016display_string\030\005 \001(\t\"\315\n\n\031NSPanelM"
-    "QTTManagerCommand\022M\n\022first_page_turn_on\030"
-    "\001 \001(\0132/.NSPanelMQTTManagerCommand.FirstP"
-    "ageTurnLightOnH\000\022O\n\023first_page_turn_off\030"
-    "\002 \001(\01320.NSPanelMQTTManagerCommand.FirstP"
-    "ageTurnLightOffH\000\022@\n\rlight_command\030\003 \001(\013"
-    "2\'.NSPanelMQTTManagerCommand.LightComman"
-    "dH\000\022c\n toggle_entity_from_entities_page\030"
-    "\004 \001(\01327.NSPanelMQTTManagerCommand.Toggle"
-    "EntityFromEntitiesPageH\000\022I\n\022save_scene_c"
-    "ommand\030\005 \001(\0132+.NSPanelMQTTManagerCommand"
-    ".SaveSceneCommandH\000\022B\n\016button_pressed\030\006 "
-    "\001(\0132(.NSPanelMQTTManagerCommand.ButtonPr"
-    "essedH\000\022\022\n\nnspanel_id\030d \001(\005\032\372\001\n\024FirstPag"
-    "eTurnLightOn\022E\n\raffect_lights\030\001 \001(\0162..NS"
-    "PanelMQTTManagerCommand.AffectLightsOpti"
-    "ons\022\037\n\027brightness_slider_value\030\002 \001(\005\022\033\n\023"
-    "kelvin_slider_value\030\003 \001(\005\022\025\n\rselected_ro"
-    "om\030\004 \001(\005\022\016\n\006global\030\005 \001(\010\022\034\n\024has_brightne"
-    "ss_value\030\006 \001(\010\022\030\n\020has_kelvin_value\030\007 \001(\010"
-    "\032n\n\025FirstPageTurnLightOff\022E\n\raffect_ligh"
-    "ts\030\001 \001(\0162..NSPanelMQTTManagerCommand.Aff"
-    "ectLightsOptions\022\016\n\006global\030\002 \001(\010\032\321\001\n\014Lig"
-    "htCommand\022\021\n\tlight_ids\030\001 \003(\005\022\026\n\016has_brig"
-    "htness\030\002 \001(\010\022\022\n\nbrightness\030\003 \001(\005\022\035\n\025has_"
-    "color_temperature\030\004 \001(\010\022\031\n\021color_tempera"
-    "ture\030\005 \001(\005\022\017\n\007has_hue\030\006 \001(\010\022\013\n\003hue\030\007 \001(\005"
-    "\022\026\n\016has_saturation\030\010 \001(\010\022\022\n\nsaturation\030\t"
-    " \001(\005\032K\n\034ToggleEntityFromEntitiesPage\022\026\n\016"
-    "entity_page_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001("
-    "\005\032\?\n\020SaveSceneCommand\022\026\n\016entity_page_id\030"
-    "\001 \001(\005\022\023\n\013entity_slot\030\002 \001(\005\032\"\n\rButtonPres"
-    "sed\022\021\n\tbutton_id\030\002 \001(\005\"D\n\023AffectLightsOp"
-    "tions\022\007\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020\001\022\022\n\016CEIL"
-    "ING_LIGHTS\020\002B\r\n\013CommandData*[\n\023NSPanelWa"
-    "rningLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ERROR\020\001\022\013\n\007W"
-    "ARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n\005TRACE\020\005"
-    "b\006proto3"
+    "erature_sensor_mqtt_topic\030( \001(\t\022!\n\031butto"
+    "n1_lower_temperature\030) \001(\005\022!\n\031button1_up"
+    "per_temperature\030* \001(\005\022!\n\031button2_lower_t"
+    "emperature\030+ \001(\005\022!\n\031button2_upper_temper"
+    "ature\030, \001(\005\032L\n\010RoomInfo\022\017\n\007room_id\030\001 \001(\005"
+    "\022\027\n\017entity_page_ids\030\002 \003(\005\022\026\n\016scene_page_"
+    "ids\030\003 \003(\005\"8\n\022NSPanelDefaultPage\022\010\n\004HOME\020"
+    "\000\022\n\n\006SCENES\020\001\022\014\n\010ENTITIES\020\002\"\250\001\n\026NSPanelS"
+    "creensaverMode\022\033\n\027WEATHER_WITH_BACKGROUN"
+    "D\020\000\022\036\n\032WEATHER_WITHOUT_BACKGROUND\020\001\022\034\n\030D"
+    "ATETIME_WITH_BACKGROUND\020\003\022\037\n\033DATETIME_WI"
+    "THOUT_BACKGROUND\020\004\022\022\n\016NO_SCREENSAVER\020\005\"i"
+    "\n\021NSPanelButtonMode\022\n\n\006DIRECT\020\000\022\n\n\006FOLLO"
+    "W\020\001\022\022\n\016NOTIFY_MANAGER\020\002\022\023\n\017THERMOSTAT_HE"
+    "AT\020\003\022\023\n\017THERMOSTAT_COOL\020\004\"C\n\016NSPanelWarn"
+    "ing\022#\n\005level\030\001 \001(\0162\024.NSPanelWarningLevel"
+    "\022\014\n\004text\030\002 \001(\t\"\332\003\n\023NSPanelStatusReport\0221"
+    "\n\rnspanel_state\030\001 \001(\0162\032.NSPanelStatusRep"
+    "ort.state\022\027\n\017update_progress\030\002 \001(\005\022\014\n\004rs"
+    "si\030\003 \001(\005\022\025\n\rheap_used_pct\030\004 \001(\005\022\023\n\013mac_a"
+    "ddress\030\005 \001(\t\022\023\n\013temperature\030\006 \001(\002\022\022\n\nip_"
+    "address\030\007 \001(\t\022!\n\010warnings\030\010 \003(\0132\017.NSPane"
+    "lWarning\022\024\n\014md5_firmware\030\t \001(\t\022\024\n\014md5_li"
+    "ttlefs\030\n \001(\t\022\023\n\013md5_tft_gui\030\013 \001(\t\022\024\n\014has"
+    "_humidity\030\014 \001(\010\022\020\n\010humidity\030\r \001(\002\022\024\n\014has"
+    "_pressure\030\016 \001(\010\022\020\n\010pressure\030\017 \001(\002\"`\n\005sta"
+    "te\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE\020\001\022\020\n\014UPDATING_"
+    "TFT\020\002\022\025\n\021UPDATING_FIRMWARE\020\003\022\025\n\021UPDATING"
+    "_LITTLEFS\020\004\"\325\001\n\022NSPanelLightStatus\022\n\n\002id"
+    "\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\017\n\007can_dim\030\003 \001(\010\022\035\n"
+    "\025can_color_temperature\030\004 \001(\010\022\017\n\007can_rgb\030"
+    "\005 \001(\010\022\023\n\013light_level\030\006 \001(\005\022\022\n\ncolor_temp"
+    "\030\007 \001(\005\022\013\n\003hue\030\010 \001(\005\022\022\n\nsaturation\030\t \001(\005\022"
+    "\032\n\022room_view_position\030\n \001(\005\"\230\002\n\027NSPanelR"
+    "oomEntitiesPage\022\n\n\002id\030\001 \001(\005\022\021\n\tpage_type"
+    "\030\002 \001(\005\022\023\n\013header_text\030\003 \001(\t\0225\n\010entities\030"
+    "\004 \003(\0132#.NSPanelRoomEntitiesPage.EntitySl"
+    "ot\032\221\001\n\nEntitySlot\022\032\n\022room_view_position\030"
+    "\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\014\n\004icon\030\003 \001(\t\022\013\n\003pco"
+    "\030\004 \001(\005\022\014\n\004pco2\030\005 \001(\005\022\026\n\016can_save_scene\030\006"
+    " \001(\010\022\030\n\020mqtt_state_topic\030\007 \001(\t\"\226\003\n\021NSPan"
+    "elRoomStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\031"
+    "\n\021average_dim_level\030\003 \001(\005\022 \n\030ceiling_lig"
+    "hts_dim_level\030\004 \001(\005\022\036\n\026table_lights_dim_"
+    "level\030\005 \001(\005\022!\n\031average_color_temperature"
+    "\030\006 \001(\005\022.\n&ceiling_lights_color_temperatu"
+    "re_value\030\007 \001(\005\022,\n$table_lights_color_tem"
+    "perature_value\030\010 \001(\005\022\032\n\022num_ceiling_ligh"
+    "ts\030\t \001(\005\022\030\n\020num_table_lights\030\n \001(\005\022\035\n\025nu"
+    "m_ceiling_lights_on\030\013 \001(\005\022\033\n\023num_table_l"
+    "ights_on\030\014 \001(\005\022\027\n\017entity_page_ids\030\r \003(\005\""
+    "\277\003\n\024NSPanelWeatherUpdate\022:\n\016forecast_ite"
+    "ms\030\001 \003(\0132\".NSPanelWeatherUpdate.Forecast"
+    "Item\022\034\n\024current_weather_icon\030\002 \001(\t\022\"\n\032cu"
+    "rrent_temperature_string\030\003 \001(\t\022\"\n\032curren"
+    "t_maxmin_temperature\030\004 \001(\t\022\033\n\023current_wi"
+    "nd_string\030\005 \001(\t\022\026\n\016sunrise_string\030\006 \001(\t\022"
+    "\025\n\rsunset_string\030\007 \001(\t\022$\n\034current_precip"
+    "itation_string\030\010 \001(\t\032\222\001\n\014ForecastItem\022\024\n"
+    "\014weather_icon\030\001 \001(\t\022\034\n\024precipitation_str"
+    "ing\030\002 \001(\t\022!\n\031temperature_maxmin_string\030\003"
+    " \001(\t\022\023\n\013wind_string\030\004 \001(\t\022\026\n\016display_str"
+    "ing\030\005 \001(\t\"\227\r\n\031NSPanelMQTTManagerCommand\022"
+    "M\n\022first_page_turn_on\030\001 \001(\0132/.NSPanelMQT"
+    "TManagerCommand.FirstPageTurnLightOnH\000\022O"
+    "\n\023first_page_turn_off\030\002 \001(\01320.NSPanelMQT"
+    "TManagerCommand.FirstPageTurnLightOffH\000\022"
+    "@\n\rlight_command\030\003 \001(\0132\'.NSPanelMQTTMana"
+    "gerCommand.LightCommandH\000\022c\n toggle_enti"
+    "ty_from_entities_page\030\004 \001(\01327.NSPanelMQT"
+    "TManagerCommand.ToggleEntityFromEntities"
+    "PageH\000\022I\n\022save_scene_command\030\005 \001(\0132+.NSP"
+    "anelMQTTManagerCommand.SaveSceneCommandH"
+    "\000\022B\n\016button_pressed\030\006 \001(\0132(.NSPanelMQTTM"
+    "anagerCommand.ButtonPressedH\000\022a\n\036thermos"
+    "tat_temperature_command\030\007 \001(\01327.NSPanelM"
+    "QTTManagerCommand.ThermostatTemperatureC"
+    "ommandH\000\022J\n\022thermostat_command\030\010 \001(\0132,.N"
+    "SPanelMQTTManagerCommand.ThermostatComma"
+    "ndH\000\022\022\n\nnspanel_id\030d \001(\005\032\372\001\n\024FirstPageTu"
+    "rnLightOn\022E\n\raffect_lights\030\001 \001(\0162..NSPan"
+    "elMQTTManagerCommand.AffectLightsOptions"
+    "\022\037\n\027brightness_slider_value\030\002 \001(\005\022\033\n\023kel"
+    "vin_slider_value\030\003 \001(\005\022\025\n\rselected_room\030"
+    "\004 \001(\005\022\016\n\006global\030\005 \001(\010\022\034\n\024has_brightness_"
+    "value\030\006 \001(\010\022\030\n\020has_kelvin_value\030\007 \001(\010\032n\n"
+    "\025FirstPageTurnLightOff\022E\n\raffect_lights\030"
+    "\001 \001(\0162..NSPanelMQTTManagerCommand.Affect"
+    "LightsOptions\022\016\n\006global\030\002 \001(\010\032\321\001\n\014LightC"
+    "ommand\022\021\n\tlight_ids\030\001 \003(\005\022\026\n\016has_brightn"
+    "ess\030\002 \001(\010\022\022\n\nbrightness\030\003 \001(\005\022\035\n\025has_col"
+    "or_temperature\030\004 \001(\010\022\031\n\021color_temperatur"
+    "e\030\005 \001(\005\022\017\n\007has_hue\030\006 \001(\010\022\013\n\003hue\030\007 \001(\005\022\026\n"
+    "\016has_saturation\030\010 \001(\010\022\022\n\nsaturation\030\t \001("
+    "\005\032K\n\034ToggleEntityFromEntitiesPage\022\026\n\016ent"
+    "ity_page_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001(\005\032\?"
+    "\n\020SaveSceneCommand\022\026\n\016entity_page_id\030\001 \001"
+    "(\005\022\023\n\013entity_slot\030\002 \001(\005\032\"\n\rButtonPressed"
+    "\022\021\n\tbutton_id\030\002 \001(\005\032J\n\034ThermostatTempera"
+    "tureCommand\022\025\n\rthermostat_id\030\001 \001(\005\022\023\n\013te"
+    "mperature\030\002 \001(\002\032M\n\021ThermostatCommand\022\025\n\r"
+    "thermostat_id\030\001 \001(\005\022\016\n\006option\030\002 \001(\t\022\021\n\tn"
+    "ew_value\030\003 \001(\t\"D\n\023AffectLightsOptions\022\007\n"
+    "\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020\001\022\022\n\016CEILING_LIGH"
+    "TS\020\002B\r\n\013CommandData*[\n\023NSPanelWarningLev"
+    "el\022\014\n\010CRITICAL\020\000\022\t\n\005ERROR\020\001\022\013\n\007WARNING\020\002"
+    "\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n\005TRACE\020\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    4808,
+    5400,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
     nullptr,
     0,
-    17,
+    19,
     schemas,
     file_default_instances,
     TableStruct_protobuf_5fnspanel_2eproto::offsets,
@@ -1008,9 +1110,9 @@ const ::google::protobuf::EnumDescriptor* NSPanelConfig_NSPanelButtonMode_descri
   return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[2];
 }
 PROTOBUF_CONSTINIT const uint32_t NSPanelConfig_NSPanelButtonMode_internal_data_[] = {
-    196608u, 0u, };
+    327680u, 0u, };
 bool NSPanelConfig_NSPanelButtonMode_IsValid(int value) {
-  return 0 <= value && value <= 2;
+  return 0 <= value && value <= 4;
 }
 #if (__cplusplus < 201703) && \
   (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
@@ -1018,6 +1120,8 @@ bool NSPanelConfig_NSPanelButtonMode_IsValid(int value) {
 constexpr NSPanelConfig_NSPanelButtonMode NSPanelConfig::DIRECT;
 constexpr NSPanelConfig_NSPanelButtonMode NSPanelConfig::FOLLOW;
 constexpr NSPanelConfig_NSPanelButtonMode NSPanelConfig::NOTIFY_MANAGER;
+constexpr NSPanelConfig_NSPanelButtonMode NSPanelConfig::THERMOSTAT_HEAT;
+constexpr NSPanelConfig_NSPanelButtonMode NSPanelConfig::THERMOSTAT_COOL;
 constexpr NSPanelConfig_NSPanelButtonMode NSPanelConfig::NSPanelButtonMode_MIN;
 constexpr NSPanelConfig_NSPanelButtonMode NSPanelConfig::NSPanelButtonMode_MAX;
 constexpr int NSPanelConfig::NSPanelButtonMode_ARRAYSIZE;
@@ -1372,9 +1476,9 @@ NSPanelConfig::NSPanelConfig(
                offsetof(Impl_, default_room_),
            reinterpret_cast<const char *>(&from._impl_) +
                offsetof(Impl_, default_room_),
-           offsetof(Impl_, default_light_brightess_) -
+           offsetof(Impl_, button2_upper_temperature_) -
                offsetof(Impl_, default_room_) +
-               sizeof(Impl_::default_light_brightess_));
+               sizeof(Impl_::button2_upper_temperature_));
 
   // @@protoc_insertion_point(copy_constructor:NSPanelConfig)
 }
@@ -1397,9 +1501,9 @@ inline void NSPanelConfig::SharedCtor(::_pb::Arena* arena) {
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, default_room_),
            0,
-           offsetof(Impl_, default_light_brightess_) -
+           offsetof(Impl_, button2_upper_temperature_) -
                offsetof(Impl_, default_room_) +
-               sizeof(Impl_::default_light_brightess_));
+               sizeof(Impl_::button2_upper_temperature_));
 }
 NSPanelConfig::~NSPanelConfig() {
   // @@protoc_insertion_point(destructor:NSPanelConfig)
@@ -1434,15 +1538,15 @@ NSPanelConfig::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<5, 32, 1, 94, 7> NSPanelConfig::_table_ = {
+const ::_pbi::TcParseTable<5, 36, 1, 94, 7> NSPanelConfig::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    40, 248,  // max_field_number, fast_idx_mask
+    44, 248,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
     515899392,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    32,  // num_field_entries
+    36,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelConfig_default_instance_._instance,
@@ -1528,9 +1632,15 @@ const ::_pbi::TcParseTable<5, 32, 1, 94, 7> NSPanelConfig::_table_ = {
     // .NSPanelConfig.NSPanelButtonMode button2_mode = 25;
     {::_pbi::TcParser::FastV32S2,
      {456, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_mode_)}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
+    // int32 button1_upper_temperature = 42;
+    {::_pbi::TcParser::FastV32S2,
+     {720, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_upper_temperature_)}},
+    // int32 button2_lower_temperature = 43;
+    {::_pbi::TcParser::FastV32S2,
+     {728, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_lower_temperature_)}},
+    // int32 button2_upper_temperature = 44;
+    {::_pbi::TcParser::FastV32S2,
+     {736, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_upper_temperature_)}},
     {::_pbi::TcParser::MiniParse, {}},
     // repeated int32 global_scene_entity_page_ids = 30;
     {::_pbi::TcParser::FastV32P2,
@@ -1540,7 +1650,7 @@ const ::_pbi::TcParseTable<5, 32, 1, 94, 7> NSPanelConfig::_table_ = {
      {504, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.optimistic_mode_)}},
   }}, {{
     33, 0, 1,
-    65290, 26,
+    61450, 26,
     65535, 65535
   }}, {{
     // string name = 1;
@@ -1639,6 +1749,18 @@ const ::_pbi::TcParseTable<5, 32, 1, 94, 7> NSPanelConfig::_table_ = {
     // string inside_temperature_sensor_mqtt_topic = 40;
     {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.inside_temperature_sensor_mqtt_topic_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int32 button1_lower_temperature = 41;
+    {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_lower_temperature_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 button1_upper_temperature = 42;
+    {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button1_upper_temperature_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 button2_lower_temperature = 43;
+    {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_lower_temperature_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 button2_upper_temperature = 44;
+    {PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_upper_temperature_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
   }}, {{
     {::_pbi::TcParser::GetTable<::NSPanelConfig_RoomInfo>()},
   }}, {{
@@ -1663,8 +1785,8 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
   _impl_.name_.ClearToEmpty();
   _impl_.inside_temperature_sensor_mqtt_topic_.ClearToEmpty();
   ::memset(&_impl_.default_room_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.default_light_brightess_) -
-      reinterpret_cast<char*>(&_impl_.default_room_)) + sizeof(_impl_.default_light_brightess_));
+      reinterpret_cast<char*>(&_impl_.button2_upper_temperature_) -
+      reinterpret_cast<char*>(&_impl_.default_room_)) + sizeof(_impl_.button2_upper_temperature_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -1911,6 +2033,34 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
     target = stream->WriteStringMaybeAliased(40, _s, target);
   }
 
+  // int32 button1_lower_temperature = 41;
+  if (this->_internal_button1_lower_temperature() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        41, this->_internal_button1_lower_temperature(), target);
+  }
+
+  // int32 button1_upper_temperature = 42;
+  if (this->_internal_button1_upper_temperature() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        42, this->_internal_button1_upper_temperature(), target);
+  }
+
+  // int32 button2_lower_temperature = 43;
+  if (this->_internal_button2_lower_temperature() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        43, this->_internal_button2_lower_temperature(), target);
+  }
+
+  // int32 button2_upper_temperature = 44;
+  if (this->_internal_button2_upper_temperature() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        44, this->_internal_button2_upper_temperature(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -2131,6 +2281,30 @@ PROTOBUF_NOINLINE void NSPanelConfig::Clear() {
                                     this->_internal_default_light_brightess());
   }
 
+  // int32 button1_lower_temperature = 41;
+  if (this->_internal_button1_lower_temperature() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_button1_lower_temperature());
+  }
+
+  // int32 button1_upper_temperature = 42;
+  if (this->_internal_button1_upper_temperature() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_button1_upper_temperature());
+  }
+
+  // int32 button2_lower_temperature = 43;
+  if (this->_internal_button2_lower_temperature() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_button2_lower_temperature());
+  }
+
+  // int32 button2_upper_temperature = 44;
+  if (this->_internal_button2_upper_temperature() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_button2_upper_temperature());
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -2232,6 +2406,18 @@ void NSPanelConfig::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::g
   if (from._internal_default_light_brightess() != 0) {
     _this->_impl_.default_light_brightess_ = from._impl_.default_light_brightess_;
   }
+  if (from._internal_button1_lower_temperature() != 0) {
+    _this->_impl_.button1_lower_temperature_ = from._impl_.button1_lower_temperature_;
+  }
+  if (from._internal_button1_upper_temperature() != 0) {
+    _this->_impl_.button1_upper_temperature_ = from._impl_.button1_upper_temperature_;
+  }
+  if (from._internal_button2_lower_temperature() != 0) {
+    _this->_impl_.button2_lower_temperature_ = from._impl_.button2_lower_temperature_;
+  }
+  if (from._internal_button2_upper_temperature() != 0) {
+    _this->_impl_.button2_upper_temperature_ = from._impl_.button2_upper_temperature_;
+  }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -2255,8 +2441,8 @@ void NSPanelConfig::InternalSwap(NSPanelConfig* PROTOBUF_RESTRICT other) {
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.inside_temperature_sensor_mqtt_topic_, &other->_impl_.inside_temperature_sensor_mqtt_topic_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.default_light_brightess_)
-      + sizeof(NSPanelConfig::_impl_.default_light_brightess_)
+      PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.button2_upper_temperature_)
+      + sizeof(NSPanelConfig::_impl_.button2_upper_temperature_)
       - PROTOBUF_FIELD_OFFSET(NSPanelConfig, _impl_.default_room_)>(
           reinterpret_cast<char*>(&_impl_.default_room_),
           reinterpret_cast<char*>(&other->_impl_.default_room_));
@@ -2519,9 +2705,9 @@ NSPanelStatusReport::NSPanelStatusReport(
                offsetof(Impl_, nspanel_state_),
            reinterpret_cast<const char *>(&from._impl_) +
                offsetof(Impl_, nspanel_state_),
-           offsetof(Impl_, temperature_) -
+           offsetof(Impl_, pressure_) -
                offsetof(Impl_, nspanel_state_) +
-               sizeof(Impl_::temperature_));
+               sizeof(Impl_::pressure_));
 
   // @@protoc_insertion_point(copy_constructor:NSPanelStatusReport)
 }
@@ -2541,9 +2727,9 @@ inline void NSPanelStatusReport::SharedCtor(::_pb::Arena* arena) {
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, nspanel_state_),
            0,
-           offsetof(Impl_, temperature_) -
+           offsetof(Impl_, pressure_) -
                offsetof(Impl_, nspanel_state_) +
-               sizeof(Impl_::temperature_));
+               sizeof(Impl_::pressure_));
 }
 NSPanelStatusReport::~NSPanelStatusReport() {
   // @@protoc_insertion_point(destructor:NSPanelStatusReport)
@@ -2581,15 +2767,15 @@ NSPanelStatusReport::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<4, 11, 1, 92, 2> NSPanelStatusReport::_table_ = {
+const ::_pbi::TcParseTable<4, 15, 1, 92, 2> NSPanelStatusReport::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    11, 120,  // max_field_number, fast_idx_mask
+    15, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294965248,  // skipmap
+    4294934528,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    11,  // num_field_entries
+    15,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelStatusReport_default_instance_._instance,
@@ -2633,10 +2819,18 @@ const ::_pbi::TcParseTable<4, 11, 1, 92, 2> NSPanelStatusReport::_table_ = {
     // string md5_tft_gui = 11;
     {::_pbi::TcParser::FastUS1,
      {90, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.md5_tft_gui_)}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
+    // bool has_humidity = 12;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelStatusReport, _impl_.has_humidity_), 63>(),
+     {96, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.has_humidity_)}},
+    // float humidity = 13;
+    {::_pbi::TcParser::FastF32S1,
+     {109, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.humidity_)}},
+    // bool has_pressure = 14;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelStatusReport, _impl_.has_pressure_), 63>(),
+     {112, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.has_pressure_)}},
+    // float pressure = 15;
+    {::_pbi::TcParser::FastF32S1,
+     {125, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.pressure_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -2673,6 +2867,18 @@ const ::_pbi::TcParseTable<4, 11, 1, 92, 2> NSPanelStatusReport::_table_ = {
     // string md5_tft_gui = 11;
     {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.md5_tft_gui_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // bool has_humidity = 12;
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.has_humidity_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // float humidity = 13;
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.humidity_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kFloat)},
+    // bool has_pressure = 14;
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.has_pressure_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // float pressure = 15;
+    {PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.pressure_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kFloat)},
   }}, {{
     {::_pbi::TcParser::GetTable<::NSPanelWarning>()},
   }}, {{
@@ -2700,8 +2906,8 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
   _impl_.md5_littlefs_.ClearToEmpty();
   _impl_.md5_tft_gui_.ClearToEmpty();
   ::memset(&_impl_.nspanel_state_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.temperature_) -
-      reinterpret_cast<char*>(&_impl_.nspanel_state_)) + sizeof(_impl_.temperature_));
+      reinterpret_cast<char*>(&_impl_.pressure_) -
+      reinterpret_cast<char*>(&_impl_.nspanel_state_)) + sizeof(_impl_.pressure_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -2803,6 +3009,44 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
     target = stream->WriteStringMaybeAliased(11, _s, target);
   }
 
+  // bool has_humidity = 12;
+  if (this->_internal_has_humidity() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        12, this->_internal_has_humidity(), target);
+  }
+
+  // float humidity = 13;
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_humidity = this->_internal_humidity();
+  ::uint32_t raw_humidity;
+  memcpy(&raw_humidity, &tmp_humidity, sizeof(tmp_humidity));
+  if (raw_humidity != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(
+        13, this->_internal_humidity(), target);
+  }
+
+  // bool has_pressure = 14;
+  if (this->_internal_has_pressure() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        14, this->_internal_has_pressure(), target);
+  }
+
+  // float pressure = 15;
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_pressure = this->_internal_pressure();
+  ::uint32_t raw_pressure;
+  memcpy(&raw_pressure, &tmp_pressure, sizeof(tmp_pressure));
+  if (raw_pressure != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(
+        15, this->_internal_pressure(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -2890,6 +3134,36 @@ PROTOBUF_NOINLINE void NSPanelStatusReport::Clear() {
     total_size += 5;
   }
 
+  // float humidity = 13;
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_humidity = this->_internal_humidity();
+  ::uint32_t raw_humidity;
+  memcpy(&raw_humidity, &tmp_humidity, sizeof(tmp_humidity));
+  if (raw_humidity != 0) {
+    total_size += 5;
+  }
+
+  // bool has_humidity = 12;
+  if (this->_internal_has_humidity() != 0) {
+    total_size += 2;
+  }
+
+  // bool has_pressure = 14;
+  if (this->_internal_has_pressure() != 0) {
+    total_size += 2;
+  }
+
+  // float pressure = 15;
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_pressure = this->_internal_pressure();
+  ::uint32_t raw_pressure;
+  memcpy(&raw_pressure, &tmp_pressure, sizeof(tmp_pressure));
+  if (raw_pressure != 0) {
+    total_size += 5;
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -2939,6 +3213,28 @@ void NSPanelStatusReport::MergeImpl(::google::protobuf::MessageLite& to_msg, con
   if (raw_temperature != 0) {
     _this->_impl_.temperature_ = from._impl_.temperature_;
   }
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_humidity = from._internal_humidity();
+  ::uint32_t raw_humidity;
+  memcpy(&raw_humidity, &tmp_humidity, sizeof(tmp_humidity));
+  if (raw_humidity != 0) {
+    _this->_impl_.humidity_ = from._impl_.humidity_;
+  }
+  if (from._internal_has_humidity() != 0) {
+    _this->_impl_.has_humidity_ = from._impl_.has_humidity_;
+  }
+  if (from._internal_has_pressure() != 0) {
+    _this->_impl_.has_pressure_ = from._impl_.has_pressure_;
+  }
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_pressure = from._internal_pressure();
+  ::uint32_t raw_pressure;
+  memcpy(&raw_pressure, &tmp_pressure, sizeof(tmp_pressure));
+  if (raw_pressure != 0) {
+    _this->_impl_.pressure_ = from._impl_.pressure_;
+  }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -2962,8 +3258,8 @@ void NSPanelStatusReport::InternalSwap(NSPanelStatusReport* PROTOBUF_RESTRICT ot
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.md5_littlefs_, &other->_impl_.md5_littlefs_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.md5_tft_gui_, &other->_impl_.md5_tft_gui_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.temperature_)
-      + sizeof(NSPanelStatusReport::_impl_.temperature_)
+      PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.pressure_)
+      + sizeof(NSPanelStatusReport::_impl_.pressure_)
       - PROTOBUF_FIELD_OFFSET(NSPanelStatusReport, _impl_.nspanel_state_)>(
           reinterpret_cast<char*>(&_impl_.nspanel_state_),
           reinterpret_cast<char*>(&other->_impl_.nspanel_state_));
@@ -6743,6 +7039,476 @@ void NSPanelMQTTManagerCommand_ButtonPressed::InternalSwap(NSPanelMQTTManagerCom
 }
 // ===================================================================
 
+class NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::_Internal {
+ public:
+};
+
+NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:NSPanelMQTTManagerCommand.ThermostatTemperatureCommand)
+}
+NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand(
+    ::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_ThermostatTemperatureCommand& from)
+    : NSPanelMQTTManagerCommand_ThermostatTemperatureCommand(arena) {
+  MergeFrom(from);
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0} {}
+
+inline void NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, thermostat_id_),
+           0,
+           offsetof(Impl_, temperature_) -
+               offsetof(Impl_, thermostat_id_) +
+               sizeof(Impl_::temperature_));
+}
+NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::~NSPanelMQTTManagerCommand_ThermostatTemperatureCommand() {
+  // @@protoc_insertion_point(destructor:NSPanelMQTTManagerCommand.ThermostatTemperatureCommand)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand, _impl_._cached_size_),
+              false,
+          },
+          &NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::MergeImpl,
+          &NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::kDescriptorMethods,
+          &descriptor_table_protobuf_5fnspanel_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 0, 0, 2> NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_NSPanelMQTTManagerCommand_ThermostatTemperatureCommand_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // float temperature = 2;
+    {::_pbi::TcParser::FastF32S1,
+     {21, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand, _impl_.temperature_)}},
+    // int32 thermostat_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand, _impl_.thermostat_id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand, _impl_.thermostat_id_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 thermostat_id = 1;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand, _impl_.thermostat_id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // float temperature = 2;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand, _impl_.temperature_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kFloat)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+
+PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::Clear() {
+// @@protoc_insertion_point(message_clear_start:NSPanelMQTTManagerCommand.ThermostatTemperatureCommand)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::memset(&_impl_.thermostat_id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.temperature_) -
+      reinterpret_cast<char*>(&_impl_.thermostat_id_)) + sizeof(_impl_.temperature_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:NSPanelMQTTManagerCommand.ThermostatTemperatureCommand)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // int32 thermostat_id = 1;
+  if (this->_internal_thermostat_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<1>(
+            stream, this->_internal_thermostat_id(), target);
+  }
+
+  // float temperature = 2;
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_temperature = this->_internal_temperature();
+  ::uint32_t raw_temperature;
+  memcpy(&raw_temperature, &tmp_temperature, sizeof(tmp_temperature));
+  if (raw_temperature != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(
+        2, this->_internal_temperature(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:NSPanelMQTTManagerCommand.ThermostatTemperatureCommand)
+  return target;
+}
+
+::size_t NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:NSPanelMQTTManagerCommand.ThermostatTemperatureCommand)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // int32 thermostat_id = 1;
+  if (this->_internal_thermostat_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_thermostat_id());
+  }
+
+  // float temperature = 2;
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_temperature = this->_internal_temperature();
+  ::uint32_t raw_temperature;
+  memcpy(&raw_temperature, &tmp_temperature, sizeof(tmp_temperature));
+  if (raw_temperature != 0) {
+    total_size += 5;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<NSPanelMQTTManagerCommand_ThermostatTemperatureCommand*>(&to_msg);
+  auto& from = static_cast<const NSPanelMQTTManagerCommand_ThermostatTemperatureCommand&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelMQTTManagerCommand.ThermostatTemperatureCommand)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_thermostat_id() != 0) {
+    _this->_impl_.thermostat_id_ = from._impl_.thermostat_id_;
+  }
+  static_assert(sizeof(::uint32_t) == sizeof(float),
+                "Code assumes ::uint32_t and float are the same size.");
+  float tmp_temperature = from._internal_temperature();
+  ::uint32_t raw_temperature;
+  memcpy(&raw_temperature, &tmp_temperature, sizeof(tmp_temperature));
+  if (raw_temperature != 0) {
+    _this->_impl_.temperature_ = from._impl_.temperature_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::CopyFrom(const NSPanelMQTTManagerCommand_ThermostatTemperatureCommand& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelMQTTManagerCommand.ThermostatTemperatureCommand)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::InternalSwap(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand, _impl_.temperature_)
+      + sizeof(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::_impl_.temperature_)
+      - PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand, _impl_.thermostat_id_)>(
+          reinterpret_cast<char*>(&_impl_.thermostat_id_),
+          reinterpret_cast<char*>(&other->_impl_.thermostat_id_));
+}
+
+::google::protobuf::Metadata NSPanelMQTTManagerCommand_ThermostatTemperatureCommand::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class NSPanelMQTTManagerCommand_ThermostatCommand::_Internal {
+ public:
+};
+
+NSPanelMQTTManagerCommand_ThermostatCommand::NSPanelMQTTManagerCommand_ThermostatCommand(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:NSPanelMQTTManagerCommand.ThermostatCommand)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_ThermostatCommand::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::NSPanelMQTTManagerCommand_ThermostatCommand& from_msg)
+      : option_(arena, from.option_),
+        new_value_(arena, from.new_value_),
+        _cached_size_{0} {}
+
+NSPanelMQTTManagerCommand_ThermostatCommand::NSPanelMQTTManagerCommand_ThermostatCommand(
+    ::google::protobuf::Arena* arena,
+    const NSPanelMQTTManagerCommand_ThermostatCommand& from)
+    : ::google::protobuf::Message(arena) {
+  NSPanelMQTTManagerCommand_ThermostatCommand* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  _impl_.thermostat_id_ = from._impl_.thermostat_id_;
+
+  // @@protoc_insertion_point(copy_constructor:NSPanelMQTTManagerCommand.ThermostatCommand)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_ThermostatCommand::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : option_(arena),
+        new_value_(arena),
+        _cached_size_{0} {}
+
+inline void NSPanelMQTTManagerCommand_ThermostatCommand::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.thermostat_id_ = {};
+}
+NSPanelMQTTManagerCommand_ThermostatCommand::~NSPanelMQTTManagerCommand_ThermostatCommand() {
+  // @@protoc_insertion_point(destructor:NSPanelMQTTManagerCommand.ThermostatCommand)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void NSPanelMQTTManagerCommand_ThermostatCommand::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.option_.Destroy();
+  _impl_.new_value_.Destroy();
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+NSPanelMQTTManagerCommand_ThermostatCommand::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatCommand, _impl_._cached_size_),
+              false,
+          },
+          &NSPanelMQTTManagerCommand_ThermostatCommand::MergeImpl,
+          &NSPanelMQTTManagerCommand_ThermostatCommand::kDescriptorMethods,
+          &descriptor_table_protobuf_5fnspanel_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 3, 0, 67, 2> NSPanelMQTTManagerCommand_ThermostatCommand::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    3, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967288,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    3,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_NSPanelMQTTManagerCommand_ThermostatCommand_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ThermostatCommand>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int32 thermostat_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_ThermostatCommand, _impl_.thermostat_id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatCommand, _impl_.thermostat_id_)}},
+    // string option = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatCommand, _impl_.option_)}},
+    // string new_value = 3;
+    {::_pbi::TcParser::FastUS1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatCommand, _impl_.new_value_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 thermostat_id = 1;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatCommand, _impl_.thermostat_id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // string option = 2;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatCommand, _impl_.option_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string new_value = 3;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_ThermostatCommand, _impl_.new_value_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\53\0\6\11\0\0\0\0"
+    "NSPanelMQTTManagerCommand.ThermostatCommand"
+    "option"
+    "new_value"
+  }},
+};
+
+PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_ThermostatCommand::Clear() {
+// @@protoc_insertion_point(message_clear_start:NSPanelMQTTManagerCommand.ThermostatCommand)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.option_.ClearToEmpty();
+  _impl_.new_value_.ClearToEmpty();
+  _impl_.thermostat_id_ = 0;
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* NSPanelMQTTManagerCommand_ThermostatCommand::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:NSPanelMQTTManagerCommand.ThermostatCommand)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // int32 thermostat_id = 1;
+  if (this->_internal_thermostat_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<1>(
+            stream, this->_internal_thermostat_id(), target);
+  }
+
+  // string option = 2;
+  if (!this->_internal_option().empty()) {
+    const std::string& _s = this->_internal_option();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelMQTTManagerCommand.ThermostatCommand.option");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
+  }
+
+  // string new_value = 3;
+  if (!this->_internal_new_value().empty()) {
+    const std::string& _s = this->_internal_new_value();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelMQTTManagerCommand.ThermostatCommand.new_value");
+    target = stream->WriteStringMaybeAliased(3, _s, target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:NSPanelMQTTManagerCommand.ThermostatCommand)
+  return target;
+}
+
+::size_t NSPanelMQTTManagerCommand_ThermostatCommand::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:NSPanelMQTTManagerCommand.ThermostatCommand)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // string option = 2;
+  if (!this->_internal_option().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_option());
+  }
+
+  // string new_value = 3;
+  if (!this->_internal_new_value().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_new_value());
+  }
+
+  // int32 thermostat_id = 1;
+  if (this->_internal_thermostat_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_thermostat_id());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void NSPanelMQTTManagerCommand_ThermostatCommand::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<NSPanelMQTTManagerCommand_ThermostatCommand*>(&to_msg);
+  auto& from = static_cast<const NSPanelMQTTManagerCommand_ThermostatCommand&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelMQTTManagerCommand.ThermostatCommand)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_option().empty()) {
+    _this->_internal_set_option(from._internal_option());
+  }
+  if (!from._internal_new_value().empty()) {
+    _this->_internal_set_new_value(from._internal_new_value());
+  }
+  if (from._internal_thermostat_id() != 0) {
+    _this->_impl_.thermostat_id_ = from._impl_.thermostat_id_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void NSPanelMQTTManagerCommand_ThermostatCommand::CopyFrom(const NSPanelMQTTManagerCommand_ThermostatCommand& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelMQTTManagerCommand.ThermostatCommand)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void NSPanelMQTTManagerCommand_ThermostatCommand::InternalSwap(NSPanelMQTTManagerCommand_ThermostatCommand* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.option_, &other->_impl_.option_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.new_value_, &other->_impl_.new_value_, arena);
+        swap(_impl_.thermostat_id_, other->_impl_.thermostat_id_);
+}
+
+::google::protobuf::Metadata NSPanelMQTTManagerCommand_ThermostatCommand::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 class NSPanelMQTTManagerCommand::_Internal {
  public:
   static constexpr ::int32_t kOneofCaseOffset =
@@ -6827,6 +7593,32 @@ void NSPanelMQTTManagerCommand::set_allocated_button_pressed(::NSPanelMQTTManage
   }
   // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.button_pressed)
 }
+void NSPanelMQTTManagerCommand::set_allocated_thermostat_temperature_command(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand* thermostat_temperature_command) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_CommandData();
+  if (thermostat_temperature_command) {
+    ::google::protobuf::Arena* submessage_arena = thermostat_temperature_command->GetArena();
+    if (message_arena != submessage_arena) {
+      thermostat_temperature_command = ::google::protobuf::internal::GetOwnedMessage(message_arena, thermostat_temperature_command, submessage_arena);
+    }
+    set_has_thermostat_temperature_command();
+    _impl_.CommandData_.thermostat_temperature_command_ = thermostat_temperature_command;
+  }
+  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.thermostat_temperature_command)
+}
+void NSPanelMQTTManagerCommand::set_allocated_thermostat_command(::NSPanelMQTTManagerCommand_ThermostatCommand* thermostat_command) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_CommandData();
+  if (thermostat_command) {
+    ::google::protobuf::Arena* submessage_arena = thermostat_command->GetArena();
+    if (message_arena != submessage_arena) {
+      thermostat_command = ::google::protobuf::internal::GetOwnedMessage(message_arena, thermostat_command, submessage_arena);
+    }
+    set_has_thermostat_command();
+    _impl_.CommandData_.thermostat_command_ = thermostat_command;
+  }
+  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.thermostat_command)
+}
 NSPanelMQTTManagerCommand::NSPanelMQTTManagerCommand(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
   SharedCtor(arena);
@@ -6869,6 +7661,12 @@ NSPanelMQTTManagerCommand::NSPanelMQTTManagerCommand(
         break;
       case kButtonPressed:
         _impl_.CommandData_.button_pressed_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_ButtonPressed>(arena, *from._impl_.CommandData_.button_pressed_);
+        break;
+      case kThermostatTemperatureCommand:
+        _impl_.CommandData_.thermostat_temperature_command_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand>(arena, *from._impl_.CommandData_.thermostat_temperature_command_);
+        break;
+      case kThermostatCommand:
+        _impl_.CommandData_.thermostat_command_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_ThermostatCommand>(arena, *from._impl_.CommandData_.thermostat_command_);
         break;
   }
 
@@ -6950,6 +7748,22 @@ void NSPanelMQTTManagerCommand::clear_CommandData() {
       }
       break;
     }
+    case kThermostatTemperatureCommand: {
+      if (GetArena() == nullptr) {
+        delete _impl_.CommandData_.thermostat_temperature_command_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.thermostat_temperature_command_);
+      }
+      break;
+    }
+    case kThermostatCommand: {
+      if (GetArena() == nullptr) {
+        delete _impl_.CommandData_.thermostat_command_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.thermostat_command_);
+      }
+      break;
+    }
     case COMMANDDATA_NOT_SET: {
       break;
     }
@@ -6979,16 +7793,16 @@ NSPanelMQTTManagerCommand::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 7, 6, 0, 7> NSPanelMQTTManagerCommand::_table_ = {
+const ::_pbi::TcParseTable<0, 9, 8, 0, 7> NSPanelMQTTManagerCommand::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
     100, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967232,  // skipmap
+    4294967040,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    7,  // num_field_entries
-    6,  // num_aux_entries
+    9,  // num_field_entries
+    8,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelMQTTManagerCommand_default_instance_._instance,
     nullptr,  // post_loop_handler
@@ -7002,7 +7816,7 @@ const ::_pbi::TcParseTable<0, 7, 6, 0, 7> NSPanelMQTTManagerCommand::_table_ = {
      {1696, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.nspanel_id_)}},
   }}, {{
     100, 0, 1,
-    65534, 6,
+    65534, 8,
     65535, 65535
   }}, {{
     // .NSPanelMQTTManagerCommand.FirstPageTurnLightOn first_page_turn_on = 1;
@@ -7023,6 +7837,12 @@ const ::_pbi::TcParseTable<0, 7, 6, 0, 7> NSPanelMQTTManagerCommand::_table_ = {
     // .NSPanelMQTTManagerCommand.ButtonPressed button_pressed = 6;
     {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.button_pressed_), _Internal::kOneofCaseOffset + 0, 5,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .NSPanelMQTTManagerCommand.ThermostatTemperatureCommand thermostat_temperature_command = 7;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.thermostat_temperature_command_), _Internal::kOneofCaseOffset + 0, 6,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .NSPanelMQTTManagerCommand.ThermostatCommand thermostat_command = 8;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.thermostat_command_), _Internal::kOneofCaseOffset + 0, 7,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
     // int32 nspanel_id = 100;
     {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.nspanel_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
@@ -7033,6 +7853,8 @@ const ::_pbi::TcParseTable<0, 7, 6, 0, 7> NSPanelMQTTManagerCommand::_table_ = {
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage>()},
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_SaveSceneCommand>()},
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ButtonPressed>()},
+    {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand>()},
+    {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ThermostatCommand>()},
   }}, {{
   }},
 };
@@ -7085,6 +7907,16 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand::Clear() {
     case kButtonPressed: {
       target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
           6, *_impl_.CommandData_.button_pressed_, _impl_.CommandData_.button_pressed_->GetCachedSize(), target, stream);
+      break;
+    }
+    case kThermostatTemperatureCommand: {
+      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+          7, *_impl_.CommandData_.thermostat_temperature_command_, _impl_.CommandData_.thermostat_temperature_command_->GetCachedSize(), target, stream);
+      break;
+    }
+    case kThermostatCommand: {
+      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+          8, *_impl_.CommandData_.thermostat_command_, _impl_.CommandData_.thermostat_command_->GetCachedSize(), target, stream);
       break;
     }
     default:
@@ -7155,6 +7987,18 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand::Clear() {
     case kButtonPressed: {
       total_size +=
           1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.button_pressed_);
+      break;
+    }
+    // .NSPanelMQTTManagerCommand.ThermostatTemperatureCommand thermostat_temperature_command = 7;
+    case kThermostatTemperatureCommand: {
+      total_size +=
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.thermostat_temperature_command_);
+      break;
+    }
+    // .NSPanelMQTTManagerCommand.ThermostatCommand thermostat_command = 8;
+    case kThermostatCommand: {
+      total_size +=
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.thermostat_command_);
       break;
     }
     case COMMANDDATA_NOT_SET: {
@@ -7239,6 +8083,24 @@ void NSPanelMQTTManagerCommand::MergeImpl(::google::protobuf::MessageLite& to_ms
               ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_ButtonPressed>(arena, *from._impl_.CommandData_.button_pressed_);
         } else {
           _this->_impl_.CommandData_.button_pressed_->MergeFrom(from._internal_button_pressed());
+        }
+        break;
+      }
+      case kThermostatTemperatureCommand: {
+        if (oneof_needs_init) {
+          _this->_impl_.CommandData_.thermostat_temperature_command_ =
+              ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand>(arena, *from._impl_.CommandData_.thermostat_temperature_command_);
+        } else {
+          _this->_impl_.CommandData_.thermostat_temperature_command_->MergeFrom(from._internal_thermostat_temperature_command());
+        }
+        break;
+      }
+      case kThermostatCommand: {
+        if (oneof_needs_init) {
+          _this->_impl_.CommandData_.thermostat_command_ =
+              ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_ThermostatCommand>(arena, *from._impl_.CommandData_.thermostat_command_);
+        } else {
+          _this->_impl_.CommandData_.thermostat_command_->MergeFrom(from._internal_thermostat_command());
         }
         break;
       }

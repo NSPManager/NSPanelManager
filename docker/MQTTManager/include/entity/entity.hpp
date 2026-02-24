@@ -6,9 +6,11 @@
 #include <spdlog/spdlog.h>
 #include <string_view>
 enum MQTT_MANAGER_ENTITY_TYPE {
+  ANY,
   LIGHT,
   SWITCH_ENTITY,
   BUTTON,
+  THERMOSTAT,
   SCENE,
 };
 

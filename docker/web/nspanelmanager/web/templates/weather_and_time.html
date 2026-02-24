@@ -62,7 +62,7 @@
         <h3 class="block mb-2 text-sm font-medium">Clock format</h3>
         <ul
           class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
-          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+          <li class="w-full border-t sm:border-t-0 border-neutral">
             <div class="flex items-center ps-3">
               <input id="24_hour_clock" type="radio" name="clock_us_style" value="False" {% if clock_us_style != "True" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent">
@@ -70,7 +70,7 @@
                 class="w-full py-3 ms-2 text-sm font-medium">24 hour clock</label>
             </div>
           </li>
-          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+          <li class="w-full border-t sm:border-t-0 border-neutral">
             <div class="flex items-center ps-3">
               <input id="12_hour_clock" type="radio" name="clock_us_style" value="True" {% if clock_us_style == "True" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent">
@@ -147,7 +147,7 @@
         <h3 class="block mb-2 text-sm font-medium">Temperature format</h3>
         <ul
           class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
-          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+          <li class="w-full border-t sm:border-t-0 border-neutral">
             <div class="flex items-center ps-3">
               <input id="temp_celsius" type="radio" name="use_fahrenheit" value="False" {% if use_fahrenheit != "True" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent" required>
@@ -155,7 +155,7 @@
                 class="w-full py-3 ms-2 text-sm font-medium">Celsius</label>
             </div>
           </li>
-          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+          <li class="w-full border-t sm:border-t-0 border-neutral">
             <div class="flex items-center ps-3">
               <input id="temp_fahrenheit" type="radio" name="use_fahrenheit" value="True" {% if use_fahrenheit == "True" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent" required>
@@ -170,7 +170,7 @@
         <h3 class="block mb-2 text-sm font-medium">Wind speed format</h3>
         <ul
           class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
-          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+          <li class="w-full border-t sm:border-t-0 border-neutral">
             <div class="flex items-center ps-3">
               <input id="kmh" type="radio" name="wind_speed_format" value="kmh" {% if wind_speed_format == "kmh" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent" required>
@@ -178,21 +178,21 @@
                 class="w-full py-3 ms-2 text-sm font-medium">Km/h</label>
             </div>
           </li>
-          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+          <li class="w-full border-t sm:border-t-0 border-neutral">
             <div class="flex items-center ps-3">
               <input id="meter_per_second" type="radio" name="wind_speed_format" value="ms" {% if wind_speed_format == "ms" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent" required>
               <label for="meter_per_second" class="w-full py-3 ms-2 text-sm font-medium">Meter/s</label>
             </div>
           </li>
-          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+          <li class="w-full border-t sm:border-t-0 border-neutral">
             <div class="flex items-center ps-3">
               <input id="miles_per_hour" type="radio" name="wind_speed_format" value="mph" {% if wind_speed_format == "mph" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent" required>
               <label for="miles_per_hour" class="w-full py-3 ms-2 text-sm font-medium">Mph</label>
             </div>
           </li>
-          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+          <li class="w-full border-t sm:border-t-0 border-neutral">
             <div class="flex items-center ps-3">
               <input id="knots" type="radio" name="wind_speed_format" value="knots" {% if wind_speed_format == "knots" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent" required>
@@ -207,7 +207,7 @@
         <h3 class="block mb-2 text-sm font-medium">Precipitation unit</h3>
         <ul
           class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
-          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+          <li class="w-full border-t sm:border-t-0 border-neutral">
             <div class="flex items-center ps-3">
               <input id="millimeters" type="radio" name="precipitation_format" value="mm" {% if precipitation_format == "mm" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent" required>
@@ -215,7 +215,7 @@
                 class="w-full py-3 ms-2 text-sm font-medium">Millimeters</label>
             </div>
           </li>
-          <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+          <li class="w-full border-t sm:border-t-0 border-neutral">
             <div class="flex items-center ps-3">
               <input id="inch" type="radio" name="precipitation_format" value="inch" {% if precipitation_format == "inch" %}checked{% endif %}
                 class="w-4 h-4 radio radio-accent" required>
