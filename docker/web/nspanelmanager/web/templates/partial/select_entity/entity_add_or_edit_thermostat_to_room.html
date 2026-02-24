@@ -52,7 +52,7 @@
 
                     {% if entity_source == "openhab" %}
                     <div class="mt-4 border-1 border-primary rounded-box p-4">
-                        {% component "item_select" name="temperature_item" label="Temperature item" items=openhab_items selected=thermostat.entity_data.openhab_temperature_item %}{% endcomponent %}
+                        {% component "item_select" name="temperature_item" label="Set temperature item" items=openhab_items selected=thermostat.entity_data.openhab_temperature_item %}{% endcomponent %}
                         <!-- Step size -->
                         <div class="mb-4 w-full md:me-1">
                             <label for="step_size" class="block mb-1 text-sm font-medium">Step size</label>
