@@ -32,12 +32,6 @@ find_package(SqliteOrm REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Boost REQUIRED COMPONENTS signals2 stacktrace_backtrace)
 
-# Load Magick++
-add_definitions( -DMAGICKCORE_QUANTUM_DEPTH=16 )
-add_definitions( -DMAGICKCORE_HDRI_ENABLE=0 )
-find_package(ImageMagick COMPONENTS Magick++)
-include_directories(${ImageMagick_INCLUDE_DIRS})
-
 # Load CMake google test module
 include(GoogleTest)
 
@@ -67,11 +61,6 @@ add_library(MQTTManager_WebsocketServer STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/we
 set_target_properties(MQTTManager_WebsocketServer PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.hpp)
 target_include_directories(MQTTManager_WebsocketServer PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTTManager_WebsocketServer ixwebsocket::ixwebsocket spdlog::spdlog nlohmann_json::nlohmann_json Boost::boost gtest::gtest)
-
-add_library(MQTTManager_NextionImageServer STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/nextion_image_server/nextion_image_server.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/nextion_image_server/nextion_image_server.hpp)
-set_target_properties(MQTTManager_NextionImageServer PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/nextion_image_server/nextion_image_server.hpp)
-target_include_directories(MQTTManager_NextionImageServer PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_NextionImageServer ${ImageMagick_LIBRARIES}  ixwebsocket::ixwebsocket spdlog::spdlog nlohmann_json::nlohmann_json Boost::boost gtest::gtest)
 
 add_library(MQTT_Manager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.hpp)
 set_target_properties(MQTT_Manager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.hpp)
@@ -149,7 +138,7 @@ target_link_libraries(MQTTManager_Config spdlog::spdlog MQTTManager_WebHelper nl
 
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_NextionImageServer MQTTManager_CommandManager gtest::gtest)
+target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager gtest::gtest)
 
 if (TEST_MODE==1)
     enable_testing()
