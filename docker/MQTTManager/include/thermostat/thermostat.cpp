@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <entity/entity.hpp>
 #include <entity/entity_icons.hpp>
+#include <exception>
 #include <google/protobuf/util/message_differencer.h>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <nlohmann/json.hpp>
@@ -64,6 +65,14 @@ void ThermostatEntity::reload_config() {
   } else {
     SPDLOG_ERROR("No controller defined for light {}::{}. Will default to HOME_ASSISTANT.", this->_id, this->_name);
     this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
+  }
+
+  if (entity_data.contains("step_size")) {
+    try {
+      this->_step_size = std::atof(entity_data.at("step_size").get<std::string>().c_str());
+    } catch (std::exception &ex) {
+      SPDLOG_ERROR("Caught exception while trying to set step size for {}::{}. Error: {}", this->_id, this->_name, ex.what());
+    }
   }
 
   this->_supported_fan_modes.clear();

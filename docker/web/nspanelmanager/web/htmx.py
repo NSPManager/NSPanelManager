@@ -1422,14 +1422,13 @@ def create_or_update_thermostat_entity(request):
         request.session["action_args"]
     )  # Loads arguments set when first starting process of adding/updating entity
 
-    entity_data = {
-        "controller": request.session["entity_source"],
-    }
+    entity_data = {}
     if "entity_id" in action_args and int(action_args["entity_id"]):
         new_thermostat = Entity.objects.get(id=int(action_args["entity_id"]))
         entity_data = new_thermostat.entity_data
     else:
         new_thermostat = Entity()
+        entity_data["controller"] = (request.session["entity_source"],)
         new_thermostat.entity_type = Entity.EntityType.THERMOSTAT
         # Only set once, during initial creation:
         new_thermostat.room = Room.objects.get(id=int(action_args["room_id"]))
@@ -1438,11 +1437,12 @@ def create_or_update_thermostat_entity(request):
         )
         new_thermostat.room_view_position = int(action_args["page_slot"])
 
+    entity_data["step_size"] = request.POST["step_size"]
+
     if entity_data["controller"] == "home_assistant":
         entity_data["home_assistant_name"] = request.POST["backend_name"]
     elif entity_data["controller"] == "openhab":
         entity_data["openhab_temperature_item"] = request.POST["temperature_item"]
-        entity_data["openhab_step_size"] = request.POST["step_size"]
         entity_data["openhab_fan_mode_item"] = request.POST["fan_mode_item"]
         entity_data["openhab_hvac_mode_item"] = request.POST["hvac_mode_item"]
         entity_data["openhab_preset_item"] = request.POST["preset_item"]
