@@ -295,8 +295,17 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
       MQTT_Manager::_mqtt_client->publish(msg);
 
       // Replicate messages into the websocket STOMP topics.
+      // Convert payload to base64 as to be able to send it over the websocket.
+      std::size_t encoded_size = (payload.size() + 2) / 3 * 4;
+      std::vector<char> encoded_buffer(encoded_size);
+      // Encode the string
+      std::size_t written = boost::beast::detail::base64::encode(
+          encoded_buffer.data(),
+          payload.data(),
+          payload.size());
+      encoded_buffer.resize(written);
       WebsocketServer::set_stomp_topic_retained(fmt::format("mqtt/{}", topic), retain);
-      WebsocketServer::update_stomp_topic_value(fmt::format("mqtt/{}", topic), payload);
+      WebsocketServer::update_stomp_topic_value(fmt::format("mqtt/{}", topic), std::string(encoded_buffer.begin(), encoded_buffer.end()));
     } else {
       MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
     }
@@ -309,19 +318,6 @@ void MQTT_Manager::publish_protobuf(const std::string &topic, google::protobuf::
   std::string payload_string;
   if (payload.SerializeToString(&payload_string)) {
     MQTT_Manager::publish(topic, payload_string, retain);
-
-    // Replicate messages into the websocket STOMP topics.
-    WebsocketServer::set_stomp_topic_retained(fmt::format("mqtt/{}", topic), retain);
-    // Convert payload to base64 as to be able to send it over the websocket.
-    std::size_t encoded_size = (payload_string.size() + 2) / 3 * 4;
-    std::vector<char> encoded_buffer(encoded_size);
-    // Encode the string
-    std::size_t written = boost::beast::detail::base64::encode(
-        encoded_buffer.data(),
-        payload_string.data(),
-        payload_string.size());
-    encoded_buffer.resize(written);
-    WebsocketServer::update_stomp_topic_value(fmt::format("mqtt/{}", topic), std::string(encoded_buffer.begin(), encoded_buffer.end()));
   } else {
     SPDLOG_ERROR("Tried to send message to topic '{}' but serialization of protobuf object failed.", topic);
   }
@@ -334,6 +330,7 @@ void MQTT_Manager::clear_retain(const std::string &topic) {
   }
 
   std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
+  WebsocketServer::set_stomp_topic_retained(fmt::format("mqtt/{}", topic), false);
   if (topic.size() > 0) {
     mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), "", 0, 0, true);
     if (MQTT_Manager::_mqtt_client != nullptr && MQTT_Manager::_mqtt_client->is_connected()) {
