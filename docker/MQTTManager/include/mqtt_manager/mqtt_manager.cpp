@@ -218,10 +218,8 @@ void MQTT_Manager::_reconnect_mqtt_client() {
                         "online", true);
 
   // Loop over retained MQTT messages and send them again to the MQTT broker as it may have restarted and lost retained messages.
-  {
-    for (auto it = MQTT_Manager::_mqtt_retain_buffer.cbegin(); it != MQTT_Manager::_mqtt_retain_buffer.cend(); it++) {
-      MQTT_Manager::publish(it->first, it->second, true);
-    }
+  for (auto it = MQTT_Manager::_mqtt_retain_buffer.cbegin(); it != MQTT_Manager::_mqtt_retain_buffer.cend(); it++) {
+    MQTT_Manager::publish(it->first, it->second, true);
   }
 
   try {
