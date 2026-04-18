@@ -251,6 +251,8 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
             changed_attribute = true;
             SPDLOG_DEBUG("Thermostat {}::{} got new temperature: {}", this->_id, this->_name, temperature);
           }
+        } else {
+          SPDLOG_WARN("Received state update for {}::{} but update has no valid set temperature.", this->_id, this->_name);
         }
 
       } catch (std::exception &e) {

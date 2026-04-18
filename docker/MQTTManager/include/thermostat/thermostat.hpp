@@ -207,7 +207,7 @@ protected:
   ThermostatOptionHolder _current_swingh_mode;
   ThermostatOptionHolder _current_fan_mode;
   ThermostatOptionHolder _current_preset;
-  float _current_temperature;
+  float _current_temperature = 0;
   NSPanelEntityState _last_thermostat_state;
 
   ThermostatOptionHolder _requested_mode;
@@ -215,7 +215,7 @@ protected:
   ThermostatOptionHolder _requested_swingh_mode;
   ThermostatOptionHolder _requested_fan_mode;
   ThermostatOptionHolder _requested_preset;
-  float _requested_temperature;
+  float _requested_temperature = 0;
 
   boost::signals2::signal<void(ThermostatEntity *)> _thermostat_destroyed_callbacks;
 };
