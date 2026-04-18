@@ -217,6 +217,13 @@ void MQTT_Manager::_reconnect_mqtt_client() {
   MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/status", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)),
                         "online", true);
 
+  // Loop over retained MQTT messages and send them again to the MQTT broker as it may have restarted and lost retained messages.
+  {
+    for (auto it = MQTT_Manager::_mqtt_retain_buffer.cbegin(); it != MQTT_Manager::_mqtt_retain_buffer.cend(); it++) {
+      MQTT_Manager::publish(it->first, it->second, true);
+    }
+  }
+
   try {
     SPDLOG_DEBUG("Subscribing to registered MQTT topics.");
 
@@ -287,6 +294,10 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
     return; // It's not allowed to publish to empty topic.
   }
 
+  if (retain) {
+    MQTT_Manager::_mqtt_retain_buffer[topic] = payload;
+  }
+
   std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
   mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), payload.size(), 0, retain);
   if (MQTT_Manager::_mqtt_client != nullptr) {
@@ -328,6 +339,8 @@ void MQTT_Manager::clear_retain(const std::string &topic) {
     SPDLOG_ERROR("Topic is empty, will not clear retian.");
     return;
   }
+
+  MQTT_Manager::_mqtt_retain_buffer.erase(topic);
 
   std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
   WebsocketServer::set_stomp_topic_retained(fmt::format("mqtt/{}", topic), false);

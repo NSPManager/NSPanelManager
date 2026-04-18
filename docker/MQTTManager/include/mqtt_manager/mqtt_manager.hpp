@@ -113,6 +113,7 @@ private:
   static inline std::mutex _mqtt_client_mutex;
   static inline std::mutex _mqtt_message_mutex;
   static inline std::list<mqtt::message_ptr> _mqtt_messages_buffer;
+  static inline std::unordered_map<std::string, std::string> _mqtt_retain_buffer; // Used so that when we reconnect to an MQTT server that has restarted we can repopulate the retained messages.
 
   static void _reconnect_mqtt_client();
 
