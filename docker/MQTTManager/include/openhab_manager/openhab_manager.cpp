@@ -250,7 +250,11 @@ void OpenhabManager::_send_string(std::string &data) {
   if (OpenhabManager::_websocket != nullptr && OpenhabManager::_connected) {
     std::lock_guard<std::mutex> mtex_lock(OpenhabManager::_mutex_websocket_write_access);
     SPDLOG_TRACE("[OH WS] Sending data: {}", data);
-    OpenhabManager::_websocket->send(data);
+    try {
+      OpenhabManager::_websocket->send(data);
+    } catch (std::exception &e) {
+      SPDLOG_ERROR("[OH WS] Send failed. Caught error: {}", e.what());
+    }
   }
 }
 
@@ -282,7 +286,11 @@ void OpenhabManager::_send_keepalive() {
       keepalive_message["topic"] = "openhab/websocket/heartbeat";
       keepalive_message["payload"] = "PING";
       keepalive_message["source"] = "NSPanelManager::MqttManager";
-      OpenhabManager::_websocket->send(keepalive_message.dump());
+      try {
+        OpenhabManager::_websocket->send(keepalive_message.dump());
+      } catch (std::exception &e) {
+        SPDLOG_ERROR("[Openhab WS] Keepalive send failed. Caught error: {}", e.what());
+      }
     }
   }
 

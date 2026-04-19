@@ -189,7 +189,11 @@ void HomeAssistantManager::_send_string(std::string &data) {
   if (HomeAssistantManager::_websocket != nullptr && HomeAssistantManager::_connected) {
     std::lock_guard<std::mutex> mtex_lock(HomeAssistantManager::_mutex_websocket_write_access);
     SPDLOG_TRACE("[HA WS] Sending data: {}", data);
-    HomeAssistantManager::_websocket->send(data);
+    try {
+      HomeAssistantManager::_websocket->send(data);
+    } catch (std::exception &e) {
+      SPDLOG_ERROR("[HA WS] Send failed. Caught error: {}", e.what());
+    }
   }
 }
 

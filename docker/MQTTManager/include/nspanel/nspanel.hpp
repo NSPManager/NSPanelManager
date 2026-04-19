@@ -75,6 +75,7 @@ public:
   std::string get_mac();
   std::string get_name();
   MQTT_MANAGER_NSPANEL_STATE get_state();
+  MQTT_MANAGER_NSPANEL_MODEL get_model();
   void mqtt_callback(std::string topic, std::string payload);
 
   /**

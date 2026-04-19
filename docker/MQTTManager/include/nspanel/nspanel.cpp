@@ -525,6 +525,10 @@ MQTT_MANAGER_NSPANEL_STATE NSPanel::get_state() {
   return this->_state;
 }
 
+MQTT_MANAGER_NSPANEL_MODEL NSPanel::get_model() {
+  return this->_model;
+}
+
 void NSPanel::mqtt_callback(std::string topic, std::string payload) {
   if (payload.empty()) {
     return;
