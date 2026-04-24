@@ -1079,13 +1079,13 @@ def partial_add_entity_to_entities_page_select_entity_source(
             "ADD_SWITCH_TO_ROOM",
             "ADD_BUTTON_TO_ROOM",
             "ADD_THERMOSTAT_TO_ROOM",
-            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGEADD_SCENE_TO_NSPANEL_ENTITY_PAGE",
+            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE",
         ],
         "openhab_supported_entity_types": [
             "ADD_LIGHT_TO_ROOM",
             "ADD_SWITCH_TO_ROOM",
             "ADD_THERMOSTAT_TO_ROOM",
-            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGEADD_SCENE_TO_NSPANEL_ENTITY_PAGE",
+            "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE",
         ],
         "manual_supported_entity_types": ["ADD_BUTTON_TO_ROOM"],
     }
