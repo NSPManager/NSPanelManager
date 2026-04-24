@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <esp_task_wdt.h>
 #include <math.h>
+#include <esp32/rom/md5_hash.h>
 #include <string>
 #include <vector>
 
@@ -169,7 +170,7 @@ bool NSPanel::init() {
   digitalWrite(4, HIGH); // Turn off power to the display
   vTaskDelay(1000 / portTICK_PERIOD_MS);
   digitalWrite(4, LOW); // Turn on power to the display
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  vTaskDelay(3000 / portTICK_PERIOD_MS);
 
   std::string result = "";
   this->_readDataToString(&result, 2500, false);
@@ -646,20 +647,32 @@ bool NSPanel::_initTFTUpdate(int communication_baud_rate) {
   NSPanel::_clearSerialBuffer();
   vTaskDelay(50 / portTICK_PERIOD_MS);
 
+  // Send connect twice. Some displays silently discard the first command after
+  // DRAKJHSUYDGBNCJHGJKSHBDN; the 10s read window catches whichever connect
+  // actually gets a response. Other displays respond to both — the second comok
+  // is drained by the short discard read below.
   LOG_DEBUG("Sending connect to panel");
+  Serial2.print("connect");
+  NSPanel::instance->_sendCommandEndSequence();
   Serial2.print("connect");
   NSPanel::instance->_sendCommandEndSequence();
 
   std::string comok_string = "";
   NSPanel::instance->_readDataToString(&comok_string, 10000, false);
+  std::string comok_discard = "";
+  NSPanel::instance->_readDataToString(&comok_discard, 500, false);
   NSPanel::instance->_clearSerialBuffer();
   if (comok_string.length() > 3) {
     comok_string.erase(comok_string.length() - 3);
     LOG_DEBUG("Got comok: ", comok_string.c_str());
+    // Wake the display in case it went to sleep — a sleeping display won't respond to whmi-wri.
+    Serial2.print("sleep=0");
+    NSPanel::instance->_sendCommandEndSequence();
+    NSPanel::_clearSerialBuffer();
   } else {
-    // We didn't receive a comok string back. Try again at baud 9600 (default 115200)
-    LOG_ERROR("Didn't receive expected comok, got: '", comok_string.c_str(), "'. Will retry.");
-    return NSPanel::_initTFTUpdate(communication_baud_rate == 115200 ? NSPMConfig::instance->tft_upload_baud : 115200);
+    LOG_ERROR("Didn't receive expected comok at baud ", communication_baud_rate,
+              " (got ", comok_string.length(), " bytes). Retrying at 9600.");
+    return NSPanel::_initTFTUpdate(9600);
   }
 
   // URL to download TFT file from
@@ -703,8 +716,6 @@ bool NSPanel::_initTFTUpdate(int communication_baud_rate) {
     commandString.append(",1");
   }
   NSPanel::_clearSerialBuffer();
-  vTaskDelay(500 / portTICK_PERIOD_MS);
-
   Serial2.print(commandString.c_str());
   NSPanel::instance->_sendCommandEndSequence();
   LOG_DEBUG("Sent TFT upload command: ", commandString.c_str());
@@ -743,9 +754,26 @@ bool NSPanel::_initTFTUpdate(int communication_baud_rate) {
   return true;
 }
 
+// Read up to `len` raw bytes from Serial2 within `timeout_ms`, returning count read.
+static size_t _readSerialRaw(uint8_t *buf, size_t len, uint32_t timeout_ms) {
+  size_t n = 0;
+  unsigned long deadline = millis() + timeout_ms;
+  while (n < len && millis() < deadline) {
+    if (Serial2.available()) {
+      buf[n++] = Serial2.read();
+    } else {
+      vTaskDelay(5 / portTICK_PERIOD_MS);
+    }
+  }
+  return n;
+}
+
 bool NSPanel::_updateTFTOTA() {
   LOG_INFO("_updateTFTOTA Started.");
-  NSPanel::_initTFTUpdate(115200);
+  NSPanel::_initTFTUpdate(9600);
+  // The display sends extra bytes after the init 0x05 handshake in v1.2 mode.
+  // Drain them so they don't corrupt the first chunk's ACK read.
+  NSPanel::_clearSerialBuffer();
 
   // URL to download TFT file from
   std::string downloadUrl = "http://";
@@ -768,9 +796,6 @@ bool NSPanel::_updateTFTOTA() {
       LOG_INFO("Will flash TFT, size: ", file_size);
     }
   }
-  unsigned long startWaitingForOKForNextChunk = 0;
-  unsigned long nextStartWriteOffset = 0;
-  unsigned long lastReadByte = 0;
 
   if (esp_get_free_heap_size() < 4096) {
     LOG_ERROR("Not enough free memory to flash device! Will reboot.");
@@ -779,67 +804,132 @@ bool NSPanel::_updateTFTOTA() {
   }
 
   uint8_t dataBuffer[4096];
+  unsigned long currentOffset = 0;
+  uint8_t consecutive_errors = 0;
+  bool had_rewinds = false;
 
-  // Loop until break when all firmware has finished uploading (data available in stream == 0)
+  struct MD5Context md5_ctx;
+  MD5Init(&md5_ctx);
+
   while (true) {
-    // Calculate next chunk size
-    int next_write_size;
-    if (file_size - lastReadByte > 4096) {
-      next_write_size = 4096;
-    } else {
-      next_write_size = file_size - lastReadByte;
-    }
+    int next_write_size = (file_size - currentOffset > 4096) ? 4096 : (int)(file_size - currentOffset);
+
+    // Download chunk at the current position, retrying until we get the exact size.
     size_t bytesReceived = 0;
-    while (bytesReceived != next_write_size) {
-      bytesReceived = HttpLib::DownloadChunk(dataBuffer, downloadUrl.c_str(), nextStartWriteOffset, next_write_size);
-      if (bytesReceived != next_write_size) {
-        LOG_ERROR("Bytes received: ", bytesReceived, " requested ", next_write_size, ". Will retry.");
+    while (bytesReceived != (size_t)next_write_size) {
+      bytesReceived = HttpLib::DownloadChunk(dataBuffer, downloadUrl.c_str(), currentOffset, next_write_size);
+      if (bytesReceived != (size_t)next_write_size) {
+        LOG_ERROR("Download: got ", bytesReceived, " of ", next_write_size, " bytes at offset ", currentOffset, ". Retrying.");
         vTaskDelay(250 / portTICK_PERIOD_MS);
       }
     }
 
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    unsigned long t_write = millis();
     Serial2.write(dataBuffer, bytesReceived);
-    nextStartWriteOffset += bytesReceived;
-    lastReadByte = nextStartWriteOffset;
-    NSPanel::instance->_update_progress = ((float)lastReadByte / (float)file_size) * 100;
+    LOG_DEBUG("TFT chunk: offset=", currentOffset, " size=", bytesReceived);
 
-    std::string return_string;
-    uint16_t recevied_bytes = NSPanel::instance->_readDataToString(&return_string, 5000, true);
-    if (lastReadByte >= file_size) {
+    // Last chunk: don't wait for the ACK — we're about to restart anyway.
+    if (currentOffset + (unsigned long)bytesReceived >= file_size) {
+      MD5Update(&md5_ctx, dataBuffer, bytesReceived);
+      currentOffset += bytesReceived;
       NSPanel::instance->_update_progress = 100;
-      LOG_INFO("TFT Upload complete, processed ", lastReadByte, " bytes.");
+      LOG_INFO("TFT upload complete, sent ", currentOffset, " of ", file_size, " bytes.");
       break;
-    } else if (return_string[0] == 0x05) {
-      // Old protocol, just upload next chunk.
-      LOG_TRACE("Got 0x05, uploading next chunk.");
-    } else if (return_string[0] == 0x08) {
-      while (return_string.length() < 4) {
-        LOG_TRACE("Waiting for offset data byte ", return_string.length() - 1);
-        while (Serial2.available() <= 0) {
-          vTaskDelay(20 / portTICK_PERIOD_MS);
-        }
-        return_string.push_back(Serial2.read());
-      }
-      uint32_t readNextOffset = return_string[1];
-      readNextOffset |= return_string[2] << 8;
-      readNextOffset |= return_string[3] << 16;
-      readNextOffset |= return_string[4] << 24;
-      if (readNextOffset > 0) {
-        nextStartWriteOffset = readNextOffset;
-        LOG_INFO("Got 0x08 with offset, jumping to: ", nextStartWriteOffset, " please wait.");
-      }
-    } else {
-      LOG_DEBUG("Got unexpected return data from panel. Received ", recevied_bytes, " bytes: ");
-      for (int i = 0; i < recevied_bytes; i++) {
-        LOG_DEBUG("0x", String(return_string[i], HEX).c_str());
-      }
     }
 
-    // vTaskDelay(50 / portTICK_PERIOD_MS);
+    // Read ACK first byte (up to 10 s).
+    uint8_t ack_byte = 0;
+    size_t ack_got = _readSerialRaw(&ack_byte, 1, 10000);
+    unsigned long ack_ms = millis() - t_write;
+
+    if (ack_got == 0) {
+      LOG_ERROR("TFT ACK timeout (", ack_ms, "ms) at offset ", currentOffset, ". Chunk not advanced.");
+      consecutive_errors++;
+      if (consecutive_errors >= 3) {
+        LOG_ERROR("Too many ACK timeouts — rebooting.");
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+        ESP.restart();
+      }
+      continue; // retry same chunk
+    }
+
+    if (ack_byte == 0x05) {
+      consecutive_errors = 0;
+
+      LOG_DEBUG("ACK 0x05 in ", ack_ms, "ms");
+
+      // Advance offset only after ACK (and CRC bytes) have been consumed.
+      MD5Update(&md5_ctx, dataBuffer, bytesReceived);
+      currentOffset += bytesReceived;
+      NSPanel::instance->_update_progress = ((float)currentOffset / (float)file_size) * 100;
+
+    } else if (ack_byte == 0x08) {
+      // Nextion requests retransmission from a specific offset.
+      uint8_t off_bytes[4];
+      // The display sends 0x08 immediately but may take several seconds to compute
+      // and transmit the 4-byte offset — use the same timeout as the first byte.
+      size_t off_got = _readSerialRaw(off_bytes, 4, 10000);
+      LOG_DEBUG("0x08 offset bytes received: ", off_got, "/4");
+      if (off_got == 4) {
+        uint32_t jump_to = (uint32_t)off_bytes[0]
+                         | ((uint32_t)off_bytes[1] << 8)
+                         | ((uint32_t)off_bytes[2] << 16)
+                         | ((uint32_t)off_bytes[3] << 24);
+        if (jump_to > 0) {
+          LOG_INFO("Nextion 0x08: jump to offset ", jump_to, " (was ", currentOffset, ")");
+          currentOffset = jump_to;
+          had_rewinds = true;
+        } else {
+          // offset=0 means "chunk accepted, continue sequentially" — advance past it.
+          MD5Update(&md5_ctx, dataBuffer, bytesReceived);
+          currentOffset += bytesReceived;
+          NSPanel::instance->_update_progress = ((float)currentOffset / (float)file_size) * 100;
+          LOG_DEBUG("Nextion 0x08: offset=0, advancing to ", currentOffset);
+        }
+        consecutive_errors = 0;
+      } else {
+        LOG_ERROR("0x08: only ", off_got, "/4 offset bytes received (10s timeout). Not advancing.");
+        consecutive_errors++;
+        if (consecutive_errors >= 3) {
+          LOG_ERROR("Too many consecutive errors — rebooting.");
+          vTaskDelay(2000 / portTICK_PERIOD_MS);
+          ESP.restart();
+        }
+      }
+
+    } else {
+      LOG_ERROR("Unexpected ACK 0x", String(ack_byte, HEX).c_str(),
+                " at offset ", currentOffset, " after ", ack_ms, "ms — chunk not advanced.");
+      // Drain any trailing bytes belonging to this response.
+      unsigned long t_drain = millis();
+      while (millis() - t_drain < 200) {
+        if (Serial2.available()) {
+          LOG_DEBUG("  trailing byte: 0x", String(Serial2.read(), HEX).c_str());
+        } else {
+          vTaskDelay(5 / portTICK_PERIOD_MS);
+        }
+      }
+      consecutive_errors++;
+      if (consecutive_errors >= 3) {
+        LOG_ERROR("Too many consecutive errors — rebooting.");
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+        ESP.restart();
+      }
+      // Do not advance currentOffset — the same chunk will be retried next iteration.
+    }
   }
 
-  LOG_INFO("Getting TFT MD5 checksum to store in flash.");
+  // Finalise the streaming MD5 we computed over every byte sent to the Nextion.
+  uint8_t md5_digest[16];
+  MD5Final(md5_digest, &md5_ctx);
+  char computed_md5[33];
+  for (int i = 0; i < 16; i++) {
+    sprintf(&computed_md5[i * 2], "%02x", md5_digest[i]);
+  }
+  computed_md5[32] = '\0';
+  LOG_INFO("TFT download MD5 (computed): ", computed_md5);
+
+  LOG_INFO("Getting TFT MD5 checksum from server.");
   char checksum_holder[33];
   while (true) {
     std::string checksumUrl = "http://";
@@ -856,6 +946,16 @@ bool NSPanel::_updateTFTOTA() {
     }
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
+  LOG_INFO("TFT server MD5: ", checksum_holder);
+
+  if (had_rewinds) {
+    LOG_INFO("MD5 comparison skipped: upload had Nextion-requested rewinds (chunks re-sent).");
+  } else if (strncmp(computed_md5, checksum_holder, 32) == 0) {
+    LOG_INFO("MD5 match — downloaded bytes are consistent with server file.");
+  } else {
+    LOG_ERROR("MD5 MISMATCH — downloaded bytes differ from server file! computed=", computed_md5, " server=", checksum_holder);
+  }
+
   NSPMConfig::instance->md5_tft_file = checksum_holder;
   NSPMConfig::instance->saveToLittleFS(false);
 

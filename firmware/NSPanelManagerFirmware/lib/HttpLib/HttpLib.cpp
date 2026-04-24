@@ -46,9 +46,9 @@ size_t HttpLib::DownloadChunk(uint8_t *buffer, const char *address, size_t offse
     return 0;
   }
 
-  size_t sizeReceived = 0;
-  uint8_t num_retries = 0;
-  sizeReceived += httpClient.getStream().readBytes(&buffer[sizeReceived], httpClient.getStreamPtr()->available() >= size - sizeReceived ? size - sizeReceived : httpClient.getStreamPtr()->available());
+  // readBytes loops internally until it has `size` bytes or its stream timeout fires.
+  // Capping by available() would truncate the read when TCP segments are still in flight.
+  size_t sizeReceived = httpClient.getStream().readBytes(buffer, size);
   httpClient.end();
 
   return sizeReceived;

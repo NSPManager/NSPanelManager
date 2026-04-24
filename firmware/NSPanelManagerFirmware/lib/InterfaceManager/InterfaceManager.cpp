@@ -199,8 +199,12 @@ void InterfaceManager::handleNSPanelCommand(char *topic, byte *payload, unsigned
   } else if (command.compare("firmware_update") == 0) {
     WebManager::startOTAUpdate();
   } else if (command.compare("tft_update") == 0) {
-    InterfaceManager::stop();
-    NSPanel::instance->startOTAUpdate();
+    if (NSPMConfig::instance->manager_address.empty()) {
+      LOG_ERROR("Received tft_update command but manager address is not yet known. Ignoring.");
+    } else {
+      InterfaceManager::stop();
+      NSPanel::instance->startOTAUpdate();
+    }
   } else if (command.compare("register_accept") == 0) {
     NSPMConfig::instance->manager_address = json["address"].as<String>().c_str();
     NSPMConfig::instance->manager_port = json["port"].as<uint16_t>();
