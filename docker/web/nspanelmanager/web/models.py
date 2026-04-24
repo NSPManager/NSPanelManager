@@ -60,13 +60,9 @@ class NSPanel(models.Model):
     model = models.CharField(max_length=32, choices=NSPanelModel.choices)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     button1_mode = models.IntegerField(default=0)
-    button1_detached_mode_entity = models.ForeignKey(
-        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+"
-    )
+    button1_detached_mode_entity = models.ForeignKey("Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
     button2_mode = models.IntegerField(default=0)
-    button2_detached_mode_entity = models.ForeignKey(
-        "Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+"
-    )
+    button2_detached_mode_entity = models.ForeignKey("Entity", on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
     md5_firmware = models.CharField(max_length=64, default="")
     md5_data_file = models.CharField(max_length=64, default="")
     md5_tft_file = models.CharField(max_length=64, default="")
@@ -87,9 +83,7 @@ class RelayGroup(models.Model):
 
 
 class RelayGroupBinding(models.Model):
-    relay_group = models.ForeignKey(
-        RelayGroup, on_delete=models.CASCADE, null=True, default=None
-    )
+    relay_group = models.ForeignKey(RelayGroup, on_delete=models.CASCADE, null=True, default=None)
     nspanel = models.ForeignKey(NSPanel, on_delete=models.CASCADE)
     relay_num = models.IntegerField(default=1)
 
@@ -103,9 +97,7 @@ class Entity(models.Model):
 
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     friendly_name = models.CharField(max_length=255, default="")
-    entities_page = models.ForeignKey(
-        RoomEntitiesPage, on_delete=models.CASCADE, null=True
-    )
+    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE, null=True)
     room_view_position = models.IntegerField(default=0)
     entity_type = models.CharField(max_length=64, choices=EntityType)
     entity_data = models.JSONField(default=dict)
@@ -118,9 +110,7 @@ class Scene(models.Model):
     scene_type = models.CharField(max_length=64)
     room = models.ForeignKey(Room, null=True, blank=True, on_delete=models.CASCADE)
     room_view_position = models.IntegerField()
-    entities_page = models.ForeignKey(
-        RoomEntitiesPage, on_delete=models.CASCADE, null=True
-    )
+    entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE, null=True)
 
 
 class LightState(models.Model):

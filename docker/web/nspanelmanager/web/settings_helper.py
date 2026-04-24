@@ -1,22 +1,24 @@
-from .models import Settings, NSPanelSettings, NSPanel
 import logging
+
+from .models import NSPanel, NSPanelSettings, Settings
+
 
 def get_setting_with_default(name) -> str:
     objects = Settings.objects.filter(name=name)
     if objects.count() > 0:
         return str(objects.first().value)
     else:
-        logging.error(F"Failed to get default setting with key '{name}'. No value for setting exists.")
+        logging.error(f"Failed to get default setting with key '{name}'. No value for setting exists.")
         return ""
+
 
 def does_setting_exist(name):
     objects = Settings.objects.filter(name=name)
     return objects.count() > 0
 
+
 def set_setting_value(name, value):
-    Settings.objects.update_or_create(name=name, defaults={
-        "value": value
-    })
+    Settings.objects.update_or_create(name=name, defaults={"value": value})
 
 
 # TODO: Convert so that it ALWAYS return str so that it's easy to handle the same everywhere
@@ -43,6 +45,4 @@ def delete_nspanel_setting(nspanel_id, name):
 def set_nspanel_setting_value(nspanel_id, name, value):
     panel = NSPanel.objects.filter(id=nspanel_id)
     if panel.count() > 0:
-        NSPanelSettings.objects.update_or_create(nspanel=panel.first(), name=name, defaults={
-            "value": value
-        })
+        NSPanelSettings.objects.update_or_create(nspanel=panel.first(), name=name, defaults={"value": value})

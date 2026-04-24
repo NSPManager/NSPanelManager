@@ -1,0 +1,10 @@
+# Allow lines to be as long as 120.
+line-length = 320
+
+[lint]
+# Avoid enforcing line-length violations (`E501`)
+ignore = ["E501"]
+
+[format]
+# Use double quotes when formatting.
+quote-style = "double"

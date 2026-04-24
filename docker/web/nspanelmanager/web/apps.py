@@ -1,29 +1,32 @@
-from django.apps import AppConfig
-import environ
 import logging
-import psutil
-import subprocess
 import os
 import signal
-import time
+import subprocess
 import sys
-import signal
+import time
+
+import environ
+import psutil
+from django.apps import AppConfig
+
 from web.protobuf import protobuf_mqttmanager_pb2
 
 mqttmanager_process = None
+
 
 def sigchld_handler(signum, frame):
     # Handle SIGCHLD from mqttmanager_process
     pid, status = os.waitpid(-1, os.WNOHANG)
     if pid > 0:
         if os.WIFEXITED(status):
-            logging.error(F"MQTTManager binary has exited unexpectedly. Return code: {os.WEXITSTATUS(status)}")
+            logging.error(f"MQTTManager binary has exited unexpectedly. Return code: {os.WEXITSTATUS(status)}")
         elif os.WIFSIGNALED(status):
-            logging.error(F"MQTTManager binary has exited unexpectedly. Killed by signal: {os.WTERMSIG(status)}")
+            logging.error(f"MQTTManager binary has exited unexpectedly. Killed by signal: {os.WTERMSIG(status)}")
 
 
 def start_mqtt_manager():
     from .settings_helper import get_setting_with_default
+
     global mqttmanager_process
 
     print("Did not find a running MQTTManager, starting MQTTManager...")
@@ -38,6 +41,8 @@ def start_mqtt_manager():
 """
 Restart the MQTT Manager process
 """
+
+
 def restart_mqtt_manager_process():
     for proc in psutil.process_iter():
         try:
@@ -56,6 +61,8 @@ def restart_mqtt_manager_process():
 """
 Send command to MQTT Manager to reload config
 """
+
+
 def send_mqttmanager_reload_command():
     for proc in psutil.process_iter():
         if proc.status() == psutil.STATUS_ZOMBIE:
@@ -68,6 +75,7 @@ def send_mqttmanager_reload_command():
 
 def create_entity_pages_for_all_rooms():
     from .models import Room, RoomEntitiesPage
+
     for room in Room.objects.all():
         # Check if an existing scenes page exists, if it does not, create one
         existing_pages = RoomEntitiesPage.objects.filter(room=room, is_scenes_page=True)
@@ -92,6 +100,7 @@ def create_entity_pages_for_all_rooms():
 
 def create_global_scenes_page():
     from .models import RoomEntitiesPage
+
     existing_pages = RoomEntitiesPage.objects.filter(room=None, is_scenes_page=True)
     if not existing_pages.exists():
         page = RoomEntitiesPage()
@@ -103,8 +112,8 @@ def create_global_scenes_page():
 
 
 class WebConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'web'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "web"
 
     def ready(self):
         # Only start MQTT Manager and load values if we are actually starting the application
@@ -120,18 +129,14 @@ class WebConfig(AppConfig):
             if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
                 if "SUPERVISOR_TOKEN" in environment:
                     from .settings_helper import get_setting_with_default, set_setting_value
+
                     if get_setting_with_default("home_assistant_token") == "" and get_setting_with_default("home_assistant_address") == "":
-                        print(
-                            "No home assistant address or token stored, setting according to addon environment.")
-                        set_setting_value(
-                            "home_assistant_token", environment("SUPERVISOR_TOKEN"))
-                        set_setting_value(
-                            "home_assistant_address", "http://supervisor")
+                        print("No home assistant address or token stored, setting according to addon environment.")
+                        set_setting_value("home_assistant_token", environment("SUPERVISOR_TOKEN"))
+                        set_setting_value("home_assistant_address", "http://supervisor")
                     elif get_setting_with_default("home_assistant_token") != environment("SUPERVISOR_TOKEN"):
-                        print(
-                            "Home Assistant token has changed. Will update database.")
-                        set_setting_value(
-                            "home_assistant_token", environment("SUPERVISOR_TOKEN"))
+                        print("Home Assistant token has changed. Will update database.")
+                        set_setting_value("home_assistant_token", environment("SUPERVISOR_TOKEN"))
                     # from .models import Settings
                     # objects = Settings.objects.filter(name=name)
 
@@ -139,5 +144,4 @@ class WebConfig(AppConfig):
             create_global_scenes_page()
             restart_mqtt_manager_process()
         except:
-            logging.exception(
-                "Failed to populate Home Assistant addon settings.")
+            logging.exception("Failed to populate Home Assistant addon settings.")

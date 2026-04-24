@@ -31,19 +31,10 @@ def get_nspanel_json_representation(panel):
         "id": panel.id,
         "mac": panel.mac_address,
         "name": panel.friendly_name,
-        "is_us_panel": get_nspanel_setting_with_default(
-            panel.id, "is_us_panel", "False"
-        )
-        == "True",
+        "is_us_panel": get_nspanel_setting_with_default(panel.id, "is_us_panel", "False") == "True",
         "address": panel.ip_address,
-        "relay1_is_light": get_nspanel_setting_with_default(
-            panel.id, "relay1_is_light", "False"
-        )
-        == "True",
-        "relay2_is_light": get_nspanel_setting_with_default(
-            panel.id, "relay2_is_light", "False"
-        )
-        == "True",
+        "relay1_is_light": get_nspanel_setting_with_default(panel.id, "relay1_is_light", "False") == "True",
+        "relay2_is_light": get_nspanel_setting_with_default(panel.id, "relay2_is_light", "False") == "True",
         "denied": "True" if panel.denied else "False",
     }
     return panel_config
@@ -66,33 +57,18 @@ def get_all_available_entities(request):
     return_json = {"entities": [], "errors": []}
 
     # Home Assistant
-    if (
-        get_setting_with_default("home_assistant_token") != ""
-        and get_setting_with_default("home_assistant_address") != ""
-    ):
+    if get_setting_with_default("home_assistant_token") != "" and get_setting_with_default("home_assistant_address") != "":
         home_assistant_request_headers = {
-            "Authorization": "Bearer "
-            + get_setting_with_default("home_assistant_token"),
+            "Authorization": "Bearer " + get_setting_with_default("home_assistant_token"),
             "content-type": "application/json",
         }
         try:
             environment = environ.Env()
-            if (
-                "IS_HOME_ASSISTANT_ADDON" in environment
-                and environment("IS_HOME_ASSISTANT_ADDON") == "true"
-            ):
-                home_assistant_api_address = (
-                    get_setting_with_default("home_assistant_address")
-                    + "/core/api/states"
-                )
+            if "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true":
+                home_assistant_api_address = get_setting_with_default("home_assistant_address") + "/core/api/states"
             else:
-                home_assistant_api_address = (
-                    get_setting_with_default("home_assistant_address") + "/api/states"
-                )
-            logging.debug(
-                "Trying to get Home Assistant entities via api address: "
-                + home_assistant_api_address
-            )
+                home_assistant_api_address = get_setting_with_default("home_assistant_address") + "/api/states"
+            logging.debug("Trying to get Home Assistant entities via api address: " + home_assistant_api_address)
             home_assistant_response = requests.get(
                 home_assistant_api_address,
                 headers=home_assistant_request_headers,
@@ -102,10 +78,7 @@ def get_all_available_entities(request):
             if home_assistant_response.status_code == 200:
                 for entity in home_assistant_response.json():
                     entity_type = entity["entity_id"].split(".")[0]
-                    if (
-                        len(home_assistant_type_filter) > 0
-                        and entity_type in home_assistant_type_filter
-                    ) or len(home_assistant_type_filter) == 0:
+                    if (len(home_assistant_type_filter) > 0 and entity_type in home_assistant_type_filter) or len(home_assistant_type_filter) == 0:
                         data = {
                             "type": "home_assistant",
                             "label": entity["entity_id"],
@@ -120,35 +93,20 @@ def get_all_available_entities(request):
                         elif data["entity_id"].startswith("switch."):
                             data["entity_type"] = "switch"
                         else:
-                            logging.warn(
-                                "Unknown entity type for entity: " + data["entity_id"]
-                            )
+                            logging.warn("Unknown entity type for entity: " + data["entity_id"])
 
                         return_json["entities"].append(data)
             else:
-                return_json["errors"].append(
-                    "Failed to get Home Assistant lights, got return code: "
-                    + str(home_assistant_response.status_code)
-                )
-                print(
-                    "ERROR! Got status code other than 200. Got code: "
-                    + str(home_assistant_response.status_code)
-                )
+                return_json["errors"].append("Failed to get Home Assistant lights, got return code: " + str(home_assistant_response.status_code))
+                print("ERROR! Got status code other than 200. Got code: " + str(home_assistant_response.status_code))
         except Exception as e:
-            return_json["errors"].append(
-                "Failed to get Home Assistant lights: " + str(traceback.format_exc())
-            )
+            return_json["errors"].append("Failed to get Home Assistant lights: " + str(traceback.format_exc()))
             logging.exception("Failed to get Home Assistant lights!")
     else:
-        print(
-            "No home assistant configuration values. Will not gather Home Assistant entities."
-        )
+        print("No home assistant configuration values. Will not gather Home Assistant entities.")
 
     # OpenHAB
-    if (
-        get_setting_with_default("openhab_token") != ""
-        and get_setting_with_default("openhab_address") != ""
-    ):
+    if get_setting_with_default("openhab_token") != "" and get_setting_with_default("openhab_address") != "":
         # TODO: Sort out how to map channels from items to the correct POST request when MQTT is received
         openhab_request_headers = {
             "Authorization": "Bearer " + get_setting_with_default("openhab_token"),
@@ -176,10 +134,7 @@ def get_all_available_entities(request):
                                     "Switch",
                                     "String",
                                 ]
-                                if "itemType" in channel and (
-                                    channel["itemType"]
-                                    in add_items_with_channels_of_type
-                                ):
+                                if "itemType" in channel and (channel["itemType"] in add_items_with_channels_of_type):
                                     add_entity = True
                                 if "linkedItems" in channel:
                                     # Add all available items to the list of items for this thing
@@ -199,14 +154,8 @@ def get_all_available_entities(request):
                                     }
                                 )
                 else:
-                    return_json["errors"].append(
-                        "Failed to get OpenHAB lights, got return code: "
-                        + str(openhab_response.status_code)
-                    )
-                    print(
-                        "ERROR! Got status code other than 200. Got code: "
-                        + str(openhab_response.status_code)
-                    )
+                    return_json["errors"].append("Failed to get OpenHAB lights, got return code: " + str(openhab_response.status_code))
+                    print("ERROR! Got status code other than 200. Got code: " + str(openhab_response.status_code))
             elif "rules" in openhab_type_filter:
                 openhab_response = requests.get(
                     get_setting_with_default("openhab_address") + "/rest/rules",
@@ -228,18 +177,10 @@ def get_all_available_entities(request):
                                 }
                             )
                 else:
-                    return_json["errors"].append(
-                        "Failed to get OpenHAB lights, got return code: "
-                        + str(openhab_response.status_code)
-                    )
-                    print(
-                        "ERROR! Got status code other than 200. Got code: "
-                        + str(openhab_response.status_code)
-                    )
+                    return_json["errors"].append("Failed to get OpenHAB lights, got return code: " + str(openhab_response.status_code))
+                    print("ERROR! Got status code other than 200. Got code: " + str(openhab_response.status_code))
         except Exception as e:
-            return_json["errors"].append(
-                "Failed to get OpenHAB lights: " + str(traceback.format_exc())
-            )
+            return_json["errors"].append("Failed to get OpenHAB lights: " + str(traceback.format_exc()))
             logging.exception("Failed to get OpenHAB lights!")
     else:
         print("No OpenHAB configuration values. Will not gather OpenHAB entities.")
@@ -254,28 +195,16 @@ def get_nspanel_config(request):
         base = {}
         base["name"] = nspanel.friendly_name
         base["home"] = nspanel.room.id
-        base["default_page"] = get_nspanel_setting_with_default(
-            nspanel.id, "default_page", "0"
-        )
-        base["raise_to_100_light_level"] = get_setting_with_default(
-            "raise_to_100_light_level"
-        )
+        base["default_page"] = get_nspanel_setting_with_default(nspanel.id, "default_page", "0")
+        base["raise_to_100_light_level"] = get_setting_with_default("raise_to_100_light_level")
         base["color_temp_min"] = get_setting_with_default("color_temp_min")
         base["color_temp_max"] = get_setting_with_default("color_temp_max")
         base["reverse_color_temp"] = get_setting_with_default("reverse_color_temp")
         base["min_button_push_time"] = get_setting_with_default("min_button_push_time")
-        base["button_long_press_time"] = get_setting_with_default(
-            "button_long_press_time"
-        )
-        base["special_mode_trigger_time"] = get_setting_with_default(
-            "special_mode_trigger_time"
-        )
-        base["special_mode_release_time"] = get_setting_with_default(
-            "special_mode_release_time"
-        )
-        base["screen_dim_level"] = get_nspanel_setting_with_default(
-            nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level")
-        )
+        base["button_long_press_time"] = get_setting_with_default("button_long_press_time")
+        base["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time")
+        base["special_mode_release_time"] = get_setting_with_default("special_mode_release_time")
+        base["screen_dim_level"] = get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level"))
         base["screensaver_dim_level"] = get_nspanel_setting_with_default(
             nspanel.id,
             "screensaver_dim_level",
@@ -286,43 +215,21 @@ def get_nspanel_config(request):
             "screensaver_activation_timeout",
             get_setting_with_default("screensaver_activation_timeout"),
         )
-        base["screensaver_mode"] = get_nspanel_setting_with_default(
-            nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode")
-        )
+        base["screensaver_mode"] = get_nspanel_setting_with_default(nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode"))
         base["clock_us_style"] = get_setting_with_default("clock_us_style")
         base["use_fahrenheit"] = get_setting_with_default("use_fahrenheit")
-        base["is_us_panel"] = get_nspanel_setting_with_default(
-            nspanel.id, "is_us_panel", "False"
-        )
-        base["lock_to_default_room"] = get_nspanel_setting_with_default(
-            nspanel.id, "lock_to_default_room", "False"
-        )
-        base["reverse_relays"] = get_nspanel_setting_with_default(
-            nspanel.id, "reverse_relays", False
-        )
-        base["relay1_default_mode"] = get_nspanel_setting_with_default(
-            nspanel.id, "relay1_default_mode", "False"
-        )
-        base["relay2_default_mode"] = get_nspanel_setting_with_default(
-            nspanel.id, "relay2_default_mode", "False"
-        )
-        base["temperature_calibration"] = float(
-            get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0)
-        )
+        base["is_us_panel"] = get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False")
+        base["lock_to_default_room"] = get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False")
+        base["reverse_relays"] = get_nspanel_setting_with_default(nspanel.id, "reverse_relays", False)
+        base["relay1_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", "False")
+        base["relay2_default_mode"] = get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", "False")
+        base["temperature_calibration"] = float(get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0))
         base["button1_mode"] = nspanel.button1_mode
-        base["button1_mqtt_topic"] = get_nspanel_setting_with_default(
-            nspanel.id, "button1_mqtt_topic", ""
-        )
-        base["button1_mqtt_payload"] = get_nspanel_setting_with_default(
-            nspanel.id, "button1_mqtt_payload", ""
-        )
+        base["button1_mqtt_topic"] = get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_topic", "")
+        base["button1_mqtt_payload"] = get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_payload", "")
         base["button2_mode"] = nspanel.button2_mode
-        base["button2_mqtt_topic"] = get_nspanel_setting_with_default(
-            nspanel.id, "button2_mqtt_topic", ""
-        )
-        base["button2_mqtt_payload"] = get_nspanel_setting_with_default(
-            nspanel.id, "button2_mqtt_payload", ""
-        )
+        base["button2_mqtt_topic"] = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_topic", "")
+        base["button2_mqtt_payload"] = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_payload", "")
 
         if nspanel.button1_detached_mode_light:
             base["button1_detached_light"] = nspanel.button1_detached_mode_light.id

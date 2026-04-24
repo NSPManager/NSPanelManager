@@ -66,9 +66,7 @@ def mqttmanager_settings_post(request):
             data = json.loads(request.body)
             for setting_key in data["settings"]:
                 if setting_key in banned_setting_keys:
-                    return JsonResponse(
-                        {"status": "error"}, status=403
-                    )  # Return error forbidden
+                    return JsonResponse({"status": "error"}, status=403)  # Return error forbidden
                 settings[setting_key] = get_setting_with_default(setting_key)
         else:
             return JsonResponse({"status": "error"}, status=405)
@@ -116,9 +114,7 @@ def nspanels_get(request):
         if request.GET.get("id"):
             nspanel_objects = NSPanel.objects.filter(id=request.GET.get("id"))
         elif request.GET.get("mac_address"):
-            nspanel_objects = NSPanel.objects.filter(
-                mac_address=request.GET.get("mac_address")
-            )
+            nspanel_objects = NSPanel.objects.filter(mac_address=request.GET.get("mac_address"))
         else:
             nspanel_objects = NSPanel.objects.all()
 
@@ -129,29 +125,15 @@ def nspanels_get(request):
                     "mac_address": nspanel.mac_address,
                     "name": nspanel.friendly_name,
                     "home": nspanel.room.id,
-                    "default_page": get_nspanel_setting_with_default(
-                        nspanel.id, "default_page", 0
-                    ),
-                    "raise_to_100_light_level": get_setting_with_default(
-                        "raise_to_100_light_level"
-                    ),
+                    "default_page": get_nspanel_setting_with_default(nspanel.id, "default_page", 0),
+                    "raise_to_100_light_level": get_setting_with_default("raise_to_100_light_level"),
                     "color_temp_min": get_setting_with_default("color_temp_min"),
                     "color_temp_max": get_setting_with_default("color_temp_max"),
-                    "reverse_color_temp": get_setting_with_default(
-                        "reverse_color_temp"
-                    ),
-                    "min_button_push_time": get_setting_with_default(
-                        "min_button_push_time"
-                    ),
-                    "button_long_press_time": get_setting_with_default(
-                        "button_long_press_time"
-                    ),
-                    "special_mode_trigger_time": get_setting_with_default(
-                        "special_mode_trigger_time"
-                    ),
-                    "special_mode_release_time": get_setting_with_default(
-                        "special_mode_release_time"
-                    ),
+                    "reverse_color_temp": get_setting_with_default("reverse_color_temp"),
+                    "min_button_push_time": get_setting_with_default("min_button_push_time"),
+                    "button_long_press_time": get_setting_with_default("button_long_press_time"),
+                    "special_mode_trigger_time": get_setting_with_default("special_mode_trigger_time"),
+                    "special_mode_release_time": get_setting_with_default("special_mode_release_time"),
                     "screen_dim_level": get_nspanel_setting_with_default(
                         nspanel.id,
                         "screen_dim_level",
@@ -174,49 +156,23 @@ def nspanels_get(request):
                     ),
                     "clock_us_style": get_setting_with_default("clock_us_style"),
                     "use_fahrenheit": get_setting_with_default("use_fahrenheit"),
-                    "is_us_panel": get_nspanel_setting_with_default(
-                        nspanel.id, "is_us_panel", "False"
-                    ),
-                    "lock_to_default_room": get_nspanel_setting_with_default(
-                        nspanel.id, "lock_to_default_room", "False"
-                    ),
-                    "reverse_relays": get_nspanel_setting_with_default(
-                        nspanel.id, "reverse_relays", False
-                    ),
-                    "relay1_default_mode": get_nspanel_setting_with_default(
-                        nspanel.id, "relay1_default_mode", "False"
-                    ),
-                    "relay2_default_mode": get_nspanel_setting_with_default(
-                        nspanel.id, "relay2_default_mode", "False"
-                    ),
-                    "temperature_calibration": get_nspanel_setting_with_default(
-                        nspanel.id, "temperature_calibration", 0
-                    ),
+                    "is_us_panel": get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False"),
+                    "lock_to_default_room": get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False"),
+                    "reverse_relays": get_nspanel_setting_with_default(nspanel.id, "reverse_relays", False),
+                    "relay1_default_mode": get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", "False"),
+                    "relay2_default_mode": get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", "False"),
+                    "temperature_calibration": get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0),
                     "button1_mode": nspanel.button1_mode,
                     "button2_mode": nspanel.button2_mode,
-                    "button1_mqtt_topic": get_nspanel_setting_with_default(
-                        nspanel.id, "button1_mqtt_topic", ""
-                    ),
-                    "button2_mqtt_topic": get_nspanel_setting_with_default(
-                        nspanel.id, "button2_mqtt_topic", ""
-                    ),
-                    "button1_mqtt_payload": get_nspanel_setting_with_default(
-                        nspanel.id, "button1_mqtt_payload", ""
-                    ),
-                    "button2_mqtt_payload": get_nspanel_setting_with_default(
-                        nspanel.id, "button2_mqtt_payload", ""
-                    ),
-                    "button1_detached_light": nspanel.button1_detached_mode_light.id
-                    if nspanel.button1_detached_mode_light
-                    else -1,
-                    "button2_detached_light": nspanel.button2_detached_mode_light.id
-                    if nspanel.button2_detached_mode_light
-                    else -1,
+                    "button1_mqtt_topic": get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_topic", ""),
+                    "button2_mqtt_topic": get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_topic", ""),
+                    "button1_mqtt_payload": get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_payload", ""),
+                    "button2_mqtt_payload": get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_payload", ""),
+                    "button1_detached_light": nspanel.button1_detached_mode_light.id if nspanel.button1_detached_mode_light else -1,
+                    "button2_detached_light": nspanel.button2_detached_mode_light.id if nspanel.button2_detached_mode_light else -1,
                     "denied": nspanel.denied,
                     "accepted": nspanel.accepted,
-                    "rooms": [
-                        room.id for room in Room.objects.all().order_by("displayOrder")
-                    ],
+                    "rooms": [room.id for room in Room.objects.all().order_by("displayOrder")],
                     "scenes": [scene.id for scene in Scene.objects.all()],
                 }
             )
@@ -302,9 +258,7 @@ def relay_groups(request):
                         }
                     )
                 relay_groups.append(rg_info)
-            return JsonResponse(
-                {"status": "ok", "relay_groups": relay_groups}, status=200
-            )
+            return JsonResponse({"status": "ok", "relay_groups": relay_groups}, status=200)
         else:
             return JsonResponse({"status": "error"}, status=405)
     except Exception as ex:
@@ -460,11 +414,7 @@ def scenes_post(request):
                         new_state.saturation = light_state["saturation"]
                     new_state.save()
                 else:
-                    logging.warning(
-                        "ERROR: Couldn't find a light with ID "
-                        + light_state["light_id"]
-                        + ". Will skip light!"
-                    )
+                    logging.warning("ERROR: Couldn't find a light with ID " + light_state["light_id"] + ". Will skip light!")
             return JsonResponse({"status": "ok"}, status=200)
         else:
             logging.error("Could not find scene with that id.")

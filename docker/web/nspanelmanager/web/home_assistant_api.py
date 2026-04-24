@@ -1,15 +1,15 @@
 import json
-import traceback
-import environ
 import logging
+import traceback
+
+import environ
 import requests
+
 from web.settings_helper import get_setting_with_default
 
-def get_all_home_assistant_items(filter = {}):
-    return_json = {
-        "items": [],
-        "errors": []
-    }
+
+def get_all_home_assistant_items(filter={}):
+    return_json = {"items": [], "errors": []}
 
     if get_setting_with_default("home_assistant_token") == "" or get_setting_with_default("home_assistant_address") == "":
         return_json["errors"].append("Home Assistant address and/or access token not configured")
