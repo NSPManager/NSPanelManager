@@ -45,11 +45,17 @@ void HomeAssistantScene::activate() {
     service_data["target"]["entity_id"] = this->_entity_id;
     HomeAssistantManager::send_json(service_data);
   } else if (this->_entity_id.starts_with("script.")) {
+    nlohmann::json context;
+    if (!this->_is_global && this->_room) {
+      context["room_name"] = this->_room->get_name();
+      context["room_id"] = this->_room_id;
+    }
     nlohmann::json service_data;
     service_data["type"] = "call_service";
     service_data["domain"] = "script";
     service_data["service"] = "turn_on";
     service_data["target"]["entity_id"] = this->_entity_id;
+    service_data["data"]["nspanelmanager"] = context;
     HomeAssistantManager::send_json(service_data);
   } else {
     SPDLOG_ERROR("Got request to turn on home assistant scene {}::{} but the entity '{}' is not of known type scene or script.", this->_id, this->_name, this->_entity_id);
