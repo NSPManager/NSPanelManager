@@ -1,6 +1,7 @@
 #include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
+#include "room/room.hpp"
 #include <curl/curl.h>
 #include <entity/entity_icons.hpp>
 #include <home_assistant_manager/home_assistant_manager.hpp>
@@ -45,17 +46,21 @@ void HomeAssistantScene::activate() {
     service_data["target"]["entity_id"] = this->_entity_id;
     HomeAssistantManager::send_json(service_data);
   } else if (this->_entity_id.starts_with("script.")) {
-    nlohmann::json context;
-    if (!this->_is_global && this->_room) {
-      context["room_name"] = this->_room->get_name();
-      context["room_id"] = this->_room_id;
-    }
     nlohmann::json service_data;
+    auto room = EntityManager::get_room(this->_room_id);
+    if (!this->_is_global && room.has_value()) {
+      SPDLOG_DEBUG("Sending script call with context.");
+      nlohmann::json context;
+      context["room_name"] = (*room)->get_name();
+      context["room_id"] = this->_room_id;
+      service_data["service_data"]["variables"]["nspanelmanager"] = context;
+      SPDLOG_DEBUG("Sending script with context: ");
+      SPDLOG_DEBUG(context.dump());
+    }
     service_data["type"] = "call_service";
     service_data["domain"] = "script";
     service_data["service"] = "turn_on";
     service_data["target"]["entity_id"] = this->_entity_id;
-    service_data["data"]["nspanelmanager"] = context;
     HomeAssistantManager::send_json(service_data);
   } else {
     SPDLOG_ERROR("Got request to turn on home assistant scene {}::{} but the entity '{}' is not of known type scene or script.", this->_id, this->_name, this->_entity_id);
@@ -82,15 +87,6 @@ MQTT_MANAGER_ENTITY_CONTROLLER HomeAssistantScene::get_controller() {
 }
 
 void HomeAssistantScene::post_init() {
-  if (!this->_is_global) {
-    auto room_entity = EntityManager::get_room(this->_room_id);
-    if (room_entity) {
-      this->_room = *room_entity;
-    } else {
-      SPDLOG_ERROR("Did not find any room with room ID: {}. Will not continue loading.", this->_room_id);
-      return;
-    }
-  }
 }
 
 std::string HomeAssistantScene::get_name() {

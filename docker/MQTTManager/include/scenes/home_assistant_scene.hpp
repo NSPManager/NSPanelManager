@@ -25,7 +25,6 @@ private:
   std::string _name;
   std::string _entity_id;
   uint16_t _room_id;
-  std::shared_ptr<Room> _room;
 };
 
 #endif // !HOME_ASSISTANT_SCENE
