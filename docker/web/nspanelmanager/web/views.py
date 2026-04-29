@@ -750,13 +750,16 @@ def save_settings(request):
     set_setting_value(name="screensaver_mode", value=request.POST["screensaver_mode"])
     set_setting_value(
         name="show_screensaver_inside_temperature",
-        value=request.POST["show_screensaver_inside_temperature"],
+        value=request.POST.get("show_screensaver_inside_temperature", "True"),
     )
     set_setting_value(
         name="show_screensaver_outside_temperature",
-        value=request.POST["show_screensaver_outside_temperature"],
+        value=request.POST.get("show_screensaver_outside_temperature", "True"),
     )
-    set_setting_value(name="turn_on_behavior", value=request.POST["turn_on_behavior"])
+    set_setting_value(
+        name="turn_on_behavior",
+        value=request.POST.get("turn_on_behavior", "color_temp"),
+    )
     set_setting_value(
         name="max_live_log_messages", value=request.POST["max_live_log_messages"]
     )
@@ -768,9 +771,11 @@ def save_settings(request):
     )
     set_setting_value(name="manager_address", value=request.POST["manager_address"])
     set_setting_value(name="manager_port", value=request.POST["manager_port"])
-    set_setting_value(
-        name="optimistic_mode", value=request.POST["optimistic_mode"] == "optimistic"
-    )
+    if "optimistic_mode" in request.POST:
+        set_setting_value(
+            name="optimistic_mode",
+            value=request.POST["optimistic_mode"] == "optimistic",
+        )
     set_setting_value(
         name="all_rooms_status_backoff_time",
         value=request.POST["all_rooms_status_backoff_time"],

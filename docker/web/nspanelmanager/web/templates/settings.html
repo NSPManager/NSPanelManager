@@ -395,7 +395,7 @@
                 <!-- Optimistic mode -->
                 <li class="w-full border-t sm:border-t-0 border-neutral">
               <div class="flex items-center ps-3">
-                <input id="entity_update_mode_optimistic" type="radio" name="optimistic_mode" value="optimistic" {% if optimistic_mode == "True" %}checked{% endif %}
+                <input id="entity_update_mode_optimistic" type="radio" name="optimistic_mode" value="optimistic" {% if optimistic_mode|lower == "true" %}checked{% endif %}
                   class="w-4 h-4 radio radio-accent">
                 <label for="entity_update_mode_optimistic" class="w-full py-3 ms-2 text-sm font-medium">Optimistic</label>
               </div>
@@ -404,7 +404,7 @@
             <!-- Wait mode -->
             <li class="w-full border-t sm:border-t-0 border-neutral">
               <div class="flex items-center ps-3">
-                <input id="entity_update_mode_wait" type="radio" name="optimistic_mode" value="wait" {% if optimistic_mode == "False" %}checked{% endif %}
+                <input id="entity_update_mode_wait" type="radio" name="optimistic_mode" value="wait" {% if optimistic_mode|lower == "false" %}checked{% endif %}
                   class="w-4 h-4 radio radio-accent">
                 <label for="entity_update_mode_wait"
                   class="w-full py-3 ms-2 text-sm font-medium">Wait</label>
