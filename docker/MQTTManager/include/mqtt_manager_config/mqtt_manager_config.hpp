@@ -183,8 +183,6 @@ private:
   // Map of SETTING key that points to a pair of two strings. Pair.first is database key as string, Pair.second is default value.
   static inline std::unordered_map<MQTT_MANAGER_SETTING, std::pair<std::string, std::string>> _setting_key_map = {
       {MQTT_MANAGER_SETTING::IS_HOME_ASSISTANT_ADDON, {"is_home_assistant_addon", "false"}},
-      {MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, {"optimistic_mode", "false"}},
-      {MQTT_MANAGER_SETTING::MQTT_WAIT_TIME, {"mqtt_wait_time", "0"}},
       {MQTT_MANAGER_SETTING::BUTTON_LONG_PRESS_TIME, {"button_long_press_time", "5000"}},
       {MQTT_MANAGER_SETTING::CLOCK_US_STYLE, {"clock_us_style", "False"}},
       {MQTT_MANAGER_SETTING::COLOR_TEMP_MAX, {"color_temp_max", "6000"}},
