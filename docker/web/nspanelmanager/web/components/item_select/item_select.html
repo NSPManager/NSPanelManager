@@ -28,19 +28,19 @@
     </div>
 
     <script>
-    $(document).ready(() => {
-      $(".item_select_{{ name }}_option").on('click', (event) => {
-        const element = $(event.currentTarget);
-        $("#item_select_{{ name }}_input").val(element.data('item-id'));
-        $("#item_select_{{ name }}_input").attr("data-raw-base64", element.data('raw-base64'));
+    // Use mousedown (not click) so we fire before the browser moves focus to the body
+    // on a non-focusable element, which would collapse the dropdown via :focus-within
+    // before a click event could ever land. preventDefault() keeps the input focused.
+    $(document).on('mousedown', ".item_select_{{ name }}_option", function(event) {
+        event.preventDefault();
+        const element = $(this);
+        $("#item_select_{{ name }}_input").val(element.data('item-id')); // Set value from pressed item to
+        $("#item_select_{{ name }}_input").attr("data-raw-base64", element.data('raw-base64')); // Set value from pressed item to
 
         // Update what item is shown as selected in the list
         $(".item_select_{{ name }}_option").attr('data-selected', 'false');
         element.attr('data-selected', 'true');
-
-        // Blur the input to collapse the dropdown
-        $("#item_select_{{ name }}_input").blur();
-      })
+        $("#item_select_{{ name }}_input").blur(); // Blur the input to collapse the dropdown
     });
 
     document.getElementById("item_select_{{ name }}_input").addEventListener('input', () => {
