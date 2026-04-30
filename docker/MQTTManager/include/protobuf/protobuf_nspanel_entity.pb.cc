@@ -60,6 +60,7 @@ inline constexpr NSPanelEntityState_Light::Impl_::Impl_(
         saturation_{0},
         can_color_temp_{false},
         can_color_{false},
+        state_{false},
         current_light_mode_{static_cast< ::NSPanelEntityState_Light_LightMode >(0)},
         _cached_size_{0} {}
 
@@ -174,6 +175,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Light, _impl_.can_color_temp_),
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Light, _impl_.can_color_),
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Light, _impl_.current_light_mode_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Light, _impl_.state_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Thermostat_ThermostatOption_ThermostatOptionValue, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -227,10 +229,10 @@ const ::uint32_t
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::NSPanelEntityState_Light)},
-        {17, -1, -1, sizeof(::NSPanelEntityState_Thermostat_ThermostatOption_ThermostatOptionValue)},
-        {27, -1, -1, sizeof(::NSPanelEntityState_Thermostat_ThermostatOption)},
-        {39, -1, -1, sizeof(::NSPanelEntityState_Thermostat)},
-        {54, -1, -1, sizeof(::NSPanelEntityState)},
+        {18, -1, -1, sizeof(::NSPanelEntityState_Thermostat_ThermostatOption_ThermostatOptionValue)},
+        {28, -1, -1, sizeof(::NSPanelEntityState_Thermostat_ThermostatOption)},
+        {40, -1, -1, sizeof(::NSPanelEntityState_Thermostat)},
+        {55, -1, -1, sizeof(::NSPanelEntityState)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelEntityState_Light_default_instance_._instance,
@@ -241,34 +243,35 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 const char descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\035protobuf_nspanel_entity.proto\"\303\006\n\022NSPa"
+    "\n\035protobuf_nspanel_entity.proto\"\322\006\n\022NSPa"
     "nelEntityState\022*\n\005light\030\001 \001(\0132\031.NSPanelE"
     "ntityState.LightH\000\0224\n\nthermostat\030\002 \001(\0132\036"
-    ".NSPanelEntityState.ThermostatH\000\032\202\002\n\005Lig"
+    ".NSPanelEntityState.ThermostatH\000\032\221\002\n\005Lig"
     "ht\022\020\n\010light_id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\022\n\nbr"
     "ightness\030\003 \001(\005\022\022\n\ncolor_temp\030\004 \001(\005\022\013\n\003hu"
     "e\030\005 \001(\005\022\022\n\nsaturation\030\006 \001(\005\022\026\n\016can_color"
     "_temp\030\007 \001(\010\022\021\n\tcan_color\030\010 \001(\010\022\?\n\022curren"
     "t_light_mode\030\t \001(\0162#.NSPanelEntityState."
-    "Light.LightMode\"$\n\tLightMode\022\016\n\nCOLOR_TE"
-    "MP\020\000\022\007\n\003RGB\020\001\032\273\003\n\nThermostat\022\025\n\rthermost"
-    "at_id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\033\n\023current_tem"
-    "perature\030\003 \001(\002\022\037\n\027has_current_temperatur"
-    "e\030\004 \001(\010\022\027\n\017set_temperature\030\005 \001(\002\022\021\n\tstep"
-    "_size\030\006 \001(\002\022@\n\007options\030\007 \003(\0132/.NSPanelEn"
-    "tityState.Thermostat.ThermostatOption\032\333\001"
-    "\n\020ThermostatOption\022\014\n\004name\030\001 \001(\t\022\025\n\rcurr"
-    "ent_value\030\002 \001(\t\022\024\n\014current_icon\030\003 \001(\t\022V\n"
-    "\007options\030\004 \003(\0132E.NSPanelEntityState.Ther"
-    "mostat.ThermostatOption.ThermostatOption"
-    "Value\0324\n\025ThermostatOptionValue\022\r\n\005value\030"
-    "\001 \001(\t\022\014\n\004icon\030\002 \001(\tB\010\n\006entityb\006proto3"
+    "Light.LightMode\022\r\n\005state\030\n \001(\010\"$\n\tLightM"
+    "ode\022\016\n\nCOLOR_TEMP\020\000\022\007\n\003RGB\020\001\032\273\003\n\nThermos"
+    "tat\022\025\n\rthermostat_id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t"
+    "\022\033\n\023current_temperature\030\003 \001(\002\022\037\n\027has_cur"
+    "rent_temperature\030\004 \001(\010\022\027\n\017set_temperatur"
+    "e\030\005 \001(\002\022\021\n\tstep_size\030\006 \001(\002\022@\n\007options\030\007 "
+    "\003(\0132/.NSPanelEntityState.Thermostat.Ther"
+    "mostatOption\032\333\001\n\020ThermostatOption\022\014\n\004nam"
+    "e\030\001 \001(\t\022\025\n\rcurrent_value\030\002 \001(\t\022\024\n\014curren"
+    "t_icon\030\003 \001(\t\022V\n\007options\030\004 \003(\0132E.NSPanelE"
+    "ntityState.Thermostat.ThermostatOption.T"
+    "hermostatOptionValue\0324\n\025ThermostatOption"
+    "Value\022\r\n\005value\030\001 \001(\t\022\014\n\004icon\030\002 \001(\tB\010\n\006en"
+    "tityb\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_5fentity_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_5fentity_2eproto = {
     false,
     false,
-    877,
+    892,
     descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto,
     "protobuf_nspanel_entity.proto",
     &descriptor_table_protobuf_5fnspanel_5fentity_2eproto_once,
@@ -384,15 +387,15 @@ NSPanelEntityState_Light::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<4, 9, 0, 45, 2> NSPanelEntityState_Light::_table_ = {
+const ::_pbi::TcParseTable<4, 10, 0, 45, 2> NSPanelEntityState_Light::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    9, 120,  // max_field_number, fast_idx_mask
+    10, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294966784,  // skipmap
+    4294966272,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    9,  // num_field_entries
+    10,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_NSPanelEntityState_Light_default_instance_._instance,
@@ -430,7 +433,9 @@ const ::_pbi::TcParseTable<4, 9, 0, 45, 2> NSPanelEntityState_Light::_table_ = {
     // .NSPanelEntityState.Light.LightMode current_light_mode = 9;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelEntityState_Light, _impl_.current_light_mode_), 63>(),
      {72, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.current_light_mode_)}},
-    {::_pbi::TcParser::MiniParse, {}},
+    // bool state = 10;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Light, _impl_.state_), 63>(),
+     {80, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.state_)}},
     {::_pbi::TcParser::MiniParse, {}},
     {::_pbi::TcParser::MiniParse, {}},
     {::_pbi::TcParser::MiniParse, {}},
@@ -466,6 +471,9 @@ const ::_pbi::TcParseTable<4, 9, 0, 45, 2> NSPanelEntityState_Light::_table_ = {
     // .NSPanelEntityState.Light.LightMode current_light_mode = 9;
     {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.current_light_mode_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // bool state = 10;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Light, _impl_.state_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
   }},
   // no aux_entries
   {{
@@ -560,6 +568,13 @@ PROTOBUF_NOINLINE void NSPanelEntityState_Light::Clear() {
         9, this->_internal_current_light_mode(), target);
   }
 
+  // bool state = 10;
+  if (this->_internal_state() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        10, this->_internal_state(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -624,6 +639,11 @@ PROTOBUF_NOINLINE void NSPanelEntityState_Light::Clear() {
     total_size += 2;
   }
 
+  // bool state = 10;
+  if (this->_internal_state() != 0) {
+    total_size += 2;
+  }
+
   // .NSPanelEntityState.Light.LightMode current_light_mode = 9;
   if (this->_internal_current_light_mode() != 0) {
     total_size += 1 +
@@ -665,6 +685,9 @@ void NSPanelEntityState_Light::MergeImpl(::google::protobuf::MessageLite& to_msg
   }
   if (from._internal_can_color() != 0) {
     _this->_impl_.can_color_ = from._impl_.can_color_;
+  }
+  if (from._internal_state() != 0) {
+    _this->_impl_.state_ = from._impl_.state_;
   }
   if (from._internal_current_light_mode() != 0) {
     _this->_impl_.current_light_mode_ = from._impl_.current_light_mode_;

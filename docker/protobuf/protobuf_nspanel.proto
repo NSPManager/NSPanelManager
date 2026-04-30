@@ -120,19 +120,6 @@ message NSPanelStatusReport {
   float pressure = 15;
 }
 
-message NSPanelLightStatus {
-  int32 id = 1;
-  string name = 2;
-  bool can_dim = 3;
-  bool can_color_temperature = 4;
-  bool can_rgb = 5;
-  int32 light_level = 6;
-  int32 color_temp = 7;
-  int32 hue = 8;
-  int32 saturation = 9;
-  int32 room_view_position = 10;
-}
-
 // Container of data shown on the "Entities page".
 // When pressing the next or previous button on the panel it will request a new NSPanelRoomEnititesPage from the manager.
 message NSPanelRoomEntitiesPage {

@@ -154,6 +154,7 @@ void Light::send_state_update_to_nspanel() {
   NSPanelEntityState_Light *light_state = state.mutable_light();
   light_state->set_light_id(this->_id);
   light_state->set_name(this->_name);
+  light_state->set_state(this->_current_state);
   light_state->set_can_color_temp(this->_can_color_temperature);
   light_state->set_can_color(this->_can_rgb);
 

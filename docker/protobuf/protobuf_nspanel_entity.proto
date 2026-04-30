@@ -4,48 +4,49 @@ syntax = "proto3";
 // and control/update individual entities.
 
 message NSPanelEntityState {
-    message Light {
-        enum LightMode {
-            COLOR_TEMP = 0;
-            RGB = 1;
-        }
-
-        int32 light_id = 1;
-        string name = 2;
-        int32 brightness = 3;
-        int32 color_temp = 4;
-        int32 hue = 5;
-        int32 saturation = 6;
-
-        bool can_color_temp = 7;
-        bool can_color = 8;
-        LightMode current_light_mode = 9;
+  message Light {
+    enum LightMode {
+      COLOR_TEMP = 0;
+      RGB = 1;
     }
 
-    message Thermostat {
-        int32 thermostat_id = 1;
-        string name = 2;
-        float current_temperature = 3;
-        bool has_current_temperature = 4;
-        float set_temperature = 5;
-        float step_size = 6;
+    int32 light_id = 1;
+    string name = 2;
+    int32 brightness = 3;
+    int32 color_temp = 4;
+    int32 hue = 5;
+    int32 saturation = 6;
 
-        message ThermostatOption {
-            string name = 1;
-            string current_value = 2;
-            string current_icon = 3;
-            message ThermostatOptionValue {
-                string value = 1;
-                string icon = 2;
-            }
+    bool can_color_temp = 7;
+    bool can_color = 8;
+    LightMode current_light_mode = 9;
+    bool state = 10;
+  }
 
-            repeated ThermostatOptionValue options = 4;
-        }
-        repeated ThermostatOption options = 7;
+  message Thermostat {
+    int32 thermostat_id = 1;
+    string name = 2;
+    float current_temperature = 3;
+    bool has_current_temperature = 4;
+    float set_temperature = 5;
+    float step_size = 6;
+
+    message ThermostatOption {
+      string name = 1;
+      string current_value = 2;
+      string current_icon = 3;
+      message ThermostatOptionValue {
+        string value = 1;
+        string icon = 2;
+      }
+
+      repeated ThermostatOptionValue options = 4;
     }
+    repeated ThermostatOption options = 7;
+  }
 
-    oneof entity {
-        Light light = 1;
-        Thermostat thermostat = 2;
-    }
+  oneof entity {
+    Light light = 1;
+    Thermostat thermostat = 2;
+  }
 }

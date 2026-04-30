@@ -19,7 +19,6 @@ typedef struct NSPanelConfig NSPanelConfig;
 typedef struct NSPanelConfig__RoomInfo NSPanelConfig__RoomInfo;
 typedef struct NSPanelWarning NSPanelWarning;
 typedef struct NSPanelStatusReport NSPanelStatusReport;
-typedef struct NSPanelLightStatus NSPanelLightStatus;
 typedef struct NSPanelRoomEntitiesPage NSPanelRoomEntitiesPage;
 typedef struct NSPanelRoomEntitiesPage__EntitySlot NSPanelRoomEntitiesPage__EntitySlot;
 typedef struct NSPanelRoomStatus NSPanelRoomStatus;
@@ -211,25 +210,6 @@ struct  NSPanelStatusReport
 #define NSPANEL_STATUS_REPORT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_status_report__descriptor) \
     , NSPANEL_STATUS_REPORT__STATE__ONLINE, 0, 0, 0, (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, 0,NULL, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, 0 }
-
-
-struct  NSPanelLightStatus
-{
-  ProtobufCMessage base;
-  int32_t id;
-  char *name;
-  protobuf_c_boolean can_dim;
-  protobuf_c_boolean can_color_temperature;
-  protobuf_c_boolean can_rgb;
-  int32_t light_level;
-  int32_t color_temp;
-  int32_t hue;
-  int32_t saturation;
-  int32_t room_view_position;
-};
-#define NSPANEL_LIGHT_STATUS__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&nspanel_light_status__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0 }
 
 
 struct  NSPanelRoomEntitiesPage__EntitySlot
@@ -539,25 +519,6 @@ NSPanelStatusReport *
 void   nspanel_status_report__free_unpacked
                      (NSPanelStatusReport *message,
                       ProtobufCAllocator *allocator);
-/* NSPanelLightStatus methods */
-void   nspanel_light_status__init
-                     (NSPanelLightStatus         *message);
-size_t nspanel_light_status__get_packed_size
-                     (const NSPanelLightStatus   *message);
-size_t nspanel_light_status__pack
-                     (const NSPanelLightStatus   *message,
-                      uint8_t             *out);
-size_t nspanel_light_status__pack_to_buffer
-                     (const NSPanelLightStatus   *message,
-                      ProtobufCBuffer     *buffer);
-NSPanelLightStatus *
-       nspanel_light_status__unpack
-                     (ProtobufCAllocator  *allocator,
-                      size_t               len,
-                      const uint8_t       *data);
-void   nspanel_light_status__free_unpacked
-                     (NSPanelLightStatus *message,
-                      ProtobufCAllocator *allocator);
 /* NSPanelRoomEntitiesPage__EntitySlot methods */
 void   nspanel_room_entities_page__entity_slot__init
                      (NSPanelRoomEntitiesPage__EntitySlot         *message);
@@ -678,9 +639,6 @@ typedef void (*NSPanelWarning_Closure)
 typedef void (*NSPanelStatusReport_Closure)
                  (const NSPanelStatusReport *message,
                   void *closure_data);
-typedef void (*NSPanelLightStatus_Closure)
-                 (const NSPanelLightStatus *message,
-                  void *closure_data);
 typedef void (*NSPanelRoomEntitiesPage__EntitySlot_Closure)
                  (const NSPanelRoomEntitiesPage__EntitySlot *message,
                   void *closure_data);
@@ -738,7 +696,6 @@ extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_button_mode__des
 extern const ProtobufCMessageDescriptor nspanel_warning__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_status_report__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_status_report__state__descriptor;
-extern const ProtobufCMessageDescriptor nspanel_light_status__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_room_entities_page__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_room_entities_page__entity_slot__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_room_status__descriptor;

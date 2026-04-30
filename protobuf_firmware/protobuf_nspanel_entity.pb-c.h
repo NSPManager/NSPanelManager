@@ -44,10 +44,11 @@ struct  NSPanelEntityState__Light
   protobuf_c_boolean can_color_temp;
   protobuf_c_boolean can_color;
   NSPanelEntityState__Light__LightMode current_light_mode;
+  protobuf_c_boolean state;
 };
 #define NSPANEL_ENTITY_STATE__LIGHT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_entity_state__light__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, NSPANEL_ENTITY_STATE__LIGHT__LIGHT_MODE__COLOR_TEMP }
+    , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, NSPANEL_ENTITY_STATE__LIGHT__LIGHT_MODE__COLOR_TEMP, 0 }
 
 
 struct  NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue

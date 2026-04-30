@@ -455,6 +455,7 @@ class NSPanelEntityState_Light final : public ::google::protobuf::Message
     kSaturationFieldNumber = 6,
     kCanColorTempFieldNumber = 7,
     kCanColorFieldNumber = 8,
+    kStateFieldNumber = 10,
     kCurrentLightModeFieldNumber = 9,
   };
   // string name = 2;
@@ -543,6 +544,16 @@ class NSPanelEntityState_Light final : public ::google::protobuf::Message
   void _internal_set_can_color(bool value);
 
   public:
+  // bool state = 10;
+  void clear_state() ;
+  bool state() const;
+  void set_state(bool value);
+
+  private:
+  bool _internal_state() const;
+  void _internal_set_state(bool value);
+
+  public:
   // .NSPanelEntityState.Light.LightMode current_light_mode = 9;
   void clear_current_light_mode() ;
   ::NSPanelEntityState_Light_LightMode current_light_mode() const;
@@ -558,7 +569,7 @@ class NSPanelEntityState_Light final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 9, 0,
+      4, 10, 0,
       45, 2>
       _table_;
 
@@ -587,6 +598,7 @@ class NSPanelEntityState_Light final : public ::google::protobuf::Message
     ::int32_t saturation_;
     bool can_color_temp_;
     bool can_color_;
+    bool state_;
     int current_light_mode_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -1544,6 +1556,28 @@ inline ::NSPanelEntityState_Light_LightMode NSPanelEntityState_Light::_internal_
 inline void NSPanelEntityState_Light::_internal_set_current_light_mode(::NSPanelEntityState_Light_LightMode value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.current_light_mode_ = value;
+}
+
+// bool state = 10;
+inline void NSPanelEntityState_Light::clear_state() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.state_ = false;
+}
+inline bool NSPanelEntityState_Light::state() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Light.state)
+  return _internal_state();
+}
+inline void NSPanelEntityState_Light::set_state(bool value) {
+  _internal_set_state(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Light.state)
+}
+inline bool NSPanelEntityState_Light::_internal_state() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.state_;
+}
+inline void NSPanelEntityState_Light::_internal_set_state(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.state_ = value;
 }
 
 // -------------------------------------------------------------------
