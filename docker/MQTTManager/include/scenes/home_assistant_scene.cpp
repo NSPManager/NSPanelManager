@@ -47,16 +47,16 @@ void HomeAssistantScene::activate() {
     HomeAssistantManager::send_json(service_data);
   } else if (this->_entity_id.starts_with("script.")) {
     nlohmann::json service_data;
+    nlohmann::json context;
+    context["scene_name"] = this->_name;
+    context["scene_id"] = this->_id;
     auto room = EntityManager::get_room(this->_room_id);
     if (!this->_is_global && room.has_value()) {
-      SPDLOG_DEBUG("Sending script call with context.");
-      nlohmann::json context;
       context["room_name"] = (*room)->get_name();
       context["room_id"] = this->_room_id;
-      service_data["service_data"]["variables"]["nspanelmanager"] = context;
-      SPDLOG_DEBUG("Sending script with context: ");
-      SPDLOG_DEBUG(context.dump());
     }
+    service_data["service_data"]["variables"]["nspanelmanager"] = context;
+    SPDLOG_DEBUG("Sending script with context: {}", context.dump());
     service_data["type"] = "call_service";
     service_data["domain"] = "script";
     service_data["service"] = "turn_on";
