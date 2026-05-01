@@ -98,16 +98,9 @@ void publish_time_and_date() {
       next_minute_tm.tm_hour++;
       if (next_minute_tm.tm_hour >= 24) { // We went over to next day
         next_minute_tm.tm_hour = 0;
-
-        // Handle day change
-        if (next_minute_tm.tm_mday >= 32) { // We went over to next month
-          next_minute_tm.tm_mday = 1;
-          next_minute_tm.tm_mon++;
-          if (next_minute_tm.tm_mon >= 12) { // We went over to next year
-            next_minute_tm.tm_mon = 0;
-            next_minute_tm.tm_year++;
-          }
-        }
+        next_minute_tm.tm_mday++;
+        // mktime (called below) normalises month/year overflow and handles
+        // varying month lengths and leap years, so no manual rollover needed.
       }
     }
 
