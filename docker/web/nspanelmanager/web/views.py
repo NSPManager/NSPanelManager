@@ -980,7 +980,7 @@ def download_tft(request, panel_id):
     elif is_us_panel == "True" and us_panel_orientation == "vertical":
         tft_file = "HMI_files/tft_automation/us/output_" + selected_tft + "/gui.tft"
     else:
-        print("ERROR! Could not determine TFT file for NSPanel with ID " + panel_id)
+        print(f"ERROR! Could not determine TFT file for NSPanel with ID {panel_id}")
 
     fs = FileSystemStorage()
     if "Range" in request.headers and request.headers["Range"].startswith("bytes="):
@@ -1046,7 +1046,7 @@ def checksum_tft_file(request, panel_id):
     elif is_us_panel == "True" and us_panel_orientation == "vertical":
         tft_file = "HMI_files/tft_automation/us/output_" + selected_tft + "/gui.tft"
     else:
-        print("ERROR! Could not determine TFT file for NSPanel with ID " + panel_id)
+        print(f"ERROR! Could not determine TFT file for NSPanel with ID {panel_id}")
 
     return HttpResponse(get_file_md5sum(tft_file))
 
