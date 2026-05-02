@@ -854,7 +854,7 @@ def get_entity_in_page_slot(page_id, slot_id):
 def partial_move_entity(request):
     existing_entity_in_slot = get_entity_in_page_slot(request.POST["page_id"], request.POST["slot_id"])
     new_entity_in_slot = None
-    if request.POST["new_entity_type"] == "Scene":
+    if request.POST["new_entity_type"] == "scene":
         new_entity_in_slot = Scene.objects.get(id=request.POST["new_entity_id"])
     else:
         try:
