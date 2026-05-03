@@ -785,7 +785,8 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
       } else {
         auto scene = std::dynamic_pointer_cast<Scene>(*entity);
         if (scene) {
-          scene->activate(EntityManager::get_room_id_for_panel_id(command.nspanel_id()));
+          auto room_id = EntityManager::get_room_id_for_panel_id(command.nspanel_id());
+          scene->activate(room_id ? std::optional(*room_id) : std::nullopt);
         } else {
           (*entity)->toggle();
         }
@@ -898,12 +899,12 @@ std::expected<std::shared_ptr<NSPanel>, EntityManager::EntityError> EntityManage
   return std::unexpected(EntityManager::EntityError::NOT_FOUND);
 }
 
-std::optional<int32_t> EntityManager::get_room_id_for_panel_id(uint32_t nspanel_id) {
+std::expected<int32_t, EntityManager::EntityError> EntityManager::get_room_id_for_panel_id(uint32_t nspanel_id) {
   auto nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
   if (nspanel.has_value()) {
     return (*nspanel)->get_default_room_id();
   }
-  return std::nullopt;
+  return std::unexpected(EntityManager::EntityError::NOT_FOUND);
 }
 
 std::expected<std::shared_ptr<NSPanel>, EntityManager::EntityError> EntityManager::get_nspanel_by_mac(std::string mac) {

@@ -206,7 +206,7 @@ public:
 
   static std::expected<std::shared_ptr<NSPanel>, EntityError> get_nspanel_by_id(uint id);
   static std::expected<std::shared_ptr<NSPanel>, EntityError> get_nspanel_by_mac(std::string mac);
-  static std::optional<int32_t> get_room_id_for_panel_id(uint32_t nspanel_id);
+  static std::expected<int32_t, EntityError> get_room_id_for_panel_id(uint32_t nspanel_id);
 
 private:
   static inline std::vector<std::shared_ptr<MqttManagerEntity>> _entities;
