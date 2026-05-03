@@ -36,8 +36,9 @@ void HomeAssistantScene::reload_config() {
   }
 }
 
-void HomeAssistantScene::activate() {
+void HomeAssistantScene::activate(std::optional<int32_t> triggering_room_id) {
   SPDLOG_INFO("Activating scene {}::{}.", this->_id, this->_name);
+
   if (this->_entity_id.starts_with("scene.")) {
     nlohmann::json service_data;
     service_data["type"] = "call_service";
@@ -50,11 +51,23 @@ void HomeAssistantScene::activate() {
     nlohmann::json context;
     context["scene_name"] = this->_name;
     context["scene_id"] = this->_id;
-    auto room = EntityManager::get_room(this->_room_id);
-    if (!this->_is_global && room.has_value()) {
-      context["room_name"] = (*room)->get_name();
-      context["room_id"] = this->_room_id;
+
+    if (triggering_room_id.has_value()) {
+      auto triggering_room = EntityManager::get_room(*triggering_room_id);
+      if (triggering_room.has_value()) {
+        context["triggering_room_id"] = *triggering_room_id;
+        context["triggering_room_name"] = (*triggering_room)->get_name();
+      }
     }
+
+    if (!this->_is_global) {
+      auto scene_room = EntityManager::get_room(this->_room_id);
+      if (scene_room.has_value()) {
+        context["scene_room_id"] = this->_room_id;
+        context["scene_room_name"] = (*scene_room)->get_name();
+      }
+    }
+
     service_data["service_data"]["variables"]["nspanelmanager"] = context;
     SPDLOG_DEBUG("Sending script with context: {}", context.dump());
     service_data["type"] = "call_service";

@@ -7,7 +7,7 @@ class HomeAssistantScene : public Scene {
 public:
   HomeAssistantScene(uint32_t id);
   void reload_config();
-  void activate();
+  void activate(std::optional<int32_t> triggering_room_id = std::nullopt);
   void save();
   void remove();
   uint16_t get_id();

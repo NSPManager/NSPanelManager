@@ -47,7 +47,7 @@ void NSPMScene::reload_config() {
   }
 }
 
-void NSPMScene::activate() {
+void NSPMScene::activate(std::optional<int32_t> triggering_room_id) {
   SPDLOG_INFO("Activating scene {}::{}.", this->_id, this->_name);
   try {
     auto light_states = database_manager::database.get_all<database_manager::SceneLightState>(sqlite_orm::where(sqlite_orm::c(&database_manager::SceneLightState::scene_id) == this->_id));
