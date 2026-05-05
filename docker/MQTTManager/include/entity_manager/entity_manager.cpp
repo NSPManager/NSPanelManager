@@ -97,6 +97,14 @@ void EntityManager::load_entities() {
   SPDLOG_INFO("Total loaded NSPanels: {}", EntityManager::_nspanels.size());
   SPDLOG_INFO("Total loaded Rooms: {}", EntityManager::_rooms.size());
   SPDLOG_INFO("Total loaded Entities: {}", EntityManager::_entities.size());
+
+  // Force a re-publish of the all-rooms status now that rooms/lights are fully
+  // loaded. The background thread fires before load_entities completes; a proto3
+  // message with all-zero values serializes to zero bytes, and an MQTT retained
+  // publish with an empty payload clears the retained message on the broker.
+  // Without this call, panels would never receive the aggregate until the next
+  // light-state change.
+  EntityManager::_room_updated_callback(nullptr);
 }
 
 void EntityManager::attach_entity_added_listener(void (*listener)(std::shared_ptr<MqttManagerEntity>)) {
