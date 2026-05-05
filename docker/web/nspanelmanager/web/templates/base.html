@@ -25,6 +25,9 @@
   <link rel="stylesheet" href="{{ ingress_path }}{% static 'base.css' %}?refresh={% now 'U' %}?version={{ version }}">
   <link rel="stylesheet" href="{{ ingress_path }}{% static 'jquery-ui-1.14.1.custom/jquery-ui.min.css' %}?refresh={% now 'U' %}?version={{ version }}">
 
+  <!--Include React scripts-->
+  {% include "scripts.html" %}
+
   <style>
   @font-face {
       font-family: "nspm-mdi";

@@ -1,4 +1,10 @@
 @import "tailwindcss";
+
+@theme {
+    --color-home-assistant: #18bcf2;
+    --color-openhab: #e64a19;
+}
+
 @plugin "daisyui" {
     themes: all;
 }

@@ -8,14 +8,29 @@ from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+import web.home_assistant_api
+import web.openhab_api
 from web.settings_helper import (
     get_nspanel_setting_with_default,
     get_setting_with_default,
     set_setting_value,
 )
 
-from .apps import start_mqtt_manager
-from .models import LightState, NSPanel, RelayGroup, Room, Scene
+from .apps import send_mqttmanager_reload_command
+from .models import Entity, LightState, NSPanel, RelayGroup, Room, RoomEntitiesPage, Scene
+
+########################
+# Get entities section #
+########################
+
+
+def get_home_assistant_entities(request):
+    if request.method != "GET":
+        return JsonResponse({"status": "error"}, status=405)
+
+    filter_params = json.loads(request.GET.get("filter", "{}"))
+    return JsonResponse(web.home_assistant_api.get_all_home_assistant_items(filter_params))
+
 
 ##########################
 ## MQTTManager section ###
@@ -438,3 +453,107 @@ def get_ip_by_hostname(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"error": "Internal server error"}, status=500)
+
+
+### Generic Entity section ###
+def get_entity(request, entity_id):
+    try:
+        if request.method == "GET":
+            entity = Entity.objects.get(id=entity_id)
+            return JsonResponse(
+                {
+                    "status": "success",
+                    "result": {
+                        "base": {
+                            "id": entity.id,
+                            "friendly_name": entity.friendly_name,
+                            "type": entity.entity_type,
+                            "room_id": entity.room_id,
+                            "entities_page_id": entity.entities_page_id,
+                            "room_view_position": entity.room_view_position,
+                        },
+                        "entity": entity.entity_data,
+                    },
+                }
+            )
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"error": "Internal server error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+##################
+# Lights section #
+##################
+
+
+def entities_lights(request):
+    try:
+        if request.method == "PUT":
+            return put_light_entity(request)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+def put_light_entity(request):
+    try:
+        required_base_fields = ["room_id", "entities_page_id", "room_view_position", "controller", "type", "friendly_name"]  # Fields required for all entities
+        required_light_fields = [  # Fields required for light entities
+            "can_color_temperature",
+            "can_dim",
+            "can_rgb",
+            "controlled_by_nspanel_main_page",
+            "home_assistant_name",
+            "is_ceiling_light",
+            "openhab_control_mode",
+            "openhab_item_color_temp",
+            "openhab_item_dimmer",
+            "openhab_item_rgb",
+            "openhab_item_switch",
+            "openhab_name",
+        ]
+        data = json.loads(request.body)
+        for field in required_base_fields:
+            if field not in data["base"]:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+        for field in required_light_fields:
+            if field not in data["entity"]:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        print(data)
+        entity_data = {
+            "controller": data["base"]["controller"],
+            "home_assistant_name": data["entity"]["home_assistant_name"],
+            "openhab_control_mode": data["entity"]["openhab_control_mode"],
+            "openhab_item_switch": data["entity"]["openhab_item_switch"],
+            "openhab_item_dimmer": data["entity"]["openhab_item_dimmer"],
+            "openhab_item_color_temp": data["entity"]["openhab_item_color_temp"],
+            "openhab_item_rgb": data["entity"]["openhab_item_rgb"],
+            "can_dim": data["entity"]["can_dim"] == "true",
+            "can_color_temperature": data["entity"]["can_color_temperature"] == "true",
+            "can_rgb": data["entity"]["can_rgb"] == "true",
+            "is_ceiling_light": data["entity"]["is_ceiling_light"] == "true",
+            "controlled_by_nspanel_main_page": data["entity"]["controlled_by_nspanel_main_page"] == "true",
+        }
+        if "id" in data["base"] and data["base"]["id"]:
+            new_light = Entity.objects.get(id=int(data["base"]["id"]))
+            entity_data = new_light.entity_data
+        else:
+            new_light = Entity()
+            new_light.entity_type = Entity.EntityType.LIGHT
+
+        new_light.friendly_name = data["base"]["friendly_name"]
+        new_light.room = Room.objects.get(id=int(data["base"]["room_id"]))
+        new_light.entities_page = RoomEntitiesPage.objects.get(id=int(data["base"]["entities_page_id"]))
+        new_light.room_view_position = int(data["base"]["room_view_position"])
+
+        new_light.entity_data = entity_data
+        new_light.save()
+        # send_mqttmanager_reload_command()
+
+        return JsonResponse({"status": "ok"}, status=200)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)

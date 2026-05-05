@@ -31,6 +31,8 @@
 {% block content %}
 {% load static %}
 
+{% include "partial/add_entity.html" %}
+
 <!-- Beginning of vissible content-->
 <form method="POST" action="{{ ingress_path }}{% url 'update_room_form' room_id=room.id %}">
   {% csrf_token %}

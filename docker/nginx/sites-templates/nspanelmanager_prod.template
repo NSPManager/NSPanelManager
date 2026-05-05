@@ -15,7 +15,7 @@ upstream mqttmanager {
 }
 
 upstream nextion_img {
-  server 127.0.0.1:8003;    
+  server 127.0.0.1:8003;
 }
 
 
@@ -32,6 +32,14 @@ server {
 
     location /static {
         alias /usr/src/app/nspanelmanager/web/static;
+        try_files $uri $uri/ @react;
+    }
+
+    location @react {
+        # Remove the /static prefix from the URI before passing it to the root
+        rewrite ^/static/(.*)$ /$1 break;
+        root /usr/src/app/nspanelmanager/web/react-components/dist;
+        try_files $uri $uri/ =404;
     }
 
     location /websocket {

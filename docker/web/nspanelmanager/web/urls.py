@@ -50,6 +50,8 @@ urlpatterns = [
     #####################
     ### Rest API URLs ###
     #####################
+    # Fetch entities from home assistant:
+    path("rest/home_assistant/entities", rest.get_home_assistant_entities, name="rest_get_home_assistant_entities"),
     # MQTTManager endpoints
     path("rest/mqttmanager/settings/<str:setting_key>", rest.mqttmanager_get_setting, name="rest_mqttmanager_get_setting"),
     path("rest/mqttmanager/settings", rest.mqttmanager_settings_post, name="rest_mqttmanager_settings_post"),
@@ -64,6 +66,10 @@ urlpatterns = [
     path("rest/scenes", rest.scenes, name="rest_lights"),
     # Misc
     path("rest/get_ip_by_hostname", rest.get_ip_by_hostname, name="get_ip_by_hostname"),
+    # Generic entity URLs
+    path("rest/entities/<int:entity_id>", rest.get_entity, name="rest_get_entity"),
+    # Light entities
+    path("rest/entities/lights", rest.entities_lights, name="rest_entities_lights"),
     #######################
     ### HTMX "API" URLs ###
     #######################

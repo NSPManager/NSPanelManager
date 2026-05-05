@@ -1,0 +1,20 @@
+{% load react_tags %}
+
+<dialog id="modal" class="modal" hx-swap-oob="true">
+    <div class="modal-box overflow-y-visible">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        {% RC "MultiStep_AddEditEntity" room_id=room.id entities_page_id=5 room_view_position=2 id=29 %}
+    </div>
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+    <script>
+        modal.showModal();
+    </script>
+</dialog>
