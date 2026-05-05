@@ -785,8 +785,7 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
       } else {
         auto scene = std::dynamic_pointer_cast<Scene>(*entity);
         if (scene) {
-          auto room_id = EntityManager::get_room_id_for_panel_id(command.nspanel_id());
-          scene->activate(room_id ? std::optional(*room_id) : std::nullopt);
+          scene->activate(EntityManager::get_room_id_for_panel_id(command.nspanel_id()));
         } else {
           (*entity)->toggle();
         }

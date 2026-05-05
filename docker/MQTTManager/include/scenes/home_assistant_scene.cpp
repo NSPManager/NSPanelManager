@@ -36,7 +36,7 @@ void HomeAssistantScene::reload_config() {
   }
 }
 
-void HomeAssistantScene::activate(std::optional<int32_t> triggering_room_id) {
+void HomeAssistantScene::activate(std::expected<int32_t, EntityManager::EntityError> triggering_room_id) {
   SPDLOG_INFO("Activating scene {}::{}.", this->_id, this->_name);
 
   if (this->_entity_id.starts_with("scene.")) {

@@ -17,7 +17,7 @@ bool Scene::can_toggle() {
 void Scene::toggle() {
   // Satisfies MqttManagerEntity's pure virtual. In practice all scene activations go through
   // activate(triggering_room_id) directly, so this path should never be reached.
-  this->activate(std::nullopt);
+  this->activate(std::unexpected(EntityManager::EntityError::NOT_FOUND));
 }
 
 bool Scene::is_global() {
