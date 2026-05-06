@@ -6,7 +6,7 @@
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
 
-        {% RC "MultiStep_AddEditEntity" room_id=room.id entities_page_id=5 room_view_position=2 id=29 %}
+        {% RC "MultiStep_AddEditEntity" room_id=room_id entities_page_id=entities_page_id room_view_position=room_view_position %}
     </div>
 
     <!-- Backdrop that closes dialog/modal on click -->
@@ -15,6 +15,10 @@
     </form>
 
     <script>
-        modal.showModal();
+        htmx.on("htmx:afterSwap", (e) => {
+          if(e.detail.elt.id == "modal") {
+            modal.showModal();
+          }
+        });
     </script>
 </dialog>

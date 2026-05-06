@@ -318,6 +318,51 @@ def rooms_get(request):
         return JsonResponse({"status": "error"}, status=500)
 
 
+def room_entities_pages(request, room_id):
+    if request.method == "GET":
+        try:
+            room = Room.objects.get(id=room_id)
+            pages = RoomEntitiesPage.objects.filter(room=room).order_by("display_order")
+            response = []
+            for page in pages:
+                response.append(
+                    {
+                        "id": page.id,
+                        "display_order": page.display_order,
+                        "number_of_entities": page.page_type,
+                        "type": "scene" if page.is_scenes_page else "entity",
+                        "room_id": room_id,
+                    }
+                )
+            return JsonResponse({"status": "ok", "entities_pages": response}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
+def room_entities_page(request, room_id, page_id):
+    if request.method == "GET":
+        try:
+            page = RoomEntitiesPage.objects.get(id=page_id)
+            response = {
+                "status": "ok",
+                "entities": [],
+                "scenes": [],
+            }
+            for entity in page.entity_set.all().order_by("room_view_position"):
+                response["entities"].append({"entity_id": entity.id, "room_view_position": entity.room_view_position, "type": "entity"})
+            for entity in page.scene_set.all().order_by("room_view_position"):
+                response["scenes"].append({"entity_id": entity.id, "room_view_position": entity.room_view_position, "type": "scene"})
+            return JsonResponse(response, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
 @csrf_exempt
 def room_delete(request, room_id):
     if request.method == "DELETE":

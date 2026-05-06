@@ -61,6 +61,8 @@ urlpatterns = [
     path("rest/relay_groups", rest.relay_groups, name="rest_relay_groups"),
     # Room URLs
     path("rest/rooms/<int:room_id>", rest.room_delete, name="rest_room_delete"),
+    path("rest/rooms/<int:room_id>/entities_pages", rest.room_entities_pages, name="rest_room_entities_pages"),
+    path("rest/rooms/<int:room_id>/entities_pages/<int:page_id>", rest.room_entities_page, name="rest_room_entities_pages"),
     path("rest/rooms", rest.rooms, name="rest_rooms_create"),
     # Scene URLs
     path("rest/scenes", rest.scenes, name="rest_lights"),
@@ -78,6 +80,7 @@ urlpatterns = [
     path("htmx/unblock_nspanel/<int:nspanel_id>", htmx.unblock_nspanel, name="htmx_unblock_nspanel"),
     path("htmx/partial/handle_entity_modal_result", htmx.handle_entity_modal_result, name="htmx_handle_entity_modal_result"),
     path("htmx/partial/handle_entity_modal_entity_selected/<str:entity>", htmx.handle_entity_modal_entity_selected, name="htmx_handle_entity_modal_entity_selected"),
+    path("htmx/partial/select_new_entity_type_react/<int:entities_page_id>/<int:room_view_position>", htmx.partial_add_entity_to_entities_page_select_entity_type_react, name="htmx_partial_select_new_entity_type_react"),
     path("htmx/partial/select_new_entity_type/<str:action>/<str:action_args>", htmx.partial_add_entity_to_entities_page_select_entity_type, name="htmx_partial_select_new_entity_type"),
     path("htmx/partial/select_new_entity_source/<str:action>/<str:action_args>", htmx.partial_add_entity_to_entities_page_select_entity_source, name="htmx_partial_select_new_entity_source"),
     path("htmx/partial/select_new_entity_config_modal/<str:entity_source>", htmx.partial_add_entity_to_entities_page_config_modal, name="htmx_partial_select_new_entity_config"),

@@ -184,7 +184,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({ handleChange, values }: { handleC
                 type="text"
                 id="add_new_light_name"
                 onChange={handleChange("friendly_name")}
-                value={values.friendly_name.toString()}
+                value={values.friendly_name ? values.friendly_name.toString() : ""}
                 required
               />
             </div>

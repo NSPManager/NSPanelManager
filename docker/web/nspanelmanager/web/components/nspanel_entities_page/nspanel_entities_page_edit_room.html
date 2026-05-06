@@ -66,7 +66,7 @@
                             <span class="mdi mdi-plus"></span>
                         </button>
                     {% else %}
-                        <button class="btn btn-neutral hover:btn-success btn-xs btn-circle ms-2 flex items-center justify-center" title="Add entitiy" hx-swap="none" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_type" action="ADD_ENTITY_TO_NSPANEL_ENTITY_PAGE" action_args=action_args %}' hx-indicator="#modal_loading">
+                        <button class="btn btn-neutral hover:btn-success btn-xs btn-circle ms-2 flex items-center justify-center" title="Add entitiy" hx-swap="none" hx-get='{{ ingress_path }}{% url "htmx_partial_select_new_entity_type_react" entities_page_id=page.id room_view_position=i %}' hx-indicator="#modal_loading">
                             <span class="mdi mdi-plus"></span>
                         </button>
                     {% endif %}

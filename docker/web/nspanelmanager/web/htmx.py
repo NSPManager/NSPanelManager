@@ -943,6 +943,20 @@ def partial_move_entities_pages(request):
 
 
 @csrf_exempt
+def partial_add_entity_to_entities_page_select_entity_type_react(request, entities_page_id, room_view_position):
+    entities_page = RoomEntitiesPage.objects.get(id=entities_page_id)
+    return render(
+        request,
+        "partial/react_add_edit_entity.html",
+        {
+            "room_id": entities_page.room.id,
+            "entities_page_id": entities_page_id,
+            "room_view_position": room_view_position,
+        },
+    )
+
+
+@csrf_exempt
 def partial_add_entity_to_entities_page_select_entity_type(request, action, action_args):
     data = {"action": action, "action_args": action_args}
     return render(request, "partial/add_entity_to_entities_page_select_entity_type.html", data)

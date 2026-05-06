@@ -9,7 +9,7 @@ export type nextStepType = () => void;
 export type handleChangeType = (input: string) => (e: React.ChangeEvent<HTMLInputElement>) => void;
 export type handleButtonSelectEvent = (input: string, value: string) => () => void;
 export interface formDataType {
-  [key: string]: string | number | boolean | undefined;
+  [key: string]: string | number | boolean | null;
 }
 
 const MultiStep_AddOrEditEntity = ({
