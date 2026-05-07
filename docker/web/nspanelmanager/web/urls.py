@@ -68,6 +68,8 @@ urlpatterns = [
     path("rest/scenes", rest.scenes, name="rest_lights"),
     # Misc
     path("rest/get_ip_by_hostname", rest.get_ip_by_hostname, name="get_ip_by_hostname"),
+    # Generic scene URLs
+    path("rest/scenes/<int:scene_id>", rest.get_scene, name="rest_get_scene"),
     # Generic entity URLs
     path("rest/entities/<int:entity_id>", rest.get_entity, name="rest_get_entity"),
     # Light entities

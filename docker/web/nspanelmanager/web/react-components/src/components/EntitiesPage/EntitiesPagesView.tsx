@@ -1,7 +1,7 @@
 import { useState } from "react";
-import EntityPage from "./EntityPage";
+import EntitiesPage from "./EntityPage";
 
-const MultiStep_AddOrEditEntity = ({ room_id, type }: { room_id: number; type: string }) => {
+const EntitiesPagesView = ({ room_id, type }: { room_id: number; type: string }) => {
   const [viewData, _setViewData] = useState({
     room_id: room_id,
     type: type, // "entity" or "scene"
@@ -66,13 +66,13 @@ const MultiStep_AddOrEditEntity = ({ room_id, type }: { room_id: number; type: s
           if (entity_page.type !== type) continue;
 
           items.push(
-            <EntityPage
+            <EntitiesPage
               id={entity_page.id}
               room_id={viewData.room_id}
               type={viewData.type}
               number_of_entities={entity_page.number_of_entities}
               can_remove={entitiesPages.entities_pages.length > 1}
-            ></EntityPage>,
+            ></EntitiesPage>,
           );
         }
         return items;
@@ -81,4 +81,4 @@ const MultiStep_AddOrEditEntity = ({ room_id, type }: { room_id: number; type: s
   );
 };
 
-export default MultiStep_AddOrEditEntity;
+export default EntitiesPagesView;

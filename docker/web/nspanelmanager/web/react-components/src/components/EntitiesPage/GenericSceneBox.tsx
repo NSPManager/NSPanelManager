@@ -2,32 +2,29 @@ import { useState } from "react";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
-const GenericEntityBox = ({ id }: { id: number }) => {
-  interface BaseData {
+const GenericSceneBox = ({ id }: { id: number }) => {
+  interface SceneData {
     id: number;
     friendly_name: string;
     type: string;
     room_id: number;
     entities_page_id: number;
     room_view_position: number;
-  }
-  interface EntityData {
     controller: string;
-    controlled_by_nspanel_main_page?: boolean;
+    backend_name: string;
   }
   interface IFetchData {
     status: "loading" | "success" | "error";
-    result: {
-      base: BaseData;
-      entity?: EntityData;
-    };
+    result: SceneData;
   }
 
   const [hasFetchedEntityData, setHasFetchedEntityData] = useState(false);
   const [entityData, setEntityData] = useState<IFetchData>({} as IFetchData);
 
+  console.log("Scene ID: ", id);
   if (!hasFetchedEntityData) {
-    fetch(`/rest/entities/${id}`)
+    console.log("Fetching scene ID: ", id);
+    fetch(`/rest/scenes/${id}`)
       .then((response) => response.json())
       .then((data) => {
         setEntityData({ ...entityData, ...data });
@@ -41,29 +38,12 @@ const GenericEntityBox = ({ id }: { id: number }) => {
       title="Drag & drop to move this entity"
     >
       {/*<!-- Box indicators/buttons -->*/}
-      {(() => {
-        if (!hasFetchedEntityData) return null;
-        if (entityData.result.entity === undefined) return null;
-        if (entityData.result.entity.controlled_by_nspanel_main_page === undefined) return null;
-
-        if (entityData.result.entity.controlled_by_nspanel_main_page) {
-          return (
-            <span
-              className="indicator-item badge badge-secondary me-16 w-6 h-6 flex items-center justify-center cursor-default"
-              title="Controlled from main page"
-            >
-              <span className="mdi mdi-home"></span>
-            </span>
-          );
-        }
-        return null;
-      })()}
-      <button className="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center cursor-pointer" title="Edit entity">
+      <button className="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center cursor-pointer" title="Edit scene">
         <span className="mdi mdi-pencil"></span>
       </button>
       <button
         className="indicator-item badge badge-warning hover:badge-error w-6 h-6 flex items-center justify-center cursor-pointer"
-        title="Remove entity from page/room"
+        title="Remove scene from page/room"
       >
         <span className="mdi mdi-close"></span>
       </button>
@@ -71,22 +51,20 @@ const GenericEntityBox = ({ id }: { id: number }) => {
       {/*<!-- "Status badge" (dot) before name to indicate entity controller -->*/}
       {(() => {
         if (!hasFetchedEntityData) return null;
-        if (entityData.result.base === undefined) return null;
-        if (entityData.result.entity === undefined) return null;
 
-        if (entityData.result.entity.controller == "home_assistant") {
+        if (entityData.result.controller == "home_assistant") {
           return <div className="status status-info shadow-none absolute top-2 left-2 cursor-default" title="Controlled by Home Assistant"></div>;
-        } else if (entityData.result.entity.controller == "openhab") {
+        } else if (entityData.result.controller == "openhab") {
           return <div className="status status-warning shadow-none absolute top-2 left-2 cursor-default" title="Controlled by OpenHAB"></div>;
-        } else if (entityData.result.entity.controller == "nspm_scene" || entityData.result.entity.controller == "nspm") {
+        } else if (entityData.result.controller == "nspm_scene" || entityData.result.controller == "nspm") {
           return <div className="status status-accent shadow-none absolute top-2 left-2 cursor-default" title="Controlled by NSPanel Manager"></div>;
         } else {
           return <div className="status status-error animate-ping absolute top-2 left-2 cursor-default" title="Unknown controller"></div>;
         }
       })()}
-      <span className="text-sm m-2">{hasFetchedEntityData && entityData.result.base !== undefined ? entityData.result.base.friendly_name : ""}</span>
+      <span className="text-sm m-2">{hasFetchedEntityData ? entityData.result.friendly_name : ""}</span>
     </div>
   );
 };
 
-export default GenericEntityBox;
+export default GenericSceneBox;

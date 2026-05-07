@@ -500,6 +500,23 @@ def get_ip_by_hostname(request):
         return JsonResponse({"error": "Internal server error"}, status=500)
 
 
+### Generic scene URLs ###
+def get_scene(request, scene_id):
+    try:
+        if request.method == "GET":
+            scene = Scene.objects.get(id=scene_id)
+            return JsonResponse(
+                {
+                    "status": "success",
+                    "result": {"id": scene.id, "room_id": scene.room_id, "friendly_name": scene.friendly_name, "type": "scene", "controller": scene.scene_type, "backend_name": scene.backend_name, "entities_page_id": scene.entities_page_id, "room_view_position": scene.room_view_position},
+                }
+            )
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"error": "Internal server error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
 ### Generic Entity section ###
 def get_entity(request, entity_id):
     try:

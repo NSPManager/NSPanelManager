@@ -1,10 +1,11 @@
 import { useState } from "react";
 import GenericEntityBox from "./GenericEntityBox";
+import GenericSceneBox from "./GenericSceneBox";
 
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
-const MultiStep_AddOrEditEntity = ({
+const EntitiesPage = ({
   room_id,
   id,
   can_remove,
@@ -105,7 +106,11 @@ const MultiStep_AddOrEditEntity = ({
           }
 
           if (item != null) {
-            items.push(<GenericEntityBox id={item.entity_id} type={item.type}></GenericEntityBox>);
+            if (item.type === "scene") {
+              items.push(<GenericSceneBox id={item.entity_id}></GenericSceneBox>);
+            } else {
+              items.push(<GenericEntityBox id={item.entity_id}></GenericEntityBox>);
+            }
           } else {
             items.push(
               <div className="rounded-box border-neutral/50 border-dashed border-2 flex items-center justify-center indicator w-full h-full">
@@ -147,4 +152,4 @@ const MultiStep_AddOrEditEntity = ({
   );
 };
 
-export default MultiStep_AddOrEditEntity;
+export default EntitiesPage;
