@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { forwardRef, useState } from "react";
+import { useDraggable } from "@dnd-kit/react";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
-const GenericEntityBox = ({ id }: { id: number }) => {
+const GenericEntityBox = forwardRef(({ id }: { id: number }) => {
   interface BaseData {
     id: number;
     friendly_name: string;
@@ -25,6 +26,7 @@ const GenericEntityBox = ({ id }: { id: number }) => {
 
   const [hasFetchedEntityData, setHasFetchedEntityData] = useState(false);
   const [entityData, setEntityData] = useState<IFetchData>({} as IFetchData);
+  const nodeRef = useDraggable({ id: `entity-${id}` });
 
   if (!hasFetchedEntityData) {
     fetch(`/rest/entities/${id}`)
@@ -37,6 +39,7 @@ const GenericEntityBox = ({ id }: { id: number }) => {
 
   return (
     <div
+      ref={nodeRef.ref}
       className="draggable-entity-item bg-neutral/50 rounded-box text-neutral-content flex items-center justify-center indicator w-full h-full hover:outline-1 hover:outline-accent cursor-grab"
       title="Drag & drop to move this entity"
     >
@@ -87,6 +90,6 @@ const GenericEntityBox = ({ id }: { id: number }) => {
       <span className="text-sm m-2">{hasFetchedEntityData && entityData.result.base !== undefined ? entityData.result.base.friendly_name : ""}</span>
     </div>
   );
-};
+});
 
 export default GenericEntityBox;

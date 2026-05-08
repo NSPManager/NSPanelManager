@@ -1,9 +1,7 @@
 import { useState } from "react";
 import GenericEntityBox from "./GenericEntityBox";
 import GenericSceneBox from "./GenericSceneBox";
-
-// import Step2 from "./step2_select_controller";
-// import Step3 from "./Step3";
+import EntitiesPageDropTarget from "./EntitiesPageDropTarget";
 
 const EntitiesPage = ({
   room_id,
@@ -107,22 +105,20 @@ const EntitiesPage = ({
 
           if (item != null) {
             if (item.type === "scene") {
-              items.push(<GenericSceneBox id={item.entity_id}></GenericSceneBox>);
+              items.push(
+                <EntitiesPageDropTarget id={`${pageData.type}-${pageData.id}-${i}`} type={pageData.type}>
+                  <GenericSceneBox id={item.entity_id}></GenericSceneBox>
+                </EntitiesPageDropTarget>,
+              );
             } else {
-              items.push(<GenericEntityBox id={item.entity_id}></GenericEntityBox>);
+              items.push(
+                <EntitiesPageDropTarget id={`${pageData.type}-${pageData.id}-${i}`} type={pageData.type}>
+                  <GenericEntityBox id={item.entity_id}></GenericEntityBox>
+                </EntitiesPageDropTarget>,
+              );
             }
           } else {
-            items.push(
-              <div className="rounded-box border-neutral/50 border-dashed border-2 flex items-center justify-center indicator w-full h-full">
-                <span className="italic font-thin">No {type === "scene" ? "scene" : "entity"} set</span>
-                <button
-                  className="btn btn-neutral hover:btn-success btn-xs btn-circle ms-2 flex items-center justify-center"
-                  title={`Add ${type === "scene" ? "scene" : "entity"}`}
-                >
-                  <span className="mdi mdi-plus"></span>
-                </button>
-              </div>,
-            );
+            items.push(<EntitiesPageDropTarget id={`${pageData.type}-${pageData.id}-${i}`} type={pageData.type}></EntitiesPageDropTarget>);
           }
         }
         return items;

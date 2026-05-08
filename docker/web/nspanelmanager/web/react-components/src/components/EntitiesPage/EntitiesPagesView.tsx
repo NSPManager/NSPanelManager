@@ -1,5 +1,6 @@
 import { useState } from "react";
 import EntitiesPage from "./EntityPage";
+import { DragDropProvider } from "@dnd-kit/react";
 
 const EntitiesPagesView = ({ room_id, type }: { room_id: number; type: string }) => {
   const [viewData, _setViewData] = useState({
@@ -56,28 +57,37 @@ const EntitiesPagesView = ({ room_id, type }: { room_id: number; type: string })
   }
 
   return (
-    <ul className="list-none w-full nspanel-entities-pages">
-      {(() => {
-        if (!("entities_pages" in entitiesPages)) return [];
-        if (!hasFetchedEntitiesPages) return [];
+    <DragDropProvider
+      onDragEnd={(event) => {
+        if (event.canceled) return;
 
-        const items = [];
-        for (const entity_page of entitiesPages.entities_pages) {
-          if (entity_page.type !== type) continue;
+        const { target } = event.operation;
+        console.log(target?.id);
+      }}
+    >
+      <ul className="list-none w-full nspanel-entities-pages">
+        {(() => {
+          if (!("entities_pages" in entitiesPages)) return [];
+          if (!hasFetchedEntitiesPages) return [];
 
-          items.push(
-            <EntitiesPage
-              id={entity_page.id}
-              room_id={viewData.room_id}
-              type={viewData.type}
-              number_of_entities={entity_page.number_of_entities}
-              can_remove={entitiesPages.entities_pages.length > 1}
-            ></EntitiesPage>,
-          );
-        }
-        return items;
-      })()}
-    </ul>
+          const items = [];
+          for (const entity_page of entitiesPages.entities_pages) {
+            if (entity_page.type !== type) continue;
+
+            items.push(
+              <EntitiesPage
+                id={entity_page.id}
+                room_id={viewData.room_id}
+                type={viewData.type}
+                number_of_entities={entity_page.number_of_entities}
+                can_remove={entitiesPages.entities_pages.length > 1}
+              ></EntitiesPage>,
+            );
+          }
+          return items;
+        })()}
+      </ul>
+    </DragDropProvider>
   );
 };
 
