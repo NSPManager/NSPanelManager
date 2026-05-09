@@ -727,6 +727,7 @@ def partial_entity_edit_scene_entity(request, scene_id):
 
     request.session["action"] = "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE"
     request.session["action_args"] = json.dumps(action_args)
+    request.session["entity_source"] = scene.scene_type
 
     data = {
         "scene": scene,
@@ -734,7 +735,31 @@ def partial_entity_edit_scene_entity(request, scene_id):
         "entity": {
             "name": scene.friendly_name,
         },
+        "entity_source": scene.scene_type,
+        "backend_name": scene.backend_name,
+        "home_assistant_items": [],
+        "openhab_items": [],
     }
+
+    if scene.scene_type == "home_assistant":
+        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["scene", "script"]})
+        if len(ha_items["errors"]) == 0:
+            data["home_assistant_items"] = ha_items["items"]
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from Home Assistant!"},
+                status=500,
+            )
+    elif scene.scene_type == "openhab":
+        openhab_items = web.openhab_api.get_all_openhab_scenes()
+        if len(openhab_items["errors"]) == 0:
+            data["openhab_items"] = openhab_items["items"]
+        else:
+            return JsonResponse(
+                {"status": "error", "text": "Failed to get items from OpenHAB!"},
+                status=500,
+            )
+
     return render(request, "partial/select_entity/entity_add_or_edit_scene.html", data)
 
 
@@ -1409,6 +1434,8 @@ def create_or_update_scene_entity(request):
 
     if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
         new_scene = Scene.objects.get(id=int(action_args["entity_id"]))
+        if new_scene.scene_type in ("home_assistant", "openhab") and "backend_name" in request.POST:
+            new_scene.backend_name = request.POST["backend_name"]
     else:
         new_scene = Scene()
         if "room_id" in action_args:
