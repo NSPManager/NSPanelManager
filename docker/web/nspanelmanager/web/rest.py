@@ -352,9 +352,9 @@ def room_entities_page(request, room_id, page_id):
                 "scenes": [],
             }
             for entity in page.entity_set.all().order_by("room_view_position"):
-                response["entities"].append({"entity_id": entity.id, "room_view_position": entity.room_view_position, "type": "entity"})
+                response["entities"].append(get_rest_entitiy_representation(entity.id))
             for entity in page.scene_set.all().order_by("room_view_position"):
-                response["scenes"].append({"entity_id": entity.id, "room_view_position": entity.room_view_position, "type": "scene"})
+                response["scenes"].append(get_rest_scene_representation(entity.id))
             return JsonResponse(response, status=200)
         except Exception as ex:
             logging.exception(ex)
@@ -396,6 +396,37 @@ def room_create(request):
 #####################
 ### Scene section ###
 #####################
+def get_rest_scene_representation(scene_id):
+    scene = Scene.objects.get(id=scene_id)
+    scene_info = {
+        "base": {
+            "id": scene.id,
+            "friendly_name": scene.friendly_name,
+            "type": "scene",
+            "room_id": scene.room.id if scene.room != None else None,
+            "entities_page_id": scene.entities_page.id if scene.entities_page != None else None,
+            "room_view_position": scene.room_view_position,
+            "controller": scene.scene_type,
+        },
+        "scene": {
+            "scene_type": scene.scene_type,
+            "backend_name": scene.backend_name,  # Name for OpenHAB or Home Assistant entity to activate
+            "light_states": [],
+        },
+    }
+    for state in scene.lightstate_set.all():
+        scene_info["scene"]["light_states"].append(
+            {
+                "light_id": state.light.id,
+                "light_type": state.light.type,
+                "color_mode": state.color_mode,
+                "light_level": state.light_level,
+                "color_temp": state.color_temperature,
+                "hue": state.hue,
+                "saturation": state.saturation,
+            }
+        )
+    return scene_info
 
 
 def scenes(request):
@@ -518,24 +549,28 @@ def get_scene(request, scene_id):
 
 
 ### Generic Entity section ###
+def get_rest_entitiy_representation(entity_id):
+    entity = Entity.objects.get(id=entity_id)
+    return {
+        "base": {
+            "id": entity.id,
+            "friendly_name": entity.friendly_name,
+            "type": "entity",
+            "room_id": entity.room_id,
+            "entities_page_id": entity.entities_page_id,
+            "room_view_position": entity.room_view_position,
+        },
+        "entity": entity.entity_data,
+    }
+
+
 def get_entity(request, entity_id):
     try:
         if request.method == "GET":
-            entity = Entity.objects.get(id=entity_id)
             return JsonResponse(
                 {
                     "status": "success",
-                    "result": {
-                        "base": {
-                            "id": entity.id,
-                            "friendly_name": entity.friendly_name,
-                            "type": entity.entity_type,
-                            "room_id": entity.room_id,
-                            "entities_page_id": entity.entities_page_id,
-                            "room_view_position": entity.room_view_position,
-                        },
-                        "entity": entity.entity_data,
-                    },
+                    "result": get_rest_entitiy_representation(entity_id),
                 }
             )
     except Exception as ex:

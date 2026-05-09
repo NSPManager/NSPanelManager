@@ -2,6 +2,7 @@ import { useState } from "react";
 import GenericEntityBox from "./GenericEntityBox";
 import GenericSceneBox from "./GenericSceneBox";
 import EntitiesPageDropTarget from "./EntitiesPageDropTarget";
+import { type IEntityOrSceneData } from "./EntitiesPagesView";
 
 const EntitiesPage = ({
   room_id,
@@ -9,12 +10,14 @@ const EntitiesPage = ({
   can_remove,
   type,
   number_of_entities,
+  entities,
 }: {
   room_id: number;
   id: number;
   can_remove: boolean;
   type: string;
   number_of_entities: number;
+  entities: IEntityOrSceneData[];
 }) => {
   const [pageData, _setPageData] = useState({
     room_id: room_id,
@@ -22,56 +25,10 @@ const EntitiesPage = ({
     can_remove: can_remove,
     type: type, // scene or entity
     number_of_entities: number_of_entities, // Number of entities on page. 4, 8 or 12
+    entities: entities,
   });
 
-  interface EntityOrSceneData {
-    entity_id: number;
-    room_view_position: number;
-    type: "scene" | "entity";
-  }
-
-  interface EntitiesPages {
-    status: string;
-    entities: EntityOrSceneData[];
-    scenes: EntityOrSceneData[];
-  }
-
-  const [hasFetchedEntities, setHasFetchedEntities] = useState(false);
-  const [entities, setEntities] = useState<EntitiesPages>({ status: "loading", entities: [], scenes: [] });
-
   const gridRows = pageData.number_of_entities === 12 ? "grid-rows-6" : pageData.number_of_entities === 4 ? "grid-rows-2" : "grid-rows-4";
-
-  function getCookie(name: string) {
-    let cookieValue = "";
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-
-  function fetchEntities() {
-    fetch(`/rest/rooms/${room_id}/entities_pages/${id}`, {
-      credentials: "same-origin",
-      method: "GET",
-      mode: "same-origin",
-      headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setEntities(data);
-        setHasFetchedEntities(true);
-      });
-  }
-  if (!hasFetchedEntities) {
-    fetchEntities();
-  }
 
   return (
     <li
@@ -82,43 +39,44 @@ const EntitiesPage = ({
       className={`bg-base-200 float-left m-2 rounded-box p-3 grid grid-cols-2 ${gridRows} gap-4 w-full max-w-[24rem] aspect-square indicator nspanel-entities-page`}
     >
       {(() => {
-        if (!(entities && "entities" in entities)) return [];
+        if (!entities || entities.length === 0) return [];
 
         const items = [];
         for (let i = 0; i < pageData.number_of_entities; i++) {
           let item = null;
           if (pageData.type == "entity") {
-            for (let j = 0; j < entities.entities.length; j++) {
-              if (entities.entities[j].room_view_position === i) {
-                item = entities.entities[j];
+            for (let j = 0; j < entities.length; j++) {
+              if (entities[j].base.room_view_position === i && entities[j].base.type === "entity" && entities[j].base.entities_page_id === pageData.id) {
+                item = entities[j];
                 break;
               }
             }
           } else {
-            for (let j = 0; j < entities.scenes.length; j++) {
-              if (entities.scenes[j].room_view_position === i) {
-                item = entities.scenes[j];
+            for (let j = 0; j < entities.length; j++) {
+              if (entities[j].base.room_view_position === i && entities[j].base.type === "scene" && entities[j].base.entities_page_id === pageData.id) {
+                item = entities[j];
                 break;
               }
             }
           }
 
+          const entitiesPageDropTargetId = JSON.stringify({ type: pageData.type, entities_page_id: pageData.id, room_view_position: i });
           if (item != null) {
-            if (item.type === "scene") {
+            if (item.base.type === "scene") {
               items.push(
-                <EntitiesPageDropTarget id={`${pageData.type}-${pageData.id}-${i}`} type={pageData.type}>
-                  <GenericSceneBox id={item.entity_id}></GenericSceneBox>
+                <EntitiesPageDropTarget id={entitiesPageDropTargetId} type={pageData.type}>
+                  <GenericSceneBox scene={item}></GenericSceneBox>
                 </EntitiesPageDropTarget>,
               );
             } else {
               items.push(
-                <EntitiesPageDropTarget id={`${pageData.type}-${pageData.id}-${i}`} type={pageData.type}>
-                  <GenericEntityBox id={item.entity_id}></GenericEntityBox>
+                <EntitiesPageDropTarget id={entitiesPageDropTargetId} type={pageData.type}>
+                  <GenericEntityBox entity={item}></GenericEntityBox>
                 </EntitiesPageDropTarget>,
               );
             }
           } else {
-            items.push(<EntitiesPageDropTarget id={`${pageData.type}-${pageData.id}-${i}`} type={pageData.type}></EntitiesPageDropTarget>);
+            items.push(<EntitiesPageDropTarget id={entitiesPageDropTargetId} type={pageData.type}></EntitiesPageDropTarget>);
           }
         }
         return items;

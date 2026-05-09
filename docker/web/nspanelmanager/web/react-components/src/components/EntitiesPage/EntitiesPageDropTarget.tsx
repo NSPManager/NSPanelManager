@@ -4,7 +4,7 @@ import { forwardRef } from "react";
 // import Step3 from "./Step3";
 
 const EntitiesDropTarget = forwardRef(({ id, type, children }: { id: string; type: string; children?: React.ReactNode }) => {
-  const { ref, isDropTarget } = useDroppable({ id: id });
+  const { ref, isDropTarget } = useDroppable({ id: id, data: { accepts: type } });
 
   return (
     <div ref={ref}>
