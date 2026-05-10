@@ -61,6 +61,7 @@ urlpatterns = [
     path("rest/relay_groups", rest.relay_groups, name="rest_relay_groups"),
     # Room URLs
     path("rest/rooms/<int:room_id>", rest.room_delete, name="rest_room_delete"),
+    path("rest/rooms/<int:room_id>/entities/order", rest.put_room_entities_order, name="rest_put_room_entities_order"),
     path("rest/rooms/<int:room_id>/entities_pages", rest.room_entities_pages, name="rest_room_entities_pages"),
     path("rest/rooms/<int:room_id>/entities_pages/<int:page_id>", rest.room_entities_page, name="rest_room_entities_pages"),
     path("rest/rooms", rest.rooms, name="rest_rooms_create"),

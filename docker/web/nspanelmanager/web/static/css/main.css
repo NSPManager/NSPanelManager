@@ -90,6 +90,7 @@
     --default-mono-font-variation-settings: initial;
     --color-home-assistant: #18bcf2;
     --color-openhab: #e64a19;
+    --animate-rotate-border: border-rotate 3s linear infinite;
   }
 }
 @layer base {
@@ -5974,6 +5975,9 @@
   .animate-pulse {
     animation: var(--animate-pulse);
   }
+  .animate-rotate-border {
+    animation: var(--animate-rotate-border);
+  }
   .link {
     cursor: pointer;
     text-decoration-line: underline;
@@ -7386,6 +7390,10 @@
     --tw-gradient-position: in oklab;
     background-image: conic-gradient(var(--tw-gradient-stops));
   }
+  .bg-conic\/\[from_var\(--border-angle\)\] {
+    --tw-gradient-position: from var(--border-angle);
+    background-image: conic-gradient(var(--tw-gradient-stops));
+  }
   .bg-radial {
     --tw-gradient-position: in oklab;
     background-image: radial-gradient(var(--tw-gradient-stops));
@@ -7395,6 +7403,25 @@
   }
   .via-none {
     --tw-gradient-via-stops: initial;
+  }
+  .from-base-200 {
+    --tw-gradient-from: var(--color-base-200);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+  .from-30\% {
+    --tw-gradient-from-position: 30%;
+  }
+  .via-accent\/50 {
+    --tw-gradient-via: color-mix(in oklab, var(--color-accent) 50%, transparent);
+    --tw-gradient-via-stops: var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-via-stops);
+  }
+  .to-base-200 {
+    --tw-gradient-to: var(--color-base-200);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+  .to-60\% {
+    --tw-gradient-to-position: 60%;
   }
   .box-decoration-clone {
     -webkit-box-decoration-break: clone;
@@ -10632,6 +10659,11 @@
     }
   }
 }
+@property --border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
 @layer base {
   :where(:root),:root:has(input.theme-controller[value=light]:checked),[data-theme=light] {
     color-scheme: light;
@@ -12065,6 +12097,48 @@
   inherits: false;
   initial-value: 0;
 }
+@property --tw-gradient-position {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-gradient-from {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #0000;
+}
+@property --tw-gradient-via {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #0000;
+}
+@property --tw-gradient-to {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #0000;
+}
+@property --tw-gradient-stops {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-gradient-via-stops {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-gradient-from-position {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+@property --tw-gradient-via-position {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 50%;
+}
+@property --tw-gradient-to-position {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
 @property --tw-leading {
   syntax: "*";
   inherits: false;
@@ -12267,5 +12341,10 @@
 @keyframes pulse {
   50% {
     opacity: 0.5;
+  }
+}
+@keyframes border-rotate {
+  to {
+    --border-angle: 360deg;
   }
 }

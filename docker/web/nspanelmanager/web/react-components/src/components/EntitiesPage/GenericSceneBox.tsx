@@ -1,15 +1,14 @@
-import { useState, forwardRef } from "react";
 import { useDraggable } from "@dnd-kit/react";
 import type { IEntityOrSceneData } from "./EntitiesPagesView";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
-const GenericSceneBox = forwardRef(({ scene }: { scene: IEntityOrSceneData }) => {
-  const nodeRef = useDraggable({ id: JSON.stringify(scene), data: { type: "scene" } });
+const GenericSceneBox = ({ scene }: { scene: IEntityOrSceneData }) => {
+  const { ref } = useDraggable({ id: `scene-${scene.base.id}`, data: { type: "scene", config: scene } });
 
   return (
     <div
-      ref={nodeRef.ref}
+      ref={ref}
       className="draggable-entity-item bg-neutral/50 rounded-box text-neutral-content flex items-center justify-center indicator w-full h-full hover:outline-1 hover:outline-accent cursor-grab"
       title="Drag & drop to move this entity"
     >
@@ -41,6 +40,6 @@ const GenericSceneBox = forwardRef(({ scene }: { scene: IEntityOrSceneData }) =>
       <span className="text-sm m-2">{scene.base.friendly_name}</span>
     </div>
   );
-});
+};
 
 export default GenericSceneBox;

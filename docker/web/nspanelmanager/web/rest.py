@@ -2,6 +2,7 @@ import hashlib
 import json
 import logging
 import socket
+from pprint import pprint
 from re import A
 
 from django.core.files.storage import FileSystemStorage
@@ -316,6 +317,29 @@ def rooms_get(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
+
+
+def put_room_entities_order(request, room_id):
+    if request.method == "PUT":
+        try:
+            data = json.loads(request.body)
+            for entity in data["entities"]:
+                db_entity = Entity.objects.get(id=entity["base"]["id"])
+                db_entity.room_view_position = entity["base"]["room_view_position"]
+                db_entity.entities_page_id = entity["base"]["entities_page_id"]
+                db_entity.save()
+            for scene in data["scenes"]:
+                db_scene = Scene.objects.get(id=scene["base"]["id"])
+                db_scene.room_view_position = scene["base"]["room_view_position"]
+                db_scene.entities_page_id = scene["base"]["entities_page_id"]
+                db_scene.save()
+            send_mqttmanager_reload_command()
+            return JsonResponse({"status": "ok"}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
 
 
 def room_entities_pages(request, room_id):

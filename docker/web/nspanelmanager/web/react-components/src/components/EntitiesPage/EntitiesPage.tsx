@@ -11,6 +11,7 @@ const EntitiesPage = ({
   type,
   number_of_entities,
   entities,
+  draging_item,
 }: {
   room_id: number;
   id: number;
@@ -18,6 +19,7 @@ const EntitiesPage = ({
   type: string;
   number_of_entities: number;
   entities: IEntityOrSceneData[];
+  draging_item?: IEntityOrSceneData | undefined;
 }) => {
   const [pageData, _setPageData] = useState({
     room_id: room_id,
@@ -25,7 +27,6 @@ const EntitiesPage = ({
     can_remove: can_remove,
     type: type, // scene or entity
     number_of_entities: number_of_entities, // Number of entities on page. 4, 8 or 12
-    entities: entities,
   });
 
   const gridRows = pageData.number_of_entities === 12 ? "grid-rows-6" : pageData.number_of_entities === 4 ? "grid-rows-2" : "grid-rows-4";
@@ -60,23 +61,30 @@ const EntitiesPage = ({
             }
           }
 
-          const entitiesPageDropTargetId = JSON.stringify({ type: pageData.type, entities_page_id: pageData.id, room_view_position: i });
           if (item != null) {
             if (item.base.type === "scene") {
               items.push(
-                <EntitiesPageDropTarget id={entitiesPageDropTargetId} type={pageData.type}>
-                  <GenericSceneBox scene={item}></GenericSceneBox>
+                <EntitiesPageDropTarget key={i} entities_page_id={pageData.id} room_view_position={i} type={pageData.type} draging_item={draging_item}>
+                  <GenericSceneBox key={item.base.id} scene={item}></GenericSceneBox>
                 </EntitiesPageDropTarget>,
               );
             } else {
               items.push(
-                <EntitiesPageDropTarget id={entitiesPageDropTargetId} type={pageData.type}>
-                  <GenericEntityBox entity={item}></GenericEntityBox>
+                <EntitiesPageDropTarget key={i} entities_page_id={pageData.id} room_view_position={i} type={pageData.type} draging_item={draging_item}>
+                  <GenericEntityBox key={item.base.id} entity={item}></GenericEntityBox>
                 </EntitiesPageDropTarget>,
               );
             }
           } else {
-            items.push(<EntitiesPageDropTarget id={entitiesPageDropTargetId} type={pageData.type}></EntitiesPageDropTarget>);
+            items.push(
+              <EntitiesPageDropTarget
+                key={i}
+                entities_page_id={pageData.id}
+                room_view_position={i}
+                type={pageData.type}
+                draging_item={draging_item}
+              ></EntitiesPageDropTarget>,
+            );
           }
         }
         return items;
@@ -99,7 +107,7 @@ const EntitiesPage = ({
           className="indicator-item indicator-bottom indicator-center badge badge-neutral hover:badge-info w-6 h-6 flex items-center justify-center nspanel-entities-page-move-handle cursor-grab"
           title="Drag & drop to move this page"
         >
-          <span className="mdi mdi-hand-back-right"></span>
+          <span className="mdi mdi-drag"></span>
         </span>
       )}
     </li>
