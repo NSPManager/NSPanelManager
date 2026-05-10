@@ -28,8 +28,54 @@ const EntitiesPage = ({
     type: type, // scene or entity
     number_of_entities: number_of_entities, // Number of entities on page. 4, 8 or 12
   });
-
+  const [editPageTypeOpen, setEditPageTypeOpen] = useState(false);
   const gridRows = pageData.number_of_entities === 12 ? "grid-rows-6" : pageData.number_of_entities === 4 ? "grid-rows-2" : "grid-rows-4";
+
+  function getCookie(name: string) {
+    let cookieValue = "";
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  async function setPageNumberOfEntities(type: number) {
+    _setPageData({ ...pageData, number_of_entities: type });
+    setEditPageTypeOpen(false);
+
+    // PUT request using fetch with error handling
+    fetch(`/rest/rooms/${room_id}/entities_pages/${pageData.id}`, {
+      credentials: "same-origin",
+      method: "PUT",
+      mode: "same-origin",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
+      body: JSON.stringify({
+        ...pageData,
+        number_of_entities: type,
+      }),
+    })
+      .then(async (response) => {
+        const data = await response.json();
+
+        // check for error response
+        if (!response.ok) {
+          // get error message from body or default to response status
+          const error = (data && data.message) || response.status;
+          return Promise.reject(error);
+        }
+      })
+      .catch((error) => {
+        // setErrorMessage(error);
+        console.error("There was an error!", error);
+      });
+  }
 
   return (
     <li
@@ -96,12 +142,33 @@ const EntitiesPage = ({
       >
         ✕
       </button>
-      <button
-        className="indicator-item indicator-bottom indicator-end badge badge-info w-6 h-6 flex items-center justify-center me-8 cursor-pointer"
-        title="Edit page"
+      <div
+        className={`dropdown dropdown-top dropdown-center ${editPageTypeOpen ? "dropdown-open" : ""} me-8 flex indicator-item indicator-bottom indicator-end`}
       >
-        <span className="mdi mdi-pencil"></span>
-      </button>
+        <div onClick={() => setEditPageTypeOpen(!editPageTypeOpen)} className="badge badge-info w-6 h-6 flex items-center justify-center cursor-pointer">
+          <span className="mdi mdi-pencil"></span>
+        </div>
+        <div className="dropdown-content bg-base-100 join rounded-box z-1 w-52 p-1 shadow-sm">
+          <button
+            onClick={() => setPageNumberOfEntities(4)}
+            className={`btn join-item btn-lg btn-square ${pageData.number_of_entities === 4 ? "btn-active btn-accent" : ""}`}
+          >
+            4
+          </button>
+          <button
+            onClick={() => setPageNumberOfEntities(8)}
+            className={`btn join-item btn-lg btn-square ${pageData.number_of_entities === 8 ? "btn-active btn-accent" : ""}`}
+          >
+            8
+          </button>
+          <button
+            onClick={() => setPageNumberOfEntities(12)}
+            className={`btn join-item btn-lg btn-square ${pageData.number_of_entities === 12 ? "btn-active btn-accent" : ""}`}
+          >
+            12
+          </button>
+        </div>
+      </div>
       {can_remove && (
         <span
           className="indicator-item indicator-bottom indicator-center badge badge-neutral hover:badge-info w-6 h-6 flex items-center justify-center nspanel-entities-page-move-handle cursor-grab"

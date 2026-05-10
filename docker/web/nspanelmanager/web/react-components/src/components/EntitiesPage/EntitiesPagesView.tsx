@@ -114,15 +114,6 @@ const EntitiesPagesView = ({ room_id, type }: { room_id: number; type: string })
           const error = (data && data.message) || response.status;
           return Promise.reject(error);
         }
-
-        // for (let i = 0; i < document.getElementsByTagName("dialog").length; i++) {
-        //   const dialog = document.getElementsByTagName("dialog")[i];
-        //   if (dialog.id == "modal") {
-        //     dialog.close();
-        //   }
-        // }
-
-        // setPostId(data.id);
       })
       .catch((error) => {
         // setErrorMessage(error);

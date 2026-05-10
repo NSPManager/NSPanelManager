@@ -3818,6 +3818,9 @@
       cursor: pointer;
     }
   }
+  .z-1 {
+    z-index: 1;
+  }
   .z-10 {
     z-index: 10;
   }
@@ -5730,6 +5733,9 @@
   .w-44 {
     width: calc(var(--spacing) * 44);
   }
+  .w-52 {
+    width: calc(var(--spacing) * 52);
+  }
   .w-56 {
     width: calc(var(--spacing) * 56);
   }
@@ -5774,6 +5780,9 @@
   }
   .max-w-4xl {
     max-width: var(--container-4xl);
+  }
+  .max-w-6 {
+    max-width: calc(var(--spacing) * 6);
   }
   .max-w-6\/12 {
     max-width: calc(6/12 * 100%);
@@ -7411,6 +7420,11 @@
   .from-30\% {
     --tw-gradient-from-position: 30%;
   }
+  .via-accent {
+    --tw-gradient-via: var(--color-accent);
+    --tw-gradient-via-stops: var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-via-stops);
+  }
   .via-accent\/50 {
     --tw-gradient-via: color-mix(in oklab, var(--color-accent) 50%, transparent);
     --tw-gradient-via-stops: var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) var(--tw-gradient-to-position);
@@ -7721,6 +7735,9 @@
     --size: calc(var(--size-selector, 0.25rem) * 4);
     font-size: 0.625rem;
     padding-inline: calc(0.25rem * 2 - var(--border));
+  }
+  .px-0 {
+    padding-inline: calc(var(--spacing) * 0);
   }
   .px-0\.5 {
     padding-inline: calc(var(--spacing) * 0.5);

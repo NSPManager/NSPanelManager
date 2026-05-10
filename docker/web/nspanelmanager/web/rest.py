@@ -383,6 +383,17 @@ def room_entities_page(request, room_id, page_id):
         except Exception as ex:
             logging.exception(ex)
             return JsonResponse({"status": "error"}, status=500)
+    elif request.method == "PUT":
+        try:
+            data = json.loads(request.body)
+            db_page = RoomEntitiesPage.objects.get(id=page_id)
+            db_page.page_type = data.get("number_of_entities", db_page.page_type)
+            db_page.display_order = data.get("display_order", db_page.display_order)
+            db_page.save()
+            return JsonResponse({"status": "ok"}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
     else:
         return JsonResponse({"status": "error"}, status=405)
 
