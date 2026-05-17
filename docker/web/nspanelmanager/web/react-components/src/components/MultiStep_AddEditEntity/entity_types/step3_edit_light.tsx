@@ -26,7 +26,15 @@ const select_components = {
   Option: CustomOption,
 };
 
-const MultiStep_AddEditEntity_Step3_Light = ({ handleChange, values }: { handleChange: handleChangeType; values: formDataType }) => {
+const MultiStep_AddEditEntity_Step3_Light = ({
+  handleChange,
+  values,
+  onComplete,
+}: {
+  handleChange: handleChangeType;
+  values: formDataType;
+  onComplete?: () => void;
+}) => {
   const [options, setOptions] = useState<OptionType[]>([]);
   const [hasFetchedConfig, setHasFetchedConfig] = useState<boolean>(false);
   const [entitySettings, setEntitySettings] = useState<formDataType>({
@@ -120,6 +128,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({ handleChange, values }: { handleC
 
   function saveEntity() {
     // PUT request using fetch with error handling
+    console.log("Updating entity with data:", entitySettings);
     fetch("/rest/entities/lights", {
       credentials: "same-origin",
       method: "PUT",
@@ -132,6 +141,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({ handleChange, values }: { handleC
     })
       .then(async (response) => {
         const data = await response.json();
+        console.log("Entity created/updated. Got response:", data);
 
         // check for error response
         if (!response.ok) {
@@ -139,15 +149,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({ handleChange, values }: { handleC
           const error = (data && data.message) || response.status;
           return Promise.reject(error);
         }
-
-        for (let i = 0; i < document.getElementsByTagName("dialog").length; i++) {
-          const dialog = document.getElementsByTagName("dialog")[i];
-          if (dialog.id == "modal") {
-            dialog.close();
-          }
-        }
-
-        // setPostId(data.id);
+        onComplete?.();
       })
       .catch((error) => {
         // setErrorMessage(error);
@@ -202,6 +204,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({ handleChange, values }: { handleC
               }}
               unstyled
               components={select_components}
+              value={options.find((option) => option.value === values.home_assistant_name)}
               styles={{
                 input: (base) => ({
                   ...base,

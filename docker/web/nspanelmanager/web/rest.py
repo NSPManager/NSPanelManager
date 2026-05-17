@@ -394,6 +394,14 @@ def room_entities_page(request, room_id, page_id):
         except Exception as ex:
             logging.exception(ex)
             return JsonResponse({"status": "error"}, status=500)
+    elif request.method == "DELETE":
+        try:
+            db_page = RoomEntitiesPage.objects.get(id=page_id)
+            db_page.delete()
+            return JsonResponse({"status": "ok"}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
     else:
         return JsonResponse({"status": "error"}, status=405)
 
@@ -591,9 +599,11 @@ def get_rest_entitiy_representation(entity_id):
             "id": entity.id,
             "friendly_name": entity.friendly_name,
             "type": "entity",
+            "entity_type": entity.entity_type,
             "room_id": entity.room_id,
             "entities_page_id": entity.entities_page_id,
             "room_view_position": entity.room_view_position,
+            "controller": entity.entity_data["controller"],
         },
         "entity": entity.entity_data,
     }
@@ -606,6 +616,14 @@ def get_entity(request, entity_id):
                 {
                     "status": "success",
                     "result": get_rest_entitiy_representation(entity_id),
+                }
+            )
+        elif request.method == "DELETE":
+            Entity.objects.get(id=entity_id).delete()
+            send_mqttmanager_reload_command()
+            return JsonResponse(
+                {
+                    "status": "success",
                 }
             )
     except Exception as ex:
@@ -654,7 +672,6 @@ def put_light_entity(request):
             if field not in data["entity"]:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
 
-        print(data)
         entity_data = {
             "controller": data["base"]["controller"],
             "home_assistant_name": data["entity"]["home_assistant_name"],
@@ -663,15 +680,14 @@ def put_light_entity(request):
             "openhab_item_dimmer": data["entity"]["openhab_item_dimmer"],
             "openhab_item_color_temp": data["entity"]["openhab_item_color_temp"],
             "openhab_item_rgb": data["entity"]["openhab_item_rgb"],
-            "can_dim": data["entity"]["can_dim"] == "true",
-            "can_color_temperature": data["entity"]["can_color_temperature"] == "true",
-            "can_rgb": data["entity"]["can_rgb"] == "true",
-            "is_ceiling_light": data["entity"]["is_ceiling_light"] == "true",
-            "controlled_by_nspanel_main_page": data["entity"]["controlled_by_nspanel_main_page"] == "true",
+            "can_dim": str(data["entity"]["can_dim"]).lower() == "true",
+            "can_color_temperature": str(data["entity"]["can_color_temperature"]).lower() == "true",
+            "can_rgb": str(data["entity"]["can_rgb"]).lower() == "true",
+            "is_ceiling_light": str(data["entity"]["is_ceiling_light"]).lower() == "true",
+            "controlled_by_nspanel_main_page": str(data["entity"]["controlled_by_nspanel_main_page"]).lower() == "true",
         }
         if "id" in data["base"] and data["base"]["id"]:
             new_light = Entity.objects.get(id=int(data["base"]["id"]))
-            entity_data = new_light.entity_data
         else:
             new_light = Entity()
             new_light.entity_type = Entity.EntityType.LIGHT
@@ -683,7 +699,7 @@ def put_light_entity(request):
 
         new_light.entity_data = entity_data
         new_light.save()
-        # send_mqttmanager_reload_command()
+        send_mqttmanager_reload_command()
 
         return JsonResponse({"status": "ok"}, status=200)
     except Exception as ex:

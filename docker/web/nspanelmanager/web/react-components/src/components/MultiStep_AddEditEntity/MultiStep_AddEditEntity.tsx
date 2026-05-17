@@ -16,12 +16,16 @@ const MultiStep_AddOrEditEntity = ({
   room_id,
   entities_page_id,
   room_view_position,
+  type,
   id,
+  onComplete,
 }: {
   room_id: number;
   entities_page_id: number;
   room_view_position: number;
+  type: string;
   id?: number;
+  onComplete?: () => void;
 }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<formDataType>({
@@ -29,7 +33,8 @@ const MultiStep_AddOrEditEntity = ({
     entities_page_id: entities_page_id,
     room_view_position: room_view_position,
     controller: "",
-    type: "",
+    type: type,
+    entity_type: "",
     friendly_name: "",
     id: null,
   });
@@ -52,8 +57,6 @@ const MultiStep_AddOrEditEntity = ({
       .then((response) => response.json())
       .then((data) => {
         setFormData({ ...formData, ...data.result.base });
-        console.log("Got data:", data);
-        console.log("Form data:", formData);
       });
   }
 
@@ -62,10 +65,11 @@ const MultiStep_AddOrEditEntity = ({
   } else if (id == null && step == 2) {
     return <MultiStep_AddEditEntity_Step2 handleButtonSelectEvent={handleButtonSelectEvent} next_step={nextStep} />;
   } else {
-    switch (formData.type) {
+    switch (formData.entity_type) {
       case "light":
-        return <MultiStep_AddEditEntity_Step3_Light handleChange={handleChange} values={formData} />;
+        return <MultiStep_AddEditEntity_Step3_Light handleChange={handleChange} values={formData} onComplete={onComplete} />;
       default:
+        console.log("Unknown entity type while trying to edit entity. Type: ", formData.entity_type);
         return null;
     }
   }

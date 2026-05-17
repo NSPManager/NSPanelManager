@@ -1,51 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EntitiesPage from "./EntitiesPage";
 import { DragDropProvider } from "@dnd-kit/react";
-
-export interface IEntityOrSceneData {
-  base: {
-    id: number;
-    friendly_name: string;
-    room_view_position: number | null;
-    type: "scene" | "entity";
-    entities_page_id: number;
-  };
-  entity?: any;
-  scene?: any;
-}
-
-export interface IEntityPageData {
-  status: string;
-  entities: IEntityOrSceneData[];
-  scenes: IEntityOrSceneData[];
-}
+import { useEntitiesPagesStore } from "./EntitiesPagesStore";
+import { type IEntityOrSceneData } from "./EntitiesPagesStore";
 
 const EntitiesPagesView = ({ room_id, type }: { room_id: number; type: string }) => {
-  const [viewData, _setViewData] = useState({
-    room_id: room_id,
-    type: type, // "entity" or "scene"
-  });
-
-  interface EntitiesPageData {
-    id: number;
-    display_order: number;
-    number_of_entities: number;
-    type: string;
-    room_id: number;
-  }
-  interface EntitiesPages {
-    status: string;
-    entities_pages: EntitiesPageData[];
-  }
-
-  const [hasFetchedEntitiesPages, setHasFetchedEntitiesPages] = useState(false);
-  const [hasFetchedEntities, setHasFetchedEntities] = useState(false);
-  const [entitiesPages, setEntitiesPages] = useState<EntitiesPages>({ status: "loading", entities_pages: [] });
-  const [entities, setEntities] = useState<IEntityOrSceneData[]>([]);
-  const [scenes, setScenes] = useState<IEntityOrSceneData[]>([]);
+  const { entities_pages, fetchData, removeEntitiesPage, entities, scenes, setScenePosition, setEntityPosition } = useEntitiesPagesStore();
   const [dragingItem, setDragingItem] = useState<IEntityOrSceneData | undefined>(undefined);
-  // const [sourceDragDroppable, setSourceDragDroppable] = useState<Droppable>(undefined);
-  // const [entitiesPagesElements, setEntitiesPagesElements] = useState<React.ReactNode[]>([]);
+
+  useEffect(() => {
+    fetchData(room_id);
+  }, [room_id, fetchData]);
 
   function getCookie(name: string) {
     let cookieValue = "";
@@ -62,35 +27,23 @@ const EntitiesPagesView = ({ room_id, type }: { room_id: number; type: string })
     return cookieValue;
   }
 
-  if (!hasFetchedEntitiesPages) {
-    fetch(`/rest/rooms/${room_id}/entities_pages`, {
+  async function deleteEntitiesPage(id: number) {
+    console.log("Deleting entities page", id);
+    fetch(`/rest/rooms/${room_id}/entities_pages/${id}`, {
       credentials: "same-origin",
-      method: "GET",
+      method: "DELETE",
       mode: "same-origin",
       headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
     })
-      .then((response) => response.json())
-      .then((data) => {
-        setEntitiesPages(data);
-        setHasFetchedEntitiesPages(true);
-      });
-  }
-
-  if (hasFetchedEntitiesPages && !hasFetchedEntities) {
-    for (const page of entitiesPages.entities_pages) {
-      fetch(`/rest/rooms/${page.room_id}/entities_pages/${page.id}`, {
-        credentials: "same-origin",
-        method: "GET",
-        mode: "same-origin",
-        headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
+      .then(async (response) => {
+        if (response.ok) {
+          console.log("Successfully deleted entities page", id);
+          removeEntitiesPage(id);
+        }
       })
-        .then((response) => response.json())
-        .then((data) => {
-          setEntities((prevEntities) => [...prevEntities, ...data.entities]);
-          setScenes((prevScenes) => [...prevScenes, ...data.scenes]);
-        });
-    }
-    setHasFetchedEntities(true);
+      .catch((error) => {
+        console.error("Error deleting entities page", error);
+      });
   }
 
   async function saveEntitiesOrder(entities: IEntityOrSceneData[], scenes: IEntityOrSceneData[]) {
@@ -152,103 +105,49 @@ const EntitiesPagesView = ({ room_id, type }: { room_id: number; type: string })
 
         // if (over && over.data.current.accepts.includes(active.data.current.type)) {
         if (sourceData.base.type == "entity") {
+          const entity = entities.find((e) => e.base.id == sourceData.base.id);
+          if (!entity) return;
+
           let existingEntity = entities.find(
             (e) => e.base.entities_page_id == targetData.entities_page_id && e.base.room_view_position == targetData.room_view_position,
           );
           if (existingEntity != null) {
             existingEntity = JSON.parse(JSON.stringify(existingEntity)); // Create deep copy of existing entity to avoid modifying the original
-          }
-
-          for (const entity of entities) {
-            if (entity.base.id == sourceData.base.id) {
-              // Swap positions with existing entity
-              if (existingEntity != null) {
-                existingEntity.base.entities_page_id = entity.base.entities_page_id;
-                existingEntity.base.room_view_position = entity.base.room_view_position;
-              }
-
-              // Get all untouched elements
-              let updatedEntities: IEntityOrSceneData[] = [];
-              if (existingEntity != null) {
-                updatedEntities = entities.filter((e) => e.base.id != sourceData.base.id && e.base.id != existingEntity.base.id);
-              } else {
-                updatedEntities = entities.filter((e) => e.base.id != sourceData.base.id);
-              }
-
-              // Updated moved entity position
-              const updatedEntity = JSON.parse(JSON.stringify(entity)); // Create a copy of the entity to update
-              updatedEntity.base.entities_page_id = targetData.entities_page_id;
-              updatedEntity.base.room_view_position = targetData.room_view_position;
-
-              if (existingEntity != null) {
-                setEntities([...updatedEntities, updatedEntity, existingEntity]);
-                saveEntitiesOrder([...updatedEntities, updatedEntity, existingEntity], []);
-              } else {
-                setEntities([...updatedEntities, updatedEntity]);
-                saveEntitiesOrder([...updatedEntities, updatedEntity], []);
-              }
-              break;
+            if (existingEntity) {
+              setEntityPosition(existingEntity.base.id, entity.base.entities_page_id, entity.base.room_view_position);
             }
           }
+
+          const updatedEntity = JSON.parse(JSON.stringify(entity)); // Create a copy of the entity to update
+          setEntityPosition(updatedEntity.base.id, targetData.entities_page_id, targetData.room_view_position);
+          saveEntitiesOrder(useEntitiesPagesStore.getState().entities, []);
         } else {
-          let existingEntity = scenes.find(
+          const scene = scenes.find((e) => e.base.id == sourceData.base.id);
+          if (!scene) return;
+
+          let existingScene = scenes.find(
             (e) => e.base.entities_page_id == targetData.entities_page_id && e.base.room_view_position == targetData.room_view_position,
           );
-          if (existingEntity != null) {
-            existingEntity = JSON.parse(JSON.stringify(existingEntity)); // Create deep copy of existing entity to avoid modifying the original
-          }
-
-          for (const entity of scenes) {
-            if (entity.base.id == sourceData.base.id) {
-              // Swap positions with existing entity
-              if (existingEntity != null) {
-                existingEntity.base.entities_page_id = entity.base.entities_page_id;
-                existingEntity.base.room_view_position = entity.base.room_view_position;
-              }
-
-              // Get all untouched elements
-              let updatedScenes: IEntityOrSceneData[] = [];
-              if (existingEntity != null) {
-                updatedScenes = scenes.filter((e) => e.base.id != sourceData.base.id && e.base.id != existingEntity.base.id);
-              } else {
-                updatedScenes = scenes.filter((e) => e.base.id != sourceData.base.id);
-              }
-
-              // Updated moved entity position
-              const updatedEntity = JSON.parse(JSON.stringify(entity)); // Create a copy of the entity to update
-              updatedEntity.base.entities_page_id = targetData.entities_page_id;
-              updatedEntity.base.room_view_position = targetData.room_view_position;
-
-              if (existingEntity != null) {
-                setScenes([...updatedScenes, updatedEntity, existingEntity]);
-                saveEntitiesOrder([], [...updatedScenes, updatedEntity, existingEntity]);
-              } else {
-                setScenes([...updatedScenes, updatedEntity]);
-                saveEntitiesOrder([], [...updatedScenes, updatedEntity]);
-              }
-              break;
+          if (existingScene != null) {
+            existingScene = JSON.parse(JSON.stringify(existingScene)); // Create deep copy of existing entity to avoid modifying the original
+            if (existingScene) {
+              setScenePosition(existingScene.base.id, scene.base.entities_page_id, scene.base.room_view_position);
             }
           }
+
+          const updatedEntity = JSON.parse(JSON.stringify(scene)); // Create a copy of the entity to update
+          setScenePosition(updatedEntity.base.id, targetData.entities_page_id, targetData.room_view_position);
+          saveEntitiesOrder([], useEntitiesPagesStore.getState().scenes);
         }
       }}
     >
       <ul className="list-none w-full nspanel-entities-pages">
         {(() => {
           const items = [];
-          for (const entity_page of entitiesPages.entities_pages) {
+          for (const entity_page of entities_pages) {
             if (entity_page.type !== type) continue;
-
             items.push(
-              <EntitiesPage
-                key={entity_page.id}
-                id={entity_page.id}
-                room_id={viewData.room_id}
-                type={viewData.type}
-                number_of_entities={entity_page.number_of_entities}
-                can_remove={entitiesPages.entities_pages.filter((p) => p.type == viewData.type).length > 1}
-                entities={entity_page.type == "entity" ? entities : scenes}
-                draging_item={dragingItem}
-              ></EntitiesPage>,
+              <EntitiesPage key={entity_page.id} id={entity_page.id} draging_item={dragingItem} deleteEntitiesPage={deleteEntitiesPage}></EntitiesPage>,
             );
           }
           return items;

@@ -1,8 +1,8 @@
 import { useDroppable } from "@dnd-kit/react";
-import { forwardRef } from "react";
-import type { IEntityOrSceneData } from "./EntitiesPagesView";
-// import Step2 from "./step2_select_controller";
-// import Step3 from "./Step3";
+import { forwardRef, useRef } from "react";
+import type { IEntityOrSceneData } from "./EntitiesPagesStore";
+import MultiStep_AddEditEntity from "../MultiStep_AddEditEntity/MultiStep_AddEditEntity";
+import { useEntitiesPagesStore } from "./EntitiesPagesStore";
 
 const EntitiesDropTarget = forwardRef(
   ({
@@ -18,6 +18,8 @@ const EntitiesDropTarget = forwardRef(
     children?: React.ReactNode;
     draging_item: IEntityOrSceneData | undefined;
   }) => {
+    const { entities_pages, fetchData } = useEntitiesPagesStore();
+    const entities_page = entities_pages.find((page) => page.id === entities_page_id);
     const { ref, isDropTarget } = useDroppable({
       id: `entities_page-${entities_page_id}-room_view_position-${room_view_position}`,
       data: {
@@ -29,6 +31,7 @@ const EntitiesDropTarget = forwardRef(
         },
       },
     });
+    const dialogRef = useRef<HTMLDialogElement>(null);
 
     const isChildDragging =
       draging_item !== undefined && draging_item.base.entities_page_id === entities_page_id && draging_item.base.room_view_position === room_view_position;
@@ -59,6 +62,27 @@ const EntitiesDropTarget = forwardRef(
             <div
               className={`rounded-box ${isDropTarget ? "border-2 border-solid border-accent" : "border-dashed border-2 border-neutral/50"} flex items-center justify-center indicator w-full h-full`}
             >
+              <dialog ref={dialogRef} className="modal">
+                <div className="modal-box">
+                  {/* Upper right close button */}
+                  <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={() => dialogRef.current?.close()}>
+                    ✕
+                  </button>
+                  <MultiStep_AddEditEntity
+                    type={type}
+                    room_id={entities_page.room_id}
+                    entities_page_id={entities_page.id}
+                    room_view_position={room_view_position}
+                    onComplete={() => {
+                      dialogRef.current.close();
+                      fetchData(entities_page.room_id);
+                    }}
+                  />
+                </div>
+                <form method="dialog" className="modal-backdrop">
+                  <button onClick={() => dialogRef.current?.close()}>close</button>
+                </form>
+              </dialog>
               <span className="italic font-thin">
                 {isDropTarget && draging_item !== undefined ? draging_item.base.friendly_name : "No " + (type === "scene" ? "scene" : "entity") + " set"}
               </span>
@@ -66,6 +90,7 @@ const EntitiesDropTarget = forwardRef(
                 hidden={isDropTarget}
                 className="btn btn-neutral hover:btn-success btn-xs btn-circle ms-2 flex items-center justify-center"
                 title={`Add ${type === "scene" ? "scene" : "entity"}`}
+                onClick={() => dialogRef.current?.showModal()}
               >
                 <span className="mdi mdi-plus"></span>
               </button>

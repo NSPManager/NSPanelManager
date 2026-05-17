@@ -23,7 +23,7 @@ const MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }: {
           onMouseLeave={() => setLightHovered(false)}
           className="group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-yellow-500/10"
           onClick={() => {
-            handleButtonSelectEvent("type", "light")();
+            handleButtonSelectEvent("entity_type", "light")();
             next_step();
           }}
         >
@@ -39,7 +39,7 @@ const MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }: {
           onMouseLeave={() => setSwitchHovered(false)}
           className="group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-yellow-500/10"
           onClick={() => {
-            handleButtonSelectEvent("type", "switch")();
+            handleButtonSelectEvent("entity_type", "switch")();
             next_step();
           }}
         >
@@ -57,7 +57,7 @@ const MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }: {
           onMouseLeave={() => setButtonHovered(false)}
           className="group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-yellow-500/10"
           onClick={() => {
-            handleButtonSelectEvent("type", "button")();
+            handleButtonSelectEvent("entity_type", "button")();
             next_step();
           }}
         >
@@ -75,7 +75,7 @@ const MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }: {
           onMouseLeave={() => setThermostatHovered(false)}
           className="group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-yellow-500/10"
           onClick={() => {
-            handleButtonSelectEvent("type", "thermostat")();
+            handleButtonSelectEvent("entity_type", "thermostat")();
             next_step();
           }}
         >
