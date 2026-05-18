@@ -33,6 +33,8 @@ const EntitiesDropTarget = forwardRef(
     });
     const dialogRef = useRef<HTMLDialogElement>(null);
 
+    if (entities_page === undefined) return null;
+
     const isChildDragging =
       draging_item !== undefined && draging_item.base.entities_page_id === entities_page_id && draging_item.base.room_view_position === room_view_position;
 
@@ -63,7 +65,7 @@ const EntitiesDropTarget = forwardRef(
               className={`rounded-box ${isDropTarget ? "border-2 border-solid border-accent" : "border-dashed border-2 border-neutral/50"} flex items-center justify-center indicator w-full h-full`}
             >
               <dialog ref={dialogRef} className="modal">
-                <div className="modal-box">
+                <div className="modal-box overflow-y-visible">
                   {/* Upper right close button */}
                   <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={() => dialogRef.current?.close()}>
                     ✕
@@ -74,7 +76,7 @@ const EntitiesDropTarget = forwardRef(
                     entities_page_id={entities_page.id}
                     room_view_position={room_view_position}
                     onComplete={() => {
-                      dialogRef.current.close();
+                      dialogRef.current?.close();
                       fetchData(entities_page.room_id);
                     }}
                   />

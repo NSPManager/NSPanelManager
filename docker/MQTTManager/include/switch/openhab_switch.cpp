@@ -34,11 +34,6 @@ OpenhabSwitch::OpenhabSwitch(uint32_t switch_id) : SwitchEntity(switch_id) {
   auto switch_config = database_manager::database.get<database_manager::Entity>(this->_id);
   nlohmann::json entity_data = switch_config.get_entity_data_json();
 
-  if (entity_data.contains("openhab_name")) {
-    this->_openhab_name = entity_data["openhab_name"];
-  } else {
-    SPDLOG_ERROR("No OpenHAB name defined for switch {}::{}", this->_id, this->_name);
-  }
   if (entity_data.contains("openhab_item_switch")) {
     this->_openhab_on_off_item = entity_data["openhab_item_switch"];
   } else {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import MultiStep_AddEditEntity_Step1 from "./step1_select_type";
 import MultiStep_AddEditEntity_Step2 from "./step2_select_source";
 import MultiStep_AddEditEntity_Step3_Light from "./entity_types/step3_edit_light";
+import MultiStep_AddEditEntity_Step3_Switch from "./entity_types/step3_edit_switch";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
@@ -68,6 +69,8 @@ const MultiStep_AddOrEditEntity = ({
     switch (formData.entity_type) {
       case "light":
         return <MultiStep_AddEditEntity_Step3_Light handleChange={handleChange} values={formData} onComplete={onComplete} />;
+      case "switch":
+        return <MultiStep_AddEditEntity_Step3_Switch handleChange={handleChange} values={formData} onComplete={onComplete} />;
       default:
         console.log("Unknown entity type while trying to edit entity. Type: ", formData.entity_type);
         return null;

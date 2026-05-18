@@ -75,6 +75,8 @@ urlpatterns = [
     path("rest/entities/<int:entity_id>", rest.get_entity, name="rest_get_entity"),
     # Light entities
     path("rest/entities/lights", rest.entities_lights, name="rest_entities_lights"),
+    # Switch entities
+    path("rest/entities/switches", rest.entities_switches, name="rest_entities_switches"),
     #######################
     ### HTMX "API" URLs ###
     #######################

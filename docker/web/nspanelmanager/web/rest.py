@@ -585,6 +585,10 @@ def get_scene(request, scene_id):
                     "result": {"id": scene.id, "room_id": scene.room_id, "friendly_name": scene.friendly_name, "type": "scene", "controller": scene.scene_type, "backend_name": scene.backend_name, "entities_page_id": scene.entities_page_id, "room_view_position": scene.room_view_position},
                 }
             )
+        elif request.method == "DELETE":
+            scene = Scene.objects.get(id=scene_id)
+            scene.delete()
+            return JsonResponse({"status": "success"})
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"error": "Internal server error"}, status=500)
@@ -699,6 +703,62 @@ def put_light_entity(request):
 
         new_light.entity_data = entity_data
         new_light.save()
+        send_mqttmanager_reload_command()
+
+        return JsonResponse({"status": "ok"}, status=200)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+####################
+# Switches section #
+####################
+
+
+def entities_switches(request):
+    try:
+        if request.method == "PUT":
+            return put_switch_entity(request)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+def put_switch_entity(request):
+    try:
+        required_base_fields = ["room_id", "entities_page_id", "room_view_position", "controller", "type", "friendly_name"]  # Fields required for all entities
+        required_switch_fields = [  # Fields required for light entities
+            "home_assistant_name",
+            "openhab_item_switch",
+        ]
+        data = json.loads(request.body)
+        for field in required_base_fields:
+            if field not in data["base"]:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+        for field in required_switch_fields:
+            if field not in data["entity"]:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        entity_data = {
+            "openhab_item_switch": data["entity"]["openhab_item_switch"],
+            "home_assistant_name": data["entity"]["home_assistant_name"],
+            "controller": data["base"]["controller"],
+        }
+        if "id" in data["base"] and data["base"]["id"]:
+            new_switch = Entity.objects.get(id=int(data["base"]["id"]))
+        else:
+            new_switch = Entity()
+            new_switch.entity_type = Entity.EntityType.SWITCH
+
+        new_switch.friendly_name = data["base"]["friendly_name"]
+        new_switch.room = Room.objects.get(id=int(data["base"]["room_id"]))
+        new_switch.entities_page = RoomEntitiesPage.objects.get(id=int(data["base"]["entities_page_id"]))
+        new_switch.room_view_position = int(data["base"]["room_view_position"])
+
+        new_switch.entity_data = entity_data
+        new_switch.save()
         send_mqttmanager_reload_command()
 
         return JsonResponse({"status": "ok"}, status=200)

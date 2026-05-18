@@ -14,6 +14,8 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
   const removeEntityDialogRef = useRef<HTMLDialogElement>(null);
   const editEntityDialogRef = useRef<HTMLDialogElement>(null);
 
+  if (entity_page == undefined) return null;
+
   function getCookie(name: string) {
     let cookieValue = "";
     if (document.cookie && document.cookie !== "") {
@@ -30,7 +32,7 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
   }
 
   async function deleteEntity(id: number) {
-    console.log("Deleting entities page", id);
+    console.log("Deleting entity", id);
     const entity_page = entities_pages.find((page) => page.id === entity.base.entities_page_id);
     if (entity_page) {
       fetch(`/rest/entities/${id}`, {
@@ -46,7 +48,7 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
           }
         })
         .catch((error) => {
-          console.error("Error deleting entities page", error);
+          console.error("Error deleting entity", error);
         });
     }
   }
@@ -81,7 +83,7 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
         </form>
       </dialog>
       <dialog ref={editEntityDialogRef} className="modal">
-        <div className="modal-box">
+        <div className="modal-box overflow-y-visible">
           <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={() => editEntityDialogRef.current?.close()}>
             ✕
           </button>
