@@ -1,4 +1,5 @@
 #include "nspanel.hpp"
+#include <scenes/scene.hpp>
 #include "database_manager/database_manager.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
@@ -1401,7 +1402,12 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
             auto entity = EntityManager::get_entity_by_id<MqttManagerEntity>(MQTT_MANAGER_ENTITY_TYPE::ANY, this->_settings.button1_detached_mode_entity_id.value());
             if (entity) {
               if ((*entity)->can_toggle()) {
-                (*entity)->toggle();
+                auto scene = std::dynamic_pointer_cast<Scene>(*entity);
+                if (scene) {
+                  scene->activate(this->get_default_room_id());
+                } else {
+                  (*entity)->toggle();
+                }
               }
             } else
               SPDLOG_ERROR("Tried to toggle detached entity via panel but no entity was found with configured ID '{}'.", this->_settings.button1_detached_mode_entity_id.value());
@@ -1430,7 +1436,12 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
             auto entity = EntityManager::get_entity_by_id<MqttManagerEntity>(MQTT_MANAGER_ENTITY_TYPE::ANY, this->_settings.button2_detached_mode_entity_id.value());
             if (entity) {
               if ((*entity)->can_toggle()) {
-                (*entity)->toggle();
+                auto scene = std::dynamic_pointer_cast<Scene>(*entity);
+                if (scene) {
+                  scene->activate(this->get_default_room_id());
+                } else {
+                  (*entity)->toggle();
+                }
               }
             } else
               SPDLOG_ERROR("Tried to toggle detached entity via panel but no entity was found with configured ID '{}'.", this->_settings.button2_detached_mode_entity_id.value());

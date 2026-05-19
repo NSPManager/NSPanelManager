@@ -791,7 +791,12 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
           SPDLOG_ERROR("Received command to toggle light entity in slot {} in page with ID {} but entity could not be cast to a light.", command.toggle_entity_from_entities_page().entity_slot(), command.toggle_entity_from_entities_page().entity_page_id());
         }
       } else {
-        (*entity)->toggle();
+        auto scene = std::dynamic_pointer_cast<Scene>(*entity);
+        if (scene) {
+          scene->activate(EntityManager::get_room_id_for_panel_id(command.nspanel_id()));
+        } else {
+          (*entity)->toggle();
+        }
       }
     } else {
       SPDLOG_DEBUG("Received command to toggle entity in slot {} in page with ID {} bot did not find such an entity.", command.toggle_entity_from_entities_page().entity_slot(), command.toggle_entity_from_entities_page().entity_page_id());
@@ -898,6 +903,14 @@ std::expected<std::shared_ptr<NSPanel>, EntityManager::EntityError> EntityManage
     }
   }
   SPDLOG_TRACE("Did not find NSPanel by ID {}", id);
+  return std::unexpected(EntityManager::EntityError::NOT_FOUND);
+}
+
+std::expected<int32_t, EntityManager::EntityError> EntityManager::get_room_id_for_panel_id(uint32_t nspanel_id) {
+  auto nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
+  if (nspanel.has_value()) {
+    return (*nspanel)->get_default_room_id();
+  }
   return std::unexpected(EntityManager::EntityError::NOT_FOUND);
 }
 
