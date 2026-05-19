@@ -36,7 +36,7 @@ void OpenhabScene::reload_config() {
   }
 }
 
-void OpenhabScene::activate() {
+void OpenhabScene::activate(std::expected<int32_t, EntityManager::EntityError> triggering_room_id) {
   SPDLOG_INFO("Activating scene {}::{}.", this->_id, this->_name);
 
   std::string openhab_trigger_scene_url = fmt::format("{}/rest/rules/{}/runnow", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::OPENHAB_ADDRESS), this->_entity_id);
