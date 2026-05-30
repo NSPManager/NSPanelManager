@@ -10,6 +10,7 @@ const GenericSceneBox = ({ scene }: { scene: IEntityOrSceneData }) => {
   const { entities_pages, removeScene } = useEntitiesPagesStore();
   const entity_page = entities_pages.find((page) => page.id === scene.base.entities_page_id);
   const removeSceneDialogRef = useRef<HTMLDialogElement>(null);
+  // const [editDialogOpened, setEditDialogOpened] = useState(false);
 
   function getCookie(name: string) {
     let cookieValue = "";

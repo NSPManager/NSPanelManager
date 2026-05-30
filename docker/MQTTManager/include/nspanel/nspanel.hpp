@@ -250,6 +250,8 @@ private:
   // Home Assistant MQTT registration topics:
   std::string _mqtt_config_topic;
   std::string _mqtt_sensor_temperature_topic;
+  std::string _mqtt_sensor_humidity_topic;
+  std::string _mqtt_sensor_pressure_topic;
   std::string _mqtt_switch_relay1_topic;
   std::string _mqtt_light_relay1_topic;
   std::string _mqtt_switch_relay2_topic;

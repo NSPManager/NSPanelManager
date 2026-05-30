@@ -5,7 +5,7 @@
     var element = document.getElementById(`nspanel-pressure-status-{{ nspanel.id }}`);
     var data = JSON.parse(message.body);
     element.state = data.state;
-    element.pressure = Math.round(data.pressure*10)/10;
+    element.pressure = (Math.round(data.pressure/100)*10)/10;
   })
 
   define({

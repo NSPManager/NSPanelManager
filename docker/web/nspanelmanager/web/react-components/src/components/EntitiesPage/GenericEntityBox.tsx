@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useDraggable } from "@dnd-kit/react";
 import { type IEntityOrSceneData } from "./EntitiesPagesStore";
 import { useEntitiesPagesStore } from "./EntitiesPagesStore";
@@ -12,7 +12,7 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
   const { entities_pages, removeEntity, fetchData } = useEntitiesPagesStore();
   const entity_page = entities_pages.find((page) => page.id === entity.base.entities_page_id);
   const removeEntityDialogRef = useRef<HTMLDialogElement>(null);
-  const editEntityDialogRef = useRef<HTMLDialogElement>(null);
+  const [editDialogOpened, setEditDialogOpened] = useState(false);
 
   if (entity_page == undefined) return null;
 
@@ -82,27 +82,19 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
           <button>close</button>
         </form>
       </dialog>
-      <dialog ref={editEntityDialogRef} className="modal">
-        <div className="modal-box overflow-y-visible">
-          <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={() => editEntityDialogRef.current?.close()}>
-            ✕
-          </button>
-          <MultiStep_AddOrEditEntity
-            type={entity.base.entity_type}
-            room_id={entity_page.room_id}
-            entities_page_id={entity.base.entities_page_id}
-            room_view_position={entity.base.room_view_position}
-            id={entity.base.id}
-            onComplete={() => {
-              editEntityDialogRef.current?.close();
-              fetchData(entity_page.room_id);
-            }}
-          />
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
+      <MultiStep_AddOrEditEntity
+        type={entity.base.entity_type}
+        room_id={entity_page.room_id}
+        entities_page_id={entity.base.entities_page_id}
+        room_view_position={entity.base.room_view_position}
+        id={entity.base.id}
+        opened={editDialogOpened}
+        setOpened={setEditDialogOpened}
+        onComplete={() => {
+          fetchData(entity_page.room_id);
+          setEditDialogOpened(false);
+        }}
+      />
       {/* Box indicators/buttons */}
       {(() => {
         if (entity.entity === undefined) return null;
@@ -123,7 +115,7 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
         className="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center cursor-pointer"
         title="Edit entity"
         onClick={() => {
-          editEntityDialogRef.current?.showModal();
+          setEditDialogOpened(true);
         }}
       >
         <span className="mdi mdi-pencil"></span>

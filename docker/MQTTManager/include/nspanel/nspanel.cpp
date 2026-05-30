@@ -213,6 +213,8 @@ void NSPanel::reload_config() {
       this->_mqtt_log_topic = fmt::format("nspanel/{}/log", this->_name); // TODO: Remove as this is the old log topic. Use the new based on MAC-address instead.
       this->_mqtt_command_topic = fmt::format("nspanel/{}/command", this->_mac);
       this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
+      this->_mqtt_sensor_humidity_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_humidity/config", mqtt_register_mac);
+      this->_mqtt_sensor_pressure_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_pressure/config", mqtt_register_mac);
       this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
       this->_mqtt_light_relay1_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay1/config", mqtt_register_mac);
       this->_mqtt_switch_relay2_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay2/config", mqtt_register_mac);
@@ -230,7 +232,6 @@ void NSPanel::reload_config() {
       this->_mqtt_temperature_topic = fmt::format("nspanel/{}/temperature", this->_mac);
       this->_mqtt_humidity_topic = fmt::format("nspanel/{}/humidity", this->_mac);
       this->_mqtt_pressure_topic = fmt::format("nspanel/{}/pressure", this->_mac);
-
       this->_mqtt_topic_home_page_status = fmt::format("nspanel/{}/home_page", this->_mac);
       this->_mqtt_topic_home_page_all_rooms_status = fmt::format("nspanel/{}/home_page_all", this->_mac);
       this->_mqtt_topic_room_entities_page_status = fmt::format("nspanel/{}/entities_page", this->_mac);
@@ -502,6 +503,8 @@ void NSPanel::reset_ha_mqtt_topics() {
   MQTT_Manager::clear_retain(this->_mqtt_switch_relay2_topic);
   MQTT_Manager::clear_retain(this->_mqtt_switch_screen_topic);
   MQTT_Manager::clear_retain(this->_mqtt_sensor_temperature_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_sensor_humidity_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_sensor_pressure_topic);
   MQTT_Manager::clear_retain(this->_mqtt_number_screen_brightness_topic);
   MQTT_Manager::clear_retain(this->_mqtt_number_screensaver_brightness_topic);
   MQTT_Manager::clear_retain(this->_mqtt_select_screensaver_topic);
@@ -609,12 +612,15 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         this->_current_littlefs_md5_checksum = report.md5_littlefs();
         this->_current_tft_md5_checksum = report.md5_tft_gui();
 
+        MQTT_Manager::publish(this->_mqtt_temperature_topic, fmt::format("{:.1f}", this->_temperature));
         if (report.has_humidity()) {
           this->_humidity = report.humidity();
+          MQTT_Manager::publish(this->_mqtt_humidity_topic, fmt::format("{:.1f}", this->_humidity));
         }
 
         if (report.has_pressure()) {
           this->_pressure = report.pressure();
+          MQTT_Manager::publish(this->_mqtt_pressure_topic, fmt::format("{:.1f}", this->_pressure / 100));
         }
 
         switch (report.nspanel_state()) {
@@ -670,14 +676,6 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
           this->_nspanel_warnings.push_back(ws_warn);
         }
 
-        // Received new temperature from status report, send out on temperature topic:
-        MQTT_Manager::publish(this->_mqtt_temperature_topic, fmt::format("{:.1f}", this->_temperature));
-        if (report.has_humidity()) {
-          MQTT_Manager::publish(this->_mqtt_humidity_topic, fmt::format("{:.1f}", this->_humidity));
-        }
-        if (report.has_pressure()) {
-          MQTT_Manager::publish(this->_mqtt_pressure_topic, fmt::format("{:.1f}", this->_pressure));
-        }
         this->send_websocket_status_update();
       } else {
         SPDLOG_ERROR("Failed to parse NSPanelStatusReport from string as protobuf. Will try JSON.");
@@ -853,23 +851,26 @@ void NSPanel::send_websocket_status_update() {
   }
 
   // Check if NSPanel has firmware, littlefs or tft file updates available and set appropriate warning.
-  if (this->_current_firmware_md5_checksum.empty() || this->_current_littlefs_md5_checksum.empty()) {
-    status_data["warnings"].push_back(nlohmann::json{
-        {"level", "warning"},
-        {"text", "Manager has no checksum for installed firmware on panel. If this doesn't go away within 5 minutes, try performing a firmware update from the manager."}});
-  } else if (this->has_firmware_update() || this->has_littlefs_update()) {
-    status_data["warnings"].push_back(nlohmann::json{
-        {"level", "warning"},
-        {"text", "Firmware update available"}});
-  }
-  if (this->_current_tft_md5_checksum.empty()) {
-    status_data["warnings"].push_back(nlohmann::json{
-        {"level", "warning"},
-        {"text", "Manager has no checksum for installed GUI on panel. If this doesn't go away within 5 minutes, try performing a GUI update from the manager."}});
-  } else if (this->has_tft_update()) {
-    status_data["warnings"].push_back(nlohmann::json{
-        {"level", "warning"},
-        {"text", "GUI update available"}});
+  // Only check for models that actually have firmware, littlefs and TFT.
+  if (this->_model != MQTT_MANAGER_NSPANEL_MODEL::WEB) {
+    if (this->_current_firmware_md5_checksum.empty() || this->_current_littlefs_md5_checksum.empty()) {
+      status_data["warnings"].push_back(nlohmann::json{
+          {"level", "warning"},
+          {"text", "Manager has no checksum for installed firmware on panel. If this doesn't go away within 5 minutes, try performing a firmware update from the manager."}});
+    } else if (this->has_firmware_update() || this->has_littlefs_update()) {
+      status_data["warnings"].push_back(nlohmann::json{
+          {"level", "warning"},
+          {"text", "Firmware update available"}});
+    }
+    if (this->_current_tft_md5_checksum.empty()) {
+      status_data["warnings"].push_back(nlohmann::json{
+          {"level", "warning"},
+          {"text", "Manager has no checksum for installed GUI on panel. If this doesn't go away within 5 minutes, try performing a GUI update from the manager."}});
+    } else if (this->has_tft_update()) {
+      status_data["warnings"].push_back(nlohmann::json{
+          {"level", "warning"},
+          {"text", "GUI update available"}});
+    }
   }
 
   switch (this->_state) {
@@ -1253,11 +1254,34 @@ void NSPanel::register_to_home_assistant() {
     temperature_sensor_data["unit_of_measurement"] = "°C";
   }
   temperature_sensor_data["name"] = "Temperature";
-  temperature_sensor_data["state_topic"] = fmt::format("nspanel/{}/temperature", this->_mac);
+  temperature_sensor_data["state_topic"] = this->_mqtt_temperature_topic;
   temperature_sensor_data["unique_id"] = fmt::format("{}_temperature", this->_name);
   std::string temperature_sensor_data_str = temperature_sensor_data.dump();
   SPDLOG_DEBUG("Registring temp sensor for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
   MQTT_Manager::publish(this->_mqtt_sensor_temperature_topic, temperature_sensor_data_str, true);
+
+  // Register humidity sensor
+  if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::CUSTOM) {
+    nlohmann::json humidity_sensor_data = nlohmann::json(base_json);
+    humidity_sensor_data["device_class"] = "humidity";
+    humidity_sensor_data["unit_of_measurement"] = "%";
+    humidity_sensor_data["name"] = "Humidity";
+    humidity_sensor_data["state_topic"] = this->_mqtt_humidity_topic;
+    humidity_sensor_data["unique_id"] = fmt::format("{}_humidity", this->_name);
+    std::string humidity_sensor_data_str = humidity_sensor_data.dump();
+    SPDLOG_DEBUG("Registring humidity sensor for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
+    MQTT_Manager::publish(this->_mqtt_sensor_humidity_topic, humidity_sensor_data_str, true);
+
+    nlohmann::json pressure_sensor_data = nlohmann::json(base_json);
+    pressure_sensor_data["device_class"] = "pressure";
+    pressure_sensor_data["unit_of_measurement"] = "hPa";
+    pressure_sensor_data["name"] = "Pressure";
+    pressure_sensor_data["state_topic"] = this->_mqtt_pressure_topic;
+    pressure_sensor_data["unique_id"] = fmt::format("{}_pressure", this->_name);
+    std::string pressure_sensor_data_str = pressure_sensor_data.dump();
+    SPDLOG_DEBUG("Registring pressure sensor for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
+    MQTT_Manager::publish(this->_mqtt_sensor_pressure_topic, pressure_sensor_data_str, true);
+  }
 
   // Register relay1
   if (this->_register_relay1_as_light == NSPanelSettings::RelayRegisterType::NSPanelSettings_RelayRegisterType_SWITCH) {
