@@ -7,7 +7,7 @@ class HomeAssistantScene : public Scene {
 public:
   HomeAssistantScene(uint32_t id);
   void reload_config();
-  void activate();
+  void activate(std::expected<int32_t, EntityManager::EntityError> triggering_room_id = std::unexpected(EntityManager::EntityError::NOT_FOUND));
   void save();
   void remove();
   uint16_t get_id();
