@@ -52,6 +52,8 @@ urlpatterns = [
     #####################
     # Fetch entities from home assistant:
     path("rest/home_assistant/entities", rest.get_home_assistant_entities, name="rest_get_home_assistant_entities"),
+    # Fetch entities from OpenHAB:
+    path("rest/openhab/items", rest.get_openhab_items, name="rest_get_openhab_items"),
     # MQTTManager endpoints
     path("rest/mqttmanager/settings/<str:setting_key>", rest.mqttmanager_get_setting, name="rest_mqttmanager_get_setting"),
     path("rest/mqttmanager/settings", rest.mqttmanager_settings_post, name="rest_mqttmanager_settings_post"),

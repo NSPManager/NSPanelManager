@@ -73,44 +73,78 @@ const MultiStep_AddEditEntity_Step3_Light = ({
     const home_assistant_filter_params = new URLSearchParams({
       filter: JSON.stringify({ type: ["light", "switch"] }),
     });
-    fetch(`/rest/home_assistant/entities?${home_assistant_filter_params.toString()}`, {
-      credentials: "same-origin",
-      method: "GET",
-      mode: "same-origin",
-      headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
-    })
-      .then(async (response) => {
-        const data = await response.json();
+    if (values.controller == "home_assistant") {
+      fetch(`/rest/home_assistant/entities?${home_assistant_filter_params.toString()}`, {
+        credentials: "same-origin",
+        method: "GET",
+        mode: "same-origin",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
+      })
+        .then(async (response) => {
+          const data = await response.json();
 
-        // check for error response
-        if (!response.ok) {
-          // get error message from body or default to response status
-          const error = (data && data.message) || response.status;
-          return Promise.reject(error);
-        }
-
-        const local_options: OptionType[] = [];
-        for (const item of data.items) {
-          let mdi_icon = "mdi-help"; // Default to a question mark when no icon is found for a given entity type.
-          if (item.item_id.startsWith("light")) {
-            mdi_icon = "mdi-lightbulb";
-          } else if (item.item_id.startsWith("switch")) {
-            mdi_icon = "mdi-toggle-switch-variant";
+          // check for error response
+          if (!response.ok) {
+            // get error message from body or default to response status
+            const error = (data && data.message) || response.status;
+            return Promise.reject(error);
           }
 
-          local_options.push({
-            value: item.item_id,
-            label: item.label,
-            icon: mdi_icon,
-          });
-        }
-        setOptions(local_options);
-        console.log("Options length:", options.length);
+          const local_options: OptionType[] = [];
+          for (const item of data.items) {
+            let mdi_icon = "mdi-help"; // Default to a question mark when no icon is found for a given entity type.
+            if (item.item_id.startsWith("light")) {
+              mdi_icon = "mdi-lightbulb";
+            } else if (item.item_id.startsWith("switch")) {
+              mdi_icon = "mdi-toggle-switch-variant";
+            }
+
+            local_options.push({
+              value: item.item_id,
+              label: item.label,
+              icon: mdi_icon,
+            });
+          }
+          setOptions(local_options);
+          console.log("Options length:", options.length);
+        })
+        .catch((error) => {
+          // setErrorMessage(error);
+          console.error("There was an error!", error);
+        });
+    } else if (values.controller == "openhab") {
+      fetch(`/rest/openhab/items`, {
+        credentials: "same-origin",
+        method: "GET",
+        mode: "same-origin",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
       })
-      .catch((error) => {
-        // setErrorMessage(error);
-        console.error("There was an error!", error);
-      });
+        .then(async (response) => {
+          const data = await response.json();
+
+          // check for error response
+          if (!response.ok) {
+            // get error message from body or default to response status
+            const error = (data && data.message) || response.status;
+            return Promise.reject(error);
+          }
+
+          const local_options: OptionType[] = [];
+          for (const item of data.items) {
+            local_options.push({
+              value: item.item_id,
+              label: item.label,
+              icon: "openhab",
+            });
+          }
+          setOptions(local_options);
+          console.log("Options length:", options.length);
+        })
+        .catch((error) => {
+          // setErrorMessage(error);
+          console.error("There was an error!", error);
+        });
+    }
   }
   if (options.length == 0) {
     console.log("Options length is 0, fetching entities...");
@@ -204,7 +238,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({
               }}
               unstyled
               components={select_components}
-              value={options.find((option) => option.value === values.home_assistant_name)}
+              value={options.find((option) => option.value === entitySettings.home_assistant_name)}
               styles={{
                 input: (base) => ({
                   ...base,
@@ -340,6 +374,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({
               options={options}
               classNames={classNames}
               onChange={(newValue) => setEntitySettings((prev) => ({ ...prev, openhab_item_dimmer: newValue ? newValue.value : "" }))}
+              value={options.find((option) => option.value === entitySettings.openhab_item_dimmer)}
               unstyled
               components={select_components}
               styles={{
@@ -365,7 +400,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({
           </>
         )}
 
-        {values.controller == "openhab" && entitySettings.can_color_temperature == "true" && (
+        {values.controller == "openhab" && entitySettings.can_color_temperature == true && (
           <>
             <label className="block mb-2 mt-4 text-sm font-medium">Color temperature item</label>
             <Select<OptionType>
@@ -374,6 +409,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({
               onChange={(newValue) => {
                 setEntitySettings((prev) => ({ ...prev, openhab_item_color_temp: newValue ? newValue.value : "" }));
               }}
+              value={options.find((option) => option.value === entitySettings.openhab_item_color_temp)}
               components={select_components}
               unstyled
               styles={{
@@ -399,13 +435,14 @@ const MultiStep_AddEditEntity_Step3_Light = ({
           </>
         )}
 
-        {values.controller == "openhab" && entitySettings.can_rgb == "true" && (
+        {values.controller == "openhab" && entitySettings.can_rgb == true && (
           <>
             <label className="block mb-2 mt-4 text-sm font-medium">RGB item</label>
             <Select<OptionType>
               options={options}
               classNames={classNames}
               onChange={(newValue) => setEntitySettings((prev) => ({ ...prev, openhab_item_rgb: newValue ? newValue.value : "" }))}
+              value={options.find((option) => option.value === entitySettings.openhab_item_rgb)}
               components={select_components}
               unstyled
               styles={{

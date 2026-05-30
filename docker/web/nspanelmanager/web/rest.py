@@ -33,6 +33,14 @@ def get_home_assistant_entities(request):
     return JsonResponse(web.home_assistant_api.get_all_home_assistant_items(filter_params))
 
 
+def get_openhab_items(request):
+    if request.method != "GET":
+        return JsonResponse({"status": "error"}, status=405)
+
+    filter_params = json.loads(request.GET.get("filter", "{}"))
+    return JsonResponse(web.openhab_api.get_all_openhab_items(filter_params))
+
+
 ##########################
 ## MQTTManager section ###
 ##########################
