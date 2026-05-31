@@ -1,3 +1,16 @@
+FROM node:20-alpine AS ui-builder
+WORKDIR /ui-app
+
+# Install git to clone your frontend repository
+RUN apk add --no-cache git
+
+# Clone the UI repo
+RUN git clone https://github.com/NSPManager/NSPanelManager-Web-UI.git .
+
+# Install dependencies and build
+RUN npm install
+RUN npm run build
+
 FROM --platform=$BUILDPLATFORM python:3.12.5-bookworm AS build
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
@@ -37,4 +50,5 @@ RUN apt-get install -y nginx libmagick++-dev
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8000
+COPY --from=ui-builder /ui-app/dist /var/www/html/webapp
 CMD ["/bin/bash", "./run_uwsgi.sh"]
