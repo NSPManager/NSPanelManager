@@ -57,7 +57,7 @@ const MultiStep_AddEditEntity_Step3_Switch = ({
     fetch(`/rest/entities/${values.id}`)
       .then((response) => response.json())
       .then((data) => {
-        setEntitySettings({ ...entitySettings, ...data.result.entity });
+        setEntitySettings({ ...entitySettings, ...data });
         setHasFetchedConfig(true);
       });
   }

@@ -9,16 +9,14 @@ interface IEntitiesPageData {
 }
 
 export interface IEntityOrSceneData {
-  base: {
-    id: number;
-    friendly_name: string;
-    room_view_position: number;
-    type: "scene" | "entity";
-    entity_type: string;
-    entities_page_id: number;
-  };
-  entity?: any;
-  scene?: any;
+  id: number;
+  friendly_name: string;
+  room_view_position: number;
+  type: "scene" | "entity";
+  entity_type: string;
+  entities_page_id: number;
+  controller: string;
+  controlled_by_nspanel_main_page: boolean;
 }
 
 interface IEntitiesPages {
@@ -90,27 +88,25 @@ export const useEntitiesPagesStore = create<IEntitiesPages>((set) => ({
   setScenePosition: (id: number, entities_page_id: number, room_view_position: number) => {
     set((state) => ({
       ...state,
-      scenes: state.scenes.map((scene) =>
-        scene.base.id === id ? { ...scene, base: { ...scene.base, entities_page_id: entities_page_id, room_view_position: room_view_position } } : scene,
-      ),
+      scenes: state.scenes.map((scene) => (scene.id === id ? { ...scene, entities_page_id: entities_page_id, room_view_position: room_view_position } : scene)),
     }));
   },
   setEntityPosition: (id: number, entities_page_id: number, room_view_position: number) => {
     set((state) => ({
       ...state,
       entities: state.entities.map((entity) =>
-        entity.base.id === id ? { ...entity, base: { ...entity.base, entities_page_id: entities_page_id, room_view_position: room_view_position } } : entity,
+        entity.id === id ? { ...entity, entities_page_id: entities_page_id, room_view_position: room_view_position } : entity,
       ),
     }));
   },
   removeEntity: (id: number) => {
     set((state) => ({
-      entities: state.entities.filter((entity) => entity.base.id !== id),
+      entities: state.entities.filter((entity) => entity.id !== id),
     }));
   },
   removeScene: (id: number) => {
     set((state) => ({
-      scenes: state.scenes.filter((scene) => scene.base.id !== id),
+      scenes: state.scenes.filter((scene) => scene.id !== id),
     }));
   },
 }));

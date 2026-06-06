@@ -1,9 +1,31 @@
 import Select, { type OptionProps } from "react-select";
 import { type ClassNamesConfig, type GroupBase } from "react-select";
-import { type formDataType, type handleChangeType } from "../MultiStep_AddEditEntity";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAvailableEntitiesStore } from "../../AvailableEntitiesStore";
 import { type IOptionType } from "../../AvailableEntitiesStore";
+
+const schema = z.object({
+  type: z.literal("entity"),
+  entity_type: z.literal("light"),
+  room_id: z.number(),
+  entities_page_id: z.number(),
+  room_view_position: z.number(),
+  friendly_name: z.string(),
+  controller: z.string(),
+  can_color_temperature: z.boolean().optional(),
+  can_dim: z.boolean().optional(),
+  can_rgb: z.boolean().optional(),
+  controlled_by_nspanel_main_page: z.boolean().optional(),
+  home_assistant_name: z.string().optional(),
+  is_ceiling_light: z.boolean().optional(),
+  openhab_item_color_temp: z.string().optional(),
+  openhab_item_dimmer: z.string().optional(),
+  openhab_item_rgb: z.string().optional(),
+});
+export type LightFormData = z.infer<typeof schema>;
 
 const CustomOption: React.FC<OptionProps<IOptionType>> = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
   if (isDisabled) {
@@ -23,30 +45,47 @@ const select_components = {
 };
 
 const MultiStep_AddEditEntity_Step3_Light = ({
-  handleChange,
-  values,
+  controller,
+  room_id,
+  entities_page_id,
+  room_view_position,
+  id,
   onComplete,
 }: {
-  handleChange: handleChangeType;
-  values: formDataType;
+  controller: string;
+  room_id: number;
+  entities_page_id: number;
+  room_view_position: number;
+  id?: number;
   onComplete?: () => void;
 }) => {
   const [hasFetchedConfig, setHasFetchedConfig] = useState<boolean>(false);
-  const [entitySettings, setEntitySettings] = useState<formDataType>({
-    type: "light",
-    can_color_temperature: "",
-    can_dim: "",
-    can_rgb: "",
-    controlled_by_nspanel_main_page: true,
-    home_assistant_name: "",
-    is_ceiling_light: false,
-    openhab_control_mode: "",
-    openhab_item_color_temp: "",
-    openhab_item_dimmer: "",
-    openhab_item_rgb: "",
-    openhab_item_switch: "",
-    openhab_name: "",
-    has_fetched_config: false,
+  const {
+    handleSubmit,
+    register,
+    reset,
+    getValues,
+    setValue,
+    formState: { isValid },
+  } = useForm<LightFormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      controller: controller,
+      type: "entity",
+      entity_type: "light",
+      room_id: room_id,
+      entities_page_id: entities_page_id,
+      room_view_position: room_view_position,
+      can_color_temperature: false,
+      can_dim: false,
+      can_rgb: false,
+      controlled_by_nspanel_main_page: false,
+      is_ceiling_light: false,
+      home_assistant_name: "",
+      openhab_item_color_temp: "",
+      openhab_item_dimmer: "",
+      openhab_item_rgb: "",
+    },
   });
 
   function getCookie(name: string) {
@@ -64,26 +103,26 @@ const MultiStep_AddEditEntity_Step3_Light = ({
     return cookieValue;
   }
 
-  if (values.id != null && !hasFetchedConfig) {
-    fetch(`/rest/entities/${values.id}`)
+  if (id && !hasFetchedConfig) {
+    fetch(`/rest/entities/${id}`)
       .then((response) => response.json())
       .then((data) => {
-        setEntitySettings({ ...entitySettings, ...data.result.entity });
+        // setEntitySettings({ ...entitySettings, ...data.result.entity });
+        reset(data);
         setHasFetchedConfig(true);
       });
   }
 
-  function saveEntity() {
+  function onSave(values: LightFormData) {
     // PUT request using fetch with error handling
-    console.log("Updating entity with data:", entitySettings);
+    console.log("Updating entity with data:", values);
     fetch("/rest/entities/lights", {
       credentials: "same-origin",
       method: "PUT",
       mode: "same-origin",
       headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
       body: JSON.stringify({
-        base: values,
-        entity: entitySettings,
+        values,
       }),
     })
       .then(async (response) => {
@@ -111,7 +150,14 @@ const MultiStep_AddEditEntity_Step3_Light = ({
   };
 
   return (
-    <div>
+    <form onSubmit={handleSubmit(onSave)}>
+      <input type="hidden" {...register("controller")} />
+      <input type="hidden" {...register("type")} />
+      <input type="hidden" {...register("entity_type")} />
+      <input type="hidden" {...register("room_id")} />
+      <input type="hidden" {...register("entities_page_id")} />
+      <input type="hidden" {...register("room_view_position")} />
+
       <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear w-full">
         <ul className="steps">
           <li className="step step-primary">Type</li>
@@ -132,15 +178,14 @@ const MultiStep_AddEditEntity_Step3_Light = ({
                 className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                 type="text"
                 id="add_new_light_name"
-                onChange={handleChange("friendly_name")}
-                value={values.friendly_name ? values.friendly_name.toString() : ""}
+                {...register("friendly_name")}
                 required
               />
             </div>
           </div>
         </div>
 
-        {values.controller == "home_assistant" && (
+        {controller == "home_assistant" && (
           <>
             <label className="block mb-2 text-sm font-medium">Home Assistant entity</label>
             <Select<IOptionType>
@@ -148,12 +193,10 @@ const MultiStep_AddEditEntity_Step3_Light = ({
                 .getState()
                 .home_assistant_options.filter((option) => option.value.startsWith("light.") || option.value.startsWith("switch."))}
               classNames={classNames}
-              onChange={(newValue) => {
-                setEntitySettings((prev) => ({ ...prev, home_assistant_name: newValue ? newValue.value : "" }));
-              }}
+              onChange={(newValue) => setValue("home_assistant_name", newValue ? newValue.value : "", { shouldValidate: true, shouldDirty: true })}
               unstyled
               components={select_components}
-              value={useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === entitySettings.home_assistant_name)}
+              value={useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === getValues("home_assistant_name"))}
               styles={{
                 input: (base) => ({
                   ...base,
@@ -178,31 +221,24 @@ const MultiStep_AddEditEntity_Step3_Light = ({
         )}
 
         <fieldset className="fieldset mt-4">
-          <label className={`label ${entitySettings.controlled_by_nspanel_main_page ? "text-base-content" : "text-base-content/50"}`}>
-            <input
-              type="checkbox"
-              name="controlled_by_nspanel_main_page"
-              className="toggle toggle-accent"
-              checked={entitySettings.controlled_by_nspanel_main_page ? true : false}
-              onChange={(newValue) => {
-                setEntitySettings((prev) => ({ ...prev, controlled_by_nspanel_main_page: newValue.target.checked }));
-              }}
-            />
-            {entitySettings.controlled_by_nspanel_main_page ? "Controlled by NSPanel main page" : "Not controlled by NSPanel main page"}
+          <label className={`label ${getValues("controlled_by_nspanel_main_page") ? "text-base-content" : "text-base-content/50"}`}>
+            <input type="checkbox" className="toggle toggle-accent" {...register("controlled_by_nspanel_main_page")} />
+            {getValues("controlled_by_nspanel_main_page") ? "Controlled by NSPanel main page" : "Not controlled by NSPanel main page"}
           </label>
         </fieldset>
 
         {/*Select light type*/}
         <label className="block mb-2 mt-4 text-sm font-medium">Light type</label>
+        <input type="hidden" {...register("is_ceiling_light")} />
         <div className="grid grid-cols-2 gap-4 w-full">
           {/*Table lamp*/}
           <div
             className="group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-yellow-500/10"
-            onClick={() => setEntitySettings((prev) => ({ ...prev, is_ceiling_light: false }))}
+            onClick={() => setValue("is_ceiling_light", false, { shouldValidate: true, shouldDirty: true })}
           >
             <div className="flex justify-center items-center p-4">
               <span
-                className={`mdi mdi-lamp text-5xl text-neutral-content/50 group-hover:text-yellow-500 ${!entitySettings.is_ceiling_light ? "text-yellow-500" : ""}`}
+                className={`mdi mdi-lamp text-5xl text-neutral-content/50 group-hover:text-yellow-500 ${getValues("is_ceiling_light") ? "" : "text-yellow-500"}`}
               ></span>
             </div>
             <div className="flex justify-center items-center">
@@ -213,11 +249,11 @@ const MultiStep_AddEditEntity_Step3_Light = ({
           {/*Ceiling lamp*/}
           <div
             className="group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-yellow-500/10"
-            onClick={() => setEntitySettings((prev) => ({ ...prev, is_ceiling_light: true }))}
+            onClick={() => setValue("is_ceiling_light", true, { shouldValidate: true, shouldDirty: true })}
           >
             <div className="flex justify-center items-center p-4">
               <span
-                className={`mdi mdi-ceiling-light text-5xl text-neutral-content/50 group-hover:text-yellow-500 ${entitySettings.is_ceiling_light ? "text-yellow-500" : ""}`}
+                className={`mdi mdi-ceiling-light text-5xl text-neutral-content/50 group-hover:text-yellow-500 ${getValues("is_ceiling_light") ? "text-yellow-500" : ""}`}
               ></span>
             </div>
             <div className="flex justify-center items-center">
@@ -228,18 +264,18 @@ const MultiStep_AddEditEntity_Step3_Light = ({
 
         {/*Select light features*/}
         <label className="block mb-2 mt-4 text-sm font-medium">Light capabilities</label>
+        <input type="hidden" {...register("can_dim")} />
         <div className="grid grid-cols-3 gap-4 w-full">
           {/*Table lamp*/}
           <div
             className="group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-yellow-500/10"
             onClick={() => {
-              setEntitySettings((prev) => ({ ...prev, can_dim: !entitySettings.can_dim }));
-              setEntitySettings((prev) => ({ ...prev, openhab_control_mode: entitySettings.can_dim ? "dimmer" : "switch" }));
+              setValue("can_dim", !getValues("can_dim"), { shouldValidate: true, shouldDirty: true });
             }}
           >
             <div className="flex justify-center items-center p-4">
               <span
-                className={`mdi mdi-lightbulb-on-50 text-5xl text-neutral-content/50 group-hover:text-yellow-500 ${entitySettings.can_dim ? "text-yellow-500" : ""}`}
+                className={`mdi mdi-lightbulb-on-50 text-5xl text-neutral-content/50 group-hover:text-yellow-500 ${getValues("can_dim") ? "text-yellow-500" : ""}`}
               ></span>
             </div>
             <div className="flex justify-center items-center">
@@ -248,15 +284,16 @@ const MultiStep_AddEditEntity_Step3_Light = ({
           </div>
 
           {/*Ceiling lamp*/}
+          <input type="hidden" {...register("can_color_temperature")} />
           <div
             className="group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-yellow-500/10"
             onClick={() => {
-              setEntitySettings((prev) => ({ ...prev, can_color_temperature: !entitySettings.can_color_temperature }));
+              setValue("can_color_temperature", !getValues("can_color_temperature"), { shouldValidate: true, shouldDirty: true });
             }}
           >
             <div className="flex justify-center items-center p-4">
               <span
-                className={`mdi mdi-temperature-kelvin text-5xl text-neutral-content/50 group-hover:text-yellow-500 ${entitySettings.can_color_temperature ? "text-yellow-500" : ""}`}
+                className={`mdi mdi-temperature-kelvin text-5xl text-neutral-content/50 group-hover:text-yellow-500 ${getValues("can_color_temperature") ? "text-yellow-500" : ""}`}
               ></span>
             </div>
             <div className="flex justify-center items-center">
@@ -265,15 +302,16 @@ const MultiStep_AddEditEntity_Step3_Light = ({
           </div>
 
           {/*Can RGB*/}
+          <input type="hidden" {...register("can_rgb")} />
           <div
             className="group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-yellow-500/10"
             onClick={() => {
-              setEntitySettings((prev) => ({ ...prev, can_rgb: !entitySettings.can_rgb }));
+              setValue("can_rgb", !getValues("can_rgb"), { shouldValidate: true, shouldDirty: true });
             }}
           >
             <div className="flex justify-center items-center p-4">
               <span
-                className={`mdi mdi-palette text-5xl text-neutral-content/50 group-hover:text-yellow-500 ${entitySettings.can_rgb ? "text-yellow-500" : ""}`}
+                className={`mdi mdi-palette text-5xl text-neutral-content/50 group-hover:text-yellow-500 ${getValues("can_rgb") ? "text-yellow-500" : ""}`}
               ></span>
             </div>
             <div className="flex justify-center items-center">
@@ -282,14 +320,14 @@ const MultiStep_AddEditEntity_Step3_Light = ({
           </div>
         </div>
 
-        {values.controller == "openhab" && (
+        {controller == "openhab" && (
           <>
             <label className="block mb-2 mt-4 text-sm font-medium">Brightness item</label>
             <Select<IOptionType>
               options={useAvailableEntitiesStore.getState().openhab_options}
               classNames={classNames}
-              onChange={(newValue) => setEntitySettings((prev) => ({ ...prev, openhab_item_dimmer: newValue ? newValue.value : "" }))}
-              value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === entitySettings.openhab_item_dimmer)}
+              onChange={(newValue) => setValue("openhab_item_dimmer", newValue ? newValue.value : "", { shouldValidate: true, shouldDirty: true })}
+              value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_dimmer"))}
               unstyled
               components={select_components}
               styles={{
@@ -315,16 +353,16 @@ const MultiStep_AddEditEntity_Step3_Light = ({
           </>
         )}
 
-        {values.controller == "openhab" && entitySettings.can_color_temperature == true && (
+        {controller == "openhab" && getValues("can_color_temperature") == true && (
           <>
             <label className="block mb-2 mt-4 text-sm font-medium">Color temperature item</label>
             <Select<IOptionType>
               options={useAvailableEntitiesStore.getState().openhab_options}
               classNames={classNames}
               onChange={(newValue) => {
-                setEntitySettings((prev) => ({ ...prev, openhab_item_color_temp: newValue ? newValue.value : "" }));
+                setValue("openhab_item_color_temp", newValue ? newValue.value : "", { shouldValidate: true, shouldDirty: true });
               }}
-              value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === entitySettings.openhab_item_color_temp)}
+              value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_color_temp"))}
               components={select_components}
               unstyled
               styles={{
@@ -350,14 +388,14 @@ const MultiStep_AddEditEntity_Step3_Light = ({
           </>
         )}
 
-        {values.controller == "openhab" && entitySettings.can_rgb == true && (
+        {controller == "openhab" && getValues("can_rgb") == true && (
           <>
             <label className="block mb-2 mt-4 text-sm font-medium">RGB item</label>
             <Select<IOptionType>
               options={useAvailableEntitiesStore.getState().openhab_options}
               classNames={classNames}
-              onChange={(newValue) => setEntitySettings((prev) => ({ ...prev, openhab_item_rgb: newValue ? newValue.value : "" }))}
-              value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === entitySettings.openhab_item_rgb)}
+              onChange={(newValue) => setValue("openhab_item_rgb", newValue ? newValue.value : "", { shouldValidate: true, shouldDirty: true })}
+              value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_rgb"))}
               components={select_components}
               unstyled
               styles={{
@@ -385,11 +423,11 @@ const MultiStep_AddEditEntity_Step3_Light = ({
       </div>
 
       <div className="flex mt-4 justify-end items-center">
-        <button type="button" className="btn btn-info" onClick={saveEntity}>
+        <button className="btn btn-info" disabled={!isValid}>
           Save
         </button>
       </div>
-    </div>
+    </form>
   );
 };
 

@@ -6,9 +6,9 @@ import { useRef } from "react";
 // import Step3 from "./Step3";
 
 const GenericSceneBox = ({ scene }: { scene: IEntityOrSceneData }) => {
-  const { ref } = useDraggable({ id: `scene-${scene.base.id}`, data: { type: "scene", config: scene } });
+  const { ref } = useDraggable({ id: `scene-${scene.id}`, data: { type: "scene", config: scene } });
   const { entities_pages, removeScene } = useEntitiesPagesStore();
-  const entity_page = entities_pages.find((page) => page.id === scene.base.entities_page_id);
+  const entity_page = entities_pages.find((page) => page.id === scene.entities_page_id);
   const removeSceneDialogRef = useRef<HTMLDialogElement>(null);
   // const [editDialogOpened, setEditDialogOpened] = useState(false);
 
@@ -57,7 +57,7 @@ const GenericSceneBox = ({ scene }: { scene: IEntityOrSceneData }) => {
       <dialog ref={removeSceneDialogRef} className="modal">
         <div className="modal-box">
           <h3 className="text-lg font-bold">Delete scene</h3>
-          <p className="py-4">Are you sure you want to delete scene "{scene.base.friendly_name}"?</p>
+          <p className="py-4">Are you sure you want to delete scene "{scene.friendly_name}"?</p>
           <div className="flex justify-end join">
             <button onClick={() => removeSceneDialogRef.current?.close()} className="btn btn-neutral join-item">
               Cancel
@@ -65,7 +65,7 @@ const GenericSceneBox = ({ scene }: { scene: IEntityOrSceneData }) => {
             <button
               onClick={() => {
                 removeSceneDialogRef.current?.close();
-                deleteScene(scene.base.id);
+                deleteScene(scene.id);
               }}
               className="btn btn-error join-item"
             >
@@ -93,19 +93,17 @@ const GenericSceneBox = ({ scene }: { scene: IEntityOrSceneData }) => {
 
       {/*<!-- "Status badge" (dot) before name to indicate entity controller -->*/}
       {(() => {
-        if (scene.scene === undefined) return null;
-
-        if (scene.scene.scene_type == "home_assistant") {
+        if (scene.controller == "home_assistant") {
           return <div className="status status-info shadow-none absolute top-2 left-2 cursor-default" title="Controlled by Home Assistant"></div>;
-        } else if (scene.scene.scene_type == "openhab") {
+        } else if (scene.controller == "openhab") {
           return <div className="status status-warning shadow-none absolute top-2 left-2 cursor-default" title="Controlled by OpenHAB"></div>;
-        } else if (scene.scene.scene_type == "nspm_scene" || scene.scene.scene_type == "nspm") {
+        } else if (scene.controller == "nspm_scene" || scene.controller == "nspm") {
           return <div className="status status-accent shadow-none absolute top-2 left-2 cursor-default" title="Controlled by NSPanel Manager"></div>;
         } else {
           return <div className="status status-error animate-ping absolute top-2 left-2 cursor-default" title="Unknown controller"></div>;
         }
       })()}
-      <span className="text-sm m-2">{scene.base.friendly_name}</span>
+      <span className="text-sm m-2">{scene.friendly_name}</span>
     </div>
   );
 };

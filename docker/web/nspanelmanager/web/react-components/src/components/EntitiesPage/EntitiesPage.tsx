@@ -109,14 +109,14 @@ const EntitiesPage = ({
             let item = null;
             if (pageData.type == "entity") {
               for (let j = 0; j < entities.length; j++) {
-                if (entities[j].base.room_view_position === i && entities[j].base.type === "entity" && entities[j].base.entities_page_id === pageData.id) {
+                if (entities[j].room_view_position === i && entities[j].type === "entity" && entities[j].entities_page_id === pageData.id) {
                   item = entities[j];
                   break;
                 }
               }
             } else if (pageData.type == "scene") {
               for (let j = 0; j < scenes.length; j++) {
-                if (scenes[j].base.room_view_position === i && scenes[j].base.type === "scene" && scenes[j].base.entities_page_id === pageData.id) {
+                if (scenes[j].room_view_position === i && scenes[j].type === "scene" && scenes[j].entities_page_id === pageData.id) {
                   item = scenes[j];
                   break;
                 }
@@ -126,16 +126,16 @@ const EntitiesPage = ({
             }
 
             if (item != null) {
-              if (item.base.type === "scene") {
+              if (item.type === "scene") {
                 items.push(
                   <EntitiesPageDropTarget key={i} entities_page_id={pageData.id} room_view_position={i} type={pageData.type} draging_item={draging_item}>
-                    <GenericSceneBox key={item.base.id} scene={item}></GenericSceneBox>
+                    <GenericSceneBox key={item.id} scene={item}></GenericSceneBox>
                   </EntitiesPageDropTarget>,
                 );
               } else {
                 items.push(
                   <EntitiesPageDropTarget key={i} entities_page_id={pageData.id} room_view_position={i} type={pageData.type} draging_item={draging_item}>
-                    <GenericEntityBox key={item.base.id} entity={item}></GenericEntityBox>
+                    <GenericEntityBox key={item.id} entity={item}></GenericEntityBox>
                   </EntitiesPageDropTarget>,
                 );
               }

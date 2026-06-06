@@ -36,7 +36,7 @@ const EntitiesDropTarget = forwardRef(
     if (entities_page === undefined) return null;
 
     const isChildDragging =
-      draging_item !== undefined && draging_item.base.entities_page_id === entities_page_id && draging_item.base.room_view_position === room_view_position;
+      draging_item !== undefined && draging_item.entities_page_id === entities_page_id && draging_item.room_view_position === room_view_position;
 
     return (
       <div ref={ref}>
@@ -47,7 +47,7 @@ const EntitiesDropTarget = forwardRef(
                 className={`rounded-box p-1 items-center justify-center w-full h-full bg-conic/[from_var(--border-angle)] from-base-200 via-accent/50 to-base-200 animate-rotate-border from-30% to-60%`}
               >
                 <div className="flex items-center justify-center rounded-box w-full h-full bg-base-200">
-                  <span className="italic font-thin">{draging_item.base.friendly_name}</span>
+                  <span className="italic font-thin">{draging_item.friendly_name}</span>
                 </div>
                 {children}
               </div>
@@ -77,7 +77,7 @@ const EntitiesDropTarget = forwardRef(
                 setOpened={setAddEditEntityDialogOpened}
               />
               <span className="italic font-thin">
-                {isDropTarget && draging_item !== undefined ? draging_item.base.friendly_name : "No " + (type === "scene" ? "scene" : "entity") + " set"}
+                {isDropTarget && draging_item !== undefined ? draging_item.friendly_name : "No " + (type === "scene" ? "scene" : "entity") + " set"}
               </span>
               <button
                 hidden={isDropTarget}

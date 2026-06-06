@@ -99,44 +99,40 @@ const EntitiesPagesView = ({ room_id, type }: { room_id: number; type: string })
         const sourceData = source.data.config;
         const targetData = target.data.config;
 
-        if (sourceData.base.entities_page_id == targetData.entities_page_id && sourceData.base.room_view_position == targetData.room_view_position) {
+        if (sourceData.entities_page_id == targetData.entities_page_id && sourceData.room_view_position == targetData.room_view_position) {
           return; // We did in fact not move the item.
         }
 
         // if (over && over.data.current.accepts.includes(active.data.current.type)) {
-        if (sourceData.base.type == "entity") {
-          const entity = entities.find((e) => e.base.id == sourceData.base.id);
+        if (sourceData.type == "entity") {
+          const entity = entities.find((e) => e.id == sourceData.id);
           if (!entity) return;
 
-          let existingEntity = entities.find(
-            (e) => e.base.entities_page_id == targetData.entities_page_id && e.base.room_view_position == targetData.room_view_position,
-          );
+          let existingEntity = entities.find((e) => e.entities_page_id == targetData.entities_page_id && e.room_view_position == targetData.room_view_position);
           if (existingEntity != null) {
             existingEntity = JSON.parse(JSON.stringify(existingEntity)); // Create deep copy of existing entity to avoid modifying the original
             if (existingEntity) {
-              setEntityPosition(existingEntity.base.id, entity.base.entities_page_id, entity.base.room_view_position);
+              setEntityPosition(existingEntity.id, entity.entities_page_id, entity.room_view_position);
             }
           }
 
           const updatedEntity = JSON.parse(JSON.stringify(entity)); // Create a copy of the entity to update
-          setEntityPosition(updatedEntity.base.id, targetData.entities_page_id, targetData.room_view_position);
+          setEntityPosition(updatedEntity.id, targetData.entities_page_id, targetData.room_view_position);
           saveEntitiesOrder(useEntitiesPagesStore.getState().entities, []);
         } else {
-          const scene = scenes.find((e) => e.base.id == sourceData.base.id);
+          const scene = scenes.find((e) => e.id == sourceData.id);
           if (!scene) return;
 
-          let existingScene = scenes.find(
-            (e) => e.base.entities_page_id == targetData.entities_page_id && e.base.room_view_position == targetData.room_view_position,
-          );
+          let existingScene = scenes.find((e) => e.entities_page_id == targetData.entities_page_id && e.room_view_position == targetData.room_view_position);
           if (existingScene != null) {
             existingScene = JSON.parse(JSON.stringify(existingScene)); // Create deep copy of existing entity to avoid modifying the original
             if (existingScene) {
-              setScenePosition(existingScene.base.id, scene.base.entities_page_id, scene.base.room_view_position);
+              setScenePosition(existingScene.id, scene.entities_page_id, scene.room_view_position);
             }
           }
 
           const updatedEntity = JSON.parse(JSON.stringify(scene)); // Create a copy of the entity to update
-          setScenePosition(updatedEntity.base.id, targetData.entities_page_id, targetData.room_view_position);
+          setScenePosition(updatedEntity.id, targetData.entities_page_id, targetData.room_view_position);
           saveEntitiesOrder([], useEntitiesPagesStore.getState().scenes);
         }
       }}

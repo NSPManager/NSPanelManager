@@ -6,11 +6,11 @@ import MultiStep_AddOrEditEntity from "../MultiStep_AddEditEntity/MultiStep_AddE
 
 const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
   const { ref } = useDraggable({
-    id: `entity-${entity.base.id}`,
+    id: `entity-${entity.id}`,
     data: { type: "entity", config: entity },
   });
   const { entities_pages, removeEntity, fetchData } = useEntitiesPagesStore();
-  const entity_page = entities_pages.find((page) => page.id === entity.base.entities_page_id);
+  const entity_page = entities_pages.find((page) => page.id === entity.entities_page_id);
   const removeEntityDialogRef = useRef<HTMLDialogElement>(null);
   const [editDialogOpened, setEditDialogOpened] = useState(false);
 
@@ -33,7 +33,7 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
 
   async function deleteEntity(id: number) {
     console.log("Deleting entity", id);
-    const entity_page = entities_pages.find((page) => page.id === entity.base.entities_page_id);
+    const entity_page = entities_pages.find((page) => page.id === entity.entities_page_id);
     if (entity_page) {
       fetch(`/rest/entities/${id}`, {
         credentials: "same-origin",
@@ -62,7 +62,7 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
       <dialog ref={removeEntityDialogRef} className="modal">
         <div className="modal-box">
           <h3 className="text-lg font-bold">Delete entities page</h3>
-          <p className="py-4">Are you sure you want to delete entity "{entity.base.friendly_name}"?</p>
+          <p className="py-4">Are you sure you want to delete entity "{entity.friendly_name}"?</p>
           <div className="flex justify-end join">
             <button onClick={() => removeEntityDialogRef.current?.close()} className="btn btn-neutral join-item">
               Cancel
@@ -70,7 +70,7 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
             <button
               onClick={() => {
                 removeEntityDialogRef.current?.close();
-                deleteEntity(entity.base.id);
+                deleteEntity(entity.id);
               }}
               className="btn btn-error join-item"
             >
@@ -83,11 +83,11 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
         </form>
       </dialog>
       <MultiStep_AddOrEditEntity
-        type={entity.base.entity_type}
+        type={entity.entity_type}
         room_id={entity_page.room_id}
-        entities_page_id={entity.base.entities_page_id}
-        room_view_position={entity.base.room_view_position}
-        id={entity.base.id}
+        entities_page_id={entity.entities_page_id}
+        room_view_position={entity.room_view_position}
+        id={entity.id}
         opened={editDialogOpened}
         setOpened={setEditDialogOpened}
         onComplete={() => {
@@ -97,9 +97,9 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
       />
       {/* Box indicators/buttons */}
       {(() => {
-        if (entity.entity === undefined) return null;
+        // if (entity.entity === undefined) return null;
 
-        if (entity.entity.controlled_by_nspanel_main_page) {
+        if (entity.controlled_by_nspanel_main_page) {
           return (
             <span
               className="indicator-item badge badge-secondary me-16 w-6 h-6 flex items-center justify-center cursor-default"
@@ -132,19 +132,17 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
 
       {/*<!-- "Status badge" (dot) before name to indicate entity controller -->*/}
       {(() => {
-        if (entity.entity === undefined) return null;
-
-        if (entity.entity.controller == "home_assistant") {
+        if (entity.controller == "home_assistant") {
           return <div className="status status-info shadow-none absolute top-2 left-2 cursor-default" title="Controlled by Home Assistant"></div>;
-        } else if (entity.entity.controller == "openhab") {
+        } else if (entity.controller == "openhab") {
           return <div className="status status-warning shadow-none absolute top-2 left-2 cursor-default" title="Controlled by OpenHAB"></div>;
-        } else if (entity.entity.controller == "nspm_scene" || entity.entity.controller == "nspm") {
+        } else if (entity.controller == "nspm_scene" || entity.controller == "nspm") {
           return <div className="status status-accent shadow-none absolute top-2 left-2 cursor-default" title="Controlled by NSPanel Manager"></div>;
         } else {
           return <div className="status status-error animate-ping absolute top-2 left-2 cursor-default" title="Unknown controller"></div>;
         }
       })()}
-      <span className="text-sm m-2">{entity.base.friendly_name}</span>
+      <span className="text-sm m-2">{entity.friendly_name}</span>
     </div>
   );
 };

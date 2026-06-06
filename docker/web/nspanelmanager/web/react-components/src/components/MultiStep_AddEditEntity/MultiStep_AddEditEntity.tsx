@@ -73,7 +73,7 @@ const MultiStep_AddOrEditEntity = ({
     fetch(`/rest/entities/${id}`)
       .then((response) => response.json())
       .then((data) => {
-        setFormData({ ...formData, ...data.result.base });
+        setFormData({ ...formData, ...data });
       });
   }
 
@@ -97,7 +97,8 @@ const MultiStep_AddOrEditEntity = ({
       if (maxHeightString.endsWith("%")) {
         // Convert percentage to pixels based on window height
         maxHeight = Math.trunc((window.innerHeight * maxHeight) / 100);
-        console.log("Max height", maxHeight);
+        contentRef.current.classList.toggle("overflow-y-auto", contentRef.current.scrollHeight > maxHeight);
+        contentRef.current.classList.toggle("overflow-y-visible", contentRef.current.scrollHeight <= maxHeight);
       }
     }
   };
@@ -135,7 +136,16 @@ const MultiStep_AddOrEditEntity = ({
           } else {
             switch (formData.entity_type) {
               case "light":
-                return <MultiStep_AddEditEntity_Step3_Light handleChange={handleChange} values={formData} onComplete={onComplete} />;
+                return (
+                  <MultiStep_AddEditEntity_Step3_Light
+                    controller={String(formData.controller)}
+                    room_id={room_id}
+                    entities_page_id={entities_page_id}
+                    room_view_position={room_view_position}
+                    id={id}
+                    onComplete={onComplete}
+                  />
+                );
               case "switch":
                 return <MultiStep_AddEditEntity_Step3_Switch handleChange={handleChange} values={formData} onComplete={onComplete} />;
               default:

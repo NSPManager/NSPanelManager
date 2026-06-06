@@ -428,6 +428,18 @@ def room_delete(request, room_id):
         return JsonResponse({"status": "error"}, status=405)
 
 
+def room_entities(request, room_id):
+    if request.method == "GET":
+        try:
+            entities = Entity.objects.filter(room_id=room_id)
+            return JsonResponse({"status": "ok", "entities": [get_rest_entitiy_representation(entity.id) for entity in entities]}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
 @csrf_exempt
 def room_create(request):
     if request.method == "POST":
@@ -450,20 +462,16 @@ def room_create(request):
 def get_rest_scene_representation(scene_id):
     scene = Scene.objects.get(id=scene_id)
     scene_info = {
-        "base": {
-            "id": scene.id,
-            "friendly_name": scene.friendly_name,
-            "type": "scene",
-            "room_id": scene.room.id if scene.room != None else None,
-            "entities_page_id": scene.entities_page.id if scene.entities_page != None else None,
-            "room_view_position": scene.room_view_position,
-            "controller": scene.scene_type,
-        },
-        "scene": {
-            "scene_type": scene.scene_type,
-            "backend_name": scene.backend_name,  # Name for OpenHAB or Home Assistant entity to activate
-            "light_states": [],
-        },
+        "id": scene.id,
+        "friendly_name": scene.friendly_name,
+        "type": "scene",
+        "room_id": scene.room.id if scene.room != None else None,
+        "entities_page_id": scene.entities_page.id if scene.entities_page != None else None,
+        "room_view_position": scene.room_view_position,
+        "controller": scene.scene_type,
+        "scene_type": scene.scene_type,
+        "backend_name": scene.backend_name,  # Name for OpenHAB or Home Assistant entity to activate
+        "light_states": [],
     }
     for state in scene.lightstate_set.all():
         scene_info["scene"]["light_states"].append(
@@ -607,17 +615,15 @@ def get_scene(request, scene_id):
 def get_rest_entitiy_representation(entity_id):
     entity = Entity.objects.get(id=entity_id)
     return {
-        "base": {
-            "id": entity.id,
-            "friendly_name": entity.friendly_name,
-            "type": "entity",
-            "entity_type": entity.entity_type,
-            "room_id": entity.room_id,
-            "entities_page_id": entity.entities_page_id,
-            "room_view_position": entity.room_view_position,
-            "controller": entity.entity_data["controller"],
-        },
-        "entity": entity.entity_data,
+        "id": entity.id,
+        "friendly_name": entity.friendly_name,
+        "type": "entity",
+        "entity_type": entity.entity_type,
+        "room_id": entity.room_id,
+        "entities_page_id": entity.entities_page_id,
+        "room_view_position": entity.room_view_position,
+        "controller": entity.entity_data["controller"],
+        **entity.entity_data,
     }
 
 
@@ -625,10 +631,7 @@ def get_entity(request, entity_id):
     try:
         if request.method == "GET":
             return JsonResponse(
-                {
-                    "status": "success",
-                    "result": get_rest_entitiy_representation(entity_id),
-                }
+                get_rest_entitiy_representation(entity_id),
             )
         elif request.method == "DELETE":
             Entity.objects.get(id=entity_id).delete()
@@ -661,53 +664,51 @@ def entities_lights(request):
 
 def put_light_entity(request):
     try:
-        required_base_fields = ["room_id", "entities_page_id", "room_view_position", "controller", "type", "friendly_name"]  # Fields required for all entities
         required_light_fields = [  # Fields required for light entities
+            "room_id",
+            "entities_page_id",
+            "room_view_position",
+            "controller",
+            "type",
+            "friendly_name",
             "can_color_temperature",
             "can_dim",
             "can_rgb",
             "controlled_by_nspanel_main_page",
             "home_assistant_name",
             "is_ceiling_light",
-            "openhab_control_mode",
             "openhab_item_color_temp",
             "openhab_item_dimmer",
             "openhab_item_rgb",
-            "openhab_item_switch",
-            "openhab_name",
         ]
-        data = json.loads(request.body)
-        for field in required_base_fields:
-            if field not in data["base"]:
-                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+        data = json.loads(request.body)["values"]
         for field in required_light_fields:
-            if field not in data["entity"]:
+            if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
 
         entity_data = {
-            "controller": data["base"]["controller"],
-            "home_assistant_name": data["entity"]["home_assistant_name"],
-            "openhab_control_mode": data["entity"]["openhab_control_mode"],
-            "openhab_item_switch": data["entity"]["openhab_item_switch"],
-            "openhab_item_dimmer": data["entity"]["openhab_item_dimmer"],
-            "openhab_item_color_temp": data["entity"]["openhab_item_color_temp"],
-            "openhab_item_rgb": data["entity"]["openhab_item_rgb"],
-            "can_dim": str(data["entity"]["can_dim"]).lower() == "true",
-            "can_color_temperature": str(data["entity"]["can_color_temperature"]).lower() == "true",
-            "can_rgb": str(data["entity"]["can_rgb"]).lower() == "true",
-            "is_ceiling_light": str(data["entity"]["is_ceiling_light"]).lower() == "true",
-            "controlled_by_nspanel_main_page": str(data["entity"]["controlled_by_nspanel_main_page"]).lower() == "true",
+            "controller": data["controller"],
+            "home_assistant_name": data.get("home_assistant_name", ""),
+            "openhab_control_mode": "dimmer" if data.get("can_dim", False) else "switch",
+            "openhab_item_dimmer": data.get("openhab_item_dimmer", ""),
+            "openhab_item_color_temp": data.get("openhab_item_color_temp", ""),
+            "openhab_item_rgb": data.get("openhab_item_rgb", ""),
+            "can_dim": str(data["can_dim"]).lower() == "true",
+            "can_color_temperature": str(data["can_color_temperature"]).lower() == "true",
+            "can_rgb": str(data["can_rgb"]).lower() == "true",
+            "is_ceiling_light": str(data["is_ceiling_light"]).lower() == "true",
+            "controlled_by_nspanel_main_page": str(data["controlled_by_nspanel_main_page"]).lower() == "true",
         }
-        if "id" in data["base"] and data["base"]["id"]:
+        if "id" in data and data["id"]:
             new_light = Entity.objects.get(id=int(data["base"]["id"]))
         else:
             new_light = Entity()
             new_light.entity_type = Entity.EntityType.LIGHT
 
-        new_light.friendly_name = data["base"]["friendly_name"]
-        new_light.room = Room.objects.get(id=int(data["base"]["room_id"]))
-        new_light.entities_page = RoomEntitiesPage.objects.get(id=int(data["base"]["entities_page_id"]))
-        new_light.room_view_position = int(data["base"]["room_view_position"])
+        new_light.friendly_name = data["friendly_name"]
+        new_light.room = Room.objects.get(id=int(data["room_id"]))
+        new_light.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_light.room_view_position = int(data["room_view_position"])
 
         new_light.entity_data = entity_data
         new_light.save()
