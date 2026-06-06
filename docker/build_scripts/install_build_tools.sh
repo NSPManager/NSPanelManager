@@ -30,4 +30,8 @@ echo node > .nvmrc
 # Hot-load NVM
 source /root/.bash_env
 
+echo "Installing Node.js via NVM"
 nvm install
+
+cd /usr/src/app/nspanelmanager/web/react-components/
+npm install

@@ -2,14 +2,10 @@ import Select, { type OptionProps } from "react-select";
 import { type ClassNamesConfig, type GroupBase } from "react-select";
 import { type formDataType, type handleChangeType } from "../MultiStep_AddEditEntity";
 import { useState } from "react";
+import { useAvailableEntitiesStore } from "../../AvailableEntitiesStore";
+import { type IOptionType } from "../../AvailableEntitiesStore";
 
-interface OptionType {
-  value: string;
-  label: string;
-  icon?: string;
-}
-
-const CustomOption: React.FC<OptionProps<OptionType>> = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+const CustomOption: React.FC<OptionProps<IOptionType>> = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
   if (isDisabled) {
     return null;
   }
@@ -35,7 +31,6 @@ const MultiStep_AddEditEntity_Step3_Light = ({
   values: formDataType;
   onComplete?: () => void;
 }) => {
-  const [options, setOptions] = useState<OptionType[]>([]);
   const [hasFetchedConfig, setHasFetchedConfig] = useState<boolean>(false);
   const [entitySettings, setEntitySettings] = useState<formDataType>({
     type: "light",
@@ -67,88 +62,6 @@ const MultiStep_AddEditEntity_Step3_Light = ({
       }
     }
     return cookieValue;
-  }
-
-  function fetch_entities() {
-    const home_assistant_filter_params = new URLSearchParams({
-      filter: JSON.stringify({ type: ["light", "switch"] }),
-    });
-    if (values.controller == "home_assistant") {
-      fetch(`/rest/home_assistant/entities?${home_assistant_filter_params.toString()}`, {
-        credentials: "same-origin",
-        method: "GET",
-        mode: "same-origin",
-        headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
-      })
-        .then(async (response) => {
-          const data = await response.json();
-
-          // check for error response
-          if (!response.ok) {
-            // get error message from body or default to response status
-            const error = (data && data.message) || response.status;
-            return Promise.reject(error);
-          }
-
-          const local_options: OptionType[] = [];
-          for (const item of data.items) {
-            let mdi_icon = "mdi-help"; // Default to a question mark when no icon is found for a given entity type.
-            if (item.item_id.startsWith("light")) {
-              mdi_icon = "mdi-lightbulb";
-            } else if (item.item_id.startsWith("switch")) {
-              mdi_icon = "mdi-toggle-switch-variant";
-            }
-
-            local_options.push({
-              value: item.item_id,
-              label: item.label,
-              icon: mdi_icon,
-            });
-          }
-          setOptions(local_options);
-          console.log("Options length:", options.length);
-        })
-        .catch((error) => {
-          // setErrorMessage(error);
-          console.error("There was an error!", error);
-        });
-    } else if (values.controller == "openhab") {
-      fetch(`/rest/openhab/items`, {
-        credentials: "same-origin",
-        method: "GET",
-        mode: "same-origin",
-        headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
-      })
-        .then(async (response) => {
-          const data = await response.json();
-
-          // check for error response
-          if (!response.ok) {
-            // get error message from body or default to response status
-            const error = (data && data.message) || response.status;
-            return Promise.reject(error);
-          }
-
-          const local_options: OptionType[] = [];
-          for (const item of data.items) {
-            local_options.push({
-              value: item.item_id,
-              label: item.label,
-              icon: "openhab",
-            });
-          }
-          setOptions(local_options);
-          console.log("Options length:", options.length);
-        })
-        .catch((error) => {
-          // setErrorMessage(error);
-          console.error("There was an error!", error);
-        });
-    }
-  }
-  if (options.length == 0) {
-    console.log("Options length is 0, fetching entities...");
-    fetch_entities();
   }
 
   if (values.id != null && !hasFetchedConfig) {
@@ -230,15 +143,17 @@ const MultiStep_AddEditEntity_Step3_Light = ({
         {values.controller == "home_assistant" && (
           <>
             <label className="block mb-2 text-sm font-medium">Home Assistant entity</label>
-            <Select<OptionType>
-              options={options}
+            <Select<IOptionType>
+              options={useAvailableEntitiesStore
+                .getState()
+                .home_assistant_options.filter((option) => option.value.startsWith("light.") || option.value.startsWith("switch."))}
               classNames={classNames}
               onChange={(newValue) => {
                 setEntitySettings((prev) => ({ ...prev, home_assistant_name: newValue ? newValue.value : "" }));
               }}
               unstyled
               components={select_components}
-              value={options.find((option) => option.value === entitySettings.home_assistant_name)}
+              value={useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === entitySettings.home_assistant_name)}
               styles={{
                 input: (base) => ({
                   ...base,
@@ -370,11 +285,11 @@ const MultiStep_AddEditEntity_Step3_Light = ({
         {values.controller == "openhab" && (
           <>
             <label className="block mb-2 mt-4 text-sm font-medium">Brightness item</label>
-            <Select<OptionType>
-              options={options}
+            <Select<IOptionType>
+              options={useAvailableEntitiesStore.getState().openhab_options}
               classNames={classNames}
               onChange={(newValue) => setEntitySettings((prev) => ({ ...prev, openhab_item_dimmer: newValue ? newValue.value : "" }))}
-              value={options.find((option) => option.value === entitySettings.openhab_item_dimmer)}
+              value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === entitySettings.openhab_item_dimmer)}
               unstyled
               components={select_components}
               styles={{
@@ -403,13 +318,13 @@ const MultiStep_AddEditEntity_Step3_Light = ({
         {values.controller == "openhab" && entitySettings.can_color_temperature == true && (
           <>
             <label className="block mb-2 mt-4 text-sm font-medium">Color temperature item</label>
-            <Select<OptionType>
-              options={options}
+            <Select<IOptionType>
+              options={useAvailableEntitiesStore.getState().openhab_options}
               classNames={classNames}
               onChange={(newValue) => {
                 setEntitySettings((prev) => ({ ...prev, openhab_item_color_temp: newValue ? newValue.value : "" }));
               }}
-              value={options.find((option) => option.value === entitySettings.openhab_item_color_temp)}
+              value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === entitySettings.openhab_item_color_temp)}
               components={select_components}
               unstyled
               styles={{
@@ -438,11 +353,11 @@ const MultiStep_AddEditEntity_Step3_Light = ({
         {values.controller == "openhab" && entitySettings.can_rgb == true && (
           <>
             <label className="block mb-2 mt-4 text-sm font-medium">RGB item</label>
-            <Select<OptionType>
-              options={options}
+            <Select<IOptionType>
+              options={useAvailableEntitiesStore.getState().openhab_options}
               classNames={classNames}
               onChange={(newValue) => setEntitySettings((prev) => ({ ...prev, openhab_item_rgb: newValue ? newValue.value : "" }))}
-              value={options.find((option) => option.value === entitySettings.openhab_item_rgb)}
+              value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === entitySettings.openhab_item_rgb)}
               components={select_components}
               unstyled
               styles={{

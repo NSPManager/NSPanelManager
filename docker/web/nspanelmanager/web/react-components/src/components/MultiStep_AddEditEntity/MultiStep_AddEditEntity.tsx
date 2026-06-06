@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import MultiStep_AddEditEntity_Step1 from "./step1_select_type";
 import MultiStep_AddEditEntity_Step2 from "./step2_select_source";
 import MultiStep_AddEditEntity_Step3_Light from "./entity_types/step3_edit_light";
 import MultiStep_AddEditEntity_Step3_Switch from "./entity_types/step3_edit_switch";
+import { useAvailableEntitiesStore } from "../AvailableEntitiesStore";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
@@ -47,8 +48,15 @@ const MultiStep_AddOrEditEntity = ({
   };
   const [formData, setFormData] = useState<formDataType>(defaultFormData);
 
+  useEffect(() => {
+    if (useAvailableEntitiesStore.getState().status == "none") {
+      useAvailableEntitiesStore.getState().fetchEntities();
+    }
+  }, []);
+
   const nextStep = () => setStep((prev) => prev + 1);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   // const prevStep = () => setStep((prev) => prev - 1);
 
   const handleChange = (input: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,9 +89,34 @@ const MultiStep_AddOrEditEntity = ({
     }, 220);
   };
 
+  // Automatically switch between overflow-y-visible and overflow-y-auto depending on content height and max height
+  const checkOverflow = () => {
+    if (contentRef.current) {
+      const maxHeightString = window.getComputedStyle(contentRef.current).maxHeight;
+      let maxHeight = parseFloat(maxHeightString);
+      if (maxHeightString.endsWith("%")) {
+        // Convert percentage to pixels based on window height
+        maxHeight = Math.trunc((window.innerHeight * maxHeight) / 100);
+        console.log("Max height", maxHeight);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      entries.forEach(() => {
+        checkOverflow();
+      });
+    });
+
+    if (contentRef.current) {
+      observer.observe(contentRef.current);
+    }
+  }, [contentRef]);
+
   return (
     <dialog ref={dialogRef} open={opened ?? false} onClose={onDialogClose} className="modal duration-200">
-      <div className="modal-box overflow-y-visible">
+      <div ref={contentRef} className={`modal-box max-h-11/12`}>
         {/* Upper right close button */}
         <button
           className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
