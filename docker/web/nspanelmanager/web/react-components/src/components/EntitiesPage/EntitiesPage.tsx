@@ -167,7 +167,7 @@ const EntitiesPage = ({
           <div onClick={() => setEditPageTypeOpen(!editPageTypeOpen)} className="badge badge-info w-6 h-6 flex items-center justify-center cursor-pointer">
             <span className="mdi mdi-pencil"></span>
           </div>
-          <div className="dropdown-content bg-base-100 join rounded-box z-1 w-52 p-1 shadow-sm">
+          <div className="dropdown-content bg-base-100 join rounded-box z-1 p-1 shadow-sm">
             <button
               onClick={() => setPageNumberOfEntities(4)}
               className={`btn join-item btn-lg btn-square ${pageData.number_of_entities === 4 ? "btn-active btn-accent" : ""}`}
