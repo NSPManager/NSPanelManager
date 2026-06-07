@@ -1,15 +1,16 @@
 import Select, { type OptionProps } from "react-select";
 import { type ClassNamesConfig, type GroupBase } from "react-select";
-import { useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAvailableEntitiesStore } from "../../AvailableEntitiesStore";
 import { type IOptionType } from "../../AvailableEntitiesStore";
+import { useEntitiesPagesStore } from "../../EntitiesPage/EntitiesPagesStore";
 
 const schema = z.object({
-  type: z.literal("entity"),
-  entity_type: z.literal("light"),
+  type: z.string(),
+  entity_type: z.string(),
   room_id: z.number(),
   entities_page_id: z.number(),
   room_view_position: z.number(),
@@ -59,7 +60,6 @@ const MultiStep_AddEditEntity_Step3_Light = ({
   id?: number;
   onComplete?: () => void;
 }) => {
-  const [hasFetchedConfig, setHasFetchedConfig] = useState<boolean>(false);
   const {
     handleSubmit,
     register,
@@ -103,15 +103,22 @@ const MultiStep_AddEditEntity_Step3_Light = ({
     return cookieValue;
   }
 
-  if (id && !hasFetchedConfig) {
-    fetch(`/rest/entities/${id}`)
-      .then((response) => response.json())
-      .then((data) => {
-        // setEntitySettings({ ...entitySettings, ...data.result.entity });
-        reset(data);
-        setHasFetchedConfig(true);
-      });
-  }
+  useEffect(() => {
+    if (id != null) {
+      const entityData = useEntitiesPagesStore.getState().entities.find((entity) => entity.id == id);
+      reset(entityData);
+    }
+  }, [id, useEntitiesPagesStore.getState().entities]);
+
+  // if (id && !hasFetchedConfig) {
+  //   fetch(`/rest/entities/${id}`)
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       // setEntitySettings({ ...entitySettings, ...data.result.entity });
+  //       reset(data);
+  //       setHasFetchedConfig(true);
+  //     });
+  // }
 
   function onSave(values: LightFormData) {
     // PUT request using fetch with error handling
@@ -221,8 +228,16 @@ const MultiStep_AddEditEntity_Step3_Light = ({
         )}
 
         <fieldset className="fieldset mt-4">
+          <input type="hidden" {...register("controlled_by_nspanel_main_page")} />
           <label className={`label ${getValues("controlled_by_nspanel_main_page") ? "text-base-content" : "text-base-content/50"}`}>
-            <input type="checkbox" className="toggle toggle-accent" {...register("controlled_by_nspanel_main_page")} />
+            <input
+              type="checkbox"
+              className="toggle toggle-accent"
+              checked={getValues("controlled_by_nspanel_main_page")}
+              onClick={() => {
+                setValue("controlled_by_nspanel_main_page", !getValues("controlled_by_nspanel_main_page"), { shouldValidate: true, shouldDirty: true });
+              }}
+            />
             {getValues("controlled_by_nspanel_main_page") ? "Controlled by NSPanel main page" : "Not controlled by NSPanel main page"}
           </label>
         </fieldset>

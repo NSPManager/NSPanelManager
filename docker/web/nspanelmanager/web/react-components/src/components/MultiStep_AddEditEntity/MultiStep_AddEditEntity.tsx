@@ -3,7 +3,9 @@ import MultiStep_AddEditEntity_Step1 from "./step1_select_type";
 import MultiStep_AddEditEntity_Step2 from "./step2_select_source";
 import MultiStep_AddEditEntity_Step3_Light from "./entity_types/step3_edit_light";
 import MultiStep_AddEditEntity_Step3_Switch from "./entity_types/step3_edit_switch";
+import MultiStep_AddEditEntity_Step3_Button from "./entity_types/step3_edit_button";
 import { useAvailableEntitiesStore } from "../AvailableEntitiesStore";
+import { useEntitiesPagesStore } from "../EntitiesPage/EntitiesPagesStore";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
@@ -59,23 +61,25 @@ const MultiStep_AddOrEditEntity = ({
   const contentRef = useRef<HTMLDivElement>(null);
   // const prevStep = () => setStep((prev) => prev - 1);
 
-  const handleChange = (input: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [input]: e.target.value });
-    e.preventDefault();
-  };
-
   const handleButtonSelectEvent = (input: string, value: string) => () => {
     setFormData({ ...formData, [input]: value });
   };
 
-  if (id != null && formData.id == null) {
-    // Fetch existing entity type and populate base data.
-    fetch(`/rest/entities/${id}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setFormData({ ...formData, ...data });
-      });
-  }
+  useEffect(() => {
+    if (id != null) {
+      const entityData = useEntitiesPagesStore.getState().entities.find((entity) => entity.id == id);
+      setFormData({ ...formData, ...entityData });
+    }
+  }, [id, useEntitiesPagesStore.getState().entities]);
+
+  // if (id != null && formData.id == null) {
+  //   // Fetch existing entity type and populate base data.
+  //   fetch(`/rest/entities/${id}`)
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       setFormData({ ...formData, ...data });
+  //     });
+  // }
 
   const onDialogClose = () => {
     // Clear form data and close dialog
@@ -84,7 +88,10 @@ const MultiStep_AddOrEditEntity = ({
     setTimeout(() => {
       setOpened(false);
       if (onClose) onClose();
-      setFormData(defaultFormData);
+      if (id != null) {
+        const entityData = useEntitiesPagesStore.getState().entities.find((entity) => entity.id == id);
+        setFormData({ ...formData, ...entityData });
+      }
       setStep(1);
     }, 220);
   };
@@ -132,7 +139,13 @@ const MultiStep_AddOrEditEntity = ({
           if (id == null && step == 1) {
             return <MultiStep_AddEditEntity_Step1 handleButtonSelectEvent={handleButtonSelectEvent} next_step={nextStep} />;
           } else if (id == null && step == 2) {
-            return <MultiStep_AddEditEntity_Step2 handleButtonSelectEvent={handleButtonSelectEvent} next_step={nextStep} />;
+            return (
+              <MultiStep_AddEditEntity_Step2
+                handleButtonSelectEvent={handleButtonSelectEvent}
+                entity_type={String(formData.entity_type)}
+                next_step={nextStep}
+              />
+            );
           } else {
             switch (formData.entity_type) {
               case "light":
@@ -147,7 +160,27 @@ const MultiStep_AddOrEditEntity = ({
                   />
                 );
               case "switch":
-                return <MultiStep_AddEditEntity_Step3_Switch handleChange={handleChange} values={formData} onComplete={onComplete} />;
+                return (
+                  <MultiStep_AddEditEntity_Step3_Switch
+                    controller={String(formData.controller)}
+                    room_id={room_id}
+                    id={id}
+                    entities_page_id={entities_page_id}
+                    room_view_position={room_view_position}
+                    onComplete={onComplete}
+                  />
+                );
+              case "button":
+                return (
+                  <MultiStep_AddEditEntity_Step3_Button
+                    controller={String(formData.controller)}
+                    room_id={room_id}
+                    id={id}
+                    entities_page_id={entities_page_id}
+                    room_view_position={room_view_position}
+                    onComplete={onComplete}
+                  />
+                );
               default:
                 console.error("Unknown entity type while trying to edit entity. Type: ", formData.entity_type);
                 return <span className="text-lg text-error">Unknown entity type: {formData.entity_type}</span>;

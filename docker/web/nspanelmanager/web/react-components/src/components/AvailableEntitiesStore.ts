@@ -40,6 +40,8 @@ function getOptionsFromItems(items: any[]): IOptionType[] {
       mdi_icon = "mdi-toggle-switch-variant";
     } else if (item.item_id.startsWith("switch")) {
       mdi_icon = "mdi-toggle-switch-variant";
+    } else if (item.item_id.startsWith("button") || item.item_id.startsWith("input_button")) {
+      mdi_icon = "mdi-gesture-tap-button";
     }
 
     options.push({

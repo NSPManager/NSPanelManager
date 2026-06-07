@@ -34,7 +34,7 @@ void HomeAssistantButton::send_state_update_to_controller() {
     SPDLOG_ERROR("Home Assistant button {}::{} has no HA item defined!", this->_id, this->_name);
     return;
   }
-  std::string home_assistant_name = this->_entity_data["home_assistant_name"];
+  std::string home_assistant_name = this->_entity_data.value("home_assistant_name", "");
 
   nlohmann::json service_data;
   service_data["type"] = "call_service";

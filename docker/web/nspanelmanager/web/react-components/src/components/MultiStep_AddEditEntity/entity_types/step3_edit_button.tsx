@@ -17,9 +17,10 @@ const schema = z.object({
   friendly_name: z.string(),
   controller: z.string(),
   home_assistant_name: z.string().optional(),
-  openhab_item_switch: z.string().optional(),
+  mqtt_topic: z.string().optional(),
+  mqtt_payload: z.string().optional(),
 });
-export type SwitchFormData = z.infer<typeof schema>;
+export type ButtonFormData = z.infer<typeof schema>;
 
 const CustomOption: React.FC<OptionProps<IOptionType>> = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
   if (isDisabled) {
@@ -38,7 +39,7 @@ const select_components = {
   Option: CustomOption,
 };
 
-const MultiStep_AddEditEntity_Step3_Switch = ({
+const MultiStep_AddEditEntity_Step3_Button = ({
   controller,
   room_id,
   entities_page_id,
@@ -60,7 +61,7 @@ const MultiStep_AddEditEntity_Step3_Switch = ({
     getValues,
     setValue,
     formState: { isValid },
-  } = useForm<SwitchFormData>({
+  } = useForm<ButtonFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       controller: controller,
@@ -69,8 +70,9 @@ const MultiStep_AddEditEntity_Step3_Switch = ({
       room_id: room_id,
       entities_page_id: entities_page_id,
       room_view_position: room_view_position,
-      openhab_item_switch: "",
       home_assistant_name: "",
+      mqtt_topic: "",
+      mqtt_payload: "",
     },
   });
 
@@ -96,9 +98,9 @@ const MultiStep_AddEditEntity_Step3_Switch = ({
     }
   }, [id, useEntitiesPagesStore.getState().entities]);
 
-  function saveEntity(data: SwitchFormData) {
+  function saveEntity(data: ButtonFormData) {
     // PUT request using fetch with error handling
-    fetch("/rest/entities/switches", {
+    fetch("/rest/entities/buttons", {
       credentials: "same-origin",
       method: "PUT",
       mode: "same-origin",
@@ -142,7 +144,7 @@ const MultiStep_AddEditEntity_Step3_Switch = ({
         <ul className="steps">
           <li className="step step-primary">Type</li>
           <li className="step step-primary">Controller</li>
-          <li className="step step-primary">Switch</li>
+          <li className="step step-primary">Button</li>
         </ul>
       </div>
 
@@ -150,14 +152,14 @@ const MultiStep_AddEditEntity_Step3_Switch = ({
         <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear">
           {/* Name */}
           <div className="w-full">
-            <label htmlFor="add_new_switch_name" className="block mb-2 text-sm font-medium">
+            <label htmlFor="add_new_button_name" className="block mb-2 text-sm font-medium">
               Name
             </label>
             <div className="flex flex-row-reverse">
               <input
                 className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                 type="text"
-                id="add_new_switch_name"
+                id="add_new_button_name"
                 {...register("friendly_name")}
                 required
               />
@@ -171,7 +173,7 @@ const MultiStep_AddEditEntity_Step3_Switch = ({
             <Select<IOptionType>
               options={useAvailableEntitiesStore
                 .getState()
-                .home_assistant_options.filter((option) => option.value.startsWith("switch.") || option.value.startsWith("input_boolean."))}
+                .home_assistant_options.filter((option) => option.value.startsWith("button.") || option.value.startsWith("input_button."))}
               classNames={classNames}
               onChange={(newValue) => {
                 setValue("home_assistant_name", newValue ? newValue.value : "");
@@ -202,36 +204,37 @@ const MultiStep_AddEditEntity_Step3_Switch = ({
           </>
         )}
 
-        {controller == "openhab" && (
+        {controller == "nspm" && (
           <>
-            <label className="block mb-2 mt-4 text-sm font-medium">OpenHAB item</label>
-            <Select<IOptionType>
-              options={useAvailableEntitiesStore.getState().openhab_options}
-              classNames={classNames}
-              onChange={(newValue) => setValue("openhab_item_switch", newValue ? newValue.value : "")}
-              value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_switch"))}
-              unstyled
-              components={select_components}
-              styles={{
-                input: (base) => ({
-                  ...base,
-                  "input:focus": {
-                    boxShadow: "none",
-                  },
-                }),
-                // On mobile, the label will truncate automatically, so we want to
-                // override that behaviour.
-                multiValueLabel: (base) => ({
-                  ...base,
-                  whiteSpace: "normal",
-                  overflow: "visible",
-                }),
-                control: (base) => ({
-                  ...base,
-                  transition: "none",
-                }),
-              }}
-            />
+            <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear">
+              {/* MQTT Topic */}
+              <div className="w-full">
+                <label className="block mb-2 text-sm font-medium">MQTT Topic</label>
+                <div className="flex flex-row-reverse">
+                  <input
+                    className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
+                    type="text"
+                    {...register("mqtt_topic")}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear">
+              {/* MQTT Payload */}
+              <div className="w-full">
+                <label className="block mb-2 text-sm font-medium">MQTT Payload</label>
+                <div className="flex flex-row-reverse">
+                  <input
+                    className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
+                    type="text"
+                    {...register("mqtt_payload")}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
           </>
         )}
       </div>
@@ -245,4 +248,4 @@ const MultiStep_AddEditEntity_Step3_Switch = ({
   );
 };
 
-export default MultiStep_AddEditEntity_Step3_Switch;
+export default MultiStep_AddEditEntity_Step3_Button;
