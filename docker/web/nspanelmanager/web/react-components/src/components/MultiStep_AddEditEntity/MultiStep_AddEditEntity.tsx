@@ -4,6 +4,7 @@ import MultiStep_AddEditEntity_Step2 from "./step2_select_source";
 import MultiStep_AddEditEntity_Step3_Light from "./entity_types/step3_edit_light";
 import MultiStep_AddEditEntity_Step3_Switch from "./entity_types/step3_edit_switch";
 import MultiStep_AddEditEntity_Step3_Button from "./entity_types/step3_edit_button";
+import MultiStep_AddEditEntity_Step3_Thermostat from "./entity_types/step3_edit_thermostat";
 import { useAvailableEntitiesStore } from "../AvailableEntitiesStore";
 import { useEntitiesPagesStore } from "../EntitiesPage/EntitiesPagesStore";
 // import Step2 from "./step2_select_controller";
@@ -146,7 +147,7 @@ const MultiStep_AddOrEditEntity = ({
                 next_step={nextStep}
               />
             );
-          } else {
+          } else if (formData.entity_type != "") {
             switch (formData.entity_type) {
               case "light":
                 return (
@@ -173,6 +174,17 @@ const MultiStep_AddOrEditEntity = ({
               case "button":
                 return (
                   <MultiStep_AddEditEntity_Step3_Button
+                    controller={String(formData.controller)}
+                    room_id={room_id}
+                    id={id}
+                    entities_page_id={entities_page_id}
+                    room_view_position={room_view_position}
+                    onComplete={onComplete}
+                  />
+                );
+              case "thermostat":
+                return (
+                  <MultiStep_AddEditEntity_Step3_Thermostat
                     controller={String(formData.controller)}
                     room_id={room_id}
                     id={id}

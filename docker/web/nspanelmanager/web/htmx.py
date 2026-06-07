@@ -383,23 +383,6 @@ def handle_entity_modal_result(request):
         )
 
 
-def handle_entity_modal_entity_selected(request, entity):
-    entity_data = json.loads(base64.b64decode(entity).decode("utf-8"))
-
-    if request.session["action"] == "ADD_LIGHT_TO_ROOM":
-        return partial_entity_add_light_entity(request, json.dumps(entity_data))
-    elif request.session["action"] == "ADD_SWITCH_TO_ROOM":
-        return partial_entity_add_switch_entity(request, json.dumps(entity_data))
-    else:
-        return JsonResponse(
-            {
-                "status": "error",
-                "text": "Unknown entity type! Type: " + entity_data["entity_type"],
-            },
-            status=500,
-        )
-
-
 def partial_select_new_entity_item_list(request, action, action_args):
     # This is used in the last step of adding an entity to call the correct
     # "add function" so that it get added to the correct room, page and so on.
@@ -511,65 +494,6 @@ def partial_entity_edit_light_entity(request, light_id):
     return render(request, "partial/select_entity/entity_add_or_edit_light_to_room.html", data)
 
 
-def partial_entity_add_switch_entity(request):
-    data = {
-        "entity_source": request.session["entity_source"],
-        "openhab_item": "",
-        "home_assistant_item": "",
-        "controlled_by_nspanel_main_page": True,  # By default when adding a light. Make it controlled by the NSPanel main page.
-        "openhab_items": [],
-        "home_assistant_items": [],
-    }
-
-    if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["switch", "input_boolean"]})
-        if len(ha_items["errors"]) == 0:
-            data["home_assistant_items"] = ha_items["items"]
-        else:
-            return JsonResponse(
-                {"status": "error", "text": "Failed to get items from Home Assistant!"},
-                status=500,
-            )
-    elif data["entity_source"] == "openhab":
-        openhab_items = web.openhab_api.get_all_openhab_items()
-        if len(openhab_items["errors"]) == 0:
-            data["openhab_items"] = openhab_items["items"]
-        else:
-            return JsonResponse(
-                {"status": "error", "text": "Failed to get items from OpenHAB!"},
-                status=500,
-            )
-    else:
-        logging.error("Unknown entity source! Source: " + data["entity_source"])
-
-    return render(request, "partial/select_entity/entity_add_or_edit_switch_to_room.html", data)
-
-
-def partial_entity_add_button_entity(request):
-    data = {
-        "entity_source": request.session["entity_source"],
-        "openhab_item": "",
-        "home_assistant_item": "",
-        "controlled_by_nspanel_main_page": True,  # By default when adding a light. Make it controlled by the NSPanel main page.
-        "openhab_items": [],
-        "home_assistant_items": [],
-    }
-
-    if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["button", "input_button"]})
-        if len(ha_items["errors"]) == 0:
-            data["home_assistant_items"] = ha_items["items"]
-        else:
-            return JsonResponse(
-                {"status": "error", "text": "Failed to get items from Home Assistant!"},
-                status=500,
-            )
-    else:
-        logging.error("Unknown entity source! Source: " + data["entity_source"])
-
-    return render(request, "partial/select_entity/entity_add_or_edit_button_to_room.html", data)
-
-
 def partial_entity_add_thermostat_entity(request):
     data = get_base_data(request)
     data |= {
@@ -606,63 +530,6 @@ def partial_entity_add_thermostat_entity(request):
         "partial/select_entity/entity_add_or_edit_thermostat_to_room.html",
         data,
     )
-
-
-def partial_entity_edit_switch_entity(request, switch_id):
-    switch = Entity.objects.get(id=switch_id)
-
-    request.session["action"] = "ADD_SWITCH_TO_ROOM"
-    request.session["action_args"] = json.dumps(
-        {
-            "entity_id": switch_id,
-            "room_id": switch.room.id,
-            "page_id": switch.entities_page.id,
-            "page_slot": switch.room_view_position,
-        }
-    )
-
-    data = {
-        "light": switch,
-        "edit_light_id": switch_id,
-        "entity": {
-            "name": switch.friendly_name,
-        },
-    }
-    return render(request, "partial/select_entity/entity_add_or_edit_switch_to_room.html", data)
-
-
-def partial_entity_edit_button_entity(request, button_id):
-    button = Entity.objects.get(id=button_id)
-
-    request.session["action"] = "ADD_BUTTON_TO_ROOM"
-    request.session["action_args"] = json.dumps(
-        {
-            "entity_id": button_id,
-            "room_id": button.room.id,
-            "page_id": button.entities_page.id,
-            "page_slot": button.room_view_position,
-        }
-    )
-
-    data = {
-        "button": button,
-        "edit_button_id": button_id,
-        "entity_source": button.entity_data["controller"],
-        "entity": {
-            "name": button.friendly_name,
-        },
-    }
-    if data["entity_source"] == "home_assistant":
-        ha_items = web.home_assistant_api.get_all_home_assistant_items({"type": ["button", "input_button"]})
-        if len(ha_items["errors"]) == 0:
-            data["home_assistant_items"] = ha_items["items"]
-        else:
-            return JsonResponse(
-                {"status": "error", "text": "Failed to get items from Home Assistant!"},
-                status=500,
-            )
-
-    return render(request, "partial/select_entity/entity_add_or_edit_button_to_room.html", data)
 
 
 def partial_entity_edit_thermostat_entity(request, thermostat_id):
@@ -1001,13 +868,7 @@ def partial_add_entity_to_entities_page_select_entity_source(request, action, ac
 @csrf_exempt
 def partial_add_entity_to_entities_page_config_modal(request, entity_source):
     request.session["entity_source"] = entity_source
-    if request.session["action"] == "ADD_LIGHT_TO_ROOM":
-        return partial_entity_add_light_entity(request)
-    elif request.session["action"] == "ADD_SWITCH_TO_ROOM":
-        return partial_entity_add_switch_entity(request)
-    elif request.session["action"] == "ADD_BUTTON_TO_ROOM":
-        return partial_entity_add_button_entity(request)
-    elif request.session["action"] == "ADD_THERMOSTAT_TO_ROOM":
+    if request.session["action"] == "ADD_THERMOSTAT_TO_ROOM":
         return partial_entity_add_thermostat_entity(request)
     elif request.session["action"] == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE":
         return partial_entity_add_scene_entity(request)
