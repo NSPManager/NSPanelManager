@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@tailwind components;
+@tailwind utilities;
 
 @property --border-angle {
     syntax: "<angle>";
@@ -56,6 +58,18 @@
     --border: 1px;
     --depth: 0;
     --noise: 0;
+}
+
+.number-apperance-none {
+    appearance: none;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    -moz-appearance: textfield;
 }
 
 /* @plugin "daisyui/theme" {

@@ -42,6 +42,8 @@ function getOptionsFromItems(items: any[]): IOptionType[] {
       mdi_icon = "mdi-toggle-switch-variant";
     } else if (item.item_id.startsWith("button") || item.item_id.startsWith("input_button")) {
       mdi_icon = "mdi-gesture-tap-button";
+    } else if (item.item_id.startsWith("climate")) {
+      mdi_icon = "mdi-thermostat";
     }
 
     options.push({

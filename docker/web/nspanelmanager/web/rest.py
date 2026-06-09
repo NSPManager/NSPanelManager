@@ -836,3 +836,92 @@ def put_button_entity(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
+
+
+###################
+# Thermostat section #
+###################
+
+
+def entities_thermostats(request):
+    try:
+        if request.method == "PUT":
+            return put_thermostat_entity(request)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+def put_thermostat_entity(request):
+    try:
+        required_fields = [  # Fields required for thermostat entities
+            "room_id",
+            "entities_page_id",
+            "room_view_position",
+            "controller",
+            "type",
+            "friendly_name",
+            "step_size",
+            "home_assistant_name",
+            "openhab_fan_mode_item",
+            "openhab_hvac_mode_item",
+            "openhab_preset_item",
+            "openhab_swing_item",
+            "openhab_swingh_item",
+            "openhab_temperature_item",
+            "fan_modes",
+            "hvac_modes",
+            "preset_modes",
+            "swing_modes",
+            "swingh_modes",
+        ]
+        required_mode_fields = ["icon", "label", "value"]  # Fields required in each ..._modes items
+
+        data = json.loads(request.body)
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        for mode in ["fan_modes", "hvac_modes", "preset_modes", "swing_modes", "swingh_modes"]:
+            if mode in data:
+                for item in data[mode]:
+                    for field in required_mode_fields:
+                        if field not in item:
+                            return JsonResponse({"status": "error", "message": f"Missing required field in {mode}. Missing field: {field}"}, status=400)
+
+        entity_data = {
+            "controller": data.get("controller", ""),
+            "fan_modes": data.get("fan_modes", []),
+            "hvac_modes": data.get("hvac_modes", []),
+            "preset_modes": data.get("preset_modes", []),
+            "swing_modes": data.get("swing_modes", []),
+            "swingh_modes": data.get("swingh_modes", []),
+            "home_assistant_name": data.get("home_assistant_name", ""),
+            "openhab_fan_mode_item": data.get("openhab_fan_mode_item", ""),
+            "openhab_hvac_mode_item": data.get("openhab_hvac_mode_item", ""),
+            "openhab_preset_mode_item": data.get("openhab_preset_mode_item", ""),
+            "openhab_swing_mode_item": data.get("openhab_swing_mode_item", ""),
+            "openhab_swingh_mode_item": data.get("openhab_swingh_mode_item", ""),
+            "openhab_temperature_item": data.get("openhab_temperature_item", ""),
+            "step_size": data.get("step_size", 1),
+        }
+        if "id" in data and data["id"]:
+            new_thermostat = Entity.objects.get(id=int(data["id"]))
+        else:
+            new_thermostat = Entity()
+            new_thermostat.entity_type = Entity.EntityType.THERMOSTAT
+
+        new_thermostat.friendly_name = data["friendly_name"]
+        new_thermostat.room = Room.objects.get(id=int(data["room_id"]))
+        new_thermostat.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_thermostat.room_view_position = int(data["room_view_position"])
+
+        new_thermostat.entity_data = entity_data
+        new_thermostat.save()
+        send_mqttmanager_reload_command()
+
+        return JsonResponse({"status": "ok"}, status=200)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)

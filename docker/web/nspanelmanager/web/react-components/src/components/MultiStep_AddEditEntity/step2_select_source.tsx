@@ -9,7 +9,7 @@ const MultiStep_AddEditEntity_Step2 = ({
   entity_type: string;
   next_step: () => void;
 }) => {
-  const available_controllers = {
+  const available_controllers: Record<string, string[]> = {
     light: ["home_assistant", "openhab"],
     switch: ["home_assistant", "openhab"],
     button: ["home_assistant", "nspm"],

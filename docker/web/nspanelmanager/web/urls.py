@@ -82,6 +82,8 @@ urlpatterns = [
     path("rest/entities/switches", rest.entities_switches, name="rest_entities_switches"),
     # Button entities
     path("rest/entities/buttons", rest.entities_buttons, name="rest_entities_buttons"),
+    # Thermostats entities
+    path("rest/entities/thermostats", rest.entities_thermostats, name="rest_entities_thermostats"),
     #######################
     ### HTMX "API" URLs ###
     #######################

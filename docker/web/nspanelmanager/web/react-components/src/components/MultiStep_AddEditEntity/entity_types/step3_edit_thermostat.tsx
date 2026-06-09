@@ -15,6 +15,7 @@ const schema = z.object({
   entities_page_id: z.number(),
   room_view_position: z.number(),
   friendly_name: z.string(),
+  step_size: z.float32(),
   controller: z.string(),
   home_assistant_name: z.string().optional(),
   openhab_fan_mode_item: z.string().optional(),
@@ -117,6 +118,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
       openhab_swing_item: "",
       openhab_swingh_item: "",
       openhab_temperature_item: "",
+      step_size: 0.5,
       fan_modes: [],
       hvac_modes: [],
       preset_modes: [],
@@ -244,35 +246,35 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
 
     if ("fan_modes" in attributes) {
       const fan_modes = attributes["fan_modes"];
-      fan_modes.forEach((mode) => {
+      fan_modes.forEach((mode: any) => {
         appendFanModeField({ icon: "", label: mode, value: mode });
       });
     }
 
     if ("hvac_modes" in attributes) {
       const hvac_modes = attributes["hvac_modes"];
-      hvac_modes.forEach((mode) => {
+      hvac_modes.forEach((mode: any) => {
         appendHvacModeField({ icon: "", label: mode, value: mode });
       });
     }
 
     if ("preset_modes" in attributes) {
       const presets = attributes["preset_modes"];
-      presets.forEach((mode) => {
+      presets.forEach((mode: any) => {
         appendPresetModeField({ icon: "", label: mode, value: mode });
       });
     }
 
     if ("swing_modes" in attributes) {
       const swing_options = attributes["swing_modes"];
-      swing_options.forEach((mode) => {
+      swing_options.forEach((mode: any) => {
         appendSwingModeField({ icon: "", label: mode, value: mode });
       });
     }
 
     if ("swing_horizontal_modes" in attributes) {
       const swingh_options = attributes["swing_horizontal_modes"];
-      swingh_options.forEach((mode) => {
+      swingh_options.forEach((mode: any) => {
         appendSwinghModeField({ icon: "", label: mode, value: mode });
       });
     }
@@ -320,14 +322,56 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
           </div>
         </div>
 
+        <div className="mb-4">
+          <label className="block mb-2 text-sm font-medium">Step size</label>
+          <div className="join w-full">
+            <button
+              type="button"
+              onClick={() => {
+                if (getValues("step_size") > 10) {
+                  setValue("step_size", 10);
+                } else if (getValues("step_size") > 0.1) {
+                  setValue("step_size", Math.round(getValues("step_size") * 10 - 1) / 10);
+                } else {
+                  setValue("step_size", 0.1);
+                }
+              }}
+              className="btn h-auto rounded-l-md border-neutral border border-r-0 "
+            >
+              -
+            </button>
+            <input
+              type="number"
+              className="join-item number-apperance-none outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block min-w-0 w-full text-sm p-2.5"
+              step="0.1"
+              min="0.1"
+              max="10"
+              {...register("step_size")}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (getValues("step_size") < 0.1) {
+                  setValue("step_size", 0.1);
+                } else if (getValues("step_size") < 10) {
+                  setValue("step_size", Math.round(getValues("step_size") * 10 + 1) / 10);
+                } else {
+                  setValue("step_size", 10);
+                }
+              }}
+              className="btn h-auto rounded-r-md border-neutral border border-l-0"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
         {controller == "home_assistant" && (
           <div className="mb-4">
             <div>
               <label className="block mb-2 text-sm font-medium">Home Assistant entity</label>
               <Select<IOptionType>
-                options={useAvailableEntitiesStore
-                  .getState()
-                  .home_assistant_options.filter((option) => option.value.startsWith("switch.") || option.value.startsWith("input_boolean."))}
+                options={useAvailableEntitiesStore.getState().home_assistant_options.filter((option) => option.value.startsWith("climate."))}
                 classNames={classNames}
                 onChange={(newValue) => {
                   setValue("home_assistant_name", newValue ? newValue.value : "");
@@ -442,12 +486,14 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
                 <input
                   type="text"
                   {...register(`fan_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="rounded-l-box outline-none bg-base-300 border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  title="Label"
                 />
                 <input
                   type="text"
                   {...register(`fan_modes.${index}.value`)}
                   className="rounded-r-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  title="Value"
                 />
                 <div className="flex justify-center items-center pl-1 py-2.5 h-full">
                   <button
@@ -513,12 +559,14 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
                 <input
                   type="text"
                   {...register(`hvac_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="rounded-l-box outline-none bg-base-300 border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  title="Label"
                 />
                 <input
                   type="text"
                   {...register(`hvac_modes.${index}.value`)}
                   className="rounded-r-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  title="Value"
                 />
                 <div className="flex justify-center items-center pl-1 py-2.5 h-full">
                   <button
@@ -584,12 +632,14 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
                 <input
                   type="text"
                   {...register(`preset_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="rounded-l-box outline-none bg-base-300 border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  title="Label"
                 />
                 <input
                   type="text"
                   {...register(`preset_modes.${index}.value`)}
                   className="rounded-r-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  title="Value"
                 />
                 <div className="flex justify-center items-center pl-1 py-2.5 h-full">
                   <button
@@ -655,12 +705,14 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
                 <input
                   type="text"
                   {...register(`swing_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="rounded-l-box outline-none bg-base-300 border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  title="Label"
                 />
                 <input
                   type="text"
                   {...register(`swing_modes.${index}.value`)}
                   className="rounded-r-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  title="Value"
                 />
                 <div className="flex justify-center items-center pl-1 py-2.5 h-full">
                   <button
@@ -726,12 +778,14 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
                 <input
                   type="text"
                   {...register(`swingh_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="rounded-l-box outline-none bg-base-300 border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  title="Label"
                 />
                 <input
                   type="text"
                   {...register(`swingh_modes.${index}.value`)}
                   className="rounded-r-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  title="Value"
                 />
                 <div className="flex justify-center items-center pl-1 py-2.5 h-full">
                   <button
