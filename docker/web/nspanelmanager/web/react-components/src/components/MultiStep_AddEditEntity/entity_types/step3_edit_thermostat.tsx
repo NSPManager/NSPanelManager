@@ -717,16 +717,14 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
                   title="Value"
                 />
                 <IconSelector value={field.icon} onChange={(icon) => setValue(`hvac_modes.${index}.icon`, icon)} />
-                <div className="flex justify-center items-center pl-1 py-2.5 h-full">
-                  <button
-                    type="button"
-                    className="btn h-auto rounded-box rounded-l-none border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
-                    title="Remove HVAC mode"
-                    onClick={() => removeHvacModeField(index)}
-                  >
-                    ✕
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  className="btn h-auto rounded-box rounded-l-none border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
+                  title="Remove HVAC mode"
+                  onClick={() => removeHvacModeField(index)}
+                >
+                  ✕
+                </button>
               </div>
             ))}
             <button
