@@ -124,7 +124,7 @@ const MultiStep_AddOrEditEntity = ({
   }, [contentRef]);
 
   return (
-    <dialog ref={dialogRef} open={opened ?? false} onClose={onDialogClose} className="modal duration-200">
+    <dialog ref={dialogRef} open={opened ?? false} onClose={onDialogClose} className="modal bg-base-100 text-base-content duration-200">
       <div ref={contentRef} className={`modal-box max-h-11/12`}>
         {/* Upper right close button */}
         <button

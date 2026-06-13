@@ -56,7 +56,7 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
   return (
     <div
       ref={ref}
-      className="draggable-entity-item bg-neutral/50 rounded-box text-neutral-content flex items-center justify-center indicator w-full h-full hover:outline-1 hover:outline-accent cursor-grab"
+      className="draggable-entity-item bg-neutral/50 text-neutral-content rounded-box flex items-center justify-center indicator w-full h-full hover:outline-1 hover:outline-accent cursor-grab"
       title="Drag & drop to move this entity"
     >
       <dialog ref={removeEntityDialogRef} className="modal">

@@ -99,7 +99,6 @@ urlpatterns = [
     path("htmx/partial/select_new_outside_temperature_sensor", htmx.partial_select_new_outside_temperature_sensor, name="htmx_partial_select_new_outside_temperature_sensor"),
     path("htmx/partial/add_light_entity_to_room/<int:room_id>", htmx.partial_entity_add_light_entity, name="htmx_partial_add_light_entity"),
     path("htmx/partial/edit_light_entity_in_room/<int:light_id>", htmx.partial_entity_edit_light_entity, name="htmx_partial_edit_light_entity"),
-    path("htmx/partial/edit_thermostat_entity_in_room/<int:thermostat_id>", htmx.partial_entity_edit_thermostat_entity, name="htmx_partial_edit_thermostat_entity"),
     path("htmx/partial/edit_scene_entity/<int:scene_id>", htmx.partial_entity_edit_scene_entity, name="htmx_partial_edit_scene_entity"),
     path("htmx/partial/remove_entity_from_page_slot/<int:page_id>/<int:slot_id>", htmx.partial_remove_entity_from_page_slot, name="htmx_partial_remove_entity_from_page_slot"),
     path("htmx/partial/add_entities_page_to_room/<int:room_id>/<str:is_scenes_page>/<str:is_global_scenes_page>", htmx.partial_add_entities_page_to_room, name="htmx_partial_add_entities_page_to_room"),

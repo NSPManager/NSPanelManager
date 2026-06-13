@@ -845,8 +845,8 @@ def put_button_entity(request):
 
 def entities_thermostats(request):
     try:
-        if request.method == "PUT":
-            return put_thermostat_entity(request)
+        # if request.method == "PUT":
+        return put_thermostat_entity(request)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
@@ -866,9 +866,9 @@ def put_thermostat_entity(request):
             "home_assistant_name",
             "openhab_fan_mode_item",
             "openhab_hvac_mode_item",
-            "openhab_preset_item",
-            "openhab_swing_item",
-            "openhab_swingh_item",
+            "openhab_preset_mode_item",
+            "openhab_swing_mode_item",
+            "openhab_swingh_mode_item",
             "openhab_temperature_item",
             "fan_modes",
             "hvac_modes",

@@ -45,9 +45,7 @@ def get_file_md5sum(filename):
 def get_base_data(request):
     """Get data that is used on ALL rendered views."""
     data = {
-        "ingress_path": request.headers["X-Ingress-Path"]
-        if "X-Ingress-Path" in request.headers
-        else "",
+        "ingress_path": request.headers["X-Ingress-Path"] if "X-Ingress-Path" in request.headers else "",
         "enabled_themes": {
             "default": "Default",
             "light": "Light",
@@ -88,112 +86,12 @@ def get_base_data(request):
         "version": "%version%",  # This value get's replaced during build
         "manager_address": get_setting_with_default("manager_address"),
         "has_unread_messages": Message.objects.filter(read=False).exists(),
-        "icons": [
-            {
-                "name": "Off",
-                "icon": "h",
-            },
-            {
-                "name": "Heating",
-                "icon": "!",
-            },
-            {
-                "name": "Cooling",
-                "icon": "8",
-            },
-            {
-                "name": "Hot/Cold",
-                "icon": "#",
-            },
-            {
-                "name": "Thermostat",
-                "icon": "7",
-            },
-            {
-                "name": "Thermostat Auto",
-                "icon": "$",
-            },
-            {
-                "name": "Dry",
-                "icon": "%",
-            },
-            {
-                "name": "Eco",
-                "icon": "&",
-            },
-            {
-                "name": "Away",
-                "icon": "'",
-            },
-            {
-                "name": "Home",
-                "icon": "(",
-            },
-            {
-                "name": "Sleep",
-                "icon": ")",
-            },
-            {
-                "name": "Boost",
-                "icon": "*",
-            },
-            {
-                "name": "Comfort",
-                "icon": "+",
-            },
-            {
-                "name": "Activity",
-                "icon": ",",
-            },
-            {
-                "name": "Defrosting",
-                "icon": "-",
-            },
-            {
-                "name": "Swing Both",
-                "icon": ".",
-            },
-            {
-                "name": "Swing Horizontal",
-                "icon": "/",
-            },
-            {
-                "name": "Swing Vertical",
-                "icon": "0",
-            },
-            {
-                "name": "Fan Off",
-                "icon": "1",
-            },
-            {
-                "name": "Fan Auto",
-                "icon": "2",
-            },
-            {
-                "name": "Fan",
-                "icon": "3",
-            },
-            {
-                "name": "Fan 1",
-                "icon": "4",
-            },
-            {
-                "name": "Fan 2",
-                "icon": "5",
-            },
-            {
-                "name": "Fan 3",
-                "icon": "6",
-            },
-        ],
+        "icons": [],
     }
 
     if data["manager_address"] == "":
         environment = environ.Env()
-        data["is_home_assistant_addon"] = (
-            "IS_HOME_ASSISTANT_ADDON" in environment
-            and environment("IS_HOME_ASSISTANT_ADDON") == "true"
-        )
+        data["is_home_assistant_addon"] = "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true"
 
     return data
 
@@ -206,9 +104,7 @@ def index(request):
 
     notifications = []
     if get_setting_with_default("manager_address") == "":
-        notifications.append(
-            {"text": "No manager address configured in settings.", "class": "error"}
-        )
+        notifications.append({"text": "No manager address configured in settings.", "class": "error"})
 
     nspanels = []
     for nspanel in NSPanel.objects.filter(denied=False):
@@ -235,12 +131,8 @@ def index(request):
                 "mqtt_port": get_setting_with_default("mqtt_port"),
                 "mqtt_username": get_setting_with_default("mqtt_username"),
                 "mqtt_password": get_setting_with_default("mqtt_password"),
-                "home_assistant_address": get_setting_with_default(
-                    "home_assistant_address"
-                ),
-                "home_assistant_token": get_setting_with_default(
-                    "home_assistant_token"
-                ),
+                "home_assistant_address": get_setting_with_default("home_assistant_address"),
+                "home_assistant_token": get_setting_with_default("home_assistant_token"),
                 "openhab_address": get_setting_with_default("openhab_address"),
                 "openhab_token": get_setting_with_default("openhab_token"),
             },
@@ -334,78 +226,30 @@ def edit_nspanel(request, panel_id: int):
     else:
         temperature_unit = "°C"
     settings = {
-        "lock_to_default_room": get_nspanel_setting_with_default(
-            panel_id, "lock_to_default_room", "False"
-        ),
-        "screen_dim_level": get_nspanel_setting_with_default(
-            panel_id, "screen_dim_level", ""
-        ),
-        "screensaver_dim_level": get_nspanel_setting_with_default(
-            panel_id, "screensaver_dim_level", ""
-        ),
-        "is_us_panel": get_nspanel_setting_with_default(
-            panel_id, "is_us_panel", "False"
-        ),
-        "us_panel_orientation": get_nspanel_setting_with_default(
-            panel_id, "us_panel_orientation", "vertical"
-        ),
-        "selected_tft": get_nspanel_setting_with_default(
-            panel_id, "selected_tft", "tft1"
-        ),
-        "show_screensaver_inside_temperature": get_nspanel_setting_with_default(
-            panel_id, "show_screensaver_inside_temperature", "global"
-        ),
-        "show_screensaver_outside_temperature": get_nspanel_setting_with_default(
-            panel_id, "show_screensaver_outside_temperature", "global"
-        ),
-        "screensaver_activation_timeout": get_nspanel_setting_with_default(
-            panel_id, "screensaver_activation_timeout", ""
-        ),
-        "screensaver_mode": get_nspanel_setting_with_default(
-            panel_id, "screensaver_mode", "global"
-        ),
-        "reverse_relays": get_nspanel_setting_with_default(
-            panel_id, "reverse_relays", "False"
-        ),
-        "relay1_default_mode": get_nspanel_setting_with_default(
-            panel_id, "relay1_default_mode", "False"
-        ),
-        "relay1_is_light": get_nspanel_setting_with_default(
-            panel_id, "relay1_is_light", "False"
-        ),
-        "relay2_default_mode": get_nspanel_setting_with_default(
-            panel_id, "relay2_default_mode", "False"
-        ),
-        "relay2_is_light": get_nspanel_setting_with_default(
-            panel_id, "relay2_is_light", "False"
-        ),
-        "temperature_calibration": get_nspanel_setting_with_default(
-            panel_id, "temperature_calibration", 0
-        ),
-        "button1_custom_mqtt_topic": get_nspanel_setting_with_default(
-            panel_id, "button1_mqtt_topic", ""
-        ),
-        "button1_custom_mqtt_payload": get_nspanel_setting_with_default(
-            panel_id, "button1_mqtt_payload", ""
-        ),
-        "button2_custom_mqtt_topic": get_nspanel_setting_with_default(
-            panel_id, "button2_mqtt_topic", ""
-        ),
-        "button2_custom_mqtt_payload": get_nspanel_setting_with_default(
-            panel_id, "button2_mqtt_payload", ""
-        ),
-        "button1_relay_lower_temperature": get_nspanel_setting_with_default(
-            panel_id, "button1_relay_lower_temperature", ""
-        ),
-        "button1_relay_upper_temperature": get_nspanel_setting_with_default(
-            panel_id, "button1_relay_upper_temperature", ""
-        ),
-        "button2_relay_lower_temperature": get_nspanel_setting_with_default(
-            panel_id, "button2_relay_lower_temperature", ""
-        ),
-        "button2_relay_upper_temperature": get_nspanel_setting_with_default(
-            panel_id, "button2_relay_upper_temperature", ""
-        ),
+        "lock_to_default_room": get_nspanel_setting_with_default(panel_id, "lock_to_default_room", "False"),
+        "screen_dim_level": get_nspanel_setting_with_default(panel_id, "screen_dim_level", ""),
+        "screensaver_dim_level": get_nspanel_setting_with_default(panel_id, "screensaver_dim_level", ""),
+        "is_us_panel": get_nspanel_setting_with_default(panel_id, "is_us_panel", "False"),
+        "us_panel_orientation": get_nspanel_setting_with_default(panel_id, "us_panel_orientation", "vertical"),
+        "selected_tft": get_nspanel_setting_with_default(panel_id, "selected_tft", "tft1"),
+        "show_screensaver_inside_temperature": get_nspanel_setting_with_default(panel_id, "show_screensaver_inside_temperature", "global"),
+        "show_screensaver_outside_temperature": get_nspanel_setting_with_default(panel_id, "show_screensaver_outside_temperature", "global"),
+        "screensaver_activation_timeout": get_nspanel_setting_with_default(panel_id, "screensaver_activation_timeout", ""),
+        "screensaver_mode": get_nspanel_setting_with_default(panel_id, "screensaver_mode", "global"),
+        "reverse_relays": get_nspanel_setting_with_default(panel_id, "reverse_relays", "False"),
+        "relay1_default_mode": get_nspanel_setting_with_default(panel_id, "relay1_default_mode", "False"),
+        "relay1_is_light": get_nspanel_setting_with_default(panel_id, "relay1_is_light", "False"),
+        "relay2_default_mode": get_nspanel_setting_with_default(panel_id, "relay2_default_mode", "False"),
+        "relay2_is_light": get_nspanel_setting_with_default(panel_id, "relay2_is_light", "False"),
+        "temperature_calibration": get_nspanel_setting_with_default(panel_id, "temperature_calibration", 0),
+        "button1_custom_mqtt_topic": get_nspanel_setting_with_default(panel_id, "button1_mqtt_topic", ""),
+        "button1_custom_mqtt_payload": get_nspanel_setting_with_default(panel_id, "button1_mqtt_payload", ""),
+        "button2_custom_mqtt_topic": get_nspanel_setting_with_default(panel_id, "button2_mqtt_topic", ""),
+        "button2_custom_mqtt_payload": get_nspanel_setting_with_default(panel_id, "button2_mqtt_payload", ""),
+        "button1_relay_lower_temperature": get_nspanel_setting_with_default(panel_id, "button1_relay_lower_temperature", ""),
+        "button1_relay_upper_temperature": get_nspanel_setting_with_default(panel_id, "button1_relay_upper_temperature", ""),
+        "button2_relay_lower_temperature": get_nspanel_setting_with_default(panel_id, "button2_relay_lower_temperature", ""),
+        "button2_relay_upper_temperature": get_nspanel_setting_with_default(panel_id, "button2_relay_upper_temperature", ""),
         "default_page": get_nspanel_setting_with_default(panel_id, "default_page", "0"),
     }
 
@@ -433,16 +277,12 @@ def save_panel_settings(request, panel_id: int):
     panel.friendly_name = request.POST["name"]
     panel.button1_mode = request.POST["button1_mode"]
     if request.POST["button1_mode"] == "1":  # Detached mode
-        panel.button1_detached_mode_entity = Entity.objects.get(
-            id=request.POST["button1_detached_mode_light"]
-        )
+        panel.button1_detached_mode_entity = Entity.objects.get(id=request.POST["button1_detached_mode_light"])
     else:
         panel.button1_detached_mode_entity = None
 
     if request.POST["button1_mode"] == "2":  # Custom MQTT Mode
-        set_nspanel_setting_value(
-            panel_id, "button1_mqtt_topic", request.POST["button1_custom_mqtt_topic"]
-        )
+        set_nspanel_setting_value(panel_id, "button1_mqtt_topic", request.POST["button1_custom_mqtt_topic"])
         set_nspanel_setting_value(
             panel_id,
             "button1_mqtt_payload",
@@ -454,16 +294,12 @@ def save_panel_settings(request, panel_id: int):
 
     panel.button2_mode = request.POST["button2_mode"]
     if request.POST["button2_mode"] == "1":  # Detached mode
-        panel.button2_detached_mode_entity = Entity.objects.get(
-            id=request.POST["button2_detached_mode_light"]
-        )
+        panel.button2_detached_mode_entity = Entity.objects.get(id=request.POST["button2_detached_mode_light"])
     else:
         panel.button2_detached_mode_entity = None
 
     if request.POST["button2_mode"] == "2":  # Custom MQTT Mode
-        set_nspanel_setting_value(
-            panel_id, "button2_mqtt_topic", request.POST["button2_custom_mqtt_topic"]
-        )
+        set_nspanel_setting_value(panel_id, "button2_mqtt_topic", request.POST["button2_custom_mqtt_topic"])
         set_nspanel_setting_value(
             panel_id,
             "button2_mqtt_payload",
@@ -474,16 +310,12 @@ def save_panel_settings(request, panel_id: int):
         delete_nspanel_setting(panel_id, "button2_mqtt_payload")
 
     if request.POST["screen_dim_level"].strip():
-        set_nspanel_setting_value(
-            panel_id, "screen_dim_level", request.POST["screen_dim_level"]
-        )
+        set_nspanel_setting_value(panel_id, "screen_dim_level", request.POST["screen_dim_level"])
     else:
         delete_nspanel_setting(panel_id, "screen_dim_level")
 
     if request.POST["screensaver_dim_level"].strip():
-        set_nspanel_setting_value(
-            panel_id, "screensaver_dim_level", request.POST["screensaver_dim_level"]
-        )
+        set_nspanel_setting_value(panel_id, "screensaver_dim_level", request.POST["screensaver_dim_level"])
     else:
         delete_nspanel_setting(panel_id, "screensaver_dim_level")
 
@@ -499,9 +331,7 @@ def save_panel_settings(request, panel_id: int):
     if request.POST["screensaver_mode"] == "global":
         delete_nspanel_setting(panel_id, "screensaver_mode")
     else:
-        set_nspanel_setting_value(
-            panel_id, "screensaver_mode", request.POST["screensaver_mode"]
-        )
+        set_nspanel_setting_value(panel_id, "screensaver_mode", request.POST["screensaver_mode"])
 
     if request.POST["show_screensaver_inside_temperature"] == "global":
         delete_nspanel_setting(panel_id, "show_screensaver_inside_temperature")
@@ -530,19 +360,11 @@ def save_panel_settings(request, panel_id: int):
             float(request.POST.get("temperature_calibration", 0)),
         )
 
-    set_nspanel_setting_value(
-        panel_id, "relay1_default_mode", request.POST["relay1_default_mode"]
-    )
-    set_nspanel_setting_value(
-        panel_id, "relay2_default_mode", request.POST["relay2_default_mode"]
-    )
+    set_nspanel_setting_value(panel_id, "relay1_default_mode", request.POST["relay1_default_mode"])
+    set_nspanel_setting_value(panel_id, "relay2_default_mode", request.POST["relay2_default_mode"])
     set_nspanel_setting_value(panel_id, "default_page", request.POST["default_page"])
-    set_nspanel_setting_value(
-        panel_id, "lock_to_default_room", request.POST["lock_to_default_room"]
-    )
-    set_nspanel_setting_value(
-        panel_id, "reverse_relays", request.POST["reverse_relays"]
-    )
+    set_nspanel_setting_value(panel_id, "lock_to_default_room", request.POST["lock_to_default_room"])
+    set_nspanel_setting_value(panel_id, "reverse_relays", request.POST["reverse_relays"])
 
     if request.POST["button1_relay_lower_temperature"].strip():
         set_nspanel_setting_value(
@@ -580,23 +402,15 @@ def save_panel_settings(request, panel_id: int):
             set_nspanel_setting_value(panel_id, "us_panel_orientation", "horizontal")
         elif request.POST["panel_type"] == "us_horizontal_mirrored":
             set_nspanel_setting_value(panel_id, "is_us_panel", "True")
-            set_nspanel_setting_value(
-                panel_id, "us_panel_orientation", "horizontal_mirrored"
-            )
+            set_nspanel_setting_value(panel_id, "us_panel_orientation", "horizontal_mirrored")
         elif request.POST["panel_type"] == "us_vertical":
             set_nspanel_setting_value(panel_id, "is_us_panel", "True")
             set_nspanel_setting_value(panel_id, "us_panel_orientation", "vertical")
 
-    set_nspanel_setting_value(
-        panel_id, "selected_tft", request.POST.get("selected_tft")
-    )
+    set_nspanel_setting_value(panel_id, "selected_tft", request.POST.get("selected_tft"))
 
-    set_nspanel_setting_value(
-        panel_id, "relay1_is_light", request.POST["relay1_is_light"]
-    )
-    set_nspanel_setting_value(
-        panel_id, "relay2_is_light", request.POST["relay2_is_light"]
-    )
+    set_nspanel_setting_value(panel_id, "relay1_is_light", request.POST["relay1_is_light"])
+    set_nspanel_setting_value(panel_id, "relay2_is_light", request.POST["relay2_is_light"])
 
     panel.save()
     send_mqttmanager_reload_command()
@@ -620,60 +434,31 @@ def settings_page(request):
     data["home_assistant_token"] = get_setting_with_default("home_assistant_token")
     data["openhab_address"] = get_setting_with_default("openhab_address")
     data["openhab_token"] = get_setting_with_default("openhab_token")
-    data["openhab_brightness_channel_name"] = get_setting_with_default(
-        "openhab_brightness_channel_name"
-    )
-    data["openhab_brightness_channel_min"] = get_setting_with_default(
-        "openhab_brightness_channel_min"
-    )
-    data["openhab_brightness_channel_max"] = get_setting_with_default(
-        "openhab_brightness_channel_max"
-    )
-    data["openhab_color_temp_channel_name"] = get_setting_with_default(
-        "openhab_color_temp_channel_name"
-    )
-    data["openhab_rgb_channel_name"] = get_setting_with_default(
-        "openhab_rgb_channel_name"
-    )
-    data["raise_to_100_light_level"] = get_setting_with_default(
-        "raise_to_100_light_level"
-    )
+    data["openhab_brightness_channel_name"] = get_setting_with_default("openhab_brightness_channel_name")
+    data["openhab_brightness_channel_min"] = get_setting_with_default("openhab_brightness_channel_min")
+    data["openhab_brightness_channel_max"] = get_setting_with_default("openhab_brightness_channel_max")
+    data["openhab_color_temp_channel_name"] = get_setting_with_default("openhab_color_temp_channel_name")
+    data["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name")
+    data["raise_to_100_light_level"] = get_setting_with_default("raise_to_100_light_level")
     data["min_button_push_time"] = get_setting_with_default("min_button_push_time")
     data["button_long_press_time"] = get_setting_with_default("button_long_press_time")
-    data["special_mode_trigger_time"] = get_setting_with_default(
-        "special_mode_trigger_time"
-    )
-    data["special_mode_release_time"] = get_setting_with_default(
-        "special_mode_release_time"
-    )
-    data["screensaver_activation_timeout"] = get_setting_with_default(
-        "screensaver_activation_timeout"
-    )
+    data["special_mode_trigger_time"] = get_setting_with_default("special_mode_trigger_time")
+    data["special_mode_release_time"] = get_setting_with_default("special_mode_release_time")
+    data["screensaver_activation_timeout"] = get_setting_with_default("screensaver_activation_timeout")
     data["screen_dim_level"] = get_setting_with_default("screen_dim_level")
     data["screensaver_dim_level"] = get_setting_with_default("screensaver_dim_level")
     data["screensaver_mode"] = get_setting_with_default("screensaver_mode")
-    data["show_screensaver_inside_temperature"] = get_setting_with_default(
-        "show_screensaver_inside_temperature"
-    )
-    data["show_screensaver_outside_temperature"] = get_setting_with_default(
-        "show_screensaver_outside_temperature"
-    )
+    data["show_screensaver_inside_temperature"] = get_setting_with_default("show_screensaver_inside_temperature")
+    data["show_screensaver_outside_temperature"] = get_setting_with_default("show_screensaver_outside_temperature")
     data["turn_on_behavior"] = get_setting_with_default("turn_on_behavior")
     data["max_live_log_messages"] = get_setting_with_default("max_live_log_messages")
     data["max_log_buffer_size"] = get_setting_with_default("max_log_buffer_size")
-    data["is_home_assistant_addon"] = (
-        "IS_HOME_ASSISTANT_ADDON" in environment
-        and environment("IS_HOME_ASSISTANT_ADDON") == "true"
-    )
+    data["is_home_assistant_addon"] = "IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true"
     data["manager_address"] = get_setting_with_default("manager_address")
     data["manager_port"] = get_setting_with_default("manager_port")
     data["optimistic_mode"] = get_setting_with_default("optimistic_mode")
-    data["light_turn_on_brightness"] = get_setting_with_default(
-        "light_turn_on_brightness"
-    )
-    data["all_rooms_status_backoff_time"] = get_setting_with_default(
-        "all_rooms_status_backoff_time"
-    )
+    data["light_turn_on_brightness"] = get_setting_with_default("light_turn_on_brightness")
+    data["all_rooms_status_backoff_time"] = get_setting_with_default("all_rooms_status_backoff_time")
     return render(request, "settings.html", data)
 
 
@@ -697,9 +482,7 @@ def save_settings(request):
         set_setting_value(name="home_assistant_token", value="")
     elif "home_assistant_token" in request.POST:
         if request.POST["home_assistant_token"] != "":
-            set_setting_value(
-                name="home_assistant_token", value=request.POST["home_assistant_token"]
-            )
+            set_setting_value(name="home_assistant_token", value=request.POST["home_assistant_token"])
 
     if "openhab_address" in request.POST:
         openhab_address = request.POST["openhab_address"]
@@ -713,23 +496,13 @@ def save_settings(request):
         if request.POST["openhab_token"] != "":
             set_setting_value(name="openhab_token", value=request.POST["openhab_token"])
 
-    set_setting_value(
-        name="raise_to_100_light_level", value=request.POST["raise_to_100_light_level"]
-    )
-    set_setting_value(
-        name="default_nspanel_type", value=request.POST["default_nspanel_type"]
-    )
+    set_setting_value(name="raise_to_100_light_level", value=request.POST["raise_to_100_light_level"])
+    set_setting_value(name="default_nspanel_type", value=request.POST["default_nspanel_type"])
     set_setting_value(name="color_temp_min", value=request.POST["color_temp_min"])
     set_setting_value(name="color_temp_max", value=request.POST["color_temp_max"])
-    set_setting_value(
-        name="reverse_color_temp", value=request.POST["reverse_color_temp"]
-    )
-    set_setting_value(
-        name="min_button_push_time", value=request.POST["min_button_push_time"]
-    )
-    set_setting_value(
-        name="button_long_press_time", value=request.POST["button_long_press_time"]
-    )
+    set_setting_value(name="reverse_color_temp", value=request.POST["reverse_color_temp"])
+    set_setting_value(name="min_button_push_time", value=request.POST["min_button_push_time"])
+    set_setting_value(name="button_long_press_time", value=request.POST["button_long_press_time"])
     set_setting_value(
         name="special_mode_trigger_time",
         value=request.POST["special_mode_trigger_time"],
@@ -744,9 +517,7 @@ def save_settings(request):
         value=request.POST["screensaver_activation_timeout"],
     )
     set_setting_value(name="screen_dim_level", value=request.POST["screen_dim_level"])
-    set_setting_value(
-        name="screensaver_dim_level", value=request.POST["screensaver_dim_level"]
-    )
+    set_setting_value(name="screensaver_dim_level", value=request.POST["screensaver_dim_level"])
     set_setting_value(name="screensaver_mode", value=request.POST["screensaver_mode"])
     set_setting_value(
         name="show_screensaver_inside_temperature",
@@ -760,15 +531,9 @@ def save_settings(request):
         name="turn_on_behavior",
         value=request.POST.get("turn_on_behavior", "color_temp"),
     )
-    set_setting_value(
-        name="max_live_log_messages", value=request.POST["max_live_log_messages"]
-    )
-    set_setting_value(
-        name="max_log_buffer_size", value=request.POST["max_log_buffer_size"]
-    )
-    set_setting_value(
-        name="mqttmanager_log_level", value=request.POST["mqttmanager_log_level"]
-    )
+    set_setting_value(name="max_live_log_messages", value=request.POST["max_live_log_messages"])
+    set_setting_value(name="max_log_buffer_size", value=request.POST["max_log_buffer_size"])
+    set_setting_value(name="mqttmanager_log_level", value=request.POST["mqttmanager_log_level"])
     set_setting_value(name="manager_address", value=request.POST["manager_address"])
     set_setting_value(name="manager_port", value=request.POST["manager_port"])
     if "optimistic_mode" in request.POST:
@@ -780,9 +545,7 @@ def save_settings(request):
         name="all_rooms_status_backoff_time",
         value=request.POST["all_rooms_status_backoff_time"],
     )
-    set_setting_value(
-        name="light_turn_on_brightness", value=request.POST["light_turn_on_brightness"]
-    )
+    set_setting_value(name="light_turn_on_brightness", value=request.POST["light_turn_on_brightness"])
     # Settings saved, restart mqtt_manager
     send_mqttmanager_reload_command()
     return redirect("settings")
@@ -866,21 +629,13 @@ def save_new_tft_file(request):
         elif tft_file_type == "us4":
             file_path = "HMI_files/tft_automation/us/output_tft4/gui.tft"
         elif tft_file_type == "us1_horizontal_mirrored":
-            file_path = (
-                "HMI_files/tft_automation/us_horizontal_mirrored/output_tft1/gui.tft"
-            )
+            file_path = "HMI_files/tft_automation/us_horizontal_mirrored/output_tft1/gui.tft"
         elif tft_file_type == "us2_horizontal_mirrored":
-            file_path = (
-                "HMI_files/tft_automation/us_horizontal_mirrored/output_tft2/gui.tft"
-            )
+            file_path = "HMI_files/tft_automation/us_horizontal_mirrored/output_tft2/gui.tft"
         elif tft_file_type == "us3_horizontal_mirrored":
-            file_path = (
-                "HMI_files/tft_automation/us_horizontal_mirrored/output_tft3/gui.tft"
-            )
+            file_path = "HMI_files/tft_automation/us_horizontal_mirrored/output_tft3/gui.tft"
         elif tft_file_type == "us4_horizontal_mirrored":
-            file_path = (
-                "HMI_files/tft_automation/us_horizontal_mirrored/output_tft4/gui.tft"
-            )
+            file_path = "HMI_files/tft_automation/us_horizontal_mirrored/output_tft4/gui.tft"
         else:
             print("ERROR! Unknown TFT file type!")
             return HttpResponse("ERROR! Unknown TFT file type!", status=500)
@@ -912,15 +667,11 @@ def download_firmware(request):
 
         if parts[1] == "":
             range_start = int(parts[0])
-            return HttpResponse(
-                data[range_start:], content_type="application/octet-stream"
-            )
+            return HttpResponse(data[range_start:], content_type="application/octet-stream")
         else:
             range_start = int(parts[0])
             range_end = int(parts[1])
-            return HttpResponse(
-                data[range_start:range_end], content_type="application/octet-stream"
-            )
+            return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
 
     else:
         return HttpResponse(
@@ -943,13 +694,9 @@ def download_data_file(request):
         parts = request.headers["Range"][6:].split("-")
         range_start = int(parts[0])
         range_end = int(parts[1])
-        print(
-            f"Received request for partial LittleFS download. Start: {range_start}, end: {range_end}"
-        )
+        print(f"Received request for partial LittleFS download. Start: {range_start}, end: {range_end}")
         data = fs.open(f"firmware/{model}/data_file.bin").read()
-        return HttpResponse(
-            data[range_start:range_end], content_type="application/octet-stream"
-        )
+        return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
     else:
         return HttpResponse(
             fs.open(f"firmware/{model}/data_file.bin").read(),
@@ -960,9 +707,7 @@ def download_data_file(request):
 def download_tft(request, panel_id):
     selected_tft = get_nspanel_setting_with_default(panel_id, "selected_tft", "tft1")
     is_us_panel = get_nspanel_setting_with_default(panel_id, "is_us_panel", "False")
-    us_panel_orientation = get_nspanel_setting_with_default(
-        panel_id, "us_panel_orientation", "vertical"
-    )
+    us_panel_orientation = get_nspanel_setting_with_default(panel_id, "us_panel_orientation", "vertical")
 
     tft_file = ""
     if is_us_panel == "False":
@@ -972,11 +717,7 @@ def download_tft(request, panel_id):
         tft_file = "HMI_files/tft_automation/eu/output_" + selected_tft + "/gui.tft"
     elif is_us_panel == "True" and us_panel_orientation == "horizontal_mirrored":
         # We use EU tft file for horizontal US panel with buttons on left as it's the same screen and orientation
-        tft_file = (
-            "HMI_files/tft_automation/us_horizontal_mirrored/output_"
-            + selected_tft
-            + "/gui.tft"
-        )
+        tft_file = "HMI_files/tft_automation/us_horizontal_mirrored/output_" + selected_tft + "/gui.tft"
     elif is_us_panel == "True" and us_panel_orientation == "vertical":
         tft_file = "HMI_files/tft_automation/us/output_" + selected_tft + "/gui.tft"
     else:
@@ -987,17 +728,11 @@ def download_tft(request, panel_id):
         parts = request.headers["Range"][6:].split("-")
         range_start = int(parts[0])
         range_end = int(parts[1])
-        print(
-            f"Received request for partial EU TFT download. Start: {range_start}, end: {range_end}"
-        )
+        print(f"Received request for partial EU TFT download. Start: {range_start}, end: {range_end}")
         data = fs.open(tft_file).read()
-        return HttpResponse(
-            data[range_start:range_end], content_type="application/octet-stream"
-        )
+        return HttpResponse(data[range_start:range_end], content_type="application/octet-stream")
     else:
-        return HttpResponse(
-            fs.open(tft_file).read(), content_type="application/octet-stream"
-        )
+        return HttpResponse(fs.open(tft_file).read(), content_type="application/octet-stream")
 
 
 def checksum_firmware(request):
@@ -1027,9 +762,7 @@ def checksum_data_file(request):
 def checksum_tft_file(request, panel_id):
     selected_tft = get_nspanel_setting_with_default(panel_id, "selected_tft", "tft1")
     is_us_panel = get_nspanel_setting_with_default(panel_id, "is_us_panel", "False")
-    us_panel_orientation = get_nspanel_setting_with_default(
-        panel_id, "us_panel_orientation", "vertical"
-    )
+    us_panel_orientation = get_nspanel_setting_with_default(panel_id, "us_panel_orientation", "vertical")
     tft_file = ""
     if is_us_panel == "False":
         tft_file = "HMI_files/tft_automation/eu/output_" + selected_tft + "/gui.tft"
@@ -1038,11 +771,7 @@ def checksum_tft_file(request, panel_id):
         tft_file = "HMI_files/tft_automation/eu/output_" + selected_tft + "/gui.tft"
     elif is_us_panel == "True" and us_panel_orientation == "horizontal_mirrored":
         # We use EU tft file for horizontal US panel with buttons on left as it's the same screen and orientation
-        tft_file = (
-            "HMI_files/tft_automation/us_horizontal_mirrored/output_"
-            + selected_tft
-            + "/gui.tft"
-        )
+        tft_file = "HMI_files/tft_automation/us_horizontal_mirrored/output_" + selected_tft + "/gui.tft"
     elif is_us_panel == "True" and us_panel_orientation == "vertical":
         tft_file = "HMI_files/tft_automation/us/output_" + selected_tft + "/gui.tft"
     else:
@@ -1053,9 +782,7 @@ def checksum_tft_file(request, panel_id):
 
 def get_manual(request):
     fs = FileSystemStorage()
-    response = HttpResponse(
-        fs.open("manual.pdf").read(), content_type="application/pdf"
-    )
+    response = HttpResponse(fs.open("manual.pdf").read(), content_type="application/pdf")
     response["Content-Disposition"] = 'attachment; filename="manual.pdf"'
     return response
 
@@ -1097,12 +824,7 @@ def add_nspanel_relay_to_group(request):
     nspanel = NSPanel.objects.get(id=request.POST["nspanel_id"])
     relay_num = request.POST["relay_num"]
 
-    exists = (
-        RelayGroupBinding.objects.filter(
-            nspanel=nspanel, relay_num=relay_num, relay_group=rg
-        ).count()
-        > 0
-    )
+    exists = RelayGroupBinding.objects.filter(nspanel=nspanel, relay_num=relay_num, relay_group=rg).count() > 0
     if not exists:
         binding = RelayGroupBinding()
         binding.relay_group = rg
@@ -1127,15 +849,9 @@ def weather_and_time(request):
         set_setting_value("location_longitude", request.POST["location_longitude"])
         set_setting_value("wind_speed_format", request.POST["wind_speed_format"])
         set_setting_value("precipitation_format", request.POST["precipitation_format"])
-        set_setting_value(
-            "outside_temp_sensor_provider", request.POST["outside_temp_provider"]
-        )
-        set_setting_value(
-            "outside_temp_sensor_entity_id", request.POST["outside_temp_sensor"]
-        )
-        set_setting_value(
-            "weather_update_interval", request.POST["weather_update_interval"]
-        )
+        set_setting_value("outside_temp_sensor_provider", request.POST["outside_temp_provider"])
+        set_setting_value("outside_temp_sensor_entity_id", request.POST["outside_temp_sensor"])
+        set_setting_value("weather_update_interval", request.POST["weather_update_interval"])
         set_setting_value("date_format", request.POST["date_format"])
         set_setting_value("clock_us_style", request.POST["clock_us_style"])
         set_setting_value("use_fahrenheit", request.POST["use_fahrenheit"])
@@ -1147,19 +863,13 @@ def weather_and_time(request):
             "date_format": get_setting_with_default("date_format"),
             "clock_us_style": get_setting_with_default("clock_us_style"),
             "use_fahrenheit": get_setting_with_default("use_fahrenheit"),
-            "outside_temp_provider": get_setting_with_default(
-                "outside_temp_sensor_provider"
-            ),
-            "outside_temp_sensor": get_setting_with_default(
-                "outside_temp_sensor_entity_id"
-            ),
+            "outside_temp_provider": get_setting_with_default("outside_temp_sensor_provider"),
+            "outside_temp_sensor": get_setting_with_default("outside_temp_sensor_entity_id"),
             "location_latitude": get_setting_with_default("location_latitude"),
             "location_longitude": get_setting_with_default("location_longitude"),
             "wind_speed_format": get_setting_with_default("wind_speed_format"),
             "precipitation_format": get_setting_with_default("precipitation_format"),
-            "weather_update_interval": get_setting_with_default(
-                "weather_update_interval"
-            ),
+            "weather_update_interval": get_setting_with_default("weather_update_interval"),
         }
 
         return render(request, "weather_and_time.html", data)
@@ -1183,8 +893,6 @@ def download_mqttmanager_log(request):
     if os.path.exists("/dev/shm/mqttmanager.log"):
         with open("/dev/shm/mqttmanager.log", "rb") as fh:
             response = HttpResponse(fh.read(), content_type="application/vnd.ms-excel")
-            response["Content-Disposition"] = "inline; filename=" + os.path.basename(
-                "mqttmanager_log.txt"
-            )
+            response["Content-Disposition"] = "inline; filename=" + os.path.basename("mqttmanager_log.txt")
             return response
     raise Http404

@@ -6,9 +6,10 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useEntitiesPagesStore } from "../../EntitiesPage/EntitiesPagesStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const schema = z.object({
+  id: z.number().optional(),
   type: z.string(),
   entity_type: z.string(),
   room_id: z.number(),
@@ -20,45 +21,55 @@ const schema = z.object({
   home_assistant_name: z.string().optional(),
   openhab_fan_mode_item: z.string().optional(),
   openhab_hvac_mode_item: z.string().optional(),
-  openhab_preset_item: z.string().optional(),
-  openhab_swing_item: z.string().optional(),
-  openhab_swingh_item: z.string().optional(),
+  openhab_preset_mode_item: z.string().optional(),
+  openhab_swing_mode_item: z.string().optional(),
+  openhab_swingh_mode_item: z.string().optional(),
   openhab_temperature_item: z.string().optional(),
   fan_modes: z.array(
-    z.object({
-      icon: z.string(),
-      label: z.string(),
-      value: z.string(),
-    }),
+    z
+      .object({
+        icon: z.string(),
+        label: z.string(),
+        value: z.string(),
+      })
+      .optional(),
   ),
   hvac_modes: z.array(
-    z.object({
-      icon: z.string(),
-      label: z.string(),
-      value: z.string(),
-    }),
+    z
+      .object({
+        icon: z.string(),
+        label: z.string(),
+        value: z.string(),
+      })
+      .optional(),
   ),
-  preset_modes: z.array(
-    z.object({
-      icon: z.string(),
-      label: z.string(),
-      value: z.string(),
-    }),
-  ),
-  swing_modes: z.array(
-    z.object({
-      icon: z.string(),
-      label: z.string(),
-      value: z.string(),
-    }),
-  ),
-  swingh_modes: z.array(
-    z.object({
-      icon: z.string(),
-      label: z.string(),
-      value: z.string(),
-    }),
-  ),
+  preset_modes: z
+    .array(
+      z.object({
+        icon: z.string(),
+        label: z.string(),
+        value: z.string(),
+      }),
+    )
+    .optional(),
+  swing_modes: z
+    .array(
+      z.object({
+        icon: z.string(),
+        label: z.string(),
+        value: z.string(),
+      }),
+    )
+    .optional(),
+  swingh_modes: z
+    .array(
+      z.object({
+        icon: z.string(),
+        label: z.string(),
+        value: z.string(),
+      }),
+    )
+    .optional(),
 });
 export type ThermostatFormData = z.infer<typeof schema>;
 
@@ -77,6 +88,143 @@ const CustomOption: React.FC<OptionProps<IOptionType>> = ({ innerProps, isDisabl
 
 const select_components = {
   Option: CustomOption,
+};
+
+const IconSelector = ({ value, onChange }: { value: string; onChange: (icon: string) => void }) => {
+  const climateIcons = [
+    {
+      name: "Off",
+      icon: "h",
+    },
+    {
+      name: "Heating",
+      icon: "!",
+    },
+    {
+      name: "Cooling",
+      icon: "8",
+    },
+    {
+      name: "Hot/Cold",
+      icon: "#",
+    },
+    {
+      name: "Thermostat",
+      icon: "7",
+    },
+    {
+      name: "Thermostat Auto",
+      icon: "$",
+    },
+    {
+      name: "Dry",
+      icon: "%",
+    },
+    {
+      name: "Eco",
+      icon: "&",
+    },
+    {
+      name: "Away",
+      icon: "'",
+    },
+    {
+      name: "Home",
+      icon: "(",
+    },
+    {
+      name: "Sleep",
+      icon: ")",
+    },
+    {
+      name: "Boost",
+      icon: "*",
+    },
+    {
+      name: "Comfort",
+      icon: "+",
+    },
+    {
+      name: "Activity",
+      icon: ",",
+    },
+    {
+      name: "Defrosting",
+      icon: "-",
+    },
+    {
+      name: "Swing Both",
+      icon: ".",
+    },
+    {
+      name: "Swing Horizontal",
+      icon: "/",
+    },
+    {
+      name: "Swing Vertical",
+      icon: "0",
+    },
+    {
+      name: "Fan Off",
+      icon: "1",
+    },
+    {
+      name: "Fan Auto",
+      icon: "2",
+    },
+    {
+      name: "Fan",
+      icon: "3",
+    },
+    {
+      name: "Fan 1",
+      icon: "4",
+    },
+    {
+      name: "Fan 2",
+      icon: "5",
+    },
+    {
+      name: "Fan 3",
+      icon: "6",
+    },
+  ];
+  const [selectedIcon, setSelectedIcon] = useState(value);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  const select_icon = (icon: string) => {
+    setSelectedIcon(icon);
+    onChange(icon);
+    setDetailsOpen(false);
+  };
+
+  return (
+    <details open={detailsOpen} onToggle={(e) => setDetailsOpen(e.currentTarget.open)} className="dropdown dropdown-end h-auto" id="dropdown_icon_selector">
+      <summary id="icon_selector_button" title="Select icon" className="btn rounded-none h-full border-neutral border-y border-x-0 font-nspm-mdi">
+        {selectedIcon}
+      </summary>
+      <div className="dropdown-content bg-base-100 text-base-content rounded-box rounded-tr-none w-56 border border-primary">
+        <div className="flex justify-center pb-1 mb-2 mt-1 border-b border-primary">
+          <span className="text-sm">Select Icon</span>
+        </div>
+        <div className="grid grid-cols-4 w-full">
+          {climateIcons.map((icon) => (
+            <button
+              type="button"
+              title={icon.name}
+              className="btn btn-ghost rounded-none hover:btn-info icon-select-button"
+              data-icon_value={icon.icon}
+              onClick={() => {
+                select_icon(icon.icon);
+              }}
+            >
+              <span className="font-nspm-mdi">{icon.icon}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </details>
+  );
 };
 
 const MultiStep_AddEditEntity_Step3_Thermostat = ({
@@ -105,6 +253,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
   } = useForm<ThermostatFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
+      id: id,
       controller: controller,
       type: "entity",
       entity_type: "light",
@@ -114,9 +263,9 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
       home_assistant_name: "",
       openhab_fan_mode_item: "",
       openhab_hvac_mode_item: "",
-      openhab_preset_item: "",
-      openhab_swing_item: "",
-      openhab_swingh_item: "",
+      openhab_preset_mode_item: "",
+      openhab_swing_mode_item: "",
+      openhab_swingh_mode_item: "",
       openhab_temperature_item: "",
       step_size: 0.5,
       fan_modes: [],
@@ -196,7 +345,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
 
   function saveEntity(data: ThermostatFormData) {
     // PUT request using fetch with error handling
-    fetch("/rest/entities/switches", {
+    fetch("/rest/entities/thermostats", {
       credentials: "same-origin",
       method: "PUT",
       mode: "same-origin",
@@ -281,8 +430,8 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
   }
 
   const classNames: ClassNamesConfig<{ value: string; label: string }, false, GroupBase<{ value: string; label: string }>> = {
-    control: (state) => `${state.isFocused ? "border" : "border-0"} border-accent p-2.5 text-sm rounded-box bg-base-300 rounded-md`,
-    menu: () => "bg-base-300 p-2.5 rounded-box",
+    control: (state) => `${state.isFocused ? "border" : "border-0"} border-accent p-2.5 text-sm rounded-box bg-base-300 text-base-content rounded-md`,
+    menu: () => "bg-base-300 p-2.5 rounded-box text-base-content",
     option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`,
   };
 
@@ -312,7 +461,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             </label>
             <div className="flex flex-row-reverse">
               <input
-                className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
+                className="outline-none bg-base-300 text-base-content border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                 type="text"
                 id="add_new_switch_name"
                 {...register("friendly_name")}
@@ -342,7 +491,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             </button>
             <input
               type="number"
-              className="join-item number-apperance-none outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block min-w-0 w-full text-sm p-2.5"
+              className="join-item number-apperance-none outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block min-w-0 w-full text-sm p-2.5"
               step="0.1"
               min="0.1"
               max="10"
@@ -410,7 +559,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
 
         {/* Temperature */}
         {controller == "openhab" && (
-          <div className="mt-4 border-1 border-primary rounded-box p-4 pt-2">
+          <div className="mt-4 border border-primary rounded-box p-4 pt-2">
             <span className="text-lg mb-4">Temperature</span>
             <div className="">
               <label className="block mb-2 text-sm font-medium">OpenHAB target temperature item</label>
@@ -446,7 +595,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
         )}
 
         {/* Fan modes */}
-        <div className="mt-4 border-1 border-primary rounded-box p-4 pt-2">
+        <div className="mt-4 border border-primary rounded-box p-4 pt-2">
           <span className="text-lg mb-4">Fan modes</span>
           {controller == "openhab" && (
             <div className="mb-4">
@@ -482,29 +631,28 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
           )}
           <div id={`fan_mode_options`}>
             {fanModeFields.map((field, index) => (
-              <div key={field.id} className="flex items-center justify-center w-full mb-1">
+              <div key={field.id} className="flex items-stretch justify-center w-full mb-1">
                 <input
                   type="text"
                   {...register(`fan_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="rounded-l-box outline-none bg-base-300 text-base-content border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                   title="Label"
                 />
                 <input
                   type="text"
                   {...register(`fan_modes.${index}.value`)}
-                  className="rounded-r-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                   title="Value"
                 />
-                <div className="flex justify-center items-center pl-1 py-2.5 h-full">
-                  <button
-                    type="button"
-                    className="btn btn-xs btn-circle btn-error join-item ring-0 inset-ring-0 focus:ring-0"
-                    title="Remove fan mode"
-                    onClick={() => removeFanModeField(index)}
-                  >
-                    ✕
-                  </button>
-                </div>
+                <IconSelector value={field.icon} onChange={(icon) => setValue(`fan_modes.${index}.icon`, icon)} />
+                <button
+                  type="button"
+                  className="btn h-auto rounded-box rounded-l-none border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
+                  title="Remove fan mode"
+                  onClick={() => removeFanModeField(index)}
+                >
+                  ✕
+                </button>
               </div>
             ))}
             <button
@@ -519,7 +667,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
         </div>
 
         {/* HVAC modes */}
-        <div className="mt-4 border-1 border-primary rounded-box p-4 pt-2">
+        <div className="mt-4 border border-primary rounded-box p-4 pt-2">
           <span className="input_field_label block mb-2 text-sm font-medium">HVAC modes</span>
           {controller == "openhab" && (
             <div className="mb-4">
@@ -555,23 +703,24 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
           )}
           <div id={`hvac_mode_options`}>
             {hvacModeFields.map((field, index) => (
-              <div key={field.id} className="flex items-center justify-center w-full mb-1">
+              <div key={field.id} className="flex items-stretch justify-center w-full mb-1">
                 <input
                   type="text"
                   {...register(`hvac_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="rounded-l-box outline-none bg-base-300 text-base-content border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                   title="Label"
                 />
                 <input
                   type="text"
                   {...register(`hvac_modes.${index}.value`)}
-                  className="rounded-r-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                   title="Value"
                 />
+                <IconSelector value={field.icon} onChange={(icon) => setValue(`hvac_modes.${index}.icon`, icon)} />
                 <div className="flex justify-center items-center pl-1 py-2.5 h-full">
                   <button
                     type="button"
-                    className="btn btn-xs btn-circle btn-error join-item ring-0 inset-ring-0 focus:ring-0"
+                    className="btn h-auto rounded-box rounded-l-none border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
                     title="Remove HVAC mode"
                     onClick={() => removeHvacModeField(index)}
                   >
@@ -592,7 +741,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
         </div>
 
         {/* Preset modes */}
-        <div className="mt-4 border-1 border-primary rounded-box p-4 pt-2">
+        <div className="mt-4 border border-primary rounded-box p-4 pt-2">
           <span className="input_field_label block mb-2 text-sm font-medium">Presets</span>
           {controller == "openhab" && (
             <div className="mb-4">
@@ -600,8 +749,8 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
               <Select<IOptionType>
                 options={useAvailableEntitiesStore.getState().openhab_options}
                 classNames={classNames}
-                onChange={(newValue) => setValue("openhab_preset_item", newValue ? newValue.value : "")}
-                value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_preset_item"))}
+                onChange={(newValue) => setValue("openhab_preset_mode_item", newValue ? newValue.value : "")}
+                value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_preset_mode_item"))}
                 unstyled
                 components={select_components}
                 styles={{
@@ -628,29 +777,28 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
           )}
           <div id={`preset_mode_options`}>
             {presetModeFields.map((field, index) => (
-              <div key={field.id} className="flex items-center justify-center w-full mb-1">
+              <div key={field.id} className="flex items-stretch justify-center w-full mb-1">
                 <input
                   type="text"
                   {...register(`preset_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="rounded-l-box outline-none bg-base-300 text-base-content border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                   title="Label"
                 />
                 <input
                   type="text"
                   {...register(`preset_modes.${index}.value`)}
-                  className="rounded-r-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                   title="Value"
                 />
-                <div className="flex justify-center items-center pl-1 py-2.5 h-full">
-                  <button
-                    type="button"
-                    className="btn btn-xs btn-circle btn-error join-item ring-0 inset-ring-0 focus:ring-0"
-                    title="Remove preset mode"
-                    onClick={() => removePresetModeField(index)}
-                  >
-                    ✕
-                  </button>
-                </div>
+                <IconSelector value={field.icon} onChange={(icon) => setValue(`preset_modes.${index}.icon`, icon)} />
+                <button
+                  type="button"
+                  className="btn h-auto rounded-box rounded-l-none border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
+                  title="Remove preset mode"
+                  onClick={() => removePresetModeField(index)}
+                >
+                  ✕
+                </button>
               </div>
             ))}
             <button
@@ -665,7 +813,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
         </div>
 
         {/* Swing modes */}
-        <div className="mt-4 border-1 border-primary rounded-box p-4 pt-2">
+        <div className="mt-4 border border-primary rounded-box p-4 pt-2">
           <span className="input_field_label block mb-2 text-sm font-medium">Swing modes</span>
           {controller == "openhab" && (
             <div className="mb-4">
@@ -673,8 +821,8 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
               <Select<IOptionType>
                 options={useAvailableEntitiesStore.getState().openhab_options}
                 classNames={classNames}
-                onChange={(newValue) => setValue("openhab_swing_item", newValue ? newValue.value : "")}
-                value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_swing_item"))}
+                onChange={(newValue) => setValue("openhab_swing_mode_item", newValue ? newValue.value : "")}
+                value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_swing_mode_item"))}
                 unstyled
                 components={select_components}
                 styles={{
@@ -701,29 +849,28 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
           )}
           <div id={`swing_mode_options`}>
             {swingModeFields.map((field, index) => (
-              <div key={field.id} className="flex items-center justify-center w-full mb-1">
+              <div key={field.id} className="flex items-stretch justify-center w-full mb-1">
                 <input
                   type="text"
                   {...register(`swing_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="rounded-l-box outline-none bg-base-300 text-base-content border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                   title="Label"
                 />
                 <input
                   type="text"
                   {...register(`swing_modes.${index}.value`)}
-                  className="rounded-r-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                   title="Value"
                 />
-                <div className="flex justify-center items-center pl-1 py-2.5 h-full">
-                  <button
-                    type="button"
-                    className="btn btn-xs btn-circle btn-error join-item ring-0 inset-ring-0 focus:ring-0"
-                    title="Remove swing mode"
-                    onClick={() => removeSwingModeField(index)}
-                  >
-                    ✕
-                  </button>
-                </div>
+                <IconSelector value={field.icon} onChange={(icon) => setValue(`swing_modes.${index}.icon`, icon)} />
+                <button
+                  type="button"
+                  className="btn h-auto rounded-box rounded-l-none border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
+                  title="Remove swing mode"
+                  onClick={() => removeSwingModeField(index)}
+                >
+                  ✕
+                </button>
               </div>
             ))}
             <button
@@ -738,7 +885,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
         </div>
 
         {/* Swing Horizontal modes */}
-        <div className="mt-4 border-1 border-primary rounded-box p-4 pt-2">
+        <div className="mt-4 border border-primary rounded-box p-4 pt-2">
           <span className="input_field_label block mb-2 text-sm font-medium">Horizontal swing modes</span>
           {controller == "openhab" && (
             <div className="mb-4">
@@ -746,8 +893,8 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
               <Select<IOptionType>
                 options={useAvailableEntitiesStore.getState().openhab_options}
                 classNames={classNames}
-                onChange={(newValue) => setValue("openhab_swingh_item", newValue ? newValue.value : "")}
-                value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_swingh_item"))}
+                onChange={(newValue) => setValue("openhab_swingh_mode_item", newValue ? newValue.value : "")}
+                value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_swingh_mode_item"))}
                 unstyled
                 components={select_components}
                 styles={{
@@ -774,29 +921,28 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
           )}
           <div id={`swing_mode_options`}>
             {swinghModeFields.map((field, index) => (
-              <div key={field.id} className="flex items-center justify-center w-full mb-1">
+              <div key={field.id} className="flex items-stretch justify-center w-full mb-1">
                 <input
                   type="text"
                   {...register(`swingh_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="rounded-l-box outline-none bg-base-300 text-base-content border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                   title="Label"
                 />
                 <input
                   type="text"
                   {...register(`swingh_modes.${index}.value`)}
-                  className="rounded-r-box outline-none bg-base-300 border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                  className="outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                   title="Value"
                 />
-                <div className="flex justify-center items-center pl-1 py-2.5 h-full">
-                  <button
-                    type="button"
-                    className="btn btn-xs btn-circle btn-error join-item ring-0 inset-ring-0 focus:ring-0"
-                    title="Remove swing mode"
-                    onClick={() => removeSwinghModeField(index)}
-                  >
-                    ✕
-                  </button>
-                </div>
+                <IconSelector value={field.icon} onChange={(icon) => setValue(`swingh_modes.${index}.icon`, icon)} />
+                <button
+                  type="button"
+                  className="btn h-auto rounded-box rounded-l-none border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
+                  title="Remove swing mode"
+                  onClick={() => removeSwinghModeField(index)}
+                >
+                  ✕
+                </button>
               </div>
             ))}
             <button
