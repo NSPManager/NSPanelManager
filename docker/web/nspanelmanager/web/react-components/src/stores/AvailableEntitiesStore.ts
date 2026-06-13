@@ -44,6 +44,10 @@ function getOptionsFromItems(items: any[]): IOptionType[] {
       mdi_icon = "mdi-gesture-tap-button";
     } else if (item.item_id.startsWith("climate")) {
       mdi_icon = "mdi-thermostat";
+    } else if (item.item_id.startsWith("scene")) {
+      mdi_icon = "mdi-palette";
+    } else if (item.item_id.startsWith("script")) {
+      mdi_icon = "mdi-code-json";
     }
 
     options.push({

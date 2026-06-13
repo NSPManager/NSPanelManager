@@ -945,3 +945,57 @@ def put_thermostat_entity(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
+
+
+#################
+# Scene section #
+#################
+
+
+def entities_scenes(request):
+    try:
+        # if request.method == "PUT":
+        return put_scene_entity(request)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+def put_scene_entity(request):
+    try:
+        required_fields = [  # Fields required for scene entities
+            "room_id",
+            "entities_page_id",
+            "room_view_position",
+            "controller",
+            "type",
+            "friendly_name",
+            "scene_type",
+            "backend_name",
+        ]
+
+        data = json.loads(request.body)
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        if "id" in data and data["id"]:
+            new_scene = Scene.objects.get(id=int(data["id"]))
+        else:
+            new_scene = Scene()
+
+        new_scene.friendly_name = data["friendly_name"]
+        new_scene.room = Room.objects.get(id=int(data["room_id"]))
+        new_scene.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_scene.room_view_position = int(data["room_view_position"])
+
+        new_scene.scene_type = data.get("scene_type", "")
+        new_scene.backend_name = data.get("backend_name", "")
+        new_scene.save()
+        send_mqttmanager_reload_command()
+
+        return JsonResponse({"status": "ok"}, status=200)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)

@@ -15,6 +15,7 @@ const MultiStep_AddEditEntity_Step2 = ({
     switch: ["home_assistant", "openhab"],
     button: ["home_assistant", "nspm"],
     thermostat: ["home_assistant", "openhab"],
+    scene: ["home_assistant", "openhab", "nspm"],
   };
 
   return (
@@ -28,7 +29,7 @@ const MultiStep_AddEditEntity_Step2 = ({
       </div>
 
       <div className="grid grid-cols-3 gap-4 w-full">
-        {available_controllers[entity_type]?.includes("home_assistant") && useSettingsStore.getState().settings.home_assistant_token_set && (
+        {available_controllers[entity_type]?.includes("home_assistant") && useSettingsStore.getState().settings?.home_assistant_token_set && (
           <div
             className="group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-home-assistant/10"
             onClick={() => {
@@ -45,7 +46,7 @@ const MultiStep_AddEditEntity_Step2 = ({
           </div>
         )}
 
-        {available_controllers[entity_type]?.includes("openhab") && useSettingsStore.getState().settings.openhab_token_set && (
+        {available_controllers[entity_type]?.includes("openhab") && useSettingsStore.getState().settings?.openhab_token_set && (
           <div
             className="group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-openhab/10"
             onClick={() => {

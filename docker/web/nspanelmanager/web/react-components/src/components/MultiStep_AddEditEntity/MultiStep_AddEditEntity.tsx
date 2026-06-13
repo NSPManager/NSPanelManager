@@ -5,6 +5,7 @@ import MultiStep_AddEditEntity_Step3_Light from "./entity_types/step3_edit_light
 import MultiStep_AddEditEntity_Step3_Switch from "./entity_types/step3_edit_switch";
 import MultiStep_AddEditEntity_Step3_Button from "./entity_types/step3_edit_button";
 import MultiStep_AddEditEntity_Step3_Thermostat from "./entity_types/step3_edit_thermostat";
+import MultiStep_AddEditEntity_Step3_Scene from "./entity_types/step3_edit_scene";
 import { useAvailableEntitiesStore } from "../../stores/AvailableEntitiesStore";
 import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
 import { useSettingsStore } from "../../stores/SettingsStore";
@@ -51,6 +52,7 @@ const MultiStep_AddOrEditEntity = ({
     id: null,
   };
   const [formData, setFormData] = useState<formDataType>(defaultFormData);
+  const [entitiesPageType, setEntitiesPageType] = useState<string>("");
 
   useEffect(() => {
     if (useAvailableEntitiesStore.getState().status == "none") {
@@ -75,7 +77,9 @@ const MultiStep_AddOrEditEntity = ({
       const entityData = useEntitiesPagesStore.getState().entities.find((entity) => entity.id == id);
       setFormData({ ...formData, ...entityData });
     }
-  }, [id, useEntitiesPagesStore.getState().entities]);
+    const entityPage = useEntitiesPagesStore.getState().entities_pages.find((page) => page.id == entities_page_id);
+    setEntitiesPageType(entityPage?.type ?? "");
+  }, [id, useEntitiesPagesStore.getState().entities, useEntitiesPagesStore.getState().entities_pages]);
 
   // if (id != null && formData.id == null) {
   //   // Fetch existing entity type and populate base data.
@@ -141,9 +145,14 @@ const MultiStep_AddOrEditEntity = ({
           ✕
         </button>
         {(() => {
-          if (id == null && step == 1) {
+          if (id == null && step == 1 && entitiesPageType == "entity") {
             return <MultiStep_AddEditEntity_Step1 handleButtonSelectEvent={handleButtonSelectEvent} next_step={nextStep} />;
-          } else if (id == null && step == 2) {
+          } else if (id == null && step == 1 && entitiesPageType == "scene") {
+            setFormData({ ...formData, entity_type: "scene" });
+            setStep(2);
+          }
+
+          if (id == null && step == 2) {
             return (
               <MultiStep_AddEditEntity_Step2
                 handleButtonSelectEvent={handleButtonSelectEvent}
@@ -189,6 +198,17 @@ const MultiStep_AddOrEditEntity = ({
               case "thermostat":
                 return (
                   <MultiStep_AddEditEntity_Step3_Thermostat
+                    controller={String(formData.controller)}
+                    room_id={room_id}
+                    id={id}
+                    entities_page_id={entities_page_id}
+                    room_view_position={room_view_position}
+                    onComplete={onComplete}
+                  />
+                );
+              case "scene":
+                return (
+                  <MultiStep_AddEditEntity_Step3_Scene
                     controller={String(formData.controller)}
                     room_id={room_id}
                     id={id}
