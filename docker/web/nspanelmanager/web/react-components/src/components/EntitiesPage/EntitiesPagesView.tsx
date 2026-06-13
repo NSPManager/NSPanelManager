@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import EntitiesPage from "./EntitiesPage";
 import { DragDropProvider } from "@dnd-kit/react";
-import { useEntitiesPagesStore } from "./EntitiesPagesStore";
-import { type IEntityOrSceneData } from "./EntitiesPagesStore";
+import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
+import { type IEntityOrSceneData } from "../../stores/EntitiesPagesStore";
 
 const EntitiesPagesView = ({ room_id, type }: { room_id: number; type: string }) => {
   const { entities_pages, fetchData, removeEntitiesPage, entities, scenes, setScenePosition, setEntityPosition } = useEntitiesPagesStore();

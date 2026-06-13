@@ -4,9 +4,9 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAvailableEntitiesStore } from "../../AvailableEntitiesStore";
-import { type IOptionType } from "../../AvailableEntitiesStore";
-import { useEntitiesPagesStore } from "../../EntitiesPage/EntitiesPagesStore";
+import { useAvailableEntitiesStore } from "../../../stores/AvailableEntitiesStore";
+import { type IOptionType } from "../../../stores/AvailableEntitiesStore";
+import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 
 const schema = z.object({
   type: z.string(),

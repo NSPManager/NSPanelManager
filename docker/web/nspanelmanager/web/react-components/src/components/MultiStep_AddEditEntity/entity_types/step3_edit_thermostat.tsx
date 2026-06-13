@@ -1,11 +1,11 @@
 import Select, { type OptionProps } from "react-select";
 import { type ClassNamesConfig, type GroupBase } from "react-select";
-import { useAvailableEntitiesStore } from "../../AvailableEntitiesStore";
-import { type IOptionType } from "../../AvailableEntitiesStore";
+import { useAvailableEntitiesStore } from "../../../stores/AvailableEntitiesStore";
+import { type IOptionType } from "../../../stores/AvailableEntitiesStore";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-import { useEntitiesPagesStore } from "../../EntitiesPage/EntitiesPagesStore";
+import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 import { useEffect, useState } from "react";
 
 const schema = z.object({

@@ -1,8 +1,8 @@
 import { useDroppable } from "@dnd-kit/react";
 import { forwardRef, useState } from "react";
-import type { IEntityOrSceneData } from "./EntitiesPagesStore";
+import type { IEntityOrSceneData } from "../../stores/EntitiesPagesStore";
 import MultiStep_AddEditEntity from "../MultiStep_AddEditEntity/MultiStep_AddEditEntity";
-import { useEntitiesPagesStore } from "./EntitiesPagesStore";
+import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
 
 const EntitiesDropTarget = forwardRef(
   ({

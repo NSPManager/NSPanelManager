@@ -2,8 +2,8 @@ import { useState, useRef } from "react";
 import GenericEntityBox from "./GenericEntityBox";
 import GenericSceneBox from "./GenericSceneBox";
 import EntitiesPageDropTarget from "./EntitiesPageDropTarget";
-import { useEntitiesPagesStore } from "./EntitiesPagesStore";
-import { type IEntityOrSceneData } from "./EntitiesPagesStore";
+import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
+import { type IEntityOrSceneData } from "../../stores/EntitiesPagesStore";
 
 const EntitiesPage = ({
   id,

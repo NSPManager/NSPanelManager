@@ -1,6 +1,6 @@
 import { useDraggable } from "@dnd-kit/react";
-import type { IEntityOrSceneData } from "./EntitiesPagesStore";
-import { useEntitiesPagesStore } from "./EntitiesPagesStore";
+import type { IEntityOrSceneData } from "../../stores/EntitiesPagesStore";
+import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
 import { useRef } from "react";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";

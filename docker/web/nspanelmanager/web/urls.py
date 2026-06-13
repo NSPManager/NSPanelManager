@@ -68,6 +68,8 @@ urlpatterns = [
     path("rest/rooms/<int:room_id>/entities_pages", rest.room_entities_pages, name="rest_room_entities_pages"),
     path("rest/rooms/<int:room_id>/entities_pages/<int:page_id>", rest.room_entities_page, name="rest_room_entities_pages"),
     path("rest/rooms", rest.rooms, name="rest_rooms_create"),
+    # Settings URLs
+    path("rest/settings", rest.settings, name="rest_settings"),
     # Scene URLs
     path("rest/scenes", rest.scenes, name="rest_lights"),
     # Misc

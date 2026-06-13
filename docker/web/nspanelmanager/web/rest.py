@@ -18,7 +18,7 @@ from web.settings_helper import (
 )
 
 from .apps import send_mqttmanager_reload_command
-from .models import Entity, LightState, NSPanel, RelayGroup, Room, RoomEntitiesPage, Scene
+from .models import Entity, LightState, NSPanel, RelayGroup, Room, RoomEntitiesPage, Scene, Settings
 
 ########################
 # Get entities section #
@@ -303,6 +303,26 @@ def rooms(request):
         return room_create(request)
     else:
         return JsonResponse({"status": "error"}, status=405)
+
+
+def settings(request):
+    if request.method == "GET":
+        return settings_get(request)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
+def settings_get(request):
+    settings = {}
+    for setting in Settings.objects.all():
+        settings[setting.name] = setting.value
+    settings["home_assistant_token_set"] = settings.get("home_assistant_token", "") != ""
+    del settings["home_assistant_token"]
+    settings["openhab_token_set"] = settings.get("openhab_token", "") != ""
+    del settings["openhab_token"]
+    settings["mqtt_password_set"] = settings.get("mqtt_password", "") != ""
+    del settings["mqtt_password"]
+    return JsonResponse({"status": "ok", "settings": settings}, status=200)
 
 
 def rooms_get(request):

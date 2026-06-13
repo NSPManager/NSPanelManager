@@ -5,8 +5,9 @@ import MultiStep_AddEditEntity_Step3_Light from "./entity_types/step3_edit_light
 import MultiStep_AddEditEntity_Step3_Switch from "./entity_types/step3_edit_switch";
 import MultiStep_AddEditEntity_Step3_Button from "./entity_types/step3_edit_button";
 import MultiStep_AddEditEntity_Step3_Thermostat from "./entity_types/step3_edit_thermostat";
-import { useAvailableEntitiesStore } from "../AvailableEntitiesStore";
-import { useEntitiesPagesStore } from "../EntitiesPage/EntitiesPagesStore";
+import { useAvailableEntitiesStore } from "../../stores/AvailableEntitiesStore";
+import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
+import { useSettingsStore } from "../../stores/SettingsStore";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
@@ -54,6 +55,9 @@ const MultiStep_AddOrEditEntity = ({
   useEffect(() => {
     if (useAvailableEntitiesStore.getState().status == "none") {
       useAvailableEntitiesStore.getState().fetchEntities();
+    }
+    if (useSettingsStore.getState().status == "none") {
+      useSettingsStore.getState().fetchData();
     }
   }, []);
 
@@ -124,8 +128,8 @@ const MultiStep_AddOrEditEntity = ({
   }, [contentRef]);
 
   return (
-    <dialog ref={dialogRef} open={opened ?? false} onClose={onDialogClose} className="modal bg-base-100 text-base-content duration-200">
-      <div ref={contentRef} className={`modal-box max-h-11/12`}>
+    <dialog ref={dialogRef} open={opened ?? false} onClose={onDialogClose} className="modal duration-200">
+      <div ref={contentRef} className={`modal-box max-h-11/12 bg-base-100 text-base-content`}>
         {/* Upper right close button */}
         <button
           className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
